@@ -1,0 +1,55 @@
+/* Variables */
+:root {
+    --admin-primary: #ffffff;
+    --admin-accent: #3b82f6;
+    --admin-success: #10b981;
+    --admin-danger: #ef4444;
+    --admin-warning: #f50b0b;
+    --admin-text: #1f2937;
+    --admin-text-light: #6b7280;
+    --admin-bg: #f5f7fa;
+    --admin-white: #ffffff;
+    --admin-border: #e5e7eb;
+}
+
+/* ID selectors still in use */
+#vendedoresPanel {
+    padding: 10px 0px;
+    overflow-y: auto;
+    height: calc(100vh - 130px);
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+#vendedoresPanel::-webkit-scrollbar {
+    display: none;
+}
+
+#paymentNotifContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+/* Animations */
+@keyframes pnSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}

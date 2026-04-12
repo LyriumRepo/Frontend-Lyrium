@@ -1,0 +1,1 @@
+export { SalesPageClient } from './SalesPageClient';

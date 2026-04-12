@@ -1,0 +1,15 @@
+FROM node:24-alpine
+
+WORKDIR /app
+
+COPY ./frontapp/package*.json ./
+COPY ./frontapp/next.config.ts ./
+COPY ./frontapp/tsconfig.json ./
+COPY ./frontapp/postcss.config.mjs ./
+COPY ./frontapp/eslint.config.mjs ./
+COPY ./frontapp/.env.local* ./
+
+RUN npm install
+
+EXPOSE 3000
+CMD ["npm", "run", "dev"]

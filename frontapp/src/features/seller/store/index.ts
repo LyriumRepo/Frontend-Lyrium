@@ -1,0 +1,1 @@
+export { StorePageClient } from './StorePageClient';

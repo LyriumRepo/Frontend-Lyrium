@@ -1,0 +1,1 @@
+export { LogisticsPageClient } from './LogisticsPageClient';

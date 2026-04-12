@@ -1,0 +1,26 @@
+services:
+  # Servicio para el entorno de desarrollo
+  dev:
+    build:
+      # El contexto es la raíz del proyecto, para que pueda ver tanto la carpeta 'docker' como 'frontapp'
+      context: .
+      # Le indicamos que use el Dockerfile de desarrollo
+      dockerfile: ./docker/Dockerfile.dev
+      # Usamos solo la etapa 'deps' del Dockerfile para instalar dependencias
+      target: deps
+    # El comando que ejecutará el contenedor al iniciar
+    command: npm run dev
+    ports:
+      - "3000:3000"
+    environment:
+      # Habilita el modo "polling" para que Next.js detecte los cambios de archivos en Windows/macOS
+      - WATCHPACK_POLLING=true
+      - CHOKIDAR_USEPOLLING=true
+    volumes:
+      # ¡LA MAGIA DEL HOT-RELOAD!
+      # Montamos el código de nuestra app local en el directorio de trabajo del contenedor.
+      # Cualquier cambio en `frontapp/` se refleja instantáneamente dentro del contenedor.
+      - ./frontapp:/app
+      # Usamos un volumen anónimo para los node_modules para que no se sobreescriban
+      # por una posible carpeta node_modules local. Esto asegura que se usen los del contenedor.
+      - /app/node_modules

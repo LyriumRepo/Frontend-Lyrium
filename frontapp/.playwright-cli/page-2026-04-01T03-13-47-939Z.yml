@@ -1,0 +1,282 @@
+- generic [active] [ref=e11]:
+  - generic [ref=e113]:
+    - banner [ref=e114]:
+      - generic [ref=e115]:
+        - generic [ref=e116]:
+          - generic [ref=e117]: Mi Panel del Vendedor
+          - navigation [ref=e119]:
+            - link [ref=e120] [cursor=pointer]:
+              - /url: /
+              - img [ref=e121]
+            - generic [ref=e123]:
+              - img [ref=e124]
+              - link "Mi Tienda" [ref=e126] [cursor=pointer]:
+                - /url: /seller
+            - generic [ref=e127]:
+              - img [ref=e128]
+              - generic [ref=e130]: Ayuda
+        - generic [ref=e131]:
+          - generic [ref=e133]:
+            - img [ref=e135]
+            - img [ref=e138]
+            - img [ref=e141]
+            - button "Verificar conexiones" [ref=e143]:
+              - img [ref=e144]
+          - generic [ref=e151]: API Offline
+          - generic [ref=e153]:
+            - generic [ref=e154]: "Ventas del Mes: S/ 4,560.00"
+            - generic [ref=e155]: "Pedidos Hoy: 08"
+          - button "Modo automático" [ref=e159]:
+            - img [ref=e160]
+          - button "Centro de Notificaciones" [ref=e163]:
+            - img [ref=e164]
+            - generic [ref=e167]: 9+
+          - button "TP Tienda Pepito seller" [ref=e170]:
+            - generic [ref=e171]:
+              - generic [ref=e172]: TP
+              - generic [ref=e173]:
+                - paragraph [ref=e174]: Tienda Pepito
+                - paragraph [ref=e175]: seller
+            - img [ref=e176]
+    - generic [ref=e178]:
+      - complementary [ref=e179]:
+        - generic [ref=e181]:
+          - generic [ref=e183]: TI
+          - generic [ref=e185]:
+            - paragraph [ref=e186]: Tienda Pepito
+            - paragraph [ref=e187]: Vendedor Premium
+        - generic [ref=e188]:
+          - heading "Gestión Comercial" [level=2] [ref=e189]
+          - button [ref=e190]:
+            - img [ref=e191]
+        - navigation [ref=e194]:
+          - generic [ref=e195]:
+            - heading "Navegación" [level=3] [ref=e198]
+            - link "Mi Plan" [ref=e199] [cursor=pointer]:
+              - /url: /seller/planes
+              - generic [ref=e201]:
+                - img [ref=e204]
+                - generic [ref=e206]: Mi Plan
+            - link "Mis Datos" [ref=e207] [cursor=pointer]:
+              - /url: /seller/profile
+              - generic [ref=e209]:
+                - img [ref=e212]
+                - generic [ref=e215]: Mis Datos
+            - link "Mi Tienda" [ref=e216] [cursor=pointer]:
+              - /url: /seller/store
+              - generic [ref=e218]:
+                - img [ref=e221]
+                - generic [ref=e225]: Mi Tienda
+            - link "Mi Catálogo" [ref=e226] [cursor=pointer]:
+              - /url: /seller/catalog
+              - generic [ref=e228]:
+                - img [ref=e231]
+                - generic [ref=e235]: Mi Catálogo
+            - link "Mis Servicios" [ref=e236] [cursor=pointer]:
+              - /url: /seller/services
+              - generic [ref=e238]:
+                - img [ref=e241]
+                - generic [ref=e243]: Mis Servicios
+            - link "Mis Ventas" [ref=e244] [cursor=pointer]:
+              - /url: /seller/sales
+              - generic [ref=e246]:
+                - img [ref=e249]
+                - generic [ref=e252]: Mis Ventas
+            - link "Mi Agenda" [ref=e253] [cursor=pointer]:
+              - /url: /seller/agenda
+              - generic [ref=e255]:
+                - img [ref=e258]
+                - generic [ref=e261]: Mi Agenda
+            - link "Mi Logística" [ref=e262] [cursor=pointer]:
+              - /url: /seller/logistics
+              - generic [ref=e264]:
+                - img [ref=e267]
+                - generic [ref=e272]: Mi Logística
+            - link "Centro de Finanzas" [ref=e273] [cursor=pointer]:
+              - /url: /seller/finance
+              - generic [ref=e275]:
+                - img [ref=e278]
+                - generic [ref=e280]: Centro de Finanzas
+            - link "Chat con Clientes" [ref=e281] [cursor=pointer]:
+              - /url: /seller/chat
+              - generic [ref=e283]:
+                - img [ref=e286]
+                - generic [ref=e288]: Chat con Clientes
+            - link "Mesa de Ayuda" [ref=e289] [cursor=pointer]:
+              - /url: /seller/help
+              - generic [ref=e291]:
+                - img [ref=e294]
+                - generic [ref=e297]: Mesa de Ayuda
+            - link "Mis Comprobantes" [ref=e300] [cursor=pointer]:
+              - /url: /seller/invoices
+              - generic [ref=e302]:
+                - img [ref=e305]
+                - generic [ref=e308]: Mis Comprobantes
+        - generic [ref=e310]:
+          - generic [ref=e311]:
+            - img [ref=e312]
+            - generic [ref=e314]: VENDOR PANEL © 2025
+          - generic [ref=e315]: v4.0 SPA
+      - main [ref=e316]:
+        - generic [ref=e318]:
+          - generic [ref=e319]:
+            - generic [ref=e320]:
+              - generic [ref=e321]:
+                - img [ref=e323]
+                - heading "Mesa de Ayuda" [level=1] [ref=e326]
+              - paragraph: Centro de soporte y gestion de incidencias
+            - button "Nuevo Ticket" [ref=e331]:
+              - img [ref=e332]
+              - text: Nuevo Ticket
+          - generic [ref=e334]:
+            - button "Centro de Soporte" [ref=e335]
+            - button "Datos Registrados" [ref=e336]
+          - generic [ref=e338]:
+            - generic [ref=e340]:
+              - generic [ref=e341]:
+                - generic [ref=e342]:
+                  - generic [ref=e343]:
+                    - paragraph [ref=e344]: Bandeja activa
+                    - paragraph [ref=e345]: Revisa tickets, filtra rapido y entra directo al caso correcto.
+                  - button "Crear nuevo ticket" [ref=e346]:
+                    - img [ref=e347]
+                    - text: Nuevo
+                - generic [ref=e349]:
+                  - img [ref=e350]
+                  - textbox "Buscar ticket o ID" [ref=e353]:
+                    - /placeholder: Buscar ticket o ID...
+                - combobox "Filtrar tickets por categoria" [ref=e355] [cursor=pointer]:
+                  - option "Todas las Categorías" [selected]
+                  - option "Soporte Técnico"
+                  - option "Pagos / Facturas"
+                  - option "Trámites"
+                  - option "🆘 Críticos"
+                - generic [ref=e356]:
+                  - generic [ref=e357]: 6 Tickets
+                  - generic [ref=e358]: Estado en tiempo real
+              - generic [ref=e359]:
+                - button "#2026-006 Abierto Pagos jjjjjjjjjjjjjjjjjjjjjjjjjj vbhggjjjj Tienda Pepito 2 hace 2 horas" [ref=e360] [cursor=pointer]:
+                  - generic [ref=e361]:
+                    - generic [ref=e363]: "#2026-006"
+                    - generic [ref=e364]:
+                      - generic [ref=e365]: Abierto
+                      - generic [ref=e366]: Pagos
+                  - heading "jjjjjjjjjjjjjjjjjjjjjjjjjj" [level=4] [ref=e367]
+                  - paragraph [ref=e368]: vbhggjjjj
+                  - generic [ref=e369]:
+                    - generic [ref=e371]: Tienda Pepito
+                    - generic [ref=e372]:
+                      - generic [ref=e373]:
+                        - img [ref=e374]
+                        - generic [ref=e376]: "2"
+                      - generic [ref=e377]: hace 2 horas
+                - button "#2026-005 Cerrado Pagos nO ME PAGARON El vendedor cerró este ticket. Tienda Pepito 2 hace 3 horas" [ref=e378] [cursor=pointer]:
+                  - generic [ref=e379]:
+                    - generic [ref=e381]: "#2026-005"
+                    - generic [ref=e382]:
+                      - generic [ref=e383]: Cerrado
+                      - generic [ref=e384]: Pagos
+                  - heading "nO ME PAGARON" [level=4] [ref=e385]
+                  - paragraph [ref=e386]: El vendedor cerró este ticket.
+                  - generic [ref=e387]:
+                    - generic [ref=e389]: Tienda Pepito
+                    - generic [ref=e390]:
+                      - generic [ref=e391]:
+                        - img [ref=e392]
+                        - generic [ref=e394]: "2"
+                      - generic [ref=e395]: hace 3 horas
+                - button "#2026-004 Cerrado Pagos gggggggggggggggggggg El vendedor cerró este ticket. Tienda Pepito 6 hace 3 horas" [ref=e396] [cursor=pointer]:
+                  - generic [ref=e397]:
+                    - generic [ref=e399]: "#2026-004"
+                    - generic [ref=e400]:
+                      - generic [ref=e401]: Cerrado
+                      - generic [ref=e402]: Pagos
+                  - heading "gggggggggggggggggggg" [level=4] [ref=e403]
+                  - paragraph [ref=e404]: El vendedor cerró este ticket.
+                  - generic [ref=e405]:
+                    - generic [ref=e407]: Tienda Pepito
+                    - generic [ref=e408]:
+                      - generic [ref=e409]:
+                        - img [ref=e410]
+                        - generic [ref=e412]: "6"
+                      - generic [ref=e413]: hace 3 horas
+                - button "#2026-002 Cerrado Pagos TEST TIEMPO REAL — ticket nuevo Estado cambiado de in_progress a closed. Tienda Pepito 12 1 hace 17 horas" [ref=e414] [cursor=pointer]:
+                  - generic [ref=e415]:
+                    - generic [ref=e417]: "#2026-002"
+                    - generic [ref=e418]:
+                      - generic [ref=e419]: Cerrado
+                      - generic [ref=e420]: Pagos
+                  - heading "TEST TIEMPO REAL — ticket nuevo" [level=4] [ref=e421]
+                  - paragraph [ref=e422]: Estado cambiado de in_progress a closed.
+                  - generic [ref=e423]:
+                    - generic [ref=e425]: Tienda Pepito
+                    - generic [ref=e426]:
+                      - generic [ref=e427]:
+                        - img [ref=e428]
+                        - generic [ref=e430]: "12"
+                      - generic [ref=e431]: "1"
+                      - generic [ref=e432]: hace 17 horas
+                - button "#2026-003 Cerrado Pagos hghjhgjhgjjjjjjjjjjj El vendedor cerró este ticket. Tienda Pepito 2 hace 17 horas" [ref=e433] [cursor=pointer]:
+                  - generic [ref=e434]:
+                    - generic [ref=e436]: "#2026-003"
+                    - generic [ref=e437]:
+                      - generic [ref=e438]: Cerrado
+                      - generic [ref=e439]: Pagos
+                  - heading "hghjhgjhgjjjjjjjjjjj" [level=4] [ref=e440]
+                  - paragraph [ref=e441]: El vendedor cerró este ticket.
+                  - generic [ref=e442]:
+                    - generic [ref=e444]: Tienda Pepito
+                    - generic [ref=e445]:
+                      - generic [ref=e446]:
+                        - img [ref=e447]
+                        - generic [ref=e449]: "2"
+                      - generic [ref=e450]: hace 17 horas
+                - button "#2026-001 Abierto Pagos holaerer okkkk Tienda Pepito 2 hace 19 horas" [ref=e451] [cursor=pointer]:
+                  - generic [ref=e452]:
+                    - generic [ref=e454]: "#2026-001"
+                    - generic [ref=e455]:
+                      - generic [ref=e456]: Abierto
+                      - generic [ref=e457]: Pagos
+                  - heading "holaerer" [level=4] [ref=e458]
+                  - paragraph [ref=e459]: okkkk
+                  - generic [ref=e460]:
+                    - generic [ref=e462]: Tienda Pepito
+                    - generic [ref=e463]:
+                      - generic [ref=e464]:
+                        - img [ref=e465]
+                        - generic [ref=e467]: "2"
+                      - generic [ref=e468]: hace 19 horas
+            - generic [ref=e471]:
+              - generic [ref=e474]:
+                - paragraph [ref=e475]: Centro de soporte
+                - generic [ref=e476]:
+                  - heading "Selecciona un ticket y responde sin salir del contexto" [level=3] [ref=e477]
+                  - paragraph [ref=e478]: El panel de conversacion esta pensado para que el historial, el estado y la respuesta convivan en una sola vista util.
+                - generic [ref=e479]:
+                  - generic [ref=e480]: Respuesta rapida
+                  - generic [ref=e481]: Seguimiento claro
+                  - generic [ref=e482]: Tickets largos sin ruido
+              - generic [ref=e483]:
+                - generic [ref=e484]:
+                  - paragraph [ref=e485]: Aun no hay un ticket seleccionado.
+                  - paragraph [ref=e486]: Elige un caso desde la bandeja o abre uno nuevo para iniciar la conversacion.
+                - button "Crear Nuevo Ticket" [ref=e487]:
+                  - img [ref=e488]
+                  - text: Crear Nuevo Ticket
+    - contentinfo [ref=e490]:
+      - generic [ref=e492]:
+        - generic [ref=e493]: © 2026 MarketPlace. Todos los derechos reservados.
+        - generic [ref=e494]:
+          - link "Términos" [ref=e495] [cursor=pointer]:
+            - /url: /terminoscondiciones
+          - link "Privacidad" [ref=e496] [cursor=pointer]:
+            - /url: /politicasdeprivacidad
+          - link "Soporte" [ref=e497] [cursor=pointer]:
+            - /url: /support
+  - generic [ref=e14]:
+    - img [ref=e16]
+    - button "Open Tanstack query devtools" [ref=e64] [cursor=pointer]:
+      - img [ref=e65]
+  - button "Open Next.js Dev Tools" [ref=e6] [cursor=pointer]:
+    - img [ref=e7]
+  - alert [ref=e10]

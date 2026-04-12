@@ -1,0 +1,777 @@
+[  103384ms] [WARNING] WebSocket connection to 'wss://localhost:8080/app/qzg5p7xmovk4uthurig0?protocol=7&client=js&version=8.4.0&flash=false' failed: WebSocket is closed before the connection is established. @ webpack-internal:///(app-pages-browser)/./node_modules/pusher-js/dist/web/pusher.js:1527
+[  126289ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:8000/broadcasting/auth:0
+[  139101ms] [WARNING] Image with src "http://localhost:3000/img/nombrelogo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio. @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  139111ms] [WARNING] Image with src "http://localhost:3000/img/iconologo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio. @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  201390ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:8000/broadcasting/auth:0
+[  218700ms] [WARNING] Image with src "http://localhost:3000/img/iconologo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio. @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  218701ms] [WARNING] Image with src "http://localhost:3000/img/nombrelogo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio. @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  330774ms] [WARNING] Image with src "http://localhost:3000/img/iconologo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio. @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  330775ms] [WARNING] Image with src "http://localhost:3000/img/nombrelogo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio. @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  330857ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:8000/broadcasting/auth:0
+[  422267ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775015897726 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[  488025ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775015897726 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[  495511ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775015897726 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[  502073ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775015897726 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[  518693ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775015897726 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[  538683ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775015897726 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[  558651ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775015897726 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[  678675ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775015897726 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[  718673ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775015897726 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[  738677ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775015897726 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[  758674ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775015897726 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[  838670ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775015897726 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[  938652ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775015897726 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[  978673ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775015897726 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[  998674ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775015897726 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 1018668ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775015897726 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 1058669ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775015897726 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 1078675ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775015897726 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 1118667ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775015897726 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 1138660ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775015897726 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 1158669ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775015897726 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 1178678ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775015897726 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 1258676ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775015897726 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 1278662ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775015897726 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 1298671ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775015897726 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 1318648ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775015897726 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 1638665ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775015897726 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 1658670ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775015897726 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 1678669ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775015897726 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 1698675ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775015897726 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 1718681ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775015897726 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 1738655ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775015897726 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 1758654ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775015897726 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 1778659ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775015897726 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 1798648ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775015897726 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 1818674ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775015897726 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 1826493ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775015897726 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 1840355ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775015897726 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 1858672ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775015897726 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 1869676ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775015897726 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 1895160ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775015897726 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 1911696ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775015897726 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 1918710ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775015897726 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 1918710ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775017397305 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 1929399ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775015897726 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 1948108ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775015897726 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 1981337ms] [WARNING] Image with src "http://localhost:3000/img/iconologo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio. @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[ 1981340ms] [WARNING] Image with src "http://localhost:3000/img/nombrelogo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio. @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[ 1990554ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:8000/broadcasting/auth:0
+[ 2266142ms] [WARNING] Image with src "http://localhost:3000/img/iconologo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio. @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[ 2266143ms] [WARNING] Image with src "http://localhost:3000/img/nombrelogo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio. @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[ 2275931ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:8000/broadcasting/auth:0
+[ 3061502ms] [WARNING] Image with src "http://localhost:3000/img/iconologo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio. @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[ 3061504ms] [WARNING] Image with src "http://localhost:3000/img/nombrelogo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio. @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[ 3067474ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:8000/broadcasting/auth:0
+[ 3172318ms] [WARNING] Image with src "http://localhost:3000/img/iconologo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio. @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[ 3172318ms] [WARNING] Image with src "http://localhost:3000/img/nombrelogo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio. @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[ 3191487ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:8000/broadcasting/auth:0
+[ 3440824ms] [WARNING] Image with src "http://localhost:3000/img/iconologo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio. @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[ 3440826ms] [WARNING] Image with src "http://localhost:3000/img/nombrelogo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio. @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[ 3449686ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:8000/broadcasting/auth:0
+[ 3624618ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775019099573 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 3628662ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775019099573 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 3704180ms] [WARNING] Image with src "http://localhost:3000/img/iconologo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio. @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[ 3704181ms] [WARNING] Image with src "http://localhost:3000/img/nombrelogo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio. @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[ 3712463ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:8000/broadcasting/auth:0
+[ 4065907ms] [WARNING] Image with src "http://localhost:3000/img/iconologo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio. @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[ 4065908ms] [WARNING] Image with src "http://localhost:3000/img/nombrelogo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio. @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[ 4074428ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:8000/broadcasting/auth:0
+[ 4741515ms] [ERROR] ./src/features/seller/help/HelpPageClient.tsx
+Error:   × Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+     ╭─[F:\FRONTEND\fe-001-marketplace-admin\frontapp\src\features\seller\help\HelpPageClient.tsx:139:1]
+ 136 │                                         onNewTicket={() => setShowNewTicketForm(true)}
+ 137 │                                     />
+ 138 │                                 </>
+ 139 │                             )}
+     ·                              ▲
+ 140 │                         </div>
+ 141 │ 
+ 142 │                         <div className="hidden h-full min-h-0 grid-cols-12 gap-5 md:grid">
+     ╰────
+  × Expression expected
+     ╭─[F:\FRONTEND\fe-001-marketplace-admin\frontapp\src\features\seller\help\HelpPageClient.tsx:142:1]
+ 139 │                             )}
+ 140 │                         </div>
+ 141 │ 
+ 142 │                         <div className="hidden h-full min-h-0 grid-cols-12 gap-5 md:grid">
+     ·                         ─
+ 143 │                             <div className="col-span-12 h-full min-h-0 md:col-span-5 xl:col-span-4">
+ 144 │                                 <TicketSidebar
+ 145 │                                     tickets={unifiedTickets}
+     ╰────
+  × Expected '</', got 'ident'
+     ╭─[F:\FRONTEND\fe-001-marketplace-admin\frontapp\src\features\seller\help\HelpPageClient.tsx:142:1]
+ 139 │                             )}
+ 140 │                         </div>
+ 141 │ 
+ 142 │                         <div className="hidden h-full min-h-0 grid-cols-12 gap-5 md:grid">
+     ·                              ─────────
+ 143 │                             <div className="col-span-12 h-full min-h-0 md:col-span-5 xl:col-span-4">
+ 144 │                                 <TicketSidebar
+ 145 │                                     tickets={unifiedTickets}
+     ╰────
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/features/seller/help/HelpPageClient.tsx
+./src/app/seller/help/page.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:51
+[ 4759472ms] [ERROR] ./src/features/seller/help/HelpPageClient.tsx
+Error:   × Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+     ╭─[F:\FRONTEND\fe-001-marketplace-admin\frontapp\src\features\seller\help\HelpPageClient.tsx:139:1]
+ 136 │                                         onNewTicket={() => setShowNewTicketForm(true)}
+ 137 │                                     />
+ 138 │                                 </>
+ 139 │                             )}
+     ·                              ▲
+ 140 │                         </div>
+ 141 │ 
+ 142 │                         <div className="hidden h-full min-h-0 grid-cols-12 gap-5 md:grid">
+     ╰────
+  × Expression expected
+     ╭─[F:\FRONTEND\fe-001-marketplace-admin\frontapp\src\features\seller\help\HelpPageClient.tsx:142:1]
+ 139 │                             )}
+ 140 │                         </div>
+ 141 │ 
+ 142 │                         <div className="hidden h-full min-h-0 grid-cols-12 gap-5 md:grid">
+     ·                         ─
+ 143 │                             <div className="col-span-12 h-full min-h-0 md:col-span-5 xl:col-span-4">
+ 144 │                                 <TicketSidebar
+ 145 │                                     tickets={unifiedTickets}
+     ╰────
+  × Expected '</', got 'ident'
+     ╭─[F:\FRONTEND\fe-001-marketplace-admin\frontapp\src\features\seller\help\HelpPageClient.tsx:142:1]
+ 139 │                             )}
+ 140 │                         </div>
+ 141 │ 
+ 142 │                         <div className="hidden h-full min-h-0 grid-cols-12 gap-5 md:grid">
+     ·                              ─────────
+ 143 │                             <div className="col-span-12 h-full min-h-0 md:col-span-5 xl:col-span-4">
+ 144 │                                 <TicketSidebar
+ 145 │                                     tickets={unifiedTickets}
+     ╰────
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/features/seller/help/HelpPageClient.tsx
+./src/app/seller/help/page.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:51
+[ 4762702ms] [ERROR] ./src/features/seller/help/HelpPageClient.tsx
+Error:   × Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+     ╭─[F:\FRONTEND\fe-001-marketplace-admin\frontapp\src\features\seller\help\HelpPageClient.tsx:139:1]
+ 136 │                                         onNewTicket={() => setShowNewTicketForm(true)}
+ 137 │                                     />
+ 138 │                                 </>
+ 139 │                             )}
+     ·                              ▲
+ 140 │                         </div>
+ 141 │ 
+ 142 │                         <div className="hidden h-full min-h-0 grid-cols-12 gap-5 md:grid">
+     ╰────
+  × Expression expected
+     ╭─[F:\FRONTEND\fe-001-marketplace-admin\frontapp\src\features\seller\help\HelpPageClient.tsx:142:1]
+ 139 │                             )}
+ 140 │                         </div>
+ 141 │ 
+ 142 │                         <div className="hidden h-full min-h-0 grid-cols-12 gap-5 md:grid">
+     ·                         ─
+ 143 │                             <div className="col-span-12 h-full min-h-0 md:col-span-5 xl:col-span-4">
+ 144 │                                 <TicketSidebar
+ 145 │                                     tickets={unifiedTickets}
+     ╰────
+  × Expected '</', got 'ident'
+     ╭─[F:\FRONTEND\fe-001-marketplace-admin\frontapp\src\features\seller\help\HelpPageClient.tsx:142:1]
+ 139 │                             )}
+ 140 │                         </div>
+ 141 │ 
+ 142 │                         <div className="hidden h-full min-h-0 grid-cols-12 gap-5 md:grid">
+     ·                              ─────────
+ 143 │                             <div className="col-span-12 h-full min-h-0 md:col-span-5 xl:col-span-4">
+ 144 │                                 <TicketSidebar
+ 145 │                                     tickets={unifiedTickets}
+     ╰────
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/features/seller/help/HelpPageClient.tsx
+./src/app/seller/help/page.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:51
+[ 4813769ms] [ERROR] ./src/features/seller/help/HelpPageClient.tsx
+Error:   × Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+     ╭─[F:\FRONTEND\fe-001-marketplace-admin\frontapp\src\features\seller\help\HelpPageClient.tsx:139:1]
+ 136 │                                         onNewTicket={() => setShowNewTicketForm(true)}
+ 137 │                                     />
+ 138 │                                 </>
+ 139 │                             )}
+     ·                              ▲
+ 140 │                         </div>
+ 141 │ 
+ 142 │                         <div className="hidden h-full min-h-0 grid-cols-12 gap-5 md:grid">
+     ╰────
+  × Expression expected
+     ╭─[F:\FRONTEND\fe-001-marketplace-admin\frontapp\src\features\seller\help\HelpPageClient.tsx:142:1]
+ 139 │                             )}
+ 140 │                         </div>
+ 141 │ 
+ 142 │                         <div className="hidden h-full min-h-0 grid-cols-12 gap-5 md:grid">
+     ·                         ─
+ 143 │                             <div className="col-span-12 h-full min-h-0 md:col-span-5 xl:col-span-4">
+ 144 │                                 <TicketSidebar
+ 145 │                                     tickets={unifiedTickets}
+     ╰────
+  × Expected '</', got 'ident'
+     ╭─[F:\FRONTEND\fe-001-marketplace-admin\frontapp\src\features\seller\help\HelpPageClient.tsx:142:1]
+ 139 │                             )}
+ 140 │                         </div>
+ 141 │ 
+ 142 │                         <div className="hidden h-full min-h-0 grid-cols-12 gap-5 md:grid">
+     ·                              ─────────
+ 143 │                             <div className="col-span-12 h-full min-h-0 md:col-span-5 xl:col-span-4">
+ 144 │                                 <TicketSidebar
+ 145 │                                     tickets={unifiedTickets}
+     ╰────
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/features/seller/help/HelpPageClient.tsx
+./src/app/seller/help/page.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:51
+[ 4844687ms] [ERROR] ./src/features/seller/help/HelpPageClient.tsx
+Error:   × Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+     ╭─[F:\FRONTEND\fe-001-marketplace-admin\frontapp\src\features\seller\help\HelpPageClient.tsx:139:1]
+ 136 │                                         onNewTicket={() => setShowNewTicketForm(true)}
+ 137 │                                     />
+ 138 │                                 </>
+ 139 │                             )}
+     ·                              ▲
+ 140 │                         </div>
+ 141 │ 
+ 142 │                         <div className="hidden h-full min-h-0 grid-cols-12 gap-5 md:grid">
+     ╰────
+  × Expression expected
+     ╭─[F:\FRONTEND\fe-001-marketplace-admin\frontapp\src\features\seller\help\HelpPageClient.tsx:142:1]
+ 139 │                             )}
+ 140 │                         </div>
+ 141 │ 
+ 142 │                         <div className="hidden h-full min-h-0 grid-cols-12 gap-5 md:grid">
+     ·                         ─
+ 143 │                             <div className="col-span-12 h-full min-h-0 md:col-span-5 xl:col-span-4">
+ 144 │                                 <TicketSidebar
+ 145 │                                     tickets={unifiedTickets}
+     ╰────
+  × Expected '</', got 'ident'
+     ╭─[F:\FRONTEND\fe-001-marketplace-admin\frontapp\src\features\seller\help\HelpPageClient.tsx:142:1]
+ 139 │                             )}
+ 140 │                         </div>
+ 141 │ 
+ 142 │                         <div className="hidden h-full min-h-0 grid-cols-12 gap-5 md:grid">
+     ·                              ─────────
+ 143 │                             <div className="col-span-12 h-full min-h-0 md:col-span-5 xl:col-span-4">
+ 144 │                                 <TicketSidebar
+ 145 │                                     tickets={unifiedTickets}
+     ╰────
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/features/seller/help/HelpPageClient.tsx
+./src/app/seller/help/page.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:51
+[ 4847192ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/?_rsc=o52sv:0
+[ 4848557ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/?_rsc=o52sv:0
+[ 4848763ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/:0
+[ 4851887ms] ModuleBuildError: Module build failed (from ./node_modules/next/dist/build/webpack/loaders/next-swc-loader.js):
+Error:   × Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+     ╭─[F:\FRONTEND\fe-001-marketplace-admin\frontapp\src\features\seller\help\HelpPageClient.tsx:139:1]
+ 136 │                                         onNewTicket={() => setShowNewTicketForm(true)}
+ 137 │                                     />
+ 138 │                                 </>
+ 139 │                             )}
+     ·                              ▲
+ 140 │                         </div>
+ 141 │ 
+ 142 │                         <div className="hidden h-full min-h-0 grid-cols-12 gap-5 md:grid">
+     ╰────
+  × Expression expected
+     ╭─[F:\FRONTEND\fe-001-marketplace-admin\frontapp\src\features\seller\help\HelpPageClient.tsx:142:1]
+ 139 │                             )}
+ 140 │                         </div>
+ 141 │ 
+ 142 │                         <div className="hidden h-full min-h-0 grid-cols-12 gap-5 md:grid">
+     ·                         ─
+ 143 │                             <div className="col-span-12 h-full min-h-0 md:col-span-5 xl:col-span-4">
+ 144 │                                 <TicketSidebar
+ 145 │                                     tickets={unifiedTickets}
+     ╰────
+  × Expected '</', got 'ident'
+     ╭─[F:\FRONTEND\fe-001-marketplace-admin\frontapp\src\features\seller\help\HelpPageClient.tsx:142:1]
+ 139 │                             )}
+ 140 │                         </div>
+ 141 │ 
+ 142 │                         <div className="hidden h-full min-h-0 grid-cols-12 gap-5 md:grid">
+     ·                              ─────────
+ 143 │                             <div className="col-span-12 h-full min-h-0 md:col-span-5 xl:col-span-4">
+ 144 │                                 <TicketSidebar
+ 145 │                                     tickets={unifiedTickets}
+     ╰────
+
+
+Caused by:
+    Syntax Error
+    at processResult (file://F:\FRONTEND\fe-001-marketplace-admin\frontapp\node_modules\next\dist\compiled\webpack\bundle5.js:29:407096)
+    at <unknown> (file://F:\FRONTEND\fe-001-marketplace-admin\frontapp\node_modules\next\dist\compiled\webpack\bundle5.js:29:408891)
+    at <unknown> (file://F:\FRONTEND\fe-001-marketplace-admin\frontapp\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js:1:8645)
+    at <unknown> (file://F:\FRONTEND\fe-001-marketplace-admin\frontapp\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js:1:5019)
+    at r.callback (file://F:\FRONTEND\fe-001-marketplace-admin\frontapp\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js:1:4039)
+[ 4851543ms] [ERROR] ./src/features/seller/help/HelpPageClient.tsx
+Error:   × Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+     ╭─[F:\FRONTEND\fe-001-marketplace-admin\frontapp\src\features\seller\help\HelpPageClient.tsx:139:1]
+ 136 │                                         onNewTicket={() => setShowNewTicketForm(true)}
+ 137 │                                     />
+ 138 │                                 </>
+ 139 │                             )}
+     ·                              ▲
+ 140 │                         </div>
+ 141 │ 
+ 142 │                         <div className="hidden h-full min-h-0 grid-cols-12 gap-5 md:grid">
+     ╰────
+  × Expression expected
+     ╭─[F:\FRONTEND\fe-001-marketplace-admin\frontapp\src\features\seller\help\HelpPageClient.tsx:142:1]
+ 139 │                             )}
+ 140 │                         </div>
+ 141 │ 
+ 142 │                         <div className="hidden h-full min-h-0 grid-cols-12 gap-5 md:grid">
+     ·                         ─
+ 143 │                             <div className="col-span-12 h-full min-h-0 md:col-span-5 xl:col-span-4">
+ 144 │                                 <TicketSidebar
+ 145 │                                     tickets={unifiedTickets}
+     ╰────
+  × Expected '</', got 'ident'
+     ╭─[F:\FRONTEND\fe-001-marketplace-admin\frontapp\src\features\seller\help\HelpPageClient.tsx:142:1]
+ 139 │                             )}
+ 140 │                         </div>
+ 141 │ 
+ 142 │                         <div className="hidden h-full min-h-0 grid-cols-12 gap-5 md:grid">
+     ·                              ─────────
+ 143 │                             <div className="col-span-12 h-full min-h-0 md:col-span-5 xl:col-span-4">
+ 144 │                                 <TicketSidebar
+ 145 │                                     tickets={unifiedTickets}
+     ╰────
+
+Caused by:
+    Syntax Error @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/userspace/pages/pages-dev-overlay-setup.js:70
+[ 4851558ms] [ERROR] ./src/features/seller/help/HelpPageClient.tsx
+Error:   × Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+     ╭─[F:\FRONTEND\fe-001-marketplace-admin\frontapp\src\features\seller\help\HelpPageClient.tsx:139:1]
+ 136 │                                         onNewTicket={() => setShowNewTicketForm(true)}
+ 137 │                                     />
+ 138 │                                 </>
+ 139 │                             )}
+     ·                              ▲
+ 140 │                         </div>
+ 141 │ 
+ 142 │                         <div className="hidden h-full min-h-0 grid-cols-12 gap-5 md:grid">
+     ╰────
+  × Expression expected
+     ╭─[F:\FRONTEND\fe-001-marketplace-admin\frontapp\src\features\seller\help\HelpPageClient.tsx:142:1]
+ 139 │                             )}
+ 140 │                         </div>
+ 141 │ 
+ 142 │                         <div className="hidden h-full min-h-0 grid-cols-12 gap-5 md:grid">
+     ·                         ─
+ 143 │                             <div className="col-span-12 h-full min-h-0 md:col-span-5 xl:col-span-4">
+ 144 │                                 <TicketSidebar
+ 145 │                                     tickets={unifiedTickets}
+     ╰────
+  × Expected '</', got 'ident'
+     ╭─[F:\FRONTEND\fe-001-marketplace-admin\frontapp\src\features\seller\help\HelpPageClient.tsx:142:1]
+ 139 │                             )}
+ 140 │                         </div>
+ 141 │ 
+ 142 │                         <div className="hidden h-full min-h-0 grid-cols-12 gap-5 md:grid">
+     ·                              ─────────
+ 143 │                             <div className="col-span-12 h-full min-h-0 md:col-span-5 xl:col-span-4">
+ 144 │                                 <TicketSidebar
+ 145 │                                     tickets={unifiedTickets}
+     ╰────
+
+Caused by:
+    Syntax Error @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/userspace/pages/pages-dev-overlay-setup.js:70
+[ 4851733ms] [ERROR] ./src/features/seller/help/HelpPageClient.tsx
+Error:   × Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+     ╭─[F:\FRONTEND\fe-001-marketplace-admin\frontapp\src\features\seller\help\HelpPageClient.tsx:139:1]
+ 136 │                                         onNewTicket={() => setShowNewTicketForm(true)}
+ 137 │                                     />
+ 138 │                                 </>
+ 139 │                             )}
+     ·                              ▲
+ 140 │                         </div>
+ 141 │ 
+ 142 │                         <div className="hidden h-full min-h-0 grid-cols-12 gap-5 md:grid">
+     ╰────
+  × Expression expected
+     ╭─[F:\FRONTEND\fe-001-marketplace-admin\frontapp\src\features\seller\help\HelpPageClient.tsx:142:1]
+ 139 │                             )}
+ 140 │                         </div>
+ 141 │ 
+ 142 │                         <div className="hidden h-full min-h-0 grid-cols-12 gap-5 md:grid">
+     ·                         ─
+ 143 │                             <div className="col-span-12 h-full min-h-0 md:col-span-5 xl:col-span-4">
+ 144 │                                 <TicketSidebar
+ 145 │                                     tickets={unifiedTickets}
+     ╰────
+  × Expected '</', got 'ident'
+     ╭─[F:\FRONTEND\fe-001-marketplace-admin\frontapp\src\features\seller\help\HelpPageClient.tsx:142:1]
+ 139 │                             )}
+ 140 │                         </div>
+ 141 │ 
+ 142 │                         <div className="hidden h-full min-h-0 grid-cols-12 gap-5 md:grid">
+     ·                              ─────────
+ 143 │                             <div className="col-span-12 h-full min-h-0 md:col-span-5 xl:col-span-4">
+ 144 │                                 <TicketSidebar
+ 145 │                                     tickets={unifiedTickets}
+     ╰────
+
+Caused by:
+    Syntax Error @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/userspace/pages/pages-dev-overlay-setup.js:70
+[ 4852335ms] [ERROR] ./src/features/seller/help/HelpPageClient.tsx
+Error:   × Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+     ╭─[F:\FRONTEND\fe-001-marketplace-admin\frontapp\src\features\seller\help\HelpPageClient.tsx:139:1]
+ 136 │                                         onNewTicket={() => setShowNewTicketForm(true)}
+ 137 │                                     />
+ 138 │                                 </>
+ 139 │                             )}
+     ·                              ▲
+ 140 │                         </div>
+ 141 │ 
+ 142 │                         <div className="hidden h-full min-h-0 grid-cols-12 gap-5 md:grid">
+     ╰────
+  × Expression expected
+     ╭─[F:\FRONTEND\fe-001-marketplace-admin\frontapp\src\features\seller\help\HelpPageClient.tsx:142:1]
+ 139 │                             )}
+ 140 │                         </div>
+ 141 │ 
+ 142 │                         <div className="hidden h-full min-h-0 grid-cols-12 gap-5 md:grid">
+     ·                         ─
+ 143 │                             <div className="col-span-12 h-full min-h-0 md:col-span-5 xl:col-span-4">
+ 144 │                                 <TicketSidebar
+ 145 │                                     tickets={unifiedTickets}
+     ╰────
+  × Expected '</', got 'ident'
+     ╭─[F:\FRONTEND\fe-001-marketplace-admin\frontapp\src\features\seller\help\HelpPageClient.tsx:142:1]
+ 139 │                             )}
+ 140 │                         </div>
+ 141 │ 
+ 142 │                         <div className="hidden h-full min-h-0 grid-cols-12 gap-5 md:grid">
+     ·                              ─────────
+ 143 │                             <div className="col-span-12 h-full min-h-0 md:col-span-5 xl:col-span-4">
+ 144 │                                 <TicketSidebar
+ 145 │                                     tickets={unifiedTickets}
+     ╰────
+
+Caused by:
+    Syntax Error @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/userspace/pages/pages-dev-overlay-setup.js:70
+[ 4879561ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/_next/static/webpack/76d989a27f44f659.webpack.hot-update.json:0
+[ 4879562ms] [WARNING] [Fast Refresh] performing full reload because your application had an unrecoverable error @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[ 4883039ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/_next/static/webpack/76d989a27f44f659.webpack.hot-update.json:0
+[ 4883041ms] [WARNING] [Fast Refresh] performing full reload because your application had an unrecoverable error @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[ 4908923ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/_next/static/webpack/76d989a27f44f659.webpack.hot-update.json:0
+[ 4908923ms] [WARNING] [Fast Refresh] performing full reload because your application had an unrecoverable error @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[ 4910123ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/_next/static/webpack/76d989a27f44f659.webpack.hot-update.json:0
+[ 4910123ms] [WARNING] [Fast Refresh] performing full reload because your application had an unrecoverable error @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[ 4914051ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/_next/static/webpack/76d989a27f44f659.webpack.hot-update.json:0
+[ 4914052ms] [WARNING] [Fast Refresh] performing full reload because your application had an unrecoverable error @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[ 4950513ms] [WARNING] Image with src "http://localhost:3000/img/iconologo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio. @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[ 4950550ms] [WARNING] Image with src "http://localhost:3000/img/nombrelogo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio. @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[ 4974214ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:8000/broadcasting/auth:0
+[ 5559124ms] [WARNING] Image with src "http://localhost:3000/img/iconologo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio. @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[ 5559124ms] [WARNING] Image with src "http://localhost:3000/img/nombrelogo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio. @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[ 5566504ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:8000/broadcasting/auth:0
+[ 6090823ms] [WARNING] Image with src "http://localhost:3000/img/iconologo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio. @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[ 6090823ms] [WARNING] Image with src "http://localhost:3000/img/nombrelogo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio. @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[ 6108913ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:8000/broadcasting/auth:0
+[ 6148791ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775021630056 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 6214400ms] [WARNING] Image with src "http://localhost:3000/img/iconologo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio. @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[ 6214401ms] [WARNING] Image with src "http://localhost:3000/img/nombrelogo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio. @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[ 6220835ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:8000/broadcasting/auth:0
+[ 6775766ms] [WARNING] Image with src "http://localhost:3000/img/iconologo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio. @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[ 6775767ms] [WARNING] Image with src "http://localhost:3000/img/nombrelogo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio. @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[ 6779542ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:8000/broadcasting/auth:0
+[ 7240893ms] [WARNING] Image with src "http://localhost:3000/img/iconologo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio. @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[ 7240896ms] [WARNING] Image with src "http://localhost:3000/img/nombrelogo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio. @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[ 7251953ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:8000/broadcasting/auth:0
+[ 7468205ms] [WARNING] Image with src "http://localhost:3000/img/iconologo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio. @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[ 7468205ms] [WARNING] Image with src "http://localhost:3000/img/nombrelogo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio. @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[ 7503183ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:8000/broadcasting/auth:0
+[ 7760328ms] [WARNING] Image with src "http://localhost:3000/img/iconologo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio. @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[ 7760330ms] [WARNING] Image with src "http://localhost:3000/img/nombrelogo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio. @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[ 7766043ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:8000/broadcasting/auth:0
+[ 8250804ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775023727032 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 8258100ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775023727032 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 8268104ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775023727032 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 8278090ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775023727032 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 8288114ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775023727032 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 8298086ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775023727032 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 8308101ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775023727032 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 8318068ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775023727032 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 8328086ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775023727032 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 8376999ms] [WARNING] Image with src "http://localhost:3000/img/iconologo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio. @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[ 8377000ms] [WARNING] Image with src "http://localhost:3000/img/nombrelogo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio. @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[ 8383539ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:8000/broadcasting/auth:0
+[ 8781252ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775024262966 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 8868717ms] [WARNING] Image with src "http://localhost:3000/img/iconologo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio. @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[ 8868720ms] [WARNING] Image with src "http://localhost:3000/img/nombrelogo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio. @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[ 8971242ms] [WARNING] Image with src "http://localhost:3000/img/iconologo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio. @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[ 8971243ms] [WARNING] Image with src "http://localhost:3000/img/nombrelogo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio. @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[ 8981945ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:8000/broadcasting/auth:0
+[ 9431520ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_RESET @ http://localhost:3000/?_rsc=o52sv:0
+[ 9431724ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_RESET @ http://localhost:3000/_next/static/css/app/layout.css?v=1775024916724:0
+[ 9432009ms] network error
+[ 9434457ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/__nextjs_original-stack-frames:0
+[ 9435333ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr?id=n_fNXCxS3YoObgKW9Ferj' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/dev/hot-reloader/app/web-socket.js:55
+[ 9437528ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775024916724 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9450460ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775024916724 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9554848ms] [WARNING] Image with src "http://localhost:3000/img/iconologo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio. @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[ 9554848ms] [WARNING] Image with src "http://localhost:3000/img/nombrelogo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio. @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[ 9556872ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:8000/broadcasting/auth:0
+[ 9611853ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025085539 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9611853ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025089664 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9611853ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025039905 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9611853ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025094004 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9611853ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025045004 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9611853ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025074329 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9618604ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025085539 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9618604ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025089664 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9618605ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025039905 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9618605ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025094004 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9618605ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025045004 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9618605ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025074329 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9629843ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025114686 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9629843ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025085539 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9629843ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025089664 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9629843ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025039905 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9629843ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025094004 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9629843ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025045004 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9629843ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025074329 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9638026ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025114686 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9638026ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025085539 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9638026ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025119682 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9638026ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025089664 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9638027ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025045004 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9638027ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025039905 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9638027ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025094004 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9638027ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025074329 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9644340ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025114686 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9644340ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025085539 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9644341ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025119682 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9644341ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025089664 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9644341ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025045004 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9644341ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025128001 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9644341ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025039905 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9644341ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025094004 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9644341ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025074329 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9647563ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025114686 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9647563ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025085539 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9647563ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025119682 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9647563ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025089664 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9647563ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025045004 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9647563ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025128001 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9647564ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025039905 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9647564ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025094004 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9647564ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025074329 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9651221ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025114686 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9651221ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025085539 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9651221ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025119682 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9651221ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025089664 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9651222ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025045004 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9651222ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025128001 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9651222ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025039905 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9651222ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025094004 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9651222ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025074329 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9662462ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025114686 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9662462ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025085539 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9662462ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025119682 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9662462ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025089664 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9662462ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025045004 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9662462ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025128001 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9662462ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025039905 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9662463ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025094004 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9662463ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025074329 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9668210ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025114686 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9668210ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025085539 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9668210ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025119682 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9668210ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025089664 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9668210ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025045004 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9668210ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025153233 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9668210ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025128001 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9668210ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025039905 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9668210ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025094004 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9668211ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775025074329 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[ 9720913ms] [WARNING] Image with src "http://localhost:3000/img/nombrelogo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio. @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[ 9720914ms] [WARNING] Image with src "http://localhost:3000/img/iconologo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio. @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[ 9853347ms] ChunkLoadError: Loading chunk app/layout failed.
+(timeout: http://localhost:3000/_next/static/chunks/app/layout.js)
+    at __webpack_require__.f.j (http://localhost:3000/_next/static/chunks/webpack.js?v=1775025212862:854:29)
+    at http://localhost:3000/_next/static/chunks/webpack.js?v=1775025212862:145:40
+    at Array.reduce (<anonymous>)
+    at __webpack_require__.e (http://localhost:3000/_next/static/chunks/webpack.js?v=1775025212862:144:67)
+    at fn.e (http://localhost:3000/_next/static/chunks/webpack.js?v=1775025212862:381:50)
+    at loadChunk (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-server-dom-webpack/cjs/react-server-dom-webpack-client.browser.development.js:113:34)
+    at preloadModule (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-server-dom-webpack/cjs/react-server-dom-webpack-client.browser.development.js:82:31)
+    at resolveModule (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-server-dom-webpack/cjs/react-server-dom-webpack-client.browser.development.js:2902:20)
+    at processFullStringRow (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-server-dom-webpack/cjs/react-server-dom-webpack-client.browser.development.js:4314:11)
+    at processFullBinaryRow (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-server-dom-webpack/cjs/react-server-dom-webpack-client.browser.development.js:4309:7)
+    at processBinaryChunk (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-server-dom-webpack/cjs/react-server-dom-webpack-client.browser.development.js:4532:19)
+    at progress (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-server-dom-webpack/cjs/react-server-dom-webpack-client.browser.development.js:4808:9)
+[ 9862346ms] [WARNING] [Fast Refresh] performing full reload because your application had an unrecoverable error @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[ 9869631ms] Invalid or unexpected token
+[ 9995077ms] ChunkLoadError: Loading chunk app/layout failed.
+(timeout: http://localhost:3000/_next/static/chunks/app/layout.js)
+    at __webpack_require__.f.j (http://localhost:3000/_next/static/chunks/webpack.js?v=1775025350361:854:29)
+    at http://localhost:3000/_next/static/chunks/webpack.js?v=1775025350361:145:40
+    at Array.reduce (<anonymous>)
+    at __webpack_require__.e (http://localhost:3000/_next/static/chunks/webpack.js?v=1775025350361:144:67)
+    at fn.e (http://localhost:3000/_next/static/chunks/webpack.js?v=1775025350361:381:50)
+    at loadChunk (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-server-dom-webpack/cjs/react-server-dom-webpack-client.browser.development.js:113:34)
+    at preloadModule (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-server-dom-webpack/cjs/react-server-dom-webpack-client.browser.development.js:82:31)
+    at resolveModule (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-server-dom-webpack/cjs/react-server-dom-webpack-client.browser.development.js:2902:20)
+    at processFullStringRow (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-server-dom-webpack/cjs/react-server-dom-webpack-client.browser.development.js:4314:11)
+    at processFullBinaryRow (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-server-dom-webpack/cjs/react-server-dom-webpack-client.browser.development.js:4309:7)
+    at processBinaryChunk (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-server-dom-webpack/cjs/react-server-dom-webpack-client.browser.development.js:4532:19)
+    at progress (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-server-dom-webpack/cjs/react-server-dom-webpack-client.browser.development.js:4808:9)
+[ 9999254ms] [WARNING] [Fast Refresh] performing full reload because your application had an unrecoverable error @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[10004840ms] Invalid or unexpected token
+[10130905ms] ChunkLoadError: Loading chunk app/layout failed.
+(timeout: http://localhost:3000/_next/static/chunks/app/layout.js)
+    at __webpack_require__.f.j (http://localhost:3000/_next/static/chunks/webpack.js?v=1775025487916:854:29)
+    at http://localhost:3000/_next/static/chunks/webpack.js?v=1775025487916:145:40
+    at Array.reduce (<anonymous>)
+    at __webpack_require__.e (http://localhost:3000/_next/static/chunks/webpack.js?v=1775025487916:144:67)
+    at fn.e (http://localhost:3000/_next/static/chunks/webpack.js?v=1775025487916:381:50)
+    at loadChunk (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-server-dom-webpack/cjs/react-server-dom-webpack-client.browser.development.js:113:34)
+    at preloadModule (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-server-dom-webpack/cjs/react-server-dom-webpack-client.browser.development.js:82:31)
+    at resolveModule (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-server-dom-webpack/cjs/react-server-dom-webpack-client.browser.development.js:2902:20)
+    at processFullStringRow (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-server-dom-webpack/cjs/react-server-dom-webpack-client.browser.development.js:4314:11)
+    at processFullBinaryRow (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-server-dom-webpack/cjs/react-server-dom-webpack-client.browser.development.js:4309:7)
+    at processBinaryChunk (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-server-dom-webpack/cjs/react-server-dom-webpack-client.browser.development.js:4532:19)
+    at progress (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-server-dom-webpack/cjs/react-server-dom-webpack-client.browser.development.js:4808:9)
+[10136155ms] [WARNING] [Fast Refresh] performing full reload because your application had an unrecoverable error @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[10141533ms] [WARNING] [Fast Refresh] performing full reload because your application had an unrecoverable error @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[10267643ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_RESET @ http://localhost:3000/:0
+[10267645ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_RESET @ http://localhost:3000/?_rsc=o52sv:0
+[10267647ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_RESET @ http://localhost:3000/?_rsc=o52sv:0
+[10267870ms] network error
+[10270348ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/__nextjs_original-stack-frames:0
+[10271362ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr?id=u6fqTDxfG1oKMKbvYlMot' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/dev/hot-reloader/app/web-socket.js:55
+[10274945ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr?id=u6fqTDxfG1oKMKbvYlMot' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/dev/hot-reloader/app/web-socket.js:55
+[10278545ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr?id=u6fqTDxfG1oKMKbvYlMot' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/dev/hot-reloader/app/web-socket.js:55
+[10281350ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:8000/broadcasting/auth:0
+[10282164ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr?id=u6fqTDxfG1oKMKbvYlMot' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/dev/hot-reloader/app/web-socket.js:55
+[10285496ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr?id=u6fqTDxfG1oKMKbvYlMot' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/dev/hot-reloader/app/web-socket.js:55
+[10292858ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr?id=u6fqTDxfG1oKMKbvYlMot' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/dev/hot-reloader/app/web-socket.js:55
+[10300231ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr?id=u6fqTDxfG1oKMKbvYlMot' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/dev/hot-reloader/app/web-socket.js:55
+[10307620ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr?id=u6fqTDxfG1oKMKbvYlMot' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/dev/hot-reloader/app/web-socket.js:55
+[10314980ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr?id=u6fqTDxfG1oKMKbvYlMot' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/dev/hot-reloader/app/web-socket.js:55
+[10322359ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr?id=u6fqTDxfG1oKMKbvYlMot' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/dev/hot-reloader/app/web-socket.js:55
+[10329722ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr?id=u6fqTDxfG1oKMKbvYlMot' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/dev/hot-reloader/app/web-socket.js:55
+[10337064ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr?id=u6fqTDxfG1oKMKbvYlMot' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/dev/hot-reloader/app/web-socket.js:55
+[10529999ms] [WARNING] Image with src "http://localhost:3000/img/nombrelogo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio. @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[10530000ms] [WARNING] Image with src "http://localhost:3000/img/iconologo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio. @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[10545703ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:8000/broadcasting/auth:0
+[10580190ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026019801 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10580190ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026035855 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10590546ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026019801 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10590546ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026070260 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10590546ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026035855 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10599063ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026019801 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10599063ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026080149 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10599063ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026035855 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10599063ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026070260 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10606896ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026019801 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10606896ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026080149 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10606896ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026035855 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10606896ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026070260 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10606896ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026089404 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10612525ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026019801 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10612526ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026080149 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10612526ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026035855 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10612526ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026070260 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10612527ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026089404 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10619905ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026019801 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10619906ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026104098 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10619906ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026080149 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10619906ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026070260 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10619907ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026089404 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10619907ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026102627 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10619907ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026035855 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10619907ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026099668 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10623131ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026019801 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10623131ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026104098 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10623131ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026080149 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10623131ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026070260 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10623132ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026089404 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10623132ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026102627 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10623132ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026035855 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10623132ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026099668 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10628610ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026019801 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10628610ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026104098 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10628610ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026080149 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10628610ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026070260 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10628610ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026089404 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10628610ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026102627 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10628610ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026035855 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10628610ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026099668 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10632509ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026019801 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10632509ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026104098 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10632509ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026080149 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10632510ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026070260 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10632510ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026089404 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10632510ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026102627 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10632510ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026035855 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10632510ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026099668 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10641410ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/?_rsc=o52sv:0
+[10647853ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026019801 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10647853ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026104098 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10647853ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026080149 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10647853ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026070260 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10647853ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026089404 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10647853ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026102627 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10647853ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026035855 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10647853ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026099668 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10711579ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:8000/broadcasting/auth:0
+[10724509ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/?_rsc=o52sv:0
+[10729893ms] network error
+[10732308ms] Invalid or unexpected token
+[10755620ms] [ERROR] Can't perform a React state update on a component that hasn't mounted yet. This indicates that you have a side-effect in your render function that asynchronously tries to update the component. Move this work to useEffect instead. @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:51
+[10780510ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026258448 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10780510ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026247674 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10784521ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026258448 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10784521ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026247674 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10798061ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026258448 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10798061ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026247674 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10831544ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026258448 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10831545ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026247674 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10831545ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026313016 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10837620ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026258448 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10837620ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026247674 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10837620ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775026313016 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/:0
+[10839618ms] Invalid or unexpected token
+[10978818ms] ChunkLoadError: Loading chunk app/layout failed.
+(timeout: http://localhost:3000/_next/static/chunks/app/layout.js)
+    at __webpack_require__.f.j (http://localhost:3000/_next/static/chunks/webpack.js?v=1775026323802:854:29)
+    at http://localhost:3000/_next/static/chunks/webpack.js?v=1775026323802:145:40
+    at Array.reduce (<anonymous>)
+    at __webpack_require__.e (http://localhost:3000/_next/static/chunks/webpack.js?v=1775026323802:144:67)
+    at fn.e (http://localhost:3000/_next/static/chunks/webpack.js?v=1775026323802:381:50)
+    at loadChunk (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-server-dom-webpack/cjs/react-server-dom-webpack-client.browser.development.js:113:34)
+    at preloadModule (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-server-dom-webpack/cjs/react-server-dom-webpack-client.browser.development.js:82:31)
+    at resolveModule (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-server-dom-webpack/cjs/react-server-dom-webpack-client.browser.development.js:2902:20)
+    at processFullStringRow (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-server-dom-webpack/cjs/react-server-dom-webpack-client.browser.development.js:4314:11)
+    at processFullBinaryRow (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-server-dom-webpack/cjs/react-server-dom-webpack-client.browser.development.js:4309:7)
+    at processBinaryChunk (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-server-dom-webpack/cjs/react-server-dom-webpack-client.browser.development.js:4532:19)
+    at progress (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-server-dom-webpack/cjs/react-server-dom-webpack-client.browser.development.js:4808:9)

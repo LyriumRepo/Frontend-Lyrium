@@ -1,0 +1,134 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e5]:
+          - generic [ref=e6]: Mi Panel del Vendedor
+          - navigation [ref=e8]:
+            - link [ref=e9] [cursor=pointer]:
+              - /url: /
+              - img [ref=e10]
+            - generic [ref=e12]:
+              - img [ref=e13]
+              - link "Mi Tienda" [ref=e15] [cursor=pointer]:
+                - /url: /seller
+            - generic [ref=e16]:
+              - img [ref=e17]
+              - generic [ref=e19]: Ayuda
+        - generic [ref=e20]:
+          - generic [ref=e22]:
+            - img [ref=e24]
+            - img [ref=e30]
+            - img [ref=e36]
+            - button "Verificar conexiones" [ref=e41]:
+              - img [ref=e42]
+          - generic [ref=e49]: API Offline
+          - generic [ref=e51]:
+            - generic [ref=e52]: "Ventas del Mes: S/ 4,560.00"
+            - generic [ref=e53]: "Pedidos Hoy: 08"
+          - button "Modo automático" [ref=e57]:
+            - img [ref=e58]
+          - button "Centro de Notificaciones" [ref=e61]:
+            - img [ref=e62]
+    - generic [ref=e66]:
+      - complementary [ref=e67]:
+        - generic [ref=e69]:
+          - generic [ref=e71]: MI
+          - generic [ref=e73]:
+            - paragraph [ref=e74]: Mi Tienda
+            - paragraph [ref=e75]: Vendedor Premium
+        - generic [ref=e76]:
+          - heading "Gestión Comercial" [level=2] [ref=e77]
+          - button [ref=e78]:
+            - img [ref=e79]
+        - navigation [ref=e82]:
+          - generic [ref=e83]:
+            - heading "Navegación" [level=3] [ref=e86]
+            - link "Mi Plan" [ref=e87] [cursor=pointer]:
+              - /url: /seller/planes
+              - generic [ref=e89]:
+                - img [ref=e92]
+                - generic [ref=e94]: Mi Plan
+            - link "Mis Datos" [ref=e95] [cursor=pointer]:
+              - /url: /seller/profile
+              - generic [ref=e97]:
+                - img [ref=e100]
+                - generic [ref=e103]: Mis Datos
+            - link "Mi Tienda" [ref=e104] [cursor=pointer]:
+              - /url: /seller/store
+              - generic [ref=e106]:
+                - img [ref=e109]
+                - generic [ref=e113]: Mi Tienda
+            - link "Mi Catálogo" [ref=e114] [cursor=pointer]:
+              - /url: /seller/catalog
+              - generic [ref=e116]:
+                - img [ref=e119]
+                - generic [ref=e123]: Mi Catálogo
+            - link "Mis Servicios" [ref=e124] [cursor=pointer]:
+              - /url: /seller/services
+              - generic [ref=e126]:
+                - img [ref=e129]
+                - generic [ref=e131]: Mis Servicios
+            - link "Mis Ventas" [ref=e132] [cursor=pointer]:
+              - /url: /seller/sales
+              - generic [ref=e134]:
+                - img [ref=e137]
+                - generic [ref=e140]: Mis Ventas
+            - link "Mi Agenda" [ref=e141] [cursor=pointer]:
+              - /url: /seller/agenda
+              - generic [ref=e143]:
+                - img [ref=e146]
+                - generic [ref=e149]: Mi Agenda
+            - link "Mi Logística" [ref=e150] [cursor=pointer]:
+              - /url: /seller/logistics
+              - generic [ref=e152]:
+                - img [ref=e155]
+                - generic [ref=e160]: Mi Logística
+            - link "Centro de Finanzas" [ref=e161] [cursor=pointer]:
+              - /url: /seller/finance
+              - generic [ref=e163]:
+                - img [ref=e166]
+                - generic [ref=e168]: Centro de Finanzas
+            - link "Chat con Clientes" [ref=e169] [cursor=pointer]:
+              - /url: /seller/chat
+              - generic [ref=e171]:
+                - img [ref=e174]
+                - generic [ref=e176]: Chat con Clientes
+            - link "Mesa de Ayuda" [ref=e177] [cursor=pointer]:
+              - /url: /seller/help
+              - generic [ref=e179]:
+                - img [ref=e182]
+                - generic [ref=e185]: Mesa de Ayuda
+            - link "Mis Comprobantes" [ref=e188] [cursor=pointer]:
+              - /url: /seller/invoices
+              - generic [ref=e190]:
+                - img [ref=e193]
+                - generic [ref=e196]: Mis Comprobantes
+        - generic [ref=e198]:
+          - generic [ref=e199]:
+            - img [ref=e200]
+            - generic [ref=e202]: VENDOR PANEL © 2025
+          - generic [ref=e203]: v4.0 SPA
+      - main [ref=e204]:
+        - generic [ref=e206]:
+          - generic [ref=e208]:
+            - generic [ref=e209]:
+              - img [ref=e211]
+              - heading "Mesa de Ayuda" [level=1] [ref=e214]
+            - paragraph: Centro de soporte y gestion de incidencias
+          - generic [ref=e218]:
+            - img [ref=e223]
+            - paragraph [ref=e226]: Cargando tickets de soporte...
+    - contentinfo [ref=e229]:
+      - generic [ref=e231]:
+        - generic [ref=e232]: © 2026 MarketPlace. Todos los derechos reservados.
+        - generic [ref=e233]:
+          - link "Términos" [ref=e234] [cursor=pointer]:
+            - /url: /terminoscondiciones
+          - link "Privacidad" [ref=e235] [cursor=pointer]:
+            - /url: /politicasdeprivacidad
+          - link "Soporte" [ref=e236] [cursor=pointer]:
+            - /url: /support
+  - button "Open Next.js Dev Tools" [ref=e242] [cursor=pointer]:
+    - img [ref=e243]
+  - alert [ref=e246]
