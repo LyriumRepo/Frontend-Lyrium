@@ -15,7 +15,7 @@ jobs:
       - name: Configurar Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22' # Usamos Node 22 que va mejor con Next 16
+          node-version: '22' 
           cache: 'npm'
 
       - name: Instalar dependencias
