@@ -1,0 +1,25 @@
+name: Revision Frontend (Next.js 16)
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar codigo
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22' # Usamos Node 22 que va mejor con Next 16
+          cache: 'npm'
+
+      - name: Instalar dependencias
+        run: npm install
+
+      - name: Verificar Tipados y Build
+        run: npm run build
