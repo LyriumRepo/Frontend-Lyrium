@@ -2,6 +2,12 @@
 
 // LogoLyrium.tsx — caritas animadas por horario (v2 · React/Next.js port)
 // Requiere: npm install animejs@3.2.2 y npm install --save-dev @types/animejs
+// para llamarlo <Link href="/" className="flex items-center gap-2 group">
+//                        <LogoLyrium
+//                        frontImg="/img/iconologo.png"
+//                        sideImg="/img/nombrelogo.png"
+//                        />
+//                    </Link>
 
 import anime from 'animejs/lib/anime.es.js';
 import React, { useEffect, useRef, useState } from 'react';
