@@ -33,13 +33,14 @@ export function useSellerSales() {
                 return { orders: filteredOrders as Order[], kpis: MOCK_KPIS as SalesKPI[] };
             }
 
-            try {
-                const orders = await orderRepository.getOrders();
-                return { orders, kpis: [] as SalesKPI[] };
-            } catch (error) {
-                console.warn('FALLBACK: orderRepository.getOrders() error', error);
-                return { orders: MOCK_ORDERS as Order[], kpis: MOCK_KPIS as SalesKPI[] };
-            }
+             try {
+                 const result = await orderRepository.getOrders() as Order[] | { data: Order[] };
+                 const orders = Array.isArray(result) ? result : (result?.data ?? []);
+                 return { orders: orders as Order[], kpis: [] as SalesKPI[] };
+             } catch (error) {
+                 console.warn('FALLBACK: orderRepository.getOrders() error', error);
+                 return { orders: MOCK_ORDERS as Order[], kpis: MOCK_KPIS as SalesKPI[] };
+             }
         },
         staleTime: 5 * 60 * 1000,
     });
