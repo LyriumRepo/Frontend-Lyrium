@@ -247,7 +247,7 @@ const STYLES = `
     backface-visibility: hidden; -webkit-backface-visibility: hidden;
     display: flex; align-items: center; justify-content: center; overflow: hidden;
   }
-  .lyr-face-front { background: white; z-index: 2; }
+  .lyr-face-front { background: #ffffff00; z-index: 2; }
   .lyr-face-back  {
     transform: rotateY(180deg);
     background: linear-gradient(135deg, #a3e635 0%, #0ea5e9 100%);
