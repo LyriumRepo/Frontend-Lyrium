@@ -1,7 +1,7 @@
 'use client';
 
 // LogoLyrium.tsx — caritas animadas por horario (v2 · React/Next.js port)
-// Requiere: npm install animejs @types/animejs
+// Requiere: npm install animejs@3.2.2 y npm install --save-dev @types/animejs
 
 import anime from 'animejs/lib/anime.es.js';
 import React, { useEffect, useRef, useState } from 'react';
