@@ -24,7 +24,32 @@ export function useSellerLogistics() {
             try {
                 const methods = await shippingApi.storeMethods();
                 const zones = await shippingApi.listZones();
-                return { methods, zones } as unknown as LogisticsConfig;
+                
+                // Transform API response to match LogisticsConfig structure
+                return {
+                    globalConfig: {
+                        envioGratuitoEnabled: false,
+                        montoMinimoGratuito: 0,
+                        recojoTiendaEnabled: false,
+                        direccionTienda: '',
+                        deliveryEnabled: false,
+                        puertaAPuertaEnabled: false,
+                        recojoAgenciaEnabled: false,
+                        localEnabled: false,
+                        interprovincialEnabled: false
+                    },
+                    cityRates: zones?.map((zone: any) => ({
+                        department: zone.department || '',
+                        city: zone.city || '',
+                        rate: zone.rate || 0,
+                        agencies: zone.agencies || []
+                    })) || [],
+                    operators: {
+                        shalom: { enabled: false, name: 'Shalom', discount: 0 },
+                        olva: { enabled: false, name: 'Olva Courier', discount: 0 },
+                        express: { enabled: false, name: 'Servicios Express', discount: 0 }
+                    }
+                } as LogisticsConfig;
             } catch (e) {
                 console.warn('FALLBACK: Logistics config error', e);
                 return { ...MOCK_LOGISTICS_CONFIG } as LogisticsConfig;
