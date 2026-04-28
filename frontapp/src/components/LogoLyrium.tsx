@@ -253,13 +253,13 @@ const STYLES = `
     backface-visibility: hidden; -webkit-backface-visibility: hidden;
     display: flex; align-items: center; justify-content: center; overflow: hidden;
   }
-  .lyr-face-front { background: #ffffff00; z-index: 2; }
+  .lyr-face-front { background: #ffffff; z-index: 2; }
   .lyr-face-back  {
     transform: rotateY(180deg);
     background: linear-gradient(135deg, #a3e635 0%, #0ea5e9 100%);
     box-shadow: 0 8px 30px rgba(0,0,0,0.5);
   }
-  .lyr-front-img { width: 110%; height: 110%; object-fit: cover; }
+  .lyr-front-img { width: 110%; height: 131%; object-fit: cover; }
 
   /* ── Imagen lateral ── */
   .lyr-side-container::after {
