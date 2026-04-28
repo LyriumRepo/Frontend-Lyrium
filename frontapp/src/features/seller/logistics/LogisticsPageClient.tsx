@@ -182,7 +182,7 @@ export function LogisticsPageClient(_props: LogisticsPageClientProps) {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {config.cityRates.map((city, index) => (
-                        <div key={`${city.department}-${city.city}`} className="glass-card p-6 border-l-4 border-sky-500 bg-[var(--bg-card)] space-y-6 rounded-3xl hover:shadow-xl transition-all border border-[var(--border-subtle)]">
+                        <div key={index} className="glass-card p-6 border-l-4 border-sky-500 bg-[var(--bg-card)] space-y-6 rounded-3xl hover:shadow-xl transition-all border border-[var(--border-subtle)]">
                             <div className="flex justify-between items-start">
                                 <div>
                                     <span className="text-xs font-black text-sky-500 uppercase tracking-widest block mb-1">{city.department}</span>
