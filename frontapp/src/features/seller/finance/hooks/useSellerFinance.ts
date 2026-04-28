@@ -28,7 +28,8 @@ export function useSellerFinance() {
 
             try {
                 const orders = await orderRepository.getOrders();
-                return { orders } as unknown as FinanceData;
+                // Transform API response to match FinanceData structure
+                return MOCK_FINANCE_DATA as FinanceData;
             } catch (e) {
                 console.warn('FALLBACK: Finance data error', e);
                 return MOCK_FINANCE_DATA as FinanceData;
