@@ -6,36 +6,16 @@ export class LaravelProductRepository implements IProductRepository {
         return process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://localhost:8000/api';
     }
 
-    private async getAuthHeaders(): Promise<HeadersInit> {
-        const token = await this.getToken();
-        return token ? { Authorization: `Bearer ${token}` } : {};
-    }
-
-    private async getToken(): Promise<string | null> {
-        try {
-            if (typeof window !== 'undefined') {
-                const match = document.cookie.match(/(?:^|;\s*)laravel_token=([^;]+)/);
-                return match ? decodeURIComponent(match[1]) : null;
-            }
-            const { cookies } = await import('next/headers');
-            const cookieStore = await cookies();
-            return cookieStore.get('laravel_token')?.value ?? null;
-        } catch {
-            return null;
-        }
-    }
-
     private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
         const baseUrl = this.getBaseUrl();
-        const authHeaders = await this.getAuthHeaders();
 
         const response = await fetch(`${baseUrl}${endpoint}`, {
             ...options,
             headers: {
                 'Content-Type': 'application/json',
-                ...authHeaders,
                 ...options.headers,
             },
+            credentials: 'include',
         });
 
         if (!response.ok) {
