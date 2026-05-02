@@ -10,9 +10,8 @@ import BaseButton from '@/components/ui/BaseButton';
 import BaseLoading from '@/components/ui/BaseLoading';
 import Icon from '@/components/ui/Icon';
 import { useToast } from '@/shared/lib/context/ToastContext';
-import { deleteProduct, updateProductPrice } from '@/shared/lib/actions/catalog';
+import { deleteProduct, updateProductPrice, getProducts } from '@/shared/lib/actions/catalog';
 import { productRepository } from '@/shared/lib/api/factory';
-import { USE_MOCKS } from '@/shared/lib/config/flags';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import { useConfirmDialog } from '@/components/ui/confirm-dialog';
 
@@ -260,107 +259,150 @@ export default function CatalogClient({ initialProducts }: CatalogClientProps) {
 
   const onSave = async (product: ProductFormData) => {
     try {
+      // Always use real API - no mocks
+      const hasBase64Image = product.image && product.image.startsWith('data:');
+      
+      // Limpiar atributos vacíos
+      const cleanAttributes = (attrs: any[] | undefined) => {
+        if (!attrs) return [];
+        return attrs
+          .map(attr => ({
+            values: (attr.values || [])
+              .filter((v: any) => v && String(v).trim().length > 0)
+              .map((v: any) => String(v))
+          }))
+          .filter(attr => attr.values.length > 0);
+      };
+
+      const payload = {
+        name: product.name || '',
+        category: product.category || '',
+        price: product.price || 0,
+        stock: product.stock || 0,
+        description: product.description || '',
+        image: hasBase64Image ? null : product.image || null,
+        weight: product.weight,
+        dimensions: product.dimensions,
+        sticker: product.sticker || null,
+        mainAttributes: cleanAttributes(product.mainAttributes),
+        additionalAttributes: cleanAttributes(product.additionalAttributes),
+      };
+
+      console.log('[onSave] Starting product save', { isUpdate: !!selectedProduct, hasImage: !!product.image });
+      
       let savedProduct;
 
-      if (!USE_MOCKS) {
-        // Create product without image first (or with external URL)
-        const hasBase64Image = product.image && product.image.startsWith('data:');
-        const payload = {
-          name: product.name || '',
-          category: product.category || '',
-          price: product.price || 0,
-          stock: product.stock || 0,
-          description: product.description || '',
-          image: hasBase64Image ? null : product.image || null,
-          weight: product.weight,
-          dimensions: product.dimensions,
-          sticker: product.sticker || null,
-          mainAttributes: product.mainAttributes || [],
-          additionalAttributes: product.additionalAttributes || [],
-        };
+      if (selectedProduct) {
+        // UPDATE existing product
+        savedProduct = await productRepository.updateProduct(selectedProduct.id, payload);
         
-        if (selectedProduct) {
-          savedProduct = await productRepository.updateProduct(selectedProduct.id, payload);
-          
-          // Upload image if there's a new base64 image
-          if (hasBase64Image && product.image) {
-            try {
-              const response = await fetch(product.image);
-              const blob = await response.blob();
-              const fileName = `product-${Date.now()}.webp`;
-              const file = new File([blob], fileName, { type: blob.type });
-              
-              await productRepository.uploadProductImage(savedProduct.id, file);
-            } catch (uploadErr) {
-              console.error('Error uploading image:', uploadErr);
-            }
-          }
-          
-          // Use form data for display since backend response may be incomplete
-          savedProduct = {
-            ...savedProduct,
-            name: product.name || savedProduct.name,
-            category: product.category || savedProduct.category,
-            price: product.price ?? savedProduct.price,
-            stock: product.stock ?? savedProduct.stock,
-            description: product.description || savedProduct.description,
-            image: product.image || savedProduct.image,
-            weight: product.weight ?? savedProduct.weight,
-            dimensions: product.dimensions || savedProduct.dimensions,
-          } as Product;
-        } else {
-          savedProduct = await productRepository.createProduct(payload);
-          
-          // Upload image if there's a base64 image
-          if (hasBase64Image && product.image && savedProduct.id) {
-            try {
-              const response = await fetch(product.image);
-              const blob = await response.blob();
-              const fileName = `product-${Date.now()}.webp`;
-              const file = new File([blob], fileName, { type: blob.type });
-              
-              const uploadResult = await productRepository.uploadProductImage(savedProduct.id, file);
-              savedProduct = { ...savedProduct, image: uploadResult.url } as Product;
-            } catch (uploadErr) {
-              console.error('Error uploading image:', uploadErr);
-            }
-          }
-          
-          // Use form data for display since backend may not return all fields
-          savedProduct = {
-            ...savedProduct,
-            name: product.name || savedProduct.name,
-            category: product.category || savedProduct.category,
-            price: product.price || savedProduct.price,
-            stock: product.stock ?? savedProduct.stock,
-            description: product.description || savedProduct.description,
-            weight: product.weight ?? savedProduct.weight,
-            dimensions: product.dimensions ?? savedProduct.dimensions,
-          } as Product;
+        if (!savedProduct || !savedProduct.id) {
+          throw new Error('El servidor no retornó un ID de producto válido');
         }
-      } else {
+
+        console.log('[onSave] Product updated, ID:', savedProduct.id);
+        
+        // Upload new image if provided
+        if (hasBase64Image && product.image) {
+          console.log('[onSave] Uploading new image for product', savedProduct.id);
+          try {
+            const response = await fetch(product.image);
+            const blob = await response.blob();
+            const fileName = `product-${Date.now()}.webp`;
+            const file = new File([blob], fileName, { type: blob.type });
+            
+            await productRepository.uploadProductImage(savedProduct.id, file);
+            console.log('[onSave] Image uploaded successfully');
+          } catch (uploadErr) {
+            console.error('[onSave] Error uploading image:', uploadErr);
+            showToast('Producto actualizado, pero la imagen no se guardó', 'warning');
+          }
+        }
+        
+        // Ensure all form data is reflected
         savedProduct = {
-          id: product.id || Date.now().toString(),
-          ...product,
-        };
+          ...savedProduct,
+          name: product.name || savedProduct.name,
+          category: product.category || savedProduct.category,
+          price: product.price ?? savedProduct.price,
+          stock: product.stock ?? savedProduct.stock,
+          description: product.description || savedProduct.description,
+          weight: product.weight ?? savedProduct.weight,
+          dimensions: product.dimensions || savedProduct.dimensions,
+        } as Product;
+      } else {
+        // CREATE new product
+        console.log('[onSave] Creating new product');
+        savedProduct = await productRepository.createProduct(payload);
+        
+        if (!savedProduct || !savedProduct.id) {
+          throw new Error('El servidor no retornó un ID de producto válido. No se guardó en la base de datos.');
+        }
+
+        console.log('[onSave] Product created, ID:', savedProduct.id);
+        
+        // Upload image immediately after product creation
+        if (hasBase64Image && product.image && savedProduct.id) {
+          console.log('[onSave] Uploading image for new product', savedProduct.id);
+          try {
+            const response = await fetch(product.image);
+            const blob = await response.blob();
+            const fileName = `product-${Date.now()}.webp`;
+            const file = new File([blob], fileName, { type: blob.type });
+            
+            const uploadResult = await productRepository.uploadProductImage(savedProduct.id, file);
+            console.log('[onSave] Image uploaded successfully:', uploadResult.url);
+            savedProduct = { ...savedProduct, image: uploadResult.url } as Product;
+          } catch (uploadErr) {
+            console.error('[onSave] Error uploading image:', uploadErr);
+            showToast('Producto creado, pero la imagen no se guardó correctamente', 'warning');
+          }
+        }
+        
+        // Ensure all form data is reflected
+        savedProduct = {
+          ...savedProduct,
+          name: product.name || savedProduct.name,
+          category: product.category || savedProduct.category,
+          price: product.price || savedProduct.price,
+          stock: product.stock ?? savedProduct.stock,
+          description: product.description || savedProduct.description,
+          weight: product.weight ?? savedProduct.weight,
+          dimensions: product.dimensions ?? savedProduct.dimensions,
+          createdAt: savedProduct.createdAt || new Date().toISOString(),
+        } as Product;
       }
 
       showToast(
-        selectedProduct ? 'Producto actualizado correctamente' : 'Nuevo producto agregado al catálogo',
+        selectedProduct ? 'Producto actualizado correctamente' : 'Nuevo producto agregado al catálogo (pendiente de aprobación)',
         'success'
       );
 
-      startTransition(() => {
-        setProducts(prev => {
-          if (selectedProduct) {
-            return prev.map(p => p.id === selectedProduct.id ? savedProduct as Product : p);
-          }
-          return [savedProduct as Product, ...prev];
+      console.log('[onSave] Refreshing product list from server');
+      
+      // Refresh from server to ensure consistency
+      try {
+        startTransition(async () => {
+          const refreshedProducts = await getProducts();
+          console.log('[onSave] Refreshed products count:', refreshedProducts.length);
+          setProducts(refreshedProducts);
         });
-      });
+      } catch (refreshErr) {
+        console.error('[onSave] Error refreshing products, using local update:', refreshErr);
+        // Fallback: update state locally
+        startTransition(() => {
+          setProducts(prev => {
+            if (selectedProduct) {
+              return prev.map(p => p.id === selectedProduct.id ? savedProduct as Product : p);
+            }
+            return [savedProduct as Product, ...prev];
+          });
+        });
+      }
 
       closeModal();
     } catch (err: any) {
+      console.error('[onSave] Error:', err);
       showToast(err.message || 'Error al procesar el producto', 'error');
     }
   };
@@ -446,9 +488,9 @@ export default function CatalogClient({ initialProducts }: CatalogClientProps) {
       {/* Product Grid con Optimistic Updates */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-6">
         {filteredProducts.length > 0 ? (
-          filteredProducts.map(product => (
+          filteredProducts.map((product, index) => (
             <OptimisticProductCard
-              key={product.id}
+              key={product.id || `product-${index}`}
               product={product}
               optimisticPrice={optimisticPrices[product.id]}
               onEdit={openEditModal}
