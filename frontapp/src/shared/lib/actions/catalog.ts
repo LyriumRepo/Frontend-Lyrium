@@ -22,7 +22,7 @@ export async function getProducts(vendorId?: string): Promise<Product[]> {
       console.error('Error getting cookies in getProducts:', e);
     }
     
-    console.log('getProducts - Token present:', !!token, 'Cookie header:', cookieHeader ? 'present' : 'missing');
+    console.log('[getProducts] Token present:', !!token, 'Cookie header:', cookieHeader ? 'present' : 'missing');
     
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
@@ -38,21 +38,36 @@ export async function getProducts(vendorId?: string): Promise<Product[]> {
     const response = await fetch(`${LARAVEL_API_URL}/products?per_page=100`, {
       headers,
       cache: 'no-store',
+      credentials: 'include',
     });
     
-    console.log('getProducts - Response status:', response.status);
+    console.log('[getProducts] Response status:', response.status);
 
     if (!response.ok) {
-      console.error('Error fetching products:', response.status);
+      console.error('[getProducts] Error response status:', response.status);
       return [];
     }
 
     const data = await response.json();
-    console.log('getProducts - Response data:', JSON.stringify(data).substring(0, 500));
-    const products = data.data?.data || data.data || [];
+    console.log('[getProducts] Response data keys:', Object.keys(data));
+    
+    // Handle both response formats: { data: { data: [...], meta: {...} } } and { data: [...] }
+    let products = [];
+    if (data.data?.data && Array.isArray(data.data.data)) {
+      // Paginated response format
+      products = data.data.data;
+    } else if (Array.isArray(data.data)) {
+      // Direct array response
+      products = data.data;
+    } else if (Array.isArray(data)) {
+      // Raw array
+      products = data;
+    }
+    
+    console.log('[getProducts] Found products count:', products.length);
     
     return products.map((p: any) => ({
-      id: p.id.toString(),
+      id: p.id?.toString() || '',
       name: p.name || '',
       slug: p.slug || '',
       description: p.description || '',
@@ -61,7 +76,8 @@ export async function getProducts(vendorId?: string): Promise<Product[]> {
       salePrice: p.sale_price ? parseFloat(p.sale_price) : undefined,
       stock: p.stock ?? 0,
       status: p.status || 'draft',
-      image: p.images?.[0]?.src || '',
+      // Image handling: Spatie MediaLibrary returns images array
+      image: p.images?.[0]?.src || p.image || '',
       category: p.categories?.[0]?.slug || p.categories?.[0]?.name || '',
       categories: p.categories || [],
       type: p.type || 'physical',
@@ -70,9 +86,11 @@ export async function getProducts(vendorId?: string): Promise<Product[]> {
       sticker: p.sticker || null,
       mainAttributes: p.mainAttributes || [],
       additionalAttributes: p.additionalAttributes || [],
+      createdAt: p.created_at || new Date().toISOString(),
+      discountPercentage: p.discount_percentage,
     }));
   } catch (error) {
-    console.error('Error fetching products from Laravel:', error);
+    console.error('[getProducts] Exception:', error);
     return [];
   }
 }
@@ -177,14 +195,169 @@ export async function updateProductPrice(
 }
 
 /**
- * Server Action: Crear/Actualizar producto
+ * Server Action: Crear producto con imagen
+ * - SEGURO: Usa httpOnly cookies del servidor
+ * - NO envía token al cliente
+ * - Maneja base64 image en servidor
  */
-export async function saveProduct(
-  product: Partial<Product>
+export async function createProduct(
+  product: any
 ): Promise<{ success: boolean; data?: Product; error?: string }> {
   try {
-    if (!product.name || product.name.trim() === '') {
-      return { success: false, error: 'El nombre del producto es requerido' };
+    // Validaciones
+    if (!product.name || product.name.trim().length < 3) {
+      return { success: false, error: 'El nombre debe tener al menos 3 caracteres' };
+    }
+
+    if (!product.mainAttributes || product.mainAttributes.length === 0) {
+      return { success: false, error: 'Agrega al menos una característica' };
+    }
+
+    const LARAVEL_API_URL = process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://localhost:8000/api';
+    
+    // Obtener token desde httpOnly cookie (seguro, solo servidor)
+    let token = '';
+    try {
+      const cookieStore = await import('next/headers');
+      token = (await cookieStore.cookies()).get('laravel_token')?.value || '';
+    } catch (e) {
+      console.error('[createProduct] Error getting cookies:', e);
+    }
+    
+    if (!token) {
+      return { success: false, error: 'No estás autenticado' };
+    }
+
+    // Preparar payload
+    const payload = {
+      type: 'physical',
+      name: product.name,
+      description: product.description || '',
+      price: Number(product.price) || 0,
+      stock: Number(product.stock) || 0,
+      category: product.category || null,
+      image: null, // No enviar base64, se sube después
+      weight: product.weight ? Number(product.weight) : null,
+      dimensions: product.dimensions || null,
+      mainAttributes: product.mainAttributes || [],
+      additionalAttributes: product.additionalAttributes || [],
+    };
+
+    console.log('[createProduct] Creating with payload:', { ...payload, image: 'base64 omitted' });
+
+    // 1. Crear producto
+    const response = await fetch(`${LARAVEL_API_URL}/products`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      credentials: 'include',
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error('[createProduct] API error:', response.status, errorData);
+      return {
+        success: false,
+        error: errorData.message || JSON.stringify(errorData.errors) || 'Error al crear producto'
+      };
+    }
+
+    const responseData = await response.json();
+    const productData = responseData.data || responseData;
+
+    if (!productData || !productData.id) {
+      return { success: false, error: 'Backend no retornó ID' };
+    }
+
+    const productId = productData.id.toString();
+    console.log('[createProduct] Product created with ID:', productId);
+
+    // 2. Subir imagen si existe (base64)
+    if (product.image && product.image.startsWith('data:')) {
+      try {
+        console.log('[createProduct] Uploading image...');
+        
+        const response = await fetch(product.image);
+        const blob = await response.blob();
+        const fileName = `product-${Date.now()}.webp`;
+        const file = new File([blob], fileName, { type: blob.type });
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const uploadResponse = await fetch(`${LARAVEL_API_URL}/products/${productId}/media`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+          credentials: 'include',
+          body: formData,
+        });
+
+        if (!uploadResponse.ok) {
+          console.error('[createProduct] Image upload failed:', uploadResponse.status);
+          // No es crítico, el producto se creó
+        } else {
+          console.log('[createProduct] Image uploaded successfully');
+        }
+      } catch (uploadErr) {
+        console.error('[createProduct] Image upload error:', uploadErr);
+        // No es crítico, el producto se creó
+      }
+    }
+
+    // 3. Obtener producto actualizado
+    const finalResponse = await fetch(`${LARAVEL_API_URL}/products/${productId}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+      credentials: 'include',
+    });
+
+    const finalData = finalResponse.ok ? await finalResponse.json() : productData;
+    const finalProductData = finalData.data || finalData;
+
+    const savedProduct: Product = {
+      id: finalProductData.id?.toString() || productId,
+      name: finalProductData.name || product.name,
+      category: finalProductData.categories?.[0]?.name || product.category || '',
+      price: parseFloat(finalProductData.price || product.price || '0'),
+      stock: finalProductData.stock ?? product.stock ?? 0,
+      weight: finalProductData.weight,
+      dimensions: finalProductData.dimensions,
+      description: finalProductData.description || product.description || '',
+      image: finalProductData.images?.[0]?.src || '',
+      sticker: finalProductData.sticker || null,
+      mainAttributes: product.mainAttributes || [],
+      additionalAttributes: product.additionalAttributes || [],
+      createdAt: finalProductData.created_at || new Date().toISOString(),
+    };
+
+    revalidateTag('seller-catalog');
+
+    return { success: true, data: savedProduct };
+  } catch (error) {
+    console.error('[createProduct] Exception:', error);
+    return {
+      success: false,
+      error: 'Error al crear el producto'
+    };
+  }
+}
+
+/**
+ * Server Action: Actualizar producto
+ */
+export async function updateProduct(
+  productId: string,
+  product: any
+): Promise<{ success: boolean; data?: Product; error?: string }> {
+  try {
+    if (!product.name || product.name.trim().length < 3) {
+      return { success: false, error: 'El nombre debe tener al menos 3 caracteres' };
     }
 
     const LARAVEL_API_URL = process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://localhost:8000/api';
@@ -194,38 +367,36 @@ export async function saveProduct(
       const cookieStore = await import('next/headers');
       token = (await cookieStore.cookies()).get('laravel_token')?.value || '';
     } catch (e) {
-      console.error('Error getting cookies:', e);
+      console.error('[updateProduct] Error getting cookies:', e);
     }
     
-    console.log('Token:', token ? 'present' : 'MISSING');
+    if (!token) {
+      return { success: false, error: 'No estás autenticado' };
+    }
 
-    const isUpdate = !!product.id;
-    const endpoint = isUpdate 
-      ? `${LARAVEL_API_URL}/products/${product.id}`
-      : `${LARAVEL_API_URL}/products`;
-    
-    const method = isUpdate ? 'PUT' : 'POST';
-
-    const payload: any = {
+    const payload = {
       type: 'physical',
       name: product.name,
-      price: product.price || 0,
-      stock: product.stock || 0,
       description: product.description || '',
+      price: Number(product.price) || 0,
+      stock: Number(product.stock) || 0,
       category: product.category || null,
-      image: product.image || null,
-      discountPercentage: product.discountPercentage || null,
-      weight: product.weight || null,
+      weight: product.weight ? Number(product.weight) : null,
       dimensions: product.dimensions || null,
+      mainAttributes: product.mainAttributes || [],
+      additionalAttributes: product.additionalAttributes || [],
     };
 
-    console.log('Saving product payload:', payload);
+    // No enviar imagen si es base64 (se sube después con media endpoint)
+    if (product.image && !product.image.startsWith('data:')) {
+      payload.image = product.image;
+    }
 
-    const response = await fetch(endpoint, {
-      method,
+    const response = await fetch(`${LARAVEL_API_URL}/products/${productId}`, {
+      method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+        'Authorization': `Bearer ${token}`,
       },
       credentials: 'include',
       body: JSON.stringify(payload),
@@ -233,37 +404,76 @@ export async function saveProduct(
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      console.error('Save product error:', response.status, errorData);
-      return { 
-        success: false, 
-        error: errorData.message || errorData.errors ? JSON.stringify(errorData.errors) : `Error ${response.status}: Error al guardar el producto` 
+      return {
+        success: false,
+        error: errorData.message || JSON.stringify(errorData.errors) || 'Error al actualizar'
       };
     }
 
-    const data = await response.json();
-    
-    const savedProduct: Product = {
-      id: data.id?.toString() || product.id || Date.now().toString(),
-      name: data.name || product.name,
-      category: data.categories?.[0]?.name || product.category || 'Sin categoría',
-      price: parseFloat(data.price || product.price || '0'),
-      stock: data.stock ?? product.stock ?? 0,
-      description: data.description || product.description || '',
-      image: data.images?.[0]?.src || product.image || '',
-      sticker: data.sticker || product.sticker || null,
+    // Subir imagen si es base64
+    if (product.image && product.image.startsWith('data:')) {
+      try {
+        const imageResponse = await fetch(product.image);
+        const blob = await imageResponse.blob();
+        const fileName = `product-${Date.now()}.webp`;
+        const file = new File([blob], fileName, { type: blob.type });
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        await fetch(`${LARAVEL_API_URL}/products/${productId}/media`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+          credentials: 'include',
+          body: formData,
+        });
+      } catch (uploadErr) {
+        console.error('[updateProduct] Image upload error:', uploadErr);
+      }
+    }
+
+    const responseData = await response.json();
+    const productData = responseData.data || responseData;
+
+    const updatedProduct: Product = {
+      id: productData.id?.toString() || productId,
+      name: productData.name || product.name,
+      category: productData.categories?.[0]?.name || product.category || '',
+      price: parseFloat(productData.price || product.price || '0'),
+      stock: productData.stock ?? product.stock ?? 0,
+      weight: productData.weight,
+      dimensions: productData.dimensions,
+      description: productData.description || product.description || '',
+      image: productData.images?.[0]?.src || '',
+      sticker: productData.sticker || null,
       mainAttributes: product.mainAttributes || [],
       additionalAttributes: product.additionalAttributes || [],
-      createdAt: data.created_at || new Date().toISOString(),
+      createdAt: productData.created_at || new Date().toISOString(),
     };
 
-    revalidateTag('seller-catalog', 'max');
+    revalidateTag('seller-catalog');
 
-    return { success: true, data: savedProduct };
+    return { success: true, data: updatedProduct };
   } catch (error) {
-    console.error('Error saving product:', error);
+    console.error('[updateProduct] Exception:', error);
     return {
       success: false,
-      error: 'Error al guardar el producto'
+      error: 'Error al actualizar el producto'
     };
+  }
+}
+
+/**
+ * Server Action: Crear/Actualizar producto (legacy)
+ */
+export async function saveProduct(
+  product: Partial<Product>
+): Promise<{ success: boolean; data?: Product; error?: string }> {
+  if (product.id) {
+    return updateProduct(product.id, product);
+  } else {
+    return createProduct(product);
   }
 }
