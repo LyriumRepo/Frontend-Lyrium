@@ -161,6 +161,10 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit }:
         e.preventDefault();
 
         // Validaciones críticas de negocio
+        if (!formData.name || formData.name.trim().length < 3) {
+            showToast('El nombre del producto debe tener al menos 3 caracteres', 'error');
+            return;
+        }
         if (!formData.image) {
             showToast('Es obligatorio adjuntar una foto del producto', 'error');
             return;
@@ -171,6 +175,16 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit }:
         }
         if (!formData.dimensions) {
             showToast('Las dimensiones son necesarias para el cálculo de envío', 'error');
+            return;
+        }
+
+        // Validar que haya al menos una característica con valores válidos
+        const hasMainAttributes = (formData.mainAttributes || []).some(attr =>
+            attr.values && attr.values.length > 0 && attr.values.some(v => v && v.trim().length > 0)
+        );
+
+        if (!hasMainAttributes) {
+            showToast('Agregá al menos una característica del producto', 'error');
             return;
         }
 
