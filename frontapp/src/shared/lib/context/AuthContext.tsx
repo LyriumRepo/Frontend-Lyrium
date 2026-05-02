@@ -88,7 +88,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
             
             if (result.user && result.token) {
-                console.log('[Auth] Server action set httpOnly cookies, verifying...');
+                console.log('[Auth] Server action set httpOnly cookies');
                 
                 const targetRoute = getRoleBasedRoute(result.user.role);
                 console.log('[Auth] Redirecting to:', targetRoute);
