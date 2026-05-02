@@ -10,8 +10,7 @@ import BaseButton from '@/components/ui/BaseButton';
 import BaseLoading from '@/components/ui/BaseLoading';
 import Icon from '@/components/ui/Icon';
 import { useToast } from '@/shared/lib/context/ToastContext';
-import { deleteProduct, updateProductPrice, getProducts } from '@/shared/lib/actions/catalog';
-import { productRepository } from '@/shared/lib/api/factory';
+import { deleteProduct, updateProductPrice, getProducts, createProduct, updateProduct } from '@/shared/lib/actions/catalog';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import { useConfirmDialog } from '@/components/ui/confirm-dialog';
 
@@ -259,9 +258,6 @@ export default function CatalogClient({ initialProducts }: CatalogClientProps) {
 
   const onSave = async (product: ProductFormData) => {
     try {
-      // Always use real API - no mocks
-      const hasBase64Image = product.image && product.image.startsWith('data:');
-      
       // Limpiar atributos vacíos
       const cleanAttributes = (attrs: any[] | undefined) => {
         if (!attrs) return [];
@@ -280,7 +276,7 @@ export default function CatalogClient({ initialProducts }: CatalogClientProps) {
         price: product.price || 0,
         stock: product.stock || 0,
         description: product.description || '',
-        image: hasBase64Image ? null : product.image || null,
+        image: product.image || null,
         weight: product.weight,
         dimensions: product.dimensions,
         sticker: product.sticker || null,
@@ -288,122 +284,43 @@ export default function CatalogClient({ initialProducts }: CatalogClientProps) {
         additionalAttributes: cleanAttributes(product.additionalAttributes),
       };
 
-      console.log('[onSave] Starting product save', { isUpdate: !!selectedProduct, hasImage: !!product.image });
+      console.log('[onSave] Starting product save', { isUpdate: !!selectedProduct });
       
-      let savedProduct;
+      let result;
 
       if (selectedProduct) {
-        // UPDATE existing product
-        savedProduct = await productRepository.updateProduct(selectedProduct.id, payload);
-        
-        if (!savedProduct || !savedProduct.id) {
-          throw new Error('El servidor no retornó un ID de producto válido');
-        }
-
-        console.log('[onSave] Product updated, ID:', savedProduct.id);
-        
-        // Upload new image if provided
-        if (hasBase64Image && product.image) {
-          console.log('[onSave] Uploading new image for product', savedProduct.id);
-          try {
-            const response = await fetch(product.image);
-            const blob = await response.blob();
-            const fileName = `product-${Date.now()}.webp`;
-            const file = new File([blob], fileName, { type: blob.type });
-            
-            await productRepository.uploadProductImage(savedProduct.id, file);
-            console.log('[onSave] Image uploaded successfully');
-          } catch (uploadErr) {
-            console.error('[onSave] Error uploading image:', uploadErr);
-            showToast('Producto actualizado, pero la imagen no se guardó', 'warning');
-          }
-        }
-        
-        // Ensure all form data is reflected
-        savedProduct = {
-          ...savedProduct,
-          name: product.name || savedProduct.name,
-          category: product.category || savedProduct.category,
-          price: product.price ?? savedProduct.price,
-          stock: product.stock ?? savedProduct.stock,
-          description: product.description || savedProduct.description,
-          weight: product.weight ?? savedProduct.weight,
-          dimensions: product.dimensions || savedProduct.dimensions,
-        } as Product;
+        // UPDATE existing product (via Server Action)
+        result = await updateProduct(selectedProduct.id, payload);
       } else {
-        // CREATE new product
-        console.log('[onSave] Creating new product');
-        savedProduct = await productRepository.createProduct(payload);
-        
-        if (!savedProduct || !savedProduct.id) {
-          throw new Error('El servidor no retornó un ID de producto válido. No se guardó en la base de datos.');
-        }
+        // CREATE new product (via Server Action)
+        result = await createProduct(payload);
+      }
 
-        console.log('[onSave] Product created, ID:', savedProduct.id);
-        
-        // Upload image immediately after product creation
-        if (hasBase64Image && product.image && savedProduct.id) {
-          console.log('[onSave] Uploading image for new product', savedProduct.id);
-          try {
-            const response = await fetch(product.image);
-            const blob = await response.blob();
-            const fileName = `product-${Date.now()}.webp`;
-            const file = new File([blob], fileName, { type: blob.type });
-            
-            const uploadResult = await productRepository.uploadProductImage(savedProduct.id, file);
-            console.log('[onSave] Image uploaded successfully:', uploadResult.url);
-            savedProduct = { ...savedProduct, image: uploadResult.url } as Product;
-          } catch (uploadErr) {
-            console.error('[onSave] Error uploading image:', uploadErr);
-            showToast('Producto creado, pero la imagen no se guardó correctamente', 'warning');
-          }
-        }
-        
-        // Ensure all form data is reflected
-        savedProduct = {
-          ...savedProduct,
-          name: product.name || savedProduct.name,
-          category: product.category || savedProduct.category,
-          price: product.price || savedProduct.price,
-          stock: product.stock ?? savedProduct.stock,
-          description: product.description || savedProduct.description,
-          weight: product.weight ?? savedProduct.weight,
-          dimensions: product.dimensions ?? savedProduct.dimensions,
-          createdAt: savedProduct.createdAt || new Date().toISOString(),
-        } as Product;
+      if (!result.success || !result.data) {
+        throw new Error(result.error || 'Error al guardar producto');
       }
 
       showToast(
-        selectedProduct ? 'Producto actualizado correctamente' : 'Nuevo producto agregado al catálogo (pendiente de aprobación)',
+        selectedProduct ? 'Producto actualizado correctamente' : 'Nuevo producto agregado al catálogo',
         'success'
       );
 
       console.log('[onSave] Refreshing product list from server');
       
       // Refresh from server to ensure consistency
-      try {
-        startTransition(async () => {
-          const refreshedProducts = await getProducts();
-          console.log('[onSave] Refreshed products count:', refreshedProducts.length);
-          setProducts(refreshedProducts);
-        });
-      } catch (refreshErr) {
-        console.error('[onSave] Error refreshing products, using local update:', refreshErr);
-        // Fallback: update state locally
-        startTransition(() => {
-          setProducts(prev => {
-            if (selectedProduct) {
-              return prev.map(p => p.id === selectedProduct.id ? savedProduct as Product : p);
-            }
-            return [savedProduct as Product, ...prev];
-          });
-        });
-      }
+      startTransition(async () => {
+        const refreshedProducts = await getProducts();
+        console.log('[onSave] Refreshed products count:', refreshedProducts.length);
+        setProducts(refreshedProducts);
+      });
 
       closeModal();
-    } catch (err: any) {
-      console.error('[onSave] Error:', err);
-      showToast(err.message || 'Error al procesar el producto', 'error');
+    } catch (error) {
+      console.error('[onSave] Error:', error);
+      showToast(
+        error instanceof Error ? error.message : 'Error al guardar producto',
+        'error'
+      );
     }
   };
 
