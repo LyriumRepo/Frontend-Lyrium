@@ -13,13 +13,18 @@ export interface MenuItem {
 
 export interface MegaCategoryData {
     icons: { title: string; img: string; href: string }[];
-    cols: { h: string; items: string[] }[];
+    cols: { h: string; items: ( | string | {
+        name: string;
+        href?: string;
+      }
+        )[];
+    }[];
 }
 
 export const megaMenuData: Record<string, MegaCategoryData> = {
     'Bebés y recién nacidos': {
         icons: [
-            { title: 'De paseo y en el coche', img: '/img/Productos/Bebes/1.webp', href: '/productos/bebes/paseo' },
+            { title: 'De paseo y en el coche', img: '/img/Productos/Bebes/1.webp', href: '/productos/bebes-recacidos' },
             { title: 'Alimentación', img: '/img/Productos/Bebes/2.webp', href: '/productos/bebes/alimentacion' },
             { title: 'Juguetes', img: '/img/Productos/Bebes/3.webp', href: '/productos/bebes/juguetes' },
             { title: 'Ropa', img: '/img/Productos/Bebes/4.webp', href: '/productos/bebes/ropa' },

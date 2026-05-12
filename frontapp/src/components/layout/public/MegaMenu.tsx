@@ -100,16 +100,23 @@ export default function MegaMenu({
                                     {col.h}
                                 </div>
                                 <ul className="space-y-1.5">
-                                    {col.items.map((it, itemIdx) => (
-                                        <li key={`${it}-${colIdx}-${itemIdx}`}>
-                                            <Link
-                                                href="#"
-                                                className="text-[12px] text-slate-500 dark:text-[var(--text-placeholder)] hover:text-sky-600 dark:hover:text-[#6BAF7B] transition"
-                                            >
-                                                {it}
-                                            </Link>
-                                        </li>
-                                    ))}
+                                    {col.items.map((it, itemIdx) => {
+                                        const item =
+                                            typeof it === 'string'
+                                                ? { name: it, href: '#' }
+                                                : it;
+
+                                        return (
+                                            <li key={`${item.name}-${colIdx}-${itemIdx}`}>
+                                                <Link
+                                                    href={item.href || '#'}
+                                                    className="text-[12px] text-slate-500 dark:text-[var(--text-placeholder)] hover:text-sky-600 dark:hover:text-[#6BAF7B] transition"
+                                                >
+                                                    {item.name}
+                                                </Link>
+                                            </li>
+                                        );
+                                    })}
                                 </ul>
                             </div>
                         ))}

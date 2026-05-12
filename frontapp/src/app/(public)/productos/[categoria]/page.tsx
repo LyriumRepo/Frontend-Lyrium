@@ -1,19 +1,23 @@
 import { notFound } from 'next/navigation';
-import { getCategoryBySlug, getProductsByCategorySlug, mapWooProductToLocal } from '@/shared/lib/api/wooCommerce';
+import { getCategoryBySlug, getProductsByCategorySlug, mapCatalogProductToLocal } from '@/shared/lib/api/catalogProducts';
 import { getCategories } from '@/shared/lib/api';
 import { ProductCategory } from '@/shared/types/wp/wp-types';
 import CategoryPageClient from './CategoryPageClient';
 
 interface PageProps {
   params: Promise<{ categoria: string }>;
+  searchParams: Promise<{ sub?: string }>;
 }
 
-export default async function CategoryPage({ params }: PageProps) {
+export default async function CategoryPage({ params, searchParams }: PageProps) {
   const { categoria } = await params;
+  const { sub } = await searchParams;
   
+  const filterSlug = sub || categoria;
+
   const [categoryRaw, wooProducts, allCategoriesRaw] = await Promise.all([
     getCategoryBySlug(categoria),
-    getProductsByCategorySlug(categoria, 50),
+    getProductsByCategorySlug(filterSlug, 50),
     getCategories(),
   ]);
 
@@ -21,7 +25,9 @@ export default async function CategoryPage({ params }: PageProps) {
     notFound();
   }
 
-  const productos = wooProducts.map(mapWooProductToLocal);
+  console.log("wooProducts:", wooProducts);
+  const productos = wooProducts.map(mapCatalogProductToLocal);
+  console.log("productos:", productos);
 
   // Convertir categoría actual al tipo correcto
   const category: ProductCategory = {

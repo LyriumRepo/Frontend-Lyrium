@@ -5,16 +5,22 @@ const LARAVEL_API_URL = process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://local
 
 interface PageProps {
     params: Promise<{ categoria: string }>;
+    searchParams: Promise<{ sub?: string }>;
 }
 
 async function getCategoryBySlug(slug: string) {
-    const res = await fetch(`${LARAVEL_API_URL}/categories?type=service&search=${slug}&per_page=50`, {
-        next: { revalidate: 60 },
-    });
+    const res = await fetch(
+        `${LARAVEL_API_URL}/categories/slug/${slug}`,
+        {
+            next: { revalidate: 60 },
+        }
+    );
+
     if (!res.ok) return null;
-    const data = await res.json();
-    const items: any[] = data.data ?? [];
-    return items.find((c: any) => c.slug === slug) ?? null;
+
+    const json = await res.json();
+
+    return json.data;
 }
 
 async function getServicesByCategory(categorySlug: string) {
@@ -36,14 +42,18 @@ async function getServiceCategories() {
     return data.data ?? [];
 }
 
-export default async function ServicesCategoryPage({ params }: PageProps) {
+export default async function ServicesCategoryPage({ params, searchParams }: PageProps) {
     const { categoria } = await params;
+    const { sub } = await searchParams;
+    const activeSlug = sub || categoria;
 
     const [category, services, allCategories] = await Promise.all([
-        getCategoryBySlug(categoria),
-        getServicesByCategory(categoria),
+        getCategoryBySlug(activeSlug),
+        getServicesByCategory(activeSlug),
         getServiceCategories(),
     ]);
+    console.log("activeSlug:", activeSlug);
+    console.log("services:", services);
 
     if (!category) {
         notFound();

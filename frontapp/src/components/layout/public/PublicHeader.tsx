@@ -67,7 +67,7 @@ export default function PublicHeader() {
 
                             <Link href="/carrito" className="flex items-center gap-1 hover:underline">
                                 <Icon name="ShoppingCart" className="text-[18px]" />
-                                <span>Carrito</span>
+                                <span>Carritto</span>
                                 {cartItemCount > 0 && (
                                     <span className="bg-sky-500 dark:bg-[var(--brand-green)] text-white dark:text-[var(--text-primary)] text-[11px] rounded-full px-2 py-0.5">{cartItemCount}</span>
                                 )}
