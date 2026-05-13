@@ -15,23 +15,22 @@ export function invalidateTokenCache() {
 }
 
 async function getToken(): Promise<string | null> {
+    if (typeof window === 'undefined') {
+        return null;
+    }
+
     const now = Date.now();
 
     if (cachedToken && tokenExpiry > now) {
         return cachedToken;
     }
 
-    try {
-        const res = await fetch('/api/auth-token', { credentials: 'same-origin' });
-        if (!res.ok) return null;
-        const data = await res.json();
-        cachedToken = data.token ?? null;
-        tokenExpiry = now + 60_000;
-    } catch {
-        cachedToken = null;
-    }
+    const token = localStorage.getItem('laravel_token');
 
-    return cachedToken;
+    cachedToken = token;
+    tokenExpiry = now + 60_000;
+
+    return token;
 }
 
 export async function apiClient<T = unknown>(

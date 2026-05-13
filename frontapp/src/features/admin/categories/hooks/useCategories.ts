@@ -38,7 +38,10 @@ function getTokenFromCookies(): string | null {
 }
 
 async function getAuthHeaders(): Promise<Record<string, string>> {
-    const token = getTokenFromCookies();
+    const token =
+        typeof window !== 'undefined'
+            ? localStorage.getItem('laravel_token')
+            : null;
 
     return {
         'Content-Type': 'application/json',
@@ -105,9 +108,13 @@ async function apiDeleteCategory(id: number): Promise<void> {
 }
 
 async function apiUploadImage(id: number, file: File): Promise<string> {
-    const token = getTokenFromCookies();
+    const token =
+        typeof window !== 'undefined'
+            ? localStorage.getItem('laravel_token')
+            : null;
 
     const form = new FormData();
+
     form.append('image', file);
 
     const res = await fetch(`${LARAVEL_API}/categories/${id}/image`, {
@@ -118,11 +125,15 @@ async function apiUploadImage(id: number, file: File): Promise<string> {
         },
         body: form,
     });
+
     if (!res.ok) {
         const err = await res.json();
+
         throw new Error(err.error || 'Error al subir imagen');
     }
+
     const json = await res.json();
+
     return json.image;
 }
 

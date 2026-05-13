@@ -7,6 +7,8 @@ import { User } from '@/shared/types/auth';
 import { loginAction, logoutAction, loginWithSocialAction } from '@/shared/lib/actions/auth';
 import { getRoleBasedRoute } from '@/shared/lib/config/auth';
 
+const LARAVEL_API_URL = process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://localhost:8000/api';
+
 interface AuthContextType {
     user: User | null;
     loading: boolean;
@@ -19,14 +21,39 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const fetchSession = async (): Promise<{ authenticated: boolean; user: User | null }> => {
-    const response = await fetch('/api/auth/session');
+    const token = localStorage.getItem('laravel_token');
+
+    if (!token) {
+        return {
+            authenticated: false,
+            user: null
+        };
+    }
+
+    const response = await fetch(`${LARAVEL_API_URL}/auth/validate`, {
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+        },
+    });
+
     if (!response.ok) {
         console.log('[Auth] Session fetch failed:', response.status);
-        return { authenticated: false, user: null };
+
+        return {
+            authenticated: false,
+            user: null
+        };
     }
+
     const data = await response.json();
+
     console.log('[Auth] Session fetch result:', data);
-    return data;
+
+    return {
+        authenticated: true,
+        user: data,
+    };
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -89,7 +116,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             
             if (result.user && result.token) {
                 console.log('[Auth] Server action set httpOnly cookies, verifying...');
-                
+                localStorage.setItem('laravel_token', result.token);
                 const targetRoute = getRoleBasedRoute(result.user.role);
                 console.log('[Auth] Redirecting to:', targetRoute);
                 
@@ -112,6 +139,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } catch {
             // Continue even if server action fails
         }
+        localStorage.removeItem('laravel_token');
         setUser(null);
         window.location.href = '/login';
     };

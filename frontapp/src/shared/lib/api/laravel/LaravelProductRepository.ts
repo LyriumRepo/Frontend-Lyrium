@@ -7,27 +7,29 @@ export class LaravelProductRepository implements IProductRepository {
     }
 
     private async getAuthHeaders(): Promise<HeadersInit> {
-        const token = await this.getToken();
-        return token ? { Authorization: `Bearer ${token}` } : {};
+        const token =
+        typeof window !== 'undefined'
+            ? localStorage.getItem('laravel_token')
+            : null;
+
+        return {
+            'Accept': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        };
     }
 
     private async getToken(): Promise<string | null> {
-        try {
-            if (typeof window !== 'undefined') {
-                const match = document.cookie.match(/(?:^|;\s*)laravel_token=([^;]+)/);
-                return match ? decodeURIComponent(match[1]) : null;
-            }
-            const { cookies } = await import('next/headers');
-            const cookieStore = await cookies();
-            return cookieStore.get('laravel_token')?.value ?? null;
-        } catch {
+        if (typeof window === 'undefined') {
             return null;
         }
+
+        return localStorage.getItem('laravel_token');
     }
 
     private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
         const baseUrl = this.getBaseUrl();
         const authHeaders = await this.getAuthHeaders();
+        
 
         const response = await fetch(`${baseUrl}${endpoint}`, {
             ...options,
@@ -82,6 +84,26 @@ export class LaravelProductRepository implements IProductRepository {
     async createProduct(input: CreateProductInput): Promise<Product> {
         // No enviar imagen si es base64 (muy grande para la DB)
         const image = input.image && !input.image.startsWith('data:') ? input.image : null;
+        // Limpiar atributos vacíos
+        const cleanMainAttributes = (input.mainAttributes || [])
+            .filter(attr =>
+                attr.values &&
+                attr.values.some(v => v && v.trim() !== '')
+            )
+            .map(attr => ({
+                ...attr,
+                values: attr.values.filter(v => v && v.trim() !== '')
+            }));
+
+        const cleanAdditionalAttributes = (input.additionalAttributes || [])
+            .filter(attr =>
+                attr.values &&
+                attr.values.some(v => v && v.trim() !== '')
+            )
+            .map(attr => ({
+                ...attr,
+                values: attr.values.filter(v => v && v.trim() !== '')
+            }));
         
         return this.request<Product>('/products', {
             method: 'POST',
@@ -95,8 +117,8 @@ export class LaravelProductRepository implements IProductRepository {
                 image: image,
                 weight: input.weight ? Number(input.weight) : null,
                 dimensions: input.dimensions || null,
-                mainAttributes: input.mainAttributes || [],
-                additionalAttributes: input.additionalAttributes || [],
+                mainAttributes: cleanMainAttributes,
+                additionalAttributes: cleanAdditionalAttributes,
             }),
         });
     }
@@ -168,7 +190,6 @@ export class LaravelProductRepository implements IProductRepository {
             headers: {
                 ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
             },
-            credentials: 'include',
             body: formData,
         });
 
