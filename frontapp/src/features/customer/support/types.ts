@@ -1,6 +1,5 @@
 export type TicketStatus = 'open' | 'in_progress' | 'pending' | 'resolved' | 'closed';
-export type TicketPriority = 'low' | 'medium' | 'high' | 'urgent';
-export type TicketCategory = 'technical' | 'billing' | 'order' | 'shipping' | 'general';
+export type TicketCategory = 'critico' | 'tecnico' | 'negativo' | 'informacion' | 'positivo';
 
 export interface CustomerTicket {
     id: string;
@@ -8,7 +7,6 @@ export interface CustomerTicket {
     subject: string;
     description: string;
     category: TicketCategory;
-    priority: TicketPriority;
     status: TicketStatus;
     createdAt: string;
     updatedAt: string;

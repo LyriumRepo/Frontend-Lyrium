@@ -133,7 +133,7 @@ export default function CustomerSecurityPage() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         <div className="lg:col-span-8 space-y-8">
           <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-[2.5rem] shadow-2xl overflow-hidden">
-            <div className="bg-gradient-to-r from-sky-500 to-sky-300 p-8 relative overflow-hidden">
+            <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[var(--brand-green)] dark:to-[#1A3A32] p-8 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl" />
               <div className="flex items-center gap-5 text-white relative z-10">
                 <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30">
@@ -165,7 +165,7 @@ export default function CustomerSecurityPage() {
                       value={passwordData.actual}
                       onChange={(e) => handlePasswordChange('actual', e.target.value)}
                       required
-                      className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-transparent p-3 pr-12 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500"
+                      className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-transparent p-3 pr-12 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)]"
                     />
                     <button
                       type="button"
@@ -187,7 +187,7 @@ export default function CustomerSecurityPage() {
                       value={passwordData.nueva}
                       onChange={(e) => handlePasswordChange('nueva', e.target.value)}
                       required
-                      className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-transparent p-3 pr-12 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500"
+                      className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-transparent p-3 pr-12 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)]"
                     />
                     <button
                       type="button"
@@ -238,7 +238,7 @@ export default function CustomerSecurityPage() {
                       value={passwordData.confirmar}
                       onChange={(e) => handlePasswordChange('confirmar', e.target.value)}
                       required
-                      className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-transparent p-3 pr-12 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500"
+                      className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-transparent p-3 pr-12 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)]"
                     />
                     <button
                       type="button"
@@ -258,7 +258,7 @@ export default function CustomerSecurityPage() {
                 <div className="pt-4">
                   <button
                     type="submit"
-                    className="w-full py-5 rounded-[2rem] bg-gradient-to-r from-sky-500 to-sky-600 text-white font-black text-xs uppercase tracking-[0.2em] hover:shadow-lg flex items-center justify-center gap-3"
+                    className="w-full py-5 rounded-[2rem] bg-gradient-to-r from-sky-500 to-sky-600 dark:from-[var(--brand-green)] dark:to-[#1A3A32] dark:hover:from-[var(--brand-green-hover)] dark:hover:to-[var(--brand-green)] text-white font-black text-xs uppercase tracking-[0.2em] hover:shadow-lg flex items-center justify-center gap-3"
                   >
                     <Icon name="ShieldCheck" className="w-5 h-5" />
                     Actualizar Contraseña
@@ -272,7 +272,7 @@ export default function CustomerSecurityPage() {
         <div className="lg:col-span-4 space-y-8">
           <div className="bg-white dark:bg-[var(--bg-secondary)] p-8 rounded-[2.5rem] shadow-2xl">
             <div className="flex items-center gap-4 mb-6">
-              <div className="w-12 h-12 bg-gradient-to-br from-sky-400 to-sky-600 rounded-2xl flex items-center justify-center">
+              <div className="w-12 h-12 bg-gradient-to-br from-sky-400 to-sky-600 dark:from-[var(--brand-green)] dark:to-[#1A3A32] rounded-2xl flex items-center justify-center">
                 <Icon name="ShieldCheck" className="w-6 h-6 text-white" />
               </div>
               <div>
@@ -283,14 +283,14 @@ export default function CustomerSecurityPage() {
 
             <ul className="space-y-4">
               <li className="flex items-start gap-3 p-4 rounded-2xl bg-gray-50 dark:bg-[var(--bg-muted)] border border-gray-100 dark:border-[var(--border-subtle)]">
-                <Icon name="Shield" className="w-5 h-5 text-sky-500 mt-0.5" />
+                <Icon name="Shield" className="w-5 h-5 text-sky-500 dark:text-[var(--icons-green)] mt-0.5" />
                 <div>
                   <p className="text-sm font-bold text-gray-800 dark:text-[var(--text-primary)]">Usa una contraseña única</p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">No reutilices contraseñas de otras cuentas.</p>
                 </div>
               </li>
               <li className="flex items-start gap-3 p-4 rounded-2xl bg-gray-50 dark:bg-[var(--bg-muted)] border border-gray-100 dark:border-[var(--border-subtle)]">
-                <Icon name="RotateCcw" className="w-5 h-5 text-sky-500 mt-0.5" />
+                <Icon name="RotateCcw" className="w-5 h-5 text-sky-500 dark:text-[var(--icons-green)] mt-0.5" />
                 <div>
                   <p className="text-sm font-bold text-gray-800 dark:text-[var(--text-primary)]">Cambia regularmente</p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">Recomendamos cada 3 a 6 meses.</p>

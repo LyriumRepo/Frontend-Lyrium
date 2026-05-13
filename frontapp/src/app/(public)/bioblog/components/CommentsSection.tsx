@@ -11,26 +11,26 @@ export default function CommentsSection() {
         <div className="w-full pb-20 px-4 max-w-7xl mx-auto">
             {/* Cabecera de Comentarios Premium */}
             <div className="flex flex-col items-center text-center">
-                <div className="inline-flex items-center gap-2 px-4 py-2 bg-sky-100 dark:bg-sky-900/50 text-sky-700 dark:text-sky-300 rounded-full text-xs font-bold uppercase tracking-widest mb-4">
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-sky-100 dark:bg-[var(--brand-green)] text-sky-700 dark:text-[var(--text-primary)] rounded-full text-xs font-bold uppercase tracking-widest mb-4">
                     <MessageCircle className="text-lg" />
                     Comunidad Lyrium
                 </div>
                 <h2 className="text-4xl md:text-5xl font-black text-slate-800 dark:text-[var(--text-primary)] tracking-tight">
-                    Comparte tu <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-sky-600">Opinión</span>
+                    Comparte tu <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-sky-600 dark:from-[var(--icons-green)] dark:to-[var(--brand-green)]">Opinión</span>
                 </h2>
-                <div className="w-24 h-1.5 bg-gradient-to-r from-sky-400 to-sky-500 rounded-full mt-6" />
+                <div className="w-24 h-1.5 bg-gradient-to-r from-sky-400 to-sky-500 dark:from-lime-400 dark:to-lime-500 rounded-full mt-6" />
             </div>
 
             {/* Sección de Comentarios */}
             <div className="w-full bg-white/60 dark:bg-[var(--bg-secondary)]/60 backdrop-blur-md border border-white/50 dark:border-[var(--border-subtle)] rounded-[2.5rem] p-6 md:p-12 shadow-xl mt-12 mb-20 relative overflow-hidden">
                 {/* Decoración de Fondo */}
-                <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-sky-100/50 dark:from-sky-900/20 to-transparent rounded-bl-[100%] z-0 pointer-events-none" />
+                <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-sky-100/50 dark:from-lime-500/20 to-transparent dark:opacity-30 rounded-bl-[100%] z-0 pointer-events-none" />
 
                 {/* Header: Título y Acciones */}
                 <div className="relative z-10 flex flex-col md:flex-row justify-between items-end mb-10 gap-6 border-b border-slate-200/60 dark:border-[var(--border-subtle)] pb-6">
                     <div>
                         <h3 className="text-3xl font-black text-slate-800 dark:text-[var(--text-primary)] tracking-tight flex items-center gap-3">
-                            <span className="text-sky-500">
+                            <span className="text-sky-500 dark:text-[var(--icons-green)]">
                                 <MessageCircle className="w-8 h-8" />
                             </span>
                             Comentarios
@@ -44,7 +44,7 @@ export default function CommentsSection() {
                         {/* Botón Suscribirse */}
                         <button
                             type="button"
-                            className="group flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-sky-500 to-sky-400 text-white text-[11px] font-black uppercase tracking-widest rounded-full transition-all duration-300 shadow-lg hover:shadow-sky-500/30 hover:scale-105 active:scale-95"
+                            className="group flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-sky-500 to-sky-400 dark:from-[var(--brand-green)] dark:to-[var(--brand-green-hover)] text-white text-[11px] font-black uppercase tracking-widest rounded-full transition-all duration-300 shadow-lg shadow-[0_10px_25px_rgba(14,165,233,0.2)] dark:shadow-[0_10px_25px_rgba(74,124,89,0.25)] hover:scale-105 active:scale-95"
                         >
                             <Mail className="text-white/90 group-hover:scale-110 transition-transform duration-300 text-sm" />
                             <span>Suscríbete</span>
@@ -52,7 +52,7 @@ export default function CommentsSection() {
                         {/* Login Link */}
                         <Link
                             href="/login"
-                            className="group flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-sky-500 to-sky-400 text-white text-[11px] font-black uppercase tracking-widest rounded-full transition-all duration-300 shadow-lg hover:shadow-sky-500/30 hover:scale-105 active:scale-95"
+                            className="group flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-sky-500 to-sky-400 dark:from-[var(--brand-green)] dark:to-[var(--brand-green-hover)] text-white text-[11px] font-black uppercase tracking-widest rounded-full transition-all duration-300 shadow-lg shadow-[0_10px_25px_rgba(14,165,233,0.2)] dark:shadow-[0_10px_25px_rgba(74,124,89,0.25)] hover:scale-105 active:scale-95"
                         >
                             <User className="transition-transform duration-300 group-hover:translate-x-1" />
                             <span>Iniciar Sesión</span>
@@ -74,9 +74,10 @@ export default function CommentsSection() {
                             {/* Área de Texto con Diseño Premium */}
                         <div className="flex-1 w-full relative group">
                             {/* Glow Effect focus */}
-                            <div className="absolute -inset-0.5 bg-gradient-to-r from-sky-400 to-emerald-400 rounded-2xl opacity-0 group-focus-within:opacity-20 transition duration-500 blur-sm" />
+                            <div className="absolute -inset-0.5 bg-gradient-to-r from-sky-400 to-emerald-400 dark:from-[var(--brand-green)] dark:to-[var(--brand-green-hover)] rounded-2xl opacity-0 group-focus-within:opacity-20 transition duration-500 blur-sm" />
 
-                            <div className="relative bg-white dark:bg-[var(--bg-primary)] rounded-2xl shadow-sm border border-slate-200 dark:border-[var(--border-subtle)] hover:border-sky-300 transition-colors duration-300 overflow-hidden group-focus-within:shadow-md group-focus-within:border-sky-400">
+                            <div className="relative bg-white dark:bg-[var(--bg-primary)] rounded-2xl shadow-sm border border-slate-200 dark:border-[var(--border-subtle)] hover:border-sky-300 
+                                 dark:hover:border-[var(--icons-green)] transition-colors duration-300 overflow-hidden group-focus-within:shadow-md group-focus-within:border-sky-400 dark:group-focus-within:border-[var(--icons-green)]">
                                 <textarea
                                     name="wc_comment"
                                     id="wc_comment"
@@ -88,22 +89,22 @@ export default function CommentsSection() {
                                 {/* Simulated Toolbar */}
                                 <div className="bg-slate-50/50 dark:bg-[var(--bg-secondary)]/50 px-4 py-3 border-t border-slate-100 dark:border-[var(--border-subtle)] flex items-center gap-4 text-slate-400 dark:text-[var(--text-secondary)] text-sm">
                                     <div className="flex gap-2">
-                                        <button type="button" aria-label="Aplicar negrita" className="p-1.5 hover:bg-white dark:hover:bg-[#2A3F33] hover:text-sky-600 rounded transition-colors">
+                                        <button type="button" aria-label="Aplicar negrita" className="p-1.5 hover:bg-white dark:hover:bg-[#2A3F33] hover:text-sky-600 dark:hover:text-[var(--icons-green)] rounded transition-colors">
                                             <Bold className="w-4 h-4" />
                                         </button>
-                                        <button type="button" aria-label="Aplicar cursiva" className="p-1.5 hover:bg-white dark:hover:bg-[#2A3F33] hover:text-sky-600 rounded transition-colors">
+                                        <button type="button" aria-label="Aplicar cursiva" className="p-1.5 hover:bg-white dark:hover:bg-[#2A3F33] hover:text-sky-600 dark:hover:text-[var(--icons-green)] rounded transition-colors">
                                             <Italic className="w-4 h-4" />
                                         </button>
-                                        <button type="button" aria-label="Aplicar subrayado" className="p-1.5 hover:bg-white dark:hover:bg-[#2A3F33] hover:text-sky-600 rounded transition-colors">
+                                        <button type="button" aria-label="Aplicar subrayado" className="p-1.5 hover:bg-white dark:hover:bg-[#2A3F33] hover:text-sky-600 dark:hover:text-[var(--icons-green)] rounded transition-colors">
                                             <Underline className="w-4 h-4" />
                                         </button>
                                     </div>
-                                    <div className="w-px h-4 bg-slate-200 dark:bg-[var(--border-subtle)]" />
+                                    <div className="w-px h-4 bg-slate-200 dark:bg-[var(--text-primary)]" />
                                     <div>
                                         <button
                                             type="button"
                                             aria-label="Adjuntar foto"
-                                            className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-[var(--bg-secondary)] border border-slate-200 dark:border-[var(--border-subtle)] hover:border-sky-300 text-xs font-bold text-slate-500 dark:text-[var(--text-secondary)] hover:text-sky-600 rounded-lg transition-all shadow-sm"
+                                            className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-[var(--bg-secondary)] border border-slate-200 dark:border-[var(--border-subtle)] hover:border-sky-300 dark:hover:border-[var(--icons-green)] text-xs font-bold text-slate-500 dark:text-[var(--text-secondary)] hover:text-sky-600 dark:hover:text-[var(--icons-green)] rounded-lg transition-all shadow-sm"
                                         >
                                             <Image className="w-4 h-4" aria-hidden="true" />
                                             <span className="hidden sm:inline">Adjuntar Foto</span>
@@ -118,7 +119,7 @@ export default function CommentsSection() {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                         {/* Nombre */}
                         <div className="relative group">
-                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 dark:text-[var(--text-secondary)] group-focus-within:text-sky-500 transition-colors z-10">
+                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 dark:text-[var(--text-secondary)] group-focus-within:text-sky-500 dark:group-focus-within:text-[var(--icons-green)] transition-colors z-10">
                                 <User className="text-sm" />
                             </div>
                             <label htmlFor="wc_name" className="sr-only">Nombre</label>
@@ -129,13 +130,13 @@ export default function CommentsSection() {
                                 placeholder="Tu Nombre *"
                                 aria-label="Tu nombre"
                                 required
-                                className="w-full pl-11 pr-4 py-3.5 bg-slate-50 dark:bg-[var(--bg-primary)] hover:bg-white dark:hover:bg-[#111A15] border border-slate-200 dark:border-[var(--border-subtle)] rounded-xl text-slate-700 dark:text-[var(--text-primary)] text-sm font-medium focus:bg-white dark:focus:bg-[#111A15] focus:outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-500/10 shadow-sm transition-all duration-300 placeholder:text-slate-400 dark:placeholder:text-[#9BAF9F]"
+                                className="w-full pl-11 pr-4 py-3.5 bg-slate-50 dark:bg-[var(--bg-primary)] hover:bg-white dark:hover:bg-[#111A15] border border-slate-200 dark:border-[var(--border-subtle)] rounded-xl text-slate-700 dark:text-[var(--text-primary)] text-sm font-medium focus:bg-white dark:focus:bg-[#111A15] focus:outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)] focus:ring-4 focus:ring-sky-500/10 shadow-sm transition-all duration-300 placeholder:text-slate-400 dark:placeholder:text-[#9BAF9F]"
                             />
                         </div>
 
                         {/* Email */}
                         <div className="relative group">
-                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 dark:text-[var(--text-secondary)] group-focus-within:text-sky-500 transition-colors z-10">
+                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 dark:text-[var(--text-secondary)] group-focus-within:text-sky-500 dark:group-focus-within:text-[var(--icons-green)]  transition-colors z-10">
                                 <Mail className="text-sm" />
                             </div>
                             <label htmlFor="wc_email" className="sr-only">Email</label>
@@ -146,20 +147,20 @@ export default function CommentsSection() {
                                 placeholder="Tu Email *"
                                 aria-label="Tu correo electrónico"
                                 required
-                                className="w-full pl-11 pr-4 py-3.5 bg-slate-50 dark:bg-[var(--bg-primary)] hover:bg-white dark:hover:bg-[#111A15] border border-slate-200 dark:border-[var(--border-subtle)] rounded-xl text-slate-700 dark:text-[var(--text-primary)] text-sm font-medium focus:bg-white dark:focus:bg-[#111A15] focus:outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-500/10 shadow-sm transition-all duration-300 placeholder:text-slate-400 dark:placeholder:text-[#9BAF9F]"
+                                className="w-full pl-11 pr-4 py-3.5 bg-slate-50 dark:bg-[var(--bg-primary)] hover:bg-white dark:hover:bg-[#111A15] border border-slate-200 dark:border-[var(--border-subtle)] rounded-xl text-slate-700 dark:text-[var(--text-primary)] text-sm font-medium focus:bg-white dark:focus:bg-[#111A15] focus:outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)] focus:ring-4 focus:ring-sky-500/10 shadow-sm transition-all duration-300 placeholder:text-slate-400 dark:placeholder:text-[#9BAF9F]"
                             />
                         </div>
 
                         {/* Website */}
                         <div className="relative group">
-                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 dark:text-[var(--text-secondary)] group-focus-within:text-sky-500 transition-colors z-10">
+                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 dark:text-[var(--text-secondary)] group-focus-within:text-sky-500 dark:group-focus-within:text-[var(--icons-green)]  transition-colors z-10">
                                 <LinkIcon className="text-sm" />
                             </div>
                             <input
                                 type="url"
                                 name="wc_website"
                                 placeholder="Sitio Web (Opcional)"
-                                className="w-full pl-11 pr-4 py-3.5 bg-slate-50 dark:bg-[var(--bg-primary)] hover:bg-white dark:hover:bg-[#111A15] border border-slate-200 dark:border-[var(--border-subtle)] rounded-xl text-slate-700 dark:text-[var(--text-primary)] text-sm font-medium focus:bg-white dark:focus:bg-[#111A15] focus:outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-500/10 shadow-sm transition-all duration-300 placeholder:text-slate-400 dark:placeholder:text-[#9BAF9F]"
+                                className="w-full pl-11 pr-4 py-3.5 bg-slate-50 dark:bg-[var(--bg-primary)] hover:bg-white dark:hover:bg-[#111A15] border border-slate-200 dark:border-[var(--border-subtle)] rounded-xl text-slate-700 dark:text-[var(--text-primary)] text-sm font-medium focus:bg-white dark:focus:bg-[#111A15] focus:outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)] focus:ring-4 focus:ring-sky-500/10 shadow-sm transition-all duration-300 placeholder:text-slate-400 dark:placeholder:text-[#9BAF9F]"
                             />
                         </div>
                     </div>
@@ -188,7 +189,7 @@ export default function CommentsSection() {
                         <button
                             type="submit"
                             name="submit"
-                            className="relative overflow-hidden w-full md:w-auto px-10 py-4 bg-gradient-to-r from-sky-500 to-cyan-500 text-white font-black uppercase tracking-wider text-sm rounded-xl shadow-lg shadow-sky-500/30 hover:shadow-sky-500/50 hover:scale-105 active:scale-95 transition-all duration-300 group"
+                            className="relative overflow-hidden w-full md:w-auto px-10 py-4 bg-gradient-to-r from-sky-500 to-cyan-500 dark:from-[var(--brand-green)] dark:to-[var(--brand-green-hover)] text-white font-black uppercase tracking-wider text-sm rounded-xl shadow-lg shadow-[0_10px_25px_rgba(14,165,233,0.2)] dark:shadow-[0_10px_25px_rgba(74,124,89,0.25)] hover:scale-105 active:scale-95 transition-all duration-300 group"
                         >
                             <span className="relative z-10 flex items-center justify-center gap-2">
                                 Publicar Comentario

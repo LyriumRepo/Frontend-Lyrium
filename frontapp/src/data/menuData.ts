@@ -715,7 +715,7 @@ export const menuItems: MenuItem[] = [
     },
     {
         label: 'REGISTRA TU TIENDA',
-        href: '/login',
+        href: '/login?mode=vendor',
         icon: 'storefront',
     },
     {

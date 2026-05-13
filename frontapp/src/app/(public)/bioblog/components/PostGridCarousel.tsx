@@ -40,13 +40,13 @@ export default function PostGridCarousel() {
                 {/* Custom Navigation Arrows */}
                 <button
                     id="alter-prev-btn"
-                    className="hidden md:block absolute md:left-0 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[var(--text-secondary)] hover:text-sky-500 transition-colors cursor-pointer z-50 p-2"
+                    className="hidden md:block absolute md:left-0 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[var(--text-secondary)] hover:text-sky-500 dark:hover:text-[var(--icons-green)] transition-colors cursor-pointer z-50 p-2"
                 >
                     <ChevronLeft className="w-8 h-8 md:w-10 md:h-10 transform rotate-180" />
                 </button>
                 <button
                     id="alter-next-btn"
-                    className="hidden md:block absolute md:right-0 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[var(--text-secondary)] hover:text-sky-500 transition-colors cursor-pointer z-50 p-2"
+                    className="hidden md:block absolute md:right-0 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[var(--text-secondary)] hover:text-sky-500 dark:hover:text-[var(--icons-green)] transition-colors cursor-pointer z-50 p-2"
                 >
                     <ChevronRight className="w-8 h-8 md:w-10 md:h-10" />
                 </button>
@@ -99,13 +99,13 @@ export default function PostGridCarousel() {
                                 <div className="flex flex-col flex-grow">
                                     {/* Categoría */}
                                     <div className="flex items-center gap-2 mb-2">
-                                        <span className="text-[10px] md:text-xs font-black text-sky-500 uppercase tracking-widest leading-none">
+                                        <span className="text-[10px] md:text-xs font-black text-sky-500 dark:text-[var(--icons-green)] uppercase tracking-widest leading-none">
                                             {post.category_name}
                                         </span>
                                     </div>
 
                                     {/* Título */}
-                                    <h3 className="text-xl md:text-2xl font-bold text-slate-800 dark:text-[var(--text-primary)] leading-tight mb-3 group-hover:text-sky-600 transition-colors line-clamp-2">
+                                    <h3 className="text-xl md:text-2xl font-bold text-slate-800 dark:text-[var(--text-primary)] leading-tight mb-3 group-hover:text-sky-600 dark:group-hover:text-[var(--icons-green)] transition-colors line-clamp-2">
                                         <Link href={`/bioblog/${post.slug}`}>{post.title}</Link>
                                     </h3>
 

@@ -100,10 +100,17 @@ export default function PublicFooter() {
                     </button>
                     <div className={`footer-accordion-content ${openSections['pago'] ? 'block' : 'hidden'} md:block mt-4 md:mt-4`}>
                         <p className="text-sm mb-3 text-sky-100 dark:text-[var(--text-secondary)]">Aceptamos tarjetas:</p>
-                        <div className="flex flex-wrap justify-center md:justify-start gap-2 mb-4">
-                            <span className="px-3 py-1 rounded-lg bg-white/10 dark:bg-[var(--border-subtle)]/30 border border-white/20 dark:border-[var(--border-subtle)]/50 text-xs font-medium dark:text-[var(--text-secondary)]">VISA</span>
-                            <span className="px-3 py-1 rounded-lg bg-white/10 dark:bg-[var(--border-subtle)]/30 border border-white/20 dark:border-[var(--border-subtle)]/50 text-xs font-medium dark:text-[var(--text-secondary)]">MasterCard</span>
-                            <span className="px-3 py-1 rounded-lg bg-white/10 dark:bg-[var(--border-subtle)]/30 border border-white/20 dark:border-[var(--border-subtle)]/50 text-xs font-medium dark:text-[var(--text-secondary)]">AmEx</span>
+                        <div className="flex flex-wrap justify-center md:justify-start items-center gap-3 mb-4">
+                            {/* VISA */}
+                            <Image src="/img/intro/visa1.png" alt="Visa" width={50} height={30} className="h-10 w-auto object-contain" />
+                            {/* MASTERCARD */}
+                            <Image src="/img/intro/mastercard.png" alt="Mastercard" width={50} height={30} className="h-10 w-auto object-contain" />
+                            {/* AMEX */}
+                            <Image src="/img/intro/amex1.png" alt="American Express" width={50} height={30} className="h-10 w-auto object-contain" />
+                            {/* YAPE */}
+                            <Image src="/img/intro/yape.png" alt="Yape" width={50} height={30} className="h-10 w-auto object-contain" />
+                            {/* PLIN */}
+                            <Image src="/img/intro/logo-plin.png" alt="Plin" width={50} height={30} className="h-10 w-auto object-contain" />
                         </div>
                         <p className="flex items-center gap-2 text-sm text-sky-100 dark:text-[var(--text-secondary)]">
                             <Icon name="LockKey" className="text-xl" />

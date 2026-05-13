@@ -74,23 +74,33 @@ export default function PrivacyPolicyPage() {
 
             {/* ===================== HEADER SECTION ===================== */}
             <section className="text-center space-y-6 animate-in">
-                <div className="inline-flex items-center gap-4 bg-emerald-500 px-6 py-3 rounded-full shadow-lg text-white mb-4">
-                    <ShieldCheck className="w-8 h-8 animate-float" />
-                    <h1 className="text-2xl md:text-3xl font-black uppercase tracking-tight">Políticas de privacidad</h1>
+                <div className="flex justify-center mb-6">
+                    <h1 className="flex items-center justify-center gap-3 px-6 md:px-8 py-3 md:py-4 w-full rounded-full 
+                        bg-gradient-to-r from-sky-500 to-sky-400 
+                        dark:from-[#1A3A32] dark:to-[var(--brand-green)]
+                        text-white 
+                        shadow-[0_10px_25px_rgba(14,165,233,0.2)]
+                        dark:shadow-[0_10px_25px_rgba(74,124,89,0.25)]
+                        font-black tracking-tight text-center
+                        text-[clamp(20px,2.6vw,34px)]"
+                    >
+                        <ShieldCheck className="w-7 h-7 md:w-9 md:h-9 animate-float" />
+                        Políticas de privacidad
+                    </h1>
                 </div>
-                <p className="text-gray-500 max-w-3xl mx-auto text-lg leading-relaxed">
+                <p className="text-gray-500 dark:text-[var(--text-primary)] max-w-3xl mx-auto text-lg leading-relaxed">
                     Esta Política de Privacidad explica cómo recopilamos, usamos y protegemos tu información cuando utilizas
-                    <strong className="text-emerald-600"> LYRIUM BIO MARKETPLACE</strong>.
+                    <strong className="text-sky-600 dark:text-[var(--icons-green)]"> LYRIUM BIOMARKETPLACE</strong>.
                 </p>
             </section>
 
             <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-10 items-start">
 
                 {/* ===================== SIDEBAR INDEX (Desktop) ===================== */}
-                <aside className="hidden lg:block sticky top-28 bg-white/90 backdrop-blur-md border border-gray-100 rounded-3xl p-6 shadow-xl space-y-6">
+                <aside className="hidden lg:block sticky top-28 bg-white/90 dark:bg-[#dddddd] backdrop-blur-md border border-gray-100 rounded-3xl p-6 shadow-xl space-y-6">
                     <div className="flex items-center gap-3 border-b border-gray-50 pb-4">
-                        <List className="w-5 h-5 text-emerald-500" />
-                        <h4 className="font-black text-xs uppercase tracking-widest text-gray-900">Contenido</h4>
+                        <List className="w-5 h-5 text-sky-500 dark:text-[var(--brand-green)]" />
+                        <h4 className="font-black text-ms tracking-widest text-[#333333]">Contenido</h4>
                     </div>
                     <nav className="space-y-1">
                         {privacyData.map((section) => (
@@ -99,8 +109,8 @@ export default function PrivacyPolicyPage() {
                                 onClick={() => scrollToSection(section.id)}
                                 className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-300 text-left text-[13.5px] font-semibold group
                   ${activeSection === section.id
-                                        ? 'bg-emerald-50 text-emerald-600 border border-emerald-100 shadow-sm'
-                                        : 'text-gray-500 hover:bg-gray-50 hover:text-emerald-500'}`}
+                                        ? 'bg-emerald-50 text-sky-600 dark:text-[var(--brand-green)] border border-sky-100 shadow-sm'
+                                        : 'text-gray-500 hover:bg-gray-50 hover:text-sky-500 dark:hover:text-[var(--brand-green-hover)]'}`}
                             >
                                 <span className="flex-1">{section.title}</span>
                                 <ChevronRight className={`w-4 h-4 transition-all duration-300 
@@ -112,13 +122,13 @@ export default function PrivacyPolicyPage() {
                 </aside>
 
                 {/* ===================== CONTENT CARD ===================== */}
-                <section className="bg-white/90 backdrop-blur-md border border-gray-100 rounded-[2.5rem] shadow-2xl relative overflow-hidden group">
-                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-400 via-teal-500 to-emerald-400 bg-[length:200%_100%] animate-shimmer-line"></div>
-
+                <section className="bg-white/90 dark:bg-[#dddddd] backdrop-blur-md border border-gray-100 rounded-[2.5rem] shadow-2xl relative overflow-hidden group">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-sky-400 via-teal-500 to-sky-400 dark:bg-gradient-to-r dark:from-[var(--brand-green)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green)] bg-[length:200%_100%] animate-shimmer-line">
+                    </div>
                     <div className="p-8 md:p-12 space-y-12">
                         <div className="text-center space-y-2">
-                            <h2 className="text-2xl font-black text-gray-800 uppercase tracking-tighter">Política de Privacidad y Protección de Datos</h2>
-                            <div className="text-emerald-500 font-bold text-sm tracking-widest">- LYRIUM BIOMARKETPLACE -</div>
+                            <h2 className="text-2xl font-black text-[#333333] uppercase tracking-tighter">Política de Privacidad y Protección de Datos</h2>
+                            <div className="text-sky-500 dark:text-[var(--brand-green)] font-bold text-sm tracking-widest">- LYRIUM BIOMARKETPLACE -</div>
                         </div>
 
                         {privacyData.map((section) => (
@@ -129,30 +139,30 @@ export default function PrivacyPolicyPage() {
                                 className="space-y-6 pt-10 border-t border-dashed border-gray-100 first:border-0 first:pt-0 group/section"
                             >
                                 <div className="flex items-center gap-4">
-                                    <h3 className="text-2xl md:text-3xl font-black text-gray-900 tracking-tight group-hover/section:text-emerald-600 transition-colors">
+                                    <h3 className="text-2xl md:text-2xl font-bold text-[#333333] tracking-tight group-hover/section:text-sky-600 dark:group-hover/section:text-[var(--brand-green)] transition-colors">
                                         {section.title}
                                     </h3>
                                     {section.badge && (
-                                        <span className="hidden md:inline-flex items-center gap-2 px-4 py-1.5 bg-emerald-50 border border-emerald-100 text-emerald-700 text-xs font-bold rounded-full shadow-sm">
+                                        <span className="hidden md:inline-flex items-center gap-2 px-4 py-1.5 bg-sky-50 border border-sky-100 text-sky-700 dark:text-[var(--brand-green)] text-xs font-bold rounded-full shadow-sm">
                                             <MapPin className="w-3.5 h-3.5" />
                                             {section.badge}
                                         </span>
                                     )}
                                 </div>
 
-                                <p className="text-gray-600 text-lg leading-relaxed">
+                                <p className="text-justify text-gray-600 text-lg leading-relaxed">
                                     {section.content}
                                 </p>
 
                                 {section.subSections && (
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         {section.subSections.map((sub) => (
-                                            <div key={sub.title} className="bg-slate-50 p-6 rounded-2xl border border-gray-100 hover:bg-white hover:shadow-lg transition-all duration-300">
-                                                <h4 className="font-bold text-gray-900 mb-2 flex items-center gap-2">
-                                                    <div className="w-1.5 h-6 bg-emerald-400 rounded-full"></div>
+                                            <div key={sub.title} className="bg-slate-50 dark:bg-slate-100 p-6 rounded-2xl border border-gray-100 dark:hover:bg-white/70 hover:shadow-lg transition-all duration-300">
+                                                <h4 className="font-bold text-[#333333] mb-2 flex items-center gap-2">
+                                                    <div className="w-1.5 h-6 bg-sky-400 dark:bg-[var(--brand-green)] rounded-full"></div>
                                                     {sub.title}
                                                 </h4>
-                                                <p className="text-gray-500 text-sm leading-relaxed">{sub.text}</p>
+                                                <p className="text-justify text-gray-500 text-sm leading-relaxed">{sub.text}</p>
                                             </div>
                                         ))}
                                     </div>
@@ -161,8 +171,8 @@ export default function PrivacyPolicyPage() {
                                 {section.list && (
                                     <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         {section.list.map((item) => (
-                                            <li key={item} className="flex items-center gap-3 text-gray-600 bg-white p-4 rounded-xl border border-gray-50 shadow-sm">
-                                                <div className="w-2 h-2 rounded-full bg-emerald-400"></div>
+                                            <li key={item} className="flex items-center gap-3 text-gray-600 bg-white dark:bg-slate-100 p-4 rounded-xl border border-gray-50 shadow-sm">
+                                                <div className="w-2 h-2 rounded-full bg-sky-400 dark:bg-[var(--brand-green)]"></div>
                                                 {item}
                                             </li>
                                         ))}

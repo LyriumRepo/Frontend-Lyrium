@@ -109,12 +109,19 @@ export default function TermsAndConditionsPage() {
 
             {/* ===================== HEADER SECTION ===================== */}
             <section className="text-center space-y-6">
-                <div className="inline-flex items-center gap-4 bg-sky-500 px-6 py-3 rounded-full shadow-lg text-white mb-4">
-                    <FileText className="w-8 h-8 animate-float" />
-                    <h1 className="text-2xl md:text-3xl font-black uppercase tracking-tight">Términos y condiciones</h1>
-                </div>
-                <p className="text-gray-500 max-w-3xl mx-auto text-lg">
-                    Revisa los términos aplicables al uso de <strong className="text-sky-600">LYRIUM BIO MARKETPLACE</strong>.
+                <div className="flex justify-center mb-6">
+                <h1 className="flex items-center justify-center gap-3 px-6 md:px-8 py-3 md:py-4 
+                    w-full rounded-full 
+                    bg-gradient-to-r from-sky-500 dark:from-[#1A3A32] to-sky-400 dark:to-[var(--brand-green)] 
+                    text-white 
+                    shadow-[0_10px_25px_rgba(14,165,233,0.2)]
+                    dark:shadow-[0_10px_25px_rgba(74,124,89,0.25)]
+                    font-black tracking-tight text-center
+                    text-[clamp(20px,2.6vw,34px)]" >
+                <FileText className="w-7 h-7 md:w-9 md:h-9 animate-float" /> Términos y condiciones </h1>
+</div>
+                <p className="text-gray-500 dark:text-[var(--text-primary)] max-w-3xl mx-auto text-lg">
+                    Revisa los términos aplicables al uso de <strong className="text-sky-600 dark:text-[var(--icons-green)]">LYRIUM BIO MARKETPLACE</strong>.
                     Usa las pestañas para cambiar entre Cliente y Vendedor.
                 </p>
 
@@ -123,7 +130,7 @@ export default function TermsAndConditionsPage() {
                     <button
                         onClick={() => { setMode('cliente'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
                         className={`flex items-center gap-2 px-6 py-3 rounded-full font-bold transition-all duration-300 shadow-sm border
-              ${mode === 'cliente' ? 'bg-sky-500 text-white border-sky-400 shadow-sky-200' : 'bg-white text-gray-500 border-gray-100 hover:bg-gray-50'}`}
+              ${mode === 'cliente' ? 'bg-sky-500 dark:bg-[var(--brand-green)] text-white border-sky-400 dark:border-[var(--icons-green)] shadow-sky-200 dark:shadow-[var(--icons-green)]' : 'bg-white text-gray-500 border-gray-100 hover:bg-gray-50'}`}
                     >
                         <UserCircle className="w-5 h-5" />
                         Del Cliente
@@ -131,7 +138,7 @@ export default function TermsAndConditionsPage() {
                     <button
                         onClick={() => { setMode('vendedor'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
                         className={`flex items-center gap-2 px-6 py-3 rounded-full font-bold transition-all duration-300 shadow-sm border
-              ${mode === 'vendedor' ? 'bg-sky-500 text-white border-sky-400 shadow-sky-200' : 'bg-white text-gray-500 border-gray-100 hover:bg-gray-50'}`}
+              ${mode === 'vendedor' ? 'bg-sky-500 dark:bg-[var(--brand-green)] text-white border-sky-400 dark:border-[var(--icons-green)] shadow-sky-200 dark:shadow-[var(--icons-green)]' : 'bg-white text-gray-500 border-gray-100 hover:bg-gray-50'}`}
                     >
                         <Store className="w-5 h-5" />
                         Del Vendedor
@@ -139,14 +146,14 @@ export default function TermsAndConditionsPage() {
                     <a
                         href={config.pdfHref}
                         download={config.pdfName}
-                        className="flex items-center gap-2 px-6 py-3 rounded-full font-bold bg-white text-sky-600 border border-sky-100 shadow-sm hover:bg-sky-50 transition-all duration-300 shine-effect"
+                        className="flex items-center gap-2 px-6 py-3 rounded-full font-bold bg-white text-sky-600 dark:text-[var(--brand-green)] border border-sky-100 shadow-sm hover:bg-sky-50 transition-all duration-300 shine-effect"
                     >
                         <Download className="w-5 h-5" />
                         {config.pdfLabel}
                     </a>
                     <button
                         onClick={() => setIsShareModalOpen(true)}
-                        className="flex items-center gap-2 px-6 py-3 rounded-full font-bold bg-white text-sky-500 border border-sky-100 shadow-sm hover:bg-sky-50 transition-all duration-300"
+                        className="flex items-center gap-2 px-6 py-3 rounded-full font-bold bg-white text-sky-500 dark:text-[var(--brand-green)] border border-sky-100 shadow-sm hover:bg-sky-50 transition-all duration-300"
                     >
                         <Share2 className="w-5 h-5" />
                         Compartir
@@ -157,10 +164,10 @@ export default function TermsAndConditionsPage() {
             <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-10 items-start">
 
                 {/* ===================== SIDEBAR INDEX (Desktop) ===================== */}
-                <aside className="hidden lg:block sticky top-28 bg-white/90 backdrop-blur-md border border-gray-100 rounded-3xl p-6 shadow-xl space-y-6">
+                <aside className="hidden lg:block sticky top-28 bg-white/90 dark:bg-[#dddddd] backdrop-blur-md border border-gray-100 rounded-3xl p-6 shadow-xl space-y-6">
                     <div className="flex items-center gap-3 border-b border-gray-50 pb-4">
-                        <List className="w-5 h-5 text-sky-500" />
-                        <h4 className="font-black text-xs uppercase tracking-widest text-gray-900">Contenido {mode === 'cliente' ? 'Cliente' : 'Vendedor'}</h4>
+                        <List className="w-5 h-5 text-sky-500 dark:text-[var(--brand-green)]" />
+                        <h4 className="font-black text-sm tracking-widest text-[#333333]">Contenido {mode === 'cliente' ? 'Cliente' : 'Vendedor'}</h4>
                     </div>
                     <nav className="space-y-1">
                         {currentTerms.map((section) => (
@@ -169,8 +176,8 @@ export default function TermsAndConditionsPage() {
                                 onClick={() => scrollToSection(section.id)}
                                 className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-300 text-left text-[13.5px] font-semibold group
                   ${activeSection === section.id
-                                        ? 'bg-sky-50 text-sky-600 border border-sky-100 shadow-sm'
-                                        : 'text-gray-500 hover:bg-gray-50 hover:text-sky-500'}`}
+                                        ? 'bg-sky-50 text-sky-600 dark:text-[var(--brand-green)] border border-sky-100 shadow-sm'
+                                        : 'text-gray-500 hover:bg-gray-50 hover:text-sky-500 dark:hover:text-[var(--brand-green-hover)]'}`}
                             >
                                 <span className="flex-1">{section.title}</span>
                                 <ChevronRight className={`w-4 h-4 transition-all duration-300 
@@ -182,13 +189,13 @@ export default function TermsAndConditionsPage() {
                 </aside>
 
                 {/* ===================== CONTENT CARD ===================== */}
-                <section className="bg-white/90 backdrop-blur-md border border-gray-100 rounded-[2.5rem] shadow-2xl relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-sky-400 via-sky-500 to-sky-400 bg-[length:200%_100%] animate-shimmer-line"></div>
+                <section className="bg-white/90 dark:bg-[#dddddd] backdrop-blur-md border border-gray-100 rounded-[2.5rem] shadow-2xl relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-sky-400 via-sky-500 to-sky-400 dark:bg-gradient-to-r dark:from-[var(--brand-green)] dark:via-[var(--brand-green)] dark:to-[var(--icons-green)] bg-[length:200%_100%] animate-shimmer-line"></div>
 
                     <div className="p-8 md:p-12 space-y-12">
                         <div className="text-center space-y-2">
-                            <h2 className="text-2xl font-black text-gray-800 uppercase tracking-tighter transition-all duration-500">{config.subtitle}</h2>
-                            <div className="text-sky-500 font-bold text-sm tracking-widest">- LYRIUM BIOMARKETPLACE -</div>
+                            <h2 className="text-2xl font-black text-[#333333] uppercase tracking-tighter transition-all duration-500">{config.subtitle}</h2>
+                            <div className="text-sky-500 dark:text-[var(--brand-green)] font-bold text-sm tracking-widest">- LYRIUM BIOMARKETPLACE -</div>
                         </div>
 
                         <div className="space-y-12">
@@ -199,11 +206,11 @@ export default function TermsAndConditionsPage() {
                                     ref={el => { sectionRefs.current[section.id] = el }}
                                     className="space-y-6 pt-10 border-t border-dashed border-gray-100 first:border-0 first:pt-0 group/section"
                                 >
-                                    <h3 className="text-2xl md:text-3xl font-black text-gray-900 tracking-tight group-hover/section:text-sky-600 transition-colors">
+                                    <h3 className="text-2xl md:text-2xl font-bold text-[#333333] tracking-tight group-hover/section:text-sky-600 dark:group-hover/section:text-[var(--brand-green)] transition-colors">
                                         {section.title}
                                     </h3>
                                     <div
-                                        className="text-gray-600 text-[16px] leading-relaxed terms-content"
+                                        className="text-justify text-gray-600 text-[16px] leading-relaxed terms-content"
                                         dangerouslySetInnerHTML={{ __html: sanitizeHtml(section.content) }}
                                     />
                                 </div>
@@ -211,7 +218,7 @@ export default function TermsAndConditionsPage() {
                         </div>
 
                         <div className="mt-8 pt-8 border-t border-gray-50 text-center text-sm text-gray-400 italic">
-                            Última actualización: <strong>2025</strong>. Al usar LYRIUM BIO MARKETPLACE, aceptas los términos y condiciones.
+                            Última actualización: <strong>2025</strong>. Al usar LYRIUM BIOMARKETPLACE, aceptas los términos y condiciones.
                         </div>
                     </div>
                 </section>

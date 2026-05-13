@@ -1,5 +1,12 @@
 import { useState, useCallback } from 'react';
-import { CustomerConversation, CustomerMessage, CustomerChatFilters } from '../types';
+import { CustomerConversation, CustomerMessage, CustomerChatFilters, ChatCategory } from '../types';
+
+// ← Nuevo: lista de vendedores disponibles para seleccionar
+export const mockSellers = [
+    { id: 'seller-1', name: 'Juan Pérez',    store: 'Tienda Electrónica' },
+    { id: 'seller-2', name: 'María García',  store: 'Moda Urbana'        },
+    { id: 'seller-3', name: 'Carlos López',  store: 'Ferretería Central' },
+];
 
 const mockConversations: CustomerConversation[] = [
     {
@@ -10,7 +17,9 @@ const mockConversations: CustomerConversation[] = [
         lastMessage: 'Gracias por su compra, estimado!',
         lastMessageTime: '2025-03-11T10:30:00',
         unreadCount: 2,
-        status: 'active'
+        status: 'active',
+        category: 'logistica',        // ← agregar
+        subject: 'Consulta de laptop'  // ← agregar
     },
     {
         id: '2',
@@ -20,7 +29,9 @@ const mockConversations: CustomerConversation[] = [
         lastMessage: 'El producto ya fue enviado',
         lastMessageTime: '2025-03-10T15:45:00',
         unreadCount: 0,
-        status: 'active'
+        status: 'active',
+        category: 'informacion',       // ← agregar
+        subject: 'Estado de mi pedido' // ← agregar
     }
 ];
 
@@ -95,11 +106,12 @@ export function useCustomerChat() {
 
     const totalConversations = conversations.length;
     const criticalCount = conversations.filter(c => c.unreadCount > 0).length;
+    const [isCreating, setIsCreating] = useState(false);
 
     const setActiveConversation = useCallback((id: string | null) => {
         setActiveConversationId(id);
         if (id) {
-            setConversations(prev => prev.map(c => 
+            setConversations(prev => prev.map(c =>
                 c.id === id ? { ...c, unreadCount: 0 } : c
             ));
         }
@@ -107,7 +119,7 @@ export function useCustomerChat() {
 
     const sendMessage = useCallback((content: string) => {
         if (!activeConversationId) return;
-        
+
         const newMessage: CustomerMessage = {
             id: `m${Date.now()}`,
             conversationId: activeConversationId,
@@ -125,7 +137,7 @@ export function useCustomerChat() {
         mockMessages[activeConversationId].push(newMessage);
 
         setConversations(prev => prev.map(c =>
-            c.id === activeConversationId 
+            c.id === activeConversationId
                 ? { ...c, lastMessage: content, lastMessageTime: new Date().toISOString() }
                 : c
         ));
@@ -141,6 +153,37 @@ export function useCustomerChat() {
         ));
     }, []);
 
+    // ← Nueva función
+    const createConversation = useCallback(async (data: {
+        sellerId: string;
+        category: ChatCategory;
+        subject: string;
+    }) => {
+        setIsCreating(true);
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        const seller = mockSellers.find(s => s.id === data.sellerId);
+        if (!seller) { setIsCreating(false); return; }
+
+        const newConversation: CustomerConversation = {
+            id: `conv-${Date.now()}`,
+            sellerId: seller.id,
+            sellerName: seller.name,
+            sellerStore: seller.store,
+            lastMessage: data.subject,
+            lastMessageTime: new Date().toISOString(),
+            unreadCount: 0,
+            status: 'active',
+            category: data.category,
+            subject: data.subject,
+        };
+
+        mockMessages[newConversation.id] = [];
+        setConversations(prev => [newConversation, ...prev]);
+        setActiveConversationId(newConversation.id);
+        setIsCreating(false);
+    }, []);
+
     return {
         conversations,
         totalConversations,
@@ -153,6 +196,8 @@ export function useCustomerChat() {
         sendMessage,
         clearActiveChat,
         archiveConversation,
+        isCreating,
+        createConversation,
         criticalCount
     };
 }

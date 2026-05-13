@@ -16,9 +16,9 @@ export const faqData: FAQCategory[] = [
     {
         id: 'todos',
         title: 'Para todos',
-        icon: '👥',
+        icon: 'Users',
         description: 'Información general',
-        color: 'sky',
+        color: 'limeCustom',
         items: [
             {
                 question: '¿Qué es LYRIUM BIOMARKETPLACE?',
@@ -37,9 +37,9 @@ export const faqData: FAQCategory[] = [
     {
         id: 'comprador',
         title: 'Si soy comprador',
-        icon: '🛒',
+        icon: 'ShoppingCart',
         description: 'Compras, pagos y entregas',
-        color: 'emerald',
+        color: 'greenCustom',
         items: [
             {
                 question: '¿Cuál es el horario de atención de LYRIUM BIOMARKETPLACE?',
@@ -76,7 +76,7 @@ export const faqData: FAQCategory[] = [
         title: 'Si soy vendedor',
         icon: '🏪',
         description: 'Registro y ventas',
-        color: 'violet',
+        color: 'blueCustom',
         items: [
             {
                 question: '¿Qué tipos de tiendas pueden registrarse en LYRIUM BIOMARKETPLACE?',

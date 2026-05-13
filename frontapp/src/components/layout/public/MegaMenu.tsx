@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import Icon from '@/components/ui/Icon';
 import { MenuItem, MegaCategoryData } from '@/data/menuData';
+import { useEffect, useRef, useState } from "react";
 
 interface MegaMenuProps {
     item: MenuItem;
@@ -13,6 +14,48 @@ interface MegaMenuProps {
     onCategoryHover: (category: string) => void;
     onMouseEnter: () => void;
     onMouseLeave: () => void;
+}
+
+function CategoryLabel({ label, active }: { label: string; active: boolean }) {
+    const textRef = useRef<HTMLSpanElement>(null);
+    const [isTruncated, setIsTruncated] = useState(false);
+
+    useEffect(() => {
+        const el = textRef.current;
+        if (!el) return;
+
+        const check = () => {
+            setIsTruncated(el.scrollWidth > el.clientWidth);
+        };
+
+        check();
+        window.addEventListener("resize", check);
+
+        return () => window.removeEventListener("resize", check);
+    }, [label]);
+
+    return (
+        <div className="relative group w-full min-w-0">
+            <span
+                ref={textRef}
+                className={`block max-w-full truncate whitespace-nowrap text-left ${active
+                    ? 'text-white'
+                    : 'text-slate-700 dark:text-[var(--text-primary)]'
+                    }`}
+            >
+                {label}
+            </span>
+
+            {/* Tooltip SOLO si hay truncado */}
+            {isTruncated && (
+                <div className="absolute right-0 top-full mt-1 z-50 hidden group-hover:block">
+                    <div className="bg-[#333333] text-white text-xs px-2 py-1 rounded shadow-lg whitespace-nowrap">
+                        {label}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
 }
 
 export default function MegaMenu({
@@ -28,6 +71,10 @@ export default function MegaMenu({
 
     if (!item.children) return null;
 
+    const bgColor =
+        item.label?.toLowerCase() === 'servicios'
+            ? 'bg-[#78e69d]'
+            : 'bg-[#bde90d]';
     return (
         <div
             className="fixed left-0 w-full bg-white dark:bg-[var(--bg-secondary)] shadow-2xl dark:shadow-none border-t border-gray-200 dark:border-[var(--border-subtle)] opacity-100 pointer-events-auto transition-all duration-150 z-[99999]"
@@ -38,13 +85,7 @@ export default function MegaMenu({
             <div className="max-w-7xl mx-auto grid grid-cols-12 gap-0 h-full overflow-hidden">
                 {/* LISTA DE CATEGORÍAS (IZQUIERDA) */}
                 <aside className="col-span-12 md:col-span-4 lg:col-span-3 bg-gray-50 dark:bg-[var(--bg-muted)] border-r border-gray-200 dark:border-[var(--border-subtle)] p-3 overflow-y-auto h-full">
-                    <button
-                        type="button"
-                        className="w-full flex items-center justify-between px-5 py-3.5 rounded-xl bg-lime-500 text-white text-[13px] font-bold tracking-wide shadow-sm min-h-[48px]"
-                    >
-                        <span className="text-slate-800 dark:text-[var(--text-primary)]">{activeCategory}</span>
-                        <Icon name="ChevronDown" className="w-4 h-4 text-slate-500 dark:text-[var(--text-placeholder)]" />
-                    </button>
+
                     <ul className="mt-3 space-y-1 text-sm">
                         {item.children.map((child) => (
                             <li key={child.label}>
@@ -52,15 +93,18 @@ export default function MegaMenu({
                                     type="button"
                                     onMouseEnter={() => onCategoryHover(child.label)}
                                     className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition ${activeCategory === child.label
-                                        ? 'bg-white dark:bg-[var(--bg-secondary)] shadow-sm'
-                                        : 'hover:bg-white dark:hover:bg-[#111A15] hover:shadow-sm'
+                                        ? `${bgColor} text-white shadow-sm`
+                                        : 'hover:bg-[#bde90d] hover:text-white hover:shadow-sm'
                                         }`}
                                 >
-                                    <span className="text-slate-700 dark:text-[var(--text-primary)]">{child.label}</span>
+                                    <CategoryLabel
+                                        label={child.label}
+                                        active={activeCategory === child.label}
+                                    />
                                     <Icon
                                         name="ChevronDown"
-                                        className={`w-4 h-4 text-slate-400 dark:text-[var(--text-placeholder)] ${activeCategory === child.label ? 'rotate-90' : ''
-                                            } transition-transform`}
+                                        className={`w-4 h-4 transition-transform ${activeCategory === child.label ? 'text-white rotate-90' : 'text-slate-400 dark:text-[var(--text-placeholder)]'
+                                            }`}
                                     />
                                 </button>
                             </li>

@@ -55,19 +55,19 @@ export default function SidebarProducts({ productos, titulo = 'Artículos de ten
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <h3 className="flex items-center gap-2 text-base font-bold text-gray-800 dark:text-[var(--text-primary)]">
-          <Star className="w-5 h-5 text-sky-500" />
+          <Star className="w-5 h-5 text-sky-500 dark:text-[var(--icons-green)]" />
           {titulo}
         </h3>
         <div className="flex gap-1">
           <button 
             onClick={() => scroll('left')}
-            className="w-7 h-7 flex items-center justify-center bg-gray-100 dark:bg-[var(--bg-muted)] hover:bg-sky-500 hover:text-white rounded-md text-gray-500 dark:text-gray-400 transition-all"
+            className="w-7 h-7 flex items-center justify-center bg-gray-100 dark:bg-[var(--bg-muted)] hover:bg-sky-500 dark:hover:bg-[var(--brand-green)] hover:text-white rounded-md text-gray-500 dark:text-gray-400 transition-all"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
           <button 
             onClick={() => scroll('right')}
-            className="w-7 h-7 flex items-center justify-center bg-gray-100 dark:bg-[var(--bg-muted)] hover:bg-sky-500 hover:text-white rounded-md text-gray-500 dark:text-gray-400 transition-all"
+            className="w-7 h-7 flex items-center justify-center bg-gray-100 dark:bg-[var(--bg-muted)] hover:bg-sky-500 dark:hover:bg-[var(--brand-green)] hover:text-white rounded-md text-gray-500 dark:text-gray-400 transition-all"
           >
             <ChevronRight className="w-4 h-4" />
           </button>
@@ -88,7 +88,7 @@ export default function SidebarProducts({ productos, titulo = 'Artículos de ten
             <Link
               key={producto.id}
               href={producto.slug ? `/producto/${producto.slug}` : '#'}
-              className="sidebar-product-card bg-white dark:bg-[var(--bg-secondary)] rounded-xl border border-gray-200 dark:border-[var(--border-subtle)] overflow-hidden shadow-sm hover:shadow-md hover:border-sky-300 dark:hover:border-sky-500 transition-all group"
+              className="sidebar-product-card bg-white dark:bg-[var(--bg-secondary)] rounded-xl border border-gray-200 dark:border-[var(--border-subtle)] overflow-hidden shadow-sm hover:shadow-md hover:border-sky-300 dark:hover:border-[var(--icons-green)] transition-all group"
             >
               {/* Imagen panorámica */}
               <div className="relative aspect-[16/10] overflow-hidden bg-gray-100 dark:bg-[var(--bg-muted)]">

@@ -126,7 +126,7 @@ export default function StoreHeader({ store, stats, onSearch }: StoreHeaderProps
               <form onSubmit={handleSearch} className="flex-1 max-w-sm">
                 <div className="relative group">
                   {/* Ícono lupa */}
-                  <div className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg bg-sky-500 flex items-center justify-center shadow-sm">
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg bg-sky-500 dark:bg-[var(--brand-green)] dark:hover:bg-[var(--brand-green-hover)] border-1 dark:border-white/70 flex items-center justify-center shadow-sm">
                     <Icon name="Search" className="w-4 h-4 text-white" />
                   </div>
 
@@ -139,15 +139,15 @@ export default function StoreHeader({ store, stats, onSearch }: StoreHeaderProps
                     className="w-full pl-14 pr-4 py-3 rounded-xl bg-white border-2 border-slate-200 
                       text-sm text-slate-700 placeholder-slate-400 
                       focus:outline-none focus:border-sky-400 focus:shadow-lg focus:shadow-sky-100
-                      hover:border-slate-300
+                      hover:border-slate-300 dark:hover:border-white
                       transition-all duration-200 shadow-md
-                      dark:bg-slate-800 dark:border-slate-600 dark:text-white dark:placeholder-slate-400
-                      dark:focus:border-sky-400 dark:focus:shadow-sky-900/20"
+                      dark:bg-[var(--bg-secondary)] dark:border-white dark:text-white dark:placeholder-white
+                      dark:focus:border-white dark:focus:shadow-lime-900/20"
                   />
 
                   {/* Tecla Enter */}
                   <div className="absolute right-3 top-1/2 -translate-y-1/2 hidden sm:flex items-center gap-1">
-                    <kbd className="px-2 py-0.5 text-[10px] font-medium text-slate-400 bg-slate-100 dark:bg-slate-700 dark:text-slate-300 rounded border border-slate-200 dark:border-slate-600">
+                    <kbd className="px-2 py-0.5 text-[10px] font-medium text-slate-400 bg-slate-100 dark:bg-[var(--brand-green)] dark:text-white rounded border border-slate-200 dark:border-white/70">
                       Enter
                     </kbd>
                   </div>
@@ -160,71 +160,71 @@ export default function StoreHeader({ store, stats, onSearch }: StoreHeaderProps
           <div className="px-4 lg:px-6 py-3 bg-white/40 backdrop-blur-sm border-t border-white/50 dark:bg-black/20 dark:border-white/10">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {/* Card: Ubicación */}
-              <div className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-lg border-l-4 border-l-sky-500 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 cursor-default dark:border-sky-500">
+              <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-xl p-4 shadow-lg border-l-4 border-l-sky-500 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 cursor-default dark:border-sky-400">
                 <div className="flex items-start justify-between">
                   <div className="flex-1 min-w-0">
-                    <p className="text-slate-500 dark:text-slate-400 text-xs font-medium mb-1">Ubicación</p>
+                    <p className="text-slate-500 dark:text-white/90 text-xs font-medium mb-1">Ubicación</p>
                     <p className="text-lg font-bold text-slate-800 dark:text-white truncate">{addressShort}</p>
-                    <p className="text-xs text-sky-600 dark:text-sky-400 font-medium mt-1 flex items-center gap-0.5">
+                    <p className="text-xs text-sky-600 dark:text-sky-300 font-medium mt-1 flex items-center gap-0.5">
                       <Icon name="MapPin" className="w-3 h-3" />
                       Ver en mapa
                     </p>
                   </div>
-                  <div className="w-10 h-10 rounded-full bg-sky-100 dark:bg-sky-900/30 flex items-center justify-center flex-shrink-0">
-                    <Icon name="MapPin" className="w-5 h-5 text-sky-600 dark:text-sky-400" />
+                  <div className="w-10 h-10 rounded-full bg-sky-100 dark:bg-sky-500/30 flex items-center justify-center flex-shrink-0">
+                    <Icon name="MapPin" className="w-5 h-5 text-sky-600 dark:text-sky-300" />
                   </div>
                 </div>
               </div>
 
               {/* Card: Categoría */}
-              <div className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-lg border-l-4 border-l-purple-500 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 cursor-default dark:border-purple-500">
+              <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-xl p-4 shadow-lg border-l-4 border-l-purple-500 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 cursor-default dark:border-purple-400">
                 <div className="flex items-start justify-between">
                   <div className="flex-1 min-w-0">
-                    <p className="text-slate-500 dark:text-slate-400 text-xs font-medium mb-1">Categoría</p>
+                    <p className="text-slate-500 dark:text-white/90 text-xs font-medium mb-1">Categoría</p>
                     <p className="text-lg font-bold text-slate-800 dark:text-white truncate">{store.category}</p>
-                    <p className="text-xs text-purple-600 dark:text-purple-400 font-medium mt-1 flex items-center gap-0.5">
+                    <p className="text-xs text-purple-600 dark:text-purple-300 font-medium mt-1 flex items-center gap-0.5">
                       <Icon name="Tag" className="w-3 h-3" />
                       Productos naturales
                     </p>
                   </div>
-                  <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center flex-shrink-0">
-                    <Icon name="Tag" className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                  <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-500/30 flex items-center justify-center flex-shrink-0">
+                    <Icon name="Tag" className="w-5 h-5 text-purple-600 dark:text-purple-300" />
                   </div>
                 </div>
               </div>
 
               {/* Card: Valoración */}
-              <div className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-lg border-l-4 border-l-amber-500 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 cursor-default dark:border-amber-500">
+              <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-xl p-4 shadow-lg border-l-4 border-l-amber-500 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 cursor-default dark:border-amber-400">
                 <div className="flex items-start justify-between">
                   <div className="flex-1 min-w-0">
-                    <p className="text-slate-500 dark:text-slate-400 text-xs font-medium mb-1">Valoración</p>
+                    <p className="text-slate-500 dark:text-white/90 text-xs font-medium mb-1">Valoración</p>
                     <p className="text-lg font-bold text-slate-800 dark:text-white">
                       {stats.rating > 0 ? `${stats.rating} ★` : 'Sin reseñas'}
                     </p>
-                    <p className="text-xs text-amber-600 dark:text-amber-400 font-medium mt-1 flex items-center gap-0.5">
+                    <p className="text-xs text-amber-600 dark:text-amber-300 font-medium mt-1 flex items-center gap-0.5">
                       <Icon name="Users" className="w-3 h-3" />
                       {stats.reviews} reseñas
                     </p>
                   </div>
-                  <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center flex-shrink-0">
-                    <Icon name="Star" className="w-5 h-5 text-amber-500 dark:text-amber-400" />
+                  <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-500/30 flex items-center justify-center flex-shrink-0">
+                    <Icon name="Star" className="w-5 h-5 text-amber-500 dark:text-amber-300" />
                   </div>
                 </div>
               </div>
 
               {/* Card: Productos */}
-              <div className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-lg border-l-4 border-l-emerald-500 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 cursor-default dark:border-emerald-500">
+              <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-xl p-4 shadow-lg border-l-4 border-l-emerald-500 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 cursor-default dark:border-emerald-400">
                 <div className="flex items-start justify-between">
                   <div className="flex-1 min-w-0">
-                    <p className="text-slate-500 dark:text-slate-400 text-xs font-medium mb-1">Productos Activos</p>
+                    <p className="text-slate-500 dark:text-white/90 text-xs font-medium mb-1">Productos Activos</p>
                     <p className="text-lg font-bold text-slate-800 dark:text-white">{stats.products}</p>
-                    <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium mt-1 flex items-center gap-0.5">
+                    <p className="text-xs text-emerald-600 dark:text-emerald-100 font-medium mt-1 flex items-center gap-0.5">
                       <Icon name="CheckCircle" className="w-3 h-3" />
                       Disponibles
                     </p>
                   </div>
-                  <div className="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center flex-shrink-0">
-                    <Icon name="Package" className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                  <div className="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-500/30 flex items-center justify-center flex-shrink-0">
+                    <Icon name="Package" className="w-5 h-5 text-emerald-600 dark:text-emerald-100" />
                   </div>
                 </div>
               </div>

@@ -13,7 +13,6 @@ import { useMegaMenu } from '@/shared/hooks/useMegaMenu';
 import { useCarritoStore } from '@/store/carritoStore';
 import { useAuth } from '@/shared/lib/context/AuthContext';
 import { AUTH_CONFIG } from '@/shared/lib/config/auth';
-import LogoLyrium from '@/components/LogoLyrium';
 
 export default function PublicHeader() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -35,10 +34,26 @@ export default function PublicHeader() {
             <header className="bg-white dark:bg-[var(--bg-secondary)] shadow-md dark:shadow-none sticky top-0 z-50 border-b border-gray-100 dark:border-[var(--border-subtle)]">
                 <div className="max-w-7xl mx-auto flex items-center justify-between px-4 py-3 gap-6">
                     {/* Logo */}
-                    <Link href="/" className="flex items-center gap-2 group">
-                        <LogoLyrium
-                        frontImg="/img/iconologo.png"
-                        sideImg="/img/nombrelogo.png"
+                    <Link href="/" className="flex items-center gap-2 group relative">
+
+                        {/* Logo NORMAL (no se toca tamaño) */}
+                        <Image
+                            src="/img/iconologo.png"
+                            alt="Lyrium Icono"
+                            width={80}
+                            height={80}
+                            className="h-16 md:h-20 w-auto object-contain relative z-10 transition-transform duration-700 ease-out group-hover:rotate-[360deg]"
+                        />
+
+                        {/* Círculo blanco DETRÁS */}
+                        <div className="absolute left-2 md:left-2 w-14 h-14 md:w-15 md:h-14 bg-white rounded-full z-0" />
+
+                        <Image
+                            src="/img/nombrelogo.png"
+                            alt="Lyrium Nombre"
+                            width={160}
+                            height={40}
+                            className="h-8 md:h-10 w-auto object-contain mt-1"
                         />
                     </Link>
 
@@ -53,25 +68,44 @@ export default function PublicHeader() {
                                             {user.display_name || user.username || user.email}
                                         </span>
                                     </span>
-                                    <Link href={dashboardUrl} className="flex items-center gap-1 hover:underline font-medium">
-                                        <Icon name="LayoutDashboard" className="text-[18px]" />
-                                        <span className="whitespace-nowrap">Mi Panel</span>
-                                    </Link>
+                                    <div className="relative group">
+                                        <Link href={dashboardUrl} className="p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] transition-colors flex items-center justify-center">
+                                            <Icon name="LayoutDashboard" className="text-[18px]" />
+                                        </Link>
+
+                                        <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-[#333333] text-white text-xs px-2 py-1 rounded-md whitespace-nowrap">
+                                            Mi panel
+                                        </span>
+                                    </div>
                                 </div>
                             ) : (
-                                <Link href="/login" className="flex items-center gap-1 hover:underline">
-                                    <Icon name="UserCircle" className="text-[18px]" />
-                                    <span className="whitespace-nowrap">Iniciar Sesión | Registrarse</span>
-                                </Link>
+                                <div className="relative group">
+                                    <Link href="/login" className="p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] transition-colors flex items-center justify-center"
+                                    >
+                                        <Icon name="UserCircle" className="text-[18px]" />
+                                    </Link>
+
+                                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-[#333333] text-white text-xs px-2 py-1 rounded-md whitespace-nowrap">
+                                        Iniciar sesión
+                                    </span>
+                                </div>
                             )}
 
-                            <Link href="/carrito" className="flex items-center gap-1 hover:underline">
-                                <Icon name="ShoppingCart" className="text-[18px]" />
-                                <span>Carrito</span>
-                                {cartItemCount > 0 && (
-                                    <span className="bg-sky-500 dark:bg-[var(--brand-green)] text-white dark:text-[var(--text-primary)] text-[11px] rounded-full px-2 py-0.5">{cartItemCount}</span>
-                                )}
-                            </Link>
+                            <div className="relative group">
+                                <Link href="/carrito" className="p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] transition-colors flex items-center justify-center">
+                                    <Icon name="ShoppingCart" className="text-[18px]" />
+
+                                    {cartItemCount > 0 && (
+                                        <span className="absolute -top-1 -right-1 bg-sky-500 text-white text-[11px] rounded-full px-1.5 py-0.5">
+                                            {cartItemCount}
+                                        </span>
+                                    )}
+                                </Link>
+
+                                <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-[#333333] text-white text-xs px-2 py-1 rounded-md whitespace-nowrap">
+                                    Carrito
+                                </span>
+                            </div>
 
                             <ThemeToggle />
                         </div>

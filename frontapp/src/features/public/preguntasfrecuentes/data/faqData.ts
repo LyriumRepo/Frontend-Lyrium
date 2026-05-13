@@ -16,7 +16,7 @@ export const faqData: FAQCategory[] = [
     {
         id: 'todos',
         title: 'Para todos',
-        icon: '👥',
+        icon: 'Users',
         description: 'Información general',
         color: 'sky',
         items: [
@@ -39,7 +39,7 @@ export const faqData: FAQCategory[] = [
         title: 'Si soy comprador',
         icon: '🛒',
         description: 'Compras, pagos y entregas',
-        color: 'emerald',
+        color: 'greenCustom',
         items: [
             {
                 question: '¿Cuál es el horario de atención de LYRIUM BIOMARKETPLACE?',

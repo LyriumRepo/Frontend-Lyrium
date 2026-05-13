@@ -176,7 +176,7 @@ export default function SearchBar({ categorias }: SearchBarProps) {
               aria-expanded={showAutocomplete}
               aria-controls="search-results"
               autoComplete="off"
-              className="w-full h-12 md:h-14 pl-4 pr-36 md:pl-6 md:pr-56 rounded-full border border-gray-200 dark:border-[var(--border-subtle)] text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400 transition-all shadow-inner bg-gray-50/50 dark:bg-[var(--bg-muted)]/50 text-gray-800 dark:text-[var(--text-primary)] placeholder:text-gray-400 dark:placeholder:text-[var(--text-placeholder)]"
+              className="w-full h-12 md:h-14 pl-4 pr-36 md:pl-6 md:pr-56 rounded-full border border-gray-200 dark:border-[var(--border-subtle)] text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-sky-400 dark:focus:ring-[var(--text-primary)] focus:border-sky-400 dark:focus:border-[var(--text-primary)] transition-all shadow-inner bg-gray-50/50 dark:bg-[var(--bg-muted)]/50 text-gray-800 dark:text-[var(--text-primary)] placeholder:text-gray-400 dark:placeholder:text-[var(--text-placeholder)]"
             />
 
             {/* Botones de Acción */}
@@ -184,7 +184,7 @@ export default function SearchBar({ categorias }: SearchBarProps) {
               <button
                 type="button"
                 aria-label="Buscar por voz"
-                className="h-full w-10 md:w-14 rounded-full bg-sky-500 hover:bg-sky-600 dark:bg-[var(--brand-green)] dark:hover:bg-[var(--brand-green-hover)] text-white font-semibold flex items-center justify-center transition-all duration-200"
+                className="h-full w-10 md:w-14 rounded-full bg-sky-500 hover:bg-sky-600 dark:bg-[var(--brand-green)] dark:hover:bg-[var(--brand-green-hover)] text-white font-semibold flex items-center justify-center transition-all duration-200 border border-sky-200 dark:border-[var(--border-subtle)]"
               >
                 <Mic className="w-5 h-5" />
               </button>
@@ -203,7 +203,7 @@ export default function SearchBar({ categorias }: SearchBarProps) {
               <button
                 type="submit"
                 aria-label="Ejecutar búsqueda"
-                className="h-full w-10 md:w-auto md:px-7 rounded-full bg-sky-500 hover:bg-sky-600 dark:bg-[var(--brand-green)] dark:hover:bg-[var(--brand-green-hover)] text-white font-bold flex items-center justify-center gap-2 transition-all shadow-md"
+                className="h-full w-10 md:w-auto md:px-7 rounded-full bg-sky-500 hover:bg-sky-600 dark:bg-[var(--brand-green)] dark:hover:bg-[var(--brand-green-hover)] text-white font-bold flex items-center justify-center gap-2 transition-all shadow-md border border-sky-200 dark:border-[var(--border-subtle)]"
               >
                 <Search className="w-5 h-5" />
                 <span className="hidden md:inline">Buscar</span>

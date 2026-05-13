@@ -80,6 +80,7 @@ export function AuthContainer({ onSuccess }: AuthContainerProps) {
                 buttonText="Entrar"
                 onEnter={handleEnterPortal}
                 autoHideAfter={0}
+                backgroundImage="/img/intro/tienda2.png"
             />
         );
     }
@@ -92,8 +93,13 @@ export function AuthContainer({ onSuccess }: AuthContainerProps) {
                 
                 {/* Left Side Panel - visible siempre */}
                 <div
-                    className={`absolute top-0 left-0 h-full w-[40%] bg-gradient-to-br from-sky-500 via-sky-400 to-lime-400 p-10 flex flex-col justify-between text-white z-20 rounded-r-[20px]`}
+                    className={`absolute top-0 left-0 h-full w-[40%] 
+                    bg-[linear-gradient(to_bottom_right,rgba(14,165,233,0.9),rgba(132,204,22,0.9))] 
+                    dark:bg-[linear-gradient(to_bottom_right,var(--brand-green),var(--icons-green),var(--brand-green-hover))] 
+                    p-10 flex flex-col justify-between text-white z-20 rounded-r-[20px]`}
                 >
+                    <img src="/img/intro/Flor6.png" alt="decoración" className="absolute -bottom-20 -left-80 w-[700px] max-w-none opacity-60 mix-blend-overlay pointer-events-none"/>
+
                     <div className="absolute inset-0 opacity-30">
                         <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
                             <defs>
@@ -132,13 +138,13 @@ export function AuthContainer({ onSuccess }: AuthContainerProps) {
                     </div>
 
                     <div className="relative z-10">
-                        <p className="text-sm mb-4 opacity-90">
+                        <p className="text-sm mb-4 text-white font-medium tracking-wide dark:[text-shadow:0_1px_2px_rgba(0,0,0,0.9),0_4px_10px_rgba(0,0,0,0.85),0_0px_25px_rgba(0,0,0,0.7)]">
                             {isRegister ? '¿Ya tienes cuenta?' : (userType === 'vendedor' ? '¿Ya eres parte de Lyrium como vendedor?' : '¿Ya tienes una cuenta?')}
                         </p>
                         <button
                             type="button"
                             onClick={toggleMode}
-                            className="w-full py-4 px-6 bg-white text-sky-500 rounded-xl font-bold text-sm uppercase tracking-wider shadow-[0_10px_25px_rgba(0,0,0,0.1)] hover:shadow-[0_8px_20px_rgba(0,0,0,0.15)] hover:-translate-y-0.5 transition-all duration-300"
+                            className="w-full py-4 px-6 bg-white text-sky-500 dark:text-[var(--brand-green)] rounded-xl font-bold text-sm uppercase tracking-wider shadow-[0_10px_25px_rgba(0,0,0,0.1)] hover:shadow-[0_8px_20px_rgba(0,0,0,0.15)] hover:-translate-y-0.5 transition-all duration-300"
                         >
                             {isRegister ? 'Iniciar Sesión' : (userType === 'vendedor' ? 'Registrarse como vendedor' : 'Crear cuenta')}
                         </button>

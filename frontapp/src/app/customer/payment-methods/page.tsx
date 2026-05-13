@@ -120,9 +120,9 @@ export default function CustomerPaymentMethodsPage() {
   const getMethodStyles = (tipo: string | undefined) => {
     switch (tipo) {
       case 'tarjeta':
-        return { icon: 'CreditCard', grad: 'from-sky-500 to-blue-500', color: 'text-sky-500', label: 'Tarjeta de Crédito' };
+        return { icon: 'CreditCard', grad: 'from-sky-500 to-blue-500 dark:from-[var(--icons-green)] dark:to-lime-200', color: 'text-sky-500 dark:text-[var(--icons-green)]', label: 'Tarjeta de Crédito' };
       case 'yape':
-        return { icon: 'Smartphone', grad: 'from-purple-500 to-pink-500', color: 'text-purple-600', label: 'Yape' };
+        return { icon: 'Phone', grad: 'from-purple-500 to-pink-500', color: 'text-purple-600', label: 'Yape' };
       case 'plin':
         return { icon: 'Circle', grad: 'from-blue-500 to-sky-500', color: 'text-blue-600', label: 'Plin' };
       default:
@@ -151,7 +151,7 @@ export default function CustomerPaymentMethodsPage() {
         </div>
         <button
           onClick={openAddModal}
-          className="flex items-center gap-3 px-6 py-3 rounded-xl bg-white dark:bg-[var(--bg-secondary)] backdrop-blur-md text-black dark:text-[var(--text-primary)] font-bold text-sm border border-gray-200 dark:border-[var(--border-subtle)] hover:text-sky-500 transition-all"
+          className="flex items-center gap-3 px-6 py-3 rounded-xl bg-white dark:bg-[var(--bg-secondary)] backdrop-blur-md text-black dark:text-[var(--text-primary)] font-bold text-sm border border-gray-200 dark:border-[var(--border-subtle)] hover:text-sky-500 dark:hover:text-[var(--icons-green)] transition-all"
         >
           <Icon name="Plus" className="w-5 h-5" />
           <span>Agregar Método</span>
@@ -164,7 +164,7 @@ export default function CustomerPaymentMethodsPage() {
           return (
             <div
               key={method.id}
-              className={`bg-[var(--bg-card)] rounded-[2.5rem] shadow-2xl overflow-hidden group/card hover:-translate-y-2 transition-all duration-500 ${method.is_default ? 'ring-2 ring-sky-500/20 bg-gradient-to-br from-white to-sky-50/30 dark:from-[var(--bg-card)] dark:to-[var(--bg-muted)]' : ''}`}
+              className={`bg-[var(--bg-card)] rounded-[2.5rem] shadow-2xl overflow-hidden group/card hover:-translate-y-2 transition-all duration-500 ${method.is_default ? 'bg-gradient-to-br from-white to-sky-50/30 dark:from-[var(--bg-card)] dark:to-[var(--bg-muted)]' : ''}`}
             >
               <div className={`h-2 bg-gradient-to-r ${styles.grad}`}></div>
               <div className="p-8">
@@ -173,7 +173,7 @@ export default function CustomerPaymentMethodsPage() {
                     <Icon name={styles.icon as any} className={`w-7 h-7 ${styles.color}`} />
                   </div>
                   {method.is_default && (
-                    <span className="px-3 py-1 bg-gradient-to-r from-green-400 to-sky-500 text-white text-[9px] font-black uppercase rounded-full shadow-sm">
+                    <span className="px-3 py-1 bg-gradient-to-r from-green-400 to-sky-500 dark:from-[var(--brand-green)] dark:via-[var(--icons-green)] dark:to-[var(--brand-green)] text-white text-[9px] font-black uppercase rounded-full shadow-sm">
                       Predeterminado
                     </span>
                   )}
@@ -195,7 +195,7 @@ export default function CustomerPaymentMethodsPage() {
                 <div className="flex gap-3">
                   <button
                     onClick={() => openEditModal(method)}
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gray-100 dark:bg-[var(--bg-muted)] text-gray-600 dark:text-gray-400 dark:text-[var(--text-primary)] text-xs font-bold hover:bg-sky-50 dark:hover:bg-[#2A3F33] hover:text-sky-600 transition-all"
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gray-100 dark:bg-[var(--bg-muted)] text-gray-600 dark:text-gray-400 dark:text-[var(--text-primary)] text-xs font-bold hover:bg-sky-50 dark:hover:bg-[#2A3F33] hover:text-sky-600 dark:hover:text-[var(--icons-green)] transition-all"
                   >
                     <Icon name="Pencil" className="w-4 h-4" />
                     Editar
@@ -214,29 +214,29 @@ export default function CustomerPaymentMethodsPage() {
 
         <button
           onClick={openAddModal}
-          className="border-2 border-dashed border-sky-200 dark:border-[var(--border-subtle)] rounded-[2.5rem] shadow-xl bg-white/50 dark:bg-[var(--bg-secondary)]/50 hover:bg-sky-50/30 dark:hover:bg-[#182420]/30 hover:border-sky-400 transition-all duration-500 cursor-pointer flex flex-col items-center justify-center p-8 min-h-[340px]"
+          className="border-2 border-dashed border-sky-200 dark:border-[var(--border-subtle)] rounded-[2.5rem] shadow-xl bg-white/50 dark:bg-[var(--bg-secondary)]/50 hover:bg-sky-50/30 dark:hover:bg-[#1f2f1f]/30 hover:border-sky-400 dark:hover:border-[var(--icons-green)] transition-all duration-500 cursor-pointer flex flex-col items-center justify-center p-8 min-h-[340px]"
         >
           <div className="relative mb-6">
-            <div className="w-20 h-20 bg-sky-500 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform duration-500">
+            <div className="w-20 h-20 bg-sky-500 dark:bg-[var(--icons-green)] rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform duration-500">
               <Icon name="Plus" className="w-10 h-10 text-white" />
             </div>
           </div>
           <div className="text-center space-y-2">
             <h3 className="text-xl font-black text-sky-900 dark:text-[var(--text-primary)]">Nuevo Método</h3>
-            <p className="text-xs font-bold text-sky-400 max-w-[150px] mx-auto">Agrega tarjetas, Yape, Plin o datos fiscales</p>
+            <p className="text-xs font-bold text-sky-400 dark:text-[var(--icons-green)] max-w-[150px] mx-auto">Agrega tarjetas, Yape, Plin o datos fiscales</p>
           </div>
         </button>
       </div>
 
-      <div className="bg-gradient-to-br from-sky-500/10 to-green-500/10 rounded-[2.5rem] shadow-xl p-8">
+      <div className="bg-gradient-to-br from-sky-500/30 to-green-500/10 dark:from-[#2A5A4D]/40 dark:via-[#8FC3A1]/50 dark:to-[#0F2A24]/40 rounded-[2.5rem] shadow-xl p-8">
         <div className="flex items-center gap-8">
-          <div className="w-20 h-20 bg-gradient-to-r from-green-400 to-sky-500 rounded-[2rem] flex items-center justify-center shrink-0">
+          <div className="w-20 h-20 bg-gradient-to-r from-green-400 to-sky-500 dark:from-[var(--brand-green)] dark:via-[var(--icons-green)] dark:to-[var(--brand-green)] rounded-[2rem] flex items-center justify-center shrink-0">
             <Icon name="ShieldCheck" className="w-10 h-10 text-white" />
           </div>
           <div className="space-y-2">
             <h4 className="text-xl font-black text-gray-800 dark:text-[var(--text-primary)]">Tu seguridad es nuestra prioridad</h4>
-            <p className="text-sm font-bold text-gray-500 dark:text-gray-400 leading-relaxed max-w-2xl">
-              En <span className="text-sky-600 font-black">Lyrium</span>, tus datos financieros están protegidos bajo estándares bancarios. Nunca almacenamos tus códigos de seguridad CVV y toda la información viaja encriptada.
+            <p className="text-sm font-bold text-gray-500 dark:text-gray-300 leading-relaxed max-w-2xl">
+              En <span className="text-sky-600 dark:text-[var(--icons-green)] font-black">Lyrium</span>, tus datos financieros están protegidos bajo estándares bancarios. Nunca almacenamos tus códigos de seguridad CVV y toda la información viaja encriptada.
             </p>
           </div>
         </div>
@@ -248,7 +248,7 @@ export default function CustomerPaymentMethodsPage() {
             className="bg-white dark:bg-[var(--bg-secondary)] rounded-[3.5rem] max-w-xl w-full max-h-[90vh] overflow-hidden shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="bg-gradient-to-r from-sky-500 to-sky-300 p-8 text-white relative">
+            <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-8 text-white relative">
               <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl" />
               <div className="relative z-10 flex items-center justify-between">
                 <div className="flex items-center gap-4">
@@ -268,14 +268,14 @@ export default function CustomerPaymentMethodsPage() {
               <div className="flex gap-2 mt-8 bg-black/10 p-1.5 rounded-2xl">
                 <button
                   onClick={() => setActiveTab('pagos')}
-                  className={`flex-1 py-3 px-4 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'pagos' ? 'bg-white text-sky-600 shadow-sm' : 'text-white hover:bg-white/10'}`}
+                  className={`flex-1 py-3 px-4 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'pagos' ? 'bg-white text-sky-600 dark:text-[var(--brand-green)] shadow-sm' : 'text-white hover:bg-white/10'}`}
                 >
                   <Icon name="CreditCard" className="w-4 h-4 inline mr-2" />
                   Pago
                 </button>
                 <button
                   onClick={() => setActiveTab('facturacion')}
-                  className={`flex-1 py-3 px-4 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'facturacion' ? 'bg-white text-emerald-600 shadow-sm' : 'text-white hover:bg-white/10'}`}
+                  className={`flex-1 py-3 px-4 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'facturacion' ? 'bg-white text-sky-600 dark:text-[var(--brand-green)] shadow-sm' : 'text-white hover:bg-white/10'}`}
                 >
                   <Icon name="FileText" className="w-4 h-4 inline mr-2" />
                   Facturación
@@ -293,7 +293,7 @@ export default function CustomerPaymentMethodsPage() {
                         value={formData.tipo_metodo || ''}
                         onChange={(e) => setFormData({ ...formData, tipo_metodo: e.target.value as 'tarjeta' | 'yape' | 'plin' | undefined })}
                         required
-                        className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500"
+                        className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)]"
                       >
                         <option value="">Seleccionar...</option>
                         <option value="tarjeta">💳 Tarjeta de Crédito/Débito</option>
@@ -311,7 +311,7 @@ export default function CustomerPaymentMethodsPage() {
                         onChange={(e) => setFormData({ ...formData, documento: e.target.value })}
                         required
                         placeholder={formData.tipo_metodo === 'tarjeta' ? '0000 0000 0000 0000' : '900 000 000'}
-                        className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500"
+                        className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)]"
                       />
                     </div>
                   </div>
@@ -324,7 +324,7 @@ export default function CustomerPaymentMethodsPage() {
                       onChange={(e) => setFormData({ ...formData, titular: e.target.value })}
                       required
                       placeholder="Nombre completo"
-                      className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500"
+                      className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)]"
                     />
                   </div>
 
@@ -336,7 +336,7 @@ export default function CustomerPaymentMethodsPage() {
                         value={formData.detalle_extra}
                         onChange={(e) => setFormData({ ...formData, detalle_extra: e.target.value })}
                         placeholder="00/00"
-                        className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500"
+                        className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)]"
                       />
                     </div>
                   )}
@@ -347,7 +347,7 @@ export default function CustomerPaymentMethodsPage() {
                         type="checkbox"
                         checked={formData.is_default}
                         onChange={(e) => setFormData({ ...formData, is_default: e.target.checked })}
-                        className="w-5 h-5 accent-sky-500"
+                        className="w-5 h-5 accent-sky-500 dark:accent-[var(--icons-green)]"
                       />
                       <span className="text-xs font-bold text-gray-600 dark:text-gray-400 dark:text-[var(--text-primary)] uppercase">
                         Establecer como predeterminado
@@ -365,7 +365,7 @@ export default function CustomerPaymentMethodsPage() {
                     </button>
                     <button
                       type="submit"
-                      className="flex-[2] px-8 py-4 rounded-2xl bg-gradient-to-r from-sky-500 to-sky-600 text-white font-black text-xs uppercase tracking-[0.2em] hover:shadow-lg"
+                      className="flex-[2] px-8 py-4 rounded-2xl bg-gradient-to-r from-sky-500 to-sky-600 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] text-white font-black text-xs uppercase tracking-[0.2em] hover:shadow-lg"
                     >
                       Guardar Método
                     </button>
@@ -381,7 +381,7 @@ export default function CustomerPaymentMethodsPage() {
                         value={billingForm.ruc_dni}
                         onChange={(e) => setBillingForm({ ...billingForm, ruc_dni: e.target.value })}
                         required
-                        className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500"
+                        className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)]"
                       />
                     </div>
                     <div className="space-y-2">
@@ -391,7 +391,7 @@ export default function CustomerPaymentMethodsPage() {
                         value={billingForm.razon_social}
                         onChange={(e) => setBillingForm({ ...billingForm, razon_social: e.target.value })}
                         required
-                        className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500"
+                        className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)]"
                       />
                     </div>
                   </div>
@@ -403,7 +403,7 @@ export default function CustomerPaymentMethodsPage() {
                       value={billingForm.direccion_fiscal}
                       onChange={(e) => setBillingForm({ ...billingForm, direccion_fiscal: e.target.value })}
                       required
-                      className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500"
+                      className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)]"
                     />
                   </div>
 
@@ -416,7 +416,7 @@ export default function CustomerPaymentMethodsPage() {
 
                   <button
                     type="submit"
-                    className="w-full px-8 py-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-black text-xs uppercase tracking-[0.2em] hover:shadow-lg"
+                    className="w-full px-8 py-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] text-white font-black text-xs uppercase tracking-[0.2em] hover:shadow-lg"
                   >
                     Guardar Datos Fiscales
                   </button>

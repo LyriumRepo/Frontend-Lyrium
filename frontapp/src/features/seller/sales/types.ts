@@ -2,6 +2,8 @@ export type OrderStatus = 'pending_seller' | 'confirmed' | 'processing' | 'shipp
 
 export type ItemStatus = 'pending_seller' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
 
+export type TipoEnvio = 'domicilio' | 'agencia' | 'sucursal';
+
 export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
     pending_seller: 'Pendiente Confirmar',
     confirmed: 'Confirmado',
@@ -47,6 +49,7 @@ export interface Order {
     estado: OrderStatus;
     global_status: OrderStatus;
     currentStep: number;
+    tipo_envio: TipoEnvio;
     metodo_pago: string;
     estado_pago: 'pendiente' | 'verificado';
     envio: ShippingInfo;

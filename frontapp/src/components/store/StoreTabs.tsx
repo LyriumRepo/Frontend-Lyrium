@@ -117,7 +117,7 @@ export default function StoreTabs({ tienda, productos, sucursales = [], opinione
               { value: 'destacado', label: 'Destacados', icon: <Star className="w-4 h-4" /> },
               { value: 'bio', label: 'Bio', icon: <span className="text-xs">🌿</span> },
             ].map((f) => (
-              <button key={f.value} onClick={() => setFiltroRapido(f.value as FiltroRapido)} className={`px-3 py-2 rounded-lg text-sm font-medium ${filtroRapido === f.value ? 'bg-sky-500 text-white' : 'bg-gray-100 dark:bg-[var(--bg-muted)]'}`}>
+              <button key={f.value} onClick={() => setFiltroRapido(f.value as FiltroRapido)} className={`px-3 py-2 rounded-lg text-sm font-medium ${filtroRapido === f.value ? 'bg-sky-500 dark:bg-[var(--brand-green)] text-white' : 'bg-gray-100 dark:bg-[var(--bg-muted)]'}`}>
                 {f.icon && <span className="mr-1">{f.icon}</span>}{f.label}
               </button>
             ))}
@@ -136,7 +136,7 @@ export default function StoreTabs({ tienda, productos, sucursales = [], opinione
           <div className="mt-4 pt-4 border-t border-gray-100 dark:border-[var(--border-subtle)]">
             <div className="flex items-center justify-between mb-3">
               <span className="text-sm text-gray-500">{productosFiltrados.length} productos</span>
-              <button onClick={() => { setPrecioMin(0); setPrecioMax(1000); }} className="text-sm text-sky-600 hover:underline">Reset</button>
+              <button onClick={() => { setPrecioMin(0); setPrecioMax(1000); }} className="text-sm text-sky-600 dark:text-[var(--icons-green)] hover:underline">Reset</button>
             </div>
             <div className="flex items-center gap-4">
               <div className="flex-1"><input type="number" value={precioMin} onChange={(e) => setPrecioMin(Number(e.target.value))} min={0} placeholder="Min" className="w-full px-3 py-2 bg-gray-50 dark:bg-[var(--bg-muted)] border border-gray-200 dark:border-[var(--border-subtle)] rounded-lg text-sm" /></div>
@@ -150,7 +150,7 @@ export default function StoreTabs({ tienda, productos, sucursales = [], opinione
       {/* TABS */}
       <div className="flex overflow-x-auto border-b border-gray-200 dark:border-[var(--border-subtle)] mb-6">
         {tabs.map(tab => (
-          <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`px-6 py-3 text-sm font-medium whitespace-nowrap border-b-2 ${activeTab === tab.id ? 'border-sky-500 text-sky-600' : 'border-transparent text-gray-500'}`}>
+          <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`px-6 py-3 text-sm font-medium whitespace-nowrap border-b-2 ${activeTab === tab.id ? 'border-sky-500 dark:border-[var(--icons-green)] text-sky-600 dark:text-[var(--icons-green)]' : 'border-transparent text-gray-500'}`}>
             {tab.label}
           </button>
         ))}
@@ -175,14 +175,14 @@ export default function StoreTabs({ tienda, productos, sucursales = [], opinione
                   {sticker && !descuento && <span className={`absolute top-2 left-2 text-white text-xs font-bold px-2 py-0.5 rounded-full ${sticker.class}`}>{sticker.label}</span>}
                   <div className="hidden md:flex absolute inset-0 bg-black/0 group-hover:bg-black/10 items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
                     <button className="bg-white p-2 rounded-full shadow-lg"><Eye className="w-4 h-4" /></button>
-                    <button className="bg-sky-500 p-2 rounded-full shadow-lg"><ShoppingCart className="w-4 h-4 text-white" /></button>
+                    <button className="bg-sky-500 dark:bg-[var(--brand-green)] p-2 rounded-full shadow-lg"><ShoppingCart className="w-4 h-4 text-white" /></button>
                   </div>
                 </div>
                 <div className="p-3">
                   <Link href={producto.slug ? `/producto/${producto.slug}` : '#'}><h4 className="font-medium text-sm line-clamp-2 mb-2">{producto.titulo}</h4></Link>
                   <div className="flex items-center gap-1 mb-2">{producto.estrellas && producto.estrellas.split('').map((_, i) => <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400" />)}</div>
                   <div className="flex items-center justify-between">
-                    <div><p className="text-sky-600 font-bold">S/{producto.precio.toFixed(2)}</p>{tieneDescuento && <p className="text-gray-400 text-xs line-through">S/{precioAnterior?.toFixed(2)}</p>}</div>
+                    <div><p className="text-sky-600 dark:text-[var(--icons-green)] font-bold">S/{producto.precio.toFixed(2)}</p>{tieneDescuento && <p className="text-gray-400 text-xs line-through">S/{precioAnterior?.toFixed(2)}</p>}</div>
                   </div>
                   <div className="flex md:hidden mt-2 gap-2">
                     <button className="flex-1 py-1.5 bg-gray-100 dark:bg-[var(--bg-muted)] rounded-lg text-xs">Ver</button>
@@ -227,7 +227,7 @@ export default function StoreTabs({ tienda, productos, sucursales = [], opinione
               <option>Selecciona un asunto</option><option>Consulta general</option><option>Solicitar cotización</option><option>Seguimiento de pedido</option><option>Reclamo</option><option>Sugerencia</option>
             </select>
             <textarea placeholder="Tu mensaje *" rows={4} className="w-full px-4 py-3 bg-gray-50 dark:bg-[var(--bg-muted)] border border-gray-200 dark:border-[var(--border-subtle)] rounded-lg text-sm resize-none" />
-            <button type="submit" className="w-full py-3 bg-sky-500 text-white font-bold rounded-lg hover:bg-sky-600">Enviar mensaje</button>
+            <button type="submit" className="w-full py-3 border-1 dark:border-[var(--border-subtle)] bg-sky-500 dark:bg-[var(--brand-green)] text-white font-bold rounded-lg hover:bg-sky-600 dark:hover:bg-[var(--brand-green-hover)]">Enviar mensaje</button>
           </form>
         </div>
       )}
