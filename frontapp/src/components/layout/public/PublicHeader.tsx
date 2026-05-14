@@ -13,6 +13,7 @@ import { useMegaMenu } from '@/shared/hooks/useMegaMenu';
 import { useCarritoStore } from '@/store/carritoStore';
 import { useAuth } from '@/shared/lib/context/AuthContext';
 import { AUTH_CONFIG } from '@/shared/lib/config/auth';
+import LogoLyrium from '@/components/LogoLyrium';
 
 export default function PublicHeader() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -23,7 +24,6 @@ export default function PublicHeader() {
         ? (AUTH_CONFIG.routes[user.role as keyof typeof AUTH_CONFIG.routes] ?? '/login')
         : '/login';
 
-    // Combinar: items de API (PRODUCTOS/SERVICIOS) + items estáticos (NOSOTROS, CONTACTO, etc.)
     const staticItems = fallbackMenuItems.filter(item => !item.children);
     const menuItems = hasData ? [...apiMenuItems, ...staticItems] : fallbackMenuItems;
     const megaMenuData = hasData ? apiMegaMenuData : fallbackMegaMenuData;
@@ -36,24 +36,10 @@ export default function PublicHeader() {
                     {/* Logo */}
                     <Link href="/" className="flex items-center gap-2 group relative">
 
-                        {/* Logo NORMAL (no se toca tamaño) */}
-                        <Image
-                            src="/img/iconologo.png"
-                            alt="Lyrium Icono"
-                            width={80}
-                            height={80}
-                            className="h-16 md:h-20 w-auto object-contain relative z-10 transition-transform duration-700 ease-out group-hover:rotate-[360deg]"
-                        />
-
-                        {/* Círculo blanco DETRÁS */}
-                        <div className="absolute left-2 md:left-2 w-14 h-14 md:w-15 md:h-14 bg-white rounded-full z-0" />
-
-                        <Image
-                            src="/img/nombrelogo.png"
-                            alt="Lyrium Nombre"
-                            width={160}
-                            height={40}
-                            className="h-8 md:h-10 w-auto object-contain mt-1"
+                        {/* Logo con animación de caritas (compañero) */}
+                        <LogoLyrium
+                            frontImg="/img/iconologo.png"
+                            sideImg="/img/nombrelogo.png"
                         />
                     </Link>
 
@@ -72,7 +58,6 @@ export default function PublicHeader() {
                                         <Link href={dashboardUrl} className="p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] transition-colors flex items-center justify-center">
                                             <Icon name="LayoutDashboard" className="text-[18px]" />
                                         </Link>
-
                                         <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-[#333333] text-white text-xs px-2 py-1 rounded-md whitespace-nowrap">
                                             Mi panel
                                         </span>
@@ -80,11 +65,9 @@ export default function PublicHeader() {
                                 </div>
                             ) : (
                                 <div className="relative group">
-                                    <Link href="/login" className="p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] transition-colors flex items-center justify-center"
-                                    >
+                                    <Link href="/login" className="p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] transition-colors flex items-center justify-center">
                                         <Icon name="UserCircle" className="text-[18px]" />
                                     </Link>
-
                                     <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-[#333333] text-white text-xs px-2 py-1 rounded-md whitespace-nowrap">
                                         Iniciar sesión
                                     </span>
@@ -94,14 +77,12 @@ export default function PublicHeader() {
                             <div className="relative group">
                                 <Link href="/carrito" className="p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] transition-colors flex items-center justify-center">
                                     <Icon name="ShoppingCart" className="text-[18px]" />
-
                                     {cartItemCount > 0 && (
                                         <span className="absolute -top-1 -right-1 bg-sky-500 text-white text-[11px] rounded-full px-1.5 py-0.5">
                                             {cartItemCount}
                                         </span>
                                     )}
                                 </Link>
-
                                 <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-[#333333] text-white text-xs px-2 py-1 rounded-md whitespace-nowrap">
                                     Carrito
                                 </span>
@@ -121,11 +102,9 @@ export default function PublicHeader() {
                     </div>
                 </div>
 
-                {/* Desktop Nav con MegaMenu */}
                 <DesktopNav menuItems={menuItems} megaMenuData={megaMenuData} />
             </header>
 
-            {/* Mobile Menu (drawer con drill-down) */}
             <MobileMenu
                 isOpen={mobileMenuOpen}
                 onClose={() => setMobileMenuOpen(false)}
