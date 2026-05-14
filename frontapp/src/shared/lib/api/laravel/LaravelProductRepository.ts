@@ -7,10 +7,7 @@ export class LaravelProductRepository implements IProductRepository {
     }
 
     private async getAuthHeaders(): Promise<HeadersInit> {
-        const token =
-        typeof window !== 'undefined'
-            ? localStorage.getItem('laravel_token')
-            : null;
+        const token = await this.getToken();
 
         return {
             'Accept': 'application/json',
@@ -19,11 +16,25 @@ export class LaravelProductRepository implements IProductRepository {
     }
 
     private async getToken(): Promise<string | null> {
-        if (typeof window === 'undefined') {
-            return null;
+        // CLIENTE
+        if (typeof window !== 'undefined') {
+
+            return localStorage.getItem('laravel_token');
         }
 
-        return localStorage.getItem('laravel_token');
+        // SERVIDOR
+        try {
+
+            const { cookies } = await import('next/headers');
+
+            const cookieStore = await cookies();
+
+            return cookieStore.get('laravel_token')?.value ?? null;
+
+        } catch {
+
+            return null;
+        }
     }
 
     private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {

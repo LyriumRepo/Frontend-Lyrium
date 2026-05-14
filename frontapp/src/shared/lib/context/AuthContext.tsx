@@ -115,6 +115,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
             
             if (result.user && result.token) {
+                localStorage.setItem('laravel_token', result.token);
                 console.log('[Auth] Server action set httpOnly cookies, verifying...');
                 localStorage.setItem('laravel_token', result.token);
                 const targetRoute = getRoleBasedRoute(result.user.role);
