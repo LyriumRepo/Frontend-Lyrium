@@ -34,7 +34,7 @@ export function ProfilePageClient(_props: ProfilePageClientProps) {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const EDIT_FIELD_CLASSES = "bg-white dark:bg-[var(--bg-card)]/70 dark:bg-[var(--bg-card)] ring-sky-500/10 px-3 py-1 rounded-xl border-2 border-sky-100 dark:border-[var(--border-subtle)]";
-    const READONLY_FIELD_CLASSES = "border-transparent px-3 py-1";
+    const READONLY_FIELD_CLASSES = "px-3 py-1";
 
     useEffect(() => {
         if (hookData && !isEditMode) {
@@ -108,7 +108,7 @@ export function ProfilePageClient(_props: ProfilePageClientProps) {
         }
     };
 
-    const fieldCls = `w-full text-sm font-black text-gray-800 dark:text-[var(--text-primary)] bg-transparent p-3 border-2 border-gray-100 dark:border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 transition-all`;
+    const fieldCls = `w-full text-sm font-black text-gray-800 dark:text-[var(--text-primary)] bg-transparent p-3 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 transition-all`;
 
     return (
         <div className="space-y-8 animate-fadeIn">

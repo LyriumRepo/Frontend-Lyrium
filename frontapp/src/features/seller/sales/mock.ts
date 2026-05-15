@@ -1,4 +1,4 @@
-import { Order, SalesKPI, ItemStatus } from './types';
+import { Order, SalesKPI } from './types';
 
 export const MOCK_ORDERS: Order[] = [
     {
@@ -11,6 +11,7 @@ export const MOCK_ORDERS: Order[] = [
         estado: 'processing',
         global_status: 'processing',
         currentStep: 2,
+        tipo_envio: 'domicilio',
         metodo_pago: 'Tarjeta de Crédito',
         estado_pago: 'verificado',
         envio: { direccion: 'Av. Siempre Viva 123, Lima', carrier: 'Olva Courier', tracking: 'TRK-123456789', costo: 15.00 },
@@ -29,6 +30,7 @@ export const MOCK_ORDERS: Order[] = [
         estado: 'pending_seller',
         global_status: 'pending_seller',
         currentStep: 1,
+        tipo_envio: 'agencia',
         metodo_pago: 'Yape',
         estado_pago: 'verificado',
         envio: { direccion: 'Calle Falsa 456, Arequipa', carrier: 'Shalom', tracking: 'SHL-987654321', costo: 10.00 },
@@ -46,6 +48,7 @@ export const MOCK_ORDERS: Order[] = [
         estado: 'pending_seller',
         global_status: 'pending_seller',
         currentStep: 1,
+        tipo_envio: 'sucursal',
         metodo_pago: 'Transferencia Bancaria',
         estado_pago: 'pendiente',
         envio: { direccion: 'Urb. Los Rosales Mz A Lt 5, Trujillo', carrier: 'Pendiente', tracking: '-', costo: 20.00 },

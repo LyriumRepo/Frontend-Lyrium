@@ -96,7 +96,7 @@ export const termsData: { [key: string]: TermSection[] } = {
     vendedor: [
         {
             id: 'vend-primero',
-            title: '1. Obligaciones del Vendedor',
+            title: 'Primero: Antecedentes Generales',
             content: `
         <p class="mb-4">El vendedor se compromete a publicar información veraz y completa sobre sus productos/servicios, incluyendo precios, stock, condiciones, imágenes y restricciones aplicables.</p>
         <ul class="list-disc pl-5 space-y-2 mb-4">

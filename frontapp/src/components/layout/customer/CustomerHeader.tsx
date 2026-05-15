@@ -22,7 +22,7 @@ export default function CustomerHeader({ onOpenMenu }: { onOpenMenu: () => void 
                         <Menu className="w-6 h-6 text-gray-600 dark:text-gray-400" />
                     </button>
                     <span className="hidden md:inline-block px-3 py-1 bg-sky-500 text-white text-xs font-bold uppercase rounded-full whitespace-nowrap">
-                        Mi Panel de Cliente
+                        Mi Panel de Usuario
                     </span>
                     <div className="hidden sm:block">
                         <Breadcrumb items={breadcrumbs} />
