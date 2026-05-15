@@ -1,6 +1,15 @@
 import { Producto } from '@/types/public';
 
 const API = process.env.NEXT_PUBLIC_LARAVEL_API_URL;
+interface SearchProductsParams {
+  query?: string;
+  perPage?: number;
+  minPrice?: string;
+  maxPrice?: string;
+  onSale?: boolean;
+  sticker?: string;
+  category?: string;
+}
 
 export async function getCategories() {
   const res = await fetch(`${API}/categories`, {
@@ -49,6 +58,58 @@ export async function getProductsByCategorySlug(
 
   if (!res.ok) {
     console.error('Failed to fetch products:', categorySlug, res.status);
+    return [];
+  }
+
+  const json = await res.json();
+
+  return Array.isArray(json.data)
+    ? json.data
+    : [];
+}
+
+export async function searchProducts({
+  query = '',
+  perPage = 10,
+  minPrice,
+  maxPrice,
+  onSale,
+  sticker,
+  category,
+}: SearchProductsParams = {}) {
+  const params = new URLSearchParams();
+  
+  if (query)    params.set('search', query);
+  if (perPage)  params.set('per_page', String(perPage));
+  if (minPrice) params.set('min_price', minPrice);
+  if (maxPrice) params.set('max_price', maxPrice);
+  if (onSale)   params.set('on_sale', 'true');
+  if (sticker)  params.set('sticker', sticker);
+  if (category) params.set('category', category);
+
+  const res = await fetch(`${API}/products?${params.toString()}`, {
+    next: { revalidate: 60 },
+  });
+
+  if (!res.ok) {
+    console.error('Failed to search products', res.status);
+    return [];
+  }
+
+  const json = await res.json();
+  return Array.isArray(json.data) ? json.data : [];
+}
+
+export async function searchCategories(query: string, perPage = 10) {
+  const res = await fetch(
+    `${API}/categories?search=${encodeURIComponent(query)}&per_page=${perPage}`,
+    {
+      next: { revalidate: 60 }
+    }
+  );
+
+  if (!res.ok) {
+    console.error('Failed to search categories', res.status);
     return [];
   }
 

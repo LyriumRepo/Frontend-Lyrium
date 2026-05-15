@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Search, Filter, X, SlidersHorizontal } from 'lucide-react';
-import { searchProducts, searchCategories, mapWooProductToLocal } from '@/shared/lib/api/wooCommerce';
+import { searchProducts, searchCategories, mapCatalogProductToLocal } from '@/shared/lib/api/catalogProducts';
 import ProductGrid from '@/components/products/ProductGrid';
 import { Producto, Categoria } from '@/types/public';
 
@@ -25,12 +25,22 @@ function SearchResultsContent({ initialQuery = '', initialCategory = '' }: Searc
   const [priceMin, setPriceMin] = useState('');
   const [priceMax, setPriceMax] = useState('');
   const [totalResults, setTotalResults] = useState(0);
+  const [onSale, setOnSale] = useState(false);
+  const [sticker, setSticker] = useState('');
 
   useEffect(() => {
     const q = searchParams.get('q') || initialQuery;
     const cat = searchParams.get('category') || initialCategory;
+    const min = searchParams.get('min_price') || '';
+    const max = searchParams.get('max_price') || '';
+    const sale = searchParams.get('on_sale') === 'true';
+    const stickerParam = searchParams.get('sticker') || '';
     setQuery(q);
     setSelectedCategory(cat);
+    setPriceMin(min);
+    setPriceMax(max);
+    setOnSale(sale);
+    setSticker(stickerParam);
   }, [searchParams, initialQuery, initialCategory]);
 
   useEffect(() => {
@@ -40,12 +50,20 @@ function SearchResultsContent({ initialQuery = '', initialCategory = '' }: Searc
       setIsLoading(true);
       try {
         const [productsResult, categoriesResult] = await Promise.all([
-          searchProducts(query, 50),
+          searchProducts({
+            query,
+            perPage: 50,
+            minPrice: priceMin || undefined,
+            maxPrice: priceMax || undefined,
+            onSale: onSale || undefined,
+            sticker: sticker || undefined,
+            category: selectedCategory || undefined,
+          }),
           searchCategories(query, 10),
         ]);
 
         const mappedProducts: Producto[] = (Array.isArray(productsResult) ? productsResult : [])
-          .map(mapWooProductToLocal)
+          .map(mapCatalogProductToLocal)
           .filter((p): p is Producto => p !== null);
 
         const mappedCategories = (Array.isArray(categoriesResult) ? categoriesResult : [])
@@ -81,7 +99,10 @@ function SearchResultsContent({ initialQuery = '', initialCategory = '' }: Searc
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (query.trim()) {
-      router.push(`/buscar?q=${encodeURIComponent(query)}`);
+      const params = new URLSearchParams({ q: query });
+      if (priceMin) params.set('min_price', priceMin);
+      if (priceMax) params.set('max_price', priceMax);
+      router.push(`/buscar?${params.toString()}`);
     }
   };
 

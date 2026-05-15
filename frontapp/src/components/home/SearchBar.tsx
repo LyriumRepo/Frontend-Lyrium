@@ -25,11 +25,15 @@ export default function SearchBar({ categorias }: SearchBarProps) {
   const [loadingCategoryProducts, setLoadingCategoryProducts] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const searchContainerRef = useRef<HTMLDivElement>(null);
+  const searchContainerRef = useRef<HTMLFormElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const { activeDropdown: globalDropdown, setActiveDropdown: setGlobalDropdown } = useUIStore();
 
   const showAutocomplete = activeDropdownLocal === 'autocomplete';
   const filterOpen = activeDropdownLocal === 'filter';
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
+  const [selectedOffer, setSelectedOffer] = useState<string>('');
 
   const setActiveDropdown = (dropdown: 'autocomplete' | 'filter' | null) => {
     setActiveDropdownLocal(dropdown);
@@ -65,16 +69,24 @@ export default function SearchBar({ categorias }: SearchBarProps) {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        inputRef.current &&
-        !inputRef.current.contains(event.target as Node)
-      ) {
+      const target = event.target as Node;
+
+      const clickedInsideInput =
+        searchContainerRef.current?.contains(target);
+
+      const clickedInsideDropdown =
+        dropdownRef.current?.contains(target);
+
+      if (!clickedInsideInput && !clickedInsideDropdown) {
         setActiveDropdown(null);
       }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, []);
 
   useEffect(() => {
@@ -90,9 +102,34 @@ export default function SearchBar({ categorias }: SearchBarProps) {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
+    const params = new URLSearchParams();
     if (searchTerm.trim()) {
-      router.push(`/buscar?q=${encodeURIComponent(searchTerm)}&category=${selectedCategory}`);
+      params.append('q', searchTerm);
     }
+
+    if (selectedCategory) {
+      params.append('category', selectedCategory);
+    }
+
+    if (minPrice) {
+      params.append('min_price', minPrice);
+    }
+
+    if (maxPrice) {
+      params.append('max_price', maxPrice);
+    }
+    if (selectedOffer === 'on_sale') {
+    params.append('on_sale', 'true');
+    } else if (selectedOffer === 'promotion') {
+      params.append('on_sale', 'true');
+      params.append('sticker', 'promotion');   // tu backend acepta ?sticker=
+    } else if (selectedOffer === 'offer') {
+      params.append('on_sale', 'true');
+      params.append('sticker', 'offer');
+    }
+
+    router.push(`/buscar?${params.toString()}`);
+
     setActiveDropdown(null);
   };
 
@@ -158,7 +195,7 @@ export default function SearchBar({ categorias }: SearchBarProps) {
   return (
     <div className="border-t border-gray-100 dark:border-[var(--border-subtle)] bg-white/80 dark:bg-[var(--bg-secondary)]/80 backdrop-blur-sm shadow-sm">
       <div className="max-w-7xl mx-auto px-4 py-4">
-        <form onSubmit={handleSearch} className="w-full relative">
+        <form ref={searchContainerRef} onSubmit={handleSearch} className="w-full relative">
           <input type="hidden" name="category" value={selectedCategory} />
 
           <div className="relative w-full">
@@ -193,7 +230,7 @@ export default function SearchBar({ categorias }: SearchBarProps) {
                 type="button"
                 aria-label={filterOpen ? "Cerrar filtros" : "Abrir filtros"}
                 aria-expanded={filterOpen}
-                onClick={() => setActiveDropdown(filterOpen ? null : 'filter')}
+                onMouseDown={() => setActiveDropdown(filterOpen ? null : 'filter')}
                 className="flex h-full w-10 md:w-auto md:px-7 rounded-full bg-sky-500 dark:bg-[var(--brand-green)] text-white hover:bg-sky-600 dark:hover:bg-[var(--brand-green-hover)] font-bold items-center justify-center gap-2 transition-all border border-sky-200 dark:border-[var(--border-subtle)]"
               >
                 <Filter className="w-5 h-5" />
@@ -214,6 +251,7 @@ export default function SearchBar({ categorias }: SearchBarProps) {
           {/* AUTOCOMPLETE DROPDOWN */}
           {showAutocomplete && isMounted && createPortal(
             <div
+              ref={dropdownRef}
               id="search-results"
               role="listbox"
               aria-modal="true"
@@ -225,7 +263,7 @@ export default function SearchBar({ categorias }: SearchBarProps) {
                 left: inputRef.current ? inputRef.current.getBoundingClientRect().left : 0,
                 width: inputRef.current ? inputRef.current.getBoundingClientRect().width : 0,
               }}
-              onClick={(e) => e.stopPropagation()}
+              onMouseDown={(e) => e.stopPropagation()}
               onKeyDown={(e) => e.stopPropagation()}
             >
               <div className="overflow-y-auto max-h-[320px]">
@@ -247,7 +285,7 @@ export default function SearchBar({ categorias }: SearchBarProps) {
                           <li key={`category-${result.id}`}>
                             <button
                               type="button"
-                              onClick={() => handleSelectResult(result)}
+                              onMouseDown={() => handleSelectResult(result)}
                               onMouseEnter={() => handleCategoryHover(result)}
                               onMouseLeave={handleCategoryLeave}
                               className={`w-full px-3 py-2 flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-[#182420] transition-colors rounded-lg ${
@@ -282,7 +320,7 @@ export default function SearchBar({ categorias }: SearchBarProps) {
                               <li key={`hover-product-${product.id}`}>
                                 <button
                                   type="button"
-                                  onClick={() => handleSelectResult(product)}
+                                  onMouseDown={() => handleSelectResult(product)}
                                   className="w-full px-3 py-2 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-[#182420] transition-colors rounded-lg"
                                 >
                                   <div className="relative w-10 h-10 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 dark:bg-[var(--bg-muted)]">
@@ -322,7 +360,7 @@ export default function SearchBar({ categorias }: SearchBarProps) {
                             <li key={`product-${result.id}`}>
                               <button
                                 type="button"
-                                onClick={() => handleSelectResult(result)}
+                                onMouseDown={() => handleSelectResult(result)}
                                 className="w-full px-3 py-2 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-[#182420] transition-colors rounded-lg"
                               >
                                 <div className="relative w-10 h-10 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 dark:bg-[var(--bg-muted)]">
@@ -388,20 +426,22 @@ export default function SearchBar({ categorias }: SearchBarProps) {
               role="dialog"
               aria-modal="true"
               tabIndex={-1}
-              className="fixed bg-white/95 dark:bg-[var(--bg-card)]/95 backdrop-blur-2xl border border-gray-200 dark:border-[var(--border-subtle)] rounded-[2.5rem] shadow-[0_30px_70px_rgba(0,0,0,0.15)] dark:shadow-[0_30px_70px_rgba(0,0,0,0.4)] p-6 overflow-hidden z-[99998]"
+              className="fixed bg-white/95 dark:bg-[var(--bg-card)]/95 backdrop-blur-2xl border border-gray-200 dark:border-[var(--border-subtle)] rounded-[2.5rem] shadow-[0_30px_70px_rgba(0,0,0,0.15)] dark:shadow-[0_30px_70px_rgba(0,0,0,0.4)] p-6 overflow-y-auto overscroll-contain max-h-[90vh] z-[99998]"
               style={{
-                top: inputRef.current ? inputRef.current.getBoundingClientRect().bottom + 16 : 0,
-                left: inputRef.current ? inputRef.current.getBoundingClientRect().left : 0,
-                width: inputRef.current ? inputRef.current.getBoundingClientRect().width : 0,
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: 'min(90vw, 900px)',
+                maxHeight: '90vh',
               }}
-              onClick={(e) => e.stopPropagation()}
+              onMouseDown={(e) => e.stopPropagation()}
               onKeyDown={(e) => e.stopPropagation()}
             >
               <div className="flex justify-between items-center mb-4">
                 <h3 className="font-bold text-gray-800 dark:text-[var(--text-primary)]">Filtros de búsqueda</h3>
                 <button
                   type="button"
-                  onClick={() => setActiveDropdown(null)}
+                  onMouseDown={() => setActiveDropdown(null)}
                   className="p-2 hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] rounded-full transition-colors"
                 >
                   <X className="w-5 h-5 dark:text-[var(--text-secondary)]" />
@@ -420,8 +460,8 @@ export default function SearchBar({ categorias }: SearchBarProps) {
                       <button
                         key={cat.id}
                         type="button"
-                        onClick={() => setSelectedCategory(selectedCategory === cat.nombre ? '' : cat.nombre)}
-                        className={`px-3.5 py-2.5 rounded-full border text-xs font-bold transition-all ${selectedCategory === cat.nombre
+                        onMouseDown={() => setSelectedCategory(selectedCategory === cat.slug || '' ? '' : cat.slug || '')}
+                        className={`px-3.5 py-2.5 rounded-full border text-xs font-bold transition-all ${selectedCategory === cat.slug || ''
                             ? 'bg-sky-500 text-white border-sky-500 shadow-md'
                             : 'bg-white dark:bg-[var(--bg-card)] border-gray-100 dark:border-[var(--border-subtle)] text-gray-600 dark:text-[var(--text-secondary)] hover:border-sky-300 dark:hover:border-[var(--brand-green)] hover:bg-sky-50 dark:hover:bg-[var(--bg-muted)]'
                           }`}
@@ -438,17 +478,26 @@ export default function SearchBar({ categorias }: SearchBarProps) {
                     <span className="w-2 h-2 bg-red-500 rounded-full"></span>
                     Ofertas Especiales
                   </p>
-                  <div className="flex flex-wrap gap-2">
-                    <button type="button" className="px-3.5 py-2.5 rounded-full bg-white dark:bg-[var(--bg-card)] border border-gray-100 dark:border-[var(--border-subtle)] text-xs font-bold text-sky-600 dark:text-[var(--color-success)] hover:border-sky-300 dark:hover:border-[var(--brand-green)] hover:bg-sky-50 dark:hover:bg-[var(--bg-muted)] transition-all">
-                      Descuentos
+                  {[
+                    { label: 'Descuentos', value: 'on_sale' },
+                    { label: 'Promociones', value: 'promotion' },
+                    { label: 'Ofertas', value: 'offer' },
+                  ].map(({ label, value }) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onMouseDown={() =>
+                        setSelectedOffer(selectedOffer === value ? '' : value)
+                      }
+                      className={`px-3.5 py-2.5 rounded-full border text-xs font-bold transition-all ${
+                        selectedOffer === value
+                          ? 'bg-red-500 text-white border-red-500 shadow-md'
+                          : 'bg-white dark:bg-[var(--bg-card)] border-gray-100 dark:border-[var(--border-subtle)] text-sky-600 dark:text-[var(--color-success)] hover:border-sky-300 dark:hover:border-[var(--brand-green)] hover:bg-sky-50 dark:hover:bg-[var(--bg-muted)]'
+                      }`}
+                    >
+                      {label}
                     </button>
-                    <button type="button" className="px-3.5 py-2.5 rounded-full bg-white dark:bg-[var(--bg-card)] border border-gray-100 dark:border-[var(--border-subtle)] text-xs font-bold text-sky-600 dark:text-[var(--color-success)] hover:border-sky-300 dark:hover:border-[var(--brand-green)] hover:bg-sky-50 dark:hover:bg-[var(--bg-muted)] transition-all">
-                      Promociones
-                    </button>
-                    <button type="button" className="px-3.5 py-2.5 rounded-full bg-white dark:bg-[var(--bg-card)] border border-gray-100 dark:border-[var(--border-subtle)] text-xs font-bold text-sky-600 dark:text-[var(--color-success)] hover:border-sky-300 dark:hover:border-[var(--brand-green)] hover:bg-sky-50 dark:hover:bg-[var(--bg-muted)] transition-all">
-                      Ofertas
-                    </button>
-                  </div>
+                  ))}
                 </div>
 
                 {/* Precio */}
@@ -457,17 +506,69 @@ export default function SearchBar({ categorias }: SearchBarProps) {
                     <span className="w-2 h-2 bg-green-500 rounded-full"></span>
                     Rango de Precio
                   </p>
-                  <div className="space-y-3">
-                    <input
-                      type="range"
-                      min="0"
-                      max="1000"
-                      className="w-full h-2 bg-gray-200 dark:bg-[var(--border-subtle)] rounded-lg appearance-none cursor-pointer accent-sky-500"
-                    />
-                    <div className="flex justify-between text-xs text-gray-500 dark:text-[var(--text-secondary)]">
-                      <span>S/ 0</span>
-                      <span>S/ 1000</span>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs text-gray-500 dark:text-[var(--text-secondary)] mb-1">
+                        Desde
+                      </label>
+
+                      <input
+                        type="number"
+                        value={minPrice}
+                        onChange={(e) => setMinPrice(e.target.value)}
+                        placeholder="0"
+                        min="0"
+                        className="
+                          w-full
+                          px-3
+                          py-2.5
+                          rounded-xl
+                          border
+                          border-gray-200
+                          dark:border-[var(--border-subtle)]
+                          bg-white
+                          dark:bg-[var(--bg-card)]
+                          text-sm
+                          text-gray-700
+                          dark:text-[var(--text-primary)]
+                          focus:outline-none
+                          focus:ring-2
+                          focus:ring-sky-500
+                        "
+                      />
                     </div>
+
+                    <div>
+                      <label className="block text-xs text-gray-500 dark:text-[var(--text-secondary)] mb-1">
+                        Hasta
+                      </label>
+
+                      <input
+                        type="number"
+                        value={maxPrice}
+                        onChange={(e) => setMaxPrice(e.target.value)}
+                        placeholder="1000"
+                        min="0"
+                        className="
+                          w-full
+                          px-3
+                          py-2.5
+                          rounded-xl
+                          border
+                          border-gray-200
+                          dark:border-[var(--border-subtle)]
+                          bg-white
+                          dark:bg-[var(--bg-card)]
+                          text-sm
+                          text-gray-700
+                          dark:text-[var(--text-primary)]
+                          focus:outline-none
+                          focus:ring-2
+                          focus:ring-sky-500
+                        "
+                      />
+                    </div>
+
                   </div>
                 </div>
               </div>
@@ -476,8 +577,11 @@ export default function SearchBar({ categorias }: SearchBarProps) {
               <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-100 dark:border-[var(--border-subtle)]">
                 <button
                   type="button"
-                  onClick={() => {
+                  onMouseDown={() => {
                     setSelectedCategory('');
+                    setSelectedOffer('');
+                    setMinPrice('');
+                    setMaxPrice('');
                     setSearchTerm('');
                   }}
                   className="px-4 py-2 text-gray-600 dark:text-[var(--text-secondary)] font-medium hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] rounded-full transition-colors"
