@@ -18,6 +18,8 @@ export default function SearchBar({ categorias }: SearchBarProps) {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [priceMin, setPriceMin] = useState('');
+  const [priceMax, setPriceMax] = useState('');
   const [activeDropdownLocal, setActiveDropdownLocal] = useState<'autocomplete' | 'filter' | null>(null);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [hoveredCategory, setHoveredCategory] = useState<SearchResult | null>(null);
@@ -91,7 +93,12 @@ export default function SearchBar({ categorias }: SearchBarProps) {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchTerm.trim()) {
-      router.push(`/buscar?q=${encodeURIComponent(searchTerm)}&category=${selectedCategory}`);
+      const params = new URLSearchParams();
+      params.set('q', searchTerm);
+      if (selectedCategory) params.set('category', selectedCategory);
+      if (priceMin) params.set('minPrice', priceMin);
+      if (priceMax) params.set('maxPrice', priceMax);
+      router.push(`/buscar?${params.toString()}`);
     }
     setActiveDropdown(null);
   };
@@ -225,6 +232,7 @@ export default function SearchBar({ categorias }: SearchBarProps) {
                 left: inputRef.current ? inputRef.current.getBoundingClientRect().left : 0,
                 width: inputRef.current ? inputRef.current.getBoundingClientRect().width : 0,
               }}
+              onMouseDown={(e) => e.stopPropagation()}
               onClick={(e) => e.stopPropagation()}
               onKeyDown={(e) => e.stopPropagation()}
             >
@@ -394,6 +402,7 @@ export default function SearchBar({ categorias }: SearchBarProps) {
                 left: inputRef.current ? inputRef.current.getBoundingClientRect().left : 0,
                 width: inputRef.current ? inputRef.current.getBoundingClientRect().width : 0,
               }}
+              onMouseDown={(e) => e.stopPropagation()}
               onClick={(e) => e.stopPropagation()}
               onKeyDown={(e) => e.stopPropagation()}
             >
@@ -458,15 +467,33 @@ export default function SearchBar({ categorias }: SearchBarProps) {
                     Rango de Precio
                   </p>
                   <div className="space-y-3">
-                    <input
-                      type="range"
-                      min="0"
-                      max="1000"
-                      className="w-full h-2 bg-gray-200 dark:bg-[var(--border-subtle)] rounded-lg appearance-none cursor-pointer accent-sky-500"
-                    />
-                    <div className="flex justify-between text-xs text-gray-500 dark:text-[var(--text-secondary)]">
-                      <span>S/ 0</span>
-                      <span>S/ 1000</span>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs text-gray-500 dark:text-[var(--text-placeholder)] mb-1">
+                          Mínimo (S/)
+                        </label>
+                        <input
+                          type="number"
+                          value={priceMin}
+                          onChange={(e) => setPriceMin(e.target.value)}
+                          placeholder="0"
+                          min="0"
+                          className="w-full h-10 px-3 rounded-lg border border-gray-200 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] text-gray-900 dark:text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-500 dark:text-[var(--text-placeholder)] mb-1">
+                          Máximo (S/)
+                        </label>
+                        <input
+                          type="number"
+                          value={priceMax}
+                          onChange={(e) => setPriceMax(e.target.value)}
+                          placeholder="1000"
+                          min="0"
+                          className="w-full h-10 px-3 rounded-lg border border-gray-200 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] text-gray-900 dark:text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -479,6 +506,8 @@ export default function SearchBar({ categorias }: SearchBarProps) {
                   onClick={() => {
                     setSelectedCategory('');
                     setSearchTerm('');
+                    setPriceMin('');
+                    setPriceMax('');
                   }}
                   className="px-4 py-2 text-gray-600 dark:text-[var(--text-secondary)] font-medium hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] rounded-full transition-colors"
                 >

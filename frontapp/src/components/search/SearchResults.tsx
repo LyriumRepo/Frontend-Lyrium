@@ -29,8 +29,12 @@ function SearchResultsContent({ initialQuery = '', initialCategory = '' }: Searc
   useEffect(() => {
     const q = searchParams.get('q') || initialQuery;
     const cat = searchParams.get('category') || initialCategory;
+    const minP = searchParams.get('minPrice') || '';
+    const maxP = searchParams.get('maxPrice') || '';
     setQuery(q);
     setSelectedCategory(cat);
+    setPriceMin(minP);
+    setPriceMax(maxP);
   }, [searchParams, initialQuery, initialCategory]);
 
   useEffect(() => {
