@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight, Star, ShoppingCart } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Producto } from '@/types/public';
+import { useCarritoStore } from '@/store/carritoStore';
 
 interface ProductCarouselProps {
   productos: Producto[];
@@ -29,6 +30,13 @@ export default function ProductCarousel({
   minWidth = '200px'
 }: ProductCarouselProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const addToCart = useCarritoStore((s) => s.addToCart);
+  const openCart = useCarritoStore((s) => s.openCart);
+
+  const handleAddToCart = (producto: Producto) => {
+    addToCart(producto);
+    openCart();
+  };
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
@@ -136,7 +144,7 @@ export default function ProductCarousel({
                       </div>
                       <button 
                         className="w-8 h-8 bg-sky-500 hover:bg-sky-600 dark:hover:bg-sky-400 rounded-full flex items-center justify-center transition-colors"
-                        onClick={(e) => e.preventDefault()}
+                        onClick={(e) => { e.preventDefault(); handleAddToCart(producto); }}
                         aria-label="Añadir al carrito"
                       >
                         <ShoppingCart className="w-4 h-4 text-white" />

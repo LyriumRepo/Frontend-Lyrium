@@ -5,6 +5,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Search, SlidersHorizontal, Funnel, ArrowUpDown, Star, ShoppingCart, Eye, Heart, Tag, MapPin, Phone, Mail, Clock, MessageCircle, Shield, CheckCircle, Truck, CreditCard, Instagram, Facebook, Globe, Youtube, MapPinned } from 'lucide-react';
 import { Producto, Tienda } from '@/types/public';
+import { useCarritoStore } from '@/store/carritoStore';
+import QuickViewModal from '@/components/products/QuickViewModal';
 
 type Ordenamiento = 'recientes' | 'precio-asc' | 'precio-desc' | 'nombre' | 'popular';
 type FiltroRapido = 'todos' | 'oferta' | 'destacado' | 'bio';
@@ -72,6 +74,21 @@ export default function StoreTabs({ tienda, productos, sucursales = [], opinione
   const [precioMin, setPrecioMin] = useState(0);
   const [precioMax, setPrecioMax] = useState(1000);
   const [showFiltrosAvanzados, setShowFiltrosAvanzados] = useState(false);
+  const [quickViewProduct, setQuickViewProduct] = useState<Producto | null>(null);
+  const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
+
+  const addToCart = useCarritoStore((s) => s.addToCart);
+  const openCart = useCarritoStore((s) => s.openCart);
+
+  const handleAddToCart = (producto: Producto) => {
+    addToCart(producto);
+    openCart();
+  };
+
+  const handleQuickView = (producto: Producto) => {
+    setQuickViewProduct(producto);
+    setIsQuickViewOpen(true);
+  };
 
   const productosFiltrados = useMemo(() => {
     let result = [...productos];
@@ -174,8 +191,8 @@ export default function StoreTabs({ tienda, productos, sucursales = [], opinione
                   {descuento > 0 && <span className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">-{descuento}%</span>}
                   {sticker && !descuento && <span className={`absolute top-2 left-2 text-white text-xs font-bold px-2 py-0.5 rounded-full ${sticker.class}`}>{sticker.label}</span>}
                   <div className="hidden md:flex absolute inset-0 bg-black/0 group-hover:bg-black/10 items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
-                    <button className="bg-white p-2 rounded-full shadow-lg"><Eye className="w-4 h-4" /></button>
-                    <button className="bg-sky-500 p-2 rounded-full shadow-lg"><ShoppingCart className="w-4 h-4 text-white" /></button>
+                    <button onClick={() => handleQuickView(producto)} className="bg-white p-2 rounded-full shadow-lg"><Eye className="w-4 h-4" /></button>
+                    <button onClick={() => handleAddToCart(producto)} className="bg-sky-500 p-2 rounded-full shadow-lg"><ShoppingCart className="w-4 h-4 text-white" /></button>
                   </div>
                 </div>
                 <div className="p-3">
@@ -185,8 +202,8 @@ export default function StoreTabs({ tienda, productos, sucursales = [], opinione
                     <div><p className="text-sky-600 font-bold">S/{producto.precio.toFixed(2)}</p>{tieneDescuento && <p className="text-gray-400 text-xs line-through">S/{precioAnterior?.toFixed(2)}</p>}</div>
                   </div>
                   <div className="flex md:hidden mt-2 gap-2">
-                    <button className="flex-1 py-1.5 bg-gray-100 dark:bg-[var(--bg-muted)] rounded-lg text-xs">Ver</button>
-                    <button className="flex-1 py-1.5 bg-sky-500 text-white rounded-lg text-xs">Añadir</button>
+                    <button onClick={() => handleQuickView(producto)} className="flex-1 py-1.5 bg-gray-100 dark:bg-[var(--bg-muted)] rounded-lg text-xs">Ver</button>
+                    <button onClick={() => handleAddToCart(producto)} className="flex-1 py-1.5 bg-sky-500 text-white rounded-lg text-xs">Añadir</button>
                   </div>
                 </div>
               </div>
@@ -303,6 +320,23 @@ export default function StoreTabs({ tienda, productos, sucursales = [], opinione
           )}
         </div>
       )}
+
+      <QuickViewModal
+        isOpen={isQuickViewOpen}
+        onClose={() => setIsQuickViewOpen(false)}
+        producto={quickViewProduct}
+        onAddToCart={(p, cant) => {
+          addToCart(p);
+          openCart();
+        }}
+        tienda={{
+          nombre: tienda.nombre || tienda.slug,
+          slug: tienda.slug,
+          logo: tienda.logo,
+          valoracion: tienda.valoracion || 0,
+          reviews: tienda.reviews || 0,
+        }}
+      />
     </div>
   );
 }
