@@ -111,14 +111,31 @@ export default function TiendasRegistradasPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-sky-100/30 to-transparent dark:from-sky-900/20 dark:to-transparent py-10 px-4">
+    <main className="min-h-screen to-transparent py-10 px-4">
       <div className="max-w-7xl mx-auto space-y-10">
-        <h1 className="text-4xl md:text-5xl font-extrabold text-[var(--text-primary)] text-center uppercase tracking-wide">
-          Tiendas Registradas
-        </h1>
+        <h1 className="flex items-center justify-center gap-3 px-6 md:px-8 py-3 md:py-4 w-full rounded-full 
+             bg-gradient-to-r from-sky-500 to-sky-400 dark:from-[#1A3A32] dark:to-[var(--brand-green)]
+             text-white 
+             shadow-[0_10px_25px_rgba(14,165,233,0.2)] dark:shadow-[0_10px_25px_rgba(74,124,89,0.25)] 
+             font-black tracking-tight text-center
+             text-[clamp(20px,2.6vw,34px)]">
+        <svg xmlns="http://www.w3.org/2000/svg" 
+             viewBox="0 0 24 24" 
+             fill="none" 
+             stroke="currentColor" 
+             strokeWidth="2" 
+             strokeLinecap="round" 
+             strokeLinejoin="round"
+          className="w-[28px] md:w-[38px] h-[28px] md:h-[38px]">
+        <path d="M10 12h4"/>
+        <path d="M10 8h4"/>
+        <path d="M14 21v-3a2 2 0 0 0-4 0v3"/>
+        <path d="M6 10H4a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-2"/>
+        <path d="M6 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16"/>
+       </svg> Tiendas Registradas </h1>
 
         <div className="bg-white dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl shadow-xl p-4 md:p-5 flex items-center justify-between gap-3">
-          <div className="text-[var(--text-secondary)] font-semibold text-sm md:text-base">
+          <div className="text-[var(--text-secondary)] dark:text-white/90 font-semibold text-sm md:text-base">
             Total de Tiendas Registradas:{' '}
             <span className="text-[var(--text-primary)] font-extrabold">{stores.length}</span>
           </div>
@@ -126,7 +143,7 @@ export default function TiendasRegistradasPage() {
           <div className="flex items-center gap-3 md:gap-8">
             <button
               type="button"
-              className="inline-flex items-center gap-2.5 bg-gradient-to-r from-sky-400 to-sky-500 text-white font-bold px-4 py-2.5 rounded-full shadow-lg shadow-sky-500/25 hover:shadow-sky-500/40 hover:-translate-y-0.5 transition-all duration-200"
+              className="inline-flex items-center gap-2.5 bg-gradient-to-r from-sky-400 to-sky-500 dark:from-[var(--brand-green)] dark:to-[var(--brand-green)] text-white font-bold px-4 py-2.5 rounded-full shadow-lg shadow-[0_10px_25px_rgba(14,165,233,0.2)] dark:shadow-[0_10px_25px_rgba(74,124,89,0.25)] hover:-translate-y-0.5 transition-all duration-200"
             >
               <Icon name="Settings" className="w-4 h-4" />
               <span>Filtro</span>
@@ -137,7 +154,7 @@ export default function TiendasRegistradasPage() {
               onClick={() => setViewMode('grid')}
               className={`w-11 h-11 rounded-xl border transition-all hover:-translate-y-0.5 hover:shadow-lg flex items-center justify-center ${
                 viewMode === 'grid'
-                  ? 'bg-sky-50 dark:bg-sky-900/30 border-sky-200 dark:border-sky-700'
+                  ? 'bg-sky-50 dark:bg-[var(--brand-green-hover)] border-sky-200 dark:border-[var(--icons-green)]'
                   : 'bg-white dark:bg-[var(--bg-card)] border-[var(--border-subtle)]'
               }`}
               aria-label="Vista en cuadrícula"
@@ -150,7 +167,7 @@ export default function TiendasRegistradasPage() {
               onClick={() => setViewMode('list')}
               className={`w-11 h-11 rounded-xl border transition-all hover:-translate-y-0.5 hover:shadow-lg flex items-center justify-center ${
                 viewMode === 'list'
-                  ? 'bg-sky-50 dark:bg-sky-900/30 border-sky-200 dark:border-sky-700'
+                  ? 'bg-sky-50 dark:bg-[var(--brand-green-hover)] border-sky-200 dark:border-[var(--icons-green)]'
                   : 'bg-white dark:bg-[var(--bg-card)] border-[var(--border-subtle)]'
               }`}
               aria-label="Vista en lista"
@@ -221,14 +238,16 @@ export default function TiendasRegistradasPage() {
               <div className="pt-6 pb-4 px-4 bg-gradient-to-b from-slate-50 to-white dark:from-[var(--bg-muted)] dark:to-[var(--bg-card)] flex items-center gap-3">
                 <a
                   href={`/tienda/${store.nombre.toLowerCase().replace(/\s+/g, '-')}`}
-                  className="w-11 h-11 rounded-full bg-gradient-to-r from-sky-400 to-sky-500 text-white flex items-center justify-center shadow-lg shadow-sky-500/25 hover:-translate-y-0.5 hover:shadow-sky-500/40 transition-all flex-shrink-0"
+                  className="w-11 h-11 rounded-full bg-gradient-to-r from-sky-400 to-sky-500 dark:from-[var(--brand-green)] dark:to-[var(--brand-green)] text-white flex items-center justify-center shadow-lg 
+                  shadow-[0_10px_25px_rgba(14,165,233,0.2)] dark:shadow-[0_10px_25px_rgba(74,124,89,0.25)] hover:-translate-y-0.5 transition-all flex-shrink-0"
                   aria-label={`Ver tienda ${store.nombre}`}
                 >
                   <Icon name="ArrowRight" className="w-5 h-5" />
                 </a>
                 <button
                   type="button"
-                  className="h-11 px-5 rounded-full font-extrabold text-sky-500 bg-white dark:bg-[var(--bg-card)] border-2 border-sky-400/55 shadow-md hover:bg-sky-50 dark:hover:bg-sky-900/20 hover:border-sky-500/70 hover:text-sky-600 transition-all"
+                  className="h-11 px-5 rounded-full font-extrabold text-sky-500 dark:text-[var(--text-primary)] bg-white dark:bg-[var(--brand-green)] border-2 border-sky-400/55 dark:border-[var(--border-subtle)] shadow-md hover:bg-sky-50 
+                  dark:hover:bg-[var(--brand-green-hover)] hover:border-sky-500/70 dark:hover:border-[var(--brand-green)] hover:text-sky-600 dark:hover:text-[var(--text-primary)] transition-all"
                 >
                   Seguir
                 </button>
@@ -238,12 +257,12 @@ export default function TiendasRegistradasPage() {
         </section>
 
         <div className="mt-12 text-center">
-          <p className="text-[var(--text-muted)] mb-4">
+          <p className="text-[var(--text-muted)] dark:text-white/90 mb-4">
             ¿Tienes una tienda y quieres registrarte?
           </p>
           <a
             href="/login"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-xl transition-colors"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-sky-500 dark:bg-[var(--brand-green)] hover:bg-sky-600 dark:hover:bg-[var(--brand-green-hover)] border-2 border-[var(--border-subtle)] text-white font-bold rounded-xl transition-colors"
           >
             <Icon name="UserPlus" className="w-5 h-5" />
             Registra tu Tienda

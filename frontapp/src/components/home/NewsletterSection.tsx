@@ -69,7 +69,7 @@ export default function NewsletterSection() {
               <button
                 type="submit"
                 disabled={loading}
-                className="px-6 py-2.5 rounded-full bg-sky-500 hover:bg-sky-600 dark:bg-[var(--brand-green)] dark:hover:bg-[var(--brand-green-hover)] text-sm font-semibold shadow-md transition-colors disabled:opacity-50"
+                className="px-6 py-2.5 rounded-full bg-sky-500 hover:bg-sky-600 dark:bg-[var(--brand-green)] dark:hover:bg-[var(--brand-green-hover)] text-sm font-semibold shadow-md transition-colors disabled:opacity-50 dark:border-[var(--border-subtle)]"
               >
                 {loading ? 'Suscribiendo...' : 'Suscribirme'}
               </button>

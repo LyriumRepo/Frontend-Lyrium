@@ -1,3 +1,6 @@
+// Agregar al inicio del archivo
+export type ChatCategory = 'facturacion' | 'logistica' | 'negativo' | 'informacion' | 'positivo';
+
 export interface CustomerConversation {
     id: string;
     sellerId: string;
@@ -8,6 +11,8 @@ export interface CustomerConversation {
     lastMessageTime: string;
     unreadCount: number;
     status: 'active' | 'archived';
+    category?: ChatCategory;  // ← nuevo
+    subject?: string;         // ← nuevo
 }
 
 export interface CustomerMessage {

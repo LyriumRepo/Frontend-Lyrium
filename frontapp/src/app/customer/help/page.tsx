@@ -13,23 +13,23 @@ interface FaqItem {
 const faqs: FaqItem[] = [
   {
     question: '¿Cómo puedo rastrear mi pedido?',
-    answer: 'Puedes rastrear tu pedido en la sección "Mis Pedidos". Allí encontrarás el estado actualizado y el número de seguimiento.'
+    answer: 'Puedes rastrear tu pedido en el módulo "Mis Pedidos". En detalles del pedido encontrarás el estado actualizado y el número de seguimiento.'
   },
   {
-    question: '¿Cómo puedo devolver un producto?',
-    answer: 'Para devolver un producto, ve a "Mis Pedidos", selecciona el pedido y haz clic en "Solicitar Devolución". Te guiaremos a través del proceso.'
+    question: '¿Cómo puedo realizar una devolución, reembolso o cancelación de pedido?',
+    answer: 'Cualquier solicitud de devolución, reembolso o cancelación de pedido se tramitará directamente con la tienda correspondiente, puede utilizar su módulo "Chat con Vendedor" o las vías de contacto corporativas (correo electrónico y WhatsApp) brindadas por la misma.'
   },
   {
-    question: '¿Cuáles son los métodos de pago aceptados?',
-    answer: 'Aceptamos tarjetas de crédito/débito (Visa, Mastercard, American Express), PayPal y transferencia bancaria.'
+    question: '¿Cuáles son los métodos de pago aceptados por Lyrium Biomarketplace?',
+    answer: 'Aceptamos múltiples métodos de pago, incluyendo tarjetas de crédito y débito Visa, Mastercard y American Express, así como las billeteras digitales Yape y Plin.'
   },
   {
     question: '¿Cuánto tiempo tarda en llegar mi pedido?',
-    answer: 'El tiempo de entrega depende de tu ubicación. Generalmente entre 3-7 días hábiles para Lima y 5-10 días hábiles para provincias.'
+    answer: 'El tiempo de entrega depende de tu ubicación, la modalidad de envió y del operador logístico designado por la tienda en donde realizo el pedido. También puedo ver los detalles en su modulo "Mis Pedidos".'
   },
   {
-    question: '¿Cómo puedo contactar al soporte?',
-    answer: 'Puedescontactarnos a través de nuestro chat en vivo, enviando un ticket de soporte o escribiendo a soporte@lyrium.com'
+    question: '¿Cómo puedo contactar al soporte de Lyrium Biomarketplace?',
+    answer: 'Puedes contactarnos a través del módulo "Soporte Lyrium", enviando un ticket de atención con su respectiva categoría y asunto.'
   }
 ];
 
@@ -73,7 +73,7 @@ export default function CustomerHelpPage() {
       </div>
 
       <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-3xl shadow-xl border border-slate-100 dark:border-[var(--border-subtle)] overflow-hidden">
-        <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 p-8 flex items-center gap-5 relative overflow-hidden">
+        <div className="bg-gradient-to-r from-sky-400 via-sky-500 to-sky-600 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-8 flex items-center gap-5 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl" />
           <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-inner">
             <Icon name="Search" className="w-6 h-6 text-white" />
@@ -95,7 +95,7 @@ export default function CustomerHelpPage() {
               placeholder="Buscar pregunta..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 pl-12 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-xl outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-100 transition-all"
+              className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 pl-12 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 dark:focus:border-[var(--brand-green)] focus:ring-2 focus:ring-sky-100  dark:focus:ring-[var(--icons-green)] transition-all"
             />
             <Icon name="Search" className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
           </div>
@@ -121,8 +121,8 @@ export default function CustomerHelpPage() {
                   />
                 </button>
                 {openFaq === index && (
-                  <div className="p-4 pt-0 border-t border-gray-100 dark:border-[var(--border-subtle)]">
-                    <p className="text-sm text-gray-600 dark:text-[var(--text-muted)]">
+                  <div className="p-4 pt-4 border-t border-gray-100 dark:border-[var(--border-subtle)]">
+                    <p className="text-sm text-gray-600 dark:text-gray-300">
                       {faq.answer}
                     </p>
                   </div>
@@ -143,32 +143,32 @@ export default function CustomerHelpPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <a
           href="/customer/support"
-          className="bg-white dark:bg-[var(--bg-secondary)] p-6 rounded-2xl shadow-lg border border-slate-100 dark:border-[var(--border-subtle)] hover:border-sky-300 dark:hover:border-sky-600 transition-colors group"
+          className="bg-white dark:bg-[var(--bg-secondary)] p-6 rounded-2xl shadow-lg border border-slate-100 dark:border-[var(--border-subtle)] hover:border-[#bde90d] transition-colors group"
         >
-          <div className="w-12 h-12 bg-sky-100 dark:bg-sky-900/30 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-            <Icon name="MessageCircle" className="w-6 h-6 text-sky-600 dark:text-sky-400" />
+          <div className="w-12 h-12 bg-[#bde90d]/20 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+            <Icon name="MessageCircle" className="w-6 h-6 text-[#bde90d]" />
           </div>
-          <h4 className="font-bold text-gray-800 dark:text-[var(--text-primary)] mb-2">Chat en Vivo</h4>
+          <h4 className="font-bold text-gray-800 dark:text-[var(--text-primary)] mb-2">Soporte Lyrium</h4>
           <p className="text-sm text-gray-500 dark:text-[var(--text-muted)]">Habla con un agente ahora</p>
         </a>
 
         <a
           href="mailto:soporte@lyrium.com"
-          className="bg-white dark:bg-[var(--bg-secondary)] p-6 rounded-2xl shadow-lg border border-slate-100 dark:border-[var(--border-subtle)] hover:border-violet-300 dark:hover:border-violet-600 transition-colors group"
+          className="bg-white dark:bg-[var(--bg-secondary)] p-6 rounded-2xl shadow-lg border border-slate-100 dark:border-[var(--border-subtle)] hover:border-[#78e69d] transition-colors group"
         >
-          <div className="w-12 h-12 bg-violet-100 dark:bg-violet-900/30 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-            <Icon name="Mail" className="w-6 h-6 text-violet-600 dark:text-violet-400" />
+          <div className="w-12 h-12 bg-[#78e69d]/20 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+            <Icon name="Mail" className="w-6 h-6 text-[#78e69d]" />
           </div>
           <h4 className="font-bold text-gray-800 dark:text-[var(--text-primary)] mb-2">Email</h4>
-          <p className="text-sm text-gray-500 dark:text-[var(--text-muted)]">soporte@lyrium.com</p>
+          <p className="text-sm text-gray-500 dark:text-[var(--text-muted)]">ventas@lyriumbiomarketplace.com</p>
         </a>
 
         <a
           href="tel:+5101800000"
-          className="bg-white dark:bg-[var(--bg-secondary)] p-6 rounded-2xl shadow-lg border border-slate-100 dark:border-[var(--border-subtle)] hover:border-emerald-300 dark:hover:border-emerald-600 transition-colors group"
+          className="bg-white dark:bg-[var(--bg-secondary)] p-6 rounded-2xl shadow-lg border border-slate-100 dark:border-[var(--border-subtle)] hover:border-[#59a6cb] transition-colors group"
         >
-          <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-            <Icon name="Phone" className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+          <div className="w-12 h-12 bg-[#59a6cb]/20 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+            <Icon name="Phone" className="w-6 h-6 text-[#59a6cb]" />
           </div>
           <h4 className="font-bold text-gray-800 dark:text-[var(--text-primary)] mb-2">Teléfono</h4>
           <p className="text-sm text-gray-500 dark:text-[var(--text-muted)]">0800-0000 (Sin costo)</p>
