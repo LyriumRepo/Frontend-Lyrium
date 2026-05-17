@@ -105,7 +105,7 @@ export default function LayoutSelector({ config, updateConfig }: LayoutSelectorP
 
     return (
         <div className="glass-card p-0 overflow-hidden border-none rounded-[2.5rem] shadow-2xl bg-[var(--bg-card)] mb-8 animate-fadeIn">
-            <div className="bg-gradient-to-r from-sky-500 via-sky-500 to-sky-400 p-8 flex items-center justify-between relative overflow-hidden">
+            <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[var(--brand-green)] dark:to-[#1A3A32] p-8 flex items-center justify-between relative overflow-hidden">
                 <div className="flex items-center gap-5 text-white relative z-10">
                     <div className="w-12 h-12 bg-white/20 dark:bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 dark:border-white/20 shadow-inner">
                         <Icon name="Palette" className="w-6 h-6" />
@@ -119,7 +119,7 @@ export default function LayoutSelector({ config, updateConfig }: LayoutSelectorP
                 </div>
                 <button
                     onClick={() => setIsPreviewOpen(true)}
-                    className="relative z-10 flex items-center gap-3 px-6 py-3 rounded-2xl bg-[var(--bg-card)] backdrop-blur-md text-[var(--text-primary)] border border-[var(--border-subtle)] font-black text-[10px] uppercase tracking-widest hover:text-sky-500 transition-all shadow-lg active:scale-95"
+                    className="relative z-10 flex items-center gap-3 px-6 py-3 rounded-2xl bg-[var(--bg-card)] backdrop-blur-md text-[var(--text-primary)] border border-[var(--border-subtle)] font-black text-[10px] uppercase tracking-widest hover:text-sky-500 dark:hover:text-[var(--icons-green)] transition-all shadow-lg active:scale-95"
                 >
                     <Icon name="Eye" className="w-5 h-5" />
                     <span>Visualizar Tienda</span>
@@ -130,7 +130,7 @@ export default function LayoutSelector({ config, updateConfig }: LayoutSelectorP
                 <div className="space-y-8">
                     <div className="space-y-6">
                         <div className="flex items-center gap-2 mb-2 ml-1">
-                            <Icon name="MousePointerClick" className="text-sky-500 w-4 h-4" />
+                            <Icon name="MousePointerClick" className="text-sky-500 dark:text-[var(--icons-green)] w-4 h-4" />
                             <span className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Selecciona una estructura</span>
                         </div>
 
@@ -146,7 +146,7 @@ export default function LayoutSelector({ config, updateConfig }: LayoutSelectorP
                                         onChange={e => updateConfig({ layout: e.target.value as any })}
                                         className="sr-only peer"
                                     />
-                                    <div className="p-6 rounded-[2.5rem] border-2 border-[var(--border-subtle)] bg-[var(--bg-card)] hover:border-sky-500/30 hover:shadow-lg peer-checked:border-sky-500 peer-checked:shadow-2xl peer-checked:shadow-sky-500/20 peer-checked:-translate-y-1 transition-all relative overflow-hidden">
+                                    <div className="p-6 rounded-[2.5rem] border-2 border-[var(--border-subtle)] bg-[var(--bg-card)] hover:border-sky-500/30 dark:hover:border-emerald-500/30 hover:shadow-lg peer-checked:border-sky-500 dark:peer-checked:border-[var(--icons-green)] peer-checked:shadow-2xl peer-checked:shadow-sky-500/20 dark:peer-checked:shadow-emerald-500/30 peer-checked:-translate-y-1 transition-all relative overflow-hidden">
                                         <div className="absolute top-0 right-0 w-20 h-20 bg-sky-500/10 rounded-bl-[4rem] opacity-0 peer-checked:opacity-100 transition-opacity flex items-center justify-center pl-6 pb-6">
                                             <Icon name="Check" className="text-sky-500 w-6 h-6" />
                                         </div>

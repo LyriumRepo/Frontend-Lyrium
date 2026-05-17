@@ -16,7 +16,7 @@ export default function AboutPage() {
 
     const getTimelineIcon = (index: number) => {
         const iconName = timelineIcons[index % 6];
-        return <Icon name={iconName as any} className="w-full h-full text-sky-500 group-hover:rotate-12 transition-transform" />;
+        return <Icon name={iconName as any} className="w-full h-full text-sky-500 dark:text-[var(--text-primary)] group-hover:rotate-12 transition-transform" />;
     };
 
     return (
@@ -36,7 +36,7 @@ export default function AboutPage() {
                     <h1 className="text-3xl md:text-5xl lg:text-7xl font-black text-white leading-tight tracking-tighter drop-shadow-2xl max-w-4xl">
                         {aboutData.hero.title}
                     </h1>
-                    <div className="mt-8 mx-auto w-24 h-1 bg-sky-400 rounded-full shadow-[0_0_15px_rgba(56,189,248,0.5)] animate-pulse" />
+                    <div className="mt-8 mx-auto w-24 h-1 bg-sky-400 dark:bg-[var(--icons-green)] rounded-full shadow-[0_0_15px_rgba(56,189,248,0.5)] animate-pulse" />
                 </div>
             </section>
 
@@ -44,7 +44,7 @@ export default function AboutPage() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
                     <div className="space-y-8 animate-in animate-delay-1">
                         <div className="inline-flex items-center gap-2 px-4 py-2 bg-sky-50 dark:bg-[var(--bg-secondary)] border border-sky-100 dark:border-[var(--border-subtle)] rounded-full">
-                            <span className="w-2 h-2 bg-sky-500 rounded-full animate-ping" />
+                            <span className="w-2 h-2 bg-sky-500 dark:bg-[var(--icons-green)] rounded-full animate-ping" />
                             <span className="text-xs font-bold text-sky-600 dark:text-[#6BAF7B] uppercase tracking-widest">
                                 {aboutData.doctorSection.tagline}
                             </span>
@@ -52,14 +52,14 @@ export default function AboutPage() {
 
                         <h2 className="text-4xl md:text-5xl font-black text-slate-800 dark:text-[var(--text-primary)] leading-[1.1]">
                             Tu salud es nuestra <br />
-                            <span className="bg-gradient-to-r from-sky-500 to-sky-700 bg-clip-text text-transparent italic">
+                            <span className="bg-gradient-to-r from-sky-500 to-sky-700 dark:from-[var(--icons-green)] dark:to-[var(--brand-green)] bg-clip-text text-transparent italic">
                                 prioridad absoluta
                             </span>
                         </h2>
 
                         <div className="space-y-6 text-slate-600 dark:text-[var(--text-muted)] leading-relaxed text-lg">
                             {aboutData.doctorSection.paragraphs.map((p, i) => (
-                                <p key={`paragraph-${i}`} className={i === 0 ? "font-semibold text-slate-900 dark:text-[var(--text-primary)] border-l-4 border-sky-500 pl-6 py-2 bg-sky-50/30 dark:bg-[var(--bg-secondary)]/30 rounded-r-2xl" : ""}>
+                                <p key={`paragraph-${i}`} className={`text-justify ${ i === 0 ? "font-semibold text-slate-900 dark:text-[var(--text-primary)] border-l-4 border-sky-500 dark:border-[var(--icons-green)] pl-6 py-2 bg-sky-50/30 dark:bg-[var(--bg-secondary)]/30 rounded-r-2xl" : ""}`}>
                                     {p}
                                 </p>
                             ))}
@@ -81,7 +81,7 @@ export default function AboutPage() {
                     </div>
 
                     <div className="relative group animate-in animate-delay-2">
-                        <div className="absolute -inset-4 bg-sky-400/20 dark:bg-sky-500/10 rounded-[3rem] blur-2xl group-hover:bg-sky-400/30 transition-all duration-700" />
+                        <div className="absolute -inset-4 bg-sky-400/20 dark:bg-[var(--brand-green)] rounded-[3rem] blur-2xl group-hover:bg-sky-400/30 dark:group-hover:bg-[var(--icons-green)] transition-all duration-700" />
                         <div className="relative rounded-[2.5rem] overflow-hidden shadow-2xl border-8 border-white dark:border-[#111A15]">
                             <Image
                                 src={`/${aboutData.doctorSection.image}`}
@@ -131,7 +131,7 @@ export default function AboutPage() {
                                             ))}
                                         </ul>
                                     ) : (
-                                        <p className="white/90 font-medium text-lg leading-relaxed">
+                                        <p className="text-white/90 font-medium text-lg leading-relaxed text-justify">
                                             {val.description}
                                         </p>
                                     )}
@@ -156,7 +156,7 @@ export default function AboutPage() {
                     </div>
 
                     <div className="relative">
-                        <div className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-1 bg-gradient-to-b from-sky-200 dark:from-[#2A3F33] via-sky-500 to-sky-200 dark:to-[#2A3F33] rounded-full hidden md:block" />
+                        <div className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-1 bg-gradient-to-b from-sky-200 via-sky-500 to-sky-200 dark:from-[var(--brand-green)] dark:via-[var(--icons-green)] dark:to-[var(--brand-green)] rounded-full hidden md:block" />
 
                         <div className="space-y-20 md:space-y-0 relative">
                             {aboutData.timeline.items.map((item, idx) => (

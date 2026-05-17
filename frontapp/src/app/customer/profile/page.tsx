@@ -14,8 +14,8 @@ interface ProfileFormData {
   celular_secundario: string;
   telefono_fijo: string;
   fecha_cumpleanos: string;
-  dni: string;
-  document_type: string;
+  tipo_documento: string;
+  numero_documento: string;
   foto: string;
 }
 
@@ -28,8 +28,8 @@ const initialData: ProfileFormData = {
   celular_secundario: '',
   telefono_fijo: '',
   fecha_cumpleanos: '',
-  dni: '',
-  document_type: 'DNI',
+  tipo_documento: 'DNI',
+  numero_documento: '',
   foto: '',
 };
 
@@ -39,131 +39,222 @@ export default function CustomerProfilePage() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [formData, setFormData] = useState<ProfileFormData>(initialData);
   const [saving, setSaving] = useState(false);
-  const [saveError, setSaveError] = useState('');
-  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [errors, setErrors] = useState<Partial<Record<keyof ProfileFormData, string>>>({});
 
-  // Redirigir si no está autenticado
   useEffect(() => {
     if (loading) return;
+
     if (!isAuthenticated) {
       router.push('/login');
     }
   }, [loading, isAuthenticated, router]);
 
-  // FIX: Mapeo correcto de campos del backend al formulario
   useEffect(() => {
     if (user) {
-      // display_name puede ser "Juan Pérez" → separamos en nombre y apellido
-      // nicename puede ser "juan-perez" (slug) → no usarlo para apellidos
-      const fullName = user.display_name || user.nicename || '';
-      const partes = fullName.split(' ');
-      const nombres = partes[0] || '';
-      const apellidos = partes.slice(1).join(' ') || '';
-
       setFormData({
-        nombres,
-        apellidos,
+        nombres: user.nicename?.split(' ')[0] || '',
+        apellidos: user.nicename?.split(' ').slice(1).join(' ') || '',
         correo: user.email || '',
-        correo_secundario: '',           // No existe en backend aún
-        telefono: user.phone || '',      // FIX: user.phone → telefono
-        celular_secundario: user.phone_2 || '',  // FIX: user.phone_2
-        telefono_fijo: '',               // No existe en backend aún
-        fecha_cumpleanos: '',            // No existe en backend aún
-        dni: user.document_number || '', // FIX: user.document_number → dni
-        document_type: user.document_type || 'DNI',
+        correo_secundario: '',
+        telefono: '',
+        celular_secundario: '',
+        telefono_fijo: '',
+        fecha_cumpleanos: '',
+        tipo_documento: 'DNI',
+        numero_documento: '',
         foto: user.avatar || '',
       });
     }
   }, [user]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+  const formatearDocumento = (valor: string, tipoDocumento: string) => {
+    const numeros = valor.replace(/\D/g, '');
+
+    if (tipoDocumento === 'DNI') {
+      return numeros.slice(0, 8);
+    }
+
+    if (tipoDocumento === 'CE' || tipoDocumento === 'PASAPORTE') {
+      return numeros.slice(0, 9);
+    }
+
+    if (tipoDocumento === 'RUC') {
+      const soloNumeros = numeros.slice(0, 11);
+
+      if (soloNumeros.length <= 2) return soloNumeros;
+      if (soloNumeros.length <= 10) {
+        return `${soloNumeros.slice(0, 2)}-${soloNumeros.slice(2)}`;
+      }
+
+      return `${soloNumeros.slice(0, 2)}-${soloNumeros.slice(2, 10)}-${soloNumeros.slice(10)}`;
+    }
+
+    return numeros;
   };
 
-  // FIX: handleSave ahora llama al backend real
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    const fieldName = name as keyof ProfileFormData;
+
+    if (name === 'numero_documento' && e.target instanceof HTMLInputElement) {
+      setFormData(prev => ({
+        ...prev,
+        numero_documento: formatearDocumento(value, prev.tipo_documento),
+      }));
+
+      setErrors(prev => ({ ...prev, numero_documento: '' }));
+      return;
+    }
+
+    setFormData(prev => ({ ...prev, [fieldName]: value }));
+    setErrors(prev => ({ ...prev, [fieldName]: '' }));
+  };
+
+  const handleTipoDocumentoChange = (
+    e: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    const nuevoTipo = e.target.value;
+
+    setFormData(prev => ({
+      ...prev,
+      tipo_documento: nuevoTipo,
+      numero_documento: formatearDocumento(prev.numero_documento, nuevoTipo),
+    }));
+
+    setErrors(prev => ({
+      ...prev,
+      tipo_documento: '',
+      numero_documento: '',
+    }));
+  };
+
+  const requiredFields: { key: keyof ProfileFormData; label: string }[] = [
+    { key: 'nombres', label: 'Nombres' },
+    { key: 'apellidos', label: 'Apellidos' },
+    { key: 'correo', label: 'Correo Principal' },
+    { key: 'telefono', label: 'Celular Principal' },
+    { key: 'tipo_documento', label: 'Tipo de Documento' },
+    { key: 'numero_documento', label: 'Número de Documento' },
+  ];
+
+  const validateForm = () => {
+    const newErrors: Partial<Record<keyof ProfileFormData, string>> = {};
+
+    requiredFields.forEach(({ key, label }) => {
+      if (!formData[key].toString().trim()) {
+        newErrors[key] = `El campo ${label} es obligatorio.`;
+      }
+    });
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSave = async () => {
-    setSaving(true);
-    setSaveError('');
-    setSaveSuccess(false);
+    if (!validateForm()) return;
 
     try {
-      const API = process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://localhost:8000/api';
+      setSaving(true);
 
-      // Obtener token de cookie httpOnly a través del proxy de sesión
-      const sessionRes = await fetch('/api/auth/session');
-      const sessionData = await sessionRes.json();
-      const token = sessionData?.token;
+      // Aquí iría tu lógica real de guardado
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
-      if (!token) {
-        setSaveError('No se encontró tu sesión. Vuelve a iniciar sesión.');
-        setSaving(false);
-        return;
-      }
-
-      const payload: Record<string, string> = {
-        name: `${formData.nombres} ${formData.apellidos}`.trim(),
-      };
-
-      // Solo incluir campos que el backend acepta y que tienen valor
-      if (formData.telefono)    payload.phone           = formData.telefono;
-      if (formData.dni)         payload.document_number = formData.dni;
-      if (formData.document_type) payload.document_type = formData.document_type;
-      if (formData.foto)        payload.avatar          = formData.foto;
-
-      const res = await fetch(`${API}/users/profile`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (res.ok) {
-        setSaveSuccess(true);
-        setIsEditMode(false);
-        setTimeout(() => setSaveSuccess(false), 3000);
-      } else {
-        const errorData = await res.json().catch(() => ({}));
-        setSaveError(errorData?.message || 'Error al guardar. Intenta de nuevo.');
-      }
-    } catch {
-      setSaveError('Error de conexión con el servidor.');
+      setIsEditMode(false);
     } finally {
       setSaving(false);
     }
   };
 
-  const handleCancelEdit = () => {
-    setIsEditMode(false);
-    setSaveError('');
-    // Restaurar datos originales del usuario
-    if (user) {
-      const fullName = user.display_name || user.nicename || '';
-      const partes = fullName.split(' ');
-      setFormData(prev => ({
-        ...prev,
-        nombres: partes[0] || '',
-        apellidos: partes.slice(1).join(' ') || '',
-        telefono: user.phone || '',
-        celular_secundario: user.phone_2 || '',
-        dni: user.document_number || '',
-        document_type: user.document_type || 'DNI',
-        foto: user.avatar || '',
-      }));
-    }
+  const parseBirthday = (dateStr: string) => {
+    if (!dateStr) return null;
+
+    const [year, month, day] = dateStr.split('-').map(Number);
+    if (!year || !month || !day) return null;
+
+    return { year, month, day };
+  };
+
+  const makeLocalDate = (year: number, month: number, day: number) => {
+    const date = new Date(year, month - 1, day);
+    date.setHours(0, 0, 0, 0);
+    return date;
   };
 
   const formatBirthday = (dateStr: string) => {
-    if (!dateStr) return '---';
-    try {
-      const date = new Date(dateStr);
-      return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'long' });
-    } catch {
-      return '---';
-    }
+    const parts = parseBirthday(dateStr);
+    if (!parts) return '---';
+
+    const date = makeLocalDate(parts.year, parts.month, parts.day);
+
+    return date.toLocaleDateString('es-ES', {
+      day: 'numeric',
+      month: 'long',
+    });
   };
+
+  const getBirthdayContent = (dateStr: string) => {
+    const parts = parseBirthday(dateStr);
+
+    if (!parts) {
+      return {
+        title: 'Lyrium siempre piensa en ti',
+        description: 'Aún no tienes una fecha de cumpleaños registrada.',
+      };
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const currentYear = today.getFullYear();
+
+    let nextBirthday = makeLocalDate(currentYear, parts.month, parts.day);
+    if (nextBirthday < today) {
+      nextBirthday = makeLocalDate(currentYear + 1, parts.month, parts.day);
+    }
+
+    let lastBirthday = makeLocalDate(currentYear, parts.month, parts.day);
+    if (lastBirthday > today) {
+      lastBirthday = makeLocalDate(currentYear - 1, parts.month, parts.day);
+    }
+
+    const daysUntilBirthday = Math.round(
+      (nextBirthday.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+    );
+
+    const daysSinceBirthday = Math.round(
+      (today.getTime() - lastBirthday.getTime()) / (1000 * 60 * 60 * 24)
+    );
+
+    if (daysUntilBirthday === 0) {
+      return {
+        title: '¡Feliz cumpleaños!',
+        description: 'Hoy es tu día. Te deseamos un cumpleaños increíble.',
+      };
+    }
+
+    if (daysUntilBirthday >= 1 && daysUntilBirthday <= 30) {
+      return {
+        title: '¡Tu día especial <br /> está llegando!',
+        description: 'Prepárate para una sorpresa exclusiva diseñada solo para ti.',
+      };
+    }
+
+    if (daysSinceBirthday >= 1 && daysSinceBirthday <= 7) {
+      return {
+        title: 'Tu día especial fue hace poco',
+        description: 'Esperamos que la hayas pasado genial y que hayas disfrutado tu día al máximo.',
+      };
+    }
+
+    return {
+      title: 'Lyrium siempre piensa en ti',
+      description: 'Todavía falta bastante para tu día especial, pero ya lo tenemos presente.',
+    };
+  };
+
+  const birthdayContent = getBirthdayContent(formData.fecha_cumpleanos);
 
   if (loading || !user) {
     return (
@@ -173,9 +264,15 @@ export default function CustomerProfilePage() {
     );
   }
 
+  const inputClassName = (field: keyof ProfileFormData) =>
+    `w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-transparent p-3 border-2 rounded-xl outline-none transition-all duration-300 ${
+      errors[field]
+        ? 'border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-100 dark:focus:ring-red-900/30'
+        : 'border-gray-200 dark:border-[var(--border-subtle)] focus:border-sky-500 dark:focus:border-[var(--brand-green)] focus:ring-2 focus:ring-sky-100 dark:focus:ring-[var(--icons-green)]'
+    }`;
+
   return (
     <div className="space-y-8 animate-fadeIn">
-      {/* Cabecera */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl md:text-3xl font-black text-slate-800 dark:text-[var(--text-primary)]">
@@ -185,64 +282,33 @@ export default function CustomerProfilePage() {
             Gestiona tu información personal
           </p>
         </div>
-        <div className="flex gap-3">
-          {/* Botón cancelar (solo en modo edición) */}
-          {isEditMode && (
-            <button
-              onClick={handleCancelEdit}
-              className="flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-sm bg-gray-100 dark:bg-[var(--bg-muted)] text-gray-600 dark:text-[var(--text-muted)] hover:bg-gray-200 transition-all"
-            >
-              <Icon name="X" className="w-4 h-4" />
-              <span>Cancelar</span>
-            </button>
-          )}
-          {/* Botón guardar / editar */}
-          <button
-            onClick={() => isEditMode ? handleSave() : setIsEditMode(true)}
-            disabled={saving}
-            className={`flex items-center gap-3 px-6 py-3 rounded-xl font-bold text-sm transition-all ${
-              isEditMode
-                ? 'bg-sky-500 text-white hover:bg-sky-600'
-                : 'bg-white dark:bg-[var(--bg-secondary)] text-black dark:text-[var(--text-primary)] border border-gray-200 dark:border-[var(--border-subtle)] hover:text-sky-500'
+        <button
+          onClick={() => isEditMode ? handleSave() : setIsEditMode(true)}
+          disabled={saving}
+          className={`flex items-center gap-3 px-6 py-3 rounded-xl font-bold text-sm transition-all ${isEditMode
+            ? 'bg-sky-500 dark:bg-[var(--brand-green)] text-white hover:bg-sky-600 dark:hover:bg-[var(--brand-green-hover)]'
+            : 'bg-white dark:bg-[var(--bg-secondary)] text-black dark:text-[var(--text-primary)] border border-gray-200 dark:border-[var(--border-subtle)] hover:text-sky-500 dark:hover:text-[var(--icons-green)]'
             }`}
-          >
-            {saving ? (
-              <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
-            ) : isEditMode ? (
-              <>
-                <Icon name="Check" className="w-5 h-5" />
-                <span>Guardar Cambios</span>
-              </>
-            ) : (
-              <>
-                <Icon name="Pencil" className="w-5 h-5" />
-                <span>Editar Información</span>
-              </>
-            )}
-          </button>
-        </div>
+        >
+          {saving ? (
+            <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
+          ) : isEditMode ? (
+            <>
+              <Icon name="Check" className="w-5 h-5" />
+              <span>Guardar Cambios</span>
+            </>
+          ) : (
+            <>
+              <Icon name="Pencil" className="w-5 h-5" />
+              <span>Editar Información</span>
+            </>
+          )}
+        </button>
       </div>
 
-      {/* Mensaje de éxito */}
-      {saveSuccess && (
-        <div className="flex items-center gap-3 px-5 py-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-2xl text-green-700 dark:text-green-400 text-sm font-bold">
-          <Icon name="CheckCircle" className="w-5 h-5 flex-shrink-0" />
-          Cambios guardados correctamente.
-        </div>
-      )}
-
-      {/* Mensaje de error */}
-      {saveError && (
-        <div className="flex items-center gap-3 px-5 py-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl text-red-700 dark:text-red-400 text-sm font-bold">
-          <Icon name="AlertCircle" className="w-5 h-5 flex-shrink-0" />
-          {saveError}
-        </div>
-      )}
-
       <form className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
-        {/* Panel principal de información */}
         <div className="md:col-span-8 bg-white dark:bg-[var(--bg-secondary)] rounded-3xl shadow-xl border border-slate-100 dark:border-[var(--border-subtle)] overflow-hidden">
-          <div className="bg-gradient-to-r from-sky-500 via-sky-500 to-sky-300 p-8 flex items-center gap-5 relative overflow-hidden">
+          <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[var(--brand-green)] dark:to-[#1A3A32] p-8 flex items-center gap-5 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl" />
             <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-inner">
               <Icon name="User" className="w-6 h-6 text-white" />
@@ -259,10 +325,8 @@ export default function CustomerProfilePage() {
 
           <div className="p-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-
-              {/* Nombres */}
               <div className="space-y-1">
-                <label className="text-[10px] font-black text-gray-400 dark:text-gray-400 uppercase tracking-widest ml-1">
+                <label className="text-[10px] font-black text-gray-400 dark:text-gray-300 uppercase tracking-widest ml-1">
                   Nombres <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -271,15 +335,17 @@ export default function CustomerProfilePage() {
                   value={formData.nombres}
                   onChange={handleChange}
                   readOnly={!isEditMode}
-                  placeholder="Tu nombre"
-                  className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-transparent p-3 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100 transition-all duration-300 read-only:cursor-default"
+                  placeholder="Cargando..."
+                  className={inputClassName('nombres')}
                 />
+                {errors.nombres && (
+                  <p className="text-xs text-red-500 font-semibold ml-1">{errors.nombres}</p>
+                )}
               </div>
 
-              {/* Apellidos */}
               <div className="space-y-1">
-                <label className="text-[10px] font-black text-gray-400 dark:text-gray-400 uppercase tracking-widest ml-1">
-                  Apellidos
+                <label className="text-[10px] font-black text-gray-400 dark:text-gray-300 uppercase tracking-widest ml-1">
+                  Apellidos <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -287,30 +353,35 @@ export default function CustomerProfilePage() {
                   value={formData.apellidos}
                   onChange={handleChange}
                   readOnly={!isEditMode}
-                  placeholder={isEditMode ? "Tus apellidos" : "—"}
-                  className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-transparent p-3 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100 transition-all duration-300 read-only:cursor-default"
+                  placeholder="Cargando..."
+                  className={inputClassName('apellidos')}
                 />
+                {errors.apellidos && (
+                  <p className="text-xs text-red-500 font-semibold ml-1">{errors.apellidos}</p>
+                )}
               </div>
 
-              {/* Correo Principal (solo lectura siempre) */}
               <div className="space-y-1">
-                <label className="text-[10px] font-black text-gray-400 dark:text-gray-400 uppercase tracking-widest ml-1">
+                <label className="text-[10px] font-black text-gray-400 dark:text-gray-300 uppercase tracking-widest ml-1">
                   Correo Principal <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="email"
                   name="correo"
                   value={formData.correo}
-                  readOnly
-                  className="w-full text-sm font-bold text-gray-500 dark:text-[var(--text-muted)] bg-gray-50 dark:bg-[var(--bg-muted)] p-3 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-xl outline-none cursor-not-allowed"
+                  onChange={handleChange}
+                  readOnly={!isEditMode}
+                  placeholder="usuario@ejemplo.com"
+                  className={inputClassName('correo')}
                 />
-                <p className="text-[9px] text-gray-400 ml-1 mt-1">El correo no puede modificarse</p>
+                {errors.correo && (
+                  <p className="text-xs text-red-500 font-semibold ml-1">{errors.correo}</p>
+                )}
               </div>
 
-              {/* Correo Secundario */}
               <div className="space-y-1">
-                <label className="text-[10px] font-black text-gray-400 dark:text-gray-400 uppercase tracking-widest ml-1">
-                  Correo Secundario
+                <label className="text-[10px] font-black text-gray-400 dark:text-gray-300 uppercase tracking-widest ml-1">
+                  Correo Secundario (opcional)
                 </label>
                 <input
                   type="email"
@@ -318,15 +389,13 @@ export default function CustomerProfilePage() {
                   value={formData.correo_secundario}
                   onChange={handleChange}
                   readOnly={!isEditMode}
-                  placeholder="—"
-                  className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-transparent p-3 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100 transition-all duration-300 read-only:cursor-default"
+                  className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-transparent dark:bg-transparent p-3 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 dark:focus:border-[var(--brand-green)] focus:ring-2 focus:ring-sky-100 dark:focus:ring-[var(--icons-green)] transition-all duration-300"
                 />
               </div>
 
-              {/* Celular Principal */}
               <div className="space-y-1">
-                <label className="text-[10px] font-black text-gray-400 dark:text-gray-400 uppercase tracking-widest ml-1">
-                  Celular Principal
+                <label className="text-[10px] font-black text-gray-400 dark:text-gray-300 uppercase tracking-widest ml-1">
+                  Celular Principal <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="tel"
@@ -335,14 +404,16 @@ export default function CustomerProfilePage() {
                   onChange={handleChange}
                   readOnly={!isEditMode}
                   placeholder="+51 --- --- ---"
-                  className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-transparent p-3 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100 transition-all duration-300 read-only:cursor-default"
+                  className={inputClassName('telefono')}
                 />
+                {errors.telefono && (
+                  <p className="text-xs text-red-500 font-semibold ml-1">{errors.telefono}</p>
+                )}
               </div>
 
-              {/* Celular Secundario */}
               <div className="space-y-1">
-                <label className="text-[10px] font-black text-gray-400 dark:text-gray-400 uppercase tracking-widest ml-1">
-                  Celular Secundario
+                <label className="text-[10px] font-black text-gray-400 dark:text-gray-300 uppercase tracking-widest ml-1">
+                  Celular Secundario (opcional)
                 </label>
                 <input
                   type="tel"
@@ -350,15 +421,13 @@ export default function CustomerProfilePage() {
                   value={formData.celular_secundario}
                   onChange={handleChange}
                   readOnly={!isEditMode}
-                  placeholder="—"
-                  className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-transparent p-3 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100 transition-all duration-300 read-only:cursor-default"
+                  className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-transparent dark:bg-transparent p-3 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 dark:focus:border-[var(--brand-green)] focus:ring-2 focus:ring-sky-100 dark:focus:ring-[var(--icons-green)] transition-all duration-300"
                 />
               </div>
 
-              {/* Teléfono Fijo */}
               <div className="space-y-1">
-                <label className="text-[10px] font-black text-gray-400 dark:text-gray-400 uppercase tracking-widest ml-1">
-                  Teléfono Fijo
+                <label className="text-[10px] font-black text-gray-400 dark:text-gray-300 uppercase tracking-widest ml-1">
+                  Teléfono Fijo (opcional)
                 </label>
                 <input
                   type="tel"
@@ -366,15 +435,13 @@ export default function CustomerProfilePage() {
                   value={formData.telefono_fijo}
                   onChange={handleChange}
                   readOnly={!isEditMode}
-                  placeholder="—"
-                  className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-transparent p-3 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100 transition-all duration-300 read-only:cursor-default"
+                  className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-transparent dark:bg-transparent p-3 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 dark:focus:border-[var(--brand-green)] focus:ring-2 focus:ring-sky-100 dark:focus:ring-[var(--icons-green)] transition-all duration-300"
                 />
               </div>
 
-              {/* Fecha de Cumpleaños */}
               <div className="space-y-1">
-                <label className="text-[10px] font-black text-gray-400 dark:text-gray-400 uppercase tracking-widest ml-1">
-                  Fecha de Cumpleaños
+                <label className="text-[10px] font-black text-gray-400 dark:text-gray-300 uppercase tracking-widest ml-1">
+                  Fecha de Cumpleaños (opcional)
                 </label>
                 <input
                   type="date"
@@ -382,67 +449,68 @@ export default function CustomerProfilePage() {
                   value={formData.fecha_cumpleanos}
                   onChange={handleChange}
                   readOnly={!isEditMode}
-                  className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-transparent p-3 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100 transition-all duration-300 read-only:cursor-default"
+                  className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-transparent dark:bg-transparent p-3 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 dark:focus:border-[var(--brand-green)] focus:ring-2 focus:ring-sky-100 dark:focus:ring-[var(--icons-green)] transition-all duration-300"
                 />
                 <p className="text-[9px] text-gray-400 dark:text-gray-400 ml-1 mt-1">
                   Recibirás un saludo especial en tu cumpleaños
                 </p>
               </div>
 
-              {/* Tipo de Documento */}
               <div className="space-y-1">
-                <label className="text-[10px] font-black text-gray-400 dark:text-gray-400 uppercase tracking-widest ml-1">
-                  Tipo de Documento
+                <label className="text-[10px] font-black text-gray-400 dark:text-gray-300 uppercase tracking-widest ml-1">
+                  Tipo de Documento <span className="text-red-500">*</span>
                 </label>
-                {isEditMode ? (
-                  <select
-                    name="document_type"
-                    value={formData.document_type}
-                    onChange={handleChange}
-                    className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-white dark:bg-[var(--bg-secondary)] p-3 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100 transition-all duration-300"
-                  >
-                    <option value="DNI">DNI</option>
-                    <option value="CE">CE</option>
-                    <option value="PAS">Pasaporte</option>
-                    <option value="RUC">RUC</option>
-                  </select>
-                ) : (
-                  <input
-                    type="text"
-                    value={formData.document_type || '—'}
-                    readOnly
-                    className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-transparent p-3 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-xl outline-none cursor-default"
-                  />
+                <select
+                  name="tipo_documento"
+                  value={formData.tipo_documento}
+                  onChange={handleTipoDocumentoChange}
+                  disabled={!isEditMode}
+                  className={`w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] p-3 border-2 rounded-xl outline-none transition-all duration-300 bg-white dark:bg-[var(--bg-secondary)] ${
+                    errors.tipo_documento
+                      ? 'border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-100 dark:focus:ring-red-900/30'
+                      : 'border-gray-200 dark:border-[var(--border-subtle)] focus:border-sky-500 dark:focus:border-[var(--brand-green)] focus:ring-2 focus:ring-sky-100 dark:focus:ring-[var(--icons-green)]'
+                  }`}
+                >
+                  <option value="DNI">DNI</option>
+                  <option value="CE">Carnet de extranjería</option>
+                  <option value="PASAPORTE">Pasaporte</option>
+                  <option value="RUC">RUC</option>
+                </select>
+                {errors.tipo_documento && (
+                  <p className="text-xs text-red-500 font-semibold ml-1">{errors.tipo_documento}</p>
                 )}
               </div>
 
-              {/* Número de Documento (DNI, CE, etc.) */}
               <div className="space-y-1">
-                <label className="text-[10px] font-black text-gray-400 dark:text-gray-400 uppercase tracking-widest ml-1">
-                  Número de Documento
+                <label className="text-[10px] font-black text-gray-400 dark:text-gray-300 uppercase tracking-widest ml-1">
+                  Número de Documento <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
-                  name="dni"
-                  value={formData.dni}
+                  name="numero_documento"
+                  value={formData.numero_documento}
                   onChange={handleChange}
                   readOnly={!isEditMode}
-                  maxLength={20}
-                  placeholder="—"
-                  className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-transparent p-3 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100 transition-all duration-300 read-only:cursor-default"
+                  inputMode="numeric"
+                  autoComplete="off"
+                  placeholder={
+                    formData.tipo_documento === 'RUC'
+                      ? 'XX-XXXXXXXX-X'
+                      : 'Ingrese el número'
+                  }
+                  className={inputClassName('numero_documento')}
                 />
+                {errors.numero_documento && (
+                  <p className="text-xs text-red-500 font-semibold ml-1">{errors.numero_documento}</p>
+                )}
               </div>
-
             </div>
           </div>
         </div>
 
-        {/* Panel lateral derecho */}
         <div className="md:col-span-4 space-y-8 self-stretch">
-
-          {/* Foto de perfil */}
           <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-3xl shadow-xl border border-slate-100 dark:border-[var(--border-subtle)] overflow-hidden">
-            <div className="bg-gradient-to-r from-sky-500 via-sky-500 to-sky-300 p-8 flex items-center gap-5 relative overflow-hidden">
+            <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[var(--brand-green)] dark:to-[#1A3A32] p-8 flex items-center gap-5 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl" />
               <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-inner">
                 <Icon name="Camera" className="w-6 h-6 text-white" />
@@ -476,7 +544,7 @@ export default function CustomerProfilePage() {
                 {isEditMode && (
                   <button
                     type="button"
-                    className="mt-4 px-6 py-2 rounded-lg bg-sky-50 text-sky-600 text-sm font-bold hover:bg-sky-100 transition-colors"
+                    className="mt-4 px-6 py-2 rounded-lg bg-sky-50 text-sky-600 dark:text-[var(--brand-green)] text-sm font-bold hover:bg-sky-100 dark:hover:bg-lime-100 transition-colors"
                   >
                     Cambiar Foto
                   </button>
@@ -485,8 +553,7 @@ export default function CustomerProfilePage() {
             </div>
           </div>
 
-          {/* Banner de cumpleaños */}
-          <div className="bg-gradient-to-br from-green-400 via-green-500 to-sky-500 rounded-3xl shadow-xl relative overflow-hidden p-7 text-center space-y-5">
+          <div className="bg-gradient-to-br from-green-400 via-green-500 to-sky-500 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] rounded-3xl shadow-xl relative overflow-hidden p-7 text-center space-y-5">
             <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-50">
               <div className="absolute w-40 h-40 bg-white/20 rounded-full -top-10 -left-10 blur-2xl" />
               <div className="absolute w-56 h-56 bg-white/10 rounded-full -bottom-20 -right-20 blur-3xl" />
@@ -497,16 +564,17 @@ export default function CustomerProfilePage() {
                 <Icon name="Gift" className="w-8 h-8 text-white" />
               </div>
 
-              <h4 className="text-xl font-black tracking-tighter leading-tight text-white">
-                ¡Tu día especial <br /> está llegando!
-              </h4>
+              <h4
+                className="text-xl font-black tracking-tighter leading-tight text-white"
+                dangerouslySetInnerHTML={{ __html: birthdayContent.title }}
+              />
 
               <div className="inline-block px-2.5 py-0.5 bg-black/10 backdrop-blur-md rounded-full border border-white/10 mt-2">
                 <p className="text-[8px] font-black text-white uppercase tracking-[0.2em]">Celebración Lyrium</p>
               </div>
 
               <p className="text-[11px] font-bold leading-tight text-white/90 max-w-[200px] mx-auto mt-3">
-                Prepárate para una sorpresa exclusiva diseñada solo para ti.
+                {birthdayContent.description}
               </p>
 
               <div className="mt-4 px-6 py-3 bg-white/10 backdrop-blur-2xl rounded-xl border border-white/40 shadow-md inline-block">
@@ -516,7 +584,6 @@ export default function CustomerProfilePage() {
               </div>
             </div>
           </div>
-
         </div>
       </form>
     </div>

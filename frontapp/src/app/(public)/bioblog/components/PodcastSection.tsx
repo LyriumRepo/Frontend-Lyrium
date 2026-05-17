@@ -87,7 +87,7 @@ export default function PodcastSection() {
                         <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-12">
                             <div className="w-full flex-1 space-y-6">
                                 <h1 className="text-3xl md:text-6xl font-black !text-white leading-tight">
-                                    Conecta <span className="!text-sky-400">Natural</span>
+                                    Conecta <span className="!text-sky-400 dark:!text-lime-400">Natural</span>
                                 </h1>
 
                                 <AnimatedText animations={podcastAnimations} />

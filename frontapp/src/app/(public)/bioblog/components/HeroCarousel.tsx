@@ -41,13 +41,13 @@ export default function HeroCarousel() {
                 {/* Custom Navigation Arrows */}
                 <button
                     id="hero-prev-btn"
-                    className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 z-40 p-3 rounded-full bg-white/10 backdrop-blur-md hover:bg-sky-500 text-white cursor-pointer transition-all duration-300 hidden md:flex items-center justify-center group"
+                    className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 z-40 p-3 rounded-full bg-white/10 backdrop-blur-md hover:bg-sky-500 dark:hover:bg-[var(--brand-green)] text-white cursor-pointer transition-all duration-300 hidden md:flex items-center justify-center group"
                 >
                     <ChevronLeft className="w-8 h-8 transform group-hover:-translate-x-1 transition-transform" />
                 </button>
                 <button
                     id="hero-next-btn"
-                    className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 z-40 p-3 rounded-full bg-white/10 backdrop-blur-md hover:bg-sky-500 text-white cursor-pointer transition-all duration-300 hidden md:flex items-center justify-center group"
+                    className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 z-40 p-3 rounded-full bg-white/10 backdrop-blur-md hover:bg-sky-500 dark:hover:bg-[var(--brand-green)] text-white cursor-pointer transition-all duration-300 hidden md:flex items-center justify-center group"
                 >
                     <ChevronRight className="w-8 h-8 transform group-hover:translate-x-1 transition-transform" />
                 </button>
@@ -113,7 +113,7 @@ export default function HeroCarousel() {
                                 <div className="absolute inset-0 p-8 md:p-16 flex flex-col justify-end md:justify-center items-start max-w-2xl">
                                     {/* Category Pill */}
                                     <div className="mb-6 overflow-hidden">
-                                        <span className="inline-block px-4 py-1.5 bg-sky-500/20 backdrop-blur-md border border-sky-400/30 text-sky-300 rounded-full text-xs font-black tracking-widest uppercase transform transition-transform duration-500 translate-y-0 group-hover:-translate-y-1">
+                                        <span className="inline-block px-4 py-1.5 bg-sky-500/20 dark:bg-[var(--icons-green)] backdrop-blur-md border border-sky-400/30 text-sky-300 dark:text-[var(--brand-green-hover)] rounded-full text-xs font-black tracking-widest uppercase transform transition-transform duration-500 translate-y-0 group-hover:-translate-y-1">
                                             {post.category_name}
                                         </span>
                                     </div>
@@ -131,7 +131,7 @@ export default function HeroCarousel() {
                                     {/* Date & Excerpt */}
                                     <div className="flex flex-col gap-4">
                                         <div className="flex items-center gap-3 text-slate-300 text-xs font-bold tracking-widest uppercase">
-                                            <span className="text-sky-500">BY LYRIUM</span>
+                                            <span className="text-sky-500 dark:text-[var(--icons-green)]">BY LYRIUM</span>
                                             <span className="w-1 h-1 rounded-full bg-slate-500" />
                                             <span>{formatDate(post.published_at)}</span>
                                         </div>
@@ -147,7 +147,7 @@ export default function HeroCarousel() {
                                             className="inline-flex items-center gap-2 text-white font-bold tracking-widest text-sm hover:gap-4 transition-all duration-300 group/btn"
                                         >
                                             LEER ARTÍCULO
-                                            <ChevronRight className="text-sky-500 group-hover/btn:text-white transition-colors" />
+                                            <ChevronRight className="text-sky-500 dark:text-[var(--icons-green)] group-hover/btn:text-white transition-colors" />
                                         </Link>
                                     </div>
                                 </div>
