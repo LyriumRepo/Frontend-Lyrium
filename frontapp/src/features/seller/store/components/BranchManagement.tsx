@@ -44,7 +44,7 @@ export default function BranchManagement({ branches, setBranches }: BranchManage
 
     return (
         <div className="glass-card p-0 overflow-hidden border-none rounded-[2.5rem] shadow-2xl bg-[var(--bg-card)] mb-8">
-            <div className="bg-gradient-to-r from-sky-500 via-sky-500 to-sky-400 p-8 flex items-center justify-between relative overflow-hidden">
+            <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[var(--brand-green)] dark:to-[#1A3A32] p-8 flex items-center justify-between relative overflow-hidden">
                 <div className="flex items-center gap-5 text-white relative z-10">
                     <div className="w-12 h-12 bg-white/20 dark:bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 dark:border-white/20 shadow-inner">
                         <Store className="w-6 h-6" />
@@ -58,7 +58,7 @@ export default function BranchManagement({ branches, setBranches }: BranchManage
                 </div>
                 <button
                     onClick={() => handleOpenModal()}
-                    className="relative z-10 flex items-center gap-2 px-6 py-3 rounded-xl bg-[var(--bg-card)] backdrop-blur-md text-[var(--text-primary)] font-black text-xs border border-[var(--border-subtle)] hover:bg-[var(--bg-card)] hover:text-sky-500 transition-all shadow-lg shadow-black/5 uppercase tracking-widest"
+                    className="relative z-10 flex items-center gap-2 px-6 py-3 rounded-xl bg-[var(--bg-card)] backdrop-blur-md text-[var(--text-primary)] font-black text-xs border border-[var(--border-subtle)] hover:bg-[var(--bg-card)] hover:text-sky-500 dark:hover:text-[var(--icons-green)] transition-all shadow-lg shadow-black/5 uppercase tracking-widest"
                 >
                     <Plus className="w-4 h-4" /> Agregar Sucursal
                 </button>

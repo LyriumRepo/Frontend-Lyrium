@@ -132,7 +132,7 @@ export function ProfilePageClient(_props: ProfilePageClientProps) {
 
                 {/* 1. DATOS EMPRESARIALES */}
                 <div className="md:col-span-8 overflow-hidden rounded-[2.5rem] shadow-2xl bg-white dark:bg-[var(--bg-card)] border border-gray-100 dark:border-[var(--border-subtle)]">
-                    <div className="bg-gradient-to-r from-sky-500 via-sky-500 to-sky-400 p-6 flex items-center justify-between relative overflow-hidden">
+                    <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[var(--brand-green)] dark:to-[#1A3A32] p-6 flex items-center justify-between relative overflow-hidden">
                         <div className="flex items-center gap-5 text-white relative z-10">
                             <div className="w-12 h-12 bg-white dark:bg-[var(--bg-card)]/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-inner">
                                 <Icon name="Building2" className="w-6 h-6" />
@@ -255,7 +255,7 @@ export function ProfilePageClient(_props: ProfilePageClientProps) {
                 <div className="md:col-span-4 h-full">
                     <div className="overflow-hidden rounded-[2.5rem] shadow-2xl bg-white dark:bg-[var(--bg-card)] border border-gray-100 dark:border-[var(--border-subtle)] h-full">
                         {/* Header Premium */}
-                        <div className="bg-gradient-to-r from-sky-500 via-sky-500 to-sky-400 p-4 flex items-center justify-between relative overflow-hidden">
+                        <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[var(--brand-green)] dark:to-[#1A3A32] p-4 flex items-center justify-between relative overflow-hidden">
                             <div className="flex items-center gap-5 text-white relative z-10">
                             <div className="w-12 h-12 bg-white dark:bg-[var(--bg-card)]/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-inner">
                                     <Icon name="UserCog" className="w-6 h-6" />
@@ -317,7 +317,7 @@ export function ProfilePageClient(_props: ProfilePageClientProps) {
 
                 {/* 3. FINANZAS */}
                 <div className="md:col-span-12 overflow-hidden rounded-[2.5rem] shadow-2xl bg-white dark:bg-[var(--bg-card)] border border-gray-100 dark:border-[var(--border-subtle)]">
-                    <div className="bg-gradient-to-r from-sky-500 via-sky-500 to-sky-400 p-6 flex items-center justify-between relative overflow-hidden">
+                    <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[var(--brand-green)] dark:to-[#1A3A32] p-6 flex items-center justify-between relative overflow-hidden">
                         <div className="flex items-center gap-5 text-white relative z-10">
                             <div className="w-12 h-12 bg-white dark:bg-[var(--bg-card)]/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-inner">
                                 <Icon name="Receipt" className="w-6 h-6" />

@@ -44,8 +44,34 @@ export function ServicesPageClient(_props: ServicesPageClientProps) {
         serviceConfig: false,
         specialist: false,
         detail: false,
-        reschedule: false
+        reschedule: false,
     });
+
+    // ── Guardar servicio y sincronizar availability de especialistas ─────────
+    const saveServiceAndSyncSpecialists = (serviceData: Omit<Service, 'id'> & { id?: number }) => {
+        handleSaveService(serviceData);
+
+        // Calcular la lista de servicios resultante tras el guardado
+        const futureServices: Service[] = serviceData.id
+            ? services.map((s) =>
+                s.id === serviceData.id ? { ...s, ...serviceData, id: serviceData.id } : s,
+              )
+            : [...services, { ...serviceData, id: -1 }]; // id temporal solo para el cálculo
+
+        specialists.forEach((sp) => {
+            const willBeAssigned = futureServices.some((s) =>
+                s.especialistasAsignados.includes(sp.id),
+            );
+
+            if (willBeAssigned && sp.availability !== 'Ocupado') {
+                handleSaveSpecialist({ ...sp, id: sp.id, availability: 'Ocupado' });
+            } else if (!willBeAssigned && sp.availability === 'Ocupado') {
+                // Liberar al especialista solo si ya no está en ningún servicio
+                handleSaveSpecialist({ ...sp, id: sp.id, availability: 'Disponible' });
+            }
+        });
+    };
+
 
     const deleteService = async (id: number) => {
         const confirmed = await confirm(
@@ -55,7 +81,30 @@ export function ServicesPageClient(_props: ServicesPageClientProps) {
         if (confirmed) {
             handleDeleteService(id);
             showToast('Servicio eliminado del catálogo', 'info');
+
+            // Liberar especialistas que ya no están asignados a ningún otro servicio
+            const remainingServices = services.filter((s) => s.id !== id);
+            specialists.forEach((sp) => {
+                const stillAssigned = remainingServices.some((s) =>
+                    s.especialistasAsignados.includes(sp.id),
+                );
+                if (!stillAssigned && sp.availability === 'Ocupado') {
+                    handleSaveSpecialist({ ...sp, id: sp.id, availability: 'Disponible' });
+                }
+            });
         }
+    };
+
+    // ── Publicar / Despublicar servicio ──────────────────────────────────────
+    const handlePublish = (service: Service) => {
+        const nuevoEstado = service.estado === 'publicado' ? 'borrador' : 'publicado';
+        handleSaveService({ ...service, estado: nuevoEstado });
+        showToast(
+            nuevoEstado === 'publicado'
+                ? `"${service.denominacion}" publicado exitosamente`
+                : `"${service.denominacion}" movido a borradores`,
+            nuevoEstado === 'publicado' ? 'success' : 'info',
+        );
     };
 
     if (loading) {
@@ -97,31 +146,38 @@ export function ServicesPageClient(_props: ServicesPageClientProps) {
             />
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-8">
+
                 {/* LADO IZQUIERDO: Catálogo */}
                 <div className="lg:col-span-8 space-y-6">
                     <div className="flex items-center justify-between mb-4 px-2">
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-sky-500/10 rounded-2xl flex items-center justify-center border border-sky-500/20 shadow-sm text-sky-500">
+                            <div className="w-10 h-10 bg-sky-500/10 dark:bg-[#8FC3A1]/10 rounded-2xl flex items-center justify-center border border-sky-500/20 dark:border-[#8FC3A1]/20 shadow-sm text-sky-500 dark:text-[#8FC3A1]">
                                 <Icon name="Services" className="w-5 h-5 stroke-[2.5px]" />
                             </div>
                             <div>
-                                <h2 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-widest">Catálogo de Servicios</h2>
-                                <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wide">Tus ofertas activas</p>
+                                <h2 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-widest">
+                                    Catálogo de Servicios
+                                </h2>
+                                <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wide">
+                                    Tus ofertas activas
+                                </p>
                             </div>
                         </div>
                         <div className="flex gap-4">
-                            <span className="flex items-center gap-2 text-[10px] font-black text-emerald-500 uppercase tracking-widest bg-emerald-500/10 px-3 py-1.5 rounded-lg border border-emerald-500/20">
-                                <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse shadow-sm shadow-emerald-500"></span>Disponible
+                            <span className="flex items-center gap-2 text-[10px] font-black text-sky-500 dark:text-[#8FC3A1] uppercase tracking-widest bg-sky-500/10 dark:bg-[#8FC3A1]/10 px-3 py-1.5 rounded-lg border border-emerald-500/20 dark:border-[#8FC3A1]/20">
+                                <span className="w-2.5 h-2.5 bg-sky-500 dark:bg-[#8FC3A1] rounded-full animate-pulse shadow-sm shadow-sky-500 dark:shadow-[#8FC3A1]" />
+                                Publicado
                             </span>
-                            <span className="flex items-center gap-2 text-[10px] font-black text-rose-500 uppercase tracking-widest bg-rose-500/10 px-3 py-1.5 rounded-lg border border-rose-500/20">
-                                <span className="w-2.5 h-2.5 bg-rose-500 rounded-full"></span>Agotado
+                            <span className="flex items-center gap-2 text-[10px] font-black text-gray-300 uppercase tracking-widest bg-gray-300/10 px-3 py-1.5 rounded-lg border border-gray-300/20">
+                                <span className="w-2.5 h-2.5 bg-gray-300 rounded-full" />
+                                Borrador
                             </span>
                         </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                         {services.length > 0 ? (
-                            services.map(s => (
+                            services.map((s) => (
                                 <ServiceCard
                                     key={s.id}
                                     service={s}
@@ -135,6 +191,7 @@ export function ServicesPageClient(_props: ServicesPageClientProps) {
                                         setModals({ ...modals, serviceConfig: true });
                                     }}
                                     onDelete={deleteService}
+                                    onPublish={handlePublish}
                                 />
                             ))
                         ) : (
@@ -148,7 +205,6 @@ export function ServicesPageClient(_props: ServicesPageClientProps) {
                                         setActiveService(null);
                                         setModals({ ...modals, serviceConfig: true });
                                     }}
-                                    suggestion="Definir horarios claros y especialistas aumenta la confianza del cliente."
                                 />
                             </div>
                         )}
@@ -158,17 +214,21 @@ export function ServicesPageClient(_props: ServicesPageClientProps) {
                 {/* LADO DERECHO: Especialistas */}
                 <div className="lg:col-span-4 space-y-6">
                     <div className="flex items-center gap-3 mb-4 px-2">
-                        <div className="w-10 h-10 bg-indigo-500/10 rounded-2xl flex items-center justify-center border border-indigo-500/20 shadow-sm text-indigo-500">
+                        <div className="w-10 h-10 bg-sky-500/10 dark:bg-[#8FC3A1]/10 rounded-2xl flex items-center justify-center border border-sky-500/20 dark:border-[#8FC3A1]/20 shadow-sm text-sky-500 dark:text-[#8FC3A1]">
                             <Icon name="Users" className="w-5 h-5 stroke-[2.5px]" />
                         </div>
                         <div>
-                            <h2 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-widest">Especialistas</h2>
-                            <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wide">Tu equipo de profesionales</p>
+                            <h2 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-widest">
+                                Especialistas
+                            </h2>
+                            <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wide">
+                                Tu equipo de profesionales
+                            </p>
                         </div>
                     </div>
                     <div className="space-y-4">
                         {specialists.length > 0 ? (
-                            specialists.map(esp => (
+                            specialists.map((esp) => (
                                 <SpecialistItem
                                     key={esp.id}
                                     specialist={esp}
@@ -180,14 +240,16 @@ export function ServicesPageClient(_props: ServicesPageClientProps) {
                             ))
                         ) : (
                             <div className="p-10 text-center bg-[var(--bg-secondary)]/50 rounded-[2.5rem] border border-dashed border-[var(--border-subtle)]">
-                                <p className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Sin especialistas</p>
+                                <p className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">
+                                    Sin especialistas
+                                </p>
                             </div>
                         )}
                     </div>
                 </div>
             </div>
 
-            {/* Modals */}
+            {/* ── Modals ── */}
             <SpecialistModal
                 isOpen={modals.specialist}
                 specialist={selectedSpecialist}
@@ -200,7 +262,7 @@ export function ServicesPageClient(_props: ServicesPageClientProps) {
                 service={activeService}
                 specialists={specialists}
                 onClose={() => setModals({ ...modals, serviceConfig: false })}
-                onSave={handleSaveService}
+                onSave={saveServiceAndSyncSpecialists}
             />
 
             <ServiceDetailModal

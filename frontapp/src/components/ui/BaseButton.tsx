@@ -24,8 +24,8 @@ interface BaseButtonProps {
 
 const variantClasses: Record<ButtonVariant, string> = {
     primary: `
-        bg-sky-500 text-white
-        hover:bg-sky-600
+        bg-sky-500 dark:bg-[var(--brand-green)] text-white
+        hover:bg-sky-600 dark:hover:bg-[var(--brand-green-hover)]
         focus:ring-2 focus:ring-sky-500/50 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-transparent
         active:bg-sky-700
     `,
@@ -42,8 +42,8 @@ const variantClasses: Record<ButtonVariant, string> = {
         active:bg-lime-700
     `,
     ghost: `
-        bg-transparent text-[var(--text-secondary)]
-        hover:bg-[var(--bg-hover)]
+        bg-transparent text-[var(--text-secondary)] dark:hover:text-[var(--brand-green-hover)]
+        hover:bg-[var(--bg-hover)] dark:hover:bg-gray-100
         focus:ring-2 focus:ring-[var(--ring-focus)] focus:ring-offset-2 focus:ring-offset-[var(--bg-card)]
         active:bg-[var(--bg-secondary)]
     `,
@@ -56,7 +56,7 @@ const variantClasses: Record<ButtonVariant, string> = {
     action: `
         relative z-10 flex items-center gap-2 px-6 py-3 rounded-xl
         bg-[var(--bg-card)] backdrop-blur-md text-[var(--text-primary)] font-black text-xs
-        border border-[var(--border-subtle)] hover:bg-[var(--bg-card)] hover:text-[var(--brand-sky)]
+        border border-[var(--border-subtle)] hover:bg-[var(--bg-card)] hover:text-[var(--brand-sky)] dark:hover:text-[var(--icons-green)]
         transition-all shadow-lg shadow-black/5 uppercase tracking-widest
     `,
 };
