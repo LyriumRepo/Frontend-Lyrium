@@ -1,6 +1,6 @@
-export interface ProductAttribute {
+    export interface ProductAttribute {
     name?: string;
-    values: string[];
+    values: (string | AttributeValue)[];
 }
 
 export type ProductSticker = 'liquidacion' | 'oferta' | 'descuento' | 'nuevo' | 'bestseller' | 'envio_gratis' | null;
@@ -15,7 +15,10 @@ export interface ProductFormData {
     sticker: ProductSticker;
     discountPercentage?: number;
 }
-
+export interface AttributeValue {
+    label: string;
+    value: string;
+}
 export interface Product {
     id: string;
     name: string;

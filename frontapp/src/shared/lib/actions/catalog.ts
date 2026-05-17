@@ -217,6 +217,8 @@ export async function saveProduct(
       discountPercentage: product.discountPercentage || null,
       weight: product.weight || null,
       dimensions: product.dimensions || null,
+      mainAttributes: product.mainAttributes || [],
+      additionalAttributes: product.additionalAttributes || [],
     };
 
     console.log('Saving product payload:', payload);

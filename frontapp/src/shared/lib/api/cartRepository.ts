@@ -1,4 +1,12 @@
+/**
+ * cartRepository.ts
+ * Repositorio del carrito — conecta con Laravel CartController
+ * Soporta sesión anónima (X-Session-ID) y usuario autenticado (Bearer token)
+ */
+
 import { LARAVEL_API_URL } from '@/shared/lib/config/flags';
+
+// ─── Tipos ────────────────────────────────────────────────────────────────────
 
 export interface CartItemProduct {
   id: number;
@@ -6,6 +14,7 @@ export interface CartItemProduct {
   slug: string;
   image?: string;
   price: number;
+  regular_price?: number;
   stock?: number;
 }
 
@@ -31,68 +40,99 @@ interface ApiResponse<T> {
   message?: string;
 }
 
-async function getAuthHeaders(): Promise<HeadersInit> {
-  if (typeof window === 'undefined') return {};
-  const match = document.cookie.match(/laravel_token=([^;]+)/);
-  return match ? { Authorization: `Bearer ${match[1]}` } : {};
+// ─── Helpers de sesión / auth ─────────────────────────────────────────────────
+
+function getSessionId(): string {
+  if (typeof window === 'undefined') return '';
+  let sid = sessionStorage.getItem('cart_session_id');
+  if (!sid) {
+    sid = `guest_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+    sessionStorage.setItem('cart_session_id', sid);
+  }
+  return sid;
 }
 
-async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-  const headers = await getAuthHeaders();
+async function getAuthToken(): Promise<string | null> {
+  try {
+    const res = await fetch('/api/auth-token');
+    if (!res.ok) return null;
+    const { token } = await res.json();
+    return token ?? null;
+  } catch {
+    return null;
+  }
+}
 
-  const response = await fetch(`${LARAVEL_API_URL}${endpoint}`, {
+async function buildHeaders(): Promise<HeadersInit> {
+  const token = await getAuthToken();
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    Accept: 'application/json',
+  };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  } else {
+    headers['X-Session-ID'] = getSessionId();
+  }
+  return headers;
+}
+
+// ─── Request base ─────────────────────────────────────────────────────────────
+
+async function request<T>(
+  endpoint: string,
+  options: RequestInit = {}
+): Promise<T> {
+  const headers = await buildHeaders();
+  const res = await fetch(`${LARAVEL_API_URL}${endpoint}`, {
     ...options,
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json',
-      ...(options.headers as Record<string, string>),
-      ...headers,
-    },
+    headers: { ...headers, ...(options.headers ?? {}) },
   });
 
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ message: `HTTP ${response.status}` }));
-    throw new Error(error.message || `API Error: ${response.status}`);
+  const json: ApiResponse<T> = await res.json();
+
+  if (!res.ok) {
+    throw new Error(json.message ?? `Error ${res.status}`);
   }
 
-  return response.json();
+  return (json.data ?? json) as T;
 }
 
+// ─── API pública del repositorio ──────────────────────────────────────────────
+
 export const cartApi = {
-  get: async (): Promise<CartResource> => {
-    const response = await request<ApiResponse<CartResource>>('/cart');
-    return response.data || {
-      items: [],
-      subtotal: 0,
-      total: 0,
-      itemCount: 0,
-    };
+  /** Obtiene el carrito actual */
+  getCart(): Promise<CartResource> {
+    return request<CartResource>('/cart');
   },
 
-  addItem: async (productId: number, quantity = 1): Promise<CartResource> => {
-    const response = await request<ApiResponse<CartResource>>('/cart/items', {
+  /** Agrega un producto (o incrementa cantidad si ya existe) */
+  addItem(productId: number, quantity = 1): Promise<CartResource> {
+    return request<CartResource>('/cart/items', {
       method: 'POST',
       body: JSON.stringify({ product_id: productId, quantity }),
     });
-    return response.data!;
   },
 
-  updateItem: async (itemId: number, quantity: number): Promise<CartResource> => {
-    const response = await request<ApiResponse<CartResource>>(`/cart/items/${itemId}`, {
-      method: 'PATCH',
+  /** Actualiza la cantidad de un ítem (PUT /api/cart/items/{productId}) */
+  updateItem(productId: number, quantity: number): Promise<CartResource> {
+    return request<CartResource>(`/cart/items/${productId}`, {
+      method: 'PUT',
       body: JSON.stringify({ quantity }),
     });
-    return response.data!;
   },
 
-  removeItem: async (itemId: number): Promise<CartResource> => {
-    const response = await request<ApiResponse<CartResource>>(`/cart/items/${itemId}`, {
+  /** Elimina un ítem del carrito (DELETE /api/cart/items/{productId}) */
+  removeItem(productId: number): Promise<CartResource> {
+    return request<CartResource>(`/cart/items/${productId}`, {
       method: 'DELETE',
     });
-    return response.data!;
   },
 
-  clear: async (): Promise<void> => {
-    await request('/cart', { method: 'DELETE' });
+  /** Vacía el carrito completo */
+  clearCart(): Promise<CartResource> {
+    return request<CartResource>('/cart/clear', {
+      method: 'DELETE',
+    });
   },
 };
