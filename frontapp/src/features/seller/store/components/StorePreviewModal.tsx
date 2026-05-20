@@ -18,7 +18,7 @@ export default function StorePreviewModal({ isOpen, onClose, layoutId }: StorePr
             title="Santuario Visual"
             subtitle={`Previsualización en tiempo real • Configuración: ${layoutId}`}
             size="full"
-            accentColor="from-indigo-500 via-purple-500 to-pink-500"
+            accentColor="from-sky-500 via-sky-600 to-sky-700 dark:from-[var(--brand-green)] dark:via-[var(--icons-green)] dark:to-[var(--brand-green)]"
         >
             <div className="flex-1 overflow-y-auto bg-[var(--bg-secondary)]/50 p-4 md:p-12 min-h-[600px]">
                 <div className="max-w-6xl mx-auto bg-[var(--bg-card)] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.15)] rounded-[3rem] overflow-hidden min-h-screen border border-[var(--border-subtle)] flex flex-col">
@@ -41,7 +41,7 @@ export default function StorePreviewModal({ isOpen, onClose, layoutId }: StorePr
                             </div>
                             <h4 className="text-xl font-black text-[var(--text-secondary)] uppercase tracking-[0.3em] relative z-10">Hero Vision {layoutId}</h4>
                             <div className="mt-6 flex gap-3 relative z-10">
-                                <div className="w-24 h-1 bg-sky-500 rounded-full"></div>
+                                <div className="w-24 h-1 bg-sky-500 dark:bg-[var(--icons-green)] rounded-full"></div>
                                 <div className="w-8 h-1 bg-[var(--border-subtle)] rounded-full"></div>
                                 <div className="w-8 h-1 bg-[var(--border-subtle)] rounded-full"></div>
                             </div>

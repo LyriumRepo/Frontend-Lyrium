@@ -91,7 +91,7 @@ export const useMesaAyuda = () => {
                 const tickets = await ticketApi.admin.list();
                 return {
                     ...MOCK_HELPDESK_DATA,
-                    tickets: tickets || MOCK_HELPDESK_DATA.tickets,
+                    tickets,
                 } as MesaAyudaData;
             } catch {
                 return MOCK_HELPDESK_DATA as MesaAyudaData;

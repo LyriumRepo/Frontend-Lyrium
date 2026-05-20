@@ -161,7 +161,7 @@ export default function VisualIdentity(props: VisualIdentityProps): React.ReactE
 
     return (
         <div className="glass-card p-0 overflow-hidden border-none rounded-[2.5rem] shadow-2xl bg-[var(--bg-card)] animate-fadeIn mb-8">
-            <div className="bg-gradient-to-r from-sky-500 via-sky-500 to-sky-400 p-8 flex items-center justify-between relative overflow-hidden">
+            <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[var(--brand-green)] dark:to-[#1A3A32] p-8 flex items-center justify-between relative overflow-hidden">
                 <div className="flex items-center gap-5 text-white relative z-10">
                     <div className="w-12 h-12 bg-white/20 dark:bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 dark:border-white/20 shadow-inner">
                         <Icon name="Palette" className="w-6 h-6" />
@@ -179,13 +179,13 @@ export default function VisualIdentity(props: VisualIdentityProps): React.ReactE
                 <div className="lg:col-span-4 xl:col-span-3 space-y-8">
                     <div className="flex flex-col items-start">
                         <div className="flex items-center gap-2 mb-6">
-                            <span className="w-1.5 h-4 bg-sky-500 rounded-full"></span>
+                            <span className="w-1.5 h-4 bg-sky-500 dark:bg-[var(--icons-green)] rounded-full"></span>
                             <span className="text-[11px] font-black text-[var(--text-primary)] uppercase tracking-widest">Logo de Marca</span>
                         </div>
                         <div
                             role="button"
                             tabIndex={0}
-                            className="relative w-48 h-48 bg-[var(--bg-secondary)] rounded-full ring-4 ring-[var(--bg-secondary)] ring-offset-4 ring-offset-[var(--bg-card)] border-2 border-dashed border-[var(--border-subtle)] group cursor-pointer overflow-hidden flex items-center justify-center transition-all duration-500 hover:scale-[1.02] hover:border-sky-400"
+                            className="relative w-48 h-48 bg-[var(--bg-secondary)] rounded-full ring-4 ring-[var(--bg-secondary)] ring-offset-4 ring-offset-[var(--bg-card)] border-2 border-dashed border-[var(--border-subtle)] group cursor-pointer overflow-hidden flex items-center justify-center transition-all duration-500 hover:scale-[1.02] hover:border-sky-400 dark:hover:border-[var(--icons-green)]"
                             onClick={() => document.getElementById('input-logo')?.click()}
                             onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') document.getElementById('input-logo')?.click(); }}
                         >
@@ -194,7 +194,7 @@ export default function VisualIdentity(props: VisualIdentityProps): React.ReactE
                             ) : (
                                 <Icon name="Image" className="w-12 h-12 text-[var(--text-secondary)]" />
                             )}
-                            <div className="absolute inset-0 bg-sky-600/60 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-500 flex flex-col items-center justify-center text-white">
+                            <div className="absolute inset-0 bg-sky-600/60 dark:bg-[var(--icons-green)] backdrop-blur-[0px] opacity-0 group-hover:opacity-100 transition-all duration-500 flex flex-col items-center justify-center text-white">
                                 <Icon name="Camera" className="w-8 h-8 mb-2 animate-bounce" />
                                 <span className="text-[9px] font-black uppercase tracking-widest">{uploading === 'logo' ? 'Subiendo...' : 'Actualizar'}</span>
                             </div>
@@ -214,7 +214,7 @@ export default function VisualIdentity(props: VisualIdentityProps): React.ReactE
                                 <p className="text-[10px] font-black text-[var(--text-secondary)] uppercase">Ratio Profesional 1:1</p>
                             </div>
                             <div className="flex items-center gap-2">
-                                <Icon name="Image" className="w-3 h-3 text-emerald-500" />
+                                <Icon name="Image" className="w-3 h-3 text-sky-500 dark:text-[var(--icons-green)]" />
                                 <p className="text-[9px] font-bold text-red-400 uppercase">PNG • JPG • WEBP (Máx 2MB)</p>
                             </div>
                         </div>
@@ -225,7 +225,7 @@ export default function VisualIdentity(props: VisualIdentityProps): React.ReactE
                     <div className="space-y-6">
                         <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-4">
                             <div className="flex items-center gap-2">
-                                <span className="w-1.5 h-4 bg-sky-500 rounded-full"></span>
+                                <span className="w-1.5 h-4 bg-sky-500 dark:bg-[var(--icons-green)] rounded-full"></span>
                                 <span className="text-[11px] font-black text-[var(--text-primary)] uppercase tracking-widest">Escaparate de Banners</span>
                             </div>
                             <p className="text-[9px] font-bold text-red-400 uppercase tracking-widest italic flex items-center gap-1">
@@ -267,7 +267,7 @@ export default function VisualIdentity(props: VisualIdentityProps): React.ReactE
                             <div
                                 role="button"
                                 tabIndex={0}
-                                className={`relative aspect-[4/1.5] rounded-3xl overflow-hidden border-2 border-dashed ${localBanner2 ? 'border-[var(--border-subtle)] bg-[var(--bg-secondary)]' : 'border-sky-500/20 bg-sky-500/5'} flex items-center justify-center cursor-pointer hover:bg-sky-500/10 transition-all group`}
+                                className={`relative aspect-[4/1.5] rounded-3xl overflow-hidden border-2 border-dashed ${localBanner2 ? 'border-[var(--border-subtle)] bg-[var(--bg-secondary)]' : 'border-sky-500/20 dark:border-emerald-500/20 bg-sky-500/5 dark:bg-emerald-500/5'} flex items-center justify-center cursor-pointer hover:bg-sky-500/10 transition-all group`}
                                 onClick={() => document.getElementById('input-banner2')?.click()}
                                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') document.getElementById('input-banner2')?.click(); }}
                             >
@@ -285,11 +285,11 @@ export default function VisualIdentity(props: VisualIdentityProps): React.ReactE
                                     </>
                                 ) : (
                                     <div className="text-center">
-                                        <div className="w-12 h-12 bg-[var(--bg-card)] rounded-2xl flex items-center justify-center mx-auto mb-3 border border-sky-500/20 shadow-sm">
-                                            <Icon name="Plus" className="text-sky-500 w-5 h-5" />
+                                        <div className="w-12 h-12 bg-[var(--bg-card)] rounded-2xl flex items-center justify-center mx-auto mb-3 border border-sky-500/20 dark:border-emerald-500/20 shadow-sm">
+                                            <Icon name="Plus" className="text-sky-500 dark:text-[var(--icons-green)] w-5 h-5" />
                                         </div>
-                                        <p className="text-[10px] font-black text-sky-600 uppercase tracking-widest">Expandir Campaña</p>
-                                        <p className="text-[8px] font-bold text-sky-300 uppercase mt-1">Añadir Banner de Oferta</p>
+                                        <p className="text-[10px] font-black text-sky-600 dark:text-[var(--icons-green)] uppercase tracking-widest">Expandir Campaña</p>
+                                        <p className="text-[8px] font-bold text-sky-300 dark:text-[var(--icons-green)] uppercase mt-1">Añadir Banner de Oferta</p>
                                     </div>
                                 )}
                                 <input 
@@ -307,11 +307,11 @@ export default function VisualIdentity(props: VisualIdentityProps): React.ReactE
                     <div className="space-y-6">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
-                                <span className="w-1.5 h-4 bg-indigo-500 rounded-full"></span>
+                                <span className="w-1.5 h-4 bg-sky-500 dark:bg-[var(--icons-green)] rounded-full"></span>
                                 <span className="text-[11px] font-black text-[var(--text-primary)] uppercase tracking-widest">Muro de Instalaciones</span>
                             </div>
                             <button 
-                                className="flex items-center gap-2 px-5 py-2.5 bg-sky-500/10 text-sky-500 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-sky-500 hover:text-white transition-all"
+                                className="flex items-center gap-2 px-5 py-2.5 bg-sky-500/10 dark:bg-emerald-500/10 text-sky-500 dark:text-[var(--icons-green)] rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-sky-500 dark:hover:bg-[var(--brand-green)] hover:text-white transition-all"
                                 onClick={() => document.getElementById('input-gallery')?.click()}
                                 disabled={uploading !== null || !isStoreReady}
                             >
@@ -335,7 +335,7 @@ export default function VisualIdentity(props: VisualIdentityProps): React.ReactE
                                 onClick={() => document.getElementById('input-gallery')?.click()}
                                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') document.getElementById('input-gallery')?.click(); }}
                             >
-                                <Icon name="Image" className="w-6 h-6 text-[var(--text-secondary)] group-hover:text-indigo-400" />
+                                <Icon name="Image" className="w-6 h-6 text-[var(--text-secondary)] group-hover:text-sky-400 dark:group-hover:text-[var(--icons-green)]" />
                                 <span className="text-[8px] font-black text-[var(--text-secondary)] uppercase mt-1">Próxima Foto</span>
                                 <input 
                                     type="file" 

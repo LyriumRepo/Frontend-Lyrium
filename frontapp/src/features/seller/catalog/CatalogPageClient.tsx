@@ -10,7 +10,9 @@ import BaseButton from '@/components/ui/BaseButton';
 import BaseLoading from '@/components/ui/BaseLoading';
 import Icon from '@/components/ui/Icon';
 import { useToast } from '@/shared/lib/context/ToastContext';
-import { deleteProduct, updateProductPrice, getProducts, createProduct, updateProduct } from '@/shared/lib/actions/catalog';
+import { deleteProduct, updateProductPrice } from '@/shared/lib/actions/catalog';
+import { productRepository } from '@/shared/lib/api/factory';
+import { USE_MOCKS } from '@/shared/lib/config/flags';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import { useConfirmDialog } from '@/components/ui/confirm-dialog';
 
@@ -258,46 +260,89 @@ export default function CatalogClient({ initialProducts }: CatalogClientProps) {
 
   const onSave = async (product: ProductFormData) => {
     try {
-      // Limpiar atributos vacíos
-      const cleanAttributes = (attrs: any[] | undefined) => {
-        if (!attrs) return [];
-        return attrs
-          .map(attr => ({
-            values: (attr.values || [])
-              .filter((v: any) => v && String(v).trim().length > 0)
-              .map((v: any) => String(v))
-          }))
-          .filter(attr => attr.values.length > 0);
-      };
+      let savedProduct;
 
-      const payload = {
-        name: product.name || '',
-        category: product.category || '',
-        price: product.price || 0,
-        stock: product.stock || 0,
-        description: product.description || '',
-        image: product.image || null,
-        weight: product.weight,
-        dimensions: product.dimensions,
-        sticker: product.sticker || null,
-        mainAttributes: cleanAttributes(product.mainAttributes),
-        additionalAttributes: cleanAttributes(product.additionalAttributes),
-      };
-
-      console.log('[onSave] Starting product save', { isUpdate: !!selectedProduct });
-      
-      let result;
-
-      if (selectedProduct) {
-        // UPDATE existing product (via Server Action)
-        result = await updateProduct(selectedProduct.id, payload);
+      if (!USE_MOCKS) {
+        // Create product without image first (or with external URL)
+        const hasBase64Image = product.image && product.image.startsWith('data:');
+        const payload = {
+          name: product.name || '',
+          category: product.category || '',
+          price: product.price || 0,
+          stock: product.stock || 0,
+          description: product.description || '',
+          image: hasBase64Image ? null : product.image || null,
+          weight: product.weight,
+          dimensions: product.dimensions,
+          sticker: product.sticker || null,
+          mainAttributes: product.mainAttributes || [],
+          additionalAttributes: product.additionalAttributes || [],
+        };
+        
+        if (selectedProduct) {
+          savedProduct = await productRepository.updateProduct(selectedProduct.id, payload);
+          
+          // Upload image if there's a new base64 image
+          if (hasBase64Image && product.image) {
+            try {
+              const response = await fetch(product.image);
+              const blob = await response.blob();
+              const fileName = `product-${Date.now()}.webp`;
+              const file = new File([blob], fileName, { type: blob.type });
+              
+              await productRepository.uploadProductImage(savedProduct.id, file);
+            } catch (uploadErr) {
+              console.error('Error uploading image:', uploadErr);
+            }
+          }
+          
+          // Use form data for display since backend response may be incomplete
+          savedProduct = {
+            ...savedProduct,
+            name: product.name || savedProduct.name,
+            category: product.category || savedProduct.category,
+            price: product.price ?? savedProduct.price,
+            stock: product.stock ?? savedProduct.stock,
+            description: product.description || savedProduct.description,
+            image: product.image || savedProduct.image,
+            weight: product.weight ?? savedProduct.weight,
+            dimensions: product.dimensions || savedProduct.dimensions,
+          } as Product;
+        } else {
+          savedProduct = await productRepository.createProduct(payload);
+          
+          // Upload image if there's a base64 image
+          if (hasBase64Image && product.image && savedProduct.id) {
+            try {
+              const response = await fetch(product.image);
+              const blob = await response.blob();
+              const fileName = `product-${Date.now()}.webp`;
+              const file = new File([blob], fileName, { type: blob.type });
+              
+              const uploadResult = await productRepository.uploadProductImage(savedProduct.id, file);
+              savedProduct = { ...savedProduct, image: uploadResult.url } as Product;
+            } catch (uploadErr) {
+              console.error('Error uploading image:', uploadErr);
+            }
+          }
+          
+          // Use form data for display since backend may not return all fields
+          savedProduct = {
+            ...savedProduct,
+            name: product.name || savedProduct.name,
+            category: product.category || savedProduct.category,
+            price: product.price || savedProduct.price,
+            stock: product.stock ?? savedProduct.stock,
+            description: product.description || savedProduct.description,
+            weight: product.weight ?? savedProduct.weight,
+            dimensions: product.dimensions ?? savedProduct.dimensions,
+          } as Product;
+        }
       } else {
-        // CREATE new product (via Server Action)
-        result = await createProduct(payload);
-      }
-
-      if (!result.success || !result.data) {
-        throw new Error(result.error || 'Error al guardar producto');
+        savedProduct = {
+          id: product.id || Date.now().toString(),
+          ...product,
+        };
       }
 
       showToast(
@@ -305,22 +350,18 @@ export default function CatalogClient({ initialProducts }: CatalogClientProps) {
         'success'
       );
 
-      console.log('[onSave] Refreshing product list from server');
-      
-      // Refresh from server to ensure consistency
-      startTransition(async () => {
-        const refreshedProducts = await getProducts();
-        console.log('[onSave] Refreshed products count:', refreshedProducts.length);
-        setProducts(refreshedProducts);
+      startTransition(() => {
+        setProducts(prev => {
+          if (selectedProduct) {
+            return prev.map(p => p.id === selectedProduct.id ? savedProduct as Product : p);
+          }
+          return [savedProduct as Product, ...prev];
+        });
       });
 
       closeModal();
-    } catch (error) {
-      console.error('[onSave] Error:', error);
-      showToast(
-        error instanceof Error ? error.message : 'Error al guardar producto',
-        'error'
-      );
+    } catch (err: any) {
+      showToast(err.message || 'Error al procesar el producto', 'error');
     }
   };
 
@@ -405,9 +446,9 @@ export default function CatalogClient({ initialProducts }: CatalogClientProps) {
       {/* Product Grid con Optimistic Updates */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-6">
         {filteredProducts.length > 0 ? (
-          filteredProducts.map((product, index) => (
+          filteredProducts.map(product => (
             <OptimisticProductCard
-              key={product.id || `product-${index}`}
+              key={product.id}
               product={product}
               optimisticPrice={optimisticPrices[product.id]}
               onEdit={openEditModal}
