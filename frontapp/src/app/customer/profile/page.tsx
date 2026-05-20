@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/shared/lib/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import Icon from '@/components/ui/Icon';
+import { userRepository } from '@/shared/lib/api/factory';
 
 interface ProfileFormData {
   nombres: string;
@@ -153,15 +154,25 @@ export default function CustomerProfilePage() {
   };
 
   const handleSave = async () => {
-    if (!validateForm()) return;
+    if (!validateForm() || !user) return;
 
     try {
       setSaving(true);
 
-      // Aquí iría tu lógica real de guardado
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await userRepository.updateUser(user.id, {
+        display_name: `${formData.nombres} ${formData.apellidos}`.trim(),
+        email: formData.correo,
+        phone: formData.telefono,
+        phone_2: formData.celular_secundario,
+        document_type: formData.tipo_documento,
+        document_number: formData.numero_documento.replace(/\D/g, ''),
+        avatar: formData.foto,
+      });
 
       setIsEditMode(false);
+    } catch (err) {
+      console.error('Error al guardar perfil:', err);
+      alert('Ocurrió un error al guardar los cambios. Intenta nuevamente.');
     } finally {
       setSaving(false);
     }
