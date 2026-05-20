@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { Product } from '@/features/seller/catalog/types';
+import { AttributeValue, Product } from '@/features/seller/catalog/types';
 import BaseModal from '@/components/ui/BaseModal';
 import { formatCurrency } from '@/shared/lib/utils/formatters';
 
@@ -10,6 +10,23 @@ interface ProductDetailModalProps {
     product: Product | null;
     isOpen: boolean;
     onClose: () => void;
+}
+// Agrega este helper al inicio del componente o fuera de él
+function normalizeValues(values: unknown): AttributeValue[] {
+    if (!values) return [];
+    // Si ya es array
+    if (Array.isArray(values)) {
+        return values.map((v) =>
+            typeof v === 'object' && v !== null && 'label' in v
+                ? (v as AttributeValue)
+                : { label: String(v), value: String(v) }
+        );
+    }
+    // Si es un objeto directo {label, value}
+    if (typeof values === 'object' && 'label' in (values as object)) {
+        return [values as AttributeValue];
+    }
+    return [];
 }
 
 export default function ProductDetailModal({ product, isOpen, onClose }: ProductDetailModalProps) {
@@ -81,15 +98,16 @@ export default function ProductDetailModal({ product, isOpen, onClose }: Product
                             <div className="space-y-3">
                                 <h4 className="text-xs font-black text-sky-500 uppercase tracking-widest border-b border-sky-500/20 pb-2">Información Principal</h4>
                                 <div className="space-y-2">
-                                    {mainAttributes.map((attr, idx) => (
-                                        <div key={`main-${attr.name || idx}`} className="grid grid-cols-2 md:grid-cols-3 gap-4 py-2 border-b border-[var(--border-subtle)] border-dashed">
-                                            {attr.values && Array.isArray(attr.values) && attr.values.map((val, vIdx) => (
-                                                <span key={`${attr.name}-${vIdx}`} className={`text-xs ${vIdx === 0 ? 'font-black text-[var(--text-primary)] uppercase' : 'font-bold text-[var(--text-secondary)]'}`}>
-                                                    {val}
-                                                </span>
-                                            ))}
-                                        </div>
-                                    ))}
+                                    {mainAttributes.map((attr, idx) => {
+                                        const vals = normalizeValues(attr.values);
+                                        if (!vals.length) return null;
+                                        return (
+                                            <div key={`main-${attr.name || idx}`} className="flex justify-between py-2 border-b border-[var(--border-subtle)] border-dashed">
+                                                <span className="text-xs font-black text-[var(--text-primary)] uppercase">{vals[0].label}</span>
+                                                <span className="text-xs font-bold text-[var(--text-secondary)]">{vals[0].value}</span>
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             </div>
                         )}
@@ -98,15 +116,16 @@ export default function ProductDetailModal({ product, isOpen, onClose }: Product
                             <div className="space-y-3">
                                 <h4 className="text-xs font-black text-[var(--text-secondary)] uppercase tracking-widest border-b border-[var(--border-subtle)] pb-2">Detalles Adicionales</h4>
                                 <div className="space-y-2">
-                                    {additionalAttributes.map((attr, idx) => (
-                                        <div key={`additional-${attr.name || idx}`} className="grid grid-cols-2 md:grid-cols-3 gap-4 py-2 border-b border-[var(--border-subtle)] border-dashed">
-                                            {attr.values && Array.isArray(attr.values) && attr.values.map((val, vIdx) => (
-                                                <span key={`${attr.name}-${vIdx}`} className={`text-xs ${vIdx === 0 ? 'font-bold text-[var(--text-secondary)] uppercase' : 'font-medium text-[var(--text-secondary)]'}`}>
-                                                    {val}
-                                                </span>
-                                            ))}
-                                        </div>
-                                    ))}
+                                    {additionalAttributes.map((attr, idx) => {
+                                        const vals = normalizeValues(attr.values);
+                                        if (!vals.length) return null;
+                                        return (
+                                            <div key={`additional-${attr.name || idx}`} className="flex justify-between py-2 border-b border-[var(--border-subtle)] border-dashed">
+                                                <span className="text-xs font-black text-[var(--text-secondary)] uppercase">{vals[0].label}</span>
+                                                <span className="text-xs font-medium text-[var(--text-secondary)]">{vals[0].value}</span>
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             </div>
                         )}

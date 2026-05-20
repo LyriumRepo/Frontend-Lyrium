@@ -6,23 +6,21 @@ export class LaravelProductRepository implements IProductRepository {
         return process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://localhost:8000/api';
     }
 
-    private async getAuthHeaders(): Promise<HeadersInit> {
-        const token = await this.getToken();
-        return token ? { Authorization: `Bearer ${token}` } : {};
-    }
-
+    // ✅ FIX: La cookie es httpOnly — solo es accesible desde el servidor.
+    // Siempre usar next/headers, nunca document.cookie.
     private async getToken(): Promise<string | null> {
         try {
-            if (typeof window !== 'undefined') {
-                const match = document.cookie.match(/(?:^|;\s*)laravel_token=([^;]+)/);
-                return match ? decodeURIComponent(match[1]) : null;
-            }
             const { cookies } = await import('next/headers');
             const cookieStore = await cookies();
             return cookieStore.get('laravel_token')?.value ?? null;
         } catch {
             return null;
         }
+    }
+
+    private async getAuthHeaders(): Promise<HeadersInit> {
+        const token = await this.getToken();
+        return token ? { Authorization: `Bearer ${token}` } : {};
     }
 
     private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
@@ -51,7 +49,7 @@ export class LaravelProductRepository implements IProductRepository {
         const params = new URLSearchParams();
         if (filters?.search) params.set('search', filters.search);
         if (filters?.category) params.set('category', filters.category);
-        
+
         const query = params.toString() ? `?${params.toString()}` : '';
         return this.request<Product[]>(`/products${query}`);
     }
@@ -62,7 +60,7 @@ export class LaravelProductRepository implements IProductRepository {
             return {
                 id: data.id?.toString() || id,
                 name: data.name || '',
-                category: data.categories?.[0]?.name || 'Sin categoría',
+                category: data.categories?.[0]?.slug || '',
                 price: parseFloat(data.price || '0'),
                 stock: data.stock || 0,
                 weight: data.weight,
@@ -70,8 +68,8 @@ export class LaravelProductRepository implements IProductRepository {
                 description: data.description || '',
                 image: data.images?.[0]?.src || '',
                 sticker: data.sticker || null,
-                mainAttributes: [],
-                additionalAttributes: [],
+                mainAttributes: data.mainAttributes || [],
+                additionalAttributes: data.additionalAttributes || [],
                 createdAt: data.created_at || new Date().toISOString(),
             };
         } catch {
@@ -80,9 +78,8 @@ export class LaravelProductRepository implements IProductRepository {
     }
 
     async createProduct(input: CreateProductInput): Promise<Product> {
-        // No enviar imagen si es base64 (muy grande para la DB)
         const image = input.image && !input.image.startsWith('data:') ? input.image : null;
-        
+
         return this.request<Product>('/products', {
             method: 'POST',
             body: JSON.stringify({
@@ -103,29 +100,21 @@ export class LaravelProductRepository implements IProductRepository {
 
     async updateProduct(id: string, input: UpdateProductInput): Promise<Product> {
         const updateData: Record<string, unknown> = {};
-        
-        // Always send these fields
+
         if (input.name !== undefined) updateData.name = input.name;
         if (input.description !== undefined) updateData.description = input.description ?? '';
         if (input.price !== undefined) updateData.price = Number(input.price);
         if (input.stock !== undefined) updateData.stock = Number(input.stock);
         if (input.category !== undefined) updateData.category = input.category || null;
-        
-        // Handle image - only send if not base64 and not empty
+
         if (input.image !== undefined && input.image !== null && !input.image.startsWith('data:')) {
             updateData.image = input.image;
         }
-        
+
         if (input.discountPercentage !== undefined) updateData.discountPercentage = input.discountPercentage;
-        
-        // Sticker
         if (input.sticker !== undefined) updateData.sticker = input.sticker;
-        
-        // Physical fields
         if (input.weight !== undefined) updateData.weight = input.weight ? Number(input.weight) : null;
         if (input.dimensions !== undefined) updateData.dimensions = input.dimensions || null;
-        
-        // Attributes
         if (input.mainAttributes !== undefined) updateData.mainAttributes = input.mainAttributes;
         if (input.additionalAttributes !== undefined) updateData.additionalAttributes = input.additionalAttributes;
 
@@ -136,9 +125,7 @@ export class LaravelProductRepository implements IProductRepository {
     }
 
     async deleteProduct(id: string): Promise<boolean> {
-        await this.request(`/products/${id}`, {
-            method: 'DELETE',
-        });
+        await this.request(`/products/${id}`, { method: 'DELETE' });
         return true;
     }
 
@@ -159,14 +146,14 @@ export class LaravelProductRepository implements IProductRepository {
     async uploadProductImage(productId: string, file: File): Promise<{ url: string }> {
         const token = await this.getToken();
         const baseUrl = this.getBaseUrl();
-        
+
         const formData = new FormData();
         formData.append('file', file);
-        
+
         const response = await fetch(`${baseUrl}/products/${productId}/media`, {
             method: 'POST',
             headers: {
-                ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+                ...(token ? { Authorization: `Bearer ${token}` } : {}),
             },
             credentials: 'include',
             body: formData,

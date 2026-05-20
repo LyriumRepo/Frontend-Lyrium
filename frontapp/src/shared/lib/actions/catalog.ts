@@ -1,269 +1,272 @@
 'use server';
 
 import { revalidateTag } from 'next/cache';
-import { parseWPProduct, parseWPProducts, Product } from '../adapters/wp-product.adapter';
+import type { Product, ProductPayload } from '@/features/seller/catalog/types';
 
-/**
- * Server Action: Obtener productos del catálogo
- * Usa el adapter Zod para limpiar datos de WooCommerce
- */
-export async function getProducts(vendorId?: string): Promise<Product[]> {
+const LARAVEL_API_URL =
+  process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://localhost:8000/api';
+
+// ─── Helper: obtener token desde cookies ─────────────────────────────────────
+async function getAuthToken(): Promise<string> {
   try {
-    const LARAVEL_API_URL = process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://localhost:8000/api';
-    
-    let token = '';
-    let cookieHeader = '';
-    try {
-      const cookieStore = await import('next/headers');
-      const cookies = await cookieStore.cookies();
-      token = cookies.get('laravel_token')?.value || '';
-      cookieHeader = cookies.toString();
-    } catch (e) {
-      console.error('Error getting cookies in getProducts:', e);
-    }
-    
-    console.log('getProducts - Token present:', !!token, 'Cookie header:', cookieHeader ? 'present' : 'missing');
-    
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-    };
-    
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-    if (cookieHeader) {
-      headers['Cookie'] = cookieHeader;
-    }
-    
-    const response = await fetch(`${LARAVEL_API_URL}/products?per_page=100`, {
-      headers,
+    const { cookies } = await import('next/headers');
+    return (await cookies()).get('laravel_token')?.value ?? '';
+  } catch {
+    return '';
+  }
+}
+
+// ─── Helper: headers autenticados ────────────────────────────────────────────
+function authHeaders(token: string): Record<string, string> {
+  return {
+    'Content-Type': 'application/json',
+    Accept: 'application/json',
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+}
+
+// ─── Helper: mapear respuesta Laravel → Product ───────────────────────────────
+function mapLaravelProduct(p: any): Product {
+  return {
+    id: String(p.id),
+    name: p.name ?? '',
+    slug: p.slug ?? '',
+    type: p.type ?? 'physical',
+    description: p.description ?? '',
+    short_description: p.short_description ?? null,
+    price: parseFloat(p.price ?? '0'),
+    regularPrice: parseFloat(p.regular_price ?? p.price ?? '0'),
+    stock: p.stock ?? 0,
+    status: p.status ?? 'draft',
+    sticker: p.sticker ?? null,
+    discountPercentage: p.discount_percentage
+      ? parseFloat(p.discount_percentage)
+      : null,
+
+    // Imagen principal
+    image: p.images?.[0]?.src ?? '',
+    images: p.images ?? [],
+
+    // Categorías
+    category: p.categories?.[0]?.slug ?? '',
+    categories: p.categories ?? [],
+
+    // Physical
+    weight: p.weight ?? null,
+    dimensions: p.dimensions ?? null,
+    expirationDate: p.expirationDate ?? null,
+
+    // Digital
+    downloadUrl: p.downloadUrl ?? null,
+    downloadLimit: p.downloadLimit ?? null,
+    fileType: p.fileType ?? null,
+    fileSize: p.fileSize ?? null,
+
+    // Service
+    serviceDuration: p.serviceDuration ?? null,
+    serviceModality: p.serviceModality ?? null,
+    serviceLocation: p.serviceLocation ?? null,
+
+    // Atributos — ya vienen mapeados desde ProductResource
+    mainAttributes: (p.characteristics ?? []).map((c: any) => ({
+      values: { label: c.label ?? '', value: c.value ?? '' },
+    })),
+    additionalAttributes: (p.additional_info ?? []).map((c: any) => ({
+      values: { label: c.label ?? '', value: c.value ?? '' },
+    })),
+    nutritionalAttributes: (p.nutritional_info?.rows ?? []).map((r: any) => ({
+      values: {
+        label: r.label ?? '',
+        value: r.value ?? '',
+        daily_value: r.daily_value ?? null,
+      },
+    })),
+    servingNote: p.nutritional_info?.serving_note ?? null,
+
+    createdAt: p.created_at ?? new Date().toISOString(),
+    updatedAt: p.updated_at ?? new Date().toISOString(),
+  };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET /api/products  (productos del vendedor autenticado)
+// ─────────────────────────────────────────────────────────────────────────────
+export async function getProducts(): Promise<Product[]> {
+  try {
+    const token = await getAuthToken();
+    const res = await fetch(`${LARAVEL_API_URL}/products?per_page=100`, {
+      headers: authHeaders(token),
       cache: 'no-store',
     });
-    
-    console.log('getProducts - Response status:', response.status);
 
-    if (!response.ok) {
-      console.error('Error fetching products:', response.status);
+    if (!res.ok) {
+      console.error('getProducts error:', res.status);
       return [];
     }
 
-    const data = await response.json();
-    console.log('getProducts - Response data:', JSON.stringify(data).substring(0, 500));
-    const products = data.data?.data || data.data || [];
-    
-    return products.map((p: any) => ({
-      id: p.id.toString(),
-      name: p.name || '',
-      slug: p.slug || '',
-      description: p.description || '',
-      price: parseFloat(p.price || '0'),
-      regularPrice: parseFloat(p.regular_price || p.price || '0'),
-      salePrice: p.sale_price ? parseFloat(p.sale_price) : undefined,
-      stock: p.stock ?? 0,
-      status: p.status || 'draft',
-      image: p.images?.[0]?.src || '',
-      category: p.categories?.[0]?.slug || p.categories?.[0]?.name || '',
-      categories: p.categories || [],
-      type: p.type || 'physical',
-      weight: p.weight,
-      dimensions: p.dimensions,
-      sticker: p.sticker || null,
-      mainAttributes: p.mainAttributes || [],
-      additionalAttributes: p.additionalAttributes || [],
-    }));
-  } catch (error) {
-    console.error('Error fetching products from Laravel:', error);
+    const data = await res.json();
+    const raw: any[] = data.data ?? [];
+    return raw.map(mapLaravelProduct);
+  } catch (err) {
+    console.error('getProducts exception:', err);
     return [];
   }
 }
 
-/**
- * Server Action: Buscar productos con filtros
- */
-export async function searchProducts(
-  query: string,
-  category?: string
-): Promise<Product[]> {
-  const products = await getProducts();
-
-  let filtered = products;
-
-  if (query) {
-    const q = query.toLowerCase();
-    filtered = filtered.filter(p =>
-      p.name.toLowerCase().includes(q) ||
-      p.description.toLowerCase().includes(q)
-    );
-  }
-
-  if (category) {
-    filtered = filtered.filter(p => p.category === category);
-  }
-
-  return filtered;
-}
-
-/**
- * Server Action: Eliminar producto
- */
-export async function deleteProduct(productId: string): Promise<{ success: boolean; error?: string }> {
-  try {
-    const LARAVEL_API_URL = process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://localhost:8000/api';
-    
-    const cookieStore = await import('next/headers');
-    const token = (await cookieStore.cookies()).get('laravel_token')?.value;
-    
-    const response = await fetch(`${LARAVEL_API_URL}/products/${productId}`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
-      },
-      credentials: 'include',
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      return {
-        success: false,
-        error: errorData.message || 'No se pudo eliminar el producto'
-      };
-    }
-
-    revalidateTag('seller-catalog', 'max');
-
-    return { success: true };
-  } catch (error) {
-    return {
-      success: false,
-      error: 'No se pudo eliminar el producto. Intenta de nuevo.'
-    };
-  }
-}
-
-/**
- * Server Action: Actualizar precio de producto (para Optimistic UI)
- */
-export async function updateProductPrice(
-  productId: string,
-  newPrice: number
-): Promise<{ success: boolean; data?: { id: string; price: number }; error?: string }> {
-  try {
-    // Validar
-    if (!productId) {
-      return { success: false, error: 'ID de producto requerido' };
-    }
-
-    if (newPrice < 0) {
-      return { success: false, error: 'El precio debe ser positivo' };
-    }
-
-    // Simular llamada a WC API
-    await new Promise(resolve => setTimeout(resolve, 300));
-
-    // Revalidar cache
-    revalidateTag('seller-catalog', 'max');
-
-    return {
-      success: true,
-      data: { id: productId, price: newPrice }
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error: 'No se pudo actualizar el precio. Intenta de nuevo.'
-    };
-  }
-}
-
-/**
- * Server Action: Crear/Actualizar producto
- */
+// ─────────────────────────────────────────────────────────────────────────────
+// POST /api/products  |  PUT /api/products/{id}
+// ─────────────────────────────────────────────────────────────────────────────
 export async function saveProduct(
-  product: Partial<Product>
+  product: Partial<Product>,
 ): Promise<{ success: boolean; data?: Product; error?: string }> {
   try {
-    if (!product.name || product.name.trim() === '') {
+    if (!product.name?.trim()) {
       return { success: false, error: 'El nombre del producto es requerido' };
     }
 
-    const LARAVEL_API_URL = process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://localhost:8000/api';
-    
-    let token = '';
-    try {
-      const cookieStore = await import('next/headers');
-      token = (await cookieStore.cookies()).get('laravel_token')?.value || '';
-    } catch (e) {
-      console.error('Error getting cookies:', e);
-    }
-    
-    console.log('Token:', token ? 'present' : 'MISSING');
-
+    const token = await getAuthToken();
     const isUpdate = !!product.id;
-    const endpoint = isUpdate 
+    const endpoint = isUpdate
       ? `${LARAVEL_API_URL}/products/${product.id}`
       : `${LARAVEL_API_URL}/products`;
-    
-    const method = isUpdate ? 'PUT' : 'POST';
 
-    const payload: any = {
-      type: 'physical',
+    // ── Construir payload exacto que espera Laravel ──────────────────────────
+    const payload: ProductPayload = {
+      type: product.type ?? 'physical',
       name: product.name,
-      price: product.price || 0,
-      stock: product.stock || 0,
-      description: product.description || '',
+      description: product.description ?? '',
+      short_description: product.short_description ?? null,
+      price: product.price ?? 0,
+      stock: product.stock ?? 0,
       category: product.category || null,
-      image: product.image || null,
-      discountPercentage: product.discountPercentage || null,
-      weight: product.weight || null,
-      dimensions: product.dimensions || null,
+      sticker: product.sticker ?? null,
+      discountPercentage: product.discountPercentage ?? null,
+
+      // Atributos — formato { values: { label, value } }
+      mainAttributes: product.mainAttributes ?? [],
+      additionalAttributes: product.additionalAttributes ?? [],
+
+      // Nutricional
+      ...(product.nutritionalAttributes?.length
+        ? {
+            nutritionalAttributes: product.nutritionalAttributes,
+            servingNote: product.servingNote ?? null,
+          }
+        : {}),
     };
 
-    console.log('Saving product payload:', payload);
+    // Campos específicos por tipo
+    if (payload.type === 'physical') {
+      payload.weight = product.weight ?? null;
+      payload.dimensions = product.dimensions ?? null;
+      payload.expirationDate = product.expirationDate ?? null;
+    }
 
-    const response = await fetch(endpoint, {
-      method,
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
-      },
-      credentials: 'include',
+    if (payload.type === 'digital') {
+      payload.downloadUrl = product.downloadUrl ?? null;
+      payload.downloadLimit = product.downloadLimit ?? null;
+      payload.fileType = product.fileType ?? null;
+      payload.fileSize = product.fileSize ?? null;
+    }
+
+    if (payload.type === 'service') {
+      payload.serviceDuration = product.serviceDuration ?? null;
+      payload.serviceModality = product.serviceModality ?? null;
+      payload.serviceLocation = product.serviceLocation ?? null;
+    }
+
+    const res = await fetch(endpoint, {
+      method: isUpdate ? 'PUT' : 'POST',
+      headers: authHeaders(token),
       body: JSON.stringify(payload),
     });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error('Save product error:', response.status, errorData);
-      return { 
-        success: false, 
-        error: errorData.message || errorData.errors ? JSON.stringify(errorData.errors) : `Error ${response.status}: Error al guardar el producto` 
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      const msg =
+        err.message ??
+        (err.errors ? Object.values(err.errors).flat().join(', ') : null) ??
+        `Error ${res.status}`;
+      return { success: false, error: msg };
+    }
+
+    const data = await res.json();
+    revalidateTag('seller-catalog');
+
+    // La respuesta puede ser el producto directamente o { data: producto }
+    const raw = data.data ?? data;
+    return { success: true, data: mapLaravelProduct(raw) };
+  } catch (err: any) {
+    console.error('saveProduct exception:', err);
+    return {
+      success: false,
+      error: err.message ?? 'Error al guardar el producto',
+    };
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DELETE /api/products/{id}
+// ─────────────────────────────────────────────────────────────────────────────
+export async function deleteProduct(
+  productId: string,
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const token = await getAuthToken();
+    const res = await fetch(`${LARAVEL_API_URL}/products/${productId}`, {
+      method: 'DELETE',
+      headers: authHeaders(token),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      return {
+        success: false,
+        error: err.message ?? 'No se pudo eliminar el producto',
       };
     }
 
-    const data = await response.json();
-    
-    const savedProduct: Product = {
-      id: data.id?.toString() || product.id || Date.now().toString(),
-      name: data.name || product.name,
-      category: data.categories?.[0]?.name || product.category || 'Sin categoría',
-      price: parseFloat(data.price || product.price || '0'),
-      stock: data.stock ?? product.stock ?? 0,
-      description: data.description || product.description || '',
-      image: data.images?.[0]?.src || product.image || '',
-      sticker: data.sticker || product.sticker || null,
-      mainAttributes: product.mainAttributes || [],
-      additionalAttributes: product.additionalAttributes || [],
-      createdAt: data.created_at || new Date().toISOString(),
-    };
+    revalidateTag('seller-catalog');
+    return { success: true };
+  } catch {
+    return { success: false, error: 'Error de conexión al eliminar' };
+  }
+}
 
-    revalidateTag('seller-catalog', 'max');
+// ─────────────────────────────────────────────────────────────────────────────
+// PUT /api/products/{id}  — actualización rápida de precio (Optimistic UI)
+// ─────────────────────────────────────────────────────────────────────────────
+export async function updateProductPrice(
+  productId: string,
+  newPrice: number,
+): Promise<{
+  success: boolean;
+  data?: { id: string; price: number };
+  error?: string;
+}> {
+  try {
+    if (!productId) return { success: false, error: 'ID requerido' };
+    if (newPrice < 0)
+      return { success: false, error: 'El precio debe ser positivo' };
 
-    return { success: true, data: savedProduct };
-  } catch (error) {
-    console.error('Error saving product:', error);
-    return {
-      success: false,
-      error: 'Error al guardar el producto'
-    };
+    const token = await getAuthToken();
+    const res = await fetch(`${LARAVEL_API_URL}/products/${productId}`, {
+      method: 'PUT',
+      headers: authHeaders(token),
+      body: JSON.stringify({ price: newPrice }),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      return {
+        success: false,
+        error: err.message ?? 'Error al actualizar precio',
+      };
+    }
+
+    revalidateTag('seller-catalog');
+    return { success: true, data: { id: productId, price: newPrice } };
+  } catch {
+    return { success: false, error: 'Error de conexión' };
   }
 }

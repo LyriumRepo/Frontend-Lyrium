@@ -1,93 +1,78 @@
 import { notFound } from 'next/navigation';
+
+import type { Metadata } from 'next';
 import {
-  getCategoryBySlug,
-  getProductsByCategorySlug,
-  mapWooProductToLocal,
-  WooCategory,
-} from '@/shared/lib/api/wooCommerce';
-import { getCategories } from '@/shared/lib/api';
-import { ProductCategory } from '@/shared/types/wp/wp-types';
+    getCategoryBySlug,
+    getAllCategories,
+    flattenCategories,
+} from '@/shared/lib/api/laravelCategoryRepository';
+import { getProductsByCategory } from '@/shared/lib/api/laravelProductRepository';
 import CategoryPageClient from './CategoryPageClient';
 
+// ─── IMPORTANTE: catch-all route ─────────────────────────────────────────────
+// La carpeta se llama [...categoria] (con los tres puntos)
+// para que Next.js capture rutas anidadas como:
+//   /productos/bebes-recien-nacidos          → categoria = ['bebes-recien-nacidos']
+//   /productos/bebes-recien-nacidos/bebes-alimentacion → categoria = ['bebes-recien-nacidos','bebes-alimentacion']
+// Siempre usamos el ÚLTIMO segmento como slug real de la categoría.
+// ─────────────────────────────────────────────────────────────────────────────
+
 interface PageProps {
-  params: Promise<{ categoria: string[] }>;
+    params: Promise<{ categoria: string[] }>;
 }
 
+// ─── Metadata dinámica ────────────────────────────────────────────────────────
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+    const { categoria } = await params;
+    const slug = categoria[categoria.length - 1]; // último segmento
+    const category = await getCategoryBySlug(slug);
+
+    if (!category) return { title: 'Categoría | Lyrium' };
+
+    return {
+        title: `${category.name} | Lyrium Biomarketplace`,
+        description: category.description || `Explora nuestra selección de ${category.name} en Lyrium.`,
+    };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PAGE — Server Component
+// Resuelve el slug real (siempre el último segmento de la URL),
+// carga los productos de esa categoría desde Laravel y renderiza el Client.
+// ─────────────────────────────────────────────────────────────────────────────
 export default async function CategoryPage({ params }: PageProps) {
-  const { categoria } = await params;
+    const { categoria } = await params;
 
-  const fullSlugs = categoria;
-  const currentSlug = categoria[categoria.length - 1];
+    // Siempre el último segmento es el slug real de la categoría
+    // Ej: ['bebes-recien-nacidos', 'bebes-alimentacion'] → 'bebes-alimentacion'
+    const slug = categoria[categoria.length - 1];
 
-  // 🔥 VALIDAR TODA LA JERARQUÍA Y OBTENER LA CATEGORÍA FINAL
-  let parentId = 0;
-  let categoryRaw: WooCategory | null = null;
+    // Cargar en paralelo: categoría actual + productos + todas las categorías
+    const [category, products, allCategories] = await Promise.all([
+        getCategoryBySlug(slug),
+        getProductsByCategory(slug, 50),
+        getAllCategories(),
+    ]);
 
-  for (const slug of fullSlugs) {
-    const cat = await getCategoryBySlug(slug);
-
-    if (!cat) {
-      console.error('Categoría no encontrada:', slug);
-      notFound();
+    if (!category) {
+        notFound();
     }
 
-    if (cat.parent !== parentId) {
-      console.error('Jerarquía inválida en:', slug);
-      notFound();
-    }
+    // Categorías hermanas: mismas que tienen el mismo parent_id
+    // Si la categoría no tiene padre → son las categorías raíz
+    const flat = flattenCategories(allCategories);
+    const siblingCategories = flat.filter(
+        (c) => c.parent === (category.parent ?? null) && c.id !== category.id
+    );
 
-    parentId = cat.id;
-    categoryRaw = cat;
-  }
+    // Incluir la categoría actual al inicio de los hermanos para la nav
+    const navCategories = [category, ...siblingCategories];
 
-  if (!categoryRaw) {
-    notFound();
-  }
-
-  const wooProducts = await getProductsByCategorySlug(currentSlug, 50);
-  const allCategoriesRaw = await getCategories();
-
-  const productos = wooProducts.map(mapWooProductToLocal);
-
-  const category: ProductCategory = {
-    id: categoryRaw.id,
-    name: categoryRaw.name,
-    slug: categoryRaw.slug,
-    parent: categoryRaw.parent,
-    description: categoryRaw.description || '',
-    count: categoryRaw.count || 0,
-    image: categoryRaw.image?.src
-      ? {
-          id: 0,
-          src: categoryRaw.image.src,
-          name: categoryRaw.name,
-        }
-      : undefined,
-  };
-
-  const mainCategories: ProductCategory[] = allCategoriesRaw
-    .filter((cat: any) => cat.parent === 0)
-    .map((cat: any) => ({
-      id: cat.id,
-      name: cat.name,
-      slug: cat.slug,
-      parent: cat.parent,
-      description: cat.description || '',
-      count: cat.count || 0,
-      image: cat.image?.src
-        ? {
-            id: 0,
-            src: cat.image.src,
-            name: cat.name,
-          }
-        : undefined,
-    }));
-
-  return (
-    <CategoryPageClient
-      category={category}
-      products={productos}
-      allCategories={mainCategories}
-    />
-  );
+    return (
+        <CategoryPageClient
+            category={category}
+            products={products}
+            siblingCategories={navCategories}
+        />
+    );
 }
