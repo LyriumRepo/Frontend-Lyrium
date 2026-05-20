@@ -8,6 +8,7 @@ import ThemeToggle from '@/components/layout/shared/ThemeToggle';
 import TopBanner from './TopBanner';
 import DesktopNav from './DesktopNav';
 import MobileMenu from './MobileMenu';
+import SearchAutocomplete from '@/components/search/SearchAutocomplete';
 import { menuItems as fallbackMenuItems, megaMenuData as fallbackMegaMenuData } from '@/data/menuData';
 import { useMegaMenu } from '@/shared/hooks/useMegaMenu';
 import { useCarritoStore } from '@/store/carritoStore';
@@ -42,6 +43,14 @@ export default function PublicHeader() {
                             sideImg="/img/nombrelogo.png"
                         />
                     </Link>
+
+                    {/* Search bar - visible on all pages */}
+                    <div className="hidden md:block flex-1 max-w-xl">
+                        <SearchAutocomplete
+                            placeholder="¿Qué buscas para tu salud?"
+                            onSearch={(q) => { window.location.href = `/buscar?q=${encodeURIComponent(q)}`; }}
+                        />
+                    </div>
 
                     <div className="flex items-center gap-4">
                         {/* Desktop: Session / Cart */}

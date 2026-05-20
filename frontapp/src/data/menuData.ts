@@ -205,54 +205,62 @@ export const menuItems: MenuItem[] = [
         icon: 'shopping-bag',
         children: [
             { 
-                label: 'Bebés y recién nacidos', 
-                href: '/productos/bebes',
+                label: 'Suplementos vitamínicos', 
+                href: '/productos/suplementos',
                 children: [
                     { 
-                        label: 'Alimentación', 
-                        href: '/productos/bebes/alimentacion',
+                        label: 'Vitaminas', 
+                        href: '/productos/suplementos/vitaminas',
                         children: [
-                            { label: 'Biberones y tetinas', href: '/productos/bebes/alimentacion/biberones' },
-                            { label: 'Papillas y purés', href: '/productos/bebes/alimentacion/papillas' },
-                            { label: 'Leches infantiles', href: '/productos/bebes/alimentacion/leches' },
-                            { label: 'Accesorios de alimentación', href: '/productos/bebes/alimentacion/accesorios' },
-                        ]
-                    },
-                    { label: 'Ropa', href: '/productos/bebes/ropa' },
-                    { label: 'Calzado', href: '/productos/bebes/calzado' },
-                    { label: 'Juguetes', href: '/productos/bebes/juguetes' },
-                    { label: 'Lactancia y chupetes', href: '/productos/bebes/lactancia' },
-                    { label: 'De paseo y en el coche', href: '/productos/bebes/paseo' },
-                ]
-            },
-            { 
-                label: 'Belleza', 
-                href: '/productos/belleza',
-                children: [
-                    { 
-                        label: 'Hombres', 
-                        href: '/productos/belleza/hombres',
-                        children: [
-                            { label: 'Aseo e higiene', href: '/productos/belleza/hombres/aseo' },
-                            { label: 'Cuidado facial', href: '/productos/belleza/hombres/facial' },
-                            { label: 'Cuidado capilar', href: '/productos/belleza/hombres/capilar' },
+                            { label: 'Vitamina C', href: '/productos/suplementos/vitaminas/vitamina-c' },
+                            { label: 'Vitamina D', href: '/productos/suplementos/vitaminas/vitamina-d' },
+                            { label: 'Vitamina E', href: '/productos/suplementos/vitaminas/vitamina-e' },
+                            { label: 'Complejo B', href: '/productos/suplementos/vitaminas/complejo-b' },
                         ]
                     },
                     { 
-                        label: 'Mujeres', 
-                        href: '/productos/belleza/mujeres',
+                        label: 'Minerales', 
+                        href: '/productos/suplementos/minerales',
                         children: [
-                            { label: 'Maquillaje', href: '/productos/belleza/mujeres/maquillaje' },
-                            { label: 'Cuidado facial', href: '/productos/belleza/mujeres/facial' },
-                            { label: 'Cuidado corporal', href: '/productos/belleza/mujeres/corporal' },
+                            { label: 'Magnesio', href: '/productos/suplementos/minerales/magnesio' },
+                            { label: 'Zinc', href: '/productos/suplementos/minerales/zinc' },
+                            { label: 'Hierro', href: '/productos/suplementos/minerales/hierro' },
+                            { label: 'Calcio', href: '/productos/suplementos/minerales/calcio' },
                         ]
                     },
                     { 
-                        label: 'Adolescentes, Niños y bebes', 
-                        href: '/productos/belleza/jovenes',
+                        label: 'Proteínas', 
+                        href: '/productos/suplementos/proteinas',
                         children: [
-                            { label: 'Aseo infantil', href: '/productos/belleza/jovenes/aseo' },
-                            { label: 'Cuidado solar', href: '/productos/belleza/jovenes/solar' },
+                            { label: 'Whey protein', href: '/productos/suplementos/proteinas/whey' },
+                            { label: 'Proteína vegetal', href: '/productos/suplementos/proteinas/vegetal' },
+                            { label: 'Aminoácidos BCAA', href: '/productos/suplementos/proteinas/bcaa' },
+                        ]
+                    },
+                    { 
+                        label: 'Aminoácidos', 
+                        href: '/productos/suplementos/aminoacidos',
+                        children: [
+                            { label: 'L-Glutamina', href: '/productos/suplementos/aminoacidos/glutamina' },
+                            { label: 'L-Arginina', href: '/productos/suplementos/aminoacidos/arginina' },
+                        ]
+                    },
+                    { 
+                        label: 'Hierbas', 
+                        href: '/productos/suplementos/hierbas',
+                        children: [
+                            { label: 'Valeriana', href: '/productos/suplementos/hierbas/valeriana' },
+                            { label: 'Ginkgo biloba', href: '/productos/suplementos/hierbas/ginkgo' },
+                            { label: 'Equinacea', href: '/productos/suplementos/hierbas/equinacea' },
+                        ]
+                    },
+                    { 
+                        label: 'Deportivos', 
+                        href: '/productos/suplementos/deportivos',
+                        children: [
+                            { label: 'Pre-entreno', href: '/productos/suplementos/deportivos/pre-entreno' },
+                            { label: 'Creatina', href: '/productos/suplementos/deportivos/creatina' },
+                            { label: 'Reponedores electrolitos', href: '/productos/suplementos/deportivos/electrolitos' },
                         ]
                     },
                 ]
@@ -317,62 +325,6 @@ export const menuItems: MenuItem[] = [
                 ]
             },
             { 
-                label: 'Bienestar físico y deportes', 
-                href: '/productos/deportes',
-                children: [
-                    { 
-                        label: 'Calzado Mujer', 
-                        href: '/productos/deportes/calzado-mujer',
-                        children: [
-                            { label: 'Zapatillas running', href: '/productos/deportes/calzado-mujer/running' },
-                            { label: 'Zapatillas entrenamiento', href: '/productos/deportes/calzado-mujer/entrenamiento' },
-                            { label: 'Sandalias deportivas', href: '/productos/deportes/calzado-mujer/sandalias' },
-                        ]
-                    },
-                    { 
-                        label: 'Ropa mujer', 
-                        href: '/productos/deportes/ropa-mujer',
-                        children: [
-                            { label: 'Camisetas deportivas', href: '/productos/deportes/ropa-mujer/camisetas' },
-                            { label: 'Leggings y shorts', href: '/productos/deportes/ropa-mujer/leggings' },
-                            { label: 'Sudaderas', href: '/productos/deportes/ropa-mujer/sudaderas' },
-                        ]
-                    },
-                    { 
-                        label: 'Calzado Hombre', 
-                        href: '/productos/deportes/calzado-hombre',
-                        children: [
-                            { label: 'Zapatillas running', href: '/productos/deportes/calzado-hombre/running' },
-                            { label: 'Zapatillas entrenamiento', href: '/productos/deportes/calzado-hombre/entrenamiento' },
-                        ]
-                    },
-                    { 
-                        label: 'Ropa Hombre', 
-                        href: '/productos/deportes/ropa-hombre',
-                        children: [
-                            { label: 'Camisetas deportivas', href: '/productos/deportes/ropa-hombre/camisetas' },
-                            { label: 'Pantalones cortos', href: '/productos/deportes/ropa-hombre/pantalones' },
-                        ]
-                    },
-                    { 
-                        label: 'Deportes Niños', 
-                        href: '/productos/deportes/ninos',
-                        children: [
-                            { label: 'Ropa deportiva niño', href: '/productos/deportes/ninos/ropa' },
-                            { label: 'Calzado deportivo niño', href: '/productos/deportes/ninos/calzado' },
-                        ]
-                    },
-                    { 
-                        label: 'Deportes Hombre', 
-                        href: '/productos/deportes/deportes-hombre',
-                        children: [
-                            { label: 'Fitness', href: '/productos/deportes/deportes-hombre/fitness' },
-                            { label: 'Running', href: '/productos/deportes/deportes-hombre/running' },
-                        ]
-                    },
-                ]
-            },
-            { 
                 label: 'Digestión saludable', 
                 href: '/productos/digestion',
                 children: [
@@ -431,6 +383,94 @@ export const menuItems: MenuItem[] = [
                 ]
             },
             { 
+                label: 'Belleza', 
+                href: '/productos/belleza',
+                children: [
+                    { 
+                        label: 'Hombres', 
+                        href: '/productos/belleza/hombres',
+                        children: [
+                            { label: 'Aseo e higiene', href: '/productos/belleza/hombres/aseo' },
+                            { label: 'Cuidado facial', href: '/productos/belleza/hombres/facial' },
+                            { label: 'Cuidado capilar', href: '/productos/belleza/hombres/capilar' },
+                        ]
+                    },
+                    { 
+                        label: 'Mujeres', 
+                        href: '/productos/belleza/mujeres',
+                        children: [
+                            { label: 'Maquillaje', href: '/productos/belleza/mujeres/maquillaje' },
+                            { label: 'Cuidado facial', href: '/productos/belleza/mujeres/facial' },
+                            { label: 'Cuidado corporal', href: '/productos/belleza/mujeres/corporal' },
+                        ]
+                    },
+                    { 
+                        label: 'Adolescentes, Niños y bebes', 
+                        href: '/productos/belleza/jovenes',
+                        children: [
+                            { label: 'Aseo infantil', href: '/productos/belleza/jovenes/aseo' },
+                            { label: 'Cuidado solar', href: '/productos/belleza/jovenes/solar' },
+                        ]
+                    },
+                ]
+            },
+            { 
+                label: 'Bienestar físico y deportes', 
+                href: '/productos/deportes',
+                children: [
+                    { 
+                        label: 'Calzado Mujer', 
+                        href: '/productos/deportes/calzado-mujer',
+                        children: [
+                            { label: 'Zapatillas running', href: '/productos/deportes/calzado-mujer/running' },
+                            { label: 'Zapatillas entrenamiento', href: '/productos/deportes/calzado-mujer/entrenamiento' },
+                            { label: 'Sandalias deportivas', href: '/productos/deportes/calzado-mujer/sandalias' },
+                        ]
+                    },
+                    { 
+                        label: 'Ropa mujer', 
+                        href: '/productos/deportes/ropa-mujer',
+                        children: [
+                            { label: 'Camisetas deportivas', href: '/productos/deportes/ropa-mujer/camisetas' },
+                            { label: 'Leggings y shorts', href: '/productos/deportes/ropa-mujer/leggings' },
+                            { label: 'Sudaderas', href: '/productos/deportes/ropa-mujer/sudaderas' },
+                        ]
+                    },
+                    { 
+                        label: 'Calzado Hombre', 
+                        href: '/productos/deportes/calzado-hombre',
+                        children: [
+                            { label: 'Zapatillas running', href: '/productos/deportes/calzado-hombre/running' },
+                            { label: 'Zapatillas entrenamiento', href: '/productos/deportes/calzado-hombre/entrenamiento' },
+                        ]
+                    },
+                    { 
+                        label: 'Ropa Hombre', 
+                        href: '/productos/deportes/ropa-hombre',
+                        children: [
+                            { label: 'Camisetas deportivas', href: '/productos/deportes/ropa-hombre/camisetas' },
+                            { label: 'Pantalones cortos', href: '/productos/deportes/ropa-hombre/pantalones' },
+                        ]
+                    },
+                    { 
+                        label: 'Deportes Niños', 
+                        href: '/productos/deportes/ninos',
+                        children: [
+                            { label: 'Ropa deportiva niño', href: '/productos/deportes/ninos/ropa' },
+                            { label: 'Calzado deportivo niño', href: '/productos/deportes/ninos/calzado' },
+                        ]
+                    },
+                    { 
+                        label: 'Deportes Hombre', 
+                        href: '/productos/deportes/deportes-hombre',
+                        children: [
+                            { label: 'Fitness', href: '/productos/deportes/deportes-hombre/fitness' },
+                            { label: 'Running', href: '/productos/deportes/deportes-hombre/running' },
+                        ]
+                    },
+                ]
+            },
+            { 
                 label: 'Equipos y dispositivos médicos', 
                 href: '/productos/equipos',
                 children: [
@@ -440,6 +480,70 @@ export const menuItems: MenuItem[] = [
                     { label: 'Movilidad', href: '/productos/equipos/movilidad' },
                     { label: 'Cuidado en casa', href: '/productos/equipos/casa' },
                     { label: 'Emergencias', href: '/productos/equipos/emergencias' },
+                ]
+            },
+            { 
+                label: 'Protección limpieza y desinfección', 
+                href: '/productos/limpieza',
+                children: [
+                    { 
+                        label: 'Limpieza Hogar', 
+                        href: '/productos/limpieza/hogar',
+                        children: [
+                            { label: 'Detergentes', href: '/productos/limpieza/hogar/detergentes' },
+                            { label: 'Suavizantes', href: '/productos/limpieza/hogar/suavizantes' },
+                            { label: 'Limpiadores multiuso', href: '/productos/limpieza/hogar/limpiadores' },
+                            { label: 'Escobas y trapeadores', href: '/productos/limpieza/hogar/escobas' },
+                        ]
+                    },
+                    { 
+                        label: 'Desinfección', 
+                        href: '/productos/limpieza/desinfeccion',
+                        children: [
+                            { label: 'Cloro', href: '/productos/limpieza/desinfeccion/cloro' },
+                            { label: 'Alcohol', href: '/productos/limpieza/desinfeccion/alcohol' },
+                            { label: 'Sprays antibacteriales', href: '/productos/limpieza/desinfeccion/sprays' },
+                        ]
+                    },
+                    { 
+                        label: 'Protección Personal', 
+                        href: '/productos/limpieza/proteccion',
+                        children: [
+                            { label: 'Guantes', href: '/productos/limpieza/proteccion/guantes' },
+                            { label: 'Mascarillas', href: '/productos/limpieza/proteccion/mascarillas' },
+                            { label: 'Cofias y batas', href: '/productos/limpieza/proteccion/cofias' },
+                        ]
+                    },
+                    { 
+                        label: 'Antibacteriales', 
+                        href: '/productos/limpieza/antibacteriales',
+                        children: [
+                            { label: 'Jabón líquido', href: '/productos/limpieza/antibacteriales/jabon' },
+                            { label: 'Toallas húmedas', href: '/productos/limpieza/antibacteriales/toallas' },
+                            { label: 'Desinfectantes de manos', href: '/productos/limpieza/antibacteriales/manos' },
+                        ]
+                    },
+                ]
+            },
+            { 
+                label: 'Bebés y recién nacidos', 
+                href: '/productos/bebes',
+                children: [
+                    { 
+                        label: 'Alimentación', 
+                        href: '/productos/bebes/alimentacion',
+                        children: [
+                            { label: 'Biberones y tetinas', href: '/productos/bebes/alimentacion/biberones' },
+                            { label: 'Papillas y purés', href: '/productos/bebes/alimentacion/papillas' },
+                            { label: 'Leches infantiles', href: '/productos/bebes/alimentacion/leches' },
+                            { label: 'Accesorios de alimentación', href: '/productos/bebes/alimentacion/accesorios' },
+                        ]
+                    },
+                    { label: 'Ropa', href: '/productos/bebes/ropa' },
+                    { label: 'Calzado', href: '/productos/bebes/calzado' },
+                    { label: 'Juguetes', href: '/productos/bebes/juguetes' },
+                    { label: 'Lactancia y chupetes', href: '/productos/bebes/lactancia' },
+                    { label: 'De paseo y en el coche', href: '/productos/bebes/paseo' },
                 ]
             },
             { 
@@ -491,110 +595,6 @@ export const menuItems: MenuItem[] = [
                         children: [
                             { label: 'Roedores', href: '/productos/mascotas/otros/roedores' },
                             { label: 'Reptiles', href: '/productos/mascotas/otros/reptiles' },
-                        ]
-                    },
-                ]
-            },
-            { 
-                label: 'Protección limpieza y desinfección', 
-                href: '/productos/limpieza',
-                children: [
-                    { 
-                        label: 'Limpieza Hogar', 
-                        href: '/productos/limpieza/hogar',
-                        children: [
-                            { label: 'Detergentes', href: '/productos/limpieza/hogar/detergentes' },
-                            { label: 'Suavizantes', href: '/productos/limpieza/hogar/suavizantes' },
-                            { label: 'Limpiadores multiuso', href: '/productos/limpieza/hogar/limpiadores' },
-                            { label: 'Escobas y trapeadores', href: '/productos/limpieza/hogar/escobas' },
-                        ]
-                    },
-                    { 
-                        label: 'Desinfección', 
-                        href: '/productos/limpieza/desinfeccion',
-                        children: [
-                            { label: 'Cloro', href: '/productos/limpieza/desinfeccion/cloro' },
-                            { label: 'Alcohol', href: '/productos/limpieza/desinfeccion/alcohol' },
-                            { label: 'Sprays antibacteriales', href: '/productos/limpieza/desinfeccion/sprays' },
-                        ]
-                    },
-                    { 
-                        label: 'Protección Personal', 
-                        href: '/productos/limpieza/proteccion',
-                        children: [
-                            { label: 'Guantes', href: '/productos/limpieza/proteccion/guantes' },
-                            { label: 'Mascarillas', href: '/productos/limpieza/proteccion/mascarillas' },
-                            { label: 'Cofias y batas', href: '/productos/limpieza/proteccion/cofias' },
-                        ]
-                    },
-                    { 
-                        label: 'Antibacteriales', 
-                        href: '/productos/limpieza/antibacteriales',
-                        children: [
-                            { label: 'Jabón líquido', href: '/productos/limpieza/antibacteriales/jabon' },
-                            { label: 'Toallas húmedas', href: '/productos/limpieza/antibacteriales/toallas' },
-                            { label: 'Desinfectantes de manos', href: '/productos/limpieza/antibacteriales/manos' },
-                        ]
-                    },
-                ]
-            },
-            { 
-                label: 'Suplementos vitamínicos', 
-                href: '/productos/suplementos',
-                children: [
-                    { 
-                        label: 'Vitaminas', 
-                        href: '/productos/suplementos/vitaminas',
-                        children: [
-                            { label: 'Vitamina C', href: '/productos/suplementos/vitaminas/vitamina-c' },
-                            { label: 'Vitamina D', href: '/productos/suplementos/vitaminas/vitamina-d' },
-                            { label: 'Vitamina E', href: '/productos/suplementos/vitaminas/vitamina-e' },
-                            { label: 'Complejo B', href: '/productos/suplementos/vitaminas/complejo-b' },
-                        ]
-                    },
-                    { 
-                        label: 'Minerales', 
-                        href: '/productos/suplementos/minerales',
-                        children: [
-                            { label: 'Magnesio', href: '/productos/suplementos/minerales/magnesio' },
-                            { label: 'Zinc', href: '/productos/suplementos/minerales/zinc' },
-                            { label: 'Hierro', href: '/productos/suplementos/minerales/hierro' },
-                            { label: 'Calcio', href: '/productos/suplementos/minerales/calcio' },
-                        ]
-                    },
-                    { 
-                        label: 'Proteínas', 
-                        href: '/productos/suplementos/proteinas',
-                        children: [
-                            { label: 'Whey protein', href: '/productos/suplementos/proteinas/whey' },
-                            { label: 'Proteína vegetal', href: '/productos/suplementos/proteinas/vegetal' },
-                            { label: 'Aminoácidos BCAA', href: '/productos/suplementos/proteinas/bcaa' },
-                        ]
-                    },
-                    { 
-                        label: 'Aminoácidos', 
-                        href: '/productos/suplementos/aminoacidos',
-                        children: [
-                            { label: 'L-Glutamina', href: '/productos/suplementos/aminoacidos/glutamina' },
-                            { label: 'L-Arginina', href: '/productos/suplementos/aminoacidos/arginina' },
-                        ]
-                    },
-                    { 
-                        label: 'Hierbas', 
-                        href: '/productos/suplementos/hierbas',
-                        children: [
-                            { label: 'Valeriana', href: '/productos/suplementos/hierbas/valeriana' },
-                            { label: 'Ginkgo biloba', href: '/productos/suplementos/hierbas/ginkgo' },
-                            { label: 'Equinacea', href: '/productos/suplementos/hierbas/equinacea' },
-                        ]
-                    },
-                    { 
-                        label: 'Deportivos', 
-                        href: '/productos/suplementos/deportivos',
-                        children: [
-                            { label: 'Pre-entreno', href: '/productos/suplementos/deportivos/pre-entreno' },
-                            { label: 'Creatina', href: '/productos/suplementos/deportivos/creatina' },
-                            { label: 'Reponedores electrolitos', href: '/productos/suplementos/deportivos/electrolitos' },
                         ]
                     },
                 ]

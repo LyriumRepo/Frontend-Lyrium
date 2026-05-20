@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { money, ApiProduct } from '@/modules/cart/utils';
 import CartItem from './CartItem';
 import { useCarritoStore } from '@/store/carritoStore';
+import { useAuth } from '@/shared/lib/context/AuthContext';
 
 interface Props {
     productsCache: ApiProduct[];
@@ -24,6 +25,7 @@ export default function CartDrawer({ productsCache, onAdd, onIncrease, onDecreas
     const [discountOpen, setDiscountOpen] = useState(false);
     const [discountCode, setDiscountCode] = useState('');
 
+    const { isAuthenticated } = useAuth();
     const totalItems = cartItems.reduce((a, i) => a + Number(i.cantidad ?? 0), 0);
     const subtotal = cartItems.reduce((a, i) => a + Number(i.cantidad ?? 0) * Number(i.precio_unitario ?? 0), 0);
 
@@ -61,8 +63,7 @@ export default function CartDrawer({ productsCache, onAdd, onIncrease, onDecreas
                             <div className="mx-auto w-14 h-14 rounded-2xl bg-gray-100 grid place-items-center mb-4">
                                 <ShoppingCart className="w-7 h-7 text-gray-400" />
                             </div>
-                            <p className="text-gray-700 font-medium">Tu carrito está vacío</p>
-                            <p className="text-xs mt-1 text-gray-400">Agrega productos para verlos aquí.</p>
+                            <p className="text-gray-700 font-medium">No tienes productos en el carrito, puedes seguir comprando.</p>
                         </div>
                     ) : (
                         <div className="space-y-3">
@@ -119,7 +120,7 @@ export default function CartDrawer({ productsCache, onAdd, onIncrease, onDecreas
 
                     <div className="space-y-2">
                         <button
-                            onClick={() => { closeCart(); router.push('/checkout'); }}
+                            onClick={() => { closeCart(); isAuthenticated ? router.push('/checkout') : router.push('/login'); }}
                             className="w-full py-3 rounded-xl bg-gradient-to-r from-sky-400 to-sky-500 hover:from-sky-500 hover:to-sky-600 text-white font-medium inline-flex items-center justify-center gap-2 shadow-lg shadow-sky-200/50 transition-all"
                         >
                             🛒 Continuar compra

@@ -2,7 +2,8 @@ import { notFound } from 'next/navigation';
 import {
   getCategoryBySlug,
   getProductsByCategorySlug,
-  mapWooProductToLocal
+  mapWooProductToLocal,
+  WooCategory,
 } from '@/shared/lib/api/wooCommerce';
 import { getCategories } from '@/shared/lib/api';
 import { ProductCategory } from '@/shared/types/wp/wp-types';
@@ -18,8 +19,9 @@ export default async function CategoryPage({ params }: PageProps) {
   const fullSlugs = categoria;
   const currentSlug = categoria[categoria.length - 1];
 
-  // 🔥 VALIDAR TODA LA JERARQUÍA
+  // 🔥 VALIDAR TODA LA JERARQUÍA Y OBTENER LA CATEGORÍA FINAL
   let parentId = 0;
+  let categoryRaw: WooCategory | null = null;
 
   for (const slug of fullSlugs) {
     const cat = await getCategoryBySlug(slug);
@@ -35,18 +37,15 @@ export default async function CategoryPage({ params }: PageProps) {
     }
 
     parentId = cat.id;
+    categoryRaw = cat;
   }
-
-  // 🔥 SOLO USAR EL ÚLTIMO PARA PRODUCTOS
-  const [categoryRaw, wooProducts, allCategoriesRaw] = await Promise.all([
-    getCategoryBySlug(currentSlug),
-    getProductsByCategorySlug(currentSlug, 50),
-    getCategories(),
-  ]);
 
   if (!categoryRaw) {
     notFound();
   }
+
+  const wooProducts = await getProductsByCategorySlug(currentSlug, 50);
+  const allCategoriesRaw = await getCategories();
 
   const productos = wooProducts.map(mapWooProductToLocal);
 
