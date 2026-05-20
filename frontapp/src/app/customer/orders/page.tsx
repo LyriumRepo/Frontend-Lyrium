@@ -420,7 +420,8 @@ export default function CustomerOrdersPage() {
       setFiltered(mapped);
     } catch (err) {
       console.error('Error al cargar pedidos:', err);
-      setFetchError('No pudimos cargar tus pedidos. Intenta nuevamente.');
+      const msg = err instanceof TypeError ? 'No pudimos conectar con el servidor. Verifica que el backend esté corriendo.' : 'No pudimos cargar tus pedidos. Intenta nuevamente.';
+      setFetchError(msg);
     } finally {
       setFetching(false);
     }

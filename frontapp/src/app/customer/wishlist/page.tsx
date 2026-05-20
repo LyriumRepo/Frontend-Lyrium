@@ -62,7 +62,8 @@ export default function CustomerWishlistPage() {
       setItems(data.map(mapApiItem));
     } catch (err) {
       console.error('Error al cargar lista de deseos:', err);
-      setFetchError('No pudimos cargar tu lista de deseos.');
+      const msg = err instanceof TypeError ? 'No pudimos conectar con el servidor. Verifica que el backend esté corriendo.' : 'No pudimos cargar tu lista de deseos.';
+      setFetchError(msg);
     } finally {
       setFetching(false);
     }

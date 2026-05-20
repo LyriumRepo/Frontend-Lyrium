@@ -78,17 +78,20 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 
 export const orderApi = {
   list: async (page = 1): Promise<{ data: OrderResource[]; pagination: { current_page: number; per_page: number; total: number; total_pages: number } }> => {
-    const response = await request<ApiResponse<OrderResource[]>>(`/orders?page=${page}`);
+    const response = await request<ApiResponse<unknown>>(`/orders?page=${page}`);
+    const payload = response.data as any;
+    const list = Array.isArray(payload) ? payload : (payload?.data ?? []);
     return {
-      data: response.data || [],
-      pagination: (response as unknown as { meta?: { current_page: number; per_page: number; total: number; total_pages: number } }).meta || { current_page: 1, per_page: 20, total: 0, total_pages: 0 },
+      data: list,
+      pagination: payload?.pagination ?? { current_page: 1, per_page: 20, total: 0, total_pages: 0 },
     };
   },
 
   get: async (id: number): Promise<OrderResource | null> => {
     try {
-      const response = await request<ApiResponse<OrderResource>>(`/orders/${id}`);
-      return response.data || null;
+      const response = await request<ApiResponse<unknown>>(`/orders/${id}`);
+      const payload = response.data as any;
+      return (payload?.data ?? payload) || null;
     } catch {
       return null;
     }
@@ -103,10 +106,12 @@ export const orderApi = {
   },
 
   getMyOrders: async (page = 1): Promise<{ data: OrderResource[]; pagination: { current_page: number; per_page: number; total: number; total_pages: number } }> => {
-    const response = await request<ApiResponse<OrderResource[]>>(`/customer/orders?page=${page}`);
+    const response = await request<ApiResponse<unknown>>(`/customer/orders?page=${page}`);
+    const payload = response.data as any;
+    const list = Array.isArray(payload) ? payload : (payload?.data ?? []);
     return {
-      data: response.data || [],
-      pagination: (response as unknown as { meta?: { current_page: number; per_page: number; total: number; total_pages: number } }).meta || { current_page: 1, per_page: 20, total: 0, total_pages: 0 },
+      data: list,
+      pagination: payload?.pagination ?? { current_page: 1, per_page: 20, total: 0, total_pages: 0 },
     };
   },
 
