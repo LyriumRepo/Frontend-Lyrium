@@ -32,7 +32,7 @@ export default function CarritoPage() {
   const openCart = useCarritoStore((s) => s.openCart);
   const openDetailModal = useCarritoStore((s) => s.openDetailModal);
   const addToCart = useCarritoStore((s) => s.addToCart);
-  const updateItemQuantity = useCarritoStore((s) => s.updateItemQuantity);
+  const updateItemQuantity = useCarritoStore((s) => s.updateQuantity);
   const removeFromCart = useCarritoStore((s) => s.removeFromCart);
 
   // ── Handlers conectados al store ───────────────────────────────────────
@@ -151,14 +151,7 @@ export default function CarritoPage() {
       </div>
 
       {/* ── Drawer ───────────────────────────────────────────────── */}
-      <CartDrawer
-        productsCache={products}
-        onAdd={handleAdd}
-        onIncrease={handleIncrease}
-        onDecrease={handleDecrease}
-        onDelete={handleDelete}
-        onViewProduct={handleView}
-      />
+      <CartDrawer />
 
       {/* ── Detail Modal ──────────────────────────────────────────── */}
       <ProductDetailModal

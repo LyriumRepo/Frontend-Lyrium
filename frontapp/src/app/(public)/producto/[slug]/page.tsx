@@ -1,69 +1,69 @@
+// app/(public)/producto/[slug]/page.tsx
+
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import {
-    getPublicProductBySlug,
-    getProductsByCategory,
+  getPublicProductBySlug,
+  getProductsByCategory,
 } from '@/shared/lib/api/laravelProductRepository';
 import { ProductDetailPageClient } from './ProductDetailPageClient';
 import BaseLoading from '@/components/ui/BaseLoading';
 
 interface PageProps {
-    params: Promise<{ slug: string }>;
+  params: Promise<{ slug: string }>;
 }
 
-// ─── Metadata dinámica ────────────────────────────────────────────────────────
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-    const { slug } = await params;
-    const product = await getPublicProductBySlug(slug);
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const product = await getPublicProductBySlug(slug);
 
-    if (!product) {
-        return { title: 'Producto no encontrado | Lyrium' };
-    }
+  if (!product) return { title: 'Producto no encontrado | Lyrium' };
 
-    return {
-        title: `${product.name} | Lyrium Biomarketplace`,
-        description: product.description?.slice(0, 160) ?? `Compra ${product.name} en Lyrium Biomarketplace`,
-        openGraph: {
-            title: product.name,
-            description: product.description?.slice(0, 160) ?? '',
-            images: product.images[0]?.large
-                ? [{ url: product.images[0].large, alt: product.images[0].alt ?? product.name }]
-                : [],
-        },
-    };
+  const description =
+    product.short_description ??
+    product.description?.slice(0, 160) ??
+    `Compra ${product.name} en Lyrium Biomarketplace`;
+
+  return {
+    title: `${product.name} | Lyrium Biomarketplace`,
+    description,
+    openGraph: {
+      title: product.name,
+      description,
+      images: product.images[0]?.large
+        ? [
+            {
+              url: product.images[0].large,
+              alt: product.images[0].alt ?? product.name,
+            },
+          ]
+        : [],
+    },
+  };
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// PAGE — Server Component
-// 1. Busca el producto por slug en Laravel (GET /api/products?slug=...)
-// 2. Busca productos relacionados de la misma categoría
-// 3. Pasa los datos como props al ProductDetailPageClient (Client Component)
-// ─────────────────────────────────────────────────────────────────────────────
 export default async function ProductoPage({ params }: PageProps) {
-    const { slug } = await params;
+  const { slug } = await params;
 
-    // Fetch en paralelo: producto principal + productos relacionados
-    const product = await getPublicProductBySlug(slug);
+  const product = await getPublicProductBySlug(slug);
+  if (!product) notFound();
 
-    if (!product) {
-        notFound();
-    }
+  const firstCategorySlug = product.categories[0]?.slug;
+  const relatedProducts = firstCategorySlug
+    ? await getProductsByCategory(firstCategorySlug, 9).then((products) =>
+        products.filter((p) => p.id !== product.id),
+      )
+    : [];
 
-    // Obtener relacionados de la primera categoría del producto
-    const firstCategorySlug = product.categories[0]?.slug;
-    const relatedProducts = firstCategorySlug
-        ? await getProductsByCategory(firstCategorySlug, 9).then((products) =>
-              products.filter((p) => p.id !== product.id)
-          )
-        : [];
-
-    return (
-        <Suspense fallback={<BaseLoading />}>
-            <ProductDetailPageClient
-                product={product}
-                relatedProducts={relatedProducts}
-            />
-        </Suspense>
-    );
+  return (
+    <Suspense fallback={<BaseLoading />}>
+      <ProductDetailPageClient
+        product={product}
+        relatedProducts={relatedProducts}
+      />
+    </Suspense>
+  );
 }
