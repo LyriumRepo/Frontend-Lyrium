@@ -12,6 +12,8 @@ interface MegaMenuProps {
     activeCategory: string;
     menuPosition: { top: number; left: number };
     onCategoryHover: (category: string) => void;
+    onMouseEnter: () => void;
+    onMouseLeave: () => void;
 }
 
 function CategoryLabel({ label, active }: { label: string; active: boolean }) {
@@ -62,6 +64,8 @@ export default function MegaMenu({
     activeCategory,
     menuPosition,
     onCategoryHover,
+    onMouseEnter,
+    onMouseLeave,
 }: MegaMenuProps) {
     const megaData = megaMenuData[activeCategory] || Object.values(megaMenuData)[0];
 
@@ -75,6 +79,8 @@ export default function MegaMenu({
         <div
             className="fixed left-0 w-full bg-white dark:bg-[var(--bg-secondary)] shadow-2xl dark:shadow-none border-t border-gray-200 dark:border-[var(--border-subtle)] opacity-100 pointer-events-auto transition-all duration-150 z-[99999]"
             style={{ top: `${menuPosition.top}px`, bottom: 0 }}
+            onMouseEnter={onMouseEnter}
+            onMouseLeave={onMouseLeave}
         >
             <div className="max-w-7xl mx-auto grid grid-cols-12 gap-0 h-full overflow-hidden">
                 {/* LISTA DE CATEGORÍAS (IZQUIERDA) */}
