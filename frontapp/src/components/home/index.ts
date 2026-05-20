@@ -1,5 +1,6 @@
 export { default as HeroSection } from './HeroSection';
 export { default as TopBanner } from './TopBanner';
+export { default as SearchBar } from './SearchBar';
 export { default as ServicesGrid } from './ServicesGrid';
 export { default as ProductsGrid } from './ProductsGrid';
 export { default as ProductCard } from './ProductCard';
