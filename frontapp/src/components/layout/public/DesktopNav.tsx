@@ -64,12 +64,24 @@ export default function DesktopNav({ menuItems, megaMenuData }: DesktopNavProps)
                     const iconName = item.icon ? iconNameMap[item.icon] : null;
 
                     return (
-                        <div key={item.label} className="relative">
+                        <div
+                            key={item.label}
+                            className="relative"
+                            onMouseEnter={() => {
+                                if (item.children) {
+                                    handleMenuEnter(item.label, item.children);
+                                }
+                            }}
+                            onMouseLeave={() => {
+                                if (item.children) {
+                                    handleMenuLeave();
+                                }
+                            }}
+                        >
                             {item.children ? (
                                 <button
                                     ref={(el) => { menuRefs.current[item.label] = el; }}
                                     type="button"
-                                    onMouseEnter={() => handleMenuEnter(item.label, item.children)}
                                     className={`flex items-center gap-1 hover:text-sky-500 dark:hover:text-[var(--color-success)] transition whitespace-nowrap ${activeMenu === item.label ? 'text-sky-500 dark:text-[var(--color-success)]' : ''
                                         }`}
                                 >
@@ -95,8 +107,6 @@ export default function DesktopNav({ menuItems, megaMenuData }: DesktopNavProps)
                                     activeCategory={activeCategory}
                                     menuPosition={menuPosition}
                                     onCategoryHover={(cat) => setActiveCategory(cat)}
-                                    onMouseEnter={() => handleMenuEnter(item.label)}
-                                    onMouseLeave={handleMenuLeave}
                                 />
                             )}
                         </div>
