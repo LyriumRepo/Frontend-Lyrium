@@ -1,5 +1,4 @@
 import {
-    SearchBar,
     HeroSection,
     ServicesGrid,
     ProductsGrid,
@@ -97,8 +96,6 @@ export default async function HomePage() {
 
     return (
         <div className="space-y-8 md:space-y-16 pb-8 md:pb-12">
-            <SearchBar categorias={categoriasServicios} />
-
             <HeroSection banners={banners} />
 
             <ServicesGrid categorias={categoriasServicios} />
