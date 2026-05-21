@@ -87,7 +87,7 @@ export default async function HomePage() {
 
     return (
         <div className="space-y-8 md:space-y-16 pb-8 md:pb-12">
-            <SearchBar categorias={categoriasServicios} />
+            <SearchBar categoriasServicios={categoriasServicios} categoriasProductos={categoriasProductos}  />
             <HeroSection banners={banners} />
             <ServicesGrid categorias={categoriasServicios} />
             <ProductsGrid categorias={categoriasProductos} titulo="Categorías de productos saludables" />

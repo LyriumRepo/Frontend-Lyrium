@@ -11,13 +11,21 @@ import { Package, FolderOpen } from 'lucide-react';
 import { createPortal } from 'react-dom';
 
 interface SearchBarProps {
-  categorias: Categoria[];
+  categoriasServicios: Categoria[];
+  categoriasProductos: Categoria[];
+  // Props opcionales para pre-rellenar desde la página de resultados
+  initialQuery?: string;
+  initialCategory?: string;
+  initialMinPrice?: string;
+  initialMaxPrice?: string;
+  initialOffer?: string;
+  autoSearch?: boolean;
 }
 
-export default function SearchBar({ categorias }: SearchBarProps) {
+export default function SearchBar({ categoriasServicios, categoriasProductos, initialQuery = '', initialCategory = '', initialMinPrice = '', initialMaxPrice = '', initialOffer = '', autoSearch = false, }: SearchBarProps) {
   const router = useRouter();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
+  const [searchTerm, setSearchTerm] = useState(initialQuery);
+  const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const [activeDropdownLocal, setActiveDropdownLocal] = useState<'autocomplete' | 'filter' | null>(null);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [hoveredCategory, setHoveredCategory] = useState<SearchResult | null>(null);
@@ -31,9 +39,11 @@ export default function SearchBar({ categorias }: SearchBarProps) {
 
   const showAutocomplete = activeDropdownLocal === 'autocomplete';
   const filterOpen = activeDropdownLocal === 'filter';
-  const [minPrice, setMinPrice] = useState('');
-  const [maxPrice, setMaxPrice] = useState('');
-  const [selectedOffer, setSelectedOffer] = useState<string>('');
+  const [minPrice, setMinPrice] = useState(initialMinPrice);
+  const [maxPrice, setMaxPrice] = useState(initialMaxPrice);
+  const [selectedOffer, setSelectedOffer] = useState<string>(initialOffer);
+  const [filterError, setFilterError] = useState('');
+  
 
   const setActiveDropdown = (dropdown: 'autocomplete' | 'filter' | null) => {
     setActiveDropdownLocal(dropdown);
@@ -102,6 +112,12 @@ export default function SearchBar({ categorias }: SearchBarProps) {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!searchTerm.trim()) {
+      setFilterError('Ingresa un término de búsqueda para continuar.');
+      return;
+    }
+
+    setFilterError('');
     const params = new URLSearchParams();
     if (searchTerm.trim()) {
       params.append('q', searchTerm);
@@ -122,7 +138,7 @@ export default function SearchBar({ categorias }: SearchBarProps) {
     params.append('on_sale', 'true');
     } else if (selectedOffer === 'promotion') {
       params.append('on_sale', 'true');
-      params.append('sticker', 'promotion');   // tu backend acepta ?sticker=
+      params.append('sticker', 'promotion');
     } else if (selectedOffer === 'offer') {
       params.append('on_sale', 'true');
       params.append('sticker', 'offer');
@@ -205,7 +221,10 @@ export default function SearchBar({ categorias }: SearchBarProps) {
               type="text"
               name="q"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                if (filterError) setFilterError(''); 
+              }}
               onKeyDown={handleKeyDown}
               onFocus={() => searchTerm.length >= 2 && setActiveDropdown('autocomplete')}
               placeholder="¿Qué buscas para tu salud?"
@@ -247,6 +266,11 @@ export default function SearchBar({ categorias }: SearchBarProps) {
               </button>
             </div>
           </div>
+          {filterError && (
+            <p className="absolute left-4 -bottom-5 text-xs text-red-500 animate-fade-in">
+              {filterError}
+            </p>
+          )}
 
           {/* AUTOCOMPLETE DROPDOWN */}
           {showAutocomplete && isMounted && createPortal(
@@ -427,13 +451,17 @@ export default function SearchBar({ categorias }: SearchBarProps) {
               aria-modal="true"
               tabIndex={-1}
               className="fixed bg-white/95 dark:bg-[var(--bg-card)]/95 backdrop-blur-2xl border border-gray-200 dark:border-[var(--border-subtle)] rounded-[2.5rem] shadow-[0_30px_70px_rgba(0,0,0,0.15)] dark:shadow-[0_30px_70px_rgba(0,0,0,0.4)] p-6 overflow-y-auto overscroll-contain max-h-[90vh] z-[99998]"
-              style={{
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                width: 'min(90vw, 900px)',
-                maxHeight: '90vh',
-              }}
+              style={(() => {
+                const rect = searchContainerRef.current?.getBoundingClientRect();
+                if (!rect) return {};
+                const spaceBelow = window.innerHeight - rect.bottom - 8;
+                return {
+                  top: rect.bottom + 8,
+                  left: rect.left,
+                  width: rect.width,
+                  maxHeight: Math.min(spaceBelow, 480),
+                };
+              })()}
               onMouseDown={(e) => e.stopPropagation()}
               onKeyDown={(e) => e.stopPropagation()}
             >
@@ -448,56 +476,129 @@ export default function SearchBar({ categorias }: SearchBarProps) {
                 </button>
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Categorías */}
-                <div className="p-4 bg-gray-50/50 dark:bg-[var(--bg-muted)]/50 rounded-2xl">
+                <div className="p-4 bg-gray-50/50 dark:bg-[var(--bg-muted)]/50 rounded-2xl md:col-span-1 overflow-y-auto max-h-64">
                   <p className="text-xs uppercase tracking-wider text-gray-500 dark:text-[var(--text-secondary)] font-bold inline-flex items-center gap-2 mb-4">
                     <span className="w-2 h-2 bg-sky-500 rounded-full"></span>
                     Categorías
                   </p>
-                  <div className="flex flex-wrap gap-2">
-                    {categorias.map((cat) => (
-                      <button
-                        key={cat.id}
-                        type="button"
-                        onMouseDown={() => setSelectedCategory(selectedCategory === cat.slug || '' ? '' : cat.slug || '')}
-                        className={`px-3.5 py-2.5 rounded-full border text-xs font-bold transition-all ${selectedCategory === cat.slug || ''
-                            ? 'bg-sky-500 text-white border-sky-500 shadow-md'
-                            : 'bg-white dark:bg-[var(--bg-card)] border-gray-100 dark:border-[var(--border-subtle)] text-gray-600 dark:text-[var(--text-secondary)] hover:border-sky-300 dark:hover:border-[var(--brand-green)] hover:bg-sky-50 dark:hover:bg-[var(--bg-muted)]'
-                          }`}
-                      >
-                        {cat.nombre}
-                      </button>
-                    ))}
+
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                    
+                    {/* Servicios */}
+                    {categoriasServicios.length > 0 && (
+                      <div className="col-span-2 mb-1">
+                        <p className="text-xs text-gray-400 dark:text-[var(--text-placeholder)] font-semibold mb-1 pl-1">
+                          Servicios
+                        </p>
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-0.5">
+                          {categoriasServicios.map((cat) => (
+                            <button
+                              key={cat.id}
+                              type="button"
+                              onMouseDown={() =>
+                                setSelectedCategory(selectedCategory === cat.slug ? '' : cat.slug || '')
+                              }
+                              className={`flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs font-medium text-left transition-all group ${
+                                selectedCategory === cat.slug
+                                  ? 'text-sky-500 dark:text-sky-400'
+                                  : 'text-gray-600 dark:text-[var(--text-secondary)] hover:text-sky-500 dark:hover:text-sky-400'
+                              }`}
+                            >
+                              {/* Checkmark / indicador */}
+                              <span className={`w-3.5 h-3.5 rounded-full border flex-shrink-0 flex items-center justify-center transition-all ${
+                                selectedCategory === cat.slug
+                                  ? 'bg-sky-500 border-sky-500'
+                                  : 'border-gray-300 dark:border-[var(--border-subtle)] group-hover:border-sky-400'
+                              }`}>
+                                {selectedCategory === cat.slug && (
+                                  <svg className="w-2 h-2 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                  </svg>
+                                )}
+                              </span>
+                              <span className="truncate capitalize">{cat.nombre.toLowerCase()}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Divisor */}
+                    {categoriasServicios.length > 0 && categoriasProductos.length > 0 && (
+                      <div className="col-span-2 border-t border-gray-100 dark:border-[var(--border-subtle)] my-2" />
+                    )}
+
+                    {/* Productos */}
+                    {categoriasProductos.length > 0 && (
+                      <div className="col-span-2">
+                        <p className="text-xs text-gray-400 dark:text-[var(--text-placeholder)] font-semibold mb-1 pl-1">
+                          Productos
+                        </p>
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-0.5">
+                          {categoriasProductos.map((cat) => (
+                            <button
+                              key={cat.id}
+                              type="button"
+                              onMouseDown={() =>
+                                setSelectedCategory(selectedCategory === cat.slug ? '' : cat.slug || '')
+                              }
+                              className={`flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs font-medium text-left transition-all group ${
+                                selectedCategory === cat.slug
+                                  ? 'text-sky-500 dark:text-sky-400'
+                                  : 'text-gray-600 dark:text-[var(--text-secondary)] hover:text-sky-500 dark:hover:text-sky-400'
+                              }`}
+                            >
+                              <span className={`w-3.5 h-3.5 rounded-full border flex-shrink-0 flex items-center justify-center transition-all ${
+                                selectedCategory === cat.slug
+                                  ? 'bg-sky-500 border-sky-500'
+                                  : 'border-gray-300 dark:border-[var(--border-subtle)] group-hover:border-sky-400'
+                              }`}>
+                                {selectedCategory === cat.slug && (
+                                  <svg className="w-2 h-2 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                  </svg>
+                                )}
+                              </span>
+                              <span className="truncate capitalize">{cat.nombre.toLowerCase()}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                   </div>
                 </div>
 
                 {/* Ofertas */}
                 <div className="p-4 bg-gray-50/50 dark:bg-[var(--bg-muted)]/50 rounded-2xl">
-                  <p className="text-xs uppercase tracking-wider text-gray-500 font-bold inline-flex items-center gap-2 mb-4">
+                  <p className="text-xs uppercase tracking-wider text-gray-500 dark:text-[var(--text-secondary)] font-bold inline-flex items-center gap-2 mb-4">
                     <span className="w-2 h-2 bg-red-500 rounded-full"></span>
                     Ofertas Especiales
                   </p>
-                  {[
-                    { label: 'Descuentos', value: 'on_sale' },
-                    { label: 'Promociones', value: 'promotion' },
-                    { label: 'Ofertas', value: 'offer' },
-                  ].map(({ label, value }) => (
-                    <button
-                      key={value}
-                      type="button"
-                      onMouseDown={() =>
-                        setSelectedOffer(selectedOffer === value ? '' : value)
-                      }
-                      className={`px-3.5 py-2.5 rounded-full border text-xs font-bold transition-all ${
-                        selectedOffer === value
-                          ? 'bg-red-500 text-white border-red-500 shadow-md'
-                          : 'bg-white dark:bg-[var(--bg-card)] border-gray-100 dark:border-[var(--border-subtle)] text-sky-600 dark:text-[var(--color-success)] hover:border-sky-300 dark:hover:border-[var(--brand-green)] hover:bg-sky-50 dark:hover:bg-[var(--bg-muted)]'
-                      }`}
-                    >
-                      {label}
-                    </button>
-                  ))}
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { label: 'Descuentos', value: 'on_sale' },
+                      { label: 'Promociones', value: 'promotion' },
+                      { label: 'Ofertas', value: 'offer' },
+                    ].map(({ label, value }) => (
+                      <button
+                        key={value}
+                        type="button"
+                        onMouseDown={() =>
+                          setSelectedOffer(selectedOffer === value ? '' : value)
+                        }
+                        className={`px-3.5 py-2.5 rounded-full border text-xs font-bold transition-all ${
+                          selectedOffer === value
+                            ? 'bg-red-500 text-white border-red-500 shadow-md'
+                            : 'bg-white dark:bg-[var(--bg-card)] border-gray-200 dark:border-[var(--border-subtle)] text-gray-600 dark:text-[var(--text-secondary)] hover:border-red-300 hover:bg-red-50 dark:hover:bg-red-900/10 dark:hover:border-red-400'
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Precio */}
@@ -589,7 +690,16 @@ export default function SearchBar({ categorias }: SearchBarProps) {
                   Limpiar
                 </button>
                 <button
-                  type="submit"
+                  type="button"
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (autoSearch) {
+                      handleSearch(e as unknown as React.FormEvent); // navega y cierra
+                    } else {
+                      setActiveDropdown(null); // solo cierra
+                    }
+                  }}
                   className="px-6 py-2 bg-sky-500 dark:bg-[var(--brand-green)] text-white font-bold rounded-full hover:bg-sky-600 dark:hover:bg-[var(--brand-green-hover)] transition-colors"
                 >
                   Aplicar Filtros

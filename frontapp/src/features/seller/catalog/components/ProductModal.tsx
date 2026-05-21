@@ -48,7 +48,7 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit }:
         queryKey: ['seller', 'categories'],
         queryFn: async () => {
             const LARAVEL_API_URL = process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://localhost:8000/api';
-            const res = await fetch(`${LARAVEL_API_URL}/categories?type=product&per_page=100`);
+            const res = await fetch(`${LARAVEL_API_URL}/categories?type=product&per_page=400`);
             const data = await res.json();
             return data.data || data || [];
         },

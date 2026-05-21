@@ -91,11 +91,6 @@ export async function searchProducts({
     next: { revalidate: 60 },
   });
 
-  if (!res.ok) {
-    console.error('Failed to search products', res.status);
-    return [];
-  }
-
   const json = await res.json();
   return Array.isArray(json.data) ? json.data : [];
 }
