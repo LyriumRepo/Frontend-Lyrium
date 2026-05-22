@@ -88,24 +88,29 @@ export default function BrandsCarousel({ marcas }: BrandsCarouselProps) {
           className="flex transition-transform duration-700 divide-x-2 divide-gray-800 dark:divide-gray-200"
           style={{ transform: `translateX(-${current * (100 / itemsPerView)}%)` }}
         >
-          {marcas.map((marca) => (
-            <div
-              key={marca.id}
-              className="flex-shrink-0 w-[calc(50%-0.5rem)] sm:w-[calc(33.333%-0.67rem)] lg:w-[calc(25%-0.75rem)] xl:w-[calc(20%-0.8rem)]"
-            >
-              <div className="h-20 md:h-24 flex items-center justify-center p-2 bg-white dark:bg-gray-900">
-                <article className="group cursor-pointer transition-all duration-300">
-                  <Image
-                    src={marca.logo || '/img/no-image.png'}
-                    alt={marca.nombre}
-                    width={140}
-                    height={80}
-                    className="max-w-full max-h-full object-contain transition-all duration-500 group-hover:scale-110"
-                  />
-                </article>
+          {marcas.map((marca, index) => {
+          
+            const imageNumber = (index % 6) + 1;
+            const localLogo = `/img/servicios/Marcas/${imageNumber}.png`;
+            return (
+              <div
+                key={marca.id}
+                className="flex-shrink-0 w-[calc(50%-0.5rem)] sm:w-[calc(33.333%-0.67rem)] lg:w-[calc(25%-0.75rem)] xl:w-[calc(20%-0.8rem)]"
+              >
+                <div className="h-20 md:h-24 flex items-center justify-center p-2 bg-white dark:bg-gray-900">
+                  <article className="group cursor-pointer transition-all duration-300">
+                    <Image
+                      src={localLogo}
+                      alt={marca.nombre}
+                      width={140}
+                      height={80}
+                      className="max-w-full max-h-full object-contain transition-all duration-500 group-hover:scale-110"
+                    />
+                  </article>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>

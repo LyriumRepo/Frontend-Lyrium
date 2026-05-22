@@ -12,14 +12,24 @@ interface HeroSectionProps {
 export default function HeroSection({ banners }: HeroSectionProps) {
   const [current, setCurrent] = useState(0);
 
+  // Tus 6 imágenes PNG locales ubicadas en public/img/Inicio/
+  const displayBanners = [
+    { id: 1, titulo: 'Banner 1', imagen: '/img/BANNER_GRANDE_INICIO/1.png' },
+    { id: 2, titulo: 'Banner 2', imagen: '/img/BANNER_GRANDE_INICIO/2.png' },
+    { id: 3, titulo: 'Banner 3', imagen: '/img/BANNER_GRANDE_INICIO/3.png' },
+    { id: 4, titulo: 'Banner 4', imagen: '/img/BANNER_GRANDE_INICIO/4.png' },
+    { id: 5, titulo: 'Banner 5', imagen: '/img/BANNER_GRANDE_INICIO/5.png' },
+    { id: 6, titulo: 'Banner 6', imagen: '/img/BANNER_GRANDE_INICIO/6.png' },
+  ];
+
   const prev = useCallback(
-    () => setCurrent((c) => (c === 0 ? banners.length - 1 : c - 1)),
-    [banners.length]
+    () => setCurrent((c) => (c === 0 ? displayBanners.length - 1 : c - 1)),
+    [displayBanners.length]
   );
 
   const next = useCallback(
-    () => setCurrent((c) => (c === banners.length - 1 ? 0 : c + 1)),
-    [banners.length]
+    () => setCurrent((c) => (c === displayBanners.length - 1 ? 0 : c + 1)),
+    [displayBanners.length]
   );
 
   useEffect(() => {
@@ -28,42 +38,6 @@ export default function HeroSection({ banners }: HeroSectionProps) {
     }, 5000);
     return () => clearInterval(timer);
   }, [next]);
-
-  if (banners.length === 0) {
-    return (
-      <section className="relative w-full !mt-0">
-        <div className="hidden md:block w-full -mb-px">
-          <Image
-            src="/img/BANNER_SUPERIOR.png"
-            alt="Banner Superior"
-            width={1600}
-            height={270}
-            className="w-full h-auto object-cover min-h-[80px] block origin-center"
-            style={{ transform: 'scaleX(1.005)' }}
-            priority
-          />
-        </div>
-        <div className="w-full h-[400px] md:h-[500px] bg-gradient-to-br from-sky-50 to-sky-100 dark:from-[var(--bg-secondary)] dark:to-[var(--bg-muted)] flex flex-col items-center justify-center text-center p-8">
-          <p className="text-sky-600 dark:text-[var(--brand-green)] text-lg font-medium">
-            No hay datos para mostrar por ahora
-          </p>
-          <p className="text-gray-500 dark:text-gray-400 text-sm mt-2">
-            Pronto tendremos banners disponibles
-          </p>
-        </div>
-        <div className="hidden md:block w-full -mt-px">
-          <Image
-            src="/img/BANNER_INFERIOR.png"
-            alt="Banner Inferior"
-            width={1600}
-            height={270}
-            className="w-full h-auto object-cover min-h-[80px] block origin-center"
-            style={{ transform: 'scaleX(1.006)' }}
-          />
-        </div>
-      </section>
-    );
-  }
 
   return (
     <section className="relative w-full !mt-0">
@@ -86,15 +60,11 @@ export default function HeroSection({ banners }: HeroSectionProps) {
           className="flex transition-transform duration-700 ease-in-out"
           style={{ transform: `translateX(-${current * 100}%)` }}
         >
-          {banners.map((banner) => (
+          {displayBanners.map((banner) => (
             <div key={banner.id} className="min-w-full overflow-hidden">
               <picture>
-                <source
-                  srcSet={banner.imagenMobile || '/img/no-image.png'}
-                  media="(max-width: 767px)"
-                />
                 <Image
-                  src={banner.imagen || '/img/no-image.png'}
+                  src={banner.imagen}
                   alt={banner.titulo}
                   width={1600}
                   height={600}
@@ -125,7 +95,7 @@ export default function HeroSection({ banners }: HeroSectionProps) {
 
         {/* Indicadores */}
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-          {banners.map((_, i) => (
+          {displayBanners.map((_, i) => (
             <button
               key={`slide-indicator-${i}`}
               onClick={() => setCurrent(i)}
