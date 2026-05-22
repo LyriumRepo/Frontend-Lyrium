@@ -6,7 +6,8 @@ import { useQuery } from '@tanstack/react-query';
 import { User } from '@/shared/types/auth';
 import { loginAction, logoutAction, loginWithSocialAction } from '@/shared/lib/actions/auth';
 import { getRoleBasedRoute } from '@/shared/lib/config/auth';
-import { setToken, clearToken } from '@/shared/lib/api/token-store';
+
+const LARAVEL_API_URL = process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://localhost:8000/api';
 
 interface AuthContextType {
     user: User | null;
@@ -19,15 +20,40 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const fetchSession = async (): Promise<{ authenticated: boolean; user: User | null; token?: string }> => {
-    const response = await fetch('/api/auth/session');
+const fetchSession = async (): Promise<{ authenticated: boolean; user: User | null }> => {
+    const token = localStorage.getItem('laravel_token');
+
+    if (!token) {
+        return {
+            authenticated: false,
+            user: null
+        };
+    }
+
+    const response = await fetch(`${LARAVEL_API_URL}/auth/validate`, {
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+        },
+    });
+
     if (!response.ok) {
         console.log('[Auth] Session fetch failed:', response.status);
-        return { authenticated: false, user: null };
+
+        return {
+            authenticated: false,
+            user: null
+        };
     }
+
     const data = await response.json();
+
     console.log('[Auth] Session fetch result:', data);
-    return data;
+
+    return {
+        authenticated: true,
+        user: data,
+    };
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -49,9 +75,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (!loading && sessionData) {
             if (sessionData.authenticated && sessionData.user) {
                 console.log('[Auth] Setting user from session:', sessionData.user);
-                if (sessionData.token) {
-                    setToken(sessionData.token);
-                }
                 setUser(sessionData.user);
             } else {
                 console.log('[Auth] Clearing user - not authenticated');
@@ -92,9 +115,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
             
             if (result.user && result.token) {
+                localStorage.setItem('laravel_token', result.token);
                 console.log('[Auth] Server action set httpOnly cookies, verifying...');
-                setToken(result.token);
-                
+                localStorage.setItem('laravel_token', result.token);
                 const targetRoute = getRoleBasedRoute(result.user.role);
                 console.log('[Auth] Redirecting to:', targetRoute);
                 
@@ -117,7 +140,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } catch {
             // Continue even if server action fails
         }
-        clearToken();
+        localStorage.removeItem('laravel_token');
         setUser(null);
         window.location.href = '/login';
     };
@@ -131,7 +154,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
 
             if (result.user && result.token) {
-                setToken(result.token);
                 setUser(result.user);
                 const targetRoute = getRoleBasedRoute(result.user.role);
                 window.location.href = targetRoute;

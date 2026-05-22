@@ -11,35 +11,21 @@ import { Package, FolderOpen } from 'lucide-react';
 import { createPortal } from 'react-dom';
 
 interface SearchBarProps {
-  categorias?: Categoria[];
-  compact?: boolean;
+  categoriasServicios: Categoria[];
+  categoriasProductos: Categoria[];
+  // Props opcionales para pre-rellenar desde la página de resultados
+  initialQuery?: string;
+  initialCategory?: string;
+  initialMinPrice?: string;
+  initialMaxPrice?: string;
+  initialOffer?: string;
+  autoSearch?: boolean;
 }
 
-async function fetchCategorias(): Promise<Categoria[]> {
-  try {
-    const res = await fetch('/api/categories');
-    if (!res.ok) return [];
-    const data = await res.json();
-    const list = Array.isArray(data) ? data : data?.data ?? [];
-    return list.map((c: any) => ({ id: c.id, nombre: c.name ?? c.nombre, slug: c.slug }));
-  } catch {
-    return [];
-  }
-}
-
-export default function SearchBar({ categorias: propCategorias, compact = false }: SearchBarProps) {
+export default function SearchBar({ categoriasServicios, categoriasProductos, initialQuery = '', initialCategory = '', initialMinPrice = '', initialMaxPrice = '', initialOffer = '', autoSearch = false, }: SearchBarProps) {
   const router = useRouter();
-  const [categorias, setCategorias] = useState<Categoria[]>(propCategorias ?? []);
-
-  useEffect(() => {
-    if (!propCategorias || propCategorias.length === 0) {
-      fetchCategorias().then(setCategorias);
-    }
-  }, [propCategorias]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [priceMin, setPriceMin] = useState('');
-  const [priceMax, setPriceMax] = useState('');
+  const [searchTerm, setSearchTerm] = useState(initialQuery);
+  const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const [activeDropdownLocal, setActiveDropdownLocal] = useState<'autocomplete' | 'filter' | null>(null);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [hoveredCategory, setHoveredCategory] = useState<SearchResult | null>(null);
@@ -47,11 +33,17 @@ export default function SearchBar({ categorias: propCategorias, compact = false 
   const [loadingCategoryProducts, setLoadingCategoryProducts] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const searchContainerRef = useRef<HTMLDivElement>(null);
+  const searchContainerRef = useRef<HTMLFormElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const { activeDropdown: globalDropdown, setActiveDropdown: setGlobalDropdown } = useUIStore();
 
   const showAutocomplete = activeDropdownLocal === 'autocomplete';
   const filterOpen = activeDropdownLocal === 'filter';
+  const [minPrice, setMinPrice] = useState(initialMinPrice);
+  const [maxPrice, setMaxPrice] = useState(initialMaxPrice);
+  const [selectedOffer, setSelectedOffer] = useState<string>(initialOffer);
+  const [filterError, setFilterError] = useState('');
+  
 
   const setActiveDropdown = (dropdown: 'autocomplete' | 'filter' | null) => {
     setActiveDropdownLocal(dropdown);
@@ -87,16 +79,24 @@ export default function SearchBar({ categorias: propCategorias, compact = false 
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        inputRef.current &&
-        !inputRef.current.contains(event.target as Node)
-      ) {
+      const target = event.target as Node;
+
+      const clickedInsideInput =
+        searchContainerRef.current?.contains(target);
+
+      const clickedInsideDropdown =
+        dropdownRef.current?.contains(target);
+
+      if (!clickedInsideInput && !clickedInsideDropdown) {
         setActiveDropdown(null);
       }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, []);
 
   useEffect(() => {
@@ -112,14 +112,40 @@ export default function SearchBar({ categorias: propCategorias, compact = false 
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchTerm.trim()) {
-      const params = new URLSearchParams();
-      params.set('q', searchTerm);
-      if (selectedCategory) params.set('category', selectedCategory);
-      if (priceMin) params.set('minPrice', priceMin);
-      if (priceMax) params.set('maxPrice', priceMax);
-      router.push(`/buscar?${params.toString()}`);
+    if (!searchTerm.trim()) {
+      setFilterError('Ingresa un término de búsqueda para continuar.');
+      return;
     }
+
+    setFilterError('');
+    const params = new URLSearchParams();
+    if (searchTerm.trim()) {
+      params.append('q', searchTerm);
+    }
+
+    if (selectedCategory) {
+      params.append('category', selectedCategory);
+    }
+
+    if (minPrice) {
+      params.append('min_price', minPrice);
+    }
+
+    if (maxPrice) {
+      params.append('max_price', maxPrice);
+    }
+    if (selectedOffer === 'on_sale') {
+    params.append('on_sale', 'true');
+    } else if (selectedOffer === 'promotion') {
+      params.append('on_sale', 'true');
+      params.append('sticker', 'promotion');
+    } else if (selectedOffer === 'offer') {
+      params.append('on_sale', 'true');
+      params.append('sticker', 'offer');
+    }
+
+    router.push(`/buscar?${params.toString()}`);
+
     setActiveDropdown(null);
   };
 
@@ -182,367 +208,10 @@ export default function SearchBar({ categorias: propCategorias, compact = false 
     setCategoryProducts([]);
   };
 
-  return compact ? (
-    <form onSubmit={handleSearch} className="w-full relative">
-      <input type="hidden" name="category" value={selectedCategory} />
-
-      <div className="relative w-full">
-        <input
-          ref={inputRef}
-          type="text"
-          name="q"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          onKeyDown={handleKeyDown}
-          onFocus={() => searchTerm.length >= 2 && setActiveDropdown('autocomplete')}
-          placeholder="¿Qué buscas para tu salud?"
-          aria-label="Buscar productos o servicios"
-          aria-expanded={showAutocomplete}
-          aria-controls="search-results"
-          autoComplete="off"
-          className="w-full h-10 pl-4 pr-28 rounded-full border border-gray-200 dark:border-[var(--border-subtle)] text-sm focus:outline-none focus:ring-2 focus:ring-sky-400 dark:focus:ring-[var(--text-primary)] focus:border-sky-400 dark:focus:border-[var(--text-primary)] transition-all shadow-inner bg-gray-50/50 dark:bg-[var(--bg-muted)]/50 text-gray-800 dark:text-[var(--text-primary)] placeholder:text-gray-400 dark:placeholder:text-[var(--text-placeholder)]"
-        />
-
-        <div className="absolute right-0.5 top-0.5 bottom-0.5 flex items-center gap-0.5">
-          <button
-            type="button"
-            aria-label="Buscar por voz"
-            className="h-full w-8 rounded-full bg-sky-500 hover:bg-sky-600 dark:bg-[var(--brand-green)] dark:hover:bg-[var(--brand-green-hover)] text-white flex items-center justify-center transition-all duration-200"
-          >
-            <Mic className="w-4 h-4" />
-          </button>
-
-          <button
-            type="button"
-            aria-label={filterOpen ? "Cerrar filtros" : "Abrir filtros"}
-            aria-expanded={filterOpen}
-            onClick={() => setActiveDropdown(filterOpen ? null : 'filter')}
-            className="flex h-full w-8 md:w-auto md:px-3 rounded-full bg-sky-500 dark:bg-[var(--brand-green)] text-white hover:bg-sky-600 dark:hover:bg-[var(--brand-green-hover)] font-semibold items-center justify-center gap-1 transition-all"
-          >
-            <Filter className="w-4 h-4" />
-            <span className="hidden md:inline text-xs">Filtros</span>
-          </button>
-
-          <button
-            type="submit"
-            aria-label="Ejecutar búsqueda"
-            className="h-full w-8 md:w-auto md:px-3 rounded-full bg-sky-500 hover:bg-sky-600 dark:bg-[var(--brand-green)] dark:hover:bg-[var(--brand-green-hover)] text-white font-semibold flex items-center justify-center gap-1 transition-all shadow-sm"
-          >
-            <Search className="w-4 h-4" />
-            <span className="hidden md:inline text-xs">Buscar</span>
-          </button>
-        </div>
-      </div>
-
-      {/* AUTOCOMPLETE DROPDOWN */}
-      {showAutocomplete && isMounted && createPortal(
-        <div
-          id="search-results"
-          role="listbox"
-          aria-modal="true"
-          aria-label="Resultados de búsqueda"
-          tabIndex={-1}
-          className="fixed bg-white dark:bg-[var(--bg-secondary)] rounded-2xl shadow-lg border border-gray-100 dark:border-[var(--border-subtle)] overflow-hidden z-[99998]"
-          style={{
-            top: inputRef.current ? inputRef.current.getBoundingClientRect().bottom + 8 : 0,
-            left: inputRef.current ? inputRef.current.getBoundingClientRect().left : 0,
-            width: inputRef.current ? inputRef.current.getBoundingClientRect().width : 0,
-          }}
-          onMouseDown={(e) => e.stopPropagation()}
-          onClick={(e) => e.stopPropagation()}
-          onKeyDown={(e) => e.stopPropagation()}
-        >
-          <div className="overflow-y-auto max-h-[320px]">
-          {isLoading ? (
-            <div className="p-4 flex items-center justify-center gap-2 text-gray-500">
-              <Loader2 className="w-5 h-5 animate-spin" />
-              <span>Buscando...</span>
-            </div>
-          ) : results.length > 0 ? (
-            <div className="flex">
-              {/* Columna Izquierda: Categorías */}
-              <div className="w-1/3 border-r border-gray-100 dark:border-[var(--border-subtle)] max-h-80 overflow-y-auto">
-                <div className="p-2">
-                  <p className="text-xs font-bold text-gray-500 dark:text-[var(--text-placeholder)] px-2 py-1 uppercase">
-                    Categorías
-                  </p>
-                  <ul>
-                    {categoryResults.map((result, index) => (
-                      <li key={`category-${result.id}`}>
-                        <button
-                          type="button"
-                          onClick={() => handleSelectResult(result)}
-                          onMouseEnter={() => handleCategoryHover(result)}
-                          onMouseLeave={handleCategoryLeave}
-                          className={`w-full px-3 py-2 flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-[#182420] transition-colors rounded-lg ${
-                            hoveredCategory?.id === result.id ? 'bg-gray-50 dark:bg-[var(--bg-muted)]' : ''
-                          }`}
-                        >
-                          <FolderOpen className="w-4 h-4 text-green-500 flex-shrink-0" />
-                          <span className="text-sm font-medium text-gray-900 dark:text-[var(--text-primary)] truncate">
-                            {result.titulo}
-                          </span>
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-
-              {/* Columna Derecha: Productos */}
-              <div className="w-2/3 max-h-80 overflow-y-auto">
-                {hoveredCategory ? (
-                  <div className="p-2">
-                    <p className="text-xs font-bold text-gray-500 dark:text-[var(--text-placeholder)] px-2 py-1 uppercase">
-                      en {hoveredCategory.titulo}
-                    </p>
-                    {loadingCategoryProducts ? (
-                      <div className="p-4 flex items-center justify-center gap-2 text-gray-500">
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      </div>
-                    ) : categoryProducts.length > 0 ? (
-                      <ul>
-                        {categoryProducts.map((product) => (
-                          <li key={`hover-product-${product.id}`}>
-                            <button
-                              type="button"
-                              onClick={() => handleSelectResult(product)}
-                              className="w-full px-3 py-2 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-[#182420] transition-colors rounded-lg"
-                            >
-                              <div className="relative w-10 h-10 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 dark:bg-[var(--bg-muted)]">
-                                <Image
-                                  src={product.imagen || '/img/no-image.png'}
-                                  alt={product.titulo}
-                                  fill
-                                  sizes="40px"
-                                  className="object-cover"
-                                />
-                              </div>
-                              <div className="flex-1 min-w-0 text-left">
-                                <span className="text-sm font-medium text-gray-900 dark:text-[var(--text-primary)] truncate block">
-                                  {product.titulo}
-                                </span>
-                                {product.precio !== undefined && (
-                                  <span className="text-xs font-bold text-sky-600 dark:text-[var(--color-success)]">
-                                    S/{product.precio.toFixed(2)}
-                                  </span>
-                                )}
-                              </div>
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="text-xs text-gray-400 px-3 py-2">Sin productos</p>
-                    )}
-                  </div>
-                ) : (
-                  <div className="p-2">
-                    <p className="text-xs font-bold text-gray-500 dark:text-[var(--text-placeholder)] px-2 py-1 uppercase">
-                      Productos
-                    </p>
-                    <ul>
-                      {productResults.map((result, index) => (
-                        <li key={`product-${result.id}`}>
-                          <button
-                            type="button"
-                            onClick={() => handleSelectResult(result)}
-                            className="w-full px-3 py-2 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-[#182420] transition-colors rounded-lg"
-                          >
-                            <div className="relative w-10 h-10 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 dark:bg-[var(--bg-muted)]">
-                              <Image
-                                src={result.imagen || '/img/no-image.png'}
-                                alt={result.titulo}
-                                fill
-                                sizes="40px"
-                                className="object-cover"
-                              />
-                            </div>
-                            <div className="flex-1 min-w-0 text-left">
-                              <div className="flex items-center gap-2">
-                                <Package className="w-4 h-4 text-sky-500 flex-shrink-0" />
-                                <span className="text-sm font-medium text-gray-900 dark:text-[var(--text-primary)] truncate">
-                                  {result.titulo}
-                                </span>
-                              </div>
-                              {result.precio !== undefined && (
-                                <span className="text-xs font-bold text-sky-600 dark:text-[var(--color-success)] ml-6">
-                                  S/{result.precio.toFixed(2)}
-                                </span>
-                              )}
-                              {result.categoria && (
-                                <span className="text-xs text-gray-500 dark:text-[var(--text-placeholder)] ml-1">
-                                  en {result.categoria}
-                                </span>
-                              )}
-                            </div>
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
-            </div>
-          ) : searchTerm.length >= 2 ? (
-            <div className="p-4 text-center text-gray-500 text-sm">
-              No se encontraron resultados
-            </div>
-          ) : null}
-          {/* Footer: Ver todos */}
-          {results.length > 0 && (
-            <li className="border-t border-gray-100 dark:border-[var(--border-subtle)]">
-              <button
-                type="submit"
-                className="w-full px-4 py-3 flex items-center justify-center gap-2 hover:bg-gray-50 dark:hover:bg-[#182420] transition-colors text-sky-500 font-medium text-sm"
-              >
-                <Search className="w-4 h-4" />
-                Ver todos los resultados para &quot;{searchTerm}&quot;
-              </button>
-            </li>
-          )}
-        </div>
-        </div>,
-        document.body
-      )}
-
-      {/* DROPDOWN DE FILTROS */}
-      {filterOpen && isMounted && createPortal(
-        <div
-          role="dialog"
-          aria-modal="true"
-          tabIndex={-1}
-          className="fixed bg-white/95 dark:bg-[var(--bg-card)]/95 backdrop-blur-2xl border border-gray-200 dark:border-[var(--border-subtle)] rounded-[2.5rem] shadow-[0_30px_70px_rgba(0,0,0,0.15)] dark:shadow-[0_30px_70px_rgba(0,0,0,0.4)] p-6 overflow-hidden z-[99998]"
-          style={{
-            top: inputRef.current ? inputRef.current.getBoundingClientRect().bottom + 16 : 0,
-            left: inputRef.current ? inputRef.current.getBoundingClientRect().left : 0,
-            width: inputRef.current ? inputRef.current.getBoundingClientRect().width : 0,
-          }}
-          onMouseDown={(e) => e.stopPropagation()}
-          onClick={(e) => e.stopPropagation()}
-          onKeyDown={(e) => e.stopPropagation()}
-        >
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="font-bold text-gray-800 dark:text-[var(--text-primary)]">Filtros de búsqueda</h3>
-            <button
-              type="button"
-              onClick={() => setActiveDropdown(null)}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] rounded-full transition-colors"
-            >
-              <X className="w-5 h-5 dark:text-[var(--text-secondary)]" />
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Categorías */}
-            <div className="p-4 bg-gray-50/50 dark:bg-[var(--bg-muted)]/50 rounded-2xl">
-              <p className="text-xs uppercase tracking-wider text-gray-500 dark:text-[var(--text-secondary)] font-bold inline-flex items-center gap-2 mb-4">
-                <span className="w-2 h-2 bg-sky-500 rounded-full"></span>
-                Categorías
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {categorias.map((cat) => (
-                  <button
-                    key={cat.id}
-                    type="button"
-                    onClick={() => setSelectedCategory(selectedCategory === cat.nombre ? '' : cat.nombre)}
-                    className={`px-3.5 py-2.5 rounded-full border text-xs font-bold transition-all ${selectedCategory === cat.nombre
-                        ? 'bg-sky-500 text-white border-sky-500 shadow-md'
-                        : 'bg-white dark:bg-[var(--bg-card)] border-gray-100 dark:border-[var(--border-subtle)] text-gray-600 dark:text-[var(--text-secondary)] hover:border-sky-300 dark:hover:border-[var(--brand-green)] hover:bg-sky-50 dark:hover:bg-[var(--bg-muted)]'
-                      }`}
-                  >
-                    {cat.nombre}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Ofertas */}
-            <div className="p-4 bg-gray-50/50 dark:bg-[var(--bg-muted)]/50 rounded-2xl">
-              <p className="text-xs uppercase tracking-wider text-gray-500 font-bold inline-flex items-center gap-2 mb-4">
-                <span className="w-2 h-2 bg-red-500 rounded-full"></span>
-                Ofertas Especiales
-              </p>
-              <div className="flex flex-wrap gap-2">
-                <button type="button" className="px-3.5 py-2.5 rounded-full bg-white dark:bg-[var(--bg-card)] border border-gray-100 dark:border-[var(--border-subtle)] text-xs font-bold text-sky-600 dark:text-[var(--color-success)] hover:border-sky-300 dark:hover:border-[var(--brand-green)] hover:bg-sky-50 dark:hover:bg-[var(--bg-muted)] transition-all">
-                  Descuentos
-                </button>
-                <button type="button" className="px-3.5 py-2.5 rounded-full bg-white dark:bg-[var(--bg-card)] border border-gray-100 dark:border-[var(--border-subtle)] text-xs font-bold text-sky-600 dark:text-[var(--color-success)] hover:border-sky-300 dark:hover:border-[var(--brand-green)] hover:bg-sky-50 dark:hover:bg-[var(--bg-muted)] transition-all">
-                  Promociones
-                </button>
-                <button type="button" className="px-3.5 py-2.5 rounded-full bg-white dark:bg-[var(--bg-card)] border border-gray-100 dark:border-[var(--border-subtle)] text-xs font-bold text-sky-600 dark:text-[var(--color-success)] hover:border-sky-300 dark:hover:border-[var(--brand-green)] hover:bg-sky-50 dark:hover:bg-[var(--bg-muted)] transition-all">
-                  Ofertas
-                </button>
-              </div>
-            </div>
-
-            {/* Precio */}
-            <div className="p-4 bg-gray-50/50 dark:bg-[var(--bg-muted)]/50 rounded-2xl">
-              <p className="text-xs uppercase tracking-wider text-gray-500 dark:text-[var(--text-secondary)] font-bold inline-flex items-center gap-2 mb-4">
-                <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                Rango de Precio
-              </p>
-              <div className="space-y-3">
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs text-gray-500 dark:text-[var(--text-placeholder)] mb-1">
-                      Mínimo (S/)
-                    </label>
-                    <input
-                      type="number"
-                      value={priceMin}
-                      onChange={(e) => setPriceMin(e.target.value)}
-                      placeholder="0"
-                      min="0"
-                      className="w-full h-10 px-3 rounded-lg border border-gray-200 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] text-gray-900 dark:text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-gray-500 dark:text-[var(--text-placeholder)] mb-1">
-                      Máximo (S/)
-                    </label>
-                    <input
-                      type="number"
-                      value={priceMax}
-                      onChange={(e) => setPriceMax(e.target.value)}
-                      placeholder="1000"
-                      min="0"
-                      className="w-full h-10 px-3 rounded-lg border border-gray-200 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] text-gray-900 dark:text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-100 dark:border-[var(--border-subtle)]">
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedCategory('');
-                setSearchTerm('');
-                setPriceMin('');
-                setPriceMax('');
-              }}
-              className="px-4 py-2 text-gray-600 dark:text-[var(--text-secondary)] font-medium hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] rounded-full transition-colors"
-            >
-              Limpiar
-            </button>
-            <button
-              type="submit"
-              className="px-6 py-2 bg-sky-500 dark:bg-[var(--brand-green)] text-white font-bold rounded-full hover:bg-sky-600 dark:hover:bg-[var(--brand-green-hover)] transition-colors"
-            >
-              Aplicar Filtros
-            </button>
-          </div>
-        </div>,
-        document.body
-      )}
-    </form>
-  ) : (
+  return (
     <div className="border-t border-gray-100 dark:border-[var(--border-subtle)] bg-white/80 dark:bg-[var(--bg-secondary)]/80 backdrop-blur-sm shadow-sm">
       <div className="max-w-7xl mx-auto px-4 py-4">
-        <form onSubmit={handleSearch} className="w-full relative">
+        <form ref={searchContainerRef} onSubmit={handleSearch} className="w-full relative">
           <input type="hidden" name="category" value={selectedCategory} />
 
           <div className="relative w-full">
@@ -552,7 +221,10 @@ export default function SearchBar({ categorias: propCategorias, compact = false 
               type="text"
               name="q"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                if (filterError) setFilterError(''); 
+              }}
               onKeyDown={handleKeyDown}
               onFocus={() => searchTerm.length >= 2 && setActiveDropdown('autocomplete')}
               placeholder="¿Qué buscas para tu salud?"
@@ -577,7 +249,7 @@ export default function SearchBar({ categorias: propCategorias, compact = false 
                 type="button"
                 aria-label={filterOpen ? "Cerrar filtros" : "Abrir filtros"}
                 aria-expanded={filterOpen}
-                onClick={() => setActiveDropdown(filterOpen ? null : 'filter')}
+                onMouseDown={() => setActiveDropdown(filterOpen ? null : 'filter')}
                 className="flex h-full w-10 md:w-auto md:px-7 rounded-full bg-sky-500 dark:bg-[var(--brand-green)] text-white hover:bg-sky-600 dark:hover:bg-[var(--brand-green-hover)] font-bold items-center justify-center gap-2 transition-all border border-sky-200 dark:border-[var(--border-subtle)]"
               >
                 <Filter className="w-5 h-5" />
@@ -594,10 +266,16 @@ export default function SearchBar({ categorias: propCategorias, compact = false 
               </button>
             </div>
           </div>
+          {filterError && (
+            <p className="absolute left-4 -bottom-5 text-xs text-red-500 animate-fade-in">
+              {filterError}
+            </p>
+          )}
 
           {/* AUTOCOMPLETE DROPDOWN */}
           {showAutocomplete && isMounted && createPortal(
             <div
+              ref={dropdownRef}
               id="search-results"
               role="listbox"
               aria-modal="true"
@@ -610,7 +288,6 @@ export default function SearchBar({ categorias: propCategorias, compact = false 
                 width: inputRef.current ? inputRef.current.getBoundingClientRect().width : 0,
               }}
               onMouseDown={(e) => e.stopPropagation()}
-              onClick={(e) => e.stopPropagation()}
               onKeyDown={(e) => e.stopPropagation()}
             >
               <div className="overflow-y-auto max-h-[320px]">
@@ -632,7 +309,7 @@ export default function SearchBar({ categorias: propCategorias, compact = false 
                           <li key={`category-${result.id}`}>
                             <button
                               type="button"
-                              onClick={() => handleSelectResult(result)}
+                              onMouseDown={() => handleSelectResult(result)}
                               onMouseEnter={() => handleCategoryHover(result)}
                               onMouseLeave={handleCategoryLeave}
                               className={`w-full px-3 py-2 flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-[#182420] transition-colors rounded-lg ${
@@ -667,7 +344,7 @@ export default function SearchBar({ categorias: propCategorias, compact = false 
                               <li key={`hover-product-${product.id}`}>
                                 <button
                                   type="button"
-                                  onClick={() => handleSelectResult(product)}
+                                  onMouseDown={() => handleSelectResult(product)}
                                   className="w-full px-3 py-2 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-[#182420] transition-colors rounded-lg"
                                 >
                                   <div className="relative w-10 h-10 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 dark:bg-[var(--bg-muted)]">
@@ -707,7 +384,7 @@ export default function SearchBar({ categorias: propCategorias, compact = false 
                             <li key={`product-${result.id}`}>
                               <button
                                 type="button"
-                                onClick={() => handleSelectResult(result)}
+                                onMouseDown={() => handleSelectResult(result)}
                                 className="w-full px-3 py-2 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-[#182420] transition-colors rounded-lg"
                               >
                                 <div className="relative w-10 h-10 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 dark:bg-[var(--bg-muted)]">
@@ -773,67 +450,154 @@ export default function SearchBar({ categorias: propCategorias, compact = false 
               role="dialog"
               aria-modal="true"
               tabIndex={-1}
-              className="fixed bg-white/95 dark:bg-[var(--bg-card)]/95 backdrop-blur-2xl border border-gray-200 dark:border-[var(--border-subtle)] rounded-[2.5rem] shadow-[0_30px_70px_rgba(0,0,0,0.15)] dark:shadow-[0_30px_70px_rgba(0,0,0,0.4)] p-6 overflow-hidden z-[99998]"
-              style={{
-                top: inputRef.current ? inputRef.current.getBoundingClientRect().bottom + 16 : 0,
-                left: inputRef.current ? inputRef.current.getBoundingClientRect().left : 0,
-                width: inputRef.current ? inputRef.current.getBoundingClientRect().width : 0,
-              }}
+              className="fixed bg-white/95 dark:bg-[var(--bg-card)]/95 backdrop-blur-2xl border border-gray-200 dark:border-[var(--border-subtle)] rounded-[2.5rem] shadow-[0_30px_70px_rgba(0,0,0,0.15)] dark:shadow-[0_30px_70px_rgba(0,0,0,0.4)] p-6 overflow-y-auto overscroll-contain max-h-[90vh] z-[99998]"
+              style={(() => {
+                const rect = searchContainerRef.current?.getBoundingClientRect();
+                if (!rect) return {};
+                const spaceBelow = window.innerHeight - rect.bottom - 8;
+                return {
+                  top: rect.bottom + 8,
+                  left: rect.left,
+                  width: rect.width,
+                  maxHeight: Math.min(spaceBelow, 480),
+                };
+              })()}
               onMouseDown={(e) => e.stopPropagation()}
-              onClick={(e) => e.stopPropagation()}
               onKeyDown={(e) => e.stopPropagation()}
             >
               <div className="flex justify-between items-center mb-4">
                 <h3 className="font-bold text-gray-800 dark:text-[var(--text-primary)]">Filtros de búsqueda</h3>
                 <button
                   type="button"
-                  onClick={() => setActiveDropdown(null)}
+                  onMouseDown={() => setActiveDropdown(null)}
                   className="p-2 hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] rounded-full transition-colors"
                 >
                   <X className="w-5 h-5 dark:text-[var(--text-secondary)]" />
                 </button>
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Categorías */}
-                <div className="p-4 bg-gray-50/50 dark:bg-[var(--bg-muted)]/50 rounded-2xl">
+                <div className="p-4 bg-gray-50/50 dark:bg-[var(--bg-muted)]/50 rounded-2xl md:col-span-1 overflow-y-auto max-h-64">
                   <p className="text-xs uppercase tracking-wider text-gray-500 dark:text-[var(--text-secondary)] font-bold inline-flex items-center gap-2 mb-4">
                     <span className="w-2 h-2 bg-sky-500 rounded-full"></span>
                     Categorías
                   </p>
-                  <div className="flex flex-wrap gap-2">
-                    {categorias.map((cat) => (
-                      <button
-                        key={cat.id}
-                        type="button"
-                        onClick={() => setSelectedCategory(selectedCategory === cat.nombre ? '' : cat.nombre)}
-                        className={`px-3.5 py-2.5 rounded-full border text-xs font-bold transition-all ${selectedCategory === cat.nombre
-                            ? 'bg-sky-500 text-white border-sky-500 shadow-md'
-                            : 'bg-white dark:bg-[var(--bg-card)] border-gray-100 dark:border-[var(--border-subtle)] text-gray-600 dark:text-[var(--text-secondary)] hover:border-sky-300 dark:hover:border-[var(--brand-green)] hover:bg-sky-50 dark:hover:bg-[var(--bg-muted)]'
-                          }`}
-                      >
-                        {cat.nombre}
-                      </button>
-                    ))}
+
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                    
+                    {/* Servicios */}
+                    {categoriasServicios.length > 0 && (
+                      <div className="col-span-2 mb-1">
+                        <p className="text-xs text-gray-400 dark:text-[var(--text-placeholder)] font-semibold mb-1 pl-1">
+                          Servicios
+                        </p>
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-0.5">
+                          {categoriasServicios.map((cat) => (
+                            <button
+                              key={cat.id}
+                              type="button"
+                              onMouseDown={() =>
+                                setSelectedCategory(selectedCategory === cat.slug ? '' : cat.slug || '')
+                              }
+                              className={`flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs font-medium text-left transition-all group ${
+                                selectedCategory === cat.slug
+                                  ? 'text-sky-500 dark:text-sky-400'
+                                  : 'text-gray-600 dark:text-[var(--text-secondary)] hover:text-sky-500 dark:hover:text-sky-400'
+                              }`}
+                            >
+                              {/* Checkmark / indicador */}
+                              <span className={`w-3.5 h-3.5 rounded-full border flex-shrink-0 flex items-center justify-center transition-all ${
+                                selectedCategory === cat.slug
+                                  ? 'bg-sky-500 border-sky-500'
+                                  : 'border-gray-300 dark:border-[var(--border-subtle)] group-hover:border-sky-400'
+                              }`}>
+                                {selectedCategory === cat.slug && (
+                                  <svg className="w-2 h-2 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                  </svg>
+                                )}
+                              </span>
+                              <span className="truncate capitalize">{cat.nombre.toLowerCase()}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Divisor */}
+                    {categoriasServicios.length > 0 && categoriasProductos.length > 0 && (
+                      <div className="col-span-2 border-t border-gray-100 dark:border-[var(--border-subtle)] my-2" />
+                    )}
+
+                    {/* Productos */}
+                    {categoriasProductos.length > 0 && (
+                      <div className="col-span-2">
+                        <p className="text-xs text-gray-400 dark:text-[var(--text-placeholder)] font-semibold mb-1 pl-1">
+                          Productos
+                        </p>
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-0.5">
+                          {categoriasProductos.map((cat) => (
+                            <button
+                              key={cat.id}
+                              type="button"
+                              onMouseDown={() =>
+                                setSelectedCategory(selectedCategory === cat.slug ? '' : cat.slug || '')
+                              }
+                              className={`flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs font-medium text-left transition-all group ${
+                                selectedCategory === cat.slug
+                                  ? 'text-sky-500 dark:text-sky-400'
+                                  : 'text-gray-600 dark:text-[var(--text-secondary)] hover:text-sky-500 dark:hover:text-sky-400'
+                              }`}
+                            >
+                              <span className={`w-3.5 h-3.5 rounded-full border flex-shrink-0 flex items-center justify-center transition-all ${
+                                selectedCategory === cat.slug
+                                  ? 'bg-sky-500 border-sky-500'
+                                  : 'border-gray-300 dark:border-[var(--border-subtle)] group-hover:border-sky-400'
+                              }`}>
+                                {selectedCategory === cat.slug && (
+                                  <svg className="w-2 h-2 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                  </svg>
+                                )}
+                              </span>
+                              <span className="truncate capitalize">{cat.nombre.toLowerCase()}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                   </div>
                 </div>
 
                 {/* Ofertas */}
                 <div className="p-4 bg-gray-50/50 dark:bg-[var(--bg-muted)]/50 rounded-2xl">
-                  <p className="text-xs uppercase tracking-wider text-gray-500 font-bold inline-flex items-center gap-2 mb-4">
+                  <p className="text-xs uppercase tracking-wider text-gray-500 dark:text-[var(--text-secondary)] font-bold inline-flex items-center gap-2 mb-4">
                     <span className="w-2 h-2 bg-red-500 rounded-full"></span>
                     Ofertas Especiales
                   </p>
                   <div className="flex flex-wrap gap-2">
-                    <button type="button" className="px-3.5 py-2.5 rounded-full bg-white dark:bg-[var(--bg-card)] border border-gray-100 dark:border-[var(--border-subtle)] text-xs font-bold text-sky-600 dark:text-[var(--color-success)] hover:border-sky-300 dark:hover:border-[var(--brand-green)] hover:bg-sky-50 dark:hover:bg-[var(--bg-muted)] transition-all">
-                      Descuentos
-                    </button>
-                    <button type="button" className="px-3.5 py-2.5 rounded-full bg-white dark:bg-[var(--bg-card)] border border-gray-100 dark:border-[var(--border-subtle)] text-xs font-bold text-sky-600 dark:text-[var(--color-success)] hover:border-sky-300 dark:hover:border-[var(--brand-green)] hover:bg-sky-50 dark:hover:bg-[var(--bg-muted)] transition-all">
-                      Promociones
-                    </button>
-                    <button type="button" className="px-3.5 py-2.5 rounded-full bg-white dark:bg-[var(--bg-card)] border border-gray-100 dark:border-[var(--border-subtle)] text-xs font-bold text-sky-600 dark:text-[var(--color-success)] hover:border-sky-300 dark:hover:border-[var(--brand-green)] hover:bg-sky-50 dark:hover:bg-[var(--bg-muted)] transition-all">
-                      Ofertas
-                    </button>
+                    {[
+                      { label: 'Descuentos', value: 'on_sale' },
+                      { label: 'Promociones', value: 'promotion' },
+                      { label: 'Ofertas', value: 'offer' },
+                    ].map(({ label, value }) => (
+                      <button
+                        key={value}
+                        type="button"
+                        onMouseDown={() =>
+                          setSelectedOffer(selectedOffer === value ? '' : value)
+                        }
+                        className={`px-3.5 py-2.5 rounded-full border text-xs font-bold transition-all ${
+                          selectedOffer === value
+                            ? 'bg-red-500 text-white border-red-500 shadow-md'
+                            : 'bg-white dark:bg-[var(--bg-card)] border-gray-200 dark:border-[var(--border-subtle)] text-gray-600 dark:text-[var(--text-secondary)] hover:border-red-300 hover:bg-red-50 dark:hover:bg-red-900/10 dark:hover:border-red-400'
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    ))}
                   </div>
                 </div>
 
@@ -843,35 +607,69 @@ export default function SearchBar({ categorias: propCategorias, compact = false 
                     <span className="w-2 h-2 bg-green-500 rounded-full"></span>
                     Rango de Precio
                   </p>
-                  <div className="space-y-3">
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-xs text-gray-500 dark:text-[var(--text-placeholder)] mb-1">
-                          Mínimo (S/)
-                        </label>
-                        <input
-                          type="number"
-                          value={priceMin}
-                          onChange={(e) => setPriceMin(e.target.value)}
-                          placeholder="0"
-                          min="0"
-                          className="w-full h-10 px-3 rounded-lg border border-gray-200 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] text-gray-900 dark:text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs text-gray-500 dark:text-[var(--text-placeholder)] mb-1">
-                          Máximo (S/)
-                        </label>
-                        <input
-                          type="number"
-                          value={priceMax}
-                          onChange={(e) => setPriceMax(e.target.value)}
-                          placeholder="1000"
-                          min="0"
-                          className="w-full h-10 px-3 rounded-lg border border-gray-200 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] text-gray-900 dark:text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
-                        />
-                      </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs text-gray-500 dark:text-[var(--text-secondary)] mb-1">
+                        Desde
+                      </label>
+
+                      <input
+                        type="number"
+                        value={minPrice}
+                        onChange={(e) => setMinPrice(e.target.value)}
+                        placeholder="0"
+                        min="0"
+                        className="
+                          w-full
+                          px-3
+                          py-2.5
+                          rounded-xl
+                          border
+                          border-gray-200
+                          dark:border-[var(--border-subtle)]
+                          bg-white
+                          dark:bg-[var(--bg-card)]
+                          text-sm
+                          text-gray-700
+                          dark:text-[var(--text-primary)]
+                          focus:outline-none
+                          focus:ring-2
+                          focus:ring-sky-500
+                        "
+                      />
                     </div>
+
+                    <div>
+                      <label className="block text-xs text-gray-500 dark:text-[var(--text-secondary)] mb-1">
+                        Hasta
+                      </label>
+
+                      <input
+                        type="number"
+                        value={maxPrice}
+                        onChange={(e) => setMaxPrice(e.target.value)}
+                        placeholder="1000"
+                        min="0"
+                        className="
+                          w-full
+                          px-3
+                          py-2.5
+                          rounded-xl
+                          border
+                          border-gray-200
+                          dark:border-[var(--border-subtle)]
+                          bg-white
+                          dark:bg-[var(--bg-card)]
+                          text-sm
+                          text-gray-700
+                          dark:text-[var(--text-primary)]
+                          focus:outline-none
+                          focus:ring-2
+                          focus:ring-sky-500
+                        "
+                      />
+                    </div>
+
                   </div>
                 </div>
               </div>
@@ -880,18 +678,28 @@ export default function SearchBar({ categorias: propCategorias, compact = false 
               <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-100 dark:border-[var(--border-subtle)]">
                 <button
                   type="button"
-                  onClick={() => {
+                  onMouseDown={() => {
                     setSelectedCategory('');
+                    setSelectedOffer('');
+                    setMinPrice('');
+                    setMaxPrice('');
                     setSearchTerm('');
-                    setPriceMin('');
-                    setPriceMax('');
                   }}
                   className="px-4 py-2 text-gray-600 dark:text-[var(--text-secondary)] font-medium hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] rounded-full transition-colors"
                 >
                   Limpiar
                 </button>
                 <button
-                  type="submit"
+                  type="button"
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (autoSearch) {
+                      handleSearch(e as unknown as React.FormEvent); // navega y cierra
+                    } else {
+                      setActiveDropdown(null); // solo cierra
+                    }
+                  }}
                   className="px-6 py-2 bg-sky-500 dark:bg-[var(--brand-green)] text-white font-bold rounded-full hover:bg-sky-600 dark:hover:bg-[var(--brand-green-hover)] transition-colors"
                 >
                   Aplicar Filtros

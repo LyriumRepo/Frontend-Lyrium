@@ -4,7 +4,6 @@ import { useState, useMemo, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEchoPublic } from '@laravel/echo-react';
 import { useToast } from '@/shared/lib/context/ToastContext';
-import { getToken, getAuthHeaders } from '@/shared/lib/api/token-store';
 
 const LARAVEL_API = process.env.NEXT_PUBLIC_LARAVEL_API_URL || 'http://127.0.0.1:8000/api';
 
@@ -24,6 +23,31 @@ export interface Category {
 export interface CategoryNode extends Category {
     children: CategoryNode[];
     level: number;
+}
+
+function getTokenFromCookies(): string | null {
+    if (typeof document === 'undefined') return null;
+    const cookies = document.cookie.split(';');
+    for (const cookie of cookies) {
+        const [name, value] = cookie.trim().split('=');
+        if (name === 'laravel_token') {
+            return decodeURIComponent(value || '');
+        }
+    }
+    return null;
+}
+
+async function getAuthHeaders(): Promise<Record<string, string>> {
+    const token =
+        typeof window !== 'undefined'
+            ? localStorage.getItem('laravel_token')
+            : null;
+
+    return {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    };
 }
 
 async function fetchCategories(): Promise<Category[]> {
@@ -84,9 +108,13 @@ async function apiDeleteCategory(id: number): Promise<void> {
 }
 
 async function apiUploadImage(id: number, file: File): Promise<string> {
-    const token = getToken();
+    const token =
+        typeof window !== 'undefined'
+            ? localStorage.getItem('laravel_token')
+            : null;
 
     const form = new FormData();
+
     form.append('image', file);
 
     const res = await fetch(`${LARAVEL_API}/categories/${id}/image`, {
@@ -97,11 +125,15 @@ async function apiUploadImage(id: number, file: File): Promise<string> {
         },
         body: form,
     });
+
     if (!res.ok) {
         const err = await res.json();
+
         throw new Error(err.error || 'Error al subir imagen');
     }
+
     const json = await res.json();
+
     return json.image;
 }
 

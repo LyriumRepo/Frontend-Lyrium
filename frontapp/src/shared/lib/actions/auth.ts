@@ -14,14 +14,18 @@ export async function loginAction(credentials: LoginCredentials) {
     const cookieStore = await cookies();
 
     cookieStore.set('laravel_token', result.token, {
-        httpOnly: false,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 60 * 60 * 24 * 7,
-        path: '/'
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 60 * 60 * 24,
+    path: '/',
     });
 
-    return { success: true, user: result.user, token: result.token };
+    return { 
+        success: true, 
+        user: result.user, 
+        token: result.token 
+    };
 }
 
 export async function logoutAction() {
@@ -80,7 +84,7 @@ export async function loginWithSocialAction(provider: string, credential: string
         const cookieStore = await cookies();
 
         cookieStore.set('laravel_token', result.token, {
-            httpOnly: false,
+            httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'lax',
             maxAge: 60 * 60 * 24 * 7,

@@ -1,5 +1,4 @@
 import { LARAVEL_API_URL } from '@/shared/lib/config/flags';
-import { getToken } from './token-store';
 import type { ApiResponse } from '@/shared/lib/api/base-client';
 
 export interface SellerProfile {
@@ -155,27 +154,13 @@ export interface UpdateStorePayload {
     website?: string;
   };
 }
-
+//Function modified only so that it can use Sanctum API Tokens.
 async function getAuthToken(): Promise<string | null> {
-  if (typeof window !== 'undefined') {
-    const token = getToken();
-    if (token) {
-      console.log('[sellerApi] Token (client):', token.substring(0, 20) + '...');
-      return token;
-    }
-    console.log('[sellerApi] No laravel_token found in client');
+  if (typeof window === 'undefined') {
     return null;
   }
-  try {
-    const { cookies } = await import('next/headers');
-    const cookieStore = await cookies();
-    const value = cookieStore.get('laravel_token')?.value ?? null;
-    console.log('[sellerApi] Token from server cookies:', value ? 'found' : 'not found');
-    const token = value ? decodeURIComponent(value) : null;
-    return token;
-  } catch {
-    return null;
-  }
+
+  return localStorage.getItem('laravel_token');
 }
 
 async function request<T>(
@@ -187,7 +172,6 @@ async function request<T>(
 
   const response = await fetch(`${baseUrl}${endpoint}`, {
     ...options,
-    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
