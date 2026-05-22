@@ -68,6 +68,7 @@ export default function MegaMenu({
     onMouseLeave,
 }: MegaMenuProps) {
     const megaData = megaMenuData[activeCategory] || Object.values(megaMenuData)[0];
+    console.log(megaData.icons);
 
     if (!item.children) return null;
 
@@ -116,7 +117,7 @@ export default function MegaMenu({
                 <section className="col-span-12 md:col-span-8 lg:col-span-9 p-5 overflow-y-auto h-full bg-white dark:bg-[var(--bg-secondary)]">
                     {/* ICONS */}
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-                        {megaData.icons.map((icon) => (
+                        {megaData.icons?.slice(0, 6).map((icon) => (
                             <Link key={icon.title} href={icon.href} className="group text-center">
                                 <div className="mx-auto w-28 h-28 rounded-full bg-lime-500/20 border border-lime-200 flex items-center justify-center shadow-sm group-hover:shadow-md group-hover:scale-[1.02] transition overflow-hidden">
                                     <Image
@@ -140,9 +141,20 @@ export default function MegaMenu({
                     <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 text-sm">
                         {megaData.cols.map((col, colIdx) => (
                             <div key={`${col.h}-${colIdx}`}>
-                                <div className="text-[13px] font-extrabold tracking-wide text-slate-800 dark:text-[var(--text-primary)] uppercase mb-2">
-                                    {col.h}
-                                </div>
+                                {(() => {
+                                    const relatedIcon = megaData.icons.find(
+                                        (icon) => icon.title === col.h
+                                    );
+
+                                    return (
+                                        <Link
+                                            href={relatedIcon?.href || '#'}
+                                            className="text-[13px] font-extrabold tracking-wide text-slate-800 dark:text-[var(--text-primary)] uppercase mb-2 block hover:text-sky-600 dark:hover:text-[#6BAF7B] transition"
+                                        >
+                                            {col.h}
+                                        </Link>
+                                    );
+                                })()}
                                 <ul className="space-y-1.5">
                                     {col.items.map((it, itemIdx) => {
                                         const item =
