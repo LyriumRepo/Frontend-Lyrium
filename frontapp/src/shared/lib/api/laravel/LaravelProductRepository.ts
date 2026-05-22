@@ -74,8 +74,9 @@ export class LaravelProductRepository implements IProductRepository {
             const data = await this.request<any>(`/products/${id}`);
             return {
                 id: data.id?.toString() || id,
+                type: data.type || 'physical',
                 name: data.name || '',
-                category: data.categories?.[0]?.name || 'Sin categoría',
+                category: data.categories?.[0]?.slug || '',
                 price: parseFloat(data.price || '0'),
                 stock: data.stock || 0,
                 weight: data.weight,
@@ -85,6 +86,7 @@ export class LaravelProductRepository implements IProductRepository {
                 sticker: data.sticker || null,
                 mainAttributes: [],
                 additionalAttributes: [],
+                nutritionalAttributes: [],
                 createdAt: data.created_at || new Date().toISOString(),
             };
         } catch {
@@ -96,25 +98,24 @@ export class LaravelProductRepository implements IProductRepository {
         // No enviar imagen si es base64 (muy grande para la DB)
         const image = input.image && !input.image.startsWith('data:') ? input.image : null;
         // Limpiar atributos vacíos
+        const isNotEmpty = (attr: { values: { label?: string; value?: string } }) =>
+            attr.values && (attr.values.label?.trim() || attr.values.value?.trim());
+
+        const trimValues = (attr: { values: { label?: string; value?: string } }) => ({
+            ...attr,
+            values: {
+                label: attr.values.label?.trim() || '',
+                value: attr.values.value?.trim() || '',
+            },
+        });
+
         const cleanMainAttributes = (input.mainAttributes || [])
-            .filter(attr =>
-                attr.values &&
-                attr.values.some(v => v && v.trim() !== '')
-            )
-            .map(attr => ({
-                ...attr,
-                values: attr.values.filter(v => v && v.trim() !== '')
-            }));
+            .filter(isNotEmpty)
+            .map(trimValues);
 
         const cleanAdditionalAttributes = (input.additionalAttributes || [])
-            .filter(attr =>
-                attr.values &&
-                attr.values.some(v => v && v.trim() !== '')
-            )
-            .map(attr => ({
-                ...attr,
-                values: attr.values.filter(v => v && v.trim() !== '')
-            }));
+            .filter(isNotEmpty)
+            .map(trimValues);
         
         return this.request<Product>('/products', {
             method: 'POST',

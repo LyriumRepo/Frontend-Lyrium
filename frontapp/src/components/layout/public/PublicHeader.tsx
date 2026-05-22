@@ -46,7 +46,7 @@ export default function PublicHeader() {
 
                     {/* Search bar - visible on all pages */}
                     <div className="hidden md:block flex-1 max-w-xl">
-                        <SearchBar compact />
+                        <SearchBar />
                     </div>
 
                     <div className="flex items-center gap-4">
