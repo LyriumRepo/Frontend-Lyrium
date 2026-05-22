@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { User } from '@/shared/types/auth';
 import { loginAction, logoutAction, loginWithSocialAction } from '@/shared/lib/actions/auth';
 import { getRoleBasedRoute } from '@/shared/lib/config/auth';
+import { setToken, clearToken } from '@/shared/lib/api/token-store';
 
 interface AuthContextType {
     user: User | null;
@@ -18,7 +19,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const fetchSession = async (): Promise<{ authenticated: boolean; user: User | null }> => {
+const fetchSession = async (): Promise<{ authenticated: boolean; user: User | null; token?: string }> => {
     const response = await fetch('/api/auth/session');
     if (!response.ok) {
         console.log('[Auth] Session fetch failed:', response.status);
@@ -48,6 +49,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (!loading && sessionData) {
             if (sessionData.authenticated && sessionData.user) {
                 console.log('[Auth] Setting user from session:', sessionData.user);
+                if (sessionData.token) {
+                    setToken(sessionData.token);
+                }
                 setUser(sessionData.user);
             } else {
                 console.log('[Auth] Clearing user - not authenticated');
@@ -89,6 +93,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             
             if (result.user && result.token) {
                 console.log('[Auth] Server action set httpOnly cookies, verifying...');
+                setToken(result.token);
                 
                 const targetRoute = getRoleBasedRoute(result.user.role);
                 console.log('[Auth] Redirecting to:', targetRoute);
@@ -112,6 +117,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } catch {
             // Continue even if server action fails
         }
+        clearToken();
         setUser(null);
         window.location.href = '/login';
     };
@@ -125,6 +131,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
 
             if (result.user && result.token) {
+                setToken(result.token);
                 setUser(result.user);
                 const targetRoute = getRoleBasedRoute(result.user.role);
                 window.location.href = targetRoute;

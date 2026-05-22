@@ -1,4 +1,5 @@
 import { LARAVEL_API_URL } from '@/shared/lib/config/flags';
+import { getAuthHeaders } from './token-store';
 import type { ApiResponse } from './base-client';
 
 export type OrderStatus = 'pending_seller' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
@@ -47,12 +48,6 @@ export interface CreateOrderPayload {
   billing_address?: OrderAddress;
   payment_method?: string;
   notes?: string;
-}
-
-async function getAuthHeaders(): Promise<HeadersInit> {
-  if (typeof window === 'undefined') return {};
-  const match = document.cookie.match(/laravel_token=([^;]+)/);
-  return match ? { Authorization: `Bearer ${match[1]}` } : {};
 }
 
 async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {

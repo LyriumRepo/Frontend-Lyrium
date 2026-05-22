@@ -1,3 +1,4 @@
+import { getToken, getTokenAsync } from '@/shared/lib/api/token-store';
 import {
     Ticket,
     CreateTicketPayload,
@@ -78,37 +79,8 @@ async function handleResponse<T>(response: Response): Promise<T> {
 
 const API_BASE = process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://localhost:8000/api';
 
-let cachedToken: string | null = null;
-let tokenExpiry = 0;
-
-function getTokenFromCookies(): string | null {
-    if (typeof document === 'undefined') return null;
-    
-    const cookies = document.cookie.split(';');
-    for (const cookie of cookies) {
-        const [name, value] = cookie.trim().split('=');
-        if (name === 'laravel_token') {
-            return decodeURIComponent(value || '');
-        }
-    }
-    return null;
-}
-
-async function getToken(): Promise<string | null> {
-    const now = Date.now();
-    
-    if (cachedToken && tokenExpiry > now) {
-        return cachedToken;
-    }
-    
-    cachedToken = getTokenFromCookies();
-    tokenExpiry = now + 60000;
-    
-    return cachedToken;
-}
-
 async function getAuthHeaders(contentType?: string): Promise<Record<string, string>> {
-    const token = await getToken();
+    const token = await getTokenAsync();
 
     const headers: Record<string, string> = {};
 

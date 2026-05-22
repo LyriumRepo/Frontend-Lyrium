@@ -1,4 +1,5 @@
 import { LARAVEL_API_URL } from '@/shared/lib/config/flags';
+import { getAuthHeaders } from './token-store';
 import type { ApiResponse } from './base-client';
 
 export interface WishlistProduct {
@@ -28,12 +29,6 @@ export interface CheckResult {
   wishlist_id: number | null;
 }
 
-async function getAuthHeaders(): Promise<HeadersInit> {
-  if (typeof window === 'undefined') return {};
-  const match = document.cookie.match(/laravel_token=([^;]+)/);
-  return match ? { Authorization: `Bearer ${match[1]}` } : {};
-}
-
 async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const headers = await getAuthHeaders();
 
@@ -57,16 +52,19 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 
 export const wishlistApi = {
   list: async (): Promise<WishlistItem[]> => {
-    const response = await request<ApiResponse<WishlistItem[]>>('/wishlist');
-    return response.data ?? [];
+    const response = await request<ApiResponse<{ data: WishlistItem[] }>>('/wishlist');
+    const payload = response.data;
+    return Array.isArray(payload) ? payload : (payload?.data ?? []);
   },
 
   add: async (productId: number): Promise<WishlistItem> => {
-    const response = await request<ApiResponse<WishlistItem>>('/wishlist', {
+    const response = await request<ApiResponse<{ data: WishlistItem }>>('/wishlist', {
       method: 'POST',
       body: JSON.stringify({ product_id: productId }),
     });
-    return response.data!;
+    const payload = response.data;
+    const inner = payload && (payload as any).data;
+    return inner ?? (payload as unknown as WishlistItem);
   },
 
   remove: async (id: number): Promise<void> => {

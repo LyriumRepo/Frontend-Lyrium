@@ -1,3 +1,4 @@
+import { getToken } from '../token-store';
 import { User, UserRole, UserLocation } from '@/lib/types/auth';
 import { IUserRepository, UserFilters, UpdateUserInput } from '../contracts/IUserRepository';
 
@@ -17,26 +18,23 @@ export class LaravelUserRepository implements IUserRepository {
     }
 
     private async getToken(): Promise<string | null> {
-        // Client-side: read from document.cookie
         if (typeof window !== 'undefined') {
-            const match = document.cookie.match(/laravel_token=([^;]+)/);
-            if (match && match[1]) {
-                const rawToken = match[1];
-                const token = rawToken.includes('%') ? decodeURIComponent(rawToken) : rawToken;
+            const token = getToken();
+            if (token) {
                 console.log('[LaravelUserRepository] Token from client:', token.substring(0, 20) + '...');
                 return token;
             }
-            console.log('[LaravelUserRepository] No laravel_token cookie found in client');
+            console.log('[LaravelUserRepository] No laravel_token found in client');
             return null;
         }
         
-        // Server-side: use next/headers
         try {
             const { cookies } = await import('next/headers');
             const cookieStore = await cookies();
             const value = cookieStore.get('laravel_token')?.value ?? null;
             console.log('[LaravelUserRepository] Token from server:', value ? 'found' : 'not found');
-            return value;
+            const token = value ? decodeURIComponent(value) : null;
+            return token;
         } catch (e) {
             console.log('[LaravelUserRepository] Error getting token:', e);
             return null;

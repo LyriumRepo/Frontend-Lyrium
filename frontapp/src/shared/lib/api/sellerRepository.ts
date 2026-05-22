@@ -1,4 +1,5 @@
 import { LARAVEL_API_URL } from '@/shared/lib/config/flags';
+import { getToken } from './token-store';
 import type { ApiResponse } from '@/shared/lib/api/base-client';
 
 export interface SellerProfile {
@@ -157,14 +158,12 @@ export interface UpdateStorePayload {
 
 async function getAuthToken(): Promise<string | null> {
   if (typeof window !== 'undefined') {
-    const match = document.cookie.match(/laravel_token=([^;]+)/);
-    if (match && match[1]) {
-      const rawToken = match[1];
-      const token = rawToken.includes('%') ? decodeURIComponent(rawToken) : rawToken;
+    const token = getToken();
+    if (token) {
       console.log('[sellerApi] Token (client):', token.substring(0, 20) + '...');
       return token;
     }
-    console.log('[sellerApi] No laravel_token cookie found in client');
+    console.log('[sellerApi] No laravel_token found in client');
     return null;
   }
   try {
@@ -172,7 +171,8 @@ async function getAuthToken(): Promise<string | null> {
     const cookieStore = await cookies();
     const value = cookieStore.get('laravel_token')?.value ?? null;
     console.log('[sellerApi] Token from server cookies:', value ? 'found' : 'not found');
-    return value;
+    const token = value ? decodeURIComponent(value) : null;
+    return token;
   } catch {
     return null;
   }

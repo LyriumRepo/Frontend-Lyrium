@@ -22,6 +22,7 @@
  */
 
 import { LARAVEL_API_URL } from '@/shared/lib/config/flags';
+import { getAuthHeaders } from './token-store';
 import type { ApiResponse } from '@/shared/lib/api/base-client';
 
 // ─── Tipos de respuesta del backend ──────────────────────────────────────────
@@ -119,27 +120,6 @@ export interface PaginatedServices {
     per_page: number;
     total: number;
   };
-}
-
-// ─── Helper: Auth headers ─────────────────────────────────────────────────────
-
-async function getAuthHeaders(): Promise<HeadersInit> {
-  const base: Record<string, string> = {
-    'Content-Type': 'application/json',
-    Accept: 'application/json',
-  };
-
-  try {
-    const res = await fetch('/api/auth-token');
-    if (res.ok) {
-      const { token } = await res.json();
-      if (token) base['Authorization'] = `Bearer ${token}`;
-    }
-  } catch {
-    /* sin token — continúa sin auth */
-  }
-
-  return base;
 }
 
 // ─── Request base ─────────────────────────────────────────────────────────────

@@ -1,3 +1,4 @@
+import { getToken } from './token-store';
 import {
   Service,
   Specialist,
@@ -18,21 +19,10 @@ const LARAVEL_API_URL =
   process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://localhost:8000/api';
 
 /**
- * Helper interno para leer cookies desde el cliente (Next.js CSR)
- */
-function getCookie(name: string): string {
-  if (typeof document === 'undefined') return '';
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(';').shift() || '';
-  return '';
-}
-
-/**
  * Genera de forma automatizada las cabeceras comunes inyectando el Laravel Token de sesión
  */
 function getHeaders(): Record<string, string> {
-  const token = getCookie('laravel_token');
+  const token = getToken();
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     Accept: 'application/json',

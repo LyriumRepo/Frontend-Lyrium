@@ -3,17 +3,15 @@
 // Uses Laravel API URL
 // ============================================
 
+import { getToken } from '@/shared/lib/api/token-store';
+
 const LARAVEL_API_URL = process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://localhost:8000/api';
 const API_BASE = LARAVEL_API_URL;
 
-// Lee el token Laravel de la cookie (cuando exista)
-// Con PHP no hay token, retorna null y no afecta nada
 function getAuthHeaders(): Record<string, string> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-  if (typeof document !== 'undefined') {
-    const token = document.cookie.match(/(?:^|;\s*)laravel_token=([^;]+)/)?.[1];
-    if (token) headers['Authorization'] = `Bearer ${decodeURIComponent(token)}`;
-  }
+  const token = getToken();
+  if (token) headers['Authorization'] = `Bearer ${token}`;
   return headers;
 }
 

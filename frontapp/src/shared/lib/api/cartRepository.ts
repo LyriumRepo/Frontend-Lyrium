@@ -5,6 +5,7 @@
  */
 
 import { LARAVEL_API_URL } from '@/shared/lib/config/flags';
+import { getToken } from './token-store';
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -52,19 +53,8 @@ function getSessionId(): string {
   return sid;
 }
 
-async function getAuthToken(): Promise<string | null> {
-  try {
-    const res = await fetch('/api/auth-token');
-    if (!res.ok) return null;
-    const { token } = await res.json();
-    return token ?? null;
-  } catch {
-    return null;
-  }
-}
-
 async function buildHeaders(): Promise<HeadersInit> {
-  const token = await getAuthToken();
+  const token = getToken();
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     Accept: 'application/json',
