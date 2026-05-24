@@ -5,9 +5,8 @@ import BaseButton from '@/components/ui/BaseButton';
 import Icon from '@/components/ui/Icon';
 import {
   Specialist,
-  DocumentType,
   AvailabilityStatus,
-  DOCUMENT_TYPE_LABELS,
+  SPECIALIST_CATEGORIES,
 } from '@/features/seller/services/types';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -21,13 +20,6 @@ interface SpecialistModalProps {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const DOCUMENT_TYPES = Object.entries(DOCUMENT_TYPE_LABELS) as [DocumentType, string][];
-
-/**
- * Solo Disponible e Indispuesto son editables manualmente.
- * "Ocupado" se asigna automáticamente cuando el especialista
- * está asignado a al menos un servicio.
- */
 const AVAILABILITY_OPTIONS: {
   value: Exclude<AvailabilityStatus, 'Ocupado'>;
   label: string;
@@ -43,17 +35,26 @@ const AVAILABILITY_OPTIONS: {
   {
     value: 'Indispuesto',
     label: 'Indispuesto',
-    activeClass: 'bg-rose-500/15 border-rose-500/50 text-rose-500',
-    dotClass: 'bg-rose-500',
+    activeClass: 'bg-gray-500/15 border-gray-500/50 text-gray-500 dark:bg-gray-300/15 dark:border-gray-300/50 dark:text-gray-300',
+    dotClass: 'bg-gray-500 dark:bg-gray-300',
   },
+];
+
+const EXPERIENCIA_OPTIONS = [
+  ...Array.from({ length: 29 }, (_, i) => ({ value: i + 1, label: `${i + 1} año${i + 1 !== 1 ? 's' : ''}` })),
+  { value: 30, label: '30+ años' },
 ];
 
 const DEFAULT_FORM: Omit<Specialist, 'id'> = {
   nombres: '',
   apellidos: '',
-  tipoDocumento: 'dni',
-  numeroDocumento: '',
+  dni: '',
+  email: '',
   especialidad: '',
+  subEspecialidad: '',
+  aniosExperiencia: undefined,
+  categoria: '',
+  numeroColegiatura: '',
   foto: undefined,
   availability: 'Disponible',
 };
@@ -78,21 +79,14 @@ const SvgXTiny = () => (
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const getDocumentMaxLength = (type: DocumentType): number => {
-  switch (type) {
-    case 'dni':                return 8;
-    case 'ruc':                return 11;
-    case 'carnet_extranjeria': return 12;
-    case 'pasaporte':          return 12;
-  }
-};
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const inputCls = (hasError: boolean) =>
   `w-full bg-[var(--bg-secondary)] border rounded-xl px-3 py-2.5 text-sm
    text-[var(--text-primary)] focus:outline-none transition-colors
    ${hasError
      ? 'border-rose-500/50 focus:border-rose-500'
-     : 'border-[var(--border-subtle)] focus:border-indigo-500/50'
+     : 'border-[var(--border-subtle)] focus:border-sky-500/50 dark:focus:border-[#8FC3A1]/50'
    }`;
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -112,15 +106,17 @@ export default function SpecialistModal({
     if (!isOpen) return;
     if (specialist) {
       setForm({
-        nombres:         specialist.nombres,
-        apellidos:       specialist.apellidos,
-        tipoDocumento:   specialist.tipoDocumento,
-        numeroDocumento: specialist.numeroDocumento,
-        especialidad:    specialist.especialidad,
-        foto:            specialist.foto,
-        // Si llega como "Ocupado" (asignado automáticamente),
-        // lo mostramos como Disponible en el form — el seller no lo edita.
-        availability: specialist.availability === 'Ocupado' ? 'Disponible' : specialist.availability,
+        nombres:          specialist.nombres,
+        apellidos:        specialist.apellidos,
+        dni:              specialist.dni,
+        email:            specialist.email,
+        especialidad:     specialist.especialidad,
+        subEspecialidad:  specialist.subEspecialidad ?? '',
+        aniosExperiencia: specialist.aniosExperiencia,
+        categoria:        specialist.categoria,
+        numeroColegiatura: specialist.numeroColegiatura ?? '',
+        foto:             specialist.foto,
+        availability:     specialist.availability === 'Ocupado' ? 'Disponible' : specialist.availability,
       });
       setFotoPreview(specialist.foto ?? null);
     } else {
@@ -159,11 +155,16 @@ export default function SpecialistModal({
     if (!form.nombres.trim())      e.nombres = 'Requerido';
     if (!form.apellidos.trim())    e.apellidos = 'Requerido';
     if (!form.especialidad.trim()) e.especialidad = 'Requerido';
-    const maxLen = getDocumentMaxLength(form.tipoDocumento);
-    if (!form.numeroDocumento.trim()) {
-      e.numeroDocumento = 'Requerido';
-    } else if (form.numeroDocumento.length !== maxLen) {
-      e.numeroDocumento = `Debe tener ${maxLen} caracteres`;
+    if (!form.categoria)           e.categoria = 'Requerido';
+    if (!form.dni.trim()) {
+      e.dni = 'Requerido';
+    } else if (form.dni.length !== 8) {
+      e.dni = 'Debe tener 8 dígitos';
+    }
+    if (!form.email.trim()) {
+      e.email = 'Requerido';
+    } else if (!EMAIL_REGEX.test(form.email)) {
+      e.email = 'Email inválido';
     }
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -178,7 +179,6 @@ export default function SpecialistModal({
 
   if (!isOpen) return null;
 
-  const maxLen = getDocumentMaxLength(form.tipoDocumento);
   const isOccupied = specialist?.availability === 'Ocupado';
 
   return (
@@ -190,7 +190,7 @@ export default function SpecialistModal({
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-[var(--border-subtle)]">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-indigo-500/10 rounded-2xl flex items-center justify-center border border-indigo-500/20 text-indigo-500">
+            <div className="w-10 h-10 bg-sky-500/10 dark:bg-[#8FC3A1]/10 rounded-2xl flex items-center justify-center border border-sky-500/20 text-sky-500 dark:border-[#8FC3A1]/20 dark:text-[#8FC3A1]">
               <Icon name="Users" className="w-5 h-5 stroke-[2.5px]" />
             </div>
             <div>
@@ -214,8 +214,10 @@ export default function SpecialistModal({
           {/* Foto */}
           <div className="flex flex-col items-center gap-2">
             <div className="relative group">
-              <div onClick={() => fileInputRef.current?.click()}
-                className="w-20 h-20 rounded-full bg-[var(--bg-secondary)] border-2 border-dashed border-[var(--border-subtle)] hover:border-indigo-500/50 transition-all cursor-pointer overflow-hidden flex items-center justify-center shadow-sm text-[var(--text-secondary)]">
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                className="w-20 h-20 rounded-full bg-[var(--bg-secondary)] border-2 border-dashed border-[var(--border-subtle)] hover:border-sky-500/50 dark:hover:border-[#8FC3A1]/50 transition-all cursor-pointer overflow-hidden flex items-center justify-center shadow-sm text-[var(--text-secondary)]"
+              >
                 {fotoPreview
                   ? <img src={fotoPreview} alt="Foto" className="w-full h-full object-cover" />
                   : <SvgUserSilhouette />
@@ -237,43 +239,100 @@ export default function SpecialistModal({
           {/* Nombres / Apellidos */}
           <div className="grid grid-cols-2 gap-3">
             <Field label="Nombres" error={errors.nombres}>
-              <input type="text" value={form.nombres} placeholder="Juan"
+              <input type="text" value={form.nombres} placeholder="....."
                 onChange={(e) => set('nombres', e.target.value)}
                 className={inputCls(!!errors.nombres)} />
             </Field>
             <Field label="Apellidos" error={errors.apellidos}>
-              <input type="text" value={form.apellidos} placeholder="Pérez"
+              <input type="text" value={form.apellidos} placeholder="....."
                 onChange={(e) => set('apellidos', e.target.value)}
                 className={inputCls(!!errors.apellidos)} />
             </Field>
           </div>
 
-          {/* Tipo / N° documento */}
+          {/* DNI / Email */}
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Tipo de documento">
-              <select value={form.tipoDocumento}
-                onChange={(e) => { set('tipoDocumento', e.target.value as DocumentType); set('numeroDocumento', ''); }}
-                className={inputCls(false)}>
-                {DOCUMENT_TYPES.map(([val, label]) => (
-                  <option key={val} value={val}>{label}</option>
-                ))}
-              </select>
+            <Field label="DNI · 8 dígitos" error={errors.dni}>
+              <input
+                type="text"
+                value={form.dni}
+                placeholder="....."
+                maxLength={8}
+                onChange={(e) => set('dni', e.target.value.replace(/\D/g, ''))}
+                className={inputCls(!!errors.dni)}
+              />
             </Field>
-            <Field label={`N° Documento (${maxLen} díg.)`} error={errors.numeroDocumento}>
-              <input type="text" value={form.numeroDocumento} maxLength={maxLen}
-                placeholder={'0'.repeat(maxLen)}
-                onChange={(e) => set('numeroDocumento', e.target.value.replace(/\D/g, ''))}
-                className={inputCls(!!errors.numeroDocumento)} />
+            <Field label="Email" error={errors.email}>
+              <input
+                type="email"
+                value={form.email}
+                placeholder="....."
+                onChange={(e) => set('email', e.target.value)}
+                className={inputCls(!!errors.email)}
+              />
             </Field>
           </div>
 
-          {/* Especialidad */}
-          <Field label="Especialidad" error={errors.especialidad}>
-            <input type="text" value={form.especialidad}
-              placeholder="ej. Nutricionista, Psicólogo, Fisioterapeuta..."
-              onChange={(e) => set('especialidad', e.target.value)}
-              className={inputCls(!!errors.especialidad)} />
+          {/* Especialidad / Sub-especialidad */}
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Especialidad" error={errors.especialidad}>
+              <input
+                type="text"
+                value={form.especialidad}
+                placeholder="....."
+                onChange={(e) => set('especialidad', e.target.value)}
+                className={inputCls(!!errors.especialidad)}
+              />
+            </Field>
+            <Field label="Sub-especialidad (opci..)">
+              <input
+                type="text"
+                value={form.subEspecialidad ?? ''}
+                placeholder="....."
+                onChange={(e) => set('subEspecialidad', e.target.value)}
+                className={inputCls(false)}
+              />
+            </Field>
+          </div>
+
+          {/* Categoría */}
+            <Field label="Categoría" error={errors.categoria}>
+              <select
+                value={form.categoria}
+                onChange={(e) => set('categoria', e.target.value)}
+                className={inputCls(!!errors.categoria)}
+              >
+                <option value="">Seleccionar</option>
+                {SPECIALIST_CATEGORIES.map((cat) => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
+            </Field>
+
+          {/* N° Colegiatura / Años de experiencia */}
+          <div className="grid grid-cols-2 gap-3">
+          <Field label="N° Colegiatura (opcional)">
+            <input
+              type="text"
+              value={form.numeroColegiatura ?? ''}
+              placeholder="....."
+              onChange={(e) => set('numeroColegiatura', e.target.value)}
+              className={inputCls(false)}
+            />
           </Field>
+            <Field label="Años de experiencia (opci..)">
+              <select
+                value={form.aniosExperiencia ?? ''}
+                onChange={(e) => set('aniosExperiencia', e.target.value ? Number(e.target.value) : undefined)}
+                className={inputCls(false)}
+              >
+                <option value="">—</option>
+                {EXPERIENCIA_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </Field>
+            </div>
 
           {/* Disponibilidad */}
           <div className="space-y-2">
@@ -281,18 +340,16 @@ export default function SpecialistModal({
               Estado de disponibilidad
             </p>
 
-            {/* Banner informativo si está ocupado */}
             {isOccupied && (
-              <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-amber-500/10 border border-amber-500/20">
-                <span className="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0" />
-                <p className="text-[10px] font-bold text-amber-500">
+              <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-sky-500/10 dark:bg-[#8FC3A1]/10 border border-sky-500/20 dark:border-[#8FC3A1]/20">
+                <span className="w-2 h-2 rounded-full bg-sky-500 dark:bg-[#8FC3A1] flex-shrink-0" />
+                <p className="text-[10px] font-bold text-sky-500 dark:text-[#8FC3A1]">
                   Este especialista está <strong>Ocupado</strong> porque fue asignado a un servicio.
                   Su estado volverá a Disponible si lo desasignas de todos los servicios.
                 </p>
               </div>
             )}
 
-            {/* Solo 2 opciones editables: Disponible e Indispuesto */}
             <div className="flex gap-2">
               {AVAILABILITY_OPTIONS.map((opt) => {
                 const active = form.availability === opt.value;
@@ -306,18 +363,15 @@ export default function SpecialistModal({
                         ? 'opacity-40 cursor-not-allowed bg-[var(--bg-secondary)] border-[var(--border-subtle)] text-[var(--text-secondary)]'
                         : active
                           ? opt.activeClass
-                          : 'bg-[var(--bg-secondary)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-indigo-500/20'
+                          : 'bg-[var(--bg-secondary)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-sky-500/20 dark:hover:border-[#8FC3A1]/20'
                       }`}>
                     <span className={`w-2 h-2 rounded-full mb-1.5 ${active && !isOccupied ? opt.dotClass : 'bg-[var(--text-secondary)]/30'}`} />
                     {opt.label}
-                    <span className="text-[8px] font-bold normal-case tracking-normal mt-0.5 opacity-60">
-                    </span>
                   </button>
                 );
               })}
             </div>
 
-            {/* Nota aclaratoria */}
             <p className="text-[9px] text-[var(--text-secondary)] px-1">
               El estado <strong>Ocupado</strong> se asigna automáticamente al agregar el especialista a un servicio.
             </p>

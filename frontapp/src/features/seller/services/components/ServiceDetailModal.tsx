@@ -1,4 +1,7 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
+import ServiceCalendar from './ServiceCalendar';
 import Image from 'next/image';
 import {
     Service,
@@ -6,23 +9,38 @@ import {
     Appointment,
     WEEK_DAY_SHORT,
     countTotalSessions,
+    calculateSessions,
 } from '@/features/seller/services/types';
 import BaseDrawer from '@/components/ui/BaseDrawer';
 import Icon from '@/components/ui/Icon';
 import BaseButton from '@/components/ui/BaseButton';
 
+type Client = {
+    id: number;
+    nombres: string;
+    apellidos: string;
+    dni: string;
+    telefono?: string;
+    email?: string;
+    direccion?: string;
+};
+
+type AppointmentWithClient = Appointment & {
+    clientId?: number;
+};
+
 interface ServiceDetailModalProps {
     service: Service | null;
     specialists: Specialist[];
-    appointments: Appointment[];
+    clients: Client[];
+    appointments: AppointmentWithClient[];
     isOpen: boolean;
     onClose: () => void;
     onEdit: (service: Service) => void;
-    onReschedule: (appointment: Appointment) => void;
+    onReschedule: (appointment: AppointmentWithClient) => void;
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
-
 function getAvatarChars(sp: Specialist): string {
     return (
         (sp.nombres?.charAt(0)?.toUpperCase() ?? '') +
@@ -30,7 +48,6 @@ function getAvatarChars(sp: Specialist): string {
     );
 }
 
-/** "Lun, Mié, Vie · 12 sesiones · 30 min" */
 function buildScheduleSubtitle(service: Service): string {
     if (!service.diasAtencion || service.diasAtencion.length === 0) return 'Sin horario configurado';
     const days = service.diasAtencion.map((d) => WEEK_DAY_SHORT[d.dia]).join(', ');
@@ -46,29 +63,19 @@ function isServiceActive(service: Service): boolean {
     return service.diasAtencion.length > 0 && service.especialistasAsignados.length > 0;
 }
 
-const ESTADO_COLORS: Record<Appointment['estado'], string> = {
-    confirmada: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
-    pendiente:  'bg-amber-500/10  text-amber-500  border-amber-500/20',
-    cancelada:  'bg-rose-500/10   text-rose-500   border-rose-500/20',
-};
-
-const ESTADO_LABELS: Record<Appointment['estado'], string> = {
-    confirmada: 'Confirmada',
-    pendiente:  'Pendiente',
-    cancelada:  'Cancelada',
-};
-
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export default function ServiceDetailModal({
     service,
     specialists,
+    clients,
     appointments,
     isOpen,
     onClose,
     onEdit,
     onReschedule,
 }: ServiceDetailModalProps) {
+    const [isCalendarOpen, setIsCalendarOpen] = useState(false);
     if (!service) return null;
 
     // Especialistas asignados resueltos
@@ -169,92 +176,66 @@ export default function ServiceDetailModal({
                     </div>
                 </div>
 
-                {/* ── Citas del servicio ── */}
-                <div className="space-y-6">
+                {/* ── Disponibilidad compacta ── */}
+                <div className="space-y-4">
                     <div className="flex items-center justify-between px-1">
                         <h3 className="text-xs font-black text-[var(--text-primary)] uppercase tracking-widest flex items-center gap-2">
                             <div className="w-1.5 h-4 bg-sky-500 rounded-full" />
-                            Hoja de Ruta (Hoy)
+                            Disponibilidad
                         </h3>
-                        <span className="text-[9px] font-black text-[var(--text-secondary)] bg-[var(--bg-secondary)] px-3 py-1 rounded-full">
-                            {serviceAppointments.length} Cita{serviceAppointments.length !== 1 ? 's' : ''}
-                        </span>
+                        <button
+                            onClick={() => setIsCalendarOpen(true)}
+                            className="flex items-center gap-1.5 text-[9px] font-black text-sky-500 uppercase tracking-widest hover:opacity-70 transition-all"
+                        >
+                            <Icon name="CalendarDays" className="w-3.5 h-3.5" />
+                            Ver calendario completo
+                        </button>
                     </div>
 
-                    <div className="space-y-4">
-                        {serviceAppointments.length > 0 ? (
-                            serviceAppointments.map((appointment, idx) => {
-                                const esp = specialists.find((e) => e.id === appointment.specialistId);
+                    <div className="space-y-2">
+                        {service.diasAtencion.length === 0 ? (
+                            <div className="py-8 text-center text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest bg-[var(--bg-secondary)]/30 rounded-[1.5rem] border border-dashed border-[var(--border-subtle)]">
+                                Sin días configurados
+                            </div>
+                        ) : (
+                            service.diasAtencion.map((dayObj) => {
+                                const totalSes = dayObj.bloques.reduce(
+                                    (t, b) => t + calculateSessions(b, service.duracion).length, 0
+                                );
                                 return (
-                                    <div key={appointment.id} className="relative pl-8 group">
-                                        {/* Línea del timeline */}
-                                        {idx !== serviceAppointments.length - 1 && (
-                                            <div className="absolute left-[11px] top-8 bottom-[-24px] w-0.5 bg-gradient-to-b from-[var(--border-subtle)] to-transparent" />
-                                        )}
-                                        {/* Punto del timeline */}
-                                        <div className="absolute left-0 top-6 w-6 h-6 bg-[var(--bg-card)] border-2 border-sky-400 rounded-full flex items-center justify-center z-10 shadow-sm group-hover:scale-125 transition-transform">
-                                            <div className="w-1.5 h-1.5 bg-sky-500 rounded-full animate-pulse" />
+                                    <div
+                                        key={dayObj.dia}
+                                        className="flex items-center justify-between px-5 py-3.5 bg-[var(--bg-secondary)]/50 rounded-2xl border border-[var(--border-subtle)]"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-sky-500" />
+                                            <span className="text-xs font-black text-[var(--text-primary)] uppercase tracking-widest">
+                                                {dayObj.dia}
+                                            </span>
                                         </div>
-
-                                        <div className="p-6 bg-[var(--bg-card)] rounded-[2.5rem] border border-[var(--border-subtle)] flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 transition-all hover:shadow-2xl hover:shadow-black/5 hover:border-sky-500/20">
-                                            <div className="flex items-center gap-5">
-                                                {/* Avatar especialista */}
-                                                <div className="relative w-12 h-12 rounded-2xl bg-sky-500/10 flex items-center justify-center text-xs font-black text-sky-500 border border-sky-500/20 overflow-hidden flex-shrink-0">
-                                                    {esp?.foto
-                                                        ? <Image src={esp.foto} fill sizes="48px" className="object-cover" alt="" />
-                                                        : <span>{esp ? getAvatarChars(esp) : '??'}</span>
-                                                    }
-                                                </div>
-                                                <div>
-                                                    {/* Fecha + sesión */}
-                                                    <p className="text-base font-black text-[var(--text-primary)] tracking-tight leading-tight">
-                                                        {appointment.fecha}
-                                                    </p>
-                                                    <div className="flex items-center gap-3 mt-1.5 flex-wrap">
-                                                        <span className="text-[11px] font-black text-sky-500 font-mono bg-sky-500/10 px-2 py-0.5 rounded-lg border border-sky-500/20 uppercase">
-                                                            {appointment.sesion.inicio} – {appointment.sesion.fin}
-                                                        </span>
-                                                        <span className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest">
-                                                            · {esp ? `${esp.nombres} ${esp.apellidos}` : 'Personal no asignado'}
-                                                        </span>
-                                                        <span className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest">
-                                                            · {appointment.cuposOcupados} cupo{appointment.cuposOcupados !== 1 ? 's' : ''}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div className="flex items-center gap-3 border-t sm:border-t-0 pt-4 sm:pt-0">
-                                                <button
-                                                    onClick={() => onReschedule(appointment)}
-                                                    className="px-6 py-3 bg-[var(--bg-secondary)] text-[var(--text-secondary)] rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-sky-500/10 hover:text-sky-500 transition-all active:scale-95 border border-transparent hover:border-sky-500/20"
-                                                >
-                                                    Reprogramar
-                                                </button>
-                                                <div className={`px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest border shadow-sm ${ESTADO_COLORS[appointment.estado]}`}>
-                                                    {ESTADO_LABELS[appointment.estado]}
-                                                </div>
-                                            </div>
+                                        <div className="flex items-center gap-3">
+                                            <span className="text-[9px] font-bold text-[var(--text-secondary)] uppercase tracking-widest">
+                                                {dayObj.bloques.length} bloque{dayObj.bloques.length !== 1 ? 's' : ''}
+                                            </span>
+                                            <span className="text-[9px] font-black text-sky-500 bg-sky-500/10 border border-sky-500/20 px-2 py-0.5 rounded-lg">
+                                                {totalSes} ses.
+                                            </span>
                                         </div>
                                     </div>
                                 );
                             })
-                        ) : (
-                            <div className="py-20 flex flex-col items-center justify-center text-center gap-4 bg-[var(--bg-secondary)]/30 rounded-[3rem] border-2 border-dashed border-[var(--border-subtle)]">
-                                <div className="w-16 h-16 bg-[var(--bg-card)] rounded-[2rem] flex items-center justify-center shadow-xl shadow-black/5 border border-[var(--border-subtle)]">
-                                    <Icon name="CalendarX" className="w-8 h-8 text-[var(--text-secondary)]" />
-                                </div>
-                                <div>
-                                    <p className="text-[11px] font-black text-[var(--text-secondary)] uppercase tracking-[0.2em] mb-1">
-                                        Sin Actividad Programada
-                                    </p>
-                                    <p className="text-[9px] font-bold text-[var(--text-secondary)] uppercase italic">
-                                        Tu agenda está despejada por ahora
-                                    </p>
-                                </div>
-                            </div>
                         )}
                     </div>
+
+                    <ServiceCalendar
+                        isOpen={isCalendarOpen}
+                        service={service}
+                        specialists={specialists}
+                        clients={clients}
+                        appointments={appointments}
+                        onClose={() => setIsCalendarOpen(false)}
+                        onReschedule={onReschedule}
+                    />
                 </div>
 
                 {/* ── Configuración maestra ── */}

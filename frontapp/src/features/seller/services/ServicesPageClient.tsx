@@ -17,12 +17,17 @@ import BaseLoading from '@/components/ui/BaseLoading';
 import Icon from '@/components/ui/Icon';
 import { useConfirmDialog } from '@/components/ui/confirm-dialog';
 
+type AppointmentWithClient = Appointment & {
+    clientId?: number;
+};;
+
 interface ServicesPageClientProps {
-    // TODO Tarea 3: Recibir datos iniciales del Server Component
+    
 }
 
 export function ServicesPageClient(_props: ServicesPageClientProps) {
     const {
+        clients,
         specialists,
         services,
         appointments,
@@ -38,7 +43,7 @@ export function ServicesPageClient(_props: ServicesPageClientProps) {
 
     const [activeService, setActiveService] = useState<Service | null>(null);
     const [selectedSpecialist, setSelectedSpecialist] = useState<Specialist | null>(null);
-    const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+    const [selectedAppointment, setSelectedAppointment] = useState<AppointmentWithClient | null>(null);
 
     const [modals, setModals] = useState({
         serviceConfig: false,
@@ -55,7 +60,7 @@ export function ServicesPageClient(_props: ServicesPageClientProps) {
         const futureServices: Service[] = serviceData.id
             ? services.map((s) =>
                 s.id === serviceData.id ? { ...s, ...serviceData, id: serviceData.id } : s,
-              )
+            )
             : [...services, { ...serviceData, id: -1 }]; // id temporal solo para el cálculo
 
         specialists.forEach((sp) => {
@@ -71,7 +76,6 @@ export function ServicesPageClient(_props: ServicesPageClientProps) {
             }
         });
     };
-
 
     const deleteService = async (id: number) => {
         const confirmed = await confirm(
@@ -168,8 +172,8 @@ export function ServicesPageClient(_props: ServicesPageClientProps) {
                                 <span className="w-2.5 h-2.5 bg-sky-500 dark:bg-[#8FC3A1] rounded-full animate-pulse shadow-sm shadow-sky-500 dark:shadow-[#8FC3A1]" />
                                 Publicado
                             </span>
-                            <span className="flex items-center gap-2 text-[10px] font-black text-gray-300 uppercase tracking-widest bg-gray-300/10 px-3 py-1.5 rounded-lg border border-gray-300/20">
-                                <span className="w-2.5 h-2.5 bg-gray-300 rounded-full" />
+                            <span className="flex items-center gap-2 text-[10px] font-black text-gray-500 dark:text-gray-300 uppercase tracking-widest bg-gray-400/10 dark:bg-gray-300/10 px-3 py-1.5 rounded-lg border border-gray-500/20 dark:border-gray-300/20">
+                                <span className="w-2.5 h-2.5 bg-gray-500 dark:bg-gray-300 rounded-full" />
                                 Borrador
                             </span>
                         </div>
@@ -269,6 +273,7 @@ export function ServicesPageClient(_props: ServicesPageClientProps) {
                 isOpen={modals.detail}
                 service={activeService}
                 specialists={specialists}
+                clients={clients}
                 appointments={appointments}
                 onClose={() => setModals({ ...modals, detail: false })}
                 onEdit={(serv) => {
@@ -284,6 +289,9 @@ export function ServicesPageClient(_props: ServicesPageClientProps) {
             <RescheduleModal
                 isOpen={modals.reschedule}
                 appointment={selectedAppointment}
+                service={activeService!}
+                appointments={appointments}
+                clients={clients}
                 onClose={() => setModals({ ...modals, reschedule: false, detail: true })}
                 onConfirm={handleReschedule}
             />

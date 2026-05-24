@@ -113,7 +113,7 @@ export default function ServiceCard({
                     <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
                         <button
                             onClick={(e) => { e.stopPropagation(); onEdit(service); }}
-                            className="w-8 h-8 flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-sky-500/10 hover:text-sky-500 rounded-lg transition-colors border border-[var(--border-subtle)]"
+                            className="w-8 h-8 flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-sky-500/10 hover:text-sky-500 dark:hover:bg-[#8FC3A1]/10 dark:hover:text-[#8FC3A1] rounded-lg transition-colors border border-[var(--border-subtle)]"
                             title="Editar"
                         >
                             <Icon name="Pencil" className="w-4 h-4" />
@@ -189,10 +189,10 @@ export default function ServiceCard({
                             flex items-center justify-center gap-2 transition-all
                             ${isPublished
                                 /* Publicado → botón para despublicar */
-                                ? 'bg-sky-500/10 dark:bg-[#8FC3A1]/10 border-sky-500/30 dark:border-[#8FC3A1]/30 text-sky-500 dark:text-[#8FC3A1] hover:bg-gray-500/10 dark:hover:bg-gray-300/10 hover:border-gray-500/30 dark:hover:border-gray-300/30 hover:text-gray-300 dark:hover:text-gray-300'
+                                ? 'bg-sky-500/10 dark:bg-[#8FC3A1]/10 border-sky-500/30 dark:border-[#8FC3A1]/30 text-sky-500 dark:text-[#8FC3A1] hover:bg-gray-500/10 dark:hover:bg-gray-300/10 hover:border-gray-500/30 dark:hover:border-gray-300/30 hover:text-gray-500 dark:hover:text-gray-300'
                                 : publishable
                                 /* Borrador + tiene especialista → puede publicar */
-                                ? 'bg-gray-300/10 border-gray-300/30 text-gray-300 hover:bg-sky-500/10 dark:hover:bg-[#8FC3A1]/10 hover:border-sky-500/30 dark:hover:border-[#8FC3A1]/30 hover:text-sky-500 dark:hover:text-[#8FC3A1]'
+                                ? 'bg-gray-400/10 dark:bg-gray-300/10 border-gray-500/30 dark:border-gray-300/30 text-gray-500 dark:text-gray-300 hover:bg-sky-500/10 dark:hover:bg-[#8FC3A1]/10 hover:border-sky-500/30 dark:hover:border-[#8FC3A1]/30 hover:text-sky-500 dark:hover:text-[#8FC3A1]'
                                 /* Borrador sin especialista → deshabilitado */
                                 : 'bg-[var(--bg-secondary)] border-[var(--border-subtle)] text-[var(--text-secondary)] opacity-50 cursor-not-allowed'
                             }

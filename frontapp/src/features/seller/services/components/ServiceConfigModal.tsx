@@ -24,7 +24,14 @@ interface ServiceConfigModalProps {
   onSave: (data: Omit<Service, 'id'> & { id?: number }) => void;
 }
 
-type FormData = Omit<Service, 'id'>;
+/** Bloques (por índice) que un especialista cubre en un día concreto */
+type SpecialistDayEntry = { dia: WeekDay; bloques: number[] };
+/** Asignación de un especialista: qué días y qué bloques dentro de cada día */
+type SpecialistAssignment = { id: number; dias: SpecialistDayEntry[] };
+
+type FormData = Omit<Service, 'id' | 'especialistasAsignados'> & {
+  especialistasAsignados: SpecialistAssignment[];
+};
 
 const CATEGORIES = [
   'Salud y bienestar', 'Nutrición', 'Psicología', 'Fisioterapia',
@@ -39,7 +46,7 @@ const DEFAULT_FORM: FormData = {
   categoria: '',
   duracion: 30,
   diasAtencion: [],
-  especialistasAsignados: [],
+  especialistasAsignados: [] as SpecialistAssignment[],
   cupos: 1,
   precio: 0,
   estado: 'borrador',
@@ -103,7 +110,7 @@ const inputCls = (hasError: boolean) =>
    text-[var(--text-primary)] focus:outline-none transition-colors
    ${hasError
      ? 'border-rose-500/50 focus:border-rose-500'
-     : 'border-[var(--border-subtle)] focus:border-sky-500/50'
+     : 'border-[var(--border-subtle)] focus:border-sky-500/50 dark:focus:border-[#8FC3A1]/70'
    }`;
 
 function DurationPicker({
@@ -118,13 +125,11 @@ function DurationPicker({
   const [hStr, setHStr] = useState(String(Math.floor(value / 60)));
   const [mStr, setMStr] = useState(String(value % 60));
 
-  // Keep display in sync when value changes from outside (± buttons, form reset).
   const computedH = Math.floor(value / 60);
   const computedM = value % 60;
   useEffect(() => { setHStr(String(computedH)); }, [computedH]);
   useEffect(() => { setMStr(String(computedM)); }, [computedM]);
 
-  /** Push a validated total to the parent. */
   const commit = (h: string | number, m: string | number) => {
     const hours = Math.max(0, Number(h) || 0);
     const mins  = Math.max(0, Math.min(59, Number(m) || 0));
@@ -270,8 +275,6 @@ function DurationPicker({
   );
 }
 
-// ─── Component ────────────────────────────────────────────────────────────────
-
 export default function ServiceConfigModal({
   isOpen, service, specialists, onClose, onSave,
 }: ServiceConfigModalProps) {
@@ -295,7 +298,14 @@ export default function ServiceConfigModal({
         categoria:              service.categoria,
         duracion:               service.duracion,
         diasAtencion:           service.diasAtencion,
-        especialistasAsignados: service.especialistasAsignados,
+        // Migrar number[] → SpecialistAssignment[] pre-asignando todos los días y bloques del servicio
+        especialistasAsignados: service.especialistasAsignados.map((id) => ({
+          id,
+          dias: service.diasAtencion.map((d) => ({
+            dia: d.dia,
+            bloques: d.bloques.map((_, i) => i),
+          })),
+        })),
         cupos:                  service.cupos,
         precio:                 service.precio,
         estado:                 service.estado,
@@ -316,11 +326,19 @@ export default function ServiceConfigModal({
     setErrors((p) => ({ ...p, [key]: undefined }));
   }, []);
 
-  // ── Gestión de días ───────────────────────────────────────────────────────
   const toggleDay = (day: WeekDay) => {
     const exists = form.diasAtencion.find((d) => d.dia === day);
     if (exists) {
-      set('diasAtencion', form.diasAtencion.filter((d) => d.dia !== day));
+      // Al quitar el día, eliminarlo también de las asignaciones de especialistas
+      setForm((p) => ({
+        ...p,
+        diasAtencion: p.diasAtencion.filter((d) => d.dia !== day),
+        especialistasAsignados: p.especialistasAsignados.map((a) => ({
+          ...a,
+          dias: a.dias.filter((d) => d.dia !== day),
+        })),
+      }));
+      setErrors((p) => ({ ...p, diasAtencion: undefined }));
     } else {
       const updated = [
         ...form.diasAtencion,
@@ -334,9 +352,26 @@ export default function ServiceConfigModal({
     set('diasAtencion', form.diasAtencion.map((d) =>
       d.dia === day ? { ...d, bloques: [...d.bloques, { ...EMPTY_BLOCK }] } : d));
 
-  const removeBlock = (day: WeekDay, bi: number) =>
-    set('diasAtencion', form.diasAtencion.map((d) =>
-      d.dia === day ? { ...d, bloques: d.bloques.filter((_, i) => i !== bi) } : d));
+  const removeBlock = (day: WeekDay, bi: number) => {
+    // Eliminar el bloque del día y reajustar índices en asignaciones de especialistas
+    setForm((p) => ({
+      ...p,
+      diasAtencion: p.diasAtencion.map((d) =>
+        d.dia === day ? { ...d, bloques: d.bloques.filter((_, i) => i !== bi) } : d),
+      especialistasAsignados: p.especialistasAsignados.map((a) => ({
+        ...a,
+        dias: a.dias.map((de) => {
+          if (de.dia !== day) return de;
+          return {
+            ...de,
+            bloques: de.bloques
+              .filter((b) => b !== bi)          // quitar el índice eliminado
+              .map((b) => (b > bi ? b - 1 : b)), // reajustar índices superiores
+          };
+        }),
+      })),
+    }));
+  };
 
   const updateBlock = (day: WeekDay, bi: number, field: keyof TimeBlock, val: string) =>
     set('diasAtencion', form.diasAtencion.map((d) =>
@@ -344,17 +379,64 @@ export default function ServiceConfigModal({
         ? { ...d, bloques: d.bloques.map((b, i) => (i === bi ? { ...b, [field]: val } : b)) }
         : d));
 
-  // ── Especialistas ─────────────────────────────────────────────────────────
   const toggleSpecialist = (id: number) => {
     const cur = form.especialistasAsignados;
-    set('especialistasAsignados', cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id]);
+    const exists = cur.find((a) => a.id === id);
+    set('especialistasAsignados', exists ? cur.filter((a) => a.id !== id) : [...cur, { id, dias: [] }]);
   };
 
-  // ── Sesiones preview ──────────────────────────────────────────────────────
+  /** Agrega o quita un día entero; al añadir selecciona todos sus bloques por defecto */
+  const toggleSpecialistDay = (specialistId: number, day: WeekDay) => {
+    setForm((p) => ({
+      ...p,
+      especialistasAsignados: p.especialistasAsignados.map((a) => {
+        if (a.id !== specialistId) return a;
+        const hasDay = a.dias.some((d) => d.dia === day);
+        if (hasDay) return { ...a, dias: a.dias.filter((d) => d.dia !== day) };
+        const dayEntry = p.diasAtencion.find((d) => d.dia === day);
+        const allBlockIndices = dayEntry ? dayEntry.bloques.map((_, i) => i) : [];
+        return { ...a, dias: [...a.dias, { dia: day, bloques: allBlockIndices }] };
+      }),
+    }));
+  };
+
+  /** Agrega o quita un bloque específico dentro de un día para un especialista */
+  const toggleSpecialistBlock = (specialistId: number, day: WeekDay, blockIndex: number) => {
+    setForm((p) => ({
+      ...p,
+      especialistasAsignados: p.especialistasAsignados.map((a) => {
+        if (a.id !== specialistId) return a;
+        return {
+          ...a,
+          dias: a.dias.map((d) => {
+            if (d.dia !== day) return d;
+            const has = d.bloques.includes(blockIndex);
+            return { ...d, bloques: has ? d.bloques.filter((b) => b !== blockIndex) : [...d.bloques, blockIndex] };
+          }),
+        };
+      }),
+    }));
+  };
+
+  /** Selecciona todos los días+bloques, o los limpia todos */
+  const toggleAllDaysForSpecialist = (specialistId: number) => {
+    setForm((p) => {
+      const allDayEntries = p.diasAtencion.map((d) => ({ dia: d.dia, bloques: d.bloques.map((_, i) => i) }));
+      return {
+        ...p,
+        especialistasAsignados: p.especialistasAsignados.map((a) => {
+          if (a.id !== specialistId) return a;
+          const allSelected = p.diasAtencion.every((d) =>
+            a.dias.some((ad) => ad.dia === d.dia && d.bloques.every((_, i) => ad.bloques.includes(i))));
+          return { ...a, dias: allSelected ? [] : allDayEntries };
+        }),
+      };
+    });
+  };
+
   const totalSessions = form.diasAtencion.reduce((acc, d) =>
     acc + d.bloques.reduce((a, b) => a + calculateSessions(b, form.duracion).length, 0), 0);
 
-  // ── Validación por paso ───────────────────────────────────────────────────
   const validateStep = (s: 1 | 2 | 3): boolean => {
     const e: typeof errors = {};
     if (s === 1) {
@@ -381,9 +463,13 @@ export default function ServiceConfigModal({
   const handleSubmit = () => {
     if (!validateStep(3)) return;
     const finalCat = form.categoria === 'Otro' ? customCategory : form.categoria;
-    onSave(service
-      ? { ...form, categoria: finalCat, id: service.id }
-      : { ...form, categoria: finalCat });
+    // Serializar SpecialistAssignment[] → number[] para el contrato de onSave
+    const saveData = {
+      ...form,
+      categoria: finalCat,
+      especialistasAsignados: form.especialistasAsignados.map((a) => a.id),
+    };
+    onSave(service ? { ...saveData, id: service.id } : saveData);
     onClose();
   };
 
@@ -400,7 +486,7 @@ export default function ServiceConfigModal({
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-[var(--border-subtle)] flex-shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-sky-500/10 rounded-2xl flex items-center justify-center border border-sky-500/20 text-sky-500">
+            <div className="w-10 h-10 bg-sky-500/10 dark:bg-[#8FC3A1]/10 rounded-2xl flex items-center justify-center border border-sky-500/20 dark:border-[#8FC3A1]/20 text-sky-500 dark:text-[#8FC3A1]">
               <Icon name="Briefcase" className="w-5 h-5 stroke-[2.5px]" />
             </div>
             <div>
@@ -426,9 +512,9 @@ export default function ServiceConfigModal({
             const active = step === idx;
             return (
               <div key={label} className="flex-1 space-y-1.5">
-                <div className={`h-1 rounded-full transition-all ${done ? 'bg-sky-500' : active ? 'bg-sky-500/50' : 'bg-[var(--border-subtle)]'}`} />
+                <div className={`h-1 rounded-full transition-all ${done ? 'bg-sky-500 dark:bg-[#8FC3A1]' : active ? 'bg-sky-500/50 dark:bg-[#8FC3A1]/50' : 'bg-[var(--border-subtle)]'}`} />
                 <p className={`text-[9px] font-black uppercase tracking-widest transition-colors
-                  ${active ? 'text-sky-500' : done ? 'text-[var(--text-secondary)]' : 'text-[var(--border-subtle)]'}`}>
+                  ${active ? 'text-sky-500 dark:text-[#8FC3A1]' : done ? 'text-[var(--text-secondary)]' : 'text-[var(--border-subtle)]'}`}>
                   {i + 1}. {label}
                 </p>
               </div>
@@ -496,21 +582,21 @@ export default function ServiceConfigModal({
                 <button type="button" onClick={() => set('domicilio', !form.domicilio)}
                   className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl border transition-all
                     ${form.domicilio
-                      ? 'bg-sky-500/10 border-sky-500/40'
-                      : 'bg-[var(--bg-secondary)] border-[var(--border-subtle)] hover:border-sky-500/20'
+                      ? 'bg-sky-500/10 dark:bg-[#8FC3A1]/10 border-sky-500/40 dark:border-[#8FC3A1]/40'
+                      : 'bg-[var(--bg-secondary)] border-[var(--border-subtle)] hover:border-sky-500/20 dark:hover:border-[#8FC3A1]/50'
                     }`}>
-                  <div className={`flex-shrink-0 transition-colors ${form.domicilio ? 'text-sky-500' : 'text-[var(--text-secondary)]'}`}>
+                  <div className={`flex-shrink-0 transition-colors ${form.domicilio ? 'text-sky-500 dark:text-[#8FC3A1]' : 'text-[var(--text-secondary)]'}`}>
                     <SvgHome />
                   </div>
                   <div className="flex-1 text-left">
                     <p className={`text-xs font-black uppercase tracking-widest transition-colors
-                      ${form.domicilio ? 'text-sky-500' : 'text-[var(--text-primary)]'}`}>
+                      ${form.domicilio ? 'text-sky-500 dark:text-[#8FC3A1]' : 'text-[var(--text-primary)]'}`}>
                       Disponible a domicilio
                     </p>
                   </div>
                   <div className={`w-10 h-6 rounded-full border-2 flex items-center transition-all flex-shrink-0
                     ${form.domicilio
-                      ? 'bg-sky-500 border-sky-500 justify-end'
+                      ? 'bg-sky-500 dark:bg-[#8FC3A1] border-sky-500 dark:border-[#8FC3A1] justify-end'
                       : 'bg-[var(--bg-primary)] border-[var(--border-subtle)] justify-start'
                     }`}>
                     <div className="w-4 h-4 bg-white rounded-full mx-0.5 shadow-sm" />
@@ -527,15 +613,15 @@ export default function ServiceConfigModal({
                 ) : (
                   <div className="space-y-2">
                     {assignableSpecialists.map((sp) => {
-                      const selected = form.especialistasAsignados.includes(sp.id);
+                      const selected = form.especialistasAsignados.some((a) => a.id === sp.id);
                       return (
                         <button key={sp.id} type="button" onClick={() => toggleSpecialist(sp.id)}
                           className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl border transition-all
                             ${selected
-                              ? 'bg-indigo-500/10 border-indigo-500/40'
-                              : 'bg-[var(--bg-secondary)] border-[var(--border-subtle)] hover:border-indigo-500/20'
+                              ? 'bg-sky-500/10 border-sky-500/40 dark:bg-[#8FC3A1]/10 dark:border-[#8FC3A1]/40'
+                              : 'bg-[var(--bg-secondary)] border-[var(--border-subtle)] hover:border-sky-500/20 dark:hover:border-[#8FC3A1]/20'
                             }`}>
-                          <div className="w-8 h-8 rounded-full bg-indigo-500/20 border border-indigo-500/30 overflow-hidden flex-shrink-0 flex items-center justify-center text-indigo-400">
+                          <div className="w-8 h-8 rounded-full bg-sky-500/20 dark:bg-[#8FC3A1]/20 border border-sky-500/30 dark:border-[#8FC3A1]/30 overflow-hidden flex-shrink-0 flex items-center justify-center text-sky-400 dark:text-[#8FC3A1]">
                             {sp.foto
                               ? <img src={sp.foto} alt="" className="w-full h-full object-cover" />
                               : <SvgUserSilhouette />
@@ -546,8 +632,8 @@ export default function ServiceConfigModal({
                               <p className="text-xs font-black text-[var(--text-primary)]">
                                 {sp.nombres} {sp.apellidos}
                               </p>
-                              {sp.availability === 'Ocupado' && (
-                                <span className="text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-amber-500">
+                              {currentlyAssignedIds.includes(sp.id) && (
+                                <span className="text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-emerald-500">
                                   Ya asignado
                                 </span>
                               )}
@@ -555,7 +641,7 @@ export default function ServiceConfigModal({
                             <p className="text-[10px] text-[var(--text-secondary)]">{sp.especialidad}</p>
                           </div>
                           <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all flex-shrink-0
-                            ${selected ? 'bg-indigo-500 border-indigo-500 text-white' : 'border-[var(--border-subtle)]'}`}>
+                            ${selected ? 'bg-sky-500 dark:bg-[var(--brand-green)] border-sky-500 dark:border-[var(--brand-green)] text-white' : 'border-[var(--border-subtle)]'}`}>
                             {selected && <SvgCheck />}
                           </div>
                         </button>
@@ -579,8 +665,8 @@ export default function ServiceConfigModal({
                       <button key={day} type="button" onClick={() => toggleDay(day)}
                         className={`w-12 h-12 rounded-2xl text-[10px] font-black uppercase border transition-all
                           ${active
-                            ? 'bg-sky-500/15 border-sky-500/50 text-sky-500'
-                            : 'bg-[var(--bg-secondary)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-sky-500/30'
+                            ? 'bg-sky-500/15 dark:bg-[#8FC3A1]/15 border-sky-500/50 dark:border-[#8FC3A1]/50 text-sky-500 dark:text-[#8FC3A1]'
+                            : 'bg-[var(--bg-secondary)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-sky-500/30 dark:hover:border-[#8FC3A1]/50'
                           }`}>
                         {WEEK_DAY_SHORT[day]}
                       </button>
@@ -605,7 +691,7 @@ export default function ServiceConfigModal({
                 <div key={dayEntry.dia} className="rounded-[1.75rem] border border-[var(--border-subtle)] bg-[var(--bg-secondary)]/40 overflow-hidden">
                   <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border-subtle)]">
                     <div className="flex items-center gap-2">
-                      <span className="w-7 h-7 rounded-xl bg-sky-500/15 border border-sky-500/30 flex items-center justify-center text-[10px] font-black text-sky-500">
+                      <span className="w-7 h-7 rounded-xl bg-sky-500/15 dark:bg-[#8FC3A1]/15 border border-sky-500/30 dark:border-[#8FC3A1]/30 flex items-center justify-center text-[10px] font-black text-sky-500 dark:text-[#8FC3A1]">
                         {WEEK_DAY_SHORT[dayEntry.dia]}
                       </span>
                       <span className="text-xs font-black text-[var(--text-primary)] uppercase tracking-widest">
@@ -617,7 +703,7 @@ export default function ServiceConfigModal({
                         {dayEntry.bloques.reduce((a, b) => a + calculateSessions(b, form.duracion).length, 0)} sesión(es)
                       </span>
                       <button type="button" onClick={() => addBlock(dayEntry.dia)}
-                        className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-sky-500/10 border border-sky-500/20 text-sky-500 text-[10px] font-black uppercase tracking-widest hover:bg-sky-500/20 transition-colors">
+                        className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-sky-500/10 dark:bg-[#8FC3A1]/10 border border-sky-500/20 dark:border-[#8FC3A1]/20 text-sky-500 dark:text-[#8FC3A1] text-[10px] font-black uppercase tracking-widest hover:bg-sky-500/20 dark:hover:bg-[#8FC3A1]/20 transition-colors">
                         <SvgPlus />
                         Bloque
                       </button>
@@ -671,16 +757,160 @@ export default function ServiceConfigModal({
               ))}
 
               {totalSessions > 0 && (
-                <div className="rounded-[1.75rem] border border-sky-500/20 bg-sky-500/5 p-4 flex items-center justify-between">
+                <div className="rounded-[1.75rem] border border-sky-500/20 dark:border-[#8FC3A1]/20 bg-sky-500/5 dark:bg-[#8FC3A1]/5 p-4 flex items-center justify-between">
                   <div>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-sky-500">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-sky-500 dark:text-[#8FC3A1]">
                       Total de sesiones automáticas
                     </p>
                     <p className="text-xs text-[var(--text-secondary)] mt-0.5">
                       Duración {formatMin(form.duracion)} + {bufferMinutos} min margen
                     </p>
                   </div>
-                  <span className="text-2xl font-black text-sky-500">{totalSessions}</span>
+                  <span className="text-2xl font-black text-sky-500 dark:text-[#8FC3A1]">{totalSessions}</span>
+                </div>
+              )}
+
+              {/* ── Asignación de días y bloques por especialista ── */}
+              {form.especialistasAsignados.length > 0 && (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <div className="text-sky-400 dark:text-[#8FC3A1]"><SvgUserSilhouette /></div>
+                    <div>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-primary)]">
+                        Horario por especialista
+                      </p>
+                      <p className="text-[9px] text-[var(--text-secondary)] mt-0.5">
+                        Selecciona qué días y bloques cubre cada especialista
+                      </p>
+                    </div>
+                  </div>
+
+                  {form.diasAtencion.length === 0 ? (
+                    <div className="rounded-2xl border border-dashed border-[var(--border-subtle)] p-4 text-center">
+                      <p className="text-[10px] text-[var(--text-secondary)] font-semibold">
+                        Configura los días de atención primero
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {form.especialistasAsignados.map((assignment) => {
+                        const sp = specialists.find((s) => s.id === assignment.id);
+                        if (!sp) return null;
+
+                        const totalBlocksInService = form.diasAtencion.reduce((a, d) => a + d.bloques.length, 0);
+                        const assignedBlocks = assignment.dias.reduce((a, d) => a + d.bloques.length, 0);
+                        const allSelected = totalBlocksInService > 0 && assignedBlocks === totalBlocksInService;
+                        const noneSelected = assignedBlocks === 0;
+
+                        return (
+                          <div key={assignment.id}
+                            className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)]/40 overflow-hidden">
+
+                            {/* Header especialista */}
+                            <div className="flex items-center gap-3 px-4 py-3 border-b border-[var(--border-subtle)]">
+                              <div className="w-7 h-7 rounded-full bg-sky-500/20 dark:bg-[#8FC3A1]/20 border border-sky-500/30 dark:border-[#8FC3A1]/30 overflow-hidden flex-shrink-0 flex items-center justify-center text-sky-400 dark:text-[#8FC3A1]">
+                                {sp.foto
+                                  ? <img src={sp.foto} alt="" className="w-full h-full object-cover" />
+                                  : <SvgUserSilhouette />}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs font-black text-[var(--text-primary)] truncate">
+                                  {sp.nombres} {sp.apellidos}
+                                </p>
+                                <p className="text-[9px] text-[var(--text-secondary)]">{sp.especialidad}</p>
+                              </div>
+                              {noneSelected ? (
+                                <span className="text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 flex-shrink-0">
+                                  Sin bloques
+                                </span>
+                              ) : (
+                                <span className="text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded-lg bg-sky-500/10 dark:bg-[#8FC3A1]/10 border border-sky-500/20 dark:border-[#8FC3A1]/20 text-sky-400 dark:text-[#8FC3A1] flex-shrink-0">
+                                  {assignedBlocks} bloque{assignedBlocks !== 1 ? 's' : ''}
+                                </span>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => toggleAllDaysForSpecialist(assignment.id)}
+                                className="text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-sky-500/30 dark:hover:border-[#8FC3A1] hover:text-sky-400 dark:hover:text-[#8FC3A1] transition-colors flex-shrink-0">
+                                {allSelected ? 'Ninguno' : 'Todos'}
+                              </button>
+                            </div>
+
+                            {/* Días con sus bloques */}
+                            <div className="divide-y divide-[var(--border-subtle)]">
+                              {form.diasAtencion.map((dayEntry) => {
+                                const assignedDay = assignment.dias.find((d) => d.dia === dayEntry.dia);
+                                const dayActive = !!assignedDay;
+                                const assignedBlockCount = assignedDay?.bloques.length ?? 0;
+
+                                return (
+                                  <div key={dayEntry.dia} className="p-3 space-y-2">
+                                    {/* Fila del día */}
+                                    <div className="flex items-center gap-2">
+                                      <button
+                                        type="button"
+                                        onClick={() => toggleSpecialistDay(assignment.id, dayEntry.dia)}
+                                        className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all flex-shrink-0
+                                          ${dayActive
+                                            ? 'bg-sky-500/10 dark:bg-[#8FC3A1]/10 border-sky-500/40 dark:border-[#8FC3A1]/40 text-sky-500 dark:text-[#8FC3A1]'
+                                            : 'bg-[var(--bg-primary)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-sky-500/20 dark:hover:border-[#8FC3A1]/20'
+                                          }`}>
+                                        <span className="text-[10px] font-black uppercase tracking-wider">
+                                          {WEEK_DAY_SHORT[dayEntry.dia]}
+                                        </span>
+                                        <span className="text-[8px] opacity-70">
+                                          {dayEntry.dia}
+                                        </span>
+                                      </button>
+                                      {dayActive && (
+                                        <span className="text-[9px] text-[var(--text-secondary)]">
+                                          {assignedBlockCount}/{dayEntry.bloques.length} bloques
+                                        </span>
+                                      )}
+                                    </div>
+
+                                    {/* Bloques del día (solo si el día está activo) */}
+                                    {dayActive && (
+                                      <div className="flex flex-wrap gap-1.5 pl-1">
+                                        {dayEntry.bloques.map((block, bi) => {
+                                          const blockActive = assignedDay.bloques.includes(bi);
+                                          const sessions = calculateSessions(block, form.duracion);
+                                          const invalid = block.inicio >= block.fin;
+                                          return (
+                                            <button
+                                              key={bi}
+                                              type="button"
+                                              disabled={invalid}
+                                              onClick={() => toggleSpecialistBlock(assignment.id, dayEntry.dia, bi)}
+                                              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border transition-all
+                                                ${invalid
+                                                  ? 'opacity-40 cursor-not-allowed bg-[var(--bg-primary)] border-[var(--border-subtle)] text-[var(--text-secondary)]'
+                                                  : blockActive
+                                                    ? 'bg-sky-500/15 dark:bg-[#8FC3A1]/15 border-sky-500/50 dark:border-[#8FC3A1]/50 text-sky-500 dark:text-[#8FC3A1]'
+                                                    : 'bg-[var(--bg-primary)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-sky-500/20 dark:hover:border-[#8FC3A1]/20 hover:text-[var(--text-primary)]'
+                                                }`}>
+                                              <span className="text-[9px] font-black">
+                                                {block.inicio}–{block.fin}
+                                              </span>
+                                              {!invalid && (
+                                                <span className={`text-[8px] font-semibold ${blockActive ? 'text-sky-400 dark:text-[#8FC3A1]' : 'opacity-60'}`}>
+                                                  · {sessions.length} ses.
+                                                </span>
+                                              )}
+                                            </button>
+                                          );
+                                        })}
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -708,7 +938,7 @@ export default function ServiceConfigModal({
                 <div className="space-y-3">
                   <div className="flex items-center gap-4">
                     <button type="button" onClick={() => set('cupos', Math.max(1, form.cupos - 1))}
-                      className="w-10 h-10 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-primary)] hover:border-sky-500/30 transition-colors font-black text-lg select-none">
+                      className="w-10 h-10 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-primary)] hover:border-sky-500/30 dark:hover:border-[#8FC3A1]/50 transition-colors font-black text-lg select-none">
                       −
                     </button>
                     <div className="flex-1 text-center">
@@ -718,13 +948,13 @@ export default function ServiceConfigModal({
                       </p>
                     </div>
                     <button type="button" onClick={() => set('cupos', Math.min(100, form.cupos + 1))}
-                      className="w-10 h-10 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-primary)] hover:border-sky-500/30 transition-colors font-black text-lg select-none">
+                      className="w-10 h-10 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-primary)] hover:border-sky-500/30 dark:hover:border-[#8FC3A1]/50 transition-colors font-black text-lg select-none">
                       +
                     </button>
                   </div>
                   <input type="range" min={1} max={100} value={form.cupos}
                     onChange={(e) => set('cupos', parseInt(e.target.value))}
-                    className="w-full accent-sky-500" />
+                    className="w-full accent-sky-500 dark:accent-[#8FC3A1]" />
                   <div className="flex justify-between text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)]">
                     <span>1 mín</span><span>100 máx</span>
                   </div>
@@ -750,10 +980,10 @@ export default function ServiceConfigModal({
                         onClick={() => set('anticipacionReserva', h)}
                         className={`flex flex-col items-center py-4 px-3 rounded-2xl border transition-all
                           ${active
-                            ? 'bg-sky-500/10 border-sky-500/40 text-sky-500'
-                            : 'bg-[var(--bg-secondary)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-sky-500/20'
+                            ? 'bg-sky-500/10 dark:bg-[#8FC3A1]/10 border-sky-500/40 dark:border-[#8FC3A1]/40 text-sky-500 dark:text-[#8FC3A1]'
+                            : 'bg-[var(--bg-secondary)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-sky-500/20 dark:hover:border-[#8FC3A1]/50'
                           }`}>
-                        <span className={`text-2xl font-black ${active ? 'text-sky-500' : 'text-[var(--text-primary)]'}`}>
+                        <span className={`text-2xl font-black ${active ? 'text-sky-500 dark:text-[#8FC3A1]' : 'text-[var(--text-primary)]'}`}>
                           {h}
                         </span>
                         <span className="text-[9px] font-black uppercase tracking-widest mt-1 opacity-70">
@@ -788,7 +1018,7 @@ export default function ServiceConfigModal({
                 <div className="pt-2 border-t border-[var(--border-subtle)]">
                   <p className="text-[10px] text-[var(--text-secondary)]">
                     El servicio se guardará como{' '}
-                    <span className="font-black text-[#99F6E4]">Borrador</span>.
+                    <span className="font-black text-gray-700 dark:text-gray-300">Borrador</span>.
                     Podrás publicarlo desde el panel de servicios.
                   </p>
                 </div>
@@ -819,8 +1049,6 @@ export default function ServiceConfigModal({
   );
 }
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
-
 function Field({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
   return (
     <div className="space-y-2">
@@ -832,7 +1060,7 @@ function Field({ label, error, children }: { label: string; error?: string; chil
 }
 
 function SummaryItem({ label, value, accent }: { label: string; value: string; accent?: 'sky' | 'emerald' | 'indigo' }) {
-  const cls = accent ? { sky: 'text-sky-500', emerald: 'text-emerald-500', indigo: 'text-indigo-500' }[accent] : 'text-[var(--text-primary)]';
+  const cls = accent ? { sky: 'text-sky-500 dark:text-[#8FC3A1]', emerald: 'text-emerald-500', indigo: 'text-indigo-500' }[accent] : 'text-[var(--text-primary)]';
   return (
     <div className="space-y-0.5">
       <p className="text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)]">{label}</p>
