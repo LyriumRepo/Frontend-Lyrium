@@ -175,7 +175,7 @@ export default function TermsContent() {
 
                     <div className="p-8 md:p-12 space-y-12">
                         <div className="text-center space-y-2">
-                            <h2 className="text-2xl font-black text-gray-800 uppercase tracking-tighter transition-all duration-500">{config.subtitle}</h2>
+                            <h2 className="text-2xl font-black text-[#333333] uppercase tracking-tighter transition-all duration-500">{config.subtitle}</h2>
                             <div className="text-sky-500 font-bold text-sm tracking-widest">- LYRIUM BIOMARKETPLACE -</div>
                         </div>
 

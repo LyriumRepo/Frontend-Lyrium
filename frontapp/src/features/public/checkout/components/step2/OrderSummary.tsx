@@ -1,6 +1,6 @@
 'use client';
 
-import { Truck, CreditCard, ShieldCheck, Lock } from 'lucide-react';
+import { Truck, CreditCard, ShieldCheck, Lock, AlertCircle, X } from 'lucide-react';
 import { useCheckoutStore } from '@/store/checkoutStore';
 import { useCheckoutSubmit } from '../../hooks/useCheckoutSubmit';
 import type { DeliveryMethod, PaymentMethod } from '@/store/checkoutStore';
@@ -25,7 +25,7 @@ export default function OrderSummary() {
     const orderData = useCheckoutStore((s) => s.orderData);
     const setOrderData = useCheckoutStore((s) => s.setOrderData);
     const isProcessing = useCheckoutStore((s) => s.isProcessing);
-    const { submitOrder, subtotal, total } = useCheckoutSubmit();
+    const { submitOrder, submitError, clearError, subtotal, total } = useCheckoutSubmit();
 
     const handleDeliveryChange = (value: DeliveryMethod) => {
         const option = DELIVERY_OPTIONS.find((o) => o.value === value);
@@ -109,6 +109,21 @@ export default function OrderSummary() {
                     <span className="text-2xl font-black text-sky-600 dark:text-[var(--brand-sky)]">S/ {total.toFixed(2)}</span>
                 </div>
             </div>
+
+            {/* Error message */}
+            {submitError && (
+                <div className="px-5">
+                    <div className="flex items-start gap-3 p-4 rounded-2xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/30 animate-fadeIn">
+                        <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+                        <div className="flex-1 min-w-0">
+                            <p className="text-xs font-bold text-red-700 dark:text-red-400 leading-relaxed">{submitError}</p>
+                        </div>
+                        <button onClick={clearError} className="shrink-0 p-1 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors">
+                            <X className="w-4 h-4 text-red-400" />
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* Place order button */}
             <div className="px-5 pb-5">

@@ -98,6 +98,9 @@ export default function ServicesCategoryPageClient({ category, services, allCate
             s.store?.name.toLowerCase().includes(q)
         );
     }, [services, search]);
+    console.log("Categoria..:", category);
+    console.log("services:", services);
+
 
     return (
         <main className="min-h-screen bg-gray-50 dark:bg-[var(--bg-primary)]">

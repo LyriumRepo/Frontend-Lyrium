@@ -1,6 +1,6 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+import type { Metadata } from 'next';
+import { Geist, Geist_Mono } from 'next/font/google';
+import './globals.css';
 import { NotificationProvider } from '@/shared/lib/context/NotificationContext';
 import { AuthProvider } from '@/shared/lib/context/AuthContext';
 import { ToastProvider } from '@/shared/lib/context/ToastContext';
@@ -8,20 +8,27 @@ import { EchoProvider } from '@/shared/lib/providers/EchoProvider';
 import { ThemeProvider } from 'next-themes';
 import QueryProvider from '@/components/providers/QueryProvider';
 import { GoogleOAuthWrapper } from '@/components/providers/GoogleOAuthWrapper';
+import { DM_Serif_Display, DM_Sans } from 'next/font/google';
+const dmSerif = DM_Serif_Display({
+  subsets: ['latin'],
+  weight: '400',
+  variable: '--font-dm-serif',
+});
+const dmSans = DM_Sans({ subsets: ['latin'], variable: '--font-dm-sans' });
 
 const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+  variable: '--font-geist-sans',
+  subsets: ['latin'],
 });
 
 const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  variable: '--font-geist-mono',
+  subsets: ['latin'],
 });
 
 export const metadata: Metadata = {
-  title: "Bienvenido al Lyrium Marketplace",
-  description: "Tu marketplace de confianza",
+  title: 'Bienvenido al Lyrium Marketplace',
+  description: 'Tu marketplace de confianza',
 };
 
 export default function RootLayout({
@@ -40,9 +47,7 @@ export default function RootLayout({
               <AuthProvider>
                 <EchoProvider>
                   <NotificationProvider>
-                    <ToastProvider>
-                      {children}
-                    </ToastProvider>
+                    <ToastProvider>{children}</ToastProvider>
                   </NotificationProvider>
                 </EchoProvider>
               </AuthProvider>

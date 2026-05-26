@@ -584,16 +584,26 @@ body {
    PESTAÑA 1: MI PLAN
    ============================================ */
 .my-plan-title {
+    --title-gradient: linear-gradient(135deg, #1f2937 0%, #2563eb 55%, #06b6d4 100%);
     font-size: clamp(3rem, 3.5vw, 2.5rem);
     font-weight: 800;
     text-align: center;
     margin-bottom: 8px;
     letter-spacing: -0.6px;
     line-height: 1.15;
-    background: linear-gradient(135deg, #111111 0%, #92f63b 55%, #5cf6c5 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    display: block;
+    width: 100%;
+    background: var(--title-gradient) !important;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    color: transparent !important;
+}
+
+.dark .my-plan-title {
+    --title-gradient: linear-gradient(135deg, #111111 0%, #92f63b 55%, #5cf6c5 100%);
 }
 
 .my-plan-subtitle {

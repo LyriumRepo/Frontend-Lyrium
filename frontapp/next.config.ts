@@ -2,9 +2,13 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  async rewrites() {
+
+
+async rewrites() {
+  const storageUrl = process.env.NEXT_PUBLIC_LARAVEL_STORAGE_URL ?? 'http://127.0.0.1:8000';
   return [
-    { source: '/backend/:path*', destination: 'http://127.0.0.1:8000/:path*' }
+    { source: '/backend/:path*', destination: `${storageUrl}/:path*` },
+    { source: '/storage/:path*', destination: `${storageUrl}/storage/:path*` }
   ];
 },
 
@@ -12,12 +16,14 @@ const nextConfig: NextConfig = {
     maxInactiveAge: 25 * 1000,
     pagesBufferLength: 5,
   },
-  turbopack: {},
+
+  // === CONFIGURACIÓN DE IMÁGENES ===
   images: {
-    unoptimized: true,
+    unoptimized: true,   // Útil mientras desarrollas con Laravel
     remotePatterns: [
       { protocol: 'https', hostname: 'i.pravatar.cc' },
       { protocol: 'https', hostname: 'lyriumbiomarketplace.com' },
+
       {
         protocol: 'https',
         hostname: '**.woocommerce.com',
@@ -46,6 +52,13 @@ const nextConfig: NextConfig = {
         protocol: 'http',
         hostname: 'localhost',
         port: '8000',
+        pathname:'/**',
+      },
+      {
+        protocol: 'http',
+        hostname: '127.0.0.1', 
+        port: '8000',
+        pathname: '/**',
       },
       {
         protocol: 'https',

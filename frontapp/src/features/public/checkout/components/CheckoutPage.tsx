@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useCheckoutStore } from '@/store/checkoutStore';
+import { useCarritoStore } from '@/store/carritoStore';
+import { cartApi } from '@/shared/lib/api/cartRepository';
 import CheckoutStepBar from './CheckoutStepBar';
 import CheckoutHeader from './CheckoutHeader';
 import CartItemList from './step1/CartItemList';
@@ -17,13 +19,57 @@ import ModalRegistroUsuario from './modals/ModalRegistroUsuario';
 export default function CheckoutPage() {
     const currentStep = useCheckoutStore((s) => s.currentStep);
     const setStep = useCheckoutStore((s) => s.setStep);
+    const setCartItems = useCheckoutStore((s) => s.setCartItems);
     const orderResult = useCheckoutStore((s) => s.orderResult);
     const isProcessing = useCheckoutStore((s) => s.isProcessing);
+
+    // Cargar carrito al montar el checkout
+    useEffect(() => {
+        async function loadCart() {
+            try {
+                const serverCart = await cartApi.getCart();
+                if (serverCart.items && serverCart.items.length > 0) {
+                    const mapped = serverCart.items.map((item) => ({
+                        id: item.id,
+                        storeId: (item.product as any).store_id ?? 0,
+                        storeName: (item.product as any).store_name ?? 'Tienda',
+                        name: item.product.name,
+                        image: item.product.image ?? '/img/placeholder.png',
+                        price: item.unitPrice,
+                        originalPrice: item.product.regular_price ?? item.unitPrice,
+                        quantity: item.quantity,
+                        selected: true,
+                    }));
+                    setCartItems(mapped);
+                    return;
+                }
+            } catch {
+                // Fallo al cargar carrito del backend, continuar
+            }
+
+            // Si el backend está vacío, intentar desde carritoStore local
+            const localItems = useCarritoStore.getState().cartItems;
+            if (localItems.length > 0) {
+                const mapped = localItems.map((item) => ({
+                    id: Number(item.producto_id),
+                    storeId: 0,
+                    storeName: item.vendedor_nombre ?? 'Tienda',
+                    name: item.producto_nombre ?? 'Producto',
+                    image: item.imagen_url ?? '/img/placeholder.png',
+                    price: Number(item.precio_unitario),
+                    originalPrice: Number(item.precio_unitario),
+                    quantity: Number(item.cantidad),
+                    selected: true,
+                }));
+                setCartItems(mapped);
+            }
+        }
+        loadCart();
+    }, [setCartItems]);
 
     const [showPostCompra, setShowPostCompra] = useState(false);
     const [showRegistro, setShowRegistro] = useState(false);
 
-    // Open post-purchase modal when order lands on step 3
     useEffect(() => {
         if (currentStep === 3) {
             setShowPostCompra(true);
@@ -36,17 +82,17 @@ export default function CheckoutPage() {
         <div className="min-h-screen bg-slate-50 dark:bg-[#0A0F0D] antialiased">
             <div id="lyrium-stack-wrapper" className="min-h-screen bg-white dark:bg-[var(--bg-primary)]">
 
-                {/* Sticky top wrapper */}
+                {/* Sticky top bar — logo + compact step circles */}
                 <div id="checkout-top-wrapper" className="sticky top-0 z-[10000] bg-white dark:bg-[var(--bg-secondary)] border-b border-gray-100 dark:border-[var(--border-subtle)] shadow-[0_1px_4px_rgba(0,0,0,0.06)] dark:shadow-none">
                     <CheckoutStepBar />
                 </div>
 
-                {/* Dynamic header — content adapts to current step */}
+                {/* Dynamic header — gradient with step title */}
                 <CheckoutHeader />
 
                 {/* Main content */}
                 <div id="checkout-main-content" className={`transition-all duration-700 ${isProcessing ? 'blur-sm pointer-events-none' : ''}`}>
-                    <div className="max-w-6xl mx-auto px-4 pt-6 pb-8">
+                    <div className="max-w-6xl mx-auto px-4 pt-4 pb-8">
 
                         {/* ── PASO 1 ── */}
                         {currentStep === 1 && (

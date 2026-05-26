@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
             }
 
             const data = await response.json();
-            const user = data.user || data;
+            const user = data.data || data.user || data;
 
             if (!user?.id) {
                 return NextResponse.json({
@@ -42,6 +42,7 @@ export async function GET(request: NextRequest) {
 
             return NextResponse.json({
                 authenticated: true,
+                token: decodeURIComponent(token),
                 user: {
                     id: user.id,
                     username: user.username,

@@ -26,7 +26,7 @@ export default function SellerHeader({ onOpenMenu }: { onOpenMenu: () => void })
                         <Menu className="w-6 h-6 text-[var(--text-secondary)]" />
                     </button>
                     <span className="hidden md:inline-block px-3 py-1 bg-sky-500 text-white text-xs font-bold uppercase rounded-full whitespace-nowrap">
-                        Mi Panel del Vendedor
+                        Mi Panel
                     </span>
                     <div className="hidden sm:block">
                         <Breadcrumb items={breadcrumbs} />

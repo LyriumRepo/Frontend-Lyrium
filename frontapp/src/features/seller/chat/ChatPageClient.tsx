@@ -88,10 +88,9 @@ export function ChatPageClient(_props: ChatPageClientProps) {
                         className="w-full text-xs py-3 px-4 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 font-black uppercase tracking-wider text-[var(--text-primary)] cursor-pointer outline-none shadow-sm"
                     >
                         <option value="all">TODAS LAS CATEGORÍAS</option>
-                        <option value="tech">DIAGNÓSTICO TÉCNICO</option>
+                        <option value="info">SOLICITUD DE INFORMACIÓN</option>
+                        <option value="comment">COMENTARIOS</option>
                         <option value="admin">SOPORTE ADMINISTRATIVO</option>
-                        <option value="info">SOLICITUD DE INFO</option>
-                        <option value="comment">ELOGIOS Y FEEDBACK</option>
                     </select>
                 </div>
             </div>

@@ -7,6 +7,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useCarritoStore } from '@/store/carritoStore';
 import { money } from '@/modules/cart/utils';
+import { useAuth } from '@/shared/lib/context/AuthContext';
 
 export default function PublicCartDrawer() {
     const router = useRouter();
@@ -18,6 +19,7 @@ export default function PublicCartDrawer() {
     const [discountOpen, setDiscountOpen] = useState(false);
     const [discountCode, setDiscountCode] = useState('');
 
+    const { isAuthenticated } = useAuth();
     const totalItems = cartItems.reduce((a, i) => a + Number(i.cantidad ?? 0), 0);
     const subtotal = cartItems.reduce((a, i) => a + Number(i.cantidad ?? 0) * Number(i.precio_unitario ?? 0), 0);
 
@@ -51,8 +53,7 @@ export default function PublicCartDrawer() {
                             <div className="mx-auto w-14 h-14 rounded-2xl bg-gray-100 dark:bg-[var(--bg-muted)] grid place-items-center mb-4">
                                 <ShoppingCart className="w-7 h-7 text-gray-400 dark:text-[var(--text-muted)]" />
                             </div>
-                            <p className="text-gray-700 dark:text-[var(--text-primary)] font-medium">Tu carrito está vacío</p>
-                            <p className="text-xs mt-1 text-gray-400 dark:text-[var(--text-muted)]">Agrega productos para verlos aquí.</p>
+                            <p className="text-gray-700 dark:text-[var(--text-primary)] font-medium">No tienes productos en el carrito, puedes seguir comprando.</p>
                         </div>
                     ) : (
                         <div className="space-y-4">
@@ -163,7 +164,7 @@ export default function PublicCartDrawer() {
 
                         <div className="space-y-2">
                             <button
-                                onClick={() => { closeCart(); router.push('/checkout'); }}
+                                onClick={() => { closeCart(); isAuthenticated ? router.push('/checkout') : router.push('/login'); }}
                                 className="w-full py-3 rounded-xl bg-gradient-to-r from-sky-400 to-sky-500 hover:from-sky-500 hover:to-sky-600 text-white font-medium inline-flex items-center justify-center gap-2 shadow-lg shadow-sky-200/50 dark:shadow-sky-900/20 transition-all"
                             >
                                 Finalizar compra

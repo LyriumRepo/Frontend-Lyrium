@@ -47,8 +47,7 @@ export default function CartItemList({ onDeleteSelected }: Props) {
                 {cartItems.length === 0 ? (
                     <div className="py-12 flex flex-col items-center gap-3 text-gray-400 dark:text-[var(--text-muted)]">
                         <Package className="w-10 h-10 opacity-30" />
-                        <p className="text-sm font-medium">Tu carrito está vacío</p>
-                        <a href="/" className="text-xs text-sky-500 dark:text-[var(--brand-sky)] hover:underline font-bold">Explorar productos</a>
+                        <p className="text-sm font-medium">No tienes productos en el carrito, puedes seguir comprando.</p>
                     </div>
                 ) : (
                     Object.entries(stores).map(([storeId, group]) => (

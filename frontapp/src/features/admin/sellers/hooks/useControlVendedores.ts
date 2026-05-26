@@ -8,6 +8,7 @@ import {
 import { MOCK_CONTROL_DATA } from '@/features/admin/sellers/mock';
 import { getStores, getProducts, updateStoreStatus } from '@/shared/lib/api';
 import { sellerApi } from '@/shared/lib/api/sellerRepository';
+import { getToken } from '@/shared/lib/api/token-store';
 import { Product as WCProduct } from '@/lib/types/wp/wp-types';
 import { Store as DokanStore } from '@/lib/types/stores/store';
 import { USE_MOCKS } from '@/shared/lib/config/flags';
@@ -54,11 +55,11 @@ export const useControlVendedores = () => {
 
             // 2. Productos - Fetch from new admin endpoint
             const LARAVEL_API_URL = process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://localhost:8000/api';
-            const token = typeof document !== 'undefined' ? document.cookie.match(/(?:^|;\s*)laravel_token=([^;]+)/)?.[1] : null;
+            const token = getToken();
             
             const productsResponse = await fetch(`${LARAVEL_API_URL}/admin/products`, {
                 headers: {
-                    ...(token ? { 'Authorization': `Bearer ${decodeURIComponent(token)}` } : {}),
+                    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
                 },
             });
             
@@ -114,13 +115,13 @@ export const useControlVendedores = () => {
     const productStatusMutation = useMutation({
         mutationFn: async ({ id, status, reason }: { id: number, status: ProductStatus, reason: string }) => {
             const LARAVEL_API_URL = process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://localhost:8000/api';
-            const token = typeof document !== 'undefined' ? document.cookie.match(/(?:^|;\s*)laravel_token=([^;]+)/)?.[1] : null;
+            const token = getToken();
             
             const response = await fetch(`${LARAVEL_API_URL}/products/${id}/status`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    ...(token ? { 'Authorization': `Bearer ${decodeURIComponent(token)}` } : {}),
+                    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
                 },
                 body: JSON.stringify({ status, reason }),
             });

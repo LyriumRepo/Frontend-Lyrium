@@ -48,7 +48,7 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit }:
         queryKey: ['seller', 'categories'],
         queryFn: async () => {
             const LARAVEL_API_URL = process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://localhost:8000/api';
-            const res = await fetch(`${LARAVEL_API_URL}/categories?type=product&per_page=100`);
+            const res = await fetch(`${LARAVEL_API_URL}/categories?type=product&per_page=400`);
             const data = await res.json();
             return data.data || data || [];
         },
@@ -161,10 +161,6 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit }:
         e.preventDefault();
 
         // Validaciones críticas de negocio
-        if (!formData.name || formData.name.trim().length < 3) {
-            showToast('El nombre del producto debe tener al menos 3 caracteres', 'error');
-            return;
-        }
         if (!formData.image) {
             showToast('Es obligatorio adjuntar una foto del producto', 'error');
             return;
@@ -175,16 +171,6 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit }:
         }
         if (!formData.dimensions) {
             showToast('Las dimensiones son necesarias para el cálculo de envío', 'error');
-            return;
-        }
-
-        // Validar que haya al menos una característica con valores válidos
-        const hasMainAttributes = (formData.mainAttributes || []).some(attr =>
-            attr.values && attr.values.length > 0 && attr.values.some(v => v && v.trim().length > 0)
-        );
-
-        if (!hasMainAttributes) {
-            showToast('Agregá al menos una característica del producto', 'error');
             return;
         }
 
@@ -326,8 +312,10 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit }:
                                                     { val: null, label: 'Ninguno', color: 'gray' },
                                                     { val: 'nuevo', label: 'Nuevo', color: 'sky' },
                                                     { val: 'oferta', label: 'Oferta', color: 'lime' },
-                                                    { val: 'bestseller', label: 'Top', color: 'purple' },
                                                     { val: 'descuento', label: 'Desc %', color: 'emerald' },
+                                                    { val: 'bestseller', label: 'Top', color: 'purple' },
+                                                    { val: 'liquidacion', label: 'Liquidación', color: 'rose' },
+                                                    { val: 'envio_gratis', label: 'Envío Gratis', color: 'amber' },
                                                 ].map((opt) => (
                                                     <label key={opt.val || 'none'} className="cursor-pointer">
                                                         <input
@@ -342,7 +330,9 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit }:
                                                                         : opt.color === 'lime' ? 'bg-lime-400 text-white border-lime-400 scale-105 shadow-sm'
                                                                             : opt.color === 'purple' ? 'bg-purple-500 text-white border-purple-500 scale-105 shadow-sm'
                                                                                 : opt.color === 'emerald' ? 'bg-emerald-500 text-white border-emerald-500 scale-105 shadow-sm'
-                                                                                    : 'bg-gray-900 text-white border-gray-900 scale-105 shadow-sm'
+                                                                                    : opt.color === 'rose' ? 'bg-rose-500 text-white border-rose-500 scale-105 shadow-sm'
+                                                                                        : opt.color === 'amber' ? 'bg-amber-500 text-white border-amber-500 scale-105 shadow-sm'
+                                                                                            : 'bg-gray-900 text-white border-gray-900 scale-105 shadow-sm'
                                                                 : 'bg-[var(--bg-card)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-[var(--border-default)]'}`}>
                                                             {opt.label}
                                                         </div>

@@ -4,6 +4,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Star, Heart, ShoppingCart, Eye } from 'lucide-react';
 import { Producto } from '@/types/public';
+import { useCarritoStore } from '@/store/carritoStore';
+import { useState } from 'react';
+import QuickViewModal from '@/components/products/QuickViewModal';
 
 interface RelatedProductsProps {
   productos: Producto[];
@@ -18,6 +21,21 @@ const stickerConfig: Record<string, { label: string; class: string }> = {
 };
 
 export default function RelatedProducts({ productos, titulo = 'Descubre más productos' }: RelatedProductsProps) {
+  const addToCart = useCarritoStore((s) => s.addToCart);
+  const openCart = useCarritoStore((s) => s.openCart);
+  const [quickViewProduct, setQuickViewProduct] = useState<Producto | null>(null);
+  const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
+
+  const handleAddToCart = (producto: Producto) => {
+    addToCart(producto);
+    openCart();
+  };
+
+  const handleQuickView = (producto: Producto) => {
+    setQuickViewProduct(producto);
+    setIsQuickViewOpen(true);
+  };
+
   if (!productos || productos.length === 0) {
     return null;
   }
@@ -68,6 +86,11 @@ export default function RelatedProducts({ productos, titulo = 'Descubre más pro
                     {sticker.label}
                   </span>
                 )}
+
+                <div className="hidden md:flex absolute inset-0 bg-black/0 group-hover:bg-black/10 items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                  <button onClick={() => handleQuickView(producto)} className="bg-white p-2 rounded-full shadow-lg"><Eye className="w-4 h-4" /></button>
+                  <button onClick={() => handleAddToCart(producto)} className="bg-sky-500 p-2 rounded-full shadow-lg"><ShoppingCart className="w-4 h-4 text-white" /></button>
+                </div>
               </div>
 
               {/* Info */}
@@ -89,12 +112,25 @@ export default function RelatedProducts({ productos, titulo = 'Descubre más pro
                       </p>
                     )}
                   </div>
+                  <button onClick={() => handleAddToCart(producto)} className="w-8 h-8 bg-sky-500 hover:bg-sky-600 rounded-full flex items-center justify-center transition-colors md:hidden">
+                    <ShoppingCart className="w-4 h-4 text-white" />
+                  </button>
                 </div>
               </div>
             </div>
           );
         })}
       </div>
+
+      <QuickViewModal
+        isOpen={isQuickViewOpen}
+        onClose={() => setIsQuickViewOpen(false)}
+        producto={quickViewProduct}
+        onAddToCart={(p) => {
+          addToCart(p);
+          openCart();
+        }}
+      />
     </section>
   );
 }

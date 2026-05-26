@@ -1,81 +1,51 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/shared/lib/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import Icon from '@/components/ui/Icon';
-
-interface Address {
-  id: number;
-  etiqueta: 'casa' | 'trabajo' | 'otro';
-  destinatario: string;
-  telefono: string;
-  pais: string;
-  departamento: string;
-  provincia: string;
-  distrito: string;
-  avenida: string;
-  numero: string;
-  pisoLote: string;
-  referencia: string;
-  is_default: boolean;
-}
-
-const mockAddresses: Address[] = [
-  {
-    id: 1,
-    etiqueta: 'casa',
-    destinatario: 'Jeyson Demo',
-    telefono: '+51 900 000 123',
-    pais: 'Perú',
-    departamento: 'Lima',
-    provincia: 'Lima',
-    distrito: 'Miraflores',
-    avenida: 'Av. Larco',
-    numero: '123',
-    pisoLote: 'Dpto 501',
-    referencia: 'Frente al parque central',
-    is_default: true,
-  },
-  {
-    id: 2,
-    etiqueta: 'trabajo',
-    destinatario: 'Jeyson Demo',
-    telefono: '+51 900 000 456',
-    pais: 'Perú',
-    departamento: 'Lima',
-    provincia: 'Lima',
-    distrito: 'San Isidro',
-    avenida: 'Av. Javier Prado',
-    numero: '456',
-    pisoLote: 'Piso 10',
-    referencia: 'Edificio Torre Azul',
-    is_default: false,
-  },
-];
+import { addressApi, Address } from '@/shared/lib/api/addressRepository';
 
 export default function CustomerAddressesPage() {
   const { isAuthenticated, loading } = useAuth();
   const router = useRouter();
-  
-  const [addresses, setAddresses] = useState<Address[]>(mockAddresses);
+
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [fetching, setFetching] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingAddress, setEditingAddress] = useState<Address | null>(null);
-  
+
   const [formData, setFormData] = useState<Partial<Address>>({
     etiqueta: undefined,
     destinatario: '',
-    telefono: '',
     pais: 'Perú',
     departamento: '',
     provincia: '',
     distrito: '',
     avenida: '',
     numero: '',
-    pisoLote: '',
+    piso_lote: '',
     referencia: '',
     is_default: false,
   });
+
+  const loadAddresses = useCallback(async () => {
+    try {
+      setFetching(true);
+      const data = await addressApi.list();
+      setAddresses(data);
+    } catch {
+      setAddresses([]);
+    } finally {
+      setFetching(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!loading && isAuthenticated) {
+      loadAddresses();
+    }
+  }, [loading, isAuthenticated, loadAddresses]);
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
@@ -88,14 +58,13 @@ export default function CustomerAddressesPage() {
     setFormData({
       etiqueta: undefined,
       destinatario: '',
-      telefono: '',
       pais: 'Perú',
       departamento: '',
       provincia: '',
       distrito: '',
       avenida: '',
       numero: '',
-      pisoLote: '',
+      piso_lote: '',
       referencia: '',
       is_default: addresses.length === 0,
     });
@@ -104,58 +73,88 @@ export default function CustomerAddressesPage() {
 
   const openEditModal = (address: Address) => {
     setEditingAddress(address);
-    setFormData({ ...address });
+    setFormData({
+      etiqueta: address.etiqueta,
+      destinatario: address.destinatario,
+      pais: address.pais,
+      departamento: address.departamento,
+      provincia: address.provincia,
+      distrito: address.distrito,
+      avenida: address.avenida,
+      numero: address.numero,
+      piso_lote: address.piso_lote,
+      referencia: address.referencia,
+      is_default: address.is_default,
+    });
     setShowModal(true);
   };
 
-  const deleteAddress = (id: number) => {
-    if (confirm('¿Eliminar Dirección? Esta ubicación deje de estar disponible.')) {
-      setAddresses(addresses.filter(a => a.id !== id));
+  const deleteAddress = async (id: number) => {
+    if (confirm('¿Eliminar Dirección? Esta ubicación dejará de estar disponible.')) {
+      try {
+        await addressApi.delete(id);
+        setAddresses(prev => prev.filter(a => a.id !== id));
+      } catch (err) {
+        console.error('Error al eliminar:', err);
+      }
     }
   };
 
-  const setAsDefault = (id: number) => {
-    setAddresses(addresses.map(a => ({
-      ...a,
-      is_default: a.id === id,
-    })));
+  const setAsDefault = async (id: number) => {
+    try {
+      const updated = await addressApi.setDefault(id);
+      setAddresses(prev => prev.map(a => ({
+        ...a,
+        is_default: a.id === updated.id,
+      })));
+    } catch (err) {
+      console.error('Error al establecer como predeterminada:', err);
+    }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    let updatedAddresses = [...addresses];
-    
-    if (formData.is_default) {
-      updatedAddresses = updatedAddresses.map(a => ({ ...a, is_default: false }));
+    try {
+      const payload = {
+        etiqueta: formData.etiqueta,
+        destinatario: formData.destinatario,
+        pais: formData.pais,
+        departamento: formData.departamento,
+        provincia: formData.provincia,
+        distrito: formData.distrito,
+        avenida: formData.avenida,
+        numero: formData.numero,
+        piso_lote: formData.piso_lote,
+        referencia: formData.referencia,
+        is_default: formData.is_default,
+      };
+      if (editingAddress) {
+        const updated = await addressApi.update(editingAddress.id, payload);
+        setAddresses(prev => prev.map(a => a.id === updated.id ? updated : a));
+      } else {
+        const created = await addressApi.create(payload);
+        setAddresses(prev => [...prev, created]);
+      }
+      setShowModal(false);
+    } catch (err) {
+      console.error('Error al guardar:', err);
     }
-    
-    if (editingAddress) {
-      updatedAddresses = updatedAddresses.map(a => 
-        a.id === editingAddress.id ? { ...a, ...formData } as Address : a
-      );
-    } else {
-      updatedAddresses.push({ ...formData, id: Date.now() } as Address);
-    }
-    
-    setAddresses(updatedAddresses);
-    setShowModal(false);
   };
 
   const getLabelStyles = (etiqueta: string | undefined) => {
     switch (etiqueta) {
       case 'casa':
-        return { icon: 'Home', grad: 'from-sky-500 to-[#11B4FC]', color: 'text-sky-500', label: 'Casa' };
+        return { icon: 'Home', grad: 'from-sky-500 to-[#11B4FC] dark:from-[var(--icons-green)] dark:to-lime-200', color: 'text-sky-500 dark:text-[var(--icons-green)]', label: 'Casa' };
       case 'trabajo':
-        return { icon: 'Building2', grad: 'from-[#11B4FC] to-[#95EA64]', color: 'text-blue-500', label: 'Trabajo' };
+        return { icon: 'Building2', grad: 'from-[#11B4FC] to-[#95EA64] dark:from-[var(--icons-green)] dark:to-lime-200', color: 'text-blue-500 dark:text-[var(--icons-green)]', label: 'Trabajo' };
       case 'otro':
-        return { icon: 'MapPin', grad: 'from-[#95EA64] to-[#F1C40F]', color: 'text-emerald-500', label: 'Otro' };
+        return { icon: 'MapPin', grad: 'from-[#95EA64] to-[#F1C40F] dark:from-[var(--icons-green)] dark:to-lime-200', color: 'text-emerald-500 dark:text-[var(--icons-green)]', label: 'Otro' };
       default:
-        return { icon: 'MapPin', grad: 'from-gray-500 to-gray-600', color: 'text-gray-500 dark:text-gray-400', label: 'Otro' };
+        return { icon: 'MapPin', grad: 'from-gray-500 to-gray-600 dark:from-[var(--icons-green)] dark:to-lime-200', color: 'text-gray-500 dark:text-[var(--icons-green)]', label: 'Otro' };
     }
   };
 
-  if (loading) {
+  if (loading || fetching) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-sky-500"></div>
@@ -176,7 +175,7 @@ export default function CustomerAddressesPage() {
         </div>
         <button
           onClick={openAddModal}
-          className="flex items-center gap-3 px-6 py-3 rounded-xl bg-white dark:bg-[var(--bg-secondary)] backdrop-blur-md text-black dark:text-[var(--text-primary)] font-bold text-sm border border-gray-200 dark:border-[var(--border-subtle)] hover:text-sky-500 transition-all"
+          className="flex items-center gap-3 px-6 py-3 rounded-xl bg-white dark:bg-[var(--bg-secondary)] backdrop-blur-md text-black dark:text-[var(--text-primary)] font-bold text-sm border border-gray-200 dark:border-[var(--border-subtle)] hover:text-sky-500 dark:hover:text-[var(--icons-green)] transition-all"
         >
           <Icon name="Plus" className="w-5 h-5" />
           <span>Agregar Dirección</span>
@@ -189,7 +188,7 @@ export default function CustomerAddressesPage() {
           return (
             <div
               key={address.id}
-              className={`bg-white dark:bg-[var(--bg-secondary)] rounded-[2.5rem] shadow-2xl overflow-hidden group/card hover:-translate-y-2 transition-all duration-500 ${address.is_default ? 'ring-2 ring-sky-500/20 bg-gradient-to-br from-white to-sky-50/30 dark:from-[var(--bg-secondary)] dark:to-[var(--bg-muted)]' : ''}`}
+              className={`bg-white dark:bg-[var(--bg-secondary)] rounded-[2.5rem] shadow-2xl overflow-hidden group/card hover:-translate-y-2 transition-all duration-500 ${address.is_default ? 'bg-gradient-to-br from-white to-sky-50/30 dark:from-[var(--bg-secondary)] dark:to-[var(--bg-muted)]' : ''}`}
             >
               <div className={`h-2 bg-gradient-to-r ${styles.grad}`}></div>
               <div className="p-8">
@@ -207,28 +206,21 @@ export default function CustomerAddressesPage() {
                   <h3 className="text-xl font-black text-gray-800 dark:text-[var(--text-primary)]">{styles.label}</h3>
                   <div className="space-y-3 p-5 bg-gray-50 dark:bg-[var(--bg-muted)] rounded-[2rem] border border-gray-100 dark:border-[var(--border-subtle)]">
                     <div className="flex items-start gap-3">
-                      <Icon name="User" className="w-5 h-5 text-sky-500 mt-0.5" />
+                      <Icon name="User" className="w-5 h-5 text-sky-500 dark:text-[var(--icons-green)] mt-0.5" />
                       <div>
                         <p className="text-[9px] font-black text-gray-400 dark:text-gray-400 uppercase">Destinatario</p>
                         <p className="text-sm font-bold text-gray-800 dark:text-[var(--text-primary)]">{address.destinatario}</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <Icon name="Phone" className="w-5 h-5 text-sky-500 mt-0.5" />
-                      <div>
-                        <p className="text-[9px] font-black text-gray-400 dark:text-gray-400 uppercase">Teléfono</p>
-                        <p className="text-sm font-bold text-gray-800 dark:text-[var(--text-primary)]">{address.telefono}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <Icon name="MapPin" className="w-5 h-5 text-sky-500 mt-0.5" />
+                      <Icon name="MapPin" className="w-5 h-5 text-sky-500 dark:text-[var(--icons-green)] mt-0.5" />
                       <div>
                         <p className="text-[9px] font-black text-gray-400 dark:text-gray-400 uppercase">Dirección</p>
                         <p className="text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] leading-snug">
                           {address.avenida} {address.numero}, {address.distrito}
                         </p>
                         {address.referencia && (
-                          <p className="text-xs text-sky-600 font-bold mt-1 italic">Ref: {address.referencia}</p>
+                          <p className="text-xs text-sky-600 dark:text-[var(--icons-green)] font-bold mt-1 italic">Ref: {address.referencia}</p>
                         )}
                       </div>
                     </div>
@@ -237,16 +229,17 @@ export default function CustomerAddressesPage() {
                 <div className="flex gap-3">
                   <button
                     onClick={() => openEditModal(address)}
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gray-100 dark:bg-[var(--bg-muted)] text-gray-600 dark:text-gray-400 dark:text-[var(--text-primary)] text-xs font-bold hover:bg-sky-50 dark:hover:bg-[#2A3F33] hover:text-sky-600 transition-all"
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gray-100 dark:bg-[var(--bg-muted)] text-gray-600 dark:text-gray-400 dark:text-[var(--text-primary)] text-xs font-bold hover:bg-sky-50 dark:hover:bg-[#2A3F33] hover:text-sky-600 dark:hover:text-[var(--icons-green)] transition-all"
                   >
                     <Icon name="Pencil" className="w-4 h-4" />
                     Editar
                   </button>
                   <button
                     onClick={() => setAsDefault(address.id)}
-                    className="w-12 h-12 flex items-center justify-center rounded-xl bg-sky-50 dark:bg-[var(--bg-muted)] text-sky-500 hover:bg-sky-100 dark:hover:bg-[#2A3F33] transition-all"
+                    title={address.is_default ? 'Quitar como predeterminada' : 'Establecer como predeterminada'}
+                    className={`group w-12 h-12 flex items-center justify-center rounded-xl transition-all duration-200 ${address.is_default ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-500 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/30' : 'bg-sky-50 dark:bg-[var(--bg-muted)] text-sky-500 dark:text-[var(--icons-green)] hover:bg-sky-100 dark:hover:bg-[#2A3F33]'} hover:scale-110 active:scale-95`}
                   >
-                    <Icon name="Star" className="w-5 h-5" />
+                    <Icon name="Star" className={`w-5 h-5 transition-all duration-200 group-hover:rotate-12 ${address.is_default ? 'fill-current' : ''}`} style={address.is_default ? { fill: 'currentColor' } : undefined} />
                   </button>
                   <button
                     onClick={() => deleteAddress(address.id)}
@@ -262,16 +255,16 @@ export default function CustomerAddressesPage() {
 
         <button
           onClick={openAddModal}
-          className="border-2 border-dashed border-sky-200 dark:border-[var(--border-subtle)] rounded-[2.5rem] shadow-xl bg-white/50 dark:bg-[var(--bg-secondary)]/50 hover:bg-sky-50/30 dark:hover:bg-[#182420]/30 hover:border-sky-400 transition-all duration-500 cursor-pointer flex flex-col items-center justify-center p-8 min-h-[340px]"
+          className="border-2 border-dashed border-sky-200 dark:border-[var(--border-subtle)] rounded-[2.5rem] shadow-xl bg-white/50 dark:bg-[var(--bg-secondary)]/50 hover:bg-sky-50/30 dark:hover:bg-[#1f2f1f]/30 hover:border-sky-400 dark:hover:border-[var(--icons-green)] transition-all duration-500 cursor-pointer flex flex-col items-center justify-center p-8 min-h-[340px]"
         >
           <div className="relative mb-6">
-            <div className="w-20 h-20 bg-sky-500 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform duration-500">
+            <div className="w-20 h-20 bg-sky-500 dark:bg-[var(--brand-green)] rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform duration-500">
               <Icon name="Plus" className="w-10 h-10 text-white" />
             </div>
           </div>
           <div className="text-center space-y-2">
             <h3 className="text-xl font-black text-sky-900 dark:text-[var(--text-primary)]">Nueva Dirección</h3>
-            <p className="text-xs font-bold text-sky-400 max-w-[150px] mx-auto">Registra un nuevo punto de entrega</p>
+            <p className="text-xs font-bold text-sky-400 dark:text-[var(--icons-green)] max-w-[150px] mx-auto">Registra un nuevo punto de entrega</p>
           </div>
         </button>
       </div>
@@ -282,7 +275,7 @@ export default function CustomerAddressesPage() {
             className="bg-white dark:bg-[var(--bg-secondary)] rounded-[3.5rem] max-w-2xl w-full max-h-[95vh] overflow-hidden shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="bg-gradient-to-r from-sky-500 to-sky-300 p-8 text-white relative">
+            <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[#1A3A32] dark:to-[var(--brand-green)] p-8 text-white relative">
               <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl" />
               <div className="relative z-10 flex items-center justify-between">
                 <div className="flex items-center gap-4">
@@ -310,7 +303,7 @@ export default function CustomerAddressesPage() {
                     value={formData.etiqueta || ''}
                     onChange={(e) => setFormData({ ...formData, etiqueta: e.target.value as 'casa' | 'trabajo' | 'otro' | undefined })}
                     required
-                    className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500"
+                    className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)]"
                   >
                     <option value="">Seleccionar...</option>
                     <option value="casa">🏠 Casa</option>
@@ -325,17 +318,7 @@ export default function CustomerAddressesPage() {
                     value={formData.destinatario}
                     onChange={(e) => setFormData({ ...formData, destinatario: e.target.value })}
                     required
-                    className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-gray-400 dark:text-gray-400 uppercase">Teléfono de contacto</label>
-                  <input
-                    type="tel"
-                    value={formData.telefono}
-                    onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
-                    required
-                    className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500"
+                    className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)]"
                   />
                 </div>
                 <div className="space-y-2">
@@ -345,7 +328,7 @@ export default function CustomerAddressesPage() {
                     value={formData.pais}
                     onChange={(e) => setFormData({ ...formData, pais: e.target.value })}
                     required
-                    className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500"
+                    className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)]"
                   />
                 </div>
                 <div className="space-y-2">
@@ -354,7 +337,7 @@ export default function CustomerAddressesPage() {
                     value={formData.departamento}
                     onChange={(e) => setFormData({ ...formData, departamento: e.target.value })}
                     required
-                    className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500"
+                    className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)]"
                   >
                     <option value="">Seleccionar...</option>
                     <option value="Lima">Lima</option>
@@ -371,7 +354,7 @@ export default function CustomerAddressesPage() {
                     value={formData.provincia}
                     onChange={(e) => setFormData({ ...formData, provincia: e.target.value })}
                     required
-                    className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500"
+                    className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)]"
                   />
                 </div>
                 <div className="space-y-2">
@@ -381,7 +364,7 @@ export default function CustomerAddressesPage() {
                     value={formData.distrito}
                     onChange={(e) => setFormData({ ...formData, distrito: e.target.value })}
                     required
-                    className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500"
+                    className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)]"
                   />
                 </div>
               </div>
@@ -393,7 +376,7 @@ export default function CustomerAddressesPage() {
                     value={formData.avenida}
                     onChange={(e) => setFormData({ ...formData, avenida: e.target.value })}
                     required
-                    className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500"
+                    className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)]"
                   />
                 </div>
                 <div className="space-y-2">
@@ -403,36 +386,36 @@ export default function CustomerAddressesPage() {
                     value={formData.numero}
                     onChange={(e) => setFormData({ ...formData, numero: e.target.value })}
                     required
-                    className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500"
+                    className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)]"
                   />
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-gray-400 dark:text-gray-400 uppercase">Piso / Lote / Dpto</label>
                   <input
                     type="text"
-                    value={formData.pisoLote}
-                    onChange={(e) => setFormData({ ...formData, pisoLote: e.target.value })}
-                    className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500"
+                    value={formData.piso_lote || ''}
+                    onChange={(e) => setFormData({ ...formData, piso_lote: e.target.value })}
+                    className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)]"
                   />
                 </div>
               </div>
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-gray-400 dark:text-gray-400 uppercase">Puntos de referencia</label>
                 <textarea
-                  value={formData.referencia}
+                  value={formData.referencia || ''}
                   onChange={(e) => setFormData({ ...formData, referencia: e.target.value })}
                   rows={2}
                   placeholder="Frente al parque, portón verde, etc."
-                  className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500 resize-none"
+                  className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500 resize-none dark:focus:border-[var(--icons-green)]"
                 />
               </div>
               <div className="p-6 bg-sky-50 dark:bg-[var(--bg-muted)]/50 rounded-[2rem] border border-sky-100 dark:border-[var(--border-subtle)]">
                 <label className="flex items-center gap-4 cursor-pointer">
                   <input
                     type="checkbox"
-                    checked={formData.is_default}
+                    checked={formData.is_default || false}
                     onChange={(e) => setFormData({ ...formData, is_default: e.target.checked })}
-                    className="w-5 h-5 accent-sky-500"
+                    className="w-5 h-5 accent-sky-500 dark:accent-[var(--icons-green)]"
                   />
                   <span className="text-xs font-bold text-gray-600 dark:text-gray-400 dark:text-[var(--text-primary)] uppercase">
                     Establecer como dirección principal
@@ -449,7 +432,7 @@ export default function CustomerAddressesPage() {
                 </button>
                 <button
                   type="submit"
-                  className="flex-[2] px-8 py-4 rounded-2xl bg-gradient-to-r from-sky-500 to-sky-600 text-white font-black text-xs uppercase tracking-[0.2em] hover:shadow-lg"
+                  className="flex-[2] px-8 py-4 rounded-2xl bg-gradient-to-r from-sky-500 to-sky-600 dark:from-[#1A3A32] dark:to-[var(--brand-green)] text-white font-black text-xs uppercase tracking-[0.2em] hover:shadow-lg"
                 >
                   Guardar Dirección
                 </button>

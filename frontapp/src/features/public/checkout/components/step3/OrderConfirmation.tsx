@@ -27,7 +27,7 @@ export default function OrderConfirmation() {
     const { orderId, email, total, items, personalData, shippingData, orderData } = result;
 
     const addressLines = orderData.deliveryMethod !== 'pickup'
-        ? [shippingData.avenida, shippingData.numero, shippingData.distrito, shippingData.departamento].filter(Boolean).join(', ')
+        ? [shippingData.avenida, shippingData.numero, shippingData.pisoLote, shippingData.distrito, shippingData.provincia, shippingData.departamento].filter(Boolean).join(', ')
         : 'Retiro en tienda';
 
     return (
@@ -46,9 +46,13 @@ export default function OrderConfirmation() {
 
                         <h2 className="text-3xl font-black text-gray-900 dark:text-[var(--text-primary)] tracking-tight mb-2 uppercase">¡Gracias por tu compra!</h2>
                         <p className="text-xs text-gray-400 dark:text-[var(--text-muted)] font-bold uppercase tracking-widest mb-2">Tu pedido ha sido procesado con éxito</p>
-                        <p className="text-[10px] text-sky-500 dark:text-[var(--brand-sky)] font-bold uppercase tracking-widest mb-6">
+                        <p className="text-[10px] text-sky-500 dark:text-[var(--brand-sky)] font-bold uppercase tracking-widest mb-4">
                             Recibo digital enviado a: <span className="text-gray-900 dark:text-[var(--text-primary)]">{email}</span>
                         </p>
+
+                        <Link href="/" className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-sky-50 dark:bg-[var(--bg-muted)] border border-sky-100 dark:border-[var(--border-subtle)] text-sky-600 dark:text-[var(--brand-sky)] hover:bg-sky-100 dark:hover:bg-[#1b2b24] font-black text-xs uppercase tracking-widest transition-all mb-6">
+                            <Home className="w-4 h-4" /> Volver a la Tienda
+                        </Link>
 
                         <div className="inline-flex items-center gap-3 px-6 py-3 bg-gray-50 dark:bg-[var(--bg-muted)] rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)] mb-8">
                             <span className="text-[10px] font-black text-gray-400 dark:text-[var(--text-muted)] uppercase tracking-widest">Orden ID:</span>
@@ -80,9 +84,9 @@ export default function OrderConfirmation() {
                         {/* Actions */}
                         <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6">
                             <Link href="/" className="px-8 py-4 rounded-2xl border-2 border-gray-100 dark:border-[var(--border-subtle)] text-gray-500 dark:text-[var(--text-muted)] hover:bg-gray-50 dark:hover:bg-[var(--bg-muted)] font-black text-xs uppercase tracking-widest transition-all text-center flex items-center justify-center gap-2">
-                                <Home className="w-4 h-4" /> Ir al Inicio
+                                <Home className="w-4 h-4" /> Volver a la Tienda
                             </Link>
-                            <Link href="/seller/orders" className="px-8 py-4 rounded-2xl bg-gray-900 dark:bg-[var(--bg-secondary)] text-white dark:text-[var(--text-primary)] font-black text-xs uppercase tracking-widest hover:shadow-xl transition-all text-center flex items-center justify-center gap-2">
+                            <Link href="/customer/orders" className="px-8 py-4 rounded-2xl bg-gray-900 dark:bg-[var(--bg-secondary)] text-white dark:text-[var(--text-primary)] font-black text-xs uppercase tracking-widest hover:shadow-xl transition-all text-center flex items-center justify-center gap-2">
                                 Ver Mis Pedidos
                             </Link>
                         </div>
