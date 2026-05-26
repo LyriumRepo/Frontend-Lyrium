@@ -47,6 +47,10 @@ export interface NutritionalInfo {
 
 // ── Producto ─────────────────────────────────────────────────────────────────
 
+export interface AttributeGroup {
+  values: AttributeValue[];
+}
+
 export interface LaravelProduct {
   id: string;
   name: string;
@@ -69,10 +73,14 @@ export interface LaravelProduct {
   created_at: string | null;
   updated_at: string | null;
 
-  // Características — ya aplanadas desde el backend
-  characteristics: AttributeValue[]; // mainAttributes → tabla key/value
-  additional_info: AttributeValue[]; // additionalAttributes
-  nutritional_info: NutritionalInfo | null; // ficha nutricional
+  // Atributos desde API (ProductResource)
+  mainAttributes: AttributeGroup[];
+  additionalAttributes: AttributeGroup[];
+
+  // Alias planos (transformación opcional desde el backend)
+  characteristics: AttributeValue[];
+  additional_info: AttributeValue[];
+  nutritional_info: NutritionalInfo | null;
 
   // Solo physical
   weight?: number | null;

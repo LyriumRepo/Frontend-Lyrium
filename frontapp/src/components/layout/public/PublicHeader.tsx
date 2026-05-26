@@ -8,7 +8,6 @@ import ThemeToggle from '@/components/layout/shared/ThemeToggle';
 import TopBanner from './TopBanner';
 import DesktopNav from './DesktopNav';
 import MobileMenu from './MobileMenu';
-import { SearchBar } from '@/components/home';
 import { menuItems as fallbackMenuItems, megaMenuData as fallbackMegaMenuData } from '@/data/menuData';
 import { useMegaMenu } from '@/shared/hooks/useMegaMenu';
 import { useCarritoStore } from '@/store/carritoStore';
@@ -44,10 +43,6 @@ export default function PublicHeader() {
                         />
                     </Link>
 
-                    {/* Search bar - visible on all pages */}
-                    <div className="hidden md:block flex-1 max-w-xl">
-                        <SearchBar />
-                    </div>
 
                     <div className="flex items-center gap-4">
                         {/* Desktop: Session / Cart */}

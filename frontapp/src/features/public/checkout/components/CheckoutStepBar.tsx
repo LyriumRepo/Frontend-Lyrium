@@ -98,7 +98,7 @@ export default function CheckoutStepBar() {
 
                                 {/* Connector (placed after the step column) */}
                                 {idx < STEPS.length - 1 && (
-                                    <div className="flex-1 h-3 flex items-start px-2 relative z-0 -mt-10"> {/* Negative margin to align with circle vertical center */}
+                                    <div className="flex-1 h-3 flex items-start px-2 relative z-0 -mt-10">
                                         <div className="w-full h-1.5 bg-gray-100 dark:bg-[var(--bg-muted)] rounded-full overflow-hidden transition-all duration-500">
                                             <div
                                                 className="h-full rounded-full transition-all duration-700"

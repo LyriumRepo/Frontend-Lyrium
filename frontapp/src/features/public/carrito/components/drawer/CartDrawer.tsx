@@ -36,7 +36,10 @@ function formatPrice(n: number): string {
 }
 
 function resolveImg(url?: string | null): string {
-  return url && url.startsWith("http") ? url : "/no-image.png";
+  if (!url) return "/no-image.png";
+  if (url.startsWith("http")) return url;
+  if (url.startsWith("/")) return url;
+  return "/no-image.png";
 }
 
 

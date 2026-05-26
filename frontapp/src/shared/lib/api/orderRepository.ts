@@ -44,10 +44,19 @@ export interface OrderResource {
 }
 
 export interface CreateOrderPayload {
-  shipping_address?: OrderAddress;
-  billing_address?: OrderAddress;
   payment_method?: string;
+  shipping_name?: string;
+  shipping_email?: string;
+  shipping_phone?: string;
+  shipping_address?: string;
+  shipping_city?: string;
+  shipping_postal_code?: string;
+  shipping_notes?: string;
+  shipping_type?: string;
+  shipping_cost?: number;
+  coupon_code?: string;
   notes?: string;
+  billing_address?: OrderAddress;
 }
 
 async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
@@ -101,7 +110,7 @@ export const orderApi = {
   },
 
   getMyOrders: async (page = 1): Promise<{ data: OrderResource[]; pagination: { current_page: number; per_page: number; total: number; total_pages: number } }> => {
-    const response = await request<ApiResponse<unknown>>(`/customer/orders?page=${page}`);
+    const response = await request<ApiResponse<unknown>>(`/orders?page=${page}`);
     const payload = response.data as any;
     const list = Array.isArray(payload) ? payload : (payload?.data ?? []);
     return {
@@ -111,8 +120,8 @@ export const orderApi = {
   },
 
   updateStatus: async (id: number, status: OrderStatus): Promise<OrderResource> => {
-    const response = await request<ApiResponse<OrderResource>>(`/seller/orders/${id}/status`, {
-      method: 'PATCH',
+    const response = await request<ApiResponse<OrderResource>>(`/orders/${id}/status`, {
+      method: 'PUT',
       body: JSON.stringify({ status }),
     });
     return response.data!;
@@ -139,5 +148,30 @@ export const orderApi = {
       body: JSON.stringify({ status: 'cancelled' }),
     });
     return response.data!;
+  },
+
+  downloadReceipt: async (orderId: number): Promise<void> => {
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${LARAVEL_API_URL}/orders/${orderId}/receipt`, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/pdf',
+        ...headers,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Error al descargar el comprobante');
+    }
+
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `comprobante-${orderId}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
   },
 };

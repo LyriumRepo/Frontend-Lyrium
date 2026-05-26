@@ -38,6 +38,7 @@ interface EnvioInfo {
 
 interface Order {
   id: string;
+  originalId: number;
   fecha: string;
   hora: string;
   tienda: string;
@@ -166,6 +167,13 @@ function parseDateToDisplay(iso: string): { fecha: string; hora: string } {
   }
 }
 
+const SHIPPING_TYPE_MAP: Record<string, TipoEnvio> = {
+  delivery: 'domicilio',
+  pickup: 'sucursal',
+  service_home: 'atencion_domicilio',
+  service_store: 'atencion_sede',
+};
+
 function mapOrderResourceToOrder(raw: OrderResource): Order {
   const item = raw as any;
   const createdAt = item.createdAt ?? item.created_at;
@@ -178,9 +186,12 @@ function mapOrderResourceToOrder(raw: OrderResource): Order {
     ? `${itemCount} ${itemCount === 1 ? 'producto' : 'productos'}`
     : 'Sin productos';
   const statusKey = item.status ?? 'pending_seller';
+  const shippingTypeRaw = item.shipping?.type;
+  const tipoEnvio = shippingTypeRaw ? (SHIPPING_TYPE_MAP[shippingTypeRaw] ?? 'domicilio') : 'domicilio';
 
   return {
     id: item.orderNumber ?? item.order_number ?? `#ORD-${item.id}`,
+    originalId: item.id,
     fecha,
     hora,
     tienda,
@@ -189,7 +200,7 @@ function mapOrderResourceToOrder(raw: OrderResource): Order {
     estado: STATUS_MAP[statusKey] ?? 'validado_vendedor',
     estadoLabel: item.statusLabel ?? STATUS_LABEL_MAP[statusKey] ?? statusKey,
     tipo: 'productos',
-    tipo_envio: 'domicilio',
+    tipo_envio: tipoEnvio,
     currentStep: STATUS_STEP_MAP[statusKey] ?? 1,
     envio: item.shipping
       ? {
@@ -1161,7 +1172,16 @@ export default function CustomerOrdersPage() {
                 >
                   Cerrar Ventana
                 </button>
-                <button className="py-5 rounded-2xl bg-gradient-to-r from-green-400 to-sky-500 dark:from-[var(--brand-green)] dark:to-[var(--brand-green-hover)] text-white font-black text-xs uppercase tracking-[0.2em] hover:shadow-lg hover:shadow-sky-200 transition-all flex items-center justify-center gap-3">
+                <button
+                  onClick={async () => {
+                    try {
+                      await orderApi.downloadReceipt(selectedOrder.originalId);
+                    } catch (err) {
+                      console.error('Error al descargar comprobante:', err);
+                    }
+                  }}
+                  className="py-5 rounded-2xl bg-gradient-to-r from-green-400 to-sky-500 dark:from-[var(--brand-green)] dark:to-[var(--brand-green-hover)] text-white font-black text-xs uppercase tracking-[0.2em] hover:shadow-lg hover:shadow-sky-200 transition-all flex items-center justify-center gap-3"
+                >
                   <Icon name="Upload" className="w-5 h-5" />
                   Descargar Comprobante
                 </button>

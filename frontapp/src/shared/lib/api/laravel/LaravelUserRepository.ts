@@ -1,16 +1,6 @@
 import { getToken } from '../token-store';
-import { User, UserRole, UserLocation } from '@/lib/types/auth';
+import { User, UserRole } from '@/lib/types/auth';
 import { IUserRepository, UserFilters, UpdateUserInput } from '../contracts/IUserRepository';
-
-export interface UpdateUserInputExtended extends UpdateUserInput {
-    phone?: string;
-    document_type?: string;
-    document_number?: string;
-    location?: UserLocation;
-    admin_nombre?: string;
-    admin_dni?: string;
-    phone_2?: string;
-}
 
 export class LaravelUserRepository implements IUserRepository {
     private getBaseUrl(): string {
@@ -49,8 +39,6 @@ export class LaravelUserRepository implements IUserRepository {
     private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
         const baseUrl = this.getBaseUrl();
         const authHeaders = await this.getAuthHeaders();
-        
-        console.log('[LaravelUserRepository] Making request to:', endpoint, 'Token exists:', !!authHeaders.Authorization);
 
         const response = await fetch(`${baseUrl}${endpoint}`, {
             ...options,
@@ -62,11 +50,9 @@ export class LaravelUserRepository implements IUserRepository {
             },
         });
 
-        console.log('[LaravelUserRepository] Response status:', response.status);
-
         if (!response.ok) {
             if (response.status === 401) {
-                console.log('[LaravelUserRepository] 401 Unauthorized - token may be invalid');
+                console.log('[LaravelUserRepository] 401 Unauthorized');
                 return null as unknown as T;
             }
             throw new Error(`Laravel API Error: ${response.status}`);
@@ -104,11 +90,30 @@ export class LaravelUserRepository implements IUserRepository {
         return this.request<User[]>(`/users/role/${role}`);
     }
 
-    async updateUser(id: number, input: UpdateUserInputExtended): Promise<User> {
+    async updateUser(id: number, input: UpdateUserInput): Promise<User> {
         return this.request<User>(`/users/profile`, {
             method: 'PUT',
             body: JSON.stringify(input),
         });
+    }
+
+    async uploadAvatar(file: File): Promise<{ avatar: string }> {
+        const token = await this.getToken();
+        const baseUrl = this.getBaseUrl();
+        const formData = new FormData();
+        formData.append('avatar', file);
+
+        const response = await fetch(`${baseUrl}/users/avatar`, {
+            method: 'POST',
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+            body: formData,
+        });
+
+        if (!response.ok) {
+            throw new Error(`Avatar upload failed: ${response.status}`);
+        }
+
+        return response.json();
     }
 
     async deleteUser(id: number): Promise<boolean> {

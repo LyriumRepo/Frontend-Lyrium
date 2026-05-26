@@ -9,6 +9,7 @@ import { wishlistApi, WishlistItem as WishlistItemType } from '@/shared/lib/api/
 interface WishlistItem {
   id: number;
   nombre: string;
+  slug: string;
   tienda: string;
   precio: number;
   precioOriginal?: number;
@@ -36,6 +37,7 @@ function mapApiItem(item: WishlistItemType): WishlistItem {
   return {
     id: item.id,
     nombre: p?.name ?? 'Producto',
+    slug: p?.slug ?? '',
     tienda: p?.store_name ?? 'Tienda',
     precio: p?.price ?? 0,
     precioOriginal: p?.original_price ?? undefined,
@@ -219,7 +221,7 @@ export default function CustomerWishlistPage() {
                   )}
                 </div>
                 <a
-                  href={`/producto/${item.nombre.toLowerCase().replace(/\s+/g, '-')}`}
+                  href={`/producto/${item.slug}`}
                   className="w-full px-4 py-2 rounded-lg bg-sky-500 dark:bg-[var(--brand-green)] text-white text-sm font-bold hover:bg-sky-600 dark:hover:bg-[var(--brand-green-hover)] transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
                 >
                   <Icon name="ShoppingCart" className="w-4 h-4" />

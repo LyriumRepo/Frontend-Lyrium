@@ -312,8 +312,10 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit }:
                                                     { val: null, label: 'Ninguno', color: 'gray' },
                                                     { val: 'nuevo', label: 'Nuevo', color: 'sky' },
                                                     { val: 'oferta', label: 'Oferta', color: 'lime' },
-                                                    { val: 'bestseller', label: 'Top', color: 'purple' },
                                                     { val: 'descuento', label: 'Desc %', color: 'emerald' },
+                                                    { val: 'bestseller', label: 'Top', color: 'purple' },
+                                                    { val: 'liquidacion', label: 'Liquidación', color: 'rose' },
+                                                    { val: 'envio_gratis', label: 'Envío Gratis', color: 'amber' },
                                                 ].map((opt) => (
                                                     <label key={opt.val || 'none'} className="cursor-pointer">
                                                         <input
@@ -328,7 +330,9 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit }:
                                                                         : opt.color === 'lime' ? 'bg-lime-400 text-white border-lime-400 scale-105 shadow-sm'
                                                                             : opt.color === 'purple' ? 'bg-purple-500 text-white border-purple-500 scale-105 shadow-sm'
                                                                                 : opt.color === 'emerald' ? 'bg-emerald-500 text-white border-emerald-500 scale-105 shadow-sm'
-                                                                                    : 'bg-gray-900 text-white border-gray-900 scale-105 shadow-sm'
+                                                                                    : opt.color === 'rose' ? 'bg-rose-500 text-white border-rose-500 scale-105 shadow-sm'
+                                                                                        : opt.color === 'amber' ? 'bg-amber-500 text-white border-amber-500 scale-105 shadow-sm'
+                                                                                            : 'bg-gray-900 text-white border-gray-900 scale-105 shadow-sm'
                                                                 : 'bg-[var(--bg-card)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-[var(--border-default)]'}`}>
                                                             {opt.label}
                                                         </div>

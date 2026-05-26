@@ -6,6 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import {
   ArrowLeft,
+  Home,
   Star,
   Heart,
   Share2,
@@ -42,6 +43,7 @@ import type {
 } from '@/features/public/product/types';
 import { useAddToCart } from '@/features/public/product/hooks/useAddToCart';
 import { useReviews } from '@/features/public/product/hooks/useReview';
+import { useWishlist } from '@/shared/hooks/useWishlist';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -89,7 +91,7 @@ function ProductGallery({
   return (
     <div className="space-y-3">
       {/* Imagen principal */}
-      <div className="relative aspect-square overflow-hidden bg-[#f2f0ea] border border-[rgba(15,14,12,0.08)] group">
+      <div className="relative aspect-square overflow-hidden bg-[#f2f0ea] dark:bg-[var(--bg-secondary)] border border-[rgba(15,14,12,0.08)] dark:border-[var(--border-subtle)] group">
         <Image
           key={src}
           src={src}
@@ -108,10 +110,10 @@ function ProductGallery({
               aria-label="Anterior"
               className="
                 absolute left-3 top-1/2 -translate-y-1/2
-                w-9 h-9 bg-white border border-[rgba(15,14,12,0.1)]
+                w-9 h-9 bg-white dark:bg-[var(--bg-card)] border border-[rgba(15,14,12,0.1)] dark:border-[var(--border-subtle)]
                 flex items-center justify-center
                 opacity-0 group-hover:opacity-100 transition-opacity duration-200
-                text-[#3a3935] hover:bg-[#f2f0ea]
+                text-[#3a3935] dark:text-[var(--text-primary)] hover:bg-[#f2f0ea] dark:bg-[var(--bg-secondary)] dark:hover:bg-[var(--bg-card)]
               "
             >
               <ChevronLeft className="w-4 h-4" />
@@ -121,10 +123,10 @@ function ProductGallery({
               aria-label="Siguiente"
               className="
                 absolute right-3 top-1/2 -translate-y-1/2
-                w-9 h-9 bg-white border border-[rgba(15,14,12,0.1)]
+                w-9 h-9 bg-white dark:bg-[var(--bg-card)] border border-[rgba(15,14,12,0.1)] dark:border-[var(--border-subtle)]
                 flex items-center justify-center
                 opacity-0 group-hover:opacity-100 transition-opacity duration-200
-                text-[#3a3935] hover:bg-[#f2f0ea]
+                text-[#3a3935] dark:text-[var(--text-primary)] hover:bg-[#f2f0ea] dark:bg-[var(--bg-secondary)] dark:hover:bg-[var(--bg-card)]
               "
             >
               <ChevronRight className="w-4 h-4" />
@@ -134,7 +136,7 @@ function ProductGallery({
 
         {/* Contador */}
         {images.length > 1 && (
-          <div className="absolute bottom-3 right-3 text-[10px] tracking-[.06em] text-[#7a7970]">
+          <div className="absolute bottom-3 right-3 text-[10px] tracking-[.06em] text-[#7a7970] dark:text-[var(--text-secondary)]">
             {active + 1} / {images.length}
           </div>
         )}
@@ -152,8 +154,8 @@ function ProductGallery({
                 border transition-all duration-200
                 ${
                   i === active
-                    ? 'border-[#0f0e0c]'
-                    : 'border-transparent opacity-50 hover:opacity-100 hover:border-[rgba(15,14,12,0.3)]'
+                    ? 'border-[#0f0e0c] dark:border-[var(--text-primary)]'
+                    : 'border-transparent opacity-50 hover:opacity-100 hover:border-[rgba(15,14,12,0.3)] dark:hover:border-[var(--border-subtle)]'
                 }
               `}
             >
@@ -162,7 +164,7 @@ function ProductGallery({
                 alt={img.alt ?? name}
                 fill
                 sizes="60px"
-                className="object-contain p-1 bg-[#f2f0ea]"
+                className="object-contain p-1 bg-[#f2f0ea] dark:bg-[var(--bg-secondary)]"
               />
             </button>
           ))}
@@ -197,13 +199,13 @@ function Stars({ value, size = 'sm' }: { value: number; size?: 'sm' | 'md' }) {
 const STICKER_MAP: Record<string, { label: string; className: string }> = {
   oferta: { label: 'Oferta', className: 'bg-[#c0392b] text-white' },
   liquidacion: { label: 'Liquidación', className: 'bg-[#c0392b] text-white' },
-  nuevo: { label: 'Nuevo', className: 'bg-[#1a3a2a] text-[#e8f5ee]' },
+  nuevo: { label: 'Nuevo', className: 'bg-[#1a3a2a] dark:bg-green-900 text-[#e8f5ee] dark:text-green-100' },
   bestseller: { label: 'Más vendido', className: 'bg-[#3a3935] text-white' },
   envio_gratis: {
     label: 'Envío gratis',
-    className: 'bg-[#1a3a2a] text-[#e8f5ee]',
+    className: 'bg-[#1a3a2a] dark:bg-green-900 text-[#e8f5ee] dark:text-green-100',
   },
-  descuento: { label: 'Descuento', className: 'bg-[#c9a84c] text-[#0f0e0c]' },
+  descuento: { label: 'Descuento', className: 'bg-[#c9a84c] text-[#0f0e0c] dark:text-[var(--text-primary)]' },
 };
 
 function StickerBadge({ sticker }: { sticker: string | null }) {
@@ -239,30 +241,30 @@ function NutritionalPanel({
   );
 
   return (
-    <div className="border border-[rgba(15,14,12,0.1)]">
+    <div className="border border-[rgba(15,14,12,0.1)] dark:border-[var(--border-subtle)]">
       {/* Header toggle */}
       <button
         onClick={() => setOpen((o) => !o)}
         className="
           w-full flex items-center justify-between
           px-4 py-3
-          hover:bg-[#f2f0ea] transition-colors duration-150
+          hover:bg-[#f2f0ea] dark:bg-[var(--bg-secondary)] dark:hover:bg-[var(--bg-card)] transition-colors duration-150
         "
       >
         <div className="flex items-center gap-2.5">
-          <Leaf className="w-4 h-4 text-[#2d5e42]" />
-          <span className="text-[11px] font-medium tracking-[.1em] uppercase text-[#3a3935]">
+          <Leaf className="w-4 h-4 text-[#2d5e42] dark:text-[var(--brand-green)]" />
+          <span className="text-[11px] font-medium tracking-[.1em] uppercase text-[#3a3935] dark:text-[var(--text-primary)]">
             Información nutricional
           </span>
           {calorieRow && (
-            <span className="flex items-center gap-1 px-2 py-[2px] bg-[#1a3a2a] text-[#e8f5ee] text-[10px] tracking-[.06em]">
+            <span className="flex items-center gap-1 px-2 py-[2px] bg-[#1a3a2a] dark:bg-green-900 text-[#e8f5ee] dark:text-green-100 text-[10px] tracking-[.06em]">
               <Flame className="w-2.5 h-2.5" />
               {calorieRow.value}
             </span>
           )}
         </div>
         <ChevronDown
-          className={`w-4 h-4 text-[#7a7970] transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+          className={`w-4 h-4 text-[#7a7970] dark:text-[var(--text-secondary)] transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
         />
       </button>
 
@@ -273,22 +275,22 @@ function NutritionalPanel({
           ${open ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0'}
         `}
       >
-        <div className="border-t border-[rgba(15,14,12,0.08)]">
+        <div className="border-t border-[rgba(15,14,12,0.08)] dark:border-[var(--border-subtle)]">
           {info.serving_note && (
-            <p className="px-4 py-2 text-[11px] text-[#7a7970] italic bg-[#f2f0ea] border-b border-[rgba(15,14,12,0.08)]">
+            <p className="px-4 py-2 text-[11px] text-[#7a7970] dark:text-[var(--text-secondary)] italic bg-[#f2f0ea] dark:bg-[var(--bg-secondary)] border-b border-[rgba(15,14,12,0.08)] dark:border-[var(--border-subtle)]">
               {info.serving_note}
             </p>
           )}
           <table className="w-full text-[12px]">
             <thead>
-              <tr className="bg-[#f2f0ea]">
-                <th className="px-4 py-2 text-left text-[10px] font-medium tracking-[.1em] uppercase text-[#7a7970]">
+              <tr className="bg-[#f2f0ea] dark:bg-[var(--bg-secondary)]">
+                <th className="px-4 py-2 text-left text-[10px] font-medium tracking-[.1em] uppercase text-[#7a7970] dark:text-[var(--text-secondary)]">
                   Nutriente
                 </th>
-                <th className="px-4 py-2 text-center text-[10px] font-medium tracking-[.1em] uppercase text-[#7a7970]">
+                <th className="px-4 py-2 text-center text-[10px] font-medium tracking-[.1em] uppercase text-[#7a7970] dark:text-[var(--text-secondary)]">
                   Cantidad
                 </th>
-                <th className="px-4 py-2 text-right text-[10px] font-medium tracking-[.1em] uppercase text-[#7a7970]">
+                <th className="px-4 py-2 text-right text-[10px] font-medium tracking-[.1em] uppercase text-[#7a7970] dark:text-[var(--text-secondary)]">
                   % VD
                 </th>
               </tr>
@@ -297,15 +299,15 @@ function NutritionalPanel({
               {info.rows.map((row, i) => (
                 <tr
                   key={i}
-                  className="border-t border-[rgba(15,14,12,0.05)] hover:bg-[#f2f0ea] transition-colors"
+                  className="border-t border-[rgba(15,14,12,0.05)] dark:border-[var(--border-subtle)] hover:bg-[#f2f0ea] dark:bg-[var(--bg-secondary)] dark:hover:bg-[var(--bg-card)] transition-colors"
                 >
-                  <td className="px-4 py-2.5 font-medium text-[#3a3935]">
+                  <td className="px-4 py-2.5 font-medium text-[#3a3935] dark:text-[var(--text-primary)]">
                     {row.label}
                   </td>
-                  <td className="px-4 py-2.5 text-center font-medium text-[#2d5e42]">
+                  <td className="px-4 py-2.5 text-center font-medium text-[#2d5e42] dark:text-[var(--brand-green)]">
                     {row.value}
                   </td>
-                  <td className="px-4 py-2.5 text-right text-[#7a7970]">
+                  <td className="px-4 py-2.5 text-right text-[#7a7970] dark:text-[var(--text-secondary)]">
                     {row.daily_value ?? '—'}
                   </td>
                 </tr>
@@ -327,12 +329,12 @@ function CharacteristicsTable({
   characteristics: LaravelProduct['characteristics'];
   additional_info: LaravelProduct['additional_info'];
 }) {
-  const hasMain = characteristics.length > 0;
-  const hasAdditional = additional_info.length > 0;
+  const hasMain = Array.isArray(characteristics) && characteristics.length > 0;
+  const hasAdditional = Array.isArray(additional_info) && additional_info.length > 0;
 
   if (!hasMain && !hasAdditional) {
     return (
-      <p className="text-[#7a7970] italic text-sm">
+      <p className="text-[#7a7970] dark:text-[var(--text-secondary)] italic text-sm">
         Sin características especificadas.
       </p>
     );
@@ -342,7 +344,7 @@ function CharacteristicsTable({
     <div className="space-y-6">
       {hasMain && (
         <div>
-          <h4 className="text-[10px] font-medium tracking-[.12em] uppercase text-[#7a7970] mb-3">
+          <h4 className="text-[10px] font-medium tracking-[.12em] uppercase text-[#7a7970] dark:text-[var(--text-secondary)] mb-3">
             Características principales
           </h4>
           <table className="w-full text-[13px] border-collapse">
@@ -350,12 +352,12 @@ function CharacteristicsTable({
               {characteristics.map((attr, i) => (
                 <tr
                   key={i}
-                  className="border-b border-[rgba(15,14,12,0.06)] hover:bg-[#f2f0ea] transition-colors"
+                  className="border-b border-[rgba(15,14,12,0.06)] dark:border-[var(--border-subtle)] hover:bg-[#f2f0ea] dark:bg-[var(--bg-secondary)] dark:hover:bg-[var(--bg-card)] transition-colors"
                 >
-                  <td className="py-2.5 pr-4 text-[#7a7970] font-light w-2/5">
+                  <td className="py-2.5 pr-4 text-[#7a7970] dark:text-[var(--text-secondary)] font-light w-2/5">
                     {attr.label}
                   </td>
-                  <td className="py-2.5 text-[#0f0e0c] font-medium">
+                  <td className="py-2.5 text-[#0f0e0c] dark:text-[var(--text-primary)] font-medium">
                     {attr.value}
                   </td>
                 </tr>
@@ -367,7 +369,7 @@ function CharacteristicsTable({
 
       {hasAdditional && (
         <div>
-          <h4 className="text-[10px] font-medium tracking-[.12em] uppercase text-[#7a7970] mb-3">
+          <h4 className="text-[10px] font-medium tracking-[.12em] uppercase text-[#7a7970] dark:text-[var(--text-secondary)] mb-3">
             Información adicional
           </h4>
           <div className="flex flex-wrap gap-2">
@@ -376,8 +378,8 @@ function CharacteristicsTable({
                 key={i}
                 className="
                   inline-flex items-center gap-1.5
-                  px-3 py-1.5 border border-[#2d5e42]
-                  text-[#2d5e42] text-[11px] tracking-[.06em]
+                  px-3 py-1.5 border border-[#2d5e42] dark:border-[var(--brand-green)]
+                  text-[#2d5e42] dark:text-[var(--brand-green)] text-[11px] tracking-[.06em]
                 "
               >
                 <span className="opacity-60">{attr.label}:</span>
@@ -402,15 +404,15 @@ function RatingDistribution({ stats }: { stats: ReviewStats }) {
         const pct = Math.round((count / max) * 100);
         return (
           <div key={n} className="flex items-center gap-2 text-[11px]">
-            <span className="w-3 text-right text-[#7a7970]">{n}</span>
+            <span className="w-3 text-right text-[#7a7970] dark:text-[var(--text-secondary)]">{n}</span>
             <Star className="w-2.5 h-2.5 text-[#c9a84c] fill-[#c9a84c] flex-shrink-0" />
-            <div className="flex-1 h-[4px] bg-[#e8e5dc]">
+            <div className="flex-1 h-[4px] bg-[#e8e5dc] dark:bg-[var(--bg-secondary)]">
               <div
                 className="h-full bg-[#c9a84c] transition-all duration-500"
                 style={{ width: `${pct}%` }}
               />
             </div>
-            <span className="w-5 text-right text-[#7a7970]">{count}</span>
+            <span className="w-5 text-right text-[#7a7970] dark:text-[var(--text-secondary)]">{count}</span>
           </div>
         );
       })}
@@ -422,10 +424,10 @@ function RatingDistribution({ stats }: { stats: ReviewStats }) {
 
 function ReviewCard({ review }: { review: LaravelReview }) {
   return (
-    <div className="py-5 border-b border-[rgba(15,14,12,0.08)] last:border-0">
+    <div className="py-5 border-b border-[rgba(15,14,12,0.08)] dark:border-[var(--border-subtle)] last:border-0">
       <div className="flex items-center gap-3 mb-2.5">
         {/* Avatar */}
-        <div className="w-9 h-9 rounded-full bg-[#f2f0ea] border border-[rgba(15,14,12,0.1)] flex items-center justify-center flex-shrink-0 text-[#3a3935] font-medium text-[13px] overflow-hidden">
+        <div className="w-9 h-9 rounded-full bg-[#f2f0ea] dark:bg-[var(--bg-secondary)] border border-[rgba(15,14,12,0.1)] dark:border-[var(--border-subtle)] flex items-center justify-center flex-shrink-0 text-[#3a3935] dark:text-[var(--text-primary)] font-medium text-[13px] overflow-hidden">
           {review.user?.avatar ? (
             <Image
               src={review.user.avatar}
@@ -441,11 +443,11 @@ function ReviewCard({ review }: { review: LaravelReview }) {
 
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="font-medium text-[13px] text-[#0f0e0c]">
+            <span className="font-medium text-[13px] text-[#0f0e0c] dark:text-[var(--text-primary)]">
               {review.user?.name ?? 'Usuario'}
             </span>
             {review.isVerifiedPurchase && (
-              <span className="inline-flex items-center gap-1 text-[10px] tracking-[.08em] uppercase text-[#2d5e42]">
+              <span className="inline-flex items-center gap-1 text-[10px] tracking-[.08em] uppercase text-[#2d5e42] dark:text-[var(--brand-green)]">
                 <BadgeCheck className="w-3 h-3" />
                 Compra verificada
               </span>
@@ -453,7 +455,7 @@ function ReviewCard({ review }: { review: LaravelReview }) {
           </div>
         </div>
 
-        <span className="text-[11px] text-[#7a7970] ml-auto flex-shrink-0">
+        <span className="text-[11px] text-[#7a7970] dark:text-[var(--text-secondary)] ml-auto flex-shrink-0">
           {formatDate(review.createdAt)}
         </span>
       </div>
@@ -461,12 +463,12 @@ function ReviewCard({ review }: { review: LaravelReview }) {
       <Stars value={review.rating} />
 
       {review.title && (
-        <p className="mt-2 font-medium text-[13px] text-[#0f0e0c]">
+        <p className="mt-2 font-medium text-[13px] text-[#0f0e0c] dark:text-[var(--text-primary)]">
           {review.title}
         </p>
       )}
       {review.comment && (
-        <p className="mt-1 text-[12px] text-[#3a3935] leading-relaxed font-light">
+        <p className="mt-1 text-[12px] text-[#3a3935] dark:text-[var(--text-primary)] leading-relaxed font-light">
           {review.comment}
         </p>
       )}
@@ -483,7 +485,7 @@ function ReviewsSection({ productId }: { productId: string }) {
   if (loading && reviews.length === 0) {
     return (
       <div className="flex justify-center py-10">
-        <Loader2 className="w-5 h-5 animate-spin text-[#7a7970]" />
+        <Loader2 className="w-5 h-5 animate-spin text-[#7a7970] dark:text-[var(--text-secondary)]" />
       </div>
     );
   }
@@ -501,13 +503,13 @@ function ReviewsSection({ productId }: { productId: string }) {
     <div className="space-y-6">
       {/* Resumen */}
       {stats && stats.count > 0 && (
-        <div className="grid grid-cols-[auto_1fr] gap-6 p-5 bg-[#f2f0ea] border border-[rgba(15,14,12,0.08)]">
-          <div className="flex flex-col items-center justify-center gap-1.5 border-r border-[rgba(15,14,12,0.08)] pr-6">
-            <span className="font-['DM_Serif_Display',Georgia,serif] text-5xl text-[#0f0e0c] leading-none">
+        <div className="grid grid-cols-[auto_1fr] gap-6 p-5 bg-[#f2f0ea] dark:bg-[var(--bg-secondary)] border border-[rgba(15,14,12,0.08)] dark:border-[var(--border-subtle)]">
+          <div className="flex flex-col items-center justify-center gap-1.5 border-r border-[rgba(15,14,12,0.08)] dark:border-[var(--border-subtle)] pr-6">
+            <span className="font-['DM_Serif_Display',Georgia,serif] text-5xl text-[#0f0e0c] dark:text-[var(--text-primary)] leading-none">
               {stats.average.toFixed(1)}
             </span>
             <Stars value={stats.average} size="md" />
-            <span className="text-[11px] text-[#7a7970] tracking-[.04em]">
+            <span className="text-[11px] text-[#7a7970] dark:text-[var(--text-secondary)] tracking-[.04em]">
               {stats.count} {stats.count === 1 ? 'reseña' : 'reseñas'}
             </span>
           </div>
@@ -521,7 +523,7 @@ function ReviewsSection({ productId }: { productId: string }) {
 
       {/* Lista */}
       {reviews.length === 0 ? (
-        <div className="text-center py-12 text-[#7a7970]">
+        <div className="text-center py-12 text-[#7a7970] dark:text-[var(--text-secondary)]">
           <MessageSquare className="w-8 h-8 mx-auto mb-3 opacity-30" />
           <p className="font-medium text-[13px]">Sin reseñas aún</p>
           <p className="text-[12px] mt-1 font-light">
@@ -541,9 +543,9 @@ function ReviewsSection({ productId }: { productId: string }) {
           onClick={loadMore}
           disabled={loading}
           className="
-            w-full py-3 border border-[rgba(15,14,12,0.12)]
-            text-[11px] font-medium tracking-[.1em] uppercase text-[#7a7970]
-            hover:bg-[#f2f0ea] hover:text-[#0f0e0c]
+            w-full py-3 border border-[rgba(15,14,12,0.12)] dark:border-[var(--border-subtle)]
+            text-[11px] font-medium tracking-[.1em] uppercase text-[#7a7970] dark:text-[var(--text-secondary)]
+            hover:bg-[#f2f0ea] dark:bg-[var(--bg-secondary)] dark:hover:bg-[var(--bg-card)] hover:text-[#0f0e0c] dark:text-[var(--text-primary)]
             transition-all duration-150
             disabled:opacity-40
             flex items-center justify-center gap-2
@@ -562,26 +564,26 @@ function ReviewsSection({ productId }: { productId: string }) {
 function ProductTypeInfo({ product }: { product: LaravelProduct }) {
   if (product.type === 'digital') {
     return (
-      <div className="grid grid-cols-2 gap-3 p-4 bg-[#f2f0ea] border border-[rgba(15,14,12,0.08)]">
+      <div className="grid grid-cols-2 gap-3 p-4 bg-[#f2f0ea] dark:bg-[var(--bg-secondary)] border border-[rgba(15,14,12,0.08)] dark:border-[var(--border-subtle)]">
         <div className="flex items-center gap-2.5 text-[13px]">
-          <Download className="w-4 h-4 text-[#2d5e42] flex-shrink-0" />
+          <Download className="w-4 h-4 text-[#2d5e42] dark:text-[var(--brand-green)] flex-shrink-0" />
           <div>
-            <p className="text-[10px] tracking-[.1em] uppercase text-[#7a7970]">
+            <p className="text-[10px] tracking-[.1em] uppercase text-[#7a7970] dark:text-[var(--text-secondary)]">
               Formato
             </p>
-            <p className="font-medium text-[#3a3935]">
+            <p className="font-medium text-[#3a3935] dark:text-[var(--text-primary)]">
               {product.fileType?.toUpperCase() ?? '—'}
             </p>
           </div>
         </div>
         {product.downloadLimit && (
           <div className="flex items-center gap-2.5 text-[13px]">
-            <Package className="w-4 h-4 text-[#2d5e42] flex-shrink-0" />
+            <Package className="w-4 h-4 text-[#2d5e42] dark:text-[var(--brand-green)] flex-shrink-0" />
             <div>
-              <p className="text-[10px] tracking-[.1em] uppercase text-[#7a7970]">
+              <p className="text-[10px] tracking-[.1em] uppercase text-[#7a7970] dark:text-[var(--text-secondary)]">
                 Descargas
               </p>
-              <p className="font-medium text-[#3a3935]">
+              <p className="font-medium text-[#3a3935] dark:text-[var(--text-primary)]">
                 {product.downloadLimit}x
               </p>
             </div>
@@ -593,25 +595,25 @@ function ProductTypeInfo({ product }: { product: LaravelProduct }) {
 
   if (product.type === 'service') {
     return (
-      <div className="grid grid-cols-2 gap-3 p-4 bg-[#f2f0ea] border border-[rgba(15,14,12,0.08)]">
+      <div className="grid grid-cols-2 gap-3 p-4 bg-[#f2f0ea] dark:bg-[var(--bg-secondary)] border border-[rgba(15,14,12,0.08)] dark:border-[var(--border-subtle)]">
         <div className="flex items-center gap-2.5 text-[13px]">
-          <Clock className="w-4 h-4 text-[#2d5e42] flex-shrink-0" />
+          <Clock className="w-4 h-4 text-[#2d5e42] dark:text-[var(--brand-green)] flex-shrink-0" />
           <div>
-            <p className="text-[10px] tracking-[.1em] uppercase text-[#7a7970]">
+            <p className="text-[10px] tracking-[.1em] uppercase text-[#7a7970] dark:text-[var(--text-secondary)]">
               Duración
             </p>
-            <p className="font-medium text-[#3a3935]">
+            <p className="font-medium text-[#3a3935] dark:text-[var(--text-primary)]">
               {product.serviceDuration} min
             </p>
           </div>
         </div>
         <div className="flex items-center gap-2.5 text-[13px]">
-          <MapPin className="w-4 h-4 text-[#2d5e42] flex-shrink-0" />
+          <MapPin className="w-4 h-4 text-[#2d5e42] dark:text-[var(--brand-green)] flex-shrink-0" />
           <div>
-            <p className="text-[10px] tracking-[.1em] uppercase text-[#7a7970]">
+            <p className="text-[10px] tracking-[.1em] uppercase text-[#7a7970] dark:text-[var(--text-secondary)]">
               Modalidad
             </p>
-            <p className="font-medium text-[#3a3935] capitalize">
+            <p className="font-medium text-[#3a3935] dark:text-[var(--text-primary)] capitalize">
               {product.serviceModality ?? '—'}
             </p>
           </div>
@@ -624,37 +626,37 @@ function ProductTypeInfo({ product }: { product: LaravelProduct }) {
     return null;
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 bg-[#f2f0ea] border border-[rgba(15,14,12,0.08)]">
+    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 bg-[#f2f0ea] dark:bg-[var(--bg-secondary)] border border-[rgba(15,14,12,0.08)] dark:border-[var(--border-subtle)]">
       {product.weight && (
         <div className="flex items-center gap-2.5 text-[13px]">
-          <Weight className="w-4 h-4 text-[#7a7970] flex-shrink-0" />
+          <Weight className="w-4 h-4 text-[#7a7970] dark:text-[var(--text-secondary)] flex-shrink-0" />
           <div>
-            <p className="text-[10px] tracking-[.1em] uppercase text-[#7a7970]">
+            <p className="text-[10px] tracking-[.1em] uppercase text-[#7a7970] dark:text-[var(--text-secondary)]">
               Peso
             </p>
-            <p className="font-medium text-[#3a3935]">{product.weight} kg</p>
+            <p className="font-medium text-[#3a3935] dark:text-[var(--text-primary)]">{product.weight} kg</p>
           </div>
         </div>
       )}
       {product.dimensions && (
         <div className="flex items-center gap-2.5 text-[13px]">
-          <Ruler className="w-4 h-4 text-[#7a7970] flex-shrink-0" />
+          <Ruler className="w-4 h-4 text-[#7a7970] dark:text-[var(--text-secondary)] flex-shrink-0" />
           <div>
-            <p className="text-[10px] tracking-[.1em] uppercase text-[#7a7970]">
+            <p className="text-[10px] tracking-[.1em] uppercase text-[#7a7970] dark:text-[var(--text-secondary)]">
               Dimensiones
             </p>
-            <p className="font-medium text-[#3a3935]">{product.dimensions}</p>
+            <p className="font-medium text-[#3a3935] dark:text-[var(--text-primary)]">{product.dimensions}</p>
           </div>
         </div>
       )}
       {product.expirationDate && (
         <div className="flex items-center gap-2.5 text-[13px]">
-          <Calendar className="w-4 h-4 text-[#7a7970] flex-shrink-0" />
+          <Calendar className="w-4 h-4 text-[#7a7970] dark:text-[var(--text-secondary)] flex-shrink-0" />
           <div>
-            <p className="text-[10px] tracking-[.1em] uppercase text-[#7a7970]">
+            <p className="text-[10px] tracking-[.1em] uppercase text-[#7a7970] dark:text-[var(--text-secondary)]">
               Vence
             </p>
-            <p className="font-medium text-[#3a3935]">
+            <p className="font-medium text-[#3a3935] dark:text-[var(--text-primary)]">
               {product.expirationDate}
             </p>
           </div>
@@ -671,7 +673,7 @@ function RelatedProductsSidebar({ products }: { products: LaravelProduct[] }) {
 
   return (
     <aside className="w-full">
-      <h2 className="text-[10px] font-medium tracking-[.12em] uppercase text-[#7a7970] mb-4 px-1">
+      <h2 className="text-[10px] font-medium tracking-[.12em] uppercase text-[#7a7970] dark:text-[var(--text-secondary)] mb-4 px-1">
         También te puede gustar
       </h2>
       <div className="divide-y divide-[rgba(15,14,12,0.08)]">
@@ -684,7 +686,7 @@ function RelatedProductsSidebar({ products }: { products: LaravelProduct[] }) {
               className="flex gap-3 py-3 group hover:opacity-70 transition-opacity duration-150"
             >
               {/* Imagen */}
-              <div className="relative w-[56px] h-[56px] flex-shrink-0 bg-[#f2f0ea] border border-[rgba(15,14,12,0.08)] overflow-hidden">
+              <div className="relative w-[56px] h-[56px] flex-shrink-0 bg-[#f2f0ea] dark:bg-[var(--bg-secondary)] border border-[rgba(15,14,12,0.08)] dark:border-[var(--border-subtle)] overflow-hidden">
                 <Image
                   src={
                     rel.images[0]?.medium ??
@@ -700,11 +702,11 @@ function RelatedProductsSidebar({ products }: { products: LaravelProduct[] }) {
 
               {/* Info */}
               <div className="flex-1 min-w-0 py-0.5">
-                <p className="text-[12px] text-[#3a3935] line-clamp-2 leading-snug mb-1.5">
+                <p className="text-[12px] text-[#3a3935] dark:text-[var(--text-primary)] line-clamp-2 leading-snug mb-1.5">
                   {rel.name}
                 </p>
                 <div className="flex items-baseline gap-1.5">
-                  <span className="font-['DM_Serif_Display',Georgia,serif] text-[15px] text-[#0f0e0c]">
+                  <span className="font-['DM_Serif_Display',Georgia,serif] text-[15px] text-[#0f0e0c] dark:text-[var(--text-primary)]">
                     {formatPrice(rel.price)}
                   </span>
                   {relDiscount > 0 && (
@@ -716,7 +718,7 @@ function RelatedProductsSidebar({ products }: { products: LaravelProduct[] }) {
                 {rel.rating.count > 0 && (
                   <div className="flex items-center gap-1 mt-1">
                     <Star className="w-2.5 h-2.5 text-[#c9a84c] fill-[#c9a84c]" />
-                    <span className="text-[10px] text-[#7a7970]">
+                    <span className="text-[10px] text-[#7a7970] dark:text-[var(--text-secondary)]">
                       {rel.rating.average.toFixed(1)} ({rel.rating.count})
                     </span>
                   </div>
@@ -747,8 +749,6 @@ export function ProductDetailPageClient({
 }: Props) {
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<TabKey>('descripcion');
-  const [wishlisted, setWishlisted] = useState(false);
-
   const {
     addToCart,
     loading: cartLoading,
@@ -756,12 +756,15 @@ export function ProductDetailPageClient({
     error: cartError,
   } = useAddToCart();
 
+  const { isWishlisted, toggle: toggleWishlist } = useWishlist(product.id);
+
   const discount = discountPercent(product.price, product.regular_price);
-  const inStock = product.in_stock;
+  const inStock = product.stock > 0;
 
   const hasNutritional = !!product.nutritional_info?.rows?.length;
-  const hasCharacteristics =
-    product.characteristics.length > 0 || product.additional_info.length > 0;
+  const characteristics = product.mainAttributes?.flatMap((a: { values: { label: string; value: string }[] }) => a.values) ?? [];
+  const additionalInfo = product.additionalAttributes?.flatMap((a: { values: { label: string; value: string }[] }) => a.values) ?? [];
+  const hasCharacteristics = characteristics.length > 0 || additionalInfo.length > 0;
 
   const TABS: { key: TabKey; label: string }[] = [
     { key: 'descripcion', label: 'Descripción' },
@@ -774,41 +777,36 @@ export function ProductDetailPageClient({
   ];
 
   return (
-    <main className="min-h-screen bg-[#faf9f6]">
-      {/* ── Breadcrumb ── */}
-      <div className="bg-white border-b border-[rgba(15,14,12,0.08)]">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 py-3 flex items-center gap-2 text-[11px] tracking-[.06em] text-[#7a7970] flex-wrap">
-          <Link href="/" className="hover:text-[#1a3a2a] transition-colors">
+    <main className="min-h-screen bg-[#faf9f6] dark:bg-[var(--bg-primary)]">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 pt-4 pb-1">
+        {/* ── Breadcrumb ── */}
+        <nav className="flex items-center gap-2 text-[11px] tracking-[.06em] text-[#7a7970] dark:text-[var(--text-secondary)] flex-nowrap overflow-x-auto">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1 hover:text-[#1a3a2a] dark:hover:text-[var(--brand-green)] transition-colors flex-shrink-0"
+          >
+            <Home className="w-3 h-3" />
             Inicio
           </Link>
           {product.categories[0] && (
             <>
-              <span className="opacity-40">/</span>
+              <span className="opacity-40 flex-shrink-0">/</span>
               <Link
                 href={`/productos/${product.categories[0].slug}`}
-                className="hover:text-[#1a3a2a] transition-colors"
+                className="hover:text-[#1a3a2a] dark:hover:text-[var(--brand-green)] transition-colors flex-shrink-0"
               >
                 {product.categories[0].name}
               </Link>
             </>
           )}
-          <span className="opacity-40">/</span>
-          <span className="text-[#3a3935] truncate max-w-[200px]">
+          <span className="opacity-40 flex-shrink-0">/</span>
+          <span className="text-[#3a3935] dark:text-[var(--text-primary)] truncate min-w-0">
             {product.name}
           </span>
-        </div>
+        </nav>
       </div>
 
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 py-6">
-        {/* Volver */}
-        <Link
-          href="/"
-          className="inline-flex items-center gap-1.5 text-[11px] tracking-[.08em] uppercase text-[#7a7970] hover:text-[#1a3a2a] transition-colors mb-6"
-        >
-          <ArrowLeft className="w-3.5 h-3.5" />
-          Volver
-        </Link>
-
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 pb-6">
         {/* ── Layout principal: 3 columnas ── */}
         <div className="flex flex-col xl:flex-row gap-10 xl:gap-12">
           {/* COL 1: Galería */}
@@ -830,9 +828,9 @@ export function ProductDetailPageClient({
                     href={`/productos/${cat.slug}`}
                     className="
                       text-[10px] tracking-[.1em] uppercase font-medium
-                      text-[#2d5e42] border border-[#2d5e42]
+                      text-[#2d5e42] dark:text-[var(--brand-green)] border border-[#2d5e42] dark:border-[var(--brand-green)]
                       px-2.5 py-[3px]
-                      hover:bg-[#2d5e42] hover:text-white
+                      hover:bg-[#2d5e42] dark:hover:bg-green-600 hover:text-white
                       transition-all duration-150
                     "
                   >
@@ -847,22 +845,22 @@ export function ProductDetailPageClient({
                 className="
                   font-['DM_Serif_Display',Georgia,serif]
                   text-[32px] md:text-[38px] font-normal
-                  text-[#0f0e0c] leading-[1.1]
+                  text-[#0f0e0c] dark:text-[var(--text-primary)] leading-[1.1]
                 "
               >
                 {product.name}
               </h1>
 
               {product.short_description && (
-                <p className="text-[#7a7970] text-[13px] leading-relaxed font-light">
+                <p className="text-[#7a7970] dark:text-[var(--text-secondary)] text-[13px] leading-relaxed font-light">
                   {product.short_description}
                 </p>
               )}
 
               {/* Rating */}
-              <div className="flex items-center gap-2.5 pb-4 border-b border-[rgba(15,14,12,0.08)]">
+              <div className="flex items-center gap-2.5 pb-4 border-b border-[rgba(15,14,12,0.08)] dark:border-[var(--border-subtle)]">
                 <Stars value={product.rating.average} />
-                <span className="text-[12px] text-[#7a7970]">
+                <span className="text-[12px] text-[#7a7970] dark:text-[var(--text-secondary)]">
                   {product.rating.average > 0
                     ? `${product.rating.average.toFixed(1)} · ${product.rating.count} reseñas`
                     : 'Sin reseñas aún'}
@@ -871,16 +869,16 @@ export function ProductDetailPageClient({
 
               {/* Precio */}
               <div>
-                <p className="text-[10px] tracking-[.12em] uppercase text-[#7a7970] mb-1">
+                <p className="text-[10px] tracking-[.12em] uppercase text-[#7a7970] dark:text-[var(--text-secondary)] mb-1">
                   Precio
                 </p>
                 <div className="flex items-baseline gap-3 flex-wrap">
-                  <span className="font-['DM_Serif_Display',Georgia,serif] text-[38px] text-[#0f0e0c] leading-none">
+                  <span className="font-['DM_Serif_Display',Georgia,serif] text-[38px] text-[#0f0e0c] dark:text-[var(--text-primary)] leading-none">
                     {formatPrice(product.price)}
                   </span>
                   {discount > 0 && (
                     <>
-                      <span className="text-[16px] text-[#7a7970] line-through font-light">
+                      <span className="text-[16px] text-[#7a7970] dark:text-[var(--text-secondary)] line-through font-light">
                         {formatPrice(product.regular_price)}
                       </span>
                       <span className="bg-[#c0392b] text-white text-[10px] font-medium tracking-[.08em] px-2 py-[2px]">
@@ -894,12 +892,12 @@ export function ProductDetailPageClient({
               {/* Stock */}
               <div
                 className={`flex items-center gap-2 text-[12px] tracking-[.04em] ${
-                  inStock ? 'text-[#2d5e42]' : 'text-[#c0392b]'
+                  inStock ? 'text-[#2d5e42] dark:text-[var(--brand-green)]' : 'text-[#c0392b]'
                 }`}
               >
                 <span
                   className={`w-1.5 h-1.5 rounded-full ${
-                    inStock ? 'bg-[#2d5e42]' : 'bg-[#c0392b]'
+                    inStock ? 'bg-[#2d5e42] dark:bg-green-700' : 'bg-[#c0392b]'
                   }`}
                 />
                 {inStock
@@ -918,25 +916,25 @@ export function ProductDetailPageClient({
               {/* Cantidad */}
               {inStock && (
                 <div className="flex items-center gap-5">
-                  <span className="text-[11px] tracking-[.1em] uppercase text-[#7a7970]">
+                  <span className="text-[11px] tracking-[.1em] uppercase text-[#7a7970] dark:text-[var(--text-secondary)]">
                     Cantidad
                   </span>
-                  <div className="flex items-center border border-[rgba(15,14,12,0.12)]">
+                  <div className="flex items-center border border-[rgba(15,14,12,0.12)] dark:border-[var(--border-subtle)]">
                     <button
                       onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                      className="w-9 h-9 flex items-center justify-center text-[#3a3935] hover:bg-[#f2f0ea] transition-colors text-lg"
+                      className="w-9 h-9 flex items-center justify-center text-[#3a3935] dark:text-[var(--text-primary)] hover:bg-[#f2f0ea] dark:bg-[var(--bg-secondary)] dark:hover:bg-[var(--bg-card)] transition-colors text-lg"
                       aria-label="Reducir"
                     >
                       −
                     </button>
-                    <span className="w-10 text-center text-[14px] font-medium text-[#0f0e0c]">
+                    <span className="w-10 text-center text-[14px] font-medium text-[#0f0e0c] dark:text-[var(--text-primary)]">
                       {quantity}
                     </span>
                     <button
                       onClick={() =>
                         setQuantity((q) => Math.min(product.stock, q + 1))
                       }
-                      className="w-9 h-9 flex items-center justify-center text-[#3a3935] hover:bg-[#f2f0ea] transition-colors text-lg"
+                      className="w-9 h-9 flex items-center justify-center text-[#3a3935] dark:text-[var(--text-primary)] hover:bg-[#f2f0ea] dark:bg-[var(--bg-secondary)] dark:hover:bg-[var(--bg-card)] transition-colors text-lg"
                       aria-label="Aumentar"
                     >
                       +
@@ -947,7 +945,7 @@ export function ProductDetailPageClient({
 
               {/* Error carrito */}
               {cartError && (
-                <div className="flex items-center gap-2 text-[12px] text-[#c0392b] bg-[#fdf0ee] border border-[rgba(192,57,43,0.2)] px-3 py-2">
+                <div className="flex items-center gap-2 text-[12px] text-[#c0392b] bg-[#fdf0ee] dark:bg-red-900/30 border border-[rgba(192,57,43,0.2)] px-3 py-2">
                   <AlertCircle className="w-4 h-4 flex-shrink-0" />
                   {cartError}
                 </div>
@@ -970,10 +968,10 @@ export function ProductDetailPageClient({
                     disabled:opacity-50
                     ${
                       addedToCart
-                        ? 'bg-[#1a5c34] text-[#e8f5ee]'
+                        ? 'bg-[#1a5c34] dark:bg-green-700 text-[#e8f5ee] dark:text-green-100'
                         : inStock
-                          ? 'bg-[#1a3a2a] text-[#e8f5ee] hover:bg-[#2d5e42]'
-                          : 'bg-[#7a7970] text-white cursor-not-allowed'
+                          ? 'bg-[#1a3a2a] dark:bg-green-900 text-[#e8f5ee] dark:text-green-100 hover:bg-[#2d5e42] dark:hover:bg-green-600'
+                          : 'bg-[#7a7970] text-white dark:text-[var(--text-secondary)] cursor-not-allowed'
                     }
                   `}
                 >
@@ -995,20 +993,20 @@ export function ProductDetailPageClient({
 
                 {/* Favoritos */}
                 <button
-                  onClick={() => setWishlisted((w) => !w)}
+                  onClick={toggleWishlist}
                   className={`
                     w-12 h-12 border flex items-center justify-center
                     transition-all duration-150
                     ${
-                      wishlisted
-                        ? 'border-[#c0392b] text-[#c0392b] bg-[#fdf0ee]'
-                        : 'border-[rgba(15,14,12,0.12)] text-[#7a7970] hover:border-[#c0392b] hover:text-[#c0392b]'
+                      isWishlisted
+                        ? 'border-[#c0392b] text-[#c0392b] bg-[#fdf0ee] dark:bg-red-900/30'
+                        : 'border-[rgba(15,14,12,0.12)] dark:border-[var(--border-subtle)] text-[#7a7970] dark:text-[var(--text-secondary)] hover:border-[#c0392b] hover:text-[#c0392b]'
                     }
                   `}
                   aria-label="Favoritos"
                 >
                   <Heart
-                    className={`w-[18px] h-[18px] ${wishlisted ? 'fill-current' : ''}`}
+                    className={`w-[18px] h-[18px] ${isWishlisted ? 'fill-current' : ''}`}
                   />
                 </button>
 
@@ -1021,9 +1019,9 @@ export function ProductDetailPageClient({
                     })
                   }
                   className="
-                    w-12 h-12 border border-[rgba(15,14,12,0.12)]
-                    flex items-center justify-center text-[#7a7970]
-                    hover:border-[#0f0e0c] hover:text-[#0f0e0c]
+                    w-12 h-12 border border-[rgba(15,14,12,0.12)] dark:border-[var(--border-subtle)]
+                    flex items-center justify-center text-[#7a7970] dark:text-[var(--text-secondary)]
+                    hover:border-[#0f0e0c] dark:hover:border-[var(--text-primary)] hover:text-[#0f0e0c] dark:text-[var(--text-primary)]
                     transition-all duration-150
                   "
                   aria-label="Compartir"
@@ -1043,12 +1041,12 @@ export function ProductDetailPageClient({
                     key={text}
                     className="
                       flex flex-col items-center gap-1.5 p-3
-                      border border-[rgba(15,14,12,0.08)]
-                      bg-white text-center
+                      border border-[rgba(15,14,12,0.08)] dark:border-[var(--border-subtle)]
+                      bg-white dark:bg-[var(--bg-card)] text-center
                     "
                   >
-                    <Icon className="w-4 h-4 text-[#2d5e42]" />
-                    <span className="text-[10px] tracking-[.06em] uppercase text-[#7a7970]">
+                    <Icon className="w-4 h-4 text-[#2d5e42] dark:text-[var(--brand-green)]" />
+                    <span className="text-[10px] tracking-[.06em] uppercase text-[#7a7970] dark:text-[var(--text-secondary)]">
                       {text}
                     </span>
                   </div>
@@ -1060,12 +1058,12 @@ export function ProductDetailPageClient({
                 href={`/tienda/${product.store.slug}`}
                 className="
                   flex items-center gap-4 p-4
-                  border border-[rgba(15,14,12,0.08)] bg-white
-                  hover:border-[#1a3a2a]
+                  border border-[rgba(15,14,12,0.08)] dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)]
+                  hover:border-[#1a3a2a] dark:hover:border-[var(--brand-green)]
                   transition-colors duration-150 group
                 "
               >
-                <div className="w-11 h-11 bg-[#1a3a2a] flex items-center justify-center flex-shrink-0 overflow-hidden">
+                <div className="w-11 h-11 bg-[#1a3a2a] dark:bg-green-900 flex items-center justify-center flex-shrink-0 overflow-hidden">
                   {product.store.logo ? (
                     <Image
                       src={product.store.logo}
@@ -1075,32 +1073,32 @@ export function ProductDetailPageClient({
                       className="object-cover"
                     />
                   ) : (
-                    <Store className="w-5 h-5 text-[#e8f5ee]" />
+                    <Store className="w-5 h-5 text-[#e8f5ee] dark:text-green-100" />
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[10px] tracking-[.08em] uppercase text-[#7a7970] mb-0.5">
+                  <p className="text-[10px] tracking-[.08em] uppercase text-[#7a7970] dark:text-[var(--text-secondary)] mb-0.5">
                     Vendido por
                   </p>
-                  <p className="font-medium text-[14px] text-[#0f0e0c] flex items-center gap-1">
+                  <p className="font-medium text-[14px] text-[#0f0e0c] dark:text-[var(--text-primary)] flex items-center gap-1">
                     {product.store.name}
-                    <BadgeCheck className="w-3.5 h-3.5 text-[#2d5e42]" />
+                    <BadgeCheck className="w-3.5 h-3.5 text-[#2d5e42] dark:text-[var(--brand-green)]" />
                   </p>
                   {product.store.phone && (
-                    <p className="text-[11px] text-[#7a7970] mt-0.5 flex items-center gap-1">
+                    <p className="text-[11px] text-[#7a7970] dark:text-[var(--text-secondary)] mt-0.5 flex items-center gap-1">
                       <Phone className="w-3 h-3" />
                       {product.store.phone}
                     </p>
                   )}
                 </div>
-                <ArrowLeft className="w-4 h-4 text-[#7a7970] rotate-180 group-hover:text-[#1a3a2a] transition-colors" />
+                <ArrowLeft className="w-4 h-4 text-[#7a7970] dark:text-[var(--text-secondary)] rotate-180 group-hover:text-[#1a3a2a] dark:group-hover:text-[var(--brand-green)] dark:hover:text-[var(--brand-green)] transition-colors" />
               </Link>
             </div>
 
             {/* ── Tabs ── */}
             <div className="mt-10">
               {/* Barra de tabs */}
-              <div className="flex border-b border-[rgba(15,14,12,0.1)] mb-6 overflow-x-auto">
+              <div className="flex border-b border-[rgba(15,14,12,0.1)] dark:border-[var(--border-subtle)] mb-6 overflow-x-auto">
                 {TABS.map(({ key, label }) => (
                   <button
                     key={key}
@@ -1111,8 +1109,8 @@ export function ProductDetailPageClient({
                       transition-all duration-150
                       ${
                         activeTab === key
-                          ? 'border-[#0f0e0c] text-[#0f0e0c]'
-                          : 'border-transparent text-[#7a7970] hover:text-[#3a3935]'
+                          ? 'border-[#0f0e0c] dark:border-[var(--text-primary)] text-[#0f0e0c] dark:text-[var(--text-primary)]'
+                          : 'border-transparent text-[#7a7970] dark:text-[var(--text-secondary)] hover:text-[#3a3935] dark:text-[var(--text-primary)]'
                       }
                     `}
                   >
@@ -1122,7 +1120,7 @@ export function ProductDetailPageClient({
               </div>
 
               {/* Contenido de tabs */}
-              <div className="bg-white border border-[rgba(15,14,12,0.08)] p-5 md:p-8">
+              <div className="bg-white dark:bg-[var(--bg-card)] border border-[rgba(15,14,12,0.08)] dark:border-[var(--border-subtle)] p-5 md:p-8">
                 {/* Tab: Descripción */}
                 {activeTab === 'descripcion' && (
                   <div className="space-y-4">
@@ -1130,13 +1128,13 @@ export function ProductDetailPageClient({
                       product.description.split('\n').map((p, i) => (
                         <p
                           key={i}
-                          className="text-[#3a3935] leading-[1.9] text-[13px] font-light"
+                          className="text-[#3a3935] dark:text-[var(--text-primary)] leading-[1.9] text-[13px] font-light"
                         >
                           {p}
                         </p>
                       ))
                     ) : (
-                      <p className="text-[#7a7970] italic text-[13px]">
+                      <p className="text-[#7a7970] dark:text-[var(--text-secondary)] italic text-[13px]">
                         Sin descripción disponible.
                       </p>
                     )}
@@ -1148,28 +1146,28 @@ export function ProductDetailPageClient({
                   <div className="space-y-8">
                     {hasNutritional && (
                       <div>
-                        <h3 className="text-[10px] font-medium tracking-[.12em] uppercase text-[#7a7970] mb-4 flex items-center gap-2">
-                          <Leaf className="w-3.5 h-3.5 text-[#2d5e42]" />
+                        <h3 className="text-[10px] font-medium tracking-[.12em] uppercase text-[#7a7970] dark:text-[var(--text-secondary)] mb-4 flex items-center gap-2">
+                          <Leaf className="w-3.5 h-3.5 text-[#2d5e42] dark:text-[var(--brand-green)]" />
                           Información Nutricional
                         </h3>
-                        <div className="border border-[rgba(15,14,12,0.08)] overflow-hidden">
+                        <div className="border border-[rgba(15,14,12,0.08)] dark:border-[var(--border-subtle)] overflow-hidden">
                           {product.nutritional_info!.serving_note && (
-                            <div className="bg-[#f2f0ea] px-4 py-2.5 border-b border-[rgba(15,14,12,0.08)]">
-                              <p className="text-[11px] text-[#7a7970] italic">
+                            <div className="bg-[#f2f0ea] dark:bg-[var(--bg-secondary)] px-4 py-2.5 border-b border-[rgba(15,14,12,0.08)] dark:border-[var(--border-subtle)]">
+                              <p className="text-[11px] text-[#7a7970] dark:text-[var(--text-secondary)] italic">
                                 {product.nutritional_info!.serving_note}
                               </p>
                             </div>
                           )}
                           <table className="w-full text-[12px]">
-                            <thead className="bg-[#f2f0ea]">
+                            <thead className="bg-[#f2f0ea] dark:bg-[var(--bg-secondary)]">
                               <tr>
-                                <th className="px-4 py-2.5 text-left text-[10px] font-medium tracking-[.1em] uppercase text-[#7a7970]">
+                                <th className="px-4 py-2.5 text-left text-[10px] font-medium tracking-[.1em] uppercase text-[#7a7970] dark:text-[var(--text-secondary)]">
                                   Nutriente
                                 </th>
-                                <th className="px-4 py-2.5 text-left text-[10px] font-medium tracking-[.1em] uppercase text-[#7a7970]">
+                                <th className="px-4 py-2.5 text-left text-[10px] font-medium tracking-[.1em] uppercase text-[#7a7970] dark:text-[var(--text-secondary)]">
                                   Cantidad
                                 </th>
-                                <th className="px-4 py-2.5 text-right text-[10px] font-medium tracking-[.1em] uppercase text-[#7a7970]">
+                                <th className="px-4 py-2.5 text-right text-[10px] font-medium tracking-[.1em] uppercase text-[#7a7970] dark:text-[var(--text-secondary)]">
                                   % VD*
                                 </th>
                               </tr>
@@ -1178,15 +1176,15 @@ export function ProductDetailPageClient({
                               {product.nutritional_info!.rows.map((row, i) => (
                                 <tr
                                   key={i}
-                                  className="hover:bg-[#f2f0ea] transition-colors"
+                                  className="hover:bg-[#f2f0ea] dark:bg-[var(--bg-secondary)] dark:hover:bg-[var(--bg-card)] transition-colors"
                                 >
-                                  <td className="px-4 py-2.5 font-medium text-[#3a3935]">
+                                  <td className="px-4 py-2.5 font-medium text-[#3a3935] dark:text-[var(--text-primary)]">
                                     {row.label}
                                   </td>
-                                  <td className="px-4 py-2.5 text-[#2d5e42] font-medium">
+                                  <td className="px-4 py-2.5 text-[#2d5e42] dark:text-[var(--brand-green)] font-medium">
                                     {row.value}
                                   </td>
-                                  <td className="px-4 py-2.5 text-right text-[#7a7970]">
+                                  <td className="px-4 py-2.5 text-right text-[#7a7970] dark:text-[var(--text-secondary)]">
                                     {row.daily_value ?? '—'}
                                   </td>
                                 </tr>
@@ -1200,19 +1198,19 @@ export function ProductDetailPageClient({
                     {hasCharacteristics && (
                       <div>
                         {hasNutritional && (
-                          <h3 className="text-[10px] font-medium tracking-[.12em] uppercase text-[#7a7970] mb-4">
+                          <h3 className="text-[10px] font-medium tracking-[.12em] uppercase text-[#7a7970] dark:text-[var(--text-secondary)] mb-4">
                             Características
                           </h3>
                         )}
                         <CharacteristicsTable
-                          characteristics={product.characteristics}
-                          additional_info={product.additional_info}
+                          characteristics={characteristics}
+                          additional_info={additionalInfo}
                         />
                       </div>
                     )}
 
                     {!hasNutritional && !hasCharacteristics && (
-                      <p className="text-[#7a7970] italic text-[13px]">
+                      <p className="text-[#7a7970] dark:text-[var(--text-secondary)] italic text-[13px]">
                         Sin información especificada.
                       </p>
                     )}
@@ -1222,7 +1220,7 @@ export function ProductDetailPageClient({
                 {/* Tab: Tienda */}
                 {activeTab === 'tienda' && (
                   <div className="flex items-start gap-5">
-                    <div className="w-14 h-14 bg-[#1a3a2a] flex items-center justify-center flex-shrink-0 overflow-hidden">
+                    <div className="w-14 h-14 bg-[#1a3a2a] dark:bg-green-900 flex items-center justify-center flex-shrink-0 overflow-hidden">
                       {product.store.logo ? (
                         <Image
                           src={product.store.logo}
@@ -1232,23 +1230,23 @@ export function ProductDetailPageClient({
                           className="object-cover"
                         />
                       ) : (
-                        <Store className="w-7 h-7 text-[#e8f5ee]" />
+                        <Store className="w-7 h-7 text-[#e8f5ee] dark:text-green-100" />
                       )}
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-['DM_Serif_Display',Georgia,serif] text-[22px] font-normal text-[#0f0e0c] flex items-center gap-2 mb-3">
+                      <h3 className="font-['DM_Serif_Display',Georgia,serif] text-[22px] font-normal text-[#0f0e0c] dark:text-[var(--text-primary)] flex items-center gap-2 mb-3">
                         {product.store.name}
-                        <BadgeCheck className="w-4 h-4 text-[#2d5e42]" />
+                        <BadgeCheck className="w-4 h-4 text-[#2d5e42] dark:text-[var(--brand-green)]" />
                       </h3>
                       <div className="space-y-1.5">
                         {product.store.email && (
-                          <p className="text-[12px] text-[#7a7970] flex items-center gap-2">
+                          <p className="text-[12px] text-[#7a7970] dark:text-[var(--text-secondary)] flex items-center gap-2">
                             <Mail className="w-3.5 h-3.5" />
                             {product.store.email}
                           </p>
                         )}
                         {product.store.phone && (
-                          <p className="text-[12px] text-[#7a7970] flex items-center gap-2">
+                          <p className="text-[12px] text-[#7a7970] dark:text-[var(--text-secondary)] flex items-center gap-2">
                             <Phone className="w-3.5 h-3.5" />
                             {product.store.phone}
                           </p>
@@ -1258,9 +1256,9 @@ export function ProductDetailPageClient({
                         href={`/tienda/${product.store.slug}`}
                         className="
                           inline-flex items-center gap-2 mt-4
-                          border border-[rgba(15,14,12,0.12)]
-                          px-4 py-2 text-[11px] tracking-[.08em] uppercase text-[#3a3935]
-                          hover:bg-[#f2f0ea] transition-colors
+                          border border-[rgba(15,14,12,0.12)] dark:border-[var(--border-subtle)]
+                          px-4 py-2 text-[11px] tracking-[.08em] uppercase text-[#3a3935] dark:text-[var(--text-primary)]
+                          hover:bg-[#f2f0ea] dark:bg-[var(--bg-secondary)] dark:hover:bg-[var(--bg-card)] transition-colors
                         "
                       >
                         <Store className="w-3.5 h-3.5" />
@@ -1289,7 +1287,7 @@ export function ProductDetailPageClient({
         {/* Relacionados en mobile/lg (abajo, grid) */}
         {relatedProducts.length > 0 && (
           <section className="mt-12 xl:hidden">
-            <h2 className="text-[10px] font-medium tracking-[.12em] uppercase text-[#7a7970] mb-5">
+            <h2 className="text-[10px] font-medium tracking-[.12em] uppercase text-[#7a7970] dark:text-[var(--text-secondary)] mb-5">
               También te puede gustar
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
@@ -1298,13 +1296,13 @@ export function ProductDetailPageClient({
                   key={rel.id}
                   href={`/producto/${rel.slug}`}
                   className="
-                    group bg-white border border-[rgba(15,14,12,0.08)]
+                    group bg-white dark:bg-[var(--bg-card)] border border-[rgba(15,14,12,0.08)] dark:border-[var(--border-subtle)]
                     overflow-hidden
-                    hover:border-[#1a3a2a]
+                  hover:border-[#1a3a2a] dark:hover:border-[var(--brand-green)]
                     transition-colors duration-150
                   "
                 >
-                  <div className="relative aspect-square overflow-hidden bg-[#f2f0ea]">
+                  <div className="relative aspect-square overflow-hidden bg-[#f2f0ea] dark:bg-[var(--bg-secondary)]">
                     <Image
                       src={
                         rel.images[0]?.medium ??
@@ -1323,10 +1321,10 @@ export function ProductDetailPageClient({
                     )}
                   </div>
                   <div className="p-3">
-                    <p className="text-[12px] text-[#3a3935] line-clamp-2 leading-snug">
+                    <p className="text-[12px] text-[#3a3935] dark:text-[var(--text-primary)] line-clamp-2 leading-snug">
                       {rel.name}
                     </p>
-                    <p className="font-['DM_Serif_Display',Georgia,serif] text-[16px] text-[#0f0e0c] mt-1.5">
+                    <p className="font-['DM_Serif_Display',Georgia,serif] text-[16px] text-[#0f0e0c] dark:text-[var(--text-primary)] mt-1.5">
                       {formatPrice(rel.price)}
                     </p>
                   </div>
