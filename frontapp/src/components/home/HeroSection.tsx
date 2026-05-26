@@ -12,7 +12,7 @@ interface HeroSectionProps {
 export default function HeroSection({ banners }: HeroSectionProps) {
   const [current, setCurrent] = useState(0);
 
-  // Tus 6 imágenes PNG locales ubicadas en public/img/Inicio/
+  // 6 imágenes PNG locales ubicadas en public/img/Inicio/
   const displayBanners = [
     { id: 1, titulo: 'Banner 1', imagen: '/img/BANNER_GRANDE_INICIO/1.png' },
     { id: 2, titulo: 'Banner 2', imagen: '/img/BANNER_GRANDE_INICIO/2.png' },

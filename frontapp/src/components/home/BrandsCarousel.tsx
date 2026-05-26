@@ -97,17 +97,17 @@ export default function BrandsCarousel({ marcas }: BrandsCarouselProps) {
                 key={marca.id}
                 className="flex-shrink-0 w-[calc(50%-0.5rem)] sm:w-[calc(33.333%-0.67rem)] lg:w-[calc(25%-0.75rem)] xl:w-[calc(20%-0.8rem)]"
               >
-                <div className="h-20 md:h-24 flex items-center justify-center p-2 bg-white dark:bg-gray-900">
-                  <article className="group cursor-pointer transition-all duration-300">
-                    <Image
-                      src={localLogo}
-                      alt={marca.nombre}
-                      width={140}
-                      height={80}
-                      className="max-w-full max-h-full object-contain transition-all duration-500 group-hover:scale-110"
-                    />
-                  </article>
-                </div>
+                <div className="h-38 md:h-46 flex items-center justify-center p-1 bg-white dark:bg-gray-900 w-full">
+                <article className="group cursor-pointer transition-all duration-300 w-full h-full relative">
+                  <Image
+                    src={localLogo}  
+                    alt={marca.nombre}
+                    fill
+                    className="object-cover transition-all duration-500 group-hover:scale-110"  
+                  />
+    
+                </article>
+              </div>
               </div>
             );
           })}

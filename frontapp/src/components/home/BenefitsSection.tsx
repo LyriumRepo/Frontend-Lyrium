@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import Image from 'next/image';
 import {
   Heart,
   Store,
@@ -105,27 +106,18 @@ export default function BenefitsSection({ beneficios }: BenefitsSectionProps) {
             {allItems.map((beneficio, index) => {
               const Icon = iconMap[beneficio.icono] || Heart;
               const iconColor = iconColorMap[beneficio.icono] || 'text-sky-600';
-
-              return (
+                       return (
                 <div
                   key={`${beneficio.id}-${index}`}
                   className="flex flex-col items-center justify-center text-center w-[250px] mx-1 flex-shrink-0 cursor-default"
                 >
-                  <div className="w-28 h-28 rounded-full bg-[#A4D65E] flex items-center justify-center mb-4 shadow-lg transition-transform duration-300 hover:scale-105 border-4 border-white/20">
-                    <Icon className={`w-10 h-10 ${iconColor} group-hover:scale-125 transition-transform duration-500`} />
-                  </div>
-                  <h3
-                    className="font-black text-lg md:text-xl mb-1 text-white uppercase tracking-wider leading-tight"
-                    style={{ textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}
-                  >
-                    {beneficio.titulo}
-                  </h3>
-                  <div
-                    className="text-[10px] md:text-xs text-white uppercase tracking-normal w-full px-2 font-light whitespace-nowrap overflow-hidden text-ellipsis"
-                    style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}
-                    title={beneficio.descripcion}
-                  >
-                    {beneficio.descripcion}
+                  <div className="w-60 h-60 flex items-center justify-center mb-4 transition-transform duration-300 hover:scale-105 relative">
+                    <Image
+                      src={`/img/Inicio/11/${(index % 7) + 2}.png`}
+                      alt="Beneficio"
+                      fill
+                      className="object-contain"
+                    />
                   </div>
                 </div>
               );

@@ -11,6 +11,7 @@ interface ProductsGridProps {
 }
 
 export default function ProductsGrid({ categorias, titulo = 'Categorías de productos saludables' }: ProductsGridProps) {
+   const displayCategories = categorias.slice(0, 7);
   const [current, setCurrent] = useState(0);
   const [itemsPerView, setItemsPerView] = useState(2);
   const [isPaused, setIsPaused] = useState(false);
@@ -31,14 +32,14 @@ export default function ProductsGrid({ categorias, titulo = 'Categorías de prod
     return () => window.removeEventListener('resize', update);
   }, []);
 
-  const maxIndex = Math.max(0, categorias.length - itemsPerView);
+  const maxIndex = Math.max(0, displayCategories.length - itemsPerView);
 
   const goToNext = useCallback(() => {
     setCurrent((c) => (c >= maxIndex ? 0 : c + 1));
   }, [maxIndex]);
 
   useEffect(() => {
-    if (isPaused || isDragging || categorias.length <= 1) return;
+    if (isPaused || isDragging || displayCategories.length <= 1) return;
     
     intervalRef.current = setInterval(goToNext, 4000);
     return () => {
@@ -76,7 +77,7 @@ export default function ProductsGrid({ categorias, titulo = 'Categorías de prod
     >
       <h2 className="text-xl md:text-2xl font-semibold text-gray-900 dark:text-white">{titulo}</h2>
 
-      <div 
+            <div 
         ref={containerRef}
         className="relative overflow-hidden cursor-grab active:cursor-grabbing"
         onMouseDown={handleMouseDown}
@@ -90,28 +91,33 @@ export default function ProductsGrid({ categorias, titulo = 'Categorías de prod
             transform: `translateX(-${current * (100 / itemsPerView)}%)`,
           }}
         >
-          {categorias.map((cat) => (
-            <Link 
-              key={cat.id} 
-              href={cat.slug ? `/productos/${cat.slug}` : '#'}
-              className="flex-shrink-0 w-[calc(50%-0.5rem)] sm:w-[calc(33.333%-0.66rem)] lg:w-[calc(25%-0.75rem)] xl:w-[calc(20%-0.8rem)]"
-            >
-              <article className="rounded-[2.5rem] overflow-hidden shadow-md bg-sky-400 dark:bg-sky-500 group cursor-pointer h-28 md:h-36">
-                <Image
-                  src={cat.imagen || '/img/no-image.png'}
-                  alt={cat.nombre}
-                  width={300}
-                  height={200}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                />
-              </article>
-              <div className="py-3 text-center">
-                <p className="text-[11px] md:text-sm font-bold tracking-tight text-gray-800 dark:text-gray-100 uppercase">
-                  {cat.nombre}
-                </p>
-              </div>
-            </Link>
-          ))}
+          {displayCategories.map((cat, index) => {
+            // Asigna ordenadamente las imágenes del 1.png al 7.png
+            const localImage = `/img/Inicio/2/${index + 1}.png`;
+
+            return (
+              <Link 
+                key={cat.id} 
+                href={cat.slug ? `/productos/${cat.slug}` : '#'}
+                className="flex-shrink-0 w-[calc(50%-0.5rem)] sm:w-[calc(33.333%-0.66rem)] lg:w-[calc(25%-0.75rem)] xl:w-[calc(20%-0.8rem)]"
+              >
+                <article className="rounded-[2.5rem] overflow-hidden shadow-md bg-sky-400 dark:bg-sky-500 group cursor-pointer h-40 md:h-48">
+                  <Image
+                    src={localImage}
+                    alt={cat.nombre}
+                    width={300}
+                    height={200}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
+                </article>
+                <div className="py-3 text-center">
+                  <p className="text-[11px] md:text-sm font-bold tracking-tight text-gray-800 dark:text-gray-100 uppercase">
+                    {cat.nombre}
+                  </p>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       </div>
     </section>
