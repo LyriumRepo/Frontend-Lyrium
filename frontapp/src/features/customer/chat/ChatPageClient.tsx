@@ -436,8 +436,8 @@ export function ChatPageClient() {
           <div className="w-full max-w-xl">
             <NewChatForm
               sellers={sellers}
-              onSubmit={(data) => {
-                createConversation(data);
+              onSubmit={async (data) => {
+                await createConversation(data);
                 setShowNewChatForm(false);
               }}
               onCancel={() => setShowNewChatForm(false)}

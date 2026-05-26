@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { orderApi } from '@/shared/lib/api/orderRepository';
 import { cartApi } from '@/shared/lib/api/cartRepository';
+import { addressApi } from '@/shared/lib/api/addressRepository';
 import { useCheckoutStore } from '@/store/checkoutStore';
 import { useCarritoStore } from '@/store/carritoStore';
 
 export function useCheckoutSubmit() {
+    const state = useCheckoutStore();
     const {
         cartItems,
         personalData,
@@ -13,7 +15,7 @@ export function useCheckoutSubmit() {
         setProcessing,
         setStep,
         setOrderResult,
-    } = useCheckoutStore();
+    } = state;
 
     const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -28,10 +30,8 @@ export function useCheckoutSubmit() {
         setProcessing(true);
 
         try {
-            // Intentar sincronizar items al backend antes de crear la orden
             let synced = false;
 
-            // 1. Si el checkoutStore tiene items, sincronizarlos
             if (selectedItems.length > 0) {
                 const serverCart = await cartApi.getCart().catch(() => null);
                 const serverCount = serverCart?.items?.length ?? 0;
@@ -43,11 +43,9 @@ export function useCheckoutSubmit() {
                 }
             }
 
-            // 2. Si no hay items en checkoutStore, buscar en carritoStore local
             if (!synced && selectedItems.length === 0) {
                 const localItems = useCarritoStore.getState().cartItems;
                 if (localItems.length > 0) {
-                    // Limpiar carrito del backend y luego sincronizar items locales
                     await cartApi.clearCart().catch(() => {});
                     for (const item of localItems) {
                         const productId = Number(item.producto_id);
@@ -60,7 +58,6 @@ export function useCheckoutSubmit() {
                 }
             }
 
-            // 3. Si aún no hay items, intentar recargar carrito desde backend
             if (!synced && selectedItems.length === 0) {
                 const refreshed = await cartApi.getCart().catch(() => null);
                 if (!refreshed || !refreshed.items || refreshed.items.length === 0) {
@@ -69,13 +66,19 @@ export function useCheckoutSubmit() {
             }
 
             const fullName = `${personalData.name} ${personalData.apellidoPaterno} ${personalData.apellidoMaterno}`.trim();
-            const address = [
-                shippingData.avenida,
-                shippingData.numero,
-                shippingData.pisoLote,
-                shippingData.urbanizacion,
-                shippingData.distrito,
-            ].filter(Boolean).join(', ');
+            const isPAS = personalData.docType === 'PAS';
+
+            const address = isPAS
+                ? [shippingData.direccionPas, shippingData.ciudadPas].filter(Boolean).join(', ')
+                : [
+                    shippingData.avenida,
+                    shippingData.numero,
+                    shippingData.pisoLote,
+                    shippingData.urbanizacion,
+                    shippingData.distrito,
+                    shippingData.provincia,
+                    shippingData.departamento,
+                ].filter(Boolean).join(', ');
 
             const response = await orderApi.create({
                 payment_method: orderData.paymentMethod,
@@ -92,6 +95,24 @@ export function useCheckoutSubmit() {
                 notes: shippingData.referencia || undefined,
             });
 
+            // Guardar dirección en perfil si el toggle está activo
+            if (shippingData.saveAddress && !isPAS) {
+                try {
+                    await addressApi.create({
+                        etiqueta: 'otro',
+                        destinatario: fullName,
+                        pais: 'Perú',
+                        departamento: shippingData.departamento,
+                        provincia: shippingData.provincia,
+                        distrito: shippingData.distrito,
+                        avenida: shippingData.avenida,
+                        numero: shippingData.numero,
+                        piso_lote: shippingData.pisoLote || null,
+                        referencia: shippingData.referencia || null,
+                    } as any);
+                } catch { /* silencioso — no bloquear la orden */ }
+            }
+
             setOrderResult({
                 orderId: response.order_number || `LYR-${Date.now().toString().slice(-6)}`,
                 email: personalData.email,
@@ -102,7 +123,6 @@ export function useCheckoutSubmit() {
                 orderData,
             });
 
-            // Limpiar carrito del backend
             try { await cartApi.clearCart(); } catch { /* ignorar */ }
 
             useCheckoutStore.getState().reset();

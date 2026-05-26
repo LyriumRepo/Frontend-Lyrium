@@ -13,9 +13,18 @@ function mapBackendStatus(status: string): TicketStatus {
   return map[status] || 'abierto';
 }
 
+const BACKEND_TO_CATEGORY: Record<string, TicketCategory> = {
+  info: 'informacion',
+  tech: 'tecnico',
+  comment: 'positivo',
+  admin: 'informacion',
+  followup: 'informacion',
+  payments: 'informacion',
+  documentation: 'informacion',
+};
+
 function mapBackendCategory(category: string): TicketCategory {
-  const valid: TicketCategory[] = ['critico', 'tecnico', 'negativo', 'informacion', 'positivo'];
-  return valid.includes(category as TicketCategory) ? category as TicketCategory : 'informacion';
+  return BACKEND_TO_CATEGORY[category] ?? 'informacion';
 }
 
 function mapTicketData(data: TicketData): CustomerTicket {
@@ -138,10 +147,18 @@ export function useCustomerSupport() {
         'positivo': 'baja',
       };
 
+      const CATEGORY_TO_BACKEND: Record<string, string> = {
+        informacion: 'info',
+        positivo: 'comment',
+        negativo: 'comment',
+        tecnico: 'tech',
+        critico: 'admin',
+      };
+
       const created = await ticketApi.create({
         asunto: data.subject,
         mensaje: data.description,
-        tipo_ticket: data.category,
+        tipo_ticket: CATEGORY_TO_BACKEND[data.category] ?? data.category,
         criticidad: criticidadMap[data.category] || 'baja',
       });
 

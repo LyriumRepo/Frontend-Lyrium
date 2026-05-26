@@ -204,7 +204,7 @@ function mapOrderResourceToOrder(raw: OrderResource): Order {
     currentStep: STATUS_STEP_MAP[statusKey] ?? 1,
     envio: item.shipping
       ? {
-          direccion: [item.shipping.address ?? item.shipping.street, item.shipping.city ?? item.shipping.city].filter(Boolean).join(', ') || 'Sin dirección',
+          direccion: combineAddressParts([item.shipping.address, item.shipping.city]),
           carrier: 'Por determinar',
           tracking: '-',
           tracking_url: '',
@@ -269,6 +269,11 @@ function getDateBounds(dateValue: string): Date | null {
   if (!dateValue) return null;
   const parsed = new Date(`${dateValue}T00:00:00`);
   return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function combineAddressParts(parts: (string | null | undefined)[]): string {
+  const filtered = parts.filter((p): p is string => !!p);
+  return filtered.length > 0 ? filtered.join(', ') : 'Sin dirección';
 }
 
 // ─── Sub-componente: Stepper de seguimiento ───────────────────────────────────

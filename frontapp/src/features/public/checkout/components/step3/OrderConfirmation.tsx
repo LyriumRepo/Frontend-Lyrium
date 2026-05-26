@@ -27,7 +27,7 @@ export default function OrderConfirmation() {
     const { orderId, email, total, items, personalData, shippingData, orderData } = result;
 
     const addressLines = orderData.deliveryMethod !== 'pickup'
-        ? [shippingData.avenida, shippingData.numero, shippingData.distrito, shippingData.departamento].filter(Boolean).join(', ')
+        ? [shippingData.avenida, shippingData.numero, shippingData.pisoLote, shippingData.distrito, shippingData.provincia, shippingData.departamento].filter(Boolean).join(', ')
         : 'Retiro en tienda';
 
     return (

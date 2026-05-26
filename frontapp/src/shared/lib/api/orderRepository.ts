@@ -4,18 +4,6 @@ import type { ApiResponse } from './base-client';
 
 export type OrderStatus = 'pending_seller' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
 
-export interface OrderItem {
-  id: number;
-  product_id: number;
-  name: string;
-  quantity: number;
-  price: number;
-  total: number;
-  status: OrderStatus;
-  can_confirm: boolean;
-  can_cancel: boolean;
-}
-
 export interface OrderAddress {
   name: string;
   street: string;
@@ -25,22 +13,53 @@ export interface OrderAddress {
   phone?: string;
 }
 
+export interface ShippingInfo {
+  name: string | null;
+  email: string | null;
+  phone: string | null;
+  address: string | null;
+  city: string | null;
+  postalCode: string | null;
+  notes: string | null;
+  type: string | null;
+}
+
+export interface OrderItemResource {
+  id: string;
+  sellerId: string;
+  productId: string;
+  productName: string;
+  unitPrice: number;
+  quantity: number;
+  lineTotal: number;
+  status: string;
+  statusLabel: string;
+  actions: { canConfirm: boolean; canCancel: boolean };
+  product?: { id: string; name: string; slug: string; image: string };
+  store?: { id: string; name: string; slug: string };
+}
+
 export interface OrderResource {
-  id: number;
-  order_number: string;
-  status: OrderStatus;
-  global_status: OrderStatus;
+  id: string;
+  orderNumber: string;
+  status: string;
+  globalStatus: string;
+  statusLabel: string;
+  paymentMethod: string | null;
+  paymentStatus: string;
+  shipping: ShippingInfo;
   subtotal: number;
-  shipping: number;
-  tax: number;
+  shippingCost: number;
+  taxAmount: number;
+  discountAmount: number;
   total: number;
-  items: OrderItem[];
-  shipping_address?: OrderAddress;
-  billing_address?: OrderAddress;
-  customer_name: string;
-  customer_email: string;
-  created_at: string;
-  updated_at: string;
+  couponCode: string | null;
+  notes: string | null;
+  actions: { canCancel: boolean; canConfirm: boolean; canUpdate: boolean };
+  items?: OrderItemResource[];
+  user?: { id: string; name: string; email: string };
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface CreateOrderPayload {

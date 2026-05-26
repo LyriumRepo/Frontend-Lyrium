@@ -15,6 +15,10 @@ export interface ChatConversation {
   sellerName: string;
   sellerStore: string;
   sellerAvatar?: string;
+  customerName?: string;
+  customerEmail?: string;
+  customerDocumentNumber?: string;
+  customerAvatar?: string;
   lastMessage: string;
   lastMessageTime: string;
   unreadCount: number;
@@ -41,6 +45,10 @@ interface RawConversation {
   seller_name: string;
   seller_store: string;
   seller_avatar: string;
+  customer_name?: string;
+  customer_email?: string;
+  customer_document_number?: string;
+  customer_avatar?: string;
   last_message: string;
   last_message_time: string;
   unread_count: number;
@@ -75,6 +83,10 @@ function mapConversation(raw: RawConversation): ChatConversation {
     sellerName: raw.seller_name,
     sellerStore: raw.seller_store,
     sellerAvatar: raw.seller_avatar,
+    customerName: raw.customer_name,
+    customerEmail: raw.customer_email,
+    customerDocumentNumber: raw.customer_document_number,
+    customerAvatar: raw.customer_avatar,
     lastMessage: raw.last_message,
     lastMessageTime: raw.last_message_time,
     unreadCount: raw.unread_count,
