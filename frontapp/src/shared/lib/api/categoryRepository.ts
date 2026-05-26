@@ -27,7 +27,7 @@ async function request<T>(endpoint: string): Promise<T> {
 
 export const categoryApi = {
   list: async (): Promise<CategoryResource[]> => {
-    const response = await request<ApiResponse<CategoryResource[]>>('/categories');
+    const response = await request<ApiResponse<CategoryResource[]>>('/categories?per_page=400');
     return response.data || [];
   },
 

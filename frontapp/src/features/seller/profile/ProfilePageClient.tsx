@@ -135,7 +135,7 @@ export function ProfilePageClient(_props: ProfilePageClientProps) {
                     <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[var(--brand-green)] dark:to-[#1A3A32] p-6 flex items-center justify-between relative overflow-hidden">
                         <div className="flex items-center gap-5 text-white relative z-10">
                             <div className="w-12 h-12 bg-white dark:bg-[var(--bg-card)]/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-inner">
-                                <Icon name="Building2" className="w-6 h-6" />
+                                <Icon name="Building2" className="w-6 h-6 text-sky-600 dark:text-white" />
                             </div>
                             <div>
                                 <h3 className="text-2xl font-black tracking-tighter leading-none text-gray-800 dark:text-[var(--text-primary)] dark:text-[var(--text-primary)]">Datos Empresariales</h3>
@@ -258,7 +258,7 @@ export function ProfilePageClient(_props: ProfilePageClientProps) {
                         <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[var(--brand-green)] dark:to-[#1A3A32] p-4 flex items-center justify-between relative overflow-hidden">
                             <div className="flex items-center gap-5 text-white relative z-10">
                             <div className="w-12 h-12 bg-white dark:bg-[var(--bg-card)]/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-inner">
-                                    <Icon name="UserCog" className="w-6 h-6" />
+                                    <Icon name="UserCog" className="w-6 h-6 text-sky-600 dark:text-white" />
                                 </div>
                                 <div>
                                     <h3 className="text-xl font-black tracking-tighter leading-none">Admin del Panel</h3>
@@ -320,7 +320,7 @@ export function ProfilePageClient(_props: ProfilePageClientProps) {
                     <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[var(--brand-green)] dark:to-[#1A3A32] p-6 flex items-center justify-between relative overflow-hidden">
                         <div className="flex items-center gap-5 text-white relative z-10">
                             <div className="w-12 h-12 bg-white dark:bg-[var(--bg-card)]/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-inner">
-                                <Icon name="Receipt" className="w-6 h-6" />
+                                <Icon name="Receipt" className="w-6 h-6 text-sky-600 dark:text-white" />
                             </div>
                             <div>
                                 <h3 className="text-2xl font-black tracking-tighter leading-none">Finanzas</h3>

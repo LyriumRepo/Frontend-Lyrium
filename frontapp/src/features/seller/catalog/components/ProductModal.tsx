@@ -476,7 +476,21 @@ export default function ProductModal({
                           required
                           value={formData.category ?? ''}
                           onChange={handleChange}
-                          className="w-full bg-transparent border-none focus:ring-0 font-bold text-[var(--text-primary)] p-0 outline-none cursor-pointer"
+                          className={`
+                            w-full
+                            bg-[var(--bg-card)]
+                            border border-[var(--border-subtle)]
+                            rounded-md
+                            focus:ring-2 focus:ring-sky-500/30
+                            font-bold
+                            text-[var(--text-primary)]
+                            p-2
+                            outline-none
+                            cursor-pointer
+                            dark:bg-[var(--bg-secondary)]
+                            dark:text-[var(--text-primary)]
+                            dark:border-[var(--border-subtle)]
+                          `}
                         >
                           <option value="">Seleccionar categoría...</option>
                           {categories.map((cat) => (
