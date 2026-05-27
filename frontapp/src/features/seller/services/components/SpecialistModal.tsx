@@ -6,8 +6,29 @@ import Icon from '@/components/ui/Icon';
 import {
   Specialist,
   AvailabilityStatus,
-  SPECIALIST_CATEGORIES,
 } from '@/features/seller/services/types';
+
+// ── Árbol de categorías para especialistas (L1 + L2) ─────────────────────────
+type SpecCatL1 = { label: string; children: string[] };
+
+const SPECIALIST_CATEGORY_TREE: SpecCatL1[] = [
+  {
+    label: 'Servicios médicos',
+    children: [
+      'Cardiología', 'Radiología', 'Dermatología', 'Medicina general',
+      'Endocrinología', 'Enfermería', 'Gastroenterología', 'Geriatría',
+      'Ginecología', 'Laboratorio clínico', 'Medicina física y rehabilitación',
+      'Neumología', 'Neurología', 'Nutriología', 'Odontología', 'Oftalmología',
+      'Oncología', 'Pediatría', 'Psicología', 'Psiquiatría', 'Reumatología',
+    ],
+  },
+  { label: 'Belleza',                      children: ['Peluquerías', 'Spas', 'Otros'] },
+  { label: 'Deportes',                     children: ['Gimnasios'] },
+  { label: 'Servicios sociales',           children: ['Otro'] },
+  { label: 'Servicios para animales',      children: ['Otro'] },
+  { label: 'Servicio de medicina natural', children: ['Otro'] },
+  { label: 'Alojamiento ecológico',        children: ['Otro'] },
+];
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -101,10 +122,15 @@ export default function SpecialistModal({
   const [fotoPreview, setFotoPreview] = useState<string | null>(null);
   const [errors, setErrors] = useState<Partial<Record<keyof Specialist, string>>>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [catL1, setCatL1] = useState('');
+  const [catL2, setCatL2] = useState('');
 
   useEffect(() => {
     if (!isOpen) return;
     if (specialist) {
+      const parts = (specialist.categoria ?? '').split(' > ');
+      setCatL1(parts[0] ?? '');
+      setCatL2(parts[1] ?? '');
       setForm({
         nombres:          specialist.nombres,
         apellidos:        specialist.apellidos,
@@ -120,6 +146,8 @@ export default function SpecialistModal({
       });
       setFotoPreview(specialist.foto ?? null);
     } else {
+      setCatL1('');
+      setCatL2('');
       setForm(DEFAULT_FORM);
       setFotoPreview(null);
     }
@@ -155,7 +183,7 @@ export default function SpecialistModal({
     if (!form.nombres.trim())      e.nombres = 'Requerido';
     if (!form.apellidos.trim())    e.apellidos = 'Requerido';
     if (!form.especialidad.trim()) e.especialidad = 'Requerido';
-    if (!form.categoria)           e.categoria = 'Requerido';
+    if (!catL1)                    e.categoria = 'Selecciona una categoría';
     if (!form.dni.trim()) {
       e.dni = 'Requerido';
     } else if (form.dni.length !== 8) {
@@ -295,19 +323,70 @@ export default function SpecialistModal({
             </Field>
           </div>
 
-          {/* Categoría */}
-            <Field label="Categoría" error={errors.categoria}>
+          {/* Categoría (2 niveles) */}
+          <div className="space-y-3">
+            <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)]">
+              Categoría
+            </p>
+
+            {/* L1 */}
+            <div className="space-y-1">
               <select
-                value={form.categoria}
-                onChange={(e) => set('categoria', e.target.value)}
+                value={catL1}
+                onChange={(e) => {
+                  const l1 = e.target.value;
+                  setCatL1(l1);
+                  setCatL2('');
+                  set('categoria', l1);
+                  setErrors((p) => ({ ...p, categoria: undefined }));
+                }}
                 className={inputCls(!!errors.categoria)}
               >
-                <option value="">Seleccionar</option>
-                {SPECIALIST_CATEGORIES.map((cat) => (
-                  <option key={cat} value={cat}>{cat}</option>
+                <option value="" disabled>1. Categoría principal...</option>
+                {SPECIALIST_CATEGORY_TREE.map((c) => (
+                  <option key={c.label} value={c.label}>{c.label}</option>
                 ))}
               </select>
-            </Field>
+              {errors.categoria && (
+                <p className="text-[10px] text-rose-500 font-semibold">{errors.categoria}</p>
+              )}
+            </div>
+
+            {/* L2 */}
+            {catL1 && (() => {
+              const l1Node = SPECIALIST_CATEGORY_TREE.find((c) => c.label === catL1);
+              return l1Node ? (
+                <div className="pl-3 border-l-2 border-sky-500/20 dark:border-[#8FC3A1]/20">
+                  <select
+                    value={catL2}
+                    onChange={(e) => {
+                      const l2 = e.target.value;
+                      setCatL2(l2);
+                      set('categoria', l2 ? `${catL1} > ${l2}` : catL1);
+                      setErrors((p) => ({ ...p, categoria: undefined }));
+                    }}
+                    className={inputCls(false)}
+                  >
+                    <option value="" disabled>2. Subcategoría...</option>
+                    {l1Node.children.map((c) => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                </div>
+              ) : null;
+            })()}
+
+            {/* Ruta visual */}
+            {catL1 && (
+              <div className="flex items-center gap-1 flex-wrap px-1">
+                <span className="text-[10px] font-black text-sky-500 dark:text-[#8FC3A1]">{catL1}</span>
+                {catL2 && (<>
+                  <span className="text-[10px] text-[var(--text-secondary)]">›</span>
+                  <span className="text-[10px] font-black text-sky-500 dark:text-[#8FC3A1]">{catL2}</span>
+                </>)}
+              </div>
+            )}
+          </div>
 
           {/* N° Colegiatura / Años de experiencia */}
           <div className="grid grid-cols-2 gap-3">

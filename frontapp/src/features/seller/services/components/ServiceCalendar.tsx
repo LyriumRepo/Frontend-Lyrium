@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import {
@@ -106,6 +106,56 @@ function getBlockLabel(index: number): string {
   return `${index + 1}° Bloque`;
 }
 
+
+type AttendanceDayExtended = AttendanceDay & Record<string, unknown>;
+
+function asNumberList(value: unknown): number[] {
+  if (value == null) return [];
+  const values = Array.isArray(value) ? value : [value];
+
+  const ids = values.flatMap((item) => {
+    if (typeof item === 'number' && Number.isFinite(item)) return [item];
+    if (typeof item === 'string' && item.trim() !== '' && !Number.isNaN(Number(item))) return [Number(item)];
+    if (typeof item === 'object' && item !== null) {
+      const maybeId =
+        (item as { id?: unknown }).id ??
+        (item as { specialistId?: unknown }).specialistId ??
+        (item as { especialistaId?: unknown }).especialistaId;
+      if (typeof maybeId === 'number' && Number.isFinite(maybeId)) return [maybeId];
+      if (typeof maybeId === 'string' && maybeId.trim() !== '' && !Number.isNaN(Number(maybeId))) {
+        return [Number(maybeId)];
+      }
+    }
+    return [];
+  });
+
+  return Array.from(new Set(ids));
+}
+
+function getAttendanceSpecialistIds(att: AttendanceDay | null): number[] {
+  if (!att) return [];
+  const data = att as AttendanceDayExtended;
+
+  const candidateValues = [
+    data.especialistasAsignados,
+    data.especialistas,
+    data.especialistaIds,
+    data.especialistIds,
+    data.specialistIds,
+    data.specialistId,
+    data.especialistaId,
+    data.idEspecialista,
+    data.assignedSpecialistIds,
+  ];
+
+  for (const value of candidateValues) {
+    const ids = asNumberList(value);
+    if (ids.length > 0) return ids;
+  }
+
+  return [];
+}
+
 export default function ServiceCalendar({
   service,
   specialists,
@@ -124,6 +174,9 @@ export default function ServiceCalendar({
   const [selectedSessionPage, setSelectedSessionPage] = useState(1);
   const [selectedAppointment, setSelectedAppointment] = useState<AppointmentWithClient | null>(null);
   const [showRescheduleWarning, setShowRescheduleWarning] = useState(false);
+  const [selectedSpecialistId, setSelectedSpecialistId] = useState<number | null>(null);
+  const [isSpecialistMenuOpen, setIsSpecialistMenuOpen] = useState(false);
+  const specialistMenuRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (!selectedDate) return;
@@ -145,9 +198,56 @@ export default function ServiceCalendar({
     setShowRescheduleWarning(false);
   }, [currentMonth]);
 
+  useEffect(() => {
+    if (!isSpecialistMenuOpen) return;
+
+    const handlePointerDown = (event: MouseEvent) => {
+      if (specialistMenuRef.current && !specialistMenuRef.current.contains(event.target as Node)) {
+        setIsSpecialistMenuOpen(false);
+      }
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setIsSpecialistMenuOpen(false);
+    };
+
+    document.addEventListener('mousedown', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isSpecialistMenuOpen]);
+
   const year = currentMonth.getFullYear();
   const month = currentMonth.getMonth();
   const calDays = getCalendarDays(year, month);
+
+  const serviceSpecialists = specialists.filter((sp) =>
+    service.especialistasAsignados.includes(sp.id)
+  );
+  const activeSpecialist = selectedSpecialistId
+    ? serviceSpecialists.find((sp) => sp.id === selectedSpecialistId) ?? null
+    : null;
+  const specialistSelectorLabel = activeSpecialist
+    ? `${activeSpecialist.nombres} ${activeSpecialist.apellidos}`
+    : 'Todos los Especialistas';
+
+  const filteredAppointments = selectedSpecialistId
+    ? appointments.filter((a) => a.specialistId === selectedSpecialistId)
+    : appointments;
+
+  // Weekdays covered by the selected specialist, derived from their schedule (especialistaHorarios)
+  type EspecialistaHorario = { id: number; dias: { dia: WeekDay }[] };
+  const specialistWeekdays: Set<WeekDay> | null = (() => {
+    if (!selectedSpecialistId) return null;
+    const horarios = (service as Service & { especialistaHorarios?: EspecialistaHorario[] }).especialistaHorarios;
+    if (!horarios) return null;
+    const entry = horarios.find((h) => h.id === selectedSpecialistId);
+    if (!entry) return new Set<WeekDay>(); // specialist has no schedule → no days
+    return new Set(entry.dias.map((d) => d.dia));
+  })();
 
   const goToPrev = () => {
     setCurrentMonth(new Date(year, month - 1, 1));
@@ -170,6 +270,14 @@ export default function ServiceCalendar({
   const handleDayClick = (date: Date) => {
     const att = getAttendanceDay(date, service);
     if (!att) return;
+
+    if (selectedSpecialistId) {
+      const horarios = (service as Service & { especialistaHorarios?: { id: number; dias: { dia: WeekDay }[] }[] }).especialistaHorarios;
+      const entry = horarios?.find((h) => h.id === selectedSpecialistId);
+      const weekDay = JS_TO_WEEKDAY[date.getDay()];
+      if (!entry || !entry.dias.some((d) => d.dia === weekDay)) return;
+    }
+
     setSelectedDate(date);
     setSelectedBlockIndex(0);
     setSelectedSessionPage(1);
@@ -178,7 +286,7 @@ export default function ServiceCalendar({
   };
 
   const selectedAtt = selectedDate ? getAttendanceDay(selectedDate, service) : null;
-  const selectedAppts = selectedDate ? getApptsForDate(selectedDate, service, appointments) : [];
+  const selectedAppts = selectedDate ? getApptsForDate(selectedDate, service, filteredAppointments) : [];
   const selectedBlocks = selectedAtt?.bloques ?? [];
   const currentBlock = selectedBlocks[selectedBlockIndex] ?? null;
   const blockSessions = currentBlock ? calculateSessions(currentBlock, service.duracion) : [];
@@ -209,6 +317,16 @@ export default function ServiceCalendar({
         return selectedDate ? isPastDate(selectedDate, today) : false;
       })()
     : false;
+
+  const handleSpecialistSelection = (specialistId: number | null) => {
+    setSelectedSpecialistId(specialistId);
+    setIsSpecialistMenuOpen(false);
+    setSelectedDate(null);
+    setSelectedBlockIndex(0);
+    setSelectedSessionPage(1);
+    setSelectedAppointment(null);
+    setShowRescheduleWarning(false);
+  };
 
   if (!isOpen) return null;
 
@@ -257,9 +375,111 @@ export default function ServiceCalendar({
             <h2 className="text-base md:text-lg font-black text-[var(--text-primary)] tracking-tight">
               {service.denominacion}
             </h2>
-            <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-[0.28em] mt-0.5">
-              Calendario de Sesiones
-            </p>
+            <div className="mt-0.5 flex flex-wrap items-center gap-2">
+              <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-[0.28em]">
+                Calendario de Sesiones
+              </p>
+
+              <div ref={specialistMenuRef} className="relative">
+                <button
+                  type="button"
+                  onClick={() => setIsSpecialistMenuOpen((prev) => !prev)}
+                  className={`inline-flex items-center gap-2 rounded-2xl border px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.26em] transition-all ${
+                    selectedSpecialistId === null
+                      ? 'border-sky-500/25 bg-sky-500/10 text-sky-500 shadow-sm shadow-sky-500/10'
+                      : 'border-[var(--border-subtle)] bg-[var(--bg-secondary)] text-[var(--text-primary)] hover:border-sky-500/30 hover:text-sky-500'
+                  }`}
+                  aria-haspopup="listbox"
+                  aria-expanded={isSpecialistMenuOpen}
+                >
+                  <span className={`flex h-5 min-w-5 items-center justify-center rounded-lg text-[8px] font-black ${
+                    selectedSpecialistId === null ? 'bg-sky-500/15 text-sky-500' : 'bg-[var(--bg-card)] text-[var(--text-secondary)]'
+                  }`}>
+                    {activeSpecialist ? getAvatarChars(activeSpecialist) : 'AA'}
+                  </span>
+                  <span className="max-w-[180px] truncate normal-case tracking-normal">
+                    {specialistSelectorLabel}
+                  </span>
+                  <Icon name={isSpecialistMenuOpen ? 'ChevronUp' : 'ChevronDown'} className="w-3.5 h-3.5 opacity-80" />
+                </button>
+
+                {isSpecialistMenuOpen && (
+                  <div className="absolute left-0 top-[calc(100%+0.5rem)] z-20 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] shadow-2xl">
+                    <div className="px-3 py-2 border-b border-[var(--border-subtle)]">
+                      <p className="text-[9px] font-black uppercase tracking-[0.24em] text-[var(--text-secondary)]">
+                        Selecciona un especialista
+                      </p>
+                    </div>
+
+                    <div className="max-h-72 overflow-auto p-2">
+                      <button
+                        type="button"
+                        onClick={() => handleSpecialistSelection(null)}
+                        className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all ${
+                          selectedSpecialistId === null
+                            ? 'bg-sky-500/10 text-sky-500'
+                            : 'hover:bg-[var(--bg-secondary)]'
+                        }`}
+                      >
+                        <span className={`flex h-9 w-9 items-center justify-center rounded-xl border text-[10px] font-black ${
+                          selectedSpecialistId === null
+                            ? 'border-sky-500/20 bg-sky-500/15 text-sky-500'
+                            : 'border-[var(--border-subtle)] bg-[var(--bg-secondary)] text-[var(--text-secondary)]'
+                        }`}>
+                          AA
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-bold text-[var(--text-primary)]">
+                            Todos los Especialistas
+                          </p>
+                          <p className="truncate text-[11px] text-[var(--text-secondary)]">
+                            Ver el calendario general
+                          </p>
+                        </div>
+                        {selectedSpecialistId === null && (
+                          <Icon name="Check" className="h-4 w-4 text-sky-500" />
+                        )}
+                      </button>
+
+                      <div className="my-2 h-px bg-[var(--border-subtle)]" />
+
+                      {serviceSpecialists.map((sp) => {
+                        const isSelected = selectedSpecialistId === sp.id;
+                        return (
+                          <button
+                            key={sp.id}
+                            type="button"
+                            onClick={() => handleSpecialistSelection(sp.id)}
+                            className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all ${
+                              isSelected
+                                ? 'bg-sky-500/10 text-sky-500'
+                                : 'hover:bg-[var(--bg-secondary)]'
+                            }`}
+                          >
+                            <div className="relative flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] text-[10px] font-black text-sky-500">
+                              {sp.foto ? (
+                                <Image src={sp.foto} fill sizes="36px" className="object-cover" alt="" />
+                              ) : (
+                                <span>{getAvatarChars(sp)}</span>
+                              )}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-sm font-bold text-[var(--text-primary)]">
+                                {sp.nombres} {sp.apellidos}
+                              </p>
+                              <p className="truncate text-[11px] text-[var(--text-secondary)]">
+                                {sp.especialidad || 'Especialista disponible'}
+                              </p>
+                            </div>
+                            {isSelected && <Icon name="Check" className="h-4 w-4 text-sky-500" />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
           <button
             onClick={onClose}
@@ -316,8 +536,11 @@ export default function ServiceCalendar({
               {calDays.map((date, idx) => {
                 if (!date) return <div key={`empty-${idx}`} className="h-8 md:h-9" />;
 
-                const isAvailable = !!getAttendanceDay(date, service);
-                const dayAppts = getApptsForDate(date, service, appointments);
+                const att = getAttendanceDay(date, service);
+                const isAvailable = !!att && (
+                  !specialistWeekdays || specialistWeekdays.has(JS_TO_WEEKDAY[date.getDay()])
+                );
+                const dayAppts = getApptsForDate(date, service, filteredAppointments);
                 const hasAppts = dayAppts.length > 0;
                 const isToday = date.toDateString() === today.toDateString();
                 const isSelected = selectedDate?.toDateString() === date.toDateString();

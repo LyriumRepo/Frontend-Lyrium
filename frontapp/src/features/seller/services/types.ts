@@ -44,6 +44,12 @@ export type ServiceEstado = 'borrador' | 'publicado';
 
 export type AnticipacionReserva = 24 | 48 | 72;
 
+/** Asignación de días y bloques (por índice) de un especialista dentro de un servicio */
+export interface SpecialistHorario {
+  id: number;
+  dias: { dia: WeekDay; bloques: number[] }[];
+}
+
 export interface Service {
   id: number;
   denominacion: string;
@@ -51,6 +57,8 @@ export interface Service {
   duracion: number;
   diasAtencion: AttendanceDay[];
   especialistasAsignados: number[];
+  /** Asignación granular por especialista. Si está presente, el modal lo usa en lugar de pre-poblar todos los días. */
+  especialistaHorarios?: SpecialistHorario[];
   cupos: number;
   precio: number;
   estado: ServiceEstado;

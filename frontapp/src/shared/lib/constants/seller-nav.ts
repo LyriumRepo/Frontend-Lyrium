@@ -32,6 +32,13 @@ export const sellerNavigation: PanelNavigation = [
                 href: '/seller/catalog'
             },
             {
+                id: 'inventario',
+                label: 'Inventario',
+                description: 'Control de existencias y alertas de stock',
+                icon: 'Boxes',
+                href: '/seller/inventario'
+            },
+            {
                 id: 'servicios',
                 label: 'Mis Servicios',
                 description: 'Gestión de prestaciones y reservas activas',

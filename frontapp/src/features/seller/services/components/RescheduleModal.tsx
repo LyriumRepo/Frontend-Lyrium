@@ -1,9 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
 import {
     Appointment,
     Service,
+    Specialist,
     WeekDay,
     AttendanceDay,
     calculateSessions,
@@ -22,14 +24,27 @@ type AppointmentWithClient = Appointment & {
     clientId?: number;
 };
 
+type EspecialistaHorario = {
+    id: number;
+    dias: { dia: WeekDay; bloques: number[] }[];
+};
+
+type ServiceWithHorarios = Service & { especialistaHorarios?: EspecialistaHorario[] };
+
 interface RescheduleModalProps {
     appointment: AppointmentWithClient | null;
     service: Service;
+    specialists: Specialist[];
     appointments: AppointmentWithClient[];
     clients: Client[];
     isOpen: boolean;
     onClose: () => void;
-    onConfirm: (appointmentId: number, newFecha: string, newSession: { inicio: string; fin: string }) => void;
+    onConfirm: (
+        appointmentId: number,
+        newFecha: string,
+        newSession: { inicio: string; fin: string },
+        newSpecialistId: number | undefined,
+    ) => void;
 }
 
 const MONTH_NAMES = [
@@ -64,9 +79,46 @@ function getAttendanceDay(date: Date, service: Service): AttendanceDay | null {
     return service.diasAtencion.find((d) => d.dia === wd) ?? null;
 }
 
+/** Días que le corresponden al especialista según especialistaHorarios */
+function getSpecialistWeekdays(service: Service, specialistId: number): Set<WeekDay> {
+    const horarios = (service as ServiceWithHorarios).especialistaHorarios;
+    if (!horarios) return new Set();
+    const entry = horarios.find((h) => h.id === specialistId);
+    if (!entry) return new Set();
+    return new Set(entry.dias.map((d) => d.dia));
+}
+
+/**
+ * Bloques (TimeBlock[]) que el especialista cubre para un día concreto.
+ * Si no hay especialistaHorarios se devuelven todos los bloques del día.
+ */
+function getSpecialistBlocksForDay(service: Service, specialistId: number, weekDay: WeekDay): AttendanceDay['bloques'] {
+    const attDay = service.diasAtencion.find((d) => d.dia === weekDay);
+    if (!attDay) return [];
+
+    const horarios = (service as ServiceWithHorarios).especialistaHorarios;
+    if (!horarios) return attDay.bloques;
+
+    const entry = horarios.find((h) => h.id === specialistId);
+    if (!entry) return attDay.bloques;
+
+    const dayEntry = entry.dias.find((d) => d.dia === weekDay);
+    if (!dayEntry) return [];
+
+    // dayEntry.bloques son índices dentro de attDay.bloques
+    return dayEntry.bloques
+        .map((idx) => attDay.bloques[idx])
+        .filter(Boolean);
+}
+
+function getAvatarChars(sp: Specialist): string {
+    return (sp.nombres?.charAt(0)?.toUpperCase() ?? '') + (sp.apellidos?.charAt(0)?.toUpperCase() ?? '');
+}
+
 export default function RescheduleModal({
     appointment,
     service,
+    specialists,
     appointments,
     clients,
     isOpen,
@@ -77,14 +129,33 @@ export default function RescheduleModal({
     const [currentMonth, setCurrentMonth] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const [selectedSession, setSelectedSession] = useState<{ inicio: string; fin: string } | null>(null);
+    const [selectedSpecialistId, setSelectedSpecialistId] = useState<number | undefined>(undefined);
+    const [isSpecialistMenuOpen, setIsSpecialistMenuOpen] = useState(false);
+    const specialistMenuRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
-        if (isOpen) {
+        if (isOpen && appointment) {
             setCurrentMonth(new Date(today.getFullYear(), today.getMonth(), 1));
             setSelectedDate(null);
             setSelectedSession(null);
+            setSelectedSpecialistId(appointment.specialistId);
         }
-    }, [isOpen]);
+    }, [isOpen, appointment]);
+
+    useEffect(() => {
+        if (!isSpecialistMenuOpen) return;
+        const handlePointerDown = (e: MouseEvent) => {
+            if (specialistMenuRef.current && !specialistMenuRef.current.contains(e.target as Node))
+                setIsSpecialistMenuOpen(false);
+        };
+        const handleKeyDown = (e: KeyboardEvent) => { if (e.key === 'Escape') setIsSpecialistMenuOpen(false); };
+        document.addEventListener('mousedown', handlePointerDown);
+        document.addEventListener('keydown', handleKeyDown);
+        return () => {
+            document.removeEventListener('mousedown', handlePointerDown);
+            document.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [isSpecialistMenuOpen]);
 
     if (!appointment) return null;
 
@@ -98,10 +169,41 @@ export default function RescheduleModal({
     const canGoPrev = currentMonth > todayMonth;
     const canGoNext = currentMonth < maxMonth;
 
-    const attDay = selectedDate ? getAttendanceDay(selectedDate, service) : null;
-    const allSessions = attDay
-        ? attDay.bloques.flatMap((b) => calculateSessions(b, service.duracion))
-        : [];
+    const serviceSpecialists = specialists.filter((sp) =>
+        service.especialistasAsignados.includes(sp.id)
+    );
+    const currentSpecialist = appointment.specialistId
+        ? specialists.find((sp) => sp.id === appointment.specialistId) ?? null
+        : null;
+    const activeSpecialist = selectedSpecialistId
+        ? serviceSpecialists.find((sp) => sp.id === selectedSpecialistId) ?? null
+        : null;
+
+    // Weekdays disponibles para el especialista seleccionado
+    const specialistWeekdays: Set<WeekDay> | null = selectedSpecialistId
+        ? getSpecialistWeekdays(service, selectedSpecialistId)
+        : null;
+
+    // Un día es seleccionable si tiene diasAtencion Y el especialista lo cubre
+    function isDayAvailable(date: Date): boolean {
+        const attDay = getAttendanceDay(date, service);
+        if (!attDay) return false;
+        if (!specialistWeekdays) return true; // sin horarios → mostrar todos
+        const wd = JS_TO_WD[date.getDay()];
+        return specialistWeekdays.has(wd);
+    }
+
+    // Sesiones del día seleccionado filtradas por los bloques del especialista
+    const selectedWeekDay = selectedDate ? JS_TO_WD[selectedDate.getDay()] : null;
+    const allSessions = selectedDate && selectedWeekDay && selectedSpecialistId
+        ? getSpecialistBlocksForDay(service, selectedSpecialistId, selectedWeekDay)
+            .flatMap((b) => calculateSessions(b, service.duracion))
+        : selectedDate
+            ? (() => {
+                const attDay = getAttendanceDay(selectedDate, service);
+                return attDay ? attDay.bloques.flatMap((b) => calculateSessions(b, service.duracion)) : [];
+            })()
+            : [];
 
     const selectedFecha = selectedDate ? formatFecha(selectedDate) : null;
 
@@ -111,12 +213,14 @@ export default function RescheduleModal({
                 (a) =>
                     a.serviceId === service.id &&
                     a.fecha === selectedFecha &&
-                    a.id !== appointment.id,
+                    a.id !== appointment.id &&
+                    (selectedSpecialistId === undefined || a.specialistId === selectedSpecialistId),
             )
             .map((a) => a.sesion.inicio),
     );
 
     const canConfirm = !!selectedDate && !!selectedSession;
+    const specialistChanged = selectedSpecialistId !== appointment.specialistId;
 
     return (
         <BaseModal
@@ -136,7 +240,15 @@ export default function RescheduleModal({
                     </div>
                     <div className="flex-1 min-w-0">
                         <p className="text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Cita actual</p>
-                        <p className="text-sm font-black text-[var(--text-primary)] truncate">{client? `${client.nombres} ${client.apellidos}`: 'Sin cliente'}</p>
+                        <p className="text-sm font-black text-[var(--text-primary)] truncate">
+                            {client ? `${client.nombres} ${client.apellidos}` : 'Sin cliente'}
+                        </p>
+                        {currentSpecialist && (
+                            <p className="text-[10px] font-bold text-[var(--text-secondary)] truncate">
+                                {currentSpecialist.nombres} {currentSpecialist.apellidos}
+                                {currentSpecialist.especialidad ? ` · ${currentSpecialist.especialidad}` : ''}
+                            </p>
+                        )}
                     </div>
                     <div className="text-right flex-shrink-0">
                         <p className="text-[11px] font-black font-mono text-[var(--text-primary)]">
@@ -144,6 +256,101 @@ export default function RescheduleModal({
                         </p>
                         <p className="text-[9px] font-bold text-[var(--text-secondary)] mt-0.5">{appointment.fecha}</p>
                     </div>
+                </div>
+
+                {/* Selector de especialista */}
+                <div ref={specialistMenuRef} className="relative">
+                    <p className="text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest mb-2">
+                        Especialista para la nueva cita
+                    </p>
+                    <button
+                        type="button"
+                        onClick={() => setIsSpecialistMenuOpen((prev) => !prev)}
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl border text-left transition-all ${
+                            specialistChanged
+                                ? 'border-sky-500/40 bg-sky-500/8'
+                                : 'border-[var(--border-subtle)] bg-[var(--bg-secondary)]/50 hover:border-sky-500/30'
+                        }`}
+                    >
+                        <div className="relative w-8 h-8 rounded-xl bg-[var(--bg-card)] flex items-center justify-center text-[10px] font-black text-sky-500 border border-[var(--border-subtle)] overflow-hidden flex-shrink-0">
+                            {activeSpecialist?.foto ? (
+                                <Image src={activeSpecialist.foto} fill sizes="32px" className="object-cover" alt="" />
+                            ) : (
+                                <span>{activeSpecialist ? getAvatarChars(activeSpecialist) : '??'}</span>
+                            )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <p className="text-sm font-bold text-[var(--text-primary)] truncate">
+                                {activeSpecialist
+                                    ? `${activeSpecialist.nombres} ${activeSpecialist.apellidos}`
+                                    : 'Sin especialista'}
+                            </p>
+                            {activeSpecialist?.especialidad && (
+                                <p className="text-[10px] text-[var(--text-secondary)] truncate">{activeSpecialist.especialidad}</p>
+                            )}
+                        </div>
+                        {specialistChanged && (
+                            <span className="text-[8px] font-black text-sky-500 bg-sky-500/10 border border-sky-500/20 px-2 py-0.5 rounded-md uppercase tracking-widest flex-shrink-0">
+                                Cambiado
+                            </span>
+                        )}
+                        <Icon name={isSpecialistMenuOpen ? 'ChevronUp' : 'ChevronDown'} className="w-4 h-4 text-[var(--text-secondary)] flex-shrink-0" />
+                    </button>
+
+                    {isSpecialistMenuOpen && (
+                        <div className="absolute left-0 top-[calc(100%+0.5rem)] z-20 w-full overflow-hidden rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] shadow-2xl">
+                            <div className="px-3 py-2 border-b border-[var(--border-subtle)]">
+                                <p className="text-[9px] font-black uppercase tracking-[0.24em] text-[var(--text-secondary)]">
+                                    Selecciona un especialista
+                                </p>
+                            </div>
+                            <div className="max-h-56 overflow-auto p-2 space-y-0.5">
+                                {serviceSpecialists.map((sp) => {
+                                    const isSelected = selectedSpecialistId === sp.id;
+                                    const isOriginal = sp.id === appointment.specialistId;
+                                    return (
+                                        <button
+                                            key={sp.id}
+                                            type="button"
+                                            onClick={() => {
+                                                setSelectedSpecialistId(sp.id);
+                                                setIsSpecialistMenuOpen(false);
+                                                setSelectedDate(null);
+                                                setSelectedSession(null);
+                                            }}
+                                            className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all ${
+                                                isSelected ? 'bg-sky-500/10' : 'hover:bg-[var(--bg-secondary)]'
+                                            }`}
+                                        >
+                                            <div className="relative flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] text-[10px] font-black text-sky-500">
+                                                {sp.foto ? (
+                                                    <Image src={sp.foto} fill sizes="36px" className="object-cover" alt="" />
+                                                ) : (
+                                                    <span>{getAvatarChars(sp)}</span>
+                                                )}
+                                            </div>
+                                            <div className="min-w-0 flex-1">
+                                                <div className="flex items-center gap-2 flex-wrap">
+                                                    <p className={`truncate text-sm font-bold ${isSelected ? 'text-sky-600' : 'text-[var(--text-primary)]'}`}>
+                                                        {sp.nombres} {sp.apellidos}
+                                                    </p>
+                                                    {isOriginal && (
+                                                        <span className="text-[8px] font-black text-[var(--text-secondary)] bg-[var(--bg-secondary)] border border-[var(--border-subtle)] px-1.5 py-0.5 rounded uppercase tracking-widest">
+                                                            Actual
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <p className="truncate text-[11px] text-[var(--text-secondary)]">
+                                                    {sp.especialidad || 'Especialista disponible'}
+                                                </p>
+                                            </div>
+                                            {isSelected && <Icon name="Check" className="h-4 w-4 text-sky-500 flex-shrink-0" />}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -180,7 +387,7 @@ export default function RescheduleModal({
                             ))}
                             {calDays.map((date, idx) => {
                                 if (!date) return <div key={`e-${idx}`} className="h-8" />;
-                                const isAvailable = !!getAttendanceDay(date, service);
+                                const isAvailable = isDayAvailable(date);
                                 const isSelected = selectedDate?.toDateString() === date.toDateString();
                                 const isToday = date.toDateString() === today.toDateString();
                                 const isPast = date < today && !isToday;
@@ -273,6 +480,14 @@ export default function RescheduleModal({
                                 {selectedSession!.inicio} – {selectedSession!.fin}
                             </p>
                             <p className="text-[10px] font-bold text-[var(--text-secondary)]">{formatFecha(selectedDate!)}</p>
+                            {activeSpecialist && (
+                                <p className="text-[10px] font-bold text-[var(--text-secondary)] mt-0.5">
+                                    {activeSpecialist.nombres} {activeSpecialist.apellidos}
+                                    {specialistChanged && (
+                                        <span className="ml-1.5 text-sky-500">(cambiado)</span>
+                                    )}
+                                </p>
+                            )}
                         </div>
                     </div>
                 )}
@@ -281,7 +496,7 @@ export default function RescheduleModal({
                     <BaseButton
                         onClick={() => {
                             if (selectedDate && selectedSession) {
-                                onConfirm(appointment.id, formatFecha(selectedDate), selectedSession);
+                                onConfirm(appointment.id, formatFecha(selectedDate), selectedSession, selectedSpecialistId);
                                 onClose();
                             }
                         }}

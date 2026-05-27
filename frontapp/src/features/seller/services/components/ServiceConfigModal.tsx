@@ -10,6 +10,7 @@ import {
   TimeBlock,
   AttendanceDay,
   AnticipacionReserva,
+  SpecialistHorario,
   WEEK_DAYS,
   WEEK_DAY_SHORT,
   ANTICIPACION_LABELS,
@@ -29,21 +30,61 @@ type SpecialistDayEntry = { dia: WeekDay; bloques: number[] };
 /** Asignación de un especialista: qué días y qué bloques dentro de cada día */
 type SpecialistAssignment = { id: number; dias: SpecialistDayEntry[] };
 
-type FormData = Omit<Service, 'id' | 'especialistasAsignados'> & {
+type FormData = Omit<Service, 'id' | 'especialistasAsignados' | 'categoria'> & {
+  categoriaL1: string;
+  categoriaL2: string;
+  categoriaL3: string;
   especialistasAsignados: SpecialistAssignment[];
 };
 
-const CATEGORIES = [
-  'Salud y bienestar', 'Nutrición', 'Psicología', 'Fisioterapia',
-  'Medicina general', 'Odontología', 'Dermatología', 'Veterinaria',
-  'Educación', 'Asesoría legal', 'Consultoría', 'Otro',
+// ── Árbol de categorías del marketplace ──────────────────────────────────────
+type CatL2 = { label: string; children: string[] };
+type CatL1 = { label: string; children: CatL2[] };
+
+const CATEGORY_TREE: CatL1[] = [
+  {
+    label: 'Servicios médicos',
+    children: [
+      'Cardiología', 'Radiología', 'Dermatología', 'Medicina general',
+      'Endocrinología', 'Enfermería', 'Gastroenterología', 'Geriatría',
+      'Ginecología', 'Laboratorio clínico', 'Medicina física y rehabilitación',
+      'Neumología', 'Neurología', 'Nutriología', 'Odontología', 'Oftalmología',
+      'Oncología', 'Pediatría', 'Psicología', 'Psiquiatría', 'Reumatología',
+    ].map((l) => ({ label: l, children: ['Otro'] })),
+  },
+  {
+    label: 'Belleza',
+    children: ['Peluquerías', 'Spas', 'Otros'].map((l) => ({ label: l, children: ['Otro'] })),
+  },
+  {
+    label: 'Deportes',
+    children: [{ label: 'Gimnasios', children: ['Otro'] }],
+  },
+  {
+    label: 'Servicios sociales',
+    children: [{ label: 'Otro', children: ['Otro'] }],
+  },
+  {
+    label: 'Servicios para animales',
+    children: [{ label: 'Otro', children: ['Otro'] }],
+  },
+  {
+    label: 'Servicio de medicina natural',
+    children: [{ label: 'Otro', children: ['Otro'] }],
+  },
+  {
+    label: 'Alojamiento ecológico',
+    children: [{ label: 'Otro', children: ['Otro'] }],
+  },
 ];
 
 const ANTICIPACION_OPTIONS: AnticipacionReserva[] = [24, 48, 72];
 
 const DEFAULT_FORM: FormData = {
   denominacion: '',
-  categoria: '',
+  categoriaL1: '',
+  categoriaL2: '',
+  categoriaL3: '',
   duracion: 30,
   diasAtencion: [],
   especialistasAsignados: [] as SpecialistAssignment[],
@@ -281,31 +322,40 @@ export default function ServiceConfigModal({
   const [form, setForm] = useState<FormData>(DEFAULT_FORM);
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
-  const [customCategory, setCustomCategory] = useState('');
   const [bufferMinutos, setBufferMinutos] = useState(10);
 
   const currentlyAssignedIds = service?.especialistasAsignados ?? [];
-  const assignableSpecialists = specialists.filter(
-    (s) => isAssignable(s) || currentlyAssignedIds.includes(s.id),
-  );
+  const serviceCatPrefix = [form.categoriaL1, form.categoriaL2].filter(Boolean).join(' > ');
+  const assignableSpecialists = specialists.filter((s) => {
+    const categoryMatch = !serviceCatPrefix || s.categoria.startsWith(serviceCatPrefix);
+    return categoryMatch && (isAssignable(s) || currentlyAssignedIds.includes(s.id));
+  });
 
   // ── Sincronizar form ──────────────────────────────────────────────────────
   useEffect(() => {
     if (!isOpen) return;
     if (service) {
+      const catParts = (service.categoria ?? '').split(' > ');
       setForm({
         denominacion:           service.denominacion,
-        categoria:              service.categoria,
+        categoriaL1:            catParts[0] ?? '',
+        categoriaL2:            catParts[1] ?? '',
+        categoriaL3:            catParts[2] ?? '',
         duracion:               service.duracion,
         diasAtencion:           service.diasAtencion,
-        // Migrar number[] → SpecialistAssignment[] pre-asignando todos los días y bloques del servicio
-        especialistasAsignados: service.especialistasAsignados.map((id) => ({
-          id,
-          dias: service.diasAtencion.map((d) => ({
-            dia: d.dia,
-            bloques: d.bloques.map((_, i) => i),
-          })),
-        })),
+        // Migrar number[] → SpecialistAssignment[]
+        // Si el servicio tiene especialistaHorarios granulares los usa; si no, pre-puebla con todos los días/bloques
+        especialistasAsignados: service.especialistasAsignados.map((id) => {
+          const saved = service.especialistaHorarios?.find((h) => h.id === id);
+          if (saved) return saved;
+          return {
+            id,
+            dias: service.diasAtencion.map((d) => ({
+              dia: d.dia,
+              bloques: d.bloques.map((_, i) => i),
+            })),
+          };
+        }),
         cupos:                  service.cupos,
         precio:                 service.precio,
         estado:                 service.estado,
@@ -317,7 +367,6 @@ export default function ServiceConfigModal({
     }
     setStep(1);
     setErrors({});
-    setCustomCategory('');
     setBufferMinutos(10);
   }, [service, isOpen]);
 
@@ -441,8 +490,8 @@ export default function ServiceConfigModal({
     const e: typeof errors = {};
     if (s === 1) {
       if (!form.denominacion.trim()) e.denominacion = 'Requerido';
-      const cat = form.categoria === 'Otro' ? customCategory : form.categoria;
-      if (!cat.trim()) e.categoria = 'Selecciona o escribe una categoría';
+      if (!form.categoriaL1) e.categoriaL1 = 'Selecciona una categoría';
+      if (!form.categoriaL2) e.categoriaL2 = 'Selecciona una subcategoría';
     }
     if (s === 2) {
       if (form.diasAtencion.length === 0) e.diasAtencion = 'Selecciona al menos un día';
@@ -462,12 +511,17 @@ export default function ServiceConfigModal({
 
   const handleSubmit = () => {
     if (!validateStep(3)) return;
-    const finalCat = form.categoria === 'Otro' ? customCategory : form.categoria;
-    // Serializar SpecialistAssignment[] → number[] para el contrato de onSave
+    const categoria = [form.categoriaL1, form.categoriaL2, form.categoriaL3]
+      .filter(Boolean).join(' > ');
+    // Serializar SpecialistAssignment[] → number[] + persistir granularidad en especialistaHorarios
     const saveData = {
       ...form,
-      categoria: finalCat,
+      categoria,
       especialistasAsignados: form.especialistasAsignados.map((a) => a.id),
+      especialistaHorarios: form.especialistasAsignados.map<SpecialistHorario>((a) => ({
+        id: a.id,
+        dias: a.dias,
+      })),
     };
     onSave(service ? { ...saveData, id: service.id } : saveData);
     onClose();
@@ -537,24 +591,94 @@ export default function ServiceConfigModal({
                   className={inputCls(!!errors.denominacion)} />
               </Field>
 
-              {/* Categoría */}
-              <Field label="Categoría" error={errors.categoria}>
-                <select
-                  value={form.categoria}
-                  onChange={(e) => { set('categoria', e.target.value); if (e.target.value !== 'Otro') setCustomCategory(''); }}
-                  className={inputCls(!!errors.categoria)}
-                >
-                  <option value="" disabled>Selecciona una categoría...</option>
-                  {CATEGORIES.map((cat) => (
-                    <option key={cat} value={cat}>{cat}</option>
-                  ))}
-                </select>
-                {form.categoria === 'Otro' && (
-                  <input type="text" value={customCategory} placeholder="Escribe la categoría..."
-                    onChange={(e) => setCustomCategory(e.target.value)}
-                    className={`mt-2 ${inputCls(false)}`} />
+              {/* ── Categorías (3 niveles) ── */}
+              <div className="space-y-3">
+                <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)]">
+                  Categoría
+                </p>
+
+                {/* L1 */}
+                <div className="space-y-1">
+                  <select
+                    value={form.categoriaL1}
+                    onChange={(e) => {
+                      const l1 = e.target.value;
+                      set('categoriaL1', l1);
+                      set('categoriaL2', '');
+                      set('categoriaL3', '');
+                    }}
+                    className={inputCls(!!errors.categoriaL1)}
+                  >
+                    <option value="" disabled>1. Categoría principal...</option>
+                    {CATEGORY_TREE.map((c) => (
+                      <option key={c.label} value={c.label}>{c.label}</option>
+                    ))}
+                  </select>
+                  {errors.categoriaL1 && (
+                    <p className="text-[10px] text-rose-500 font-semibold">{errors.categoriaL1}</p>
+                  )}
+                </div>
+
+                {/* L2 */}
+                {form.categoriaL1 && (() => {
+                  const l1Node = CATEGORY_TREE.find((c) => c.label === form.categoriaL1);
+                  return l1Node ? (
+                    <div className="space-y-1 pl-3 border-l-2 border-sky-500/20 dark:border-[#8FC3A1]/20">
+                      <select
+                        value={form.categoriaL2}
+                        onChange={(e) => {
+                          set('categoriaL2', e.target.value);
+                          set('categoriaL3', '');
+                        }}
+                        className={inputCls(!!errors.categoriaL2)}
+                      >
+                        <option value="" disabled>2. Subcategoría...</option>
+                        {l1Node.children.map((c) => (
+                          <option key={c.label} value={c.label}>{c.label}</option>
+                        ))}
+                      </select>
+                      {errors.categoriaL2 && (
+                        <p className="text-[10px] text-rose-500 font-semibold">{errors.categoriaL2}</p>
+                      )}
+                    </div>
+                  ) : null;
+                })()}
+
+                {/* L3 */}
+                {form.categoriaL2 && (() => {
+                  const l1Node = CATEGORY_TREE.find((c) => c.label === form.categoriaL1);
+                  const l2Node = l1Node?.children.find((c) => c.label === form.categoriaL2);
+                  return l2Node ? (
+                    <div className="pl-6 border-l-2 border-sky-500/10 dark:border-[#8FC3A1]/10">
+                      <select
+                        value={form.categoriaL3}
+                        onChange={(e) => set('categoriaL3', e.target.value)}
+                        className={inputCls(false)}
+                      >
+                        <option value="">3. Especialización (opcional)...</option>
+                        {l2Node.children.map((c) => (
+                          <option key={c} value={c}>{c}</option>
+                        ))}
+                      </select>
+                    </div>
+                  ) : null;
+                })()}
+
+                {/* Ruta visual */}
+                {form.categoriaL1 && (
+                  <div className="flex items-center gap-1 flex-wrap px-1">
+                    <span className="text-[10px] font-black text-sky-500 dark:text-[#8FC3A1]">{form.categoriaL1}</span>
+                    {form.categoriaL2 && (<>
+                      <span className="text-[10px] text-[var(--text-secondary)]">›</span>
+                      <span className="text-[10px] font-black text-sky-500 dark:text-[#8FC3A1]">{form.categoriaL2}</span>
+                    </>)}
+                    {form.categoriaL3 && (<>
+                      <span className="text-[10px] text-[var(--text-secondary)]">›</span>
+                      <span className="text-[10px] font-black text-sky-500 dark:text-[#8FC3A1]">{form.categoriaL3}</span>
+                    </>)}
+                  </div>
                 )}
-              </Field>
+              </div>
 
               {/* Duración por sesión */}
               <Field label="Duración por sesión" error={errors.duracion}>
@@ -1002,7 +1126,8 @@ export default function ServiceConfigModal({
                 </p>
                 <div className="grid grid-cols-2 gap-3">
                   <SummaryItem label="Denominación" value={form.denominacion || '—'} />
-                  <SummaryItem label="Categoría" value={form.categoria === 'Otro' ? customCategory || '—' : form.categoria || '—'} />
+                  <SummaryItem label="Categoría"
+                    value={[form.categoriaL1, form.categoriaL2, form.categoriaL3].filter(Boolean).join(' › ') || '—'} />
                   <SummaryItem label="Duración" value={formatMin(form.duracion)} />
                   <SummaryItem label="Sesiones totales" value={`${totalSessions}`} accent="sky" />
                   <SummaryItem label="Días de atención"
