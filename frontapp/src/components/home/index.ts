@@ -10,3 +10,4 @@ export { default as OffersSection } from './OffersSection';
 export { default as AdBanners } from './AdBanners';
 export { default as BenefitsSection } from './BenefitsSection';
 export { default as NewsletterSection } from './NewsletterSection';
+export { default as DigestionSaludableSection } from './DigestionSaludableSection';

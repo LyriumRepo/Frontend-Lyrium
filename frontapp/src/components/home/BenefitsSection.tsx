@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
 import Image from 'next/image';
 import {
   Heart,
@@ -38,46 +37,24 @@ interface BenefitsSectionProps {
 }
 
 export default function BenefitsSection({ beneficios }: BenefitsSectionProps) {
-  const scrollRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const scrollContainer = scrollRef.current;
-    if (!scrollContainer || beneficios.length === 0) return;
-
-    let animationId: number;
-    let scrollPos = 0;
-    const speed = 1;
-    const itemWidth = 252;
-
-    const animate = () => {
-      if (!scrollContainer) return;
-      
-      scrollPos += speed;
-      const totalWidth = scrollContainer.scrollWidth / 2;
-      
-      if (scrollPos >= totalWidth) {
-        scrollPos = 0;
-      }
-      
-      scrollContainer.style.transform = `translateX(-${scrollPos}px)`;
-      animationId = requestAnimationFrame(animate);
-    };
-
-    animationId = requestAnimationFrame(animate);
-
-    return () => {
-      if (animationId) {
-        cancelAnimationFrame(animationId);
-      }
-    };
-  }, [beneficios.length]);
-
   if (beneficios.length === 0) return null;
-
   const allItems = [...beneficios, ...beneficios];
-
   return (
     <section className="w-full my-8">
+      <style dangerouslySetInnerHTML={{ __html: `
+        @keyframes infiniteScroll {
+          0% {
+            transform: translateX(0);
+          }
+          100% {
+            transform: translateX(-50%);
+          }
+        }
+        .animate-infinite-scroll {
+          animation: infiniteScroll 25s linear infinite;
+        }
+      `}} />
+
       <div className="px-4 max-w-7xl mx-auto">
         <h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white">Beneficios</h2>
       </div>
@@ -99,24 +76,26 @@ export default function BenefitsSection({ beneficios }: BenefitsSectionProps) {
           }}
         >
           <div
-            ref={scrollRef}
-            className="flex items-center"
+            className="flex items-center animate-infinite-scroll"
             style={{ width: 'max-content' }}
           >
             {allItems.map((beneficio, index) => {
-              const Icon = iconMap[beneficio.icono] || Heart;
-              const iconColor = iconColorMap[beneficio.icono] || 'text-sky-600';
-                       return (
+              const relativeIndex = index % beneficios.length;
+              const imageNum = (relativeIndex % 7) + 2;
+
+              return (
                 <div
                   key={`${beneficio.id}-${index}`}
                   className="flex flex-col items-center justify-center text-center w-[250px] mx-1 flex-shrink-0 cursor-default"
                 >
                   <div className="w-60 h-60 flex items-center justify-center mb-4 transition-transform duration-300 hover:scale-105 relative">
                     <Image
-                      src={`/img/Inicio/11/${(index % 7) + 2}.png`}
+                      src={`/img/Inicio/11/${imageNum}.png`}
                       alt="Beneficio"
                       fill
                       className="object-contain"
+                      sizes="240px"
+                      priority={index < 6}
                     />
                   </div>
                 </div>
