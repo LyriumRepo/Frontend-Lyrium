@@ -18,7 +18,7 @@ export default function ContactSocial({ config, updateConfig }: ContactSocialPro
 
     return (
         <div className="glass-card p-0 overflow-hidden border-none rounded-[2.5rem] shadow-2xl bg-[var(--bg-card)] mb-8">
-            <div className="bg-gradient-to-r from-sky-500 via-sky-500 to-sky-400 p-8 flex items-center justify-between relative overflow-hidden">
+            <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[var(--brand-green)] dark:to-[#1A3A32] p-8 flex items-center justify-between relative overflow-hidden">
                 <div className="flex items-center gap-5 text-white relative z-10">
                     <div className="w-12 h-12 bg-white/20 dark:bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 dark:border-white/20 shadow-inner">
                         <Icon name="Contact" className="w-6 h-6" />
@@ -43,7 +43,7 @@ export default function ContactSocial({ config, updateConfig }: ContactSocialPro
                                 id="contact-email"
                                 value={config.email}
                                 onChange={e => updateConfig({ email: e.target.value })}
-                                className="pl-12 w-full text-sm font-black text-[var(--text-primary)] bg-[var(--bg-secondary)] p-3 border-2 border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 transition-all duration-300"
+                                className="pl-12 w-full text-sm font-black text-[var(--text-primary)] bg-[var(--bg-secondary)] p-3 border-2 border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)] transition-all duration-300"
                             />
                         </div>
                         <div className="relative group">
@@ -53,7 +53,7 @@ export default function ContactSocial({ config, updateConfig }: ContactSocialPro
                                 id="contact-phone"
                                 value={config.phone}
                                 onChange={e => updateConfig({ phone: e.target.value })}
-                                className="pl-12 w-full text-sm font-black text-[var(--text-primary)] bg-[var(--bg-secondary)] p-3 border-2 border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 transition-all duration-300"
+                                className="pl-12 w-full text-sm font-black text-[var(--text-primary)] bg-[var(--bg-secondary)] p-3 border-2 border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)] transition-all duration-300"
                             />
                         </div>
                         <div className="relative group">
@@ -63,7 +63,7 @@ export default function ContactSocial({ config, updateConfig }: ContactSocialPro
                                 id="contact-address"
                                 value={config.address}
                                 onChange={e => updateConfig({ address: e.target.value })}
-                                className="pl-12 w-full text-sm font-black text-[var(--text-primary)] bg-[var(--bg-secondary)] p-3 border-2 border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 transition-all duration-300"
+                                className="pl-12 w-full text-sm font-black text-[var(--text-primary)] bg-[var(--bg-secondary)] p-3 border-2 border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)] transition-all duration-300"
                             />
                         </div>
                     </div>
@@ -78,7 +78,7 @@ export default function ContactSocial({ config, updateConfig }: ContactSocialPro
                                     placeholder="Instagram URL"
                                     value={config.social.instagram || ''}
                                     onChange={e => updateSocial({ instagram: e.target.value })}
-                                    className="pl-12 w-full text-sm font-black text-[var(--text-primary)] bg-[var(--bg-secondary)] p-3 border-2 border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 transition-all"
+                                    className="pl-12 w-full text-sm font-black text-[var(--text-primary)] bg-[var(--bg-secondary)] p-3 border-2 border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)] transition-all"
                                 />
                             </div>
                             <div className="relative group">
@@ -88,17 +88,17 @@ export default function ContactSocial({ config, updateConfig }: ContactSocialPro
                                     placeholder="Facebook URL"
                                     value={config.social.facebook || ''}
                                     onChange={e => updateSocial({ facebook: e.target.value })}
-                                    className="pl-12 w-full text-sm font-black text-[var(--text-primary)] bg-[var(--bg-secondary)] p-3 border-2 border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 transition-all"
+                                    className="pl-12 w-full text-sm font-black text-[var(--text-primary)] bg-[var(--bg-secondary)] p-3 border-2 border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)] transition-all"
                                 />
                             </div>
                             <div className="relative group">
-                                <Icon name="Music" className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] w-4 h-4 group-focus-within:text-black" />
+                                <Icon name="Music" className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] w-4 h-4 group-focus-within:text-black dark:group-focus-within:text-white" />
                                 <input
                                     type="text"
                                     placeholder="TikTok URL (Usa Link de Perfil)"
                                     value={config.social.tiktok || ''}
                                     onChange={e => updateSocial({ tiktok: e.target.value })}
-                                    className="pl-12 w-full text-sm font-black text-[var(--text-primary)] bg-[var(--bg-secondary)] p-3 border-2 border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 transition-all"
+                                    className="pl-12 w-full text-sm font-black text-[var(--text-primary)] bg-[var(--bg-secondary)] p-3 border-2 border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)] transition-all"
                                 />
                             </div>
                             <div className="relative group">
@@ -108,7 +108,7 @@ export default function ContactSocial({ config, updateConfig }: ContactSocialPro
                                     placeholder="WhatsApp Number"
                                     value={config.social.whatsapp || ''}
                                     onChange={e => updateSocial({ whatsapp: e.target.value })}
-                                    className="pl-12 w-full text-sm font-black text-[var(--text-primary)] bg-[var(--bg-secondary)] p-3 border-2 border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 transition-all"
+                                    className="pl-12 w-full text-sm font-black text-[var(--text-primary)] bg-[var(--bg-secondary)] p-3 border-2 border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)] transition-all"
                                 />
                             </div>
                         </div>
@@ -124,7 +124,7 @@ export default function ContactSocial({ config, updateConfig }: ContactSocialPro
                                     placeholder="YouTube URL"
                                     value={config.social.youtube || ''}
                                     onChange={e => updateSocial({ youtube: e.target.value })}
-                                    className="pl-12 w-full text-sm font-black text-[var(--text-primary)] bg-[var(--bg-secondary)] p-3 border-2 border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 transition-all"
+                                    className="pl-12 w-full text-sm font-black text-[var(--text-primary)] bg-[var(--bg-secondary)] p-3 border-2 border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)] transition-all"
                                 />
                             </div>
                             <div className="relative group">
@@ -134,7 +134,7 @@ export default function ContactSocial({ config, updateConfig }: ContactSocialPro
                                     placeholder="Twitter URL"
                                     value={config.social.twitter || ''}
                                     onChange={e => updateSocial({ twitter: e.target.value })}
-                                    className="pl-12 w-full text-sm font-black text-[var(--text-primary)] bg-[var(--bg-secondary)] p-3 border-2 border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 transition-all"
+                                    className="pl-12 w-full text-sm font-black text-[var(--text-primary)] bg-[var(--bg-secondary)] p-3 border-2 border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)] transition-all"
                                 />
                             </div>
                             <div className="relative group">
@@ -144,7 +144,7 @@ export default function ContactSocial({ config, updateConfig }: ContactSocialPro
                                     placeholder="LinkedIn URL"
                                     value={config.social.linkedin || ''}
                                     onChange={e => updateSocial({ linkedin: e.target.value })}
-                                    className="pl-12 w-full text-sm font-black text-[var(--text-primary)] bg-[var(--bg-secondary)] p-3 border-2 border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 transition-all"
+                                    className="pl-12 w-full text-sm font-black text-[var(--text-primary)] bg-[var(--bg-secondary)] p-3 border-2 border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)] transition-all"
                                 />
                             </div>
                             <div className="relative group">
@@ -154,7 +154,7 @@ export default function ContactSocial({ config, updateConfig }: ContactSocialPro
                                     placeholder="Sitio Web URL"
                                     value={config.social.website || ''}
                                     onChange={e => updateSocial({ website: e.target.value })}
-                                    className="pl-12 w-full text-sm font-black text-[var(--text-primary)] bg-[var(--bg-secondary)] p-3 border-2 border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 transition-all"
+                                    className="pl-12 w-full text-sm font-black text-[var(--text-primary)] bg-[var(--bg-secondary)] p-3 border-2 border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)] transition-all"
                                 />
                             </div>
                         </div>

@@ -18,6 +18,13 @@ export const customerNavigation: PanelNavigation = [
                 href: '/customer/orders'
             },
             {
+                id: 'security',
+                label: 'Seguridad',
+                description: 'Protege tu cuenta',
+                icon: 'Shield',
+                href: '/customer/security'
+            },
+            {
                 id: 'wishlist',
                 label: 'Lista de Deseos',
                 description: 'Productos guardados',
@@ -38,13 +45,7 @@ export const customerNavigation: PanelNavigation = [
                 icon: 'MapPin',
                 href: '/customer/addresses'
             },
-            {
-                id: 'security',
-                label: 'Seguridad',
-                description: 'Protege tu cuenta',
-                icon: 'Shield',
-                href: '/customer/security'
-            },
+
             {
                 id: 'chat',
                 label: 'Chat con Vendedores',
@@ -54,7 +55,7 @@ export const customerNavigation: PanelNavigation = [
             },
             {
                 id: 'support',
-                label: 'Mesa de Ayuda',
+                label: 'Soporte Lyrium',
                 description: 'Tickets de soporte técnico',
                 icon: 'Headset',
                 href: '/customer/support'

@@ -99,7 +99,7 @@ function BioBlogHeroInner() {
                             />
                             <button
                                 type="submit"
-                                className="absolute right-1.5 px-3 py-2 md:right-3 md:px-6 md:py-3 bg-sky-500 hover:bg-sky-600 text-white text-[10px] md:text-base font-semibold rounded-xl transition-all duration-300 transform active:scale-95 shadow-md"
+                                className="absolute right-1.5 px-3 py-2 md:right-3 md:px-6 md:py-3 bg-sky-500 dark:bg-[var(--brand-green)] hover:bg-sky-600 dark:hover:bg-[var(--brand-green-hover)] text-white text-[10px] md:text-base font-semibold rounded-xl transition-all duration-300 transform active:scale-95 shadow-md border-2 border-[var(--border-subtle)]"
                             >
                                 Buscar
                             </button>
@@ -113,7 +113,7 @@ function BioBlogHeroInner() {
                                 isActive(category.slug) ? (
                                     <button
                                         key={category.id}
-                                        className="flex-shrink-0 px-4 py-2 md:px-6 md:py-2.5 bg-sky-500 text-white rounded-full text-xs md:text-sm font-semibold shadow-md active:scale-95 transition-all"
+                                        className="flex-shrink-0 px-4 py-2 md:px-6 md:py-2.5 bg-sky-500 dark:bg-[var(--brand-green)] text-white rounded-full text-xs md:text-sm font-semibold shadow-md active:scale-95 transition-all"
                                     >
                                         {category.name}
                                     </button>
@@ -121,7 +121,7 @@ function BioBlogHeroInner() {
                                     <Link
                                         key={category.id}
                                         href={`/bioblog?category=${category.slug}`}
-                                        className="flex-none px-6 py-2.5 bg-white dark:bg-[var(--bg-secondary)] text-slate-600 dark:text-[var(--text-secondary)] border border-slate-200 dark:border-[var(--border-subtle)] rounded-full font-medium hover:border-sky-500 hover:text-sky-500 transition-all"
+                                        className="flex-none px-6 py-2.5 bg-white dark:bg-[var(--bg-secondary)] text-slate-600 dark:text-[var(--text-secondary)] border border-slate-200 dark:border-[var(--border-subtle)] rounded-full font-medium hover:border-sky-500 hover:text-sky-500 dark:hover:text-[var(--text-primary)] dark:hover:border-[var(--icons-green)] transition-all"
                                     >
                                         {category.name}
                                     </Link>

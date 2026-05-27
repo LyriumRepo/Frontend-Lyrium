@@ -50,7 +50,7 @@ export default function IntroCover({
 
     const introCoverStyle: React.CSSProperties = backgroundImage 
         ? {
-            background: `linear-gradient(135deg, rgba(0, 210, 255, 0.8) 0%, rgba(58, 123, 213, 0.6) 60%, rgba(102, 255, 0, 0.4) 100%), url(${backgroundImage}) center/cover no-repeat`,
+            background: `linear-gradient(135deg, var(--intro-g1) 0%, var(--intro-g2) 60%, var(--intro-g3) 100%), url(${backgroundImage}) center/cover no-repeat`,
             transition: 'opacity 0.8s ease, transform 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55)',
         }
         : {
@@ -71,9 +71,9 @@ export default function IntroCover({
             
             {/* Floating particles */}
             <div className="absolute inset-0 pointer-events-none overflow-hidden z-[1]">
-                <div className="absolute top-[10%] left-[10%] w-24 h-24 bg-white/30 rounded-full animate-float-particle" />
-                <div className="absolute top-[60%] right-[15%] w-36 h-36 bg-white/30 rounded-full animate-float-particle" style={{ animationDelay: '5s' }} />
-                <div className="absolute bottom-[15%] left-[20%] w-20 h-20 bg-white/30 rounded-full animate-float-particle" style={{ animationDelay: '10s' }} />
+                <div className="absolute top-[10%] left-[10%] w-24 h-24 bg-white/30 dark:bg-white/20 rounded-full animate-float-particle" />
+                <div className="absolute top-[60%] right-[15%] w-36 h-36 bg-white/30 dark:bg-white/20 rounded-full animate-float-particle" style={{ animationDelay: '5s' }} />
+                <div className="absolute bottom-[15%] left-[20%] w-20 h-20 bg-white/30 dark:bg-white/20 rounded-full animate-float-particle" style={{ animationDelay: '10s' }} />
             </div>
 
             {/* Contenido */}
@@ -81,7 +81,7 @@ export default function IntroCover({
                 <div className="mb-10 animate-float">
                     <Icon 
                         name={icon} 
-                        className="mx-auto text-white" 
+                        className="mx-auto text-white dark:text-white/80" 
                         style={{ 
                             fontSize: iconSize, 
                             width: iconSize, 
@@ -92,7 +92,7 @@ export default function IntroCover({
                 </div>
                 
                 <h1 
-                    className="text-6xl font-black text-white mb-5 leading-tight"
+                    className="text-6xl font-black text-white dark:text-white/80 mb-5 leading-tight"
                     style={{ 
                         textShadow: '0 4px 20px rgba(0, 0, 0, 0.4)',
                         animation: 'fadeInUp 1s ease-out 0.2s both'
@@ -116,7 +116,7 @@ export default function IntroCover({
                     onClick={handleEnter}
                     onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleEnter(); }}
                     aria-label={buttonText}
-                    className="inline-flex items-center gap-3 py-5 px-12 bg-white text-sky-500 rounded-full text-lg font-bold cursor-pointer uppercase tracking-wider"
+                    className="inline-flex items-center gap-3 py-5 px-12 bg-white dark:bg-white/80 text-sky-500 dark:text-[var(--brand-green)] rounded-full text-lg font-bold cursor-pointer uppercase tracking-wider"
                     style={{ 
                         boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
                         transition: 'box-shadow 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55), transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55)',

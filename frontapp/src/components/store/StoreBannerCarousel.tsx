@@ -183,14 +183,14 @@ export default function StoreBannerCarousel({
               className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 bg-white/95 hover:bg-white rounded-full flex items-center justify-center shadow-[0_8px_25px_rgba(0,0,0,0.15)] transition-all hover:scale-110 z-10"
               aria-label="Banner anterior"
             >
-              <ChevronLeft className="w-5 h-5 text-sky-500" />
+              <ChevronLeft className="w-5 h-5 text-sky-500 dark:text-[var(--icons-green)]" />
             </button>
             <button
               onClick={next}
               className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 bg-white/95 hover:bg-white rounded-full flex items-center justify-center shadow-[0_8px_25px_rgba(0,0,0,0.15)] transition-all hover:scale-110 z-10"
               aria-label="Banner siguiente"
             >
-              <ChevronRight className="w-5 h-5 text-sky-500" />
+              <ChevronRight className="w-5 h-5 text-sky-500 dark:text-[var(--icons-green)]" />
             </button>
           </>
         )}

@@ -7,8 +7,7 @@ const mockTickets: CustomerTicket[] = [
         ticketNumber: 'TKT-001',
         subject: 'Problema con mi pedido #12345',
         description: 'El pedido no llegó en la fecha esperada',
-        category: 'order',
-        priority: 'high',
+        category: 'negativo',
         status: 'open',
         createdAt: '2025-03-10T09:00:00',
         updatedAt: '2025-03-11T10:30:00',
@@ -38,8 +37,7 @@ const mockTickets: CustomerTicket[] = [
         ticketNumber: 'TKT-002',
         subject: 'Consulta sobre garantía',
         description: 'Quiero saber los términos de garantía',
-        category: 'general',
-        priority: 'low',
+        category: 'positivo',
         status: 'resolved',
         createdAt: '2025-03-05T14:00:00',
         updatedAt: '2025-03-06T09:00:00',
@@ -117,7 +115,7 @@ export function useCustomerSupport() {
         setIsSending(false);
     }, [activeTicketId]);
 
-    const handleCreateTicket = useCallback(async (data: { subject: string; description: string; category: string; priority: string }) => {
+    const handleCreateTicket = useCallback(async (data: { subject: string; description: string; category: string }) => {
         setIsSending(true);
         
         await new Promise(resolve => setTimeout(resolve, 500));
@@ -128,7 +126,6 @@ export function useCustomerSupport() {
             subject: data.subject,
             description: data.description,
             category: data.category as CustomerTicket['category'],
-            priority: data.priority as CustomerTicket['priority'],
             status: 'open',
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),

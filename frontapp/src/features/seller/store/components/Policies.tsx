@@ -108,7 +108,7 @@ interface PoliciesProps {
 export default function Policies({ config, uploadPolicy, deletePolicy, isUploading }: PoliciesProps) {
     return (
         <div className="glass-card p-0 overflow-hidden border-none rounded-[2.5rem] shadow-2xl bg-[var(--bg-card)] mb-8">
-            <div className="bg-gradient-to-r from-sky-500 via-sky-500 to-sky-400 p-8 flex items-center justify-between relative overflow-hidden">
+            <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[var(--brand-green)] dark:to-[#1A3A32] p-8 flex items-center justify-between relative overflow-hidden">
                 <div className="flex items-center gap-5 text-white relative z-10">
                     <div className="w-12 h-12 bg-white/20 dark:bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 dark:border-white/20 shadow-inner">
                         <Icon name="FileText" className="w-6 h-6" />
@@ -123,9 +123,9 @@ export default function Policies({ config, uploadPolicy, deletePolicy, isUploadi
             </div>
 
             <div className="p-8">
-                <div className="mb-6 p-4 bg-sky-500/10 border border-sky-500/20 rounded-2xl flex items-start gap-3">
-                    <div className="w-8 h-8 bg-sky-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
-                        <Icon name="Info" className="text-sky-500 w-5 h-5" />
+                <div className="mb-6 p-4 bg-sky-500/10 dark:bg-emerald-500/10 border border-sky-500/20 dark:border-emerald-500/20 rounded-2xl flex items-start gap-3">
+                    <div className="w-8 h-8 bg-sky-500/20 dark:bg-emerald-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                        <Icon name="Info" className="text-sky-500 dark:text-emerald-500 w-5 h-5" />
                     </div>
                     <div className="flex-1">
                         <p className="text-xs font-black text-[var(--text-primary)] uppercase tracking-wider mb-1">Tamaño Máximo de Archivo</p>
@@ -140,7 +140,7 @@ export default function Policies({ config, uploadPolicy, deletePolicy, isUploadi
                     <PolicyRow
                         label="Política de Envío"
                         icon="Truck"
-                        color="text-sky-600"
+                        color="text-sky-600 dark:text-[var(--icons-green)]"
                         type="shipping"
                         value={config.policies.shippingPdf}
                         isUploading={isUploading}
@@ -150,7 +150,7 @@ export default function Policies({ config, uploadPolicy, deletePolicy, isUploadi
                     <PolicyRow
                         label="Devoluciones"
                         icon="RotateCcw"
-                        color="text-sky-600"
+                        color="text-sky-600 dark:text-[var(--icons-green)]"
                         type="return"
                         value={config.policies.returnPdf}
                         isUploading={isUploading}
@@ -160,7 +160,7 @@ export default function Policies({ config, uploadPolicy, deletePolicy, isUploadi
                     <PolicyRow
                         label="Privacidad"
                         icon="ShieldCheck"
-                        color="text-emerald-600"
+                        color="text-sky-600 dark:text-[var(--icons-green)]"
                         type="privacy"
                         value={config.policies.privacyPdf}
                         isUploading={isUploading}

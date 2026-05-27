@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/shared/lib/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import Icon from '@/components/ui/Icon';
@@ -16,29 +16,59 @@ interface WishlistItem {
   enOferta: boolean;
 }
 
+interface Category {
+  id: string;
+  label: string;
+  slug: string;
+  custom?: boolean;
+}
+
 const mockWishlist: WishlistItem[] = [
-  { id: 1, nombre: 'Aceite de Coco Orgánico 500ml', tienda: 'Vida Natural Perú', precio: 32, precioOriginal: 40, imagen: '/product-placeholder.jpg', categoria: 'salud', enOferta: true },
-  { id: 2, nombre: 'Auriculares Bluetooth Pro', tienda: 'Tech Store Lima', precio: 150, imagen: '/product-placeholder.jpg', categoria: 'tecnologia', enOferta: false },
-  { id: 3, nombre: 'Proteína Vegana Chocolate 1kg', tienda: 'Vida Natural Perú', precio: 89.90, imagen: '/product-placeholder.jpg', categoria: 'salud', enOferta: false },
-  { id: 4, nombre: 'Vitaminas Multivitaminico Daily', tienda: 'Salud Integral', precio: 45, precioOriginal: 60, imagen: '/product-placeholder.jpg', categoria: 'salud', enOferta: true },
-  { id: 5, nombre: 'Smartwatch Fitness Band 5', tienda: 'Tech Store Lima', precio: 199, imagen: '/product-placeholder.jpg', categoria: 'tecnologia', enOferta: false },
-  { id: 6, nombre: 'Crema Facial Anti-Aging 50ml', tienda: 'Belleza Natural', precio: 78, imagen: '/product-placeholder.jpg', categoria: 'belleza', enOferta: false },
+  { id: 1, nombre: 'Aceite de Coco Orgánico 500ml', tienda: 'Vida Natural Perú', precio: 32, precioOriginal: 40, imagen: '/product-placeholder.jpg', categoria: 'especiales', enOferta: true },
+  { id: 2, nombre: 'Auriculares Bluetooth Pro', tienda: 'Tech Store Lima', precio: 150, imagen: '/product-placeholder.jpg', categoria: 'especiales', enOferta: false },
+  { id: 3, nombre: 'Proteína Vegana Chocolate 1kg', tienda: 'Vida Natural Perú', precio: 89.90, imagen: '/product-placeholder.jpg', categoria: 'servicio', enOferta: false },
+  { id: 4, nombre: 'Vitaminas Multivitaminico Daily', tienda: 'Salud Integral', precio: 45, precioOriginal: 60, imagen: '/product-placeholder.jpg', categoria: 'servicio', enOferta: true },
+  { id: 5, nombre: 'Smartwatch Fitness Band 5', tienda: 'Tech Store Lima', precio: 199, imagen: '/product-placeholder.jpg', categoria: 'indispensable', enOferta: false },
+  { id: 6, nombre: 'Crema Facial Anti-Aging 50ml', tienda: 'Belleza Natural', precio: 78, imagen: '/product-placeholder.jpg', categoria: 'servicio', enOferta: false },
 ];
 
-type FilterType = 'all' | 'ofertas' | 'salud' | 'tecnologia';
+type FilterType = string;
+
+const predefinedCategories: Category[] = [
+  { id: 'all', label: 'Todos', slug: 'all' },
+  { id: 'ofertas', label: 'En Oferta', slug: 'ofertas' },
+  { id: 'especiales', label: 'Días especiales', slug: 'especiales' },
+  { id: 'indispensable', label: 'Mis Indispensables', slug: 'indispensable' },
+  {id: 'servicio', label: 'Prevención y Chequeos', slug: 'servicio' },
+];
+
+function normalizeSlug(value: string) {
+  return value
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, '_');
+}
 
 export default function CustomerWishlistPage() {
   const { isAuthenticated, loading } = useAuth();
   const router = useRouter();
-  
+
   const [items, setItems] = useState<WishlistItem[]>(mockWishlist);
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
+  const [customCategories, setCustomCategories] = useState<Category[]>([]);
+  const [newCategory, setNewCategory] = useState('');
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
       router.push('/login');
     }
   }, [loading, isAuthenticated, router]);
+
+  const allCategories = useMemo(() => {
+    return [...predefinedCategories, ...customCategories];
+  }, [customCategories]);
 
   const filteredItems = items.filter(item => {
     if (activeFilter === 'all') return true;
@@ -47,8 +77,8 @@ export default function CustomerWishlistPage() {
   });
 
   const removeFromWishlist = (id: number) => {
-    if (confirm('¿Quitar de Favoritos? El producto leaving de tu lista de deseos.')) {
-      setItems(items.filter(item => item.id !== id));
+    if (confirm('¿Quitar de Favoritos? El producto saldrá de tu lista de deseos.')) {
+      setItems(prev => prev.filter(item => item.id !== id));
     }
   };
 
@@ -56,12 +86,62 @@ export default function CustomerWishlistPage() {
     return {
       all: items.length,
       ofertas: items.filter(i => i.enOferta).length,
-      salud: items.filter(i => i.categoria === 'salud').length,
-      tecnologia: items.filter(i => i.categoria === 'tecnologia').length,
+      especiales: items.filter(i => i.categoria === 'especiales').length,
+      indispensable: items.filter(i => i.categoria === 'indispensable').length,
+      servicio: items.filter(i => i.categoria === 'servicio').length,
     };
   };
 
   const counts = getCounts();
+
+  const handleAddCategory = () => {
+    const label = newCategory.trim();
+
+    if (!label) {
+      alert('Escribe un nombre para la categoría.');
+      return;
+    }
+
+    if (customCategories.length >= 3) {
+      alert('Solo puedes crear hasta 3 categorías personalizadas.');
+      return;
+    }
+
+    const slug = normalizeSlug(label);
+
+    const alreadyExists = allCategories.some(cat => cat.slug === slug);
+    if (alreadyExists) {
+      alert('Esa categoría ya existe.');
+      return;
+    }
+
+    const newCat: Category = {
+      id: `custom-${Date.now()}`,
+      label,
+      slug,
+      custom: true,
+    };
+
+    setCustomCategories(prev => [...prev, newCat]);
+    setActiveFilter(slug);
+    setNewCategory('');
+  };
+
+  const handleRemoveCustomCategory = (slug: string) => {
+    setCustomCategories(prev => prev.filter(cat => cat.slug !== slug));
+
+    setItems(prev =>
+      prev.map(item =>
+        item.categoria === slug
+          ? { ...item, categoria: 'all' }
+          : item
+      )
+    );
+
+    if (activeFilter === slug) {
+      setActiveFilter('all');
+    }
+  };
 
   if (loading) {
     return (
@@ -82,23 +162,69 @@ export default function CustomerWishlistPage() {
         </p>
       </div>
 
-      <div className="flex flex-wrap items-center gap-3">
-        {(['all', 'ofertas', 'salud', 'tecnologia'] as FilterType[]).map(filter => (
+      <div className="space-y-4">
+        <div className="flex flex-wrap items-center gap-3">
+          {allCategories.map(category => {
+            const isActive = activeFilter === category.slug;
+
+            const count =
+              category.slug === 'all'
+                ? counts.all
+                : category.slug === 'ofertas'
+                  ? counts.ofertas
+                  : category.slug === 'especiales'
+                    ? counts.especiales
+                    : category.slug === 'indispensable'
+                      ? counts.indispensable
+                      : category.slug === 'servicio'
+                        ? counts.servicio
+                        : items.filter(i => i.categoria === category.slug).length;
+
+            return (
+              <div key={category.id} className="relative">
+                <button
+                  onClick={() => setActiveFilter(category.slug)}
+                  className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${
+                    isActive
+                      ? 'bg-sky-500 dark:bg-[var(--brand-green)] text-white shadow-lg shadow-sky-100'
+                      : 'bg-gray-100 dark:bg-[var(--bg-muted)] text-gray-700 dark:text-[var(--text-primary)] hover:bg-gray-200 dark:hover:bg-[#2A3F33]'
+                  }`}
+                >
+                  {category.label} ({count})
+                </button>
+
+                {category.custom && (
+                  <button
+                    onClick={() => handleRemoveCustomCategory(category.slug)}
+                    className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-black flex items-center justify-center shadow-md"
+                    title="Eliminar categoría"
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+          <input
+            type="text"
+            value={newCategory}
+            onChange={(e) => setNewCategory(e.target.value)}
+            placeholder="Crear nueva categoría"
+            className="w-full sm:w-80 px-4 py-3 rounded-xl border border-gray-200 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-secondary)] text-sm outline-none focus:ring-2 focus:ring-sky-500 dark:focus:ring-[var(--icons-green)]"
+          />
           <button
-            key={filter}
-            onClick={() => setActiveFilter(filter)}
-            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${
-              activeFilter === filter
-                ? 'bg-sky-500 text-white shadow-lg shadow-sky-100'
-                : 'bg-gray-100 dark:bg-[var(--bg-muted)] text-gray-700 dark:text-[var(--text-primary)] hover:bg-gray-200 dark:hover:bg-[#2A3F33]'
-            }`}
+            onClick={handleAddCategory}
+            className="px-5 py-3 rounded-xl bg-sky-500 dark:bg-[var(--brand-green)] text-white text-sm font-bold hover:bg-sky-600 dark:hover:bg-[var(--brand-green-hover)] transition-all"
           >
-            {filter === 'all' && `Todos (${counts.all})`}
-            {filter === 'ofertas' && `En Oferta (${counts.ofertas})`}
-            {filter === 'salud' && `Salud (${counts.salud})`}
-            {filter === 'tecnologia' && `Tecnología (${counts.tecnologia})`}
+            Agregar categoría
           </button>
-        ))}
+          <span className="text-xs font-bold text-gray-400 dark:text-gray-500">
+            {customCategories.length}/3 categorías personalizadas
+          </span>
+        </div>
       </div>
 
       {filteredItems.length === 0 ? (
@@ -127,11 +253,13 @@ export default function CustomerWishlistPage() {
                 <div className="w-full h-48 bg-gray-200 dark:bg-[var(--bg-muted)] flex items-center justify-center">
                   <Icon name="Image" className="w-12 h-12 text-gray-400 dark:text-gray-400" />
                 </div>
+
                 {item.enOferta && item.precioOriginal && (
                   <span className="absolute top-3 left-3 px-3 py-1 bg-red-500 text-white text-xs font-black uppercase rounded-full">
                     -{Math.round((1 - item.precio / item.precioOriginal) * 100)}%
                   </span>
                 )}
+
                 <button
                   onClick={() => removeFromWishlist(item.id)}
                   className="absolute top-3 right-3 w-10 h-10 bg-white dark:bg-[var(--bg-secondary)] rounded-full flex items-center justify-center shadow-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
@@ -139,16 +267,17 @@ export default function CustomerWishlistPage() {
                   <Icon name="Heart" className="w-5 h-5 text-red-500 fill-red-500" />
                 </button>
               </div>
+
               <div className="p-4">
                 <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-[var(--text-muted)] mb-1">{item.tienda}</p>
                 <h4 className="text-sm font-black text-gray-800 dark:text-[var(--text-primary)] mb-2 line-clamp-2">{item.nombre}</h4>
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="text-lg font-black text-sky-600">S/ {item.precio.toFixed(2)}</span>
+                  <span className="text-lg font-black text-sky-600 dark:text-[var(--icons-green)]">S/ {item.precio.toFixed(2)}</span>
                   {item.precioOriginal && (
                     <span className="text-sm text-gray-400 dark:text-gray-400 line-through">S/ {item.precioOriginal.toFixed(2)}</span>
                   )}
                 </div>
-                <button className="w-full px-4 py-2 rounded-lg bg-sky-500 text-white text-sm font-bold hover:bg-sky-600 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2">
+                <button className="w-full px-4 py-2 rounded-lg bg-sky-500 dark:bg-[var(--brand-green)] text-white text-sm font-bold hover:bg-sky-600 dark:hover:bg-[var(--brand-green-hover)] transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2">
                   <Icon name="ShoppingCart" className="w-4 h-4" />
                   Agregar al Carrito
                 </button>

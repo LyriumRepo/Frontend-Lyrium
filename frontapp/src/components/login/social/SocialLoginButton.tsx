@@ -84,9 +84,8 @@ export function SocialLoginButton({
     return (
         <div className={`space-y-2 ${className}`}>
             <button
-                type="button"
-                disabled
-                className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm border transition-all duration-300 bg-[#1877F2] text-white border-[#1877F2] opacity-50 cursor-not-allowed"
+                    type="button" disabled
+                    className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm border transition-all duration-300 bg-[#1877F2] text-white border-[#1877F2] dark:bg-[var(--icons-green)] dark:border-[var(--icons-green)] hover:bg-[#166fe5] dark:hover:bg-[var(--icons-green)] opacity-50 cursor-not-allowed"
             >
                 <FacebookIcon className="w-5 h-5" />
                 <span>Continuar con Facebook (próximamente)</span>

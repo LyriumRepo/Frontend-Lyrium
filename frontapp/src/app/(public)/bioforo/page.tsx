@@ -123,15 +123,15 @@ export default function BioForoPage() {
           className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 transform group-hover:scale-105"
           style={{ backgroundImage: "url('https://lyriumbiomarketplace.com/wp-content/uploads/2025/06/bioforo_banner-scaled.jpg')" }}
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-slate-950/40 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-slate-950/40 to-transparent dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)]" />
         <div className="relative z-10 p-4 md:p-14 max-w-3xl text-white h-full flex flex-col justify-center">
           <h1 className="text-2xl md:text-6xl font-extrabold tracking-tight uppercase drop-shadow-xl mb-2 md:mb-4 leading-tight">
-            Conecta <span className="text-[#2ea8ff]">BioForo</span>
+            Conecta <span className="text-[#2ea8ff] dark:text-lime-500">BioForo</span>
           </h1>
           <p className="text-xs md:text-base font-medium text-slate-200 tracking-widest uppercase mb-4 md:mb-8 max-w-lg leading-relaxed opacity-90">
             Explora foros destacados, nuevas ideas y una comunidad apasionada.
           </p>
-          <div className="w-16 md:w-24 h-1 md:h-1.5 rounded-full bg-[#2ea8ff] shadow-[0_0_20px_rgba(46,168,255,0.6)]" />
+          <div className="w-16 md:w-24 h-1 md:h-1.5 rounded-full bg-[#2ea8ff] dark:bg-[var(--icons-green)] shadow-[0_10px_25px_rgba(14,165,233,0.2)] dark:shadow-[0_10px_25px_rgba(74,124,89,0.25)]" />
         </div>
       </section>
 
@@ -192,7 +192,7 @@ export default function BioForoPage() {
 
         {/* Respuestas - Turquesa */}
         <div className="stat-card relative bg-white dark:bg-[var(--bg-secondary)] rounded-xl p-4 md:p-6 flex items-center gap-3 md:gap-4 shadow-sm border border-slate-100 dark:border-[var(--border-subtle)] transition-all duration-300 hover:-translate-y-1 hover:shadow-md overflow-hidden">
-          <div className="absolute left-0 top-0 bottom-0 w-[9px] rounded-l-xl" style={{ background: '#019895' }} />
+          <div className="absolute left-0 top-0 bottom-0 w-[9px] rounded-l-xl" style={{ background: '#78e69d' }} />
           <div className="w-10 h-10 md:w-14 md:h-14 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: '#ccfbf1', color: '#019895' }}>
             <Icon name="MessageSquare" className="text-xl md:text-2xl" />
           </div>
@@ -273,7 +273,8 @@ export default function BioForoPage() {
 
         <Link
           href="/bioforo/crear"
-          className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white px-4 py-3 rounded-full font-semibold shadow-lg shadow-emerald-500/30 transition-all transform hover:-translate-y-1 flex items-center justify-center gap-2 w-full md:w-auto"
+          className="bg-gradient-to-r from-sky-500 to-sky-400 dark:from-[var(--brand-green)] dark:to-[var(--brand-green-hover)] text-white px-4 py-3 rounded-full font-semibold 
+          shadow-lg shadow-[0_10px_25px_rgba(14,165,233,0.2)] dark:shadow-[0_10px_25px_rgba(74,124,89,0.25)] transition-all transform hover:-translate-y-1 flex items-center justify-center gap-2 w-full md:w-auto"
         >
           <Icon name="Pencil" className="w-4 h-4" />
           <span className="truncate">Crear Nuevo Tema</span>
@@ -304,13 +305,13 @@ export default function BioForoPage() {
             <div
               key={topic.id}
               id={`tema-${topic.id}`}
-              className="temasyrespuestas bg-white border-[3px] border-[#009a6279] rounded-xl md:rounded-2xl p-4 md:p-6 shadow-sm hover:shadow-md transition-all"
+              className="temasyrespuestas bg-white dark:bg-white/90 border-[3px] border-[#009a6279] rounded-xl md:rounded-2xl p-4 md:p-6 shadow-sm hover:shadow-md transition-all"
               style={{ overflowWrap: 'break-word', wordWrap: 'break-word' }}
             >
               {/* Encabezado */}
               <div className="flex items-start justify-between mb-4 tema-header">
                 <div className="flex-1 flex items-start gap-3">
-                  <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-gradient-to-br from-blue-100 to-emerald-100 flex items-center justify-center text-blue-700 font-bold text-lg md:text-xl flex-shrink-0">
+                  <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-gradient-to-br from-blue-100 to-emerald-100 dark:from-lime-100 dark:to-emerald-100 flex items-center justify-center text-blue-700 dark:text-lime-600 font-bold text-lg md:text-xl flex-shrink-0">
                     {getInitial(topic.author_name)}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -353,7 +354,7 @@ export default function BioForoPage() {
               {/* Título y Contenido - Exactamente como el CSS */}
               <div className="mb-4 md:mb-6">
                 <h3
-                  className="text-black font-bold text-lg md:text-xl underline decoration-dashed decoration-[#8db701] decoration-3 underline-offset-[9px]"
+                  className="text-[#333333] font-bold text-lg md:text-xl underline decoration-dashed decoration-lime-400 decoration-3 underline-offset-[9px]"
                   style={{ textUnderlinePosition: 'from-word' }}
                 >
                   {topic.title?.rendered || topic.topic_subject}
@@ -404,7 +405,7 @@ export default function BioForoPage() {
 
                 <Link
                   href={`/bioforo/${topic.topic_id || topic.id}`}
-                  className="flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-full bg-blue-50 hover:bg-blue-100 text-blue-700 transition-all text-xs md:text-sm"
+                  className="flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-full bg-blue-50 dark:bg-lime-50 hover:bg-blue-100 dark:hover:bg-lime-100 text-blue-700 dark:text-lime-700 transition-all text-xs md:text-sm"
                 >
                   <Icon name="MessageCircle" className="w-4 h-4" />
                   <span>Ver tema</span>
