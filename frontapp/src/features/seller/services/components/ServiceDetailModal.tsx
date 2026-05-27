@@ -1,17 +1,44 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
+import ServiceCalendar from './ServiceCalendar';
 import Image from 'next/image';
 import {
+<<<<<<< HEAD
   Service,
   Specialist,
   Appointment,
   WEEK_DAY_SHORT,
   countTotalSessions,
+=======
+    Service,
+    Specialist,
+    Appointment,
+    WEEK_DAY_SHORT,
+    countTotalSessions,
+    calculateSessions,
+>>>>>>> origin/rama-jere2
 } from '@/features/seller/services/types';
 import BaseDrawer from '@/components/ui/BaseDrawer';
 import Icon from '@/components/ui/Icon';
 import BaseButton from '@/components/ui/BaseButton';
 
+type Client = {
+    id: number;
+    nombres: string;
+    apellidos: string;
+    dni: string;
+    telefono?: string;
+    email?: string;
+    direccion?: string;
+};
+
+type AppointmentWithClient = Appointment & {
+    clientId?: number;
+};
+
 interface ServiceDetailModalProps {
+<<<<<<< HEAD
   service: Service | null;
   specialists: Specialist[];
   appointments: Appointment[];
@@ -19,10 +46,19 @@ interface ServiceDetailModalProps {
   onClose: () => void;
   onEdit: (service: Service) => void;
   onReschedule: (appointment: Appointment) => void;
+=======
+    service: Service | null;
+    specialists: Specialist[];
+    clients: Client[];
+    appointments: AppointmentWithClient[];
+    isOpen: boolean;
+    onClose: () => void;
+    onEdit: (service: Service) => void;
+    onReschedule: (appointment: AppointmentWithClient) => void;
+>>>>>>> origin/rama-jere2
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
-
 function getAvatarChars(sp: Specialist): string {
   return (
     (sp.nombres?.charAt(0)?.toUpperCase() ?? '') +
@@ -30,7 +66,6 @@ function getAvatarChars(sp: Specialist): string {
   );
 }
 
-/** "Lun, Mié, Vie · 12 sesiones · 30 min" */
 function buildScheduleSubtitle(service: Service): string {
   if (!service.diasAtencion || service.diasAtencion.length === 0)
     return 'Sin horario configurado';
@@ -52,6 +87,7 @@ function isServiceActive(service: Service): boolean {
   );
 }
 
+<<<<<<< HEAD
 const ESTADO_COLORS: Record<Appointment['estado'], string> = {
   confirmada: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
   pendiente: 'bg-amber-500/10  text-amber-500  border-amber-500/20',
@@ -76,6 +112,22 @@ export default function ServiceDetailModal({
   onReschedule,
 }: ServiceDetailModalProps) {
   if (!service) return null;
+=======
+// ─── Component ───────────────────────────────────────────────────────────────
+
+export default function ServiceDetailModal({
+    service,
+    specialists,
+    clients,
+    appointments,
+    isOpen,
+    onClose,
+    onEdit,
+    onReschedule,
+}: ServiceDetailModalProps) {
+    const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+    if (!service) return null;
+>>>>>>> origin/rama-jere2
 
   // Especialistas asignados resueltos
   const assignedSpecialists = service.especialistasAsignados
@@ -143,6 +195,7 @@ export default function ServiceDetailModal({
                               active
                                 ? 'bg-emerald-500/10 border-emerald-500/20 shadow-emerald-500/10'
                                 : 'bg-rose-500/10   border-rose-500/20   shadow-rose-500/10'
+<<<<<<< HEAD
                             }`}
             >
               <div className="relative flex-shrink-0">
@@ -165,6 +218,203 @@ export default function ServiceDetailModal({
                     : 'Asigna días o especialistas'}
                 </p>
               </div>
+=======
+                            }`}>
+                            <div className="relative flex-shrink-0">
+                                <div className={`w-4 h-4 rounded-full ${active ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+                                {active && (
+                                    <div className="absolute inset-0 w-4 h-4 rounded-full bg-emerald-500 animate-ping opacity-75" />
+                                )}
+                            </div>
+                            <div>
+                                <p className={`text-sm font-black tracking-tight ${active ? 'text-emerald-500' : 'text-rose-500'}`}>
+                                    {active ? 'Activo en Tienda' : 'Configuración Incompleta'}
+                                </p>
+                                <p className="text-[9px] font-bold text-[var(--text-secondary)] uppercase tracking-tighter mt-0.5">
+                                    {active ? 'Visibilidad pública OK' : 'Asigna días o especialistas'}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Staff */}
+                    <div className="space-y-4">
+                        <p className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest px-1">
+                            Staff Certificado
+                        </p>
+                        <div className="flex -space-x-3 p-4 bg-[var(--bg-secondary)]/30 rounded-[2.5rem] border border-[var(--border-subtle)] min-h-[5.5rem] items-center px-8 shadow-inner">
+                            {assignedSpecialists.length === 0 ? (
+                                <p className="text-[10px] font-bold text-[var(--text-secondary)] italic">Sin asignar</p>
+                            ) : (
+                                assignedSpecialists.map((esp) => (
+                                    <div
+                                        key={esp.id}
+                                        className="relative w-12 h-12 rounded-2xl bg-[var(--bg-card)] border-[3px] border-[var(--bg-card)] flex items-center justify-center text-sm font-black overflow-hidden shadow-lg hover:-translate-y-2 hover:z-10 transition-all cursor-pointer ring-1 ring-[var(--border-subtle)]"
+                                        title={`${esp.nombres} ${esp.apellidos} · ${esp.especialidad}`}
+                                    >
+                                        {esp.foto
+                                            ? <Image src={esp.foto} fill sizes="48px" className="object-cover" alt={`${esp.nombres} ${esp.apellidos}`} />
+                                            : <span className="text-sky-500">{getAvatarChars(esp)}</span>
+                                        }
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                {/* ── Disponibilidad compacta ── */}
+                <div className="space-y-4">
+                    <div className="flex items-center justify-between px-1">
+                        <h3 className="text-xs font-black text-[var(--text-primary)] uppercase tracking-widest flex items-center gap-2">
+                            <div className="w-1.5 h-4 bg-sky-500 rounded-full" />
+                            Disponibilidad
+                        </h3>
+                        <button
+                            onClick={() => setIsCalendarOpen(true)}
+                            className="flex items-center gap-1.5 text-[9px] font-black text-sky-500 uppercase tracking-widest hover:opacity-70 transition-all"
+                        >
+                            <Icon name="CalendarDays" className="w-3.5 h-3.5" />
+                            Ver calendario completo
+                        </button>
+                    </div>
+
+                    <div className="space-y-2">
+                        {service.diasAtencion.length === 0 ? (
+                            <div className="py-8 text-center text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest bg-[var(--bg-secondary)]/30 rounded-[1.5rem] border border-dashed border-[var(--border-subtle)]">
+                                Sin días configurados
+                            </div>
+                        ) : (
+                            service.diasAtencion.map((dayObj) => {
+                                const totalSes = dayObj.bloques.reduce(
+                                    (t, b) => t + calculateSessions(b, service.duracion).length, 0
+                                );
+                                return (
+                                    <div
+                                        key={dayObj.dia}
+                                        className="flex items-center justify-between px-5 py-3.5 bg-[var(--bg-secondary)]/50 rounded-2xl border border-[var(--border-subtle)]"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-sky-500" />
+                                            <span className="text-xs font-black text-[var(--text-primary)] uppercase tracking-widest">
+                                                {dayObj.dia}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            <span className="text-[9px] font-bold text-[var(--text-secondary)] uppercase tracking-widest">
+                                                {dayObj.bloques.length} bloque{dayObj.bloques.length !== 1 ? 's' : ''}
+                                            </span>
+                                            <span className="text-[9px] font-black text-sky-500 bg-sky-500/10 border border-sky-500/20 px-2 py-0.5 rounded-lg">
+                                                {totalSes} ses.
+                                            </span>
+                                        </div>
+                                    </div>
+                                );
+                            })
+                        )}
+                    </div>
+
+                    <ServiceCalendar
+                        isOpen={isCalendarOpen}
+                        service={service}
+                        specialists={specialists}
+                        clients={clients}
+                        appointments={appointments}
+                        onClose={() => setIsCalendarOpen(false)}
+                        onReschedule={onReschedule}
+                    />
+                </div>
+
+                {/* ── Configuración maestra ── */}
+                <div className="p-8 bg-sky-500 rounded-[3rem] text-white shadow-2xl space-y-6 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 blur-[100px] -z-0" />
+
+                    {/* Header */}
+                    <div className="relative z-10 flex items-center justify-between border-b border-white/10 pb-6">
+                        <div className="flex items-center gap-3">
+                            <Icon name="ShieldCheck" className="text-sky-200 w-6 h-6" />
+                            <h4 className="text-[10px] font-black uppercase tracking-[0.3em] opacity-60">
+                                Configuración Maestra
+                            </h4>
+                        </div>
+                        <div className="text-[10px] font-black text-sky-200 bg-white/10 px-3 py-1 rounded-full border border-white/20">
+                            AUTO-MANAGED
+                        </div>
+                    </div>
+
+                    {/* Grid de métricas */}
+                    <div className="grid grid-cols-2 gap-8 relative z-10">
+
+                        {/* Días de atención */}
+                        <div className="space-y-4">
+                            <p className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em]">
+                                Días de Atención
+                            </p>
+                            <div className="flex items-center gap-4">
+                                <div className="p-3 bg-white/5 rounded-2xl border border-white/10">
+                                    <Icon name="Clock" className="text-sky-200 w-5 h-5" />
+                                </div>
+                                <div>
+                                    <p className="text-xl font-black tracking-tight">
+                                        {service.diasAtencion.length > 0
+                                            ? service.diasAtencion.map((d) => WEEK_DAY_SHORT[d.dia]).join(', ')
+                                            : '—'
+                                        }
+                                    </p>
+                                    <p className="text-[9px] font-bold text-white/40 uppercase mt-0.5">
+                                        Ventana Operativa
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Cupos y sesiones */}
+                        <div className="space-y-4">
+                            <p className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em]">
+                                Capacidad
+                            </p>
+                            <div className="flex items-center gap-4">
+                                <div className="p-3 bg-white/5 rounded-2xl border border-white/10">
+                                    <Icon name="TrendingUp" className="text-emerald-300 w-5 h-5" />
+                                </div>
+                                <div>
+                                    <p className="text-xl font-black tracking-tight">
+                                        {service.cupos}
+                                        <span className="text-[10px] font-bold opacity-30 ml-1">PX/SESIÓN</span>
+                                    </p>
+                                    <p className="text-[9px] font-bold text-white/40 uppercase mt-0.5">
+                                        {totalSessions} sesiones en total
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Duración */}
+                        <div className="space-y-4">
+                            <p className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em]">
+                                Duración por Sesión
+                            </p>
+                            <p className="text-xl font-black tracking-tight">
+                                {service.duracion < 60
+                                    ? `${service.duracion} min`
+                                    : `${service.duracion / 60}h`
+                                }
+                            </p>
+                        </div>
+
+                        {/* Precio */}
+                        <div className="space-y-4">
+                            <p className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em]">
+                                Precio por Sesión
+                            </p>
+                            <p className="text-xl font-black tracking-tight">
+                                S/. {service.precio.toFixed(2)}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+>>>>>>> origin/rama-jere2
             </div>
           </div>
 

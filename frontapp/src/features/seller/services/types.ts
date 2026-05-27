@@ -1,5 +1,8 @@
+<<<<<<< HEAD
 // ─── Specialist ──────────────────────────────────────────────────────────────
 
+=======
+>>>>>>> origin/rama-jere2
 export type DocumentType = 'dni' | 'carnet_extranjeria' | 'pasaporte' | 'ruc';
 export type AvailabilityStatus = 'Disponible' | 'Indispuesto' | 'Ocupado';
 
@@ -7,15 +10,22 @@ export interface Specialist {
   id: number;
   nombres: string;
   apellidos: string;
-  tipoDocumento: DocumentType;
-  numeroDocumento: string;
+  dni: string;
+  email: string;
   especialidad: string;
-  foto?: string; // base64 o URL
+  subEspecialidad?: string;
+  aniosExperiencia?: number;
+  categoria: string;
+  numeroColegiatura?: string;
+  foto?: string;
   availability: AvailabilityStatus;
 }
 
+<<<<<<< HEAD
 // ─── Service ──────────────────────────────────────────────────────────────────
 
+=======
+>>>>>>> origin/rama-jere2
 export type WeekDay =
   | 'Lunes'
   | 'Martes'
@@ -25,6 +35,7 @@ export type WeekDay =
   | 'Sábado'
   | 'Domingo';
 
+<<<<<<< HEAD
 /** Bloque horario dentro de un día: ej. 08:00 → 10:00 */
 export interface TimeBlock {
   inicio: string; // "HH:mm"
@@ -32,11 +43,19 @@ export interface TimeBlock {
 }
 
 /** Día con uno o más bloques horarios */
+=======
+export interface TimeBlock {
+  inicio: string;
+  fin: string;
+}
+
+>>>>>>> origin/rama-jere2
 export interface AttendanceDay {
   dia: WeekDay;
   bloques: TimeBlock[];
 }
 
+<<<<<<< HEAD
 /** Sesión calculada automáticamente */
 export interface Session {
   inicio: string; // "HH:mm"
@@ -56,17 +75,35 @@ export type ServiceEstado = 'borrador' | 'publicado';
  */
 export type AnticipacionReserva = 24 | 48 | 72;
 
+=======
+export interface Session {
+  inicio: string;
+  fin: string;
+}
+
+export type ServiceEstado = 'borrador' | 'publicado';
+
+export type AnticipacionReserva = 24 | 48 | 72;
+
+/** Asignación de días y bloques (por índice) de un especialista dentro de un servicio */
+export interface SpecialistHorario {
+  id: number;
+  dias: { dia: WeekDay; bloques: number[] }[];
+}
+
+>>>>>>> origin/rama-jere2
 export interface Service {
   id: number;
   denominacion: string;
   categoria: string;
-  /** Duración de cada sesión en minutos */
   duracion: number;
   diasAtencion: AttendanceDay[];
-  especialistasAsignados: number[]; // IDs de Specialist
-  /** Cupos por sesión: mín 1, máx 100, default 1 */
+  especialistasAsignados: number[];
+  /** Asignación granular por especialista. Si está presente, el modal lo usa en lugar de pre-poblar todos los días. */
+  especialistaHorarios?: SpecialistHorario[];
   cupos: number;
   precio: number;
+<<<<<<< HEAD
 
   // ── Nuevos campos ──────────────────────────────────────────────────────────
 
@@ -88,16 +125,27 @@ export interface Service {
 
 // ─── Appointment ──────────────────────────────────────────────────────────────
 
+=======
+  estado: ServiceEstado;
+  domicilio: boolean;
+  anticipacionReserva: AnticipacionReserva;
+}
+
+>>>>>>> origin/rama-jere2
 export interface Appointment {
   id: number;
   serviceId: number;
   specialistId: number;
+<<<<<<< HEAD
   fecha: string; // "YYYY-MM-DD"
+=======
+  fecha: string;
+>>>>>>> origin/rama-jere2
   sesion: Session;
   cuposOcupados: number;
-  estado: 'pendiente' | 'confirmada' | 'cancelada';
 }
 
+<<<<<<< HEAD
 // ─── Lookup maps ──────────────────────────────────────────────────────────────
 
 export const DOCUMENT_TYPE_LABELS: Record<DocumentType, string> = {
@@ -107,6 +155,23 @@ export const DOCUMENT_TYPE_LABELS: Record<DocumentType, string> = {
   ruc: 'RUC',
 };
 
+=======
+export const DOCUMENT_TYPE_LABELS: Record<DocumentType, string> = {
+  dni:                'DNI',
+  carnet_extranjeria: 'Carnet de Extranjería',
+  pasaporte:          'Pasaporte',
+  ruc:                'RUC',
+};
+
+export const SPECIALIST_CATEGORIES = [
+  'Salud y Bienestar',
+  'Educación y Coaching',
+  'Belleza y Estética',
+] as const;
+
+export type SpecialistCategory = typeof SPECIALIST_CATEGORIES[number];
+
+>>>>>>> origin/rama-jere2
 export const WEEK_DAYS: WeekDay[] = [
   'Lunes',
   'Martes',
@@ -118,6 +183,7 @@ export const WEEK_DAYS: WeekDay[] = [
 ];
 
 export const WEEK_DAY_SHORT: Record<WeekDay, string> = {
+<<<<<<< HEAD
   Lunes: 'Lun',
   Martes: 'Mar',
   Miércoles: 'Mié',
@@ -125,6 +191,15 @@ export const WEEK_DAY_SHORT: Record<WeekDay, string> = {
   Viernes: 'Vie',
   Sábado: 'Sáb',
   Domingo: 'Dom',
+=======
+  Lunes:     'Lun',
+  Martes:    'Mar',
+  Miércoles: 'Mié',
+  Jueves:    'Jue',
+  Viernes:   'Vie',
+  Sábado:    'Sáb',
+  Domingo:   'Dom',
+>>>>>>> origin/rama-jere2
 };
 
 export const ANTICIPACION_LABELS: Record<AnticipacionReserva, string> = {
@@ -133,6 +208,7 @@ export const ANTICIPACION_LABELS: Record<AnticipacionReserva, string> = {
   72: '72 horas',
 };
 
+<<<<<<< HEAD
 /** Buffer en minutos entre sesiones */
 export const APPOINTMENT_BUFFER_MINUTES = 10;
 
@@ -142,6 +218,10 @@ export const APPOINTMENT_BUFFER_MINUTES = 10;
  * Calcula todas las sesiones automáticas de un bloque horario.
  * Cada sesión dura `duracion` minutos, con `buffer` minutos entre ellas.
  */
+=======
+export const APPOINTMENT_BUFFER_MINUTES = 10;
+
+>>>>>>> origin/rama-jere2
 export function calculateSessions(
   block: TimeBlock,
   duracion: number,
@@ -171,6 +251,7 @@ export function calculateSessions(
   return sessions;
 }
 
+<<<<<<< HEAD
 /** Cuenta el total de sesiones de un servicio dado su horario y duración */
 export function countTotalSessions(
   diasAtencion: AttendanceDay[],
@@ -191,6 +272,14 @@ export function countTotalSessions(
  * Valida si un servicio puede ser publicado.
  * Condición mínima: al menos 1 especialista asignado.
  */
+=======
+export function countTotalSessions(diasAtencion: AttendanceDay[], duracion: number): number {
+  return diasAtencion.reduce((total, day) =>
+    total + day.bloques.reduce((t, bloque) =>
+      t + calculateSessions(bloque, duracion).length, 0), 0);
+}
+
+>>>>>>> origin/rama-jere2
 export function canPublish(service: Service): boolean {
   return service.especialistasAsignados.length >= 1;
 }
