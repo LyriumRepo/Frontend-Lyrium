@@ -29,7 +29,7 @@ export default function BranchCard({ branch, onEdit, onDelete }: BranchCardProps
                 </div>
                 <div className="flex items-center gap-2 text-xs font-bold text-[var(--text-secondary)]">
                     <Icon name="Building2" className="text-sky-400 dark:text-[var(--icons-green)] w-4 h-4" />
-                    <span>{branch.city}</span>
+                    <span>{branch.district}, {branch.province}</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs font-bold text-[var(--text-secondary)]">
                     <Icon name="Phone" className="text-sky-400 dark:text-[var(--icons-green)] w-4 h-4" />

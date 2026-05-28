@@ -90,7 +90,9 @@ export interface StoreBranch {
   id: number;
   name: string;
   address: string;
-  city: string;
+  department: string;
+  province: string;
+  district: string;
   phone: string;
   hours?: string;
   is_principal: boolean;
