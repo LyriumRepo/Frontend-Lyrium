@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   ShoppingBag,
@@ -7,43 +7,41 @@ import {
   ShoppingCart,
   Loader2,
   AlertCircle,
-} from "lucide-react";
-import { useCarritoStore } from "@/store/carritoStore";
-import { useCarritoCatalog } from "../hooks/useCarritoCatalog";
-import FilterBar from "./FilterBar";
-import ProductGrid from "./ProductGrid";
-import CartDrawer from "./drawer/CartDrawer";
-import ProductDetailModal from "./modals/ProductDetailModal";
-import { useAddToCart } from "@/features/public/product/hooks/useAddToCart";
+} from 'lucide-react';
+import { useCarritoStore } from '@/store/carritoStore';
+import { useCarritoCatalog } from '../hooks/useCarritoCatalog';
+import FilterBar from './FilterBar';
+import ProductGrid from './ProductGrid';
+import CartDrawer from './drawer/CartDrawer';
+import CartPopup from './CartPopup'; // ← NUEVO
+import ProductDetailModal from './modals/ProductDetailModal';
+import { useAddToCart } from '@/features/public/product/hooks/useAddToCart';
+import AuthRequiredModal from '@/shared/compoments/AuthRequiredModal';
+import { useAuthStore } from '@/shared/hooks/useAuthstore';
+import { useEffect } from 'react';
 
-// ─────────────────────────────────────────────────────────────────────────────
-// CarritoPage — mantiene el diseño existente (filtros + grid + drawer)
-// CAMBIOS:
-// 1. useCarritoCatalog() carga productos de Laravel → carritoStore
-// 2. handleAdd, handleIncrease, handleDecrease, handleDelete conectados
-// ─────────────────────────────────────────────────────────────────────────────
 export default function CarritoPage() {
-  // ── Cargar catálogo desde Laravel ──────────────────────────────────────
   const { isLoading, isError, refetch } = useCarritoCatalog();
+  const { validate, showCheckoutModal, setShowCheckoutModal } = useAuthStore();
+  useEffect(() => {
+    validate();
+  }, [validate]);
 
-  // ── Estado del store ───────────────────────────────────────────────────
   const products = useCarritoStore((s) => s.products);
   const cartItems = useCarritoStore((s) => s.cartItems);
   const openCart = useCarritoStore((s) => s.openCart);
   const openDetailModal = useCarritoStore((s) => s.openDetailModal);
-  const addToCart = useCarritoStore((s) => s.addToCart);
   const updateItemQuantity = useCarritoStore((s) => s.updateQuantity);
   const removeFromCart = useCarritoStore((s) => s.removeFromCart);
+  const openPopup = useCarritoStore((s) => s.openPopup); // ← NUEVO
 
-  // ── Handlers conectados al store ───────────────────────────────────────
-  // ✅ DESPUÉS — usar el mismo hook que usa el modal
-
-  // dentro del componente:
   const { addToCart: addToCartApi } = useAddToCart();
 
-  const handleAdd = (id: number | string) => {
-    addToCartApi(Number(id), 1); // llama a Laravel
-    openCart(); // abre el drawer (que recarga desde Laravel al abrirse)
+  // ── Handlers ──────────────────────────────────────────────────────────────
+
+  const handleAdd = async (id: number | string) => {
+    await addToCartApi(Number(id), 1); // llama a Laravel
+    openPopup(); // ← muestra popup en lugar de abrir drawer
   };
 
   const handleView = (id: number | string) => {
@@ -53,57 +51,50 @@ export default function CarritoPage() {
   const handleIncrease = (id: number | string) => {
     const item = cartItems.find((i) => String(i.id) === String(id));
     if (!item) return;
-    const newQty = Number(item.cantidad ?? 1) + 1;
-    updateItemQuantity(Number(id), newQty);
+    updateItemQuantity(Number(id), Number(item.cantidad ?? 1) + 1);
   };
 
   const handleDecrease = (id: number | string) => {
     const item = cartItems.find((i) => String(i.id) === String(id));
     if (!item) return;
-    const currentQty = Number(item.cantidad ?? 1);
-    if (currentQty <= 1) {
-      removeFromCart(Number(id));
-    } else {
-      updateItemQuantity(Number(id), currentQty - 1);
-    }
+    const qty = Number(item.cantidad ?? 1);
+    if (qty <= 1) removeFromCart(Number(id));
+    else updateItemQuantity(Number(id), qty - 1);
   };
 
-  const handleDelete = (id: number | string) => {
-    removeFromCart(Number(id));
-  };
+  const handleDelete = (id: number | string) => removeFromCart(Number(id));
 
   const cartCount = cartItems.reduce((a, i) => a + Number(i.cantidad ?? 0), 0);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-[var(--bg-primary)]">
       <div className="max-w-7xl mx-auto px-4 py-10">
-        {/* ── Hero / Filtros ────────────────────────────────────── */}
+        {/* ── Hero / Filtros ── */}
         <div
           className="rounded-3xl px-6 py-6 md:px-8 md:py-7 mb-7"
           style={{
             background:
-              "radial-gradient(900px 260px at 35% -10%, rgba(35,180,254,.16), transparent 60%), radial-gradient(900px 260px at 95% 0%, rgba(132,204,22,.14), transparent 55%), linear-gradient(90deg, rgba(35,180,254,.08), rgba(132,204,22,.08))",
-            border: "1px solid rgba(35,180,254,.16)",
+              'radial-gradient(900px 260px at 35% -10%, rgba(35,180,254,.16), transparent 60%), radial-gradient(900px 260px at 95% 0%, rgba(132,204,22,.14), transparent 55%), linear-gradient(90deg, rgba(35,180,254,.08), rgba(132,204,22,.08))',
+            border: '1px solid rgba(35,180,254,.16)',
           }}
         >
           <FilterBar />
 
           <div className="mt-6 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
             <div>
-              <div className="inline-flex items-center gap-2 text-xs text-slate-700 bg-white/85 border border-sky-100 backdrop-blur-sm px-3 py-1 rounded-full">
+              <div className="inline-flex items-center gap-2 text-xs text-slate-700 dark:text-[var(--text-primary)] bg-white/85 dark:bg-[var(--bg-card)]/85 border border-sky-100 dark:border-[var(--border-subtle)] backdrop-blur-sm px-3 py-1 rounded-full">
                 <ShoppingBag className="w-3.5 h-3.5 text-sky-500" />
                 Catálogo Lyrium
               </div>
-              <h2 className="mt-3 text-2xl md:text-3xl text-slate-800 tracking-tight flex items-center gap-2">
+              <h2 className="mt-3 text-2xl md:text-3xl text-slate-800 dark:text-[var(--text-primary)] tracking-tight flex items-center gap-2">
                 <Sparkles className="w-7 h-7 text-sky-500" /> Productos
               </h2>
-              <p className="text-sm text-slate-400 mt-1 flex items-center gap-2">
+              <p className="text-sm text-slate-400 dark:text-[var(--text-muted)] mt-1 flex items-center gap-2">
                 <Info className="w-3.5 h-3.5 text-sky-500" />
                 Busca, compara y añade al carrito en un clic.
               </p>
             </div>
 
-            {/* Cart button */}
             <button
               onClick={openCart}
               className="relative self-start lg:self-center inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-sky-500 text-white font-medium hover:bg-sky-600 transition shadow-lg shadow-sky-200/50"
@@ -119,7 +110,7 @@ export default function CarritoPage() {
           </div>
         </div>
 
-        {/* ── Estado de carga / error ───────────────────────────── */}
+        {/* ── Estados ── */}
         {isLoading && (
           <div className="flex items-center justify-center py-20 gap-3 text-slate-500">
             <Loader2 className="w-6 h-6 animate-spin text-sky-500" />
@@ -144,20 +135,21 @@ export default function CarritoPage() {
           </div>
         )}
 
-        {/* ── Product Grid ──────────────────────────────────────── */}
         {!isLoading && !isError && (
           <ProductGrid onAdd={handleAdd} onView={handleView} />
         )}
       </div>
-
-      {/* ── Drawer ───────────────────────────────────────────────── */}
+      {/* ── Portales ── */}
       <CartDrawer />
-
-      {/* ── Detail Modal ──────────────────────────────────────────── */}
+      <CartPopup /> {/* ← NUEVO */}
       <ProductDetailModal
         onAdd={handleAdd}
         onOpenCart={openCart}
         productsCache={products}
+      />
+      <AuthRequiredModal
+        open={showCheckoutModal}
+        onClose={() => setShowCheckoutModal(false)}
       />
     </div>
   );
