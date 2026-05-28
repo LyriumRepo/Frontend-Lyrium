@@ -6,26 +6,44 @@ export class LaravelProductRepository implements IProductRepository {
         return process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://localhost:8000/api';
     }
 
+    
     // ✅ FIX: La cookie es httpOnly — solo es accesible desde el servidor.
     // Siempre usar next/headers, nunca document.cookie.
+    private async getAuthHeaders(): Promise<HeadersInit> {
+        const token = await this.getToken();
+
+        return {
+            'Accept': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        };
+    }
+
     private async getToken(): Promise<string | null> {
+        // CLIENTE
+        if (typeof window !== 'undefined') {
+
+            return localStorage.getItem('laravel_token');
+        }
+
+        // SERVIDOR
         try {
             const { cookies } = await import('next/headers');
+
             const cookieStore = await cookies();
+
             return cookieStore.get('laravel_token')?.value ?? null;
+
         } catch {
+
             return null;
         }
     }
 
-    private async getAuthHeaders(): Promise<HeadersInit> {
-        const token = await this.getToken();
-        return token ? { Authorization: `Bearer ${token}` } : {};
-    }
 
     private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
         const baseUrl = this.getBaseUrl();
         const authHeaders = await this.getAuthHeaders();
+        
 
         const response = await fetch(`${baseUrl}${endpoint}`, {
             ...options,
@@ -60,6 +78,7 @@ export class LaravelProductRepository implements IProductRepository {
             return {
                 id: data.id?.toString() || id,
                 name: data.name || '',
+                type: data.type || '',
                 category: data.categories?.[0]?.slug || '',
                 price: parseFloat(data.price || '0'),
                 stock: data.stock || 0,
@@ -80,6 +99,35 @@ export class LaravelProductRepository implements IProductRepository {
     async createProduct(input: CreateProductInput): Promise<Product> {
         const image = input.image && !input.image.startsWith('data:') ? input.image : null;
 
+        // Limpiar mainAttributes cuidando que values es un Record<string, string>
+        const cleanMainAttributes = (input.mainAttributes || [])
+            .map(attr => {
+                // Convertimos el objeto values { key: value } en un array de [key, value]
+                const filteredEntries = Object.entries(attr.values || {})
+                    .filter(([_, value]) => value && value.trim() !== '');
+
+                return {
+                    ...attr,
+                    // Volvemos a transformar el array filtrado en un objeto Record
+                    values: Object.fromEntries(filteredEntries)
+                };
+            })
+            // Opcional: Eliminamos el atributo por completo si su objeto values quedó vacío
+            .filter(attr => Object.keys(attr.values).length > 0);
+
+        // Limpiar additionalAttributes cuidando que values es un Record<string, string>
+        const cleanAdditionalAttributes = (input.additionalAttributes || [])
+            .map(attr => {
+                const filteredEntries = Object.entries(attr.values || {})
+                    .filter(([_, value]) => value && value.trim() !== '');
+
+                return {
+                    ...attr,
+                    values: Object.fromEntries(filteredEntries)
+                };
+            })
+            .filter(attr => Object.keys(attr.values).length > 0);
+
         return this.request<Product>('/products', {
             method: 'POST',
             body: JSON.stringify({
@@ -92,8 +140,8 @@ export class LaravelProductRepository implements IProductRepository {
                 image: image,
                 weight: input.weight ? Number(input.weight) : null,
                 dimensions: input.dimensions || null,
-                mainAttributes: input.mainAttributes || [],
-                additionalAttributes: input.additionalAttributes || [],
+                mainAttributes: cleanMainAttributes,
+                additionalAttributes: cleanAdditionalAttributes,
             }),
         });
     }
@@ -155,7 +203,6 @@ export class LaravelProductRepository implements IProductRepository {
             headers: {
                 ...(token ? { Authorization: `Bearer ${token}` } : {}),
             },
-            credentials: 'include',
             body: formData,
         });
 

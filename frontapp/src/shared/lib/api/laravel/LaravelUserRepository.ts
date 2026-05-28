@@ -19,15 +19,14 @@ export class LaravelUserRepository implements IUserRepository {
     private async getToken(): Promise<string | null> {
         // Client-side: read from document.cookie
         if (typeof window !== 'undefined') {
-            const match = document.cookie.match(/laravel_token=([^;]+)/);
-            if (match && match[1]) {
-                const rawToken = match[1];
-                const token = rawToken.includes('%') ? decodeURIComponent(rawToken) : rawToken;
-                console.log('[LaravelUserRepository] Token from client:', token.substring(0, 20) + '...');
-                return token;
-            }
-            console.log('[LaravelUserRepository] No laravel_token cookie found in client');
-            return null;
+            const token = localStorage.getItem('laravel_token');
+
+            console.log(
+                '[LaravelUserRepository] Token from client:',
+                token ? token.substring(0, 20) + '...' : 'not found'
+            );
+
+            return token;
         }
         
         // Server-side: use next/headers
@@ -54,6 +53,7 @@ export class LaravelUserRepository implements IUserRepository {
         
         console.log('[LaravelUserRepository] Making request to:', endpoint, 'Token exists:', !!authHeaders.Authorization);
 
+        console.log('FULL URL', `${baseUrl}${endpoint}`);
         const response = await fetch(`${baseUrl}${endpoint}`, {
             ...options,
             credentials: 'include',

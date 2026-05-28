@@ -6,7 +6,7 @@ export interface UserFilters {
 }
 
 export interface UpdateUserInput {
-    display_name?: string;
+    name?: string;
     email?: string;
     avatar?: string;
     phone?: string;

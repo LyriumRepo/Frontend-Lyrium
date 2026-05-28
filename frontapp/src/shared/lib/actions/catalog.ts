@@ -191,7 +191,7 @@ export async function saveProduct(
     }
 
     const data = await res.json();
-    revalidateTag('seller-catalog');
+    revalidateTag('seller-catalog', 'max');
 
     // La respuesta puede ser el producto directamente o { data: producto }
     const raw = data.data ?? data;
@@ -226,7 +226,7 @@ export async function deleteProduct(
       };
     }
 
-    revalidateTag('seller-catalog');
+    revalidateTag('seller-catalog', 'max');
     return { success: true };
   } catch {
     return { success: false, error: 'Error de conexión al eliminar' };
@@ -264,7 +264,7 @@ export async function updateProductPrice(
       };
     }
 
-    revalidateTag('seller-catalog');
+    revalidateTag('seller-catalog', 'max');
     return { success: true, data: { id: productId, price: newPrice } };
   } catch {
     return { success: false, error: 'Error de conexión' };

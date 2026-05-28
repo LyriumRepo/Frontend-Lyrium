@@ -6,7 +6,7 @@ import { useToast } from '@/shared/lib/context/ToastContext';
 import { validateRUC, validateDNI, validateBCPAccount, validateCCI } from '@/shared/lib/utils/validation';
 import { USE_MOCKS } from '@/shared/lib/config/flags';
 import { users as userRepo } from '@/shared/lib/api';
-import { sellerApi, type StoreData } from '@/shared/lib/api/sellerRepository';
+import { mapStoreToLocal, sellerApi, type StoreData } from '@/shared/lib/api/sellerRepository';
 import type { VendorProfileData } from '../types';
 
 export function useSellerProfile() {
@@ -51,7 +51,11 @@ export function useSellerProfile() {
             console.log('[useSellerProfile] Fetching store from Laravel API...');
             let store: StoreData | null = null;
             try {
-                store = await sellerApi.getStore();
+                const rawStore = await sellerApi.getStore();
+                store = mapStoreToLocal(rawStore);
+                console.log('[STORE IMAGE DEBUG]', {
+  raw: store?.rep_legal_foto,
+});
                 console.log('[useSellerProfile] Store API response:', JSON.stringify(store, null, 2));
             } catch (e) {
                 console.log('[useSellerProfile] Store API error:', e);
@@ -149,11 +153,11 @@ export function useSellerProfile() {
                     distrito: userData.location?.distrito || ""
                 },
                 tax_condition: store.tax_condition || "RUC",
-                admin_nombre: userData.admin_nombre || "",
-                admin_dni: userData.admin_dni || "40000001",
+                admin_nombre: userData.display_name || "",
+                admin_dni: userData.document_number || "40000001",
                 admin_email: userData.email || store.email || "",
-                phone_1: userData.phone || store.phone || "",
-                phone_2: userData.phone_2 || "",
+                phone_1: store.phone || store.phone || "",
+                phone_2: userData.phone || "",
                 direccion_fiscal: store.direccion_fiscal || "Dirección no especificada",
                 cuenta_bcp: store.cuenta_bcp || "19100000000000",
                 cci: store.cci || "00219100000000000000",
@@ -198,6 +202,7 @@ export function useSellerProfile() {
                     phone_2: updatedData.phone_2,
                     location: updatedData.location,
                     nombre_comercial: updatedData.nombre_comercial,
+                    rep_legal_foto: updatedData.rep_legal_foto,
                     direccion_fiscal: updatedData.direccion_fiscal,
                     experience_years: updatedData.experience_years,
                     tax_condition: updatedData.tax_condition,
@@ -209,10 +214,17 @@ export function useSellerProfile() {
                 // 1. Guardar datos no críticos directamente
                 try {
                     console.log('[useSellerProfile] Updating user profile (non-critical)...');
+                    console.log('PAYLOAD', {
+    name: nonCriticalData.admin_nombre,
+    email: nonCriticalData.email,
+    document_number: nonCriticalData.admin_dni,
+    phone: nonCriticalData.phone,
+});
                     await userRepo.updateUser(user!.id, {
-                        admin_nombre: nonCriticalData.admin_nombre,
-                        admin_dni: nonCriticalData.admin_dni,
-                        phone_2: nonCriticalData.phone_2,
+                        name: nonCriticalData.admin_nombre,
+                        document_number: nonCriticalData.admin_dni,
+                        email: nonCriticalData.email,
+                        phone: nonCriticalData.phone_2,
                         location: nonCriticalData.location
                     });
                     console.log('[useSellerProfile] User profile updated successfully');
@@ -228,10 +240,39 @@ export function useSellerProfile() {
                     console.log('[useSellerProfile] Store ID:', store?.id, 'Store user_id:', store?.user_id);
                     
                     if (store?.id) {
+                        //Guardando la imagen
+                        if (
+                            updatedData.rep_legal_foto &&
+                            updatedData.rep_legal_foto.startsWith('data:')
+                        ) {
+
+                            console.log('[useSellerProfile] Uploading rep legal photo...');
+
+                            const res = await fetch(updatedData.rep_legal_foto);
+                            const blob = await res.blob();
+
+                            const file = new File(
+                                [blob],
+                                `rep-${Date.now()}.jpg`,
+                                { type: blob.type }
+                            );
+
+                            const uploadData =
+                                await sellerApi.uploadRepLegalPhoto(store.id, file);
+
+                            nonCriticalData.rep_legal_foto = uploadData.url;
+
+                            console.log(
+                                '[useSellerProfile] Rep legal photo uploaded:',
+                                uploadData.url
+                            );
+                        }
+                        
                         // Guardar datos no críticos en store
                         console.log('[useSellerProfile] Updating store (non-critical):', nonCriticalData);
                         await sellerApi.updateStore(store.id, nonCriticalData);
                         console.log('[useSellerProfile] Store non-critical data updated successfully');
+                        
 
                         // Comparar con valores actuales para detectar cambios reales
                         console.log('[useSellerProfile] Current store values:', {
