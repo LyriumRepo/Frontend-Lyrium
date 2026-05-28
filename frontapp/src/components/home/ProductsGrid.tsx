@@ -92,7 +92,7 @@ export default function ProductsGrid({ categorias, titulo = 'Categorías de prod
           }}
         >
           {displayCategories.map((cat, index) => {
-            // Asigna ordenadamente las imágenes del 1.png al 7.png
+             
             const localImage = `/img/Inicio/2/${index + 1}.png`;
 
             return (
