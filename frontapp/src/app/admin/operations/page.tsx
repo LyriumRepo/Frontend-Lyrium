@@ -3,5 +3,9 @@ import { OperationsPageClient } from '@/features/admin/operations/OperationsPage
 import BaseLoading from '@/components/ui/BaseLoading';
 
 export default async function OperationsPage() {
-    return (<Suspense fallback={<BaseLoading message="Cargando operaciones..." />}><OperationsPageClient /></Suspense>);
+  return (
+    <Suspense fallback={<BaseLoading message="Cargando operaciones..." />}>
+      <OperationsPageClient />
+    </Suspense>
+  );
 }

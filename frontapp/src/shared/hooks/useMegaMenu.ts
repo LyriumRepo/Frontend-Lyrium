@@ -45,7 +45,10 @@ function apiToMegaMenuFormat(categories: ApiCategory[]): {
                     .filter(sub => sub.children.length > 0)
                     .map(sub => ({
                         h: sub.name.toUpperCase(),
-                        items: sub.children.map(subsub => subsub.name),
+                        items: sub.children.map(subsub => ({
+                            name: subsub.name,
+                            href: subsub.href,
+                        })),
                     })),
             };
         });

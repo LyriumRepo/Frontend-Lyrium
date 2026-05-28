@@ -86,7 +86,7 @@ export class LaravelHomeRepository implements IHomeRepository {
 
     async getCategories(): Promise<Categoria[]> {
         try {
-            const response = await this.request<any>('/categories');
+            const response = await this.request<any>('/categories?type=product&children_only=true&per_page=100');
             const categories = response.data || response;
             
             const baseUrl = this.getBaseUrl().replace('/api', '');
@@ -268,7 +268,7 @@ export class LaravelHomeRepository implements IHomeRepository {
 
     async getServiceCategories(): Promise<Categoria[]> {
         try {
-            const response = await this.request<any>('/categories?type=service');
+            const response = await this.request<any>('/categories?type=service&children_only=true&per_page=100');
             const baseUrl = this.getBaseUrl().replace('/api', '');
             const transformUrl = (url: string | undefined): string => {
                 if (!url) return '/img/no-image.png';
