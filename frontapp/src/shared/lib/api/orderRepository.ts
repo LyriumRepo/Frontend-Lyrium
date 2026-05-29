@@ -100,6 +100,10 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 }
 
 export const orderApi = {
+  getActiveCount: async (): Promise<number> => {
+    const response = await request<{ success: boolean; data: { count: number } }>('/orders/active-count');
+    return response.data?.count ?? 0;
+  },
   list: async (page = 1): Promise<{ data: OrderResource[]; pagination: { current_page: number; per_page: number; total: number; total_pages: number } }> => {
     const response = await request<ApiResponse<unknown>>(`/orders?page=${page}`);
     const payload = response.data as any;
@@ -167,6 +171,13 @@ export const orderApi = {
       body: JSON.stringify({ status: 'cancelled' }),
     });
     return response.data!;
+  },
+
+  requestReceipt: async (orderId: number): Promise<{ conversationId: string }> => {
+    const response = await request<{ success: boolean; data: { id: string }; message: string }>(`/orders/${orderId}/request-receipt`, {
+      method: 'POST',
+    });
+    return { conversationId: response.data.id };
   },
 
   downloadReceipt: async (orderId: number): Promise<void> => {

@@ -70,8 +70,6 @@ export default function EmitInvoiceModal({ isOpen, onClose, onEmit }: EmitInvoic
         setState('loading');
 
         const payload: EmitInvoicePayload = {
-            seller_id: 'SELLER-001',
-            seller_name: 'Vendedor Demo',
             type: form.type,
             customer_name: form.customer_name.trim(),
             customer_ruc: form.customer_ruc.trim(),

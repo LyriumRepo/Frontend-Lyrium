@@ -48,6 +48,14 @@ function mapMessage(msg: ApiMessage, isFromCustomer: boolean): ChatMessage {
         contenido: msg.content,
         hora: msg.timestamp,
         status: msg.read ? 'read' : 'sent',
+        attachments: msg.attachments?.map(a => ({
+            id: a.id,
+            file_name: a.file_name,
+            mime_type: a.mime_type,
+            file_size: a.file_size,
+            url: a.url,
+            download_url: a.download_url,
+        })),
     };
 }
 
@@ -60,6 +68,7 @@ export function useSellerChat() {
     });
     const [isMobileListVisible, setIsMobileListVisible] = useState(true);
     const [isLoading, setIsLoading] = useState(true);
+    const [isSending, setIsSending] = useState(false);
     const [messagesCache, setMessagesCache] = useState<Record<number, ChatMessage[]>>({});
     const messagesCacheRef = useRef<Record<number, ChatMessage[]>>({});
 
@@ -114,13 +123,19 @@ export function useSellerChat() {
             }
         },
         isLoading,
+        isSending,
         filters,
         setFilters: (newFilters: Partial<ChatFilters>) => setFiltersState(prev => ({ ...prev, ...newFilters })),
         isMobileListVisible,
         setIsMobileListVisible,
-        sendMessage: async (content: string) => {
-            if (!activeConversationId || !content.trim()) return;
-            const apiMsg = await chatApi.sendMessage(String(activeConversationId), content).catch(() => null);
+        sendMessage: async (content: string, files?: File[]) => {
+            if (!activeConversationId) return;
+            if (!content.trim() && (!files || files.length === 0)) return;
+            setIsSending(true);
+            const apiMsg = files && files.length > 0
+                ? await chatApi.sendMessageWithAttachment(String(activeConversationId), content, files).catch(() => null)
+                : await chatApi.sendMessage(String(activeConversationId), content).catch(() => null);
+            setIsSending(false);
             if (!apiMsg) return;
             const msg = mapMessage(apiMsg, apiMsg.senderType === 'customer');
             setMessagesCache(prev => ({
@@ -129,7 +144,7 @@ export function useSellerChat() {
             }));
             setConversations(prev => prev.map(c =>
                 c.id === activeConversationId
-                    ? { ...c, ultimoMensaje: content, fecha: formatTime(apiMsg.timestamp) }
+                    ? { ...c, ultimoMensaje: content || '(archivo adjunto)', fecha: formatTime(apiMsg.timestamp) }
                     : c
             ));
         },

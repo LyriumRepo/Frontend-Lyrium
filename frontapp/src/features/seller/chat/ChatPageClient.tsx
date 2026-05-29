@@ -1,197 +1,358 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
-import Image from 'next/image';
+import React, { useEffect, useRef, useState } from 'react';
 import { useSellerChat } from '@/features/seller/chat/hooks/useSellerChat';
+import ModuleHeader from '@/components/layout/shared/ModuleHeader';
+import ChatLayout from '@/components/shared/chat/ChatLayout';
+import MessageInput from '@/components/shared/chat/MessageInput';
+import BaseLoading from '@/components/ui/BaseLoading';
 import Icon from '@/components/ui/Icon';
 import ChatOptionsMenu from './components/ChatOptionsMenu';
-import BaseLoading from '@/components/ui/BaseLoading';
-import ChatLayout from '@/components/shared/chat/ChatLayout';
-import MessageBubble from '@/components/shared/chat/MessageBubble';
-import MessageInput from '@/components/shared/chat/MessageInput';
 
-interface ChatPageClientProps {
-    // TODO Tarea 3: Recibir datos iniciales del Server Component
-}
+const CATEGORY_STYLES: Record<string, { label: string; bg: string; text: string }> = {
+  info: { label: 'Información', bg: 'bg-sky-100 dark:bg-sky-900/20', text: 'text-sky-700 dark:text-sky-300' },
+  comment: { label: 'Comentario', bg: 'bg-purple-100 dark:bg-purple-900/20', text: 'text-purple-700 dark:text-purple-300' },
+  admin: { label: 'Soporte', bg: 'bg-amber-100 dark:bg-amber-900/20', text: 'text-amber-700 dark:text-amber-300' },
+};
 
-export function ChatPageClient(_props: ChatPageClientProps) {
-    const {
-        conversations,
-        totalConversations,
-        activeConversation,
-        setActiveConversation,
-        isLoading,
-        filters,
-        setFilters,
-        isMobileListVisible,
-        setIsMobileListVisible,
-        sendMessage,
-        clearActiveChat,
-        deleteActiveTicket,
-        criticalCount
-    } = useSellerChat();
+export function ChatPageClient() {
+  const {
+    conversations,
+    totalConversations,
+    activeConversation,
+    setActiveConversation,
+    isLoading,
+    isSending,
+    filters,
+    setFilters,
+    isMobileListVisible,
+    setIsMobileListVisible,
+    sendMessage,
+    clearActiveChat,
+    deleteActiveTicket,
+    criticalCount,
+  } = useSellerChat();
 
-    const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [showFilter, setShowFilter] = useState(false);
 
-    useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [activeConversation?.mensajes]);
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [activeConversation?.mensajes]);
 
-    const handleSendMessage = (message: string) => {
-        sendMessage(message);
-    };
+  const handleSendMessage = (message: string, files?: File[]) => {
+    sendMessage(message, files);
+  };
 
-    const messages = activeConversation?.mensajes.map(msg => ({
-        sender: msg.sender,
-        content: msg.contenido,
-        timestamp: msg.hora,
-    })) || [];
+  const formatTime = (timestamp: string) => {
+    const date = new Date(timestamp);
+    return date.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
+  };
 
-    const listContent = (
-        <>
-            <div className="p-6 bg-[var(--bg-secondary)]/50 border-b border-[var(--border-subtle)]">
-                <div className="flex items-center gap-4 mb-6">
-                    <div className="w-12 h-12 bg-sky-500 rounded-2xl flex items-center justify-center shadow-lg shadow-sky-500/20 shrink-0">
-                        <Icon name="MessageCircle" className="text-white text-2xl font-black w-6 h-6" />
-                    </div>
-                    <div className="min-w-0">
-                        <h3 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-tight truncate">Centro de Atención</h3>
-                        <p className="text-xs text-[var(--text-secondary)] font-black uppercase tracking-widest truncate">Soporte en Tiempo Real</p>
-                    </div>
-                </div>
+  const messages = activeConversation?.mensajes ?? [];
 
-                <div className="grid grid-cols-2 gap-3 mb-6">
-                    <div className="bg-[var(--bg-card)] p-4 rounded-3xl border border-[var(--border-subtle)] text-center shadow-sm">
-                        <div className="text-xl font-black text-[var(--text-primary)]">{totalConversations}</div>
-                        <div className="text-xs text-[var(--text-secondary)] font-black uppercase tracking-widest">Total</div>
-                    </div>
-                    <div className="bg-red-500/10 p-4 rounded-3xl border border-red-500/20 text-center shadow-sm">
-                        <div className="text-xl font-black text-red-500">{criticalCount}</div>
-                        <div className="text-xs text-red-500 font-black uppercase tracking-widest">Críticos</div>
-                    </div>
-                </div>
-
-                <div className="space-y-3">
-                    <div className="relative group">
-                        <Icon name="Search" className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] group-focus-within:text-sky-500 transition-colors w-4 h-4" />
-                        <input
-                            type="text"
-                            value={filters.search}
-                            onChange={(e) => setFilters({ search: e.target.value })}
-                            className="w-full pl-12 pr-4 py-3 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl text-xs font-bold text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 transition-all outline-none"
-                            placeholder="Buscar por cliente o DNI..."
-                        />
-                    </div>
-                    <select
-                        value={filters.category}
-                        onChange={(e) => setFilters({ category: e.target.value })}
-                        className="w-full text-xs py-3 px-4 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 font-black uppercase tracking-wider text-[var(--text-primary)] cursor-pointer outline-none shadow-sm"
-                    >
-                        <option value="all">TODAS LAS CATEGORÍAS</option>
-                        <option value="info">SOLICITUD DE INFORMACIÓN</option>
-                        <option value="comment">COMENTARIOS</option>
-                        <option value="admin">SOPORTE ADMINISTRATIVO</option>
-                    </select>
-                </div>
-            </div>
-
-            <div className="flex-1 overflow-y-auto p-4 space-y-2 custom-scrollbar">
-                {conversations.length > 0 ? (
-                    conversations.map(conv => (
-                        <button
-                            key={conv.id}
-                            onClick={() => setActiveConversation(conv)}
-                            className={`w-full p-4 rounded-3xl border transition-all duration-300 group flex items-center gap-4 ${activeConversation?.id === conv.id
-                                ? 'bg-sky-500 border-sky-400 shadow-xl shadow-sky-500/20'
-                                : 'border-transparent hover:bg-[var(--bg-secondary)]'
-                                }`}
-                        >
-                            <div className="relative">
-                                <Image src={conv.avatar} alt={conv.nombre} width={48} height={48} className="rounded-2xl object-cover border-2 border-[var(--bg-card)] shadow-sm group-hover:scale-105 transition-transform" />
-                                {conv.critical && <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-[var(--bg-card)] flex items-center justify-center text-xs text-white font-black">!</span>}
-                            </div>
-                            <div className="flex-1 text-left overflow-hidden">
-                                <div className="flex justify-between items-center mb-1">
-                                    <h4 className={`text-xs font-black uppercase tracking-tight truncate ${activeConversation?.id === conv.id ? 'text-white' : 'text-[var(--text-primary)]'}`}>{conv.nombre}</h4>
-                                    <span className={`text-xs font-black uppercase ${activeConversation?.id === conv.id ? 'text-white/70' : 'text-[var(--text-secondary)]'}`}>{conv.fecha}</span>
-                                </div>
-                                <p className={`text-xs font-bold truncate ${activeConversation?.id === conv.id ? 'text-white/80' : 'text-[var(--text-secondary)]'}`}>{conv.ultimoMensaje}</p>
-                            </div>
-                        </button>
-                    ))
-                ) : (
-                    <div className="p-12 text-center opacity-40">
-                        <Icon name="MessageSquareOff" className="text-4xl mb-4 text-[var(--text-secondary)] mx-auto w-10 h-10" />
-                        <p className="text-xs font-black uppercase tracking-widest text-[var(--text-secondary)] leading-relaxed">Sin resultados para<br />tu búsqueda</p>
-                    </div>
-                )}
-            </div>
-        </>
-    );
-
-    const detailContent = !activeConversation ? (
-        <div className="flex-1 flex flex-col items-center justify-center p-12 text-center animate-fadeIn">
-            <div className="w-32 h-32 bg-[var(--bg-card)] rounded-full flex items-center justify-center shadow-xl shadow-black/5 mb-8 border border-[var(--border-subtle)]">
-                <Icon name="MessageCircle" className="text-6xl text-sky-500 opacity-20 w-16 h-16" />
-            </div>
-            <h2 className="text-2xl font-black text-[var(--text-primary)] uppercase tracking-tighter">Buzón de Mensajes</h2>
-            <p className="text-xs text-[var(--text-secondary)] mt-2 font-black uppercase tracking-widest">Selecciona una conversación para leer</p>
+  const listContent = (
+    <div className="divide-y divide-gray-100 dark:divide-[var(--border-subtle)] h-full overflow-y-auto">
+      <div className="p-4 border-b border-gray-100 dark:border-[var(--border-subtle)]">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h3 className="font-semibold text-gray-900 dark:text-[var(--text-primary)] text-sm">Conversaciones</h3>
+            <p className="text-xs text-gray-500 dark:text-[var(--text-muted)]">{conversations.length} chats</p>
+          </div>
+          <button
+            onClick={() => setShowFilter(prev => !prev)}
+            className={`p-2 rounded-xl transition-colors text-xs font-medium border ${showFilter
+              ? 'bg-sky-100 text-sky-600 border-sky-200 dark:bg-sky-500/20 dark:text-sky-300 dark:border-sky-500/30'
+              : 'bg-gray-100 text-gray-500 border-gray-200 hover:bg-gray-200 dark:bg-[var(--bg-secondary)] dark:text-gray-400 dark:border-[var(--border-subtle)]'
+            }`}
+          >
+            <Icon name="Filter" className="w-4 h-4" />
+          </button>
         </div>
-    ) : (
-        <>
-            <div className="p-6 bg-[var(--bg-card)] border-b border-[var(--border-subtle)] flex items-center justify-between shadow-sm">
-                <div className="flex items-center gap-4">
-                    <button
-                        onClick={() => setIsMobileListVisible(true)}
-                        className="md:hidden p-3 bg-[var(--bg-secondary)] text-[var(--text-secondary)] rounded-2xl hover:bg-sky-500/10 transition-all active:scale-90"
-                    >
-                        <Icon name="ChevronLeft" className="w-5 h-5" />
-                    </button>
-                    <Image src={activeConversation.avatar} alt={activeConversation.nombre} width={48} height={48} className="rounded-2xl object-cover border-2 border-emerald-500/20 shadow-sm" />
-                    <div>
-                        <h3 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-tight">{activeConversation.nombre}</h3>
-                        <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-xs text-[var(--text-secondary)] font-black uppercase">{activeConversation.email}</span>
-                            <span className="text-xs text-sky-500 font-black bg-sky-500/10 px-2 py-0.5 rounded-lg uppercase tracking-tight">DNI: {activeConversation.dni}</span>
-                            {activeConversation.critical && <span className="text-xs bg-red-500/10 text-red-500 font-black px-2 py-0.5 rounded-lg uppercase tracking-widest">Prioridad Alta</span>}
-                        </div>
-                    </div>
-                </div>
 
-                <div className="flex gap-2">
-                    <ChatOptionsMenu onClear={clearActiveChat} onDelete={deleteActiveTicket} />
-                </div>
-            </div>
+        <div className="relative mb-4">
+          <Icon name="Search" className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-[var(--text-muted)]" />
+          <input
+            type="text"
+            value={filters.search}
+            onChange={(e) => setFilters({ search: e.target.value })}
+            placeholder="Buscar por cliente o DNI..."
+            className="w-full pl-10 pr-4 py-2.5 text-sm bg-gray-50 dark:bg-[var(--bg-muted)] border border-gray-200 dark:border-[var(--border-subtle)] rounded-xl outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 dark:focus:border-sky-500 transition-all"
+          />
+        </div>
 
-            <div className="flex-1 min-h-0 overflow-y-auto p-4 md:p-8 space-y-6 custom-scrollbar bg-[var(--bg-secondary)]/20">
-                <MessageBubble messages={messages} />
-                <div ref={messagesEndRef} />
-            </div>
+        {showFilter && (
+          <select
+            value={filters.category}
+            onChange={(e) => setFilters({ category: e.target.value })}
+            className="w-full text-xs py-2.5 px-3 bg-gray-50 dark:bg-[var(--bg-muted)] border border-gray-200 dark:border-[var(--border-subtle)] rounded-xl font-semibold text-gray-700 dark:text-[var(--text-primary)] outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
+          >
+            <option value="all">Todas las categorías</option>
+            <option value="info">Información</option>
+            <option value="comment">Comentarios</option>
+            <option value="admin">Soporte Administrativo</option>
+          </select>
+        )}
+      </div>
 
-            <div className="flex-shrink-0">
-                <MessageInput onSend={handleSendMessage} />
-            </div>
-        </>
-    );
+      {conversations.length === 0 && (
+        <div className="p-8 text-center text-gray-500">
+          <Icon name="MessageSquareOff" className="w-12 h-12 mx-auto mb-4 text-gray-300 dark:text-[var(--text-muted)]" />
+          <p className="text-base font-bold text-gray-800 dark:text-[var(--text-primary)]">Sin conversaciones</p>
+          <p className="text-sm mt-1">No hay chats activos con clientes</p>
+        </div>
+      )}
 
-    if (isLoading) {
+      {conversations.map((conv) => {
+        const catStyle = CATEGORY_STYLES[conv.type] ?? CATEGORY_STYLES.info;
+
         return (
-            <div className="w-full bg-[var(--bg-card)] rounded-[2.5rem] shadow-xl shadow-black/5 border border-[var(--border-subtle)] overflow-hidden flex flex-col md:flex-row animate-fadeIn"
-                style={{ height: 'calc(100vh - 160px)', minHeight: '600px' }}>
-                <div className="w-full md:w-80 shrink-0 flex items-center justify-center">
-                    <BaseLoading message="Cargando conversaciones..." />
+          <button
+            key={conv.id}
+            onClick={() => {
+              setActiveConversation(conv);
+              setIsMobileListVisible(false);
+            }}
+            className={`w-full p-4 text-left hover:bg-gray-50 dark:hover:bg-[#1A3A32] transition-colors ${
+              activeConversation?.id === conv.id ? 'bg-sky-50 dark:bg-[#1A3A32]/50' : ''
+            }`}
+          >
+            <div className="flex items-start gap-3">
+              <div className="relative shrink-0">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-sky-400 to-sky-600 dark:from-[var(--brand-green)] dark:to-[#1A3A32] flex items-center justify-center text-white font-bold text-sm">
+                  {conv.nombre.charAt(0).toUpperCase()}
                 </div>
+                {conv.critical && (
+                  <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 rounded-full border-2 border-white dark:border-[var(--bg-secondary)] flex items-center justify-center">
+                    <span className="text-[8px] text-white font-black">!</span>
+                  </span>
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-gray-900 dark:text-[var(--text-primary)] text-sm truncate">{conv.nombre}</span>
+                  <span className="text-[10px] text-gray-400 dark:text-[var(--text-muted)] shrink-0 ml-2">{conv.fecha}</span>
+                </div>
+                <p className="text-xs text-gray-500 dark:text-[var(--text-muted)] truncate mt-0.5">{conv.ultimoMensaje}</p>
+                <div className="flex items-center gap-2 mt-1.5">
+                  <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${catStyle.bg} ${catStyle.text}`}>
+                    {catStyle.label}
+                  </span>
+                  {conv.dni && (
+                    <span className="text-[9px] text-gray-400 dark:text-[var(--text-muted)] font-medium">DNI: {conv.dni}</span>
+                  )}
+                </div>
+              </div>
             </div>
+          </button>
         );
-    }
+      })}
+    </div>
+  );
 
-    return (
-        <div className="min-h-[calc(100vh-8rem)] h-full overflow-hidden pb-4">
-            <ChatLayout
-                list={listContent}
-                detail={detailContent}
-                listWidth="col-span-4"
-            />
+  const chatContent = activeConversation ? (
+    <div className="flex flex-col h-full">
+      <div className="p-4 border-b border-gray-100 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-secondary)]">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setIsMobileListVisible(true)}
+            className="md:hidden p-2 -ml-2 rounded-xl hover:bg-gray-100 dark:hover:bg-[#1A3A32]"
+          >
+            <Icon name="ArrowLeft" className="w-5 h-5" />
+          </button>
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-sky-400 to-sky-600 dark:from-[var(--brand-green)] dark:to-[#1A3A32] flex items-center justify-center text-white font-bold text-sm shrink-0">
+            {activeConversation.nombre.charAt(0).toUpperCase()}
+          </div>
+          <div className="flex-1 min-w-0">
+            <h3 className="font-bold text-gray-900 dark:text-[var(--text-primary)] text-sm truncate">{activeConversation.nombre}</h3>
+            <div className="flex items-center gap-2 flex-wrap">
+              {activeConversation.email && (
+                <span className="text-[10px] text-gray-500 dark:text-[var(--text-muted)] truncate">{activeConversation.email}</span>
+              )}
+              {activeConversation.dni && (
+                <span className="text-[9px] font-bold text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-900/20 px-2 py-0.5 rounded-md">DNI: {activeConversation.dni}</span>
+              )}
+              {activeConversation.critical && (
+                <span className="text-[9px] font-bold text-red-600 bg-red-50 dark:bg-red-900/20 px-2 py-0.5 rounded-md">Prioridad Alta</span>
+              )}
+            </div>
+          </div>
+          <ChatOptionsMenu onClear={clearActiveChat} onDelete={deleteActiveTicket} />
         </div>
+      </div>
+
+      <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-gray-50/50 dark:bg-[var(--bg-muted)]/30">
+        {messages.length === 0 && (
+          <div className="flex items-center justify-center h-full">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-gray-100 dark:bg-[#1A3A32] rounded-full flex items-center justify-center mx-auto mb-4">
+                <Icon name="MessageCircle" className="w-8 h-8 text-gray-300 dark:text-[var(--text-muted)]" />
+              </div>
+              <p className="text-sm font-bold text-gray-500 dark:text-[var(--text-muted)]">No hay mensajes aún</p>
+              <p className="text-xs text-gray-400 dark:text-[var(--text-muted)] mt-1">Responde al cliente para iniciar la conversación</p>
+            </div>
+          </div>
+        )}
+
+        {messages.map((msg) => {
+          const isSeller = msg.sender === 'user';
+
+          return (
+            <div key={msg.id ?? msg.hora} className={`flex ${isSeller ? 'justify-end' : 'justify-start'}`}>
+              <div className={`flex max-w-[75%] items-end gap-3 ${isSeller ? 'flex-row-reverse' : 'flex-row'}`}>
+                <div className={`w-9 h-9 shrink-0 rounded-full flex items-center justify-center text-[10px] font-black shadow-sm ${
+                  isSeller
+                    ? 'bg-gradient-to-br from-sky-400 to-sky-600 dark:from-[var(--brand-green)] dark:to-[#1A3A32] text-white'
+                    : 'bg-gradient-to-br from-emerald-400 to-emerald-600 text-white'
+                }`}>
+                  {isSeller ? 'Tú' : activeConversation.nombre.charAt(0).toUpperCase()}
+                </div>
+
+                <div className={`relative rounded-3xl px-5 py-3 shadow-sm border backdrop-blur-sm ${
+                  isSeller
+                    ? 'bg-gradient-to-br from-sky-500 to-sky-600 dark:from-[var(--brand-green)] dark:to-[var(--brand-green-hover)] text-white border-sky-400/20 rounded-br-md'
+                    : 'bg-white dark:bg-[#1A3A32] text-slate-800 dark:text-[var(--text-primary)] border-gray-200 dark:border-[var(--border-subtle)] rounded-bl-md'
+                }`}>
+                  <div className="mb-1 flex items-center gap-2">
+                    <p className={`text-[11px] font-black uppercase tracking-[0.16em] ${
+                      isSeller ? 'text-sky-100' : 'text-emerald-600 dark:text-emerald-400'
+                    }`}>
+                      {isSeller ? 'Tú' : activeConversation.nombre}
+                    </p>
+                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                      isSeller ? 'bg-white/15 text-sky-50' : 'bg-emerald-50 dark:bg-[#2A3F33] text-emerald-700 dark:text-emerald-400'
+                    }`}>
+                      {isSeller ? 'Vendedor' : 'Cliente'}
+                    </span>
+                  </div>
+                  {msg.contenido && <p className="text-sm leading-relaxed whitespace-pre-wrap break-all">{msg.contenido}</p>}
+                  {msg.attachments && msg.attachments.length > 0 && (
+                    <div className="mt-2 space-y-1.5">
+                      {msg.attachments.map((att) => {
+                        const isImage = att.mime_type?.startsWith('image/');
+                        return (
+                          <a
+                            key={att.id}
+                            href={att.download_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition-colors ${
+                              isSeller
+                                ? 'bg-white/15 text-sky-50 hover:bg-white/25'
+                                : 'bg-gray-100 dark:bg-[#2A3F33] text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-[#3A4F43]'
+                            }`}
+                          >
+                            {isImage ? (
+                              <img src={att.url} alt={att.file_name} className="w-8 h-8 rounded-lg object-cover shrink-0" />
+                            ) : (
+                              <Icon name="FileText" className="w-4 h-4 shrink-0" />
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <span className="truncate block">{att.file_name}</span>
+                              {att.file_size != null && (
+                                <span className="text-[10px] opacity-60">
+                                  {att.file_size < 1048576
+                                    ? `${(att.file_size / 1024).toFixed(1)} KB`
+                                    : `${(att.file_size / 1048576).toFixed(1)} MB`}
+                                </span>
+                              )}
+                            </div>
+                            <Icon name="Download" className="w-3.5 h-3.5 shrink-0 ml-auto" />
+                          </a>
+                        );
+                      })}
+                    </div>
+                  )}
+                  <div className="mt-2 flex justify-end">
+                    <p className={`text-[10px] font-medium ${isSeller ? 'text-sky-100/80' : 'text-gray-400 dark:text-gray-500'}`}>
+                      {formatTime(msg.hora)}
+                      {isSeller && (
+                        <span className="ml-1.5">
+                          {msg.status === 'read' ? (
+                            <Icon name="CheckCheck" className="w-3 h-3 inline" />
+                          ) : (
+                            <Icon name="Check" className="w-3 h-3 inline" />
+                          )}
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+        <div ref={messagesEndRef} />
+      </div>
+
+      <div className="p-4 border-t border-gray-100 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-secondary)]">
+        <MessageInput
+          onSend={handleSendMessage}
+          placeholder="Escribe un mensaje..."
+          disabled={isSending}
+        />
+      </div>
+    </div>
+  ) : (
+    <div className="flex-1 flex items-center justify-center">
+      <div className="text-center">
+        <div className="w-20 h-20 bg-sky-50 dark:bg-[#1A3A32] rounded-full flex items-center justify-center mx-auto mb-6">
+          <Icon name="MessageCircle" className="w-10 h-10 text-sky-400 dark:text-[var(--icons-green)]" />
+        </div>
+        <p className="text-xl font-black text-slate-800 dark:text-[var(--text-primary)]">Selecciona una conversación</p>
+        <p className="text-sm text-slate-500 dark:text-[var(--text-muted)] mt-2">Elige un chat para comenzar a atender al cliente</p>
+      </div>
+    </div>
+  );
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col h-[calc(100vh-140px)] animate-fadeIn">
+        <ModuleHeader
+          title="Chat con Clientes"
+          subtitle="Atención y soporte directo con los clientes"
+          icon="MessageCircle"
+        />
+        <div className="flex-1 flex items-center justify-center">
+          <BaseLoading message="Cargando conversaciones..." />
+        </div>
+      </div>
     );
+  }
+
+  return (
+    <div className="flex flex-col h-[calc(100vh-140px)] animate-fadeIn">
+      <ModuleHeader
+        title="Chat con Clientes"
+        subtitle="Atención y soporte directo con los clientes"
+        icon="MessageCircle"
+        actions={
+          <div className="flex items-center gap-3">
+            <div className="hidden md:flex items-center gap-3">
+              <div className="px-4 py-2 bg-white dark:bg-[var(--bg-secondary)] rounded-xl border border-gray-200 dark:border-[var(--border-subtle)] shadow-sm">
+                <span className="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">
+                  {totalConversations} Conversaciones
+                </span>
+              </div>
+              {criticalCount > 0 && (
+                <div className="px-4 py-2 bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-800">
+                  <span className="text-[10px] font-black text-red-600 dark:text-red-400 uppercase tracking-widest">
+                    {criticalCount} Críticos
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+        }
+      />
+
+      <div className="flex-1 min-h-0">
+        <ChatLayout
+          list={listContent}
+          detail={chatContent}
+          listWidth="col-span-4"
+        />
+      </div>
+    </div>
+  );
 }

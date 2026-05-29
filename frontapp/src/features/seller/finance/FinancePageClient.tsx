@@ -24,18 +24,19 @@ export function FinancePageClient(_props: FinancePageClientProps) {
         filters,
         setFilters,
         applyFilters: hookApplyFilters,
-        isVisible
+        isVisible,
+        isRefreshing,
     } = useSellerFinance();
 
     const { showToast } = useToast();
 
     const handleApplyFilters = async () => {
-        const success = await hookApplyFilters();
-        if (!success) {
+        if (!filters.startDate || !filters.endDate) {
             showToast('Selecciona un rango de fechas completo', 'info');
-        } else {
-            showToast('Datos sincronizados según el periodo seleccionado', 'success');
+            return;
         }
+        await hookApplyFilters();
+        showToast('Datos sincronizados según el periodo seleccionado', 'success');
     };
 
     const headerActions = (
@@ -55,9 +56,14 @@ export function FinancePageClient(_props: FinancePageClientProps) {
             />
             <button
                 onClick={handleApplyFilters}
-                className="p-2 bg-white/20 text-white rounded-lg hover:bg-white/30 transition active:scale-95"
+                disabled={isRefreshing}
+                className="p-2 bg-white/20 text-white rounded-lg hover:bg-white/30 transition active:scale-95 disabled:opacity-50"
             >
-                <Icon name="Search" className="w-4 h-4" />
+                {isRefreshing ? (
+                    <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                    <Icon name="Search" className="w-4 h-4" />
+                )}
             </button>
         </div>
     );
@@ -66,7 +72,18 @@ export function FinancePageClient(_props: FinancePageClientProps) {
         return <BaseLoading message="Sincronizando Finanzas..." />;
     }
 
-    if (!data) return null;
+    if (!data) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+                <div className="w-20 h-20 bg-rose-50 dark:bg-rose-900/20 rounded-full flex items-center justify-center">
+                    <Icon name="AlertCircle" className="w-10 h-10 text-rose-500" />
+                </div>
+                <p className="text-lg font-bold text-gray-800 dark:text-[var(--text-primary)]">No pudimos cargar los datos financieros</p>
+                <p className="text-sm text-gray-500 dark:text-[var(--text-muted)]">Verifica tu conexión e intenta nuevamente</p>
+                <button onClick={() => window.location.reload()} className="px-6 py-3 rounded-xl bg-sky-500 text-white font-bold text-sm hover:bg-sky-600 transition-all">Reintentar</button>
+            </div>
+        );
+    }
 
     const tabs = [
         { id: 'all', label: 'Todos', icon: 'LayoutGrid' },
@@ -111,7 +128,7 @@ export function FinancePageClient(_props: FinancePageClientProps) {
                     <div className="space-y-6">
                         <div className="flex items-center gap-3 mb-2">
                             <div className="w-1.5 h-6 bg-sky-500 rounded-full"></div>
-                            <h2 className="text-lg font-black text-[var(--text-primary)] uppercase tracking-tight">Análisis Monetario</h2>
+                            <h2 className="text-lg font-black text-[var(--text-primary)] uppercase tracking-tight">MONETARIO</h2>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             <BaseStatCard
@@ -128,18 +145,10 @@ export function FinancePageClient(_props: FinancePageClientProps) {
                                 description="Monto neto después de comisiones"
                                 icon="LineChart"
                                 color="emerald"
-                                chart={<FinanceChart type="line" labels={data.ingresosNetos.labels} data={data.ingresosNetos.data} color="#10B981" />}
+                                chart={<FinanceChart type="line" labels={data.ingresosNetos.labels} data={data.ingresosNetos.data} color="#10B981" fill={true} />}
                             />
                             <CardProxPago data={data.chartProxPago} formatCurrency={formatCurrency} />
 
-                            <BaseStatCard
-                                label="ROI de Ventas"
-                                value={data.ingresosBrutos.trend || '0%'}
-                                description="Retorno sobre la inversión"
-                                icon="TrendingUp"
-                                color="sky"
-                                chart={<FinanceChart type="line" labels={data.roi.labels} data={data.roi.data} color="#0EA5E9" />}
-                            />
                             <BaseStatCard
                                 label="Ventas Totales"
                                 value={data.ventasTotales.data.reduce((a, b) => a + b, 0).toString()}
@@ -151,11 +160,23 @@ export function FinancePageClient(_props: FinancePageClientProps) {
                             />
                             <BaseStatCard
                                 label="Ticket Promedio"
-                                value={formatCurrency(data.ingresosBrutos.data.reduce((a, b) => a + b, 0) / data.ventasTotales.data.reduce((a, b) => a + b, 0))}
+                                value={(() => {
+                                    const totalVentas = data.ventasTotales.data.reduce((a, b) => a + b, 0);
+                                    const totalBrutos = data.ingresosBrutos.data.reduce((a, b) => a + b, 0);
+                                    return totalVentas > 0 ? formatCurrency(totalBrutos / totalVentas) : formatCurrency(0);
+                                })()}
                                 description="Valor medio por pedido"
                                 icon="Tag"
                                 color="sky"
                                 chart={<FinanceChart type="line" labels={data.ticketPromedio.labels} data={data.ticketPromedio.data} color="#0EA5E9" />}
+                            />
+                            <BaseStatCard
+                                label="Ingresos Netos Reales"
+                                value={formatCurrency(data.ingresosReales.data.reduce((a, b) => a + b, 0))}
+                                description="Neto después de comisiones"
+                                icon="TrendingDown"
+                                color="indigo"
+                                chart={<FinanceChart type="bar" labels={data.ingresosReales.labels} data={data.ingresosReales.data} color="#6366F1" />}
                             />
                         </div>
                     </div>
@@ -171,7 +192,7 @@ export function FinancePageClient(_props: FinancePageClientProps) {
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <BaseStatCard
                                 label="Lead Time Despacho"
-                                value={`${data.leadTime.data[data.leadTime.data.length - 1]}h`}
+                                value={`${data.leadTime.data[data.leadTime.data.length - 1] ?? 0}h`}
                                 description="Tiempo promedio desde pedido a despacho"
                                 icon="Timer"
                                 color="sky"
@@ -197,7 +218,7 @@ export function FinancePageClient(_props: FinancePageClientProps) {
                                 <div className="w-full h-[200px]">
                                     <FinanceChart type="bar" labels={data.defectuosos.labels} data={data.defectuosos.data} color="#10B981" />
                                 </div>
-                                <p className="text-2xl font-black text-emerald-400 mt-6">{data.defectuosos.data[data.defectuosos.data.length - 1]}%</p>
+                                <p className="text-2xl font-black text-emerald-400 mt-6">{data.defectuosos.data[data.defectuosos.data.length - 1] ?? 0}%</p>
                                 <p className="text-xs text-[var(--text-secondary)] mt-2 font-bold uppercase tracking-widest">Productos con reportes de fallas</p>
                             </div>
                         </div>
@@ -214,7 +235,7 @@ export function FinancePageClient(_props: FinancePageClientProps) {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <BaseStatCard
                                 label="Valor de Vida del Cliente"
-                                value={`S/ ${data.ltv.data[data.ltv.data.length - 1]}`}
+                                value={`S/ ${data.ltv.data[data.ltv.data.length - 1] ?? 0}`}
                                 description="Revenue per customer lifetime"
                                 icon="Coins"
                                 color="sky"
@@ -222,7 +243,7 @@ export function FinancePageClient(_props: FinancePageClientProps) {
                             />
                             <BaseStatCard
                                 label="Cuota de Mercado"
-                                value={`${data.cuotaMercado.data[data.cuotaMercado.data.length - 1]}%`}
+                                value={`${data.cuotaMercado.data[data.cuotaMercado.data.length - 1] ?? 0}%`}
                                 description="Porcentaje del mercado objetivo"
                                 icon="PieChart"
                                 color="emerald"
@@ -242,7 +263,7 @@ export function FinancePageClient(_props: FinancePageClientProps) {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <BaseStatCard
                                 label="Tiempo de Respuesta"
-                                value={`${data.tiempoRespuesta.data[data.tiempoRespuesta.data.length - 1]} min`}
+                                value={`${data.tiempoRespuesta.data[data.tiempoRespuesta.data.length - 1] ?? 0} min`}
                                 description="Promedio de respuesta a tickets"
                                 icon="Clock"
                                 color="emerald"
@@ -250,11 +271,10 @@ export function FinancePageClient(_props: FinancePageClientProps) {
                             />
                             <BaseStatCard
                                 label="Tasa de Resolución"
-                                value={`${data.defectuosos.data[data.defectuosos.data.length - 1]}%`}
-                                description="Problemas resueltos en primera respuesta"
+                                value="N/A"
+                                description="Próximamente"
                                 icon="CheckCircle"
                                 color="sky"
-                                chart={<FinanceChart type="line" labels={data.defectuosos.labels} data={data.defectuosos.data} color="#0EA5E9" />}
                             />
                         </div>
                     </div>
@@ -270,7 +290,7 @@ export function FinancePageClient(_props: FinancePageClientProps) {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <BaseStatCard
                                 label="ROI"
-                                value={`${data.roi.data[data.roi.data.length - 1]}%`}
+                                value={`${data.roi.data[data.roi.data.length - 1] ?? 0}%`}
                                 description="Retorno sobre inversión"
                                 icon="TrendingUp"
                                 color="rose"
@@ -278,7 +298,7 @@ export function FinancePageClient(_props: FinancePageClientProps) {
                             />
                             <BaseStatCard
                                 label="Cuota de Mercado"
-                                value={`${data.cuotaMercado.data[data.cuotaMercado.data.length - 1]}%`}
+                                value={`${data.cuotaMercado.data[data.cuotaMercado.data.length - 1] ?? 0}%`}
                                 description="Participación en el mercado"
                                 icon="BarChart"
                                 color="sky"
@@ -298,7 +318,7 @@ export function FinancePageClient(_props: FinancePageClientProps) {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <BaseStatCard
                                 label="Rotación de Stock"
-                                value={`${data.stockRotacion.data[data.stockRotacion.data.length - 1]}`}
+                                value={`${data.stockRotacion.data[data.stockRotacion.data.length - 1] ?? 0}`}
                                 description="Veces que se renueva el inventario"
                                 icon="RefreshCw"
                                 color="sky"
@@ -326,7 +346,7 @@ export function FinancePageClient(_props: FinancePageClientProps) {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <BaseStatCard
                                 label="Tiempo de Respuesta"
-                                value={`${data.tiempoRespuesta.data[data.tiempoRespuesta.data.length - 1]} min`}
+                                value={`${data.tiempoRespuesta.data[data.tiempoRespuesta.data.length - 1] ?? 0} min`}
                                 description="Satisfacción medida en tiempo"
                                 icon="Smile"
                                 color="sky"
@@ -334,7 +354,7 @@ export function FinancePageClient(_props: FinancePageClientProps) {
                             />
                             <BaseStatCard
                                 label="Calidad (Defectuosos)"
-                                value={`${100 - data.defectuosos.data[data.defectuosos.data.length - 1]}%`}
+                                value={`${100 - (data.defectuosos.data[data.defectuosos.data.length - 1] ?? 0)}%`}
                                 description="Productos sin fallas reportadas"
                                 icon="Award"
                                 color="emerald"

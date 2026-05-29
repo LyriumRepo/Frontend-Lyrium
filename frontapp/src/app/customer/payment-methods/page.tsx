@@ -15,6 +15,7 @@ export default function CustomerPaymentMethodsPage() {
   const [showModal, setShowModal] = useState(false);
   const [activeTab, setActiveTab] = useState<'pagos' | 'facturacion'>('pagos');
   const [editingMethod, setEditingMethod] = useState<PaymentMethod | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
 
   const [formData, setFormData] = useState<Partial<PaymentMethod>>({
     tipo_metodo: undefined,
@@ -84,13 +85,12 @@ export default function CustomerPaymentMethodsPage() {
   };
 
   const deleteMethod = async (id: number) => {
-    if (confirm('¿Eliminar Método? Esta tarjeta o cuenta dejará de estar disponible.')) {
-      try {
-        await paymentMethodApi.delete(id);
-        setMethods(prev => prev.filter(m => m.id !== id));
-      } catch (err) {
-        console.error('Error al eliminar:', err);
-      }
+    setConfirmDeleteId(null);
+    try {
+      await paymentMethodApi.delete(id);
+      setMethods(prev => prev.filter(m => m.id !== id));
+    } catch (err) {
+      console.error('Error al eliminar:', err);
     }
   };
 
@@ -227,7 +227,7 @@ export default function CustomerPaymentMethodsPage() {
                     Editar
                   </button>
                   <button
-                    onClick={() => deleteMethod(method.id)}
+                    onClick={() => setConfirmDeleteId(method.id)}
                     className="w-12 h-12 flex items-center justify-center rounded-xl bg-red-50 dark:bg-red-900/20 text-red-500 hover:bg-red-100 transition-all"
                   >
                     <Icon name="Trash2" className="w-5 h-5" />
@@ -448,6 +448,22 @@ export default function CustomerPaymentMethodsPage() {
                   </button>
                 </form>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {confirmDeleteId !== null && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setConfirmDeleteId(null)}>
+          <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-[2rem] p-8 max-w-sm mx-4 shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="w-14 h-14 rounded-full bg-rose-50 dark:bg-rose-900/20 flex items-center justify-center mx-auto mb-4">
+              <Icon name="CreditCard" className="w-7 h-7 text-rose-500" />
+            </div>
+            <h3 className="text-lg font-black text-center text-gray-800 dark:text-[var(--text-primary)] mb-2">¿Eliminar Método?</h3>
+            <p className="text-sm text-gray-500 dark:text-[var(--text-muted)] text-center mb-6">Esta tarjeta o cuenta dejará de estar disponible.</p>
+            <div className="flex gap-3">
+              <button onClick={() => setConfirmDeleteId(null)} className="flex-1 py-3 rounded-xl bg-gray-100 dark:bg-[var(--bg-muted)] text-gray-600 dark:text-[var(--text-primary)] font-black text-xs uppercase tracking-widest hover:bg-gray-200 dark:hover:bg-[#2A3F33] transition-all">Cancelar</button>
+              <button onClick={() => deleteMethod(confirmDeleteId)} className="flex-1 py-3 rounded-xl bg-rose-500 text-white font-black text-xs uppercase tracking-widest hover:bg-rose-600 transition-all">Eliminar</button>
             </div>
           </div>
         </div>

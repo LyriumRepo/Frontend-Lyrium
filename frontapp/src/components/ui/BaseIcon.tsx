@@ -130,7 +130,13 @@ import {
     LayoutGrid,
     LineChart,
     Coins,
-    Award
+    Award,
+    Undo,
+    Archive,
+    FileCode,
+    FileX,
+    Paperclip,
+    Download
 } from 'lucide-react';
 import { LucideIcon } from 'lucide-react';
 
@@ -266,6 +272,12 @@ export const Icons: Record<string, LucideIcon> = {
     LineChart,
     Coins,
     Award,
+    Undo,
+    Archive,
+    FileCode,
+    FileX,
+    Paperclip,
+    Download,
     ShoppingBag,
     UserCircle: User,
     ShoppingCartSimple: ShoppingCart,

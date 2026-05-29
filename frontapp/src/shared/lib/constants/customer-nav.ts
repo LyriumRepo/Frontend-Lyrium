@@ -32,6 +32,13 @@ export const customerNavigation: PanelNavigation = [
                 href: '/customer/wishlist'
             },
             {
+                id: 'invoices',
+                label: 'Mis Comprobantes',
+                description: 'Facturas y boletas electrónicas',
+                icon: 'Receipt',
+                href: '/customer/invoices'
+            },
+            {
                 id: 'payment-methods',
                 label: 'Métodos de Pago',
                 description: 'Gestiona tus datos de facturación',

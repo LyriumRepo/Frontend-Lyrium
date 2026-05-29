@@ -4,7 +4,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useCustomerChat } from '@/features/customer/chat/hooks/useCustomerChat';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import ChatLayout from '@/components/shared/chat/ChatLayout';
-import MessageBubble from '@/components/shared/chat/MessageBubble';
 import MessageInput from '@/components/shared/chat/MessageInput';
 import BaseLoading from '@/components/ui/BaseLoading';
 import Icon from '@/components/ui/Icon';
@@ -111,7 +110,7 @@ function NewChatForm({
   );
 }
 
-export function ChatPageClient() {
+export function ChatPageClient({ conversationId }: { conversationId?: string }) {
   const {
     conversations,
     sellers,
@@ -127,7 +126,7 @@ export function ChatPageClient() {
     isCreating,
     createConversation,
     criticalCount,
-  } = useCustomerChat();
+  } = useCustomerChat(conversationId);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [isMobileListVisible, setIsMobileListVisible] = useState(true);
@@ -140,8 +139,8 @@ export function ChatPageClient() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const handleSendMessage = (message: string) => {
-    sendMessage(message);
+  const handleSendMessage = (message: string, files?: File[]) => {
+    sendMessage(message, files);
   };
 
   const formatTime = (timestamp: string) => {
@@ -363,7 +362,44 @@ export function ChatPageClient() {
                       {isCustomer ? 'Cliente' : 'Vendedor'}
                     </span>
                   </div>
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap break-all">{msg.content}</p>
+                  {msg.content && <p className="text-sm leading-relaxed whitespace-pre-wrap break-all">{msg.content}</p>}
+                  {msg.attachments && msg.attachments.length > 0 && (
+                    <div className="mt-2 space-y-1.5">
+                      {msg.attachments.map((att) => {
+                        const isImage = att.mime_type?.startsWith('image/');
+                        return (
+                          <a
+                            key={att.id}
+                            href={att.download_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition-colors ${
+                              isCustomer
+                                ? 'bg-white/15 text-emerald-50 hover:bg-white/25'
+                                : 'bg-gray-100 dark:bg-[#2A3F33] text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-[#3A4F43]'
+                            }`}
+                          >
+                            {isImage ? (
+                              <img src={att.url} alt={att.file_name} className="w-8 h-8 rounded-lg object-cover shrink-0" />
+                            ) : (
+                              <Icon name="FileText" className="w-4 h-4 shrink-0" />
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <span className="truncate block">{att.file_name}</span>
+                              {att.file_size != null && (
+                                <span className="text-[10px] opacity-60">
+                                  {att.file_size < 1048576
+                                    ? `${(att.file_size / 1024).toFixed(1)} KB`
+                                    : `${(att.file_size / 1048576).toFixed(1)} MB`}
+                                </span>
+                              )}
+                            </div>
+                            <Icon name="Download" className="w-3.5 h-3.5 shrink-0 ml-auto" />
+                          </a>
+                        );
+                      })}
+                    </div>
+                  )}
                   <div className="mt-2 flex justify-end">
                     <p className={`text-[10px] font-medium ${isCustomer ? 'text-emerald-100/80' : 'text-gray-400 dark:text-gray-500'}`}>
                       {formatTime(msg.timestamp)}

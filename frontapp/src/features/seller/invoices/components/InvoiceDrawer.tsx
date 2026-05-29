@@ -92,29 +92,28 @@ export default function InvoiceDrawer({ voucher, isOpen, onClose, onRetry }: Inv
                         <p className="text-sm font-bold text-[var(--text-secondary)]">{voucher.order_id}</p>
                     </div>
 
-                    <div className="space-y-4">
-                        <h3 className="text-xs font-black text-[var(--text-secondary)] uppercase tracking-widest flex items-center gap-2">
-                            <Icon name="Archive" className="w-4 h-4" /> Archivos Adjuntos
-                        </h3>
-                        <div className="grid grid-cols-3 gap-4">
-                            {[
-                                { label: 'PDF', icon: 'FileText', color: 'PDF', path: voucher.pdf_path },
-                                { label: 'XML', icon: 'FileCode', color: 'XML', path: voucher.xml_path },
-                                { label: 'CDR', icon: 'Archive', color: 'CDR', path: voucher.cdr_path }
-                            ].map((file) => (
-                                <button
-                                    key={file.label}
-                                    disabled={!file.path}
-                                    className={`p-6 bg-[var(--bg-card)] rounded-[2.5rem] transition-all flex flex-col items-center gap-3 border border-[var(--border-subtle)] shadow-xl shadow-[var(--border-subtle)]/50 group/file ${file.path ? `${fileColorClasses[file.label].bg} active:scale-95` : 'opacity-30 grayscale cursor-not-allowed'}`}
-                                >
-                                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg transition-all ${file.path ? `${fileColorClasses[file.label].bgIcon} ${fileColorClasses[file.label].textIcon} group-hover/file:scale-110 ${fileColorClasses[file.label].shadow}` : 'bg-[var(--bg-secondary)] text-gray-300'}`}>
-                                        <Icon name={file.icon} className="w-8 h-8" />
-                                    </div>
-                                    <span className={`text-[10px] font-black uppercase tracking-widest ${file.path ? 'text-[var(--text-secondary)] group-hover/file:text-[var(--text-primary)]' : 'text-gray-300'}`}>{file.label}</span>
-                                </button>
-                            ))}
+                    {(voucher.pdf_url || voucher.rapifac_pdf_url) && (
+                        <div className="space-y-4">
+                            <h3 className="text-xs font-black text-[var(--text-secondary)] uppercase tracking-widest flex items-center gap-2">
+                                <Icon name="FileText" className="w-4 h-4" /> Comprobante Digital
+                            </h3>
+                            <a
+                                href={voucher.rapifac_pdf_url || voucher.pdf_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center justify-center gap-3 p-6 bg-[var(--bg-card)] rounded-[2.5rem] border border-[var(--border-subtle)] shadow-xl shadow-[var(--border-subtle)]/50 hover:bg-emerald-500/5 transition-all group"
+                            >
+                                <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-rose-50 text-rose-500 group-hover:scale-110 transition-all shadow-lg shadow-rose-100/50">
+                                    <Icon name="FileText" className="w-8 h-8" />
+                                </div>
+                                <div className="text-left">
+                                    <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]">Ver PDF</p>
+                                    <p className="text-xs text-[var(--text-muted)] mt-1">Alojado en Rapifac Cloud</p>
+                                </div>
+                                <Icon name="ArrowRight" className="w-5 h-5 text-[var(--text-muted)] ml-auto" />
+                            </a>
                         </div>
-                    </div>
+                    )}
 
                     <div className="space-y-4">
                         <h3 className="text-xs font-black text-[var(--text-secondary)] uppercase tracking-widest flex items-center gap-2">

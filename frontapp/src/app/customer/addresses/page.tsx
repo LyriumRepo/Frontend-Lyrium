@@ -14,6 +14,7 @@ export default function CustomerAddressesPage() {
   const [fetching, setFetching] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingAddress, setEditingAddress] = useState<Address | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
 
   const [formData, setFormData] = useState<Partial<Address>>({
     etiqueta: undefined,
@@ -90,13 +91,12 @@ export default function CustomerAddressesPage() {
   };
 
   const deleteAddress = async (id: number) => {
-    if (confirm('¿Eliminar Dirección? Esta ubicación dejará de estar disponible.')) {
-      try {
-        await addressApi.delete(id);
-        setAddresses(prev => prev.filter(a => a.id !== id));
-      } catch (err) {
-        console.error('Error al eliminar:', err);
-      }
+    setConfirmDeleteId(null);
+    try {
+      await addressApi.delete(id);
+      setAddresses(prev => prev.filter(a => a.id !== id));
+    } catch (err) {
+      console.error('Error al eliminar:', err);
     }
   };
 
@@ -242,7 +242,7 @@ export default function CustomerAddressesPage() {
                     <Icon name="Star" className={`w-5 h-5 transition-all duration-200 group-hover:rotate-12 ${address.is_default ? 'fill-current' : ''}`} style={address.is_default ? { fill: 'currentColor' } : undefined} />
                   </button>
                   <button
-                    onClick={() => deleteAddress(address.id)}
+                    onClick={() => setConfirmDeleteId(address.id)}
                     className="w-12 h-12 flex items-center justify-center rounded-xl bg-red-50 dark:bg-red-900/20 text-red-500 hover:bg-red-100 transition-all"
                   >
                     <Icon name="Trash2" className="w-5 h-5" />
@@ -438,6 +438,22 @@ export default function CustomerAddressesPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {confirmDeleteId !== null && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setConfirmDeleteId(null)}>
+          <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-[2rem] p-8 max-w-sm mx-4 shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="w-14 h-14 rounded-full bg-rose-50 dark:bg-rose-900/20 flex items-center justify-center mx-auto mb-4">
+              <Icon name="MapPin" className="w-7 h-7 text-rose-500" />
+            </div>
+            <h3 className="text-lg font-black text-center text-gray-800 dark:text-[var(--text-primary)] mb-2">¿Eliminar Dirección?</h3>
+            <p className="text-sm text-gray-500 dark:text-[var(--text-muted)] text-center mb-6">Esta ubicación dejará de estar disponible.</p>
+            <div className="flex gap-3">
+              <button onClick={() => setConfirmDeleteId(null)} className="flex-1 py-3 rounded-xl bg-gray-100 dark:bg-[var(--bg-muted)] text-gray-600 dark:text-[var(--text-primary)] font-black text-xs uppercase tracking-widest hover:bg-gray-200 dark:hover:bg-[#2A3F33] transition-all">Cancelar</button>
+              <button onClick={() => deleteAddress(confirmDeleteId)} className="flex-1 py-3 rounded-xl bg-rose-500 text-white font-black text-xs uppercase tracking-widest hover:bg-rose-600 transition-all">Eliminar</button>
+            </div>
           </div>
         </div>
       )}

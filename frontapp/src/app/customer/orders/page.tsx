@@ -636,11 +636,6 @@ export default function CustomerOrdersPage() {
               className={selectClass}
             >
               <option value="">Todos</option>
-              <option value="Vida Natural Perú">Vida Natural Perú</option>
-              <option value="Tech Store Lima">Tech Store Lima</option>
-              <option value="Moda & Estilo">Moda & Estilo</option>
-              <option value="Clínica Dental Pro">Clínica Dental Pro</option>
-              <option value="Centro Estético Lyra">Centro Estético Lyra</option>
             </select>
           </div>
 
@@ -714,12 +709,7 @@ export default function CustomerOrdersPage() {
           </div>
         </div>
 
-        <div className="mt-6 flex justify-end">
-          <button className="flex items-center gap-3 px-8 py-3 rounded-xl bg-gradient-to-r from-sky-500 to-sky-600 dark:from-[var(--brand-green)] dark:to-[#1A3A32] text-white font-bold text-sm hover:from-sky-600 hover:to-sky-700 dark:hover:from-[#1A3A32] dark:hover:to-[var(--brand-green)] transition-all duration-300 shadow-lg hover:shadow-xl">
-            <Icon name="Search" className="w-5 h-5" />
-            Aplicar Filtros
-          </button>
-        </div>
+
       </div>
 
       <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-[2.5rem] shadow-xl border border-slate-100 dark:border-[var(--border-subtle)] overflow-hidden">
@@ -1180,15 +1170,16 @@ export default function CustomerOrdersPage() {
                 <button
                   onClick={async () => {
                     try {
-                      await orderApi.downloadReceipt(selectedOrder.originalId);
+                      const result = await orderApi.requestReceipt(selectedOrder.originalId);
+                      router.push(`/customer/chat?conversation=${result.conversationId}`);
                     } catch (err) {
-                      console.error('Error al descargar comprobante:', err);
+                      console.error('Error al solicitar comprobante:', err);
                     }
                   }}
-                  className="py-5 rounded-2xl bg-gradient-to-r from-green-400 to-sky-500 dark:from-[var(--brand-green)] dark:to-[var(--brand-green-hover)] text-white font-black text-xs uppercase tracking-[0.2em] hover:shadow-lg hover:shadow-sky-200 transition-all flex items-center justify-center gap-3"
+                  className="py-5 rounded-2xl bg-gradient-to-r from-amber-400 to-orange-500 dark:from-[var(--brand-green)] dark:to-[var(--brand-green-hover)] text-white font-black text-xs uppercase tracking-[0.2em] hover:shadow-lg hover:shadow-amber-200 transition-all flex items-center justify-center gap-3"
                 >
-                  <Icon name="Upload" className="w-5 h-5" />
-                  Descargar Comprobante
+                  <Icon name="MessageCircle" className="w-5 h-5" />
+                  Pedir Comprobante al Vendedor
                 </button>
               </div>
             </div>

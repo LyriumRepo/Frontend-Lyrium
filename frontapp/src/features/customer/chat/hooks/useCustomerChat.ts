@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { CustomerConversation, CustomerMessage, CustomerChatFilters, ChatCategory } from '../types';
 import { chatApi, ChatSeller } from '@/shared/lib/api/chatRepository';
 
-export function useCustomerChat() {
+export function useCustomerChat(initialConversationId?: string) {
   const [conversations, setConversations] = useState<CustomerConversation[]>([]);
   const [sellers, setSellers] = useState<ChatSeller[]>([]);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
@@ -15,6 +15,7 @@ export function useCustomerChat() {
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const initialSelectionDone = useRef(false);
 
   const activeConversation = conversations.find(c => c.id === activeConversationId) ?? null;
   const [messages, setMessages] = useState<CustomerMessage[]>([]);
@@ -33,6 +34,17 @@ export function useCustomerChat() {
       setIsLoading(false);
     }
   }, []);
+
+  // Auto-seleccionar conversación si se proporcionó un ID inicial
+  useEffect(() => {
+    if (!isLoading && !initialSelectionDone.current && initialConversationId && conversations.length > 0) {
+      const exists = conversations.find(c => c.id === initialConversationId);
+      if (exists) {
+        setActiveConversationId(initialConversationId);
+        initialSelectionDone.current = true;
+      }
+    }
+  }, [isLoading, conversations, initialConversationId]);
 
   const loadSellers = useCallback(async () => {
     try {
@@ -69,16 +81,19 @@ export function useCustomerChat() {
     }
   }, []);
 
-  const sendMessage = useCallback(async (content: string) => {
-    if (!activeConversationId || !content.trim()) return;
+  const sendMessage = useCallback(async (content: string, files?: File[]) => {
+    if (!activeConversationId) return;
+    if (!content.trim() && (!files || files.length === 0)) return;
 
     setIsSending(true);
     try {
-      const newMessage = await chatApi.sendMessage(activeConversationId, content);
+      const newMessage = files && files.length > 0
+        ? await chatApi.sendMessageWithAttachment(activeConversationId, content, files)
+        : await chatApi.sendMessage(activeConversationId, content);
       setMessages(prev => [...prev, newMessage]);
       setConversations(prev => prev.map(c =>
         c.id === activeConversationId
-          ? { ...c, lastMessage: content, lastMessageTime: newMessage.timestamp }
+          ? { ...c, lastMessage: content || '(archivo adjunto)', lastMessageTime: newMessage.timestamp }
           : c
       ));
     } catch (err) {

@@ -33,30 +33,28 @@ async function authFetch<T>(endpoint: string, options?: RequestInit): Promise<T>
     return response.json();
 }
 
-export interface SellerReturn {
+export interface SellerShipment {
     id: number;
-    return_number: string;
-    status: string;
-    reason: string;
-    reason_details: string | null;
-    resolution_notes: string | null;
-    refund_amount: number | null;
-    refund_method: string | null;
-    shipping_carrier: string | null;
+    order_id: number;
+    order_item_id: number | null;
+    store_id: number;
     tracking_number: string | null;
-    requested_at: string | null;
-    reviewed_at: string | null;
-    resolved_at: string | null;
+    tracking_url: string | null;
+    carrier: string | null;
+    status: string;
+    notes: string | null;
+    events: Record<string, unknown>[] | null;
+    shipped_at: string | null;
+    delivered_at: string | null;
     created_at: string | null;
     order?: {
-        id: number;
         order_number: string;
     } | null;
 }
 
-export const returnApi = {
-    list: async (): Promise<SellerReturn[]> => {
-        const res = await authFetch<{ data: SellerReturn[] }>('/returns?per_page=1000');
+export const shipmentApi = {
+    list: async (): Promise<SellerShipment[]> => {
+        const res = await authFetch<{ data: SellerShipment[] }>('/shipments?per_page=1000');
         return res.data || [];
     },
 };
