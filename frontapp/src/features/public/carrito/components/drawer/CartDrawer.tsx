@@ -1,5 +1,6 @@
-"use client";
+'use client';
 
+<<<<<<< HEAD
 
 /**
  * CartDrawer.tsx — R20: Detalle carrito
@@ -13,6 +14,13 @@
 import { useEffect, useCallback, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+=======
+import { useEffect, useCallback, useState } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import CartRecommendations from './CartRecommendations';
+import { useCheckoutGuard } from '@/shared/hooks/useCheckoutGuard';
+>>>>>>> d9aece4d89ab271e219257a158b75b5f636b3361
 import {
   X,
   Minus,
@@ -24,33 +32,36 @@ import {
   AlertCircle,
   PackageOpen,
   Tag,
-} from "lucide-react";
-import { useCarritoStore } from "@/store/carritoStore";
-import { cartApi } from "@/shared/lib/api/cartRepository";
-import type { CartItem, CartResource } from "@/shared/lib/api/cartRepository";
+} from 'lucide-react';
+import { useCarritoStore } from '@/store/carritoStore';
+import { cartApi } from '@/shared/lib/api/cartRepository';
+import type { CartItem, CartResource } from '@/shared/lib/api/cartRepository';
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function formatPrice(n: number): string {
+function fmt(n: number) {
   return `S/ ${n.toFixed(2)}`;
 }
+<<<<<<< HEAD
 
 function resolveImg(url?: string | null): string {
   if (!url) return "/no-image.png";
   if (url.startsWith("http")) return url;
   if (url.startsWith("/")) return url;
   return "/no-image.png";
+=======
+function img(url?: string | null) {
+  return url && url.startsWith('http') ? url : '/no-image.png';
+>>>>>>> d9aece4d89ab271e219257a158b75b5f636b3361
 }
 
 
 // ─── CartLineItem ─────────────────────────────────────────────────────────────
 
-interface CartLineItemProps {
+interface LineProps {
   item: CartItem;
   loading: boolean;
-  onIncrease: (productId: number) => void;
-  onDecrease: (productId: number) => void;
-  onRemove: (productId: number) => void;
+  onIncrease: (id: number) => void;
+  onDecrease: (id: number) => void;
+  onRemove: (id: number) => void;
 }
 
 function CartLineItem({
@@ -59,7 +70,7 @@ function CartLineItem({
   onIncrease,
   onDecrease,
   onRemove,
-}: CartLineItemProps) {
+}: LineProps) {
   const maxStock = item.product.stock ?? 99;
   const canIncrease = item.quantity < maxStock;
   const discount =
@@ -73,62 +84,100 @@ function CartLineItem({
       : 0;
 
   return (
-    <div className="flex gap-3 py-4 border-b border-gray-100 dark:border-[var(--border-subtle)] last:border-0 group relative">
+    <div
+      className="flex gap-3 py-4 last:border-0 group relative"
+      style={{
+        borderBottom: '1px solid var(--pd-border2, rgba(15,14,12,0.05))',
+      }}
+    >
       {/* Imagen */}
       <Link
         href={`/producto/${item.product.slug}`}
-        className="relative w-20 h-20 flex-shrink-0 rounded-xl overflow-hidden bg-gray-50 dark:bg-[var(--bg-primary)] border border-gray-100 dark:border-[var(--border-subtle)] hover:opacity-90 transition-opacity"
+        className="relative w-[68px] h-[68px] flex-shrink-0 overflow-hidden hover:opacity-80 transition-opacity"
+        style={{
+          background: 'var(--pd-bg2,#f2f0ea)',
+          border: '1px solid var(--pd-border)',
+        }}
       >
         <Image
-          src={resolveImg(item.product.image)}
+          src={img(item.product.image)}
           alt={item.product.name}
           fill
-          sizes="80px"
-          className="object-cover"
+          sizes="68px"
+          className="object-contain p-1"
         />
         {discount > 0 && (
-          <span className="absolute bottom-1 left-1 px-1.5 py-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full leading-none">
+          <span
+            className="absolute bottom-1 left-1 px-1 py-0.5 text-[8px] font-medium leading-none"
+            style={{ background: 'var(--pd-red,#c0392b)', color: '#fff' }}
+          >
             -{discount}%
           </span>
         )}
       </Link>
 
       {/* Info */}
-      <div className="flex-1 min-w-0 flex flex-col gap-1">
+      <div className="flex-1 min-w-0 flex flex-col gap-1 pr-5">
         <Link
           href={`/producto/${item.product.slug}`}
-          className="text-sm font-semibold text-gray-800 dark:text-[var(--text-primary)] line-clamp-2 leading-tight hover:text-sky-500 transition-colors"
+          className="text-[12px] font-medium line-clamp-2 leading-snug transition-colors"
+          style={{ color: 'var(--pd-ink,#0f0e0c)' }}
+          onMouseEnter={(e) =>
+            (e.currentTarget.style.color = 'var(--pd-accent2)')
+          }
+          onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--pd-ink)')}
         >
           {item.product.name}
         </Link>
 
-        {/* Precio unitario */}
         <div className="flex items-baseline gap-1.5">
-          <span className="text-sky-600 dark:text-sky-400 font-black text-sm">
-            {formatPrice(item.unitPrice)}
+          <span
+            className="text-[12px] font-medium"
+            style={{ color: 'var(--pd-accent2,#2d5e42)' }}
+          >
+            {fmt(item.unitPrice)}
           </span>
           {item.product.regular_price &&
             item.product.regular_price > item.unitPrice && (
-              <span className="text-xs text-gray-400 line-through">
-                {formatPrice(item.product.regular_price)}
+              <span
+                className="text-[10px] line-through"
+                style={{ color: 'var(--pd-ink3,#7a7970)' }}
+              >
+                {fmt(item.product.regular_price)}
               </span>
             )}
         </div>
 
-        {/* Controles cantidad + subtotal */}
         <div className="flex items-center justify-between mt-auto">
-          <div className="flex items-center border border-gray-200 dark:border-[var(--border-subtle)] rounded-xl overflow-hidden">
+          <div
+            className="flex items-center overflow-hidden"
+            style={{ border: '1px solid var(--pd-border)' }}
+          >
             <button
               onClick={() => onDecrease(item.productId)}
               disabled={loading || item.quantity <= 1}
-              className="w-8 h-8 flex items-center justify-center text-gray-500 hover:bg-gray-100 dark:hover:bg-[var(--bg-secondary)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="w-7 h-7 flex items-center justify-center transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              style={{ color: 'var(--pd-ink2)' }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.background = 'var(--pd-bg2)')
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.background = 'transparent')
+              }
               aria-label="Reducir"
             >
-              <Minus className="w-3.5 h-3.5" />
+              <Minus className="w-3 h-3" />
             </button>
-            <span className="w-8 h-8 flex items-center justify-center text-sm font-bold text-gray-800 dark:text-[var(--text-primary)]">
+            <span
+              className="w-7 h-7 flex items-center justify-center text-[12px] font-medium"
+              style={{
+                color: 'var(--pd-ink)',
+                borderLeft: '1px solid var(--pd-border)',
+                borderRight: '1px solid var(--pd-border)',
+              }}
+            >
               {loading ? (
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                <Loader2 className="w-3 h-3 animate-spin" />
               ) : (
                 item.quantity
               )}
@@ -136,34 +185,60 @@ function CartLineItem({
             <button
               onClick={() => onIncrease(item.productId)}
               disabled={loading || !canIncrease}
-              className="w-8 h-8 flex items-center justify-center text-gray-500 hover:bg-gray-100 dark:hover:bg-[var(--bg-secondary)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="w-7 h-7 flex items-center justify-center transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              style={{ color: 'var(--pd-ink2)' }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.background = 'var(--pd-bg2)')
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.background = 'transparent')
+              }
               aria-label="Aumentar"
             >
-              <Plus className="w-3.5 h-3.5" />
+              <Plus className="w-3 h-3" />
             </button>
           </div>
-
-          <span className="text-sm font-black text-gray-800 dark:text-[var(--text-primary)]">
-            {formatPrice(item.lineTotal)}
+          <span
+            className="text-[12px] font-medium"
+            style={{ color: 'var(--pd-ink)' }}
+          >
+            {fmt(item.lineTotal)}
           </span>
         </div>
 
+<<<<<<< HEAD
 
         {/* Stock warning */}
+=======
+>>>>>>> d9aece4d89ab271e219257a158b75b5f636b3361
         {!canIncrease && (
-          <p className="text-[10px] text-amber-500 flex items-center gap-1">
+          <p
+            className="text-[10px] flex items-center gap-1"
+            style={{ color: '#d97706' }}
+          >
             <AlertCircle className="w-3 h-3" />
             Máximo disponible: {maxStock}
           </p>
         )}
       </div>
 
-      {/* Botón eliminar */}
+      {/* Eliminar */}
       <button
         onClick={() => onRemove(item.productId)}
         disabled={loading}
-        className="absolute top-4 right-0 p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-all disabled:cursor-not-allowed"
-        aria-label="Eliminar del carrito"
+        className="absolute top-4 right-0 p-1.5 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100 disabled:cursor-not-allowed"
+        style={{ color: 'var(--pd-ink3)' }}
+        onMouseEnter={(e) => {
+          (e.currentTarget as HTMLButtonElement).style.color = 'var(--pd-red)';
+          (e.currentTarget as HTMLButtonElement).style.background =
+            'color-mix(in srgb, var(--pd-red) 8%, transparent)';
+        }}
+        onMouseLeave={(e) => {
+          (e.currentTarget as HTMLButtonElement).style.color = 'var(--pd-ink3)';
+          (e.currentTarget as HTMLButtonElement).style.background =
+            'transparent';
+        }}
+        aria-label="Eliminar"
       >
         <Trash2 className="w-3.5 h-3.5" />
       </button>
@@ -179,40 +254,32 @@ export default function CartDrawer() {
   const [fetchLoading, setFetchLoading] = useState(false);
   const [mutatingId, setMutatingId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
 
-  // ── Cargar carrito al abrir ────────────────────────────────────────────────
+  const { goToCheckout } = useCheckoutGuard();
+
   const loadCart = useCallback(async () => {
     setFetchLoading(true);
     setError(null);
     try {
-      const data = await cartApi.getCart();
-      setCart(data);
-    } catch (e) {
-      setError("No se pudo cargar el carrito. Intenta de nuevo.");
+      setCart(await cartApi.getCart());
+    } catch {
+      setError('No se pudo cargar el carrito. Intenta de nuevo.');
     } finally {
       setFetchLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    if (ui.cartOpen) {
-      loadCart();
-    }
+    if (ui.cartOpen) loadCart();
   }, [ui.cartOpen, loadCart]);
 
-  // ── Bloquear scroll cuando el drawer está abierto ─────────────────────────
   useEffect(() => {
-    if (ui.cartOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
+    document.body.style.overflow = ui.cartOpen ? 'hidden' : '';
     return () => {
-      document.body.style.overflow = "";
+      document.body.style.overflow = '';
     };
   }, [ui.cartOpen]);
-
-  // ── Mutaciones ─────────────────────────────────────────────────────────────
 
   const handleIncrease = async (productId: number) => {
     const item = cart?.items.find((i) => i.productId === productId);
@@ -220,10 +287,9 @@ export default function CartDrawer() {
     setMutatingId(productId);
     setError(null);
     try {
-      const updated = await cartApi.updateItem(productId, item.quantity + 1);
-      setCart(updated);
+      setCart(await cartApi.updateItem(productId, item.quantity + 1));
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Error al actualizar.");
+      setError(e instanceof Error ? e.message : 'Error al actualizar.');
     } finally {
       setMutatingId(null);
     }
@@ -232,20 +298,16 @@ export default function CartDrawer() {
   const handleDecrease = async (productId: number) => {
     const item = cart?.items.find((i) => i.productId === productId);
     if (!item) return;
-
     setMutatingId(productId);
     setError(null);
     try {
-      if (item.quantity <= 1) {
-        // Eliminar si llega a 0
-        const updated = await cartApi.removeItem(productId);
-        setCart(updated);
-      } else {
-        const updated = await cartApi.updateItem(productId, item.quantity - 1);
-        setCart(updated);
-      }
+      setCart(
+        item.quantity <= 1
+          ? await cartApi.removeItem(productId)
+          : await cartApi.updateItem(productId, item.quantity - 1),
+      );
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Error al actualizar.");
+      setError(e instanceof Error ? e.message : 'Error al actualizar.');
     } finally {
       setMutatingId(null);
     }
@@ -255,31 +317,45 @@ export default function CartDrawer() {
     setMutatingId(productId);
     setError(null);
     try {
-      const updated = await cartApi.removeItem(productId);
-      setCart(updated);
+      setCart(await cartApi.removeItem(productId));
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Error al eliminar.");
+      setError(e instanceof Error ? e.message : 'Error al eliminar.');
     } finally {
       setMutatingId(null);
     }
   };
 
-  const handleClear = async () => {
-    if (!cart?.items.length) return;
-    if (!confirm("¿Vaciar todo el carrito?")) return;
+  const handleClear = () => {
+    if ((cart?.items.length ?? 0) === 0) return;
+    setShowClearConfirm(true);
+  };
+
+  const confirmedClear = async () => {
+    setShowClearConfirm(false);
     setFetchLoading(true);
     setError(null);
     try {
-      const updated = await cartApi.clearCart();
-      setCart(updated);
+      if (typeof cartApi.clearCart === 'function') {
+        setCart(await cartApi.clearCart());
+      } else {
+        let updated: CartResource | null = null;
+        for (const item of cart!.items) {
+          updated = await cartApi.removeItem(item.productId);
+        }
+        if (updated) setCart(updated);
+        else
+          setCart((prev) =>
+            prev
+              ? { ...prev, items: [], itemCount: 0, subtotal: 0, total: 0 }
+              : null,
+          );
+      }
     } catch {
-      setError("Error al vaciar el carrito.");
+      setError('Error al vaciar el carrito.');
     } finally {
       setFetchLoading(false);
     }
   };
-
-  // ─── Render ───────────────────────────────────────────────────────────────
 
   const items = cart?.items ?? [];
   const isEmpty = !fetchLoading && items.length === 0;
@@ -288,56 +364,103 @@ export default function CartDrawer() {
     <>
       {/* Backdrop */}
       <div
-        className={`fixed inset-0 bg-black/40 backdrop-blur-sm z-40 transition-opacity duration-300 ${
+        className={`fixed inset-0 z-40 transition-opacity duration-300 ${
           ui.cartOpen
-            ? "opacity-100 pointer-events-auto"
-            : "opacity-0 pointer-events-none"
+            ? 'opacity-100 pointer-events-auto'
+            : 'opacity-0 pointer-events-none'
         }`}
+        style={{ background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(2px)' }}
         onClick={closeCart}
         aria-hidden="true"
       />
 
-      {/* Drawer */}
+      {/* Drawer — flex column, altura fija = pantalla */}
       <aside
         role="dialog"
         aria-modal="true"
         aria-label="Carrito de compras"
-        className={`fixed inset-y-0 right-0 z-50 flex flex-col w-full max-w-[420px] bg-white dark:bg-[var(--bg-secondary)] shadow-2xl transition-transform duration-300 ease-in-out ${
-          ui.cartOpen ? "translate-x-0" : "translate-x-full"
+        className={`fixed inset-y-0 right-0 z-50 flex flex-col w-full max-w-[400px] shadow-2xl transition-transform duration-300 ease-in-out ${
+          ui.cartOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
+        style={{ background: 'var(--pd-white,#ffffff)' }}
       >
-        {/* ── Header ── */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-[var(--border-subtle)]">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-sky-50 dark:bg-sky-900/20 flex items-center justify-center">
-              <ShoppingCart className="w-5 h-5 text-sky-500 dark:text-sky-400" />
+        {/* ── 1. HEADER — shrink-0 ── */}
+        <div
+          className="shrink-0 flex items-center justify-between px-5 py-4"
+          style={{ borderBottom: '1px solid var(--pd-border)' }}
+        >
+          <div className="flex items-center gap-3">
+            <div
+              className="w-8 h-8 flex items-center justify-center"
+              style={{
+                background: 'var(--pd-accent)',
+                color: 'var(--pd-accent-fg)',
+              }}
+            >
+              <ShoppingCart className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="font-black text-gray-900 dark:text-[var(--text-primary)] leading-none">
+              <h2
+                className="font-medium text-[14px] leading-none"
+                style={{ color: 'var(--pd-ink)' }}
+              >
                 Mi carrito
               </h2>
-              <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+              <p
+                className="text-[11px] mt-0.5 tracking-[.04em]"
+                style={{ color: 'var(--pd-ink3)' }}
+              >
                 {fetchLoading
-                  ? "Cargando…"
-                  : `${cart?.itemCount ?? 0} ${cart?.itemCount === 1 ? "artículo" : "artículos"}`}
+                  ? 'Cargando…'
+                  : `${cart?.itemCount ?? 0} ${cart?.itemCount === 1 ? 'artículo' : 'artículos'}`}
               </p>
             </div>
           </div>
-
           <div className="flex items-center gap-2">
-            {/* Vaciar carrito */}
             {items.length > 0 && (
               <button
                 onClick={handleClear}
                 disabled={fetchLoading}
-                className="text-xs text-gray-400 hover:text-red-500 transition-colors px-2 py-1 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20"
+                className="text-[11px] tracking-[.06em] uppercase px-2.5 py-1.5 transition-all disabled:opacity-40"
+                style={{
+                  color: 'var(--pd-ink3)',
+                  border: '1px solid var(--pd-border)',
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLButtonElement).style.color =
+                    'var(--pd-red)';
+                  (e.currentTarget as HTMLButtonElement).style.borderColor =
+                    'var(--pd-red)';
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLButtonElement).style.color =
+                    'var(--pd-ink3)';
+                  (e.currentTarget as HTMLButtonElement).style.borderColor =
+                    'var(--pd-border)';
+                }}
               >
                 Vaciar
               </button>
             )}
             <button
               onClick={closeCart}
-              className="w-8 h-8 flex items-center justify-center rounded-xl bg-gray-100 dark:bg-[var(--bg-primary)] text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
+              className="w-8 h-8 flex items-center justify-center transition-colors"
+              style={{
+                color: 'var(--pd-ink3)',
+                border: '1px solid var(--pd-border)',
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.background =
+                  'var(--pd-bg2)';
+                (e.currentTarget as HTMLButtonElement).style.color =
+                  'var(--pd-ink)';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.background =
+                  'transparent';
+                (e.currentTarget as HTMLButtonElement).style.color =
+                  'var(--pd-ink3)';
+              }}
               aria-label="Cerrar carrito"
             >
               <X className="w-4 h-4" />
@@ -345,56 +468,91 @@ export default function CartDrawer() {
           </div>
         </div>
 
-        {/* ── Error banner ── */}
+        {/* ── Error banner — shrink-0 ── */}
         {error && (
-          <div className="mx-4 mt-3 flex items-center gap-2 px-3 py-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-red-600 dark:text-red-400 text-xs">
+          <div
+            className="shrink-0 mx-4 mt-3 flex items-center gap-2 px-3 py-2 text-[12px]"
+            style={{
+              color: 'var(--pd-red)',
+              background: 'color-mix(in srgb, var(--pd-red) 8%, transparent)',
+              border:
+                '1px solid color-mix(in srgb, var(--pd-red) 25%, transparent)',
+            }}
+          >
             <AlertCircle className="w-4 h-4 flex-shrink-0" />
-            <span>{error}</span>
+            <span className="flex-1">{error}</span>
             <button
-              className="ml-auto text-red-400 hover:text-red-600"
               onClick={() => setError(null)}
+              style={{ color: 'var(--pd-ink3)' }}
             >
               <X className="w-3.5 h-3.5" />
             </button>
           </div>
         )}
 
-        {/* ── Body ── */}
-        <div className="flex-1 overflow-y-auto px-5 py-2">
-          {/* Estado: cargando */}
+        {/* ── 2. BODY SCROLL — flex-1 + overflow-y-auto ── */}
+        <div className="flex-1 overflow-y-auto min-h-0">
+          {/* Loading */}
           {fetchLoading && (
-            <div className="flex flex-col items-center justify-center h-full gap-3 text-gray-400">
-              <Loader2 className="w-8 h-8 animate-spin" />
-              <p className="text-sm">Cargando tu carrito…</p>
+            <div
+              className="flex flex-col items-center justify-center h-full gap-3"
+              style={{ color: 'var(--pd-ink3)' }}
+            >
+              <Loader2 className="w-7 h-7 animate-spin" />
+              <p className="text-[13px]">Cargando tu carrito…</p>
             </div>
           )}
 
-          {/* Estado: vacío */}
+          {/* Vacío */}
           {isEmpty && !error && (
             <div className="flex flex-col items-center justify-center h-full gap-4 py-16">
-              <div className="w-20 h-20 rounded-2xl bg-gray-100 dark:bg-[var(--bg-primary)] flex items-center justify-center">
-                <PackageOpen className="w-10 h-10 text-gray-300 dark:text-gray-600" />
+              <div
+                className="w-16 h-16 flex items-center justify-center"
+                style={{ background: 'var(--pd-bg2)' }}
+              >
+                <PackageOpen
+                  className="w-8 h-8"
+                  style={{ color: 'var(--pd-ink3)' }}
+                />
               </div>
               <div className="text-center">
-                <p className="font-bold text-gray-700 dark:text-[var(--text-primary)] mb-1">
+                <p
+                  className="font-medium text-[14px] mb-1"
+                  style={{ color: 'var(--pd-ink)' }}
+                >
                   Tu carrito está vacío
                 </p>
-                <p className="text-sm text-gray-400 dark:text-gray-500">
+                <p
+                  className="text-[12px] font-light"
+                  style={{ color: 'var(--pd-ink3)' }}
+                >
                   Agrega productos para continuar
                 </p>
               </div>
               <button
                 onClick={closeCart}
-                className="mt-2 px-5 py-2.5 bg-sky-500 dark:bg-[#4A7C59] text-white text-sm font-bold rounded-xl hover:bg-sky-600 dark:hover:bg-[#3D6B4A] transition-colors"
+                className="mt-2 px-5 py-2.5 text-[12px] font-medium tracking-[.08em] uppercase transition-colors"
+                style={{
+                  background: 'var(--pd-accent)',
+                  color: 'var(--pd-accent-fg)',
+                }}
+                onMouseEnter={(e) =>
+                  ((e.currentTarget as HTMLButtonElement).style.background =
+                    'var(--pd-accent2)')
+                }
+                onMouseLeave={(e) =>
+                  ((e.currentTarget as HTMLButtonElement).style.background =
+                    'var(--pd-accent)')
+                }
               >
                 Explorar productos
               </button>
             </div>
           )}
 
-          {/* Lista de ítems */}
+          {/* ── Lista de ítems ── */}
           {!fetchLoading && items.length > 0 && (
-            <div>
+            <div className="px-5 pt-2">
               {items.map((item) => (
                 <CartLineItem
                   key={item.id}
@@ -407,53 +565,168 @@ export default function CartDrawer() {
               ))}
             </div>
           )}
-        </div>
 
-        {/* ── Footer con resumen y CTA ── */}
+        </div>
+        {/* ── FIN BODY SCROLL ── */}
+
+        {/* ── 3. RECOMENDACIONES — shrink-0, FUERA del scroll ── */}
+        {!fetchLoading && items.length > 0 && (
+          <CartRecommendations
+            cartProductIds={items.map((i) => i.productId)}
+            onAdded={loadCart}
+          />
+        )}
+
+        {/* ── 4. FOOTER — shrink-0 ── */}
         {!fetchLoading && items.length > 0 && cart && (
-          <div className="border-t border-gray-100 dark:border-[var(--border-subtle)] px-5 py-4 space-y-3">
-            {/* Cupón placeholder */}
-            <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-dashed border-gray-200 dark:border-[var(--border-subtle)] text-sm text-gray-400 dark:text-gray-500 cursor-pointer hover:border-sky-400 hover:text-sky-500 transition-colors">
-              <Tag className="w-4 h-4" />
+          <div
+            className="shrink-0 px-5 py-4 space-y-3"
+            style={{ borderTop: '1px solid var(--pd-border)' }}
+          >
+            {/* Cupón */}
+            <div
+              className="flex items-center gap-2 px-3 py-2.5 text-[12px] cursor-pointer transition-colors"
+              style={{
+                border: '1px dashed var(--pd-border)',
+                color: 'var(--pd-ink3)',
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLDivElement).style.borderColor =
+                  'var(--pd-accent2)';
+                (e.currentTarget as HTMLDivElement).style.color =
+                  'var(--pd-accent2)';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLDivElement).style.borderColor =
+                  'var(--pd-border)';
+                (e.currentTarget as HTMLDivElement).style.color =
+                  'var(--pd-ink3)';
+              }}
+            >
+              <Tag className="w-3.5 h-3.5" />
               <span>Agregar código de descuento</span>
             </div>
 
-            {/* Resumen de precios */}
+            {/* Resumen */}
             <div className="space-y-1.5">
-              <div className="flex justify-between text-sm text-gray-500 dark:text-[var(--text-secondary)]">
-                <span>Subtotal</span>
-                <span>{formatPrice(cart.subtotal)}</span>
+              <div className="flex justify-between text-[13px]">
+                <span style={{ color: 'var(--pd-ink3)' }}>Subtotal</span>
+                <span style={{ color: 'var(--pd-ink2)' }}>
+                  {fmt(cart.subtotal)}
+                </span>
               </div>
-              <div className="flex justify-between text-sm text-gray-500 dark:text-[var(--text-secondary)]">
-                <span>Envío</span>
-                <span className="text-emerald-500 font-semibold">
+              <div className="flex justify-between text-[13px]">
+                <span style={{ color: 'var(--pd-ink3)' }}>Envío</span>
+                <span
+                  className="font-medium text-[12px] tracking-[.04em]"
+                  style={{ color: 'var(--pd-accent2)' }}
+                >
                   Calcular en checkout
                 </span>
               </div>
-              <div className="flex justify-between font-black text-base text-gray-900 dark:text-[var(--text-primary)] pt-2 border-t border-gray-100 dark:border-[var(--border-subtle)]">
-                <span>Total</span>
-                <span className="text-sky-600 dark:text-sky-400">
-                  {formatPrice(cart.total)}
+              <div
+                className="flex justify-between pt-2"
+                style={{ borderTop: '1px solid var(--pd-border)' }}
+              >
+                <span
+                  className="text-[13px] font-medium tracking-[.06em] uppercase"
+                  style={{ color: 'var(--pd-ink2)' }}
+                >
+                  Total
+                </span>
+                <span
+                  className="font-['DM_Serif_Display',Georgia,serif] text-[22px] leading-none"
+                  style={{ color: 'var(--pd-ink)' }}
+                >
+                  {fmt(cart.total)}
                 </span>
               </div>
             </div>
 
-            {/* Botón checkout */}
-            <Link
-              href="/checkout"
-              onClick={closeCart}
-              className="flex items-center justify-center gap-2 w-full py-3.5 bg-sky-500 hover:bg-sky-600 dark:bg-[#4A7C59] dark:hover:bg-[#3D6B4A] text-white font-black text-sm rounded-2xl transition-all shadow-lg shadow-sky-500/20 dark:shadow-none hover:-translate-y-0.5"
+            {/* CTA */}
+            <button
+              onClick={async () => {
+                closeCart();
+                await goToCheckout();
+              }}
+              className="flex items-center justify-center gap-2 w-full py-3.5 text-[12px] font-medium tracking-[.1em] uppercase transition-colors"
+              style={{
+                background: 'var(--pd-accent)',
+                color: 'var(--pd-accent-fg)',
+              }}
+              onMouseEnter={(e) =>
+                ((e.currentTarget as HTMLButtonElement).style.background =
+                  'var(--pd-accent2)')
+              }
+              onMouseLeave={(e) =>
+                ((e.currentTarget as HTMLButtonElement).style.background =
+                  'var(--pd-accent)')
+              }
             >
               Ir a pagar
               <ArrowRight className="w-4 h-4" />
-            </Link>
-
-            <button
-              onClick={closeCart}
-              className="w-full py-2.5 text-sm text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-            >
-              Seguir comprando
             </button>
+
+          </div>
+        )}
+
+        {/* ── Confirmación "Vaciar carrito" ── */}
+        {showClearConfirm && (
+          <div
+            className="absolute inset-0 z-50 flex items-center justify-center p-6"
+            style={{ background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(2px)' }}
+          >
+            <div
+              className="w-full max-w-[280px] p-5 flex flex-col items-center text-center gap-4"
+              style={{ background: 'var(--pd-white,#fff)' }}
+            >
+              <div
+                className="w-10 h-10 flex items-center justify-center"
+                style={{ background: 'color-mix(in srgb, var(--pd-red) 10%, transparent)' }}
+              >
+                <Trash2 className="w-5 h-5" style={{ color: 'var(--pd-red)' }} />
+              </div>
+              <p className="text-[14px] font-medium leading-snug" style={{ color: 'var(--pd-ink)' }}>
+                ¿Vaciar todo el carrito?
+              </p>
+              <p className="text-[12px]" style={{ color: 'var(--pd-ink3)' }}>
+                Esta acción no se puede deshacer.
+              </p>
+              <div className="flex gap-2 w-full">
+                <button
+                  onClick={() => setShowClearConfirm(false)}
+                  className="flex-1 py-2.5 text-[11px] font-medium tracking-[.06em] uppercase transition-colors"
+                  style={{
+                    color: 'var(--pd-ink2)',
+                    border: '1px solid var(--pd-border)',
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLButtonElement).style.background = 'var(--pd-bg2)';
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
+                  }}
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={confirmedClear}
+                  className="flex-1 py-2.5 text-[11px] font-medium tracking-[.06em] uppercase transition-colors"
+                  style={{
+                    background: 'var(--pd-red)',
+                    color: '#fff',
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLButtonElement).style.opacity = '0.85';
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLButtonElement).style.opacity = '1';
+                  }}
+                >
+                  Vaciar
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </aside>

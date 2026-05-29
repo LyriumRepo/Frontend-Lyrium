@@ -281,7 +281,7 @@ function usePasswordStrength(password: string) {
     if (/[0-9]/.test(password))       score++;
     if (/[^A-Za-z0-9]/.test(password)) score++;
     const labels = ['', 'Débil', 'Regular', 'Buena', 'Fuerte'];
-    const colors = ['', '#ef4444', '#f97316', '#22c55e', '#00e5a0'];
+    const colors = ['', '#ef4444', '#f97316', '#22c55e', 'var(--pd-accent)'];
     return { score, label: labels[score], color: colors[score] };
 }
 
@@ -370,7 +370,7 @@ function StepPassword({
                                         style={{
                                             background: strength.score >= n
                                                 ? strength.color
-                                                : 'rgba(255,255,255,0.08)',
+                                                : 'color-mix(in srgb, var(--text-primary) 8%, transparent)',
                                         }}
                                     />
                                 ))}
@@ -475,21 +475,21 @@ export function ForgotPasswordPageClient() {
             <style>{`
                 /* ══ Tokens Lyrium ══════════════════════════════════════════════ */
                 .fp-root {
-                    --fp-bg:        #060e0b;
-                    --fp-card:      #0d1a14;
-                    --fp-border:    rgba(0, 229, 160, 0.12);
-                    --fp-accent:    #00e5a0;
-                    --fp-accent2:   #00bcd4;
-                    --fp-text:      #e8f5ef;
-                    --fp-muted:     #7fa896;
-                    --fp-error:     #ff6b6b;
-                    --fp-ok:        #00e5a0;
+                    --fp-bg:        var(--bg-primary);
+                    --fp-card:      var(--bg-card);
+                    --fp-border:    var(--border-default);
+                    --fp-accent:    var(--pd-accent);
+                    --fp-accent2:   var(--pd-accent2);
+                    --fp-text:      var(--text-primary);
+                    --fp-muted:     var(--text-secondary);
+                    --fp-error:     #ef4444;
+                    --fp-ok:        var(--pd-accent);
 
                     min-height: 100vh;
                     background: var(--fp-bg);
                     background-image:
-                        radial-gradient(ellipse 60% 50% at 15% 20%, rgba(0,229,160,0.07) 0%, transparent 65%),
-                        radial-gradient(ellipse 45% 40% at 85% 80%, rgba(0,188,212,0.05) 0%, transparent 65%);
+                        radial-gradient(ellipse 60% 50% at 15% 20%, color-mix(in srgb, var(--pd-accent) 7%, transparent) 0%, transparent 65%),
+                        radial-gradient(ellipse 45% 40% at 85% 80%, color-mix(in srgb, var(--pd-accent2) 5%, transparent) 0%, transparent 65%);
                     display: flex;
                     flex-direction: column;
                     align-items: center;
@@ -505,8 +505,8 @@ export function ForgotPasswordPageClient() {
                     border-radius: 24px;
                     box-shadow:
                         0 0 0 1px var(--fp-border),
-                        0 24px 60px rgba(0,0,0,.7),
-                        0 0 80px rgba(0,229,160,.04);
+                        0 24px 60px color-mix(in srgb, var(--text-primary) 14%, transparent),
+                        0 0 80px color-mix(in srgb, var(--pd-accent) 4%, transparent);
                     padding: 2.5rem 2rem;
                     width: 100%;
                     max-width: 420px;
@@ -518,7 +518,7 @@ export function ForgotPasswordPageClient() {
                     position: absolute;
                     inset: 0;
                     border-radius: 24px;
-                    background: linear-gradient(135deg, rgba(0,229,160,.03) 0%, transparent 60%);
+                    background: linear-gradient(135deg, color-mix(in srgb, var(--pd-accent) 4%, transparent) 0%, transparent 60%);
                     pointer-events: none;
                 }
                 .fp-card--center { text-align: center; }
@@ -560,18 +560,18 @@ export function ForgotPasswordPageClient() {
                 }
                 .fp-input {
                     width: 100%; padding: 13px 14px 13px 42px;
-                    background: rgba(255,255,255,.04);
-                    border: 1.5px solid rgba(255,255,255,.08);
+                    background: color-mix(in srgb, var(--text-primary) 4%, transparent);
+                    border: 1.5px solid color-mix(in srgb, var(--text-primary) 8%, transparent);
                     border-radius: 12px;
                     color: var(--fp-text); font-size: .9rem;
                     outline: none; box-sizing: border-box;
                     transition: border-color .2s, box-shadow .2s, background .2s;
                 }
-                .fp-input::placeholder { color: rgba(255,255,255,.2); }
+                .fp-input::placeholder { color: color-mix(in srgb, var(--text-primary) 20%, transparent); }
                 .fp-input:focus {
                     border-color: var(--fp-accent);
-                    background: rgba(0,229,160,.04);
-                    box-shadow: 0 0 0 3px rgba(0,229,160,.1);
+                    background: color-mix(in srgb, var(--pd-accent) 5%, transparent);
+                    box-shadow: 0 0 0 3px color-mix(in srgb, var(--pd-accent) 12%, transparent);
                 }
                 .fp-input--padded-right { padding-right: 44px; }
                 .fp-input--mismatch { border-color: var(--fp-error) !important; }
@@ -607,20 +607,20 @@ export function ForgotPasswordPageClient() {
                 .fp-otp-input {
                     width: 48px; height: 56px; text-align: center;
                     font-size: 1.3rem; font-weight: 700;
-                    background: rgba(255,255,255,.04);
-                    border: 1.5px solid rgba(255,255,255,.08);
+                    background: color-mix(in srgb, var(--text-primary) 4%, transparent);
+                    border: 1.5px solid color-mix(in srgb, var(--text-primary) 8%, transparent);
                     border-radius: 12px; color: var(--fp-text);
                     outline: none; caret-color: var(--fp-accent);
                     transition: border-color .15s, box-shadow .15s, background .15s;
                 }
                 .fp-otp-input:focus {
                     border-color: var(--fp-accent);
-                    background: rgba(0,229,160,.05);
-                    box-shadow: 0 0 0 3px rgba(0,229,160,.12);
+                    background: color-mix(in srgb, var(--pd-accent) 5%, transparent);
+                    box-shadow: 0 0 0 3px color-mix(in srgb, var(--pd-accent) 12%, transparent);
                 }
                 .fp-otp-input--filled {
-                    border-color: rgba(0,229,160,.35);
-                    background: rgba(0,229,160,.06);
+                    border-color: color-mix(in srgb, var(--pd-accent) 35%, transparent);
+                    background: color-mix(in srgb, var(--pd-accent) 6%, transparent);
                 }
                 .fp-otp-input--error { border-color: var(--fp-error) !important; }
 
@@ -646,17 +646,17 @@ export function ForgotPasswordPageClient() {
                 .fp-btn-primary {
                     display: flex; align-items: center; justify-content: center; gap: 8px;
                     width: 100%; padding: 14px;
-                    background: linear-gradient(135deg, var(--fp-accent) 0%, #00bcd4 100%);
-                    color: #021a0f; font-size: .85rem; font-weight: 800;
+                    background: linear-gradient(135deg, var(--fp-accent) 0%, var(--fp-accent2) 100%);
+                    color: var(--pd-accent-fg); font-size: .85rem; font-weight: 800;
                     text-transform: uppercase; letter-spacing: .08em;
                     border: none; border-radius: 12px; cursor: pointer;
                     text-decoration: none;
-                    box-shadow: 0 8px 24px rgba(0,229,160,.2);
+                    box-shadow: 0 8px 24px color-mix(in srgb, var(--pd-accent) 25%, transparent);
                     transition: transform .15s, box-shadow .15s, opacity .15s;
                 }
                 .fp-btn-primary:hover:not(:disabled) {
                     transform: translateY(-1px);
-                    box-shadow: 0 12px 32px rgba(0,229,160,.3);
+                    box-shadow: 0 12px 32px color-mix(in srgb, var(--pd-accent) 35%, transparent);
                 }
                 .fp-btn-primary:active:not(:disabled) { transform: translateY(0); }
                 .fp-btn-primary:disabled {
@@ -667,8 +667,8 @@ export function ForgotPasswordPageClient() {
                 .fp-spinner {
                     display: inline-block;
                     width: 16px; height: 16px;
-                    border: 2px solid rgba(0,0,0,.3);
-                    border-top-color: rgba(0,0,0,.8);
+                    border: 2px solid color-mix(in srgb, var(--text-primary) 15%, transparent);
+                    border-top-color: color-mix(in srgb, var(--text-primary) 50%, transparent);
                     border-radius: 50%;
                     animation: fpSpin .7s linear infinite;
                 }
@@ -686,7 +686,7 @@ export function ForgotPasswordPageClient() {
                 /* ══ Done ═══════════════════════════════════════════════════════ */
                 .fp-done-circle {
                     width: 80px; height: 80px;
-                    background: rgba(0,229,160,.12); border-radius: 50%;
+                    background: color-mix(in srgb, var(--pd-accent) 12%, transparent); border-radius: 50%;
                     display: flex; align-items: center; justify-content: center;
                     margin: 0 auto;
                     animation: fpPulse 2s ease-in-out infinite;
@@ -700,34 +700,39 @@ export function ForgotPasswordPageClient() {
                 }
                 .fp-progress__item {
                     display: flex; align-items: center; position: relative;
-                    padding-bottom: 20px;
+                    padding-bottom: 22px;
                 }
                 .fp-progress__dot {
-                    width: 28px; height: 28px; border-radius: 50%;
+                    width: 38px; height: 38px; border-radius: 50%;
                     display: flex; align-items: center; justify-content: center;
-                    font-size: .7rem; font-weight: 700; flex-shrink: 0;
-                    transition: all .3s;
+                    font-size: .85rem; font-weight: 700; flex-shrink: 0;
+                    transition: all .35s ease;
                 }
-                .fp-progress__check { width: 13px; height: 13px; }
-                .fp-progress__dot--done   { background: var(--fp-accent); color: #021a0f; }
+                .fp-progress__check { width: 16px; height: 16px; }
+                .fp-progress__dot--done {
+                    background: var(--fp-accent); color: var(--pd-accent-fg);
+                }
                 .fp-progress__dot--active {
-                    background: rgba(0,229,160,.15);
+                    background: color-mix(in srgb, var(--pd-accent) 15%, transparent);
                     border: 2px solid var(--fp-accent); color: var(--fp-accent);
-                    box-shadow: 0 0 12px rgba(0,229,160,.3);
+                    box-shadow: 0 0 16px color-mix(in srgb, var(--pd-accent) 30%, transparent);
+                    animation: fpStepPulse .5s ease;
                 }
                 .fp-progress__dot--pending {
-                    background: rgba(255,255,255,.05);
-                    border: 2px solid rgba(255,255,255,.1); color: var(--fp-muted);
+                    background: color-mix(in srgb, var(--text-primary) 5%, transparent);
+                    border: 2px solid color-mix(in srgb, var(--text-primary) 10%, transparent);
+                    color: var(--fp-muted);
                 }
                 .fp-progress__label {
-                    font-size: .68rem; color: var(--fp-muted); white-space: nowrap;
+                    font-size: .7rem; color: var(--fp-muted); white-space: nowrap;
                     position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
                 }
                 .fp-progress__label--active { color: var(--fp-accent); font-weight: 600; }
                 .fp-progress__line {
-                    width: 48px; height: 2px;
-                    background: rgba(255,255,255,.08); margin: 0 4px;
-                    transition: background .3s;
+                    width: 60px; height: 2.5px;
+                    background: color-mix(in srgb, var(--text-primary) 8%, transparent);
+                    margin: 0 4px;
+                    transition: background .4s ease;
                 }
                 .fp-progress__line--done { background: var(--fp-accent); }
 
@@ -738,8 +743,13 @@ export function ForgotPasswordPageClient() {
                 }
                 @keyframes fpSpin { to { transform: rotate(360deg); } }
                 @keyframes fpPulse {
-                    0%, 100% { box-shadow: 0 0 0 0 rgba(0,229,160,.2); }
-                    50%      { box-shadow: 0 0 0 12px rgba(0,229,160,0); }
+                    0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--pd-accent) 20%, transparent); }
+                    50%      { box-shadow: 0 0 0 14px color-mix(in srgb, var(--pd-accent) 0%, transparent); }
+                }
+                @keyframes fpStepPulse {
+                    0%   { transform: scale(.85); }
+                    50%  { transform: scale(1.15); }
+                    100% { transform: scale(1); }
                 }
                 .fp-spin { animation: fpSpin 1s linear infinite; }
             `}</style>

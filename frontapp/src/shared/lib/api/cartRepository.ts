@@ -75,17 +75,46 @@ function getSessionId(): string {
   return sid;
 }
 
+<<<<<<< HEAD
 async function buildHeaders(): Promise<HeadersInit> {
   const token = getToken();
+=======
+let _tokenCache: { value: string | null; ts: number } | null = null;
+
+async function getAuthToken(): Promise<string | null> {
+  const now = Date.now();
+  if (_tokenCache && now - _tokenCache.ts < 30_000) {
+    return _tokenCache.value;
+  }
+  try {
+    const res = await fetch('/api/auth-token', {
+      credentials: 'include',
+      cache: 'no-store',
+    });
+    if (!res.ok) return null;
+    const { token } = await res.json();
+    const clean = token?.replace(/^["']|["']$/g, '').trim() || null;
+    _tokenCache = { value: clean, ts: now };
+    return clean;
+  } catch {
+    return null;
+  }
+}
+
+async function buildHeaders(): Promise<HeadersInit> {
+  const token = await getAuthToken();
+
+>>>>>>> d9aece4d89ab271e219257a158b75b5f636b3361
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     Accept: 'application/json',
+    'X-Session-ID': getSessionId(), //  SIEMPRE lo enviamos (invitado o logueado)
   };
+
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
-  } else {
-    headers['X-Session-ID'] = getSessionId();
   }
+
   return headers;
 }
 
@@ -93,7 +122,7 @@ async function buildHeaders(): Promise<HeadersInit> {
 
 async function request<T>(
   endpoint: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
 ): Promise<T> {
   const headers = await buildHeaders();
   const res = await fetch(`${LARAVEL_API_URL}${endpoint}`, {

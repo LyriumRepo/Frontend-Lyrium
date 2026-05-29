@@ -6,7 +6,10 @@ export interface UserFilters {
 }
 
 export interface UpdateUserInput {
+<<<<<<< HEAD
     display_name?: string;
+=======
+>>>>>>> d9aece4d89ab271e219257a158b75b5f636b3361
     name?: string;
     email?: string;
     avatar?: string;

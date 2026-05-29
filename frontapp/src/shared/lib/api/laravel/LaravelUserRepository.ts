@@ -9,6 +9,7 @@ export class LaravelUserRepository implements IUserRepository {
 
     private async getToken(): Promise<string | null> {
         if (typeof window !== 'undefined') {
+<<<<<<< HEAD
             const token = getToken();
             if (token) {
                 console.log('[LaravelUserRepository] Token from client:', token.substring(0, 20) + '...');
@@ -16,6 +17,16 @@ export class LaravelUserRepository implements IUserRepository {
             }
             console.log('[LaravelUserRepository] No laravel_token found in client');
             return null;
+=======
+            const token = localStorage.getItem('laravel_token');
+
+            console.log(
+                '[LaravelUserRepository] Token from client:',
+                token ? token.substring(0, 20) + '...' : 'not found'
+            );
+
+            return token;
+>>>>>>> d9aece4d89ab271e219257a158b75b5f636b3361
         }
         
         try {
@@ -40,6 +51,7 @@ export class LaravelUserRepository implements IUserRepository {
         const baseUrl = this.getBaseUrl();
         const authHeaders = await this.getAuthHeaders();
 
+        console.log('FULL URL', `${baseUrl}${endpoint}`);
         const response = await fetch(`${baseUrl}${endpoint}`, {
             ...options,
             credentials: 'include',

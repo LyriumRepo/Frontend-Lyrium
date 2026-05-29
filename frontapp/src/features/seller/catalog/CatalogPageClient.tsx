@@ -17,10 +17,13 @@ import {
 } from '@/shared/lib/actions/catalog';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import { useConfirmDialog } from '@/components/ui/confirm-dialog';
+import { LaravelProductRepository } from '@/shared/lib/api/laravel/LaravelProductRepository';
 
 interface CatalogClientProps {
   initialProducts: Product[];
 }
+
+const productRepository = new LaravelProductRepository();
 
 // ─── PriceEditInput ───────────────────────────────────────────────────────────
 function PriceEditInput({
@@ -194,23 +197,15 @@ export default function CatalogClient({ initialProducts }: CatalogClientProps) {
           const formData = new FormData();
           formData.append('file', file);
 
-          const uploadRes = await fetch(
-            `/api/seller/products/${savedProduct.id}/image`,
-            {
-              method: 'POST',
-              body: formData,
-            },
+          const uploadData = await productRepository.uploadProductImage(
+            String(savedProduct.id),
+            file,
           );
 
-          if (uploadRes.ok) {
-            const uploadData = await uploadRes.json();
-            savedProduct = {
-              ...savedProduct,
-              image: uploadData.url ?? productData.image,
-            };
-          } else {
-            savedProduct = { ...savedProduct, image: productData.image };
-          }
+          savedProduct = {
+            ...savedProduct,
+            image: uploadData.url ?? productData.image,
+          };
         } catch {
           savedProduct = {
             ...savedProduct,

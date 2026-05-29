@@ -6,6 +6,12 @@ export class LaravelProductRepository implements IProductRepository {
         return process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://localhost:8000/api';
     }
 
+<<<<<<< HEAD
+=======
+    
+    // ✅ FIX: La cookie es httpOnly — solo es accesible desde el servidor.
+    // Siempre usar next/headers, nunca document.cookie.
+>>>>>>> d9aece4d89ab271e219257a158b75b5f636b3361
     private async getAuthHeaders(): Promise<HeadersInit> {
         const token = await this.getToken();
 
@@ -24,7 +30,10 @@ export class LaravelProductRepository implements IProductRepository {
 
         // SERVIDOR
         try {
+<<<<<<< HEAD
 
+=======
+>>>>>>> d9aece4d89ab271e219257a158b75b5f636b3361
             const { cookies } = await import('next/headers');
 
             const cookieStore = await cookies();
@@ -37,6 +46,10 @@ export class LaravelProductRepository implements IProductRepository {
         }
     }
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> d9aece4d89ab271e219257a158b75b5f636b3361
     private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
         const baseUrl = this.getBaseUrl();
         const authHeaders = await this.getAuthHeaders();
@@ -76,6 +89,7 @@ export class LaravelProductRepository implements IProductRepository {
                 id: data.id?.toString() || id,
                 type: data.type || 'physical',
                 name: data.name || '',
+                type: data.type || '',
                 category: data.categories?.[0]?.slug || '',
                 price: parseFloat(data.price || '0'),
                 stock: data.stock || 0,
@@ -97,6 +111,7 @@ export class LaravelProductRepository implements IProductRepository {
     async createProduct(input: CreateProductInput): Promise<Product> {
         // No enviar imagen si es base64 (muy grande para la DB)
         const image = input.image && !input.image.startsWith('data:') ? input.image : null;
+<<<<<<< HEAD
         // Limpiar atributos vacíos
         const isNotEmpty = (attr: { values: { label?: string; value?: string } }) =>
             attr.values && (attr.values.label?.trim() || attr.values.value?.trim());
@@ -112,11 +127,44 @@ export class LaravelProductRepository implements IProductRepository {
         const cleanMainAttributes = (input.mainAttributes || [])
             .filter(isNotEmpty)
             .map(trimValues);
+=======
 
+        // Limpiar mainAttributes cuidando que values es un Record<string, string>
+        const cleanMainAttributes = (input.mainAttributes || [])
+            .map(attr => {
+                // Convertimos el objeto values { key: value } en un array de [key, value]
+                const filteredEntries = Object.entries(attr.values || {})
+                    .filter(([_, value]) => value && value.trim() !== '');
+>>>>>>> d9aece4d89ab271e219257a158b75b5f636b3361
+
+                return {
+                    ...attr,
+                    // Volvemos a transformar el array filtrado en un objeto Record
+                    values: Object.fromEntries(filteredEntries)
+                };
+            })
+            // Opcional: Eliminamos el atributo por completo si su objeto values quedó vacío
+            .filter(attr => Object.keys(attr.values).length > 0);
+
+        // Limpiar additionalAttributes cuidando que values es un Record<string, string>
         const cleanAdditionalAttributes = (input.additionalAttributes || [])
+<<<<<<< HEAD
             .filter(isNotEmpty)
             .map(trimValues);
         
+=======
+            .map(attr => {
+                const filteredEntries = Object.entries(attr.values || {})
+                    .filter(([_, value]) => value && value.trim() !== '');
+
+                return {
+                    ...attr,
+                    values: Object.fromEntries(filteredEntries)
+                };
+            })
+            .filter(attr => Object.keys(attr.values).length > 0);
+
+>>>>>>> d9aece4d89ab271e219257a158b75b5f636b3361
         return this.request<Product>('/products', {
             method: 'POST',
             body: JSON.stringify({

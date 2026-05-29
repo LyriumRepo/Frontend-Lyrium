@@ -90,7 +90,9 @@ export interface StoreBranch {
   id: number;
   name: string;
   address: string;
-  city: string;
+  department: string;
+  province: string;
+  district: string;
   phone: string;
   hours?: string;
   is_principal: boolean;
@@ -186,6 +188,24 @@ async function request<T>(
 
   return response.json();
 }
+
+  const getImageUrl = (path?: string | null) => {
+    if (!path) return undefined;
+
+    if (path.startsWith('http')) return path;
+
+    return `http://localhost:8000${path}`;
+
+  };
+
+  const mapStoreToLocal = (store: any) => {
+    if (!store) return null;
+
+    return {
+      ...store,
+      rep_legal_foto: getImageUrl(store.rep_legal_foto),
+    };
+  };
 
 export const sellerApi = {
   createStore: async (payload: CreateStorePayload): Promise<StoreData> => {
@@ -498,4 +518,32 @@ export const sellerApi = {
     });
     return response.data;
   },
+
+  async uploadRepLegalPhoto( storeId: number, file: File): Promise<{ url: string }> {
+      const token = localStorage.getItem('laravel_token');
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch(
+          `${LARAVEL_API_URL}/stores/${storeId}/rep-photo`,
+          {
+              method: 'POST',
+              headers: {
+                  ...(token
+                      ? { Authorization: `Bearer ${token}` }
+                      : {}),
+              },
+              body: formData,
+          }
+      );
+
+      if (!response.ok) {
+          throw new Error(`Upload failed: ${response.status}`);
+      }
+
+      return response.json();
+  }
 };
+
+export { mapStoreToLocal };

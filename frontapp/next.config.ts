@@ -3,6 +3,14 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
 
+<<<<<<< HEAD
+=======
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '10mb',
+    },
+  },
+>>>>>>> d9aece4d89ab271e219257a158b75b5f636b3361
 
 async rewrites() {
   const storageUrl = process.env.NEXT_PUBLIC_LARAVEL_STORAGE_URL ?? 'http://127.0.0.1:8000';
