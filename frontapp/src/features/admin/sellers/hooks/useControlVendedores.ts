@@ -22,7 +22,7 @@ import type {
 
 // ─── Tipos internos del hook ───────────────────────────────────────────────────
 
-export type TabKey = 'vendedores' | 'aprobacion' | 'auditoria' | 'validacion';
+export type TabKey = 'vendedores' | 'aprobacion' | 'auditoria' | 'validacion' | 'contratos';
 
 export interface SellerFilters {
   sellerSearch: string;

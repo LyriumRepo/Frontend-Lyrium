@@ -65,15 +65,15 @@ export const useContratos = () => {
             const nextId = `CTR-${new Date().getFullYear()}-${Math.floor(Math.random() * 900 + 100)}`;
             const newContract: Contract = {
                 id: nextId,
-                company: 'Nueva Empresa TEMP',
+                company: '',
                 ruc: '',
                 rep: '',
-                type: 'Comisión Mercantil',
+                type: '',
                 modality: 'VIRTUAL',
                 status: 'PENDING',
-                start: new Date().toISOString().split('T')[0],
+                start: '',
                 end: '',
-                storage_path: 'No cargado aún',
+                storage_path: 'pendiente_de_carga.pdf',
                 auditTrail: [
                     { timestamp: new Date().toISOString(), action: 'Contrato Borrador Creado', user: 'Admin' }
                 ]
@@ -149,11 +149,22 @@ export const useContratos = () => {
         },
         actions: {
             setFilters,
-            setSelectedContract: (c: Contract | null) => setSelectedContractId(c?.id || null),
+            setSelectedContract: (c: Contract | null) => {
+                setSelectedContractId(c?.id || null);
+                // Si se cierra el modal (c === null), limpiamos cualquier borrador que haya quedado completamente vacío
+                if (c === null) {
+                    queryClient.setQueryData(['admin', 'contracts'], (old: Contract[] | undefined) => {
+                        if (!old) return old;
+                        return old.filter(item => !(item.company === '' && item.ruc === ''));
+                    });
+                }
+            },
             validateContract: (id: string, updatedInfo: Partial<Contract>) =>
                 updateContractMutation.mutateAsync({ id, status: 'ACTIVE', updatedInfo }),
             invalidateContract: (id: string, updatedInfo: Partial<Contract>) =>
                 updateContractMutation.mutateAsync({ id, status: 'EXPIRED', updatedInfo }),
+            updateContractStatus: (id: string, status: ContractStatus, updatedInfo: Partial<Contract>) =>
+                updateContractMutation.mutateAsync({ id, status, updatedInfo }),
             createNew: () => createContractMutation.mutateAsync(),
             fetchContracts: () => queryClient.invalidateQueries({ queryKey: ['admin', 'contracts'] }),
             openTemplates

@@ -27,6 +27,7 @@ export function ContractsPageClient(_props: ContractsPageClientProps) {
                                 onClose={() => actions.setSelectedContract(null)}
                                 onValidate={actions.validateContract}
                                 onInvalidate={actions.invalidateContract}
+                                onUpdateStatus={actions.updateContractStatus}
                             />
                         </div>
                     </div>

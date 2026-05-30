@@ -11,7 +11,19 @@ interface ProductsGridProps {
 }
 
 export default function ProductsGrid({ categorias, titulo = 'Categorías de productos saludables' }: ProductsGridProps) {
-   const displayCategories = categorias.slice(0, 7);
+   const NOMBRE_OVERRIDE: Record<number, string> = {
+    1: 'BIENESTAR FÍSICO Y DEPORTE',
+    2: 'MASCOTAS',
+    3: 'SUPLEMENTOS VITAMÍNICOS',
+    4: 'DIGESTIÓN SALUDABLE',
+    5: 'EQUIPOS Y DISPOSITIVOS MÉDICOS',
+    6: 'PROTECCIÓN LIMPIEZA Y DESINFECCIÓN',
+    7: 'BELLEZA',
+  };
+  const displayCategories = categorias.slice(0, 7).map((cat, i) => ({
+    ...cat,
+    nombre: NOMBRE_OVERRIDE[i + 1] ?? cat.nombre,
+  }));
   const [current, setCurrent] = useState(0);
   const [itemsPerView, setItemsPerView] = useState(2);
   const [isPaused, setIsPaused] = useState(false);
@@ -111,8 +123,18 @@ export default function ProductsGrid({ categorias, titulo = 'Categorías de prod
                   />
                 </article>
                 <div className="py-3 text-center">
-                  <p className="text-[11px] md:text-sm font-bold tracking-tight text-gray-800 dark:text-gray-100 uppercase">
-                    {cat.nombre}
+                                 <p className="text-[11px] md:text-sm font-bold tracking-tight text-gray-800 dark:text-gray-100 uppercase">
+                    {(() => {
+                      const overrides: Record<string, string> = {
+                        'Diagnóstico':          'Bienestar Físico y Deporte',
+                        'Limpieza Hogar':       'Suplementos Vitamínicos',
+                        'Vitaminas':            'Digestión Saludable',
+                        'De Paseo y en el Coche': 'Equipos y Dispositivos Médicos',
+                        'Hombres':              'Protección Limpieza y Desinfección',
+                        'Sistema Nervioso':     'Belleza',
+                      };
+                      return overrides[cat.nombre] ?? cat.nombre;
+                    })()}
                   </p>
                 </div>
               </Link>
