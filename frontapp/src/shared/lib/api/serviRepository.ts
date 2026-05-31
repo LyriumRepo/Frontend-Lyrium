@@ -4,6 +4,46 @@
 
 import { LARAVEL_API_URL } from '@/shared/lib/config/flags';
 
+// ─── Helper: session ID for cart_token ────────────────────────────────────────
+
+function getCartToken(): string {
+  if (typeof window === 'undefined') return '';
+  let sid = sessionStorage.getItem('cart_session_id');
+  if (!sid) {
+    sid = `guest_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+    sessionStorage.setItem('cart_session_id', sid);
+  }
+  return sid;
+}
+
+// ─── Service Hold types ───────────────────────────────────────────────────────
+
+export interface ServiceHold {
+  id: number;
+  service_id: number;
+  service_name: string;
+  service_price: number;
+  service_image: string | null;
+  specialist_id: number;
+  specialist_name: string;
+  schedule_id: number | null;
+  appointment_date: string;
+  start_time: string;
+  customer_notes: string | null;
+  expires_at: string;
+  seconds_remaining: number;
+}
+
+export interface AddServiceHoldPayload {
+  service_id: number;
+  specialist_id: number;
+  schedule_id?: number | null;
+  appointment_date: string;
+  start_time: string;
+  customer_notes?: string | null;
+  cart_token: string;
+}
+
 // ─── Tipos de Dominio ─────────────────────────────────────────────────────────
 
 export type DayOfWeek =
@@ -51,6 +91,8 @@ export interface Service {
   price: number;
   currency: string;
   category: string;
+  category_id: number;
+  parent_category_id: number | null;
   image: string | null;
   status: 'active' | 'inactive' | 'draft';
   cancellation_policy: 'flexible' | 'strict' | 'no_refund';
@@ -192,6 +234,17 @@ export const serviceRepository = {
     }
   },
 
+  /** GET /services/slug/{slug} */
+  async getBySlug(slug: string): Promise<Service | null> {
+    try {
+      return await apiFetch<Service>(`/services/slug/${slug}`, {
+        cache: 'no-store',
+      });
+    } catch {
+      return null;
+    }
+  },
+
   /** GET /services/{serviceId}/slots?specialist_id=&appointment_date= */
   async getSlots(
     serviceId: number,
@@ -244,5 +297,35 @@ export const serviceRepository = {
     } catch {
       return null;
     }
+  },
+
+  // ── Service Hold API ────────────────────────────────────────────────────
+
+  async addServiceToCart(
+    payload: AddServiceHoldPayload,
+  ): Promise<{ hold: ServiceHold }> {
+    return apiFetch('/cart/add-service', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  },
+
+  async getServiceHolds(
+    cartToken: string,
+  ): Promise<{ holds: ServiceHold[] }> {
+    const q = toQuery({ cart_token: cartToken });
+    return apiFetch(`/cart/service-holds${q}`, {
+      cache: 'no-store',
+    });
+  },
+
+  async removeServiceHold(
+    holdId: number,
+    cartToken: string,
+  ): Promise<{ success: boolean }> {
+    const q = toQuery({ cart_token: cartToken });
+    return apiFetch(`/cart/service-holds/${holdId}${q}`, {
+      method: 'DELETE',
+    });
   },
 };

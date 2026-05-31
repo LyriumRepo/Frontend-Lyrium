@@ -23,7 +23,18 @@ import { useEffect, useState, useCallback } from 'react';
 import { useCheckoutStore } from '@/store/checkoutStore';
 import { cartApi } from '@/shared/lib/api/cartRepository';
 import { orderApi } from '@/shared/lib/api/OrdenRepository';
+import { serviceRepository } from '@/shared/lib/api/serviRepository';
 import type { CartItem } from '@/store/checkoutStore';
+
+function getCartToken(): string {
+  if (typeof window === 'undefined') return '';
+  let sid = sessionStorage.getItem('cart_session_id');
+  if (!sid) {
+    sid = `guest_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+    sessionStorage.setItem('cart_session_id', sid);
+  }
+  return sid;
+}
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -55,33 +66,58 @@ export function useCheckoutSubmit(): UseCheckoutSubmitReturn {
   const orderData = useCheckoutStore((s) => s.orderData);
   const cartItems = useCheckoutStore((s) => s.cartItems);
 
-  // ── 1. Al montar: cargar carrito del backend → checkoutStore ─────────────
+  // ── 1. Al montar: cargar carrito + service holds → checkoutStore ─────────
   useEffect(() => {
     let cancelled = false;
 
     async function loadCart() {
       try {
         setIsLoading(true);
-        const cart = await cartApi.getCart();
+        const [cart, holdsRes] = await Promise.all([
+          cartApi.getCart(),
+          (() => {
+            const token = getCartToken();
+            return token ? serviceRepository.getServiceHolds(token) : Promise.resolve(null);
+          })(),
+        ]);
 
         if (cancelled) return;
 
-        if (!cart.items || cart.items.length === 0) {
-          setCartItems([]);
-          return;
+        const checkoutItems: CartItem[] = [];
+
+        // Productos del carrito
+        if (cart.items && cart.items.length > 0) {
+          for (const item of cart.items) {
+            checkoutItems.push({
+              id: item.productId,
+              storeId: 0,
+              storeName: '',
+              name: item.product.name,
+              image: item.product.image ?? '',
+              price: item.product.price,
+              originalPrice: item.product.regular_price ?? item.product.price,
+              quantity: item.quantity,
+              selected: true,
+            });
+          }
         }
 
-        const checkoutItems: CartItem[] = cart.items.map((item) => ({
-          id: item.productId,
-          storeId: 0,
-          storeName: '',
-          name: item.product.name,
-          image: item.product.image ?? '',
-          price: item.product.price,
-          originalPrice: item.product.price,
-          quantity: item.quantity,
-          selected: true,
-        }));
+        // Service holds como CartItems (id negativo para distinguirlos)
+        if (holdsRes?.holds && holdsRes.holds.length > 0) {
+          for (const hold of holdsRes.holds) {
+            checkoutItems.push({
+              id: -hold.id, // id negativo = es servicio
+              storeId: 0,
+              storeName: '',
+              name: `${hold.service_name} — ${hold.specialist_name}`,
+              image: hold.service_image ?? '',
+              price: hold.service_price,
+              originalPrice: hold.service_price,
+              quantity: 1,
+              selected: true,
+            });
+          }
+        }
 
         setCartItems(checkoutItems);
       } catch (err) {

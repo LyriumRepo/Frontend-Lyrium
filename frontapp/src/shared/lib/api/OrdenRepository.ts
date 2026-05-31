@@ -64,6 +64,7 @@ export interface CreateOrderPayload {
 export interface CreateIzipaySessionPayload {
   order_id: string;
   email: string;
+  cart_token?: string;
 }
 
 export interface IzipaySessionResult {

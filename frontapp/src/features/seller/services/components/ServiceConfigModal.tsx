@@ -22,7 +22,7 @@ interface ServiceConfigModalProps {
   service: Service | null;
   specialists: Specialist[];
   onClose: () => void;
-  onSave: (data: Omit<Service, 'id'> & { id?: number }) => void;
+  onSave: (data: Omit<Service, 'id'> & { id?: number }) => Promise<void>;
 }
 
 /** Bloques (por índice) que un especialista cubre en un día concreto */
@@ -30,21 +30,6 @@ type SpecialistDayEntry = { dia: WeekDay; bloques: number[] };
 /** Asignación de un especialista: qué días y qué bloques dentro de cada día */
 type SpecialistAssignment = { id: number; dias: SpecialistDayEntry[] };
 
-<<<<<<< HEAD
-const CATEGORIES = [
-  'Salud y bienestar',
-  'Nutrición',
-  'Psicología',
-  'Fisioterapia',
-  'Medicina general',
-  'Odontología',
-  'Dermatología',
-  'Veterinaria',
-  'Educación',
-  'Asesoría legal',
-  'Consultoría',
-  'Otro',
-=======
 type FormData = Omit<Service, 'id' | 'especialistasAsignados' | 'categoria'> & {
   categoriaL1: string;
   categoriaL2: string;
@@ -60,16 +45,35 @@ const CATEGORY_TREE: CatL1[] = [
   {
     label: 'Servicios médicos',
     children: [
-      'Cardiología', 'Radiología', 'Dermatología', 'Medicina general',
-      'Endocrinología', 'Enfermería', 'Gastroenterología', 'Geriatría',
-      'Ginecología', 'Laboratorio clínico', 'Medicina física y rehabilitación',
-      'Neumología', 'Neurología', 'Nutriología', 'Odontología', 'Oftalmología',
-      'Oncología', 'Pediatría', 'Psicología', 'Psiquiatría', 'Reumatología',
+      'Cardiología',
+      'Radiología',
+      'Dermatología',
+      'Medicina general',
+      'Endocrinología',
+      'Enfermería',
+      'Gastroenterología',
+      'Geriatría',
+      'Ginecología',
+      'Laboratorio clínico',
+      'Medicina física y rehabilitación',
+      'Neumología',
+      'Neurología',
+      'Nutriología',
+      'Odontología',
+      'Oftalmología',
+      'Oncología',
+      'Pediatría',
+      'Psicología',
+      'Psiquiatría',
+      'Reumatología',
     ].map((l) => ({ label: l, children: ['Otro'] })),
   },
   {
     label: 'Belleza',
-    children: ['Peluquerías', 'Spas', 'Otros'].map((l) => ({ label: l, children: ['Otro'] })),
+    children: ['Peluquerías', 'Spas', 'Otros'].map((l) => ({
+      label: l,
+      children: ['Otro'],
+    })),
   },
   {
     label: 'Deportes',
@@ -91,13 +95,15 @@ const CATEGORY_TREE: CatL1[] = [
     label: 'Alojamiento ecológico',
     children: [{ label: 'Otro', children: ['Otro'] }],
   },
->>>>>>> origin/rama-jere2
 ];
 
 const ANTICIPACION_OPTIONS: AnticipacionReserva[] = [24, 48, 72];
 
 const DEFAULT_FORM: FormData = {
   denominacion: '',
+  descripcion: '',
+  beneficios: '',
+  imagen: '',
   categoriaL1: '',
   categoriaL2: '',
   categoriaL3: '',
@@ -209,16 +215,10 @@ const isAssignable = (s: Specialist) => s.availability === 'Disponible';
 const inputCls = (hasError: boolean) =>
   `w-full bg-[var(--bg-secondary)] border rounded-xl px-3 py-2.5 text-sm
    text-[var(--text-primary)] focus:outline-none transition-colors
-<<<<<<< HEAD
    ${
      hasError
        ? 'border-rose-500/50 focus:border-rose-500'
-       : 'border-[var(--border-subtle)] focus:border-sky-500/50'
-=======
-   ${hasError
-     ? 'border-rose-500/50 focus:border-rose-500'
-     : 'border-[var(--border-subtle)] focus:border-sky-500/50 dark:focus:border-[#8FC3A1]/70'
->>>>>>> origin/rama-jere2
+       : 'border-[var(--border-subtle)] focus:border-sky-500/50 dark:focus:border-[#8FC3A1]/70'
    }`;
 
 function DurationPicker({
@@ -400,38 +400,57 @@ export default function ServiceConfigModal({
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
   const [bufferMinutos, setBufferMinutos] = useState(10);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const result = reader.result as string;
+      setPreviewImage(result);
+      set('imagen', result);
+    };
+    reader.readAsDataURL(file);
+  };
 
   const currentlyAssignedIds = service?.especialistasAsignados ?? [];
-  const serviceCatPrefix = [form.categoriaL1, form.categoriaL2].filter(Boolean).join(' > ');
+  const serviceCatPrefix = [form.categoriaL1, form.categoriaL2]
+    .filter(Boolean)
+    .join(' > ');
   const assignableSpecialists = specialists.filter((s) => {
-    const categoryMatch = !serviceCatPrefix || s.categoria.startsWith(serviceCatPrefix);
-    return categoryMatch && (isAssignable(s) || currentlyAssignedIds.includes(s.id));
+    if (!serviceCatPrefix) return false;
+    const categoryMatch =
+      s.categoria.startsWith(serviceCatPrefix) ||
+      s.categoria.endsWith(serviceCatPrefix);
+    return (
+      categoryMatch && (isAssignable(s) || currentlyAssignedIds.includes(s.id))
+    );
   });
 
   // ── Sincronizar form ──────────────────────────────────────────────────────
   useEffect(() => {
     if (!isOpen) return;
     if (service) {
-      const catParts = (service.categoria ?? '').split(' > ');
+      const catLeaf = (service.categoria ?? '').split(' > ').pop() || '';
+      let catL1 = '', catL2 = '';
+      for (const l1 of CATEGORY_TREE) {
+        for (const l2 of l1.children) {
+          if (l2.label === catLeaf) { catL1 = l1.label; catL2 = l2.label; break; }
+        }
+        if (catL1) break;
+      }
       setForm({
-<<<<<<< HEAD
         denominacion: service.denominacion,
-        categoria: service.categoria,
+        descripcion: service.descripcion ?? '',
+        beneficios: service.beneficios ?? '',
+        imagen: service.imagen ?? '',
+        categoriaL1: catL1 || catLeaf,
+        categoriaL2: catL2 || '',
+        categoriaL3: '',
         duracion: service.duracion,
         diasAtencion: service.diasAtencion,
-        especialistasAsignados: service.especialistasAsignados,
-        cupos: service.cupos,
-        precio: service.precio,
-        estado: service.estado,
-        domicilio: service.domicilio,
-        anticipacionReserva: service.anticipacionReserva,
-=======
-        denominacion:           service.denominacion,
-        categoriaL1:            catParts[0] ?? '',
-        categoriaL2:            catParts[1] ?? '',
-        categoriaL3:            catParts[2] ?? '',
-        duracion:               service.duracion,
-        diasAtencion:           service.diasAtencion,
         // Migrar number[] → SpecialistAssignment[]
         // Si el servicio tiene especialistaHorarios granulares los usa; si no, pre-puebla con todos los días/bloques
         especialistasAsignados: service.especialistasAsignados.map((id) => {
@@ -445,15 +464,16 @@ export default function ServiceConfigModal({
             })),
           };
         }),
-        cupos:                  service.cupos,
-        precio:                 service.precio,
-        estado:                 service.estado,
-        domicilio:              service.domicilio,
-        anticipacionReserva:    service.anticipacionReserva,
->>>>>>> origin/rama-jere2
+        cupos: service.cupos,
+        precio: service.precio,
+        estado: service.estado,
+        domicilio: service.domicilio,
+        anticipacionReserva: service.anticipacionReserva,
       });
+      setPreviewImage(service.imagen ?? null);
     } else {
       setForm(DEFAULT_FORM);
+      setPreviewImage(null);
     }
     setStep(1);
     setErrors({});
@@ -471,12 +491,6 @@ export default function ServiceConfigModal({
   const toggleDay = (day: WeekDay) => {
     const exists = form.diasAtencion.find((d) => d.dia === day);
     if (exists) {
-<<<<<<< HEAD
-      set(
-        'diasAtencion',
-        form.diasAtencion.filter((d) => d.dia !== day),
-      );
-=======
       // Al quitar el día, eliminarlo también de las asignaciones de especialistas
       setForm((p) => ({
         ...p,
@@ -487,7 +501,6 @@ export default function ServiceConfigModal({
         })),
       }));
       setErrors((p) => ({ ...p, diasAtencion: undefined }));
->>>>>>> origin/rama-jere2
     } else {
       const updated = [
         ...form.diasAtencion,
@@ -497,33 +510,35 @@ export default function ServiceConfigModal({
     }
   };
 
-  const addBlock = (day: WeekDay) =>
-    set(
-      'diasAtencion',
-      form.diasAtencion.map((d) =>
+  const addBlock = (day: WeekDay) => {
+    const newIdx = form.diasAtencion.find((d) => d.dia === day)?.bloques.length ?? 0;
+    setForm((p) => ({
+      ...p,
+      diasAtencion: p.diasAtencion.map((d) =>
         d.dia === day
           ? { ...d, bloques: [...d.bloques, { ...EMPTY_BLOCK }] }
           : d,
       ),
-    );
+      especialistasAsignados: p.especialistasAsignados.map((a) => ({
+        ...a,
+        dias: a.dias.some((de) => de.dia === day)
+          ? a.dias.map((de) =>
+              de.dia === day ? { ...de, bloques: [...de.bloques, newIdx] } : de,
+            )
+          : [...a.dias, { dia: day, bloques: [newIdx] }],
+      })),
+    }));
+  };
 
-<<<<<<< HEAD
-  const removeBlock = (day: WeekDay, bi: number) =>
-    set(
-      'diasAtencion',
-      form.diasAtencion.map((d) =>
-        d.dia === day
-          ? { ...d, bloques: d.bloques.filter((_, i) => i !== bi) }
-          : d,
-      ),
-    );
-=======
   const removeBlock = (day: WeekDay, bi: number) => {
     // Eliminar el bloque del día y reajustar índices en asignaciones de especialistas
     setForm((p) => ({
       ...p,
       diasAtencion: p.diasAtencion.map((d) =>
-        d.dia === day ? { ...d, bloques: d.bloques.filter((_, i) => i !== bi) } : d),
+        d.dia === day
+          ? { ...d, bloques: d.bloques.filter((_, i) => i !== bi) }
+          : d,
+      ),
       especialistasAsignados: p.especialistasAsignados.map((a) => ({
         ...a,
         dias: a.dias.map((de) => {
@@ -531,14 +546,13 @@ export default function ServiceConfigModal({
           return {
             ...de,
             bloques: de.bloques
-              .filter((b) => b !== bi)          // quitar el índice eliminado
+              .filter((b) => b !== bi) // quitar el índice eliminado
               .map((b) => (b > bi ? b - 1 : b)), // reajustar índices superiores
           };
         }),
       })),
     }));
   };
->>>>>>> origin/rama-jere2
 
   const updateBlock = (
     day: WeekDay,
@@ -562,26 +576,11 @@ export default function ServiceConfigModal({
 
   const toggleSpecialist = (id: number) => {
     const cur = form.especialistasAsignados;
-<<<<<<< HEAD
+    const exists = cur.find((a) => a.id === id);
     set(
       'especialistasAsignados',
-      cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id],
+      exists ? cur.filter((a) => a.id !== id) : [...cur, { id, dias: [] }],
     );
-  };
-
-  // ── Sesiones preview ──────────────────────────────────────────────────────
-  const totalSessions = form.diasAtencion.reduce(
-    (acc, d) =>
-      acc +
-      d.bloques.reduce(
-        (a, b) => a + calculateSessions(b, form.duracion).length,
-        0,
-      ),
-    0,
-  );
-=======
-    const exists = cur.find((a) => a.id === id);
-    set('especialistasAsignados', exists ? cur.filter((a) => a.id !== id) : [...cur, { id, dias: [] }]);
   };
 
   /** Agrega o quita un día entero; al añadir selecciona todos sus bloques por defecto */
@@ -593,14 +592,23 @@ export default function ServiceConfigModal({
         const hasDay = a.dias.some((d) => d.dia === day);
         if (hasDay) return { ...a, dias: a.dias.filter((d) => d.dia !== day) };
         const dayEntry = p.diasAtencion.find((d) => d.dia === day);
-        const allBlockIndices = dayEntry ? dayEntry.bloques.map((_, i) => i) : [];
-        return { ...a, dias: [...a.dias, { dia: day, bloques: allBlockIndices }] };
+        const allBlockIndices = dayEntry
+          ? dayEntry.bloques.map((_, i) => i)
+          : [];
+        return {
+          ...a,
+          dias: [...a.dias, { dia: day, bloques: allBlockIndices }],
+        };
       }),
     }));
   };
 
   /** Agrega o quita un bloque específico dentro de un día para un especialista */
-  const toggleSpecialistBlock = (specialistId: number, day: WeekDay, blockIndex: number) => {
+  const toggleSpecialistBlock = (
+    specialistId: number,
+    day: WeekDay,
+    blockIndex: number,
+  ) => {
     setForm((p) => ({
       ...p,
       especialistasAsignados: p.especialistasAsignados.map((a) => {
@@ -610,7 +618,12 @@ export default function ServiceConfigModal({
           dias: a.dias.map((d) => {
             if (d.dia !== day) return d;
             const has = d.bloques.includes(blockIndex);
-            return { ...d, bloques: has ? d.bloques.filter((b) => b !== blockIndex) : [...d.bloques, blockIndex] };
+            return {
+              ...d,
+              bloques: has
+                ? d.bloques.filter((b) => b !== blockIndex)
+                : [...d.bloques, blockIndex],
+            };
           }),
         };
       }),
@@ -620,22 +633,36 @@ export default function ServiceConfigModal({
   /** Selecciona todos los días+bloques, o los limpia todos */
   const toggleAllDaysForSpecialist = (specialistId: number) => {
     setForm((p) => {
-      const allDayEntries = p.diasAtencion.map((d) => ({ dia: d.dia, bloques: d.bloques.map((_, i) => i) }));
+      const allDayEntries = p.diasAtencion.map((d) => ({
+        dia: d.dia,
+        bloques: d.bloques.map((_, i) => i),
+      }));
       return {
         ...p,
         especialistasAsignados: p.especialistasAsignados.map((a) => {
           if (a.id !== specialistId) return a;
           const allSelected = p.diasAtencion.every((d) =>
-            a.dias.some((ad) => ad.dia === d.dia && d.bloques.every((_, i) => ad.bloques.includes(i))));
+            a.dias.some(
+              (ad) =>
+                ad.dia === d.dia &&
+                d.bloques.every((_, i) => ad.bloques.includes(i)),
+            ),
+          );
           return { ...a, dias: allSelected ? [] : allDayEntries };
         }),
       };
     });
   };
 
-  const totalSessions = form.diasAtencion.reduce((acc, d) =>
-    acc + d.bloques.reduce((a, b) => a + calculateSessions(b, form.duracion).length, 0), 0);
->>>>>>> origin/rama-jere2
+  const totalSessions = form.diasAtencion.reduce(
+    (acc, d) =>
+      acc +
+      d.bloques.reduce(
+        (a, b) => a + calculateSessions(b, form.duracion).length,
+        0,
+      ),
+    0,
+  );
 
   const validateStep = (s: 1 | 2 | 3): boolean => {
     const e: typeof errors = {};
@@ -666,31 +693,24 @@ export default function ServiceConfigModal({
   };
   const prevStep = () => setStep((s) => Math.max(s - 1, 1) as 1 | 2 | 3);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!validateStep(3)) return;
-<<<<<<< HEAD
-    const finalCat =
-      form.categoria === 'Otro' ? customCategory : form.categoria;
-    onSave(
-      service
-        ? { ...form, categoria: finalCat, id: service.id }
-        : { ...form, categoria: finalCat },
-    );
-=======
     const categoria = [form.categoriaL1, form.categoriaL2, form.categoriaL3]
-      .filter(Boolean).join(' > ');
+      .filter(Boolean)
+      .join(' > ');
     // Serializar SpecialistAssignment[] → number[] + persistir granularidad en especialistaHorarios
     const saveData = {
       ...form,
       categoria,
       especialistasAsignados: form.especialistasAsignados.map((a) => a.id),
-      especialistaHorarios: form.especialistasAsignados.map<SpecialistHorario>((a) => ({
-        id: a.id,
-        dias: a.dias,
-      })),
+      especialistaHorarios: form.especialistasAsignados.map<SpecialistHorario>(
+        (a) => ({
+          id: a.id,
+          dias: a.dias,
+        }),
+      ),
     };
-    onSave(service ? { ...saveData, id: service.id } : saveData);
->>>>>>> origin/rama-jere2
+    await onSave(service ? { ...saveData, id: service.id } : saveData);
     onClose();
   };
 
@@ -738,19 +758,13 @@ export default function ServiceConfigModal({
             const active = step === idx;
             return (
               <div key={label} className="flex-1 space-y-1.5">
-<<<<<<< HEAD
                 <div
-                  className={`h-1 rounded-full transition-all ${done ? 'bg-sky-500' : active ? 'bg-sky-500/50' : 'bg-[var(--border-subtle)]'}`}
+                  className={`h-1 rounded-full transition-all ${done ? 'bg-sky-500 dark:bg-[#8FC3A1]' : active ? 'bg-sky-500/50 dark:bg-[#8FC3A1]/50' : 'bg-[var(--border-subtle)]'}`}
                 />
                 <p
                   className={`text-[9px] font-black uppercase tracking-widest transition-colors
-                  ${active ? 'text-sky-500' : done ? 'text-[var(--text-secondary)]' : 'text-[var(--border-subtle)]'}`}
+                  ${active ? 'text-sky-500 dark:text-[#8FC3A1]' : done ? 'text-[var(--text-secondary)]' : 'text-[var(--border-subtle)]'}`}
                 >
-=======
-                <div className={`h-1 rounded-full transition-all ${done ? 'bg-sky-500 dark:bg-[#8FC3A1]' : active ? 'bg-sky-500/50 dark:bg-[#8FC3A1]/50' : 'bg-[var(--border-subtle)]'}`} />
-                <p className={`text-[9px] font-black uppercase tracking-widest transition-colors
-                  ${active ? 'text-sky-500 dark:text-[#8FC3A1]' : done ? 'text-[var(--text-secondary)]' : 'text-[var(--border-subtle)]'}`}>
->>>>>>> origin/rama-jere2
                   {i + 1}. {label}
                 </p>
               </div>
@@ -763,49 +777,89 @@ export default function ServiceConfigModal({
           {/* ════════════════ PASO 1: Información ════════════════ */}
           {step === 1 && (
             <div className="space-y-5 animate-fadeIn">
-              {/* Denominación */}
-              <Field
-                label="Denominación del servicio"
-                error={errors.denominacion}
-              >
-                <input
-                  type="text"
-                  value={form.denominacion}
-                  placeholder="ej. Consulta nutricional, Sesión de fisioterapia..."
-                  onChange={(e) => set('denominacion', e.target.value)}
-                  className={inputCls(!!errors.denominacion)}
+              {/* ── Image + Denominación side by side ── */}
+              <div className="grid grid-cols-[160px_1fr] gap-5">
+                {/* Image upload square */}
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)]">
+                    Imagen
+                  </label>
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => fileInputRef.current?.click()}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ')
+                        fileInputRef.current?.click();
+                    }}
+                    className="relative aspect-square bg-[var(--bg-secondary)] border-2 border-dashed border-[var(--border-subtle)] flex flex-col items-center justify-center cursor-pointer group rounded-2xl overflow-hidden hover:border-sky-400/50 dark:hover:border-[#8FC3A1]/50 transition-all"
+                  >
+                    {previewImage ? (
+                      <img
+                        src={previewImage}
+                        className="w-full h-full object-cover"
+                        alt="Preview"
+                      />
+                    ) : (
+                      <div className="text-center group-hover:scale-110 transition-transform p-2">
+                        <Icon
+                          name="Image"
+                          className="w-8 h-8 mx-auto text-[var(--text-secondary)]"
+                        />
+                        <p className="text-[8px] font-black text-[var(--text-secondary)] uppercase mt-1">
+                          Subir foto
+                        </p>
+                      </div>
+                    )}
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      className="hidden"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                    />
+                  </div>
+                </div>
+
+                {/* Denominación */}
+                <div className="space-y-2">
+                  <Field
+                    label="Denominación del servicio"
+                    error={errors.denominacion}
+                  >
+                    <input
+                      type="text"
+                      value={form.denominacion}
+                      placeholder="ej. Consulta nutricional, Sesión de fisioterapia..."
+                      onChange={(e) => set('denominacion', e.target.value)}
+                      className={inputCls(!!errors.denominacion)}
+                    />
+                  </Field>
+                </div>
+              </div>
+
+              {/* Descripción */}
+              <Field label="Descripción del servicio">
+                <textarea
+                  value={form.descripcion ?? ''}
+                  placeholder="Describe en qué consiste el servicio, qué incluye, a quién está dirigido..."
+                  onChange={(e) => set('descripcion', e.target.value)}
+                  rows={3}
+                  className={inputCls(false)}
                 />
               </Field>
 
-<<<<<<< HEAD
-              {/* Categoría */}
-              <Field label="Categoría" error={errors.categoria}>
-                <select
-                  value={form.categoria}
-                  onChange={(e) => {
-                    set('categoria', e.target.value);
-                    if (e.target.value !== 'Otro') setCustomCategory('');
-                  }}
-                  className={inputCls(!!errors.categoria)}
-                >
-                  <option value="" disabled>
-                    Selecciona una categoría...
-                  </option>
-                  {CATEGORIES.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {cat}
-                    </option>
-                  ))}
-                </select>
-                {form.categoria === 'Otro' && (
-                  <input
-                    type="text"
-                    value={customCategory}
-                    placeholder="Escribe la categoría..."
-                    onChange={(e) => setCustomCategory(e.target.value)}
-                    className={`mt-2 ${inputCls(false)}`}
-                  />
-=======
+              {/* Beneficios */}
+              <Field label="Beneficios (uno por línea)">
+                <textarea
+                  value={form.beneficios ?? ''}
+                  placeholder={'• Atención personalizada\n• Resultados garantizados\n• Seguimiento post-servicio'}
+                  onChange={(e) => set('beneficios', e.target.value)}
+                  rows={3}
+                  className={inputCls(false)}
+                />
+              </Field>
+
               {/* ── Categorías (3 niveles) ── */}
               <div className="space-y-3">
                 <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)]">
@@ -824,75 +878,112 @@ export default function ServiceConfigModal({
                     }}
                     className={inputCls(!!errors.categoriaL1)}
                   >
-                    <option value="" disabled>1. Categoría principal...</option>
+                    <option value="" disabled>
+                      1. Categoría principal...
+                    </option>
                     {CATEGORY_TREE.map((c) => (
-                      <option key={c.label} value={c.label}>{c.label}</option>
+                      <option key={c.label} value={c.label}>
+                        {c.label}
+                      </option>
                     ))}
                   </select>
                   {errors.categoriaL1 && (
-                    <p className="text-[10px] text-rose-500 font-semibold">{errors.categoriaL1}</p>
+                    <p className="text-[10px] text-rose-500 font-semibold">
+                      {errors.categoriaL1}
+                    </p>
                   )}
                 </div>
 
                 {/* L2 */}
-                {form.categoriaL1 && (() => {
-                  const l1Node = CATEGORY_TREE.find((c) => c.label === form.categoriaL1);
-                  return l1Node ? (
-                    <div className="space-y-1 pl-3 border-l-2 border-sky-500/20 dark:border-[#8FC3A1]/20">
-                      <select
-                        value={form.categoriaL2}
-                        onChange={(e) => {
-                          set('categoriaL2', e.target.value);
-                          set('categoriaL3', '');
-                        }}
-                        className={inputCls(!!errors.categoriaL2)}
-                      >
-                        <option value="" disabled>2. Subcategoría...</option>
-                        {l1Node.children.map((c) => (
-                          <option key={c.label} value={c.label}>{c.label}</option>
-                        ))}
-                      </select>
-                      {errors.categoriaL2 && (
-                        <p className="text-[10px] text-rose-500 font-semibold">{errors.categoriaL2}</p>
-                      )}
-                    </div>
-                  ) : null;
-                })()}
+                {form.categoriaL1 &&
+                  (() => {
+                    const l1Node = CATEGORY_TREE.find(
+                      (c) => c.label === form.categoriaL1,
+                    );
+                    return l1Node ? (
+                      <div className="space-y-1 pl-3 border-l-2 border-sky-500/20 dark:border-[#8FC3A1]/20">
+                        <select
+                          value={form.categoriaL2}
+                          onChange={(e) => {
+                            set('categoriaL2', e.target.value);
+                            set('categoriaL3', '');
+                          }}
+                          className={inputCls(!!errors.categoriaL2)}
+                        >
+                          <option value="" disabled>
+                            2. Subcategoría...
+                          </option>
+                          {l1Node.children.map((c) => (
+                            <option key={c.label} value={c.label}>
+                              {c.label}
+                            </option>
+                          ))}
+                        </select>
+                        {errors.categoriaL2 && (
+                          <p className="text-[10px] text-rose-500 font-semibold">
+                            {errors.categoriaL2}
+                          </p>
+                        )}
+                      </div>
+                    ) : null;
+                  })()}
 
                 {/* L3 */}
-                {form.categoriaL2 && (() => {
-                  const l1Node = CATEGORY_TREE.find((c) => c.label === form.categoriaL1);
-                  const l2Node = l1Node?.children.find((c) => c.label === form.categoriaL2);
-                  return l2Node ? (
-                    <div className="pl-6 border-l-2 border-sky-500/10 dark:border-[#8FC3A1]/10">
-                      <select
-                        value={form.categoriaL3}
-                        onChange={(e) => set('categoriaL3', e.target.value)}
-                        className={inputCls(false)}
-                      >
-                        <option value="">3. Especialización (opcional)...</option>
-                        {l2Node.children.map((c) => (
-                          <option key={c} value={c}>{c}</option>
-                        ))}
-                      </select>
-                    </div>
-                  ) : null;
-                })()}
+                {form.categoriaL2 &&
+                  (() => {
+                    const l1Node = CATEGORY_TREE.find(
+                      (c) => c.label === form.categoriaL1,
+                    );
+                    const l2Node = l1Node?.children.find(
+                      (c) => c.label === form.categoriaL2,
+                    );
+                    return l2Node ? (
+                      <div className="pl-6 border-l-2 border-sky-500/10 dark:border-[#8FC3A1]/10">
+                        <select
+                          value={form.categoriaL3}
+                          onChange={(e) => set('categoriaL3', e.target.value)}
+                          className={inputCls(false)}
+                        >
+                          <option value="">
+                            3. Especialización (opcional)...
+                          </option>
+                          {l2Node.children.map((c) => (
+                            <option key={c} value={c}>
+                              {c}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    ) : null;
+                  })()}
 
                 {/* Ruta visual */}
                 {form.categoriaL1 && (
                   <div className="flex items-center gap-1 flex-wrap px-1">
-                    <span className="text-[10px] font-black text-sky-500 dark:text-[#8FC3A1]">{form.categoriaL1}</span>
-                    {form.categoriaL2 && (<>
-                      <span className="text-[10px] text-[var(--text-secondary)]">›</span>
-                      <span className="text-[10px] font-black text-sky-500 dark:text-[#8FC3A1]">{form.categoriaL2}</span>
-                    </>)}
-                    {form.categoriaL3 && (<>
-                      <span className="text-[10px] text-[var(--text-secondary)]">›</span>
-                      <span className="text-[10px] font-black text-sky-500 dark:text-[#8FC3A1]">{form.categoriaL3}</span>
-                    </>)}
+                    <span className="text-[10px] font-black text-sky-500 dark:text-[#8FC3A1]">
+                      {form.categoriaL1}
+                    </span>
+                    {form.categoriaL2 && (
+                      <>
+                        <span className="text-[10px] text-[var(--text-secondary)]">
+                          ›
+                        </span>
+                        <span className="text-[10px] font-black text-sky-500 dark:text-[#8FC3A1]">
+                          {form.categoriaL2}
+                        </span>
+                      </>
+                    )}
+                    {form.categoriaL3 && (
+                      <>
+                        <span className="text-[10px] text-[var(--text-secondary)]">
+                          ›
+                        </span>
+                        <span className="text-[10px] font-black text-sky-500 dark:text-[#8FC3A1]">
+                          {form.categoriaL3}
+                        </span>
+                      </>
+                    )}
                   </div>
->>>>>>> origin/rama-jere2
                 )}
               </div>
 
@@ -923,22 +1014,21 @@ export default function ServiceConfigModal({
                   type="button"
                   onClick={() => set('domicilio', !form.domicilio)}
                   className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl border transition-all
-<<<<<<< HEAD
                     ${
                       form.domicilio
-                        ? 'bg-sky-500/10 border-sky-500/40'
-                        : 'bg-[var(--bg-secondary)] border-[var(--border-subtle)] hover:border-sky-500/20'
+                        ? 'bg-sky-500/10 dark:bg-[#8FC3A1]/10 border-sky-500/40 dark:border-[#8FC3A1]/40'
+                        : 'bg-[var(--bg-secondary)] border-[var(--border-subtle)] hover:border-sky-500/20 dark:hover:border-[#8FC3A1]/50'
                     }`}
                 >
                   <div
-                    className={`flex-shrink-0 transition-colors ${form.domicilio ? 'text-sky-500' : 'text-[var(--text-secondary)]'}`}
+                    className={`flex-shrink-0 transition-colors ${form.domicilio ? 'text-sky-500 dark:text-[#8FC3A1]' : 'text-[var(--text-secondary)]'}`}
                   >
                     <SvgHome />
                   </div>
                   <div className="flex-1 text-left">
                     <p
                       className={`text-xs font-black uppercase tracking-widest transition-colors
-                      ${form.domicilio ? 'text-sky-500' : 'text-[var(--text-primary)]'}`}
+                      ${form.domicilio ? 'text-sky-500 dark:text-[#8FC3A1]' : 'text-[var(--text-primary)]'}`}
                     >
                       Disponible a domicilio
                     </p>
@@ -947,30 +1037,10 @@ export default function ServiceConfigModal({
                     className={`w-10 h-6 rounded-full border-2 flex items-center transition-all flex-shrink-0
                     ${
                       form.domicilio
-                        ? 'bg-sky-500 border-sky-500 justify-end'
+                        ? 'bg-sky-500 dark:bg-[#8FC3A1] border-sky-500 dark:border-[#8FC3A1] justify-end'
                         : 'bg-[var(--bg-primary)] border-[var(--border-subtle)] justify-start'
                     }`}
                   >
-=======
-                    ${form.domicilio
-                      ? 'bg-sky-500/10 dark:bg-[#8FC3A1]/10 border-sky-500/40 dark:border-[#8FC3A1]/40'
-                      : 'bg-[var(--bg-secondary)] border-[var(--border-subtle)] hover:border-sky-500/20 dark:hover:border-[#8FC3A1]/50'
-                    }`}>
-                  <div className={`flex-shrink-0 transition-colors ${form.domicilio ? 'text-sky-500 dark:text-[#8FC3A1]' : 'text-[var(--text-secondary)]'}`}>
-                    <SvgHome />
-                  </div>
-                  <div className="flex-1 text-left">
-                    <p className={`text-xs font-black uppercase tracking-widest transition-colors
-                      ${form.domicilio ? 'text-sky-500 dark:text-[#8FC3A1]' : 'text-[var(--text-primary)]'}`}>
-                      Disponible a domicilio
-                    </p>
-                  </div>
-                  <div className={`w-10 h-6 rounded-full border-2 flex items-center transition-all flex-shrink-0
-                    ${form.domicilio
-                      ? 'bg-sky-500 dark:bg-[#8FC3A1] border-sky-500 dark:border-[#8FC3A1] justify-end'
-                      : 'bg-[var(--bg-primary)] border-[var(--border-subtle)] justify-start'
-                    }`}>
->>>>>>> origin/rama-jere2
                     <div className="w-4 h-4 bg-white rounded-full mx-0.5 shadow-sm" />
                   </div>
                 </button>
@@ -985,27 +1055,22 @@ export default function ServiceConfigModal({
                 ) : (
                   <div className="space-y-2">
                     {assignableSpecialists.map((sp) => {
-<<<<<<< HEAD
-                      const selected = form.especialistasAsignados.includes(
-                        sp.id,
+                      const selected = form.especialistasAsignados.some(
+                        (a) => a.id === sp.id,
                       );
-=======
-                      const selected = form.especialistasAsignados.some((a) => a.id === sp.id);
->>>>>>> origin/rama-jere2
                       return (
                         <button
                           key={sp.id}
                           type="button"
                           onClick={() => toggleSpecialist(sp.id)}
                           className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl border transition-all
-<<<<<<< HEAD
                             ${
                               selected
-                                ? 'bg-indigo-500/10 border-indigo-500/40'
-                                : 'bg-[var(--bg-secondary)] border-[var(--border-subtle)] hover:border-indigo-500/20'
+                                ? 'bg-sky-500/10 border-sky-500/40 dark:bg-[#8FC3A1]/10 dark:border-[#8FC3A1]/40'
+                                : 'bg-[var(--bg-secondary)] border-[var(--border-subtle)] hover:border-sky-500/20 dark:hover:border-[#8FC3A1]/20'
                             }`}
                         >
-                          <div className="w-8 h-8 rounded-full bg-indigo-500/20 border border-indigo-500/30 overflow-hidden flex-shrink-0 flex items-center justify-center text-indigo-400">
+                          <div className="w-8 h-8 rounded-full bg-sky-500/20 dark:bg-[#8FC3A1]/20 border border-sky-500/30 dark:border-[#8FC3A1]/30 overflow-hidden flex-shrink-0 flex items-center justify-center text-sky-400 dark:text-[#8FC3A1]">
                             {sp.foto ? (
                               <img
                                 src={sp.foto}
@@ -1015,17 +1080,6 @@ export default function ServiceConfigModal({
                             ) : (
                               <SvgUserSilhouette />
                             )}
-=======
-                            ${selected
-                              ? 'bg-sky-500/10 border-sky-500/40 dark:bg-[#8FC3A1]/10 dark:border-[#8FC3A1]/40'
-                              : 'bg-[var(--bg-secondary)] border-[var(--border-subtle)] hover:border-sky-500/20 dark:hover:border-[#8FC3A1]/20'
-                            }`}>
-                          <div className="w-8 h-8 rounded-full bg-sky-500/20 dark:bg-[#8FC3A1]/20 border border-sky-500/30 dark:border-[#8FC3A1]/30 overflow-hidden flex-shrink-0 flex items-center justify-center text-sky-400 dark:text-[#8FC3A1]">
-                            {sp.foto
-                              ? <img src={sp.foto} alt="" className="w-full h-full object-cover" />
-                              : <SvgUserSilhouette />
-                            }
->>>>>>> origin/rama-jere2
                           </div>
                           <div className="flex-1 text-left">
                             <div className="flex items-center gap-2">
@@ -1042,15 +1096,10 @@ export default function ServiceConfigModal({
                               {sp.especialidad}
                             </p>
                           </div>
-<<<<<<< HEAD
                           <div
                             className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all flex-shrink-0
-                            ${selected ? 'bg-indigo-500 border-indigo-500 text-white' : 'border-[var(--border-subtle)]'}`}
+                            ${selected ? 'bg-sky-500 dark:bg-[var(--brand-green)] border-sky-500 dark:border-[var(--brand-green)] text-white' : 'border-[var(--border-subtle)]'}`}
                           >
-=======
-                          <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all flex-shrink-0
-                            ${selected ? 'bg-sky-500 dark:bg-[var(--brand-green)] border-sky-500 dark:border-[var(--brand-green)] text-white' : 'border-[var(--border-subtle)]'}`}>
->>>>>>> origin/rama-jere2
                             {selected && <SvgCheck />}
                           </div>
                         </button>
@@ -1075,19 +1124,12 @@ export default function ServiceConfigModal({
                         type="button"
                         onClick={() => toggleDay(day)}
                         className={`w-12 h-12 rounded-2xl text-[10px] font-black uppercase border transition-all
-<<<<<<< HEAD
                           ${
                             active
-                              ? 'bg-sky-500/15 border-sky-500/50 text-sky-500'
-                              : 'bg-[var(--bg-secondary)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-sky-500/30'
+                              ? 'bg-sky-500/15 dark:bg-[#8FC3A1]/15 border-sky-500/50 dark:border-[#8FC3A1]/50 text-sky-500 dark:text-[#8FC3A1]'
+                              : 'bg-[var(--bg-secondary)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-sky-500/30 dark:hover:border-[#8FC3A1]/50'
                           }`}
                       >
-=======
-                          ${active
-                            ? 'bg-sky-500/15 dark:bg-[#8FC3A1]/15 border-sky-500/50 dark:border-[#8FC3A1]/50 text-sky-500 dark:text-[#8FC3A1]'
-                            : 'bg-[var(--bg-secondary)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-sky-500/30 dark:hover:border-[#8FC3A1]/50'
-                          }`}>
->>>>>>> origin/rama-jere2
                         {WEEK_DAY_SHORT[day]}
                       </button>
                     );
@@ -1109,9 +1151,9 @@ export default function ServiceConfigModal({
                 </div>
               )}
 
-              {form.diasAtencion.map((dayEntry) => (
+              {form.diasAtencion.map((dayEntry, idx) => (
                 <div
-                  key={dayEntry.dia}
+                  key={`${dayEntry.dia}-${idx}`}
                   className="rounded-[1.75rem] border border-[var(--border-subtle)] bg-[var(--bg-secondary)]/40 overflow-hidden"
                 >
                   <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border-subtle)]">
@@ -1132,16 +1174,11 @@ export default function ServiceConfigModal({
                         )}{' '}
                         sesión(es)
                       </span>
-<<<<<<< HEAD
                       <button
                         type="button"
                         onClick={() => addBlock(dayEntry.dia)}
-                        className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-sky-500/10 border border-sky-500/20 text-sky-500 text-[10px] font-black uppercase tracking-widest hover:bg-sky-500/20 transition-colors"
+                        className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-sky-500/10 dark:bg-[#8FC3A1]/10 border border-sky-500/20 dark:border-[#8FC3A1]/20 text-sky-500 dark:text-[#8FC3A1] text-[10px] font-black uppercase tracking-widest hover:bg-sky-500/20 dark:hover:bg-[#8FC3A1]/20 transition-colors"
                       >
-=======
-                      <button type="button" onClick={() => addBlock(dayEntry.dia)}
-                        className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-sky-500/10 dark:bg-[#8FC3A1]/10 border border-sky-500/20 dark:border-[#8FC3A1]/20 text-sky-500 dark:text-[#8FC3A1] text-[10px] font-black uppercase tracking-widest hover:bg-sky-500/20 dark:hover:bg-[#8FC3A1]/20 transition-colors">
->>>>>>> origin/rama-jere2
                         <SvgPlus />
                         Bloque
                       </button>
@@ -1155,16 +1192,86 @@ export default function ServiceConfigModal({
                       return (
                         <div key={bi} className="space-y-2">
                           <div className="flex items-center gap-2">
-                            <TimeBlockPicker
-                              inicio={block.inicio}
-                              fin={block.fin}
-                              onChangeInicio={(v) =>
-                                updateBlock(dayEntry.dia, bi, 'inicio', v)
-                              }
-                              onChangeFin={(v) =>
-                                updateBlock(dayEntry.dia, bi, 'fin', v)
-                              }
-                            />
+                            <div
+                              className={`flex items-center gap-2 flex-1 bg-[var(--bg-primary)] rounded-xl border px-3 py-2 transition-colors
+                              ${invalid ? 'border-rose-500/40' : 'border-[var(--border-subtle)]'}`}
+                            >
+                              <label htmlFor={`inicio-${dayEntry.dia}-${bi}`} className="cursor-pointer text-[var(--text-secondary)] hover:text-sky-500 transition-colors">
+                                <SvgClock />
+                              </label>
+                              <select
+                                id={`inicio-${dayEntry.dia}-${bi}`}
+                                value={block.inicio.split(':')[0]}
+                                onChange={(e) =>
+                                  updateBlock(
+                                    dayEntry.dia,
+                                    bi,
+                                    'inicio',
+                                    `${e.target.value}:${block.inicio.split(':')[1] || '00'}`,
+                                  )
+                                }
+                                className="bg-transparent text-sm font-semibold text-[var(--text-primary)] focus:outline-none cursor-pointer appearance-none text-center w-12"
+                              >
+                                {Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0')).map((h) => (
+                                  <option key={h} value={h}>{h}</option>
+                                ))}
+                              </select>
+                              <span className="text-[var(--text-secondary)] font-semibold">:</span>
+                              <select
+                                value={block.inicio.split(':')[1] || '00'}
+                                onChange={(e) =>
+                                  updateBlock(
+                                    dayEntry.dia,
+                                    bi,
+                                    'inicio',
+                                    `${block.inicio.split(':')[0] || '00'}:${e.target.value}`,
+                                  )
+                                }
+                                className="bg-transparent text-sm font-semibold text-[var(--text-primary)] focus:outline-none cursor-pointer appearance-none text-center w-12"
+                              >
+                                <option value="00">00</option>
+                                <option value="30">30</option>
+                              </select>
+                              <span className="text-[var(--text-secondary)]">
+                                →
+                              </span>
+                              <label htmlFor={`fin-${dayEntry.dia}-${bi}`} className="cursor-pointer text-[var(--text-secondary)] hover:text-sky-500 transition-colors">
+                                <SvgClock />
+                              </label>
+                              <select
+                                id={`fin-${dayEntry.dia}-${bi}`}
+                                value={block.fin.split(':')[0]}
+                                onChange={(e) =>
+                                  updateBlock(
+                                    dayEntry.dia,
+                                    bi,
+                                    'fin',
+                                    `${e.target.value}:${block.fin.split(':')[1] || '00'}`,
+                                  )
+                                }
+                                className="bg-transparent text-sm font-semibold text-[var(--text-primary)] focus:outline-none cursor-pointer appearance-none text-center w-12"
+                              >
+                                {Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0')).map((h) => (
+                                  <option key={h} value={h}>{h}</option>
+                                ))}
+                              </select>
+                              <span className="text-[var(--text-secondary)] font-semibold">:</span>
+                              <select
+                                value={block.fin.split(':')[1] || '00'}
+                                onChange={(e) =>
+                                  updateBlock(
+                                    dayEntry.dia,
+                                    bi,
+                                    'fin',
+                                    `${block.fin.split(':')[0] || '00'}:${e.target.value}`,
+                                  )
+                                }
+                                className="bg-transparent text-sm font-semibold text-[var(--text-primary)] focus:outline-none cursor-pointer appearance-none text-center w-12"
+                              >
+                                <option value="00">00</option>
+                                <option value="30">30</option>
+                              </select>
+                            </div>
                             {dayEntry.bloques.length > 1 && (
                               <button
                                 type="button"
@@ -1210,12 +1317,9 @@ export default function ServiceConfigModal({
                       margen
                     </p>
                   </div>
-<<<<<<< HEAD
-                  <span className="text-2xl font-black text-sky-500">
+                  <span className="text-2xl font-black text-sky-500 dark:text-[#8FC3A1]">
                     {totalSessions}
                   </span>
-=======
-                  <span className="text-2xl font-black text-sky-500 dark:text-[#8FC3A1]">{totalSessions}</span>
                 </div>
               )}
 
@@ -1223,7 +1327,9 @@ export default function ServiceConfigModal({
               {form.especialistasAsignados.length > 0 && (
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
-                    <div className="text-sky-400 dark:text-[#8FC3A1]"><SvgUserSilhouette /></div>
+                    <div className="text-sky-400 dark:text-[#8FC3A1]">
+                      <SvgUserSilhouette />
+                    </div>
                     <div>
                       <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-primary)]">
                         Horario por especialista
@@ -1243,30 +1349,49 @@ export default function ServiceConfigModal({
                   ) : (
                     <div className="space-y-2">
                       {form.especialistasAsignados.map((assignment) => {
-                        const sp = specialists.find((s) => s.id === assignment.id);
+                        const sp = specialists.find(
+                          (s) => s.id === assignment.id,
+                        );
                         if (!sp) return null;
 
-                        const totalBlocksInService = form.diasAtencion.reduce((a, d) => a + d.bloques.length, 0);
-                        const assignedBlocks = assignment.dias.reduce((a, d) => a + d.bloques.length, 0);
-                        const allSelected = totalBlocksInService > 0 && assignedBlocks === totalBlocksInService;
+                        const totalBlocksInService = form.diasAtencion.reduce(
+                          (a, d) => a + d.bloques.length,
+                          0,
+                        );
+                        const assignedBlocks = assignment.dias.reduce(
+                          (a, d) => a + d.bloques.length,
+                          0,
+                        );
+                        const allSelected =
+                          totalBlocksInService > 0 &&
+                          assignedBlocks === totalBlocksInService;
                         const noneSelected = assignedBlocks === 0;
 
                         return (
-                          <div key={assignment.id}
-                            className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)]/40 overflow-hidden">
-
+                          <div
+                            key={assignment.id}
+                            className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)]/40 overflow-hidden"
+                          >
                             {/* Header especialista */}
                             <div className="flex items-center gap-3 px-4 py-3 border-b border-[var(--border-subtle)]">
                               <div className="w-7 h-7 rounded-full bg-sky-500/20 dark:bg-[#8FC3A1]/20 border border-sky-500/30 dark:border-[#8FC3A1]/30 overflow-hidden flex-shrink-0 flex items-center justify-center text-sky-400 dark:text-[#8FC3A1]">
-                                {sp.foto
-                                  ? <img src={sp.foto} alt="" className="w-full h-full object-cover" />
-                                  : <SvgUserSilhouette />}
+                                {sp.foto ? (
+                                  <img
+                                    src={sp.foto}
+                                    alt=""
+                                    className="w-full h-full object-cover"
+                                  />
+                                ) : (
+                                  <SvgUserSilhouette />
+                                )}
                               </div>
                               <div className="flex-1 min-w-0">
                                 <p className="text-xs font-black text-[var(--text-primary)] truncate">
                                   {sp.nombres} {sp.apellidos}
                                 </p>
-                                <p className="text-[9px] text-[var(--text-secondary)]">{sp.especialidad}</p>
+                                <p className="text-[9px] text-[var(--text-secondary)]">
+                                  {sp.especialidad}
+                                </p>
                               </div>
                               {noneSelected ? (
                                 <span className="text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 flex-shrink-0">
@@ -1274,36 +1399,53 @@ export default function ServiceConfigModal({
                                 </span>
                               ) : (
                                 <span className="text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded-lg bg-sky-500/10 dark:bg-[#8FC3A1]/10 border border-sky-500/20 dark:border-[#8FC3A1]/20 text-sky-400 dark:text-[#8FC3A1] flex-shrink-0">
-                                  {assignedBlocks} bloque{assignedBlocks !== 1 ? 's' : ''}
+                                  {assignedBlocks} bloque
+                                  {assignedBlocks !== 1 ? 's' : ''}
                                 </span>
                               )}
                               <button
                                 type="button"
-                                onClick={() => toggleAllDaysForSpecialist(assignment.id)}
-                                className="text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-sky-500/30 dark:hover:border-[#8FC3A1] hover:text-sky-400 dark:hover:text-[#8FC3A1] transition-colors flex-shrink-0">
+                                onClick={() =>
+                                  toggleAllDaysForSpecialist(assignment.id)
+                                }
+                                className="text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-sky-500/30 dark:hover:border-[#8FC3A1] hover:text-sky-400 dark:hover:text-[#8FC3A1] transition-colors flex-shrink-0"
+                              >
                                 {allSelected ? 'Ninguno' : 'Todos'}
                               </button>
                             </div>
 
                             {/* Días con sus bloques */}
                             <div className="divide-y divide-[var(--border-subtle)]">
-                              {form.diasAtencion.map((dayEntry) => {
-                                const assignedDay = assignment.dias.find((d) => d.dia === dayEntry.dia);
+                              {form.diasAtencion.map((dayEntry, ddx) => {
+                                const assignedDay = assignment.dias.find(
+                                  (d) => d.dia === dayEntry.dia,
+                                );
                                 const dayActive = !!assignedDay;
-                                const assignedBlockCount = assignedDay?.bloques.length ?? 0;
+                                const assignedBlockCount =
+                                  assignedDay?.bloques.length ?? 0;
 
                                 return (
-                                  <div key={dayEntry.dia} className="p-3 space-y-2">
+                                  <div
+                                    key={`${dayEntry.dia}-${ddx}`}
+                                    className="p-3 space-y-2"
+                                  >
                                     {/* Fila del día */}
                                     <div className="flex items-center gap-2">
                                       <button
                                         type="button"
-                                        onClick={() => toggleSpecialistDay(assignment.id, dayEntry.dia)}
+                                        onClick={() =>
+                                          toggleSpecialistDay(
+                                            assignment.id,
+                                            dayEntry.dia,
+                                          )
+                                        }
                                         className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all flex-shrink-0
-                                          ${dayActive
-                                            ? 'bg-sky-500/10 dark:bg-[#8FC3A1]/10 border-sky-500/40 dark:border-[#8FC3A1]/40 text-sky-500 dark:text-[#8FC3A1]'
-                                            : 'bg-[var(--bg-primary)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-sky-500/20 dark:hover:border-[#8FC3A1]/20'
-                                          }`}>
+                                          ${
+                                            dayActive
+                                              ? 'bg-sky-500/10 dark:bg-[#8FC3A1]/10 border-sky-500/40 dark:border-[#8FC3A1]/40 text-sky-500 dark:text-[#8FC3A1]'
+                                              : 'bg-[var(--bg-primary)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-sky-500/20 dark:hover:border-[#8FC3A1]/20'
+                                          }`}
+                                      >
                                         <span className="text-[10px] font-black uppercase tracking-wider">
                                           {WEEK_DAY_SHORT[dayEntry.dia]}
                                         </span>
@@ -1313,7 +1455,8 @@ export default function ServiceConfigModal({
                                       </button>
                                       {dayActive && (
                                         <span className="text-[9px] text-[var(--text-secondary)]">
-                                          {assignedBlockCount}/{dayEntry.bloques.length} bloques
+                                          {assignedBlockCount}/
+                                          {dayEntry.bloques.length} bloques
                                         </span>
                                       )}
                                     </div>
@@ -1322,27 +1465,42 @@ export default function ServiceConfigModal({
                                     {dayActive && (
                                       <div className="flex flex-wrap gap-1.5 pl-1">
                                         {dayEntry.bloques.map((block, bi) => {
-                                          const blockActive = assignedDay.bloques.includes(bi);
-                                          const sessions = calculateSessions(block, form.duracion);
-                                          const invalid = block.inicio >= block.fin;
+                                          const blockActive =
+                                            assignedDay.bloques.includes(bi);
+                                          const sessions = calculateSessions(
+                                            block,
+                                            form.duracion,
+                                          );
+                                          const invalid =
+                                            block.inicio >= block.fin;
                                           return (
                                             <button
                                               key={bi}
                                               type="button"
                                               disabled={invalid}
-                                              onClick={() => toggleSpecialistBlock(assignment.id, dayEntry.dia, bi)}
+                                              onClick={() =>
+                                                toggleSpecialistBlock(
+                                                  assignment.id,
+                                                  dayEntry.dia,
+                                                  bi,
+                                                )
+                                              }
                                               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border transition-all
-                                                ${invalid
-                                                  ? 'opacity-40 cursor-not-allowed bg-[var(--bg-primary)] border-[var(--border-subtle)] text-[var(--text-secondary)]'
-                                                  : blockActive
-                                                    ? 'bg-sky-500/15 dark:bg-[#8FC3A1]/15 border-sky-500/50 dark:border-[#8FC3A1]/50 text-sky-500 dark:text-[#8FC3A1]'
-                                                    : 'bg-[var(--bg-primary)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-sky-500/20 dark:hover:border-[#8FC3A1]/20 hover:text-[var(--text-primary)]'
-                                                }`}>
+                                                ${
+                                                  invalid
+                                                    ? 'opacity-40 cursor-not-allowed bg-[var(--bg-primary)] border-[var(--border-subtle)] text-[var(--text-secondary)]'
+                                                    : blockActive
+                                                      ? 'bg-sky-500/15 dark:bg-[#8FC3A1]/15 border-sky-500/50 dark:border-[#8FC3A1]/50 text-sky-500 dark:text-[#8FC3A1]'
+                                                      : 'bg-[var(--bg-primary)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-sky-500/20 dark:hover:border-[#8FC3A1]/20 hover:text-[var(--text-primary)]'
+                                                }`}
+                                            >
                                               <span className="text-[9px] font-black">
                                                 {block.inicio}–{block.fin}
                                               </span>
                                               {!invalid && (
-                                                <span className={`text-[8px] font-semibold ${blockActive ? 'text-sky-400 dark:text-[#8FC3A1]' : 'opacity-60'}`}>
+                                                <span
+                                                  className={`text-[8px] font-semibold ${blockActive ? 'text-sky-400 dark:text-[#8FC3A1]' : 'opacity-60'}`}
+                                                >
                                                   · {sessions.length} ses.
                                                 </span>
                                               )}
@@ -1360,7 +1518,6 @@ export default function ServiceConfigModal({
                       })}
                     </div>
                   )}
->>>>>>> origin/rama-jere2
                 </div>
               )}
             </div>
@@ -1393,16 +1550,11 @@ export default function ServiceConfigModal({
               <Field label="Cupos por sesión" error={errors.cupos}>
                 <div className="space-y-3">
                   <div className="flex items-center gap-4">
-<<<<<<< HEAD
                     <button
                       type="button"
                       onClick={() => set('cupos', Math.max(1, form.cupos - 1))}
-                      className="w-10 h-10 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-primary)] hover:border-sky-500/30 transition-colors font-black text-lg select-none"
+                      className="w-10 h-10 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-primary)] hover:border-sky-500/30 dark:hover:border-[#8FC3A1]/50 transition-colors font-black text-lg select-none"
                     >
-=======
-                    <button type="button" onClick={() => set('cupos', Math.max(1, form.cupos - 1))}
-                      className="w-10 h-10 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-primary)] hover:border-sky-500/30 dark:hover:border-[#8FC3A1]/50 transition-colors font-black text-lg select-none">
->>>>>>> origin/rama-jere2
                       −
                     </button>
                     <div className="flex-1 text-center">
@@ -1415,18 +1567,13 @@ export default function ServiceConfigModal({
                           : 'personas por sesión'}
                       </p>
                     </div>
-<<<<<<< HEAD
                     <button
                       type="button"
                       onClick={() =>
                         set('cupos', Math.min(100, form.cupos + 1))
                       }
-                      className="w-10 h-10 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-primary)] hover:border-sky-500/30 transition-colors font-black text-lg select-none"
+                      className="w-10 h-10 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-primary)] hover:border-sky-500/30 dark:hover:border-[#8FC3A1]/50 transition-colors font-black text-lg select-none"
                     >
-=======
-                    <button type="button" onClick={() => set('cupos', Math.min(100, form.cupos + 1))}
-                      className="w-10 h-10 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-primary)] hover:border-sky-500/30 dark:hover:border-[#8FC3A1]/50 transition-colors font-black text-lg select-none">
->>>>>>> origin/rama-jere2
                       +
                     </button>
                   </div>
@@ -1436,12 +1583,8 @@ export default function ServiceConfigModal({
                     max={100}
                     value={form.cupos}
                     onChange={(e) => set('cupos', parseInt(e.target.value))}
-<<<<<<< HEAD
-                    className="w-full accent-sky-500"
+                    className="w-full accent-sky-500 dark:accent-[#8FC3A1]"
                   />
-=======
-                    className="w-full accent-sky-500 dark:accent-[#8FC3A1]" />
->>>>>>> origin/rama-jere2
                   <div className="flex justify-between text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)]">
                     <span>1 mín</span>
                     <span>100 máx</span>
@@ -1471,23 +1614,15 @@ export default function ServiceConfigModal({
                         type="button"
                         onClick={() => set('anticipacionReserva', h)}
                         className={`flex flex-col items-center py-4 px-3 rounded-2xl border transition-all
-<<<<<<< HEAD
                           ${
                             active
-                              ? 'bg-sky-500/10 border-sky-500/40 text-sky-500'
-                              : 'bg-[var(--bg-secondary)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-sky-500/20'
+                              ? 'bg-sky-500/10 dark:bg-[#8FC3A1]/10 border-sky-500/40 dark:border-[#8FC3A1]/40 text-sky-500 dark:text-[#8FC3A1]'
+                              : 'bg-[var(--bg-secondary)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-sky-500/20 dark:hover:border-[#8FC3A1]/50'
                           }`}
                       >
                         <span
-                          className={`text-2xl font-black ${active ? 'text-sky-500' : 'text-[var(--text-primary)]'}`}
+                          className={`text-2xl font-black ${active ? 'text-sky-500 dark:text-[#8FC3A1]' : 'text-[var(--text-primary)]'}`}
                         >
-=======
-                          ${active
-                            ? 'bg-sky-500/10 dark:bg-[#8FC3A1]/10 border-sky-500/40 dark:border-[#8FC3A1]/40 text-sky-500 dark:text-[#8FC3A1]'
-                            : 'bg-[var(--bg-secondary)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-sky-500/20 dark:hover:border-[#8FC3A1]/50'
-                          }`}>
-                        <span className={`text-2xl font-black ${active ? 'text-sky-500 dark:text-[#8FC3A1]' : 'text-[var(--text-primary)]'}`}>
->>>>>>> origin/rama-jere2
                           {h}
                         </span>
                         <span className="text-[9px] font-black uppercase tracking-widest mt-1 opacity-70">
@@ -1505,7 +1640,6 @@ export default function ServiceConfigModal({
                   Resumen del servicio
                 </p>
                 <div className="grid grid-cols-2 gap-3">
-<<<<<<< HEAD
                   <SummaryItem
                     label="Denominación"
                     value={form.denominacion || '—'}
@@ -1513,9 +1647,9 @@ export default function ServiceConfigModal({
                   <SummaryItem
                     label="Categoría"
                     value={
-                      form.categoria === 'Otro'
-                        ? customCategory || '—'
-                        : form.categoria || '—'
+                      [form.categoriaL1, form.categoriaL2, form.categoriaL3]
+                        .filter(Boolean)
+                        .join(' › ') || '—'
                     }
                   />
                   <SummaryItem
@@ -1560,28 +1694,14 @@ export default function ServiceConfigModal({
                     value={ANTICIPACION_LABELS[form.anticipacionReserva]}
                     accent="sky"
                   />
-=======
-                  <SummaryItem label="Denominación" value={form.denominacion || '—'} />
-                  <SummaryItem label="Categoría"
-                    value={[form.categoriaL1, form.categoriaL2, form.categoriaL3].filter(Boolean).join(' › ') || '—'} />
-                  <SummaryItem label="Duración" value={formatMin(form.duracion)} />
-                  <SummaryItem label="Sesiones totales" value={`${totalSessions}`} accent="sky" />
-                  <SummaryItem label="Días de atención"
-                    value={form.diasAtencion.map((d) => WEEK_DAY_SHORT[d.dia]).join(', ') || '—'} />
-                  <SummaryItem label="Especialistas"
-                    value={`${form.especialistasAsignados.length} asignado(s)`} />
-                  <SummaryItem label="Precio"
-                    value={form.precio > 0 ? `S/. ${form.precio.toFixed(2)}` : '—'} accent="emerald" />
-                  <SummaryItem label="Cupos / sesión" value={`${form.cupos}`} accent="sky" />
-                  <SummaryItem label="A domicilio" value={form.domicilio ? 'Sí' : 'No'} />
-                  <SummaryItem label="Anticipación" value={ANTICIPACION_LABELS[form.anticipacionReserva]} accent="sky" />
->>>>>>> origin/rama-jere2
                 </div>
                 <div className="pt-2 border-t border-[var(--border-subtle)]">
                   <p className="text-[10px] text-[var(--text-secondary)]">
                     El servicio se guardará como{' '}
-                    <span className="font-black text-gray-700 dark:text-gray-300">Borrador</span>.
-                    Podrás publicarlo desde el panel de servicios.
+                    <span className="font-black text-gray-700 dark:text-gray-300">
+                      Borrador
+                    </span>
+                    . Podrás publicarlo desde el panel de servicios.
                   </p>
                 </div>
               </div>
@@ -1626,9 +1746,6 @@ export default function ServiceConfigModal({
   );
 }
 
-<<<<<<< HEAD
-// ─── Sub-components ───────────────────────────────────────────────────────────
-
 function Field({
   label,
   error,
@@ -1638,9 +1755,6 @@ function Field({
   error?: string;
   children: React.ReactNode;
 }) {
-=======
-function Field({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
->>>>>>> origin/rama-jere2
   return (
     <div className="space-y-2">
       <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)]">
@@ -1654,7 +1768,6 @@ function Field({ label, error, children }: { label: string; error?: string; chil
   );
 }
 
-<<<<<<< HEAD
 function SummaryItem({
   label,
   value,
@@ -1666,146 +1779,17 @@ function SummaryItem({
 }) {
   const cls = accent
     ? {
-        sky: 'text-sky-500',
+        sky: 'text-sky-500 dark:text-[#8FC3A1]',
         emerald: 'text-emerald-500',
         indigo: 'text-indigo-500',
       }[accent]
     : 'text-[var(--text-primary)]';
-=======
-function SummaryItem({ label, value, accent }: { label: string; value: string; accent?: 'sky' | 'emerald' | 'indigo' }) {
-  const cls = accent ? { sky: 'text-sky-500 dark:text-[#8FC3A1]', emerald: 'text-emerald-500', indigo: 'text-indigo-500' }[accent] : 'text-[var(--text-primary)]';
->>>>>>> origin/rama-jere2
   return (
     <div className="space-y-0.5">
       <p className="text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)]">
         {label}
       </p>
       <p className={`text-xs font-black ${cls}`}>{value}</p>
-    </div>
-  );
-}
-
-function generateTimeOptions(stepMin = 30): string[] {
-  const options: string[] = [];
-  for (let h = 0; h < 24; h++) {
-    for (let m = 0; m < 60; m += stepMin) {
-      options.push(
-        `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`,
-      );
-    }
-  }
-  return options;
-}
-
-const TIME_OPTIONS = generateTimeOptions(10); // cada 10 min — ajusta a gusto
-
-function SvgChevron() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2.5}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="w-3 h-3 pointer-events-none"
-    >
-      <polyline points="6 9 12 15 18 9" />
-    </svg>
-  );
-}
-
-function SvgClock2() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="w-3.5 h-3.5 flex-shrink-0"
-    >
-      <circle cx="12" cy="12" r="10" />
-      <polyline points="12 6 12 12 16 14" />
-    </svg>
-  );
-}
-
-/** Selector de una sola hora con ícono de reloj y flecha */
-function TimeSelect({
-  value,
-  onChange,
-  hasError,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-  hasError?: boolean;
-}) {
-  return (
-    <div className="relative flex items-center">
-      {/* Ícono reloj */}
-      <span className="absolute left-2.5 text-sky-500 pointer-events-none z-10">
-        <SvgClock2 />
-      </span>
-
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className={`
-          appearance-none w-full pl-8 pr-7
-          bg-[var(--bg-primary)] rounded-xl border px-3 py-2
-          text-sm font-semibold text-[var(--text-primary)]
-          focus:outline-none transition-colors cursor-pointer
-          ${
-            hasError
-              ? 'border-rose-500/40 focus:border-rose-500'
-              : 'border-[var(--border-subtle)] focus:border-sky-500/50 hover:border-sky-500/30'
-          }
-        `}
-      >
-        {TIME_OPTIONS.map((t) => (
-          <option key={t} value={t}>
-            {t}
-          </option>
-        ))}
-      </select>
-
-      {/* Flecha dropdown */}
-      <span className="absolute right-2.5 text-[var(--text-secondary)] pointer-events-none">
-        <SvgChevron />
-      </span>
-    </div>
-  );
-}
-export function TimeBlockPicker({
-  inicio,
-  fin,
-  onChangeInicio,
-  onChangeFin,
-}: {
-  inicio: string;
-  fin: string;
-  onChangeInicio: (v: string) => void;
-  onChangeFin: (v: string) => void;
-}) {
-  const invalid = inicio >= fin;
-
-  return (
-    <div
-      className={`
-        flex items-center gap-2 flex-1
-        bg-[var(--bg-primary)] rounded-xl border px-3 py-2 transition-colors
-        ${invalid ? 'border-rose-500/40' : 'border-[var(--border-subtle)]'}
-      `}
-    >
-      <TimeSelect value={inicio} onChange={onChangeInicio} hasError={invalid} />
-
-      <span className="text-[var(--text-secondary)] font-bold flex-shrink-0 text-sm">
-        →
-      </span>
-
-      <TimeSelect value={fin} onChange={onChangeFin} hasError={invalid} />
     </div>
   );
 }

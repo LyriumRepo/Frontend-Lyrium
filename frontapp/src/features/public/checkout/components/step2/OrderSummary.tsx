@@ -91,7 +91,8 @@ export default function OrderSummary() {
     (acc, i) => acc + i.price * i.quantity,
     0,
   );
-  const total = subtotal + orderData.deliveryCost - orderData.discount;
+  const igv = (subtotal + orderData.deliveryCost) * 0.16;
+  const total = subtotal + orderData.deliveryCost + igv - orderData.discount;
 
   const handleDeliveryChange = (value: DeliveryMethod) => {
     const option = DELIVERY_OPTIONS.find((o) => o.value === value);
@@ -112,9 +113,13 @@ export default function OrderSummary() {
     // Paso 2: obtener formToken del backend
     let session;
     try {
+      const cartToken = typeof window !== 'undefined'
+        ? sessionStorage.getItem('cart_session_id') ?? undefined
+        : undefined;
       session = await orderApi.createIzipaySession({
         order_id: result.orderId,
         email: result.email,
+        cart_token: cartToken,
       });
     } catch (err) {
       console.error('[Izipay] error creando sesión', err);
@@ -214,6 +219,12 @@ export default function OrderSummary() {
               </span>
             </div>
           )}
+          <div className="flex justify-between text-gray-500 dark:text-[var(--text-muted)]">
+            <span>IGV (16%)</span>
+            <span className="font-semibold text-gray-800 dark:text-[var(--text-primary)]">
+              S/ {igv.toFixed(2)}
+            </span>
+          </div>
         </div>
 
         {/* Total */}

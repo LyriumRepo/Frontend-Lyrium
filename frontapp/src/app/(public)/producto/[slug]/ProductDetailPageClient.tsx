@@ -30,9 +30,6 @@ import {
   Download,
   Clock,
   MapPin,
-  Flame,
-  Leaf,
-  ChevronDown,
   Pencil,
   Trash2,
 } from 'lucide-react';
@@ -57,7 +54,12 @@ import {
   CardTitle,
   CardDescription,
 } from '@/components/UI/Cardt';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/UI/tabs';
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from '@/components/UI/accordion';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/UI/avatar';
 import { Separator } from '@/components/UI/separator';
 import { ScrollArea } from '@/components/UI/scroll-area';
@@ -157,7 +159,7 @@ function ProductGallery({
 
   return (
     <div className="space-y-4">
-      <div className="relative aspect-square rounded-xl overflow-hidden bg-muted border border-border group">
+      <div className="relative aspect-square rounded-xl overflow-hidden bg-white border border-border group">
         <Image
           key={src}
           src={src}
@@ -204,7 +206,7 @@ function ProductGallery({
                   : 'border-border hover:border-primary/50',
               )}
             >
-              <div className="relative w-full h-full bg-muted">
+              <div className="relative w-full h-full bg-white">
                 <Image
                   src={img.thumb ?? img.src}
                   alt={img.alt ?? name}
@@ -270,11 +272,11 @@ function TypeItem({
 }) {
   return (
     <Card>
-      <CardContent className="p-4 flex items-center gap-3">
-        {icon}
+      <CardContent className="p-3 flex items-center gap-2">
+        <div className="text-primary shrink-0">{icon}</div>
         <div>
-          <p className="text-xs text-muted-foreground">{label}</p>
-          <p className="font-semibold text-sm">{value}</p>
+          <p className="text-[10px] font-semibold text-foreground">{label}</p>
+          <p className="font-bold text-sm text-foreground">{value}</p>
         </div>
       </CardContent>
     </Card>
@@ -286,13 +288,13 @@ function ProductInfoCards({ product }: { product: LaravelProduct }) {
     return (
       <div className="grid grid-cols-2 gap-4">
         <TypeItem
-          icon={<Download className="w-5 h-5 text-primary" />}
+          icon={<Download className="w-4 h-4" />}
           label="Formato"
           value={product.fileType?.toUpperCase() ?? '—'}
         />
         {product.downloadLimit && (
           <TypeItem
-            icon={<Package className="w-5 h-5 text-primary" />}
+            icon={<Package className="w-4 h-4" />}
             label="Descargas"
             value={`${product.downloadLimit}x`}
           />
@@ -304,12 +306,12 @@ function ProductInfoCards({ product }: { product: LaravelProduct }) {
     return (
       <div className="grid grid-cols-2 gap-4">
         <TypeItem
-          icon={<Clock className="w-5 h-5 text-primary" />}
+          icon={<Clock className="w-4 h-4" />}
           label="Duración"
           value={`${product.serviceDuration} min`}
         />
         <TypeItem
-          icon={<MapPin className="w-5 h-5 text-primary" />}
+          icon={<MapPin className="w-4 h-4" />}
           label="Modalidad"
           value={product.serviceModality ?? '—'}
         />
@@ -318,22 +320,22 @@ function ProductInfoCards({ product }: { product: LaravelProduct }) {
   }
   const items = [
     product.stock != null && {
-      icon: <Package className="w-5 h-5 text-primary" />,
+      icon: <Package className="w-4 h-4" />,
       label: 'Stock',
       value: `${product.stock} unidades`,
     },
     product.weight && {
-      icon: <Weight className="w-5 h-5 text-primary" />,
+      icon: <Weight className="w-4 h-4" />,
       label: 'Peso',
       value: `${product.weight} kg`,
     },
     product.dimensions && {
-      icon: <Ruler className="w-5 h-5 text-primary" />,
+      icon: <Ruler className="w-4 h-4" />,
       label: 'Dimensiones',
       value: product.dimensions,
     },
     product.sku && {
-      icon: <Calendar className="w-5 h-5 text-primary" />,
+      icon: <Calendar className="w-4 h-4" />,
       label: 'SKU',
       value: product.sku,
     },
@@ -353,98 +355,6 @@ function ProductInfoCards({ product }: { product: LaravelProduct }) {
   );
 }
 
-// ─── NutritionalPanel ─────────────────────────────────────────────────────────
-
-function NutritionalPanel({
-  info,
-}: {
-  info: NonNullable<LaravelProduct['nutritional_info']>;
-}) {
-  const [open, setOpen] = useState(false);
-  const calorieRow = info.rows.find((r) =>
-    r.label.toLowerCase().includes('caloría'),
-  );
-  return (
-    <Card className="overflow-hidden">
-      <button
-        onClick={() => setOpen((o) => !o)}
-        className="w-full flex items-center justify-between px-4 py-3 hover:bg-muted/50 transition-colors"
-      >
-        <div className="flex items-center gap-2.5">
-          <Leaf className="w-4 h-4 text-green-600" />
-          <span className="text-[11px] font-medium tracking-[.1em] uppercase text-muted-foreground">
-            Información nutricional
-          </span>
-          {calorieRow && (
-            <Badge variant="secondary" className="gap-1 text-[10px]">
-              <Flame className="w-2.5 h-2.5" />
-              {calorieRow.value}
-            </Badge>
-          )}
-        </div>
-        <ChevronDown
-          className={cn(
-            'w-4 h-4 text-muted-foreground transition-transform duration-200',
-            open && 'rotate-180',
-          )}
-        />
-      </button>
-      <div
-        className={cn(
-          'overflow-hidden transition-all duration-300',
-          open ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0',
-        )}
-      >
-        <Separator />
-        {info.serving_note && (
-          <p className="px-4 py-2 text-[11px] italic text-muted-foreground bg-muted/30 border-b border-border">
-            {info.serving_note}
-          </p>
-        )}
-        <table className="w-full text-[12px]">
-          <thead>
-            <tr className="bg-muted/50">
-              {['Nutriente', 'Cantidad', '% VD'].map((h, i) => (
-                <th
-                  key={h}
-                  className={cn(
-                    'px-4 py-2 text-[10px] font-medium tracking-[.1em] uppercase text-muted-foreground',
-                    i === 0
-                      ? 'text-left'
-                      : i === 1
-                        ? 'text-center'
-                        : 'text-right',
-                  )}
-                >
-                  {h}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {info.rows.map((row, i) => (
-              <tr
-                key={i}
-                className="border-t border-border hover:bg-muted/30 transition-colors"
-              >
-                <td className="px-4 py-2.5 font-medium text-foreground">
-                  {row.label}
-                </td>
-                <td className="px-4 py-2.5 text-center font-medium text-primary">
-                  {row.value}
-                </td>
-                <td className="px-4 py-2.5 text-right text-muted-foreground">
-                  {row.daily_value ?? '—'}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </Card>
-  );
-}
-
 // ─── CharacteristicsTable ─────────────────────────────────────────────────────
 
 function CharacteristicsTable({
@@ -458,7 +368,7 @@ function CharacteristicsTable({
   const hasAdditional = additional_info.length > 0;
   if (!hasMain && !hasAdditional)
     return (
-      <p className="text-sm italic text-muted-foreground">
+      <p className="text-sm font-semibold italic text-muted-foreground">
         Sin características especificadas.
       </p>
     );
@@ -466,18 +376,20 @@ function CharacteristicsTable({
     <div className="space-y-6">
       {hasMain && (
         <div>
-          <p className="text-[10px] font-medium tracking-[.12em] uppercase text-muted-foreground mb-3">
+          <p className="text-[10px] font-semibold tracking-[.12em] uppercase text-muted-foreground mb-3">
             Características principales
           </p>
           <ul className="grid md:grid-cols-2 gap-3">
             {characteristics.map((attr, i) => (
               <li key={i} className="flex items-start gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2 flex-shrink-0" />
-                <span className="text-sm text-muted-foreground">
-                  <span className="font-medium text-foreground">
+                <span className="text-sm text-foreground">
+                  <span className="font-bold text-foreground">
                     {attr.label}:
                   </span>{' '}
-                  {attr.value}
+                  <span className="font-semibold text-muted-foreground">
+                    {attr.value}
+                  </span>
                 </span>
               </li>
             ))}
@@ -486,17 +398,19 @@ function CharacteristicsTable({
       )}
       {hasAdditional && (
         <div>
-          <p className="text-[10px] font-medium tracking-[.12em] uppercase text-muted-foreground mb-3">
+          <p className="text-[10px] font-semibold tracking-[.12em] uppercase text-muted-foreground mb-3">
             Información adicional
           </p>
           <div className="grid md:grid-cols-2 gap-4">
             {additional_info.map((attr, i) => (
               <Card key={i}>
-                <CardContent className="p-4 flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">
+                <CardContent className="p-4">
+                  <p className="text-[10px] font-semibold tracking-[.08em] uppercase text-muted-foreground mb-1">
                     {attr.label}
-                  </span>
-                  <span className="font-semibold text-sm">{attr.value}</span>
+                  </p>
+                  <p className="font-bold text-sm text-foreground">
+                    {attr.value}
+                  </p>
                 </CardContent>
               </Card>
             ))}
@@ -704,7 +618,7 @@ function ReviewCard({
             <div className="flex items-start justify-between gap-2 flex-wrap">
               <div>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h4 className="font-semibold text-base">
+                  <h4 className="font-bold text-base">
                     {review.user?.name ?? 'Usuario'}
                   </h4>
                   {review.isVerifiedPurchase && (
@@ -714,7 +628,7 @@ function ReviewCard({
                     </Badge>
                   )}
                 </div>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm font-semibold text-muted-foreground">
                   {formatDate(review.createdAt)}
                 </p>
               </div>
@@ -847,7 +761,7 @@ function ReviewsSection({
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
             <CardTitle className="text-3xl mb-2">Reseñas de Clientes</CardTitle>
-            <CardDescription className="text-base">
+            <CardDescription className="text-base font-semibold">
               {localReviews.length} reseñas verificadas
             </CardDescription>
           </div>
@@ -858,7 +772,7 @@ function ReviewsSection({
               </span>
               <Stars value={productRating} size="lg" />
             </div>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm font-semibold text-muted-foreground">
               Basado en {productReviewCount} reseñas
             </p>
           </div>
@@ -894,8 +808,8 @@ function ReviewsSection({
         {localReviews.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">
             <MessageSquare className="w-8 h-8 mx-auto mb-3 opacity-30" />
-            <p className="font-medium">Sin reseñas aún</p>
-            <p className="text-sm mt-1">Sé el primero en dejar una opinión.</p>
+            <p className="font-bold">Sin reseñas aún</p>
+            <p className="text-sm font-semibold mt-1">Sé el primero en dejar una opinión.</p>
           </div>
         ) : (
           <ScrollArea className="h-[600px] pr-4">
@@ -1011,7 +925,9 @@ export function ProductDetailPageClient({
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Galería + Info */}
         <div className="grid lg:grid-cols-2 gap-8 mb-12">
-          <ProductGallery images={product.images} name={product.name} />
+          <div className="lg:sticky lg:top-8 lg:self-start">
+            <ProductGallery images={product.images} name={product.name} />
+          </div>
 
           <div className="space-y-6">
             <div>
@@ -1032,13 +948,13 @@ export function ProductDetailPageClient({
                 {product.name}
               </h1>
               {product.short_description && (
-                <p className="text-sm text-muted-foreground leading-relaxed mb-3">
+                <p className="text-sm font-semibold text-muted-foreground leading-relaxed mb-3">
                   {product.short_description}
                 </p>
               )}
               <div className="flex items-center gap-3">
                 <Stars value={product.rating.average} size="lg" />
-                <span className="text-sm text-muted-foreground">
+                <span className="text-sm font-semibold text-muted-foreground">
                   {product.rating.average.toFixed(1)} ({product.rating.count}{' '}
                   reseñas)
                 </span>
@@ -1054,7 +970,7 @@ export function ProductDetailPageClient({
                 </span>
                 {discount > 0 && (
                   <>
-                    <span className="text-lg line-through text-muted-foreground">
+                    <span className="text-lg line-through font-semibold text-muted-foreground">
                       {formatPrice(product.regular_price)}
                     </span>
                     <Badge
@@ -1078,22 +994,21 @@ export function ProductDetailPageClient({
                     inStock ? 'bg-green-600' : 'bg-destructive',
                   )}
                 />
-                {inStock
-                  ? `${product.stock} unidades disponibles`
-                  : 'Sin stock'}
+                <span className="font-semibold">
+                  {inStock
+                    ? `${product.stock} unidades disponibles`
+                    : 'Sin stock'}
+                </span>
               </div>
             </div>
 
             <ProductInfoCards product={product} />
-            {hasNutritional && (
-              <NutritionalPanel info={product.nutritional_info!} />
-            )}
 
             <Separator />
 
             {inStock && (
               <div className="flex items-center gap-5">
-                <span className="text-[11px] tracking-[.1em] uppercase text-muted-foreground">
+                <span className="text-[11px] font-semibold tracking-[.1em] uppercase text-muted-foreground">
                   Cantidad
                 </span>
                 <div className="flex items-center border border-border rounded-md overflow-hidden">
@@ -1106,7 +1021,7 @@ export function ProductDetailPageClient({
                   >
                     −
                   </Button>
-                  <span className="w-10 text-center text-sm font-medium text-foreground">
+                  <span className="w-10 text-center text-sm font-bold text-foreground">
                     {quantity}
                   </span>
                   <Button
@@ -1188,6 +1103,35 @@ export function ProductDetailPageClient({
               </Button>
             </div>
 
+            <Card>
+              <CardContent className="p-3">
+                <p className="text-[10px] font-semibold tracking-[.08em] uppercase text-muted-foreground mb-2.5 text-center">
+                  Medios de pago
+                </p>
+                <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
+                  {[
+                    { name: 'Visa', file: 'visa.png' },
+                    { name: 'Mastercard', file: 'mastercard.png' },
+                    { name: 'American Express', file: 'americaexpre.svg' },
+                    { name: 'Diners Club', file: 'diner.png' },
+                    { name: 'Pago Efectivo', file: 'pagoefectivo.svg' },
+                    { name: 'Yape', file: 'yape.png' },
+                    { name: 'Plin', file: 'plin.png' },
+                  ].map(({ name, file }) => (
+                    <Image
+                      key={name}
+                      src={`/img/pagos/${file}`}
+                      alt={name}
+                      width={56}
+                      height={32}
+                      className="object-contain h-8 w-auto"
+                      title={name}
+                    />
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="grid grid-cols-3 gap-2">
               {[
                 { icon: Shield, text: 'Compra segura' },
@@ -1197,7 +1141,7 @@ export function ProductDetailPageClient({
                 <Card key={text}>
                   <CardContent className="p-3 flex flex-col items-center gap-1.5 text-center">
                     <Icon className="w-4 h-4 text-primary" />
-                    <span className="text-[10px] tracking-[.06em] uppercase text-muted-foreground">
+                    <span className="text-[10px] font-semibold tracking-[.06em] uppercase text-muted-foreground">
                       {text}
                     </span>
                   </CardContent>
@@ -1205,11 +1149,81 @@ export function ProductDetailPageClient({
               ))}
             </div>
 
+            {/* Accordion de detalles */}
+            <Accordion type="multiple" className="space-y-3">
+              <AccordionItem value="descripcion">
+                <AccordionTrigger className="text-[11px] tracking-[.1em] uppercase text-muted-foreground font-semibold">
+                  Descripción
+                </AccordionTrigger>
+                <AccordionContent>
+                  {product.description ? (
+                    <div className="space-y-3">
+                      {product.description.split('\n').map((p, i) => (
+                        <p
+                          key={i}
+                          className="font-semibold text-muted-foreground leading-relaxed text-sm"
+                        >
+                          {p}
+                        </p>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="font-semibold text-muted-foreground italic text-sm">
+                      Sin descripción disponible.
+                    </p>
+                  )}
+                </AccordionContent>
+              </AccordionItem>
+
+              {hasCharacteristics && (
+                <AccordionItem value="caracteristicas">
+                  <AccordionTrigger className="text-[11px] tracking-[.1em] uppercase text-muted-foreground font-semibold">
+                    Características
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <CharacteristicsTable
+                      characteristics={product.characteristics}
+                      additional_info={product.additional_info}
+                    />
+                  </AccordionContent>
+                </AccordionItem>
+              )}
+
+              {hasNutritional && (
+                <AccordionItem value="nutricion">
+                  <AccordionTrigger className="text-[11px] tracking-[.1em] uppercase text-muted-foreground font-semibold">
+                    Información Nutricional
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    {product.nutritional_info!.serving_note && (
+                      <p className="text-sm font-semibold italic text-muted-foreground mb-4">
+                        {product.nutritional_info!.serving_note}
+                      </p>
+                    )}
+                    <div className="grid md:grid-cols-2 gap-3">
+                      {product.nutritional_info!.rows.map((row, i) => (
+                        <Card key={i}>
+                          <CardContent className="p-4 flex justify-between items-center">
+                            <span className="font-semibold text-muted-foreground text-sm">
+                              {row.label}
+                            </span>
+                            <span className="font-bold text-sm">
+                              {row.value}
+                            </span>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              )}
+            </Accordion>
+
             {product.store?.name && (
               <Link href={`/tienda/${product.store.slug}`}>
                 <Card className="hover:border-primary transition-colors cursor-pointer">
                   <CardContent className="p-4 flex items-center gap-4">
-                    <div className="w-11 h-11 flex items-center justify-center flex-shrink-0 overflow-hidden rounded-lg bg-primary">
+                    <div className="w-11 h-11 flex items-center justify-center flex-shrink-0 overflow-hidden rounded-lg bg-muted">
                       {product.store.logo ? (
                         <Image
                           src={product.store.logo}
@@ -1219,14 +1233,14 @@ export function ProductDetailPageClient({
                           className="object-cover rounded-lg"
                         />
                       ) : (
-                        <Store className="w-5 h-5 text-primary-foreground" />
+                        <Store className="w-5 h-5 text-muted-foreground" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs text-muted-foreground mb-0.5">
+                      <p className="text-xs font-semibold text-muted-foreground mb-0.5">
                         Marca / Vendido por
                       </p>
-                      <p className="font-semibold text-lg text-foreground flex items-center gap-1">
+                      <p className="font-bold text-lg text-foreground flex items-center gap-1">
                         {product.store.name}
                         <BadgeCheck className="w-4 h-4 text-primary" />
                       </p>
@@ -1238,138 +1252,6 @@ export function ProductDetailPageClient({
             )}
           </div>
         </div>
-
-        {/* Tabs */}
-        <Card className="mb-12">
-          <CardContent className="p-6">
-            <Tabs defaultValue="descripcion" className="w-full">
-              <TabsList className="grid w-full grid-cols-4 mb-6">
-                <TabsTrigger value="descripcion">Descripción</TabsTrigger>
-                <TabsTrigger value="caracteristicas">
-                  Características
-                </TabsTrigger>
-                <TabsTrigger value="nutricion">Nutrición</TabsTrigger>
-                <TabsTrigger value="tienda">Tienda</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="descripcion" className="space-y-4">
-                <h3 className="text-2xl font-semibold">
-                  Descripción del Producto
-                </h3>
-                {product.description ? (
-                  product.description.split('\n').map((p, i) => (
-                    <p
-                      key={i}
-                      className="text-muted-foreground leading-relaxed text-base"
-                    >
-                      {p}
-                    </p>
-                  ))
-                ) : (
-                  <p className="text-muted-foreground italic">
-                    Sin descripción disponible.
-                  </p>
-                )}
-              </TabsContent>
-
-              <TabsContent value="caracteristicas" className="space-y-4">
-                <h3 className="text-2xl font-semibold">Características</h3>
-                {hasCharacteristics ? (
-                  <CharacteristicsTable
-                    characteristics={product.characteristics}
-                    additional_info={product.additional_info}
-                  />
-                ) : (
-                  <p className="text-muted-foreground italic">
-                    Sin características especificadas.
-                  </p>
-                )}
-              </TabsContent>
-
-              <TabsContent value="nutricion" className="space-y-4">
-                <h3 className="text-2xl font-semibold">
-                  Información Nutricional
-                </h3>
-                {hasNutritional ? (
-                  <div>
-                    {product.nutritional_info!.serving_note && (
-                      <p className="text-sm italic text-muted-foreground mb-4">
-                        {product.nutritional_info!.serving_note}
-                      </p>
-                    )}
-                    <div className="grid md:grid-cols-2 gap-4">
-                      {product.nutritional_info!.rows.map((row, i) => (
-                        <Card key={i}>
-                          <CardContent className="p-4 flex justify-between items-center">
-                            <span className="text-muted-foreground">
-                              {row.label}
-                            </span>
-                            <span className="font-semibold">{row.value}</span>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  <p className="text-muted-foreground italic">
-                    Sin información nutricional.
-                  </p>
-                )}
-              </TabsContent>
-
-              <TabsContent value="tienda" className="space-y-4">
-                <h3 className="text-2xl font-semibold">
-                  Información de la Tienda
-                </h3>
-                <div className="flex items-start gap-5">
-                  <div className="w-14 h-14 flex items-center justify-center flex-shrink-0 overflow-hidden rounded-xl bg-primary">
-                    {product.store.logo ? (
-                      <Image
-                        src={product.store.logo}
-                        alt={product.store.name}
-                        width={56}
-                        height={56}
-                        className="object-cover rounded-xl"
-                      />
-                    ) : (
-                      <Store className="w-7 h-7 text-primary-foreground" />
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="text-xl font-bold flex items-center gap-2 mb-3 text-foreground">
-                      {product.store.name}
-                      <BadgeCheck className="w-4 h-4 text-primary" />
-                    </h4>
-                    <div className="space-y-1.5">
-                      {product.store.email && (
-                        <p className="text-sm flex items-center gap-2 text-muted-foreground">
-                          <Mail className="w-3.5 h-3.5" />
-                          {product.store.email}
-                        </p>
-                      )}
-                      {product.store.phone && (
-                        <p className="text-sm flex items-center gap-2 text-muted-foreground">
-                          <Phone className="w-3.5 h-3.5" />
-                          {product.store.phone}
-                        </p>
-                      )}
-                    </div>
-                    <Link href={`/tienda/${product.store.slug}`}>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="mt-4 gap-2"
-                      >
-                        <Store className="w-3.5 h-3.5" />
-                        Ver tienda completa
-                      </Button>
-                    </Link>
-                  </div>
-                </div>
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
 
         {/* Productos relacionados */}
         {relatedProducts.length > 0 && (
@@ -1411,7 +1293,7 @@ export function ProductDetailPageClient({
                   >
                     <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full group">
                       <CardContent className="p-0">
-                        <div className="relative aspect-square overflow-hidden rounded-t-xl bg-muted">
+                        <div className="relative aspect-square overflow-hidden rounded-t-xl bg-white">
                           <Image
                             src={
                               rel.images[0]?.medium ??
@@ -1441,12 +1323,12 @@ export function ProductDetailPageClient({
                               </Badge>
                             ))}
                           </div>
-                          <h3 className="font-semibold text-lg line-clamp-2 text-foreground">
+                          <h3 className="font-bold text-lg line-clamp-2 text-foreground">
                             {rel.name}
                           </h3>
                           <div className="flex items-center gap-2">
                             <Stars value={rel.rating.average} size="sm" />
-                            <span className="text-xs text-muted-foreground">
+                            <span className="text-xs font-semibold text-muted-foreground">
                               ({rel.rating.count})
                             </span>
                           </div>

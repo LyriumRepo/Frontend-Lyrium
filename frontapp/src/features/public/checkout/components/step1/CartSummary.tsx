@@ -33,8 +33,8 @@ export default function CartSummary({ onContinue }: Props) {
     0,
   );
   const shipping = subtotal > 0 ? 10.0 : 0;
-  const igv = subtotal * 0.16;
-  const total = subtotal + shipping;
+  const igv = (subtotal + shipping) * 0.16;
+  const total = subtotal + shipping + igv;
 
   // ── Skeleton mientras carga ────────────────────────────────────────────────
   if (isLoading) {

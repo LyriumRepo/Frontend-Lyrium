@@ -514,13 +514,13 @@ function ServiceCard({
 
         {/* CTA */}
         <div className="mt-auto">
-          <button
-            onClick={() => onOpen(service)}
+          <Link
+            href={`/servicio/${service.slug}`}
             className="w-full py-2.5 rounded-xl bg-sky-50 dark:bg-sky-950/50 text-sky-600 dark:text-sky-400 text-xs font-black uppercase tracking-wider hover:bg-sky-500 hover:text-white dark:hover:bg-sky-500 dark:hover:text-white transition-all flex items-center justify-center gap-1.5"
           >
             <Calendar className="w-3.5 h-3.5" />
             Ver y agendar
-          </button>
+          </Link>
         </div>
       </div>
     </div>

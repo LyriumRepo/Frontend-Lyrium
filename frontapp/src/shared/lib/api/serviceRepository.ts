@@ -1,44 +1,28 @@
-/**
- * serviceRepository.ts
- *
- * Repositorio de servicios — conecta con Laravel ServiceController.
- * Sigue el mismo patrón que orderRepository.ts y cartRepository.ts.
- *
- * Ubicación: src/shared/lib/api/serviceRepository.ts
- *
- * Endpoints cubiertos:
- *   GET    /api/services/me                  → list()
- *   GET    /api/services/:id                 → getById()
- *   POST   /api/services                     → create()
- *   PUT    /api/services/:id                 → update()
- *   DELETE /api/services/:id                 → remove()
- *   GET    /api/services/:id/slots?date=...  → getSlots()
- *
- * Transformación Frontend → Backend:
- *   El ServiceConfigModal del vendedor usa campos en español (denominacion,
- *   diasAtencion, cupos, etc.). Este repositorio expone CreateServiceInput
- *   en inglés (igual al shape que acepta el backend) y provee la función
- *   helper `mapFormToInput` para convertir el form del modal al payload correcto.
- */
-
 import { LARAVEL_API_URL } from '@/shared/lib/config/flags';
 import type { ApiResponse } from '@/shared/lib/api/base-client';
 
-// ─── Tipos de respuesta del backend ──────────────────────────────────────────
+export type ServiceStatus = 'active' | 'inactive' | 'pending';
+export type BookingStatus =
+  | 'pending'
+  | 'confirmed'
+  | 'completed'
+  | 'cancelled'
+  | 'no_show'
+  | 'rescheduled';
+export type PaymentStatus = 'pending' | 'paid' | 'refunded' | 'failed';
+export type PaymentMethod = 'card' | 'yape' | 'plin' | 'cash' | 'store';
 
-export type ServiceStatus = 'active' | 'inactive' | 'draft';
-export type CancellationPolicy = 'flexible' | 'strict' | 'no_refund';
-
-export interface ServiceScheduleResponse {
+export interface ServiceSchedule {
   id: number;
-  day_of_week: number; // 0=lun … 6=dom (como lo devuelve ServiceResource)
-  start_time: string; // "HH:MM"
-  end_time: string; // "HH:MM"
+  day_of_week: number;
+  start_time: string;
+  end_time: string;
+  break_start?: string;
+  break_end?: string;
   is_available: boolean;
-  max_appointments: number;
 }
 
-export interface ServiceResponse {
+export interface Service {
   id: number;
   store_id: number;
   store_name: string;
@@ -49,15 +33,15 @@ export interface ServiceResponse {
   price: number;
   currency: string;
   category: string;
-  image?: string | null;
+  image?: string;
   status: ServiceStatus;
-  cancellation_policy: CancellationPolicy;
+  cancellation_policy: 'flexible' | 'strict' | 'no_refund';
   cancellation_hours: number;
   requires_payment: boolean;
   is_virtual: boolean;
-  meeting_link?: string | null;
+  meeting_link?: string;
   max_bookings_per_slot: number;
-  schedule: ServiceScheduleResponse[];
+  schedule: ServiceSchedule[];
   created_at: string;
   updated_at: string;
 }
@@ -69,287 +53,210 @@ export interface ServiceSlot {
   remaining_slots: number;
 }
 
-// ─── Tipos de entrada (payload al backend) ────────────────────────────────────
-
-export interface ScheduleInput {
-  day_of_week:
-    | 'monday'
-    | 'tuesday'
-    | 'wednesday'
-    | 'thursday'
-    | 'friday'
-    | 'saturday'
-    | 'sunday';
-  start_time: string; // "HH:MM"
-  end_time: string; // "HH:MM"
-  max_appointments: number;
-  is_active: boolean;
+export interface ServiceBooking {
+  id: number;
+  service_id: number;
+  service_name: string;
+  store_id: number;
+  store_name: string;
+  customer_id: number;
+  customer_name: string;
+  customer_email: string;
+  customer_phone: string;
+  date: string;
+  start_time: string;
+  end_time: string;
+  status: BookingStatus;
+  payment_method: PaymentMethod;
+  payment_status: PaymentStatus;
+  payment_amount: number;
+  notes?: string;
+  seller_notes?: string;
+  reschedule_token?: string;
+  no_show_reason?: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface CreateServiceInput {
   name: string;
-  description?: string;
-  price: number;
+  description: string;
   duration_minutes: number;
+  price: number;
+  category: string;
+  image?: string;
+  cancellation_policy: 'flexible' | 'strict' | 'no_refund';
+  cancellation_hours: number;
+  requires_payment: boolean;
+  is_virtual: boolean;
+  meeting_link?: string;
+  max_bookings_per_slot: number;
+  schedule: Omit<ServiceSchedule, 'id'>[];
+}
+
+export interface UpdateServiceInput extends Partial<CreateServiceInput> {
   status?: ServiceStatus;
-  cancellation_policy?: CancellationPolicy;
-  max_cancellations?: number;
-  category_id?: number | null;
-  // Campos del frontend (paso 1 del modal)
-  buffer_minutes?: number;
-  is_home_service?: boolean;
-  booking_advance_hours?: number;
-  max_capacity?: number;
-  specialist_ids?: number[];
-  // Horarios
-  schedules?: ScheduleInput[];
 }
 
-export type UpdateServiceInput = Partial<CreateServiceInput> & {
-  status?: ServiceStatus;
-};
-
-// ─── Paginación ───────────────────────────────────────────────────────────────
-
-export interface PaginatedServices {
-  data: ServiceResponse[];
-  meta: {
-    current_page: number;
-    last_page: number;
-    per_page: number;
-    total: number;
-  };
+export interface BookServiceInput {
+  service_id: number;
+  date: string;
+  start_time: string;
+  customer_name: string;
+  customer_email: string;
+  customer_phone: string;
+  payment_method: PaymentMethod;
+  notes?: string;
 }
 
-// ─── Helper: Auth headers ─────────────────────────────────────────────────────
-
-async function getAuthHeaders(): Promise<HeadersInit> {
-  const base: Record<string, string> = {
-    'Content-Type': 'application/json',
-    Accept: 'application/json',
-  };
-
-  try {
-    const res = await fetch('/api/auth-token');
-    if (res.ok) {
-      const { token } = await res.json();
-      if (token) base['Authorization'] = `Bearer ${token}`;
-    }
-  } catch {
-    /* sin token — continúa sin auth */
-  }
-
-  return base;
-}
-
-// ─── Request base ─────────────────────────────────────────────────────────────
-
-async function request<T>(
-  endpoint: string,
-  options: RequestInit = {},
-): Promise<T> {
-  const headers = await getAuthHeaders();
-  const res = await fetch(`${LARAVEL_API_URL}${endpoint}`, {
+async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
+  const response = await fetch(`${LARAVEL_API_URL}${endpoint}`, {
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
     ...options,
-    headers: { ...headers, ...(options.headers ?? {}) },
   });
 
-  const json: ApiResponse<T> = await res.json();
-
-  if (!res.ok) {
-    const msg =
-      (json as unknown as { message?: string }).message ??
-      `Error ${res.status}`;
-    throw new Error(msg);
+  if (!response.ok) {
+    throw new Error(`API Error: ${response.status}`);
   }
 
-  return (json.data ?? json) as T;
+  return response.json();
 }
 
-// ─── Mapa de días: frontend (español) → backend (inglés) ────────────────────
-
-const DAY_MAP: Record<string, ScheduleInput['day_of_week']> = {
-  // Nombres completos en español
-  Lunes: 'monday',
-  Martes: 'tuesday',
-  Miércoles: 'wednesday',
-  Miercoles: 'wednesday',
-  Jueves: 'thursday',
-  Viernes: 'friday',
-  Sábado: 'saturday',
-  Sabado: 'saturday',
-  Domingo: 'sunday',
-  // Abreviaciones del modal
-  LUN: 'monday',
-  MAR: 'tuesday',
-  MIÉ: 'wednesday',
-  MIE: 'wednesday',
-  JUE: 'thursday',
-  VIE: 'friday',
-  SÁB: 'saturday',
-  SAB: 'saturday',
-  DOM: 'sunday',
-  // Por si el frontend ya manda en inglés
-  monday: 'monday',
-  tuesday: 'tuesday',
-  wednesday: 'wednesday',
-  thursday: 'thursday',
-  friday: 'friday',
-  saturday: 'saturday',
-  sunday: 'sunday',
-};
-
-/**
- * Convierte el form del ServiceConfigModal al payload que acepta el backend.
- *
- * El modal guarda los datos así:
- * {
- *   denominacion: string,
- *   categoria: string,        ← nombre de categoría, no ID
- *   duracion: number,
- *   diasAtencion: AttendanceDay[],
- *   cupos: number,
- *   precio: number,
- *   estado: 'borrador' | 'publicado',
- *   domicilio: boolean,
- *   anticipacionReserva: 24 | 48 | 72,
- *   bufferMinutos: number,
- *   especialistasAsignados: number[],
- * }
- *
- * El backend espera CreateServiceInput (campos en inglés).
- * category_id no se puede resolver aquí sin hacer un lookup — pásalo por separado.
- */
-export function mapFormToInput(
-  form: {
-    denominacion: string;
-    descripcion?: string;
-    categoria?: string;
-    duracion: number;
-    diasAtencion: Array<{
-      dia: string;
-      bloques: Array<{ inicio: string; fin: string }>;
-    }>;
-    cupos: number;
-    precio: number;
-    estado: 'borrador' | 'publicado';
-    domicilio: boolean;
-    anticipacionReserva: number;
-    bufferMinutos?: number;
-    especialistasAsignados?: number[];
-  },
-  categoryId?: number | null,
-): CreateServiceInput {
-  // Cada día puede tener varios bloques horarios → un schedule por bloque
-  const schedules: ScheduleInput[] = form.diasAtencion.flatMap((dayEntry) =>
-    dayEntry.bloques.map((block) => ({
-      day_of_week: DAY_MAP[dayEntry.dia] ?? 'monday',
-      start_time: block.inicio,
-      end_time: block.fin,
-      max_appointments: form.cupos,
-      is_active: true,
-    })),
-  );
-
-  return {
-    name: form.denominacion,
-    description: form.descripcion ?? '',
-    price: form.precio,
-    duration_minutes: form.duracion,
-    status: form.estado === 'publicado' ? 'active' : 'inactive',
-    cancellation_policy: 'flexible',
-    category_id: categoryId ?? null,
-    buffer_minutes: form.bufferMinutos ?? 0,
-    is_home_service: form.domicilio,
-    booking_advance_hours: form.anticipacionReserva,
-    max_capacity: form.cupos,
-    specialist_ids: form.especialistasAsignados ?? [],
-    schedules,
-  };
-}
-
-// ─── API pública del repositorio ──────────────────────────────────────────────
-
-export const serviceRepository = {
-  /**
-   * Lista los servicios de la tienda autenticada.
-   * GET /api/services/me
-   */
-  async list(perPage = 50): Promise<ServiceResponse[]> {
-    const paginated = await request<PaginatedServices>(
-      `/services/me?per_page=${perPage}`,
+export const serviceApi = {
+  list: async (status?: ServiceStatus): Promise<Service[]> => {
+    const params = status ? `?status=${status}` : '';
+    const response = await request<ApiResponse<Service[]>>(
+      `/services${params}`,
     );
-    // Si el backend devuelve paginado, extraer data; si devuelve array, devolver directo
-    return Array.isArray(paginated) ? paginated : (paginated.data ?? []);
+    return response.data || [];
   },
 
-  /**
-   * Obtiene un servicio por ID.
-   * GET /api/services/:id
-   */
-  async getById(id: number): Promise<ServiceResponse | null> {
+  getById: async (id: number): Promise<Service | null> => {
     try {
-      return await request<ServiceResponse>(`/services/${id}`);
+      const response = await request<ApiResponse<Service>>(`/services/${id}`);
+      return response.data || null;
     } catch {
       return null;
     }
   },
 
-  /**
-   * Obtiene los slots disponibles para una fecha.
-   * GET /api/services/:id/slots?date=YYYY-MM-DD
-   */
-  async getSlots(id: number, date: string): Promise<string[]> {
-    const result = await request<{ data: string[] } | string[]>(
+  getSlots: async (id: number, date: string): Promise<ServiceSlot[]> => {
+    const response = await request<ApiResponse<ServiceSlot[]>>(
       `/services/${id}/slots?date=${date}`,
     );
-    return Array.isArray(result)
-      ? result
-      : ((result as { data: string[] }).data ?? []);
+    return response.data || [];
   },
 
-  /**
-   * Crea un nuevo servicio.
-   * POST /api/services
-   */
-  async create(input: CreateServiceInput): Promise<ServiceResponse> {
-    return request<ServiceResponse>('/services', {
+  create: async (input: CreateServiceInput): Promise<Service> => {
+    const response = await request<ApiResponse<Service>>('/services', {
       method: 'POST',
       body: JSON.stringify(input),
     });
+    return response.data as Service;
   },
 
-  /**
-   * Actualiza un servicio existente.
-   * PUT /api/services/:id
-   */
-  async update(
-    id: number,
-    input: UpdateServiceInput,
-  ): Promise<ServiceResponse> {
-    return request<ServiceResponse>(`/services/${id}`, {
+  update: async (id: number, input: UpdateServiceInput): Promise<Service> => {
+    const response = await request<ApiResponse<Service>>(`/services/${id}`, {
       method: 'PUT',
       body: JSON.stringify(input),
     });
+    return response.data as Service;
   },
 
-  /**
-   * Elimina un servicio.
-   * DELETE /api/services/:id
-   */
-  async remove(id: number): Promise<void> {
-    await request<void>(`/services/${id}`, { method: 'DELETE' });
+  delete: async (id: number): Promise<boolean> => {
+    await request(`/services/${id}`, { method: 'DELETE' });
+    return true;
   },
 
-  /**
-   * Cambia el estado activo/inactivo del servicio.
-   * Atajos para publicar/despublicar desde el panel.
-   */
-  async publish(id: number): Promise<ServiceResponse> {
-    return serviceRepository.update(id, { status: 'active' });
+  book: async (
+    serviceId: number,
+    input: Omit<BookServiceInput, 'service_id'>,
+  ): Promise<ServiceBooking> => {
+    const response = await request<ApiResponse<ServiceBooking>>(
+      `/services/${serviceId}/book`,
+      {
+        method: 'POST',
+        body: JSON.stringify(input),
+      },
+    );
+    return response.data as ServiceBooking;
+  },
+};
+
+export const bookingApi = {
+  myBookings: async (): Promise<ServiceBooking[]> => {
+    const response =
+      await request<ApiResponse<ServiceBooking[]>>('/bookings/my');
+    return response.data || [];
   },
 
-  async unpublish(id: number): Promise<ServiceResponse> {
-    return serviceRepository.update(id, { status: 'inactive' });
+  sellerBookings: async (status?: BookingStatus): Promise<ServiceBooking[]> => {
+    const params = status ? `?status=${status}` : '';
+    const response = await request<ApiResponse<ServiceBooking[]>>(
+      `/bookings/seller${params}`,
+    );
+    return response.data || [];
+  },
+
+  cancel: async (id: number, reason?: string): Promise<ServiceBooking> => {
+    const response = await request<ApiResponse<ServiceBooking>>(
+      `/bookings/${id}/cancel`,
+      {
+        method: 'PUT',
+        body: JSON.stringify({ reason }),
+      },
+    );
+    return response.data as ServiceBooking;
+  },
+
+  reschedule: async (
+    id: number,
+    newDate: string,
+    newTime: string,
+    token: string,
+  ): Promise<ServiceBooking> => {
+    const response = await request<ApiResponse<ServiceBooking>>(
+      `/bookings/${id}/reschedule`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ date: newDate, time: newTime, token }),
+      },
+    );
+    return response.data as ServiceBooking;
+  },
+
+  confirm: async (id: number): Promise<ServiceBooking> => {
+    const response = await request<ApiResponse<ServiceBooking>>(
+      `/bookings/${id}/confirm`,
+      {
+        method: 'PUT',
+      },
+    );
+    return response.data as ServiceBooking;
+  },
+
+  markNoShow: async (id: number, reason?: string): Promise<ServiceBooking> => {
+    const response = await request<ApiResponse<ServiceBooking>>(
+      `/bookings/${id}/no-show`,
+      {
+        method: 'PUT',
+        body: JSON.stringify({ reason }),
+      },
+    );
+    return response.data as ServiceBooking;
+  },
+
+  updateNotes: async (id: number, notes: string): Promise<ServiceBooking> => {
+    const response = await request<ApiResponse<ServiceBooking>>(
+      `/bookings/${id}/notes`,
+      {
+        method: 'PUT',
+        body: JSON.stringify({ notes }),
+      },
+    );
+    return response.data as ServiceBooking;
   },
 };

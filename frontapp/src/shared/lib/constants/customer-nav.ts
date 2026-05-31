@@ -18,6 +18,13 @@ export const customerNavigation: PanelNavigation = [
                 href: '/customer/orders'
             },
             {
+                id: 'bookings',
+                label: 'Mis Reservas',
+                description: 'Servicios agendados y pasados',
+                icon: 'Calendar',
+                href: '/customer/bookings'
+            },
+            {
                 id: 'security',
                 label: 'Seguridad',
                 description: 'Protege tu cuenta',

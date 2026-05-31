@@ -30,12 +30,16 @@ export default function CheckoutPage() {
   const setStep = useCheckoutStore((s) => s.setStep);
   const orderResult = useCheckoutStore((s) => s.orderResult);
   const isProcessing = useCheckoutStore((s) => s.isProcessing);
+  const reset = useCheckoutStore((s) => s.reset);
 
   // ← NUEVO: inicializa el hook que carga el carrito del backend al montar
   const { isLoading, error, clearError } = useCheckoutSubmit();
 
   const [showPostCompra, setShowPostCompra] = useState(false);
   const [showRegistro, setShowRegistro] = useState(false);
+
+  // Reset checkout state on mount so we always start at step 1
+  useEffect(() => { reset(); }, [reset]);
 
   useEffect(() => {
     if (currentStep === 3) {

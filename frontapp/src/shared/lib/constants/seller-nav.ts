@@ -46,6 +46,13 @@ export const sellerNavigation: PanelNavigation = [
                 href: '/seller/services'
             },
             {
+                id: 'reservas',
+                label: 'Reservas',
+                description: 'Reservas recibidas y estado de atención',
+                icon: 'CalendarCheck',
+                href: '/seller/reservas'
+            },
+            {
                 id: 'ventas',
                 label: 'Mis Ventas',
                 description: 'Monitoreo estratégico de transacciones y despachos',

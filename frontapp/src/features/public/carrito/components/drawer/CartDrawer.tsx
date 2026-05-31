@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useCallback, useState } from 'react';
+import { useEffect, useCallback, useState, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import CartRecommendations from './CartRecommendations';
@@ -16,10 +16,15 @@ import {
   AlertCircle,
   PackageOpen,
   Tag,
+  Clock,
+  User,
+  Calendar,
 } from 'lucide-react';
 import { useCarritoStore } from '@/store/carritoStore';
 import { cartApi } from '@/shared/lib/api/cartRepository';
+import { serviceRepository } from '@/shared/lib/api/serviRepository';
 import type { CartItem, CartResource } from '@/shared/lib/api/cartRepository';
+import type { ServiceHold } from '@/shared/lib/api/serviRepository';
 
 function fmt(n: number) {
   return `S/ ${n.toFixed(2)}`;
@@ -215,6 +220,114 @@ function CartLineItem({
   );
 }
 
+// ─── Helper: get cart_token from sessionStorage ───────────────────────────────
+
+function getCartToken(): string {
+  if (typeof window === 'undefined') return '';
+  let sid = sessionStorage.getItem('cart_session_id');
+  if (!sid) {
+    sid = `guest_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+    sessionStorage.setItem('cart_session_id', sid);
+  }
+  return sid;
+}
+
+// ─── ServiceHoldLineItem ───────────────────────────────────────────────────────
+
+function ServiceHoldLineItem({
+  hold,
+  onRemove,
+  removing,
+}: {
+  hold: ServiceHold;
+  onRemove: (id: number) => void;
+  removing: boolean;
+}) {
+  const [remaining, setRemaining] = useState(hold.seconds_remaining);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    setRemaining(Math.max(0, Math.round((new Date(hold.expires_at).getTime() - Date.now()) / 1000)));
+    intervalRef.current = setInterval(() => {
+      setRemaining((prev) => Math.max(0, prev - 1));
+    }, 1000);
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [hold.expires_at]);
+
+  const minutes = Math.floor(remaining / 60);
+  const seconds = remaining % 60;
+  const expired = remaining <= 0;
+
+  const dateStr = new Date(hold.appointment_date + 'T00:00:00').toLocaleDateString('es-PE', {
+    day: 'numeric', month: 'short',
+  });
+
+  function holdImg(url?: string | null) {
+    if (!url) return '/no-image.png';
+    if (url.startsWith('http') || url.startsWith('data:')) return url;
+    return '/no-image.png';
+  }
+
+  return (
+    <div className="flex gap-3 py-4 last:border-0 group relative" style={{ borderBottom: '1px solid var(--pd-border2, rgba(15,14,12,0.05))' }}>
+      {/* Image */}
+      <div className="relative w-[68px] h-[68px] flex-shrink-0 overflow-hidden" style={{ background: 'var(--pd-bg2,#f2f0ea)', border: '1px solid var(--pd-border)' }}>
+        <Image
+          src={holdImg(hold.service_image)}
+          alt={hold.service_name}
+          fill
+          sizes="68px"
+          className="object-contain p-1"
+        />
+      </div>
+
+      {/* Info */}
+      <div className="flex-1 min-w-0 flex flex-col gap-1 pr-5">
+        <p className="text-[12px] font-medium leading-snug line-clamp-2" style={{ color: 'var(--pd-ink,#0f0e0c)' }}>
+          {hold.service_name}
+        </p>
+        <div className="flex items-center gap-1 text-[10px]" style={{ color: 'var(--pd-ink3,#7a7970)' }}>
+          <User className="w-3 h-3" />
+          <span>{hold.specialist_name}</span>
+        </div>
+        <p className="text-[10px]" style={{ color: 'var(--pd-ink3,#7a7970)' }}>
+          {dateStr} — {hold.start_time}
+        </p>
+        <div className="flex items-center justify-between mt-auto">
+          <span className="text-[12px] font-medium" style={{ color: 'var(--pd-accent2,#2d5e42)' }}>
+            S/ {Number(hold.service_price).toFixed(2)}
+          </span>
+          <div className={`flex items-center gap-1 text-[10px] font-semibold ${expired ? 'text-red-500' : 'text-amber-600'}`}>
+            <Clock className="w-3 h-3" />
+            {expired ? 'Por vencer' : `${minutes}:${String(seconds).padStart(2, '0')}`}
+          </div>
+        </div>
+      </div>
+
+      {/* Remove */}
+      <button
+        onClick={() => onRemove(hold.id)}
+        disabled={removing || expired}
+        className="absolute top-4 right-0 p-1.5 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100 disabled:cursor-not-allowed"
+        style={{ color: 'var(--pd-ink3)' }}
+        onMouseEnter={(e) => {
+          (e.currentTarget as HTMLButtonElement).style.color = 'var(--pd-red)';
+          (e.currentTarget as HTMLButtonElement).style.background = 'color-mix(in srgb, var(--pd-red) 8%, transparent)';
+        }}
+        onMouseLeave={(e) => {
+          (e.currentTarget as HTMLButtonElement).style.color = 'var(--pd-ink3)';
+          (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
+        }}
+        aria-label="Eliminar"
+      >
+        <Trash2 className="w-3.5 h-3.5" />
+      </button>
+    </div>
+  );
+}
+
 // ─── CartDrawer ───────────────────────────────────────────────────────────────
 
 export default function CartDrawer() {
@@ -224,6 +337,11 @@ export default function CartDrawer() {
   const [mutatingId, setMutatingId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+
+  // Service holds
+  const [serviceHolds, setServiceHolds] = useState<ServiceHold[]>([]);
+  const [holdsLoading, setHoldsLoading] = useState(false);
+  const [removingHoldId, setRemovingHoldId] = useState<number | null>(null);
 
   const { goToCheckout } = useCheckoutGuard();
 
@@ -239,9 +357,38 @@ export default function CartDrawer() {
     }
   }, []);
 
+  const loadHolds = useCallback(async () => {
+    const token = getCartToken();
+    if (!token) return;
+    setHoldsLoading(true);
+    try {
+      const res = await serviceRepository.getServiceHolds(token);
+      setServiceHolds(res.holds ?? []);
+    } catch {
+      // silently fail — holds are optional
+    } finally {
+      setHoldsLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
-    if (ui.cartOpen) loadCart();
-  }, [ui.cartOpen, loadCart]);
+    if (ui.cartOpen) {
+      loadCart();
+      loadHolds();
+    }
+  }, [ui.cartOpen, loadCart, loadHolds]);
+
+  const handleRemoveHold = async (holdId: number) => {
+    setRemovingHoldId(holdId);
+    try {
+      await serviceRepository.removeServiceHold(holdId, getCartToken());
+      setServiceHolds((prev) => prev.filter((h) => h.id !== holdId));
+    } catch {
+      setError('Error al eliminar el servicio del carrito.');
+    } finally {
+      setRemovingHoldId(null);
+    }
+  };
 
   useEffect(() => {
     document.body.style.overflow = ui.cartOpen ? 'hidden' : '';
@@ -327,7 +474,10 @@ export default function CartDrawer() {
   };
 
   const items = cart?.items ?? [];
-  const isEmpty = !fetchLoading && items.length === 0;
+  const totalItems = (cart?.itemCount ?? 0) + serviceHolds.length;
+  const isEmpty = !fetchLoading && items.length === 0 && serviceHolds.length === 0;
+  const serviceTotal = serviceHolds.reduce((sum, h) => sum + (h.service_price ?? 0), 0);
+  const combinedTotal = (cart?.total ?? 0) + serviceTotal;
 
   return (
     <>
@@ -381,7 +531,7 @@ export default function CartDrawer() {
               >
                 {fetchLoading
                   ? 'Cargando…'
-                  : `${cart?.itemCount ?? 0} ${cart?.itemCount === 1 ? 'artículo' : 'artículos'}`}
+                  : `${totalItems} ${totalItems === 1 ? 'artículo' : 'artículos'}`}
               </p>
             </div>
           </div>
@@ -519,7 +669,7 @@ export default function CartDrawer() {
             </div>
           )}
 
-          {/* ── Lista de ítems ── */}
+          {/* ── Lista de ítems (productos) ── */}
           {!fetchLoading && items.length > 0 && (
             <div className="px-5 pt-2">
               {items.map((item) => (
@@ -535,6 +685,32 @@ export default function CartDrawer() {
             </div>
           )}
 
+          {/* ── Service Holds ── */}
+          {!fetchLoading && serviceHolds.length > 0 && (
+            <div className="px-5 pt-2">
+              <div
+                className="flex items-center gap-2 py-2 text-[11px] font-bold uppercase tracking-wide"
+                style={{ color: 'var(--pd-ink3,#7a7970)' }}
+              >
+                <Calendar className="w-3.5 h-3.5" />
+                Servicios ({serviceHolds.length})
+              </div>
+              {serviceHolds.map((hold) => (
+                <ServiceHoldLineItem
+                  key={hold.id}
+                  hold={hold}
+                  onRemove={handleRemoveHold}
+                  removing={removingHoldId === hold.id}
+                />
+              ))}
+            </div>
+          )}
+          {holdsLoading && (
+            <div className="flex items-center justify-center py-4">
+              <Loader2 className="w-4 h-4 animate-spin" style={{ color: 'var(--pd-ink3)' }} />
+            </div>
+          )}
+
         </div>
         {/* ── FIN BODY SCROLL ── */}
 
@@ -547,7 +723,7 @@ export default function CartDrawer() {
         )}
 
         {/* ── 4. FOOTER — shrink-0 ── */}
-        {!fetchLoading && items.length > 0 && cart && (
+        {!fetchLoading && !isEmpty && (
           <div
             className="shrink-0 px-5 py-4 space-y-3"
             style={{ borderTop: '1px solid var(--pd-border)' }}
@@ -581,7 +757,7 @@ export default function CartDrawer() {
               <div className="flex justify-between text-[13px]">
                 <span style={{ color: 'var(--pd-ink3)' }}>Subtotal</span>
                 <span style={{ color: 'var(--pd-ink2)' }}>
-                  {fmt(cart.subtotal)}
+                  {fmt(cart?.subtotal ?? 0)}
                 </span>
               </div>
               <div className="flex justify-between text-[13px]">
@@ -607,7 +783,7 @@ export default function CartDrawer() {
                   className="font-['DM_Serif_Display',Georgia,serif] text-[22px] leading-none"
                   style={{ color: 'var(--pd-ink)' }}
                 >
-                  {fmt(cart.total)}
+                  {fmt(combinedTotal)}
                 </span>
               </div>
             </div>
