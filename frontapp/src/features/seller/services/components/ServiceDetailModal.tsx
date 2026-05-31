@@ -91,18 +91,18 @@ export default function ServiceDetailModal({
     const totalSessions = countTotalSessions(service.diasAtencion, service.duracion);
 
     const footer = (
-        <div className="flex flex-col sm:flex-row gap-4 w-full">
-            <BaseButton variant="ghost" onClick={onClose} className="flex-1 !rounded-3xl">
-                Cerrar Panel
+        <div className="flex flex-col sm:flex-row gap-3 w-full">
+            <BaseButton variant="ghost" onClick={onClose} className="flex-1 !rounded-2xl">
+                Cerrar
             </BaseButton>
             <BaseButton
                 onClick={() => { onEdit(service); onClose(); }}
                 variant="primary"
                 leftIcon="Pencil"
-                className="flex-[2] !rounded-3xl"
+                className="flex-[2] !rounded-2xl"
                 size="md"
             >
-                Editar Configuración
+                Editar Servicio
             </BaseButton>
         </div>
     );
@@ -113,61 +113,65 @@ export default function ServiceDetailModal({
             onClose={onClose}
             title={service.denominacion}
             subtitle={scheduleSubtitle}
-            badge="Auditoría de Servicio"
+            badge="Detalle de Servicio"
             width="md:w-[650px]"
             accentColor="from-sky-500/10 via-indigo-500/5"
             footer={footer}
         >
-            <div className="space-y-12">
+            <div className="space-y-8">
 
-                {/* ── Estado operativo + Staff ── */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                {/* ── Estado + Staff ── */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
-                    {/* Estado derivado */}
-                    <div className="space-y-4">
-                        <p className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest px-1">
-                            Estado Operativo
+                    {/* Estado operativo */}
+                    <div className="space-y-2">
+                        <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest px-1">
+                            Estado
                         </p>
-                        <div className={`flex items-center gap-5 p-6 rounded-[2.5rem] border shadow-sm transition-all
+                        {/* ↓ rounded-[2.5rem] igual que la versión original */}
+                        <div className={`flex items-center gap-4 p-5 rounded-[2.5rem] border transition-all
                             ${active
-                                ? 'bg-emerald-500/10 border-emerald-500/20 shadow-emerald-500/10'
-                                : 'bg-rose-500/10   border-rose-500/20   shadow-rose-500/10'
-                            }`}>
-                            <div className="relative flex-shrink-0">
-                                <div className={`w-4 h-4 rounded-full ${active ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+                                ? 'bg-emerald-500/8 border-emerald-500/25'
+                                : 'bg-gray-500/15 dark:bg-gray-300/15  border-gray-500/50 dark:border-gray-300/50'
+                            }`}
+                        >
+                            {/* Dot + ping: contenedor ajustado al tamaño del dot */}
+                            <div className="relative flex-shrink-0 w-4 h-4">
+                                <div className={`w-4 h-4 rounded-full ${active ? 'bg-emerald-500' : 'bg-gray-400 dark:bg-gray-300/70'}`} />
                                 {active && (
-                                    <div className="absolute inset-0 w-4 h-4 rounded-full bg-emerald-500 animate-ping opacity-75" />
+                                    <div className="absolute inset-0 rounded-full bg-emerald-500 animate-ping opacity-75" />
                                 )}
                             </div>
                             <div>
-                                <p className={`text-sm font-black tracking-tight ${active ? 'text-emerald-500' : 'text-rose-500'}`}>
-                                    {active ? 'Activo en Tienda' : 'Configuración Incompleta'}
+                                <p className={`text-sm font-bold ${active ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-600 dark:text-gray-300'}`}>
+                                    {active ? 'Activo en tienda' : 'Configuración incompleta'}
                                 </p>
-                                <p className="text-[9px] font-bold text-[var(--text-secondary)] uppercase tracking-tighter mt-0.5">
-                                    {active ? 'Visibilidad pública OK' : 'Asigna días o especialistas'}
+                                <p className="text-[11px] text-[var(--text-secondary)] mt-0.5">
+                                    {active ? 'Visible al público' : 'Asigna días o especialistas'}
                                 </p>
                             </div>
                         </div>
                     </div>
 
                     {/* Staff */}
-                    <div className="space-y-4">
-                        <p className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest px-1">
-                            Staff Certificado
+                    <div className="space-y-2">
+                        <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest px-1">
+                            Especialistas ({assignedSpecialists.length})
                         </p>
-                        <div className="flex -space-x-3 p-4 bg-[var(--bg-secondary)]/30 rounded-[2.5rem] border border-[var(--border-subtle)] min-h-[5.5rem] items-center px-8 shadow-inner">
+                        {/* ↓ rounded-[2.5rem] igual que estado */}
+                        <div className="flex -space-x-3 p-5 bg-[var(--bg-secondary)]/40 rounded-[2.5rem] border border-[var(--border-subtle)] min-h-[5rem] items-center px-6">
                             {assignedSpecialists.length === 0 ? (
-                                <p className="text-[10px] font-bold text-[var(--text-secondary)] italic">Sin asignar</p>
+                                <p className="text-xs text-[var(--text-secondary)] italic">Sin especialistas asignados</p>
                             ) : (
                                 assignedSpecialists.map((esp) => (
                                     <div
                                         key={esp.id}
-                                        className="relative w-12 h-12 rounded-2xl bg-[var(--bg-card)] border-[3px] border-[var(--bg-card)] flex items-center justify-center text-sm font-black overflow-hidden shadow-lg hover:-translate-y-2 hover:z-10 transition-all cursor-pointer ring-1 ring-[var(--border-subtle)]"
+                                        className="relative w-11 h-11 rounded-2xl bg-[var(--bg-card)] border-2 border-[var(--bg-card)] flex items-center justify-center text-sm font-black overflow-hidden shadow-md hover:-translate-y-2 hover:z-10 transition-all cursor-pointer ring-1 ring-[var(--border-subtle)]"
                                         title={`${esp.nombres} ${esp.apellidos} · ${esp.especialidad}`}
                                     >
                                         {esp.foto
-                                            ? <Image src={esp.foto} fill sizes="48px" className="object-cover" alt={`${esp.nombres} ${esp.apellidos}`} />
-                                            : <span className="text-sky-500">{getAvatarChars(esp)}</span>
+                                            ? <Image src={esp.foto} fill sizes="44px" className="object-cover" alt={`${esp.nombres} ${esp.apellidos}`} />
+                                            : <span className="text-sky-500 dark:text-[var(--icons-green)]">{getAvatarChars(esp)}</span>
                                         }
                                     </div>
                                 ))
@@ -176,56 +180,58 @@ export default function ServiceDetailModal({
                     </div>
                 </div>
 
-                {/* ── Disponibilidad compacta ── */}
-                <div className="space-y-4">
+                {/* ── Disponibilidad ── */}
+                <div className="space-y-3">
                     <div className="flex items-center justify-between px-1">
-                        <h3 className="text-xs font-black text-[var(--text-primary)] uppercase tracking-widest flex items-center gap-2">
-                            <div className="w-1.5 h-4 bg-sky-500 rounded-full" />
-                            Disponibilidad
+                        <h3 className="text-xs font-bold text-[var(--text-primary)] uppercase tracking-widest flex items-center gap-2">
+                            <div className="w-1 h-4 bg-sky-500 dark:bg-[var(--icons-green)] rounded-full" />
+                            Horario semanal
                         </h3>
                         <button
                             onClick={() => setIsCalendarOpen(true)}
-                            className="flex items-center gap-1.5 text-[9px] font-black text-sky-500 uppercase tracking-widest hover:opacity-70 transition-all"
+                            className="flex items-center gap-1.5 text-[11px] font-semibold text-sky-500 dark:text-[var(--icons-green)] hover:opacity-70 transition-opacity"
                         >
                             <Icon name="CalendarDays" className="w-3.5 h-3.5" />
-                            Ver calendario completo
+                            Ver calendario del servicio
                         </button>
                     </div>
 
-                    <div className="space-y-2">
-                        {service.diasAtencion.length === 0 ? (
-                            <div className="py-8 text-center text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest bg-[var(--bg-secondary)]/30 rounded-[1.5rem] border border-dashed border-[var(--border-subtle)]">
-                                Sin días configurados
-                            </div>
-                        ) : (
-                            service.diasAtencion.map((dayObj) => {
+                    {service.diasAtencion.length === 0 ? (
+                        <div className="py-10 text-center text-xs text-[var(--text-secondary)] bg-[var(--bg-secondary)]/30 rounded-[2.5rem] border border-dashed border-[var(--border-subtle)]">
+                            Sin días configurados — edita el servicio para agregar horarios
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 gap-2">
+                            {service.diasAtencion.map((dayObj) => {
                                 const totalSes = dayObj.bloques.reduce(
                                     (t, b) => t + calculateSessions(b, service.duracion).length, 0
                                 );
                                 return (
                                     <div
                                         key={dayObj.dia}
-                                        className="flex items-center justify-between px-5 py-3.5 bg-[var(--bg-secondary)]/50 rounded-2xl border border-[var(--border-subtle)]"
+                                        className="flex items-center justify-between px-5 py-3.5 bg-[var(--bg-secondary)]/40 hover:bg-[var(--bg-secondary)]/70 rounded-[2.5rem] border border-[var(--border-subtle)] transition-colors"
                                     >
+                                        {/* Día */}
                                         <div className="flex items-center gap-3">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-sky-500" />
-                                            <span className="text-xs font-black text-[var(--text-primary)] uppercase tracking-widest">
+                                            <div className="w-2 h-2 rounded-full bg-sky-500 dark:bg-[var(--icons-green)] flex-shrink-0" />
+                                            <span className="text-sm font-semibold text-[var(--text-primary)] capitalize">
                                                 {dayObj.dia}
                                             </span>
                                         </div>
-                                        <div className="flex items-center gap-3">
-                                            <span className="text-[9px] font-bold text-[var(--text-secondary)] uppercase tracking-widest">
-                                                {dayObj.bloques.length} bloque{dayObj.bloques.length !== 1 ? 's' : ''}
+                                        {/* Métricas */}
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-xs text-[var(--text-secondary)]">
+                                                {dayObj.bloques.length} {dayObj.bloques.length !== 1 ? 'bloques' : 'bloque'}
                                             </span>
-                                            <span className="text-[9px] font-black text-sky-500 bg-sky-500/10 border border-sky-500/20 px-2 py-0.5 rounded-lg">
-                                                {totalSes} ses.
+                                            <span className="text-xs font-semibold text-sky-600 dark:text-[var(--icons-green)] bg-sky-500/10 dark:bg-[var(--icons-green)]/10 border border-sky-500/20 dark:border-[var(--icons-green)]/20 px-2.5 py-0.5 rounded-lg">
+                                                {totalSes} sesión{totalSes !== 1 ? 'es' : ''}
                                             </span>
                                         </div>
                                     </div>
                                 );
-                            })
-                        )}
-                    </div>
+                            })}
+                        </div>
+                    )}
 
                     <ServiceCalendar
                         isOpen={isCalendarOpen}
@@ -238,92 +244,80 @@ export default function ServiceDetailModal({
                     />
                 </div>
 
-                {/* ── Configuración maestra ── */}
-                <div className="p-8 bg-sky-500 rounded-[3rem] text-white shadow-2xl space-y-6 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 blur-[100px] -z-0" />
+                {/* ── Configuración del servicio ── */}
+                <div className="rounded-2xl overflow-hidden border border-[var(--border-subtle)]">
 
                     {/* Header */}
-                    <div className="relative z-10 flex items-center justify-between border-b border-white/10 pb-6">
-                        <div className="flex items-center gap-3">
-                            <Icon name="ShieldCheck" className="text-sky-200 w-6 h-6" />
-                            <h4 className="text-[10px] font-black uppercase tracking-[0.3em] opacity-60">
-                                Configuración Maestra
-                            </h4>
+                    <div className="flex items-center justify-between px-5 py-4 bg-sky-500 dark:bg-[var(--brand-green)]">
+                        <div className="flex items-center gap-2.5">
+                            <Icon name="ShieldCheck" className="text-white/80 w-4 h-4" />
+                            <span className="text-xs font-bold text-white uppercase tracking-widest">
+                                Configuración del servicio
+                            </span>
                         </div>
-                        <div className="text-[10px] font-black text-sky-200 bg-white/10 px-3 py-1 rounded-full border border-white/20">
-                            AUTO-MANAGED
-                        </div>
+                        <span className="text-[11px] font-semibold text-white bg-white/10 px-3 py-1 rounded-full border border-white/20">
+                            Auto gestionado
+                        </span>
                     </div>
 
-                    {/* Grid de métricas */}
-                    <div className="grid grid-cols-2 gap-8 relative z-10">
+                    {/* Grid 2×2 con divisores */}
+                    <div className="grid grid-cols-2 divide-x divide-y divide-[var(--border-subtle)] bg-[var(--bg-secondary)]/20">
 
-                        {/* Días de atención */}
-                        <div className="space-y-4">
-                            <p className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em]">
-                                Días de Atención
-                            </p>
-                            <div className="flex items-center gap-4">
-                                <div className="p-3 bg-white/5 rounded-2xl border border-white/10">
-                                    <Icon name="Clock" className="text-sky-200 w-5 h-5" />
-                                </div>
-                                <div>
-                                    <p className="text-xl font-black tracking-tight">
-                                        {service.diasAtencion.length > 0
-                                            ? service.diasAtencion.map((d) => WEEK_DAY_SHORT[d.dia]).join(', ')
-                                            : '—'
-                                        }
-                                    </p>
-                                    <p className="text-[9px] font-bold text-white/40 uppercase mt-0.5">
-                                        Ventana Operativa
-                                    </p>
-                                </div>
+                        {/* Días activos */}
+                        <div className="p-5 space-y-1.5">
+                            <div className="flex items-center gap-1.5 text-[var(--text-secondary)]">
+                                <Icon name="CalendarDays" className="w-3.5 h-3.5 text-sky-500 dark:text-[var(--icons-green)]" />
+                                <span className="text-[10px] font-bold uppercase tracking-wider">Días activos</span>
                             </div>
-                        </div>
-
-                        {/* Cupos y sesiones */}
-                        <div className="space-y-4">
-                            <p className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em]">
-                                Capacidad
-                            </p>
-                            <div className="flex items-center gap-4">
-                                <div className="p-3 bg-white/5 rounded-2xl border border-white/10">
-                                    <Icon name="TrendingUp" className="text-emerald-300 w-5 h-5" />
-                                </div>
-                                <div>
-                                    <p className="text-xl font-black tracking-tight">
-                                        {service.cupos}
-                                        <span className="text-[10px] font-bold opacity-30 ml-1">PX/SESIÓN</span>
-                                    </p>
-                                    <p className="text-[9px] font-bold text-white/40 uppercase mt-0.5">
-                                        {totalSessions} sesiones en total
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Duración */}
-                        <div className="space-y-4">
-                            <p className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em]">
-                                Duración por Sesión
-                            </p>
-                            <p className="text-xl font-black tracking-tight">
-                                {service.duracion < 60
-                                    ? `${service.duracion} min`
-                                    : `${service.duracion / 60}h`
+                            <p className="text-base font-bold text-[var(--text-primary)] leading-tight">
+                                {service.diasAtencion.length > 0
+                                    ? service.diasAtencion.map((d) => WEEK_DAY_SHORT[d.dia]).join(' · ')
+                                    : <span className="text-[var(--text-secondary)] font-normal text-sm">Sin configurar</span>
                                 }
                             </p>
                         </div>
 
-                        {/* Precio */}
-                        <div className="space-y-4">
-                            <p className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em]">
-                                Precio por Sesión
-                            </p>
-                            <p className="text-xl font-black tracking-tight">
-                                S/. {service.precio.toFixed(2)}
+                        {/* Cupos */}
+                        <div className="p-5 space-y-1.5">
+                            <div className="flex items-center gap-1.5 text-[var(--text-secondary)]">
+                                <Icon name="Users" className="w-3.5 h-3.5 text-sky-500 dark:text-[var(--icons-green)]" />
+                                <span className="text-[10px] font-bold uppercase tracking-wider">Cupos por sesión</span>
+                            </div>
+                            <p className="text-base font-bold text-[var(--text-primary)]">
+                                {service.cupos}
+                                <span className="text-xs font-normal text-[var(--text-secondary)] ml-1.5">
+                                    · {totalSessions} sesión{totalSessions !== 1 ? 'es' : ''} en total
+                                </span>
                             </p>
                         </div>
+
+                        {/* Duración */}
+                        <div className="p-5 space-y-1.5">
+                            <div className="flex items-center gap-1.5 text-[var(--text-secondary)]">
+                                <Icon name="Clock" className="w-3.5 h-3.5 text-sky-500 dark:text-[var(--icons-green)]" />
+                                <span className="text-[10px] font-bold uppercase tracking-wider">Duración</span>
+                            </div>
+                            <p className="text-base font-bold text-[var(--text-primary)]">
+                                {service.duracion < 60
+                                    ? `${service.duracion} min`
+                                    : `${service.duracion / 60} h`
+                                }
+                                <span className="text-xs font-normal text-[var(--text-secondary)] ml-1.5">por sesión</span>
+                            </p>
+                        </div>
+
+                        {/* Precio */}
+                        <div className="p-5 space-y-1.5">
+                            <div className="flex items-center gap-1.5 text-[var(--text-secondary)]">
+                                <Icon name="Banknote" className="w-3.5 h-3.5 text-sky-500 dark:text-[var(--icons-green)]" />
+                                <span className="text-[10px] font-bold uppercase tracking-wider">Precio</span>
+                            </div>
+                            <p className="text-base font-bold text-[var(--text-primary)]">
+                                S/. {service.precio.toFixed(2)}
+                                <span className="text-xs font-normal text-[var(--text-secondary)] ml-1.5">por sesión</span>
+                            </p>
+                        </div>
+
                     </div>
                 </div>
 

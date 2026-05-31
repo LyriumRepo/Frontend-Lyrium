@@ -90,6 +90,15 @@ const SvgUserSilhouette = ({ className = 'w-7 h-7' }: { className?: string }) =>
   </svg>
 );
 
+const SvgInfo = ({ className = 'w-3.5 h-3.5' }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2}
+    strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <circle cx="12" cy="12" r="10" />
+    <line x1="12" y1="8" x2="12" y2="8.01" strokeWidth={3} />
+    <line x1="12" y1="12" x2="12" y2="16" />
+  </svg>
+);
+
 const SvgXTiny = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3}
     strokeLinecap="round" strokeLinejoin="round" className="w-2.5 h-2.5">
@@ -124,6 +133,7 @@ export default function SpecialistModal({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [catL1, setCatL1] = useState('');
   const [catL2, setCatL2] = useState('');
+  const [showCatInfo, setShowCatInfo] = useState(false);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -152,6 +162,7 @@ export default function SpecialistModal({
       setFotoPreview(null);
     }
     setErrors({});
+    setShowCatInfo(false);
   }, [specialist, isOpen]);
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -325,9 +336,53 @@ export default function SpecialistModal({
 
           {/* Categoría (2 niveles) */}
           <div className="space-y-3">
-            <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)]">
-              Categoría
-            </p>
+
+            {/* Label + ícono de ayuda */}
+            <div className="flex items-center gap-2">
+              <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)]">
+                Categoría
+              </p>
+
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setShowCatInfo((v) => !v)}
+                  className="w-5 h-5 flex items-center justify-center rounded-full
+                    text-sky-500 dark:text-[#8FC3A1]
+                    border border-sky-500/40 dark:border-[#8FC3A1]/40
+                    hover:bg-sky-500/10 dark:hover:bg-[#8FC3A1]/10
+                    transition-colors"
+                >
+                  <SvgInfo className="w-3 h-3" />
+                </button>
+
+                {showCatInfo && (
+                  <>
+                    {/* Overlay invisible para cerrar al clickar fuera */}
+                    <div className="fixed inset-0 z-10" onClick={() => setShowCatInfo(false)} />
+
+                    <div className="absolute left-0 top-7 z-20 w-72
+                      bg-[var(--bg-primary)] border border-sky-500/20 dark:border-[#8FC3A1]/20
+                      rounded-2xl shadow-xl p-4 space-y-2 animate-fadeIn">
+                      <p className="text-[11px] font-black uppercase tracking-widest
+                        text-sky-500 dark:text-[#8FC3A1]">
+                        ¿Qué categoría elegir?
+                      </p>
+                      <p className="text-[11px] leading-relaxed text-[var(--text-secondary)]">
+                        Selecciona según la{' '}
+                        <strong className="text-[var(--text-primary)]">especialidad</strong> del
+                        profesional y al tipo de{' '}
+                        <strong className="text-[var(--text-primary)]">servicio</strong> al que
+                        será asignado.
+                      </p>
+                      <p className="text-[11px] text-[var(--text-secondary)]/70 italic">
+                        Ej.: la categoría  de un cardiólogo debe ser → «Servicios médicos › Cardiología».
+                      </p>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
 
             {/* L1 */}
             <div className="space-y-1">

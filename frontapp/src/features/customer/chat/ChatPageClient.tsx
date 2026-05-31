@@ -396,7 +396,7 @@ export function ChatPageClient() {
                 title="Chat con Vendedores"
                 subtitle="Comunicación directa con los vendedores"
                 icon="Messages"
-                actions={                               // ← nuevo bloque actions
+                actions={                               
                     !showNewChatForm ? (
                         <button
                             onClick={() => setShowNewChatForm(true)}

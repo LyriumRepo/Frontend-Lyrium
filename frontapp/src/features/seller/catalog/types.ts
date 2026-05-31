@@ -3,8 +3,6 @@ export interface ProductAttribute {
     values: string[];
 }
 
-export type ProductSticker = 'liquidacion' | 'oferta' | 'descuento' | 'nuevo' | 'bestseller' | 'envio_gratis' | null;
-
 export interface ProductFormData {
     name: string;
     description: string;
@@ -12,7 +10,6 @@ export interface ProductFormData {
     stock: number;
     category: string;
     image: string;
-    sticker: ProductSticker;
     discountPercentage?: number;
 }
 
@@ -26,7 +23,6 @@ export interface Product {
     dimensions?: string;
     description: string;
     image: string;
-    sticker: ProductSticker;
     discountPercentage?: number;
     mainAttributes: ProductAttribute[];
     additionalAttributes: ProductAttribute[];

@@ -219,7 +219,7 @@ export function ServicesPageClient() {
                             <select
                                 value={statusFilter}
                                 onChange={(e) => { setStatusFilter(e.target.value as StatusFilter); setCurrentPage(1); }}
-                                className="appearance-none pl-3 pr-7 py-1.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] text-[10px] font-black uppercase tracking-widest text-[var(--text-primary)] focus:outline-none focus:border-sky-500/50 dark:focus:border-[#8FC3A1]/50 transition-colors cursor-pointer"
+                                className="appearance-none pl-3 pr-7 py-1.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] text-[11px] font-bold text-[var(--text-primary)] focus:outline-none focus:border-sky-500/50 dark:focus:border-[#8FC3A1]/50 transition-colors cursor-pointer"
                             >
                                 <option value="todos">Todos ({services.length})</option>
                                 <option value="publicado">Publicados ({publishedCount})</option>
@@ -234,8 +234,11 @@ export function ServicesPageClient() {
                             className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-sky-500/20 dark:border-[#8FC3A1]/20 bg-sky-500/10 dark:bg-[#8FC3A1]/10 text-sky-500 dark:text-[#8FC3A1] hover:bg-sky-500/20 dark:hover:bg-[#8FC3A1]/20 transition-colors"
                         >
                             <Icon name="Users" className="w-4 h-4" />
+                            <span className="text-[11px] font-bold">
+                                Mis Especialistas
+                            </span>
                             {specialists.length > 0 && (
-                                <span className="w-4 h-4 flex items-center justify-center rounded-full bg-sky-500 dark:bg-[#8FC3A1] text-white dark:text-[#0a1a13] text-[9px] font-black">
+                                <span className="w-4 h-4 flex items-center justify-center rounded-full bg-sky-500 dark:bg-[#8FC3A1] text-white dark:text-[#0a1a13] text-[9px] font-bold">
                                     {specialists.length}
                                 </span>
                             )}
