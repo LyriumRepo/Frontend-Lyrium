@@ -61,7 +61,7 @@ export default function BaseDrawer({
                         <div className="flex-1 min-w-0 pr-4">
                             {badge && (
                                 <div className="flex items-center gap-2 mb-3">
-                                    <span className="text-[10px] font-black text-[var(--brand-sky)] uppercase tracking-widest border border-[var(--brand-sky)]/20 rounded-lg bg-[var(--brand-sky)]/10 shadow-sm">
+                                    <span className="text-[10px] font-black text-[var(--brand-sky)] dark:text-[var(--icons-green)] uppercase tracking-widest border border-[var(--brand-sky)]/20 dark:border-[var(--icons-green)]/20 rounded-lg bg-[var(--brand-sky)]/10 dark:bg-[var(--icons-green)]/10 shadow-sm">
                                         {badge}
                                     </span>
                                 </div>

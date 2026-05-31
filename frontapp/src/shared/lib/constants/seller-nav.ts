@@ -26,14 +26,14 @@ export const sellerNavigation: PanelNavigation = [
             },
             {
                 id: 'catalogo',
-                label: 'Mi Catálogo',
+                label: 'Mis Productos',
                 description: 'Gestión integral de productos, categorías y existencias',
                 icon: 'Package',
                 href: '/seller/catalog'
             },
             {
                 id: 'inventario',
-                label: 'Inventario',
+                label: 'Gestión de stock ',
                 description: 'Control de existencias y alertas de stock',
                 icon: 'Boxes',
                 href: '/seller/inventario'

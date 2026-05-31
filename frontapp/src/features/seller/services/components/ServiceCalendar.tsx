@@ -8,7 +8,6 @@ import {
   Specialist,
   Appointment,
   AttendanceDay,
-  TimeBlock,
   WeekDay,
   calculateSessions,
 } from '@/features/seller/services/types';
@@ -39,18 +38,8 @@ interface ServiceCalendarProps {
 }
 
 const MONTH_NAMES = [
-  'Enero',
-  'Febrero',
-  'Marzo',
-  'Abril',
-  'Mayo',
-  'Junio',
-  'Julio',
-  'Agosto',
-  'Septiembre',
-  'Octubre',
-  'Noviembre',
-  'Diciembre',
+  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
 ];
 
 const DAY_HEADERS: { label: string; weekDay: WeekDay }[] = [
@@ -63,23 +52,10 @@ const DAY_HEADERS: { label: string; weekDay: WeekDay }[] = [
   { label: 'Dom', weekDay: 'Domingo' },
 ];
 
-const JS_TO_MON_BASED: Record<number, number> = {
-  1: 0,
-  2: 1,
-  3: 2,
-  4: 3,
-  5: 4,
-  6: 5,
-  0: 6,
-};
+const JS_TO_MON_BASED: Record<number, number> = { 1: 0, 2: 1, 3: 2, 4: 3, 5: 4, 6: 5, 0: 6 };
 const JS_TO_WEEKDAY: Record<number, WeekDay> = {
-  1: 'Lunes',
-  2: 'Martes',
-  3: 'Miércoles',
-  4: 'Jueves',
-  5: 'Viernes',
-  6: 'Sábado',
-  0: 'Domingo',
+  1: 'Lunes', 2: 'Martes', 3: 'Miércoles', 4: 'Jueves',
+  5: 'Viernes', 6: 'Sábado', 0: 'Domingo',
 };
 
 const SESSIONS_PER_PAGE = 3;
@@ -89,22 +65,13 @@ function getCalendarDays(year: number, month: number): (Date | null)[] {
   const lastDay = new Date(year, month + 1, 0);
   const startOffset = JS_TO_MON_BASED[firstDay.getDay()];
   const days: (Date | null)[] = Array(startOffset).fill(null);
-  for (let d = 1; d <= lastDay.getDate(); d++)
-    days.push(new Date(year, month, d));
+  for (let d = 1; d <= lastDay.getDate(); d++) days.push(new Date(year, month, d));
   while (days.length % 7 !== 0) days.push(null);
   return days;
 }
 
 function formatFecha(date: Date): string {
-  const dayNames = [
-    'Domingo',
-    'Lunes',
-    'Martes',
-    'Miércoles',
-    'Jueves',
-    'Viernes',
-    'Sábado',
-  ];
+  const dayNames = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
   return `${dayNames[date.getDay()]} ${date.getDate()} de ${MONTH_NAMES[date.getMonth()]}`;
 }
 
@@ -113,15 +80,9 @@ function getAttendanceDay(date: Date, service: Service): AttendanceDay | null {
   return service.diasAtencion.find((d) => d.dia === weekDay) ?? null;
 }
 
-function getApptsForDate(
-  date: Date,
-  service: Service,
-  appointments: AppointmentWithClient[],
-): AppointmentWithClient[] {
-  const fecha = date.toISOString().split('T')[0]; // "2026-06-01"
-  return appointments.filter(
-    (a) => a.serviceId === service.id && a.fecha === fecha,
-  );
+function getApptsForDate(date: Date, service: Service, appointments: AppointmentWithClient[]): AppointmentWithClient[] {
+  const fecha = formatFecha(date);
+  return appointments.filter((a) => a.serviceId === service.id && a.fecha === fecha);
 }
 
 function isPastDate(date: Date, today: Date): boolean {
@@ -131,17 +92,11 @@ function isPastDate(date: Date, today: Date): boolean {
 }
 
 function getAvatarChars(sp: Specialist): string {
-  return (
-    (sp.nombres?.charAt(0)?.toUpperCase() ?? '') +
-    (sp.apellidos?.charAt(0)?.toUpperCase() ?? '')
-  );
+  return (sp.nombres?.charAt(0)?.toUpperCase() ?? '') + (sp.apellidos?.charAt(0)?.toUpperCase() ?? '');
 }
 
 function getClientChars(client: Client): string {
-  return (
-    (client.nombres?.charAt(0)?.toUpperCase() ?? '') +
-    (client.apellidos?.charAt(0)?.toUpperCase() ?? '')
-  );
+  return (client.nombres?.charAt(0)?.toUpperCase() ?? '') + (client.apellidos?.charAt(0)?.toUpperCase() ?? '');
 }
 
 function getBlockLabel(index: number): string {
@@ -151,32 +106,6 @@ function getBlockLabel(index: number): string {
   return `${index + 1}° Bloque`;
 }
 
-function getSpecialistBlocksForDay(
-  specialistId: number,
-  date: Date,
-  service: Service,
-  blocks: TimeBlock[],
-): TimeBlock[] {
-  const horarios = (service as any).especialistaHorarios;
-  if (!horarios) return blocks;
-  const entry = horarios.find((h: any) => h.id === specialistId);
-  if (!entry) return [];
-  const weekDay = JS_TO_WEEKDAY[date.getDay()];
-  const dayEntry = entry.dias.find((d: any) => d.dia === weekDay);
-  if (!dayEntry) return [];
-  return dayEntry.bloques
-    .map((bi: number) => blocks[bi])
-    .filter(Boolean);
-}
-
-function getSpecialistBlocksCount(
-  specialistId: number,
-  date: Date,
-  service: Service,
-  blocks: TimeBlock[],
-): number {
-  return getSpecialistBlocksForDay(specialistId, date, service, blocks).length;
-}
 
 type AttendanceDayExtended = AttendanceDay & Record<string, unknown>;
 
@@ -186,24 +115,14 @@ function asNumberList(value: unknown): number[] {
 
   const ids = values.flatMap((item) => {
     if (typeof item === 'number' && Number.isFinite(item)) return [item];
-    if (
-      typeof item === 'string' &&
-      item.trim() !== '' &&
-      !Number.isNaN(Number(item))
-    )
-      return [Number(item)];
+    if (typeof item === 'string' && item.trim() !== '' && !Number.isNaN(Number(item))) return [Number(item)];
     if (typeof item === 'object' && item !== null) {
       const maybeId =
         (item as { id?: unknown }).id ??
         (item as { specialistId?: unknown }).specialistId ??
         (item as { especialistaId?: unknown }).especialistaId;
-      if (typeof maybeId === 'number' && Number.isFinite(maybeId))
-        return [maybeId];
-      if (
-        typeof maybeId === 'string' &&
-        maybeId.trim() !== '' &&
-        !Number.isNaN(Number(maybeId))
-      ) {
+      if (typeof maybeId === 'number' && Number.isFinite(maybeId)) return [maybeId];
+      if (typeof maybeId === 'string' && maybeId.trim() !== '' && !Number.isNaN(Number(maybeId))) {
         return [Number(maybeId)];
       }
     }
@@ -248,36 +167,29 @@ export default function ServiceCalendar({
 }: ServiceCalendarProps) {
   const today = new Date();
   const [currentMonth, setCurrentMonth] = useState(
-    new Date(today.getFullYear(), today.getMonth(), 1),
+    new Date(today.getFullYear(), today.getMonth(), 1)
   );
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedBlockIndex, setSelectedBlockIndex] = useState(0);
   const [selectedSessionPage, setSelectedSessionPage] = useState(1);
-  const [selectedAppointment, setSelectedAppointment] =
-    useState<AppointmentWithClient | null>(null);
+  const [selectedAppointment, setSelectedAppointment] = useState<AppointmentWithClient | null>(null);
   const [showRescheduleWarning, setShowRescheduleWarning] = useState(false);
-  const [selectedSpecialistId, setSelectedSpecialistId] = useState<
-    number | null
-  >(null);
+  const [selectedSpecialistId, setSelectedSpecialistId] = useState<number | null>(null);
   const [isSpecialistMenuOpen, setIsSpecialistMenuOpen] = useState(false);
   const specialistMenuRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (!selectedDate) return;
     const att = getAttendanceDay(selectedDate, service);
-    const blocks = att?.bloques ?? [];
-    if (blocks.length === 0) {
+    if (!att || att.bloques.length === 0) {
       setSelectedBlockIndex(0);
       setSelectedSessionPage(1);
       setSelectedAppointment(null);
       return;
     }
-    const filteredCount = selectedSpecialistId
-      ? getSpecialistBlocksCount(selectedSpecialistId, selectedDate, service, blocks)
-      : blocks.length;
-    setSelectedBlockIndex((prev) => Math.min(prev, Math.max(0, filteredCount - 1)));
+    setSelectedBlockIndex((prev) => Math.min(prev, att.bloques.length - 1));
     setSelectedSessionPage(1);
-  }, [selectedDate, service, selectedSpecialistId]);
+  }, [selectedDate, service]);
 
   useEffect(() => {
     setSelectedBlockIndex(0);
@@ -290,10 +202,7 @@ export default function ServiceCalendar({
     if (!isSpecialistMenuOpen) return;
 
     const handlePointerDown = (event: MouseEvent) => {
-      if (
-        specialistMenuRef.current &&
-        !specialistMenuRef.current.contains(event.target as Node)
-      ) {
+      if (specialistMenuRef.current && !specialistMenuRef.current.contains(event.target as Node)) {
         setIsSpecialistMenuOpen(false);
       }
     };
@@ -316,24 +225,24 @@ export default function ServiceCalendar({
   const calDays = getCalendarDays(year, month);
 
   const serviceSpecialists = specialists.filter((sp) =>
-    service.especialistasAsignados.includes(sp.id),
+    service.especialistasAsignados.includes(sp.id)
   );
   const activeSpecialist = selectedSpecialistId
-    ? (serviceSpecialists.find((sp) => sp.id === selectedSpecialistId) ?? null)
+    ? serviceSpecialists.find((sp) => sp.id === selectedSpecialistId) ?? null
     : null;
   const specialistSelectorLabel = activeSpecialist
     ? `${activeSpecialist.nombres} ${activeSpecialist.apellidos}`
     : 'Todos los Especialistas';
 
-  const filteredAppointments = appointments;
+  const filteredAppointments = selectedSpecialistId
+    ? appointments.filter((a) => a.specialistId === selectedSpecialistId)
+    : appointments;
 
   // Weekdays covered by the selected specialist, derived from their schedule (especialistaHorarios)
   type EspecialistaHorario = { id: number; dias: { dia: WeekDay }[] };
   const specialistWeekdays: Set<WeekDay> | null = (() => {
     if (!selectedSpecialistId) return null;
-    const horarios = (
-      service as Service & { especialistaHorarios?: EspecialistaHorario[] }
-    ).especialistaHorarios;
+    const horarios = (service as Service & { especialistaHorarios?: EspecialistaHorario[] }).especialistaHorarios;
     if (!horarios) return null;
     const entry = horarios.find((h) => h.id === selectedSpecialistId);
     if (!entry) return new Set<WeekDay>(); // specialist has no schedule → no days
@@ -362,6 +271,13 @@ export default function ServiceCalendar({
     const att = getAttendanceDay(date, service);
     if (!att) return;
 
+    if (selectedSpecialistId) {
+      const horarios = (service as Service & { especialistaHorarios?: { id: number; dias: { dia: WeekDay }[] }[] }).especialistaHorarios;
+      const entry = horarios?.find((h) => h.id === selectedSpecialistId);
+      const weekDay = JS_TO_WEEKDAY[date.getDay()];
+      if (!entry || !entry.dias.some((d) => d.dia === weekDay)) return;
+    }
+
     setSelectedDate(date);
     setSelectedBlockIndex(0);
     setSelectedSessionPage(1);
@@ -369,41 +285,29 @@ export default function ServiceCalendar({
     setShowRescheduleWarning(false);
   };
 
-  const selectedAtt = selectedDate
-    ? getAttendanceDay(selectedDate, service)
-    : null;
-  const selectedAppts = selectedDate
-    ? getApptsForDate(selectedDate, service, filteredAppointments)
-    : [];
-  const selectedBlocks = selectedSpecialistId && selectedDate
-    ? getSpecialistBlocksForDay(selectedSpecialistId, selectedDate, service, selectedAtt?.bloques ?? [])
-    : (selectedAtt?.bloques ?? []);
+  const selectedAtt = selectedDate ? getAttendanceDay(selectedDate, service) : null;
+  const selectedAppts = selectedDate ? getApptsForDate(selectedDate, service, filteredAppointments) : [];
+  const selectedBlocks = selectedAtt?.bloques ?? [];
   const currentBlock = selectedBlocks[selectedBlockIndex] ?? null;
-  const blockSessions = currentBlock
-    ? calculateSessions(currentBlock, service.duracion)
-    : [];
+  const blockSessions = currentBlock ? calculateSessions(currentBlock, service.duracion) : [];
 
   const currentBlockAppointments = currentBlock
     ? selectedAppts.filter((a) => {
-        if (selectedSpecialistId && a.specialistId !== selectedSpecialistId) return false;
         const sessions = calculateSessions(currentBlock, service.duracion);
         return sessions.some((s) => s.inicio === a.sesion.inicio);
       })
     : [];
 
   const selectedAppointmentSpecialist = selectedAppointment
-    ? (specialists.find((s) => s.id === selectedAppointment.specialistId) ??
-      null)
+    ? specialists.find((s) => s.id === selectedAppointment.specialistId) ?? null
     : null;
 
   const selectedAppointmentClient = selectedAppointment?.clientId
-    ? (clients.find((c) => c.id === selectedAppointment.clientId) ?? null)
+    ? clients.find((c) => c.id === selectedAppointment.clientId) ?? null
     : null;
 
   // Whether the currently selected date is in the past
-  const selectedDateIsPast = selectedDate
-    ? isPastDate(selectedDate, today)
-    : false;
+  const selectedDateIsPast = selectedDate ? isPastDate(selectedDate, today) : false;
 
   // Whether the appointment shown in the detail modal is completed
   const detailApptIsPast = selectedAppointment
@@ -426,13 +330,10 @@ export default function ServiceCalendar({
 
   if (!isOpen) return null;
 
-  const totalSessionPages = Math.max(
-    1,
-    Math.ceil(blockSessions.length / SESSIONS_PER_PAGE),
-  );
+  const totalSessionPages = Math.max(1, Math.ceil(blockSessions.length / SESSIONS_PER_PAGE));
   const paginatedSessions = blockSessions.slice(
     (selectedSessionPage - 1) * SESSIONS_PER_PAGE,
-    selectedSessionPage * SESSIONS_PER_PAGE,
+    selectedSessionPage * SESSIONS_PER_PAGE
   );
 
   const handlePrevBlock = () => {
@@ -443,9 +344,7 @@ export default function ServiceCalendar({
 
   const handleNextBlock = () => {
     if (!selectedBlocks.length) return;
-    setSelectedBlockIndex((prev) =>
-      Math.min(selectedBlocks.length - 1, prev + 1),
-    );
+    setSelectedBlockIndex((prev) => Math.min(selectedBlocks.length - 1, prev + 1));
     setSelectedSessionPage(1);
   };
 
@@ -469,6 +368,7 @@ export default function ServiceCalendar({
   return createPortal(
     <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-3 md:p-4">
       <div className="bg-[var(--bg-card)] rounded-[2rem] w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col border border-[var(--border-subtle)] shadow-2xl">
+
         {/* Header */}
         <div className="flex items-center justify-between px-5 md:px-8 py-4 md:py-5 border-b border-[var(--border-subtle)] flex-shrink-0">
           <div>
@@ -486,28 +386,21 @@ export default function ServiceCalendar({
                   onClick={() => setIsSpecialistMenuOpen((prev) => !prev)}
                   className={`inline-flex items-center gap-2 rounded-2xl border px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.26em] transition-all ${
                     selectedSpecialistId === null
-                      ? 'border-sky-500/25 bg-sky-500/10 text-sky-500 shadow-sm shadow-sky-500/10'
-                      : 'border-[var(--border-subtle)] bg-[var(--bg-secondary)] text-[var(--text-primary)] hover:border-sky-500/30 hover:text-sky-500'
+                      ? 'border-sky-500/25 dark:border-[var(--icons-green)]/20 bg-sky-500/10 dark:bg-[var(--icons-green)]/10 text-sky-500 dark:text-[var(--icons-green)] shadow-sm shadow-sky-500/10 dark:shadow-[var(--icons-green)]/10'
+                      : 'border-[var(--border-subtle)] bg-[var(--bg-secondary)] text-[var(--text-primary)] hover:border-sky-500/30 dark:hover:border-[var(--icons-green)]/30 hover:text-sky-500 dark:hover:text-[var(--icons-green)]'
                   }`}
                   aria-haspopup="listbox"
                   aria-expanded={isSpecialistMenuOpen}
                 >
-                  <span
-                    className={`flex h-5 min-w-5 items-center justify-center rounded-lg text-[8px] font-black ${
-                      selectedSpecialistId === null
-                        ? 'bg-sky-500/15 text-sky-500'
-                        : 'bg-[var(--bg-card)] text-[var(--text-secondary)]'
-                    }`}
-                  >
+                  <span className={`flex h-5 min-w-5 items-center justify-center rounded-lg text-[8px] font-black ${
+                    selectedSpecialistId === null ? 'bg-sky-500/15 dark:bg-[var(--icons-green)]/10 text-sky-500 dark:text-[var(--icons-green)]' : 'bg-[var(--bg-card)] text-[var(--text-secondary)]'
+                  }`}>
                     {activeSpecialist ? getAvatarChars(activeSpecialist) : 'AA'}
                   </span>
                   <span className="max-w-[180px] truncate normal-case tracking-normal">
                     {specialistSelectorLabel}
                   </span>
-                  <Icon
-                    name={isSpecialistMenuOpen ? 'ChevronUp' : 'ChevronDown'}
-                    className="w-3.5 h-3.5 opacity-80"
-                  />
+                  <Icon name={isSpecialistMenuOpen ? 'ChevronUp' : 'ChevronDown'} className="w-3.5 h-3.5 opacity-80" />
                 </button>
 
                 {isSpecialistMenuOpen && (
@@ -524,17 +417,15 @@ export default function ServiceCalendar({
                         onClick={() => handleSpecialistSelection(null)}
                         className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all ${
                           selectedSpecialistId === null
-                            ? 'bg-sky-500/10 text-sky-500'
+                            ? 'bg-sky-500/10 dark:bg-[var(--icons-green)]/10 text-sky-500 dark:text-[var(--icons-green)]'
                             : 'hover:bg-[var(--bg-secondary)]'
                         }`}
                       >
-                        <span
-                          className={`flex h-9 w-9 items-center justify-center rounded-xl border text-[10px] font-black ${
-                            selectedSpecialistId === null
-                              ? 'border-sky-500/20 bg-sky-500/15 text-sky-500'
-                              : 'border-[var(--border-subtle)] bg-[var(--bg-secondary)] text-[var(--text-secondary)]'
-                          }`}
-                        >
+                        <span className={`flex h-9 w-9 items-center justify-center rounded-xl border text-[10px] font-black ${
+                          selectedSpecialistId === null
+                            ? 'border-sky-500/20 dark:border-[var(--icons-green)]/20 bg-sky-500/15 dark:bg-[var(--icons-green)]/10 text-sky-500 dark:text-[var(--icons-green)]'
+                            : 'border-[var(--border-subtle)] bg-[var(--bg-secondary)] text-[var(--text-secondary)]'
+                        }`}>
                           AA
                         </span>
                         <div className="min-w-0 flex-1">
@@ -546,7 +437,7 @@ export default function ServiceCalendar({
                           </p>
                         </div>
                         {selectedSpecialistId === null && (
-                          <Icon name="Check" className="h-4 w-4 text-sky-500" />
+                          <Icon name="Check" className="h-4 w-4 text-sky-500 dark:text-[var(--icons-green)]" />
                         )}
                       </button>
 
@@ -561,19 +452,13 @@ export default function ServiceCalendar({
                             onClick={() => handleSpecialistSelection(sp.id)}
                             className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all ${
                               isSelected
-                                ? 'bg-sky-500/10 text-sky-500'
+                                ? 'bg-sky-500/10 dark:bg-[var(--icons-green)]/10 text-sky-500 dark:text-[var(--icons-green)]'
                                 : 'hover:bg-[var(--bg-secondary)]'
                             }`}
                           >
-                            <div className="relative flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] text-[10px] font-black text-sky-500">
+                            <div className="relative flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] text-[10px] font-black text-sky-500 dark:text-[var(--icons-green)]">
                               {sp.foto ? (
-                                <Image
-                                  src={sp.foto}
-                                  fill
-                                  sizes="36px"
-                                  className="object-cover"
-                                  alt=""
-                                />
+                                <Image src={sp.foto} fill sizes="36px" className="object-cover" alt="" />
                               ) : (
                                 <span>{getAvatarChars(sp)}</span>
                               )}
@@ -586,12 +471,7 @@ export default function ServiceCalendar({
                                 {sp.especialidad || 'Especialista disponible'}
                               </p>
                             </div>
-                            {isSelected && (
-                              <Icon
-                                name="Check"
-                                className="h-4 w-4 text-sky-500"
-                              />
-                            )}
+                            {isSelected && <Icon name="Check" className="h-4 w-4 text-sky-500 dark:text-[var(--icons-green)]" />}
                           </button>
                         );
                       })}
@@ -611,13 +491,15 @@ export default function ServiceCalendar({
 
         {/* Body */}
         <div className="flex flex-1 overflow-hidden">
+
           {/* Calendario */}
           <div className="flex-1 px-4 md:px-6 py-4 md:py-5 overflow-hidden flex flex-col gap-3 md:gap-4">
+
             {/* Month nav */}
             <div className="flex items-center justify-between">
               <button
                 onClick={goToPrev}
-                className="w-8 h-8 md:w-9 md:h-9 rounded-xl bg-[var(--bg-secondary)] flex items-center justify-center hover:bg-sky-500/10 hover:text-sky-500 transition-all"
+                className="w-8 h-8 md:w-9 md:h-9 rounded-xl bg-[var(--bg-secondary)] flex items-center justify-center hover:bg-sky-500/10 dark:hover:bg-[var(--icons-green)]/10 hover:text-sky-500 dark:hover:text-[var(--icons-green)] transition-all"
               >
                 <Icon name="ChevronLeft" className="w-4 h-4" />
               </button>
@@ -626,7 +508,7 @@ export default function ServiceCalendar({
               </h3>
               <button
                 onClick={goToNext}
-                className="w-8 h-8 md:w-9 md:h-9 rounded-xl bg-[var(--bg-secondary)] flex items-center justify-center hover:bg-sky-500/10 hover:text-sky-500 transition-all"
+                className="w-8 h-8 md:w-9 md:h-9 rounded-xl bg-[var(--bg-secondary)] flex items-center justify-center hover:bg-sky-500/10 dark:hover:bg-[var(--icons-green)]/10 hover:text-sky-500 dark:hover:text-[var(--icons-green)] transition-all"
               >
                 <Icon name="ChevronRight" className="w-4 h-4" />
               </button>
@@ -635,16 +517,12 @@ export default function ServiceCalendar({
             {/* Days header */}
             <div className="grid grid-cols-7 gap-1">
               {DAY_HEADERS.map(({ label, weekDay }) => {
-                const isServiceDay = service.diasAtencion.some(
-                  (d) => d.dia === weekDay,
-                );
+                const isServiceDay = service.diasAtencion.some((d) => d.dia === weekDay);
                 return (
                   <div
                     key={label}
                     className={`text-center text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] py-1 ${
-                      isServiceDay
-                        ? 'text-sky-500'
-                        : 'text-[var(--text-secondary)] opacity-40'
+                      isServiceDay ? 'text-sky-500 dark:text-[var(--icons-green)]' : 'text-[var(--text-secondary)] opacity-40'
                     }`}
                   >
                     {label}
@@ -656,26 +534,16 @@ export default function ServiceCalendar({
             {/* Calendar grid */}
             <div className="grid grid-cols-7 gap-1">
               {calDays.map((date, idx) => {
-                if (!date)
-                  return <div key={`empty-${idx}`} className="h-8 md:h-9" />;
+                if (!date) return <div key={`empty-${idx}`} className="h-8 md:h-9" />;
 
                 const att = getAttendanceDay(date, service);
-                const dayAppts = getApptsForDate(
-                  date,
-                  service,
-                  filteredAppointments,
+                const isAvailable = !!att && (
+                  !specialistWeekdays || specialistWeekdays.has(JS_TO_WEEKDAY[date.getDay()])
                 );
-                const hasAppts = selectedSpecialistId
-                  ? dayAppts.some((a) => a.specialistId === selectedSpecialistId)
-                  : dayAppts.length > 0;
-                const isAvailable =
-                  !!att &&
-                  (!specialistWeekdays ||
-                    specialistWeekdays.has(JS_TO_WEEKDAY[date.getDay()]) ||
-                    hasAppts);
+                const dayAppts = getApptsForDate(date, service, filteredAppointments);
+                const hasAppts = dayAppts.length > 0;
                 const isToday = date.toDateString() === today.toDateString();
-                const isSelected =
-                  selectedDate?.toDateString() === date.toDateString();
+                const isSelected = selectedDate?.toDateString() === date.toDateString();
                 const isPast = isPastDate(date, today);
 
                 return (
@@ -688,23 +556,17 @@ export default function ServiceCalendar({
                       rounded-lg md:rounded-xl flex flex-col items-center justify-center gap-0.5
                       text-[11px] md:text-xs font-black transition-all
                       ${!isAvailable ? 'text-[var(--text-secondary)] opacity-25 cursor-not-allowed' : ''}
-                      ${isAvailable && !isSelected ? 'hover:bg-sky-500/10 hover:text-sky-500 cursor-pointer' : ''}
-                      ${isAvailable && isPast && !isSelected ? 'opacity-55' : ''}
-                      ${isSelected ? 'bg-sky-500 !text-white shadow-lg shadow-sky-500/20' : ''}
-                      ${isToday && !isSelected ? 'ring-2 ring-sky-500 ring-offset-1 ring-offset-[var(--bg-card)]' : ''}
+                      ${isAvailable && !isSelected ? 'hover:bg-sky-500/10 dark:hover:bg-[var(--icons-green)]/10 hover:text-sky-500 dark:hover:text-[var(--icons-green)] cursor-pointer' : ''}
+                      ${isAvailable && isPast && !isSelected ? 'opacity-70' : ''}
+                      ${isSelected ? 'bg-sky-500 dark:bg-[var(--brand-green)] !text-white shadow-lg shadow-sky-500/20 dark:shadow-[var(--icons-green)]/20' : ''}
+                      ${isToday && !isSelected ? 'ring-2 ring-sky-500 dark:ring-[var(--icons-green)] ring-offset-1 ring-offset-[var(--bg-card)]' : ''}
                     `}
                   >
                     <span className="leading-none">{date.getDate()}</span>
                     {hasAppts && (
-                      <div
-                        className={`w-1 h-1 rounded-full ${
-                          isSelected
-                            ? 'bg-white'
-                            : isPast
-                              ? 'bg-emerald-400'
-                              : 'bg-sky-500'
-                        }`}
-                      />
+                      <div className={`w-1 h-1 rounded-full ${
+                        isSelected ? 'bg-white' : isPast ? 'bg-emerald-400' : 'bg-sky-500 dark:bg-[var(--icons-green)]'
+                      }`} />
                     )}
                   </button>
                 );
@@ -714,11 +576,11 @@ export default function ServiceCalendar({
             {/* Legend */}
             <div className="flex items-center gap-4 md:gap-6 pt-2 md:pt-3 border-t border-[var(--border-subtle)] flex-wrap">
               <span className="flex items-center gap-2 text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest">
-                <span className="w-3 h-3 rounded-lg bg-sky-500/20 border border-sky-500/30" />
+                <span className="w-3 h-3 rounded-lg bg-sky-500/20 dark:bg-[var(--icons-green)]/20 border border-sky-500/30 dark:border-[var(--icons-green)]/30" />
                 Disponible
               </span>
               <span className="flex items-center gap-2 text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest">
-                <span className="w-1.5 h-1.5 rounded-full bg-sky-500" />
+                <span className="w-1.5 h-1.5 rounded-full bg-sky-500 dark:bg-[var(--icons-green)]" />
                 Con citas
               </span>
               <span className="flex items-center gap-2 text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest">
@@ -737,10 +599,7 @@ export default function ServiceCalendar({
             {!selectedDate ? (
               <div className="flex-1 flex flex-col items-center justify-center gap-4 p-8 text-center">
                 <div className="w-14 h-14 rounded-[1.5rem] bg-[var(--bg-secondary)] flex items-center justify-center border border-[var(--border-subtle)]">
-                  <Icon
-                    name="CalendarSearch"
-                    className="w-6 h-6 text-[var(--text-secondary)]"
-                  />
+                  <Icon name="CalendarSearch" className="w-6 h-6 text-[var(--text-secondary)]" />
                 </div>
                 <div>
                   <p className="text-[11px] font-black text-[var(--text-secondary)] uppercase tracking-widest">
@@ -753,14 +612,11 @@ export default function ServiceCalendar({
               </div>
             ) : (
               <div className="flex-1 overflow-hidden flex flex-col">
+
                 {/* Selected day header */}
-                <div
-                  className={`px-5 py-4 border-b border-[var(--border-subtle)] flex-shrink-0 ${
-                    selectedDateIsPast
-                      ? 'bg-emerald-500/5'
-                      : 'bg-[var(--bg-secondary)]/30'
-                  }`}
-                >
+                <div className={`px-5 py-4 border-b border-[var(--border-subtle)] flex-shrink-0 ${
+                  selectedDateIsPast ? 'bg-emerald-500/5' : 'bg-[var(--bg-secondary)]/30'
+                }`}>
                   <div className="flex items-center gap-2">
                     <p className="text-xs font-black text-[var(--text-primary)] uppercase tracking-widest">
                       {formatFecha(selectedDate)}
@@ -772,20 +628,15 @@ export default function ServiceCalendar({
                     )}
                   </div>
                   {selectedAppts.length > 0 ? (
-                    <p
-                      className={`text-[9px] font-bold uppercase tracking-widest mt-0.5 ${
-                        selectedDateIsPast ? 'text-emerald-500' : 'text-sky-500'
-                      }`}
-                    >
-                      {selectedAppts.length} cita
-                      {selectedAppts.length !== 1 ? 's' : ''}{' '}
-                      {selectedDateIsPast ? 'completada' : 'agendada'}
-                      {selectedAppts.length !== 1 ? 's' : ''}
+                    <p className={`text-[9px] font-bold uppercase tracking-widest mt-0.5 ${
+                      selectedDateIsPast ? 'text-emerald-500' : 'text-sky-500 dark:text-[var(--icons-green)]'
+                    }`}>
+                      {selectedAppts.length} cita{selectedAppts.length !== 1 ? 's' : ''}{' '}
+                      {selectedDateIsPast ? 'completada' : 'agendada'}{selectedAppts.length !== 1 ? 's' : ''}
                     </p>
                   ) : (
                     <p className="text-[9px] font-bold text-[var(--text-secondary)] uppercase tracking-widest mt-0.5">
-                      Sin citas{' '}
-                      {selectedDateIsPast ? 'registradas' : 'agendadas'}
+                      Sin citas {selectedDateIsPast ? 'registradas' : 'agendadas'}
                     </p>
                   )}
                 </div>
@@ -795,10 +646,8 @@ export default function ServiceCalendar({
                     <div className="flex items-center justify-between gap-2 mb-3">
                       <button
                         onClick={handlePrevBlock}
-                        disabled={
-                          selectedBlocks.length <= 1 || selectedBlockIndex === 0
-                        }
-                        className="w-8 h-8 rounded-xl bg-[var(--bg-secondary)] flex items-center justify-center hover:bg-sky-500/10 hover:text-sky-500 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                        disabled={selectedBlocks.length <= 1 || selectedBlockIndex === 0}
+                        className="w-8 h-8 rounded-xl bg-[var(--bg-secondary)] flex items-center justify-center hover:bg-sky-500/10 dark:hover:bg-[var(--icons-green)]/10 hover:text-sky-500 dark:hover:text-[var(--icons-green)] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
                         aria-label="Bloque anterior"
                       >
                         <Icon name="ChevronLeft" className="w-4 h-4" />
@@ -812,11 +661,8 @@ export default function ServiceCalendar({
                       </div>
                       <button
                         onClick={handleNextBlock}
-                        disabled={
-                          selectedBlocks.length <= 1 ||
-                          selectedBlockIndex >= selectedBlocks.length - 1
-                        }
-                        className="w-8 h-8 rounded-xl bg-[var(--bg-secondary)] flex items-center justify-center hover:bg-sky-500/10 hover:text-sky-500 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                        disabled={selectedBlocks.length <= 1 || selectedBlockIndex >= selectedBlocks.length - 1}
+                        className="w-8 h-8 rounded-xl bg-[var(--bg-secondary)] flex items-center justify-center hover:bg-sky-500/10 dark:hover:bg-[var(--icons-green)]/10 hover:text-sky-500 dark:hover:text-[var(--icons-green)] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
                         aria-label="Bloque siguiente"
                       >
                         <Icon name="ChevronRight" className="w-4 h-4" />
@@ -824,28 +670,21 @@ export default function ServiceCalendar({
                     </div>
 
                     {currentBlock && (
-                      <div
-                        className={`flex items-center justify-between rounded-xl border px-4 py-3 ${
-                          selectedDateIsPast
-                            ? 'border-emerald-500/20 bg-emerald-500/5'
-                            : 'border-sky-500/20 bg-sky-500/5'
-                        }`}
-                      >
+                      <div className={`flex items-center justify-between rounded-xl border px-4 py-3 ${
+                        selectedDateIsPast
+                          ? 'border-emerald-500/20 bg-emerald-500/5'
+                          : 'border-sky-500/20 dark:border-[var(--icons-green)]/20 bg-sky-500/5 dark:bg-[var(--icons-green)]/10'
+                      }`}>
                         <div>
                           <p className="text-[10px] font-black text-[var(--text-primary)] uppercase tracking-widest">
                             {currentBlock.inicio} – {currentBlock.fin}
                           </p>
                           {currentBlockAppointments.length > 0 ? (
-                            <p
-                              className={`text-[9px] font-bold uppercase tracking-widest mt-1 ${
-                                selectedDateIsPast
-                                  ? 'text-emerald-500'
-                                  : 'text-sky-500'
-                              }`}
-                            >
+                            <p className={`text-[9px] font-bold uppercase tracking-widest mt-1 ${
+                              selectedDateIsPast ? 'text-emerald-500' : 'text-sky-500 dark:text-[var(--icons-green)]'
+                            }`}>
                               {currentBlockAppointments.length}{' '}
-                              {selectedDateIsPast ? 'completada' : 'agendada'}
-                              {currentBlockAppointments.length !== 1 ? 's' : ''}
+                              {selectedDateIsPast ? 'completada' : 'agendada'}{currentBlockAppointments.length !== 1 ? 's' : ''}
                             </p>
                           ) : (
                             <p className="text-[9px] font-bold text-[var(--text-secondary)] uppercase tracking-widest mt-1">
@@ -854,8 +693,7 @@ export default function ServiceCalendar({
                           )}
                         </div>
                         <span className="text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest">
-                          {selectedBlockIndex + 1}/
-                          {Math.max(selectedBlocks.length, 1)}
+                          {selectedBlockIndex + 1}/{Math.max(selectedBlocks.length, 1)}
                         </span>
                       </div>
                     )}
@@ -872,12 +710,7 @@ export default function ServiceCalendar({
                       <div className="flex-1 overflow-hidden px-4 pb-3">
                         <div className="space-y-2">
                           {paginatedSessions.map((ses) => {
-                            const appt = selectedAppts.find(
-                              (a) =>
-                                a.sesion.inicio === ses.inicio &&
-                                (!selectedSpecialistId ||
-                                  a.specialistId === selectedSpecialistId),
-                            );
+                            const appt = selectedAppts.find((a) => a.sesion.inicio === ses.inicio);
                             const isCompleted = selectedDateIsPast;
 
                             if (isCompleted) {
@@ -885,9 +718,7 @@ export default function ServiceCalendar({
                                 <button
                                   key={ses.inicio}
                                   type="button"
-                                  onClick={() =>
-                                    appt && setSelectedAppointment(appt)
-                                  }
+                                  onClick={() => appt && setSelectedAppointment(appt)}
                                   disabled={!appt}
                                   className={`w-full rounded-xl border p-3.5 text-left transition-all ${
                                     appt
@@ -917,13 +748,11 @@ export default function ServiceCalendar({
                               <button
                                 key={ses.inicio}
                                 type="button"
-                                onClick={() =>
-                                  appt && setSelectedAppointment(appt)
-                                }
+                                onClick={() => appt && setSelectedAppointment(appt)}
                                 disabled={!appt}
                                 className={`w-full rounded-xl border p-3.5 text-left transition-all ${
                                   appt
-                                    ? 'bg-sky-500/10 border-sky-500/20 text-sky-600 hover:brightness-110 hover:shadow-md cursor-pointer'
+                                    ? 'bg-sky-500/10 dark:bg-[var(--icons-green)]/10 border-sky-500/20 dark:border-[var(--icons-green)]/20 text-sky-600 dark:text-[var(--icons-green)] hover:brightness-110 hover:shadow-md cursor-pointer'
                                     : 'bg-[var(--bg-secondary)]/50 border-[var(--border-subtle)] cursor-default'
                                 }`}
                               >
@@ -932,7 +761,7 @@ export default function ServiceCalendar({
                                     {ses.inicio} – {ses.fin}
                                   </span>
                                   {appt ? (
-                                    <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-lg border bg-sky-500/10 border-sky-500/20 text-sky-600">
+                                    <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-lg border bg-sky-500/10 dark:bg-[var(--icons-green)]/10 border-sky-500/20 dark:border-[var(--icons-green)]/20 text-sky-600 dark:text-[var(--icons-green)]">
                                       Agendada
                                     </span>
                                   ) : (
@@ -950,17 +779,14 @@ export default function ServiceCalendar({
                       {blockSessions.length > SESSIONS_PER_PAGE && (
                         <div className="px-4 pb-4 pt-1 flex-shrink-0">
                           <div className="flex items-center justify-center gap-1.5 flex-wrap">
-                            {Array.from(
-                              { length: totalSessionPages },
-                              (_, i) => i + 1,
-                            ).map((page) => (
+                            {Array.from({ length: totalSessionPages }, (_, i) => i + 1).map((page) => (
                               <button
                                 key={page}
                                 onClick={() => setSelectedSessionPage(page)}
                                 className={`min-w-8 h-8 px-2 rounded-lg text-[10px] font-black transition-all border ${
                                   page === selectedSessionPage
-                                    ? 'bg-sky-500 text-white border-sky-500 shadow-sm shadow-sky-500/20'
-                                    : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-sky-500/30 hover:text-sky-500'
+                                    ? 'bg-sky-500 dark:bg-[var(--brand-green)] text-white border-sky-500 dark:border-[var(--brand-green)] shadow-sm shadow-sky-500/20 dark:shadow-[var(--icons-green)]/20'
+                                    : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-sky-500/30 dark:hover:border-[var(--icons-green)]/30 hover:text-sky-500 dark:hover:text-[var(--icons-green)]'
                                 }`}
                               >
                                 {page}
@@ -993,32 +819,27 @@ export default function ServiceCalendar({
       {selectedAppointment && (
         <div className="fixed inset-0 z-[100000] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
           <div className="w-full max-w-lg rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--bg-card)] shadow-2xl overflow-hidden">
-            <div
-              className={`flex items-center justify-between px-5 py-4 border-b border-[var(--border-subtle)] ${
-                detailApptIsPast ? 'bg-emerald-500/5' : ''
-              }`}
-            >
+
+            <div className={`flex items-center justify-between px-5 py-4 border-b border-[var(--border-subtle)] ${
+              detailApptIsPast ? 'bg-emerald-500/5' : ''
+            }`}>
               <div>
                 <div className="flex items-center gap-2">
                   <h3 className="text-base font-black text-[var(--text-primary)] uppercase tracking-tight">
                     Detalle de sesión
                   </h3>
                   {detailApptIsPast && (
-                    <span className="text-[8px] font-black text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md uppercase tracking-widest">
+                    <span className="text-[8px] font-black text-sky-500 dark:text-[var(--icons-green)] bg-sky-500/10 dark:bg-[var(--icons-green)]/10 border border-sky-500/20 dark:border-[var(--icons-green)]/20 px-2 py-0.5 rounded-md uppercase tracking-widest">
                       Completada
                     </span>
                   )}
                 </div>
                 <p className="text-[9px] font-bold text-[var(--text-secondary)] uppercase tracking-widest mt-0.5">
-                  {selectedAppointment.sesion.inicio} –{' '}
-                  {selectedAppointment.sesion.fin}
+                  {selectedAppointment.sesion.inicio} – {selectedAppointment.sesion.fin}
                 </p>
               </div>
               <button
-                onClick={() => {
-                  setSelectedAppointment(null);
-                  setShowRescheduleWarning(false);
-                }}
+                onClick={() => { setSelectedAppointment(null); setShowRescheduleWarning(false); }}
                 className="w-9 h-9 rounded-xl bg-[var(--bg-secondary)] flex items-center justify-center hover:bg-rose-500/10 hover:text-rose-500 transition-all"
               >
                 <Icon name="X" className="w-4 h-4" />
@@ -1028,8 +849,7 @@ export default function ServiceCalendar({
             <div className="p-5 space-y-4">
               <div className="flex items-center justify-end gap-3">
                 <span className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">
-                  {selectedAppointment.cuposOcupados} cupo
-                  {selectedAppointment.cuposOcupados !== 1 ? 's' : ''}
+                  {selectedAppointment.cuposOcupados} cupo{selectedAppointment.cuposOcupados !== 1 ? 's' : ''}
                 </span>
               </div>
 
@@ -1040,21 +860,11 @@ export default function ServiceCalendar({
                       Especialista
                     </p>
                     <div className="flex items-center gap-3">
-                      <div className="relative w-9 h-9 rounded-xl bg-[var(--bg-card)] flex items-center justify-center text-[10px] font-black text-sky-500 border border-[var(--border-subtle)] overflow-hidden flex-shrink-0">
+                      <div className="relative w-9 h-9 rounded-xl bg-[var(--bg-card)] flex items-center justify-center text-[10px] font-black text-sky-500 dark:text-[var(--icons-green)] border border-[var(--border-subtle)] overflow-hidden flex-shrink-0">
                         {selectedAppointmentSpecialist?.foto ? (
-                          <Image
-                            src={selectedAppointmentSpecialist.foto}
-                            fill
-                            sizes="36px"
-                            className="object-cover"
-                            alt=""
-                          />
+                          <Image src={selectedAppointmentSpecialist.foto} fill sizes="36px" className="object-cover" alt="" />
                         ) : (
-                          <span>
-                            {selectedAppointmentSpecialist
-                              ? getAvatarChars(selectedAppointmentSpecialist)
-                              : '??'}
-                          </span>
+                          <span>{selectedAppointmentSpecialist ? getAvatarChars(selectedAppointmentSpecialist) : '??'}</span>
                         )}
                       </div>
                       <div className="min-w-0">
@@ -1072,18 +882,25 @@ export default function ServiceCalendar({
                     </div>
                   </div>
 
-                    <div>
+                  <div>
                     <p className="text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest mb-1">
                       Cliente
                     </p>
                     <div className="flex items-center gap-3">
-                      <div className="relative w-9 h-9 rounded-xl bg-[var(--bg-card)] flex items-center justify-center text-[10px] font-black text-sky-500 border border-[var(--border-subtle)] overflow-hidden flex-shrink-0">
-                        <span>{(selectedAppointment as Appointment & { customerName?: string }).customerName?.charAt(0).toUpperCase() ?? '??'}</span>
+                      <div className="relative w-9 h-9 rounded-xl bg-[var(--bg-card)] flex items-center justify-center text-[10px] font-black text-sky-500 dark:text-[var(--icons-green)] border border-[var(--border-subtle)] overflow-hidden flex-shrink-0">
+                        <span>{selectedAppointmentClient ? getClientChars(selectedAppointmentClient) : '??'}</span>
                       </div>
                       <div className="min-w-0">
                         <p className="text-sm font-bold text-[var(--text-primary)] truncate">
-                          {(selectedAppointment as Appointment & { customerName?: string }).customerName || 'Sin cliente'}
+                          {selectedAppointmentClient
+                            ? `${selectedAppointmentClient.nombres} ${selectedAppointmentClient.apellidos}`
+                            : 'Sin cliente'}
                         </p>
+                        {selectedAppointmentClient && (
+                          <p className="text-[11px] text-[var(--text-secondary)] mt-0.5 truncate">
+                            DNI {selectedAppointmentClient.dni}
+                          </p>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -1091,20 +908,13 @@ export default function ServiceCalendar({
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <p className="text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest mb-1">
-                      Fecha
-                    </p>
-                    <p className="text-sm font-bold text-[var(--text-primary)]">
-                      {selectedAppointment.fecha}
-                    </p>
+                    <p className="text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest mb-1">Fecha</p>
+                    <p className="text-sm font-bold text-[var(--text-primary)]">{selectedAppointment.fecha}</p>
                   </div>
                   <div>
-                    <p className="text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest mb-1">
-                      Sesión
-                    </p>
+                    <p className="text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest mb-1">Sesión</p>
                     <p className="text-sm font-bold text-[var(--text-primary)]">
-                      {selectedAppointment.sesion.inicio} –{' '}
-                      {selectedAppointment.sesion.fin}
+                      {selectedAppointment.sesion.inicio} – {selectedAppointment.sesion.fin}
                     </p>
                   </div>
                 </div>
@@ -1112,21 +922,15 @@ export default function ServiceCalendar({
 
               {/* Reschedule warning (completed session) */}
               {showRescheduleWarning ? (
-                <div className="rounded-2xl border border-emerald-500/25 bg-emerald-500/8 p-4 space-y-3">
+                <div className="rounded-2xl border border-sky-500/25 dark:border-[var(--icons-green)]/25 bg-sky-500/8 dark:bg-[var(--icons-green)]/8 p-4 space-y-3">
                   <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <Icon
-                        name="AlertTriangle"
-                        className="w-4 h-4 text-emerald-500"
-                      />
+                    <div className="w-8 h-8 rounded-xl bg-emerald-500/15 dark:bg-[var(--icons-green)]/10 border border-emerald-500/25 dark:border-[var(--icons-green)]/25 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <Icon name="AlertTriangle" className="w-4 h-4 text-sky-500 dark:text-[var(--icons-green)]" />
                     </div>
                     <div>
-                      <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">
-                        Sesión ya completada
-                      </p>
+                      <p className="text-[10px] font-black text-sky-600 dark:text-[var(--icons-green)] uppercase tracking-widest">Sesión ya completada</p>
                       <p className="text-[11px] font-semibold text-[var(--text-secondary)] mt-1 leading-snug">
-                        Esta sesión ya expiró. ¿Deseas reprogramarla de todas
-                        formas?
+                        Esta sesión ya expiró. ¿Deseas reprogramarla de todas formas?
                       </p>
                     </div>
                   </div>
@@ -1139,7 +943,7 @@ export default function ServiceCalendar({
                     </button>
                     <button
                       onClick={handleRescheduleConfirm}
-                      className="flex-1 py-2.5 rounded-xl bg-emerald-500 text-white text-[10px] font-black uppercase tracking-widest hover:opacity-90 transition-all"
+                      className="flex-1 py-2.5 rounded-xl bg-emerald-500 dark:bg-[var(--brand-green)] text-white text-[10px] font-black uppercase tracking-widest hover:opacity-90 transition-all"
                     >
                       Sí, reprogramar
                     </button>
@@ -1149,7 +953,7 @@ export default function ServiceCalendar({
                 <button
                   onClick={handleRescheduleClick}
                   className={`w-full py-3 rounded-2xl text-white font-black uppercase tracking-widest text-[10px] hover:opacity-90 transition-all ${
-                    detailApptIsPast ? 'bg-emerald-500' : 'bg-sky-500'
+                    detailApptIsPast ? 'bg-sky-500 dark:bg-[var(--brand-green)]' : 'bg-sky-500 dark:bg-[var(--brand-green)]'
                   }`}
                 >
                   Reprogramar
@@ -1160,6 +964,6 @@ export default function ServiceCalendar({
         </div>
       )}
     </div>,
-    document.body,
+    document.body
   );
 }

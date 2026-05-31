@@ -5,6 +5,7 @@ import { useAuth } from '@/shared/lib/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import Icon from '@/components/ui/Icon';
 import { Eye, Info } from "lucide-react";
+import ClientRescheduleModal, { SelectedSpecialist } from './ClientRescheduleModal';
 
 // ─── Tipos ───────────────────────────────────────────────────────────────────
 
@@ -48,6 +49,12 @@ interface Order {
   tipo_envio?: TipoEnvio;
   currentStep?: number;
   envio?: EnvioInfo;
+  /** ISO "YYYY-MM-DD" — scheduled appointment date (services only) */
+  fechaCita?: string;
+  /** Number of client-initiated reschedules already done (0 or 1) */
+  reprogramaciones?: number;
+  /** True once the client sent a reschedule request to the health center */
+  solicitudEnviada?: boolean;
 }
 
 // ─── Config de flujos ─────────────────────────────────────────────────────────
@@ -195,6 +202,8 @@ const mockOrders: Order[] = [
     tipo: 'servicios',
     tipo_envio: 'atencion_domicilio',
     currentStep: 2,
+    fechaCita: '2026-06-20',
+    reprogramaciones: 0,
   },
   {
     id: '#SRV-2024-002',
@@ -208,6 +217,8 @@ const mockOrders: Order[] = [
     tipo: 'servicios',
     tipo_envio: 'atencion_sede',
     currentStep: 2,
+    fechaCita: '2026-06-10',
+    reprogramaciones: 0,
   },
   {
     id: '#SRV-2024-003',
@@ -221,6 +232,40 @@ const mockOrders: Order[] = [
     tipo: 'servicios',
     tipo_envio: 'atencion_domicilio',
     currentStep: 1,
+    fechaCita: '2026-06-05',
+    reprogramaciones: 0,
+  },
+  // ─── Demo: cita HOY → reprogramación bloqueada ───
+  {
+    id: '#SRV-2024-004',
+    fecha: '29 May 2026',
+    hora: '09:00',
+    tienda: 'Centro Médico Sur',
+    detalle: 'Consulta General',
+    total: 'S/ 90.00',
+    estado: 'validacion_centro_salud',
+    estadoLabel: 'Validación del Centro de Salud',
+    tipo: 'servicios',
+    tipo_envio: 'atencion_sede',
+    currentStep: 1,
+    fechaCita: '2026-05-29', // hoy → bloqueado
+    reprogramaciones: 0,
+  },
+  // ─── Demo: ya reprogramó 1 vez → límite alcanzado ─
+  {
+    id: '#SRV-2024-005',
+    fecha: '20 May 2026',
+    hora: '11:00',
+    tienda: 'Fisioterapia Plus',
+    detalle: 'Sesión de Fisioterapia',
+    total: 'S/ 150.00',
+    estado: 'validacion_centro_salud',
+    estadoLabel: 'Validación del Centro de Salud',
+    tipo: 'servicios',
+    tipo_envio: 'atencion_sede',
+    currentStep: 1,
+    fechaCita: '2026-06-15',
+    reprogramaciones: 1, // límite alcanzado
   },
 ];
 
@@ -397,7 +442,7 @@ function TrackingCard({ envio, tipoEnvio }: { envio: EnvioInfo; tipoEnvio: TipoE
                 </span>
               </div>
             ) : (
-              <span className="text-[11px] font-bold text-amber-500">Pendiente de despacho</span>
+              <span className="text-[11px] font-bold text-sky-500 dark:text-[var(--icons-green)]">Pendiente de despacho</span>
             )}
           </div>
         </div>
@@ -424,11 +469,12 @@ export default function CustomerOrdersPage() {
   const { isAuthenticated, loading } = useAuth();
   const router = useRouter();
 
-  const [orders] = useState<Order[]>(mockOrders);
+  const [orders, setOrders] = useState<Order[]>(mockOrders);
   const [filteredOrders, setFiltered] = useState<Order[]>(mockOrders);
   const [selectedOrder, setSelected] = useState<Order | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [showLegendModal, setShowLegendModal] = useState(false);
+  const [showRescheduleModal, setShowRescheduleModal] = useState(false);
 
   const [filters, setFilters] = useState({
     categoria: 'productos',
@@ -495,6 +541,42 @@ export default function CustomerOrdersPage() {
   const closeModal = () => {
     setShowModal(false);
     setTimeout(() => setSelected(null), 300);
+  };
+
+  // ─── Reschedule logic ─────────────────────────────────────────────────────
+
+  function canShowRescheduleButton(order: Order): boolean {
+    if (order.tipo !== 'servicios') return false;
+    const validTypes: TipoEnvio[] = ['atencion_sede', 'atencion_domicilio'];
+    return (
+      !!order.tipo_envio &&
+      validTypes.includes(order.tipo_envio as TipoEnvio) &&
+      order.estado === 'validacion_centro_salud'
+    );
+  }
+
+  const handleRescheduleConfirm = (orderId: string, newDateISO: string, specialist: SelectedSpecialist) => {
+    const updated = orders.map((o) =>
+      o.id === orderId
+        ? { ...o, reprogramaciones: (o.reprogramaciones ?? 0) + 1, fechaCita: newDateISO }
+        : o
+    );
+    setOrders(updated);
+    // specialist contiene: { id, name, specialty, slot }
+    // → enviar al backend: POST /api/orders/{orderId}/reschedule { newDateISO, specialist }
+    const updatedOrder = updated.find((o) => o.id === orderId);
+    if (updatedOrder && selectedOrder?.id === orderId) setSelected(updatedOrder);
+    setShowRescheduleModal(false);
+  };
+
+  const handleSendRequest = (orderId: string) => {
+    const updated = orders.map((o) =>
+      o.id === orderId ? { ...o, solicitudEnviada: true } : o
+    );
+    setOrders(updated);
+    const updatedOrder = updated.find((o) => o.id === orderId);
+    if (updatedOrder && selectedOrder?.id === orderId) setSelected(updatedOrder);
+    setShowRescheduleModal(false);
   };
 
   if (loading) {
@@ -605,6 +687,8 @@ export default function CustomerOrdersPage() {
               <option value="Moda & Estilo">Moda & Estilo</option>
               <option value="Clínica Dental Pro">Clínica Dental Pro</option>
               <option value="Centro Estético Lyra">Centro Estético Lyra</option>
+              <option value="Centro Médico Sur">Centro Médico Sur</option>
+              <option value="Fisioterapia Plus">Fisioterapia Plus</option>
             </select>
           </div>
 
@@ -1070,10 +1154,38 @@ export default function CustomerOrdersPage() {
 
               {selectedOrder.tipo_envio && selectedOrder.currentStep !== undefined && (
                 <div className="p-6 bg-gray-50 dark:bg-[var(--bg-muted)]/50 rounded-[2rem] border border-gray-100 dark:border-[var(--border-subtle)]">
-                  <h5 className="text-[10px] font-black text-gray-400 dark:text-gray-400 uppercase tracking-widest mb-5">
-                    Seguimiento del Pedido
-                  </h5>
+                  <div className="flex items-center justify-between mb-5">
+                    <h5 className="text-[10px] font-black text-gray-400 dark:text-gray-400 uppercase tracking-widest">
+                      Seguimiento del Pedido
+                    </h5>
+                    {canShowRescheduleButton(selectedOrder) && (
+                      <button
+                        onClick={() => setShowRescheduleModal(true)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sky-50 dark:bg-[var(--bg-muted)] border border-sky-200 dark:border-[var(--border-subtle)] text-sky-600 dark:text-[var(--icons-green)] text-[9px] font-black uppercase tracking-widest hover:bg-sky-100 dark:hover:bg-[#1b2b24] transition-colors"
+                      >
+                        <Icon name="CalendarClock" className="w-3.5 h-3.5" />
+                        Reprogramar cita
+                      </button>
+                    )}
+                  </div>
                   <OrderFlowStepper tipoEnvio={selectedOrder.tipo_envio} currentStep={selectedOrder.currentStep} />
+                  {/* Info badge: reprogramaciones restantes */}
+                  {canShowRescheduleButton(selectedOrder) && (
+                    <div className="mt-4 flex items-center gap-2 px-3 py-2 rounded-xl bg-white dark:bg-[var(--bg-secondary)] border border-gray-100 dark:border-[var(--border-subtle)]">
+                      <Icon
+                        name={(selectedOrder.reprogramaciones ?? 0) >= 1 ? 'AlertCircle' : 'Info'}
+                        className={`w-3.5 h-3.5 flex-shrink-0 ${(selectedOrder.reprogramaciones ?? 0) >= 1 ? 'text-sky-500 dark:text-[var(--icons-green)]' : 'text-sky-500 dark:text-[var(--icons-green)]'}`}
+                      />
+                      <p className="text-[9px] font-bold text-gray-500 dark:text-[var(--text-muted)]">
+                        {selectedOrder.solicitudEnviada
+                          ? 'Solicitud de reprogramación enviada al centro de salud.'
+                          : (selectedOrder.reprogramaciones ?? 0) >= 1
+                            ? 'Límite de reprogramaciones alcanzado. Puede enviar una solicitud al centro de salud.'
+                            : `Reprogramaciones disponibles: ${1 - (selectedOrder.reprogramaciones ?? 0)} de 1`
+                        }
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -1149,6 +1261,25 @@ export default function CustomerOrdersPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {showRescheduleModal && selectedOrder && (
+        <ClientRescheduleModal
+          isOpen={showRescheduleModal}
+          onClose={() => setShowRescheduleModal(false)}
+          order={{
+            id: selectedOrder.id,
+            tipo_envio: selectedOrder.tipo_envio,
+            estado: selectedOrder.estado,
+            fechaCita: selectedOrder.fechaCita,
+            reprogramaciones: selectedOrder.reprogramaciones,
+            solicitudEnviada: selectedOrder.solicitudEnviada,
+            tienda: selectedOrder.tienda,
+            detalle: selectedOrder.detalle,
+          }}
+          onConfirm={handleRescheduleConfirm}
+          onSendRequest={handleSendRequest}
+        />
       )}
     </div>
   );
