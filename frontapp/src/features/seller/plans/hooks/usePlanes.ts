@@ -3,7 +3,6 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { apiGet, apiPost, createPlanRequest, getMyPlanRequest } from '@/features/seller/plans/lib/api';
 import { buildPlanOrder, defaultPlansData, durationPresets, getDiscountForMonths } from '@/features/seller/plans/lib/plans';
 import type { PlansMap, SubscriptionInfo, Request, ButtonColors, EstadoResponse, AvisoVencimientoResponse } from '@/features/seller/plans/types';
-import { USE_MOCKS } from '@/shared/lib/config/flags';
 import { useAuth } from '@/shared/lib/context/AuthContext';
 
 export interface PlanesState {
@@ -90,123 +89,80 @@ export function usePlanes() {
   };
 
   const initialize = useCallback(async () => {
-    // MOCK DATA para desarrollo
-    if (USE_MOCKS) {
-      const mockUserId = 'mock-vendedor-001';
-      const mockUserName = 'Vendedor Demo';
-      const mockCurrentPlan = 'standard';
-      const mockSubscriptionInfo: SubscriptionInfo = {
-        plan: mockCurrentPlan,
-        expiryDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-        months: 1,
-      };
-      const mockRequests: Request[] = [
-        { id: 1, type: 'upgrade', fromPlan: 'basic', toPlan: 'premium', planName: 'Premium', duration: '6 meses', durationId: '6', months: 6, amount: 150, userName: 'Vendedor Demo', status: 'pending' },
-      ];
-      const mockAviso: AvisoVencimientoResponse = {
-        porVencer: false,
-        diasRestantes: 30,
-        nombrePlan: 'Standard',
-      };
-      const mockButtonColors: ButtonColors = {
-        subscribeBg: '#3b82f6',
-        subscribeColor: '#ffffff',
-        currentBg: '#e5e7eb',
-        currentColor: '#6b7280',
-        lockedBg: '#9ca3af',
-        lockedColor: '#e5e7eb',
-        warningColor: '#ef4444',
-      };
-
-      update({
-        userId: mockUserId,
-        userName: mockUserName,
-        currentPlan: mockCurrentPlan,
-        subscriptionInfo: mockSubscriptionInfo,
-        claimedPlans: ['basic'],
-        trialUsedPlans: [],
-        requestsCache: mockRequests,
-        avisoPorVencer: mockAviso,
-        buttonColors: mockButtonColors,
-        isLoaded: true,
-        isBlocked: false,
-        blockInfo: null,
-      });
-      return;
-    }
-
-    // API REAL
+    // ── API REAL (intentar siempre) ──────────
     try {
-      // Verificar autenticación usando el contexto de autenticación
-      if (authLoading) {
-        // Esperar a que termine de cargar
-        return;
-      }
+      // Verificar autenticación
+      if (authLoading) return; // esperar
       
       if (!isAuthenticated || !user) {
-        let msg = 'Acceso restringido';
-        let sub = 'Debes iniciar sesión como vendedor.';
-        let btnHref = '/login';
-        let btnLabel = 'Iniciar sesión';
-        update({ isBlocked: true, blockInfo: { msg, sub, btnHref, btnLabel }, isLoaded: true });
+        update({ isBlocked: true, isLoaded: true, blockInfo: {
+          msg: 'Acceso restringido', sub: 'Debes iniciar sesión como vendedor.',
+          btnHref: '/login', btnLabel: 'Iniciar sesión',
+        }});
         return;
       }
 
-      // Verificar que el usuario tenga el rol de vendedor
       const userRole = user.role?.toLowerCase() || '';
       if (userRole !== 'seller' && userRole !== 'vendedor') {
-        let msg = 'Esta sección es para vendedores';
-        let sub = 'Gestiona los planes desde el panel admin.';
-        let btnHref = '/admin';
-        let btnLabel = 'Ir al panel admin';
-        update({ isBlocked: true, blockInfo: { msg, sub, btnHref, btnLabel }, isLoaded: true });
+        update({ isBlocked: true, isLoaded: true, blockInfo: {
+          msg: 'Esta sección es para vendedores', sub: 'Gestiona los planes desde el panel admin.',
+          btnHref: '/admin', btnLabel: 'Ir al panel admin',
+        }});
         return;
       }
 
       const userId = String(user.id);
       const userName = user.display_name || user.username || 'Vendedor';
       
-      // Fetch plans and subscription from Laravel API
-      const [plansRes, subRes] = await Promise.all([
-        apiGet<{ data: Array<{ id: number; name: string; slug: string; monthly_fee: string; features: string[]; detailed_benefits?: Array<{ title: string; description: string; icon?: string }> }> }>('/plans'),
-        apiGet<{ data?: { id: number; plan_id: number; status: string; starts_at?: string; started_at?: string; ends_at?: string; expires_at?: string; plan: { id: number; name: string; slug: string; monthly_fee: string; features: string[] } } }>('/subscriptions/current').catch(() => ({ data: null })),
+      const [plansRes, subRes, colorsRes] = await Promise.all([
+        apiGet<{ data: Array<{ id: number; name: string; slug: string; monthly_fee: string; features: unknown; detailed_benefits?: unknown; timeline_icon?: string; css_color?: string; accent_color?: string; is_active?: boolean; badge?: string; description?: string }> }>('/plans'),
+        apiGet<{ data?: { id: number; plan_id: number; status: string; starts_at?: string; started_at?: string; ends_at?: string; expires_at?: string; plan: { id: number; name: string; slug: string; monthly_fee: string } } }>('/subscriptions/current').catch(() => ({ data: null })),
+        apiGet<{ data?: Record<string, string> }>('/config/colors').catch(() => ({ data: undefined })),
       ]);
       
-      // Transform Laravel plans to frontend format
-      // Crear un mapa de slug a numeric ID
       slugToNumericIdMap = {};
       const plansData: PlansMap = {};
-      if (plansRes.data) {
-        plansRes.data.forEach((plan) => {
+      if (Array.isArray(plansRes?.data)) {
+        plansRes.data.forEach((plan: any) => {
           slugToNumericIdMap[plan.slug] = plan.id;
+          const rawFeatures = plan.features ?? [];
+          const features = Array.isArray(rawFeatures)
+            ? rawFeatures.map((f: any) => typeof f === 'string' ? { text: f, active: true } : f)
+            : [];
+          const detailedBenefits = Array.isArray(plan.detailed_benefits)
+            ? plan.detailed_benefits.map((b: any) => ({
+                title: b.title ?? '',
+                description: b.description ?? '',
+                emoji: b.emoji ?? b.icon ?? '',
+              }))
+            : [];
           plansData[plan.slug] = {
             id: plan.slug,
             name: plan.name,
             slug: plan.slug,
             price: parseFloat(plan.monthly_fee) || 0,
             priceAnnual: (parseFloat(plan.monthly_fee) || 0) * 12,
-            period: 'mensual',
-            periodAnnual: 'anual',
+            period: '/mes',
+            periodAnnual: '/año',
             currency: 'S/',
-            usePriceMode: false,
+            usePriceMode: true,
             priceText: plan.monthly_fee === '0.00' ? 'Gratis' : `S/ ${plan.monthly_fee}`,
             priceSubtext: plan.monthly_fee === '0.00' ? 'Sin costo' : '/mes',
-            description: '',
-            badge: '',
-            requiresPayment: plan.monthly_fee !== '0.00',
-            features: plan.features?.map(f => ({ text: f, active: true })) || [],
-            detailedBenefits: plan.detailed_benefits?.map(b => ({
-              title: b.title,
-              description: b.description,
-              icon: b.icon || '',
-            })) || [],
-            isActive: true,
+            description: plan.description ?? '',
+            badge: plan.badge ?? '',
+            cssColor: plan.css_color ?? '#3b82f6',
+            accentColor: plan.accent_color ?? '#2563eb',
+            requiresPayment: parseFloat(plan.monthly_fee) > 0,
+            features,
+            detailedBenefits,
+            timelineIcon: plan.timeline_icon ?? 'star',
+            isActive: plan.is_active ?? true,
           };
         });
       }
-      
+
       // Get current plan from subscription
-      const subscription = subRes.data;
+      const subscription = subRes?.data;
       const currentPlan = subscription?.plan?.slug || 'emprende';
       const endsAt = subscription?.ends_at || subscription?.expires_at || '';
       const startsAt = subscription?.starts_at || subscription?.started_at || '';
@@ -218,7 +174,9 @@ export function usePlanes() {
         status: subscription.status,
         startDate: startsAt,
       } : null;
-      
+
+      const buttonColors: ButtonColors = (colorsRes?.data as Record<string, string>) ?? {};
+
       const planOrder = buildPlanOrder(plansData);
       const carouselIndex = Math.max(0, planOrder.indexOf(currentPlan));
       update({
@@ -228,10 +186,12 @@ export function usePlanes() {
         subscriptionInfo,
         avisoPorVencer: null,
         requestsCache: [],
-        buttonColors: {},
+        buttonColors,
         showcasePlan: currentPlan, carouselIndex, isLoaded: true,
       });
-    } catch { update({ isLoaded: true }); }
+    } catch {
+      update({ isLoaded: true });
+    }
   }, [update]);
 
   const switchTab = (tab: 'my-plan' | 'all-plans') => update({ activeTab: tab });

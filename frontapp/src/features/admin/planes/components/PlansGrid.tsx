@@ -58,7 +58,7 @@ export default function PlansGrid({ plansData, statusFilter, onEdit, onToggleAct
                   <div className="text-[1.3rem] font-extrabold text-gray-800 mb-2">{plan.name}</div>
                   {plan.usePriceMode === false && plan.priceText
                     ? <div className="text-[1.8rem] font-extrabold" style={{ color:plan.cssColor }}>{plan.priceText}{plan.priceSubtext && <small className="text-[0.9rem] font-semibold text-gray-400"> {plan.priceSubtext}</small>}</div>
-                    : <div className="text-[1.8rem] font-extrabold" style={{ color:plan.cssColor }}>{plan.currency ?? 'S/'} {(plan.price ?? 0).toFixed(2)}<small className="text-[0.9rem] font-semibold text-gray-400">{plan.period ?? '/mes'}</small></div>
+                    : <div className="text-[1.8rem] font-extrabold" style={{ color:plan.cssColor }}>{plan.currency ?? 'S/'} {Number(plan.price ?? 0).toFixed(2)}<small className="text-[0.9rem] font-semibold text-gray-400">{plan.period ?? '/mes'}</small></div>
                   }
                   {!isActive && <div className="inline-block px-2.5 py-1 rounded-md bg-red-100 text-red-500 text-[10px] font-extrabold tracking-wider mt-2">INACTIVO</div>}
                 </div>
