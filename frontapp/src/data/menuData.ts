@@ -13,13 +13,18 @@ export interface MenuItem {
 
 export interface MegaCategoryData {
     icons: { title: string; img: string; href: string }[];
-    cols: { h: string; items: string[] }[];
+    cols: { h: string; items: ( | string | {
+        name: string;
+        href?: string;
+      }
+        )[];
+    }[];
 }
 
 export const megaMenuData: Record<string, MegaCategoryData> = {
     'Bebés y recién nacidos': {
         icons: [
-            { title: 'De paseo y en el coche', img: '/img/Productos/Bebes/1.webp', href: '/productos/bebes/paseo' },
+            { title: 'De paseo y en el coche', img: '/img/Productos/Bebes/1.webp', href: '/productos/bebes-recacidos' },
             { title: 'Alimentación', img: '/img/Productos/Bebes/2.webp', href: '/productos/bebes/alimentacion' },
             { title: 'Juguetes', img: '/img/Productos/Bebes/3.webp', href: '/productos/bebes/juguetes' },
             { title: 'Ropa', img: '/img/Productos/Bebes/4.webp', href: '/productos/bebes/ropa' },
@@ -204,12 +209,12 @@ export const menuItems: MenuItem[] = [
         href: '/productos',
         icon: 'shopping-bag',
         children: [
-            { 
-                label: 'Bebés y recién nacidos', 
+            {
+                label: 'Bebés y recién nacidos',
                 href: '/productos/bebes',
                 children: [
-                    { 
-                        label: 'Alimentación', 
+                    {
+                        label: 'Alimentación',
                         href: '/productos/bebes/alimentacion',
                         children: [
                             { label: 'Biberones y tetinas', href: '/productos/bebes/alimentacion/biberones' },
@@ -225,12 +230,12 @@ export const menuItems: MenuItem[] = [
                     { label: 'De paseo y en el coche', href: '/productos/bebes/paseo' },
                 ]
             },
-            { 
-                label: 'Belleza', 
+            {
+                label: 'Belleza',
                 href: '/productos/belleza',
                 children: [
-                    { 
-                        label: 'Hombres', 
+                    {
+                        label: 'Hombres',
                         href: '/productos/belleza/hombres',
                         children: [
                             { label: 'Aseo e higiene', href: '/productos/belleza/hombres/aseo' },
@@ -238,8 +243,8 @@ export const menuItems: MenuItem[] = [
                             { label: 'Cuidado capilar', href: '/productos/belleza/hombres/capilar' },
                         ]
                     },
-                    { 
-                        label: 'Mujeres', 
+                    {
+                        label: 'Mujeres',
                         href: '/productos/belleza/mujeres',
                         children: [
                             { label: 'Maquillaje', href: '/productos/belleza/mujeres/maquillaje' },
@@ -247,8 +252,8 @@ export const menuItems: MenuItem[] = [
                             { label: 'Cuidado corporal', href: '/productos/belleza/mujeres/corporal' },
                         ]
                     },
-                    { 
-                        label: 'Adolescentes, Niños y bebes', 
+                    {
+                        label: 'Adolescentes, Niños y bebes',
                         href: '/productos/belleza/jovenes',
                         children: [
                             { label: 'Aseo infantil', href: '/productos/belleza/jovenes/aseo' },
@@ -257,12 +262,12 @@ export const menuItems: MenuItem[] = [
                     },
                 ]
             },
-            { 
-                label: 'Bienestar emocional y medicina natural', 
+            {
+                label: 'Bienestar emocional y medicina natural',
                 href: '/productos/bienestar',
                 children: [
-                    { 
-                        label: 'Sistema Nervioso', 
+                    {
+                        label: 'Sistema Nervioso',
                         href: '/productos/bienestar/nervioso',
                         children: [
                             { label: 'Ansiedad y estrés', href: '/productos/bienestar/nervioso/ansiedad' },
@@ -270,8 +275,8 @@ export const menuItems: MenuItem[] = [
                             { label: 'Vitaminas del grupo B', href: '/productos/bienestar/nervioso/vitaminas-b' },
                         ]
                     },
-                    { 
-                        label: 'Sistema Digestivo', 
+                    {
+                        label: 'Sistema Digestivo',
                         href: '/productos/bienestar/digestivo',
                         children: [
                             { label: 'Probióticos', href: '/productos/bienestar/digestivo/probioticos' },
@@ -279,8 +284,8 @@ export const menuItems: MenuItem[] = [
                             { label: 'Fibra y reguladores', href: '/productos/bienestar/digestivo/fibra' },
                         ]
                     },
-                    { 
-                        label: 'Sistema Circulatorio', 
+                    {
+                        label: 'Sistema Circulatorio',
                         href: '/productos/bienestar/circulatorio',
                         children: [
                             { label: 'Circulación piernas', href: '/productos/bienestar/circulatorio/piernas' },
@@ -288,8 +293,8 @@ export const menuItems: MenuItem[] = [
                             { label: 'Colesterol', href: '/productos/bienestar/circulatorio/colesterol' },
                         ]
                     },
-                    { 
-                        label: 'Sistema Oseo', 
+                    {
+                        label: 'Sistema Oseo',
                         href: '/productos/bienestar/oseo',
                         children: [
                             { label: 'Calcio y vitamina D', href: '/productos/bienestar/oseo/calcio' },
@@ -297,16 +302,16 @@ export const menuItems: MenuItem[] = [
                             { label: 'Articulaciones', href: '/productos/bienestar/oseo/articulaciones' },
                         ]
                     },
-                    { 
-                        label: 'Sistema Muscular', 
+                    {
+                        label: 'Sistema Muscular',
                         href: '/productos/bienestar/muscular',
                         children: [
                             { label: 'Magnesium', href: '/productos/bienestar/muscular/magnesio' },
                             { label: 'Recuperación muscular', href: '/productos/bienestar/muscular/recuperacion' },
                         ]
                     },
-                    { 
-                        label: 'Sistema Inmunologico', 
+                    {
+                        label: 'Sistema Inmunologico',
                         href: '/productos/bienestar/inmune',
                         children: [
                             { label: 'Vitamina C', href: '/productos/bienestar/inmune/vitamina-c' },
@@ -316,12 +321,12 @@ export const menuItems: MenuItem[] = [
                     },
                 ]
             },
-            { 
-                label: 'Bienestar físico y deportes', 
+            {
+                label: 'Bienestar físico y deportes',
                 href: '/productos/deportes',
                 children: [
-                    { 
-                        label: 'Calzado Mujer', 
+                    {
+                        label: 'Calzado Mujer',
                         href: '/productos/deportes/calzado-mujer',
                         children: [
                             { label: 'Zapatillas running', href: '/productos/deportes/calzado-mujer/running' },
@@ -329,8 +334,8 @@ export const menuItems: MenuItem[] = [
                             { label: 'Sandalias deportivas', href: '/productos/deportes/calzado-mujer/sandalias' },
                         ]
                     },
-                    { 
-                        label: 'Ropa mujer', 
+                    {
+                        label: 'Ropa mujer',
                         href: '/productos/deportes/ropa-mujer',
                         children: [
                             { label: 'Camisetas deportivas', href: '/productos/deportes/ropa-mujer/camisetas' },
@@ -338,32 +343,32 @@ export const menuItems: MenuItem[] = [
                             { label: 'Sudaderas', href: '/productos/deportes/ropa-mujer/sudaderas' },
                         ]
                     },
-                    { 
-                        label: 'Calzado Hombre', 
+                    {
+                        label: 'Calzado Hombre',
                         href: '/productos/deportes/calzado-hombre',
                         children: [
                             { label: 'Zapatillas running', href: '/productos/deportes/calzado-hombre/running' },
                             { label: 'Zapatillas entrenamiento', href: '/productos/deportes/calzado-hombre/entrenamiento' },
                         ]
                     },
-                    { 
-                        label: 'Ropa Hombre', 
+                    {
+                        label: 'Ropa Hombre',
                         href: '/productos/deportes/ropa-hombre',
                         children: [
                             { label: 'Camisetas deportivas', href: '/productos/deportes/ropa-hombre/camisetas' },
                             { label: 'Pantalones cortos', href: '/productos/deportes/ropa-hombre/pantalones' },
                         ]
                     },
-                    { 
-                        label: 'Deportes Niños', 
+                    {
+                        label: 'Deportes Niños',
                         href: '/productos/deportes/ninos',
                         children: [
                             { label: 'Ropa deportiva niño', href: '/productos/deportes/ninos/ropa' },
                             { label: 'Calzado deportivo niño', href: '/productos/deportes/ninos/calzado' },
                         ]
                     },
-                    { 
-                        label: 'Deportes Hombre', 
+                    {
+                        label: 'Deportes Hombre',
                         href: '/productos/deportes/deportes-hombre',
                         children: [
                             { label: 'Fitness', href: '/productos/deportes/deportes-hombre/fitness' },
@@ -372,12 +377,12 @@ export const menuItems: MenuItem[] = [
                     },
                 ]
             },
-            { 
-                label: 'Digestión saludable', 
+            {
+                label: 'Digestión saludable',
                 href: '/productos/digestion',
                 children: [
-                    { 
-                        label: 'Abarrotes', 
+                    {
+                        label: 'Abarrotes',
                         href: '/productos/digestion/abarrotes',
                         children: [
                             { label: 'Arroz y legumbres', href: '/productos/digestion/abarrotes/arroz' },
@@ -385,8 +390,8 @@ export const menuItems: MenuItem[] = [
                             { label: 'Aceites y vinagres', href: '/productos/digestion/abarrotes/aceites' },
                         ]
                     },
-                    { 
-                        label: 'Desayunos', 
+                    {
+                        label: 'Desayunos',
                         href: '/productos/digestion/desayunos',
                         children: [
                             { label: 'Cereales', href: '/productos/digestion/desayunos/cereales' },
@@ -394,8 +399,8 @@ export const menuItems: MenuItem[] = [
                             { label: 'Galletas integrales', href: '/productos/digestion/desayunos/galletas' },
                         ]
                     },
-                    { 
-                        label: 'Lácteos y frescos', 
+                    {
+                        label: 'Lácteos y frescos',
                         href: '/productos/digestion/lacteos',
                         children: [
                             { label: 'Leche descremada', href: '/productos/digestion/lacteos/leche' },
@@ -403,8 +408,8 @@ export const menuItems: MenuItem[] = [
                             { label: 'Quesos bajos en grasa', href: '/productos/digestion/lacteos/quesos' },
                         ]
                     },
-                    { 
-                        label: 'Bebidas', 
+                    {
+                        label: 'Bebidas',
                         href: '/productos/digestion/bebidas',
                         children: [
                             { label: 'Jugos naturales', href: '/productos/digestion/bebidas/jugos' },
@@ -412,16 +417,16 @@ export const menuItems: MenuItem[] = [
                             { label: 'Agua mineral', href: '/productos/digestion/bebidas/agua' },
                         ]
                     },
-                    { 
-                        label: 'Dulces y snacks', 
+                    {
+                        label: 'Dulces y snacks',
                         href: '/productos/digestion/dulces',
                         children: [
                             { label: 'Chocolate oscuro', href: '/productos/digestion/dulces/chocolate' },
                             { label: 'Frutos secos', href: '/productos/digestion/dulces/frutos' },
                         ]
                     },
-                    { 
-                        label: 'Panadería', 
+                    {
+                        label: 'Panadería',
                         href: '/productos/digestion/panaderia',
                         children: [
                             { label: 'Pan integral', href: '/productos/digestion/panaderia/integral' },
@@ -430,8 +435,8 @@ export const menuItems: MenuItem[] = [
                     },
                 ]
             },
-            { 
-                label: 'Equipos y dispositivos médicos', 
+            {
+                label: 'Equipos y dispositivos médicos',
                 href: '/productos/equipos',
                 children: [
                     { label: 'Diagnóstico', href: '/productos/equipos/diagnostico' },
@@ -442,12 +447,12 @@ export const menuItems: MenuItem[] = [
                     { label: 'Emergencias', href: '/productos/equipos/emergencias' },
                 ]
             },
-            { 
-                label: 'Mascotas', 
+            {
+                label: 'Mascotas',
                 href: '/productos/mascotas',
                 children: [
-                    { 
-                        label: 'Perros', 
+                    {
+                        label: 'Perros',
                         href: '/productos/mascotas/perros',
                         children: [
                             { label: 'Alimento seco', href: '/productos/mascotas/perros/seco' },
@@ -457,8 +462,8 @@ export const menuItems: MenuItem[] = [
                             { label: 'Collares y correas', href: '/productos/mascotas/perros/collares' },
                         ]
                     },
-                    { 
-                        label: 'Gatos', 
+                    {
+                        label: 'Gatos',
                         href: '/productos/mascotas/gatos',
                         children: [
                             { label: 'Alimento seco', href: '/productos/mascotas/gatos/seco' },
@@ -467,8 +472,8 @@ export const menuItems: MenuItem[] = [
                             { label: 'Juguetes', href: '/productos/mascotas/gatos/juguetes' },
                         ]
                     },
-                    { 
-                        label: 'Aves', 
+                    {
+                        label: 'Aves',
                         href: '/productos/mascotas/aves',
                         children: [
                             { label: 'Alimento para aves', href: '/productos/mascotas/aves/alimento' },
@@ -476,8 +481,8 @@ export const menuItems: MenuItem[] = [
                             { label: 'Juguetes', href: '/productos/mascotas/aves/juguetes' },
                         ]
                     },
-                    { 
-                        label: 'Peces', 
+                    {
+                        label: 'Peces',
                         href: '/productos/mascotas/peces',
                         children: [
                             { label: 'Alimento para peces', href: '/productos/mascotas/peces/alimento' },
@@ -485,8 +490,8 @@ export const menuItems: MenuItem[] = [
                             { label: 'Filtros y bombas', href: '/productos/mascotas/peces/filtros' },
                         ]
                     },
-                    { 
-                        label: 'Otros', 
+                    {
+                        label: 'Otros',
                         href: '/productos/mascotas/otros',
                         children: [
                             { label: 'Roedores', href: '/productos/mascotas/otros/roedores' },
@@ -495,12 +500,12 @@ export const menuItems: MenuItem[] = [
                     },
                 ]
             },
-            { 
-                label: 'Protección limpieza y desinfección', 
+            {
+                label: 'Protección limpieza y desinfección',
                 href: '/productos/limpieza',
                 children: [
-                    { 
-                        label: 'Limpieza Hogar', 
+                    {
+                        label: 'Limpieza Hogar',
                         href: '/productos/limpieza/hogar',
                         children: [
                             { label: 'Detergentes', href: '/productos/limpieza/hogar/detergentes' },
@@ -509,8 +514,8 @@ export const menuItems: MenuItem[] = [
                             { label: 'Escobas y trapeadores', href: '/productos/limpieza/hogar/escobas' },
                         ]
                     },
-                    { 
-                        label: 'Desinfección', 
+                    {
+                        label: 'Desinfección',
                         href: '/productos/limpieza/desinfeccion',
                         children: [
                             { label: 'Cloro', href: '/productos/limpieza/desinfeccion/cloro' },
@@ -518,8 +523,8 @@ export const menuItems: MenuItem[] = [
                             { label: 'Sprays antibacteriales', href: '/productos/limpieza/desinfeccion/sprays' },
                         ]
                     },
-                    { 
-                        label: 'Protección Personal', 
+                    {
+                        label: 'Protección Personal',
                         href: '/productos/limpieza/proteccion',
                         children: [
                             { label: 'Guantes', href: '/productos/limpieza/proteccion/guantes' },
@@ -527,8 +532,8 @@ export const menuItems: MenuItem[] = [
                             { label: 'Cofias y batas', href: '/productos/limpieza/proteccion/cofias' },
                         ]
                     },
-                    { 
-                        label: 'Antibacteriales', 
+                    {
+                        label: 'Antibacteriales',
                         href: '/productos/limpieza/antibacteriales',
                         children: [
                             { label: 'Jabón líquido', href: '/productos/limpieza/antibacteriales/jabon' },
@@ -538,12 +543,12 @@ export const menuItems: MenuItem[] = [
                     },
                 ]
             },
-            { 
-                label: 'Suplementos vitamínicos', 
+            {
+                label: 'Suplementos vitamínicos',
                 href: '/productos/suplementos',
                 children: [
-                    { 
-                        label: 'Vitaminas', 
+                    {
+                        label: 'Vitaminas',
                         href: '/productos/suplementos/vitaminas',
                         children: [
                             { label: 'Vitamina C', href: '/productos/suplementos/vitaminas/vitamina-c' },
@@ -552,8 +557,8 @@ export const menuItems: MenuItem[] = [
                             { label: 'Complejo B', href: '/productos/suplementos/vitaminas/complejo-b' },
                         ]
                     },
-                    { 
-                        label: 'Minerales', 
+                    {
+                        label: 'Minerales',
                         href: '/productos/suplementos/minerales',
                         children: [
                             { label: 'Magnesio', href: '/productos/suplementos/minerales/magnesio' },
@@ -562,8 +567,8 @@ export const menuItems: MenuItem[] = [
                             { label: 'Calcio', href: '/productos/suplementos/minerales/calcio' },
                         ]
                     },
-                    { 
-                        label: 'Proteínas', 
+                    {
+                        label: 'Proteínas',
                         href: '/productos/suplementos/proteinas',
                         children: [
                             { label: 'Whey protein', href: '/productos/suplementos/proteinas/whey' },
@@ -571,16 +576,16 @@ export const menuItems: MenuItem[] = [
                             { label: 'Aminoácidos BCAA', href: '/productos/suplementos/proteinas/bcaa' },
                         ]
                     },
-                    { 
-                        label: 'Aminoácidos', 
+                    {
+                        label: 'Aminoácidos',
                         href: '/productos/suplementos/aminoacidos',
                         children: [
                             { label: 'L-Glutamina', href: '/productos/suplementos/aminoacidos/glutamina' },
                             { label: 'L-Arginina', href: '/productos/suplementos/aminoacidos/arginina' },
                         ]
                     },
-                    { 
-                        label: 'Hierbas', 
+                    {
+                        label: 'Hierbas',
                         href: '/productos/suplementos/hierbas',
                         children: [
                             { label: 'Valeriana', href: '/productos/suplementos/hierbas/valeriana' },
@@ -588,8 +593,8 @@ export const menuItems: MenuItem[] = [
                             { label: 'Equinacea', href: '/productos/suplementos/hierbas/equinacea' },
                         ]
                     },
-                    { 
-                        label: 'Deportivos', 
+                    {
+                        label: 'Deportivos',
                         href: '/productos/suplementos/deportivos',
                         children: [
                             { label: 'Pre-entreno', href: '/productos/suplementos/deportivos/pre-entreno' },
@@ -606,36 +611,36 @@ export const menuItems: MenuItem[] = [
         href: '/servicios',
         icon: 'headset',
         children: [
-            { 
-                label: 'Servicios médicos', 
+            {
+                label: 'Servicios médicos',
                 href: '/servicios/consultas',
                 children: [
-                    { 
-                        label: 'Medicina general', 
+                    {
+                        label: 'Medicina general',
                         href: '/servicios/consultas/medicina-general',
                         children: [
                             { label: 'Chequeo general', href: '/servicios/consultas/medicina-general/chequeo' },
                             { label: 'Atención primaria', href: '/servicios/consultas/medicina-general/atencion' },
                         ]
                     },
-                    { 
-                        label: 'Pediatría', 
+                    {
+                        label: 'Pediatría',
                         href: '/servicios/consultas/pediatria',
                         children: [
                             { label: 'Control de crecimiento', href: '/servicios/consultas/pediatria/crecimiento' },
                             { label: 'Vacunación', href: '/servicios/consultas/pediatria/vacunacion' },
                         ]
                     },
-                    { 
-                        label: 'Ginecología', 
+                    {
+                        label: 'Ginecología',
                         href: '/servicios/consultas/ginecologia',
                         children: [
                             { label: 'Revisión anual', href: '/servicios/consultas/ginecologia/anual' },
                             { label: 'Ecografías', href: '/servicios/consultas/ginecologia/ecografias' },
                         ]
                     },
-                    { 
-                        label: 'Cardiología', 
+                    {
+                        label: 'Cardiología',
                         href: '/servicios/consultas/cardiologia',
                         children: [
                             { label: 'Electrocardiograma', href: '/servicios/consultas/cardiologia/ecg' },
@@ -644,12 +649,12 @@ export const menuItems: MenuItem[] = [
                     },
                 ]
             },
-            { 
-                label: 'Belleza servicios', 
+            {
+                label: 'Belleza servicios',
                 href: '/servicios/belleza',
                 children: [
-                    { 
-                        label: 'Tratamientos faciales', 
+                    {
+                        label: 'Tratamientos faciales',
                         href: '/servicios/belleza/faciales',
                         children: [
                             { label: 'Limpieza facial', href: '/servicios/belleza/faciales/limpieza' },
@@ -657,8 +662,8 @@ export const menuItems: MenuItem[] = [
                             { label: 'Antiaging', href: '/servicios/belleza/faciales/antiaging' },
                         ]
                     },
-                    { 
-                        label: 'Tratamientos corporales', 
+                    {
+                        label: 'Tratamientos corporales',
                         href: '/servicios/belleza/corporales',
                         children: [
                             { label: 'Masajes reductores', href: '/servicios/belleza/corporales/masajes' },
@@ -666,8 +671,8 @@ export const menuItems: MenuItem[] = [
                             { label: 'Tratamientos celulitis', href: '/servicios/belleza/corporales/celulitis' },
                         ]
                     },
-                    { 
-                        label: 'Maquillaje profesional', 
+                    {
+                        label: 'Maquillaje profesional',
                         href: '/servicios/belleza/maquillaje',
                         children: [
                             { label: 'Maquillaje social', href: '/servicios/belleza/maquillaje/social' },
@@ -676,28 +681,28 @@ export const menuItems: MenuItem[] = [
                     },
                 ]
             },
-            { 
-                label: 'Deportes servicios', 
+            {
+                label: 'Deportes servicios',
                 href: '/servicios/deportes',
                 children: [
-                    { 
-                        label: 'Entrenamiento personal', 
+                    {
+                        label: 'Entrenamiento personal',
                         href: '/servicios/deportes/entrenamiento',
                         children: [
                             { label: 'Planes personalizado', href: '/servicios/deportes/entrenamiento/planes' },
                             { label: 'Evaluación física', href: '/servicios/deportes/entrenamiento/evaluacion' },
                         ]
                     },
-                    { 
-                        label: 'Fisioterapia deportiva', 
+                    {
+                        label: 'Fisioterapia deportiva',
                         href: '/servicios/deportes/fisioterapia',
                         children: [
                             { label: 'Rehabilitación', href: '/servicios/deportes/fisioterapia/rehabilitacion' },
                             { label: 'Terapia manual', href: '/servicios/deportes/fisioterapia/manual' },
                         ]
                     },
-                    { 
-                        label: 'Nutrición deportiva', 
+                    {
+                        label: 'Nutrición deportiva',
                         href: '/servicios/deportes/nutricion',
                         children: [
                             { label: 'Planes nutricionales', href: '/servicios/deportes/nutricion/planes' },

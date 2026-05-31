@@ -74,20 +74,6 @@ export default function ProductModal({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { showToast } = useToast();
 
-  // ─── Categorías ────────────────────────────────────────────────────────────
-  const { data: categories = [] } = useQuery<Category[]>({
-    queryKey: ['seller', 'categories'],
-    queryFn: async () => {
-      const LARAVEL_API_URL =
-        process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://localhost:8000/api';
-      const res = await fetch(
-        `${LARAVEL_API_URL}/categories?type=product&per_page=100`,
-      );
-      const data = await res.json();
-      return data.data ?? data ?? [];
-    },
-    staleTime: 5 * 60 * 1000,
-  });
 
   // ─── Cargar producto al abrir ──────────────────────────────────────────────
   useEffect(() => {
@@ -161,6 +147,16 @@ export default function ProductModal({
     set(key as keyof Product, [...current, makeEmptyAttr()]);
   };
 
+    const { data: categories = [] } = useQuery<Category[]>({
+        queryKey: ['seller', 'categories'],
+        queryFn: async () => {
+            const LARAVEL_API_URL = process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://localhost:8000/api';
+            const res = await fetch(`${LARAVEL_API_URL}/categories?type=product&per_page=400`);
+            const data = await res.json();
+            return data.data || data || [];
+        },
+        staleTime: 5 * 60 * 1000,
+    });
   const removeAttr = (type: 'main' | 'additional', idx: number) => {
     const key = type === 'main' ? 'mainAttributes' : 'additionalAttributes';
     const current = (formData[key] as ProductAttribute[]) ?? [];
@@ -480,7 +476,21 @@ export default function ProductModal({
                           required
                           value={formData.category ?? ''}
                           onChange={handleChange}
-                          className="w-full bg-transparent border-none focus:ring-0 font-bold text-[var(--text-primary)] p-0 outline-none cursor-pointer"
+                          className={`
+                            w-full
+                            bg-[var(--bg-card)]
+                            border border-[var(--border-subtle)]
+                            rounded-md
+                            focus:ring-2 focus:ring-sky-500/30
+                            font-bold
+                            text-[var(--text-primary)]
+                            p-2
+                            outline-none
+                            cursor-pointer
+                            dark:bg-[var(--bg-secondary)]
+                            dark:text-[var(--text-primary)]
+                            dark:border-[var(--border-subtle)]
+                          `}
                         >
                           <option value="">Seleccionar categoría...</option>
                           {categories.map((cat) => (

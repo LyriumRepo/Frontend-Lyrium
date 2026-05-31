@@ -25,6 +25,9 @@ import Skeleton, { SkeletonRow } from '@/components/ui/Skeleton';
 import { exportToCSV } from '@/shared/lib/utils/export';
 import ModalsPortal from '@/components/layout/shared/ModalsPortal';
 import ProductModerationModal from '@/components/admin/sellers/ProductModerationModal';
+import { useContratos } from '@/features/admin/contracts/hooks/useContratos';
+import { ContratosModule } from '@/components/admin/contracts/ContractsModule';
+import { ContractDetailModal } from '@/components/admin/contracts/ContractDetailModal';
 
 interface TabButtonProps {
   active: boolean;
@@ -119,11 +122,10 @@ const ManagementModal = ({
               : 'Asegúrese de que el producto cumpla con las políticas de calidad y descripción antes de habilitar su venta pública.'}
           </p>
 
-          {/* ── CORRECCIÓN: e.preventDefault() agregado ── */}
           <form
             className="space-y-6"
             onSubmit={(e) => {
-              e.preventDefault(); // ← evita recarga de página
+              e.preventDefault();
               const fd = new FormData(e.currentTarget);
               onSubmit({
                 status: fd.get('status') as string,
@@ -214,12 +216,10 @@ const ManagementModal = ({
   );
 };
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 interface SellersPageClientProps {}
 
 export function SellersPageClient(_props: SellersPageClientProps) {
   const {
-    data,
     loading,
     error,
     currentTab,
@@ -237,6 +237,8 @@ export function SellersPageClient(_props: SellersPageClientProps) {
     pendingProfileRequestsCount,
   } = useControlVendedores();
 
+  const { state: contractsState, actions: contractsActions } = useContratos();
+
   const [statusModal, setStatusModal] = useState<{
     isOpen: boolean;
     type: 'seller' | 'product';
@@ -245,7 +247,6 @@ export function SellersPageClient(_props: SellersPageClientProps) {
     suggested?: string;
   }>({ isOpen: false, type: 'seller', id: 0, title: '' });
 
-  // Modal de detalle de producto (RF-03)
   const [productModal, setProductModal] = useState<{
     isOpen: boolean;
     productId: number | null;
@@ -255,9 +256,9 @@ export function SellersPageClient(_props: SellersPageClientProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleExport = () => {
-    if (filteredSellers.length) return;
+    if (!filteredSellers.length) return;
     const headers = ['ID', 'Nombre', 'Empresa', 'Email', 'Estado', 'Contratos'];
-    const csvData = data.sellers.map((s) => [
+    const csvData = filteredSellers.map((s: any) => [
       s.id,
       s.name,
       s.company,
@@ -269,7 +270,6 @@ export function SellersPageClient(_props: SellersPageClientProps) {
     exportToCSV(headers, csvData, `padron-vendedores-${dateStr}.csv`);
   };
 
-  // ── CORRECCIÓN: setIsSubmitting(true) al inicio + try/finally ──
   const handleStatusSubmit = async ({
     status,
     reason,
@@ -277,10 +277,10 @@ export function SellersPageClient(_props: SellersPageClientProps) {
     status: string;
     reason: string;
   }) => {
-    setIsSubmitting(true); // ← movido al inicio
+    setIsSubmitting(true);
     try {
       if (statusModal.type === 'seller') {
-        const seller = data.sellers.find((s) => s.id === statusModal.id);
+        const seller = filteredSellers.find((s: any) => s.id === statusModal.id);
         if (status === 'ACTIVE' && seller?.contractStatus !== 'VIGENTE') {
           alert(
             'BLOQUEO TÉCNICO: No se puede activar una cuenta sin un contrato VIGENTE (RF-16).',
@@ -303,7 +303,7 @@ export function SellersPageClient(_props: SellersPageClientProps) {
     } catch (err) {
       console.error('Error al actualizar estado:', err);
     } finally {
-      setIsSubmitting(false); // ← siempre se ejecuta, aunque haya error
+      setIsSubmitting(false);
     }
   };
 
@@ -345,12 +345,7 @@ export function SellersPageClient(_props: SellersPageClientProps) {
         </div>
       )}
 
-      <StatsOverview
-        stats={{
-          ...stats,
-          pending: statsData?.pending,
-        }}
-      />
+      
 
       <div className="flex flex-wrap gap-2 border-b border-[var(--border-subtle)] py-5 pb-6 overflow-x-auto no-scrollbar scroll-smooth">
         <TabButton
@@ -383,11 +378,23 @@ export function SellersPageClient(_props: SellersPageClientProps) {
               : undefined
           }
         />
+        <TabButton
+          active={currentTab === 'contratos'}
+          onClick={() => setCurrentTab('contratos' as any)}
+          label="Contratos"
+          icon={<FileCheck className="w-5 h-5" />}
+        />
       </div>
 
       <div className="min-h-[500px]">
         {currentTab === 'vendedores' && (
           <div className="space-y-6 animate-fadeIn">
+            <StatsOverview
+        stats={{
+          ...stats,
+          pending: statsData?.pending,
+        }}
+      />
             <div className="bg-[var(--bg-card)] p-6 rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm flex items-center gap-4">
               <div className="flex-1 relative">
                 <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] w-5 h-5" />
@@ -442,11 +449,11 @@ export function SellersPageClient(_props: SellersPageClientProps) {
             <ProductModeration
               products={products}
               isLoading={productsLoading}
-              onAction={(product) =>
+              onAction={(product: any) =>
                 setProductModal({
                   isOpen: true,
                   productId: product.id,
-                  rejectionReason: product.rejection_reason,
+                  rejectionReason: product.rejectionReason || product.rejection_reason || null,
                 })
               }
             />
@@ -496,7 +503,7 @@ export function SellersPageClient(_props: SellersPageClientProps) {
               </div>
             ) : (
               <div className="space-y-4">
-                {profileRequests.map((request) => (
+                {profileRequests.map((request: any) => (
                   <div
                     key={request.id}
                     className="bg-[var(--bg-card)] p-6 rounded-[2.5rem] border border-[var(--border-subtle)]"
@@ -641,9 +648,32 @@ export function SellersPageClient(_props: SellersPageClientProps) {
             )}
           </div>
         )}
+
+        {currentTab === 'contratos' && (
+          <div className="space-y-6 animate-fadeIn">
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h2 className="text-xl font-black text-[var(--text-primary)] tracking-tight">
+                  Control de Contratación y Organización
+                </h2>
+                <p className="text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-widest mt-1">
+                  Sistema de Contratos y Gestión Documental del Administrador (RF-16)
+                </p>
+              </div>
+              <BaseButton 
+                onClick={contractsActions.openTemplates} 
+                variant="primary" 
+                leftIcon="FolderOpen" 
+                size="md"
+              >
+                Plantillas Legales
+              </BaseButton>
+            </div>
+            <ContratosModule state={contractsState} actions={contractsActions} />
+          </div>
+        )}
       </div>
 
-      {/* Modal unificado para vendedores */}
       <ManagementModal
         isOpen={statusModal.isOpen}
         onClose={() => setStatusModal((prev) => ({ ...prev, isOpen: false }))}
@@ -652,12 +682,11 @@ export function SellersPageClient(_props: SellersPageClientProps) {
         suggested={statusModal.suggested}
         isSubmitting={isSubmitting}
         sellerContractStatus={
-          filteredSellers.find((s) => s.id === statusModal.id)?.contractStatus
+          filteredSellers.find((s: any) => s.id === statusModal.id)?.contractStatus
         }
         onSubmit={handleStatusSubmit}
       />
 
-      {/* Modal de detalle de producto para moderación (RF-03) */}
       <ProductModerationModal
         isOpen={productModal.isOpen}
         productId={productModal.productId}
@@ -676,6 +705,31 @@ export function SellersPageClient(_props: SellersPageClientProps) {
           }
         }}
       />
+
+      {contractsState.selectedContract && (
+        <ModalsPortal>
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <div 
+              role="button"
+              tabIndex={0}
+              className="absolute inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-md" 
+              onClick={() => contractsActions.setSelectedContract(null)} 
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') contractsActions.setSelectedContract(null);
+              }}
+            />
+            <div className="relative z-10">
+              <ContractDetailModal 
+                contract={contractsState.selectedContract} 
+                onClose={() => contractsActions.setSelectedContract(null)}
+                onValidate={contractsActions.validateContract}
+                onInvalidate={contractsActions.invalidateContract}
+                onUpdateStatus={contractsActions.updateContractStatus}
+              />
+            </div>
+          </div>
+        </ModalsPortal>
+      )}
     </div>
   );
 }

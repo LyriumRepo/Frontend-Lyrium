@@ -66,12 +66,7 @@ export const adminNavigation: PanelNavigation = [
     {
         title: 'Gestión',
         items: [
-            {
-                id: 'contracts',
-                label: 'Contratos',
-                href: '/admin/contracts',
-                icon: 'FileText',
-            },
+       
             {
                 id: 'categories',
                 label: 'Gestión de Categorías',

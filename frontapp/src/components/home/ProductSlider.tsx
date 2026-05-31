@@ -33,7 +33,7 @@ function CategoryCard({ producto, onAddToCart, onQuickView }: {
           />
         </Link>
 
-        {/* Action bar - slides up on hover, always visible on mobile */}
+         
         <div className="absolute bottom-0 left-0 w-full h-[44px] flex bg-sky-500 dark:bg-[var(--brand-green)] translate-y-full transition-transform duration-300 cat-actions md:group-hover:translate-y-0">
           <button
             onClick={() => onAddToCart(producto)}
