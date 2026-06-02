@@ -11,7 +11,7 @@ interface BaseStatCardProps {
         value: string | number;
         isPositive: boolean;
     };
-    color?: 'sky' | 'emerald' | 'amber' | 'indigo' | 'rose' | 'violet';
+    color?: 'sky' | 'emerald' | 'amber' | 'indigo' | 'rose' | 'violet' | 'lima' | 'verde' | 'turquesaClaro' | 'turquesa' | 'celeste' | 'azulCeleste';
     isLoading?: boolean;
     chart?: React.ReactNode;
 }
@@ -58,6 +58,48 @@ const colorMap = {
         text: 'text-violet-600 dark:text-violet-400',
         border: 'border-violet-100/50 dark:border-violet-500/20',
         shadow: 'shadow-violet-100 dark:shadow-violet-500/20'
+    },
+    lima: {
+        bg: 'bg-[#B7E000]/10 dark:bg-[#B7E000]/15',
+        iconBg: 'bg-[#B7E000]',
+        text: 'text-[#8BAE00] dark:text-[#B7E000]',
+        border: 'border-[#B7E000]/20 dark:border-[#B7E000]/30',
+        shadow: 'shadow-[#B7E000]/20'
+    },
+    verde: {
+        bg: 'bg-[#8FD400]/10 dark:bg-[#8FD400]/15',
+        iconBg: 'bg-[#8FD400]',
+        text: 'text-[#6BA300] dark:text-[#8FD400]',
+        border: 'border-[#8FD400]/20 dark:border-[#8FD400]/30',
+        shadow: 'shadow-[#8FD400]/20'
+    },
+    turquesaClaro: {
+        bg: 'bg-[#66D6A8]/10 dark:bg-[#66D6A8]/15',
+        iconBg: 'bg-[#66D6A8]',
+        text: 'text-[#3DAF82] dark:text-[#66D6A8]',
+        border: 'border-[#66D6A8]/20 dark:border-[#66D6A8]/30',
+        shadow: 'shadow-[#66D6A8]/20'
+    },
+    turquesa: {
+        bg: 'bg-[#4EC7B8]/10 dark:bg-[#4EC7B8]/15',
+        iconBg: 'bg-[#4EC7B8]',
+        text: 'text-[#2A9E91] dark:text-[#4EC7B8]',
+        border: 'border-[#4EC7B8]/20 dark:border-[#4EC7B8]/30',
+        shadow: 'shadow-[#4EC7B8]/20'
+    },
+    celeste: {
+        bg: 'bg-[#69BEEB]/10 dark:bg-[#69BEEB]/15',
+        iconBg: 'bg-[#69BEEB]',
+        text: 'text-[#3F95C2] dark:text-[#69BEEB]',
+        border: 'border-[#69BEEB]/20 dark:border-[#69BEEB]/30',
+        shadow: 'shadow-[#69BEEB]/20'
+    },
+    azulCeleste: {
+        bg: 'bg-[#5AAFE6]/10 dark:bg-[#5AAFE6]/15',
+        iconBg: 'bg-[#5AAFE6]',
+        text: 'text-[#3089C0] dark:text-[#5AAFE6]',
+        border: 'border-[#5AAFE6]/20 dark:border-[#5AAFE6]/30',
+        shadow: 'shadow-[#5AAFE6]/20'
     }
 };
 

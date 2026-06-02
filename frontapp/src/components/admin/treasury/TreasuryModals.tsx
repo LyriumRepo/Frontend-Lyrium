@@ -76,7 +76,7 @@ export const PaymentModal: React.FC<{
                                     size="md"
                                     fullWidth
                                 >
-                                    Validar y Emitir Rapifac
+                                    Validar y Emitir NubeFact
                                 </BaseButton>
                                 <BaseButton
                                     onClick={() => onProcessIn(p.id, 'REJECT')}

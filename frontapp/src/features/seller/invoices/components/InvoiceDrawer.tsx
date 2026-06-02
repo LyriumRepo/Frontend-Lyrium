@@ -9,7 +9,6 @@ interface InvoiceDrawerProps {
     voucher: Voucher | null;
     isOpen: boolean;
     onClose: () => void;
-    onRetry: (id: string) => void | Promise<void>;
 }
 
 const fileColorClasses: Record<string, { bg: string; bgIcon: string; textIcon: string; shadow: string }> = {
@@ -34,7 +33,7 @@ const statusColorClasses: Record<string, string> = {
     gray: 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-[var(--border-subtle)]',
 };
 
-export default function InvoiceDrawer({ voucher, isOpen, onClose, onRetry }: InvoiceDrawerProps) {
+export default function InvoiceDrawer({ voucher, isOpen, onClose }: InvoiceDrawerProps) {
     if (!isOpen || !voucher) return null;
 
     const status = statusConfig[voucher.sunat_status] || statusConfig.DRAFT;
@@ -92,13 +91,13 @@ export default function InvoiceDrawer({ voucher, isOpen, onClose, onRetry }: Inv
                         <p className="text-sm font-bold text-[var(--text-secondary)]">{voucher.order_id}</p>
                     </div>
 
-                    {(voucher.pdf_url || voucher.rapifac_pdf_url) && (
+                    {voucher.pdf_url && (
                         <div className="space-y-4">
                             <h3 className="text-xs font-black text-[var(--text-secondary)] uppercase tracking-widest flex items-center gap-2">
                                 <Icon name="FileText" className="w-4 h-4" /> Comprobante Digital
                             </h3>
                             <a
-                                href={voucher.rapifac_pdf_url || voucher.pdf_url}
+                                href={voucher.pdf_url}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="flex items-center justify-center gap-3 p-6 bg-[var(--bg-card)] rounded-[2.5rem] border border-[var(--border-subtle)] shadow-xl shadow-[var(--border-subtle)]/50 hover:bg-emerald-500/5 transition-all group"
@@ -108,10 +107,52 @@ export default function InvoiceDrawer({ voucher, isOpen, onClose, onRetry }: Inv
                                 </div>
                                 <div className="text-left">
                                     <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]">Ver PDF</p>
-                                    <p className="text-xs text-[var(--text-muted)] mt-1">Alojado en Rapifac Cloud</p>
+                                    <p className="text-xs text-[var(--text-muted)] mt-1">Certificado por NubeFact</p>
                                 </div>
                                 <Icon name="ArrowRight" className="w-5 h-5 text-[var(--text-muted)] ml-auto" />
                             </a>
+                        </div>
+                    )}
+
+                    {(voucher.xml_url || voucher.cdr_url) && (
+                        <div className="space-y-4">
+                            <h3 className="text-xs font-black text-[var(--text-secondary)] uppercase tracking-widest flex items-center gap-2">
+                                <Icon name="Download" className="w-4 h-4" /> Archivos SUNAT
+                            </h3>
+                            <div className="grid grid-cols-2 gap-3">
+                                {voucher.xml_url && (
+                                    <a
+                                        href={voucher.xml_url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className={`flex items-center gap-3 p-4 rounded-[2rem] border border-[var(--border-subtle)] transition-all group ${fileColorClasses.XML.bg}`}
+                                    >
+                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${fileColorClasses.XML.bgIcon} ${fileColorClasses.XML.textIcon}`}>
+                                            <Icon name="FileText" className="w-5 h-5" />
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-primary)]">XML</p>
+                                            <p className="text-[9px] text-[var(--text-muted)]">Descargar</p>
+                                        </div>
+                                    </a>
+                                )}
+                                {voucher.cdr_url && (
+                                    <a
+                                        href={voucher.cdr_url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className={`flex items-center gap-3 p-4 rounded-[2rem] border border-[var(--border-subtle)] transition-all group ${fileColorClasses.CDR.bg}`}
+                                    >
+                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${fileColorClasses.CDR.bgIcon} ${fileColorClasses.CDR.textIcon}`}>
+                                            <Icon name="Shield" className="w-5 h-5" />
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-primary)]">CDR</p>
+                                            <p className="text-[9px] text-[var(--text-muted)]">Descargar</p>
+                                        </div>
+                                    </a>
+                                )}
+                            </div>
                         </div>
                     )}
 
@@ -122,7 +163,7 @@ export default function InvoiceDrawer({ voucher, isOpen, onClose, onRetry }: Inv
                         {voucher.history && voucher.history.length > 0 ? (
                             <div className="space-y-6 relative before:absolute before:left-4 before:top-2 before:bottom-2 before:w-0.5 before:bg-[var(--border-subtle)]">
                                 {[...voucher.history].reverse().map((event, idx) => (
-                                    <div key={`history-${event.timestamp}`} className="relative pl-10">
+                                    <div key={`history-${event.timestamp}-${idx}`} className="relative pl-10">
                                         <div className="absolute left-2.5 top-1 w-3 h-3 bg-indigo-500 rounded-full border-4 border-[var(--bg-card)] shadow-sm -ml-0.5"></div>
                                         <div>
                                             <p className="text-[10px] font-black text-[var(--text-primary)] leading-none mb-1 uppercase tracking-tight">{event.note}</p>
@@ -145,14 +186,6 @@ export default function InvoiceDrawer({ voucher, isOpen, onClose, onRetry }: Inv
                 </div>
 
                 <div className="p-8 border-t border-[var(--border-subtle)] bg-[var(--bg-card)]/80 backdrop-blur-xl flex gap-4">
-                    {voucher.sunat_status === 'REJECTED' || voucher.sunat_status === 'OBSERVED' ? (
-                        <button
-                            onClick={() => onRetry(voucher.id)}
-                            className="flex-1 py-4 bg-gray-900 text-white rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-indigo-600 transition-all shadow-xl flex items-center justify-center gap-2"
-                        >
-                            <Icon name="RefreshCw" className="w-4 h-4" /> Reintentar Envío
-                        </button>
-                    ) : null}
                     <button
                         onClick={onClose}
                         className="flex-1 py-4 bg-[var(--bg-secondary)] text-[var(--text-secondary)] rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-[var(--bg-hover)] transition-all"

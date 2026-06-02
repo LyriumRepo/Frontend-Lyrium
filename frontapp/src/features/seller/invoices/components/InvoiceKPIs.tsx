@@ -16,28 +16,28 @@ export default function InvoiceKPIsDisplay({ kpis }: InvoiceKPIsProps) {
             label: 'Total Facturado',
             value: `S/ ${kpis.totalFacturado.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
             icon: 'DollarSign',
-            color: 'emerald' as const,
+            color: 'lima' as const,
             description: 'Mes Actual'
         },
         {
             label: 'Tasa de Éxito',
             value: `${kpis.successRate.toFixed(1)}%`,
             icon: 'CheckCircle2',
-            color: 'sky' as const,
+            color: 'turquesaClaro' as const,
             description: 'Sync Rate'
         },
         {
             label: 'Pendientes',
             value: kpis.pendingCount.toString(),
             icon: 'Clock',
-            color: 'amber' as const,
+            color: 'azulCeleste' as const,
             description: 'Waiting'
         },
         {
             label: 'Rechazados',
             value: kpis.rejectedCount.toString(),
             icon: 'XCircle',
-            color: 'rose' as const,
+            color: 'turquesa' as const,
             description: 'Error'
         }
     ];

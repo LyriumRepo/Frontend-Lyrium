@@ -1,24 +1,13 @@
 import { LARAVEL_API_URL } from '@/shared/lib/config/flags';
-
-function getToken(): string | null {
-    if (typeof document === 'undefined') return null;
-    const cookies = document.cookie.split(';').reduce((acc, cookie) => {
-        const [key, ...vals] = cookie.trim().split('=');
-        if (key) acc[key] = decodeURIComponent(vals.join('='));
-        return acc;
-    }, {} as Record<string, string>);
-    return cookies['laravel_token'] ?? null;
-}
+import { getAuthHeaders } from '@/shared/lib/api/token-store';
 
 async function authFetch<T>(endpoint: string, options?: RequestInit): Promise<T> {
-    const token = getToken();
+    const authHeaders = await getAuthHeaders();
     const headers: Record<string, string> = {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
+        ...(authHeaders as Record<string, string>),
     };
-    if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-    }
 
     const response = await fetch(`${LARAVEL_API_URL}${endpoint}`, {
         ...options,

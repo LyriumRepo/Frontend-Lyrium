@@ -15,6 +15,7 @@ export function useCheckoutSubmit() {
         setProcessing,
         setStep,
         setOrderResult,
+        setPendingPayment,
     } = state;
 
     const [submitError, setSubmitError] = useState<string | null>(null);
@@ -113,20 +114,28 @@ export function useCheckoutSubmit() {
                 } catch { /* silencioso — no bloquear la orden */ }
             }
 
-            setOrderResult({
-                orderId: response.order_number || `LYR-${Date.now().toString().slice(-6)}`,
+            const orderId = response.id ?? response.orderNumber ?? `LYR-${Date.now().toString().slice(-6)}`;
+
+            const orderResultData = {
+                orderId,
                 email: personalData.email,
                 total: response.total,
                 items: selectedItems,
                 personalData,
                 shippingData,
                 orderData,
-            });
+            };
+
+            setOrderResult(orderResultData);
 
             try { await cartApi.clearCart(); } catch { /* ignorar */ }
 
+            // Resetear datos sensibles del checkout pero preservar orderResult
             useCheckoutStore.getState().reset();
-            setStep(3);
+            useCheckoutStore.getState().setOrderResult(orderResultData);
+
+            // ── Ir a pago Izipay antes de mostrar confirmación ──
+            setPendingPayment(orderId);
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Error inesperado al procesar el pedido.';
             setSubmitError(message);

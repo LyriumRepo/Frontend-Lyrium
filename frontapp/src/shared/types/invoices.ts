@@ -20,7 +20,6 @@ export interface Voucher {
     emission_date: string;
     sunat_status: VoucherStatus;
     pdf_url?: string;
-    rapifac_pdf_url?: string;
     history: VoucherHistory[];
     store_id?: string | null;
     invoice_number?: string;
@@ -28,6 +27,8 @@ export interface Voucher {
     provider_invoice_id?: string | null;
     authorization_code?: string | null;
     qr_data?: string | null;
+    xml_url?: string | null;
+    cdr_url?: string | null;
 }
 
 export interface InvoiceKPIs {

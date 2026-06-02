@@ -39,9 +39,9 @@ export const adminNavigation: PanelNavigation = [
                 icon: 'Landmark',
             },
             {
-                id: 'rapifac',
-                label: 'Facturación Rápida',
-                href: '/admin/rapifac',
+                id: 'invoices',
+                label: 'Facturación Electrónica',
+                href: '/admin/invoices',
                 icon: 'Receipt',
             },
         ],

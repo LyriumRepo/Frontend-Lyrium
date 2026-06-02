@@ -77,10 +77,6 @@ export function InvoicesPageClient() {
         return new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(amount);
     };
 
-    const getPdfUrl = (v: Voucher): string | null => {
-        return v.rapifac_pdf_url || v.pdf_url || null;
-    };
-
     if (isLoading && invoices.length === 0) {
         return (
             <div className="flex flex-col h-[calc(100vh-140px)] animate-fadeIn">
@@ -141,54 +137,46 @@ export function InvoicesPageClient() {
                 ) : (
                     <div className="space-y-4">
                         {invoices.map((inv) => {
-                            const pdfUrl = getPdfUrl(inv);
+                            const statusLabels: Record<string, string> = {
+                                ACCEPTED: 'Compra confirmada — Tu comprobante electrónico ha sido aceptado por SUNAT',
+                                SENT_WAIT_CDR: 'En proceso — Tu comprobante está siendo validado por SUNAT',
+                                REJECTED: 'Comprobante rechazado — Contacta con soporte para más información',
+                                OBSERVED: 'Comprobante observado — Contacta con soporte',
+                                DRAFT: 'Comprobante en preparación',
+                            };
                             return (
                                 <div
                                     key={inv.id}
                                     className="bg-white dark:bg-[var(--bg-secondary)] rounded-[2rem] border border-gray-100 dark:border-[var(--border-subtle)] p-6 shadow-sm hover:shadow-md transition-all"
                                 >
-                                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                                        <div className="flex items-start gap-4">
-                                            <div className="w-12 h-12 rounded-xl bg-sky-50 dark:bg-[#1A3A32] flex items-center justify-center shrink-0">
-                                                <Icon name="FileText" className="w-6 h-6 text-sky-500 dark:text-[var(--icons-green)]" />
-                                            </div>
-                                            <div>
-                                                <div className="flex items-center gap-2 flex-wrap">
-                                                    <h4 className="font-black text-gray-900 dark:text-[var(--text-primary)]">
-                                                        {TYPE_LABELS[inv.type] || inv.type}
-                                                    </h4>
-                                                    <span className="text-sm font-mono font-bold text-gray-500 dark:text-[var(--text-muted)]">
-                                                        {inv.series}-{inv.number}
-                                                    </span>
-                                                </div>
-                                                <div className="flex items-center gap-3 mt-1.5 text-sm text-gray-500 dark:text-[var(--text-muted)]">
-                                                    <span>{formatDate(inv.emission_date)}</span>
-                                                    <span className="w-1 h-1 rounded-full bg-gray-300" />
-                                                    <span className="font-bold text-gray-800 dark:text-[var(--text-primary)]">
-                                                        {formatCurrency(inv.amount)}
-                                                    </span>
-                                                </div>
-                                                {inv.authorization_code && (
-                                                    <p className="text-[10px] text-gray-400 mt-1 font-mono">
-                                                        Código autorización: {inv.authorization_code}
-                                                    </p>
-                                                )}
-                                            </div>
+                                    <div className="flex items-start gap-4">
+                                        <div className="w-12 h-12 rounded-xl bg-sky-50 dark:bg-[#1A3A32] flex items-center justify-center shrink-0">
+                                            <Icon name="FileText" className="w-6 h-6 text-sky-500 dark:text-[var(--icons-green)]" />
                                         </div>
-
-                                        <div className="flex items-center gap-3 shrink-0">
-                                            <StatusBadge status={inv.sunat_status} />
-                                            {pdfUrl && inv.sunat_status === 'ACCEPTED' && (
-                                                <a
-                                                    href={pdfUrl}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="px-4 py-2.5 bg-gradient-to-r from-sky-500 to-sky-600 dark:from-[var(--brand-green)] dark:to-[var(--brand-green-hover)] text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:shadow-lg transition-all flex items-center gap-2"
-                                                >
-                                                    <Icon name="Eye" className="w-4 h-4" />
-                                                    Ver PDF
-                                                </a>
-                                            )}
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center justify-between gap-4">
+                                                <div className="min-w-0">
+                                                    <div className="flex items-center gap-2 flex-wrap">
+                                                        <h4 className="font-black text-gray-900 dark:text-[var(--text-primary)]">
+                                                            {TYPE_LABELS[inv.type] || inv.type}
+                                                        </h4>
+                                                        <span className="text-sm font-mono font-bold text-gray-500 dark:text-[var(--text-muted)]">
+                                                            {inv.series}-{inv.number}
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex items-center gap-3 mt-1.5 text-sm text-gray-500 dark:text-[var(--text-muted)]">
+                                                        <span>{formatDate(inv.emission_date)}</span>
+                                                        <span className="w-1 h-1 rounded-full bg-gray-300" />
+                                                        <span className="font-bold text-gray-800 dark:text-[var(--text-primary)]">
+                                                            {formatCurrency(inv.amount)}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <StatusBadge status={inv.sunat_status} />
+                                            </div>
+                                            <p className="text-xs text-gray-400 dark:text-[var(--text-muted)] mt-2 leading-relaxed">
+                                                {statusLabels[inv.sunat_status] ?? 'Estado no disponible'}
+                                            </p>
                                         </div>
                                     </div>
                                 </div>

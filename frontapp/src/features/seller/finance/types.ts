@@ -4,6 +4,27 @@ export interface FinanceChartData {
     trend?: string;
 }
 
+export interface FinancialBreakdown {
+    totalConIgv: number;
+    totalIgv: number;
+    totalCommission: number;
+    totalNeto: number;
+    totalPending: number;
+    totalCompleted: number;
+    pendingCount: number;
+    completedCount: number;
+}
+
+export interface RecentInvoice {
+    id: string;
+    series: string;
+    number: string;
+    type: string;
+    sunat_status: string;
+    total: number;
+    emission_date: string;
+}
+
 export interface FinanceData {
     ingresosBrutos: FinanceChartData;
     ingresosNetos: FinanceChartData;
@@ -19,6 +40,9 @@ export interface FinanceData {
     defectuosos: FinanceChartData;
     tiempoRespuesta: FinanceChartData;
     stockRotacion: FinanceChartData;
+    csat: FinanceChartData;
+    desgloseFinanciero: FinancialBreakdown;
+    comprobantesRecientes: RecentInvoice[];
 }
 
 export interface CustomerKPI {

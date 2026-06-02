@@ -15,6 +15,7 @@ import OrderSummary from './step2/OrderSummary';
 import OrderConfirmation from './step3/OrderConfirmation';
 import ModalPostCompra from './modals/ModalPostCompra';
 import ModalRegistroUsuario from './modals/ModalRegistroUsuario';
+import IzipayCheckoutForm from './IzipayCheckoutForm';
 
 export default function CheckoutPage() {
     const currentStep = useCheckoutStore((s) => s.currentStep);
@@ -22,6 +23,10 @@ export default function CheckoutPage() {
     const setCartItems = useCheckoutStore((s) => s.setCartItems);
     const orderResult = useCheckoutStore((s) => s.orderResult);
     const isProcessing = useCheckoutStore((s) => s.isProcessing);
+    const pendingPaymentOrderId = useCheckoutStore((s) => s.pendingPaymentOrderId);
+    const isPaymentModalOpen = useCheckoutStore((s) => s.isPaymentModalOpen);
+    const setPaymentModalOpen = useCheckoutStore((s) => s.setPaymentModalOpen);
+    const setPendingPayment = useCheckoutStore((s) => s.setPendingPayment);
 
     // Cargar carrito al montar el checkout
     useEffect(() => {
@@ -69,6 +74,7 @@ export default function CheckoutPage() {
 
     const [showPostCompra, setShowPostCompra] = useState(false);
     const [showRegistro, setShowRegistro] = useState(false);
+    const [paymentError, setPaymentError] = useState<string | null>(null);
 
     useEffect(() => {
         if (currentStep === 3) {
@@ -77,6 +83,23 @@ export default function CheckoutPage() {
     }, [currentStep]);
 
     const email = orderResult?.email ?? '';
+
+    const handlePaymentSuccess = (result: { transactionId: string; invoicesCreadas: number }) => {
+        setPaymentError(null);
+        setPendingPayment(null);
+        setStep(3);
+        setShowPostCompra(true);
+    };
+
+    const handlePaymentError = (error: string) => {
+        setPaymentError(error);
+    };
+
+    const handlePaymentCancel = () => {
+        setPaymentError(null);
+        setPendingPayment(null);
+        setStep(1);
+    };
 
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-[#0A0F0D] antialiased">
@@ -149,6 +172,36 @@ export default function CheckoutPage() {
                     </div>
                 )}
             </div>
+
+            {/* ── Payment Modal ── */}
+            {isPaymentModalOpen && pendingPaymentOrderId && (
+                <div className="fixed inset-0 z-[15000] flex items-center justify-center p-4">
+                    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={() => {}} />
+                    <div className="relative bg-white dark:bg-[var(--bg-card)] rounded-[2rem] shadow-2xl w-full max-w-lg p-8 animate-modal-pop border border-gray-100 dark:border-[var(--border-subtle)]">
+                        <div className="text-center mb-6">
+                            <h3 className="text-lg font-black text-gray-900 dark:text-[var(--text-primary)] uppercase tracking-tight">
+                                Finalizar Pago
+                            </h3>
+                            <p className="text-[10px] text-gray-400 dark:text-[var(--text-muted)] font-bold uppercase tracking-widest mt-1">
+                                Pedido #{pendingPaymentOrderId}
+                            </p>
+                        </div>
+
+                        {paymentError && (
+                            <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 rounded-2xl border border-red-100 dark:border-red-800/30 text-center">
+                                <p className="text-xs font-medium text-red-500">{paymentError}</p>
+                            </div>
+                        )}
+
+                        <IzipayCheckoutForm
+                            orderId={pendingPaymentOrderId}
+                            onSuccess={handlePaymentSuccess}
+                            onError={handlePaymentError}
+                            onCancel={handlePaymentCancel}
+                        />
+                    </div>
+                </div>
+            )}
 
             {/* Modals */}
             <ModalPostCompra

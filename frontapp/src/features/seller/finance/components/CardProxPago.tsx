@@ -1,5 +1,6 @@
 import React from 'react';
 import Icon from '@/components/ui/Icon';
+import { companyColors } from '../colors';
 
 interface CardProxPagoProps {
     data: {
@@ -16,12 +17,12 @@ export default function CardProxPago({ data, formatCurrency }: CardProxPagoProps
     const progress = total > 0 ? (recaudado / total) * 100 : 0;
 
     return (
-        <div className="bg-[var(--bg-card)] p-8 rounded-[2.5rem] border border-sky-100/50 shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-1 relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-sky-500/5 rounded-full -mr-16 -mt-16 blur-2xl transition-all duration-700 group-hover:scale-150"></div>
+        <div className="bg-[var(--bg-card)] p-8 rounded-[2.5rem] border shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-1 relative overflow-hidden group" style={{ borderColor: `${companyColors.celeste}40` }}>
+            <div className="absolute top-0 right-0 w-32 h-32 rounded-full -mr-16 -mt-16 blur-2xl transition-all duration-700 group-hover:scale-150" style={{ backgroundColor: `${companyColors.celeste}0D` }}></div>
 
             <div className="relative z-10">
                 <div className="flex justify-between items-start mb-6">
-                    <div className="w-12 h-12 bg-sky-500 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-sky-100 group-hover:scale-110 group-hover:rotate-3 transition-transform">
+                    <div className="w-12 h-12 text-white rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-transform" style={{ backgroundColor: companyColors.celeste }}>
                         <Icon name="CalendarCheck" className="text-2xl w-6 h-6" />
                     </div>
                     <span className="text-xs font-black text-[var(--text-secondary)] uppercase tracking-widest">
@@ -37,10 +38,10 @@ export default function CardProxPago({ data, formatCurrency }: CardProxPagoProps
                 </div>
 
                 <div className="mt-8 space-y-3">
-                    <div className="w-full h-3 bg-sky-100 dark:bg-sky-950 rounded-full overflow-hidden">
+                    <div className="w-full h-3 rounded-full overflow-hidden" style={{ backgroundColor: `${companyColors.celeste}33` }}>
                         <div
-                            className="h-full bg-gradient-to-r from-sky-400 to-sky-600 rounded-full transition-all duration-700"
-                            style={{ width: `${Math.min(progress, 100)}%` }}
+                            className="h-full rounded-full transition-all duration-700"
+                            style={{ width: `${Math.min(progress, 100)}%`, background: `linear-gradient(to right, ${companyColors.turquesa}, ${companyColors.celeste})` }}
                         />
                     </div>
                     <div className="flex justify-between text-[10px] font-bold text-[var(--text-secondary)]">

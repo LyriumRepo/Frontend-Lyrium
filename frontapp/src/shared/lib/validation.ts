@@ -257,7 +257,7 @@ export function isValidWooStatus(value: string, fieldName: string): ValidationEr
 }
 
 /**
- * Valida tipo de voucher (Rapifac)
+ * Valida tipo de voucher (NubeFact)
  */
 export function isValidVoucherType(value: string, fieldName: string): ValidationError | null {
   const validTypes = ['FACTURA', 'BOLETA', 'NOTA_CREDITO', 'NOTA_DEBITO'];

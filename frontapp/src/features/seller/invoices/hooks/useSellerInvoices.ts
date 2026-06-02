@@ -1,20 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { Voucher, InvoiceKPIs, VoucherStatus, VoucherType } from '../types';
 import { useFilteredList, FilterConfig } from '@/shared/hooks/useFilteredList';
 import { invoiceApi } from '@/shared/lib/api/invoiceRepository';
-
-export interface EmitInvoicePayload {
-    type: VoucherType;
-    customer_name: string;
-    customer_ruc: string;
-    series: string;
-    number: string;
-    amount: number;
-    order_id: string;
-}
 
 export interface VoucherFilters {
     search: string;
@@ -57,7 +47,6 @@ const filterConfig: FilterConfig<Voucher, VoucherFilters> = {
 };
 
 export function useSellerInvoices() {
-    const queryClient = useQueryClient();
     const [selectedVoucher, setSelectedVoucher] = useState<Voucher | null>(null);
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
@@ -112,27 +101,6 @@ export function useSellerInvoices() {
         }
     };
 
-    const emitMutation = useMutation({
-        mutationFn: async (payload: EmitInvoicePayload) => {
-            return invoiceApi.emit(payload);
-        },
-        onSuccess: (newVoucher) => {
-            queryClient.setQueryData(['seller', 'invoices', 'list'], (old: any) => [newVoucher, ...(old || [])]);
-            queryClient.invalidateQueries({ queryKey: ['seller', 'invoices', 'kpis'] });
-        }
-    });
-
-    const retryMutation = useMutation({
-        mutationFn: async (id: string) => {
-            return invoiceApi.retry(id);
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['seller', 'invoices', 'list'] });
-            queryClient.invalidateQueries({ queryKey: ['seller', 'invoices', 'kpis'] });
-            setIsDrawerOpen(false);
-        }
-    });
-
     return {
         vouchers: filteredVouchers,
         kpis,
@@ -151,16 +119,5 @@ export function useSellerInvoices() {
             setIsDrawerOpen(false);
             setTimeout(() => setSelectedVoucher(null), 300);
         },
-        handleRetryInvoice: (id: string) => retryMutation.mutate(id),
-        emitNewInvoice: async (payload: EmitInvoicePayload) => {
-            try {
-                await emitMutation.mutateAsync(payload);
-                return { success: true };
-            } catch (err: unknown) {
-                return { success: false, error: err instanceof Error ? err.message : 'Error al emitir factura' };
-            }
-        },
-        isEmitting: emitMutation.isPending,
-        isRetrying: retryMutation.isPending,
     };
 }

@@ -2,14 +2,25 @@
 
 import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { FinanceData } from '../types';
+import { FinanceData, RecentInvoice } from '../types';
 import { paymentApi, SellerPayment } from '@/shared/lib/api/paymentRepository';
 import { shipmentApi, SellerShipment } from '@/shared/lib/api/shipmentRepository';
 import { returnApi, SellerReturn } from '@/shared/lib/api/returnRepository';
+import { invoiceApi } from '@/shared/lib/api/invoiceRepository';
+import type { Voucher } from '@/shared/types/invoices';
+import { LARAVEL_API_URL } from '@/shared/lib/config/flags';
+import { getAuthHeaders } from '@/shared/lib/api/token-store';
 
 export interface FinanceFilters {
     startDate: string;
     endDate: string;
+}
+
+interface AnalyticsData {
+    tiempoRespuesta: number[];
+    csat: number;
+    stockRotation: number[];
+    cuotaMercado: number;
 }
 
 function computeFinanceData(
@@ -20,11 +31,10 @@ function computeFinanceData(
     nextPaymentDateFormatted: string,
     shipments: SellerShipment[],
     returns: SellerReturn[],
+    recentInvoices: RecentInvoice[],
+    analytics: AnalyticsData | null,
 ): FinanceData {
     const now = new Date();
-    const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 6, 1);
-
-    // Filter by date range if payments exist
     const filteredAll = allPayments.length > 0 ? allPayments : [];
 
     // Monthly aggregation (last 6 months)
@@ -76,7 +86,6 @@ function computeFinanceData(
     // Total numbers
     const totalBrutos = filteredAll.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
     const totalNetos = filteredAll.reduce((sum, p) => sum + (Number(p.net_amount) || 0), 0);
-    const totalReales = completedPayments.reduce((sum, p) => sum + (Number(p.net_amount) || 0), 0);
     const totalCount = filteredAll.length;
     const avgTicket = totalCount > 0 ? totalBrutos / totalCount : 0;
 
@@ -92,12 +101,10 @@ function computeFinanceData(
         return dayPayments.length > 0 ? dayTotal / dayPayments.length : avgTicket;
     });
 
-    // ROI: calculate from commission data
+    // ROI: (Ingresos - Inversión) / Inversión × 100
+    // Ingresos = amount, Inversión = commission_amount, Neto = amount - commission = Ingresos - Inversión
+    // ROI = (Neto / Commission) × 100
     const totalCommissions = filteredAll.reduce((sum, p) => sum + (Number(p.commission_amount) || 0), 0);
-    const roiValue = totalCommissions > 0
-        ? ((totalNetos - totalCommissions) / totalCommissions) * 100
-        : 0;
-
     const roiLabels = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'];
     const roiData = roiLabels.map((_, i) => {
         const monthPayments = filteredAll.filter(p => {
@@ -106,45 +113,75 @@ function computeFinanceData(
         });
         const monthComm = monthPayments.reduce((sum, p) => sum + (Number(p.commission_amount) || 0), 0);
         const monthNet = monthPayments.reduce((sum, p) => sum + (Number(p.net_amount) || 0), 0);
-        return monthComm > 0 ? ((monthNet - monthComm) / monthComm) * 100 : 0;
+        return monthComm > 0 ? Math.round((monthNet / monthComm) * 100) : 0;
     });
 
     // Pending total for next payment card
     const totalPendingAmount = pendingPayments.reduce((sum, p) => sum + (Number(p.net_amount) || 0), 0);
     const totalPendingAmountRaw = pendingPayments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
 
-    // LTV approximation from repeat payments
-    const uniqueOrders = new Set(filteredAll.map(p => p.order_id).filter(Boolean));
-    const ltvValue = uniqueOrders.size > 0 ? totalBrutos / uniqueOrders.size : 0;
+    // LTV: Ticket Promedio × Frecuencia de Compra (mensual)
+    const ltvData = monthLabels.map((_, i) => {
+        const d = new Date(now.getFullYear(), now.getMonth() - 5 + i, 1);
+        const monthPayments = filteredAll.filter(p => {
+            const pd = new Date(p.created_at);
+            return pd.getMonth() === d.getMonth() && pd.getFullYear() === d.getFullYear();
+        });
+        const monthTotal = monthPayments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+        const monthCount = monthPayments.length;
+        const monthTicket = monthCount > 0 ? monthTotal / monthCount : 0;
+        const monthCustomers = new Set(monthPayments.map(p => p.order?.userId).filter(Boolean));
+        const monthOrders = new Set(monthPayments.map(p => p.order_id).filter(Boolean));
+        const monthFreq = monthCustomers.size > 0 ? monthOrders.size / monthCustomers.size : 0;
+        return Math.round(monthTicket * monthFreq);
+    });
 
-    // Lead Time: avg hours from shipment creation to shipped_at
-    const shippedShipments = shipments.filter(s => s.shipped_at && s.created_at);
-    const leadHours = shippedShipments.length > 0
-        ? shippedShipments.reduce((sum, s) => {
-            const created = new Date(s.created_at!).getTime();
-            const shipped = new Date(s.shipped_at!).getTime();
-            return sum + (shipped - created) / (1000 * 60 * 60);
-        }, 0) / shippedShipments.length
-        : 0;
-    const leadTimeData = weekLabels.map(() => Math.round(leadHours * 10) / 10);
-    const finalLeadData = leadHours > 0
-        ? leadTimeData
-        : weekLabels.map(() => 0);
+    // Lead Time: histograma con bins de frecuencia
+    const shippedShipments = shipments.filter(s => s.shipped_at && s.order?.createdAt);
+    const leadTimeValues = shippedShipments.map(s => {
+        const created = new Date(s.order!.createdAt).getTime();
+        const shipped = new Date(s.shipped_at!).getTime();
+        return (shipped - created) / (1000 * 60 * 60);
+    });
+    const histogramBins = [
+        { label: '0-12h', min: 0, max: 12 },
+        { label: '12-24h', min: 12, max: 24 },
+        { label: '24-48h', min: 24, max: 48 },
+        { label: '48-72h', min: 48, max: 72 },
+        { label: '72h+', min: 72, max: Infinity },
+    ];
+    const histogramLabels = histogramBins.map(b => b.label);
+    const histogramData = histogramBins.map(bin =>
+        leadTimeValues.filter(h => h >= bin.min && h < bin.max).length
+    );
 
-    // Defectuosos: count returns with defect reasons / total completed payments
+    // Defectuosos: (Productos Reclamados / Productos Vendidos) × 100 (Pie chart: [ok%, defect%])
     const defectReasons = ['defective', 'arrived_damaged', 'not_as_described'];
     const totalCompleted = completedPayments.length || 1;
     const defectCount = returns.filter(r => defectReasons.includes(r.reason)).length;
-    const defectRate = Math.round((defectCount / totalCompleted) * 100 * 10) / 10;
-    const defectLabels = monthLabels.slice(-3);
+    const defectRate = Math.min((defectCount / totalCompleted) * 100, 100);
 
-    // Metrics below have no available backend data source:
-    // - stockRotacion: no inventory history system
-    // - cuotaMercado: no marketplace-wide aggregation
-    // - tiempoRespuesta: no seller-accessible ticket response-time endpoint
-    // - categories: no product/service breakdown in payment data
+    // Desglose Financiero
+    const totalConIgv = filteredAll.reduce((sum, p) => sum + (Number(p.total_con_igv) || Number(p.amount) * 1.18), 0);
+    const totalIgv = filteredAll.reduce((sum, p) => sum + (Number(p.igv) || Number(p.amount) * 0.18), 0);
+    const totalPending = pendingPayments.reduce((sum, p) => sum + (Number(p.net_amount) || 0), 0);
+    const totalCompletedAmt = completedPayments.reduce((sum, p) => sum + (Number(p.net_amount) || 0), 0);
 
+    const analyticsTiempo = analytics?.tiempoRespuesta ?? [0, 0, 0, 0];
+    const analyticsStock = analytics?.stockRotation ?? [0, 0, 0, 0];
+    const analyticsCuota = analytics?.cuotaMercado ?? 0;
     return {
+        desgloseFinanciero: {
+            totalConIgv,
+            totalIgv,
+            totalCommission: totalCommissions,
+            totalNeto: totalNetos,
+            totalPending,
+            totalCompleted: totalCompletedAmt,
+            pendingCount: pendingPayments.length,
+            completedCount: completedPayments.length,
+        },
+        comprobantesRecientes: recentInvoices,
         ingresosBrutos: {
             labels: monthLabels,
             data: monthDataIngresosBrutos,
@@ -186,35 +223,39 @@ function computeFinanceData(
         },
         roi: {
             labels: roiLabels,
-            data: roiData.map(v => Math.round(v)),
+            data: roiData,
         },
         cuotaMercado: {
-            labels: ['Tu Tienda', 'Competencia A', 'Competencia B', 'Otros'],
-            data: [0, 0, 0, 0],
+            labels: ['Tu Tienda', 'Otras Tiendas'],
+            data: [analyticsCuota, Math.max(0, 100 - analyticsCuota)],
         },
         ltv: {
-            labels: ['Últimos 6 meses'],
-            data: [Math.round(ltvValue)],
+            labels: monthLabels,
+            data: ltvData,
         },
         categories: {
             labels: ['Productos', 'Servicios'],
             data: [0, 0],
         },
         leadTime: {
-            labels: weekLabels,
-            data: finalLeadData,
+            labels: histogramLabels,
+            data: histogramData,
         },
         defectuosos: {
-            labels: defectLabels,
-            data: defectLabels.map(() => defectRate),
+            labels: ['Sin Defectos', 'Defectuosos'],
+            data: [100 - defectRate, defectRate],
         },
         tiempoRespuesta: {
             labels: weekLabels,
-            data: weekLabels.map(() => 0),
+            data: analyticsTiempo,
         },
         stockRotacion: {
             labels: ['Q1', 'Q2', 'Q3', 'Q4'],
-            data: [0, 0, 0, 0],
+            data: analyticsStock,
+        },
+        csat: {
+            labels: ['CSAT'],
+            data: [analytics?.csat ?? 0],
         },
     };
 }
@@ -264,6 +305,41 @@ export function useSellerFinance() {
         staleTime: 5 * 60 * 1000,
     });
 
+    const { data: recentInvoices = [], isLoading: loading7 } = useQuery({
+        queryKey: ['seller', 'finance', 'recent-invoices'],
+        queryFn: async () => {
+            const vouchers = await invoiceApi.list({ per_page: 5 });
+            return (vouchers || []).map((v: Voucher) => ({
+                id: v.id,
+                series: v.series,
+                number: v.number,
+                type: v.type,
+                sunat_status: v.sunat_status,
+                total: v.amount,
+                emission_date: v.emission_date,
+            })) as RecentInvoice[];
+        },
+        staleTime: 5 * 60 * 1000,
+    });
+
+    const { data: analyticsData, isLoading: loading8 } = useQuery({
+        queryKey: ['seller', 'finance', 'analytics'],
+        queryFn: async (): Promise<AnalyticsData | null> => {
+            try {
+                const authHeaders = await getAuthHeaders();
+                const res = await fetch(`${LARAVEL_API_URL}/seller/finance/analytics`, {
+                    headers: { 'Accept': 'application/json', ...authHeaders as Record<string, string> },
+                });
+                if (!res.ok) return null;
+                const json = await res.json();
+                return json.data ?? null;
+            } catch {
+                return null;
+            }
+        },
+        staleTime: 5 * 60 * 1000,
+    });
+
     const data = useMemo<FinanceData | null>(() => {
         if (!allPayments) return null;
         return computeFinanceData(
@@ -274,10 +350,12 @@ export function useSellerFinance() {
             pendingTotalData?.data?.next_payment_date_formatted ?? '',
             shipments,
             returns,
+            recentInvoices,
+            analyticsData,
         );
-    }, [allPayments, pendingPayments, completedPayments, pendingTotalData, shipments, returns]);
+    }, [allPayments, pendingPayments, completedPayments, pendingTotalData, shipments, returns, recentInvoices, analyticsData]);
 
-    const isLoading = loading1 || loading2 || loading3 || loading4 || loading5 || loading6;
+    const isLoading = loading1 || loading2 || loading3 || loading4 || loading5 || loading6 || loading7 || loading8;
 
     const setFilters = (startDate: string, endDate: string) => {
         setFiltersState({ startDate, endDate });

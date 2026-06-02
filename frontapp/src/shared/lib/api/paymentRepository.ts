@@ -1,24 +1,13 @@
 import { LARAVEL_API_URL } from '@/shared/lib/config/flags';
-
-function getToken(): string | null {
-    if (typeof document === 'undefined') return null;
-    const cookies = document.cookie.split(';').reduce((acc, cookie) => {
-        const [key, ...vals] = cookie.trim().split('=');
-        if (key) acc[key] = decodeURIComponent(vals.join('='));
-        return acc;
-    }, {} as Record<string, string>);
-    return cookies['laravel_token'] ?? null;
-}
+import { getAuthHeaders } from '@/shared/lib/api/token-store';
 
 async function authFetch<T>(endpoint: string, options?: RequestInit): Promise<T> {
-    const token = getToken();
+    const authHeaders = await getAuthHeaders();
     const headers: Record<string, string> = {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
+        ...(authHeaders as Record<string, string>),
     };
-    if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-    }
 
     const response = await fetch(`${LARAVEL_API_URL}${endpoint}`, {
         ...options,
@@ -40,6 +29,8 @@ export interface SellerPayment {
     order_id: number | null;
     status: 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled';
     amount: number;
+    total_con_igv: number;
+    igv: number;
     commission_rate: number;
     commission_amount: number;
     net_amount: number;
@@ -55,6 +46,7 @@ export interface SellerPayment {
         order_number: string;
         total: number;
         status: string;
+        userId?: string;
     } | null;
 }
 
@@ -83,6 +75,37 @@ function buildUrl(base: string, params?: { startDate?: string; endDate?: string 
     const qs = `?start_date=${encodeURIComponent(params.startDate)}&end_date=${encodeURIComponent(params.endDate)}`;
     return base + qs;
 }
+
+export interface IzipayInitResponse {
+    mode: 'mock' | 'izipay';
+    order_id: string;
+    public_key?: string;
+    form_token?: string;
+    amount?: number;
+}
+
+export interface IzipayConfirmResponse {
+    message: string;
+    order_id: string;
+    transaction_id: string;
+    invoices_creadas: number;
+}
+
+export const izipayPaymentApi = {
+    init: async (orderId: string): Promise<IzipayInitResponse> => {
+        const res = await authFetch<{ success: boolean; data: IzipayInitResponse }>(`/payments/izipay/init/${orderId}`, {
+            method: 'POST',
+        });
+        return res.data;
+    },
+
+    confirm: async (orderId: string): Promise<IzipayConfirmResponse> => {
+        const res = await authFetch<{ success: boolean; data: IzipayConfirmResponse }>(`/payments/izipay/confirm/${orderId}`, {
+            method: 'POST',
+        });
+        return res.data;
+    },
+};
 
 export const paymentApi = {
     list: async (dateParams?: { startDate?: string; endDate?: string }): Promise<SellerPayment[]> => {

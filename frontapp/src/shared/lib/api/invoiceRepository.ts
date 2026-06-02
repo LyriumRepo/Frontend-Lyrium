@@ -1,6 +1,6 @@
 import { LARAVEL_API_URL } from '@/shared/lib/config/flags';
 import { getAuthHeaders } from '@/shared/lib/api/token-store';
-import type { Voucher, InvoiceKPIs, CreateInvoiceInput } from '@/shared/types/invoices';
+import type { Voucher, InvoiceKPIs } from '@/shared/types/invoices';
 
 async function authFetch<T>(endpoint: string, options?: RequestInit): Promise<T> {
     const authHeaders = await getAuthHeaders();
@@ -24,14 +24,15 @@ async function authFetch<T>(endpoint: string, options?: RequestInit): Promise<T>
 }
 
 export const invoiceApi = {
-    list: async (params?: { status?: string; type?: string; page?: number }): Promise<Voucher[]> => {
+    list: async (params?: { status?: string; type?: string; page?: number; per_page?: number }): Promise<Voucher[]> => {
         const query = new URLSearchParams();
         if (params?.status && params.status !== 'ALL') query.set('status', params.status);
         if (params?.type && params.type !== 'ALL') query.set('type', params.type);
         if (params?.page) query.set('page', String(params.page));
+        if (params?.per_page) query.set('per_page', String(params.per_page));
         const qs = query.toString() ? `?${query.toString()}` : '';
-        const res = await authFetch<{ success: boolean; data: Voucher[] }>(`/seller/invoices${qs}`);
-        return res.data || [];
+        const res = await authFetch<{ success: boolean; data: { data: Voucher[]; pagination: any } }>(`/seller/invoices${qs}`);
+        return res.data?.data || [];
     },
 
     getById: async (id: string): Promise<Voucher | null> => {
@@ -41,21 +42,6 @@ export const invoiceApi = {
         } catch {
             return null;
         }
-    },
-
-    emit: async (input: CreateInvoiceInput): Promise<Voucher> => {
-        const res = await authFetch<{ success: boolean; data: Voucher }>('/seller/invoices/emit', {
-            method: 'POST',
-            body: JSON.stringify(input),
-        });
-        return res.data;
-    },
-
-    retry: async (id: string): Promise<Voucher> => {
-        const res = await authFetch<{ success: boolean; data: Voucher }>(`/seller/invoices/${id}/retry`, {
-            method: 'POST',
-        });
-        return res.data;
     },
 
     kpis: async (): Promise<InvoiceKPIs> => {
