@@ -43,8 +43,8 @@ function mapLaravelProduct(p: any): Product {
       ? parseFloat(p.discount_percentage)
       : null,
 
-    // Imagen principal
-    image: p.images?.[0]?.src ?? '',
+    // Imagen principal — prioriza MediaLibrary, fallback al campo image
+    image: p.images?.[0]?.src ?? p.image ?? '',
     images: p.images ?? [],
 
     // Categorías
@@ -111,6 +111,11 @@ export async function getProducts(): Promise<Product[]> {
     console.error('getProducts exception:', err);
     return [];
   }
+}
+
+// ─── Server action para obtener el token de auth desde cookies ─────────────
+export async function getServerToken(): Promise<string> {
+  return getAuthToken();
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -193,7 +198,6 @@ export async function saveProduct(
     const data = await res.json();
     revalidateTag('seller-catalog', 'max');
 
-    // La respuesta puede ser el producto directamente o { data: producto }
     const raw = data.data ?? data;
     return { success: true, data: mapLaravelProduct(raw) };
   } catch (err: any) {
@@ -230,6 +234,66 @@ export async function deleteProduct(
     return { success: true };
   } catch {
     return { success: false, error: 'Error de conexión al eliminar' };
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// POST /api/products/{id}/media  — subir imagen comprimida (server-to-server)
+// ─────────────────────────────────────────────────────────────────────────────
+export async function uploadProductImageAction(
+  productId: number,
+  imageBase64: string,
+): Promise<{ success: boolean; url?: string; error?: string }> {
+  try {
+    const token = await getAuthToken();
+    if (!token) {
+      return { success: false, error: 'Sesión expirada. Recarga la página.' };
+    }
+
+    const matches = imageBase64.match(/^data:(image\/(\w+));base64,(.+)$/);
+    if (!matches) {
+      return { success: false, error: 'Formato de imagen inválido.' };
+    }
+
+    const mimeType = matches[1];
+    const ext = matches[2];
+    const base64Data = matches[3];
+    const buffer = Buffer.from(base64Data, 'base64');
+    const blob = new Blob([buffer], { type: mimeType });
+
+    const formData = new FormData();
+    formData.append('file', blob, `product-${Date.now()}.${ext}`);
+
+    const res = await fetch(`${LARAVEL_API_URL}/products/${productId}/media`, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => null);
+      const msg =
+        err?.message ??
+        (err?.errors ? Object.values(err.errors).flat().join(', ') : null) ??
+        `Error ${res.status}`;
+      console.error('Media upload failed:', res.status, msg);
+      return { success: false, error: msg };
+    }
+
+    const data = await res.json();
+    const url = data.data?.url ?? '';
+
+    if (!url) {
+      return { success: false, error: 'La imagen se subió pero no se obtuvo la URL.' };
+    }
+
+    return { success: true, url };
+  } catch (err: any) {
+    console.error('uploadProductImageAction exception:', err);
+    return { success: false, error: err.message ?? 'Error de conexión al subir imagen.' };
   }
 }
 

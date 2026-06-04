@@ -1,10 +1,16 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { AgendaEvent } from '../types';
-import { MOCK_ORDERS, MOCK_APPOINTMENTS, MOCK_SPECIALISTS, buildUnifiedEvents } from '../mock';
-import { USE_MOCKS } from '@/shared/lib/config/flags';
+import type { AgendaEvent, AgendaResponse, AgendaFilterType } from '../types';
+
+const API_BASE = '/backend/api';
+
+function getAuthHeaders(): Record<string, string> {
+    if (typeof window === 'undefined') return {};
+    const token = localStorage.getItem('laravel_token');
+    return token ? { Authorization: `Bearer ${token}` } : {};
+}
 
 export function generateCalendarDays(currentMonth: Date) {
     const year = currentMonth.getFullYear();
@@ -35,41 +41,65 @@ export function generateCalendarDays(currentMonth: Date) {
 }
 
 export function useAgenda() {
-    const [currentMonth, setCurrentMonth] = useState<Date>(new Date(2026, 1, 1));
+    const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
+    const [filterType, setFilterType] = useState<AgendaFilterType>('all');
 
-    const { data: events = [], isLoading } = useQuery({
-        queryKey: ['seller', 'agenda'],
+    const month = currentMonth.getMonth() + 1;
+    const year = currentMonth.getFullYear();
+
+    const queryKey = ['seller', 'agenda', month, year, filterType];
+
+    const { data: response, isLoading, isFetching } = useQuery<AgendaResponse>({
+        queryKey,
         queryFn: async () => {
-            if (USE_MOCKS) {
-                return buildUnifiedEvents(MOCK_ORDERS, MOCK_APPOINTMENTS, MOCK_SPECIALISTS) as AgendaEvent[];
+            const params = new URLSearchParams({
+                month: String(month),
+                year: String(year),
+                type: filterType,
+                per_page: '500',
+            });
+            const res = await fetch(`${API_BASE}/seller/agenda?${params}`, {
+                headers: { ...getAuthHeaders(), Accept: 'application/json' },
+            });
+            if (!res.ok) {
+                throw new Error(`Error al cargar agenda: ${res.status}`);
             }
-            try {
-                return buildUnifiedEvents(MOCK_ORDERS, MOCK_APPOINTMENTS, MOCK_SPECIALISTS) as AgendaEvent[];
-            } catch (e) {
-                console.warn('FALLBACK: Agenda events pendiente');
-                return buildUnifiedEvents(MOCK_ORDERS, MOCK_APPOINTMENTS, MOCK_SPECIALISTS) as AgendaEvent[];
+            const json = await res.json();
+            if (!json.success || !json.data) {
+                throw new Error('Respuesta inválida del servidor');
             }
+            return json.data as AgendaResponse;
         },
-        staleTime: 10 * 60 * 1000,
+        staleTime: 5 * 60 * 1000,
+        retry: 1,
     });
 
-    const nextMonth = () => {
-        const next = new Date(currentMonth);
-        next.setMonth(next.getMonth() + 1);
-        setCurrentMonth(next);
-    };
+    const events = useMemo<AgendaEvent[]>(() => response?.data ?? [], [response]);
 
-    const prevMonth = () => {
-        const prev = new Date(currentMonth);
-        prev.setMonth(prev.getMonth() - 1);
-        setCurrentMonth(prev);
-    };
+    const nextMonth = useCallback(() => {
+        setCurrentMonth(prev => {
+            const next = new Date(prev);
+            next.setMonth(next.getMonth() + 1);
+            return next;
+        });
+    }, []);
+
+    const prevMonth = useCallback(() => {
+        setCurrentMonth(prev => {
+            const prevDate = new Date(prev);
+            prevDate.setMonth(prevDate.getMonth() - 1);
+            return prevDate;
+        });
+    }, []);
 
     return {
         events,
         currentMonth,
-        isLoading,
+        isLoading: isLoading || (isFetching && events.length === 0),
+        isFetching,
+        filterType,
+        setFilterType,
         nextMonth,
-        prevMonth
+        prevMonth,
     };
 }

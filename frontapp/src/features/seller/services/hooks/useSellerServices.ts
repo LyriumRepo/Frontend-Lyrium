@@ -3,7 +3,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Service, Specialist, Appointment } from '../types';
 import { useToast } from '@/shared/lib/context/ToastContext';
-import { serviceApi, bookingApi } from '@/shared/lib/api/serviceRepository';
+import { serviceRepository } from '@/shared/lib/api/serviceRepository';
+import { bookingRepository } from '@/shared/lib/api/bookingRepository';
 import { USE_MOCKS } from '@/shared/lib/config/flags';
 
 export function useSellerServices() {
@@ -85,7 +86,7 @@ export function useSellerServices() {
         ] as Service[];
       }
       try {
-        return (await serviceApi.list()) as unknown as Service[];
+        return (await serviceRepository.list()) as unknown as Service[];
       } catch (e) {
         console.warn('FALLBACK: Services error', e);
         return [] as Service[];
@@ -112,7 +113,7 @@ export function useSellerServices() {
         ] as Appointment[];
       }
       try {
-        return (await bookingApi.sellerBookings()) as unknown as Appointment[];
+        return (await bookingRepository.sellerBookings()) as unknown as Appointment[];
       } catch (e) {
         console.warn('FALLBACK: Appointments error', e);
         return [] as Appointment[];

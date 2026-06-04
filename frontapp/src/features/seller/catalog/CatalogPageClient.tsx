@@ -14,16 +14,14 @@ import {
   deleteProduct,
   updateProductPrice,
   saveProduct,
+  uploadProductImageAction,
 } from '@/shared/lib/actions/catalog';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import { useConfirmDialog } from '@/components/ui/confirm-dialog';
-import { LaravelProductRepository } from '@/shared/lib/api/laravel/LaravelProductRepository';
 
 interface CatalogClientProps {
   initialProducts: Product[];
 }
-
-const productRepository = new LaravelProductRepository();
 
 // ─── PriceEditInput ───────────────────────────────────────────────────────────
 function PriceEditInput({
@@ -166,18 +164,50 @@ export default function CatalogClient({ initialProducts }: CatalogClientProps) {
     setSelectedProduct(null);
   };
 
+  // ─── Image compression utility ────────────────────────────────────────────────
+  function compressImage(
+    dataUrl: string,
+    maxWidth = 1920,
+    quality = 0.85,
+  ): Promise<string> {
+    return new Promise((resolve, reject) => {
+      if (typeof Image === 'undefined') {
+        resolve(dataUrl);
+        return;
+      }
+      const img = new Image();
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > maxWidth) {
+          height = (height * maxWidth) / width;
+          width = maxWidth;
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          resolve(dataUrl);
+          return;
+        }
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/webp', quality));
+      };
+      img.onerror = () => reject(new Error('Failed to load image for compression'));
+      img.src = dataUrl;
+    });
+  }
+
   const onSave = async (productData: Partial<Product>) => {
     try {
-      // Si la imagen es base64, subir primero (si es edición, el ID existe)
       const hasBase64Image = productData.image?.startsWith('data:');
-      const payloadImage = hasBase64Image
-        ? (selectedProduct?.image ?? null) // mantener imagen anterior hasta que se suba
-        : (productData.image ?? null);
 
-      const result = await saveProduct({
-        ...productData,
-        image: payloadImage ?? '',
-      });
+      // Sin base64: enviar imagen existente. Con base64: preservar la anterior
+      const payload = !hasBase64Image
+        ? productData
+        : { ...productData, image: (selectedProduct?.image ?? '') };
+
+      const result = await saveProduct(payload);
 
       if (!result.success || !result.data) {
         showToast(result.error ?? 'Error al guardar el producto', 'error');
@@ -186,31 +216,21 @@ export default function CatalogClient({ initialProducts }: CatalogClientProps) {
 
       let savedProduct = result.data;
 
-      // Subir imagen si es base64
+      // Subir imagen comprimida vía server action (evita CORS, PHP upload limits, httpOnly cookie)
       if (hasBase64Image && productData.image && savedProduct.id) {
         try {
-          const res = await fetch(productData.image);
-          const blob = await res.blob();
-          const file = new File([blob], `product-${Date.now()}.webp`, {
-            type: blob.type,
-          });
-          const formData = new FormData();
-          formData.append('file', file);
-
-          const uploadData = await productRepository.uploadProductImage(
-            String(savedProduct.id),
-            file,
+          const compressed = await compressImage(productData.image);
+          const uploadResult = await uploadProductImageAction(
+            Number(savedProduct.id),
+            compressed,
           );
-
-          savedProduct = {
-            ...savedProduct,
-            image: uploadData.url ?? productData.image,
-          };
-        } catch {
-          savedProduct = {
-            ...savedProduct,
-            image: productData.image ?? savedProduct.image,
-          };
+          if (uploadResult.success && uploadResult.url) {
+            savedProduct = { ...savedProduct, image: uploadResult.url };
+          } else {
+            console.error('Upload failed:', uploadResult.error);
+          }
+        } catch (uploadErr) {
+          console.error('Upload exception:', uploadErr);
         }
       }
 
