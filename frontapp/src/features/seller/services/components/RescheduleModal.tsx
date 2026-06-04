@@ -20,7 +20,7 @@ export default function RescheduleModal({
   onClose,
   onConfirm,
 }: RescheduleModalProps) {
-  const [newTime, setNewTime] = useState(appointment?.hora || '08:00');
+  const [newTime, setNewTime] = useState(appointment?.sesion.inicio || '08:00');
 
   // Simplification: assume no conflict detect logic available
   const hasConflict = false;
@@ -46,7 +46,7 @@ export default function RescheduleModal({
               Cliente
             </p>
             <h4 className="text-xl font-black text-[var(--text-primary)] tracking-tight">
-              {appointment.cliente}
+              {`Servicio #${appointment.serviceId}`}
             </h4>
           </div>
 

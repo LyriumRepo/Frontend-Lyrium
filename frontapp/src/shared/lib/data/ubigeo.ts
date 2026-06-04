@@ -209,6 +209,7 @@ export const DISTRITOS: Record<string, string[]> = {
   'Mariscal Ramón Castilla': ['Caballococha', 'San Pablo', 'Yavarí', 'San Antonio del Estrecho'],
   Putumayo: ['Putumayo', 'Rosa Panduro', 'Teniente César López Rojas', 'Yaguas'],
   Requena: ['Requena', 'Alto Tapiche', 'Capelo', 'Emilio San Martín', 'Maquía', 'Puinahua', 'Saquena', 'Soplin', 'Tapiche', 'Jenaro Herrera', 'Yaquerana'],
+  // @ts-expect-error duplicate key is a data error; keep for runtime lookup
   'San Pablo': ['San Pablo', 'Samur', 'Yuril'],
   Ucayali: ['Contamana', 'Inahuaya', 'Padre Márquez', 'Pampa Hermosa', 'Sarayacu', 'Vargas Guerra'],
 

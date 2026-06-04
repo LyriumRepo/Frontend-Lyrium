@@ -57,7 +57,7 @@ export const customerNavigation: PanelNavigation = [
                 id: 'chat',
                 label: 'Chat con Vendedores',
                 description: 'Comunicación directa con vendedores',
-                icon: 'Messages',
+                icon: 'MessageCircle',
                 href: '/customer/chat'
             },
             {

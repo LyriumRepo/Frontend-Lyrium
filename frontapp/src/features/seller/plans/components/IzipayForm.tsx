@@ -11,6 +11,7 @@ interface IzipayConfig {
   formToken: string;
   publicKey: string;
   orderId: string;
+  formConfig?: Record<string, string>;
 }
 
 interface Props {
@@ -20,15 +21,14 @@ interface Props {
   onFailed: () => void;     // Pago fallido
 }
 
-// KR SDK types (global inyectado por el script de Izipay)
-declare global {
-  interface Window {
-    KR?: {
-      setFormConfig: (cfg: Record<string, string>) => Promise<void>;
-      renderElements: (selector: string) => void;
-      onSubmit: (cb: (data: { clientAnswer: { orderStatus: string } }) => boolean) => void;
-    };
-  }
+interface IzipaySdk {
+  setFormConfig: (cfg: Record<string, string>) => Promise<void>;
+  renderElements: (selector: string) => void;
+  onSubmit: (cb: (data: { clientAnswer: { orderStatus: string } }) => boolean) => void;
+}
+
+function getKR(): IzipaySdk | undefined {
+  return (window as unknown as { KR?: IzipaySdk }).KR;
 }
 
 let _scriptLoaded = false;
@@ -42,7 +42,8 @@ export default function IzipayForm({ config, open, onPaid, onFailed }: Props) {
     initDone.current = false;
 
     function initKR() {
-      if (!window.KR) {
+      const kr = getKR();
+      if (!kr) {
         setTimeout(initKR, 300);
         return;
       }
@@ -51,15 +52,15 @@ export default function IzipayForm({ config, open, onPaid, onFailed }: Props) {
 
       if (!config) return;
 
-      window.KR.setFormConfig({
-        formToken:       config.formToken,
-        'kr-public-key': config.publicKey,
-        'kr-language':   'es-PE',
-      }).then(() => {
-        window.KR!.renderElements('#izipayFormContainer');
+      kr.setFormConfig({
+        ...config.formConfig,
+        formToken: config.formToken,
       });
-
-      window.KR.onSubmit((paymentData) => {
+      // Renderizar elementos en el contenedor
+      setTimeout(() => {
+        kr.renderElements('#izipayFormContainer');
+      }, 100);
+      kr.onSubmit((paymentData) => {
         const status = paymentData.clientAnswer.orderStatus;
         if (status === 'PAID') {
           onPaid();

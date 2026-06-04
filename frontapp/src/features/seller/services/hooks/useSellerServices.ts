@@ -20,18 +20,14 @@ export function useSellerServices() {
             nombres: 'Dra. María',
             apellidos: 'García',
             especialidad: 'Nutrición Deportiva',
-            avatar_chars: 'MG',
-            color: '#10b981',
           },
           {
             id: 2,
             nombres: 'Lic. Juan',
             apellidos: 'Pérez',
             especialidad: 'Fisioterapia',
-            avatar_chars: 'JP',
-            color: '#f59e0b',
           },
-        ] as Specialist[];
+        ] as unknown as Specialist[];
       }
       try {
         return [] as Specialist[];
@@ -82,7 +78,7 @@ export function useSellerServices() {
               dias: ['Mar', 'Jue'],
             },
           },
-        ] as Service[];
+        ] as unknown as Service[];
       }
       try {
         return (await serviceApi.list()) as unknown as Service[];
@@ -109,7 +105,7 @@ export function useSellerServices() {
             cliente: 'Carlos Rodríguez',
             servicio: 'Evaluación Nutricional Integral',
           },
-        ] as Appointment[];
+        ] as unknown as Appointment[];
       }
       try {
         return (await bookingApi.sellerBookings()) as unknown as Appointment[];

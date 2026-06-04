@@ -25,14 +25,14 @@ export function InvoicesPageClient() {
     } = useSellerInvoices();
 
     if (isLoading && filteredVouchers.length === 0) {
-        return <BaseLoading message="Sincronizando con SUNAT vía NubeFact..." />;
+        return <BaseLoading message="Cargando comprobantes electrónicos..." />;
     }
 
     return (
         <div className="space-y-8 pb-20 animate-fadeIn">
             <ModuleHeader
                 title="Mis Comprobantes"
-                subtitle="Consulta de facturación electrónica — Los comprobantes se generan automáticamente al confirmarse el pago"
+                subtitle="Los comprobantes se generan automáticamente al confirmarse el pago"
                 icon="Receipt"
             />
 

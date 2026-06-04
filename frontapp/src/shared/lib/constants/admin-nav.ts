@@ -19,7 +19,7 @@ export const adminNavigation: PanelNavigation = [
                 id: 'helpdesk',
                 label: 'Mesa de Ayuda',
                 href: '/admin/helpdesk',
-                icon: 'Help',
+                icon: 'HelpCircle',
             },
         ],
     },
@@ -30,7 +30,7 @@ export const adminNavigation: PanelNavigation = [
                 id: 'finance',
                 label: 'Centro de Finanzas y Estadísticas',
                 href: '/admin/finance',
-                icon: 'Sales',
+                icon: 'TrendingUp',
             },
             {
                 id: 'payments',

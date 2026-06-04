@@ -21,6 +21,7 @@ export function useSellerStore() {
             
             const storeData = await sellerApi.getStore();
             
+            
             // Fallback: si no encuentra tienda, usar datos del usuario
             if (!storeData) {
                 console.warn('[useSellerStore] No store found, using fallback');
@@ -47,7 +48,9 @@ export function useSellerStore() {
                         id: '1',
                         name: 'Sede Principal',
                         address: 'Av. Principal 123',
-                        city: 'Lima, Peru',
+                        department: 'Piura',
+                        province: 'Piura',
+                        district: 'Catacaos',
                         phone: '+51 987 654 321',
                         hours: '08:00 - 20:00',
                         isPrincipal: true,
@@ -100,7 +103,9 @@ export function useSellerStore() {
                 id: String(b.id),
                 name: b.name,
                 address: b.address,
-                city: b.city,
+                department: b.department,
+                province: b.province,
+                district: b.district,
                 phone: b.phone,
                 hours: b.hours || '',
                 isPrincipal: b.is_principal,
@@ -110,7 +115,9 @@ export function useSellerStore() {
                     id: '1',
                     name: 'Sede Principal',
                     address: (storeData as any).address || 'Av. Principal 123',
-                    city: 'Lima, Peru',
+                    department: 'Piura',
+                    province: 'Piura',
+                    district: '26 de octubre',
                     phone: storeData.phone || '+51 987 654 321',
                     hours: '08:00 - 20:00',
                     isPrincipal: true,
@@ -318,12 +325,17 @@ export function useSellerStore() {
                     id: b.id !== 'new' ? parseInt(b.id) : undefined,
                     name: b.name,
                     address: b.address,
-                    city: b.city,
+                    department: b.department,
+                    province: b.province,
+                    district: b.district,
                     phone: b.phone,
                     hours: b.hours,
                     is_principal: b.isPrincipal,
                     maps_url: b.mapsUrl,
                 }));
+                console.log(
+    JSON.stringify(branchesPayload, null, 2)
+);
                 await sellerApi.updateBranches(currentStoreId!, branchesPayload);
             }
 

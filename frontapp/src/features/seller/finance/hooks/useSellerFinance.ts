@@ -351,7 +351,7 @@ export function useSellerFinance() {
             shipments,
             returns,
             recentInvoices,
-            analyticsData,
+            analyticsData ?? null,
         );
     }, [allPayments, pendingPayments, completedPayments, pendingTotalData, shipments, returns, recentInvoices, analyticsData]);
 

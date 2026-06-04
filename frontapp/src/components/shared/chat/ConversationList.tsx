@@ -81,7 +81,7 @@ export default function ConversationList({
     return (
       <div className="flex-1 flex items-center justify-center p-12 text-center">
         <div>
-          <Icon name="Messages" className="w-12 h-12 mx-auto mb-4 text-[var(--text-secondary)]" />
+          <Icon name="MessageCircle" className="w-12 h-12 mx-auto mb-4 text-[var(--text-secondary)]" />
           <p className="text-xs text-[var(--text-secondary)] font-black uppercase tracking-widest">
             Sin conversaciones
           </p>

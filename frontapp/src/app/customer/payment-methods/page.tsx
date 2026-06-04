@@ -146,7 +146,7 @@ export default function CustomerPaymentMethodsPage() {
   const getMethodStyles = (tipo: string | undefined) => {
     switch (tipo) {
       case 'tarjeta':
-        return { icon: 'CreditCard', grad: 'from-sky-500 to-blue-500 dark:from-[var(--icons-green)] dark:to-lime-200', color: 'text-sky-500 dark:text-[var(--icons-green)]', label: 'Tarjeta de Crédito' };
+        return { icon: 'CreditCard', grad: 'from-sky-500 to-blue-500 dark:from-[var(--icons-green)] dark:to-lime-200', color: 'text-sky-500 dark:text-[var(--icons-green)]', label: 'Tarjeta de Débito' };
       case 'yape':
         return { icon: 'Phone', grad: 'from-purple-500 to-pink-500', color: 'text-purple-600', label: 'Yape' };
       case 'plin':
@@ -322,7 +322,7 @@ export default function CustomerPaymentMethodsPage() {
                         className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)]"
                       >
                         <option value="">Seleccionar...</option>
-                        <option value="tarjeta">💳 Tarjeta de Crédito/Débito</option>
+                        <option value="tarjeta">💳 Tarjeta de Débito</option>
                         <option value="yape">📲 Yape</option>
                         <option value="plin">💠 Plin</option>
                       </select>

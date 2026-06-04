@@ -57,9 +57,11 @@ export function useApiConnection(): UseApiConnectionReturn {
         : false; // Skip if not configured
 
       // Verificar WooCommerce (usando endpoint de productos)
-      const wcStatus = await checkEndpoint(
-        process.env.NEXT_PUBLIC_WC_API_URL + '/products?per_page=1'
-      );
+      const wcUrl = process.env.NEXT_PUBLIC_WC_API_URL;
+
+      const wcStatus = wcUrl
+        ? await checkEndpoint(`${wcUrl}/products?per_page=1`)
+        : false;
 
       setStatus({
         wordpress: wpStatus ? 'connected' : 'error',

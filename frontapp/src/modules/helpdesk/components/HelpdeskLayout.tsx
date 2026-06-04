@@ -5,7 +5,7 @@ import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import { TicketList } from './TicketList';
 import { ChatView } from '@/modules/chat';
 import { UnifiedTicketListItem, TicketFilters } from '../types';
-import { UnifiedTicket } from '@/modules/chat/types';
+import { UnifiedTicket, ChatSendPayload } from '@/modules/chat/types';
 import BaseButton from '@/components/ui/BaseButton';
 import BaseModal from '@/components/ui/BaseModal';
 import Icon from '@/components/ui/Icon';
@@ -109,7 +109,7 @@ export function HelpdeskLayout({
             {selectedTicket ? (
               <ChatView
                 ticket={selectedTicket}
-                onSendMessage={onSendMessage}
+                onSendMessage={(payload: ChatSendPayload) => onSendMessage(payload.text, payload.isQuick)}
                 onCloseTicket={onCloseTicket}
                 isSending={isSending}
                 isClosing={isClosing}

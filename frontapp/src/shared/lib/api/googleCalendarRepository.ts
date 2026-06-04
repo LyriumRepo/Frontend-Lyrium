@@ -1,5 +1,5 @@
 import { getToken } from './token-store';
-import {
+import type {
   CalendarStatus,
   AuthUrlResponse,
 } from "@/features/seller/services/types";

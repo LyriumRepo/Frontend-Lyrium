@@ -86,6 +86,18 @@ export interface Service {
   anticipacionReserva: AnticipacionReserva;
 }
 
+// ─── Google Calendar ───────────────────────────────────────────────────────────
+
+export interface CalendarStatus {
+  connected: boolean;
+  calendar_id: string | null;
+  store_name: string;
+}
+
+export interface AuthUrlResponse {
+  url: string;
+}
+
 // ─── Appointment ──────────────────────────────────────────────────────────────
 
 export interface Appointment {

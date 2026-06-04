@@ -43,7 +43,7 @@ export default function ComprobantesSection({ invoices }: ComprobantesSectionPro
                     </div>
                     <div>
                         <h3 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-wider">Últimos Comprobantes</h3>
-                        <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest">Emitidos vía NubeFact</p>
+                        <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest">Facturación electrónica</p>
                     </div>
                 </div>
                 <a

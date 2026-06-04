@@ -1,9 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import Icon from '@/components/ui/Icon';
 import { Voucher, VoucherStatus } from '@/features/seller/invoices/types';
 import { formatCurrency } from '@/shared/lib/utils/formatters';
+import { getAuthHeaders } from '@/shared/lib/api/token-store';
 
 interface InvoiceDrawerProps {
     voucher: Voucher | null;
@@ -91,33 +92,47 @@ export default function InvoiceDrawer({ voucher, isOpen, onClose }: InvoiceDrawe
                         <p className="text-sm font-bold text-[var(--text-secondary)]">{voucher.order_id}</p>
                     </div>
 
-                    {voucher.pdf_url && (
-                        <div className="space-y-4">
-                            <h3 className="text-xs font-black text-[var(--text-secondary)] uppercase tracking-widest flex items-center gap-2">
-                                <Icon name="FileText" className="w-4 h-4" /> Comprobante Digital
-                            </h3>
+                    <div className="space-y-4">
+                        <h3 className="text-xs font-black text-[var(--text-secondary)] uppercase tracking-widest flex items-center gap-2">
+                            <Icon name="FileText" className="w-4 h-4" /> Comprobante Digital
+                        </h3>
+                        <a
+                            href={`${process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://localhost:8000/api'}/invoices/${voucher.id}/pdf`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center justify-center gap-3 p-6 bg-[var(--bg-card)] rounded-[2.5rem] border border-[var(--border-subtle)] shadow-xl shadow-[var(--border-subtle)]/50 hover:bg-emerald-500/5 transition-all group"
+                        >
+                            <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-rose-50 text-rose-500 group-hover:scale-110 transition-all shadow-lg shadow-rose-100/50">
+                                <Icon name="FileText" className="w-8 h-8" />
+                            </div>
+                            <div className="text-left">
+                                <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]">Ver PDF</p>
+                                <p className="text-xs text-[var(--text-muted)] mt-1">Comprobante Lyrium</p>
+                            </div>
+                            <Icon name="ArrowRight" className="w-5 h-5 text-[var(--text-muted)] ml-auto" />
+                        </a>
+                        {voucher.pdf_url && (
                             <a
                                 href={voucher.pdf_url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex items-center justify-center gap-3 p-6 bg-[var(--bg-card)] rounded-[2.5rem] border border-[var(--border-subtle)] shadow-xl shadow-[var(--border-subtle)]/50 hover:bg-emerald-500/5 transition-all group"
+                                className="flex items-center justify-center gap-3 p-4 bg-[var(--bg-card)] rounded-[2rem] border border-[var(--border-subtle)] hover:bg-rose-500/5 transition-all group"
                             >
-                                <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-rose-50 text-rose-500 group-hover:scale-110 transition-all shadow-lg shadow-rose-100/50">
-                                    <Icon name="FileText" className="w-8 h-8" />
+                                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-rose-50 text-rose-500">
+                                    <Icon name="ExternalLink" className="w-5 h-5" />
                                 </div>
-                                <div className="text-left">
-                                    <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]">Ver PDF</p>
-                                    <p className="text-xs text-[var(--text-muted)] mt-1">Certificado por NubeFact</p>
+                                <div className="text-left flex-1">
+                                    <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]">Ver PDF SUNAT</p>
+                                    <p className="text-[9px] text-[var(--text-muted)]">Comprobante electrónico original</p>
                                 </div>
-                                <Icon name="ArrowRight" className="w-5 h-5 text-[var(--text-muted)] ml-auto" />
                             </a>
-                        </div>
-                    )}
+                        )}
+                    </div>
 
                     {(voucher.xml_url || voucher.cdr_url) && (
                         <div className="space-y-4">
                             <h3 className="text-xs font-black text-[var(--text-secondary)] uppercase tracking-widest flex items-center gap-2">
-                                <Icon name="Download" className="w-4 h-4" /> Archivos SUNAT
+                                <Icon name="Download" className="w-4 h-4" /> Archivos
                             </h3>
                             <div className="grid grid-cols-2 gap-3">
                                 {voucher.xml_url && (

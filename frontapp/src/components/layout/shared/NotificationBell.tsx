@@ -2,10 +2,11 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Bell, AlertTriangle, ShieldAlert, Activity, Check, Info } from 'lucide-react';
+import { Bell, AlertTriangle, ShieldAlert, Activity, Check, Info, Mail } from 'lucide-react';
 import { useNotifications } from '@/shared/lib/context/NotificationContext';
 import { ProactiveNotification } from '@/shared/types/notifications';
 import { useAuth } from '@/shared/lib/context/AuthContext';
+import { apiClient } from '@/lib/api/apiClient';
 
 export default function NotificationBell() {
     const [isOpen, setIsOpen] = useState(false);
@@ -19,14 +20,55 @@ export default function NotificationBell() {
                 return { title: 'Centro de Monitoreo', subtitle: 'Sistemas de Alerta Temprana', cta: 'Abrir Consola Forense de Eventos', redirect: '/admin/helpdesk' };
             case 'seller':
                 return { title: 'Notificaciones de Mi Tienda', subtitle: 'Actualizaciones en tiempo real', cta: 'Ver todas mis notificaciones', redirect: '/seller/help' };
+            case 'customer':
+                return { title: 'Mis Notificaciones', subtitle: 'Actualizaciones de tus pedidos', cta: 'Ver todos mis pedidos', redirect: '/customer/orders' };
             case 'logistics_operator':
                 return { title: 'Panel de Envíos', subtitle: 'Seguimiento de entregas', cta: 'Ir a Mis Envíos', redirect: '/logistics/shipments' };
             default:
-                return { title: 'Centro de Monitoreo', subtitle: 'Sistemas de Alerta Temprana', cta: 'Abrir Consola Forense de Eventos', redirect: '/admin/helpdesk' };
+                return { title: 'Notificaciones', subtitle: 'Centro de notificaciones', cta: 'Ver notificaciones', redirect: '/' };
+        }
+    };
+
+    const resolveRoute = (actionType: string, actionId: string | number | undefined, role: string | undefined): string => {
+        const prefix = role === 'administrator' ? '/admin'
+            : role === 'seller' ? '/seller'
+            : role === 'customer' ? '/customer'
+            : role === 'logistics_operator' ? '/logistics'
+            : '';
+
+        switch (actionType) {
+            case 'orders':
+                return `${prefix}/orders`;
+            case 'invoices':
+                return `${prefix}/invoices`;
+            case 'ticket':
+                return role === 'administrator' ? `/admin/helpdesk?id=${actionId}`
+                    : role === 'seller' ? `/seller/help?id=${actionId}`
+                    : `/customer/support?id=${actionId}`;
+            case 'store':
+                return role === 'administrator' ? '/admin/stores'
+                    : role === 'seller' ? '/seller/settings'
+                    : '/';
+            default:
+                return prefix || '/';
         }
     };
 
     const panelInfo = getPanelInfo();
+
+    const roleNotificationTypes: Record<string, string[]> = {
+        customer: ['order_created', 'OrderCreatedNotification'],
+        seller: ['new_order', 'NewOrderSellerNotification', 'store_status_changed', 'StoreStatusNotification'],
+        administrator: ['ticket_created', 'TicketCreatedNotification', 'ticket_replied', 'TicketRepliedNotification', 'ticket_status_changed', 'TicketStatusChangedNotification', 'order_created', 'OrderCreatedNotification', 'new_order', 'NewOrderSellerNotification', 'store_status_changed', 'StoreStatusNotification'],
+        logistics_operator: [],
+    };
+
+    const filteredNotifications = notifications.filter(n => {
+        const allowed = roleNotificationTypes[user?.role ?? ''] ?? [];
+        if (allowed.length === 0) return true;
+        const type = n.metadata?.type ?? '';
+        return allowed.some(t => type.includes(t));
+    });
 
     const getLevelUI = (level: ProactiveNotification['level']) => {
         switch (level) {
@@ -49,10 +91,37 @@ export default function NotificationBell() {
             markAsRead(notification.id);
         }
         
-        const basePath = user?.role === 'administrator' ? '/admin/helpdesk' : '/seller/help';
-        router.push(basePath);
+        if (notification.action) {
+            const route = resolveRoute(notification.action.type, notification.action.id, user?.role);
+            router.push(route);
+        } else {
+            router.push(panelInfo.redirect);
+        }
         setIsOpen(false);
     };
+
+    const handleSecondaryAction = async (notification: ProactiveNotification) => {
+        if (notification.secondaryAction?.type === 'resend_email' && notification.secondaryAction.id) {
+            try {
+                await apiClient(`/orders/${notification.secondaryAction.id}/resend-notification`, {
+                    method: 'POST',
+                });
+                const btn = document.getElementById(`email-sent-${notification.id}`);
+                if (btn) {
+                    btn.textContent = '✓ Enviado';
+                    btn.className = 'text-[10px] font-black text-emerald-600';
+                }
+            } catch {
+                const btn = document.getElementById(`email-sent-${notification.id}`);
+                if (btn) {
+                    btn.textContent = '✗ Error';
+                    btn.className = 'text-[10px] font-black text-rose-600';
+                }
+            }
+        }
+    };
+
+    const unreadFiltered = filteredNotifications.filter(n => !n.read).length;
 
     return (
         <div className="relative font-industrial">
@@ -62,9 +131,9 @@ export default function NotificationBell() {
                 aria-label="Centro de Notificaciones"
             >
                 <Bell className="w-5 h-5" />
-                {unreadCount > 0 && (
+                {unreadFiltered > 0 && (
                     <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-white dark:border-[var(--bg-card)] animate-pulse">
-                        {unreadCount > 9 ? '9+' : unreadCount}
+                        {unreadFiltered > 9 ? '9+' : unreadFiltered}
                     </span>
                 )}
             </button>
@@ -86,7 +155,7 @@ export default function NotificationBell() {
                                 <p className="text-[10px] font-bold text-[var(--text-secondary)] dark:text-[var(--text-secondary)] uppercase tracking-widest mt-1">{panelInfo.subtitle}</p>
                             </div>
                             <div className="flex items-center gap-2">
-                                {unreadCount > 0 && (
+                                {unreadFiltered > 0 && (
                                     <button
                                         onClick={markAllAsRead}
                                         className="text-[10px] font-black uppercase text-indigo-500 dark:text-indigo-400 hover:bg-indigo-500/10 dark:hover:bg-indigo-900/30 px-2 py-1 rounded-lg transition-all"
@@ -94,31 +163,31 @@ export default function NotificationBell() {
                                         Limpiar Todo
                                     </button>
                                 )}
-                                <span className="px-2 py-1 bg-[var(--bg-secondary)] dark:bg-[var(--bg-muted)] text-[var(--text-secondary)] text-[10px] font-black rounded-lg uppercase">{unreadCount} no leídas</span>
+                                <span className="px-2 py-1 bg-[var(--bg-secondary)] dark:bg-[var(--bg-muted)] text-[var(--text-secondary)] text-[10px] font-black rounded-lg uppercase">{unreadFiltered} no leídas</span>
                             </div>
                         </div>
                         <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
-                            {notifications.length === 0 ? (
+                            {filteredNotifications.length === 0 ? (
                                 <div className="p-8 text-center text-[var(--text-secondary)] dark:text-[var(--text-secondary)] text-xs font-bold uppercase tracking-widest">
                                     No hay alertas activas
                                 </div>
                             ) : (
                                 <div className="p-2 space-y-2">
-                                    {notifications.map((notification) => {
+                                    {filteredNotifications.map((notification) => {
                                         const ui = getLevelUI(notification.level);
                                         return (
                                             <div
                                                 key={notification.id}
-                                                onClick={() => handleNotificationClick(notification)}
-                                                className={`p-4 rounded-2xl border transition-all cursor-pointer hover:bg-[var(--bg-secondary)]/50 ${!notification.read ? ui.color : 'bg-[var(--bg-card)] border-transparent dark:border-[var(--border-subtle)] opacity-60'}`}
+                                                className={`p-4 rounded-2xl border transition-all ${!notification.read ? ui.color : 'bg-[var(--bg-card)] border-transparent dark:border-[var(--border-subtle)] opacity-60'}`}
                                             >
                                                 <div className="flex gap-4">
                                                     <div className="flex-shrink-0 mt-1">
                                                         {ui.icon}
                                                     </div>
-                                                    <div className="flex-1">
+                                                    <div className="flex-1 min-w-0">
                                                         <div className="flex justify-between items-start gap-2">
-                                                            <p className={`font-black text-[11px] uppercase tracking-wide leading-tight ${ui.text}`}>
+                                                            <p className={`font-black text-[11px] uppercase tracking-wide leading-tight ${ui.text} cursor-pointer`}
+                                                               onClick={() => handleNotificationClick(notification)}>
                                                                 {notification.title}
                                                             </p>
                                                             {!notification.read && (
@@ -134,12 +203,36 @@ export default function NotificationBell() {
                                                                 </button>
                                                             )}
                                                         </div>
-                                                        <p className="text-xs text-[var(--text-secondary)] font-medium mt-1 leading-snug">
+                                                        <p className="text-xs text-[var(--text-secondary)] font-medium mt-1 leading-snug cursor-pointer"
+                                                           onClick={() => handleNotificationClick(notification)}>
                                                             {notification.message}
                                                         </p>
-                                                        <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest mt-2 flex items-center gap-2">
-                                                            {notification.time} • nivel: {notification.level}
-                                                        </p>
+                                                        <div className="flex items-center gap-2 mt-2 flex-wrap">
+                                                            {notification.action && (
+                                                                <button
+                                                                    onClick={() => handleNotificationClick(notification)}
+                                                                    className="text-[10px] font-black text-indigo-500 hover:text-indigo-700 bg-indigo-50 dark:bg-indigo-900/20 px-2.5 py-1 rounded-lg transition-all hover:bg-indigo-100"
+                                                                >
+                                                                    {notification.action.label} →
+                                                                </button>
+                                                            )}
+                                                            {notification.secondaryAction && (
+                                                                <button
+                                                                    id={`email-sent-${notification.id}`}
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        handleSecondaryAction(notification);
+                                                                    }}
+                                                                    className="text-[10px] font-black text-[var(--text-secondary)] hover:text-emerald-600 bg-[var(--bg-secondary)] px-2.5 py-1 rounded-lg transition-all flex items-center gap-1"
+                                                                >
+                                                                    <Mail className="w-3 h-3" />
+                                                                    {notification.secondaryAction.label}
+                                                                </button>
+                                                            )}
+                                                            <span className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest">
+                                                                {notification.time}
+                                                            </span>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>

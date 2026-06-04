@@ -102,7 +102,7 @@ export default function ProductDetailModal({ product, isOpen, onClose }: Product
                                         const vals = normalizeValues(attr.values);
                                         if (!vals.length) return null;
                                         return (
-                                            <div key={`main-${attr.name || idx}`} className="flex justify-between py-2 border-b border-[var(--border-subtle)] border-dashed">
+                                            <div key={`main-${idx}`} className="flex justify-between py-2 border-b border-[var(--border-subtle)] border-dashed">
                                                 <span className="text-xs font-black text-[var(--text-primary)] uppercase">{vals[0].label}</span>
                                                 <span className="text-xs font-bold text-[var(--text-secondary)]">{vals[0].value}</span>
                                             </div>
@@ -120,7 +120,7 @@ export default function ProductDetailModal({ product, isOpen, onClose }: Product
                                         const vals = normalizeValues(attr.values);
                                         if (!vals.length) return null;
                                         return (
-                                            <div key={`additional-${attr.name || idx}`} className="flex justify-between py-2 border-b border-[var(--border-subtle)] border-dashed">
+                                            <div key={`additional-${idx}`} className="flex justify-between py-2 border-b border-[var(--border-subtle)] border-dashed">
                                                 <span className="text-xs font-black text-[var(--text-secondary)] uppercase">{vals[0].label}</span>
                                                 <span className="text-xs font-medium text-[var(--text-secondary)]">{vals[0].value}</span>
                                             </div>

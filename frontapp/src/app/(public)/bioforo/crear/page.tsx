@@ -127,14 +127,14 @@ export default function CrearTemaPage() {
       </Link>
 
       {/* Hero Pill */}
-      <HeroPill icon="PencilSimple" text="Crear Nuevo Tema" />
+      <HeroPill icon="Pencil" text="Crear Nuevo Tema" />
 
       {/* Formulario */}
       <div className="bg-white rounded-2xl p-6 md:p-8 border border-slate-200 mt-6">
         <form onSubmit={handleSubmit} className="space-y-6">
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl flex items-center gap-2">
-              <Icon name="WarningCircle" className="w-5 h-5 flex-shrink-0" />
+              <Icon name="AlertCircle" className="w-5 h-5 flex-shrink-0" />
               <span>{error}</span>
             </div>
           )}

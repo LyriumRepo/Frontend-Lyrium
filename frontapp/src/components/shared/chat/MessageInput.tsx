@@ -7,13 +7,15 @@ interface MessageInputProps {
   onSend: (message: string, files?: File[]) => void;
   placeholder?: string;
   disabled?: boolean;
+  typing?: boolean;
 }
 
-export default function MessageInput({ onSend, placeholder = 'Escribe un mensaje...', disabled = false }: MessageInputProps) {
+export default function MessageInput({ onSend, placeholder = 'Escribe un mensaje...', disabled = false, typing = false }: MessageInputProps) {
   const [message, setMessage] = useState('');
   const [files, setFiles] = useState<File[]>([]);
   const inputId = useId();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,12 +63,30 @@ export default function MessageInput({ onSend, placeholder = 'Escribe un mensaje
     return 'File';
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit(e);
+    }
+  };
+
   return (
-    <form onSubmit={handleSubmit} className="p-6 border-t border-[var(--border-subtle)]" aria-label="Formulario de mensaje">
+    <form onSubmit={handleSubmit} className="border-t border-[var(--border-subtle)] bg-[var(--bg-primary)]" aria-label="Formulario de mensaje">
+      {typing && (
+        <div className="px-6 py-2">
+          <div className="flex items-center gap-1.5">
+            <span className="text-[10px] text-[var(--text-secondary)] font-medium italic">Alguien está escribiendo</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-[#2d5e42]/40 dark:bg-[#4A7C59]/40 animate-bounce" style={{ animationDelay: '0ms' }} />
+            <span className="w-1.5 h-1.5 rounded-full bg-[#2d5e42]/40 dark:bg-[#4A7C59]/40 animate-bounce" style={{ animationDelay: '150ms' }} />
+            <span className="w-1.5 h-1.5 rounded-full bg-[#2d5e42]/40 dark:bg-[#4A7C59]/40 animate-bounce" style={{ animationDelay: '300ms' }} />
+          </div>
+        </div>
+      )}
+
       {files.length > 0 && (
-        <div className="mb-3 flex flex-wrap gap-2">
+        <div className="px-6 pt-4 pb-2 flex flex-wrap gap-2">
           {files.map((file, index) => (
-            <div key={index} className="flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-[#1A3A32] rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-[var(--border-subtle)]">
+            <div key={index} className="flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-[#1a3a2a]/60 rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-[var(--border-subtle)]">
               <Icon name={getFileIcon(file.name)} className="w-4 h-4 shrink-0" />
               <span className="truncate max-w-[120px]">{file.name}</span>
               <span className="text-gray-400 dark:text-gray-500">{formatSize(file.size)}</span>
@@ -82,44 +102,48 @@ export default function MessageInput({ onSend, placeholder = 'Escribe un mensaje
         </div>
       )}
 
-      <div className="flex gap-3 bg-[var(--bg-secondary)] p-2 pl-6 rounded-[2.5rem] border border-[var(--border-subtle)] focus-within:border-emerald-500/30 focus-within:ring-4 focus-within:ring-emerald-500/5 transition-all">
-        <label htmlFor={inputId} className="sr-only">Escribir mensaje</label>
-        <input
-          id={inputId}
-          type="text"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          placeholder={placeholder}
-          aria-label="Escribir mensaje"
-          className="flex-1 px-2 bg-transparent border-none text-xs font-bold text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:ring-0 outline-none"
-        />
+      <div className="p-4 flex gap-3 items-end">
+        <div className="flex-1 flex items-center gap-2 bg-[var(--bg-secondary)] px-4 rounded-2xl border border-[var(--border-subtle)] focus-within:border-[#2d5e42]/30 dark:focus-within:border-[#4A7C59]/50 focus-within:ring-2 focus-within:ring-[#2d5e42]/10 dark:focus-within:ring-[#4A7C59]/20 transition-all">
+          <label htmlFor={inputId} className="sr-only">Escribir mensaje</label>
+          <input
+            ref={inputRef}
+            id={inputId}
+            type="text"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder={placeholder}
+            aria-label="Escribir mensaje"
+            className="flex-1 py-3 bg-transparent border-none text-sm font-medium text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:ring-0 outline-none"
+          />
 
-        <input
-          ref={fileInputRef}
-          type="file"
-          multiple
-          accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.xls,.xlsx,.zip,.rar"
-          onChange={handleFileSelect}
-          className="hidden"
-          aria-label="Adjuntar archivos"
-        />
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.xls,.xlsx,.zip,.rar"
+            onChange={handleFileSelect}
+            className="hidden"
+            aria-label="Adjuntar archivos"
+          />
 
-        <button
-          type="button"
-          onClick={() => fileInputRef.current?.click()}
-          aria-label="Adjuntar archivos"
-          className="w-10 h-10 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#1A3A32] transition-all"
-        >
-          <Icon name="Paperclip" className="w-5 h-5" />
-        </button>
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            aria-label="Adjuntar archivos"
+            className="w-9 h-9 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#1A3A32] transition-all shrink-0"
+          >
+            <Icon name="Paperclip" className="w-4.5 h-4.5" />
+          </button>
+        </div>
 
         <button
           type="submit"
           disabled={(!message.trim() && files.length === 0) || disabled}
           aria-label="Enviar mensaje"
-          className="w-12 h-12 bg-emerald-500 text-white rounded-full flex items-center justify-center hover:bg-emerald-600 hover:scale-105 active:scale-95 transition-all shadow-lg shadow-emerald-500/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+          className="w-11 h-11 bg-[#2d5e42] dark:bg-[#4A7C59] text-white rounded-2xl flex items-center justify-center hover:bg-[#1a3a2a] dark:hover:bg-[#3D6B4A] hover:scale-105 active:scale-95 transition-all shadow-lg shadow-[#2d5e42]/20 dark:shadow-[#4A7C59]/20 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 shrink-0"
         >
-          <Icon name="Send" className="w-5 h-5" />
+          <Icon name="Send" className="w-4.5 h-4.5" />
         </button>
       </div>
     </form>

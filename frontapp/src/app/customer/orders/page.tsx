@@ -1160,6 +1160,37 @@ export default function CustomerOrdersPage() {
                 </div>
               </div>
 
+              {selectedOrder.estado !== 'cancelado' && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <button
+                    onClick={async () => {
+                      try {
+                        await orderApi.downloadPaymentConfirmation(selectedOrder.originalId);
+                      } catch (err) {
+                        console.error('Error al descargar confirmación:', err);
+                      }
+                    }}
+                    className="py-5 rounded-2xl bg-gradient-to-r from-emerald-500 to-emerald-600 dark:from-[#2d5e42] dark:to-[#1a3a2a] text-white font-black text-xs uppercase tracking-[0.2em] hover:shadow-lg hover:shadow-emerald-200 dark:hover:shadow-[#2d5e42]/30 transition-all flex items-center justify-center gap-3"
+                  >
+                    <Icon name="Download" className="w-5 h-5" />
+                    Descargar Confirmación de Pago
+                  </button>
+                  <button
+                    onClick={async () => {
+                      try {
+                        await orderApi.downloadReceipt(selectedOrder.originalId);
+                      } catch (err) {
+                        console.error('Error al descargar boleta:', err);
+                      }
+                    }}
+                    className="py-5 rounded-2xl bg-gradient-to-r from-sky-500 to-sky-600 dark:from-[#4A7C59] dark:to-[#2d5e42] text-white font-black text-xs uppercase tracking-[0.2em] hover:shadow-lg hover:shadow-sky-200 dark:hover:shadow-[#4A7C59]/30 transition-all flex items-center justify-center gap-3"
+                  >
+                    <Icon name="FileText" className="w-5 h-5" />
+                    Descargar Boleta de Compra
+                  </button>
+                </div>
+              )}
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <button
                   onClick={closeModal}

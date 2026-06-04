@@ -11,6 +11,17 @@ export interface ProactiveNotification {
         entityId?: string;
         type?: string;
     };
+    action?: {
+        type: string;
+        id?: string | number;
+        label: string;
+    };
+    secondaryAction?: {
+        type: string;
+        id?: string | number;
+        label: string;
+        icon?: string;
+    };
 }
 
 export interface NotificationState {

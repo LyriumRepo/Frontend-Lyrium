@@ -32,7 +32,7 @@ export default function TicketChatView({
 }: TicketChatViewProps) {
     if (!ticket) return null;
 
-    const unifiedTicket = adaptSellerTicket(ticket);
+    const unifiedTicket = adaptSellerTicket(ticket as any);
 
     return (
         <UnifiedChatView

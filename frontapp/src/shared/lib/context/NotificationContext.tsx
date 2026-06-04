@@ -28,39 +28,65 @@ function mapApiNotificationToProactive(notification: Notification): ProactiveNot
     let level: NotificationLevel = 'OPERATIONAL';
     let title = 'Notificación';
     let message = notification.subject ?? notification.message_preview ?? 'Nueva notificación';
+    let action: ProactiveNotification['action'];
+    let secondaryAction: ProactiveNotification['secondaryAction'];
 
-    switch (notification.type) {
-        // Tipos simples del backend
+    const notificationType = notification.type.replace('App\\Notifications\\', '');
+
+    switch (notificationType) {
         case 'ticket_created':
+        case 'TicketCreatedNotification':
             level = 'CRITICAL';
             title = 'Nuevo ticket creado';
             message = `${notification.vendor_name ?? 'Un vendedor'} creó: ${notification.subject}`;
+            if (notification.ticket_id) {
+                action = { type: 'ticket', id: notification.ticket_id, label: 'Ver ticket' };
+            }
             break;
         case 'ticket_replied':
+        case 'TicketRepliedNotification':
             level = 'INFO';
             title = 'Nueva respuesta';
             message = `${notification.sender_name ?? 'Un usuario'} respondió: ${notification.message_preview}`;
+            if (notification.ticket_id) {
+                action = { type: 'ticket', id: notification.ticket_id, label: 'Ver ticket' };
+            }
             break;
         case 'ticket_status_changed':
+        case 'TicketStatusChangedNotification':
             level = 'WARNING';
             title = 'Estado actualizado';
             message = `Ticket #${notification.ticket_number}: ${notification.old_status} → ${notification.new_status}`;
+            if (notification.ticket_id) {
+                action = { type: 'ticket', id: notification.ticket_id, label: 'Ver ticket' };
+            }
             break;
-        // Tipos legacy (clases PHP)
-        case 'App\\Notifications\\TicketCreatedNotification':
-            level = 'CRITICAL';
-            title = 'Nuevo ticket creado';
-            message = `${notification.vendor_name ?? 'Un vendedor'} creó: ${notification.subject}`;
-            break;
-        case 'App\\Notifications\\TicketRepliedNotification':
+        case 'order_created':
+        case 'OrderCreatedNotification':
             level = 'INFO';
-            title = 'Nueva respuesta';
-            message = `${notification.sender_name ?? 'Un usuario'} respondió: ${notification.message_preview}`;
+            title = '¡Pedido exitoso!';
+            message = notification.subject ?? `Tu pedido ha sido registrado`;
+            action = { type: 'orders', label: 'Ver pedido' };
             break;
-        case 'App\\Notifications\\TicketStatusChangedNotification':
+        case 'new_order':
+        case 'NewOrderSellerNotification':
+            level = 'INFO';
+            title = '¡Nuevo pedido recibido!';
+            message = notification.subject ?? `Nuevo pedido en tu tienda`;
+            action = { type: 'invoices', label: 'Ver comprobantes' };
+            secondaryAction = { type: 'resend_email', id: notification.order_id ?? undefined, label: 'Enviar a correo', icon: 'Mail' };
+            break;
+        case 'store_status_changed':
+        case 'StoreStatusNotification':
             level = 'WARNING';
-            title = 'Estado actualizado';
-            message = `Ticket #${notification.ticket_number}: ${notification.old_status} → ${notification.new_status}`;
+            title = 'Estado de tienda actualizado';
+            message = notification.subject ?? 'El estado de tu tienda ha cambiado';
+            action = { type: 'store', label: 'Ir a tienda' };
+            break;
+        default:
+            level = 'INFO';
+            title = 'Notificación';
+            message = notification.subject ?? notification.message_preview ?? 'Nueva notificación';
             break;
     }
 
@@ -80,6 +106,9 @@ function mapApiNotificationToProactive(notification: Notification): ProactiveNot
         message,
         time: timeAgo,
         read: notification.is_read,
+        metadata: { type: notificationType },
+        action,
+        secondaryAction,
     };
 }
 

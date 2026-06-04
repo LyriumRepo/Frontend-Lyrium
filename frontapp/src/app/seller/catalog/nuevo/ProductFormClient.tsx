@@ -35,7 +35,7 @@ function SubmitButton({ isSubmitting }: { isSubmitting: boolean }) {
     >
       {pending || isSubmitting ? (
         <>
-          <Icon name="Loader2" className="w-5 h-5 animate-spin" />
+          <Icon name="Loader" className="w-5 h-5 animate-spin" />
           <span>Guardando...</span>
         </>
       ) : (
@@ -193,7 +193,7 @@ function ImageUploader({
 
               {img.isUploading && (
                 <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                  <Icon name="Loader2" className="w-6 h-6 text-white animate-spin" />
+                  <Icon name="Loader" className="w-6 h-6 text-white animate-spin" />
                 </div>
               )}
             </div>
@@ -203,7 +203,7 @@ function ImageUploader({
 
       {isUploading && (
         <p className="text-xs text-gray-500 flex items-center gap-2">
-          <Icon name="Loader2" className="w-4 h-4 animate-spin" />
+          <Icon name="Loader" className="w-4 h-4 animate-spin" />
           Subiendo imágenes...
         </p>
       )}

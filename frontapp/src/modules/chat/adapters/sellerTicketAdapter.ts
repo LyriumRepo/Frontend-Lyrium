@@ -14,6 +14,7 @@ interface SellerMessage {
   texto: string;
   isUser: boolean;
   hora: string;
+  leido?: boolean;
   attachments?: SellerAttachment[];
 }
 

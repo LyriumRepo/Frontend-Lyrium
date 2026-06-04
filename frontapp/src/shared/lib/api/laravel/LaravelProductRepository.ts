@@ -24,7 +24,6 @@ export class LaravelProductRepository implements IProductRepository {
 
         // SERVIDOR
         try {
-
             const { cookies } = await import('next/headers');
 
             const cookieStore = await cookies();
@@ -97,26 +96,34 @@ export class LaravelProductRepository implements IProductRepository {
     async createProduct(input: CreateProductInput): Promise<Product> {
         // No enviar imagen si es base64 (muy grande para la DB)
         const image = input.image && !input.image.startsWith('data:') ? input.image : null;
-        // Limpiar atributos vacíos
-        const isNotEmpty = (attr: { values: { label?: string; value?: string } }) =>
-            attr.values && (attr.values.label?.trim() || attr.values.value?.trim());
-
-        const trimValues = (attr: { values: { label?: string; value?: string } }) => ({
-            ...attr,
-            values: {
-                label: attr.values.label?.trim() || '',
-                value: attr.values.value?.trim() || '',
-            },
-        });
-
+        // Limpiar mainAttributes cuidando que values es un Record<string, string>
         const cleanMainAttributes = (input.mainAttributes || [])
-            .filter(isNotEmpty)
-            .map(trimValues);
+            .map(attr => {
+                const filteredEntries = Object.entries(attr.values || {})
+                    .filter(([_, value]) => value && value.trim() !== '');
 
+                return {
+                    ...attr,
+                    // Volvemos a transformar el array filtrado en un objeto Record
+                    values: Object.fromEntries(filteredEntries)
+                };
+            })
+            // Opcional: Eliminamos el atributo por completo si su objeto values quedó vacío
+            .filter(attr => Object.keys(attr.values).length > 0);
+
+        // Limpiar additionalAttributes cuidando que values es un Record<string, string>
         const cleanAdditionalAttributes = (input.additionalAttributes || [])
-            .filter(isNotEmpty)
-            .map(trimValues);
-        
+            .map(attr => {
+                const filteredEntries = Object.entries(attr.values || {})
+                    .filter(([_, value]) => value && value.trim() !== '');
+
+                return {
+                    ...attr,
+                    values: Object.fromEntries(filteredEntries)
+                };
+            })
+            .filter(attr => Object.keys(attr.values).length > 0);
+
         return this.request<Product>('/products', {
             method: 'POST',
             body: JSON.stringify({

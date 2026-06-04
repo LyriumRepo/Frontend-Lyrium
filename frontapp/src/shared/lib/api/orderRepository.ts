@@ -204,4 +204,29 @@ export const orderApi = {
     document.body.removeChild(a);
     window.URL.revokeObjectURL(url);
   },
+
+  downloadPaymentConfirmation: async (orderId: number): Promise<void> => {
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${LARAVEL_API_URL}/orders/${orderId}/payment-confirmation`, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/pdf',
+        ...headers,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Error al descargar la confirmación de pago');
+    }
+
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `confirmacion-pago-${orderId}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  },
 };

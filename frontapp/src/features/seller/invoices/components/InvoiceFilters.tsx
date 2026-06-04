@@ -37,7 +37,7 @@ export default function InvoiceFilters({ search, status, type, onFilterChange, o
                 </div>
 
                 <div className="w-full md:w-48 space-y-2">
-                    <label htmlFor="invoice-status" className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1">Estado SUNAT</label>
+                    <label htmlFor="invoice-status" className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1">Estado</label>
                     <select
                         id="invoice-status"
                         value={status}

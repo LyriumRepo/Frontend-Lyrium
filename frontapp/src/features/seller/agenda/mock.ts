@@ -38,13 +38,13 @@ export const MOCK_ORDERS: AgendaOrder[] = [
 ];
 
 export const MOCK_SPECIALISTS: Specialist[] = [
-    { id: 1, nombres: 'Dra. María', apellidos: 'García', especialidad: 'Nutrición Deportiva', avatar_chars: 'MG', color: '#10b981' },
-    { id: 2, nombres: 'Lic. Juan', apellidos: 'Pérez', especialidad: 'Fisioterapia', avatar_chars: 'JP', color: '#f59e0b' }
+    { id: 1, nombres: 'Dra. María', apellidos: 'García', especialidad: 'Nutrición Deportiva' } as Specialist,
+    { id: 2, nombres: 'Lic. Juan', apellidos: 'Pérez', especialidad: 'Fisioterapia' } as Specialist
 ];
 
 export const MOCK_APPOINTMENTS: Appointment[] = [
-    { id: 101, fecha: '2026-01-05', hora: '11:00', duracionMinutos: 45, especialistaId: 1, cliente: 'Carlos Rodríguez', servicio: 'Evaluación Nutricional Integral' },
-    { id: 102, fecha: '2026-01-12', hora: '10:00', duracionMinutos: 60, especialistaId: 2, cliente: 'Lucía Torres', servicio: 'Sesión de Terapia Física' }
+    { id: 101, fecha: '2026-01-05', serviceId: 1, specialistId: 1, sesion: { inicio: '11:00', fin: '11:45' }, cuposOcupados: 1, estado: 'pendiente' } as Appointment,
+    { id: 102, fecha: '2026-01-12', serviceId: 2, specialistId: 2, sesion: { inicio: '10:00', fin: '11:00' }, cuposOcupados: 1, estado: 'pendiente' } as Appointment
 ];
 
 export function buildUnifiedEvents(orders: AgendaOrder[], appointments: Appointment[], specialists: Specialist[]): AgendaEvent[] {
@@ -60,14 +60,14 @@ export function buildUnifiedEvents(orders: AgendaOrder[], appointments: Appointm
     }));
 
     const appointmentEvents: AgendaEvent[] = appointments.map(app => {
-        const esp = specialists.find(e => e.id === app.especialistaId);
+        const esp = specialists.find(e => e.id === app.specialistId);
         return {
             id: app.id,
             type: 'service',
             date: app.fecha,
-            time: app.hora,
-            title: app.servicio || 'Servicio',
-            subtitle: app.cliente,
+            time: app.sesion.inicio,
+            title: `Servicio #${app.serviceId}`,
+            subtitle: `Cupos: ${app.cuposOcupados}`,
             status: 'confirmed',
             originalData: app,
             specialist: esp

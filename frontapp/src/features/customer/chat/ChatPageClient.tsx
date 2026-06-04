@@ -36,7 +36,7 @@ function NewChatForm({
         <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl" />
         <div className="relative z-10 flex items-center gap-4">
           <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center">
-            <Icon name="Messages" className="w-6 h-6" />
+            <Icon name="MessageCircle" className="w-6 h-6" />
           </div>
           <div>
             <h3 className="text-2xl font-black tracking-tighter">Nuevo Chat</h3>
@@ -239,7 +239,7 @@ export function ChatPageClient({ conversationId }: { conversationId?: string }) 
 
       {filteredConversations.length === 0 && !isLoading && (
         <div className="p-8 text-center text-gray-500">
-          <Icon name="Messages" className="w-12 h-12 mx-auto mb-4 text-gray-300 dark:text-[#2A3F33]" />
+          <Icon name="MessageCircle" className="w-12 h-12 mx-auto mb-4 text-gray-300 dark:text-[#2A3F33]" />
           <p className="text-base font-bold text-gray-800 dark:text-[var(--text-primary)]">Sin conversaciones</p>
           <p className="text-sm mt-1">Inicia un nuevo chat con un vendedor</p>
         </div>
@@ -439,7 +439,7 @@ export function ChatPageClient({ conversationId }: { conversationId?: string }) 
         <ModuleHeader
           title="Chat con Vendedores"
           subtitle="Comunicación directa con los vendedores"
-          icon="Messages"
+          icon="MessageCircle"
         />
         <div className="flex-1 flex items-center justify-center">
           <BaseLoading message="Cargando conversaciones..." />
@@ -453,7 +453,7 @@ export function ChatPageClient({ conversationId }: { conversationId?: string }) 
       <ModuleHeader
         title="Chat con Vendedores"
         subtitle="Comunicación directa con los vendedores"
-        icon="Messages"
+        icon="MessageCircle"
         actions={
           !showNewChatForm ? (
             <button

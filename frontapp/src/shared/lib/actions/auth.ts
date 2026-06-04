@@ -29,6 +29,8 @@ export async function loginAction(credentials: LoginCredentials) {
 }
 
 export async function logoutAction() {
+    await authRepository.logout();
+
     const cookieStore = await cookies();
 
     cookieStore.delete('laravel_token');

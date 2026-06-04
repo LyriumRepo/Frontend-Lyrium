@@ -178,8 +178,8 @@ export function useSellerHelp() {
         return matchesSearch && matchesCategory;
     });
 
-    const unifiedTickets: UnifiedTicketListItem[] = adaptSellerTicketList(filteredTickets);
-    const unifiedActiveTicket = activeTicket ? adaptSellerTicketListItem(activeTicket) : null;
+    const unifiedTickets: UnifiedTicketListItem[] = adaptSellerTicketList(filteredTickets as any);
+    const unifiedActiveTicket = activeTicket ? adaptSellerTicketListItem(activeTicket as any) : null;
 
     return {
         tickets: filteredTickets,

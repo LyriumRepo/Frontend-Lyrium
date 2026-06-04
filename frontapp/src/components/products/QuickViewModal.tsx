@@ -114,7 +114,7 @@ export default function QuickViewModal({
     <BaseModal
       isOpen={isOpen}
       onClose={onClose}
-      title={producto?.titulo}
+      title={producto?.titulo ?? ''}
       size="4xl"
       showCloseButton
     >

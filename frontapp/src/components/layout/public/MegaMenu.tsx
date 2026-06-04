@@ -68,6 +68,32 @@ export default function MegaMenu({
     onMouseLeave,
 }: MegaMenuProps) {
     const megaData = megaMenuData[activeCategory] || Object.values(megaMenuData)[0];
+    const [expandedCols, setExpandedCols] = useState<Record<string, boolean>>({});
+
+    const circleColors = [
+        'hover:text-[#B7E000]', // lima
+        'hover:text-[#8FD400]', // verde
+        'hover:text-[#66D6A8]', // turquesa claro
+        'hover:text-[#4EC7B8]', // turquesa
+        'hover:text-[#69BEEB]', // celeste
+        'hover:text-[#5AAFE6]', // azul celeste
+    ];
+    const textHoverColors = [
+        'group-hover:text-[#B7E000]',
+        'group-hover:text-[#8FD400]',
+        'group-hover:text-[#66D6A8]',
+        'group-hover:text-[#4EC7B8]',
+        'group-hover:text-[#69BEEB]',
+        'group-hover:text-[#5AAFE6]',
+    ];
+
+    const toggleColumn = (key: string) => {
+        setExpandedCols(prev => ({
+            ...prev,
+            [key]: !prev[key],
+        }));
+    };
+    console.log(megaData.icons);
 
     if (!item.children) return null;
 
@@ -116,9 +142,9 @@ export default function MegaMenu({
                 <section className="col-span-12 md:col-span-8 lg:col-span-9 p-5 overflow-y-auto h-full bg-white dark:bg-[var(--bg-secondary)]">
                     {/* ICONS */}
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-                        {megaData.icons.map((icon) => (
+                        {megaData.icons?.slice(0, 6).map((icon, index) => (
                             <Link key={icon.title} href={icon.href} className="group text-center">
-                                <div className="mx-auto w-28 h-28 rounded-full bg-lime-500/20 border border-lime-200 flex items-center justify-center shadow-sm group-hover:shadow-md group-hover:scale-[1.02] transition overflow-hidden">
+                                <div className={`mx-auto w-28 h-28 rounded-full border flex items-center justify-center shadow-sm group-hover:shadow-md group-hover:scale-[1.02] transition overflow-hidden ${circleColors[index % circleColors.length]}`}>
                                     <Image
                                         src={icon.img}
                                         alt={icon.title}
@@ -127,7 +153,7 @@ export default function MegaMenu({
                                         className="w-full h-full object-contain scale-135"
                                     />
                                 </div>
-                                <div className="mt-2 text-[12px] font-semibold text-slate-700 dark:text-[var(--text-primary)] group-hover:text-sky-600 dark:group-hover:text-[var(--color-success)] transition">
+                                <div className={`mt-2 text-[12px] font-semibold text-slate-700 dark:text-[var(--text-primary)] transition ${textHoverColors[index % textHoverColors.length]}`}>
                                     {icon.title}
                                 </div>
                             </Link>
@@ -140,11 +166,27 @@ export default function MegaMenu({
                     <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 text-sm">
                         {megaData.cols.map((col, colIdx) => (
                             <div key={`${col.h}-${colIdx}`}>
-                                <div className="text-[13px] font-extrabold tracking-wide text-slate-800 dark:text-[var(--text-primary)] uppercase mb-2">
-                                    {col.h}
-                                </div>
+                                {(() => {
+                                    const relatedIcon = megaData.icons.find(
+                                        (icon) => icon.title.toUpperCase() === col.h
+                                    );
+
+                                    return (
+                                        <Link
+                                            href={relatedIcon?.href || '#'}
+                                            className="text-[13px] font-extrabold tracking-wide text-slate-800 dark:text-[var(--text-primary)] uppercase mb-2 block hover:text-[#6BAF7B] transition"
+                                        >
+                                            {col.h}
+                                        </Link>
+                                    );
+                                })()}
                                 <ul className="space-y-1.5">
-                                    {col.items.map((it, itemIdx) => {
+
+                                    {(expandedCols[col.h]
+                                        ? col.items
+                                        : col.items.slice(0, 3)
+                                    ).map((it, itemIdx) => {
+
                                         const item =
                                             typeof it === 'string'
                                                 ? { name: it, href: '#' }
@@ -154,13 +196,41 @@ export default function MegaMenu({
                                             <li key={`${item.name}-${colIdx}-${itemIdx}`}>
                                                 <Link
                                                     href={item.href || '#'}
-                                                    className="text-[12px] text-slate-500 dark:text-[var(--text-placeholder)] hover:text-sky-600 dark:hover:text-[#6BAF7B] transition"
+                                                    className="text-[12px] text-slate-500 dark:text-[var(--text-placeholder)] hover:text-[#6BAF7B] transition"
                                                 >
                                                     {item.name}
                                                 </Link>
                                             </li>
                                         );
                                     })}
+
+                                    {col.items.length > 3 && (
+                                        <li>
+                                            <button
+                                                type="button"
+                                                onClick={() => toggleColumn(col.h)}
+                                                className="flex items-center gap-1 text-[11px] font-semibold text-[#6BAF7B] hover:opacity-80 transition"
+                                            >
+                                                {expandedCols[col.h] ? 'Ver menos' : 'Ver más'}
+
+                                                <svg
+                                                    className={`w-3 h-3 transition-transform ${
+                                                        expandedCols[col.h] ? 'rotate-180' : ''
+                                                    }`}
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={2}
+                                                        d="M19 9l-7 7-7-7"
+                                                    />
+                                                </svg>
+                                            </button>
+                                        </li>
+                                    )}
                                 </ul>
                             </div>
                         ))}

@@ -2,7 +2,9 @@ export interface Branch {
     id: string;
     name: string;
     address: string;
-    city: string;
+    department: string;
+    province: string;
+    district: string;
     phone: string;
     hours: string;
     isPrincipal: boolean;

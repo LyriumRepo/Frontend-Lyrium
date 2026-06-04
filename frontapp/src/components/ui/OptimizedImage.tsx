@@ -1,53 +1,42 @@
-// src/components/ui/OptimizedImage.tsx
+'use client';
+
+import React from 'react';
 import Image from 'next/image';
-import { useState } from 'react';
 
 interface OptimizedImageProps {
-  src: string | undefined | null;
+  src: string;
   alt: string;
   width?: number;
   height?: number;
-  className?: string;
-  priority?: boolean;
   fill?: boolean;
-  fallbackSrc?: string;
+  className?: string;
+  sizes?: string;
+  priority?: boolean;
+  unoptimized?: boolean;
 }
 
 export default function OptimizedImage({
   src,
   alt,
-  width = 400,
-  height = 300,
-  className = "",
-  priority = false,
-  fill = false,
-  fallbackSrc = "/img/no-image.png"
+  width,
+  height,
+  fill,
+  className = '',
+  sizes,
+  priority,
+  unoptimized,
 }: OptimizedImageProps) {
-  const [imgSrc, setImgSrc] = useState(src || fallbackSrc);
-  const finalSrc = fixImageUrl(imgSrc);
-
   return (
     <Image
-      src={finalSrc}
+      src={src}
       alt={alt}
       width={!fill ? width : undefined}
       height={!fill ? height : undefined}
-      className={className}
-      priority={priority}
       fill={fill}
-      onError={() => setImgSrc(fallbackSrc)}
-      style={{ objectFit: fill ? 'cover' : 'contain' }}
+      className={className}
+      sizes={sizes || '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw'}
+      priority={priority}
+      unoptimized={unoptimized}
     />
   );
-}
-
-// Función auxiliar (puedes moverla a un utils si prefieres)
-function fixImageUrl(url: string): string {
-  if (!url) return '/img/no-image.png';
-  if (url.startsWith('http')) return url;
-  
-  let clean = url.trim();
-  clean = clean.replace('/backend/storage', '/storage');
-  if (!clean.startsWith('/')) clean = '/' + clean;
-  return clean;
 }
