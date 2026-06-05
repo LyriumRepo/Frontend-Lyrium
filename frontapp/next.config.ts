@@ -17,6 +17,7 @@ async rewrites() {
   ];
 },
 
+
   onDemandEntries: {
     maxInactiveAge: 25 * 1000,
     pagesBufferLength: 5,

@@ -19,7 +19,7 @@ const borderMap: Record<string, string> = {
 export const StatusBadge: React.FC<{ status: ContractStatus, large?: boolean }> = ({ status, large }) => {
     const configs = {
         ACTIVE: { label: 'Vigente', class: colorMap.emerald },
-        PENDING: { label: 'En Revisión / Pendiente', class: colorMap.amber },
+        PENDING: { label: 'En Revisión / Pendiente', class: 'bg-[var(--icons-green)] text-[var(--brand-green-hover)] border-transparent' },
         EXPIRED: { label: 'Vencido / Expirado', class: colorMap.red }
     };
     const config = configs[status] || configs.PENDING;

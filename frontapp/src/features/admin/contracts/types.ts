@@ -13,7 +13,7 @@ export interface Contract {
     company: string;
     ruc: string;
     rep: string;
-    type: string;
+    plan: string;
     modality: ContractModality;
     status: ContractStatus;
     start: string;
@@ -21,6 +21,10 @@ export interface Contract {
     storage_path: string;
     auditTrail?: AuditEvent[];
     expiryUrgency?: ExpiryUrgency;
+    phone?: string;
+    email?: string;
+    address?: string;
+    dni?: string;
 }
 
 export interface ContractFilters {

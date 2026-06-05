@@ -9,6 +9,7 @@ import {
     ProductSlider,
     BenefitsSection,
     NewsletterSection,
+    DigestionSaludableSection,
 } from '@/components/home';
 
 import { home } from '@/shared/lib/api';
@@ -111,7 +112,7 @@ export default async function HomePage() {
                     />
                 );
             })}
-
+ <DigestionSaludableSection />
             <BenefitsSection beneficios={beneficios} />
             <NewsletterSection />
         </div>

@@ -3,16 +3,19 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { ShoppingCart, Eye, ExternalLink } from 'lucide-react';
+import { ShoppingCart, Eye, ExternalLink, Star } from 'lucide-react';
 import { Producto } from '@/types/public';
 import { useCarritoStore } from '@/store/carritoStore';
+import { homeData } from '@/data/homeData';
 
 interface OfferBlockProps {
   titulo: string;
   productos: Producto[];
   backgroundImage: string;
   linkText?: string;
-  fallbackImages: string[]; // 👈 NUEVO
+  fallbackImages: string[];
+  enableCardCarousel?: boolean;
+  backgroundPosition?: string;
 }
 
 function OfferCard({
@@ -48,17 +51,16 @@ function OfferCard({
   };
 
   return (
-    <article className="flex-shrink-0 snap-center w-[190px] md:w-[220px] bg-white/[0.92] dark:bg-[var(--bg-secondary)]/92 backdrop-blur-lg border border-white/40 dark:border-[var(--border-subtle)]/50 rounded-[20px] p-3 shadow-md group transition-all duration-300 hover:-translate-y-[5px] flex flex-col items-center relative mr-[14px] md:mr-5">
+      <article className="w-[220px] shrink-0 bg-white/[0.92] dark:bg-[var(--bg-secondary)]/92 backdrop-blur-lg border border-white/40 dark:border-[var(--border-subtle)]/50 rounded-[20px] p-3 shadow-md group transition-all duration-300 hover:-translate-y-[5px] flex flex-col items-center relative">
       <div className="relative w-full aspect-square rounded-[18px] overflow-hidden bg-white dark:bg-[var(--bg-muted)] flex items-center justify-center">
-        <Link href={`/producto/${producto.slug}`}>
-          <Image
+                  <Image
             src={imgSrc}
             alt={producto.titulo}
             fill
-            className="object-contain p-[7.5%]"
+           
+            className={imgSrc.includes('1.png') ? "object-contain p-[7.5%]" : "object-cover"}
             onError={handleImageError}
           />
-        </Link>
 
         <div className="absolute bottom-0 left-0 w-full h-[44px] flex bg-sky-500 transform translate-y-full group-hover:translate-y-0 transition-transform">
           <button onClick={() => onAddToCart(producto)} className="flex-1 flex items-center justify-center text-white">
@@ -73,9 +75,22 @@ function OfferCard({
         </div>
       </div>
 
-      <div className="mt-3 w-full text-center">
-        <h3 className="text-[13px] font-bold truncate">{producto.titulo}</h3>
+       <div className="mt-3 w-full text-center flex flex-col items-center">
+        <h3 className="text-[13px] font-bold truncate w-full">{producto.titulo}</h3>
         <p className="text-[15px] font-extrabold">S/ {producto.precio.toFixed(2)}</p>
+        <div className="flex justify-center gap-0.5 mt-1">
+          {Array.from({ length: 5 }).map((_, idx) => {
+            const isFilled = idx < (producto.estrellas ? producto.estrellas.length : 5);
+            return (
+              <Star
+                key={idx}
+                className={`w-3.5 h-3.5 ${
+                  isFilled ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300 dark:text-gray-600'
+                }`}
+              />
+            );
+          })}
+        </div>
       </div>
     </article>
   );
@@ -87,6 +102,8 @@ function OfferBlock({
   backgroundImage,
   linkText = 'Ver todo',
   fallbackImages,
+  enableCardCarousel = false,
+  backgroundPosition,
   onAddToCart,
   onQuickView,
 }: OfferBlockProps & {
@@ -95,7 +112,10 @@ function OfferBlock({
 }) {
 
   const [bgIndex, setBgIndex] = useState(0);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [itemsPerView, setItemsPerView] = useState(5);
 
+   
   useEffect(() => {
     if (productos.length === 0 && fallbackImages.length > 0) {
       const interval = setInterval(() => {
@@ -106,74 +126,275 @@ function OfferBlock({
     }
   }, [productos.length, fallbackImages]);
 
-  // 🔴 ESTADO VACÍO CON CARRUSEL PERSONALIZADO
-  if (productos.length === 0) {
-    return (
-      <section className="space-y-4 md:space-y-6 max-w-7xl mx-auto px-4">
-        <h2 className="text-xl md:text-2xl font-semibold">{titulo}</h2>
+ 
+  useEffect(() => {
+    const esServiciosVacio = titulo === "Las mejores ofertas de Servicios" && productos.length === 0;
+    if (!enableCardCarousel && !esServiciosVacio) return;
 
-        <div className="min-h-[200px] rounded-[30px] shadow-2xl overflow-hidden relative">
+    const updateItemsPerView = () => {
+      if (window.innerWidth < 640) setItemsPerView(1);
+      else if (window.innerWidth < 900) setItemsPerView(2);
+      else if (window.innerWidth < 1200) setItemsPerView(3);
+      else {
+       
+        setItemsPerView(esServiciosVacio ? 3 : 5);
+      }
+    };
 
-          {/* Carrusel fondo */}
-          <div className="absolute inset-0">
-            {fallbackImages.map((img, i) => (
-              <Image
-                key={i}
-                src={img}
-                alt="Fondo"
-                fill
-                className={`object-cover transition-opacity duration-1000 ${
-                  i === bgIndex ? 'opacity-100' : 'opacity-0'
-                }`}
-              />
-            ))}
+    updateItemsPerView();
+    window.addEventListener('resize', updateItemsPerView);
+    return () => window.removeEventListener('resize', updateItemsPerView);
+  }, [enableCardCarousel, titulo, productos.length]);
+
+  
+  const totalPages = Math.max(1, Math.ceil(productos.length / itemsPerView));
+  const esServiciosVacio = titulo === "Las mejores ofertas de Servicios" && productos.length === 0;
+  
+ 
+  const totalPagesServices = esServiciosVacio ? Math.max(1, homeData.ofertasServicios.length - itemsPerView + 1) : 1;
+  // 4. Desplazamiento automático para carrusel normal
+  useEffect(() => {
+    if (!enableCardCarousel || totalPages <= 1 || productos.length === 0) return;
+
+    const interval = setInterval(() => {
+      setCurrentPage((prev) => (prev >= totalPages - 1 ? 0 : prev + 1));
+    }, 4500);
+
+    return () => clearInterval(interval);
+  }, [enableCardCarousel, totalPages, productos.length]);
+
+  // 5. Desplazamiento automático específico para Servicios vacíos
+  useEffect(() => {
+    if (!esServiciosVacio || totalPagesServices <= 1) return;
+
+    const interval = setInterval(() => {
+      setCurrentPage((prev) => (prev >= totalPagesServices - 1 ? 0 : prev + 1));
+    }, 4500);
+
+    return () => clearInterval(interval);
+  }, [esServiciosVacio, totalPagesServices]);
+
+  // 6. Resetear la página si excede el límite al cambiar tamaño de pantalla
+  useEffect(() => {
+    const maxPages = esServiciosVacio ? totalPagesServices : totalPages;
+    if (currentPage >= maxPages) {
+      setCurrentPage(0);
+    }
+  }, [currentPage, totalPages, totalPagesServices, esServiciosVacio]);
+
+ 
+    if (productos.length === 0) {
+    let productosAMostrar: Producto[] = [];
+    let animationName = '';
+
+    if (titulo === "Las mejores ofertas de Servicios" || titulo === "Las mejores ofertas de servicios") {
+      productosAMostrar = homeData.ofertasServicios;
+      animationName = 'infiniteScrollServices';
+    } else if (titulo === "Las mejores ofertas de productos" || titulo === "Las mejores ofertas de Productos") {
+      productosAMostrar = homeData.ofertasProductos;
+      animationName = 'infiniteScrollProducts';
+    } else if (titulo === "Productos Nuevos" || titulo === "Productos nuevos") {
+      productosAMostrar = homeData.productosNuevos;
+      animationName = 'infiniteScrollNewProducts';
+    }
+
+    if (productosAMostrar.length > 0) {
+      const allItems = [...productosAMostrar, ...productosAMostrar];
+
+      return (
+        <section className="space-y-4 md:space-y-6 flex flex-col items-center">
+          {/* Estilos CSS para el desplazamiento continuo y efecto de pausa en Hover */}
+          <style dangerouslySetInnerHTML={{ __html: `
+            @keyframes ${animationName} {
+              0% {
+                transform: translateX(0);
+              }
+              100% {
+                transform: translateX(-50%);
+              }
+            }
+            .animate-${animationName} {
+              animation: ${animationName} 24s linear infinite;
+            }
+            .animate-${animationName}:hover {
+              animation-play-state: paused;
+            }
+          `}} />
+
+          <div className="w-[1467px] max-w-full pl-10 pr-4 space-y-4">
+            <h2 className="text-xl md:text-2xl font-bold pl-8">{titulo}</h2>
+
+            <div className="relative w-full h-[650px] rounded-[30px] shadow-2xl overflow-hidden">
+              {/* Carrusel fondo */}
+              <div className="absolute inset-0">
+                {fallbackImages.map((img, i) => (
+                  <div
+                    key={i}
+                    className={`absolute inset-0 bg-cover bg-no-repeat bg-center transition-opacity duration-1000 ${
+                      i === bgIndex ? 'opacity-100' : 'opacity-0'
+                    }`}
+                    style={{ 
+                      backgroundImage: `url('${img}?v=1.2')`,
+                      backgroundAttachment: 'fixed',
+                      backgroundPosition: backgroundPosition || 'center 15%',
+                      backgroundRepeat: 'no-repeat'
+                    }}
+                  />
+                ))}
+              </div>
+
+              {/* Overlay original */}
+              <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
+
+              {/* Contenedor del scroll continuo alineado a la derecha */}
+              <div className="relative z-10 p-4 pb-0 md:p-8 md:pb-0 h-full flex flex-col justify-end">
+                <div 
+                  className="w-full mx-auto overflow-hidden"
+                  style={{ 
+                    maxWidth: '1200px',
+                    maskImage: 'linear-gradient(to right, transparent, black 4%, black 96%, transparent)',
+                    WebkitMaskImage: 'linear-gradient(to right, transparent, black 4%, black 96%, transparent)',
+                  }}
+                >
+                  <div
+                    className={`flex gap-5 animate-${animationName}`}
+                    style={{ width: 'max-content' }}
+                  >
+                    {allItems.map((producto, index) => (
+                      <OfferCard
+                        key={`${producto.id}-${index}`}
+                        producto={producto}
+                        allProducts={productosAMostrar}
+                        onAddToCart={onAddToCart}
+                        onQuickView={onQuickView}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
+        </section>
+      );
+    }
 
-          {/* Overlay */}
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
+    // Estado vacío de fallback por defecto
+    return (
+      <section className="space-y-4 md:space-y-6 flex flex-col items-center">
+        <div className="w-[1467px] max-w-full pl-10 pr-4 space-y-4">
+          <h2 className="text-xl md:text-2xl font-bold pl-8">{titulo}</h2>
 
-          {/* Texto */}
-          <div className="relative z-10 h-[200px] flex flex-col items-center justify-center text-center">
-            <p className="text-white text-lg font-semibold">
-              No hay datos para mostrar por ahora
-            </p>
-            <p className="text-white/80 text-sm mt-2">
-              Pronto tendremos productos en esta sección
-            </p>
+          <div className="relative w-full h-[650px] rounded-[30px] shadow-2xl overflow-hidden">
+            <div className="absolute inset-0">
+              {fallbackImages.map((img, i) => (
+                <div
+                  key={i}
+                  className={`absolute inset-0 bg-cover bg-no-repeat bg-center transition-opacity duration-1000 ${
+                    i === bgIndex ? 'opacity-100' : 'opacity-0'
+                  }`}
+                  style={{ 
+                    backgroundImage: `url('${img}?v=1.2')`,
+                    backgroundAttachment: 'fixed',
+                    backgroundPosition: backgroundPosition || 'center 15%',
+                    backgroundRepeat: 'no-repeat'
+                  }}
+                />
+              ))}
+            </div>
+
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
+
+            <div className="relative z-10 h-[200px] flex flex-col items-center justify-center text-center">
+              <p className="text-white text-lg font-semibold">
+                No hay datos para mostrar por ahora
+              </p>
+              <p className="text-white/80 text-sm mt-2">
+                Pronto tendremos productos en esta sección
+              </p>
+            </div>
           </div>
         </div>
       </section>
     );
   }
-
-  // 🟢 ESTADO NORMAL
+ 
   return (
-    <section className="space-y-4 md:space-y-6 max-w-7xl mx-auto px-4">
-      <div className="flex justify-between">
-        <h2 className="text-xl md:text-2xl font-semibold">{titulo}</h2>
-        <button className="text-sm font-bold text-sky-600">
+    <section className="space-y-4 md:space-y-6 flex flex-col items-center w-full">
+      <div className="w-[1467px] max-w-full pl-10 pr-4 flex justify-between items-center">
+        <h2 className="text-xl md:text-2xl font-bold pl-8">{titulo}</h2>
+        <button className="text-sm font-bold text-sky-600 pr-8">
           {linkText} →
         </button>
       </div>
 
-      <div className="relative min-h-[480px] rounded-[30px] shadow-2xl overflow-hidden">
+      <div className="relative w-[1467px] max-w-full h-[650px] rounded-[30px] shadow-2xl overflow-hidden mx-auto">
         <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url('${backgroundImage}')` }}
+          className="absolute inset-0 bg-cover bg-no-repeat bg-center"
+          style={{ 
+            backgroundImage: `url('${backgroundImage}?v=1.2')`,
+            backgroundAttachment: 'fixed',
+            backgroundPosition: backgroundPosition || 'center 15%',
+            backgroundRepeat: 'no-repeat'
+          }}
         />
 
-        <div className="relative z-10 p-4 md:p-8 flex">
-          <div className="flex overflow-x-auto gap-4">
-            {productos.map((producto) => (
-              <OfferCard
-                key={producto.id}
-                producto={producto}
-                allProducts={productos}
-                onAddToCart={onAddToCart}
-                onQuickView={onQuickView}
-              />
-            ))}
+        <div className="relative z-10 p-4 pb-0 md:p-8 md:pb-0 h-full flex flex-col justify-end">
+          <div 
+            className="w-full mx-auto overflow-hidden"
+            style={{ 
+              maxWidth: '1200px',
+              maskImage: 'linear-gradient(to right, transparent, black 4%, black 96%, transparent)',
+              WebkitMaskImage: 'linear-gradient(to right, transparent, black 4%, black 96%, transparent)',
+            }}
+          >
+            {enableCardCarousel ? (
+              <div
+                className="flex gap-5 will-change-transform"
+                style={{
+                  transition: 'transform 0.7s cubic-bezier(0.22, 0.61, 0.36, 1)',
+                  transform: `translateX(-${currentPage * itemsPerView * 240}px)`,
+                }}
+              >
+                {productos.map((producto) => (
+                  <OfferCard
+                    key={producto.id}
+                    producto={producto}
+                    allProducts={productos}
+                    onAddToCart={onAddToCart}
+                    onQuickView={onQuickView}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="flex overflow-x-auto gap-4">
+                {productos.map((producto) => (
+                  <OfferCard
+                    key={producto.id}
+                    producto={producto}
+                    allProducts={productos}
+                    onAddToCart={onAddToCart}
+                    onQuickView={onQuickView}
+                  />
+                ))}
+              </div>
+            )}
           </div>
+
+          {enableCardCarousel && totalPages > 1 && (
+            <div className="flex justify-center gap-2 mt-4">
+              {Array.from({ length: totalPages }).map((_, index) => (
+                <button
+                  key={`offer-page-${index}`}
+                  type="button"
+                  onClick={() => setCurrentPage(index)}
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    index === currentPage ? 'w-6 bg-indigo-500' : 'w-2 bg-white/70'
+                  }`}
+                  aria-label={`Ir a la página ${index + 1}`}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </section>
@@ -205,22 +426,22 @@ export default function OffersSection({
     openDetailModal(String(product.id));
   };
 
-  // 🔥 Carruseles por sección
+  //  Carruseles por sección
   const serviciosImages = [
+    '/img/Inicio/las_mejores_ofertas/7.png',
     '/img/1.png',
     '/img/4.png',
-    '/img/7.png',
   ];
 
   const productosImages = [
+    '/img/Inicio/las_mejores_ofertas/6.png',
     '/img/2.png',
     '/img/5.png',
-    '/img/8.png',
   ];
 
   const nuevosImages = [
+    '/img/Inicio/las_mejores_ofertas/8.png',
     '/img/3.png',
-    '/img/6.png',
     '/img/9.png',
   ];
 
@@ -229,8 +450,9 @@ export default function OffersSection({
       <OfferBlock
         titulo="Las mejores ofertas de Servicios"
         productos={ofertasServicios}
-        backgroundImage="/img/Inicio/7.png"
+        backgroundImage="/img/Inicio/las_mejores_ofertas/7.png"
         fallbackImages={serviciosImages}
+        backgroundPosition="right 60%"
         onAddToCart={handleAddToCart}
         onQuickView={handleQuickView}
       />
@@ -238,8 +460,10 @@ export default function OffersSection({
       <OfferBlock
         titulo="Las mejores ofertas de productos"
         productos={ofertasProductos}
-        backgroundImage="/img/Inicio/6.webp"
+        backgroundImage="/img/Inicio/las_mejores_ofertas/6.png"
         fallbackImages={productosImages}
+        enableCardCarousel
+        backgroundPosition="center 80%"
         onAddToCart={handleAddToCart}
         onQuickView={handleQuickView}
       />
@@ -247,8 +471,9 @@ export default function OffersSection({
       <OfferBlock
         titulo="Productos Nuevos"
         productos={productosNuevos}
-        backgroundImage="/img/Inicio/8.png"
+        backgroundImage="/img/Inicio/las_mejores_ofertas/8.png"
         fallbackImages={nuevosImages}
+        backgroundPosition="center 40%"
         onAddToCart={handleAddToCart}
         onQuickView={handleQuickView}
       />
