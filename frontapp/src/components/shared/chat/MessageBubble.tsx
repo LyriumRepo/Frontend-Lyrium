@@ -17,12 +17,14 @@ export interface Message {
   sender: string;
   content: string;
   timestamp: string;
+  read_at?: string | null;
   attachments?: MessageAttachment[];
 }
 
 interface MessageBubbleProps {
   messages: Message[];
   currentUserId?: string;
+  onMarkRead?: (messageId: string) => void;
 }
 
 const isSentByMe = (message: Message, currentUserId?: string): boolean => {
@@ -80,66 +82,79 @@ function shouldShowDateSeparator(prevIso: string | null, currIso: string): boole
   }
 }
 
-export default function MessageBubble({ messages, currentUserId }: MessageBubbleProps) {
+export default function MessageBubble({ messages, currentUserId, onMarkRead }: MessageBubbleProps) {
   return (
-    <div className="space-y-1 px-4 py-4">
+    <div className="space-y-0.5 px-4 py-4">
       {messages.map((msg, idx) => {
         const isSent = isSentByMe(msg, currentUserId);
         const prevMsg = idx > 0 ? messages[idx - 1] : null;
         const showDate = shouldShowDateSeparator(prevMsg?.timestamp ?? null, msg.timestamp);
+        const isRead = !!msg.read_at;
+
+        React.useEffect(() => {
+          if (!isSent && msg.id && !isRead && onMarkRead) {
+            onMarkRead(msg.id);
+          }
+        }, [msg.id, isSent, isRead, onMarkRead]);
 
         return (
           <React.Fragment key={msg.id || msg.timestamp + idx}>
             {showDate && (
-              <div className="flex justify-center my-4">
-                <span className="px-3 py-1 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-full text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-wider">
+              <div className="flex justify-center my-4 animate-fadeIn">
+                <span className="px-4 py-1.5 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-full text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-wider shadow-sm">
                   {formatDateSeparator(msg.timestamp)}
                 </span>
               </div>
             )}
 
-            <div className={`flex ${isSent ? 'justify-end' : 'justify-start'} ${idx > 0 && !showDate ? 'mt-0.5' : 'mt-2'}`}>
+            <div
+              className={`flex ${isSent ? 'justify-end' : 'justify-start'} ${idx > 0 && !showDate ? 'mt-0.5' : 'mt-2'} animate-fadeIn`}
+              style={{ animationDelay: `${Math.min(idx * 20, 300)}ms` }}
+            >
               <div
-                className={`max-w-[80%] md:max-w-[70%] ${
+                className={`max-w-[82%] md:max-w-[68%] ${
                   isSent
-                    ? 'bg-[#2d5e42] dark:bg-[#4A7C59] text-white rounded-2xl rounded-br-sm shadow-lg shadow-[#2d5e42]/15 dark:shadow-[#4A7C59]/20'
-                    : 'bg-[var(--bg-secondary)] border border-[var(--border-subtle)] text-[var(--text-primary)] rounded-2xl rounded-bl-sm shadow-sm'
-                } px-4 py-3 transition-all hover:shadow-md`}
+                    ? 'bg-gradient-to-br from-emerald-500 to-emerald-600 dark:from-emerald-600 dark:to-emerald-700 text-white rounded-[1.75rem] rounded-br-md shadow-lg shadow-emerald-500/20 dark:shadow-emerald-800/30'
+                    : 'bg-white dark:bg-[#1A2E25] border border-gray-100 dark:border-[#2A4035] text-[var(--text-primary)] rounded-[1.75rem] rounded-bl-md shadow-sm'
+                } px-5 py-3.5 transition-all duration-200 hover:shadow-md`}
               >
                 {msg.content && (
-                  <p className={`text-xs md:text-sm leading-relaxed ${isSent ? 'text-white' : 'text-[var(--text-primary)]'}`}>
+                  <p className={`text-sm leading-relaxed ${isSent ? 'text-white' : 'text-gray-800 dark:text-gray-100'} whitespace-pre-wrap break-words`}>
                     {msg.content}
                   </p>
                 )}
 
                 {msg.attachments && msg.attachments.length > 0 && (
-                  <div className={`mt-2 space-y-1.5 ${msg.content ? 'border-t border-white/10 pt-2' : ''}`}>
+                  <div className={`mt-2.5 space-y-2 ${msg.content ? 'border-t border-white/10 pt-2.5' : ''}`}>
                     {msg.attachments.map((att) => (
-                      <a
-                        key={att.id}
-                        href={att.download_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition-colors ${
+                      <a key={att.id} href={att.download_url} target="_blank" rel="noopener noreferrer"
+                        className={`flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 ${
                           isSent
-                            ? 'bg-white/10 text-white/90 hover:bg-white/20'
-                            : 'bg-[#2d5e42]/5 dark:bg-[#4A7C59]/10 text-[var(--text-primary)] hover:bg-[#2d5e42]/10 dark:hover:bg-[#4A7C59]/20'
-                        }`}
-                      >
+                            ? 'bg-white/10 text-white/90 hover:bg-white/20 active:scale-[0.98]'
+                            : 'bg-gray-50 dark:bg-[#24382E] text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-[#2A4035] active:scale-[0.98]'
+                        }`}>
                         <Icon name="FileText" className="w-4 h-4 shrink-0" />
-                        <span className="truncate">{att.file_name}</span>
-                        <Icon name="Download" className="w-3.5 h-3.5 shrink-0 ml-auto" />
+                        <span className="truncate flex-1">{att.file_name}</span>
+                        <span className="text-[9px] opacity-60">{(att.file_size / 1024).toFixed(0)}KB</span>
+                        <Icon name="Download" className="w-3.5 h-3.5 shrink-0" />
                       </a>
                     ))}
                   </div>
                 )}
 
-                <div className={`flex items-center gap-1 mt-1.5 ${isSent ? 'justify-end' : 'justify-start'}`}>
-                  <span className={`text-[9px] font-medium ${isSent ? 'text-white/60' : 'text-[var(--text-secondary)]'}`}>
+                <div className={`flex items-center gap-1.5 mt-1.5 ${isSent ? 'justify-end' : 'justify-start'}`}>
+                  <span className={`text-[10px] font-medium ${isSent ? 'text-white/50' : 'text-gray-400 dark:text-gray-500'}`}>
                     {formatTime(msg.timestamp)}
                   </span>
                   {isSent && (
-                    <Icon name="CheckCheck" className="w-3 h-3 text-emerald-300 dark:text-emerald-400" />
+                    isRead ? (
+                      <div className="relative">
+                        <Icon name="CheckCheck" className="w-3.5 h-3.5 text-emerald-300 dark:text-emerald-400" />
+                        <span className="absolute -top-2 -right-1 w-1.5 h-1.5 bg-emerald-400 rounded-full" />
+                      </div>
+                    ) : (
+                      <Icon name="Check" className="w-3.5 h-3.5 text-white/40" />
+                    )
                   )}
                 </div>
               </div>

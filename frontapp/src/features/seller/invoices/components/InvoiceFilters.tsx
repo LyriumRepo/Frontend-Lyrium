@@ -4,27 +4,34 @@ import React from 'react';
 import { VoucherStatus, VoucherType } from '@/features/seller/invoices/types';
 import Icon from '@/components/ui/Icon';
 import BaseInputField from '@/components/ui/BaseInputField';
-import BaseSelectField from '@/components/ui/BaseSelectField';
 
 interface InvoiceFilters {
     search?: string;
     status?: VoucherStatus | 'ALL';
     type?: VoucherType | 'ALL';
+    dateFrom?: string;
+    dateTo?: string;
+    product?: string;
+    service?: string;
 }
 
 interface InvoiceFiltersProps {
     search: string;
     status: VoucherStatus | 'ALL';
     type: VoucherType | 'ALL';
+    dateFrom: string;
+    dateTo: string;
+    product: string;
+    service: string;
     onFilterChange: (filters: Partial<InvoiceFilters>) => void;
     onClear: () => void;
 }
 
-export default function InvoiceFilters({ search, status, type, onFilterChange, onClear }: InvoiceFiltersProps) {
+export default function InvoiceFilters({ search, status, type, dateFrom, dateTo, product, service, onFilterChange, onClear }: InvoiceFiltersProps) {
     return (
         <div className="glass-card p-6 border-[var(--border-subtle)] animate-fadeIn">
-            <div className="flex flex-col md:flex-row gap-4 items-end">
-                <div className="flex-1 space-y-2 w-full">
+            <div className="flex flex-col md:flex-row gap-4 items-end flex-wrap">
+                <div className="flex-1 space-y-2 w-full md:w-auto min-w-[200px]">
                     <BaseInputField
                         label="Búsqueda"
                         name="invoice-search"
@@ -36,14 +43,22 @@ export default function InvoiceFilters({ search, status, type, onFilterChange, o
                     />
                 </div>
 
-                <div className="w-full md:w-48 space-y-2">
+                <div className="space-y-2">
+                    <label className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1">Fecha Desde</label>
+                    <input type="date" value={dateFrom} onChange={(e) => onFilterChange({ dateFrom: e.target.value })}
+                        className="w-full p-3 bg-[var(--bg-secondary)] border-none rounded-2xl text-xs font-mono text-emerald-600 focus:ring-2 focus:ring-emerald-500/20 cursor-pointer outline-none" />
+                </div>
+                <div className="space-y-2">
+                    <label className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1">Fecha Hasta</label>
+                    <input type="date" value={dateTo} onChange={(e) => onFilterChange({ dateTo: e.target.value })}
+                        className="w-full p-3 bg-[var(--bg-secondary)] border-none rounded-2xl text-xs font-mono text-emerald-600 focus:ring-2 focus:ring-emerald-500/20 cursor-pointer outline-none" />
+                </div>
+
+                <div className="w-full md:w-40 space-y-2">
                     <label htmlFor="invoice-status" className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1">Estado</label>
-                    <select
-                        id="invoice-status"
-                        value={status}
+                    <select id="invoice-status" value={status}
                         onChange={(e) => onFilterChange({ status: e.target.value as VoucherStatus | 'ALL' })}
-                        className="w-full p-3 bg-[var(--bg-secondary)] border-none rounded-2xl text-[10px] font-black uppercase tracking-widest text-emerald-600 focus:ring-2 focus:ring-emerald-500/20 cursor-pointer outline-none"
-                    >
+                        className="w-full p-3 bg-[var(--bg-secondary)] border-none rounded-2xl text-[10px] font-black uppercase tracking-widest text-emerald-600 focus:ring-2 focus:ring-emerald-500/20 cursor-pointer outline-none">
                         <option value="ALL">Todos los Estados</option>
                         <option value="DRAFT">Borrador</option>
                         <option value="SENT_WAIT_CDR">Enviado</option>
@@ -53,26 +68,32 @@ export default function InvoiceFilters({ search, status, type, onFilterChange, o
                     </select>
                 </div>
 
-                <div className="w-full md:w-48 space-y-2">
-                    <label htmlFor="invoice-type" className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1">Tipo de Comprobante</label>
-                    <select
-                        id="invoice-type"
-                        value={type}
+                <div className="w-full md:w-40 space-y-2">
+                    <label htmlFor="invoice-type" className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1">Tipo</label>
+                    <select id="invoice-type" value={type}
                         onChange={(e) => onFilterChange({ type: e.target.value as VoucherType | 'ALL' })}
-                        className="w-full p-3 bg-[var(--bg-secondary)] border-none rounded-2xl text-[10px] font-black uppercase tracking-widest text-emerald-600 focus:ring-2 focus:ring-emerald-500/20 cursor-pointer outline-none"
-                    >
-                        <option value="ALL">Todos los Tipos</option>
+                        className="w-full p-3 bg-[var(--bg-secondary)] border-none rounded-2xl text-[10px] font-black uppercase tracking-widest text-emerald-600 focus:ring-2 focus:ring-emerald-500/20 cursor-pointer outline-none">
+                        <option value="ALL">Todos</option>
                         <option value="BOLETA">Boleta</option>
                         <option value="FACTURA">Factura</option>
                         <option value="NOTA_CREDITO">Nota de Crédito</option>
                     </select>
                 </div>
 
-                <button
-                    onClick={onClear}
+                <div className="flex-1 space-y-2 w-full md:w-auto min-w-[160px]">
+                    <BaseInputField label="Producto" name="invoice-product" value={product}
+                        onChange={(value) => onFilterChange({ product: value })} placeholder="Filtrar por producto..."
+                        icon="Package" inputClassName="bg-[var(--bg-secondary)] text-sm focus:ring-emerald-500/20" />
+                </div>
+                <div className="flex-1 space-y-2 w-full md:w-auto min-w-[160px]">
+                    <BaseInputField label="Servicio" name="invoice-service" value={service}
+                        onChange={(value) => onFilterChange({ service: value })} placeholder="Filtrar por servicio..."
+                        icon="Calendar" inputClassName="bg-[var(--bg-secondary)] text-sm focus:ring-emerald-500/20" />
+                </div>
+
+                <button onClick={onClear}
                     className="p-3 bg-[var(--bg-secondary)] text-[var(--text-secondary)] rounded-2xl hover:bg-[var(--bg-hover)] transition-all shadow-sm active:scale-95 border border-[var(--border-subtle)]"
-                    title="Limpiar Filtros"
-                >
+                    title="Limpiar Filtros">
                     <Icon name="RotateCcw" className="w-5 h-5" />
                 </button>
             </div>

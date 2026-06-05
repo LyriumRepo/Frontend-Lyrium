@@ -4,11 +4,9 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import Icon from '@/components/ui/Icon';
-import { useCarritoStore } from '@/store/carritoStore';
 
 export default function PublicFooter() {
     const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
-    const cartOpen = useCarritoStore((s) => s.ui.cartOpen);
 
     const toggleSection = (section: string) => {
         setOpenSections(prev => ({
@@ -55,16 +53,6 @@ export default function PublicFooter() {
                 </div>
             </div>
 
-            <Link
-                href="https://wa.me/51937093420"
-                target="_blank"
-                className={`fixed bottom-5 right-5 bg-green-500 hover:bg-green-600 text-white px-5 py-3 rounded-full shadow-lg hidden lg:flex items-center gap-2 text-base z-[100] transition-opacity duration-300 ${
-                    cartOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'
-                }`}
-            >
-                <Icon name="MessageCircle" className="text-2xl" />
-                ¿Cómo puedo ayudarte?
-            </Link>
         </footer>
     );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import Icon from '@/components/ui/Icon';
 import { Voucher, VoucherStatus } from '@/features/seller/invoices/types';
 import { formatCurrency } from '@/shared/lib/utils/formatters';
@@ -127,6 +127,34 @@ export default function InvoiceDrawer({ voucher, isOpen, onClose }: InvoiceDrawe
                                 </div>
                             </a>
                         )}
+                    </div>
+
+                    {/* Compartir */}
+                    <div className="space-y-4">
+                        <h3 className="text-xs font-black text-[var(--text-secondary)] uppercase tracking-widest flex items-center gap-2">
+                            <Icon name="Share2" className="w-4 h-4" /> Compartir
+                        </h3>
+                        <div className="flex gap-3">
+                            <button onClick={() => {
+                                const url = `${window.location.origin}/seller/invoices`;
+                                const text = `Comprobante ${voucher.type} ${voucher.series}-${voucher.number} - S/ ${voucher.amount.toFixed(2)}`;
+                                if (navigator.share) {
+                                    navigator.share({ title: text, url: `${url}?id=${voucher.id}` }).catch(() => {});
+                                } else {
+                                    navigator.clipboard.writeText(`${text}\n${url}?id=${voucher.id}`).catch(() => {});
+                                }
+                            }}
+                                className="flex-1 flex items-center justify-center gap-2 p-4 bg-[var(--bg-secondary)] rounded-2xl hover:bg-sky-500/10 transition-all border border-[var(--border-subtle)] group">
+                                <Icon name="Share2" className="w-5 h-5 text-sky-500" />
+                                <span className="text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)] group-hover:text-sky-600">Compartir</span>
+                            </button>
+                            <a href={`https://wa.me/?text=${encodeURIComponent(`Comprobante ${voucher.type} ${voucher.series}-${voucher.number} - S/ ${voucher.amount.toFixed(2)}`)}`}
+                                target="_blank" rel="noopener noreferrer"
+                                className="flex-1 flex items-center justify-center gap-2 p-4 bg-[var(--bg-secondary)] rounded-2xl hover:bg-emerald-500/10 transition-all border border-[var(--border-subtle)] group">
+                                <Icon name="MessageCircle" className="w-5 h-5 text-emerald-500" />
+                                <span className="text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)] group-hover:text-emerald-600">WhatsApp</span>
+                            </a>
+                        </div>
                     </div>
 
                     {(voucher.xml_url || voucher.cdr_url) && (

@@ -42,6 +42,10 @@ export function InvoicesPageClient() {
                 search={filters.search}
                 status={filters.status}
                 type={filters.type}
+                dateFrom={filters.dateFrom}
+                dateTo={filters.dateTo}
+                product={filters.product}
+                service={filters.service}
                 onFilterChange={setFilters}
                 onClear={clearFilters}
             />

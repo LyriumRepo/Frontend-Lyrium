@@ -57,6 +57,7 @@ export interface OrderData {
     promoCode: string;
     discount: number;
     savePayment: boolean;
+    selectedPaymentMethodId: number | null;
 }
 
 export interface OrderResult {
@@ -121,6 +122,7 @@ const defaultOrder: OrderData = {
     promoCode: '',
     discount: 0,
     savePayment: false,
+    selectedPaymentMethodId: null,
 };
 
 export const useCheckoutStore = create<CheckoutState>((set) => ({

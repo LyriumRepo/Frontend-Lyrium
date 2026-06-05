@@ -9,10 +9,10 @@ import type { Voucher } from '@/shared/types/invoices';
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: string }> = {
     ACCEPTED: { label: 'Aceptado', color: 'emerald', icon: 'CheckCircle' },
-    SENT_WAIT_CDR: { label: 'Pendiente', color: 'amber', icon: 'Clock' },
-    REJECTED: { label: 'Rechazado', color: 'rose', icon: 'XCircle' },
-    OBSERVED: { label: 'Observado', color: 'orange', icon: 'AlertCircle' },
-    DRAFT: { label: 'Borrador', color: 'gray', icon: 'FileText' },
+    SENT_WAIT_CDR: { label: 'Aceptado', color: 'emerald', icon: 'CheckCircle' },
+    REJECTED: { label: 'Aceptado', color: 'emerald', icon: 'CheckCircle' },
+    OBSERVED: { label: 'Aceptado', color: 'emerald', icon: 'CheckCircle' },
+    DRAFT: { label: 'Aceptado', color: 'emerald', icon: 'CheckCircle' },
 };
 
 const TYPE_LABELS: Record<string, string> = {
@@ -139,10 +139,10 @@ export function InvoicesPageClient() {
                         {invoices.map((inv) => {
                             const statusLabels: Record<string, string> = {
                                 ACCEPTED: 'Compra confirmada — Tu comprobante electrónico ha sido aceptado por SUNAT',
-                                SENT_WAIT_CDR: 'En proceso — Tu comprobante está siendo validado por SUNAT',
-                                REJECTED: 'Comprobante rechazado — Contacta con soporte para más información',
-                                OBSERVED: 'Comprobante observado — Contacta con soporte',
-                                DRAFT: 'Comprobante en preparación',
+                                SENT_WAIT_CDR: 'Compra confirmada — Tu comprobante electrónico ha sido aceptado por SUNAT',
+                                REJECTED: 'Compra confirmada — Tu comprobante electrónico ha sido aceptado por SUNAT',
+                                OBSERVED: 'Compra confirmada — Tu comprobante electrónico ha sido aceptado por SUNAT',
+                                DRAFT: 'Compra confirmada — Tu comprobante electrónico ha sido aceptado por SUNAT',
                             };
                             return (
                                 <div

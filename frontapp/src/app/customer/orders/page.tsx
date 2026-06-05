@@ -1161,58 +1161,35 @@ export default function CustomerOrdersPage() {
               </div>
 
               {selectedOrder.estado !== 'cancelado' && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <button
-                    onClick={async () => {
-                      try {
-                        await orderApi.downloadPaymentConfirmation(selectedOrder.originalId);
-                      } catch (err) {
-                        console.error('Error al descargar confirmación:', err);
-                      }
-                    }}
-                    className="py-5 rounded-2xl bg-gradient-to-r from-emerald-500 to-emerald-600 dark:from-[#2d5e42] dark:to-[#1a3a2a] text-white font-black text-xs uppercase tracking-[0.2em] hover:shadow-lg hover:shadow-emerald-200 dark:hover:shadow-[#2d5e42]/30 transition-all flex items-center justify-center gap-3"
-                  >
-                    <Icon name="Download" className="w-5 h-5" />
-                    Descargar Confirmación de Pago
-                  </button>
-                  <button
-                    onClick={async () => {
-                      try {
-                        await orderApi.downloadReceipt(selectedOrder.originalId);
-                      } catch (err) {
-                        console.error('Error al descargar boleta:', err);
-                      }
-                    }}
-                    className="py-5 rounded-2xl bg-gradient-to-r from-sky-500 to-sky-600 dark:from-[#4A7C59] dark:to-[#2d5e42] text-white font-black text-xs uppercase tracking-[0.2em] hover:shadow-lg hover:shadow-sky-200 dark:hover:shadow-[#4A7C59]/30 transition-all flex items-center justify-center gap-3"
-                  >
-                    <Icon name="FileText" className="w-5 h-5" />
-                    Descargar Boleta de Compra
-                  </button>
-                </div>
-              )}
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <button
-                  onClick={closeModal}
-                  className="py-5 rounded-2xl bg-gray-100 dark:bg-[var(--bg-muted)] text-gray-600 dark:text-[var(--text-primary)] font-black text-xs uppercase tracking-widest hover:bg-gray-200 dark:hover:bg-[#2A3F33] transition-all"
-                >
-                  Cerrar Ventana
-                </button>
                 <button
                   onClick={async () => {
                     try {
-                      const result = await orderApi.requestReceipt(selectedOrder.originalId);
-                      router.push(`/customer/chat?conversation=${result.conversationId}`);
+                      await orderApi.downloadPaymentConfirmation(selectedOrder.originalId);
                     } catch (err) {
-                      console.error('Error al solicitar comprobante:', err);
+                      console.error('Error al descargar confirmación:', err);
                     }
                   }}
-                  className="py-5 rounded-2xl bg-gradient-to-r from-amber-400 to-orange-500 dark:from-[var(--brand-green)] dark:to-[var(--brand-green-hover)] text-white font-black text-xs uppercase tracking-[0.2em] hover:shadow-lg hover:shadow-amber-200 transition-all flex items-center justify-center gap-3"
+                  className="w-full py-5 rounded-2xl bg-gradient-to-r from-emerald-500 to-emerald-600 dark:from-[#2d5e42] dark:to-[#1a3a2a] text-white font-black text-xs uppercase tracking-[0.2em] hover:shadow-lg hover:shadow-emerald-200 dark:hover:shadow-[#2d5e42]/30 transition-all flex items-center justify-center gap-3"
                 >
-                  <Icon name="MessageCircle" className="w-5 h-5" />
-                  Pedir Comprobante al Vendedor
+                  <Icon name="Download" className="w-5 h-5" />
+                  Descargar Confirmación de Pago
                 </button>
-              </div>
+              )}
+
+              <button
+                onClick={async () => {
+                  try {
+                    const result = await orderApi.requestReceipt(selectedOrder.originalId);
+                    router.push(`/customer/chat?conversation=${result.conversationId}`);
+                  } catch (err) {
+                    console.error('Error al solicitar comprobante:', err);
+                  }
+                }}
+                className="w-full py-5 rounded-2xl bg-gradient-to-r from-amber-400 to-orange-500 dark:from-[var(--brand-green)] dark:to-[var(--brand-green-hover)] text-white font-black text-xs uppercase tracking-[0.2em] hover:shadow-lg hover:shadow-amber-200 transition-all flex items-center justify-center gap-3"
+              >
+                <Icon name="MessageCircle" className="w-5 h-5" />
+                Pedir Comprobante al Vendedor
+              </button>
             </div>
           </div>
         </div>

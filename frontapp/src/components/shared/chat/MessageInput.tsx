@@ -13,6 +13,7 @@ interface MessageInputProps {
 export default function MessageInput({ onSend, placeholder = 'Escribe un mensaje...', disabled = false, typing = false }: MessageInputProps) {
   const [message, setMessage] = useState('');
   const [files, setFiles] = useState<File[]>([]);
+  const [sending, setSending] = useState(false);
   const inputId = useId();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -22,6 +23,8 @@ export default function MessageInput({ onSend, placeholder = 'Escribe un mensaje
     const trimmed = message.trim();
     if (!trimmed && files.length === 0) return;
     onSend(trimmed, files.length > 0 ? files : undefined);
+    setSending(true);
+    setTimeout(() => setSending(false), 400);
     setMessage('');
     setFiles([]);
   };
@@ -141,9 +144,13 @@ export default function MessageInput({ onSend, placeholder = 'Escribe un mensaje
           type="submit"
           disabled={(!message.trim() && files.length === 0) || disabled}
           aria-label="Enviar mensaje"
-          className="w-11 h-11 bg-[#2d5e42] dark:bg-[#4A7C59] text-white rounded-2xl flex items-center justify-center hover:bg-[#1a3a2a] dark:hover:bg-[#3D6B4A] hover:scale-105 active:scale-95 transition-all shadow-lg shadow-[#2d5e42]/20 dark:shadow-[#4A7C59]/20 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 shrink-0"
+          className={`w-11 h-11 bg-[#2d5e42] dark:bg-[#4A7C59] text-white rounded-2xl flex items-center justify-center hover:bg-[#1a3a2a] dark:hover:bg-[#3D6B4A] hover:scale-105 active:scale-90 transition-all shadow-lg shadow-[#2d5e42]/20 dark:shadow-[#4A7C59]/20 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 shrink-0 ${sending ? 'animate-pulse scale-95' : ''}`}
         >
-          <Icon name="Send" className="w-4.5 h-4.5" />
+          {sending ? (
+            <div className="w-4.5 h-4.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          ) : (
+            <Icon name="Send" className="w-4.5 h-4.5" />
+          )}
         </button>
       </div>
     </form>

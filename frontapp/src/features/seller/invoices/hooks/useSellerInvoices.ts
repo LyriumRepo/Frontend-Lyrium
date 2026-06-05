@@ -3,52 +3,25 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Voucher, InvoiceKPIs, VoucherStatus, VoucherType } from '../types';
-import { useFilteredList, FilterConfig } from '@/shared/hooks/useFilteredList';
 import { invoiceApi } from '@/shared/lib/api/invoiceRepository';
 
 export interface VoucherFilters {
     search: string;
     status: VoucherStatus | 'ALL';
     type: VoucherType | 'ALL';
+    dateFrom: string;
+    dateTo: string;
+    product: string;
+    service: string;
 }
-
-const filterConfig: FilterConfig<Voucher, VoucherFilters> = {
-    search: {
-        enabled: true,
-        fields: [
-            (v: Voucher) => v.series,
-            (v: Voucher) => v.number,
-            (v: Voucher) => v.customer_name,
-            (v: Voucher) => v.customer_ruc
-        ]
-    },
-    fields: {
-        status: {
-            type: 'select',
-            options: [
-                { value: 'ALL', label: 'Todos' },
-                { value: 'DRAFT', label: 'Borrador' },
-                { value: 'SENT_WAIT_CDR', label: 'Esperando CDR' },
-                { value: 'ACCEPTED', label: 'Aceptado' },
-                { value: 'OBSERVED', label: 'Observado' },
-                { value: 'REJECTED', label: 'Rechazado' }
-            ]
-        },
-        type: {
-            type: 'select',
-            options: [
-                { value: 'ALL', label: 'Todos' },
-                { value: 'FACTURA', label: 'Factura' },
-                { value: 'BOLETA', label: 'Boleta' },
-                { value: 'NOTA_CREDITO', label: 'Nota Crédito' }
-            ]
-        }
-    }
-};
 
 export function useSellerInvoices() {
     const [selectedVoucher, setSelectedVoucher] = useState<Voucher | null>(null);
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+    const [filters, setFiltersState] = useState<VoucherFilters>({
+        search: '', status: 'ALL', type: 'ALL',
+        dateFrom: '', dateTo: '', product: '', service: ''
+    });
 
     const { data: vouchers = [], isLoading } = useQuery({
         queryKey: ['seller', 'invoices', 'list'],
@@ -68,38 +41,49 @@ export function useSellerInvoices() {
         staleTime: 2 * 60 * 1000,
     });
 
-    const {
-        filteredData: filteredVouchers,
-        filters,
-        setFilter,
-        setSearch,
-        clearFilters,
-        hasActiveFilters
-    } = useFilteredList<Voucher, VoucherFilters>({
-        data: vouchers,
-        config: filterConfig,
-        initialFilters: { search: '', status: 'ALL', type: 'ALL' }
+    const filteredVouchers = vouchers.filter((v) => {
+        if (filters.search) {
+            const s = filters.search.toLowerCase();
+            const match = v.series.toLowerCase().includes(s) ||
+                v.number.toLowerCase().includes(s) ||
+                v.customer_name.toLowerCase().includes(s) ||
+                v.customer_ruc.toLowerCase().includes(s);
+            if (!match) return false;
+        }
+        if (filters.status !== 'ALL' && v.sunat_status !== filters.status) return false;
+        if (filters.type !== 'ALL' && v.type !== filters.type) return false;
+        if (filters.dateFrom && new Date(v.emission_date) < new Date(filters.dateFrom)) return false;
+        if (filters.dateTo) {
+            const end = new Date(filters.dateTo);
+            end.setHours(23, 59, 59, 999);
+            if (new Date(v.emission_date) > end) return false;
+        }
+        if (filters.product && v.items) {
+            const hasProduct = v.items.some((i) => i.product_name?.toLowerCase().includes(filters.product.toLowerCase()));
+            if (!hasProduct) return false;
+        }
+        if (filters.service && v.items) {
+            const hasService = v.items.some((i) => i.service_name?.toLowerCase().includes(filters.service.toLowerCase()));
+            if (!hasService) return false;
+        }
+        return true;
     });
 
     const kpis = kpisData ?? null;
 
-    const typedFilters: VoucherFilters = {
-        search: filters.search ?? '',
-        status: (filters.status as VoucherStatus | 'ALL') ?? 'ALL',
-        type: (filters.type as VoucherType | 'ALL') ?? 'ALL'
+    const setFilters = (newFilters: Partial<VoucherFilters>) => {
+        setFiltersState((prev) => ({ ...prev, ...newFilters }));
     };
 
-    const setFilters = (newFilters: Partial<VoucherFilters>) => {
-        if (newFilters.search !== undefined) {
-            setSearch(newFilters.search);
-        }
-        if (newFilters.status !== undefined) {
-            setFilter('status', newFilters.status);
-        }
-        if (newFilters.type !== undefined) {
-            setFilter('type', newFilters.type);
-        }
+    const clearAllFilters = () => {
+        setFiltersState({
+            search: '', status: 'ALL', type: 'ALL',
+            dateFrom: '', dateTo: '', product: '', service: ''
+        });
     };
+
+    const hasActiveFilters = filters.search !== '' || filters.status !== 'ALL' || filters.type !== 'ALL' ||
+        filters.dateFrom !== '' || filters.dateTo !== '' || filters.product !== '' || filters.service !== '';
 
     return {
         vouchers: filteredVouchers,
@@ -107,9 +91,9 @@ export function useSellerInvoices() {
         isLoading,
         selectedVoucher,
         isDrawerOpen,
-        filters: typedFilters,
+        filters,
         setFilters,
-        clearFilters,
+        clearFilters: clearAllFilters,
         hasActiveFilters,
         handleViewDetail: (voucher: Voucher) => {
             setSelectedVoucher(voucher);

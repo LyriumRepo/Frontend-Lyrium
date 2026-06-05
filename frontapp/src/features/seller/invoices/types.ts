@@ -31,6 +31,7 @@ export interface Voucher {
     cdr_url?: string | null;
     created_at?: string;
     updated_at?: string;
+    items?: { product_name?: string; service_name?: string; quantity: number; line_total: number }[];
 }
 
 export interface InvoiceKPIs {

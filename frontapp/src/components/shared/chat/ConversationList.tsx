@@ -9,6 +9,10 @@ export interface Conversation {
   lastMessage: string;
   unreadCount?: number;
   isActive?: boolean;
+  lastMessageTime?: string;
+  avatar?: string;
+  storeName?: string;
+  category?: string;
 }
 
 export interface ChatFeatures {
@@ -91,44 +95,76 @@ export default function ConversationList({
   }
 
   return (
-    <div className="flex-1 overflow-y-auto custom-scrollbar" role="listbox" aria-label="Conversaciones">
-      {conversations.map((conv) => (
-        <button
-          key={conv.id}
-          onClick={() => onSelect(conv.id)}
-          role="option"
-          aria-selected={activeId === conv.id}
-          className={`w-full p-6 border-b border-[var(--border-subtle)] text-left transition-all relative group ${
-            activeId === conv.id 
-              ? accent.activeBg 
-              : accent.hoverBg
-          }`}
-        >
-          {/* Active indicator */}
-          {activeId === conv.id && (
-            <div className={`absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-10 ${accent.indicator} rounded-r-full`} aria-hidden="true" />
-          )}
-          
-          <div className="flex items-start justify-between">
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-black text-[var(--text-primary)] truncate uppercase tracking-tight">
-                {conv.name}
-              </p>
-            </div>
-            
-            {/* Unread badge */}
-            {features.showUnreadCount && conv.unreadCount && conv.unreadCount > 0 && (
-              <span className={`px-2 py-0.5 ${accent.badge} text-white text-[9px] font-black rounded-full flex items-center justify-center`} aria-label={`${conv.unreadCount} mensajes sin leer`}>
-                {conv.unreadCount}
-              </span>
+    <div className="flex-1 overflow-y-auto custom-scrollbar scrollbar-thin" role="listbox" aria-label="Conversaciones">
+      {conversations.map((conv) => {
+        const initial = (conv.storeName ?? conv.name).charAt(0).toUpperCase();
+        const colors = [
+          'from-sky-400 to-blue-500',
+          'from-emerald-400 to-teal-500',
+          'from-violet-400 to-purple-500',
+          'from-amber-400 to-orange-500',
+          'from-rose-400 to-pink-500',
+          'from-cyan-400 to-sky-500',
+        ];
+        const colorIdx = conv.id.charCodeAt(0) % colors.length;
+        const avatarGrad = colors[colorIdx];
+        return (
+          <button
+            key={conv.id}
+            onClick={() => onSelect(conv.id)}
+            role="option"
+            aria-selected={activeId === conv.id}
+            className={`w-full p-4 border-b border-[var(--border-subtle)] text-left transition-all duration-200 relative group ${
+              activeId === conv.id 
+                ? `${accent.activeBg} bg-opacity-50` 
+                : `${accent.hoverBg} hover:pl-6`
+            }`}
+          >
+            {activeId === conv.id && (
+              <div className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 h-10 ${accent.indicator} rounded-r-full shadow-sm`} aria-hidden="true" />
             )}
-          </div>
-          
-          <p className="text-[10px] text-[var(--text-secondary)] font-medium truncate mt-2 leading-relaxed">
-            {conv.lastMessage}
-          </p>
-        </button>
-      ))}
+            
+            <div className="flex items-start gap-3">
+              <div className={`w-10 h-10 shrink-0 rounded-full bg-gradient-to-br ${avatarGrad} flex items-center justify-center text-white font-black text-sm shadow-sm transition-transform duration-200 group-hover:scale-105`}>
+                {initial}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between gap-2">
+                  <p className={`text-xs font-black truncate uppercase tracking-tight transition-colors duration-200 ${
+                    activeId === conv.id ? 'text-[var(--text-primary)]' : 'text-[var(--text-primary)]'
+                  }`}>
+                    {conv.storeName ?? conv.name}
+                  </p>
+                  {conv.lastMessageTime && (
+                    <span className="text-[9px] text-gray-400 dark:text-gray-500 shrink-0 font-medium">
+                      {conv.lastMessageTime}
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center justify-between mt-1.5">
+                  <p className={`text-[10px] leading-relaxed truncate ${
+                    conv.unreadCount && conv.unreadCount > 0
+                      ? 'font-bold text-[var(--text-primary)]'
+                      : 'font-medium text-[var(--text-secondary)]'
+                  }`}>
+                    {conv.lastMessage}
+                  </p>
+                  {features.showUnreadCount && conv.unreadCount && conv.unreadCount > 0 && (
+                    <span className={`ml-2 px-1.5 py-0.5 ${accent.badge} text-white text-[9px] font-black rounded-full min-w-[18px] text-center leading-none`} aria-label={`${conv.unreadCount} mensajes sin leer`}>
+                      {conv.unreadCount}
+                    </span>
+                  )}
+                </div>
+                {conv.category && (
+                  <p className="text-[9px] text-gray-400 dark:text-gray-500 font-medium mt-1 uppercase tracking-wider">
+                    {conv.category}
+                  </p>
+                )}
+              </div>
+            </div>
+          </button>
+        );
+      })}
     </div>
   );
 }

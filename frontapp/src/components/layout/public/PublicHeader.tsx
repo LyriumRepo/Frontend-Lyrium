@@ -115,16 +115,6 @@ export default function PublicHeader() {
                 dashboardUrl={dashboardUrl}
             />
 
-            {/* WhatsApp floating button (mobile only) */}
-            <Link
-                href="https://wa.me/51999999999?text=Hola,%20tengo%20una%20consulta"
-                target="_blank"
-                className="fixed bottom-6 right-6 z-50 lg:hidden"
-            >
-                <div className="bg-green-500 dark:bg-[#2E7D32] text-white rounded-full w-14 h-14 flex items-center justify-center shadow-lg hover:bg-green-600 dark:hover:bg-[#1B5E20] transition-all duration-300 hover:scale-110">
-                    <Icon name="MessageCircle" className="text-3xl" />
-                </div>
-            </Link>
         </>
     );
 }

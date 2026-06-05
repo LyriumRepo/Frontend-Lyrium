@@ -159,6 +159,25 @@ export function ChatPageClient({ conversationId }: { conversationId?: string }) 
     return date.toLocaleDateString('es-PE', { day: 'numeric', month: 'short' });
   };
 
+  const formatDateSeparator = (timestamp: string) => {
+    const d = new Date(timestamp);
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    if (d.toDateString() === today.toDateString()) return 'Hoy';
+    if (d.toDateString() === yesterday.toDateString()) return 'Ayer';
+    return d.toLocaleDateString('es-PE', { day: 'numeric', month: 'long', year: 'numeric' });
+  };
+
+  const shouldShowDateSeparator = (prevIso: string | null, currIso: string): boolean => {
+    if (!prevIso) return true;
+    try {
+      return new Date(prevIso).toDateString() !== new Date(currIso).toDateString();
+    } catch {
+      return true;
+    }
+  };
+
   const filteredConversations = conversations.filter(conv => {
     if (!filterValue) return true;
     if (filterType === 'tienda') {
@@ -323,91 +342,116 @@ export function ChatPageClient({ conversationId }: { conversationId?: string }) 
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-gray-50/50 dark:bg-[var(--bg-muted)]/30">
+      <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-1 bg-[#f8fafb] dark:bg-[var(--bg-muted)]/20">
         {error && (
-          <div className="flex items-start gap-3 p-4 rounded-2xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+          <div className="flex items-start gap-3 p-4 rounded-2xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 mb-4 animate-fadeIn">
             <Icon name="AlertCircle" className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
             <p className="text-sm font-semibold text-red-700 dark:text-red-400">{error}</p>
           </div>
         )}
 
-        {messages.map((msg) => {
+        {messages.map((msg, idx) => {
           const isCustomer = msg.senderType === 'customer';
+          const prevMsg = idx > 0 ? messages[idx - 1] : null;
+          const showDate = shouldShowDateSeparator(prevMsg?.timestamp ?? null, msg.timestamp);
+          const isRead = msg.read;
 
           return (
-            <div key={msg.id} className={`flex ${isCustomer ? 'justify-end' : 'justify-start'}`}>
-              <div className={`flex max-w-[75%] items-end gap-3 ${isCustomer ? 'flex-row-reverse' : 'flex-row'}`}>
-                <div className={`w-9 h-9 shrink-0 rounded-full flex items-center justify-center text-[10px] font-black shadow-sm ${
-                  isCustomer
-                    ? 'bg-gradient-to-br from-emerald-400 to-emerald-600 text-white'
-                    : 'bg-gradient-to-br from-sky-400 to-sky-600 dark:from-[var(--brand-green)] dark:to-[#1A3A32] text-white'
-                }`}>
-                  {isCustomer ? 'Tú' : activeConversation.sellerStore.charAt(0)}
+            <React.Fragment key={msg.id}>
+              {showDate && (
+                <div className="flex justify-center my-4 md:my-6 animate-fadeIn">
+                  <span className="px-4 py-1 bg-white/70 dark:bg-[#1A3A32]/70 backdrop-blur-sm border border-gray-200/50 dark:border-[var(--border-subtle)] rounded-full text-[9px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-wider shadow-sm">
+                    {formatDateSeparator(msg.timestamp)}
+                  </span>
                 </div>
+              )}
 
-                <div className={`relative rounded-3xl px-5 py-3 shadow-sm border backdrop-blur-sm ${
-                  isCustomer
-                    ? 'bg-gradient-to-br from-emerald-500 to-emerald-600 text-white border-emerald-400/20 rounded-br-md'
-                    : 'bg-white dark:bg-[#1A3A32] text-slate-800 dark:text-[var(--text-primary)] border-gray-200 dark:border-[var(--border-subtle)] rounded-bl-md'
-                }`}>
-                  <div className="mb-1 flex items-center gap-2">
-                    <p className={`text-[11px] font-black uppercase tracking-[0.16em] ${
-                      isCustomer ? 'text-emerald-100' : 'text-sky-600 dark:text-[var(--icons-green)]'
-                    }`}>
-                      {isCustomer ? 'Tú' : activeConversation.sellerName}
-                    </p>
-                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
-                      isCustomer ? 'bg-white/15 text-emerald-50' : 'bg-sky-50 dark:bg-[#2A3F33] text-sky-700 dark:text-[#6BAF7B]'
-                    }`}>
-                      {isCustomer ? 'Cliente' : 'Vendedor'}
-                    </span>
+              <div
+                className={`flex ${isCustomer ? 'justify-end' : 'justify-start'} ${
+                  idx > 0 && !showDate ? 'mt-1' : 'mt-1'
+                } animate-fadeIn`}
+                style={{ animationDelay: `${Math.min(idx * 15, 200)}ms` }}
+              >
+                <div className={`flex max-w-[88%] md:max-w-[72%] items-end gap-2 md:gap-3 ${isCustomer ? 'flex-row-reverse' : 'flex-row'}`}>
+                  <div className={`w-7 h-7 md:w-9 md:h-9 shrink-0 rounded-full flex items-center justify-center text-[8px] md:text-[10px] font-black shadow-sm transition-transform duration-200 hover:scale-110 ${
+                    isCustomer
+                      ? 'bg-gradient-to-br from-emerald-400 to-emerald-600 text-white'
+                      : 'bg-gradient-to-br from-sky-400 to-sky-600 dark:from-[var(--brand-green)] dark:to-[#1A3A32] text-white'
+                  }`}>
+                    {isCustomer ? 'Tú' : activeConversation.sellerStore.charAt(0)}
                   </div>
-                  {msg.content && <p className="text-sm leading-relaxed whitespace-pre-wrap break-all">{msg.content}</p>}
-                  {msg.attachments && msg.attachments.length > 0 && (
-                    <div className="mt-2 space-y-1.5">
-                      {msg.attachments.map((att) => {
-                        const isImage = att.mime_type?.startsWith('image/');
-                        return (
-                          <a
-                            key={att.id}
-                            href={att.download_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition-colors ${
-                              isCustomer
-                                ? 'bg-white/15 text-emerald-50 hover:bg-white/25'
-                                : 'bg-gray-100 dark:bg-[#2A3F33] text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-[#3A4F43]'
-                            }`}
-                          >
-                            {isImage ? (
-                              <img src={att.url} alt={att.file_name} className="w-8 h-8 rounded-lg object-cover shrink-0" />
-                            ) : (
-                              <Icon name="FileText" className="w-4 h-4 shrink-0" />
-                            )}
-                            <div className="flex-1 min-w-0">
-                              <span className="truncate block">{att.file_name}</span>
-                              {att.file_size != null && (
-                                <span className="text-[10px] opacity-60">
-                                  {att.file_size < 1048576
-                                    ? `${(att.file_size / 1024).toFixed(1)} KB`
-                                    : `${(att.file_size / 1048576).toFixed(1)} MB`}
-                                </span>
-                              )}
-                            </div>
-                            <Icon name="Download" className="w-3.5 h-3.5 shrink-0 ml-auto" />
-                          </a>
-                        );
-                      })}
+
+                  <div className={`relative rounded-2xl md:rounded-3xl px-4 md:px-5 py-2.5 md:py-3 shadow-sm border transition-all duration-200 hover:shadow-md ${
+                    isCustomer
+                      ? 'bg-gradient-to-br from-emerald-500 to-emerald-600 text-white border-emerald-400/20 rounded-br-sm'
+                      : 'bg-white dark:bg-[#1A3A32] text-slate-800 dark:text-[var(--text-primary)] border-gray-100 dark:border-[var(--border-subtle)] rounded-bl-sm'
+                  }`}>
+                    <div className="mb-1 flex items-center gap-2">
+                      <p className={`text-[9px] md:text-[11px] font-black uppercase tracking-[0.12em] md:tracking-[0.16em] ${
+                        isCustomer ? 'text-emerald-100' : 'text-sky-600 dark:text-[var(--icons-green)]'
+                      }`}>
+                        {isCustomer ? 'Tú' : activeConversation.sellerName}
+                      </p>
+                      <span className={`text-[8px] md:text-[10px] font-semibold px-1.5 md:px-2 py-0.5 rounded-full ${
+                        isCustomer ? 'bg-white/15 text-emerald-50' : 'bg-sky-50 dark:bg-[#2A3F33] text-sky-700 dark:text-[#6BAF7B]'
+                      }`}>
+                        {isCustomer ? 'Cliente' : 'Vendedor'}
+                      </span>
                     </div>
-                  )}
-                  <div className="mt-2 flex justify-end">
-                    <p className={`text-[10px] font-medium ${isCustomer ? 'text-emerald-100/80' : 'text-gray-400 dark:text-gray-500'}`}>
-                      {formatTime(msg.timestamp)}
-                    </p>
+                    {msg.content && <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{msg.content}</p>}
+                    {msg.attachments && msg.attachments.length > 0 && (
+                      <div className={`mt-2 space-y-1.5 ${msg.content ? 'border-t border-white/10 pt-2' : ''}`}>
+                        {msg.attachments.map((att) => {
+                          const isImage = att.mime_type?.startsWith('image/');
+                          return (
+                            <a
+                              key={att.id}
+                              href={att.download_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-200 active:scale-[0.98] ${
+                                isCustomer
+                                  ? 'bg-white/15 text-emerald-50 hover:bg-white/25'
+                                  : 'bg-gray-50 dark:bg-[#2A3F33] text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#3A4F43]'
+                              }`}
+                            >
+                              {isImage ? (
+                                <img src={att.url} alt={att.file_name} className="w-8 h-8 rounded-lg object-cover shrink-0" />
+                              ) : (
+                                <Icon name="FileText" className="w-4 h-4 shrink-0" />
+                              )}
+                              <div className="flex-1 min-w-0">
+                                <span className="truncate block">{att.file_name}</span>
+                                {att.file_size != null && (
+                                  <span className="text-[10px] opacity-60">
+                                    {att.file_size < 1048576
+                                      ? `${(att.file_size / 1024).toFixed(1)} KB`
+                                      : `${(att.file_size / 1048576).toFixed(1)} MB`}
+                                  </span>
+                                )}
+                              </div>
+                              <Icon name="Download" className="w-3.5 h-3.5 shrink-0 ml-auto" />
+                            </a>
+                          );
+                        })}
+                      </div>
+                    )}
+                    <div className={`mt-1.5 flex items-center gap-1.5 ${isCustomer ? 'justify-end' : 'justify-start'}`}>
+                      <span className={`text-[9px] md:text-[10px] font-medium ${isCustomer ? 'text-emerald-100/70' : 'text-gray-400 dark:text-gray-500'}`}>
+                        {formatTime(msg.timestamp)}
+                      </span>
+                      {isCustomer && (
+                        isRead ? (
+                          <Icon name="CheckCheck" className="w-3.5 h-3.5 text-emerald-300 dark:text-emerald-400" />
+                        ) : (
+                          <Icon name="Check" className="w-3.5 h-3.5 text-white/40 dark:text-gray-500" />
+                        )
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            </React.Fragment>
           );
         })}
         <div ref={messagesEndRef} />

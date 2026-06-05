@@ -12,7 +12,6 @@ const defaultSettings: NotificationSettings = {
   email_order: true,
   email_promotions: true,
   email_newsletter: false,
-  sms_order: false,
   push_notifications: true,
 };
 
@@ -20,8 +19,7 @@ const NOTIFICATION_LEGEND: { key: keyof NotificationSettings; icon: string; labe
   { key: 'email_order', icon: 'ShoppingBag', label: 'Pedidos (Correo)', description: 'Actualizaciones de estado de tus pedidos: confirmación, envío, entrega.', channel: 'Email' },
   { key: 'email_promotions', icon: 'Tag', label: 'Promociones (Correo)', description: 'Ofertas especiales, descuentos y cupones exclusivos para ti.', channel: 'Email' },
   { key: 'email_newsletter', icon: 'Newspaper', label: 'Boletín Informativo (Correo)', description: 'Novedades, artículos de bienestar y contenido educativo.', channel: 'Email' },
-  { key: 'sms_order', icon: 'MessageSquare', label: 'SMS de Pedidos', description: 'Mensajes de texto al celular con actualizaciones importantes de tus pedidos.', channel: 'SMS' },
-  { key: 'push_notifications', icon: 'Bell', label: 'Notificaciones Push', description: 'Alertas instantáneas en tu dispositivo móvil sobre pedidos y promociones.', channel: 'Push' },
+  { key: 'push_notifications', icon: 'Bell', label: 'Notificaciones Push', description: 'Alertas instantáneas en tu dispositivo sobre pedidos y promociones.', channel: 'Push' },
 ];
 
 export default function CustomerSettingsPage() {
@@ -64,7 +62,6 @@ export default function CustomerSettingsPage() {
         email_order: settings.email_order,
         email_promotions: settings.email_promotions,
         email_newsletter: settings.email_newsletter,
-        sms_order: settings.sms_order,
         push_notifications: settings.push_notifications,
       });
       setSettings(updated);
@@ -204,39 +201,19 @@ export default function CustomerSettingsPage() {
           <div className="bg-gradient-to-r from-sky-600 via-sky-400 to-sky-500 dark:from-[var(--brand-green)] dark:via-[var(--brand-green-hover)] dark:to-[var(--brand-green)] p-8 flex items-center gap-5 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl" />
             <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-inner">
-              <Icon name="Phone" className="w-6 h-6 text-white" />
+              <Icon name="Bell" className="w-6 h-6 text-white" />
             </div>
             <div>
               <h3 className="text-2xl font-black tracking-tighter leading-none text-white">
-                Móvil
+                Push
               </h3>
               <p className="text-[10px] font-bold text-emerald-100 uppercase tracking-[0.2em] mt-1">
-                SMS y Push
+                Notificaciones en dispositivo
               </p>
             </div>
           </div>
 
           <div className="p-8 space-y-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center shrink-0 mt-0.5">
-                  <Icon name="MessageSquare" className="w-4 h-4 text-emerald-500" />
-                </div>
-                <div>
-                  <p className="text-sm font-bold text-gray-800 dark:text-[var(--text-primary)]">SMS de Pedidos</p>
-                  <p className="text-xs text-gray-500 dark:text-[var(--text-muted)]">Mensajes de texto al celular con actualizaciones de tus pedidos</p>
-                </div>
-              </div>
-              <button
-                onClick={() => handleToggle('sms_order')}
-                className={`relative w-12 h-6 rounded-full transition-colors ${settings.sms_order ? 'bg-sky-500 dark:bg-[var(--icons-green)]' : 'bg-gray-300 dark:bg-[var(--border-subtle)]'
-                  }`}
-              >
-                <span className={`absolute left-0 top-1 w-4 h-4 bg-white rounded-full transition-transform ${settings.sms_order ? 'translate-x-7' : 'translate-x-1'
-                  }`} />
-              </button>
-            </div>
-
             <div className="flex items-center justify-between">
               <div className="flex items-start gap-3">
                 <div className="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center shrink-0 mt-0.5">
@@ -312,7 +289,7 @@ export default function CustomerSettingsPage() {
               <div className="p-4 bg-amber-50 dark:bg-amber-900/10 rounded-2xl border border-amber-200 dark:border-amber-800/30 flex items-start gap-3">
                 <Icon name="Info" className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
                 <p className="text-xs font-bold text-amber-800 dark:text-amber-300">
-                  Los cambios que realices se aplicarán automáticamente al guardar. Las notificaciones de pedidos (correo y SMS) y las notificaciones push son independientes: puedes activar una sin afectar a las otras.
+                  Los cambios que realices se aplicarán automáticamente al guardar. Las notificaciones de pedidos y las notificaciones push son independientes: puedes activar una sin afectar a las otras.
                 </p>
               </div>
 
