@@ -201,7 +201,7 @@ export const AnalyticsModule: React.FC<AnalyticsModuleProps> = ({ state, actions
                     </div>
                 </div>
             </div>
-{/* >>> PEGUE ESTE BLOQUE FINANCIERO INTEGRAL AQUÍ: */}
+ 
 {activeTab === 'finanzas' && financeData && (
     <div className="space-y-8 animate-fadeIn">
         {/* Menú de Sub-Pestañas Financieras y Operativas Completo */}

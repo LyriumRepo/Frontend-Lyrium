@@ -15,6 +15,7 @@ interface OfferBlockProps {
   linkText?: string;
   fallbackImages: string[];
   enableCardCarousel?: boolean;
+  backgroundPosition?: string;
 }
 
 function OfferCard({
@@ -102,6 +103,7 @@ function OfferBlock({
   linkText = 'Ver todo',
   fallbackImages,
   enableCardCarousel = false,
+  backgroundPosition,
   onAddToCart,
   onQuickView,
 }: OfferBlockProps & {
@@ -222,18 +224,21 @@ function OfferBlock({
           <div className="w-[1467px] max-w-full pl-10 pr-4 space-y-4">
             <h2 className="text-xl md:text-2xl font-bold pl-8">{titulo}</h2>
 
-            <div className="relative w-full h-[496px] rounded-[30px] shadow-2xl overflow-hidden">
+            <div className="relative w-full h-[650px] rounded-[30px] shadow-2xl overflow-hidden">
               {/* Carrusel fondo */}
               <div className="absolute inset-0">
                 {fallbackImages.map((img, i) => (
-                  <Image
+                  <div
                     key={i}
-                    src={img}
-                    alt="Fondo"
-                    fill
-                    className={`object-cover transition-opacity duration-1000 ${
+                    className={`absolute inset-0 bg-cover bg-no-repeat bg-center transition-opacity duration-1000 ${
                       i === bgIndex ? 'opacity-100' : 'opacity-0'
                     }`}
+                    style={{ 
+                      backgroundImage: `url('${img}?v=1.2')`,
+                      backgroundAttachment: 'fixed',
+                      backgroundPosition: backgroundPosition || 'center 15%',
+                      backgroundRepeat: 'no-repeat'
+                    }}
                   />
                 ))}
               </div>
@@ -242,13 +247,13 @@ function OfferBlock({
               <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
 
               {/* Contenedor del scroll continuo alineado a la derecha */}
-              <div className="relative z-10 p-4 md:p-8 h-full flex flex-col justify-center">
+              <div className="relative z-10 p-4 pb-0 md:p-8 md:pb-0 h-full flex flex-col justify-end">
                 <div 
-                  className="w-full ml-auto overflow-hidden md:mr-12 mr-4"
+                  className="w-full mx-auto overflow-hidden"
                   style={{ 
-                    maxWidth: '820px',
-                    maskImage: 'linear-gradient(to right, transparent, black 8%, black 92%, transparent)',
-                    WebkitMaskImage: 'linear-gradient(to right, transparent, black 8%, black 92%, transparent)',
+                    maxWidth: '1200px',
+                    maskImage: 'linear-gradient(to right, transparent, black 4%, black 96%, transparent)',
+                    WebkitMaskImage: 'linear-gradient(to right, transparent, black 4%, black 96%, transparent)',
                   }}
                 >
                   <div
@@ -279,17 +284,20 @@ function OfferBlock({
         <div className="w-[1467px] max-w-full pl-10 pr-4 space-y-4">
           <h2 className="text-xl md:text-2xl font-bold pl-8">{titulo}</h2>
 
-          <div className="relative w-full h-[496px] rounded-[30px] shadow-2xl overflow-hidden">
+          <div className="relative w-full h-[650px] rounded-[30px] shadow-2xl overflow-hidden">
             <div className="absolute inset-0">
               {fallbackImages.map((img, i) => (
-                <Image
+                <div
                   key={i}
-                  src={img}
-                  alt="Fondo"
-                  fill
-                  className={`object-cover transition-opacity duration-1000 ${
+                  className={`absolute inset-0 bg-cover bg-no-repeat bg-center transition-opacity duration-1000 ${
                     i === bgIndex ? 'opacity-100' : 'opacity-0'
                   }`}
+                  style={{ 
+                    backgroundImage: `url('${img}?v=1.2')`,
+                    backgroundAttachment: 'fixed',
+                    backgroundPosition: backgroundPosition || 'center 15%',
+                    backgroundRepeat: 'no-repeat'
+                  }}
                 />
               ))}
             </div>
@@ -311,22 +319,34 @@ function OfferBlock({
   }
  
   return (
-    <section className="space-y-4 md:space-y-6 max-w-7xl mx-auto px-4">
-      <div className="flex justify-between">
-        <h2 className="text-xl md:text-2xl font-semibold">{titulo}</h2>
-        <button className="text-sm font-bold text-sky-600">
+    <section className="space-y-4 md:space-y-6 flex flex-col items-center w-full">
+      <div className="w-[1467px] max-w-full pl-10 pr-4 flex justify-between items-center">
+        <h2 className="text-xl md:text-2xl font-bold pl-8">{titulo}</h2>
+        <button className="text-sm font-bold text-sky-600 pr-8">
           {linkText} →
         </button>
       </div>
 
-      <div className="relative w-[1467px] h-[496px] rounded-[30px] shadow-2xl overflow-hidden mx-auto">
+      <div className="relative w-[1467px] max-w-full h-[650px] rounded-[30px] shadow-2xl overflow-hidden mx-auto">
         <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url('${backgroundImage}')` }}
+          className="absolute inset-0 bg-cover bg-no-repeat bg-center"
+          style={{ 
+            backgroundImage: `url('${backgroundImage}?v=1.2')`,
+            backgroundAttachment: 'fixed',
+            backgroundPosition: backgroundPosition || 'center 15%',
+            backgroundRepeat: 'no-repeat'
+          }}
         />
 
-        <div className="relative z-10 p-4 md:p-8 h-full flex flex-col justify-center">
-          <div className="overflow-hidden">
+        <div className="relative z-10 p-4 pb-0 md:p-8 md:pb-0 h-full flex flex-col justify-end">
+          <div 
+            className="w-full mx-auto overflow-hidden"
+            style={{ 
+              maxWidth: '1200px',
+              maskImage: 'linear-gradient(to right, transparent, black 4%, black 96%, transparent)',
+              WebkitMaskImage: 'linear-gradient(to right, transparent, black 4%, black 96%, transparent)',
+            }}
+          >
             {enableCardCarousel ? (
               <div
                 className="flex gap-5 will-change-transform"
@@ -411,20 +431,17 @@ export default function OffersSection({
     '/img/Inicio/las_mejores_ofertas/7.png',
     '/img/1.png',
     '/img/4.png',
-    '/img/7.png',
   ];
 
   const productosImages = [
-    '/img/inicio/las_mejores_ofertas/6.png',
+    '/img/Inicio/las_mejores_ofertas/6.png',
     '/img/2.png',
     '/img/5.png',
-    '/img/8.png',
   ];
 
   const nuevosImages = [
     '/img/Inicio/las_mejores_ofertas/8.png',
     '/img/3.png',
-    '/img/6.png',
     '/img/9.png',
   ];
 
@@ -433,8 +450,9 @@ export default function OffersSection({
       <OfferBlock
         titulo="Las mejores ofertas de Servicios"
         productos={ofertasServicios}
-        backgroundImage="/img/Inicio/7.png"
+        backgroundImage="/img/Inicio/las_mejores_ofertas/7.png"
         fallbackImages={serviciosImages}
+        backgroundPosition="right 60%"
         onAddToCart={handleAddToCart}
         onQuickView={handleQuickView}
       />
@@ -442,9 +460,10 @@ export default function OffersSection({
       <OfferBlock
         titulo="Las mejores ofertas de productos"
         productos={ofertasProductos}
-        backgroundImage="/img/Inicio/6.webp"
+        backgroundImage="/img/Inicio/las_mejores_ofertas/6.png"
         fallbackImages={productosImages}
         enableCardCarousel
+        backgroundPosition="center 80%"
         onAddToCart={handleAddToCart}
         onQuickView={handleQuickView}
       />
@@ -452,8 +471,9 @@ export default function OffersSection({
       <OfferBlock
         titulo="Productos Nuevos"
         productos={productosNuevos}
-        backgroundImage="/img/Inicio/8.png"
+        backgroundImage="/img/Inicio/las_mejores_ofertas/8.png"
         fallbackImages={nuevosImages}
+        backgroundPosition="center 40%"
         onAddToCart={handleAddToCart}
         onQuickView={handleQuickView}
       />

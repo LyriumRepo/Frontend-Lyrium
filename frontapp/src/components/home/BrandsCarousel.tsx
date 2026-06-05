@@ -99,12 +99,12 @@ export default function BrandsCarousel({ marcas }: BrandsCarouselProps) {
                 className="flex-shrink-0 w-[calc(50%-0.5rem)] sm:w-[calc(33.333%-0.67rem)] lg:w-[calc(25%-0.75rem)] xl:w-[calc(20%-0.8rem)]"
               >
                 <div className="h-38 md:h-46 flex items-center justify-center p-1 bg-white dark:bg-gray-900 w-full">
-                  <article className="group cursor-pointer transition-all duration-300 w-full h-full relative">
+                                   <article className="group cursor-pointer transition-all duration-300 w-full h-full relative rounded-2xl overflow-hidden">
                     <Image
                       src={localLogo}  
                       alt={marca.nombre}
                       fill
-                      className="object-cover transition-all duration-500 group-hover:scale-110"  
+                      className="object-cover transition-all duration-500 group-hover:scale-110 rounded-2xl"  
                     />
                   </article>
                 </div>

@@ -71,7 +71,7 @@ export const ContratosModule: React.FC<ContratosModuleProps> = ({ state, actions
                             <span className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest leading-none">
                                 {kpi.label}
                             </span>
-                            <div className="p-2.5 bg-indigo-500/10 text-indigo-500 dark:text-indigo-400 rounded-xl">
+                            <div className="p-2.5 bg-[var(--icons-green)]/10 text-[var(--brand-green)] dark:text-[var(--icons-green)] rounded-xl">
                                 <FileText className="w-5 h-5" />
                             </div>
                         </div>
@@ -89,7 +89,6 @@ export const ContratosModule: React.FC<ContratosModuleProps> = ({ state, actions
 
             {/* FILTROS - Diseño Premium */}
             <div className="bg-[var(--bg-card)] p-8 rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full -mr-32 -mt-32 blur-3xl group-hover:bg-indigo-500/20 transition-all duration-700"></div>
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-end relative z-10">
                     <div className="lg:col-span-6 space-y-2">
                         <label htmlFor="contract-search" className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest ml-1">
@@ -143,7 +142,7 @@ export const ContratosModule: React.FC<ContratosModuleProps> = ({ state, actions
 
                     <button
                         onClick={actions.createNew}
-                        className="lg:col-span-2 w-full p-4 bg-indigo-600 text-white rounded-2xl hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-600/20 flex items-center justify-center gap-2 whitespace-nowrap active:scale-95 duration-300"
+                        className="lg:col-span-2 w-full p-4 bg-[var(--color-info)] dark:bg-[var(--brand-green)] text-white rounded-2xl hover:brightness-95 transition-all shadow-xl shadow-[var(--color-info)]/20 dark:shadow-[var(--brand-green)]/20 flex items-center justify-center gap-2 whitespace-nowrap active:scale-95 duration-300"
                     >
                         <Plus className="w-4 h-4 font-bold" /> 
                         <span className="text-xs font-black uppercase tracking-widest">Nuevo Contrato</span>
@@ -161,7 +160,7 @@ export const ContratosModule: React.FC<ContratosModuleProps> = ({ state, actions
                                 <th scope="col" className="px-8 py-5 whitespace-nowrap">Razón Social / RUC</th>
                                 <th scope="col" className="px-8 py-5 whitespace-nowrap">Vigencia Temporal</th>
                                 <th scope="col" className="px-8 py-5 whitespace-nowrap">Modalidad</th>
-                                <th scope="col" className="px-8 py-5 whitespace-nowrap">Tipo</th>
+                                <th scope="col" className="px-8 py-5 whitespace-nowrap">Plan</th>
                                 <th scope="col" className="px-8 py-5 whitespace-nowrap text-center">Estado Legal</th>
                                 <th scope="col" className="px-8 py-5 text-right whitespace-nowrap"></th>
                             </tr>
@@ -174,7 +173,7 @@ export const ContratosModule: React.FC<ContratosModuleProps> = ({ state, actions
                                     className="hover:bg-indigo-50/20 dark:hover:bg-indigo-950/10 transition-all duration-300 group cursor-pointer"
                                 >
                                     {/* ID */}
-                                    <td className="px-8 py-6 font-mono font-black text-xs text-[var(--text-muted)] group-hover:text-indigo-600 transition-colors">
+                                    <td className="px-8 py-6 font-mono font-black text-xs text-[var(--text-muted)] group-hover:text-[var(--color-info)] transition-colors">
                                         <div className="flex items-center gap-2">
                                             <Hash className="w-3.5 h-3.5 opacity-40 shrink-0" />
                                             {c.id}
@@ -184,7 +183,7 @@ export const ContratosModule: React.FC<ContratosModuleProps> = ({ state, actions
                                     {/* Razón Social */}
                                     <td className="px-8 py-6">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-9 h-9 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0 font-black text-xs">
+                                            <div className="w-9 h-9 rounded-xl bg-[var(--icons-green)]/10 text-[var(--brand-green)] dark:text-[var(--icons-green)] flex items-center justify-center shrink-0 font-black text-xs">
                                                 {c.company ? c.company.substring(0, 2).toUpperCase() : 'CTR'}
                                             </div>
                                             <div>
@@ -216,12 +215,11 @@ export const ContratosModule: React.FC<ContratosModuleProps> = ({ state, actions
                                         <ModalityBadge modality={c.modality} />
                                     </td>
 
-                                    {/* Tipo */}
                                     <td className="px-8 py-6">
                                         <div className="flex items-center gap-2">
                                             <Landmark className="w-3.5 h-3.5 text-[var(--text-muted)] shrink-0" />
                                             <span className="text-xs font-black text-[var(--text-secondary)] uppercase">
-                                                {c.type || '—'}
+                                                {c.plan || '—'}
                                             </span>
                                         </div>
                                     </td>
@@ -233,7 +231,7 @@ export const ContratosModule: React.FC<ContratosModuleProps> = ({ state, actions
 
                                     {/* Flecha */}
                                     <td className="px-8 py-6 text-right whitespace-nowrap">
-                                        <div className="w-8 h-8 rounded-xl flex items-center justify-center text-[var(--text-muted)] group-hover:text-indigo-600 group-hover:bg-indigo-500/10 transition-all shrink-0 ml-auto">
+                                        <div className="w-8 h-8 rounded-xl flex items-center justify-center text-[var(--text-muted)] group-hover:text-[var(--color-info)] group-hover:bg-[var(--color-info)]/10 transition-all shrink-0 ml-auto">
                                             <ChevronRight className="w-5 h-5 shrink-0" />
                                         </div>
                                     </td>

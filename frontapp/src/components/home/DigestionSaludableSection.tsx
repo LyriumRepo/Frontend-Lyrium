@@ -44,7 +44,7 @@ function MarketplaceSection({ title, bannerImage, products }: MarketplaceSection
       <div className="flex flex-col lg:flex-row gap-8 items-stretch">
         
        
-        <div className="w-full aspect-[696/556] lg:w-[696px] lg:h-[556px] flex-shrink-0 overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.06)] dark:shadow-[0_10px_30px_rgba(0,0,0,0.2)] hover:shadow-[0_15px_40px_rgba(0,0,0,0.12)] transition-shadow duration-300 relative">
+        <div className="w-full aspect-[696/556] lg:w-[696px] lg:h-[556px] flex-shrink-0 overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.06)] dark:shadow-[0_10px_30px_rgba(0,0,0,0.2)] hover:shadow-[0_15px_40px_rgba(0,0,0,0.12)] transition-all duration-300 relative rounded-[30px] border border-slate-200 dark:border-[var(--border-subtle)]/50">
           <Image
             src={bannerImage}
             alt={title}

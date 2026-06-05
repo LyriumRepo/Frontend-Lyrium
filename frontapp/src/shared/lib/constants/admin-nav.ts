@@ -49,12 +49,7 @@ export const adminNavigation: PanelNavigation = [
     {
         title: 'Operaciones',
         items: [
-            {
-                id: 'analytics',
-                label: 'Analítica',
-                href: '/admin/analytics',
-                icon: 'BarChart',
-            },
+   
             {
                 id: 'operations',
                 label: 'Gestión Operativa',

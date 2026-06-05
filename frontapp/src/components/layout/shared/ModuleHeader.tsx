@@ -2,7 +2,7 @@ import React from 'react';
 import Icon from '@/components/ui/Icon';
 
 interface ModuleHeaderProps {
-    title: string;
+    title: React.ReactNode;
     subtitle: string;
     icon?: string;
     gradient?: string;

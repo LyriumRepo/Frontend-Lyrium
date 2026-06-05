@@ -17,27 +17,32 @@ export const useContratos = () => {
         dateLimit: ''
     });
 
-    // --- Query: Fetch Contracts ---
     const { data: contracts = [], isLoading, error } = useQuery({
         queryKey: ['admin', 'contracts'],
         queryFn: async () => {
-            // Simulamos delay de red 1:1 con legacy
             await new Promise(resolve => setTimeout(resolve, 600));
+            if (typeof window !== 'undefined') {
+                const stored = localStorage.getItem('lyrium_contracts');
+                if (stored) {
+                    try {
+                        return JSON.parse(stored) as Contract[];
+                    } catch (e) {
+                    }
+                }
+            }
             return MOCK_CONTRACTS_DATA as Contract[];
         },
-        staleTime: 5 * 60 * 1000, // 5 minutos de caché
+        staleTime: 5 * 60 * 1000,
     });
 
-    // --- Mutations ---
     const updateContractMutation = useMutation({
         mutationFn: async ({ id, status, updatedInfo }: { id: string, status: ContractStatus, updatedInfo: Partial<Contract> }) => {
-            console.log(`Updating contract ${id} to status ${status}`);
             return { id, status, updatedInfo };
         },
         onSuccess: (variables) => {
             queryClient.setQueryData(['admin', 'contracts'], (old: Contract[] | undefined) => {
                 if (!old) return old;
-                return old.map(c => {
+                const next = old.map(c => {
                     if (c.id === variables.id) {
                         return {
                             ...c,
@@ -55,6 +60,10 @@ export const useContratos = () => {
                     }
                     return c;
                 });
+                if (typeof window !== 'undefined') {
+                    localStorage.setItem('lyrium_contracts', JSON.stringify(next));
+                }
+                return next;
             });
             setSelectedContractId(null);
         }
@@ -63,26 +72,33 @@ export const useContratos = () => {
     const createContractMutation = useMutation({
         mutationFn: async () => {
             const nextId = `CTR-${new Date().getFullYear()}-${Math.floor(Math.random() * 900 + 100)}`;
-            const newContract: Contract = {
+            return {
                 id: nextId,
                 company: '',
                 ruc: '',
                 rep: '',
-                type: '',
+                plan: 'Plan emprende',
                 modality: 'VIRTUAL',
                 status: 'PENDING',
                 start: '',
                 end: '',
                 storage_path: 'pendiente_de_carga.pdf',
+                phone: '',
+                email: '',
+                address: '',
+                dni: '',
                 auditTrail: [
                     { timestamp: new Date().toISOString(), action: 'Contrato Borrador Creado', user: 'Admin' }
                 ]
             };
-            return newContract;
         },
         onSuccess: (newContract) => {
             queryClient.setQueryData(['admin', 'contracts'], (old: Contract[] | undefined) => {
-                return old ? [newContract, ...old] : [newContract];
+                const next = old ? [newContract, ...old] : [newContract];
+                if (typeof window !== 'undefined') {
+                    localStorage.setItem('lyrium_contracts', JSON.stringify(next));
+                }
+                return next;
             });
             setSelectedContractId(newContract.id);
         }
@@ -151,11 +167,14 @@ export const useContratos = () => {
             setFilters,
             setSelectedContract: (c: Contract | null) => {
                 setSelectedContractId(c?.id || null);
-                // Si se cierra el modal (c === null), limpiamos cualquier borrador que haya quedado completamente vacío
                 if (c === null) {
                     queryClient.setQueryData(['admin', 'contracts'], (old: Contract[] | undefined) => {
                         if (!old) return old;
-                        return old.filter(item => !(item.company === '' && item.ruc === ''));
+                        const filtered = old.filter(item => !(item.company === '' && item.ruc === ''));
+                        if (typeof window !== 'undefined') {
+                            localStorage.setItem('lyrium_contracts', JSON.stringify(filtered));
+                        }
+                        return filtered;
                     });
                 }
             },

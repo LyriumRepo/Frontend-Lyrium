@@ -55,7 +55,7 @@ function mapContractStatus(
 
 export const useControlVendedores = () => {
   const queryClient = useQueryClient();
-  const [currentTab, setCurrentTab] = useState<TabKey>('vendedores');
+  const [currentTab, setCurrentTab] = useState<TabKey>('aprobacion');
   const [filters, setFilters] = useState<SellerFilters>({
     sellerSearch: '',
     status: '',

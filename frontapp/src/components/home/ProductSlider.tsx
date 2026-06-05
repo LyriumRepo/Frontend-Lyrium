@@ -132,7 +132,7 @@ export default function ProductSlider({ productos, titulo, bannerImage }: Produc
       {/* Split layout: banner left + carousel right */}
       <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_1fr] gap-8 items-center mb-10">
         {/* Left banner */}
-        <div className="rounded-[18px] overflow-hidden">
+        <div className="rounded-[18px] overflow-hidden border border-slate-200 dark:border-[var(--border-subtle)]/50">
           <Image
             src={bannerImage}
             alt={titulo}

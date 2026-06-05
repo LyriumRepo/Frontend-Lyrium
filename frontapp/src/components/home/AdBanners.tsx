@@ -153,15 +153,14 @@ export default function AdBanners({ bannersPub }: AdBannersProps) {
   ];
 
   return (
-    <section className="mt-10 space-y-6 w-full overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4">
+    <section className="mt-10 w-full overflow-hidden flex flex-col items-center">
+      <div className="w-[1600px] max-w-full px-4 md:px-8 space-y-6">
         <h2 className="text-xl md:text-2xl font-semibold text-gray-900 dark:text-white">Banners publicitarios</h2>
+        <MedianoSlider images={medianos1} /> 
+        <PequenoSlider images={pequenos1} />
+        <MedianoSlider images={medianos2} />  
+        <PequenoSlider images={pequenos2} />
       </div>
-
-      <MedianoSlider images={medianos1} /> 
-      <PequenoSlider images={pequenos1} />
-      <MedianoSlider images={medianos2} />  
-      <PequenoSlider images={pequenos2} />
     </section>
   );
 }

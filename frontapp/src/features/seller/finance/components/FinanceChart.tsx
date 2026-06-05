@@ -29,11 +29,15 @@ export default function FinanceChart({
 }: FinanceChartProps) {
     const chartRef = useRef<HTMLCanvasElement>(null);
     const chartInstance = useRef<Chart | null>(null);
-    const { theme } = useTheme();
-    const isDark = theme === 'dark';
+    const { resolvedTheme } = useTheme();
+    const [isDark, setIsDark] = useState(false);
 
-    const gridColor = isDark ? '#334d3b' : '#f1f5f9';
-    const tickColor = isDark ? '#9BAF9F' : '#94a3b8';
+    useEffect(() => {
+        setIsDark(document.documentElement.classList.contains('dark') || resolvedTheme === 'dark');
+    }, [resolvedTheme]);
+
+    const gridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : '#f1f5f9';
+    const tickColor = isDark ? '#cbd5e1' : '#64748b';
     const pointBorder = isDark ? '#1E3028' : '#ffffff';
 
     useEffect(() => {
@@ -73,7 +77,33 @@ export default function FinanceChart({
                     legend: { display: false },
                     tooltip: { enabled: true }
                 },
-                scales: type !== 'doughnut' && type !== 'radar' ? {
+                scales: type === 'radar' ? {
+                    r: {
+                        grid: { 
+                            color: isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.06)' 
+                        },
+                        angleLines: { 
+                            color: isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.06)' 
+                        },
+                        pointLabels: {
+                            color: isDark ? '#f1f5f9' : '#1e293b', // Bright labels in dark mode
+                            font: { 
+                                size: 10, 
+                                weight: 'black',
+                                family: "'Inter', sans-serif" 
+                            }
+                        },
+                        ticks: {
+                            showLabelBackdrop: false,
+                            backdropColor: 'transparent',
+                            color: isDark ? '#cbd5e1' : '#475569',
+                            font: { 
+                                size: 9, 
+                                weight: 'bold' 
+                            }
+                        }
+                    }
+                } : (type !== 'doughnut' ? {
                     y: {
                         beginAtZero: true,
                         grid: { color: gridColor },
@@ -83,7 +113,7 @@ export default function FinanceChart({
                         grid: { display: false },
                         ticks: { font: { size: 10, weight: 'bold' }, color: tickColor }
                     }
-                } : undefined
+                } : undefined)
             } as any
         };
 

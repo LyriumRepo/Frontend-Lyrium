@@ -1,20 +1,17 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import BaseButton from '@/components/ui/BaseButton';
 import { useControlVendedores } from '@/features/admin/sellers/hooks/useControlVendedores';
 import {
-  StatsOverview,
   ProductModeration,
   AuditLog,
 } from '@/components/admin/sellers/ModuleSections';
-import SellerList from '@/components/admin/SellerList';
 import {
   Users,
   CheckCircle,
   ShieldCheck,
-  Search,
   ShieldAlert,
   Sliders,
   X,
@@ -22,7 +19,6 @@ import {
 } from 'lucide-react';
 import { SellerStatus, ProductStatus } from '@/features/admin/sellers/types';
 import Skeleton, { SkeletonRow } from '@/components/ui/Skeleton';
-import { exportToCSV } from '@/shared/lib/utils/export';
 import ModalsPortal from '@/components/layout/shared/ModalsPortal';
 import ProductModerationModal from '@/components/admin/sellers/ProductModerationModal';
 import { useContratos } from '@/features/admin/contracts/hooks/useContratos';
@@ -254,21 +250,7 @@ export function SellersPageClient(_props: SellersPageClientProps) {
   }>({ isOpen: false, productId: null });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleExport = () => {
-    if (!filteredSellers.length) return;
-    const headers = ['ID', 'Nombre', 'Empresa', 'Email', 'Estado', 'Contratos'];
-    const csvData = filteredSellers.map((s: any) => [
-      s.id,
-      s.name,
-      s.company,
-      s.email,
-      s.status,
-      s.contractStatus,
-    ]);
-    const dateStr = new Date().toISOString().split('T')[0];
-    exportToCSV(headers, csvData, `padron-vendedores-${dateStr}.csv`);
-  };
+  const combinedSellers = filteredSellers;
 
   const handleStatusSubmit = async ({
     status,
@@ -280,7 +262,7 @@ export function SellersPageClient(_props: SellersPageClientProps) {
     setIsSubmitting(true);
     try {
       if (statusModal.type === 'seller') {
-        const seller = filteredSellers.find((s: any) => s.id === statusModal.id);
+        const seller = combinedSellers.find((s: any) => s.id === statusModal.id);
         if (status === 'ACTIVE' && seller?.contractStatus !== 'VIGENTE') {
           alert(
             'BLOQUEO TÉCNICO: No se puede activar una cuenta sin un contrato VIGENTE (RF-16).',
@@ -315,14 +297,7 @@ export function SellersPageClient(_props: SellersPageClientProps) {
           subtitle="Cargando Inteligencia Operativa..."
           icon="Users"
         />
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[1, 2, 3, 4].map((i) => (
-            <Skeleton
-              key={`seller-skel-${i}`}
-              className="h-32 rounded-[2.5rem]"
-            />
-          ))}
-        </div>
+
         <div className="bg-[var(--bg-card)] p-8 rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm">
           <SkeletonRow count={8} />
         </div>
@@ -345,15 +320,7 @@ export function SellersPageClient(_props: SellersPageClientProps) {
         </div>
       )}
 
-      
-
       <div className="flex flex-wrap gap-2 border-b border-[var(--border-subtle)] py-5 pb-6 overflow-x-auto no-scrollbar scroll-smooth">
-        <TabButton
-          active={currentTab === 'vendedores'}
-          onClick={() => setCurrentTab('vendedores')}
-          label="Gestión de Vendedores"
-          icon={<Users className="w-5 h-5" />}
-        />
         <TabButton
           active={currentTab === 'aprobacion'}
           onClick={() => setCurrentTab('aprobacion')}
@@ -387,54 +354,6 @@ export function SellersPageClient(_props: SellersPageClientProps) {
       </div>
 
       <div className="min-h-[500px]">
-        {currentTab === 'vendedores' && (
-          <div className="space-y-6 animate-fadeIn">
-            <StatsOverview
-        stats={{
-          ...stats,
-          pending: statsData?.pending,
-        }}
-      />
-            <div className="bg-[var(--bg-card)] p-6 rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm flex items-center gap-4">
-              <div className="flex-1 relative">
-                <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] w-5 h-5" />
-                <input
-                  type="text"
-                  placeholder="Buscar por Nombre, Empresa o ID..."
-                  className="w-full pl-14 pr-6 py-4 bg-[var(--bg-secondary)] border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-sky-500/20 text-[var(--text-primary)]"
-                  onChange={(e) =>
-                    setFilters((prev) => ({
-                      ...prev,
-                      sellerSearch: e.target.value,
-                    }))
-                  }
-                />
-              </div>
-              <BaseButton
-                onClick={handleExport}
-                variant="secondary"
-                leftIcon="Download"
-                size="md"
-              >
-                Exportar Padrón
-              </BaseButton>
-            </div>
-            <SellerList
-              sellers={filteredSellers}
-              loading={loading}
-              onResetPassword={(id) =>
-                alert(`Reset manual para vendedor ${id}`)
-              }
-              onStatusChange={async (id, status, reason) => {
-                await actions.updateSellerStatus(
-                  id,
-                  status as SellerStatus,
-                  reason ?? 'Cambio de estado por administrador',
-                );
-              }}
-            />
-          </div>
-        )}
 
         {currentTab === 'aprobacion' && (
           <div className="animate-fadeIn">
@@ -682,7 +601,7 @@ export function SellersPageClient(_props: SellersPageClientProps) {
         suggested={statusModal.suggested}
         isSubmitting={isSubmitting}
         sellerContractStatus={
-          filteredSellers.find((s: any) => s.id === statusModal.id)?.contractStatus
+          combinedSellers.find((s: any) => s.id === statusModal.id)?.contractStatus
         }
         onSubmit={handleStatusSubmit}
       />
@@ -730,6 +649,8 @@ export function SellersPageClient(_props: SellersPageClientProps) {
           </div>
         </ModalsPortal>
       )}
+
+
     </div>
   );
 }
