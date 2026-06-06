@@ -49,6 +49,7 @@ interface Order {
   tipo_envio?: TipoEnvio;
   currentStep?: number;
   envio?: EnvioInfo;
+  imagen?: string;
   /** ISO "YYYY-MM-DD" — scheduled appointment date (services only) */
   fechaCita?: string;
   /** Number of client-initiated reschedules already done (0 or 1) */
@@ -64,6 +65,32 @@ interface FlowStep {
   label: string;
   icon: string;
 }
+
+const TRACKING_LABELS: Record<TipoEnvio, string[]> = {
+  domicilio: [
+    'Tu pedido ha sido validado por el vendedor',
+    'Tu pedido ha sido despachado con éxito',
+    '¡Tu pedido va en camino!',
+    '¡Ya llegamos! Repartidor en tu domicilio',
+    '¡Recibido! Confirmamos la entrega de tu pedido',
+  ],
+  agencia: [
+    'Tu pedido ha sido validado por el vendedor',
+    'Tu pedido ha sido despachado con éxito',
+    '¡Tu pedido va en camino!',
+    'Listo para recoger en agencia',
+    '¡Recibido! Confirmamos la entrega de tu pedido',
+  ],
+  atencion_domicilio: [
+    'Validación del centro de salud',
+    '¡El especialista va en camino!',
+    'Atención completada',
+  ],
+  atencion_sede: [
+    'Validación del centro de salud',
+    'Atención completada',
+  ],
+};
 
 const FLOW_CONFIG: Record<
   TipoEnvio,
@@ -175,6 +202,7 @@ function mapOrderResourceToOrder(raw: OrderResource): Order {
   const itemCount = items.length;
   const firstItem = items[0];
   const tienda = firstItem?.store?.name ?? firstItem?.store_name ?? item.customer_name ?? 'Tienda';
+  const firstImage = firstItem?.product?.image ?? '';
   const detalle = itemCount > 0
     ? `${itemCount} ${itemCount === 1 ? 'producto' : 'productos'}`
     : 'Sin productos';
@@ -195,6 +223,7 @@ function mapOrderResourceToOrder(raw: OrderResource): Order {
     tipo: 'productos',
     tipo_envio: tipoEnvio,
     currentStep: STATUS_STEP_MAP[statusKey] ?? 1,
+    imagen: firstImage,
     envio: item.shipping
       ? {
           direccion: combineAddressParts([item.shipping.address, item.shipping.city]),
@@ -269,68 +298,66 @@ function combineAddressParts(parts: (string | null | undefined)[]): string {
 
 // ─── Sub-componente: Stepper de seguimiento ───────────────────────────────────
 
-function OrderFlowStepper({
+function OrderTrackingCards({
   tipoEnvio,
   currentStep,
 }: {
   tipoEnvio: TipoEnvio;
   currentStep: number;
 }) {
-  const flow = FLOW_CONFIG[tipoEnvio];
-  const steps = flow.steps;
-  const progress = Math.max(0, Math.min(100, ((currentStep - 1) / (steps.length - 1)) * 100));
+  const steps = FLOW_CONFIG[tipoEnvio].steps;
+  const activeIndex = Math.min(Math.max(currentStep - 1, 0), steps.length - 1);
+  const totalSteps = steps.length;
+  const progress = totalSteps > 1
+    ? ((activeIndex) / (totalSteps - 1)) * 100
+    : 100;
 
   return (
-    <div className="space-y-5">
-      <div className="flex justify-center">
-        <span
-          className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-2xl border text-[10px] font-black uppercase tracking-widest ${flow.accent}`}
-        >
-          <Icon name={flow.icon as any} className="w-3 h-3" />
-          {flow.label}
-        </span>
-      </div>
-
-      <div className="relative flex justify-between items-start pt-1 pb-8">
-        <div className="absolute top-[21px] left-[5%] right-[5%] h-[3px] bg-gray-100 dark:bg-[var(--bg-secondary)] rounded-full z-0">
+    <div className="space-y-4 animate-card-entrance">
+      <div className="relative flex justify-between items-start pt-2 pb-4">
+        <div className="absolute top-[28px] left-[5%] right-[5%] h-[3px] bg-gray-100 dark:bg-[var(--bg-secondary)] rounded-full z-0">
           <div
             className="h-full bg-sky-500 dark:bg-[var(--brand-green)] rounded-full transition-all duration-1000 ease-in-out"
             style={{ width: `${progress}%` }}
           />
         </div>
 
-        {steps.map((step) => {
-          const isCompleted = step.id < currentStep;
-          const isActive = step.id === currentStep;
+        {steps.map((s, i) => {
+          const imgSrc = `/imagenes-seguimiento/${i + 1}.jpg`;
+          const isCompleted = i < activeIndex;
+          const isActive = i === activeIndex;
 
           return (
-            <div key={step.id} className="flex flex-col items-center relative z-10" style={{ width: `${100 / steps.length}%` }}>
+            <div key={s.id} className="flex flex-col items-center relative z-10" style={{ width: `${100 / totalSteps}%` }}>
               <div
-                className={`w-[40px] h-[40px] rounded-[14px] border-[4px] flex items-center justify-center transition-all duration-300 shadow-sm
+                className={`w-14 h-14 rounded-full border-[3px] overflow-hidden transition-all duration-700 shadow-sm flex-shrink-0 bg-white dark:bg-[var(--bg-card)] flex items-center justify-center
                 ${isCompleted
-                    ? 'bg-white dark:bg-[var(--bg-card)] border-emerald-500 text-emerald-500 dark:border-[var(--icons-green)] dark:text-[var(--icons-green)]'
+                    ? 'border-emerald-500 shadow-emerald-200 dark:shadow-emerald-900/30'
                     : isActive
-                      ? 'bg-sky-500 dark:bg-[var(--brand-green)] border-sky-500 dark:border-[var(--brand-green)] text-white shadow-lg shadow-sky-500/20 dark:shadow-lime-500/20 -translate-y-1'
-                      : 'bg-white dark:bg-[var(--bg-card)] border-gray-200 dark:border-[var(--border-subtle)] text-gray-300 dark:text-[var(--text-secondary)]'
+                      ? 'border-sky-500 dark:border-[var(--brand-green)] shadow-lg shadow-sky-500/20 dark:shadow-lime-500/20 scale-110'
+                      : 'border-gray-200 dark:border-[var(--border-subtle)] opacity-60'
                   }`}
               >
-                {isCompleted ? <Icon name="Check" className="w-4 h-4" /> : <Icon name={step.icon as any} className="w-4 h-4" />}
+                <img
+                  src={imgSrc}
+                  alt={`Paso ${s.id}`}
+                  className="w-[90%] h-[90%] rounded-full object-cover"
+                />
               </div>
-              <span
-                className={`mt-3 text-[8px] font-black uppercase tracking-wider text-center leading-tight transition-colors
-                ${isActive
-                    ? 'text-gray-800 dark:text-[var(--text-primary)]'
+              <div
+                className={`mt-2 w-1.5 h-1.5 rounded-full transition-all duration-700 ${
+                  isActive
+                    ? 'bg-sky-500 dark:bg-[var(--brand-green)] animate-pulse-dot'
                     : isCompleted
-                      ? 'text-emerald-500 dark:text-[var(--icons-green)]'
-                      : 'text-gray-400 dark:text-[var(--text-secondary)]'
-                  }`}
-              >
-                {step.label}
-              </span>
+                      ? 'bg-emerald-400'
+                      : 'bg-gray-300 dark:bg-[var(--border-subtle)]'
+                }`}
+              />
             </div>
           );
         })}
       </div>
+
     </div>
   );
 }
@@ -1125,7 +1152,7 @@ export default function CustomerOrdersPage() {
                       </button>
                     )}
                   </div>
-                  <OrderFlowStepper tipoEnvio={selectedOrder.tipo_envio} currentStep={selectedOrder.currentStep} />
+                  <OrderTrackingCards tipoEnvio={selectedOrder.tipo_envio} currentStep={selectedOrder.currentStep} />
                   {/* Info badge: reprogramaciones restantes */}
                   {canShowRescheduleButton(selectedOrder) && (
                     <div className="mt-4 flex items-center gap-2 px-3 py-2 rounded-xl bg-white dark:bg-[var(--bg-secondary)] border border-gray-100 dark:border-[var(--border-subtle)]">

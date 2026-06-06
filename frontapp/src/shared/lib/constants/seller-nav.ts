@@ -18,6 +18,13 @@ export const sellerNavigation: PanelNavigation = [
                 href: '/seller/profile'
             },
             {
+                id: 'seguridad',
+                label: 'Seguridad',
+                description: 'Protege tu cuenta y gestiona tu contraseña',
+                icon: 'Shield',
+                href: '/seller/security'
+            },
+            {
                 id: 'mi-tienda',
                 label: 'Mi Tienda',
                 description: 'Personaliza tu escaparate público y presencia de marca',

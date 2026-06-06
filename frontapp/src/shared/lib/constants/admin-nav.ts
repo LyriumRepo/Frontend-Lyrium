@@ -93,6 +93,12 @@ export const adminNavigation: PanelNavigation = [
                 href: '/admin/planes',
                 icon: 'Sparkles',
             },
+            {
+                id: 'seguridad',
+                label: 'Seguridad',
+                href: '/admin/security',
+                icon: 'Shield',
+            },
         ],
     },
 ];
