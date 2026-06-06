@@ -3,5 +3,5 @@
 import { Voucher, InvoiceKPIs } from './types';
 export const MOCK_VOUCHERS: Voucher[] = [];
 export function calculateKPIs(_vouchers: Voucher[]): InvoiceKPIs {
-    return { totalFacturado: 0, successRate: 0, pendingCount: 0, rejectedCount: 0 };
+    return { totalFacturado: 0, successRate: 0, pendingCount: 0, totalComprobantes: 0 };
 }

@@ -38,7 +38,7 @@ function KpiDetailModal({ isOpen, onClose, kpi }: KpiDetailModalProps) {
       size="2xl"
       accentColor={`from-[${kpi.color}] to-[${kpi.color}]/80`}
     >
-      <div className="space-y-8">
+      <div className="space-y-8 modal-stagger">
         {/* Valor principal + Chart */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-4">

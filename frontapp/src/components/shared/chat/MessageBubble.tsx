@@ -62,9 +62,9 @@ export function TypingIndicator() {
     <div className="flex justify-start animate-fadeIn">
       <div className="bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-2xl rounded-tl-none px-5 py-4 shadow-sm max-w-[75%]">
         <div className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-[#2d5e42]/40 dark:bg-[#4A7C59]/40 animate-bounce" style={{ animationDelay: '0ms' }} />
-          <span className="w-2 h-2 rounded-full bg-[#2d5e42]/40 dark:bg-[#4A7C59]/40 animate-bounce" style={{ animationDelay: '150ms' }} />
-          <span className="w-2 h-2 rounded-full bg-[#2d5e42]/40 dark:bg-[#4A7C59]/40 animate-bounce" style={{ animationDelay: '300ms' }} />
+          <span className="w-2 h-2 rounded-full bg-[var(--icons-green)]/40 dark:bg-[var(--icons-green)]/40 animate-pulse-dot" style={{ animationDelay: '0ms' }} />
+          <span className="w-2 h-2 rounded-full bg-[var(--icons-green)]/40 dark:bg-[var(--icons-green)]/40 animate-pulse-dot" style={{ animationDelay: '150ms' }} />
+          <span className="w-2 h-2 rounded-full bg-[var(--icons-green)]/40 dark:bg-[var(--icons-green)]/40 animate-pulse-dot" style={{ animationDelay: '300ms' }} />
         </div>
       </div>
     </div>
@@ -114,7 +114,7 @@ export default function MessageBubble({ messages, currentUserId, onMarkRead }: M
               <div
                 className={`max-w-[82%] md:max-w-[68%] ${
                   isSent
-                    ? 'bg-gradient-to-br from-emerald-500 to-emerald-600 dark:from-emerald-600 dark:to-emerald-700 text-white rounded-[1.75rem] rounded-br-md shadow-lg shadow-emerald-500/20 dark:shadow-emerald-800/30'
+                    ? 'bg-gradient-to-br from-[var(--turquesa-500)] to-[var(--verde-500)] text-white rounded-[1.75rem] rounded-br-md shadow-lg shadow-[var(--turquesa-500)]/30 dark:shadow-[var(--turquesa-500)]/20'
                     : 'bg-white dark:bg-[#1A2E25] border border-gray-100 dark:border-[#2A4035] text-[var(--text-primary)] rounded-[1.75rem] rounded-bl-md shadow-sm'
                 } px-5 py-3.5 transition-all duration-200 hover:shadow-md`}
               >
@@ -149,8 +149,8 @@ export default function MessageBubble({ messages, currentUserId, onMarkRead }: M
                   {isSent && (
                     isRead ? (
                       <div className="relative">
-                        <Icon name="CheckCheck" className="w-3.5 h-3.5 text-emerald-300 dark:text-emerald-400" />
-                        <span className="absolute -top-2 -right-1 w-1.5 h-1.5 bg-emerald-400 rounded-full" />
+                        <Icon name="CheckCheck" className="w-3.5 h-3.5 text-[var(--turquesaClaro-500)] dark:text-[var(--turquesaClaro-500)] animate-check-pop" />
+                        <span className="absolute -top-2 -right-1 w-1.5 h-1.5 bg-[var(--turquesaClaro-500)] rounded-full" />
                       </div>
                     ) : (
                       <Icon name="Check" className="w-3.5 h-3.5 text-white/40" />

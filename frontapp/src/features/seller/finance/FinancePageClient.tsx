@@ -123,12 +123,12 @@ export function FinancePageClient() {
   if (!data) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-        <div className="w-20 h-20 bg-rose-50 dark:bg-rose-900/20 rounded-full flex items-center justify-center">
-          <Icon name="AlertCircle" className="w-10 h-10 text-rose-500" />
+        <div className="w-20 h-20 rounded-full flex items-center justify-center" style={{ backgroundColor: 'var(--turquesa-100)' }}>
+          <Icon name="AlertCircle" className="w-10 h-10" style={{ color: 'var(--turquesa-500)' }} />
         </div>
         <p className="text-lg font-bold text-gray-800 dark:text-[var(--text-primary)]">No pudimos cargar los datos financieros</p>
         <p className="text-sm text-gray-500 dark:text-[var(--text-muted)]">Verifica tu conexión e intenta nuevamente</p>
-        <button onClick={() => window.location.reload()} className="px-6 py-3 rounded-xl bg-sky-500 text-white font-bold text-sm hover:bg-sky-600 transition-all">Reintentar</button>
+        <button onClick={() => window.location.reload()} className="px-6 py-3 rounded-xl text-white font-bold text-sm transition-all hover:brightness-110" style={{ backgroundColor: 'var(--celeste-500)' }}>Reintentar</button>
       </div>
     );
   }
@@ -217,14 +217,14 @@ export function FinancePageClient() {
         {/* 1. MONETARIO */}
         {isVisible('monetario') && (
           <div className="space-y-6">
-            <div className="flex items-center gap-3 mb-2">
+            <div className="flex items-center gap-3 mb-2 animate-section-reveal">
               <div className="w-1.5 h-6 rounded-full" style={{ backgroundColor: companyColors.lima }} />
               <h2 className="text-lg font-black text-[var(--text-primary)] uppercase tracking-tight">MONETARIO</h2>
             </div>
 
             <FinancialBreakdownCard data={data.desgloseFinanciero} />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 stagger-grid">
               <BaseStatCard
                 label="Ingresos Brutos"
                 value={formatCurrency(data.ingresosBrutos.data.reduce((a, b) => a + b, 0))}
@@ -296,11 +296,11 @@ export function FinancePageClient() {
         {/* 2. LOGÍSTICA */}
         {isVisible('logistica') && (
           <div className="space-y-6">
-            <div className="flex items-center gap-3 mb-2">
+            <div className="flex items-center gap-3 mb-2 animate-section-reveal">
               <div className="w-1.5 h-6 rounded-full" style={{ backgroundColor: companyColors.turquesaClaro }} />
               <h2 className="text-lg font-black text-[var(--text-primary)] uppercase tracking-tight">Rendimiento Logístico</h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 stagger-grid">
               <BaseStatCard
                 label="Lead Time de Despacho"
                 value={(() => {
@@ -321,11 +321,11 @@ export function FinancePageClient() {
         {/* 3. CALIDAD */}
         {isVisible('calidad') && (
           <div className="space-y-6">
-            <div className="flex items-center gap-3 mb-2">
+            <div className="flex items-center gap-3 mb-2 animate-section-reveal">
               <div className="w-1.5 h-6 rounded-full" style={{ backgroundColor: companyColors.turquesa }} />
               <h2 className="text-lg font-black text-[var(--text-primary)] uppercase tracking-tight">Control de Calidad</h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 stagger-grid">
               <button
                 onClick={() => openKpi(
                   'Tasa de Productos Defectuosos',
@@ -365,11 +365,11 @@ export function FinancePageClient() {
         {/* 4. FIDELIZACIÓN */}
         {isVisible('fidelizacion') && (
           <div className="space-y-6">
-            <div className="flex items-center gap-3 mb-2">
+            <div className="flex items-center gap-3 mb-2 animate-section-reveal">
               <div className="w-1.5 h-6 rounded-full" style={{ backgroundColor: companyColors.celeste }} />
               <h2 className="text-lg font-black text-[var(--text-primary)] uppercase tracking-tight">Fidelización de Clientes</h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 stagger-grid">
               <BaseStatCard
                 label="LTV (Lifetime Value)"
                 value={`S/ ${data.ltv.data[data.ltv.data.length - 1] ?? 0}`}
@@ -386,11 +386,11 @@ export function FinancePageClient() {
         {/* 5. SERVICIO */}
         {isVisible('servicio') && (
           <div className="space-y-6">
-            <div className="flex items-center gap-3 mb-2">
+            <div className="flex items-center gap-3 mb-2 animate-section-reveal">
               <div className="w-1.5 h-6 rounded-full" style={{ backgroundColor: companyColors.turquesaClaro }} />
               <h2 className="text-lg font-black text-[var(--text-primary)] uppercase tracking-tight">Servicio al Cliente</h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 stagger-grid">
               <button
                 onClick={() => openKpi(
                   'Tiempo de Respuesta (Chat)',
@@ -446,11 +446,11 @@ export function FinancePageClient() {
         {/* 6. CRECIMIENTO */}
         {isVisible('crecimiento') && (
           <div className="space-y-6">
-            <div className="flex items-center gap-3 mb-2">
+            <div className="flex items-center gap-3 mb-2 animate-section-reveal">
               <div className="w-1.5 h-6 rounded-full" style={{ backgroundColor: companyColors.azulCeleste }} />
               <h2 className="text-lg font-black text-[var(--text-primary)] uppercase tracking-tight">Estrategia de Crecimiento</h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 stagger-grid">
               <BaseStatCard
                 label="Cuota de Mercado Interna"
                 value={`${data.cuotaMercado.data[0] ?? 0}%`}
@@ -467,11 +467,11 @@ export function FinancePageClient() {
         {/* 7. INVENTARIO */}
         {isVisible('inventario') && (
           <div className="space-y-6">
-            <div className="flex items-center gap-3 mb-2">
+            <div className="flex items-center gap-3 mb-2 animate-section-reveal">
               <div className="w-1.5 h-6 rounded-full" style={{ backgroundColor: companyColors.verde }} />
               <h2 className="text-lg font-black text-[var(--text-primary)] uppercase tracking-tight">Control de Inventario</h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 stagger-grid">
               <BaseStatCard
                 label="Rotación de Stock"
                 value={`${data.stockRotacion.data[data.stockRotacion.data.length - 1] ?? 0}`}
@@ -497,11 +497,11 @@ export function FinancePageClient() {
         {/* 8. SATISFACCIÓN */}
         {isVisible('satisfaccion') && (
           <div className="space-y-6">
-            <div className="flex items-center gap-3 mb-2">
+            <div className="flex items-center gap-3 mb-2 animate-section-reveal">
               <div className="w-1.5 h-6 rounded-full" style={{ backgroundColor: companyColors.turquesa }} />
               <h2 className="text-lg font-black text-[var(--text-primary)] uppercase tracking-tight">Experiencia del Cliente</h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 stagger-grid">
               <button
                 onClick={() => openKpi(
                   'CSAT - Satisfacción del Cliente',

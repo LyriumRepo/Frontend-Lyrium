@@ -25,12 +25,12 @@ export default function MessageInput({ onSend }: MessageInputProps) {
                 rows={1}
             />
             <div className="flex gap-2 pr-2">
-                <button className="p-3 text-[var(--text-secondary)] hover:text-sky-500 transition-colors">
+                <button className="p-3 text-[var(--text-secondary)] hover:text-[var(--turquesa-500)] transition-colors">
                     <Icon name="Paperclip" className="text-xl w-6 h-6" />
                 </button>
                 <button
                     onClick={handleSend}
-                    className="w-12 h-12 bg-emerald-600 text-white rounded-2xl hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-100 active:scale-95 flex items-center justify-center translate-y-0 group-focus-within:translate-y-[-2px]"
+                    className="w-12 h-12 bg-[var(--brand-green)] text-white rounded-2xl hover:bg-[var(--brand-green-hover)] transition-all shadow-lg shadow-[var(--brand-green)]/30 active:scale-95 flex items-center justify-center translate-y-0 group-focus-within:translate-y-[-2px]"
                 >
                     <Icon name="Send" className="text-xl w-6 h-6" />
                 </button>

@@ -10,11 +10,11 @@ interface ComprobantesSectionProps {
 }
 
 const statusColors: Record<string, string> = {
-    ACCEPTED: 'text-emerald-600 bg-emerald-50 border-emerald-200',
-    SENT_WAIT_CDR: 'text-sky-600 bg-sky-50 border-sky-200',
+    ACCEPTED: 'text-[var(--verde-500)] bg-[var(--verde-100)] border-[var(--verde-500)]/30',
+    SENT_WAIT_CDR: 'text-[var(--celeste-500)] bg-[var(--celeste-100)] border-[var(--celeste-500)]/30',
     DRAFT: 'text-gray-600 bg-gray-50 border-gray-200',
-    REJECTED: 'text-rose-600 bg-rose-50 border-rose-200',
-    OBSERVED: 'text-amber-600 bg-amber-50 border-amber-200',
+    REJECTED: 'text-[var(--turquesa-500)] bg-[var(--turquesa-100)] border-[var(--turquesa-500)]/30',
+    OBSERVED: 'text-[var(--lima-500)] bg-[var(--lima-100)] border-[var(--lima-500)]/30',
 };
 
 const statusIcons: Record<string, string> = {
@@ -38,7 +38,7 @@ export default function ComprobantesSection({ invoices }: ComprobantesSectionPro
         <div className="bg-[var(--bg-card)] p-8 rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm">
             <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-violet-500 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-violet-100">
+                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg text-white" style={{ backgroundColor: 'var(--turquesa-500)', boxShadow: '0 10px 15px -3px color-mix(in srgb, var(--turquesa-500) 30%, transparent)' }}>
                         <Icon name="FileText" className="w-6 h-6 stroke-[2.5px]" />
                     </div>
                     <div>
@@ -48,7 +48,7 @@ export default function ComprobantesSection({ invoices }: ComprobantesSectionPro
                 </div>
                 <a
                     href="/seller/invoices"
-                    className="flex items-center gap-2 px-4 py-2 bg-[var(--bg-secondary)] text-[var(--text-secondary)] rounded-xl hover:bg-indigo-500 hover:text-white transition-all text-[10px] font-black uppercase tracking-widest"
+                    className="flex items-center gap-2 px-4 py-2 bg-[var(--bg-secondary)] text-[var(--text-secondary)] rounded-xl hover:bg-[var(--turquesa-500)] hover:text-white transition-all text-[10px] font-black uppercase tracking-widest"
                 >
                     <Icon name="ExternalLink" className="w-3.5 h-3.5" />
                     Ver Todos

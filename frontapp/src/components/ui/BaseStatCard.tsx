@@ -20,7 +20,7 @@ export default function BaseStatCard({
   value,
   description,
   icon,
-  color = 'sky',
+  color = 'celeste',
   trend,
   chart,
   suffix,
@@ -74,7 +74,7 @@ export default function BaseStatCard({
       {trend && (
         <div
           className={`flex items-center gap-1 text-xs font-black ${
-            trend.isPositive ? 'text-emerald-500' : 'text-rose-500'
+            trend.isPositive ? 'text-[var(--verde-500)]' : 'text-[var(--turquesa-500)]'
           }`}
         >
           <span>{trend.isPositive ? '↑' : '↓'}</span>

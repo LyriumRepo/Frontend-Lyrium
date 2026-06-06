@@ -27,7 +27,7 @@ interface ConversationListProps {
   onSelect: (id: string) => void;
   features?: ChatFeatures;
   loading?: boolean;
-  accentColor?: 'emerald' | 'violet' | 'sky';
+  accentColor?: 'emerald' | 'violet' | 'sky' | 'turquesa';
 }
 
 const defaultFeatures: ChatFeatures = {
@@ -55,6 +55,12 @@ const accentColorMap = {
     indicator: 'bg-sky-500',
     badge: 'bg-sky-500 shadow-sky-500/20',
   },
+  turquesa: {
+    activeBg: 'bg-[var(--turquesa-500)]/10',
+    hoverBg: 'hover:bg-[var(--turquesa-500)]/5',
+    indicator: 'bg-[var(--turquesa-500)]',
+    badge: 'bg-[var(--turquesa-500)] shadow-[var(--turquesa-500)]/20',
+  },
 };
 
 export default function ConversationList({
@@ -63,7 +69,7 @@ export default function ConversationList({
   onSelect,
   features: customFeatures,
   loading = false,
-  accentColor = 'emerald',
+  accentColor = 'turquesa',
 }: ConversationListProps) {
   const features = { ...defaultFeatures, ...customFeatures };
   const accent = accentColorMap[accentColor];

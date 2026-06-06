@@ -29,7 +29,7 @@ export default function ModuleHeader({
             <div className="lateral-gradient-mask dark:!bg-[var(--bg-card)] pl-8 pr-16 md:pr-24 py-7 flex flex-col justify-center flex-none w-auto max-w-[90%] z-10 transition-all duration-500">
                 <div className="flex items-center gap-3">
                     {icon && (
-                        <div className="w-10 h-10 rounded-xl bg-[var(--bg-secondary)] flex items-center justify-center text-[var(--text-secondary)] group-hover:bg-brand-sky/10 group-hover:text-brand-sky transition-all duration-500">
+                        <div className="w-10 h-10 rounded-xl bg-[var(--bg-secondary)] flex items-center justify-center text-[var(--text-secondary)] group-hover:bg-[var(--celeste-500)]/10 group-hover:text-[var(--celeste-500)] transition-all duration-500">
                             <Icon name={icon} className="w-5 h-5 !stroke-[2.5px]" />
                         </div>
                     )}

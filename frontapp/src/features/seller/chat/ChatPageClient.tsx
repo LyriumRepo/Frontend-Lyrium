@@ -10,9 +10,9 @@ import Icon from '@/components/ui/Icon';
 import ChatOptionsMenu from './components/ChatOptionsMenu';
 
 const CATEGORY_STYLES: Record<string, { label: string; bg: string; text: string }> = {
-  info: { label: 'Información', bg: 'bg-sky-100 dark:bg-sky-900/20', text: 'text-sky-700 dark:text-sky-300' },
-  comment: { label: 'Comentario', bg: 'bg-purple-100 dark:bg-purple-900/20', text: 'text-purple-700 dark:text-purple-300' },
-  admin: { label: 'Soporte', bg: 'bg-amber-100 dark:bg-amber-900/20', text: 'text-amber-700 dark:text-amber-300' },
+  info: { label: 'Información', bg: 'bg-[var(--turquesa-500)]/10 dark:bg-[var(--turquesa-500)]/10', text: 'text-[var(--turquesa-500)] dark:text-[var(--turquesa-500)]' },
+  comment: { label: 'Comentario', bg: 'bg-[var(--verde-500)]/10 dark:bg-[var(--verde-500)]/10', text: 'text-[var(--verde-500)] dark:text-[var(--verde-500)]' },
+  admin: { label: 'Soporte', bg: 'bg-[var(--icons-green)]/10 dark:bg-[var(--icons-green)]/10', text: 'text-[var(--icons-green)] dark:text-[var(--icons-green)]' },
 };
 
 export function ChatPageClient() {
@@ -61,8 +61,8 @@ export function ChatPageClient() {
           </div>
           <button
             onClick={() => setShowFilter(prev => !prev)}
-            className={`p-2 rounded-xl transition-colors text-xs font-medium border ${showFilter
-              ? 'bg-sky-100 text-sky-600 border-sky-200 dark:bg-sky-500/20 dark:text-sky-300 dark:border-sky-500/30'
+            className={`p-2 rounded-xl transition-all duration-200 text-xs font-medium border ${showFilter
+              ? 'bg-[var(--turquesa-500)]/10 text-[var(--turquesa-500)] border-[var(--turquesa-500)]/30 dark:bg-[var(--turquesa-500)]/10 dark:text-[var(--turquesa-500)] dark:border-[var(--turquesa-500)]/30'
               : 'bg-gray-100 text-gray-500 border-gray-200 hover:bg-gray-200 dark:bg-[var(--bg-secondary)] dark:text-gray-400 dark:border-[var(--border-subtle)]'
             }`}
           >
@@ -77,7 +77,7 @@ export function ChatPageClient() {
             value={filters.search}
             onChange={(e) => setFilters({ search: e.target.value })}
             placeholder="Buscar por cliente o DNI..."
-            className="w-full pl-10 pr-4 py-2.5 text-sm bg-gray-50 dark:bg-[var(--bg-muted)] border border-gray-200 dark:border-[var(--border-subtle)] rounded-xl outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 dark:focus:border-sky-500 transition-all"
+            className="w-full pl-10 pr-4 py-2.5 text-sm bg-gray-50 dark:bg-[var(--bg-muted)] border border-gray-200 dark:border-[var(--border-subtle)] rounded-xl outline-none focus:ring-2 focus:ring-[var(--turquesa-500)]/20 focus:border-[var(--turquesa-500)] dark:focus:border-[var(--turquesa-500)] transition-all"
           />
         </div>
 
@@ -85,7 +85,7 @@ export function ChatPageClient() {
           <select
             value={filters.category}
             onChange={(e) => setFilters({ category: e.target.value })}
-            className="w-full text-xs py-2.5 px-3 bg-gray-50 dark:bg-[var(--bg-muted)] border border-gray-200 dark:border-[var(--border-subtle)] rounded-xl font-semibold text-gray-700 dark:text-[var(--text-primary)] outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
+            className="w-full text-xs py-2.5 px-3 bg-gray-50 dark:bg-[var(--bg-muted)] border border-gray-200 dark:border-[var(--border-subtle)] rounded-xl font-semibold text-gray-700 dark:text-[var(--text-primary)] outline-none focus:ring-2 focus:ring-[var(--turquesa-500)]/20 focus:border-[var(--turquesa-500)]"
           >
             <option value="all">Todas las categorías</option>
             <option value="info">Información</option>
@@ -103,23 +103,24 @@ export function ChatPageClient() {
         </div>
       )}
 
-      {conversations.map((conv) => {
+      {conversations.map((conv, index) => {
         const catStyle = CATEGORY_STYLES[conv.type] ?? CATEGORY_STYLES.info;
 
         return (
           <button
             key={conv.id}
+            style={{ animationDelay: `${Math.min(index * 30, 400)}ms` }}
             onClick={() => {
               setActiveConversation(conv);
               setIsMobileListVisible(false);
             }}
-            className={`w-full p-4 text-left hover:bg-gray-50 dark:hover:bg-[#1A3A32] transition-colors ${
-              activeConversation?.id === conv.id ? 'bg-sky-50 dark:bg-[#1A3A32]/50' : ''
+            className={`w-full p-4 text-left hover:bg-gray-50 dark:hover:bg-[#1A3A32] transition-all duration-200 hover:pl-6 animate-list-item-slide ${
+              activeConversation?.id === conv.id ? 'bg-[var(--turquesa-500)]/10 dark:bg-[#1A3A32]/50' : ''
             }`}
           >
             <div className="flex items-start gap-3">
               <div className="relative shrink-0">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-sky-400 to-sky-600 dark:from-[var(--brand-green)] dark:to-[#1A3A32] flex items-center justify-center text-white font-bold text-sm">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--turquesa-500)] to-[var(--verde-500)] dark:from-[var(--brand-green)] dark:to-[var(--icons-green)] flex items-center justify-center text-white font-bold text-sm animate-avatar-appear">
                   {conv.nombre.charAt(0).toUpperCase()}
                 </div>
                 {conv.critical && (
@@ -160,7 +161,7 @@ export function ChatPageClient() {
           >
             <Icon name="ArrowLeft" className="w-5 h-5" />
           </button>
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-sky-400 to-sky-600 dark:from-[var(--brand-green)] dark:to-[#1A3A32] flex items-center justify-center text-white font-bold text-sm shrink-0">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--turquesa-500)] to-[var(--verde-500)] dark:from-[var(--brand-green)] dark:to-[var(--icons-green)] flex items-center justify-center text-white font-bold text-sm shrink-0 animate-avatar-appear">
             {activeConversation.nombre.charAt(0).toUpperCase()}
           </div>
           <div className="flex-1 min-w-0">
@@ -170,7 +171,7 @@ export function ChatPageClient() {
                 <span className="text-[10px] text-gray-500 dark:text-[var(--text-muted)] truncate">{activeConversation.email}</span>
               )}
               {activeConversation.dni && (
-                <span className="text-[9px] font-bold text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-900/20 px-2 py-0.5 rounded-md">DNI: {activeConversation.dni}</span>
+                <span className="text-[9px] font-bold text-[var(--turquesa-500)] dark:text-[var(--turquesa-500)] bg-[var(--turquesa-500)]/10 dark:bg-[var(--turquesa-500)]/10 px-2 py-0.5 rounded-md">DNI: {activeConversation.dni}</span>
               )}
               {activeConversation.critical && (
                 <span className="text-[9px] font-bold text-red-600 bg-red-50 dark:bg-red-900/20 px-2 py-0.5 rounded-md">Prioridad Alta</span>
@@ -194,33 +195,34 @@ export function ChatPageClient() {
           </div>
         )}
 
-        {messages.map((msg) => {
+        {messages.map((msg, idx) => {
           const isSeller = msg.sender === 'user';
 
           return (
-            <div key={msg.id ?? msg.hora} className={`flex ${isSeller ? 'justify-end' : 'justify-start'}`}>
+            <div key={msg.id ?? msg.hora} className={`flex ${isSeller ? 'justify-end' : 'justify-start'} ${isSeller ? 'animate-bubble-in-right' : 'animate-bubble-in-left'}`}
+              style={{ animationDelay: `${Math.min(idx * 30, 300)}ms` }}>
               <div className={`flex max-w-[75%] items-end gap-3 ${isSeller ? 'flex-row-reverse' : 'flex-row'}`}>
-                <div className={`w-9 h-9 shrink-0 rounded-full flex items-center justify-center text-[10px] font-black shadow-sm ${
+                <div className={`w-9 h-9 shrink-0 rounded-full flex items-center justify-center text-[10px] font-black shadow-sm transition-all duration-300 hover:scale-110 hover:-translate-y-0.5 ${
                   isSeller
-                    ? 'bg-gradient-to-br from-sky-400 to-sky-600 dark:from-[var(--brand-green)] dark:to-[#1A3A32] text-white'
-                    : 'bg-gradient-to-br from-emerald-400 to-emerald-600 text-white'
+                    ? 'bg-gradient-to-br from-[var(--turquesa-500)] to-[var(--verde-500)] text-white'
+                    : 'bg-gradient-to-br from-[var(--verde-500)] to-[var(--turquesaClaro-500)] dark:from-[var(--brand-green)] dark:to-[var(--icons-green)] text-white'
                 }`}>
                   {isSeller ? 'Tú' : activeConversation.nombre.charAt(0).toUpperCase()}
                 </div>
 
-                <div className={`relative rounded-3xl px-5 py-3 shadow-sm border backdrop-blur-sm ${
+                <div className={`relative rounded-3xl px-5 py-3 shadow-sm border transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 ${
                   isSeller
-                    ? 'bg-gradient-to-br from-sky-500 to-sky-600 dark:from-[var(--brand-green)] dark:to-[var(--brand-green-hover)] text-white border-sky-400/20 rounded-br-md'
+                    ? 'bg-gradient-to-br from-[var(--turquesa-500)] to-[var(--verde-500)] text-white border-transparent rounded-br-md'
                     : 'bg-white dark:bg-[#1A3A32] text-slate-800 dark:text-[var(--text-primary)] border-gray-200 dark:border-[var(--border-subtle)] rounded-bl-md'
                 }`}>
                   <div className="mb-1 flex items-center gap-2">
                     <p className={`text-[11px] font-black uppercase tracking-[0.16em] ${
-                      isSeller ? 'text-sky-100' : 'text-emerald-600 dark:text-emerald-400'
+                      isSeller ? 'text-white/80' : 'text-[var(--icons-green)] dark:text-[var(--icons-green)]'
                     }`}>
                       {isSeller ? 'Tú' : activeConversation.nombre}
                     </p>
                     <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
-                      isSeller ? 'bg-white/15 text-sky-50' : 'bg-emerald-50 dark:bg-[#2A3F33] text-emerald-700 dark:text-emerald-400'
+                      isSeller ? 'bg-white/15 text-white/80' : 'bg-[var(--icons-green)]/10 dark:bg-[#2A3F33] text-[var(--icons-green)] dark:text-[#6BAF7B]'
                     }`}>
                       {isSeller ? 'Vendedor' : 'Cliente'}
                     </span>
@@ -236,9 +238,9 @@ export function ChatPageClient() {
                             href={att.download_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition-colors ${
+                            className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-200 active:scale-[0.98] ${
                               isSeller
-                                ? 'bg-white/15 text-sky-50 hover:bg-white/25'
+                                ? 'bg-white/15 text-white/80 hover:bg-white/25'
                                 : 'bg-gray-100 dark:bg-[#2A3F33] text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-[#3A4F43]'
                             }`}
                           >
@@ -264,14 +266,14 @@ export function ChatPageClient() {
                     </div>
                   )}
                   <div className="mt-2 flex justify-end">
-                    <p className={`text-[10px] font-medium ${isSeller ? 'text-sky-100/80' : 'text-gray-400 dark:text-gray-500'}`}>
+                    <p className={`text-[10px] font-medium ${isSeller ? 'text-white/70' : 'text-gray-400 dark:text-gray-500'}`}>
                       {formatTime(msg.hora)}
                       {isSeller && (
                         <span className="ml-1.5">
                           {msg.status === 'read' ? (
-                            <Icon name="CheckCheck" className="w-3 h-3 inline" />
+                            <Icon name="CheckCheck" className="w-3 h-3 text-[var(--turquesaClaro-500)] dark:text-[var(--turquesaClaro-500)] animate-check-pop" />
                           ) : (
-                            <Icon name="Check" className="w-3 h-3 inline" />
+                            <Icon name="Check" className="w-3 h-3 text-white/40 dark:text-gray-500" />
                           )}
                         </span>
                       )}
@@ -295,9 +297,9 @@ export function ChatPageClient() {
     </div>
   ) : (
     <div className="flex-1 flex items-center justify-center">
-      <div className="text-center">
-        <div className="w-20 h-20 bg-sky-50 dark:bg-[#1A3A32] rounded-full flex items-center justify-center mx-auto mb-6">
-          <Icon name="MessageCircle" className="w-10 h-10 text-sky-400 dark:text-[var(--icons-green)]" />
+      <div className="text-center animate-slide-up">
+        <div className="w-20 h-20 bg-[var(--icons-green)]/10 dark:bg-[#1A3A32] rounded-full flex items-center justify-center mx-auto mb-6">
+          <Icon name="MessageCircle" className="w-10 h-10 text-[var(--icons-green)] dark:text-[var(--icons-green)]" />
         </div>
         <p className="text-xl font-black text-slate-800 dark:text-[var(--text-primary)]">Selecciona una conversación</p>
         <p className="text-sm text-slate-500 dark:text-[var(--text-muted)] mt-2">Elige un chat para comenzar a atender al cliente</p>
@@ -307,7 +309,7 @@ export function ChatPageClient() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col h-[calc(100vh-140px)] animate-fadeIn">
+      <div className="flex flex-col h-[calc(100vh-140px)] animate-fade-in">
         <ModuleHeader
           title="Chat con Clientes"
           subtitle="Atención y soporte directo con los clientes"
@@ -321,7 +323,7 @@ export function ChatPageClient() {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-140px)] animate-fadeIn">
+    <div className="flex flex-col h-[calc(100vh-140px)] animate-fade-in">
       <ModuleHeader
         title="Chat con Clientes"
         subtitle="Atención y soporte directo con los clientes"

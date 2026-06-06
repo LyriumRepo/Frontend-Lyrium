@@ -79,9 +79,9 @@ export default function MessageInput({ onSend, placeholder = 'Escribe un mensaje
         <div className="px-6 py-2">
           <div className="flex items-center gap-1.5">
             <span className="text-[10px] text-[var(--text-secondary)] font-medium italic">Alguien está escribiendo</span>
-            <span className="w-1.5 h-1.5 rounded-full bg-[#2d5e42]/40 dark:bg-[#4A7C59]/40 animate-bounce" style={{ animationDelay: '0ms' }} />
-            <span className="w-1.5 h-1.5 rounded-full bg-[#2d5e42]/40 dark:bg-[#4A7C59]/40 animate-bounce" style={{ animationDelay: '150ms' }} />
-            <span className="w-1.5 h-1.5 rounded-full bg-[#2d5e42]/40 dark:bg-[#4A7C59]/40 animate-bounce" style={{ animationDelay: '300ms' }} />
+            <span className="w-1.5 h-1.5 rounded-full bg-[var(--icons-green)]/40 dark:bg-[var(--icons-green)]/40 animate-pulse-dot" style={{ animationDelay: '0ms' }} />
+            <span className="w-1.5 h-1.5 rounded-full bg-[var(--icons-green)]/40 dark:bg-[var(--icons-green)]/40 animate-pulse-dot" style={{ animationDelay: '150ms' }} />
+            <span className="w-1.5 h-1.5 rounded-full bg-[var(--icons-green)]/40 dark:bg-[var(--icons-green)]/40 animate-pulse-dot" style={{ animationDelay: '300ms' }} />
           </div>
         </div>
       )}
@@ -89,7 +89,7 @@ export default function MessageInput({ onSend, placeholder = 'Escribe un mensaje
       {files.length > 0 && (
         <div className="px-6 pt-4 pb-2 flex flex-wrap gap-2">
           {files.map((file, index) => (
-            <div key={index} className="flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-[#1a3a2a]/60 rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-[var(--border-subtle)]">
+            <div key={index} className="flex items-center gap-2 px-3 py-2 bg-[var(--icons-green)]/5 dark:bg-[#1a3a2a]/60 rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-300 border border-[var(--icons-green)]/10 dark:border-[var(--border-subtle)]">
               <Icon name={getFileIcon(file.name)} className="w-4 h-4 shrink-0" />
               <span className="truncate max-w-[120px]">{file.name}</span>
               <span className="text-gray-400 dark:text-gray-500">{formatSize(file.size)}</span>
@@ -106,7 +106,7 @@ export default function MessageInput({ onSend, placeholder = 'Escribe un mensaje
       )}
 
       <div className="p-4 flex gap-3 items-end">
-        <div className="flex-1 flex items-center gap-2 bg-[var(--bg-secondary)] px-4 rounded-2xl border border-[var(--border-subtle)] focus-within:border-[#2d5e42]/30 dark:focus-within:border-[#4A7C59]/50 focus-within:ring-2 focus-within:ring-[#2d5e42]/10 dark:focus-within:ring-[#4A7C59]/20 transition-all">
+        <div className="flex-1 flex items-center gap-2 bg-[var(--bg-secondary)] px-4 rounded-2xl border border-[var(--border-subtle)] focus-within:border-[var(--icons-green)]/50 dark:focus-within:border-[var(--icons-green)]/50 focus-within:ring-2 focus-within:ring-[var(--icons-green)]/10 dark:focus-within:ring-[var(--icons-green)]/20 transition-all">
           <label htmlFor={inputId} className="sr-only">Escribir mensaje</label>
           <input
             ref={inputRef}
@@ -134,7 +134,7 @@ export default function MessageInput({ onSend, placeholder = 'Escribe un mensaje
             type="button"
             onClick={() => fileInputRef.current?.click()}
             aria-label="Adjuntar archivos"
-            className="w-9 h-9 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#1A3A32] transition-all shrink-0"
+            className="w-9 h-9 rounded-full flex items-center justify-center text-gray-400 hover:text-[var(--icons-green)] dark:hover:text-[var(--icons-green)] hover:bg-[var(--icons-green)]/5 dark:hover:bg-[#1A3A32] transition-all shrink-0"
           >
             <Icon name="Paperclip" className="w-4.5 h-4.5" />
           </button>
@@ -144,7 +144,7 @@ export default function MessageInput({ onSend, placeholder = 'Escribe un mensaje
           type="submit"
           disabled={(!message.trim() && files.length === 0) || disabled}
           aria-label="Enviar mensaje"
-          className={`w-11 h-11 bg-[#2d5e42] dark:bg-[#4A7C59] text-white rounded-2xl flex items-center justify-center hover:bg-[#1a3a2a] dark:hover:bg-[#3D6B4A] hover:scale-105 active:scale-90 transition-all shadow-lg shadow-[#2d5e42]/20 dark:shadow-[#4A7C59]/20 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 shrink-0 ${sending ? 'animate-pulse scale-95' : ''}`}
+          className={`w-11 h-11 bg-[var(--brand-green)] dark:bg-[var(--brand-green)] text-white rounded-2xl flex items-center justify-center hover:bg-[var(--brand-green-hover)] dark:hover:bg-[#3D6B4A] hover:scale-105 active:scale-90 transition-all shadow-lg shadow-[var(--brand-green)]/30 dark:shadow-[var(--brand-green)]/20 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 shrink-0 ${sending ? 'animate-pulse scale-95' : ''}`}
         >
           {sending ? (
             <div className="w-4.5 h-4.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

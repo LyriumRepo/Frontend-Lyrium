@@ -30,7 +30,7 @@ export default function BaseLoading({
         <div className="w-16 h-16 rounded-[2rem] bg-[var(--bg-secondary)] border border-[var(--border-subtle)] flex items-center justify-center mb-4 shadow-inner">
           <Icon
             name="Loader"
-            className={`w-8 h-8 text-[var(--brand-sky)] animate-spin`}
+            className={`w-8 h-8 text-[var(--celeste-500)] animate-spin`}
           />
         </div>
         {message && (
@@ -48,7 +48,7 @@ export default function BaseLoading({
     >
       <Icon
         name="Loader"
-        className={`text-[var(--brand-sky)] animate-spin`}
+        className={`text-[var(--celeste-500)] animate-spin`}
         size={s.icon}
       />
       {message && (

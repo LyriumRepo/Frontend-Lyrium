@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useState, useCallback } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Voucher, InvoiceKPIs, VoucherStatus, VoucherType } from '../types';
 import { invoiceApi } from '@/shared/lib/api/invoiceRepository';
 
@@ -11,17 +11,17 @@ export interface VoucherFilters {
     type: VoucherType | 'ALL';
     dateFrom: string;
     dateTo: string;
-    product: string;
-    service: string;
 }
 
+const DEFAULT_FILTERS: VoucherFilters = {
+    search: '', status: 'ALL', type: 'ALL', dateFrom: '', dateTo: '',
+};
+
 export function useSellerInvoices() {
+    const queryClient = useQueryClient();
     const [selectedVoucher, setSelectedVoucher] = useState<Voucher | null>(null);
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-    const [filters, setFiltersState] = useState<VoucherFilters>({
-        search: '', status: 'ALL', type: 'ALL',
-        dateFrom: '', dateTo: '', product: '', service: ''
-    });
+    const [filters, setFiltersState] = useState<VoucherFilters>(DEFAULT_FILTERS);
 
     const { data: vouchers = [], isLoading } = useQuery({
         queryKey: ['seller', 'invoices', 'list'],
@@ -58,14 +58,6 @@ export function useSellerInvoices() {
             end.setHours(23, 59, 59, 999);
             if (new Date(v.emission_date) > end) return false;
         }
-        if (filters.product && v.items) {
-            const hasProduct = v.items.some((i) => i.product_name?.toLowerCase().includes(filters.product.toLowerCase()));
-            if (!hasProduct) return false;
-        }
-        if (filters.service && v.items) {
-            const hasService = v.items.some((i) => i.service_name?.toLowerCase().includes(filters.service.toLowerCase()));
-            if (!hasService) return false;
-        }
         return true;
     });
 
@@ -75,15 +67,13 @@ export function useSellerInvoices() {
         setFiltersState((prev) => ({ ...prev, ...newFilters }));
     };
 
-    const clearAllFilters = () => {
-        setFiltersState({
-            search: '', status: 'ALL', type: 'ALL',
-            dateFrom: '', dateTo: '', product: '', service: ''
-        });
-    };
+    const clearAllFilters = useCallback(() => {
+        setFiltersState(DEFAULT_FILTERS);
+        queryClient.invalidateQueries({ queryKey: ['seller', 'invoices'] });
+    }, [queryClient]);
 
     const hasActiveFilters = filters.search !== '' || filters.status !== 'ALL' || filters.type !== 'ALL' ||
-        filters.dateFrom !== '' || filters.dateTo !== '' || filters.product !== '' || filters.service !== '';
+        filters.dateFrom !== '' || filters.dateTo !== '';
 
     return {
         vouchers: filteredVouchers,

@@ -5,29 +5,17 @@ import { VoucherStatus, VoucherType } from '@/features/seller/invoices/types';
 import Icon from '@/components/ui/Icon';
 import BaseInputField from '@/components/ui/BaseInputField';
 
-interface InvoiceFilters {
-    search?: string;
-    status?: VoucherStatus | 'ALL';
-    type?: VoucherType | 'ALL';
-    dateFrom?: string;
-    dateTo?: string;
-    product?: string;
-    service?: string;
-}
-
 interface InvoiceFiltersProps {
     search: string;
     status: VoucherStatus | 'ALL';
     type: VoucherType | 'ALL';
     dateFrom: string;
     dateTo: string;
-    product: string;
-    service: string;
-    onFilterChange: (filters: Partial<InvoiceFilters>) => void;
+    onFilterChange: (filters: Partial<{ search: string; status: VoucherStatus | 'ALL'; type: VoucherType | 'ALL'; dateFrom: string; dateTo: string }>) => void;
     onClear: () => void;
 }
 
-export default function InvoiceFilters({ search, status, type, dateFrom, dateTo, product, service, onFilterChange, onClear }: InvoiceFiltersProps) {
+export default function InvoiceFilters({ search, status, type, dateFrom, dateTo, onFilterChange, onClear }: InvoiceFiltersProps) {
     return (
         <div className="glass-card p-6 border-[var(--border-subtle)] animate-fadeIn">
             <div className="flex flex-col md:flex-row gap-4 items-end flex-wrap">
@@ -78,17 +66,6 @@ export default function InvoiceFilters({ search, status, type, dateFrom, dateTo,
                         <option value="FACTURA">Factura</option>
                         <option value="NOTA_CREDITO">Nota de Crédito</option>
                     </select>
-                </div>
-
-                <div className="flex-1 space-y-2 w-full md:w-auto min-w-[160px]">
-                    <BaseInputField label="Producto" name="invoice-product" value={product}
-                        onChange={(value) => onFilterChange({ product: value })} placeholder="Filtrar por producto..."
-                        icon="Package" inputClassName="bg-[var(--bg-secondary)] text-sm focus:ring-emerald-500/20" />
-                </div>
-                <div className="flex-1 space-y-2 w-full md:w-auto min-w-[160px]">
-                    <BaseInputField label="Servicio" name="invoice-service" value={service}
-                        onChange={(value) => onFilterChange({ service: value })} placeholder="Filtrar por servicio..."
-                        icon="Calendar" inputClassName="bg-[var(--bg-secondary)] text-sm focus:ring-emerald-500/20" />
                 </div>
 
                 <button onClick={onClear}

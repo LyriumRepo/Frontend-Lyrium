@@ -31,19 +31,19 @@ function NewChatForm({
   };
 
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-[var(--bg-secondary)] rounded-[2.5rem] shadow-2xl overflow-hidden">
-      <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[#1A3A32] dark:to-[var(--brand-green)] p-8 text-white relative">
-        <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl" />
-        <div className="relative z-10 flex items-center gap-4">
-          <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center">
-            <Icon name="MessageCircle" className="w-6 h-6" />
-          </div>
-          <div>
-            <h3 className="text-2xl font-black tracking-tighter">Nuevo Chat</h3>
-            <p className="text-[10px] font-bold text-sky-100 uppercase tracking-[0.2em]">Inicia una conversación con un vendedor</p>
+      <div className="flex flex-col h-full bg-white dark:bg-[var(--bg-secondary)] rounded-[2.5rem] shadow-2xl overflow-hidden">
+        <div className="bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--verde-500)] dark:from-[#1A3A32] dark:to-[var(--brand-green)] p-8 text-white relative">
+          <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl" />
+          <div className="relative z-10 flex items-center gap-4">
+            <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center">
+              <Icon name="MessageCircle" className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="text-2xl font-black tracking-tighter">Nuevo Chat</h3>
+              <p className="text-[10px] font-bold text-white/80 uppercase tracking-[0.2em]">Inicia una conversación con un vendedor</p>
+            </div>
           </div>
         </div>
-      </div>
 
       <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-8 space-y-6">
         <div className="space-y-2">
@@ -51,7 +51,7 @@ function NewChatForm({
           <select
             value={sellerId}
             onChange={(e) => setSellerId(e.target.value)}
-            className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)]"
+            className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-[var(--icons-green)] dark:focus:border-[var(--icons-green)]"
             required
           >
             <option value="">Seleccionar vendedor...</option>
@@ -66,7 +66,7 @@ function NewChatForm({
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value as ChatCategory)}
-            className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)]"
+            className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-[var(--icons-green)] dark:focus:border-[var(--icons-green)]"
             required
           >
             <option value="informacion">Solicitud de Información</option>
@@ -84,7 +84,7 @@ function NewChatForm({
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
             placeholder="Describe brevemente el motivo"
-            className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)]"
+            className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-[var(--icons-green)] dark:focus:border-[var(--icons-green)]"
             required
           />
         </div>
@@ -100,7 +100,7 @@ function NewChatForm({
           <button
             type="submit"
             disabled={isSubmitting || !sellerId}
-            className="flex-[2] px-8 py-4 rounded-2xl bg-gradient-to-r from-sky-500 to-sky-600 dark:from-[#1A3A32] dark:to-[var(--brand-green)] text-white font-black text-xs uppercase tracking-[0.2em] hover:shadow-lg disabled:opacity-50"
+            className="flex-[2] px-8 py-4 rounded-2xl bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--verde-500)] dark:from-[#1A3A32] dark:to-[var(--brand-green)] text-white font-black text-xs uppercase tracking-[0.2em] hover:shadow-lg hover:shadow-[var(--turquesa-500)]/30 disabled:opacity-50"
           >
             {isSubmitting ? 'Iniciando...' : 'Iniciar Chat'}
           </button>
@@ -198,8 +198,8 @@ export function ChatPageClient({ conversationId }: { conversationId?: string }) 
           </div>
           <button
             onClick={() => { setShowFilter(prev => !prev); setFilterValue(''); }}
-            className={`p-2 rounded-xl transition-colors text-xs font-medium border ${showFilter
-              ? 'bg-sky-100 text-sky-600 border-sky-200 dark:bg-[var(--brand-green)] dark:text-white'
+            className={`p-2 rounded-xl transition-all duration-200 text-xs font-medium border ${showFilter
+              ? 'bg-[var(--icons-green)]/10 text-[var(--icons-green)] border-[var(--icons-green)]/30 dark:bg-[var(--brand-green)] dark:text-white'
               : 'bg-gray-100 text-gray-500 border-gray-200 hover:bg-gray-200 dark:bg-[var(--bg-secondary)]'
             }`}
           >
@@ -212,8 +212,8 @@ export function ChatPageClient({ conversationId }: { conversationId?: string }) 
             <div className="flex rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 text-xs font-medium">
               <button
                 onClick={() => { setFilterType('tienda'); setFilterValue(''); }}
-                className={`flex-1 py-1.5 transition-colors ${filterType === 'tienda'
-                  ? 'bg-sky-500 dark:bg-[var(--brand-green)] text-white'
+                className={`flex-1 py-1.5 transition-all duration-200 ${filterType === 'tienda'
+                  ? 'bg-[var(--turquesa-500)] dark:bg-[var(--brand-green)] text-white'
                   : 'bg-gray-100 dark:bg-[var(--bg-secondary)] text-gray-500'
                 }`}
               >
@@ -221,8 +221,8 @@ export function ChatPageClient({ conversationId }: { conversationId?: string }) 
               </button>
               <button
                 onClick={() => { setFilterType('categoria'); setFilterValue(''); }}
-                className={`flex-1 py-1.5 transition-colors ${filterType === 'categoria'
-                  ? 'bg-sky-500 dark:bg-[var(--brand-green)] text-white'
+                className={`flex-1 py-1.5 transition-all duration-200 ${filterType === 'categoria'
+                  ? 'bg-[var(--turquesa-500)] dark:bg-[var(--brand-green)] text-white'
                   : 'bg-gray-100 dark:bg-[var(--bg-secondary)] text-gray-500'
                 }`}
               >
@@ -236,13 +236,13 @@ export function ChatPageClient({ conversationId }: { conversationId?: string }) 
                 value={filterValue}
                 onChange={(e) => setFilterValue(e.target.value)}
                 placeholder="Buscar tienda..."
-                className="w-full px-3 py-1.5 text-sm bg-gray-100 dark:bg-[var(--bg-secondary)] rounded-xl outline-none focus:ring-2 focus:ring-sky-500 dark:focus:ring-[var(--icons-green)]"
+                className="w-full px-3 py-1.5 text-sm bg-gray-100 dark:bg-[var(--bg-secondary)] rounded-xl outline-none focus:ring-2 focus:ring-[var(--turquesa-500)]/50 dark:focus:ring-[var(--icons-green)]"
               />
             ) : (
               <select
                 value={filterValue}
                 onChange={(e) => setFilterValue(e.target.value)}
-                className="w-full px-3 py-1.5 text-sm bg-gray-100 dark:bg-[var(--bg-secondary)] rounded-xl outline-none focus:ring-2 focus:ring-sky-500 dark:focus:ring-[var(--icons-green)]"
+                className="w-full px-3 py-1.5 text-sm bg-gray-100 dark:bg-[var(--bg-secondary)] rounded-xl outline-none focus:ring-2 focus:ring-[var(--turquesa-500)]/50 dark:focus:ring-[var(--icons-green)]"
               >
                 <option value="">Todas las categorías</option>
                 <option value="informacion">Solicitud de Información</option>
@@ -264,18 +264,19 @@ export function ChatPageClient({ conversationId }: { conversationId?: string }) 
         </div>
       )}
 
-      {filteredConversations.map((conv) => (
+      {filteredConversations.map((conv, index) => (
         <button
           key={conv.id}
           onClick={() => {
             setActiveConversation(conv.id);
             setIsMobileListVisible(false);
           }}
-          className={`w-full p-4 text-left hover:bg-gray-50 dark:hover:bg-[#1A3A32] transition-colors ${activeConversation?.id === conv.id ? 'bg-sky-50 dark:bg-[#1A3A32]/50' : ''
+          style={{ animationDelay: `${Math.min(index * 30, 400)}ms` }}
+          className={`w-full p-4 text-left hover:bg-gray-50 dark:hover:bg-[#1A3A32] transition-all duration-200 hover:pl-6 animate-list-item-slide ${activeConversation?.id === conv.id ? 'bg-[var(--icons-green)]/5 dark:bg-[#1A3A32]/50' : ''
           }`}
         >
           <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-sky-400 to-sky-600 dark:from-[var(--brand-green)] dark:to-[#1A3A32] flex items-center justify-center text-white font-bold text-sm">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--turquesa-500)] to-[var(--verde-500)] dark:from-[var(--brand-green)] dark:to-[var(--icons-green)] flex items-center justify-center text-white font-bold text-sm animate-avatar-appear">
               {conv.sellerStore.charAt(0)}
             </div>
             <div className="flex-1 min-w-0">
@@ -286,7 +287,7 @@ export function ChatPageClient({ conversationId }: { conversationId?: string }) 
               <div className="flex items-center justify-between mt-1">
                 <span className="text-sm text-gray-500 dark:text-[var(--text-muted)] truncate">{conv.lastMessage}</span>
                 {conv.unreadCount > 0 && (
-                  <span className="ml-2 px-2 py-0.5 text-xs font-bold bg-sky-500 dark:bg-[var(--icons-green)] text-white rounded-full">
+                  <span className="ml-2 px-2 py-0.5 text-xs font-bold bg-[var(--turquesa-500)] dark:bg-[var(--icons-green)] text-white rounded-full">
                     {conv.unreadCount}
                   </span>
                 )}
@@ -321,7 +322,7 @@ export function ChatPageClient({ conversationId }: { conversationId?: string }) 
           >
             <Icon name="ArrowLeft" className="w-5 h-5" />
           </button>
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-sky-400 to-sky-600 dark:from-[var(--brand-green)] dark:to-[#1A3A32] flex items-center justify-center text-white font-bold text-sm">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--turquesa-500)] to-[var(--verde-500)] dark:from-[var(--brand-green)] dark:to-[var(--icons-green)] flex items-center justify-center text-white font-bold text-sm animate-avatar-appear">
             {activeConversation.sellerStore.charAt(0)}
           </div>
           <div>
@@ -329,7 +330,7 @@ export function ChatPageClient({ conversationId }: { conversationId?: string }) 
             <p className="text-sm text-gray-500 dark:text-[var(--text-muted)]">{activeConversation.sellerName}</p>
           </div>
           <div className="ml-auto">
-            <span className="text-[10px] px-3 py-1 rounded-full bg-gray-100 dark:bg-[#1A3A32] text-gray-500 dark:text-[#6BAF7B] font-bold uppercase tracking-widest">
+            <span className="text-[10px] px-3 py-1 rounded-full bg-[var(--icons-green)]/10 dark:bg-[#1A3A32] text-[var(--icons-green)] dark:text-[#6BAF7B] font-bold uppercase tracking-widest">
               {{
                 informacion: 'Información',
                 positivo: 'Positivo',
@@ -342,9 +343,9 @@ export function ChatPageClient({ conversationId }: { conversationId?: string }) 
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-1 bg-[#f8fafb] dark:bg-[var(--bg-muted)]/20">
+      <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-1 bg-[#f8fafb] dark:bg-[var(--bg-muted)]/20 scrollbar-thin">
         {error && (
-          <div className="flex items-start gap-3 p-4 rounded-2xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 mb-4 animate-fadeIn">
+          <div className="flex items-start gap-3 p-4 rounded-2xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 mb-4 animate-slide-down">
             <Icon name="AlertCircle" className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
             <p className="text-sm font-semibold text-red-700 dark:text-red-400">{error}</p>
           </div>
@@ -359,7 +360,7 @@ export function ChatPageClient({ conversationId }: { conversationId?: string }) 
           return (
             <React.Fragment key={msg.id}>
               {showDate && (
-                <div className="flex justify-center my-4 md:my-6 animate-fadeIn">
+                <div className="flex justify-center my-4 md:my-6 animate-slide-down">
                   <span className="px-4 py-1 bg-white/70 dark:bg-[#1A3A32]/70 backdrop-blur-sm border border-gray-200/50 dark:border-[var(--border-subtle)] rounded-full text-[9px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-wider shadow-sm">
                     {formatDateSeparator(msg.timestamp)}
                   </span>
@@ -369,31 +370,31 @@ export function ChatPageClient({ conversationId }: { conversationId?: string }) 
               <div
                 className={`flex ${isCustomer ? 'justify-end' : 'justify-start'} ${
                   idx > 0 && !showDate ? 'mt-1' : 'mt-1'
-                } animate-fadeIn`}
-                style={{ animationDelay: `${Math.min(idx * 15, 200)}ms` }}
+                } ${isCustomer ? 'animate-bubble-in-right' : 'animate-bubble-in-left'}`}
+                style={{ animationDelay: `${Math.min(idx * 30, 300)}ms` }}
               >
                 <div className={`flex max-w-[88%] md:max-w-[72%] items-end gap-2 md:gap-3 ${isCustomer ? 'flex-row-reverse' : 'flex-row'}`}>
-                  <div className={`w-7 h-7 md:w-9 md:h-9 shrink-0 rounded-full flex items-center justify-center text-[8px] md:text-[10px] font-black shadow-sm transition-transform duration-200 hover:scale-110 ${
+                  <div className={`w-7 h-7 md:w-9 md:h-9 shrink-0 rounded-full flex items-center justify-center text-[8px] md:text-[10px] font-black shadow-sm transition-all duration-300 hover:scale-110 hover:-translate-y-0.5 ${
                     isCustomer
-                      ? 'bg-gradient-to-br from-emerald-400 to-emerald-600 text-white'
-                      : 'bg-gradient-to-br from-sky-400 to-sky-600 dark:from-[var(--brand-green)] dark:to-[#1A3A32] text-white'
+                      ? 'bg-gradient-to-br from-[var(--turquesa-500)] to-[var(--verde-500)] text-white'
+                      : 'bg-gradient-to-br from-[var(--verde-500)] to-[var(--turquesaClaro-500)] dark:from-[var(--brand-green)] dark:to-[var(--icons-green)] text-white'
                   }`}>
                     {isCustomer ? 'Tú' : activeConversation.sellerStore.charAt(0)}
                   </div>
 
-                  <div className={`relative rounded-2xl md:rounded-3xl px-4 md:px-5 py-2.5 md:py-3 shadow-sm border transition-all duration-200 hover:shadow-md ${
+                  <div className={`relative rounded-2xl md:rounded-3xl px-4 md:px-5 py-2.5 md:py-3 shadow-sm border transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 ${
                     isCustomer
-                      ? 'bg-gradient-to-br from-emerald-500 to-emerald-600 text-white border-emerald-400/20 rounded-br-sm'
+                      ? 'bg-gradient-to-br from-[var(--turquesa-500)] to-[var(--verde-500)] text-white border-transparent rounded-br-sm'
                       : 'bg-white dark:bg-[#1A3A32] text-slate-800 dark:text-[var(--text-primary)] border-gray-100 dark:border-[var(--border-subtle)] rounded-bl-sm'
                   }`}>
                     <div className="mb-1 flex items-center gap-2">
                       <p className={`text-[9px] md:text-[11px] font-black uppercase tracking-[0.12em] md:tracking-[0.16em] ${
-                        isCustomer ? 'text-emerald-100' : 'text-sky-600 dark:text-[var(--icons-green)]'
+                        isCustomer ? 'text-white/80' : 'text-[var(--icons-green)] dark:text-[var(--icons-green)]'
                       }`}>
                         {isCustomer ? 'Tú' : activeConversation.sellerName}
                       </p>
                       <span className={`text-[8px] md:text-[10px] font-semibold px-1.5 md:px-2 py-0.5 rounded-full ${
-                        isCustomer ? 'bg-white/15 text-emerald-50' : 'bg-sky-50 dark:bg-[#2A3F33] text-sky-700 dark:text-[#6BAF7B]'
+                        isCustomer ? 'bg-white/15 text-white/80' : 'bg-[var(--icons-green)]/10 dark:bg-[#2A3F33] text-[var(--icons-green)] dark:text-[#6BAF7B]'
                       }`}>
                         {isCustomer ? 'Cliente' : 'Vendedor'}
                       </span>
@@ -411,7 +412,7 @@ export function ChatPageClient({ conversationId }: { conversationId?: string }) 
                               rel="noopener noreferrer"
                               className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-200 active:scale-[0.98] ${
                                 isCustomer
-                                  ? 'bg-white/15 text-emerald-50 hover:bg-white/25'
+                                  ? 'bg-white/15 text-white/80 hover:bg-white/25'
                                   : 'bg-gray-50 dark:bg-[#2A3F33] text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#3A4F43]'
                               }`}
                             >
@@ -437,12 +438,12 @@ export function ChatPageClient({ conversationId }: { conversationId?: string }) 
                       </div>
                     )}
                     <div className={`mt-1.5 flex items-center gap-1.5 ${isCustomer ? 'justify-end' : 'justify-start'}`}>
-                      <span className={`text-[9px] md:text-[10px] font-medium ${isCustomer ? 'text-emerald-100/70' : 'text-gray-400 dark:text-gray-500'}`}>
+                      <span className={`text-[9px] md:text-[10px] font-medium ${isCustomer ? 'text-white/70' : 'text-gray-400 dark:text-gray-500'}`}>
                         {formatTime(msg.timestamp)}
                       </span>
                       {isCustomer && (
                         isRead ? (
-                          <Icon name="CheckCheck" className="w-3.5 h-3.5 text-emerald-300 dark:text-emerald-400" />
+                          <Icon name="CheckCheck" className="w-3.5 h-3.5 text-[var(--turquesaClaro-500)] dark:text-[var(--turquesaClaro-500)] animate-check-pop" />
                         ) : (
                           <Icon name="Check" className="w-3.5 h-3.5 text-white/40 dark:text-gray-500" />
                         )
@@ -467,9 +468,9 @@ export function ChatPageClient({ conversationId }: { conversationId?: string }) 
     </div>
   ) : (
     <div className="flex-1 flex items-center justify-center">
-      <div className="text-center">
-        <div className="w-20 h-20 bg-sky-50 dark:bg-[#1A3A32] rounded-full flex items-center justify-center mx-auto mb-6">
-          <Icon name="MessageCircle" className="w-10 h-10 text-sky-400 dark:text-[var(--icons-green)]" />
+      <div className="text-center animate-slide-up">
+        <div className="w-20 h-20 bg-[var(--icons-green)]/10 dark:bg-[#1A3A32] rounded-full flex items-center justify-center mx-auto mb-6">
+          <Icon name="MessageCircle" className="w-10 h-10 text-[var(--icons-green)] dark:text-[var(--icons-green)]" />
         </div>
         <p className="text-xl font-black text-slate-800 dark:text-[var(--text-primary)]">Selecciona una conversación</p>
         <p className="text-sm text-slate-500 dark:text-[var(--text-muted)] mt-2">Elige un chat para comenzar a chatear o inicia uno nuevo</p>
@@ -479,11 +480,22 @@ export function ChatPageClient({ conversationId }: { conversationId?: string }) 
 
   if (isLoading) {
     return (
-      <div className="flex flex-col h-[calc(100vh-140px)] animate-fadeIn">
+      <div className="flex flex-col h-[calc(100vh-140px)] animate-fade-in">
         <ModuleHeader
           title="Chat con Vendedores"
           subtitle="Comunicación directa con los vendedores"
           icon="MessageCircle"
+          actions={
+            !showNewChatForm ? (
+              <button
+                onClick={() => setShowNewChatForm(true)}
+                className="px-6 py-3 bg-white dark:bg-[var(--bg-secondary)] text-[var(--icons-green)] dark:text-[var(--icons-green)] rounded-xl font-black text-xs uppercase tracking-widest border border-gray-200 dark:border-[var(--border-subtle)] hover:bg-[var(--icons-green)]/5 dark:hover:bg-[#1A3A32] transition-all flex items-center gap-2"
+              >
+                <Icon name="Plus" className="w-4 h-4" />
+                Nuevo Chat
+              </button>
+            ) : null
+          }
         />
         <div className="flex-1 flex items-center justify-center">
           <BaseLoading message="Cargando conversaciones..." />
@@ -493,23 +505,23 @@ export function ChatPageClient({ conversationId }: { conversationId?: string }) 
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-140px)] animate-fadeIn">
-      <ModuleHeader
-        title="Chat con Vendedores"
-        subtitle="Comunicación directa con los vendedores"
-        icon="MessageCircle"
-        actions={
-          !showNewChatForm ? (
-            <button
-              onClick={() => setShowNewChatForm(true)}
-              className="px-6 py-3 bg-white dark:bg-[var(--bg-secondary)] text-sky-600 dark:text-[var(--icons-green)] rounded-xl font-black text-xs uppercase tracking-widest border border-gray-200 dark:border-[var(--border-subtle)] hover:bg-sky-50 dark:hover:bg-[#1A3A32] transition-all flex items-center gap-2"
-            >
-              <Icon name="Plus" className="w-4 h-4" />
-              Nuevo Chat
-            </button>
-          ) : null
-        }
-      />
+    <div className="flex flex-col h-[calc(100vh-140px)] animate-fade-in">
+        <ModuleHeader
+          title="Chat con Vendedores"
+          subtitle="Comunicación directa con los vendedores"
+          icon="MessageCircle"
+          actions={
+            !showNewChatForm ? (
+              <button
+                onClick={() => setShowNewChatForm(true)}
+                className="px-6 py-3 bg-white dark:bg-[var(--bg-secondary)] text-[var(--icons-green)] dark:text-[var(--icons-green)] rounded-xl font-black text-xs uppercase tracking-widest border border-gray-200 dark:border-[var(--border-subtle)] hover:bg-[var(--icons-green)]/5 dark:hover:bg-[#1A3A32] transition-all flex items-center gap-2"
+              >
+                <Icon name="Plus" className="w-4 h-4" />
+                Nuevo Chat
+              </button>
+            ) : null
+          }
+        />
 
       {showNewChatForm ? (
         <div className="flex-1 flex items-center justify-center px-8 py-6">

@@ -12,12 +12,6 @@ interface InvoiceDrawerProps {
     onClose: () => void;
 }
 
-const fileColorClasses: Record<string, { bg: string; bgIcon: string; textIcon: string; shadow: string }> = {
-    PDF: { bg: 'hover:bg-rose-500/5', bgIcon: 'bg-rose-50', textIcon: 'text-rose-500', shadow: 'shadow-rose-100/50' },
-    XML: { bg: 'hover:bg-emerald-500/5', bgIcon: 'bg-emerald-50', textIcon: 'text-emerald-500', shadow: 'shadow-emerald-100/50' },
-    CDR: { bg: 'hover:bg-sky-500/5', bgIcon: 'bg-sky-50', textIcon: 'text-sky-500', shadow: 'shadow-sky-100/50' },
-};
-
 const statusConfig: Record<VoucherStatus, { label: string; color: string; iconName: string }> = {
     ACCEPTED: { label: 'Aceptado', color: 'emerald', iconName: 'CheckCircle' },
     SENT_WAIT_CDR: { label: 'Pendiente CDR', color: 'sky', iconName: 'Clock' },
@@ -39,6 +33,37 @@ export default function InvoiceDrawer({ voucher, isOpen, onClose }: InvoiceDrawe
 
     const status = statusConfig[voucher.sunat_status] || statusConfig.DRAFT;
     const statusClasses = statusColorClasses[status.color] || statusColorClasses.gray;
+
+    const [isDownloading, setIsDownloading] = useState(false);
+
+    const handleDownloadPdf = useCallback(async (v: Voucher) => {
+        if (isDownloading) return;
+        setIsDownloading(true);
+        try {
+            const apiUrl = process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://localhost:8000/api';
+            const response = await fetch(`${apiUrl}/invoices/${v.id}/pdf`, {
+                headers: {
+                    Accept: 'application/pdf',
+                    ...(await getAuthHeaders()),
+                },
+            });
+            if (!response.ok) throw new Error('Error al descargar la factura');
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const anchor = document.createElement('a');
+            anchor.href = url;
+            anchor.download = `Factura-Lyrium-${v.series}-${v.number}.pdf`;
+            document.body.appendChild(anchor);
+            anchor.click();
+            document.body.removeChild(anchor);
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Error al descargar la factura:', error);
+        } finally {
+            setIsDownloading(false);
+        }
+    }, [isDownloading]);
 
     return (
         <div className="fixed inset-0 z-[99999] flex items-center justify-end">
@@ -96,108 +121,23 @@ export default function InvoiceDrawer({ voucher, isOpen, onClose }: InvoiceDrawe
                         <h3 className="text-xs font-black text-[var(--text-secondary)] uppercase tracking-widest flex items-center gap-2">
                             <Icon name="FileText" className="w-4 h-4" /> Comprobante Digital
                         </h3>
-                        <a
-                            href={`${process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://localhost:8000/api'}/invoices/${voucher.id}/pdf`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center justify-center gap-3 p-6 bg-[var(--bg-card)] rounded-[2.5rem] border border-[var(--border-subtle)] shadow-xl shadow-[var(--border-subtle)]/50 hover:bg-emerald-500/5 transition-all group"
+                        <button
+                            onClick={() => handleDownloadPdf(voucher)}
+                            disabled={isDownloading}
+                            className="flex items-center justify-center gap-3 p-6 bg-[var(--bg-card)] rounded-[2.5rem] border border-[var(--border-subtle)] shadow-xl shadow-[var(--border-subtle)]/50 hover:bg-emerald-500/5 transition-all group w-full text-left disabled:opacity-60 disabled:cursor-not-allowed"
                         >
                             <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-rose-50 text-rose-500 group-hover:scale-110 transition-all shadow-lg shadow-rose-100/50">
                                 <Icon name="FileText" className="w-8 h-8" />
                             </div>
                             <div className="text-left">
-                                <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]">Ver PDF</p>
+                                <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]">
+                                    {isDownloading ? 'Descargando...' : 'Descargar Factura Electrónica'}
+                                </p>
                                 <p className="text-xs text-[var(--text-muted)] mt-1">Comprobante Lyrium</p>
                             </div>
-                            <Icon name="ArrowRight" className="w-5 h-5 text-[var(--text-muted)] ml-auto" />
-                        </a>
-                        {voucher.pdf_url && (
-                            <a
-                                href={voucher.pdf_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center justify-center gap-3 p-4 bg-[var(--bg-card)] rounded-[2rem] border border-[var(--border-subtle)] hover:bg-rose-500/5 transition-all group"
-                            >
-                                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-rose-50 text-rose-500">
-                                    <Icon name="ExternalLink" className="w-5 h-5" />
-                                </div>
-                                <div className="text-left flex-1">
-                                    <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]">Ver PDF SUNAT</p>
-                                    <p className="text-[9px] text-[var(--text-muted)]">Comprobante electrónico original</p>
-                                </div>
-                            </a>
-                        )}
+                            <Icon name="Download" className="w-5 h-5 text-[var(--text-muted)] ml-auto" />
+                        </button>
                     </div>
-
-                    {/* Compartir */}
-                    <div className="space-y-4">
-                        <h3 className="text-xs font-black text-[var(--text-secondary)] uppercase tracking-widest flex items-center gap-2">
-                            <Icon name="Share2" className="w-4 h-4" /> Compartir
-                        </h3>
-                        <div className="flex gap-3">
-                            <button onClick={() => {
-                                const url = `${window.location.origin}/seller/invoices`;
-                                const text = `Comprobante ${voucher.type} ${voucher.series}-${voucher.number} - S/ ${voucher.amount.toFixed(2)}`;
-                                if (navigator.share) {
-                                    navigator.share({ title: text, url: `${url}?id=${voucher.id}` }).catch(() => {});
-                                } else {
-                                    navigator.clipboard.writeText(`${text}\n${url}?id=${voucher.id}`).catch(() => {});
-                                }
-                            }}
-                                className="flex-1 flex items-center justify-center gap-2 p-4 bg-[var(--bg-secondary)] rounded-2xl hover:bg-sky-500/10 transition-all border border-[var(--border-subtle)] group">
-                                <Icon name="Share2" className="w-5 h-5 text-sky-500" />
-                                <span className="text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)] group-hover:text-sky-600">Compartir</span>
-                            </button>
-                            <a href={`https://wa.me/?text=${encodeURIComponent(`Comprobante ${voucher.type} ${voucher.series}-${voucher.number} - S/ ${voucher.amount.toFixed(2)}`)}`}
-                                target="_blank" rel="noopener noreferrer"
-                                className="flex-1 flex items-center justify-center gap-2 p-4 bg-[var(--bg-secondary)] rounded-2xl hover:bg-emerald-500/10 transition-all border border-[var(--border-subtle)] group">
-                                <Icon name="MessageCircle" className="w-5 h-5 text-emerald-500" />
-                                <span className="text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)] group-hover:text-emerald-600">WhatsApp</span>
-                            </a>
-                        </div>
-                    </div>
-
-                    {(voucher.xml_url || voucher.cdr_url) && (
-                        <div className="space-y-4">
-                            <h3 className="text-xs font-black text-[var(--text-secondary)] uppercase tracking-widest flex items-center gap-2">
-                                <Icon name="Download" className="w-4 h-4" /> Archivos
-                            </h3>
-                            <div className="grid grid-cols-2 gap-3">
-                                {voucher.xml_url && (
-                                    <a
-                                        href={voucher.xml_url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className={`flex items-center gap-3 p-4 rounded-[2rem] border border-[var(--border-subtle)] transition-all group ${fileColorClasses.XML.bg}`}
-                                    >
-                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${fileColorClasses.XML.bgIcon} ${fileColorClasses.XML.textIcon}`}>
-                                            <Icon name="FileText" className="w-5 h-5" />
-                                        </div>
-                                        <div>
-                                            <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-primary)]">XML</p>
-                                            <p className="text-[9px] text-[var(--text-muted)]">Descargar</p>
-                                        </div>
-                                    </a>
-                                )}
-                                {voucher.cdr_url && (
-                                    <a
-                                        href={voucher.cdr_url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className={`flex items-center gap-3 p-4 rounded-[2rem] border border-[var(--border-subtle)] transition-all group ${fileColorClasses.CDR.bg}`}
-                                    >
-                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${fileColorClasses.CDR.bgIcon} ${fileColorClasses.CDR.textIcon}`}>
-                                            <Icon name="Shield" className="w-5 h-5" />
-                                        </div>
-                                        <div>
-                                            <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-primary)]">CDR</p>
-                                            <p className="text-[9px] text-[var(--text-muted)]">Descargar</p>
-                                        </div>
-                                    </a>
-                                )}
-                            </div>
-                        </div>
-                    )}
 
                     <div className="space-y-4">
                         <h3 className="text-xs font-black text-[var(--text-secondary)] uppercase tracking-widest flex items-center gap-2">

@@ -34,7 +34,7 @@ export default function BaseModal({
   title,
   subtitle,
   size = 'md',
-  accentColor = 'from-sky-400 to-indigo-500',
+  accentColor = 'from-[var(--turquesa-500)] to-[var(--verde-500)]',
   headerBgColor,
   children,
   className = '',

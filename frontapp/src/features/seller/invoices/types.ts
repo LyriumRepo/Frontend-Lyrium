@@ -38,7 +38,7 @@ export interface InvoiceKPIs {
     totalFacturado: number;
     successRate: number;
     pendingCount: number;
-    rejectedCount: number;
+    totalComprobantes: number;
 }
 
 export interface InvoiceApiResponse {
