@@ -97,7 +97,7 @@ export function FinancePageClient(_props: FinancePageClientProps) {
                         type="button"
                         onClick={() => setActiveTab(tab.id)}
                         className={`px-6 py-2.5 rounded-xl text-sm font-black whitespace-nowrap transition-all duration-300 flex items-center gap-2 ${activeTab === tab.id
-                            ? 'bg-sky-500 text-white shadow-lg shadow-sky-100'
+                            ? 'bg-[var(--brand-sky)] text-white shadow-lg shadow-[var(--brand-sky)]/10'
                             : 'text-[var(--text-secondary)] bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:bg-[var(--bg-secondary)]'
                             }`}
                     >
@@ -111,7 +111,7 @@ export function FinancePageClient(_props: FinancePageClientProps) {
                 {isVisible('monetario') && (
                     <div className="space-y-6">
                         <div className="flex items-center gap-3 mb-2">
-                            <div className="w-1.5 h-6 bg-sky-500 rounded-full"></div>
+                            <div className="w-1.5 h-6 bg-[var(--brand-sky)] rounded-full"></div>
                             <h2 className="text-lg font-black text-[var(--text-primary)] uppercase tracking-tight">Análisis Monetario</h2>
                         </div>
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -136,7 +136,7 @@ export function FinancePageClient(_props: FinancePageClientProps) {
                                         <div className="flex flex-wrap gap-6">
                                             <div>
                                                 <span className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-wider block">Ingresos Brutos</span>
-                                                <span className="text-2xl font-black text-sky-500">{formatCurrency(data.ingresosBrutos.data.reduce((a, b) => a + b, 0))}</span>
+                                                <span className="text-2xl font-black text-[var(--brand-sky)]">{formatCurrency(data.ingresosBrutos.data.reduce((a, b) => a + b, 0))}</span>
                                             </div>
                                             <div className="w-[1px] h-10 bg-[var(--border-subtle)] hidden sm:block" />
                                             <div>
@@ -154,12 +154,12 @@ export function FinancePageClient(_props: FinancePageClientProps) {
                                                 {
                                                     label: 'Ingresos Brutos',
                                                     data: data.ingresosBrutos.data,
-                                                    color: '#0EA5E9'
+                                                    color: '--brand-sky'
                                                 },
                                                 {
                                                     label: 'Ingresos Netos',
                                                     data: data.ingresosNetos.data,
-                                                    color: '#10B981'
+                                                    color: '--color-success'
                                                 }
                                             ]}
                                             height="280px"
@@ -177,7 +177,7 @@ export function FinancePageClient(_props: FinancePageClientProps) {
                                         description="Retorno sobre la inversión"
                                         icon="TrendingUp"
                                         color="sky"
-                                        chart={<FinanceChart type="radar" labels={data.roi.labels} data={data.roi.data} color="#06B6D4" />}
+                                        chart={<FinanceChart type="radar" labels={data.roi.labels} data={data.roi.data} color="--color-info" />}
                                     />
                                     
                                     {/* Ventas Totales - Histograma */}
@@ -188,7 +188,7 @@ export function FinancePageClient(_props: FinancePageClientProps) {
                                         icon="ShoppingCart"
                                         color="emerald"
                                         suffix="Ord."
-                                        chart={<FinanceChart type="bar" labels={data.ventasTotales.labels} data={data.ventasTotales.data} color="#10B981" />}
+                                        chart={<FinanceChart type="bar" labels={data.ventasTotales.labels} data={data.ventasTotales.data} color="--color-success" />}
                                     />
                                     
                                 </div>
@@ -208,7 +208,7 @@ export function FinancePageClient(_props: FinancePageClientProps) {
                                     description="Valor medio por pedido"
                                     icon="Tag"
                                     color="sky"
-                                    chart={<FinanceChart type="line" labels={data.ticketPromedio.labels} data={data.ticketPromedio.data} color="#0EA5E9" fill={true} />}
+                                    chart={<FinanceChart type="line" labels={data.ticketPromedio.labels} data={data.ticketPromedio.data} color="--brand-sky" fill={true} />}
                                 />
                                 
                             </div>
@@ -221,7 +221,7 @@ export function FinancePageClient(_props: FinancePageClientProps) {
                 {isVisible('logistica') && (
                     <div className="space-y-6">
                         <div className="flex items-center gap-3 mb-2">
-                            <div className="w-1.5 h-6 bg-sky-500 rounded-full"></div>
+                            <div className="w-1.5 h-6 bg-[var(--brand-sky)] rounded-full"></div>
                             <h2 className="text-lg font-black text-[var(--text-primary)] uppercase tracking-tight">Rendimiento Logístico</h2>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -232,7 +232,7 @@ export function FinancePageClient(_props: FinancePageClientProps) {
                                 description="Tiempo promedio desde pedido a despacho"
                                 icon="Timer"
                                 color="sky"
-                                chart={<FinanceChart type="bar" labels={data.leadTime.labels} data={data.leadTime.data} color="#0EA5E9" />}
+                                chart={<FinanceChart type="bar" labels={data.leadTime.labels} data={data.leadTime.data} color="--brand-sky" />}
                             />
                         </div>
                     </div>
@@ -255,7 +255,7 @@ export function FinancePageClient(_props: FinancePageClientProps) {
                                     <div className="bg-emerald-500/10 p-2 rounded-lg text-emerald-500 border border-emerald-500/20"><Icon name="AlertOctagon" className="text-xl w-5 h-5" /></div>
                                 </div>
                                 <div className="relative w-full h-[200px] flex items-center justify-center">
-                                    <FinanceChart type="doughnut" labels={data.defectuosos.labels} data={data.defectuosos.data} color="#10B981" cutout="75%" />
+                                    <FinanceChart type="doughnut" labels={data.defectuosos.labels} data={data.defectuosos.data} color="--color-success" cutout="75%" />
                                     <div className="absolute text-center mt-4">
                                         <span className="text-[10px] text-[var(--text-muted)] font-black uppercase tracking-wider block leading-none mb-1">Tasa Promedio</span>
                                         <span className="text-xl font-black text-emerald-500 dark:text-emerald-400">{data.defectuosos.data[data.defectuosos.data.length - 1]}%</span>
@@ -283,7 +283,7 @@ export function FinancePageClient(_props: FinancePageClientProps) {
                                 description="Revenue per customer lifetime"
                                 icon="Coins"
                                 color="sky"
-                                chart={<FinanceChart type="line" labels={data.ltv.labels} data={data.ltv.data} color="#0EA5E9" fill={true} />}
+                                chart={<FinanceChart type="line" labels={data.ltv.labels} data={data.ltv.data} color="--brand-sky" fill={true} />}
                             />
 
                             {/* Cuota de Mercado - Gráfico de Tarta (Pie) */}
@@ -293,7 +293,7 @@ export function FinancePageClient(_props: FinancePageClientProps) {
                                 description="Porcentaje del mercado objetivo"
                                 icon="PieChart"
                                 color="emerald"
-                                chart={<FinanceChart type="doughnut" labels={data.cuotaMercado.labels} data={data.cuotaMercado.data} color="#10B981" cutout="0%" />}
+                                chart={<FinanceChart type="doughnut" labels={data.cuotaMercado.labels} data={data.cuotaMercado.data} color="--color-success" cutout="0%" />}
                             />
                         </div>
                     </div>
@@ -314,7 +314,7 @@ export function FinancePageClient(_props: FinancePageClientProps) {
                                 description="Promedio de respuesta a tickets"
                                 icon="Clock"
                                 color="emerald"
-                                chart={<FinanceChart type="bar" labels={data.tiempoRespuesta.labels} data={data.tiempoRespuesta.data} color="#10B981" />}
+                                chart={<FinanceChart type="bar" labels={data.tiempoRespuesta.labels} data={data.tiempoRespuesta.data} color="--color-success" />}
                             />
 
                             {/* Tasa de Resolución - Gráfico de Áreas */}
@@ -324,7 +324,7 @@ export function FinancePageClient(_props: FinancePageClientProps) {
                                 description="Problemas resueltos en primera respuesta"
                                 icon="CheckCircle"
                                 color="sky"
-                                chart={<FinanceChart type="line" labels={data.defectuosos.labels} data={data.defectuosos.data} color="#0EA5E9" fill={true} />}
+                                chart={<FinanceChart type="line" labels={data.defectuosos.labels} data={data.defectuosos.data} color="--brand-sky" fill={true} />}
                             />
                         </div>
                     </div>
@@ -345,7 +345,7 @@ export function FinancePageClient(_props: FinancePageClientProps) {
                                 description="Retorno sobre inversión"
                                 icon="TrendingUp"
                                 color="rose"
-                                chart={<FinanceChart type="line" labels={data.roi.labels} data={data.roi.data} color="#F43F5E" fill={true} />}
+                                chart={<FinanceChart type="line" labels={data.roi.labels} data={data.roi.data} color="--color-error" fill={true} />}
                             />
 
                             {/* Cuota de Mercado - Gráfico de Tarta (Pie) */}
@@ -355,7 +355,7 @@ export function FinancePageClient(_props: FinancePageClientProps) {
                                 description="Participación en el mercado"
                                 icon="BarChart"
                                 color="sky"
-                                chart={<FinanceChart type="doughnut" labels={data.cuotaMercado.labels} data={data.cuotaMercado.data} color="#0EA5E9" cutout="0%" />}
+                                chart={<FinanceChart type="doughnut" labels={data.cuotaMercado.labels} data={data.cuotaMercado.data} color="--brand-sky" cutout="0%" />}
                             />
                         </div>
                     </div>
@@ -365,7 +365,7 @@ export function FinancePageClient(_props: FinancePageClientProps) {
                 {isVisible('inventario') && (
                     <div className="space-y-6">
                         <div className="flex items-center gap-3 mb-2">
-                            <div className="w-1.5 h-6 bg-sky-500 rounded-full"></div>
+                            <div className="w-1.5 h-6 bg-[var(--brand-sky)] rounded-full"></div>
                             <h2 className="text-lg font-black text-[var(--text-primary)] uppercase tracking-tight">Control de Inventario</h2>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -376,7 +376,7 @@ export function FinancePageClient(_props: FinancePageClientProps) {
                                 description="Veces que se renueva el inventario"
                                 icon="RefreshCw"
                                 color="sky"
-                                chart={<FinanceChart type="bar" labels={data.stockRotacion.labels} data={data.stockRotacion.data} color="#0EA5E9" />}
+                                chart={<FinanceChart type="bar" labels={data.stockRotacion.labels} data={data.stockRotacion.data} color="--brand-sky" />}
                             />
 
                             {/* Ventas Totales - Histograma */}
@@ -386,7 +386,7 @@ export function FinancePageClient(_props: FinancePageClientProps) {
                                 description="Unidades vendidas en el período"
                                 icon="Package"
                                 color="emerald"
-                                chart={<FinanceChart type="bar" labels={data.ventasTotales.labels} data={data.ventasTotales.data} color="#10B981" />}
+                                chart={<FinanceChart type="bar" labels={data.ventasTotales.labels} data={data.ventasTotales.data} color="--color-success" />}
                             />
                         </div>
                     </div>
@@ -396,7 +396,7 @@ export function FinancePageClient(_props: FinancePageClientProps) {
                 {isVisible('satisfaccion') && (
                     <div className="space-y-6">
                         <div className="flex items-center gap-3 mb-2">
-                            <div className="w-1.5 h-6 bg-sky-500 rounded-full"></div>
+                            <div className="w-1.5 h-6 bg-[var(--brand-sky)] rounded-full"></div>
                             <h2 className="text-lg font-black text-[var(--text-primary)] uppercase tracking-tight">Experiencia del Cliente</h2>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -407,7 +407,7 @@ export function FinancePageClient(_props: FinancePageClientProps) {
                                 description="Satisfacción medida en tiempo"
                                 icon="Smile"
                                 color="sky"
-                                chart={<FinanceChart type="line" labels={data.tiempoRespuesta.labels} data={data.tiempoRespuesta.data} color="#0EA5E9" fill={true} />}
+                                chart={<FinanceChart type="line" labels={data.tiempoRespuesta.labels} data={data.tiempoRespuesta.data} color="--brand-sky" fill={true} />}
                             />
 
                             {/* Calidad - Gráfico de Áreas (Calidad sin fallas) */}
@@ -417,7 +417,7 @@ export function FinancePageClient(_props: FinancePageClientProps) {
                                 description="Productos sin fallas reportadas"
                                 icon="Award"
                                 color="emerald"
-                                chart={<FinanceChart type="line" labels={data.defectuosos.labels} data={data.defectuosos.data.map(d => 100 - d)} color="#10B981" fill={true} />}
+                                chart={<FinanceChart type="line" labels={data.defectuosos.labels} data={data.defectuosos.data.map(d => 100 - d)} color="--color-success" fill={true} />}
                             />
                         </div>
                     </div>

@@ -67,9 +67,16 @@ export default function FinanceChart({
 
         let finalDatasets: any[] = [];
 
+        const resolveColor = (c: string) => {
+            if (typeof window !== 'undefined' && c.startsWith('--')) {
+                return getComputedStyle(document.documentElement).getPropertyValue(c).trim() || '#0ea5e9';
+            }
+            return c;
+        };
+
         if (datasets && datasets.length > 0) {
             finalDatasets = datasets.map((d, idx) => {
-                const itemColor = d.color;
+                const itemColor = resolveColor(d.color);
                 let bgStyle: any = `${itemColor}15`;
 
                 if (type === 'bar') {
@@ -101,18 +108,19 @@ export default function FinanceChart({
             });
         } else {
             const singleData = data || [];
+            const resolvedColor = resolveColor(color);
             let backgroundStyle: any = type === 'doughnut'
-                ? (singleData.length > 2 ? colorsPalette.slice(0, singleData.length) : [color, isDark ? '#1b231d' : '#f1f5f9'])
-                : (fill ? `${color}1A` : 'transparent');
+                ? (singleData.length > 2 ? colorsPalette.slice(0, singleData.length) : [resolvedColor, isDark ? '#1b231d' : '#f1f5f9'])
+                : (fill ? `${resolvedColor}1A` : 'transparent');
 
             if (type === 'bar') {
                 const barGrad = ctx.createLinearGradient(0, 0, 0, 200);
-                barGrad.addColorStop(0, color);
-                barGrad.addColorStop(1, `${color}10`);
+                barGrad.addColorStop(0, resolvedColor);
+                barGrad.addColorStop(1, `${resolvedColor}10`);
                 backgroundStyle = barGrad;
             } else if (type === 'line' && fill) {
                 const lineGrad = ctx.createLinearGradient(0, 0, 0, 200);
-                lineGrad.addColorStop(0, `${color}35`);
+                lineGrad.addColorStop(0, `${resolvedColor}35`);
                 lineGrad.addColorStop(1, 'transparent');
                 backgroundStyle = lineGrad;
             }
@@ -120,12 +128,12 @@ export default function FinanceChart({
             finalDatasets = [{
                 label,
                 data: singleData,
-                borderColor: color,
+                borderColor: resolvedColor,
                 backgroundColor: backgroundStyle,
                 borderWidth: type === 'doughnut' ? 0 : 2.5,
                 tension: type === 'line' ? tension : 0,
                 fill: type === 'line' ? fill : false,
-                pointBackgroundColor: color,
+                pointBackgroundColor: resolvedColor,
                 pointBorderColor: pointBorder,
                 pointRadius: type === 'line' ? 4 : 0,
                 pointHoverRadius: type === 'line' ? 6 : 0,
