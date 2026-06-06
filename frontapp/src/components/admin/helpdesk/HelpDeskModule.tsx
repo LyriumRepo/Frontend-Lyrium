@@ -501,7 +501,7 @@ export const HelpDeskModule: React.FC<HelpDeskModuleProps> = ({
                                             <div key={msg.id} className={`flex ${isAdmin ? 'justify-end' : 'justify-start'} group/msg`}>
                                                 <div className={`max-w-[70%] p-4 rounded-3xl relative flex flex-col gap-1.5 shadow-sm transition-all ${
                                                     isAdmin
-                                                        ? 'bg-brand-gradient text-white rounded-tr-none shadow-md shadow-[var(--brand-green)]/5'
+                                                        ? 'bg-gradient-to-br from-emerald-500 to-emerald-400 dark:from-[#3f7a55] dark:to-[#2d5c3d] text-white rounded-tr-none shadow-md shadow-emerald-500/5'
                                                         : 'bg-[var(--bg-secondary)] text-[var(--text-primary)] rounded-tl-none border border-[var(--border-subtle)]'
                                                 }`}>
                                                     
@@ -594,7 +594,7 @@ export const HelpDeskModule: React.FC<HelpDeskModuleProps> = ({
                                     />
                                     <button
                                         type="submit"
-                                        className="absolute right-2.5 w-11 h-11 rounded-xl bg-brand-gradient hover:brightness-105 text-white flex items-center justify-center transition active:scale-95 shadow-md shadow-[var(--brand-green)]/10 border border-[var(--border-subtle)]"
+                                        className="absolute right-2.5 w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-400 dark:from-[#3f7a55] dark:to-[#2d5c3d] hover:brightness-105 text-white flex items-center justify-center transition active:scale-95 shadow-md shadow-emerald-500/10 border border-[var(--border-subtle)]"
                                     >
                                         <Send className="w-4 h-4" />
                                     </button>
