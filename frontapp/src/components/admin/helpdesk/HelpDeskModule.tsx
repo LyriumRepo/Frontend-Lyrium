@@ -334,19 +334,19 @@ export const HelpDeskModule: React.FC<HelpDeskModuleProps> = ({
         switch (tag.toLowerCase()) {
             case 'logística':
             case 'logistica':
-                return 'bg-purple-500/10 text-purple-400 border border-purple-500/20';
+                return 'bg-[var(--brand-teal)]/10 text-[var(--brand-teal)] border border-[var(--brand-teal)]/20 dark:bg-[var(--icons-green)]/10 dark:text-[var(--icons-green)] dark:border-[var(--icons-green)]/20';
             case 'catálogo':
             case 'catalogo':
-                return 'bg-amber-500/10 text-amber-400 border border-amber-500/20';
+                return 'bg-[var(--color-warning)]/10 text-[var(--color-warning)] border border-[var(--color-warning)]/20';
             case 'finanzas':
-                return 'bg-blue-500/10 text-blue-400 border border-blue-500/20';
+                return 'bg-[var(--color-info)]/10 text-[var(--color-info)] border border-[var(--color-info)]/20';
             case 'reembolso':
-                return 'bg-rose-500/10 text-rose-400 border border-rose-500/20';
+                return 'bg-[var(--color-error)]/10 text-[var(--color-error)] border border-[var(--color-error)]/20';
             case 'consulta puntos':
             case 'puntos':
-                return 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20';
+                return 'bg-[var(--color-success)]/10 text-[var(--color-success)] border border-[var(--color-success)]/20';
             default:
-                return 'bg-zinc-500/10 text-zinc-400 border border-zinc-500/20';
+                return 'bg-[var(--text-muted)]/10 text-[var(--text-muted)] border border-[var(--text-muted)]/20';
         }
     };
 
@@ -501,7 +501,7 @@ export const HelpDeskModule: React.FC<HelpDeskModuleProps> = ({
                                             <div key={msg.id} className={`flex ${isAdmin ? 'justify-end' : 'justify-start'} group/msg`}>
                                                 <div className={`max-w-[70%] p-4 rounded-3xl relative flex flex-col gap-1.5 shadow-sm transition-all ${
                                                     isAdmin
-                                                        ? 'bg-gradient-to-br from-emerald-600 to-teal-500 text-white rounded-tr-none shadow-md shadow-emerald-500/5'
+                                                        ? 'bg-brand-gradient text-white rounded-tr-none shadow-md shadow-[var(--brand-green)]/5'
                                                         : 'bg-[var(--bg-secondary)] text-[var(--text-primary)] rounded-tl-none border border-[var(--border-subtle)]'
                                                 }`}>
                                                     
@@ -594,7 +594,7 @@ export const HelpDeskModule: React.FC<HelpDeskModuleProps> = ({
                                     />
                                     <button
                                         type="submit"
-                                        className="absolute right-2.5 w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white flex items-center justify-center transition active:scale-95 shadow-md shadow-emerald-500/10 border border-emerald-500/20"
+                                        className="absolute right-2.5 w-11 h-11 rounded-xl bg-brand-gradient hover:brightness-105 text-white flex items-center justify-center transition active:scale-95 shadow-md shadow-[var(--brand-green)]/10 border border-[var(--border-subtle)]"
                                     >
                                         <Send className="w-4 h-4" />
                                     </button>
