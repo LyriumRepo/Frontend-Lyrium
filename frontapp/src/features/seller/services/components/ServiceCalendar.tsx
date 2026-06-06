@@ -80,8 +80,12 @@ function getAttendanceDay(date: Date, service: Service): AttendanceDay | null {
   return service.diasAtencion.find((d) => d.dia === weekDay) ?? null;
 }
 
+function toDateStr(date: Date): string {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}
+
 function getApptsForDate(date: Date, service: Service, appointments: AppointmentWithClient[]): AppointmentWithClient[] {
-  const fecha = formatFecha(date);
+  const fecha = toDateStr(date);
   return appointments.filter((a) => a.serviceId === service.id && a.fecha === fecha);
 }
 
@@ -287,7 +291,15 @@ export default function ServiceCalendar({
 
   const selectedAtt = selectedDate ? getAttendanceDay(selectedDate, service) : null;
   const selectedAppts = selectedDate ? getApptsForDate(selectedDate, service, filteredAppointments) : [];
-  const selectedBlocks = selectedAtt?.bloques ?? [];
+  const selectedBlocks = selectedAtt && selectedSpecialistId
+    ? (() => {
+        const horarios = (service as Service & { especialistaHorarios?: { id: number; dias: { dia: WeekDay; bloques: number[] }[] }[] }).especialistaHorarios;
+        const entry = horarios?.find((h) => h.id === selectedSpecialistId);
+        const dayEntry = entry?.dias.find((d) => d.dia === selectedAtt.dia);
+        if (!dayEntry) return [];
+        return dayEntry.bloques.map((bi) => selectedAtt.bloques[bi]).filter(Boolean);
+      })()
+    : (selectedAtt?.bloques ?? []);
   const currentBlock = selectedBlocks[selectedBlockIndex] ?? null;
   const blockSessions = currentBlock ? calculateSessions(currentBlock, service.duracion) : [];
 

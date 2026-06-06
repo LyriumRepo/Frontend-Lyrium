@@ -146,6 +146,7 @@ export default function CatalogClient({ initialProducts }: CatalogClientProps) {
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [isDeleting, setIsDeleting]           = useState(false);
     const [optimisticPrices, setOptimisticPrices] = useState<Record<string, number>>({});
+    const [showSuccessModal, setShowSuccessModal]   = useState(false);
 
     const [isPending, startTransition] = useTransition();
     const [optimisticProducts, setOptimisticPrice] = useOptimistic(
@@ -216,59 +217,83 @@ export default function CatalogClient({ initialProducts }: CatalogClientProps) {
 
             if (!USE_MOCKS) {
                 const hasBase64Image = product.image && product.image.startsWith('data:');
-                const payload = {
-                    name:                 product.name || '',
-                    category:             product.category || '',
-                    price:                product.price || 0,
-                    stock:                product.stock || 0,
-                    description:          product.description || '',
-                    image:                hasBase64Image ? null : product.image || null,
-                    weight:               product.weight,
-                    dimensions:           product.dimensions,
-                    mainAttributes:       product.mainAttributes || [],
-                    additionalAttributes: product.additionalAttributes || [],
-                };
 
                 if (selectedProduct) {
+                    // UPDATE: solo enviar campos escalares, NO atributos (ya existen en BD)
+                    const payload: Record<string, unknown> = {};
+                    if (product.name !== undefined) payload.name = product.name;
+                    if (product.description !== undefined) payload.description = product.description;
+                    if (product.short_description !== undefined) payload.short_description = product.short_description || null;
+                    if (product.price !== undefined) payload.price = Number(product.price);
+                    if (product.stock !== undefined) payload.stock = Number(product.stock);
+                    if (product.category !== undefined) payload.category = product.category || null;
+                    if (product.sticker !== undefined) payload.sticker = product.sticker || null;
+                    if (product.discountPercentage !== undefined) payload.discountPercentage = product.discountPercentage ?? null;
+                    if (product.weight !== undefined) payload.weight = product.weight ? Number(product.weight) : null;
+                    if (product.dimensions !== undefined) payload.dimensions = product.dimensions || null;
+                    if (product.servingNote !== undefined) payload.servingNote = product.servingNote || null;
+                    if ((product as any).expirationDate !== undefined) payload.expirationDate = (product as any).expirationDate || null;
+
                     savedProduct = await productRepository.updateProduct(selectedProduct.id, payload);
                     if (hasBase64Image && product.image) {
                         try {
                             const blob = await (await fetch(product.image)).blob();
-                            await productRepository.uploadProductImage(
-                                savedProduct.id,
-                                new File([blob], `product-${Date.now()}.webp`, { type: blob.type }),
-                            );
-                        } catch {}
-                    }
-                    savedProduct = { ...savedProduct, ...product, id: selectedProduct.id } as Product;
-                } else {
-                    savedProduct = await productRepository.createProduct(payload);
-                    if (hasBase64Image && product.image && savedProduct.id) {
-                        try {
-                            const blob = await (await fetch(product.image)).blob();
-                            const r    = await productRepository.uploadProductImage(
+                            const r = await productRepository.uploadProductImage(
                                 savedProduct.id,
                                 new File([blob], `product-${Date.now()}.webp`, { type: blob.type }),
                             );
                             savedProduct = { ...savedProduct, image: r.url } as Product;
                         } catch {}
                     }
-                    savedProduct = { ...savedProduct, ...product, id: savedProduct.id } as Product;
+                } else {
+                    // CREATE: payload completo
+                    const payload = {
+                        type:                   product.type || 'physical',
+                        name:                   product.name || '',
+                        category:               product.category || '',
+                        price:                  Number(product.price) || 0,
+                        stock:                  Number(product.stock) || 0,
+                        description:            product.description || '',
+                        short_description:      product.short_description || undefined,
+                        sticker:                product.sticker || null,
+                        discountPercentage:     product.discountPercentage ?? null,
+                        weight:                 product.weight ? Number(product.weight) : null,
+                        dimensions:             product.dimensions || null,
+                        mainAttributes:         product.mainAttributes || [],
+                        additionalAttributes:   product.additionalAttributes || [],
+                        nutritionalAttributes:  product.nutritionalAttributes || [],
+                        servingNote:            product.servingNote || null,
+                        image:                  (product as any).image || null,
+                        expirationDate:         (product as any).expirationDate || null,
+                    } as any;
+
+                    savedProduct = await productRepository.createProduct(payload);
+                    if (hasBase64Image && product.image && savedProduct.id) {
+                        try {
+                            const blob = await (await fetch(product.image)).blob();
+                            const r = await productRepository.uploadProductImage(
+                                savedProduct.id,
+                                new File([blob], `product-${Date.now()}.webp`, { type: blob.type }),
+                            );
+                            savedProduct = { ...savedProduct, image: r.url } as Product;
+                        } catch {}
+                    }
                 }
             } else {
                 savedProduct = { id: product.id || Date.now().toString(), ...product } as Product;
             }
 
-            showToast(
-                selectedProduct ? 'Producto actualizado correctamente' : 'Nuevo producto agregado al catálogo',
-                'success',
-            );
+            if (!selectedProduct) {
+                setShowSuccessModal(true);
+                closeModal();
+                return;
+            }
+
+            showToast('Producto actualizado correctamente', 'success');
 
             startTransition(() => {
                 setProducts((prev) =>
-                    selectedProduct
-                        ? prev.map((p) => (p.id === selectedProduct.id ? savedProduct as Product : p))
-                        : [savedProduct as Product, ...prev],
+                    prev.map((p) => (p.id === selectedProduct.id ? savedProduct as Product : p)),
                 );
             });
 
@@ -459,6 +484,38 @@ export default function CatalogClient({ initialProducts }: CatalogClientProps) {
             />
 
             <ConfirmDialog />
+
+            {/* Success Modal */}
+            {showSuccessModal && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" onClick={() => setShowSuccessModal(false)}>
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+                    <div
+                        className="relative z-10 w-full max-w-md rounded-3xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-8 shadow-2xl animate-fadeIn"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="flex flex-col items-center text-center space-y-4">
+                            <div className="w-16 h-16 rounded-full bg-emerald-500/15 flex items-center justify-center border border-emerald-500/30">
+                                <Icon name="CheckCircle" className="w-8 h-8 text-emerald-500" />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-black text-[var(--text-primary)] uppercase tracking-widest">
+                                    Producto Enviado
+                                </h3>
+                                <p className="text-sm font-medium text-[var(--text-secondary)] mt-2 leading-relaxed">
+                                    Tu producto ha sido registrado y será evaluado por un administrador.
+                                    Recibirás una notificación cuando sea aprobado.
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => setShowSuccessModal(false)}
+                                className="px-8 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-600 text-white font-black text-sm uppercase tracking-widest transition-all active:scale-95"
+                            >
+                                Entendido
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

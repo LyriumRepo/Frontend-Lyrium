@@ -59,6 +59,9 @@ export interface LaravelService {
   is_home_service: boolean;
   booking_advance_hours: number;
   max_capacity: number;
+  sticker?: string | null;
+  discount_percentage?: number | null;
+  settings?: Record<string, unknown> | null;
   schedule?: LaravelSchedule[];
   specialists?: LaravelSpecialist[];
   created_at?: string;
@@ -195,7 +198,7 @@ export function adaptServiceToFrontend(beService: LaravelService): Service {
   const especialistasAsignados: number[] =
     (beService.specialists || []).length > 0
       ? (beService.specialists || []).map((sp) => sp.id)
-      : [...new Set((beService.schedule || []).map((sch) => sch.specialist_id))];
+      : [...new Set((beService.schedule || []).map((sch) => sch.specialist_id).filter(Boolean))];
 
   // Construir especialistaHorarios: lookup de bloque por (día + hora) en el merge
   const blockLookup = new Map<string, number>();
@@ -227,6 +230,11 @@ export function adaptServiceToFrontend(beService: LaravelService): Service {
   const anticipacion: 24 | 48 | 72 =
     hours === 24 || hours === 48 || hours === 72 ? hours : 24;
 
+  const validStickers = ['nuevo', 'descuento', 'oferta', 'liquidacion', 'bestseller', 'envio_gratis'] as const;
+  const sticker = beService.sticker && validStickers.includes(beService.sticker as any)
+    ? (beService.sticker as 'nuevo' | 'descuento' | 'oferta' | 'liquidacion' | 'bestseller' | 'envio_gratis')
+    : null;
+
   return {
     id: beService.id,
     denominacion: beService.name || '',
@@ -246,6 +254,11 @@ export function adaptServiceToFrontend(beService: LaravelService): Service {
     estado: beService.status === 'active' ? 'publicado' : 'borrador',
     domicilio: !!beService.is_home_service,
     anticipacionReserva: anticipacion,
+    sticker,
+    discountPercentage: beService.discount_percentage
+      ? parseFloat(String(beService.discount_percentage))
+      : null,
+    etiquetas: (beService.settings?.etiquetas as any) ?? undefined,
   };
 }
 
@@ -283,6 +296,13 @@ export function adaptServiceToBackend(
   if (feService.especialistasAsignados !== undefined) {
     payload.specialist_ids = feService.especialistasAsignados;
   }
+  if (feService.sticker !== undefined) payload.sticker = feService.sticker;
+  if (feService.discountPercentage !== undefined) payload.discount_percentage = feService.discountPercentage;
+  if (feService.etiquetas !== undefined) {
+    const etiquetas = feService.etiquetas;
+    payload.settings = { ...(payload.settings as Record<string, unknown> ?? {}), etiquetas };
+  }
+
   if (feService.categoria) {
     const catId = extractCategoryId(feService.categoria);
     if (catId) payload.category_id = catId;
@@ -402,13 +422,27 @@ export function adaptAppointmentToFrontend(
     : '08:00';
   const fin = beBooking.end_time ? beBooking.end_time.substring(0, 5) : '08:30';
 
+  // Extraer YYYY-MM-DD directamente del string, sin pasar por new Date()
+  // para evitar desfase por zona horaria (UTC vs PET).
+  let fecha = beBooking.date || beBooking.appointment_date || '';
+  if (fecha) {
+    // Si ya viene como YYYY-MM-DD (formato backend), usarla directamente
+    if (/^\d{4}-\d{2}-\d{2}$/.test(fecha)) {
+      // ok, mantener tal cual
+    } else {
+      // Intentar extraer de ISO string como "2026-06-01T08:00:00.000000Z"
+      const m = fecha.match(/^(\d{4})-(\d{2})-(\d{2})/);
+      if (m) fecha = `${m[1]}-${m[2]}-${m[3]}`;
+    }
+  }
+
   return {
     id: beBooking.id,
     serviceId: beBooking.service_id,
     specialistId: beBooking.specialist?.id ?? beBooking.specialist_id ?? 0,
     clientId: beBooking.customer_id,
     customerName: beBooking.customer_name,
-    fecha: beBooking.date || beBooking.appointment_date || '',
+    fecha,
     sesion: { inicio, fin },
     cuposOcupados: beBooking.num_spots || 1,
   } as Appointment & { clientId?: number; customerName?: string };

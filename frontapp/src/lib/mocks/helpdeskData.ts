@@ -72,6 +72,64 @@ export const MOCK_HELPDESK_DATA: MesaAyudaData = {
                     leido: true
                 }
             ]
+        },
+        // ── Tickets de Clientes (sin empresa) ──
+        {
+            id: 3,
+            id_display: "TKT-2024-003",
+            numero: "TKT-2024-003",
+            titulo: "Mi pedido llegó incompleto",
+            descripcion: "Cliente reporta que faltan 2 productos en su pedido #ORD-8821.",
+            vendedor: { id: 0, nombre: "Luis Medina" },
+            admin_asignado: { id: 1, nombre: "Carlos López" },
+            categoria: "info",
+            prioridad: "alta",
+            estado: "abierto",
+            fecha_creacion: "2024-02-20",
+            fecha_actualizacion: "Hace 30 min",
+            total_mensajes: 2,
+            mensajes_sin_leer: 1,
+            mensajes: [
+                {
+                    id: 3001,
+                    usuario: "Luis Medina",
+                    contenido: "Hola, recibí mi pedido pero faltan dos productos.",
+                    timestamp: "09:00 AM",
+                    leido: true
+                },
+                {
+                    id: 3002,
+                    usuario: "Carlos López (Admin)",
+                    contenido: "Vamos a verificar con el vendedor y le damos una solución.",
+                    timestamp: "09:10 AM",
+                    leido: false
+                }
+            ]
+        },
+        {
+            id: 4,
+            id_display: "TKT-2024-004",
+            numero: "TKT-2024-004",
+            titulo: "Problema con canje de puntos",
+            descripcion: "Cliente intenta canjear puntos pero el sistema no aplica el descuento.",
+            vendedor: { id: 0, nombre: "Sofía Valdivia" },
+            admin_asignado: undefined,
+            categoria: "tech",
+            prioridad: "media",
+            estado: "abierto",
+            fecha_creacion: "2024-02-20",
+            fecha_actualizacion: "Hace 1 hora",
+            total_mensajes: 1,
+            mensajes_sin_leer: 1,
+            mensajes: [
+                {
+                    id: 4001,
+                    usuario: "Sofía Valdivia",
+                    contenido: "Tengo 500 puntos pero no puedo aplicar el cupón de envío gratis.",
+                    timestamp: "08:30 AM",
+                    leido: false
+                }
+            ]
         }
     ],
     faq: [

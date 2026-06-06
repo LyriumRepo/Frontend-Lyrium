@@ -112,7 +112,7 @@ export default function CarritoPage() {
 
         {/* ── Estados ── */}
         {isLoading && (
-          <div className="flex items-center justify-center py-20 gap-3 text-slate-500">
+          <div className="flex items-center justify-center py-20 gap-3 text-slate-500 dark:text-[var(--text-muted)]">
             <Loader2 className="w-6 h-6 animate-spin text-sky-500" />
             <span className="text-sm">Cargando productos...</span>
           </div>
@@ -120,10 +120,10 @@ export default function CarritoPage() {
 
         {isError && !isLoading && (
           <div className="flex flex-col items-center justify-center py-16 gap-4 text-center">
-            <div className="w-14 h-14 rounded-2xl bg-red-50 grid place-items-center">
+            <div className="w-14 h-14 rounded-2xl bg-red-50 dark:bg-red-900/20 grid place-items-center">
               <AlertCircle className="w-7 h-7 text-red-400" />
             </div>
-            <p className="text-slate-700 font-medium">
+            <p className="text-slate-700 dark:text-[var(--text-primary)] font-medium">
               No se pudieron cargar los productos
             </p>
             <button

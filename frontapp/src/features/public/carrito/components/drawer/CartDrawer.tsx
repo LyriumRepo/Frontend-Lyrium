@@ -715,7 +715,7 @@ export default function CartDrawer() {
         {/* ── FIN BODY SCROLL ── */}
 
         {/* ── 3. RECOMENDACIONES — shrink-0, FUERA del scroll ── */}
-        {!fetchLoading && items.length > 0 && (
+        {!fetchLoading && (items.length > 0 || serviceHolds.length > 0) && (
           <CartRecommendations
             cartProductIds={items.map((i) => i.productId)}
             onAdded={loadCart}

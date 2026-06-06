@@ -27,7 +27,7 @@ interface AdminUser {
   rol?: string;
 }
 
-interface AdminTicket {
+export interface AdminTicketInput {
   id: number;
   numero?: string;
   id_display?: string;
@@ -45,6 +45,13 @@ interface AdminTicket {
   total_mensajes?: number;
   mensajes_sin_leer?: number;
   mensajes?: AdminMessage[];
+  survey_required?: boolean;
+  satisfaction_rating?: number;
+  satisfaction_comment?: string;
+  escalated?: boolean;
+  escalated_to?: string | null;
+  has_more_messages?: boolean;
+  oldest_message_id?: number;
 }
 
 function normalizeStatus(status: string): TicketStatus {
@@ -59,8 +66,32 @@ function normalizeStatus(status: string): TicketStatus {
     'resuelto': 'resolved',
     'cerrado': 'closed',
     'reabierto': 'reopened',
+    'open': 'open',
+    'in_progress': 'in_progress',
+    'resolved': 'resolved',
+    'closed': 'closed',
+    'reopened': 'reopened',
   };
   return map[status] || 'open';
+}
+
+function normalizePriority(priority?: string): string | undefined {
+  if (!priority) return undefined;
+  const map: Record<string, string> = {
+    baja: 'Baja',
+    media: 'Media',
+    alta: 'Alta',
+    critica: 'Crítica',
+    Baja: 'Baja',
+    Media: 'Media',
+    Alta: 'Alta',
+    Crítica: 'Crítica',
+    low: 'Baja',
+    medium: 'Media',
+    high: 'Alta',
+    critical: 'Crítica',
+  };
+  return map[priority] || priority;
 }
 
 function adaptMessage(msg: AdminMessage, ticketId: string): UnifiedMessage {
@@ -69,7 +100,8 @@ function adaptMessage(msg: AdminMessage, ticketId: string): UnifiedMessage {
   const isAdmin =
     senderRoleRaw.toLowerCase().includes('admin') ||
     senderName.includes('(Admin)') ||
-    senderName === 'Sistema Lyrium';
+    senderName === 'Sistema Lyrium' ||
+    senderName === 'Sistema Lyrium - Bot';
 
   const attachments: MessageAttachment[] | undefined = msg.attachments?.length
     ? msg.attachments.map((a, idx) => ({
@@ -88,7 +120,7 @@ function adaptMessage(msg: AdminMessage, ticketId: string): UnifiedMessage {
     senderRole: isAdmin ? 'admin' : 'vendor',
     content: msg.contenido || msg.texto || '',
     timestamp: new Date(msg.timestamp),
-    hour: msg.timestamp,
+    hour: msg.timestamp instanceof Date ? msg.timestamp.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' }) : msg.timestamp,
     isQuickReply: msg.tipo === 'respuesta_rapida',
     isEscalation: msg.tipo === 'escalamiento',
     isRead: msg.leido ?? false,
@@ -96,22 +128,24 @@ function adaptMessage(msg: AdminMessage, ticketId: string): UnifiedMessage {
   };
 }
 
-export function adaptAdminTicket(ticket: AdminTicket): UnifiedTicket {
+export function adaptAdminTicket(ticket: AdminTicketInput): UnifiedTicket {
   const displayId = ticket.numero || ticket.id_display || String(ticket.id);
   const title = ticket.asunto || ticket.titulo || 'Sin título';
-  
+
   const unifiedTicket: UnifiedTicket = {
     id: String(ticket.id),
     displayId,
     title,
     description: ticket.descripcion,
     status: normalizeStatus(ticket.estado),
-    priority: (ticket.prioridad || ticket.prioridad_ticket) as any,
-    assignedTo: ticket.admin_asignado ? {
-      role: 'admin',
-      id: String(ticket.admin_asignado.id),
-      name: ticket.admin_asignado.nombre,
-    } : { role: 'admin', id: '0', name: 'Sin asignar' },
+    priority: normalizePriority(ticket.prioridad || ticket.prioridad_ticket) as any,
+    assignedTo: ticket.admin_asignado
+      ? {
+          role: 'admin',
+          id: String(ticket.admin_asignado.id),
+          name: ticket.admin_asignado.nombre,
+        }
+      : { role: 'admin', id: '0', name: 'Sin asignar' },
     requester: {
       name: ticket.vendedor?.nombre || 'Vendedor',
       company: ticket.vendedor?.empresa,
@@ -120,6 +154,11 @@ export function adaptAdminTicket(ticket: AdminTicket): UnifiedTicket {
     updatedAt: ticket.fecha_actualizacion ? new Date(ticket.fecha_actualizacion) : new Date(),
     messages: (ticket.mensajes ?? []).map((m) => adaptMessage(m, String(ticket.id))),
     unreadCount: ticket.mensajes_sin_leer || 0,
+    surveyRequired: ticket.survey_required,
+    satisfactionRating: ticket.satisfaction_rating,
+    satisfactionComment: ticket.satisfaction_comment,
+    escalated: ticket.escalated ?? false,
+    escalatedTo: ticket.escalated_to,
     category: ticket.categoria,
     source: 'admin',
   };
@@ -127,6 +166,6 @@ export function adaptAdminTicket(ticket: AdminTicket): UnifiedTicket {
   return unifiedTicket;
 }
 
-export function adaptAdminTickets(tickets: AdminTicket[]): UnifiedTicket[] {
+export function adaptAdminTickets(tickets: AdminTicketInput[]): UnifiedTicket[] {
   return tickets.map(adaptAdminTicket);
 }

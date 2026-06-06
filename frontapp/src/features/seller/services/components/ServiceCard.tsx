@@ -7,6 +7,7 @@ import {
   Specialist,
   canPublish,
   ANTICIPACION_LABELS,
+  serviceEtiquetasFromService,
 } from '@/features/seller/services/types';
 import Icon from '@/components/ui/Icon';
 
@@ -52,7 +53,7 @@ export default function ServiceCard({
     <tr className="border-b border-[var(--border-subtle)] last:border-b-0 hover:bg-[var(--bg-secondary)]/60 transition-colors group">
       {/* ── Imagen ── */}
       <td className="px-4 py-3 whitespace-nowrap w-[52px]">
-        <div className="w-10 h-10 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-subtle)] overflow-hidden flex-shrink-0">
+        <div className="w-10 h-10 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-subtle)] overflow-hidden flex-shrink-0 relative">
           {service.imagen ? (
             <Image
               src={service.imagen}
@@ -67,6 +68,21 @@ export default function ServiceCard({
               <Icon name="Image" className="w-4 h-4" />
             </div>
           )}
+          {(() => {
+            const e = serviceEtiquetasFromService(service);
+            if (!e.nuevo && !e.descuento && !e.oferta && !e.edicionLimitada) return null;
+            return (
+              <div className="absolute -top-0.5 -left-0.5 z-10">
+                <div className={`text-[6px] font-black uppercase tracking-wider px-1 py-[1px] leading-tight ${
+                  e.nuevo ? 'bg-[#ADEBB3] text-[#0d3318]' :
+                  e.descuento || e.oferta ? 'bg-red-500 text-white' :
+                  'bg-[#59a6cb] text-[#1a2e3a]'
+                }`} style={{ borderRadius: '2px 6px 6px 2px' }}>
+                  {e.nuevo ? 'NUEVO' : e.descuento ? `-${e.descuento.valor}%` : e.oferta ? `-${e.oferta.valor}%` : 'ED.LIM'}
+                </div>
+              </div>
+            );
+          })()}
         </div>
       </td>
 

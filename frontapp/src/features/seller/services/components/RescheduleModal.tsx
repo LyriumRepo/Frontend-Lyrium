@@ -74,6 +74,10 @@ function formatFecha(date: Date): string {
     return `${dayNames[date.getDay()]} ${date.getDate()} de ${MONTH_NAMES[date.getMonth()]}`;
 }
 
+function toDateStr(date: Date): string {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}
+
 function getAttendanceDay(date: Date, service: Service): AttendanceDay | null {
     const wd = JS_TO_WD[date.getDay()];
     return service.diasAtencion.find((d) => d.dia === wd) ?? null;
@@ -205,7 +209,7 @@ export default function RescheduleModal({
             })()
             : [];
 
-    const selectedFecha = selectedDate ? formatFecha(selectedDate) : null;
+    const selectedFecha = selectedDate ? toDateStr(selectedDate) : null;
 
     const occupiedStarts = new Set(
         appointments
@@ -496,7 +500,7 @@ export default function RescheduleModal({
                     <BaseButton
                         onClick={() => {
                             if (selectedDate && selectedSession) {
-                                onConfirm(appointment.id, formatFecha(selectedDate), selectedSession, selectedSpecialistId);
+                                onConfirm(appointment.id, toDateStr(selectedDate), selectedSession, selectedSpecialistId);
                                 onClose();
                             }
                         }}

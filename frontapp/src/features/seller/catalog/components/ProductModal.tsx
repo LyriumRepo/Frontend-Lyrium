@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { useQuery } from '@tanstack/react-query';
-import { Product, ProductAttribute } from '@/features/seller/catalog/types';
+import { Product, ProductAttribute, ProductSticker, etiquetasFromProduct } from '@/features/seller/catalog/types';
 import BaseModal from '@/components/ui/BaseModal';
 import BaseButton from '@/components/ui/BaseButton';
 import { useToast } from '@/shared/lib/context/ToastContext';
@@ -54,15 +54,20 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit }:
     const initialProduct: Product = {
         id: '',
         name: '',
+        type: 'physical',
         category: '',
         price: 0,
         stock: 0,
         weight: 0,
         dimensions: '',
         description: '',
+        short_description: '',
         image: '',
+        sticker: null,
         mainAttributes: [{ values: ['', ''] }],
         additionalAttributes: [],
+        nutritionalAttributes: [],
+        servingNote: '',
         createdAt: new Date().toISOString()
     };
 
@@ -104,7 +109,7 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit }:
             if (productToEdit) {
                 setFormData(productToEdit);
                 setPreviewImage(productToEdit.image);
-                setEtiquetas((productToEdit as any).etiquetas ?? { nuevo: false });
+                setEtiquetas(etiquetasFromProduct(productToEdit));
             } else {
                 setFormData({ ...initialProduct, id: Date.now().toString() });
                 setPreviewImage('');
@@ -254,6 +259,34 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit }:
         }
     };
 
+    // ── Ficha nutricional ─────────────────────────────────────────────────────
+    const addNutritionalRow = () => {
+        setFormData(prev => ({
+            ...prev,
+            nutritionalAttributes: [
+                ...(prev.nutritionalAttributes || []),
+                { values: { label: '', value: '', daily_value: '' } },
+            ],
+        }));
+    };
+
+    const removeNutritionalRow = (index: number) => {
+        setFormData(prev => ({
+            ...prev,
+            nutritionalAttributes: (prev.nutritionalAttributes || []).filter((_, i) => i !== index),
+        }));
+    };
+
+    const updateNutritionalRow = (index: number, field: 'label' | 'value' | 'daily_value', val: string) => {
+        setFormData(prev => {
+            const rows = [...(prev.nutritionalAttributes || [])];
+            rows[index] = {
+                values: { ...rows[index].values, [field]: val },
+            };
+            return { ...prev, nutritionalAttributes: rows };
+        });
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -270,7 +303,27 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit }:
             return;
         }
 
-        onSave({ ...formData, sticker: null, etiquetas } as any);
+        // Mapear etiquetas complejas → sticker simple + discount_percentage
+        let sticker: ProductSticker = null;
+        let discountPercentage: number | null = null;
+        if (etiquetas.descuento) {
+            sticker = 'descuento';
+            discountPercentage = etiquetas.descuento.valor;
+        } else if (etiquetas.oferta) {
+            sticker = 'oferta';
+            discountPercentage = etiquetas.oferta.valor;
+        } else if (etiquetas.nuevo) {
+            sticker = 'nuevo';
+        } else if (etiquetas.edicionLimitada) {
+            sticker = 'liquidacion';
+        }
+
+        onSave({
+            ...formData,
+            sticker,
+            discountPercentage,
+            etiquetas,
+        } as any);
         onClose();
     };
 
@@ -713,6 +766,97 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit }:
                             className="w-full bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-[1.5rem] p-4 text-sm font-medium text-[var(--text-primary)] outline-none focus:ring-4 focus:ring-[var(--brand-sky)]/5 focus:bg-[var(--bg-card)] transition-all resize-none"
                             placeholder="Describe los beneficios clave..."
                         ></textarea>
+                    </div>
+
+                    {/* Descripción corta */}
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest px-2">Descripción Corta (opcional)</label>
+                        <textarea
+                            name="short_description" rows={1}
+                            value={formData.short_description || ''} onChange={handleChange}
+                            className="w-full bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-[1.5rem] p-3 text-sm font-medium text-[var(--text-primary)] outline-none focus:ring-4 focus:ring-[var(--brand-sky)]/5 focus:bg-[var(--bg-card)] transition-all resize-none"
+                            placeholder="Breve resumen del producto..."
+                        ></textarea>
+                    </div>
+
+                    {/* Ficha Nutricional */}
+                    <div className="space-y-3">
+                        <div className="flex items-center justify-between px-2">
+                            <h3 className="text-[10px] font-black text-[var(--text-primary)] uppercase tracking-widest flex items-center gap-2">
+                                <div className="w-1.5 h-3 bg-amber-500 rounded-full"></div>
+                                Ficha Nutricional
+                            </h3>
+                            <div className="flex gap-2">
+                                <button type="button" onClick={addNutritionalRow} className="w-7 h-7 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-lg flex items-center justify-center text-amber-500 hover:bg-amber-50 transition-all shadow-xs active:scale-90">
+                                    <Icon name="Plus" className="font-bold text-xs w-3 h-3" />
+                                </button>
+                            </div>
+                        </div>
+                        <div className="rounded-[1.5rem] overflow-hidden border border-[var(--border-subtle)] bg-[var(--bg-card)] shadow-xs">
+                            <table className="w-full text-xs">
+                                <thead>
+                                    <tr className="bg-[var(--bg-secondary)] border-b border-[var(--border-subtle)]">
+                                        <th className="px-3 py-2 text-left text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)] w-2/5">Nutriente</th>
+                                        <th className="px-3 py-2 text-left text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)] w-1/4">Valor</th>
+                                        <th className="px-3 py-2 text-left text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)] w-1/4">% VD</th>
+                                        <th className="px-3 py-2 w-8"></th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-[var(--border-subtle)]">
+                                    {(formData.nutritionalAttributes || []).map((attr, rowIndex) => (
+                                        <tr key={rowIndex} className="divide-x divide-[var(--border-subtle)] group">
+                                            <td className="px-3 py-2">
+                                                <input
+                                                    type="text"
+                                                    value={(attr.values as any).label || ''}
+                                                    onChange={(e) => updateNutritionalRow(rowIndex, 'label', e.target.value)}
+                                                    className="w-full bg-transparent border-none focus:ring-0 text-[11px] font-black text-[var(--text-primary)] outline-none"
+                                                    placeholder="Ej: Calorías"
+                                                />
+                                            </td>
+                                            <td className="px-3 py-2">
+                                                <input
+                                                    type="text"
+                                                    value={(attr.values as any).value || ''}
+                                                    onChange={(e) => updateNutritionalRow(rowIndex, 'value', e.target.value)}
+                                                    className="w-full bg-transparent border-none focus:ring-0 text-[11px] font-medium text-[var(--text-secondary)] outline-none"
+                                                    placeholder="250 kcal"
+                                                />
+                                            </td>
+                                            <td className="px-3 py-2">
+                                                <input
+                                                    type="text"
+                                                    value={(attr.values as any).daily_value || ''}
+                                                    onChange={(e) => updateNutritionalRow(rowIndex, 'daily_value', e.target.value)}
+                                                    className="w-full bg-transparent border-none focus:ring-0 text-[11px] font-medium text-[var(--text-secondary)] outline-none"
+                                                    placeholder="12%"
+                                                />
+                                            </td>
+                                            <td className="px-2 py-2 text-center w-8">
+                                                <button type="button" onClick={() => removeNutritionalRow(rowIndex)} className="text-[var(--text-secondary)] hover:text-[var(--text-danger)] transition-colors opacity-0 group-hover:opacity-100">
+                                                    <Icon name="Trash2" className="font-bold w-4 h-4" />
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    {(!formData.nutritionalAttributes || formData.nutritionalAttributes.length === 0) && (
+                                        <tr>
+                                            <td colSpan={4} className="p-4 text-center text-[9px] font-black text-[var(--text-secondary)] uppercase italic">Sin información nutricional</td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div className="px-2">
+                            <label className="text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Nota de porción</label>
+                            <input
+                                type="text"
+                                value={formData.servingNote || ''}
+                                onChange={(e) => setFormData(prev => ({ ...prev, servingNote: e.target.value }))}
+                                className="w-full bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-xl px-3 py-2 text-sm text-[var(--text-primary)] focus:outline-none focus:border-amber-500/50 transition-colors mt-1"
+                                placeholder="Ej: Porción: 100g"
+                            />
+                        </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

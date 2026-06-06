@@ -101,29 +101,6 @@ export const getMyPlanRequest = async () => {
   return apiGet<{ success: boolean; data: any }>('/stores/me/plan-request');
 };
 
-// Admin - Plan Requests
-export const getAllPlanRequests = async () => {
-  return apiGet<{ success: boolean; data: any[] }>('/admin/plan-requests');
-};
-
-export const getPlanRequestById = async (id: number) => {
-  return apiGet<{ success: boolean; data: any }>(`/admin/plan-requests/${id}`);
-};
-
-export const approvePlanRequest = async (id: number, notes?: string) => {
-  return apiCall<{ success: boolean; data: any }>(`/admin/plan-requests/${id}/approve`, {
-    method: 'PUT',
-    body: JSON.stringify({ admin_notes: notes || '' }),
-  });
-};
-
-export const rejectPlanRequest = async (id: number, notes: string) => {
-  return apiCall<{ success: boolean; data: any }>(`/admin/plan-requests/${id}/reject`, {
-    method: 'PUT',
-    body: JSON.stringify({ admin_notes: notes }),
-  });
-};
-
 export function getSSEUrl(canal: string, usuarioId: string): string {
   return `${LARAVEL_API_URL}/events?channel=${canal}&user_id=${usuarioId}`;
 }
@@ -157,43 +134,6 @@ export const updateSystemColors = async (colors: Record<string, string>): Promis
 export const getPublicConfig = async (): Promise<Record<string, unknown>> => {
   const response = await apiGet<{ success: boolean; data: Record<string, unknown> }>('/config/public');
   return response.success ? response.data : {};
-};
-
-// Admin - Vendedores
-export const getVendedores = async (): Promise<any[]> => {
-  const response = await apiGet<{ success: boolean; data: any[] }>('/admin/vendedores');
-  return response.success ? response.data : [];
-};
-
-export const getVendedorHistorial = async (vendedorId: number): Promise<any[]> => {
-  const response = await apiGet<{ success: boolean; data: any[] }>(`/admin/vendedores/${vendedorId}/historial`);
-  return response.success ? response.data : [];
-};
-
-// Admin - Planes (CRUD)
-export const updatePlanStatus = async (planId: number, activo: boolean): Promise<boolean> => {
-  const response = await apiPost<{ success: boolean }>(`/admin/plans/${planId}/status`, { activo });
-  return response.success;
-};
-
-export const deletePlan = async (planId: number): Promise<boolean> => {
-  const response = await apiDelete<{ success: boolean }>(`/admin/plans/${planId}`);
-  return response.success;
-};
-
-export const updatePlanIcon = async (planId: number, icono: string): Promise<boolean> => {
-  const response = await apiPost<{ success: boolean }>(`/admin/plans/${planId}/icon`, { icono });
-  return response.success;
-};
-
-export const savePlan = async (planData: any): Promise<boolean> => {
-  const response = await apiPost<{ success: boolean; data?: any }>(`/admin/plans`, planData);
-  return response.success;
-};
-
-export const updatePlan = async (planId: number, planData: any): Promise<boolean> => {
-  const response = await apiPost<{ success: boolean }>(`/admin/plans/${planId}`, planData);
-  return response.success;
 };
 
 export { API_BASE };

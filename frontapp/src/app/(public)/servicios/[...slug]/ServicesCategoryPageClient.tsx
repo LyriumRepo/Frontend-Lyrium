@@ -60,6 +60,38 @@ function getCancellationLabel(policy: string) {
   };
 }
 
+function getLeafCategory(category: string): string {
+  if (!category) return '';
+  const parts = category.split(' > ');
+  return parts[parts.length - 1]?.trim() ?? category;
+}
+
+function getStickerBadge(sticker?: string | null, discountPercentage?: number | null): { label: string; className: string } | null {
+  if (!sticker) return null;
+  const map: Record<string, { label: string; className: string }> = {
+    nuevo: { label: 'NUEVO', className: 'bg-emerald-500 text-white' },
+    oferta: { label: 'OFERTA', className: 'bg-orange-500 text-white' },
+    liquidacion: { label: 'LIQUIDACIÓN', className: 'bg-red-600 text-white' },
+    bestseller: { label: 'MÁS VENDIDO', className: 'bg-amber-500 text-white' },
+    envio_gratis: { label: 'ENVÍO GRATIS', className: 'bg-blue-500 text-white' },
+  };
+  if (sticker === 'descuento') {
+    const pct = discountPercentage ?? 0;
+    return { label: `-${pct}%`, className: 'bg-red-500 text-white' };
+  }
+  return map[sticker] ?? null;
+}
+
+function getExtraBadges(service: Service): Array<{ label: string; className: string }> {
+  const etiquetas = (service as any).settings?.etiquetas;
+  if (!etiquetas) return [];
+  const badges: Array<{ label: string; className: string }> = [];
+  if (etiquetas.nuevo && service.sticker !== 'nuevo') {
+    badges.push({ label: 'NUEVO', className: 'bg-emerald-500 text-white' });
+  }
+  return badges;
+}
+
 function AvailabilityDot({ status }: { status: string }) {
   const color = status === 'Disponible' ? 'bg-emerald-400' : 'bg-amber-400';
   return (
@@ -93,12 +125,12 @@ function SpecialistSchedule({ schedules }: { schedules: ServiceSchedule[] }) {
     <div className="space-y-1.5">
       {days.map((day) => (
         <div key={day} className="flex items-start gap-2 text-xs">
-          <span className="w-20 shrink-0 font-semibold text-gray-700 dark:text-gray-300">
+          <span className="w-20 shrink-0 font-semibold text-gray-700 dark:text-[var(--text-primary)]">
             {DAY_NAMES[day]}
           </span>
           <div className="flex flex-col gap-0.5">
             {byDay[day].map((block) => (
-              <span key={block.id} className="text-gray-500 dark:text-gray-400">
+              <span key={block.id} className="text-gray-500 dark:text-[var(--text-muted)]">
                 {block.start_time} – {block.end_time}
               </span>
             ))}
@@ -121,10 +153,10 @@ function SpecialistCard({
   onSelect: (s: ServiceSpecialist) => void;
 }) {
   return (
-    <div className="border border-gray-100 dark:border-gray-700 rounded-xl p-4 hover:border-sky-200 dark:hover:border-sky-700 hover:shadow-sm transition-all group">
+    <div className="border border-gray-100 dark:border-[var(--border-subtle)] rounded-xl p-4 hover:border-sky-200 dark:hover:border-[var(--brand-sky)] hover:shadow-sm transition-all group">
       <div className="flex items-start gap-3 mb-3">
         {/* Avatar */}
-        <div className="shrink-0 w-11 h-11 rounded-full bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900/50 dark:to-blue-900/50 flex items-center justify-center overflow-hidden border border-sky-200 dark:border-sky-800">
+        <div className="shrink-0 w-11 h-11 rounded-full bg-gradient-to-br from-sky-100 to-blue-100 dark:from-[var(--brand-sky)]/20 dark:to-[var(--brand-sky)]/20 flex items-center justify-center overflow-hidden border border-sky-200 dark:border-sky-800">
           {specialist.foto ? (
             <Image
               src={specialist.foto}
@@ -142,20 +174,20 @@ function SpecialistCard({
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 mb-0.5">
             <AvailabilityDot status={specialist.availability} />
-            <span className="font-bold text-sm text-gray-900 dark:text-white truncate">
+            <span className="font-bold text-sm text-gray-900 dark:text-[var(--text-primary)] truncate">
               {specialist.nombre_completo}
             </span>
           </div>
-          <p className="text-xs text-sky-600 dark:text-sky-400 font-medium">
+          <p className="text-xs text-sky-600 dark:text-[var(--brand-sky)] font-medium">
             {specialist.especialidad}
           </p>
           {specialist.sub_especialidad && (
-            <p className="text-xs text-gray-400 dark:text-gray-500 truncate">
+            <p className="text-xs text-gray-400 dark:text-[var(--text-muted)] truncate">
               {specialist.sub_especialidad}
             </p>
           )}
           {specialist.anios_experiencia != null && (
-            <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+            <p className="text-xs text-gray-400 dark:text-[var(--text-muted)] mt-0.5">
               {specialist.anios_experiencia} años de experiencia
             </p>
           )}
@@ -165,7 +197,7 @@ function SpecialistCard({
       {/* Horarios */}
       {specialist.schedules && specialist.schedules.length > 0 && (
         <div className="mb-3 pl-1">
-          <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5">
+          <p className="text-xs font-semibold text-gray-500 dark:text-[var(--text-muted)] uppercase tracking-wide mb-1.5">
             Horarios disponibles
           </p>
           <SpecialistSchedule schedules={specialist.schedules} />
@@ -182,7 +214,7 @@ function SpecialistCard({
           Agendar con este especialista
         </button>
       ) : (
-        <div className="w-full py-2.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-400 text-xs font-semibold text-center">
+        <div className="w-full py-2.5 rounded-lg bg-gray-100 dark:bg-[var(--bg-muted)] text-gray-400 text-xs font-semibold text-center">
           No disponible actualmente
         </div>
       )}
@@ -211,28 +243,28 @@ function ServiceDetailModal({
       />
 
       {/* Panel */}
-      <div className="relative w-full sm:max-w-lg bg-white dark:bg-gray-900 rounded-t-2xl sm:rounded-2xl shadow-2xl max-h-[90dvh] overflow-y-auto z-10">
+      <div className="relative w-full sm:max-w-lg bg-white dark:bg-[var(--bg-card)] rounded-t-2xl sm:rounded-2xl shadow-2xl max-h-[90dvh] overflow-y-auto z-10">
         {/* Header del modal */}
-        <div className="sticky top-0 z-10 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 px-5 py-4 flex items-center gap-3">
+        <div className="sticky top-0 z-10 bg-white dark:bg-[var(--bg-card)] border-b border-gray-100 dark:border-[var(--border-default)] px-5 py-4 flex items-center gap-3">
           {step === 'specialists' && (
             <button
               onClick={() => setStep('info')}
-              className="p-1.5 -ml-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              className="p-1.5 -ml-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] transition-colors"
             >
               <ChevronLeft className="w-5 h-5 text-gray-500" />
             </button>
           )}
           <div className="flex-1 min-w-0">
-            <h2 className="font-bold text-gray-900 dark:text-white text-base truncate">
+            <h2 className="font-bold text-gray-900 dark:text-[var(--text-primary)] text-base truncate">
               {step === 'info' ? service.name : 'Elige un especialista'}
             </h2>
-            <p className="text-xs text-gray-400 dark:text-gray-500">
+            <p className="text-xs text-gray-400 dark:text-[var(--text-muted)]">
               {service.store_name}
             </p>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 -mr-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            className="p-1.5 -mr-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] transition-colors"
           >
             <X className="w-5 h-5 text-gray-500" />
           </button>
@@ -243,21 +275,51 @@ function ServiceDetailModal({
             <>
               {/* Imagen */}
               {service.image && (
-                <div className="w-full h-44 rounded-xl overflow-hidden">
+                <div className="relative w-full h-44 rounded-xl overflow-hidden">
                   <img
                     src={service.image}
                     alt={service.name}
                     className="w-full h-full object-cover"
                   />
+                  {(() => {
+                    const primary = getStickerBadge(service.sticker, service.discount_percentage);
+                    const extras = getExtraBadges(service);
+                    if (!primary && extras.length === 0) return null;
+                    return (
+                      <div className="absolute top-2 left-2 flex flex-col gap-1">
+                        {primary && (
+                          <span className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider shadow-lg ${primary.className}`}>
+                            {primary.label}
+                          </span>
+                        )}
+                        {extras.map((e, i) => (
+                          <span key={i} className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider shadow-lg ${e.className}`}>
+                            {e.label}
+                          </span>
+                        ))}
+                      </div>
+                    );
+                  })()}
                 </div>
               )}
 
               {/* Precio + duración */}
               <div className="flex items-center justify-between">
-                <span className="text-3xl font-black text-gray-900 dark:text-white">
-                  S/ {Number(service.price).toFixed(2)}
-                </span>
-                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-sky-50 dark:bg-sky-950/50 text-sky-600 dark:text-sky-400">
+                <div>
+                  {service.discount_percentage && service.discount_percentage > 0 ? (
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-3xl font-black text-gray-900 dark:text-[var(--text-primary)]">
+                        S/ {(service.price * (1 - service.discount_percentage / 100)).toFixed(2)}
+                      </span>
+                      <span className="text-lg text-gray-400 line-through">S/ {Number(service.price).toFixed(2)}</span>
+                    </div>
+                  ) : (
+                    <span className="text-3xl font-black text-gray-900 dark:text-[var(--text-primary)]">
+                      S/ {Number(service.price).toFixed(2)}
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-sky-50 dark:bg-[var(--brand-sky)]/20 text-sky-600 dark:text-[var(--brand-sky)]">
                   <Clock className="w-3.5 h-3.5" />
                   <span className="text-sm font-semibold">
                     {formatDuration(service.duration_minutes)}
@@ -267,10 +329,40 @@ function ServiceDetailModal({
 
               {/* Descripción */}
               {service.description && (
-                <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                <p className="text-sm text-gray-600 dark:text-[var(--text-primary)] leading-relaxed">
                   {service.description}
                 </p>
               )}
+
+              {/* Beneficios / Incluye */}
+              {service.benefits && (() => {
+                const items: string[] = (() => {
+                  if (typeof service.benefits === 'string') {
+                    try { return JSON.parse(service.benefits); } catch { /* not JSON */ }
+                    const trimmed = service.benefits.trim();
+                    if (trimmed.includes('\n')) return trimmed.split('\n').map((b) => b.trim()).filter(Boolean);
+                    return [trimmed];
+                  }
+                  if (Array.isArray(service.benefits)) return service.benefits;
+                  return [];
+                })();
+                if (items.length === 0) return null;
+                return (
+                  <div>
+                    <p className="text-xs font-bold text-gray-500 dark:text-[var(--text-muted)] uppercase tracking-wide mb-2">
+                      Este servicio incluye
+                    </p>
+                    <div className="space-y-1.5">
+                      {items.map((b, i) => (
+                        <div key={i} className="flex items-start gap-2">
+                          <CheckCircle className="w-3.5 h-3.5 text-sky-500 shrink-0 mt-0.5" />
+                          <span className="text-sm text-gray-600 dark:text-[var(--text-primary)]">{b}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
 
               {/* Badges de características */}
               <div className="flex flex-wrap gap-2">
@@ -281,12 +373,12 @@ function ServiceDetailModal({
                   {cancelInfo.label}
                 </span>
                 {service.is_home_service && (
-                  <span className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold text-violet-600 bg-violet-50 dark:bg-violet-950/40 dark:text-violet-400">
+                  <span className="flex items-center gap-1 px-1.5 py-1 rounded-md text-xs font-semibold text-cyan-600 bg-cyan-50 dark:bg-cyan-950/40 dark:text-cyan-400">
                     <Home className="w-3 h-3" />A domicilio
                   </span>
                 )}
                 {service.is_virtual && (
-                  <span className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold text-indigo-600 bg-indigo-50 dark:bg-indigo-950/40 dark:text-indigo-400">
+                  <span className="flex items-center gap-1 px-1.5 py-1 rounded-md text-xs font-semibold text-sky-600 bg-sky-50 dark:bg-sky-950/40 dark:text-sky-400">
                     <Wifi className="w-3 h-3" />
                     Virtual
                   </span>
@@ -295,19 +387,19 @@ function ServiceDetailModal({
 
               {/* Info adicional */}
               <div className="grid grid-cols-2 gap-3">
-                <div className="bg-gray-50 dark:bg-gray-800/60 rounded-xl p-3">
-                  <p className="text-xs text-gray-400 dark:text-gray-500 mb-0.5">
+                <div className="bg-gray-50 dark:bg-[var(--bg-muted)]/60 rounded-xl p-3">
+                  <p className="text-xs text-gray-400 dark:text-[var(--text-muted)] mb-0.5">
                     Reservar con anticipación
                   </p>
-                  <p className="text-sm font-bold text-gray-800 dark:text-gray-200">
+                  <p className="text-sm font-bold text-gray-800 dark:text-[var(--text-primary)]">
                     {service.booking_advance_hours}h antes
                   </p>
                 </div>
-                <div className="bg-gray-50 dark:bg-gray-800/60 rounded-xl p-3">
-                  <p className="text-xs text-gray-400 dark:text-gray-500 mb-0.5">
+                <div className="bg-gray-50 dark:bg-[var(--bg-muted)]/60 rounded-xl p-3">
+                  <p className="text-xs text-gray-400 dark:text-[var(--text-muted)] mb-0.5">
                     Cupo por sesión
                   </p>
-                  <p className="text-sm font-bold text-gray-800 dark:text-gray-200">
+                  <p className="text-sm font-bold text-gray-800 dark:text-[var(--text-primary)]">
                     {service.max_capacity} persona
                     {service.max_capacity !== 1 ? 's' : ''}
                   </p>
@@ -317,7 +409,7 @@ function ServiceDetailModal({
               {/* Especialistas preview */}
               {service.specialists.length > 0 && (
                 <div>
-                  <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
+                  <p className="text-xs font-bold text-gray-500 dark:text-[var(--text-muted)] uppercase tracking-wide mb-2">
                     {service.specialists.length} especialista
                     {service.specialists.length !== 1 ? 's' : ''} disponible
                     {service.specialists.length !== 1 ? 's' : ''}
@@ -325,7 +417,7 @@ function ServiceDetailModal({
                   <div className="space-y-2">
                     {service.specialists.slice(0, 3).map((sp) => (
                       <div key={sp.id} className="flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900/50 dark:to-blue-900/50 flex items-center justify-center shrink-0">
+                        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-sky-100 to-blue-100 dark:from-[var(--brand-sky)]/20 dark:to-[var(--brand-sky)]/20 flex items-center justify-center shrink-0">
                           {sp.foto ? (
                             <Image
                               src={sp.foto}
@@ -339,10 +431,10 @@ function ServiceDetailModal({
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs font-semibold text-gray-800 dark:text-gray-200 truncate">
+                          <p className="text-xs font-semibold text-gray-800 dark:text-[var(--text-primary)] truncate">
                             {sp.nombre_completo}
                           </p>
-                          <p className="text-xs text-gray-400 dark:text-gray-500 truncate">
+                          <p className="text-xs text-gray-400 dark:text-[var(--text-muted)] truncate">
                             {sp.especialidad}
                           </p>
                         </div>
@@ -367,7 +459,7 @@ function ServiceDetailModal({
 
           {step === 'specialists' && (
             <>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              <p className="text-sm text-gray-500 dark:text-[var(--text-muted)]">
                 Selecciona un especialista para ver su disponibilidad y agendar
                 tu cita.
               </p>
@@ -415,9 +507,9 @@ function ServiceCard({
   );
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all overflow-hidden group flex flex-col">
+    <div className="bg-white dark:bg-[var(--bg-card)] rounded-2xl border border-gray-100 dark:border-[var(--border-default)] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all overflow-hidden group flex flex-col">
       {/* Imagen o placeholder */}
-      <div className="relative h-36 bg-gradient-to-br from-sky-50 to-blue-50 dark:from-sky-950/30 dark:to-blue-950/30 overflow-hidden">
+      <div className="relative h-36 bg-gradient-to-br from-sky-50 to-blue-50 dark:from-[var(--brand-sky)]/10 dark:to-[var(--brand-sky)]/10 overflow-hidden">
         {service.image ? (
           <img
             src={service.image}
@@ -429,44 +521,73 @@ function ServiceCard({
             <Calendar className="w-10 h-10 text-sky-200 dark:text-sky-900" />
           </div>
         )}
+        {/* Sticker badge */}
+        {(() => {
+          const primary = getStickerBadge(service.sticker, service.discount_percentage);
+          const extras = getExtraBadges(service);
+          if (!primary && extras.length === 0) return null;
+          return (
+            <div className="absolute top-2 left-2 z-10 flex flex-col gap-1">
+              {primary && (
+                <span className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider shadow-lg ${primary.className}`}>
+                  {primary.label}
+                </span>
+              )}
+              {extras.map((e, i) => (
+                <span key={i} className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider shadow-lg ${e.className}`}>
+                  {e.label}
+                </span>
+              ))}
+            </div>
+          );
+        })()}
         {/* Badge virtual / domicilio */}
         {(service.is_virtual || service.is_home_service) && (
-          <div className="absolute top-2 left-2 flex gap-1">
+          <div className="absolute top-2 right-2 flex gap-1">
             {service.is_virtual && (
-              <span className="px-2 py-0.5 rounded-full bg-indigo-500/90 text-white text-xs font-bold backdrop-blur-sm flex items-center gap-1">
+              <span className="px-1.5 py-1 rounded-md bg-sky-500/90 text-white text-xs font-bold backdrop-blur-sm flex items-center gap-1">
                 <Wifi className="w-3 h-3" /> Virtual
               </span>
             )}
             {service.is_home_service && (
-              <span className="px-2 py-0.5 rounded-full bg-violet-500/90 text-white text-xs font-bold backdrop-blur-sm flex items-center gap-1">
+              <span className="px-1.5 py-1 rounded-md bg-emerald-500/90 text-white text-xs font-bold backdrop-blur-sm flex items-center gap-1">
                 <Home className="w-3 h-3" /> Domicilio
               </span>
             )}
           </div>
         )}
         {/* Precio flotante */}
-        <div className="absolute top-2 right-2 px-2.5 py-1 rounded-xl bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm shadow-sm">
-          <span className="text-sm font-black text-emerald-600 dark:text-emerald-400">
-            S/ {Number(service.price).toFixed(2)}
-          </span>
+        <div className="absolute bottom-2 right-2 px-2.5 py-1 rounded-xl bg-white/95 dark:bg-[var(--bg-card)]/95 backdrop-blur-sm shadow-sm">
+          {service.discount_percentage && service.discount_percentage > 0 ? (
+            <div className="flex flex-col items-end">
+              <span className="text-[10px] text-gray-400 line-through">S/ {Number(service.price).toFixed(2)}</span>
+              <span className="text-sm font-black text-emerald-600 dark:text-emerald-400">
+                S/ {(service.price * (1 - service.discount_percentage / 100)).toFixed(2)}
+              </span>
+            </div>
+          ) : (
+            <span className="text-sm font-black text-emerald-600 dark:text-emerald-400">
+              S/ {Number(service.price).toFixed(2)}
+            </span>
+          )}
         </div>
       </div>
 
       <div className="p-4 flex flex-col flex-1">
         {/* Nombre */}
-        <h3 className="font-bold text-gray-900 dark:text-white text-sm leading-tight mb-1 group-hover:text-sky-500 transition-colors line-clamp-2">
+        <h3 className="font-bold text-gray-900 dark:text-[var(--text-primary)] text-sm leading-tight mb-1 group-hover:text-sky-500 transition-colors line-clamp-2">
           {service.name}
         </h3>
 
         {/* Descripción */}
         {service.description && (
-          <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mb-3 leading-relaxed">
+          <p className="text-xs text-gray-500 dark:text-[var(--text-muted)] line-clamp-2 mb-3 leading-relaxed">
             {service.description}
           </p>
         )}
 
         {/* Meta info */}
-        <div className="flex items-center gap-3 text-xs text-gray-400 dark:text-gray-500 mb-3">
+        <div className="flex items-center gap-3 text-xs text-gray-400 dark:text-[var(--text-muted)] mb-3">
           <span className="flex items-center gap-1">
             <Clock className="w-3.5 h-3.5" />
             {formatDuration(service.duration_minutes)}
@@ -487,7 +608,7 @@ function ServiceCard({
               {availableSpecialists.slice(0, 3).map((sp) => (
                 <div
                   key={sp.id}
-                  className="w-6 h-6 rounded-full border-2 border-white dark:border-gray-900 bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900/50 dark:to-blue-900/50 flex items-center justify-center overflow-hidden"
+                  className="w-6 h-6 rounded-full border-2 border-white dark:border-[var(--bg-card)] bg-gradient-to-br from-sky-100 to-blue-100 dark:from-[var(--brand-sky)]/20 dark:to-[var(--brand-sky)]/20 flex items-center justify-center overflow-hidden"
                   title={sp.nombre_completo}
                 >
                   {sp.foto ? (
@@ -504,7 +625,7 @@ function ServiceCard({
                 </div>
               ))}
             </div>
-            <span className="text-xs text-gray-400 dark:text-gray-500">
+            <span className="text-xs text-gray-400 dark:text-[var(--text-muted)]">
               {availableSpecialists.length} especialista
               {availableSpecialists.length !== 1 ? 's' : ''} disponible
               {availableSpecialists.length !== 1 ? 's' : ''}
@@ -516,7 +637,7 @@ function ServiceCard({
         <div className="mt-auto">
           <Link
             href={`/servicio/${service.slug}`}
-            className="w-full py-2.5 rounded-xl bg-sky-50 dark:bg-sky-950/50 text-sky-600 dark:text-sky-400 text-xs font-black uppercase tracking-wider hover:bg-sky-500 hover:text-white dark:hover:bg-sky-500 dark:hover:text-white transition-all flex items-center justify-center gap-1.5"
+            className="w-full py-2.5 rounded-xl bg-sky-50 dark:bg-[var(--brand-sky)]/20 text-sky-600 dark:text-[var(--brand-sky)] text-xs font-black uppercase tracking-wider hover:bg-sky-500 hover:text-white dark:hover:bg-sky-500 dark:hover:text-white transition-all flex items-center justify-center gap-1.5"
           >
             <Calendar className="w-3.5 h-3.5" />
             Ver y agendar
@@ -554,9 +675,9 @@ export default function ServicesCategoryPageClient({
   }, [services, search]);
 
   return (
-    <main className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <main className="min-h-screen bg-gray-50 dark:bg-[var(--bg-primary)]">
       {/* Breadcrumb */}
-      <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
+      <div className="bg-white dark:bg-[var(--bg-card)] border-b border-gray-200 dark:border-[var(--border-default)]">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center gap-2 text-sm">
           <Link
             href="/"
@@ -565,15 +686,15 @@ export default function ServicesCategoryPageClient({
             <ArrowLeft className="w-4 h-4" />
             Inicio
           </Link>
-          <span className="text-gray-300 dark:text-gray-700">/</span>
+          <span className="text-gray-300 dark:text-[var(--text-secondary)]">/</span>
           <Link
             href="/servicios"
             className="text-gray-400 hover:text-sky-500 transition-colors"
           >
             Servicios
           </Link>
-          <span className="text-gray-300 dark:text-gray-700">/</span>
-          <span className="font-semibold text-gray-700 dark:text-gray-200">
+          <span className="text-gray-300 dark:text-[var(--text-secondary)]">/</span>
+          <span className="font-semibold text-gray-700 dark:text-[var(--text-primary)]">
             {category.name}
           </span>
         </div>
@@ -582,11 +703,11 @@ export default function ServicesCategoryPageClient({
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Título */}
         <div className="mb-6">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-[var(--text-primary)]">
             {category.name}
           </h1>
           {category.description && (
-            <p className="text-gray-500 dark:text-gray-400 mt-1.5 text-sm leading-relaxed max-w-xl">
+            <p className="text-gray-500 dark:text-[var(--text-muted)] mt-1.5 text-sm leading-relaxed max-w-xl">
               {category.description}
             </p>
           )}
@@ -606,7 +727,7 @@ export default function ServicesCategoryPageClient({
                 className={`shrink-0 px-4 py-2 rounded-full text-xs font-bold transition-all border whitespace-nowrap ${
                   cat.slug === category.slug
                     ? 'bg-sky-500 text-white border-sky-500 shadow-sm'
-                    : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-sky-300 hover:text-sky-500'
+                    : 'bg-white dark:bg-[var(--bg-card)] text-gray-600 dark:text-[var(--text-muted)] border-gray-200 dark:border-[var(--border-subtle)] hover:border-sky-300 hover:text-sky-500'
                 }`}
               >
                 {cat.name}
@@ -623,12 +744,12 @@ export default function ServicesCategoryPageClient({
             placeholder="Buscar por servicio o especialista..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-700 dark:text-gray-200 placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 transition-all"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] text-sm text-gray-700 dark:text-[var(--text-primary)] placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-[var(--border-focus)] transition-all"
           />
         </div>
 
         {/* Contador */}
-        <p className="text-xs text-gray-400 dark:text-gray-500 mb-4">
+        <p className="text-xs text-gray-400 dark:text-[var(--text-muted)] mb-4">
           {filtered.length} servicio{filtered.length !== 1 ? 's' : ''}{' '}
           encontrado{filtered.length !== 1 ? 's' : ''}
           {search && ` para "${search}"`}
@@ -646,7 +767,7 @@ export default function ServicesCategoryPageClient({
             ))}
           </div>
         ) : (
-          <div className="text-center py-20 text-gray-400 dark:text-gray-600">
+          <div className="text-center py-20 text-gray-400 dark:text-[var(--text-muted)]">
             <Calendar className="w-14 h-14 mx-auto mb-3 opacity-20" />
             <p className="font-semibold text-sm">
               {search

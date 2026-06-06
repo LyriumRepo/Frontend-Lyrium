@@ -96,11 +96,9 @@ export function useIzipay({ onSuccess }: UseIzipayOptions): UseIzipayReturn {
         window.KR.onLoaded(() => {
           if (cancelled) return;
 
-          window.KR?.setFormConfig({
-            formToken: '__publicKey__', // placeholder, se sobreescribe después
-
-            'kr-public-key': process.env.NEXT_PUBLIC_IZIPAY_PUBLIC_KEY,
-          });
+          // NOTA: La public key ya se configuró via kr-public-key en el <script> del layout.
+          // NO llamar a setFormConfig aquí porque con un formToken placeholder rompe el SDK.
+          // setFormConfig se llama únicamente en loadSmartForm con el formToken real.
 
           // ✅ CORRECCIÓN: usar window.KR?.onSubmit(...) en lugar de window.KR?.()
           window.KR?.onSubmit((response) => {

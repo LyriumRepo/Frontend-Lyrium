@@ -1,7 +1,7 @@
 'use client';
 
 import { X, Check } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 interface Props {
     isOpen: boolean;
@@ -13,6 +13,45 @@ interface Props {
 
 export default function ModalPostCompra({ isOpen, email, onClose, onSync, onOpenRegistro }: Props) {
     const [phase, setPhase] = useState<1 | 2>(1);
+    const confettiRef = useRef<boolean>(false);
+
+    useEffect(() => {
+        if (isOpen && !confettiRef.current) {
+            confettiRef.current = true;
+            import('canvas-confetti').then(({ default: confetti }) => {
+                const duration = 3000;
+                const end = Date.now() + duration;
+
+                const frame = () => {
+                    confetti({
+                        particleCount: 3,
+                        angle: 60,
+                        spread: 55,
+                        origin: { x: 0, y: 0.6 },
+                        colors: ['#0ea5e9', '#34d399', '#fbbf24', '#f472b6', '#a78bfa'],
+                        zIndex: 40000,
+                    });
+                    confetti({
+                        particleCount: 3,
+                        angle: 120,
+                        spread: 55,
+                        origin: { x: 1, y: 0.6 },
+                        colors: ['#0ea5e9', '#34d399', '#fbbf24', '#f472b6', '#a78bfa'],
+                        zIndex: 40000,
+                    });
+
+                    if (Date.now() < end) {
+                        requestAnimationFrame(frame);
+                    }
+                };
+
+                frame();
+            });
+        }
+        if (!isOpen) {
+            confettiRef.current = false;
+        }
+    }, [isOpen]);
 
     if (!isOpen) return null;
 

@@ -1,4 +1,5 @@
 import { LARAVEL_API_URL } from '@/shared/lib/config/flags';
+import type { ScanApiResponse } from '@/features/admin/operations/types/scan';
 import {
   Supplier,
   SupplierFilters,
@@ -167,6 +168,29 @@ export const expenseRepository = {
 
   delete(id: number): Promise<{ success: boolean }> {
     return request(`/expenses/${id}`, { method: 'DELETE' });
+  },
+
+  scan: async (file: File): Promise<ScanApiResponse> => {
+    const token = await getAuthToken();
+    const baseUrl = LARAVEL_API_URL.endsWith('/')
+      ? LARAVEL_API_URL.slice(0, -1)
+      : LARAVEL_API_URL;
+    const formData = new FormData();
+    formData.append('file', file);
+    const res = await fetch(`${baseUrl}/expenses/scan`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        Accept: 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: formData,
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error ?? err.message ?? `Error ${res.status}`);
+    }
+    return res.json();
   },
 };
 

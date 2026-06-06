@@ -25,11 +25,14 @@ import {
   Store,
   BadgeCheck,
   TrendingUp,
+  Calendar,
+  Clock,
 } from 'lucide-react';
 import {
   rankingApi,
   type ProductRanking,
   type StoreRanking,
+  type ServiceRanking,
   type ReviewReport,
   type AdminReview,
 } from '@/shared/lib/api/rankingRepository';
@@ -87,6 +90,40 @@ function EmptyState({
   );
 }
 
+// ─── Limit Selector compartido ─────────────────────────────────────────────────
+
+function LimitSelector({
+  value,
+  onChange,
+}: {
+  value: number;
+  onChange: (v: number) => void;
+}) {
+  const options = [5, 10, 100];
+  return (
+    <div className="flex items-center gap-2">
+      <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+        Top
+      </span>
+      <div className="flex gap-1">
+        {options.map((opt) => (
+          <button
+            key={opt}
+            onClick={() => onChange(opt)}
+            className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all ${
+              value === opt
+                ? 'bg-sky-500 text-white shadow-sm'
+                : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+            }`}
+          >
+            {opt}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ─── Tab: Top Productos ───────────────────────────────────────────────────────
 
 function TopProductsTab() {
@@ -95,6 +132,7 @@ function TopProductsTab() {
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
   const perPage = 10;
 
   useEffect(() => {
@@ -103,7 +141,6 @@ function TopProductsTab() {
     rankingApi
       .getTopProducts(100, 1)
       .then((res) => {
-        // request() puede devolver el array directamente O { data: [...] }
         const list = Array.isArray(res) ? res : ((res as any).data ?? []);
         setProducts(Array.isArray(list) ? list : []);
       })
@@ -119,8 +156,9 @@ function TopProductsTab() {
     return matchName || matchStore;
   });
 
-  const totalPages = Math.ceil(filtered.length / perPage);
-  const paginated = filtered.slice((page - 1) * perPage, page * perPage);
+  const limited = filtered.slice(0, limit);
+  const totalPages = Math.ceil(limited.length / perPage);
+  const paginated = limited.slice((page - 1) * perPage, page * perPage);
 
   if (loading)
     return (
@@ -141,18 +179,21 @@ function TopProductsTab() {
 
   return (
     <div className="space-y-4">
-      {/* Buscador */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-        <input
-          value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setPage(1);
-          }}
-          placeholder="Buscar producto o tienda..."
-          className="w-full pl-9 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500/30 bg-white dark:bg-[var(--bg-card)]"
-        />
+      {/* Buscador y Limit */}
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="relative flex-1 min-w-[200px]">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <input
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
+            placeholder="Buscar producto o tienda..."
+            className="w-full pl-9 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500/30 bg-white dark:bg-[var(--bg-card)]"
+          />
+        </div>
+        <LimitSelector value={limit} onChange={(v) => { setLimit(v); setPage(1); }} />
       </div>
 
       {/* Tabla */}
@@ -229,7 +270,7 @@ function TopProductsTab() {
       {/* Paginación */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between pt-2">
-          <p className="text-xs text-gray-400">{filtered.length} productos</p>
+          <p className="text-xs text-gray-400">{limited.length} productos</p>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
@@ -261,13 +302,13 @@ function TopStoresTab() {
   const [stores, setStores] = useState<StoreRanking[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [limit, setLimit] = useState(10);
 
   useEffect(() => {
     setLoading(true);
     rankingApi
       .getTopStores(50)
       .then((res) => {
-        // FIX 2: misma normalización que getTopProducts
         const list = Array.isArray(res) ? res : ((res as any).data ?? []);
         setStores(Array.isArray(list) ? list : []);
       })
@@ -292,16 +333,23 @@ function TopStoresTab() {
       </div>
     );
 
+  const displayed = stores.slice(0, limit);
+
   return (
-    <div className="space-y-2">
-      {stores.length === 0 ? (
+    <div className="space-y-4">
+      {/* Limit */}
+      <div className="flex justify-end">
+        <LimitSelector value={limit} onChange={setLimit} />
+      </div>
+
+      {displayed.length === 0 ? (
         <EmptyState
           icon={Store}
           title="Sin tiendas"
           subtitle="Aún no hay tiendas con reseñas"
         />
       ) : (
-        stores.map((store, i) => (
+        displayed.map((store, i) => (
           <div
             key={store.id}
             className="flex items-center gap-4 p-4 bg-white dark:bg-[var(--bg-card)] border border-gray-100 dark:border-[var(--border-subtle)] rounded-2xl hover:border-sky-200 transition-all"
@@ -346,6 +394,159 @@ function TopStoresTab() {
             </div>
           </div>
         ))
+      )}
+    </div>
+  );
+}
+
+// ─── Tab: Top Servicios ───────────────────────────────────────────────────────
+
+function TopServicesTab() {
+  const [services, setServices] = useState<ServiceRanking[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [limit, setLimit] = useState(10);
+  const [page, setPage] = useState(1);
+  const perPage = 10;
+
+  useEffect(() => {
+    setLoading(true);
+    setError(null);
+    rankingApi
+      .getTopServices(100)
+      .then((res) => {
+        const list = Array.isArray(res) ? res : ((res as any).data ?? []);
+        setServices(Array.isArray(list) ? list : []);
+      })
+      .catch(() => setError('No se pudo cargar el ranking de servicios.'))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading)
+    return (
+      <div className="space-y-3">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <BaseSkeleton key={i} className="h-16 w-full rounded-2xl" />
+        ))}
+      </div>
+    );
+
+  if (error)
+    return (
+      <div className="flex items-center gap-2 text-red-500 text-sm p-4 bg-red-50 rounded-2xl">
+        <AlertCircle className="w-4 h-4 flex-shrink-0" />
+        {error}
+      </div>
+    );
+
+  const limited = services.slice(0, limit);
+  const totalPages = Math.ceil(limited.length / perPage);
+  const paginated = limited.slice((page - 1) * perPage, page * perPage);
+
+  return (
+    <div className="space-y-4">
+      {/* Limit */}
+      <div className="flex justify-end">
+        <LimitSelector value={limit} onChange={(v) => { setLimit(v); setPage(1); }} />
+      </div>
+
+      {/* Tabla */}
+      {paginated.length === 0 ? (
+        <EmptyState
+          icon={Calendar}
+          title="Sin servicios"
+          subtitle="Aún no hay servicios con reseñas"
+        />
+      ) : (
+        <div className="space-y-2">
+          {paginated.map((service, i) => {
+            const rank = (page - 1) * perPage + i + 1;
+            return (
+              <div
+                key={service.id}
+                className="flex items-center gap-4 p-3 bg-white dark:bg-[var(--bg-card)] border border-gray-100 dark:border-[var(--border-subtle)] rounded-2xl hover:border-sky-200 transition-all group"
+              >
+                {/* Rank */}
+                <div
+                  className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 font-black text-sm ${rank === 1 ? 'bg-amber-100 text-amber-600' : rank === 2 ? 'bg-gray-100 text-gray-600' : rank === 3 ? 'bg-orange-100 text-orange-600' : 'bg-gray-50 text-gray-400'}`}
+                >
+                  {rank <= 3 ? <Trophy className="w-4 h-4" /> : rank}
+                </div>
+
+                {/* Imagen */}
+                <div className="w-10 h-10 rounded-xl bg-sky-100 overflow-hidden flex-shrink-0 flex items-center justify-center">
+                  {service.image ? (
+                    <Image
+                      src={service.image}
+                      alt={service.name}
+                      width={40}
+                      height={40}
+                      className="object-cover w-full h-full"
+                    />
+                  ) : (
+                    <Calendar className="w-5 h-5 text-sky-500" />
+                  )}
+                </div>
+
+                {/* Info */}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] truncate">
+                    {service.name}
+                  </p>
+                  <p className="text-xs text-gray-400 truncate flex items-center gap-2">
+                    <Store className="w-3 h-3" />
+                    {service.store?.name ?? '—'}
+                    <span className="flex items-center gap-0.5">
+                      <Clock className="w-3 h-3" />
+                      {service.duration_minutes} min
+                    </span>
+                  </p>
+                </div>
+
+                {/* Rating */}
+                <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                  <RatingBadge value={service.rating_average} />
+                  <p className="text-xs text-gray-400">
+                    {service.rating_count} reseñas
+                  </p>
+                </div>
+
+                {/* Precio */}
+                <div className="text-right flex-shrink-0 min-w-[60px]">
+                  <p className="text-sm font-black text-gray-800">
+                    S/ {service.price.toFixed(2)}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Paginación */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between pt-2">
+          <p className="text-xs text-gray-400">{limited.length} servicios</p>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="p-1.5 rounded-lg border border-gray-200 disabled:opacity-40 hover:bg-gray-50 transition-colors"
+            >
+              <ChevronLeft className="w-4 h-4 text-gray-500" />
+            </button>
+            <span className="text-xs font-bold text-gray-600">
+              {page} / {totalPages}
+            </span>
+            <button
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={page === totalPages}
+              className="p-1.5 rounded-lg border border-gray-200 disabled:opacity-40 hover:bg-gray-50 transition-colors"
+            >
+              <ChevronRight className="w-4 h-4 text-gray-500" />
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );
@@ -768,11 +969,12 @@ function AllReviewsTab() {
 
 // ─── COMPONENTE PRINCIPAL ─────────────────────────────────────────────────────
 
-type TabKey = 'productos' | 'tiendas' | 'moderacion' | 'reseñas';
+type TabKey = 'productos' | 'tiendas' | 'servicios' | 'moderacion' | 'reseñas';
 
 const TABS: { key: TabKey; label: string; icon: React.ElementType }[] = [
   { key: 'productos', label: 'Top Productos', icon: TrendingUp },
   { key: 'tiendas', label: 'Top Tiendas', icon: Store },
+  { key: 'servicios', label: 'Top Servicios', icon: Calendar },
   { key: 'moderacion', label: 'Moderación', icon: ShieldAlert },
   { key: 'reseñas', label: 'Todas las reseñas', icon: MessageSquare },
 ];
@@ -811,6 +1013,7 @@ export function ReviewsPageClient() {
         <div className="p-6">
           {activeTab === 'productos' && <TopProductsTab />}
           {activeTab === 'tiendas' && <TopStoresTab />}
+          {activeTab === 'servicios' && <TopServicesTab />}
           {activeTab === 'moderacion' && <ModerationTab />}
           {activeTab === 'reseñas' && <AllReviewsTab />}
         </div>

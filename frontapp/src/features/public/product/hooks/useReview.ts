@@ -46,11 +46,12 @@ export function useReviews(productId: string): UseReviewsReturn {
 
         if (!res.ok) throw new Error(`Error ${res.status}`);
 
-        const json: LaravelReviewsResponse = await res.json();
+        const json: { data: LaravelReviewsResponse } = await res.json();
+        const inner = json.data;
 
-        setReviews((prev) => (append ? [...prev, ...json.data] : json.data));
-        setStats(json.stats);
-        setPagination(json.pagination);
+        setReviews((prev) => (append ? [...prev, ...inner.data] : inner.data));
+        setStats(inner.stats);
+        setPagination(inner.pagination);
       } catch (err) {
         setError('No se pudieron cargar las reseñas.');
         console.error('[useReviews]', err);

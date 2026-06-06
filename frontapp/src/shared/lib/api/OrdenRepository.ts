@@ -47,16 +47,17 @@ export interface OrderResult {
 }
 
 export interface CreateOrderPayload {
-  shipping_name: string;
-  shipping_email: string;
-  shipping_phone: string;
-  shipping_address: string;
-  shipping_city: string;
+  shipping_name?: string;
+  shipping_email?: string;
+  shipping_phone?: string;
+  shipping_address?: string;
+  shipping_city?: string;
   shipping_postal_code?: string;
   shipping_notes?: string;
   shipping_cost?: number;
   coupon_code?: string;
   notes?: string;
+  lirios_used?: number;
 }
 
 // ── Tipos Izipay ──────────────────────────────────────────────────────────────
@@ -114,9 +115,20 @@ async function buildHeaders(): Promise<HeadersInit> {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     Accept: 'application/json',
+    'X-Session-ID': getSessionId(),
   };
   if (token) headers['Authorization'] = `Bearer ${token}`;
   return headers;
+}
+
+function getSessionId(): string {
+  if (typeof window === 'undefined') return '';
+  let sid = sessionStorage.getItem('cart_session_id');
+  if (!sid) {
+    sid = `guest_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+    sessionStorage.setItem('cart_session_id', sid);
+  }
+  return sid;
 }
 
 async function post<T>(endpoint: string, body: object): Promise<T> {

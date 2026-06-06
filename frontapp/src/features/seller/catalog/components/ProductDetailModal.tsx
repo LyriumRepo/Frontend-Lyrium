@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { AttributeValue, Product } from '@/features/seller/catalog/types';
+import { AttributeValue, Product, etiquetasFromProduct } from '@/features/seller/catalog/types';
 import BaseModal from '@/components/ui/BaseModal';
 import { formatCurrency } from '@/shared/lib/utils/formatters';
 
@@ -29,25 +29,12 @@ function normalizeValues(values: unknown): AttributeValue[] {
     return [];
 }
 
-// ── Etiqueta types (mirror ProductModal) ──────────────────────────────────────
-interface EtiquetaDescuentoData { valor: number; inicio: string; fin: string | null; }
-interface EtiquetaOfertaData    { valor: number; inicio: string; fin: string; }
-interface EtiquetaEdicionData   { inicio: string; fin: string; }
-interface EtiquetaPromocionData { productosIds: string[]; }
-interface ProductEtiquetaConfig {
-    nuevo: boolean;
-    descuento?:      EtiquetaDescuentoData;
-    oferta?:         EtiquetaOfertaData;
-    edicionLimitada?: EtiquetaEdicionData;
-    promocion?:      EtiquetaPromocionData;
-}
-
 export default function ProductDetailModal({ product, isOpen, onClose }: ProductDetailModalProps) {
     if (!product) return null;
 
     const mainAttributes       = product.mainAttributes       || [];
     const additionalAttributes = product.additionalAttributes || [];
-    const etiquetas: ProductEtiquetaConfig = (product as any).etiquetas ?? { nuevo: false };
+    const etiquetas = etiquetasFromProduct(product);
     const hasEtiquetas = etiquetas.nuevo || etiquetas.descuento || etiquetas.oferta || etiquetas.edicionLimitada || etiquetas.promocion;
 
     return (

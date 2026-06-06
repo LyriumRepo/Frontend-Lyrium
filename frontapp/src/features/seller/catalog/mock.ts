@@ -4,6 +4,7 @@ export const MOCK_CATALOG_DATA: Product[] = [
     {
         id: '1',
         name: 'Aceite Esencial de Lavanda Orgánico',
+        type: 'physical',
         category: 'cuidado_personal',
         price: 45.00,
         stock: 24,
@@ -18,6 +19,7 @@ export const MOCK_CATALOG_DATA: Product[] = [
     {
         id: '2',
         name: 'Mix de Frutos Secos Energético',
+        type: 'physical',
         category: 'alimentos',
         price: 25.50,
         stock: 50,
@@ -32,6 +34,7 @@ export const MOCK_CATALOG_DATA: Product[] = [
     {
         id: '3',
         name: 'Vitamina C + Zinc Liposomal',
+        type: 'physical',
         category: 'suplementos',
         price: 89.90,
         stock: 12,

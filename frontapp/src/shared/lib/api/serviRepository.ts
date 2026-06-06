@@ -30,6 +30,7 @@ export interface ServiceHold {
   appointment_date: string;
   start_time: string;
   customer_notes: string | null;
+  service_address: string | null;
   expires_at: string;
   seconds_remaining: number;
 }
@@ -42,6 +43,7 @@ export interface AddServiceHoldPayload {
   start_time: string;
   customer_notes?: string | null;
   cart_token: string;
+  service_address?: string | null;
 }
 
 // ─── Tipos de Dominio ─────────────────────────────────────────────────────────
@@ -83,9 +85,11 @@ export interface Service {
   id: number;
   store_id: number;
   store_name: string;
+  store_logo: string | null;
   name: string;
   slug: string;
   description: string;
+  benefits?: string;
   duration_minutes: number;
   buffer_minutes: number;
   price: number;
@@ -94,6 +98,9 @@ export interface Service {
   category_id: number;
   parent_category_id: number | null;
   image: string | null;
+  sticker?: string | null;
+  discount_percentage?: number | null;
+  settings?: Record<string, unknown> | null;
   status: 'active' | 'inactive' | 'draft';
   cancellation_policy: 'flexible' | 'strict' | 'no_refund';
   cancellation_hours: number;
@@ -326,6 +333,16 @@ export const serviceRepository = {
     const q = toQuery({ cart_token: cartToken });
     return apiFetch(`/cart/service-holds/${holdId}${q}`, {
       method: 'DELETE',
+    });
+  },
+
+  async updateServiceHold(
+    holdId: number,
+    payload: { cart_token: string; service_address: string },
+  ): Promise<{ hold: { id: number; service_address: string } }> {
+    return apiFetch(`/cart/service-holds/${holdId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
     });
   },
 };

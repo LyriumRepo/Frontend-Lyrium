@@ -2,7 +2,7 @@
 
 import React, { ReactNode } from 'react';
 import Image from 'next/image';
-import { Product } from '@/features/seller/catalog/types';
+import { Product, etiquetasFromProduct } from '@/features/seller/catalog/types';
 import Icon from '@/components/ui/Icon';
 
 interface ProductCardProps {
@@ -35,6 +35,21 @@ export default function ProductCard({
                             sizes="36px"
                             className="object-contain"
                         />
+                        {(() => {
+                            const e = etiquetasFromProduct(product);
+                            if (!e.nuevo && !e.descuento && !e.oferta && !e.edicionLimitada) return null;
+                            return (
+                                <div className="absolute -top-0.5 -left-0.5 z-10">
+                                    <div className={`text-[6px] font-black uppercase tracking-wider px-1 py-[1px] leading-tight ${
+                                        e.nuevo ? 'bg-[#ADEBB3] text-[#0d3318]' :
+                                        e.descuento || e.oferta ? 'bg-red-500 text-white' :
+                                        'bg-[#59a6cb] text-[#1a2e3a]'
+                                    }`} style={{ borderRadius: '2px 6px 6px 2px' }}>
+                                        {e.nuevo ? 'NUEVO' : e.descuento ? `-${e.descuento.valor}%` : e.oferta ? `-${e.oferta.valor}%` : 'ED.LIM'}
+                                    </div>
+                                </div>
+                            );
+                        })()}
                     </div>
                     <div className="relative group/name min-w-0">
                         <p className="text-sm font-black text-[var(--text-primary)] truncate leading-tight cursor-default">

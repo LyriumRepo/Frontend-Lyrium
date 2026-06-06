@@ -54,6 +54,13 @@ export const customerNavigation: PanelNavigation = [
             },
 
             {
+                id: 'lirios',
+                label: 'Mis Lirios',
+                description: 'Tus puntos de fidelidad',
+                icon: 'Leaf',
+                href: '/customer/lirios'
+            },
+            {
                 id: 'chat',
                 label: 'Chat con Vendedores',
                 description: 'Comunicación directa con vendedores',

@@ -1,19 +1,19 @@
-const API_BASE = process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://localhost:8000/api';
+/**
+ * planesAdminApi.ts
+ * Repositorio para el panel de administración de planes.
+ * Compatible con cookie HttpOnly — lee el token vía /api/auth-token (server-side).
+ * Patrón idéntico a adminSellerRepository.ts
+ */
 
-interface ApiResponse<T> {
-  message?: string;
-  data?: T;
-  success?: boolean;
-  [key: string]: unknown;
-}
+import { LARAVEL_API_URL } from '@/shared/lib/config/flags';
 
-// ─── Token helper: lee vía /api/auth-token (Route Handler de Next.js) ──────────
+// ─── Token helper ─────────────────────────────────────────────────────────────
 // La cookie laravel_token es HttpOnly → JS no puede leerla directamente.
 // /api/auth-token corre server-side y sí puede leerla.
 
 let _tokenCache: { value: string | null; ts: number } | null = null;
 
-async function getAuthToken(): Promise<string | null> {
+async function getToken(): Promise<string | null> {
   const now = Date.now();
   if (_tokenCache && now - _tokenCache.ts < 30_000) {
     return _tokenCache.value;
@@ -33,53 +33,54 @@ async function getAuthToken(): Promise<string | null> {
   }
 }
 
-async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
-  const token = await getAuthToken();
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-    Accept: 'application/json',
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-  };
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 15_000);
-  const res = await fetch(`${API_BASE}${endpoint}`, { headers, credentials: 'include', ...options, signal: controller.signal });
-  clearTimeout(timeout);
+// ─── Fetch genérico ───────────────────────────────────────────────────────────
+
+async function apiFetch<T>(
+  path: string,
+  options: RequestInit = {},
+): Promise<T> {
+  const token = await getToken();
+
+  if (process.env.NODE_ENV === 'development') {
+    console.log(
+      '[planesAdmin] token:',
+      token ? token.substring(0, 20) + '...' : 'null',
+    );
+    console.log('[planesAdmin] url  :', `${LARAVEL_API_URL}${path}`);
+  }
+
+  const res = await fetch(`${LARAVEL_API_URL}${path}`, {
+    ...options,
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(options.headers ?? {}),
+    },
+  });
+
   if (!res.ok) {
-    const text = await res.text();
-    let msg: string;
-    try {
-      const json = JSON.parse(text);
-      msg = json.message || json.error || `HTTP ${res.status}`;
-    } catch {
-      msg = text || `HTTP ${res.status}`;
-    }
-    throw new Error(msg);
+    const err = await res.json().catch(() => ({ message: res.statusText }));
+    throw new Error(err.message ?? `HTTP ${res.status}`);
   }
-  const text = await res.text();
-  try {
-    return JSON.parse(text) as T;
-  } catch {
-    throw new Error(`API error [${endpoint}]: ${text}`);
-  }
+
+  return res.json();
 }
 
-function get<T>(endpoint: string): Promise<T> {
-  return request<T>(endpoint, { method: 'GET' });
+// ─── Query string helper ──────────────────────────────────────────────────────
+
+function toQuery(params: Record<string, string | number | undefined>): string {
+  const q = Object.entries(params)
+    .filter(([, v]) => v !== undefined && v !== '')
+    .map(
+      ([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(String(v))}`,
+    )
+    .join('&');
+  return q ? `?${q}` : '';
 }
 
-function post<T>(endpoint: string, data?: unknown): Promise<T> {
-  return request<T>(endpoint, { method: 'POST', body: data ? JSON.stringify(data) : undefined });
-}
-
-function put<T>(endpoint: string, data?: unknown): Promise<T> {
-  return request<T>(endpoint, { method: 'PUT', body: data ? JSON.stringify(data) : undefined });
-}
-
-function del<T>(endpoint: string): Promise<T> {
-  return request<T>(endpoint, { method: 'DELETE' });
-}
-
-// ── Plans ────────────────────────────────
+// ─── Tipos ────────────────────────────────────────────────────────────────────
 
 export interface PlanFromApi {
   id: number;
@@ -89,7 +90,9 @@ export interface PlanFromApi {
   commission_rate: string;
   has_membership_fee: boolean;
   features: { text: string; active: boolean }[] | null;
-  detailed_benefits: { emoji?: string; title: string; description: string; color?: string }[] | null;
+  detailed_benefits:
+    | { emoji?: string; title: string; description: string; color?: string }[]
+    | null;
   is_active: boolean;
   badge: string | null;
   description: string | null;
@@ -118,42 +121,6 @@ export interface PlanFromApi {
   active_subscriptions_count?: number;
 }
 
-export async function fetchPlans(): Promise<PlanFromApi[]> {
-  const res = await get<ApiResponse<PlanFromApi[]> | PlanFromApi[]>('/admin/plans');
-  return Array.isArray(res) ? res : (res.data ?? []);
-}
-
-export async function fetchPlan(slug: string): Promise<PlanFromApi> {
-  const res = await get<ApiResponse<PlanFromApi>>(`/admin/plans/${slug}`);
-  return (res.data ?? res) as PlanFromApi;
-}
-
-export async function createPlan(data: Partial<PlanFromApi>): Promise<PlanFromApi> {
-  const res = await post<ApiResponse<PlanFromApi>>('/admin/plans', data);
-  return (res.data ?? res) as PlanFromApi;
-}
-
-export async function updatePlan(slug: string, data: Partial<PlanFromApi>): Promise<PlanFromApi> {
-  const res = await put<ApiResponse<PlanFromApi>>(`/admin/plans/${slug}`, data);
-  return (res.data ?? res) as PlanFromApi;
-}
-
-export async function deletePlan(slug: string): Promise<void> {
-  await del(`/admin/plans/${slug}`);
-}
-
-export async function togglePlanActive(slug: string): Promise<PlanFromApi> {
-  const res = await put<ApiResponse<PlanFromApi>>(`/admin/plans/${slug}/toggle-active`);
-  return (res.data ?? res) as PlanFromApi;
-}
-
-export async function updatePlanIcon(slug: string, icon: string): Promise<PlanFromApi> {
-  const res = await put<ApiResponse<PlanFromApi>>(`/admin/plans/${slug}/icon`, { icon });
-  return (res.data ?? res) as PlanFromApi;
-}
-
-// ── Colors ───────────────────────────────
-
 export interface ButtonColors {
   subscribeBg: string;
   subscribeColor: string;
@@ -163,23 +130,6 @@ export interface ButtonColors {
   lockedColor: string;
   warningColor: string;
 }
-
-export async function fetchColors(): Promise<ButtonColors> {
-  const res = await get<ApiResponse<ButtonColors>>('/admin/plan-colors');
-  return (res.data ?? res) as ButtonColors;
-}
-
-export async function saveColors(colors: ButtonColors): Promise<ButtonColors> {
-  const res = await put<ApiResponse<ButtonColors>>('/admin/plan-colors', colors);
-  return (res.data ?? res) as ButtonColors;
-}
-
-export async function resetColors(): Promise<ButtonColors> {
-  const res = await del<ApiResponse<ButtonColors>>('/admin/plan-colors');
-  return (res.data ?? res) as ButtonColors;
-}
-
-// ── Plan Requests (admin) ────────────────
 
 export interface PlanRequestFromApi {
   id: number;
@@ -194,30 +144,8 @@ export interface PlanRequestFromApi {
   payment_status: string;
   status: string;
   created_at: string;
+  current_plan_slug?: string;
 }
-
-export async function fetchPlanRequests(params?: {
-  status?: string;
-  payment_status?: string;
-  per_page?: number;
-}): Promise<{ data: PlanRequestFromApi[]; pagination: any }> {
-  const qs = new URLSearchParams();
-  if (params?.status) qs.set('status', params.status);
-  if (params?.payment_status) qs.set('payment_status', params.payment_status);
-  if (params?.per_page) qs.set('per_page', String(params.per_page));
-  const res = await get<any>(`/admin/plan-requests${qs.toString() ? `?${qs.toString()}` : ''}`);
-  return res;
-}
-
-export async function approvePlanRequest(id: number): Promise<void> {
-  await put(`/admin/plan-requests/${id}/approve`);
-}
-
-export async function rejectPlanRequest(id: number, notes: string): Promise<void> {
-  await put(`/admin/plan-requests/${id}/reject`, { notes });
-}
-
-// ── Vendedores (admin) ───────────────────
 
 export interface VendedorFromApi {
   id: number;
@@ -243,50 +171,19 @@ export interface VendedorFromApi {
   created_at: string;
 }
 
-export async function fetchVendedores(params?: {
-  search?: string;
-  status?: string;
-  plan_filter?: string;
-  per_page?: number;
-}): Promise<{ data: VendedorFromApi[]; pagination?: any }> {
-  const qs = new URLSearchParams();
-  if (params?.search) qs.set('search', params.search);
-  if (params?.status) qs.set('status', params.status);
-  if (params?.plan_filter) qs.set('plan_filter', params.plan_filter);
-  if (params?.per_page) qs.set('per_page', String(params.per_page));
-  const res = await get<any>(`/admin/vendedores${qs.toString() ? `?${qs.toString()}` : ''}`);
-  return Array.isArray(res) ? { data: res } : res;
-}
-
-export async function fetchVendedorDetail(id: number): Promise<{
-  store: VendedorFromApi;
-  subscriptions: any[];
-  plan_requests: any[];
-}> {
-  const res = await get<ApiResponse<{ store: any; subscriptions: any[]; plan_requests: any[] }>>(`/admin/vendedores/${id}`);
-  return (res.data ?? res) as any;
-}
-
-export async function fetchVendedorStats(): Promise<{
-  total: number;
-  active: number;
-  pending: number;
-  con_plan: number;
-  sin_plan: number;
-}> {
-  const res = await get<ApiResponse<any>>('/admin/vendedores/stats');
-  return (res.data ?? res) as any;
-}
-
-// ── Pagos (admin) ────────────────────────
-
 export interface PagoFromApi {
   id: number;
   store_id: number;
   store_name: string;
   seller_name: string;
   seller_email: string;
-  plan: { id: number; name: string; slug: string; monthly_fee: string; color: string };
+  plan: {
+    id: number;
+    name: string;
+    slug: string;
+    monthly_fee: string;
+    color: string;
+  };
   amount: number;
   months: number;
   payment_method: string;
@@ -296,20 +193,234 @@ export interface PagoFromApi {
   procesado_en: string;
 }
 
-export async function fetchPagos(params?: {
-  estado?: string;
-  metodo?: string;
-  per_page?: number;
-}): Promise<{ data: PagoFromApi[]; totales: any; pagination: any }> {
-  const qs = new URLSearchParams();
-  if (params?.estado) qs.set('estado', params.estado);
-  if (params?.metodo) qs.set('metodo', params.metodo);
-  if (params?.per_page) qs.set('per_page', String(params.per_page));
-  const res = await get<any>(`/admin/pagos${qs.toString() ? `?${qs.toString()}` : ''}`);
-  return res;
+// ─── Paginación genérica ──────────────────────────────────────────────────────
+
+interface Pagination {
+  page: number;
+  perPage: number;
+  total: number;
+  totalPages: number;
+  hasMore: boolean;
 }
 
-export async function fetchPagosVendedor(storeId: number): Promise<any[]> {
-  const res = await get<ApiResponse<any[]>>(`/admin/pagos/vendedor/${storeId}`);
-  return res.data ?? [];
-}
+// ─── Repositorio ──────────────────────────────────────────────────────────────
+
+export const planesAdminApi = {
+  // ── Plans ──────────────────────────────────────────────────────────────────
+
+  /** GET /admin/plans */
+  async fetchPlans(): Promise<PlanFromApi[]> {
+    const res = await apiFetch<{ data: PlanFromApi[] } | PlanFromApi[]>(
+      '/admin/plans',
+    );
+    return Array.isArray(res) ? res : (res.data ?? []);
+  },
+
+  /** GET /admin/plans/:slug */
+  async fetchPlan(slug: string): Promise<PlanFromApi> {
+    const res = await apiFetch<{ data: PlanFromApi } | PlanFromApi>(
+      `/admin/plans/${slug}`,
+    );
+    return ('data' in res && res.data ? res.data : res) as PlanFromApi;
+  },
+
+  /** POST /admin/plans */
+  async createPlan(data: Partial<PlanFromApi>): Promise<PlanFromApi> {
+    const res = await apiFetch<{ data: PlanFromApi; message?: string }>(
+      '/admin/plans',
+      {
+        method: 'POST',
+        body: JSON.stringify(data),
+      },
+    );
+    return res.data ?? (res as unknown as PlanFromApi);
+  },
+
+  /** PUT /admin/plans/:slug */
+  async updatePlan(
+    slug: string,
+    data: Partial<PlanFromApi>,
+  ): Promise<PlanFromApi> {
+    const res = await apiFetch<{ data: PlanFromApi; message?: string }>(
+      `/admin/plans/${slug}`,
+      {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      },
+    );
+    return res.data ?? (res as unknown as PlanFromApi);
+  },
+
+  /** DELETE /admin/plans/:slug */
+  deletePlan(slug: string): Promise<void> {
+    return apiFetch(`/admin/plans/${slug}`, { method: 'DELETE' });
+  },
+
+  /** PUT /admin/plans/:slug/toggle-active */
+  async togglePlanActive(slug: string): Promise<PlanFromApi> {
+    const res = await apiFetch<{ data: PlanFromApi; message?: string }>(
+      `/admin/plans/${slug}/toggle-active`,
+      { method: 'PUT' },
+    );
+    return res.data ?? (res as unknown as PlanFromApi);
+  },
+
+  /** PUT /admin/plans/:slug/icon */
+  async updatePlanIcon(slug: string, icon: string): Promise<PlanFromApi> {
+    const res = await apiFetch<{ data: PlanFromApi; message?: string }>(
+      `/admin/plans/${slug}/icon`,
+      { method: 'PUT', body: JSON.stringify({ icon }) },
+    );
+    return res.data ?? (res as unknown as PlanFromApi);
+  },
+
+  // ── Colors ─────────────────────────────────────────────────────────────────
+
+  /** GET /admin/plan-colors */
+  async fetchColors(): Promise<ButtonColors> {
+    const res = await apiFetch<{ data: ButtonColors } | ButtonColors>(
+      '/admin/plan-colors',
+    );
+    return ('data' in res && res.data ? res.data : res) as ButtonColors;
+  },
+
+  /** PUT /admin/plan-colors */
+  async saveColors(colors: ButtonColors): Promise<ButtonColors> {
+    const res = await apiFetch<{ data: ButtonColors; message?: string }>(
+      '/admin/plan-colors',
+      {
+        method: 'PUT',
+        body: JSON.stringify(colors),
+      },
+    );
+    return res.data ?? (res as unknown as ButtonColors);
+  },
+
+  /** DELETE /admin/plan-colors */
+  async resetColors(): Promise<ButtonColors> {
+    const res = await apiFetch<{ data: ButtonColors; message?: string }>(
+      '/admin/plan-colors',
+      {
+        method: 'DELETE',
+      },
+    );
+    return res.data ?? (res as unknown as ButtonColors);
+  },
+
+  // ── Plan Requests ──────────────────────────────────────────────────────────
+
+  /** GET /admin/plan-requests */
+  fetchPlanRequests(
+    params: {
+      status?: string;
+      payment_status?: string;
+      per_page?: number;
+    } = {},
+  ): Promise<{ data: PlanRequestFromApi[]; pagination: Pagination }> {
+    return apiFetch(`/admin/plan-requests${toQuery(params)}`);
+  },
+
+  /** PUT /admin/plan-requests/:id/approve */
+  approvePlanRequest(id: number): Promise<{ message: string }> {
+    return apiFetch(`/admin/plan-requests/${id}/approve`, { method: 'PUT' });
+  },
+
+  /** PUT /admin/plan-requests/:id/reject */
+  rejectPlanRequest(id: number, notes: string): Promise<{ message: string }> {
+    return apiFetch(`/admin/plan-requests/${id}/reject`, {
+      method: 'PUT',
+      body: JSON.stringify({ notes }),
+    });
+  },
+
+  // ── Vendedores ─────────────────────────────────────────────────────────────
+
+  /** GET /admin/vendedores */
+  fetchVendedores(
+    params: {
+      search?: string;
+      status?: string;
+      plan_filter?: string;
+      per_page?: number;
+    } = {},
+  ): Promise<{ data: VendedorFromApi[]; pagination?: Pagination }> {
+    return apiFetch(`/admin/vendedores${toQuery(params)}`);
+  },
+
+  /** GET /admin/vendedores/stats */
+  fetchVendedorStats(): Promise<{
+    total: number;
+    active: number;
+    pending: number;
+    con_plan: number;
+    sin_plan: number;
+  }> {
+    return apiFetch('/admin/vendedores/stats');
+  },
+
+  /** GET /admin/vendedores/:id */
+  async fetchVendedorDetail(id: number): Promise<{
+    store: VendedorFromApi;
+    subscriptions: any[];
+    plan_requests: any[];
+  }> {
+    const res = await apiFetch<{ data: any } | any>(`/admin/vendedores/${id}`);
+    return 'data' in res && res.data ? res.data : res;
+  },
+
+  // ── Pagos ──────────────────────────────────────────────────────────────────
+
+  /** GET /admin/pagos */
+  fetchPagos(
+    params: {
+      estado?: string;
+      metodo?: string;
+      per_page?: number;
+    } = {},
+  ): Promise<{ data: PagoFromApi[]; totales: any; pagination: Pagination }> {
+    return apiFetch(`/admin/pagos${toQuery(params)}`);
+  },
+
+  /** GET /admin/pagos/vendedor/:storeId */
+  async fetchPagosVendedor(storeId: number): Promise<any[]> {
+    const res = await apiFetch<{ data: any[] } | any[]>(
+      `/admin/pagos/vendedor/${storeId}`,
+    );
+    return Array.isArray(res) ? res : (res.data ?? []);
+  },
+};
+
+// Re-exportar las funciones sueltas para compatibilidad con usePlanesAdmin.ts
+// (que hace `import * as api from '...'`)
+export const fetchPlans = () => planesAdminApi.fetchPlans();
+export const fetchPlan = (slug: string) => planesAdminApi.fetchPlan(slug);
+export const createPlan = (data: Partial<PlanFromApi>) =>
+  planesAdminApi.createPlan(data);
+export const updatePlan = (slug: string, data: Partial<PlanFromApi>) =>
+  planesAdminApi.updatePlan(slug, data);
+export const deletePlan = (slug: string) => planesAdminApi.deletePlan(slug);
+export const togglePlanActive = (slug: string) =>
+  planesAdminApi.togglePlanActive(slug);
+export const updatePlanIcon = (slug: string, icon: string) =>
+  planesAdminApi.updatePlanIcon(slug, icon);
+export const fetchColors = () => planesAdminApi.fetchColors();
+export const saveColors = (c: ButtonColors) => planesAdminApi.saveColors(c);
+export const resetColors = () => planesAdminApi.resetColors();
+export const fetchPlanRequests = (
+  p?: Parameters<typeof planesAdminApi.fetchPlanRequests>[0],
+) => planesAdminApi.fetchPlanRequests(p);
+export const approvePlanRequest = (id: number) =>
+  planesAdminApi.approvePlanRequest(id);
+export const rejectPlanRequest = (id: number, notes: string) =>
+  planesAdminApi.rejectPlanRequest(id, notes);
+export const fetchVendedores = (
+  p?: Parameters<typeof planesAdminApi.fetchVendedores>[0],
+) => planesAdminApi.fetchVendedores(p);
+export const fetchVendedorStats = () => planesAdminApi.fetchVendedorStats();
+export const fetchVendedorDetail = (id: number) =>
+  planesAdminApi.fetchVendedorDetail(id);
+export const fetchPagos = (
+  p?: Parameters<typeof planesAdminApi.fetchPagos>[0],
+) => planesAdminApi.fetchPagos(p);
+export const fetchPagosVendedor = (storeId: number) =>
+  planesAdminApi.fetchPagosVendedor(storeId);

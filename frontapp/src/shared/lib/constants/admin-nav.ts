@@ -50,12 +50,6 @@ export const adminNavigation: PanelNavigation = [
         title: 'Operaciones',
         items: [
             {
-                id: 'analytics',
-                label: 'Analítica',
-                href: '/admin/analytics',
-                icon: 'BarChart',
-            },
-            {
                 id: 'operations',
                 label: 'Gestión Operativa',
                 href: '/admin/operations',
@@ -64,20 +58,24 @@ export const adminNavigation: PanelNavigation = [
         ],
     },
     {
+        title: 'Seguridad',
+        items: [
+            {
+                id: 'security',
+                label: 'Centro de Seguridad',
+                href: '/admin/security',
+                icon: 'Shield',
+            },
+        ],
+    },
+    {
         title: 'Gestión',
         items: [
-       
             {
                 id: 'categories',
                 label: 'Gestión de Categorías',
                 href: '/admin/categories',
                 icon: 'FolderTree',
-            },
-            {
-                id: 'inventory',
-                label: 'Gestión de Inventario',
-                href: '/admin/inventory',
-                icon: 'Package',
             },
             {
                 id: 'reviews',

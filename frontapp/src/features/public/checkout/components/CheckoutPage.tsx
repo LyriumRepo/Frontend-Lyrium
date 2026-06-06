@@ -10,9 +10,9 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useCheckoutStore } from '@/store/checkoutStore';
-import { useCheckoutSubmit } from '../hooks/useCheckoutSubmit';
+import { useCartLoader } from '../hooks/useCartLoader';
 import CheckoutStepBar from './CheckoutStepBar';
 import CheckoutHeader from './CheckoutHeader';
 import CartItemList from './step1/CartItemList';
@@ -22,6 +22,7 @@ import ShippingForm from './step2/ShippingForm';
 import BillingInfo from './step2/BillingInfo';
 import OrderSummary from './step2/OrderSummary';
 import OrderConfirmation from './step3/OrderConfirmation';
+import BoletaView from './step4/BoletaView';
 import ModalPostCompra from './modals/ModalPostCompra';
 import ModalRegistroUsuario from './modals/ModalRegistroUsuario';
 
@@ -31,21 +32,32 @@ export default function CheckoutPage() {
   const orderResult = useCheckoutStore((s) => s.orderResult);
   const isProcessing = useCheckoutStore((s) => s.isProcessing);
   const reset = useCheckoutStore((s) => s.reset);
+  const cartError = useCheckoutStore((s) => s.cartError);
+  const clearCartError = useCheckoutStore((s) => s.setCartError);
+  const cartItems = useCheckoutStore((s) => s.cartItems);
 
-  // ← NUEVO: inicializa el hook que carga el carrito del backend al montar
-  const { isLoading, error, clearError } = useCheckoutSubmit();
+  const clearError = useCallback(() => clearCartError(null), [clearCartError]);
+
+  // Carga carrito + service holds al montar (una sola vez)
+  useCartLoader();
 
   const [showPostCompra, setShowPostCompra] = useState(false);
   const [showRegistro, setShowRegistro] = useState(false);
+  const dismissedRef = useRef(false);
 
   // Reset checkout state on mount so we always start at step 1
   useEffect(() => { reset(); }, [reset]);
 
   useEffect(() => {
-    if (currentStep === 3) {
+    if (currentStep === 3 && !dismissedRef.current) {
       setShowPostCompra(true);
     }
   }, [currentStep]);
+
+  const handleClosePostCompra = useCallback(() => {
+    dismissedRef.current = true;
+    setShowPostCompra(false);
+  }, []);
 
   const email = orderResult?.email ?? '';
 
@@ -64,14 +76,14 @@ export default function CheckoutPage() {
         <CheckoutHeader />
 
         {/* Error de carga del carrito */}
-        {error && (
+        {cartError && (
           <div className="max-w-6xl mx-auto px-4 pt-4">
             <div
               className="flex items-center justify-between gap-4 bg-red-50 dark:bg-red-950/30
               border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400
               rounded-2xl px-5 py-3 text-sm"
             >
-              <span>⚠️ {error}</span>
+              <span>⚠️ {cartError}</span>
               <button
                 onClick={clearError}
                 className="text-red-500 hover:text-red-700 font-medium"
@@ -104,9 +116,17 @@ export default function CheckoutPage() {
             {/* PASO 2 */}
             {currentStep === 2 && (
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2 space-y-6">
-                  <PersonalDataForm />
-                  <ShippingForm />
+                <div className="lg:col-span-2 space-y-8">
+                  <div className="relative">
+                    <PersonalDataForm />
+                    <div className="absolute -bottom-5 left-6 right-6 h-px bg-gradient-to-r from-transparent via-gray-200 dark:via-[var(--border-subtle)] to-transparent" />
+                  </div>
+                  {cartItems.some((i) => i.id > 0) && (
+                    <div className="relative">
+                      <ShippingForm />
+                      <div className="absolute -bottom-5 left-6 right-6 h-px bg-gradient-to-r from-transparent via-gray-200 dark:via-[var(--border-subtle)] to-transparent" />
+                    </div>
+                  )}
                   <BillingInfo />
                 </div>
                 <div className="lg:col-span-1">
@@ -117,6 +137,9 @@ export default function CheckoutPage() {
 
             {/* PASO 3 */}
             {currentStep === 3 && <OrderConfirmation />}
+
+            {/* PASO 4 — Boleta */}
+            {currentStep === 4 && <BoletaView />}
           </div>
         </div>
 
@@ -162,9 +185,10 @@ export default function CheckoutPage() {
       <ModalPostCompra
         isOpen={showPostCompra}
         email={email}
-        onClose={() => setShowPostCompra(false)}
+        onClose={handleClosePostCompra}
         onSync={() => {}}
         onOpenRegistro={() => {
+          dismissedRef.current = true;
           setShowPostCompra(false);
           setShowRegistro(true);
         }}

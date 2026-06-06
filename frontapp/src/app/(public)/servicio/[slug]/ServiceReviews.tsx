@@ -11,7 +11,7 @@ interface ReviewUser {
   avatar: string | null;
 }
 
-interface ServiceReview {
+export interface ServiceReview {
   id: string;
   rating: number;
   title: string | null;
@@ -21,7 +21,7 @@ interface ServiceReview {
   createdAt: string;
 }
 
-interface ReviewStats {
+export interface ReviewStats {
   average: number;
   count: number;
   distribution: Record<string, number>;
@@ -59,7 +59,7 @@ function Stars({ value, size = 'sm' }: { value: number; size?: 'sm' | 'md' }) {
       {[1, 2, 3, 4, 5].map((n) => (
         <Star
           key={n}
-          className={`${cls} ${n <= value ? 'text-amber-400 fill-amber-400' : 'text-gray-300 dark:text-[var(--text-muted)]'}`}
+          className={`${cls} ${n <= value ? 'text-amber-300 fill-amber-300' : 'text-gray-300 dark:text-[var(--text-muted)]'}`}
         />
       ))}
     </div>
@@ -92,7 +92,7 @@ function RatingForm({
         <div className="flex gap-1">
           {[1, 2, 3, 4, 5].map((n) => (
             <button key={n} type="button" onMouseEnter={() => setHover(n)} onMouseLeave={() => setHover(0)} onClick={() => setRating(n)}>
-              <Star className={`w-6 h-6 transition-colors ${n <= (hover || rating) ? 'fill-amber-400 text-amber-400' : 'text-gray-300 dark:text-[var(--text-muted)]'}`} />
+              <Star className={`w-6 h-6 transition-colors ${n <= (hover || rating) ? 'fill-amber-300 text-amber-300' : 'text-gray-300 dark:text-[var(--text-muted)]'}`} />
             </button>
           ))}
         </div>
@@ -261,9 +261,9 @@ export function ServiceReviews({ serviceId }: { serviceId: number }) {
             return (
               <div key={n} className="flex items-center gap-2 text-[11px]">
                 <span className="text-gray-400 w-3 text-right">{n}</span>
-                <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
+                <Star className="w-3 h-3 text-amber-300 fill-amber-300" />
                 <div className="flex-1 h-1.5 rounded-full bg-gray-100 dark:bg-[var(--bg-muted)] overflow-hidden">
-                  <div className="h-full rounded-full bg-amber-400" style={{ width: `${pct}%` }} />
+                  <div className="h-full rounded-full bg-amber-300" style={{ width: `${pct}%` }} />
                 </div>
                 <span className="text-gray-400 w-6 text-right">{count}</span>
               </div>

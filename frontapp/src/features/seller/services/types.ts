@@ -1,3 +1,12 @@
+export interface CalendarStatus {
+  connected: boolean;
+  calendar_id: string | null;
+}
+
+export interface AuthUrlResponse {
+  url: string;
+}
+
 export type DocumentType = 'dni' | 'carnet_extranjeria' | 'pasaporte' | 'ruc';
 export type AvailabilityStatus = 'Disponible' | 'Indispuesto' | 'Ocupado';
 
@@ -67,6 +76,9 @@ export interface Service {
   estado: ServiceEstado;
   domicilio: boolean;
   anticipacionReserva: AnticipacionReserva;
+  sticker?: 'nuevo' | 'descuento' | 'oferta' | 'liquidacion' | 'bestseller' | 'envio_gratis' | null;
+  discountPercentage?: number | null;
+  etiquetas?: EtiquetaConfig;
 }
 
 export interface Appointment {
@@ -167,4 +179,40 @@ export function countTotalSessions(
 
 export function canPublish(service: Service): boolean {
   return service.especialistasAsignados.length >= 1;
+}
+
+// ─── Etiquetas / Stickers ──────────────────────────────────────────────────────
+
+export interface EtiquetaDescuentoData { valor: number; inicio: string; fin: string | null; }
+export interface EtiquetaOfertaData    { valor: number; inicio: string; fin: string; }
+export interface EtiquetaEdicionData   { inicio: string; fin: string; }
+export interface EtiquetaPromocionData { productosIds: string[]; }
+export interface EtiquetaConfig {
+  nuevo: boolean;
+  descuento?:      EtiquetaDescuentoData;
+  oferta?:         EtiquetaOfertaData;
+  edicionLimitada?: EtiquetaEdicionData;
+  promocion?:      EtiquetaPromocionData;
+}
+
+export function serviceEtiquetasFromService(service: Service): EtiquetaConfig {
+  const stored = (service as any).etiquetas;
+  if (stored) return stored;
+
+  const today = new Date().toISOString().split('T')[0];
+  const nextMonth = new Date(); nextMonth.setMonth(nextMonth.getMonth() + 1);
+  const nextMonthStr = nextMonth.toISOString().split('T')[0];
+
+  switch (service.sticker) {
+    case 'nuevo':
+      return { nuevo: true };
+    case 'descuento':
+      return { nuevo: false, descuento: { valor: service.discountPercentage ?? 20, inicio: today, fin: null } };
+    case 'oferta':
+      return { nuevo: false, oferta: { valor: service.discountPercentage ?? 30, inicio: today, fin: nextMonthStr } };
+    case 'liquidacion':
+      return { nuevo: false, edicionLimitada: { inicio: today, fin: nextMonthStr } };
+    default:
+      return { nuevo: false };
+  }
 }
