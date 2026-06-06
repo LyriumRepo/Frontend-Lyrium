@@ -14,6 +14,7 @@ interface SmartSidebarProps {
         role: string;
         avatar?: string;
     };
+    badges?: Record<string, number>;
     brandColor?: 'sky' | 'violet' | 'indigo' | 'emerald' | 'amber';
     storageKey: string;
     sectionTitle?: string;
@@ -78,6 +79,7 @@ export default function SmartSidebar({
     sectionTitle = 'Gestión Administrativa',
     footerLabel = 'LYRIUM © 2025',
     isMobileOpen = false,
+    badges = {},
     onClose
 }: SmartSidebarProps) {
     const pathname = usePathname();
@@ -98,11 +100,24 @@ export default function SmartSidebar({
         localStorage.setItem(storageKey, JSON.stringify(newState));
     };
 
+    // Aplana todos los hrefs del navigation para comparar entre sí
+    const allNavHrefs = useMemo(() => {
+        const sections = (Array.isArray(navigation) && typeof navigation[0] === 'object' && 'items' in navigation[0])
+            ? (navigation as any[])
+            : [{ items: navigation }];
+        return sections.flatMap((s: any) => s.items.map((item: NavItem) => item.href));
+    }, [navigation]);
+
     const isActive = (href: string) => {
-        if (href === '/admin' || href === '/logistics' || href === '/seller') {
-            return pathname === href;
-        }
-        return pathname.startsWith(href);
+        // Coincidencia exacta siempre gana
+        if (pathname === href) return true;
+        // Prefix-match: exigir que continúe con '/' para no activar segmentos parciales
+        if (!pathname.startsWith(href + '/')) return false;
+        // No activar si hay un sibling con match más específico para este pathname
+        const hasSiblingMatch = allNavHrefs.some(
+            (otherHref) => otherHref !== href && pathname.startsWith(otherHref)
+        );
+        return !hasSiblingMatch;
     };
 
     // Renderizado optimizado para evitar saltos de hidratación
@@ -184,7 +199,8 @@ export default function SmartSidebar({
                                 )}
 
                                 {section.items.map((module: NavItem) => {
-                                    const active = isActive(module.href);
+                                    const active     = isActive(module.href);
+                                    const badgeCount = (module.id ? badges[module.id] : 0) ?? 0;
                                     return (
                                         <Link
                                             key={module.href}
@@ -198,10 +214,15 @@ export default function SmartSidebar({
                                                 <div className={`flex items-center h-full transition-all duration-500 ${active ? 'bg-[var(--bg-sidebar)] rounded-r-[80px] shadow-[10px_0_15px_-5px_rgba(0,0,0,0.05)]' : 'bg-transparent'}`}>
                                                     <div className={`flex items-center justify-center transition-all duration-500 ${(isExpanded || isMobileOpen) ? 'w-14' : 'w-20'}`}>
                                                         <div className={`
-                                                            w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-500
+                                                            relative w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-500
                                                             ${active ? `${colors.bgIcon} ${colors.textActive} shadow-inner` : `bg-[var(--bg-muted)] text-[var(--text-secondary)] group-hover:text-sky-500 dark:group-hover:text-lime-500 group-hover:bg-[var(--bg-sidebar)]`}
                                                         `}>
                                                             <Icon name={module.icon || 'Package'} className="w-5 h-5" />
+                                                            {badgeCount > 0 && (
+                                                                <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-sky-500 dark:bg-lime-500 text-white text-[8px] font-black leading-none">
+                                                                    {badgeCount > 99 ? '99+' : badgeCount}
+                                                                </span>
+                                                            )}
                                                         </div>
                                                     </div>
 

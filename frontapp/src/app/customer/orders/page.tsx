@@ -6,13 +6,13 @@ import { useRouter } from 'next/navigation';
 import Icon from '@/components/ui/Icon';
 import { Eye, Info } from "lucide-react";
 import { orderApi, OrderResource } from '@/shared/lib/api/orderRepository';
+import ClientRescheduleModal, { SelectedSpecialist } from './ClientRescheduleModal';
 
 // ─── Tipos ───────────────────────────────────────────────────────────────────
 
 type TipoEnvio =
   | 'domicilio'
   | 'agencia'
-  | 'sucursal'
   | 'atencion_domicilio'
   | 'atencion_sede';
 
@@ -22,7 +22,6 @@ type EstadoPedido =
   | 'en_transporte'
   | 'en_domicilio'
   | 'listo_recojo_agencia'
-  | 'listo_recojo_sucursal'
   | 'confirmado_cliente'
   | 'validacion_centro_salud'
   | 'en_camino'
@@ -50,6 +49,12 @@ interface Order {
   tipo_envio?: TipoEnvio;
   currentStep?: number;
   envio?: EnvioInfo;
+  /** ISO "YYYY-MM-DD" — scheduled appointment date (services only) */
+  fechaCita?: string;
+  /** Number of client-initiated reschedules already done (0 or 1) */
+  reprogramaciones?: number;
+  /** True once the client sent a reschedule request to the health center */
+  solicitudEnviada?: boolean;
 }
 
 // ─── Config de flujos ─────────────────────────────────────────────────────────
@@ -88,18 +93,6 @@ const FLOW_CONFIG: Record<
       { id: 3, label: 'En Transporte', icon: 'Truck' },
       { id: 4, label: 'Listo Agencia', icon: 'MapPin' },
       { id: 5, label: 'Confirmado', icon: 'UserCheck' },
-    ],
-  },
-  sucursal: {
-    label: 'Recojo en Sucursal',
-    icon: 'Store',
-    color: 'text-[#59a6cb]',
-    accent: 'bg-[#59a6cb]/10 border-[#59a6cb]/20 text-[#59a6cb]',
-    steps: [
-      { id: 1, label: 'Validado', icon: 'CheckSquare' },
-      { id: 2, label: 'Despachado', icon: 'Package' },
-      { id: 3, label: 'Listo Sucursal', icon: 'Store' },
-      { id: 4, label: 'Confirmado', icon: 'UserCheck' },
     ],
   },
   atencion_domicilio: {
@@ -169,7 +162,7 @@ function parseDateToDisplay(iso: string): { fecha: string; hora: string } {
 
 const SHIPPING_TYPE_MAP: Record<string, TipoEnvio> = {
   delivery: 'domicilio',
-  pickup: 'sucursal',
+  pickup: 'agencia',
   service_home: 'atencion_domicilio',
   service_store: 'atencion_sede',
 };
@@ -227,8 +220,6 @@ const getStatusStyles = (estado: EstadoPedido) => {
       return { bg: 'bg-emerald-100', text: 'text-emerald-700', icon: 'Home' };
     case 'listo_recojo_agencia':
       return { bg: 'bg-emerald-100', text: 'text-emerald-700', icon: 'MapPin' };
-    case 'listo_recojo_sucursal':
-      return { bg: 'bg-emerald-100', text: 'text-emerald-700', icon: 'Store' };
     case 'confirmado_cliente':
       return { bg: 'bg-green-100', text: 'text-green-700', icon: 'CheckCircle' };
 
@@ -365,16 +356,13 @@ function TrackingCard({ envio, tipoEnvio }: { envio: EnvioInfo; tipoEnvio: TipoE
           <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-0.5">
             {tipoEnvio === 'domicilio'
               ? 'Dirección de entrega'
-              : tipoEnvio === 'agencia'
-                ? 'Ciudad / Agencia'
-                : 'Sucursal'}
+              : 'Ciudad / Agencia'}
           </p>
           <p className="text-sm font-bold text-gray-700 dark:text-[var(--text-primary)]">{envio.direccion}</p>
         </div>
       </div>
 
-      {tipoEnvio !== 'sucursal' && (
-        <div className="flex items-start gap-3">
+      <div className="flex items-start gap-3">
           <div className="w-10 h-10 bg-white dark:bg-[var(--bg-secondary)] rounded-xl flex items-center justify-center text-sky-500 dark:text-[var(--icons-green)] border border-gray-100 dark:border-[var(--border-subtle)] flex-shrink-0 shadow-sm">
             <Icon name="Truck" className="w-4 h-4" />
           </div>
@@ -391,11 +379,10 @@ function TrackingCard({ envio, tipoEnvio }: { envio: EnvioInfo; tipoEnvio: TipoE
                 </span>
               </div>
             ) : (
-              <span className="text-[11px] font-bold text-amber-500">Pendiente de despacho</span>
+              <span className="text-[11px] font-bold text-sky-500 dark:text-[var(--icons-green)]">Pendiente de despacho</span>
             )}
           </div>
         </div>
-      )}
 
       {hasTracking && hasUrl && (
         <a
@@ -423,6 +410,7 @@ export default function CustomerOrdersPage() {
   const [selectedOrder, setSelected] = useState<Order | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [showLegendModal, setShowLegendModal] = useState(false);
+  const [showRescheduleModal, setShowRescheduleModal] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [fetchError, setFetchError] = useState('');
 
@@ -516,6 +504,40 @@ export default function CustomerOrdersPage() {
     setTimeout(() => setSelected(null), 300);
   };
 
+  // ─── Reschedule logic ─────────────────────────────────────────────────────
+
+  function canShowRescheduleButton(order: Order): boolean {
+    if (order.tipo !== 'servicios') return false;
+    const validTypes: TipoEnvio[] = ['atencion_sede', 'atencion_domicilio'];
+    return (
+      !!order.tipo_envio &&
+      validTypes.includes(order.tipo_envio as TipoEnvio) &&
+      order.estado === 'validacion_centro_salud'
+    );
+  }
+
+  const handleRescheduleConfirm = (orderId: string, newDateISO: string, specialist: SelectedSpecialist) => {
+    const updated = orders.map((o) =>
+      o.id === orderId
+        ? { ...o, reprogramaciones: (o.reprogramaciones ?? 0) + 1, fechaCita: newDateISO }
+        : o
+    );
+    setOrders(updated);
+    const updatedOrder = updated.find((o) => o.id === orderId);
+    if (updatedOrder && selectedOrder?.id === orderId) setSelected(updatedOrder);
+    setShowRescheduleModal(false);
+  };
+
+  const handleSendRequest = (orderId: string) => {
+    const updated = orders.map((o) =>
+      o.id === orderId ? { ...o, solicitudEnviada: true } : o
+    );
+    setOrders(updated);
+    const updatedOrder = updated.find((o) => o.id === orderId);
+    if (updatedOrder && selectedOrder?.id === orderId) setSelected(updatedOrder);
+    setShowRescheduleModal(false);
+  };
+
   if (loading || fetching) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -551,7 +573,6 @@ export default function CustomerOrdersPage() {
       ? [
         { value: 'domicilio', label: 'Entrega a domicilio' },
         { value: 'agencia', label: 'Recojo en agencia' },
-        { value: 'sucursal', label: 'Recojo en sucursal' },
       ]
       : [
         { value: 'atencion_domicilio', label: 'Atención a domicilio' },
@@ -571,13 +592,6 @@ export default function CustomerOrdersPage() {
       { value: 'despachado', label: 'Despachado' },
       { value: 'en_transporte', label: 'En transporte' },
       { value: 'listo_recojo_agencia', label: 'Listo para recojo en agencia' },
-      { value: 'confirmado_cliente', label: 'Confirmado por cliente' },
-    ],
-    sucursal: [
-      { value: 'validado_vendedor', label: 'Validado por vendedor' },
-      { value: 'despachado', label: 'Despachado' },
-      { value: 'en_transporte', label: 'En transporte' },
-      { value: 'listo_recojo_sucursal', label: 'Listo para recojo en sucursal' },
       { value: 'confirmado_cliente', label: 'Confirmado por cliente' },
     ],
     atencion_domicilio: [
@@ -636,6 +650,13 @@ export default function CustomerOrdersPage() {
               className={selectClass}
             >
               <option value="">Todos</option>
+              <option value="Vida Natural Perú">Vida Natural Perú</option>
+              <option value="Tech Store Lima">Tech Store Lima</option>
+              <option value="Moda & Estilo">Moda & Estilo</option>
+              <option value="Clínica Dental Pro">Clínica Dental Pro</option>
+              <option value="Centro Estético Lyra">Centro Estético Lyra</option>
+              <option value="Centro Médico Sur">Centro Médico Sur</option>
+              <option value="Fisioterapia Plus">Fisioterapia Plus</option>
             </select>
           </div>
 
@@ -938,12 +959,6 @@ export default function CustomerOrdersPage() {
                     </p>
                   </div>
 
-                  <div className="p-4 rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)] bg-gray-50 dark:bg-[var(--bg-muted)]/50">
-                    <p className="font-black text-gray-800 dark:text-[var(--text-primary)]">3. Recojo en sucursal</p>
-                    <p className="text-sm text-gray-600 dark:text-[var(--text-muted)] mt-1">
-                      Si deseas acudir presencialmente a la tienda correspondiente.
-                    </p>
-                  </div>
                 </div>
               </section>
 
@@ -1006,7 +1021,7 @@ export default function CustomerOrdersPage() {
                   <div className="p-4 rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)] bg-gray-50 dark:bg-[var(--bg-muted)]/50">
                     <p className="font-black text-gray-800 dark:text-[var(--text-primary)]">Listo para recojo</p>
                     <p className="text-sm text-gray-600 dark:text-[var(--text-muted)] mt-1">
-                      Su pedido de producto está listo para que lo recoja en agencia logística o en sucursal.
+                      Su pedido de producto está listo para que lo recoja en agencia logística.
                     </p>
                   </div>
 
@@ -1096,10 +1111,38 @@ export default function CustomerOrdersPage() {
 
               {selectedOrder.tipo_envio && selectedOrder.currentStep !== undefined && (
                 <div className="p-6 bg-gray-50 dark:bg-[var(--bg-muted)]/50 rounded-[2rem] border border-gray-100 dark:border-[var(--border-subtle)]">
-                  <h5 className="text-[10px] font-black text-gray-400 dark:text-gray-400 uppercase tracking-widest mb-5">
-                    Seguimiento del Pedido
-                  </h5>
+                  <div className="flex items-center justify-between mb-5">
+                    <h5 className="text-[10px] font-black text-gray-400 dark:text-gray-400 uppercase tracking-widest">
+                      Seguimiento del Pedido
+                    </h5>
+                    {canShowRescheduleButton(selectedOrder) && (
+                      <button
+                        onClick={() => setShowRescheduleModal(true)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sky-50 dark:bg-[var(--bg-muted)] border border-sky-200 dark:border-[var(--border-subtle)] text-sky-600 dark:text-[var(--icons-green)] text-[9px] font-black uppercase tracking-widest hover:bg-sky-100 dark:hover:bg-[#1b2b24] transition-colors"
+                      >
+                        <Icon name="CalendarClock" className="w-3.5 h-3.5" />
+                        Reprogramar cita
+                      </button>
+                    )}
+                  </div>
                   <OrderFlowStepper tipoEnvio={selectedOrder.tipo_envio} currentStep={selectedOrder.currentStep} />
+                  {/* Info badge: reprogramaciones restantes */}
+                  {canShowRescheduleButton(selectedOrder) && (
+                    <div className="mt-4 flex items-center gap-2 px-3 py-2 rounded-xl bg-white dark:bg-[var(--bg-secondary)] border border-gray-100 dark:border-[var(--border-subtle)]">
+                      <Icon
+                        name={(selectedOrder.reprogramaciones ?? 0) >= 1 ? 'AlertCircle' : 'Info'}
+                        className={`w-3.5 h-3.5 flex-shrink-0 ${(selectedOrder.reprogramaciones ?? 0) >= 1 ? 'text-sky-500 dark:text-[var(--icons-green)]' : 'text-sky-500 dark:text-[var(--icons-green)]'}`}
+                      />
+                      <p className="text-[9px] font-bold text-gray-500 dark:text-[var(--text-muted)]">
+                        {selectedOrder.solicitudEnviada
+                          ? 'Solicitud de reprogramación enviada al centro de salud.'
+                          : (selectedOrder.reprogramaciones ?? 0) >= 1
+                            ? 'Límite de reprogramaciones alcanzado. Puede enviar una solicitud al centro de salud.'
+                            : `Reprogramaciones disponibles: ${1 - (selectedOrder.reprogramaciones ?? 0)} de 1`
+                        }
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -1193,6 +1236,25 @@ export default function CustomerOrdersPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {showRescheduleModal && selectedOrder && (
+        <ClientRescheduleModal
+          isOpen={showRescheduleModal}
+          onClose={() => setShowRescheduleModal(false)}
+          order={{
+            id: selectedOrder.id,
+            tipo_envio: selectedOrder.tipo_envio,
+            estado: selectedOrder.estado,
+            fechaCita: selectedOrder.fechaCita,
+            reprogramaciones: selectedOrder.reprogramaciones,
+            solicitudEnviada: selectedOrder.solicitudEnviada,
+            tienda: selectedOrder.tienda,
+            detalle: selectedOrder.detalle,
+          }}
+          onConfirm={handleRescheduleConfirm}
+          onSendRequest={handleSendRequest}
+        />
       )}
     </div>
   );

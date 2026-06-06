@@ -1,244 +1,178 @@
-'use client';
+import { useState, useCallback } from 'react';
+import { SellerTicket, SellerTicketMessage, SellerTicketFilters } from '../types';
 
-import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useEcho } from '@laravel/echo-react';
-import { Ticket, CreateTicketPayload, TicketFilters } from '../types';
-import { ticketApi } from '@/lib/api/ticketRepository';
-import { useToast } from '@/shared/lib/context/ToastContext';
-import { useAuth } from '@/shared/lib/context/AuthContext';
-import { adaptSellerTicketListItem, adaptSellerTicketList, UnifiedTicketListItem } from '@/modules/helpdesk';
-
-interface TicketInboxUpdatedEvent {
-    ticket_id: number;
-    unread_count: number;
-    preview_text: string;
-    total_messages: number;
-}
+const mockTickets: SellerTicket[] = [
+    {
+        id: '1',
+        ticketNumber: 'TKT-001',
+        subject: 'Problema con la publicación de producto',
+        description: 'No puedo subir imágenes a mi listing',
+        category: 'tecnico',
+        status: 'open',
+        createdAt: '2025-03-10T09:00:00',
+        updatedAt: '2025-03-11T10:30:00',
+        messages: [
+            {
+                id: 'm1',
+                ticketId: '1',
+                senderId: 'seller-1',
+                senderName: 'Yo',
+                senderType: 'seller',
+                content: 'Hola, tengo problemas para subir imágenes a mis productos. ¿Pueden ayudarme?',
+                createdAt: '2025-03-10T09:00:00'
+            },
+            {
+                id: 'm2',
+                ticketId: '1',
+                senderId: 'agent-1',
+                senderName: 'Soporte Lyrium',
+                senderType: 'agent',
+                content: 'Hola! Lamentamos el inconveniente. Estamos revisando el problema con las imágenes. Te contactamos en breve.',
+                createdAt: '2025-03-10T10:30:00'
+            }
+        ]
+    },
+    {
+        id: '2',
+        ticketNumber: 'TKT-002',
+        subject: 'Consulta sobre comisiones',
+        description: 'Quiero entender el detalle de las comisiones aplicadas',
+        category: 'informacion',
+        status: 'resolved',
+        createdAt: '2025-03-05T14:00:00',
+        updatedAt: '2025-03-06T09:00:00',
+        resolvedAt: '2025-03-06T09:00:00',
+        messages: [
+            {
+                id: 'm3',
+                ticketId: '2',
+                senderId: 'seller-1',
+                senderName: 'Yo',
+                senderType: 'seller',
+                content: '¿Pueden explicarme cómo se calculan las comisiones por venta?',
+                createdAt: '2025-03-05T14:00:00'
+            },
+            {
+                id: 'm4',
+                ticketId: '2',
+                senderId: 'agent-1',
+                senderName: 'Soporte Lyrium',
+                senderType: 'agent',
+                content: 'La comisión estándar es del 8% sobre el precio de venta. Puedes ver el detalle completo en la sección de facturación de tu panel.',
+                createdAt: '2025-03-05T16:00:00'
+            }
+        ]
+    }
+];
 
 export function useSellerHelp() {
-    const queryClient = useQueryClient();
-    const { showToast } = useToast();
-    const { user } = useAuth();
-    const [activeTicketId, setActiveTicketId] = useState<number | null>(null);
-    const [loadingMoreMessages, setLoadingMoreMessages] = useState(false);
-    const [filters, setFiltersState] = useState<TicketFilters>({
-        search: '',
+    const [tickets, setTickets] = useState<SellerTicket[]>(mockTickets);
+    const [activeTicketId, setActiveTicketId] = useState<string | null>(null);
+    const [filters, setFilters] = useState<SellerTicketFilters>({
+        status: 'all',
         category: 'all',
+        search: ''
     });
+    const [isLoading, setIsLoading] = useState(false);
+    const [isSending, setIsSending] = useState(false);
+    const [isClosing, setIsClosing] = useState(false);
 
-    const refreshTicketData = async (ticketId?: number | null) => {
-        await queryClient.invalidateQueries({ queryKey: ['seller', 'help', 'tickets'] });
+    const activeTicket = tickets.find(t => t.id === activeTicketId);
 
-        if (ticketId) {
-            await queryClient.invalidateQueries({ queryKey: ['seller', 'help', 'ticket', ticketId] });
-        }
-    };
+    const openTicketsCount = tickets.filter(t => t.status === 'open' || t.status === 'in_progress').length;
 
-    const { data: tickets = [], isLoading, refetch, error } = useQuery({
-        queryKey: ['seller', 'help', 'tickets'],
-        queryFn: async () => {
-            return ticketApi.seller.list();
-        },
-        staleTime: 5 * 60 * 1000,
-        retry: 2,
-    });
+    const setActiveTicketIdHandler = useCallback((id: string | null) => {
+        setActiveTicketId(id);
+    }, []);
 
-    const { data: activeTicketDetail } = useQuery({
-        queryKey: ['seller', 'help', 'ticket', activeTicketId],
-        queryFn: async () => {
-            if (!activeTicketId) {
-                return null;
-            }
+    const handleSendMessage = useCallback(async (content: string) => {
+        if (!activeTicketId) return;
 
-            return ticketApi.seller.get(activeTicketId);
-        },
-        enabled: !!activeTicketId,
-        staleTime: 30 * 1000,
-        retry: 1,
-    });
+        setIsSending(true);
 
-    const sendMessageMutation = useMutation({
-        mutationFn: async ({ ticketId, text, attachments }: { ticketId: number; text: string; attachments?: File[] }) => {
-            return ticketApi.seller.sendMessage(ticketId, { content: text || undefined, attachments });
-        },
-        onSuccess: async (_result, variables) => {
-            await refreshTicketData(variables.ticketId);
-        },
-        onError: () => {
-            showToast('Error al enviar el mensaje. Intenta de nuevo.', 'error');
-        },
-    });
+        await new Promise(resolve => setTimeout(resolve, 500));
 
-    const createTicketMutation = useMutation({
-        mutationFn: async (formData: CreateTicketPayload) => {
-            return ticketApi.seller.create(formData);
-        },
-        onSuccess: async (newTicket) => {
-            queryClient.setQueryData(['seller', 'help', 'tickets'], (old: Ticket[] | undefined) => [newTicket, ...(old || [])]);
-            setActiveTicketId(newTicket.id);
-            await refreshTicketData(newTicket.id);
-            showToast('Ticket generado con exito. Un especialista lo revisara pronto.', 'success');
-        },
-        onError: () => {
-            showToast('Error al crear el ticket. Intenta de nuevo.', 'error');
-        },
-    });
+        const newMessage: SellerTicketMessage = {
+            id: `m${Date.now()}`,
+            ticketId: activeTicketId,
+            senderId: 'seller-1',
+            senderName: 'Yo',
+            senderType: 'seller',
+            content,
+            createdAt: new Date().toISOString()
+        };
 
-    const closeTicketMutation = useMutation({
-        mutationFn: async (ticketId: number) => {
-            return ticketApi.seller.close(ticketId);
-        },
-        onSuccess: async (_result, ticketId) => {
-            await refreshTicketData(ticketId);
-            showToast('Ticket finalizado. Por favor completa la encuesta de satisfaccion.', 'info');
-        },
-        onError: () => {
-            showToast('Error al cerrar el ticket. Intenta de nuevo.', 'error');
-        },
-    });
+        setTickets(prev => prev.map(t =>
+            t.id === activeTicketId
+                ? {
+                    ...t,
+                    messages: [...t.messages, newMessage],
+                    updatedAt: new Date().toISOString()
+                }
+                : t
+        ));
 
-    const submitSurveyMutation = useMutation({
-        mutationFn: async ({ ticketId, rating, comment }: { ticketId: number; rating: number; comment: string }) => {
-            return ticketApi.seller.submitSurvey(ticketId, { rating, comment });
-        },
-        onSuccess: async (_result, variables) => {
-            await refreshTicketData(variables.ticketId);
-            showToast('Gracias por tu feedback. Nos ayuda a mejorar.', 'success');
-        },
-        onError: () => {
-            showToast('Error al enviar la encuesta. Intenta de nuevo.', 'error');
-        },
-    });
+        setIsSending(false);
+    }, [activeTicketId]);
 
-    // WebSocket: escucha mensajes nuevos en el ticket activo (seller ve respuestas del admin en tiempo real)
-    useEcho(
-        `ticket.${activeTicketId ?? null}`,
-        'TicketMessageReceived',
-        () => {
-            if (!activeTicketId) return;
-            void queryClient.invalidateQueries({ queryKey: ['seller', 'help', 'ticket', activeTicketId] });
-            void queryClient.invalidateQueries({ queryKey: ['seller', 'help', 'tickets'] });
-        },
-        [activeTicketId]
-    );
+    const handleCreateTicket = useCallback(async (data: { subject: string; description: string; category: string }) => {
+        setIsSending(true);
 
-    // WebSocket: el admin leyó los mensajes → actualizar checkmarks
-    useEcho(
-        `ticket.${activeTicketId ?? null}`,
-        '.TicketMessagesRead',
-        () => {
-            if (!activeTicketId) return;
-            void queryClient.invalidateQueries({ queryKey: ['seller', 'help', 'ticket', activeTicketId] });
-        },
-        [activeTicketId]
-    );
+        await new Promise(resolve => setTimeout(resolve, 500));
 
-    useEcho<TicketInboxUpdatedEvent>(
-        `user.${user?.id ?? null}`,
-        '.TicketInboxUpdated',
-        (event) => {
-            queryClient.setQueryData(['seller', 'help', 'tickets'], (old: Ticket[] | undefined) => old?.map((ticket) => (
-                ticket.id === event.ticket_id
-                    ? {
-                        ...ticket,
-                        mensajes_sin_leer: event.unread_count,
-                        ultimo_mensaje: event.preview_text,
-                        mensajes_count: event.total_messages,
-                    }
-                    : ticket
-            )) ?? old);
-            void queryClient.invalidateQueries({ queryKey: ['seller', 'help', 'tickets'] });
-            void queryClient.refetchQueries({ queryKey: ['seller', 'help', 'tickets'] });
-        },
-        [queryClient, user?.id]
-    );
+        const newTicket: SellerTicket = {
+            id: `t${Date.now()}`,
+            ticketNumber: `TKT-${String(tickets.length + 1).padStart(3, '0')}`,
+            subject: data.subject,
+            description: data.description,
+            category: data.category as SellerTicket['category'],
+            status: 'open',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            messages: []
+        };
 
-    const activeTicket = activeTicketDetail || tickets.find((ticket) => ticket.id === activeTicketId) || null;
+        setTickets(prev => [newTicket, ...prev]);
+        setActiveTicketId(newTicket.id);
+        setIsSending(false);
+    }, [tickets.length]);
 
-    const filteredTickets = tickets.filter((ticket) => {
-        const title = ticket.titulo?.toLowerCase() || '';
-        const displayId = ticket.id_display || '';
-        const search = filters.search.toLowerCase();
-        const matchesSearch = title.includes(search) || displayId.includes(filters.search);
+    const handleCloseTicket = useCallback(async (id: string) => {
+        setIsClosing(true);
 
-        let matchesCategory = true;
-        if (filters.category === 'critical') {
-            matchesCategory = ticket.critical === true;
-        } else if (filters.category === 'tech-critical') {
-            matchesCategory = ticket.type === 'tech' && ticket.critical === true;
-        } else if (filters.category !== 'all') {
-            matchesCategory = ticket.type === filters.category;
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        setTickets(prev => prev.map(t =>
+            t.id === id
+                ? {
+                    ...t,
+                    status: 'closed' as const,
+                    resolvedAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                }
+                : t
+        ));
+
+        if (activeTicketId === id) {
+            setActiveTicketId(null);
         }
 
-        if (filters.status) {
-            matchesCategory = matchesCategory && (ticket.status === filters.status || ticket.estado === filters.status);
-        }
-
-        return matchesSearch && matchesCategory;
-    });
-
-    const unifiedTickets: UnifiedTicketListItem[] = adaptSellerTicketList(filteredTickets as any);
-    const unifiedActiveTicket = activeTicket ? adaptSellerTicketListItem(activeTicket as any) : null;
+        setIsClosing(false);
+    }, [activeTicketId]);
 
     return {
-        tickets: filteredTickets,
-        unifiedTickets,
-        unifiedActiveTicket,
-        activeTicket,
+        tickets,
+        activeTicket: activeTicket || null,
         activeTicketId,
-        setActiveTicketId,
+        setActiveTicketId: setActiveTicketIdHandler,
         isLoading,
-        error,
-        isSending: sendMessageMutation.isPending,
-        isClosing: closeTicketMutation.isPending,
-        isCreating: createTicketMutation.isPending,
-        isSubmittingSurvey: submitSurveyMutation.isPending,
+        isSending,
+        isClosing,
         filters,
-        setFilters: (newFilters: Partial<TicketFilters>) =>
-            setFiltersState((prev: TicketFilters) => ({ ...prev, ...newFilters })),
-        handleSendMessage: (text: string, attachments?: File[]) => {
-            if (activeTicketId) {
-                sendMessageMutation.mutate({ ticketId: activeTicketId, text, attachments });
-            }
-        },
-        handleLoadMoreMessages: async () => {
-            if (!activeTicketId || !activeTicket?.oldest_message_id || loadingMoreMessages) return;
-            setLoadingMoreMessages(true);
-            try {
-                const { messages: older, hasMore } = await ticketApi.seller.getMessages(
-                    activeTicketId,
-                    activeTicket.oldest_message_id
-                );
-                queryClient.setQueryData(
-                    ['seller', 'help', 'ticket', activeTicketId],
-                    (old: Ticket | null | undefined) => {
-                        if (!old) return old;
-                        return {
-                            ...old,
-                            mensajes: [...older, ...old.mensajes],
-                            oldest_message_id: older.length > 0 ? older[0].id : old.oldest_message_id,
-                            has_more_messages: hasMore,
-                        };
-                    }
-                );
-            } finally {
-                setLoadingMoreMessages(false);
-            }
-        },
-        hasMoreMessages: activeTicket?.has_more_messages ?? false,
-        loadingMoreMessages,
-        handleCreateTicket: (formData: CreateTicketPayload) => createTicketMutation.mutate(formData),
-        handleCloseTicket: () => {
-            if (activeTicketId) {
-                closeTicketMutation.mutate(activeTicketId);
-            }
-        },
-        handleSubmitSurvey: (rating: number, comment: string) => {
-            if (activeTicketId) {
-                submitSurveyMutation.mutate({ ticketId: activeTicketId, rating, comment });
-            }
-        },
-        refresh: refetch,
+        setFilters,
+        handleSendMessage,
+        handleCreateTicket,
+        handleCloseTicket,
+        openTicketsCount
     };
 }

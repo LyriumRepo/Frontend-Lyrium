@@ -6,355 +6,426 @@ import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import ChatLayout from '@/components/shared/chat/ChatLayout';
 import MessageInput from '@/components/shared/chat/MessageInput';
 import BaseLoading from '@/components/ui/BaseLoading';
-import Icon from '@/components/ui/Icon';
-import ChatOptionsMenu from './components/ChatOptionsMenu';
+import { mockCustomers } from '@/features/seller/chat/hooks/useSellerChat';
+import { ChatCategory } from '@/features/seller/chat/types';
 
-const CATEGORY_STYLES: Record<string, { label: string; bg: string; text: string }> = {
-  info: { label: 'Información', bg: 'bg-[var(--turquesa-500)]/10 dark:bg-[var(--turquesa-500)]/10', text: 'text-[var(--turquesa-500)] dark:text-[var(--turquesa-500)]' },
-  comment: { label: 'Comentario', bg: 'bg-[var(--verde-500)]/10 dark:bg-[var(--verde-500)]/10', text: 'text-[var(--verde-500)] dark:text-[var(--verde-500)]' },
-  admin: { label: 'Soporte', bg: 'bg-[var(--icons-green)]/10 dark:bg-[var(--icons-green)]/10', text: 'text-[var(--icons-green)] dark:text-[var(--icons-green)]' },
-};
+function NewChatForm({
+    onSubmit,
+    onCancel,
+    isSubmitting
+}: {
+    onSubmit: (data: { customerId: string; category: ChatCategory; subject: string }) => void;
+    onCancel: () => void;
+    isSubmitting: boolean;
+}) {
+    const [customerId, setCustomerId] = useState(mockCustomers[0].id);
+    const [category, setCategory] = useState<ChatCategory>('informacion');
+    const [subject, setSubject] = useState('');
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!subject.trim()) return;
+        onSubmit({ customerId, category, subject });
+    };
+
+    return (
+        <div className="flex flex-col h-full bg-[var(--bg-card)] rounded-3xl border border-gray-200 shadow-sm overflow-hidden">
+            <div className="p-4 border-b border-gray-100">
+                <h3 className="font-semibold text-gray-900 dark:text-white">Nuevo Chat</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-300">Inicia una conversación con un cliente</p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-4">
+                <div>
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-400 mb-1">Cliente</label>
+                    <select
+                        value={customerId}
+                        onChange={(e) => setCustomerId(e.target.value)}
+                        className="w-full px-4 py-2 bg-gray-100 dark:bg-[var(--bg-secondary)] rounded-xl outline-none focus:ring-2 focus:ring-sky-500 dark:focus:ring-[var(--icons-green)]"
+                        required
+                    >
+                        {mockCustomers.map(c => (
+                            <option key={c.id} value={c.id}>{c.name}</option>
+                        ))}
+                    </select>
+                </div>
+
+                <div>
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-400 mb-1">Categoría</label>
+                    <select
+                        value={category}
+                        onChange={(e) => setCategory(e.target.value as ChatCategory)}
+                        className="w-full px-4 py-2 bg-gray-100 dark:bg-[var(--bg-secondary)] rounded-xl outline-none focus:ring-2 focus:ring-sky-500 dark:focus:ring-[var(--icons-green)]"
+                        required
+                    >
+                        <option value="informacion">Solicitud de Información</option>
+                        <option value="positivo">Comentario Positivo</option>
+                        <option value="negativo">Comentario Negativo</option>
+                        <option value="logistica">Logística </option>
+                        <option value="facturacion">Soporte de Facturación </option>
+                    </select>
+                </div>
+
+                <div>
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-400 mb-1">Asunto</label>
+                    <input
+                        type="text"
+                        value={subject}
+                        onChange={(e) => setSubject(e.target.value)}
+                        placeholder="Describe brevemente el motivo"
+                        className="w-full px-4 py-2 bg-gray-100 dark:bg-[var(--bg-secondary)] rounded-xl outline-none focus:ring-2 focus:ring-sky-500 dark:focus:ring-[var(--icons-green)]"
+                        required
+                    />
+                </div>
+
+                <div className="flex gap-2 pt-4">
+                    <button
+                        type="button"
+                        onClick={onCancel}
+                        className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-xl font-medium hover:bg-gray-300 transition-colors"
+                    >
+                        Cancelar
+                    </button>
+                    <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="flex-1 px-4 py-2 bg-sky-500 text-white rounded-xl font-medium hover:bg-sky-600 dark:bg-[var(--brand-green)] dark:hover:bg-[var(--brand-green-hover)] border dark:border-[var(--border-subtle)] transition-colors disabled:opacity-50"
+                    >
+                        {isSubmitting ? 'Iniciando...' : 'Iniciar Chat'}
+                    </button>
+                </div>
+            </form>
+        </div>
+    );
+}
 
 export function ChatPageClient() {
-  const {
-    conversations,
-    totalConversations,
-    activeConversation,
-    setActiveConversation,
-    isLoading,
-    isSending,
-    filters,
-    setFilters,
-    isMobileListVisible,
-    setIsMobileListVisible,
-    sendMessage,
-    clearActiveChat,
-    deleteActiveTicket,
-    criticalCount,
-  } = useSellerChat();
+    const {
+        conversations,
+        totalConversations,
+        activeConversation,
+        setActiveConversation,
+        messages,
+        isLoading,
+        filters,
+        setFilters,
+        sendMessage,
+        clearActiveChat,
+        isCreating,
+        createConversation,
+        criticalCount
+    } = useSellerChat();
 
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [showFilter, setShowFilter] = useState(false);
+    const messagesEndRef = useRef<HTMLDivElement>(null);
+    const [isMobileListVisible, setIsMobileListVisible] = useState(true);
+    const [filterType, setFilterType] = useState<'cliente' | 'categoria'>('cliente');
+    const [filterValue, setFilterValue] = useState('');
+    const [showFilter, setShowFilter] = useState(false);
+    const [showNewChatForm, setShowNewChatForm] = useState(false);
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [activeConversation?.mensajes]);
+    useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [messages]);
 
-  const handleSendMessage = (message: string, files?: File[]) => {
-    sendMessage(message, files);
-  };
+    const handleSendMessage = (message: string) => {
+        sendMessage(message);
+    };
 
-  const formatTime = (timestamp: string) => {
-    const date = new Date(timestamp);
-    return date.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
-  };
+    const formatTime = (timestamp: string) => {
+        const date = new Date(timestamp);
+        return date.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
+    };
 
-  const messages = activeConversation?.mensajes ?? [];
+    const formatDate = (timestamp: string) => {
+        const date = new Date(timestamp);
+        const today = new Date();
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
 
-  const listContent = (
-    <div className="divide-y divide-gray-100 dark:divide-[var(--border-subtle)] h-full overflow-y-auto">
-      <div className="p-4 border-b border-gray-100 dark:border-[var(--border-subtle)]">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h3 className="font-semibold text-gray-900 dark:text-[var(--text-primary)] text-sm">Conversaciones</h3>
-            <p className="text-xs text-gray-500 dark:text-[var(--text-muted)]">{conversations.length} chats</p>
-          </div>
-          <button
-            onClick={() => setShowFilter(prev => !prev)}
-            className={`p-2 rounded-xl transition-all duration-200 text-xs font-medium border ${showFilter
-              ? 'bg-[var(--turquesa-500)]/10 text-[var(--turquesa-500)] border-[var(--turquesa-500)]/30 dark:bg-[var(--turquesa-500)]/10 dark:text-[var(--turquesa-500)] dark:border-[var(--turquesa-500)]/30'
-              : 'bg-gray-100 text-gray-500 border-gray-200 hover:bg-gray-200 dark:bg-[var(--bg-secondary)] dark:text-gray-400 dark:border-[var(--border-subtle)]'
-            }`}
-          >
-            <Icon name="Filter" className="w-4 h-4" />
-          </button>
-        </div>
+        if (date.toDateString() === today.toDateString()) return 'Hoy';
+        if (date.toDateString() === yesterday.toDateString()) return 'Ayer';
+        return date.toLocaleDateString('es-PE', { day: 'numeric', month: 'short' });
+    };
 
-        <div className="relative mb-4">
-          <Icon name="Search" className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-[var(--text-muted)]" />
-          <input
-            type="text"
-            value={filters.search}
-            onChange={(e) => setFilters({ search: e.target.value })}
-            placeholder="Buscar por cliente o DNI..."
-            className="w-full pl-10 pr-4 py-2.5 text-sm bg-gray-50 dark:bg-[var(--bg-muted)] border border-gray-200 dark:border-[var(--border-subtle)] rounded-xl outline-none focus:ring-2 focus:ring-[var(--turquesa-500)]/20 focus:border-[var(--turquesa-500)] dark:focus:border-[var(--turquesa-500)] transition-all"
-          />
-        </div>
-
-        {showFilter && (
-          <select
-            value={filters.category}
-            onChange={(e) => setFilters({ category: e.target.value })}
-            className="w-full text-xs py-2.5 px-3 bg-gray-50 dark:bg-[var(--bg-muted)] border border-gray-200 dark:border-[var(--border-subtle)] rounded-xl font-semibold text-gray-700 dark:text-[var(--text-primary)] outline-none focus:ring-2 focus:ring-[var(--turquesa-500)]/20 focus:border-[var(--turquesa-500)]"
-          >
-            <option value="all">Todas las categorías</option>
-            <option value="info">Información</option>
-            <option value="comment">Comentarios</option>
-            <option value="admin">Soporte Administrativo</option>
-          </select>
-        )}
-      </div>
-
-      {conversations.length === 0 && (
-        <div className="p-8 text-center text-gray-500">
-          <Icon name="MessageSquareOff" className="w-12 h-12 mx-auto mb-4 text-gray-300 dark:text-[var(--text-muted)]" />
-          <p className="text-base font-bold text-gray-800 dark:text-[var(--text-primary)]">Sin conversaciones</p>
-          <p className="text-sm mt-1">No hay chats activos con clientes</p>
-        </div>
-      )}
-
-      {conversations.map((conv, index) => {
-        const catStyle = CATEGORY_STYLES[conv.type] ?? CATEGORY_STYLES.info;
-
-        return (
-          <button
-            key={conv.id}
-            style={{ animationDelay: `${Math.min(index * 30, 400)}ms` }}
-            onClick={() => {
-              setActiveConversation(conv);
-              setIsMobileListVisible(false);
-            }}
-            className={`w-full p-4 text-left hover:bg-gray-50 dark:hover:bg-[#1A3A32] transition-all duration-200 hover:pl-6 animate-list-item-slide ${
-              activeConversation?.id === conv.id ? 'bg-[var(--turquesa-500)]/10 dark:bg-[#1A3A32]/50' : ''
-            }`}
-          >
-            <div className="flex items-start gap-3">
-              <div className="relative shrink-0">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--turquesa-500)] to-[var(--verde-500)] dark:from-[var(--brand-green)] dark:to-[var(--icons-green)] flex items-center justify-center text-white font-bold text-sm animate-avatar-appear">
-                  {conv.nombre.charAt(0).toUpperCase()}
-                </div>
-                {conv.critical && (
-                  <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 rounded-full border-2 border-white dark:border-[var(--bg-secondary)] flex items-center justify-center">
-                    <span className="text-[8px] text-white font-black">!</span>
-                  </span>
-                )}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-gray-900 dark:text-[var(--text-primary)] text-sm truncate">{conv.nombre}</span>
-                  <span className="text-[10px] text-gray-400 dark:text-[var(--text-muted)] shrink-0 ml-2">{conv.fecha}</span>
-                </div>
-                <p className="text-xs text-gray-500 dark:text-[var(--text-muted)] truncate mt-0.5">{conv.ultimoMensaje}</p>
-                <div className="flex items-center gap-2 mt-1.5">
-                  <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${catStyle.bg} ${catStyle.text}`}>
-                    {catStyle.label}
-                  </span>
-                  {conv.dni && (
-                    <span className="text-[9px] text-gray-400 dark:text-[var(--text-muted)] font-medium">DNI: {conv.dni}</span>
-                  )}
-                </div>
-              </div>
-            </div>
-          </button>
-        );
-      })}
-    </div>
-  );
-
-  const chatContent = activeConversation ? (
-    <div className="flex flex-col h-full">
-      <div className="p-4 border-b border-gray-100 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-secondary)]">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => setIsMobileListVisible(true)}
-            className="md:hidden p-2 -ml-2 rounded-xl hover:bg-gray-100 dark:hover:bg-[#1A3A32]"
-          >
-            <Icon name="ArrowLeft" className="w-5 h-5" />
-          </button>
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--turquesa-500)] to-[var(--verde-500)] dark:from-[var(--brand-green)] dark:to-[var(--icons-green)] flex items-center justify-center text-white font-bold text-sm shrink-0 animate-avatar-appear">
-            {activeConversation.nombre.charAt(0).toUpperCase()}
-          </div>
-          <div className="flex-1 min-w-0">
-            <h3 className="font-bold text-gray-900 dark:text-[var(--text-primary)] text-sm truncate">{activeConversation.nombre}</h3>
-            <div className="flex items-center gap-2 flex-wrap">
-              {activeConversation.email && (
-                <span className="text-[10px] text-gray-500 dark:text-[var(--text-muted)] truncate">{activeConversation.email}</span>
-              )}
-              {activeConversation.dni && (
-                <span className="text-[9px] font-bold text-[var(--turquesa-500)] dark:text-[var(--turquesa-500)] bg-[var(--turquesa-500)]/10 dark:bg-[var(--turquesa-500)]/10 px-2 py-0.5 rounded-md">DNI: {activeConversation.dni}</span>
-              )}
-              {activeConversation.critical && (
-                <span className="text-[9px] font-bold text-red-600 bg-red-50 dark:bg-red-900/20 px-2 py-0.5 rounded-md">Prioridad Alta</span>
-              )}
-            </div>
-          </div>
-          <ChatOptionsMenu onClear={clearActiveChat} onDelete={deleteActiveTicket} />
-        </div>
-      </div>
-
-      <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-gray-50/50 dark:bg-[var(--bg-muted)]/30">
-        {messages.length === 0 && (
-          <div className="flex items-center justify-center h-full">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-gray-100 dark:bg-[#1A3A32] rounded-full flex items-center justify-center mx-auto mb-4">
-                <Icon name="MessageCircle" className="w-8 h-8 text-gray-300 dark:text-[var(--text-muted)]" />
-              </div>
-              <p className="text-sm font-bold text-gray-500 dark:text-[var(--text-muted)]">No hay mensajes aún</p>
-              <p className="text-xs text-gray-400 dark:text-[var(--text-muted)] mt-1">Responde al cliente para iniciar la conversación</p>
-            </div>
-          </div>
-        )}
-
-        {messages.map((msg, idx) => {
-          const isSeller = msg.sender === 'user';
-
-          return (
-            <div key={msg.id ?? msg.hora} className={`flex ${isSeller ? 'justify-end' : 'justify-start'} ${isSeller ? 'animate-bubble-in-right' : 'animate-bubble-in-left'}`}
-              style={{ animationDelay: `${Math.min(idx * 30, 300)}ms` }}>
-              <div className={`flex max-w-[75%] items-end gap-3 ${isSeller ? 'flex-row-reverse' : 'flex-row'}`}>
-                <div className={`w-9 h-9 shrink-0 rounded-full flex items-center justify-center text-[10px] font-black shadow-sm transition-all duration-300 hover:scale-110 hover:-translate-y-0.5 ${
-                  isSeller
-                    ? 'bg-gradient-to-br from-[var(--turquesa-500)] to-[var(--verde-500)] text-white'
-                    : 'bg-gradient-to-br from-[var(--verde-500)] to-[var(--turquesaClaro-500)] dark:from-[var(--brand-green)] dark:to-[var(--icons-green)] text-white'
-                }`}>
-                  {isSeller ? 'Tú' : activeConversation.nombre.charAt(0).toUpperCase()}
-                </div>
-
-                <div className={`relative rounded-3xl px-5 py-3 shadow-sm border transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 ${
-                  isSeller
-                    ? 'bg-gradient-to-br from-[var(--turquesa-500)] to-[var(--verde-500)] text-white border-transparent rounded-br-md'
-                    : 'bg-white dark:bg-[#1A3A32] text-slate-800 dark:text-[var(--text-primary)] border-gray-200 dark:border-[var(--border-subtle)] rounded-bl-md'
-                }`}>
-                  <div className="mb-1 flex items-center gap-2">
-                    <p className={`text-[11px] font-black uppercase tracking-[0.16em] ${
-                      isSeller ? 'text-white/80' : 'text-[var(--icons-green)] dark:text-[var(--icons-green)]'
-                    }`}>
-                      {isSeller ? 'Tú' : activeConversation.nombre}
-                    </p>
-                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
-                      isSeller ? 'bg-white/15 text-white/80' : 'bg-[var(--icons-green)]/10 dark:bg-[#2A3F33] text-[var(--icons-green)] dark:text-[#6BAF7B]'
-                    }`}>
-                      {isSeller ? 'Vendedor' : 'Cliente'}
-                    </span>
-                  </div>
-                  {msg.contenido && <p className="text-sm leading-relaxed whitespace-pre-wrap break-all">{msg.contenido}</p>}
-                  {msg.attachments && msg.attachments.length > 0 && (
-                    <div className="mt-2 space-y-1.5">
-                      {msg.attachments.map((att) => {
-                        const isImage = att.mime_type?.startsWith('image/');
-                        return (
-                          <a
-                            key={att.id}
-                            href={att.download_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-200 active:scale-[0.98] ${
-                              isSeller
-                                ? 'bg-white/15 text-white/80 hover:bg-white/25'
-                                : 'bg-gray-100 dark:bg-[#2A3F33] text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-[#3A4F43]'
-                            }`}
-                          >
-                            {isImage ? (
-                              <img src={att.url} alt={att.file_name} className="w-8 h-8 rounded-lg object-cover shrink-0" />
-                            ) : (
-                              <Icon name="FileText" className="w-4 h-4 shrink-0" />
-                            )}
-                            <div className="flex-1 min-w-0">
-                              <span className="truncate block">{att.file_name}</span>
-                              {att.file_size != null && (
-                                <span className="text-[10px] opacity-60">
-                                  {att.file_size < 1048576
-                                    ? `${(att.file_size / 1024).toFixed(1)} KB`
-                                    : `${(att.file_size / 1048576).toFixed(1)} MB`}
-                                </span>
-                              )}
-                            </div>
-                            <Icon name="Download" className="w-3.5 h-3.5 shrink-0 ml-auto" />
-                          </a>
-                        );
-                      })}
-                    </div>
-                  )}
-                  <div className="mt-2 flex justify-end">
-                    <p className={`text-[10px] font-medium ${isSeller ? 'text-white/70' : 'text-gray-400 dark:text-gray-500'}`}>
-                      {formatTime(msg.hora)}
-                      {isSeller && (
-                        <span className="ml-1.5">
-                          {msg.status === 'read' ? (
-                            <Icon name="CheckCheck" className="w-3 h-3 text-[var(--turquesaClaro-500)] dark:text-[var(--turquesaClaro-500)] animate-check-pop" />
-                          ) : (
-                            <Icon name="Check" className="w-3 h-3 text-white/40 dark:text-gray-500" />
-                          )}
-                        </span>
-                      )}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          );
-        })}
-        <div ref={messagesEndRef} />
-      </div>
-
-      <div className="p-4 border-t border-gray-100 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-secondary)]">
-        <MessageInput
-          onSend={handleSendMessage}
-          placeholder="Escribe un mensaje..."
-          disabled={isSending}
-        />
-      </div>
-    </div>
-  ) : (
-    <div className="flex-1 flex items-center justify-center">
-      <div className="text-center animate-slide-up">
-        <div className="w-20 h-20 bg-[var(--icons-green)]/10 dark:bg-[#1A3A32] rounded-full flex items-center justify-center mx-auto mb-6">
-          <Icon name="MessageCircle" className="w-10 h-10 text-[var(--icons-green)] dark:text-[var(--icons-green)]" />
-        </div>
-        <p className="text-xl font-black text-slate-800 dark:text-[var(--text-primary)]">Selecciona una conversación</p>
-        <p className="text-sm text-slate-500 dark:text-[var(--text-muted)] mt-2">Elige un chat para comenzar a atender al cliente</p>
-      </div>
-    </div>
-  );
-
-  if (isLoading) {
-    return (
-      <div className="flex flex-col h-[calc(100vh-140px)] animate-fade-in">
-        <ModuleHeader
-          title="Chat con Clientes"
-          subtitle="Atención y soporte directo con los clientes"
-          icon="MessageCircle"
-        />
-        <div className="flex-1 flex items-center justify-center">
-          <BaseLoading message="Cargando conversaciones..." />
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex flex-col h-[calc(100vh-140px)] animate-fade-in">
-      <ModuleHeader
-        title="Chat con Clientes"
-        subtitle="Atención y soporte directo con los clientes"
-        icon="MessageCircle"
-        actions={
-          <div className="flex items-center gap-3">
-            <div className="hidden md:flex items-center gap-3">
-              <div className="px-4 py-2 bg-white dark:bg-[var(--bg-secondary)] rounded-xl border border-gray-200 dark:border-[var(--border-subtle)] shadow-sm">
-                <span className="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">
-                  {totalConversations} Conversaciones
-                </span>
-              </div>
-              {criticalCount > 0 && (
-                <div className="px-4 py-2 bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-800">
-                  <span className="text-[10px] font-black text-red-600 dark:text-red-400 uppercase tracking-widest">
-                    {criticalCount} Críticos
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
+    const filteredConversations = conversations.filter(conv => {
+        if (!filterValue) return true;
+        if (filterType === 'cliente') {
+            return conv.customerName.toLowerCase().includes(filterValue.toLowerCase());
         }
-      />
+        return conv.category === filterValue;
+    });
 
-      <div className="flex-1 min-h-0">
-        <ChatLayout
-          list={listContent}
-          detail={chatContent}
-          listWidth="col-span-4"
-        />
-      </div>
-    </div>
-  );
+    const listContent = (
+        <div className="divide-y divide-gray-100 h-full overflow-y-auto">
+            {/* ── Cabecera con filtro ── */}
+            <div className="p-4 border-b border-gray-100">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h3 className="font-semibold text-gray-900 dark:text-white">Conversaciones</h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-300">
+                            {filteredConversations.length} chats
+                        </p>
+                    </div>
+                    <button
+                        onClick={() => {
+                            setShowFilter(prev => !prev);
+                            setFilterValue('');
+                        }}
+                        className={`p-2 rounded-xl transition-colors text-xs font-medium border ${showFilter
+                            ? 'bg-sky-100 text-sky-600 border-sky-200 dark:bg-[var(--brand-green)] dark:text-white dark:border-transparent'
+                            : 'bg-gray-100 text-gray-500 border-gray-200 hover:bg-gray-200 dark:bg-[var(--bg-secondary)] dark:border-transparent'
+                            }`}
+                    >
+                        Filtrar
+                    </button>
+                </div>
+
+                {/* ── Panel de filtro ── */}
+                {showFilter && (
+                    <div className="mt-3 space-y-2">
+                        <div className="flex rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 text-xs font-medium">
+                            <button
+                                onClick={() => { setFilterType('cliente'); setFilterValue(''); }}
+                                className={`flex-1 py-1.5 transition-colors ${filterType === 'cliente'
+                                    ? 'bg-sky-500 dark:bg-[var(--brand-green)] text-white'
+                                    : 'bg-gray-100 dark:bg-[var(--bg-secondary)] text-gray-500 hover:bg-gray-200'
+                                    }`}
+                            >
+                                Cliente
+                            </button>
+                            <button
+                                onClick={() => { setFilterType('categoria'); setFilterValue(''); }}
+                                className={`flex-1 py-1.5 transition-colors ${filterType === 'categoria'
+                                    ? 'bg-sky-500 dark:bg-[var(--brand-green)] text-white'
+                                    : 'bg-gray-100 dark:bg-[var(--bg-secondary)] text-gray-500 hover:bg-gray-200'
+                                    }`}
+                            >
+                                Categoría
+                            </button>
+                        </div>
+
+                        {filterType === 'cliente' ? (
+                            <input
+                                type="text"
+                                value={filterValue}
+                                onChange={(e) => setFilterValue(e.target.value)}
+                                placeholder="Buscar cliente..."
+                                className="w-full px-3 py-1.5 text-sm bg-gray-100 dark:bg-[var(--bg-secondary)] rounded-xl outline-none focus:ring-2 focus:ring-sky-500 dark:focus:ring-[var(--icons-green)]"
+                            />
+                        ) : (
+                            <select
+                                value={filterValue}
+                                onChange={(e) => setFilterValue(e.target.value)}
+                                className="w-full px-3 py-1.5 text-sm bg-gray-100 dark:bg-[var(--bg-secondary)] rounded-xl outline-none focus:ring-2 focus:ring-sky-500 dark:focus:ring-[var(--icons-green)]"
+                            >
+                                <option value="">Todas las categorías</option>
+                                <option value="informacion">Solicitud de Información</option>
+                                <option value="positivo">Comentario Positivo</option>
+                                <option value="negativo">Comentario Negativo</option>
+                                <option value="logistica">Logística </option>
+                                <option value="facturacion">Soporte de Facturación</option>
+                            </select>
+                        )}
+                    </div>
+                )}
+            </div>
+
+            {/* ── Lista filtrada ── */}
+            {filteredConversations.map((conv) => (
+                <button
+                    key={conv.id}
+                    onClick={() => {
+                        setActiveConversation(conv.id);
+                        setIsMobileListVisible(false);
+                    }}
+                    className={`w-full p-4 text-left hover:bg-gray-50 dark:hover:bg-[var(--brand-green)] transition-colors ${activeConversation?.id === conv.id ? 'bg-sky-50 dark:bg-[var(--brand-green-hover)]' : ''
+                        }`}
+                >
+                    <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 rounded-full bg-sky-100 flex items-center justify-center text-sky-600 dark:text-[var(--brand-green)] font-semibold">
+                            {conv.customerName.charAt(0)}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between">
+                                <span className="font-medium text-gray-900 dark:text-white truncate">{conv.customerName}</span>
+                                <span className="text-xs text-gray-400">{formatDate(conv.lastMessageTime)}</span>
+                            </div>
+                            <div className="flex items-center justify-between mt-1">
+                                <span className="text-sm text-gray-500 dark:text-gray-300 truncate">{conv.lastMessage}</span>
+                                {conv.unreadCount > 0 && (
+                                    <span className="ml-2 px-2 py-0.5 text-xs font-medium bg-sky-500 dark:bg-[var(--icons-green)] text-white dark:text-[var(--brand-green-hover)] rounded-full">
+                                        {conv.unreadCount}
+                                    </span>
+                                )}
+                            </div>
+                            {conv.category && (
+                                <div className="mt-1">
+                                    <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 dark:bg-[var(--bg-secondary)] text-gray-500 dark:text-gray-400">
+                                        {{
+                                            informacion: 'Solicitud de Información',
+                                            positivo: 'Comentario Positivo',
+                                            negativo: 'Comentario Negativo',
+                                            logistica: 'Logística ',
+                                            facturacion: 'Soporte de Facturación',
+                                        }[conv.category]}
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </button>
+            ))}
+
+            {filteredConversations.length === 0 && (
+                <div className="p-8 text-center text-gray-500">
+                    <p>{filterValue ? 'Sin resultados para este filtro' : 'No hay conversaciones'}</p>
+                </div>
+            )}
+        </div>
+    );
+
+    const chatContent = activeConversation ? (
+        <div className="flex flex-col h-full">
+            <div className="p-4 border-b border-gray-100 bg-white dark:bg-[var(--bg-secondary)]">
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-sky-100 flex items-center justify-center text-sky-600 dark:text-[var(--brand-green)] font-semibold">
+                        {activeConversation.customerName.charAt(0)}
+                    </div>
+                    <div>
+                        <h3 className="font-semibold text-gray-900 dark:text-white">{activeConversation.customerName}</h3>
+                        {activeConversation.subject && (
+                            <p className="text-sm text-gray-500 dark:text-gray-300">{activeConversation.subject}</p>
+                        )}
+                    </div>
+                </div>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-white dark:bg-[var(--bg-secondary)]">
+                {messages.map((msg) => {
+                    const isSeller = msg.senderType === 'seller';
+
+                    return (
+                        <div
+                            key={msg.id}
+                            className={`flex ${isSeller ? 'justify-end' : 'justify-start'}`}
+                        >
+                            <div
+                                className={`flex max-w-[50%] items-end gap-3 ${isSeller ? 'flex-row-reverse' : 'flex-row'
+                                    }`}
+                            >
+                                <div
+                                    className={`w-9 h-9 shrink-0 rounded-full flex items-center justify-center text-[10px] font-black shadow-sm ${isSeller
+                                        ? 'bg-emerald-500 text-white'
+                                        : 'bg-sky-500 text-white'
+                                        }`}
+                                >
+                                    {isSeller ? 'Tú' : activeConversation.customerName.charAt(0)}
+                                </div>
+
+                                <div
+                                    className={`relative rounded-3xl px-4 py-3 shadow-sm border backdrop-blur-sm ${isSeller
+                                        ? 'bg-gradient-to-br from-emerald-500 to-emerald-600 text-white border-emerald-400/20 rounded-br-md'
+                                        : 'bg-white dark:bg-gray-100 text-slate-800 border-gray-200 rounded-bl-md'
+                                        }`}
+                                >
+                                    <div className="mb-1 flex items-center gap-2">
+                                        <p
+                                            className={`text-[11px] font-black uppercase tracking-[0.16em] ${isSeller ? 'text-emerald-100' : 'text-sky-600'
+                                                }`}
+                                        >
+                                            {isSeller ? 'Tú' : activeConversation.customerName}
+                                        </p>
+                                        <span
+                                            className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${isSeller
+                                                ? 'bg-white/15 text-emerald-50'
+                                                : 'bg-sky-50 text-sky-700'
+                                                }`}
+                                        >
+                                            {isSeller ? 'Vendedor' : 'Cliente'}
+                                        </span>
+                                    </div>
+
+                                    <p className="text-sm leading-relaxed whitespace-pre-wrap break-all">
+                                        {msg.content}
+                                    </p>
+
+                                    <div className="mt-2 flex justify-end">
+                                        <p
+                                            className={`text-[10px] font-medium ${isSeller ? 'text-emerald-100/80' : 'text-gray-400'
+                                                }`}
+                                        >
+                                            {formatTime(msg.timestamp)}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    );
+                })}
+                <div ref={messagesEndRef} />
+            </div>
+            <MessageInput onSend={handleSendMessage} placeholder="Escribe un mensaje..." />
+        </div>
+    ) : (
+        <div className="flex-1 flex items-center justify-center text-gray-500">
+            <div className="text-center">
+                <p className="text-lg mb-2">Selecciona una conversación</p>
+                <p className="text-sm">Elige un chat para comenzar a chatear</p>
+            </div>
+        </div>
+    );
+
+    if (isLoading) {
+        return (
+            <div className="flex flex-col h-[calc(100vh-140px)] animate-fadeIn">
+                <ModuleHeader
+                    title="Chat con Clientes"
+                    subtitle="Comunicación directa con tus clientes"
+                    icon="Messages"
+                />
+                <div className="flex-1 flex items-center justify-center">
+                    <BaseLoading message="Cargando conversaciones..." />
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="flex flex-col h-[calc(100vh-140px)] animate-fadeIn">
+            <ModuleHeader
+                title="Chat con Clientes"
+                subtitle="Comunicación directa con tus clientes"
+                icon="Messages"
+                actions={
+                    !showNewChatForm ? (
+                        <button
+                            onClick={() => setShowNewChatForm(true)}
+                            className="px-4 py-2 bg-white text-sky-600 dark:text-[var(--brand-green)] rounded-xl font-medium hover:bg-sky-50 transition-colors"
+                        >
+                            + Nuevo Chat
+                        </button>
+                    ) : null
+                }
+            />
+
+            {showNewChatForm ? (
+                <div className="flex-1 flex items-center justify-center px-8">
+                    <div className="w-full max-w-xl">
+                        <NewChatForm
+                            onSubmit={(data) => {
+                                createConversation(data);
+                                setShowNewChatForm(false);
+                            }}
+                            onCancel={() => setShowNewChatForm(false)}
+                            isSubmitting={isCreating}
+                        />
+                    </div>
+                </div>
+            ) : (
+                <ChatLayout
+                    list={listContent}
+                    detail={chatContent}
+                />
+            )}
+        </div>
+    );
 }

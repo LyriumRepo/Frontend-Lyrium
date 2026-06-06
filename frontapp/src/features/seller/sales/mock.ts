@@ -48,10 +48,10 @@ export const MOCK_ORDERS: Order[] = [
         estado: 'pending_seller',
         global_status: 'pending_seller',
         currentStep: 1,
-        tipo_envio: 'sucursal',
+        tipo_envio: 'domicilio',
         metodo_pago: 'Transferencia Bancaria',
         estado_pago: 'pendiente',
-        envio: { direccion: 'Urb. Los Rosales Mz A Lt 5, Trujillo', carrier: 'Pendiente', tracking: '-', costo: 20.00 },
+        envio: { direccion: 'Urb. Los Rosales Mz A Lt 5, Trujillo', carrier: 'Shalom', tracking: 'SHL-9876543456', costo: 20.00 },
         items: [
             { id: '4', name: 'Producto D', qty: 5, price: 90.00, status: 'pending_seller', can_confirm: true, can_cancel: true }
         ]

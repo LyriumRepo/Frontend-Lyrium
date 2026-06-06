@@ -1,37 +1,29 @@
-export type ChatCategory = 'tech' | 'admin' | 'info' | 'comment' | 'followup';
+export type ChatCategory = 'facturacion' | 'logistica' | 'negativo' | 'informacion' | 'positivo';
 
-export interface ChatAttachment {
+export interface SellerConversation {
     id: string;
-    file_name: string;
-    mime_type: string;
-    file_size: number;
-    url: string;
-    download_url: string;
+    customerId: string;
+    customerName: string;
+    lastMessage: string;
+    lastMessageTime: string;
+    unreadCount: number;
+    status: 'active' | 'archived';
+    category?: ChatCategory;
+    subject?: string;
 }
 
-export interface ChatMessage {
-    id?: number;
-    sender: 'user' | 'other';
-    contenido: string;
-    hora: string;
-    status?: 'sent' | 'delivered' | 'read';
-    attachments?: ChatAttachment[];
+export interface SellerMessage {
+    id: string;
+    conversationId: string;
+    senderId: string;
+    senderName: string;
+    senderType: 'seller' | 'customer';
+    content: string;
+    timestamp: string;
+    read: boolean;
 }
 
-export interface ChatConversation {
-    id: number;
-    nombre: string;
-    email: string;
-    dni: string;
-    avatar: string;
-    ultimoMensaje: string;
-    fecha: string;
-    type: ChatCategory;
-    critical: boolean;
-    mensajes: ChatMessage[];
-}
-
-export interface ChatFilters {
+export interface SellerChatFilters {
+    status: 'all' | 'active' | 'archived';
     search: string;
-    category: string | 'all';
 }

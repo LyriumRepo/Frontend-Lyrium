@@ -3,7 +3,7 @@
 import React from 'react';
 import { ChatView as UnifiedChatView } from '@/modules/chat';
 import { adaptSellerTicket } from '@/modules/chat/adapters/sellerTicketAdapter';
-import { Ticket } from '@/features/seller/help/types';
+import { SellerTicket as Ticket } from '@/features/seller/help/types';
 
 interface TicketChatViewProps {
     ticket: Ticket | null;

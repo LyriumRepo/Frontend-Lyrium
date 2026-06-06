@@ -216,11 +216,14 @@ export function adaptSpecialistToFrontend(
     id: beSpec.id,
     nombres: beSpec.nombres || '',
     apellidos: beSpec.apellidos || '',
+    dni: beSpec.document_number || '',
+    email: '',
     tipoDocumento: docType,
     numeroDocumento: beSpec.document_number || '',
     especialidad: beSpec.especialidad || '',
     foto: beSpec.foto || undefined,
     availability: availability,
+    categoria: 'Salud y Bienestar',
   };
 }
 
