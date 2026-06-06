@@ -142,7 +142,7 @@ export const ContratosModule: React.FC<ContratosModuleProps> = ({ state, actions
 
                     <button
                         onClick={actions.createNew}
-                        className="lg:col-span-2 w-full p-4 bg-[var(--color-info)] dark:bg-[var(--brand-green)] text-white rounded-2xl hover:brightness-95 transition-all shadow-xl shadow-[var(--color-info)]/20 dark:shadow-[var(--brand-green)]/20 flex items-center justify-center gap-2 whitespace-nowrap active:scale-95 duration-300"
+                        className="lg:col-span-2 w-full p-4 bg-sky-500 hover:bg-sky-600 active:bg-sky-700 dark:bg-[var(--brand-green)] dark:hover:bg-[var(--brand-green-hover)] text-white rounded-2xl transition-all shadow-xl shadow-sky-500/20 dark:shadow-[var(--brand-green)]/20 flex items-center justify-center gap-2 whitespace-nowrap duration-300"
                     >
                         <Plus className="w-4 h-4 font-bold" /> 
                         <span className="text-xs font-black uppercase tracking-widest">Nuevo Contrato</span>
