@@ -22,7 +22,7 @@ export default function ModuleHeader({
 }: ModuleHeaderProps) {
     return (
         <div
-            className={`flex items-stretch justify-between ${gradient} rounded-2xl overflow-hidden shadow-sm border border-[var(--border-subtle)] mb-8 group transition-all duration-300 hover:shadow-md`}
+            className={`flex items-stretch justify-between ${gradient} rounded-2xl overflow-visible shadow-sm border border-[var(--border-subtle)] mb-8 group transition-all duration-300 hover:shadow-md`}
             style={{ height }}
         >
             {/* Lado Izquierdo (Blanco Inteligente con Máscara) */}

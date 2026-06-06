@@ -4,6 +4,7 @@ import React from 'react';
 import { VoucherStatus, VoucherType } from '@/features/seller/invoices/types';
 import Icon from '@/components/ui/Icon';
 import BaseInputField from '@/components/ui/BaseInputField';
+import { BaseDatePicker } from '@/components/ui';
 
 interface InvoiceFiltersProps {
     search: string;
@@ -32,14 +33,12 @@ export default function InvoiceFilters({ search, status, type, dateFrom, dateTo,
                 </div>
 
                 <div className="space-y-2">
-                    <label className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1">Fecha Desde</label>
-                    <input type="date" value={dateFrom} onChange={(e) => onFilterChange({ dateFrom: e.target.value })}
-                        className="w-full p-3 bg-[var(--bg-secondary)] border-none rounded-2xl text-xs font-mono text-emerald-600 focus:ring-2 focus:ring-emerald-500/20 cursor-pointer outline-none" />
+                    <BaseDatePicker label="Fecha Desde" value={dateFrom}
+                        onChange={(v) => onFilterChange({ dateFrom: v })} placeholder="dd/mm/aaaa" />
                 </div>
                 <div className="space-y-2">
-                    <label className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1">Fecha Hasta</label>
-                    <input type="date" value={dateTo} onChange={(e) => onFilterChange({ dateTo: e.target.value })}
-                        className="w-full p-3 bg-[var(--bg-secondary)] border-none rounded-2xl text-xs font-mono text-emerald-600 focus:ring-2 focus:ring-emerald-500/20 cursor-pointer outline-none" />
+                    <BaseDatePicker label="Fecha Hasta" value={dateTo}
+                        onChange={(v) => onFilterChange({ dateTo: v })} placeholder="dd/mm/aaaa" />
                 </div>
 
                 <div className="w-full md:w-40 space-y-2">

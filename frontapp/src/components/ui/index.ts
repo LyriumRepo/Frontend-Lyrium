@@ -5,6 +5,7 @@ export { default as BaseSkeleton } from './BaseSkeleton';
 export { default as Skeleton, SkeletonRow } from './Skeleton';
 export { default as BaseInputField } from './BaseInputField';
 export { default as BaseSelectField } from './BaseSelectField';
+export { default as BaseDatePicker } from './BaseDatePicker';
 export { default as BaseErrorState } from './BaseErrorState';
 export { default as BaseEmptyState } from './BaseEmptyState';
 export { default as BaseDrawer } from './BaseDrawer';
