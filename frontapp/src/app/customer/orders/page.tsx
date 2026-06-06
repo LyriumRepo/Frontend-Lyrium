@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/shared/lib/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import Icon from '@/components/ui/Icon';
 import { Eye, Info } from "lucide-react";
+import { orderApi, OrderResource } from '@/shared/lib/api/orderRepository';
 
 // ─── Tipos ───────────────────────────────────────────────────────────────────
 
@@ -37,6 +38,7 @@ interface EnvioInfo {
 
 interface Order {
   id: string;
+  originalId: number;
   fecha: string;
   hora: string;
   tienda: string;
@@ -123,106 +125,93 @@ const FLOW_CONFIG: Record<
   },
 };
 
-// ─── Mock data ────────────────────────────────────────────────────────────────
+// ─── Helpers: API → UI mapping ────────────────────────────────────────────────
 
-const mockOrders: Order[] = [
-  {
-    id: '#PED-2024-001',
-    fecha: '15 Feb 2024',
-    hora: '10:30',
-    tienda: 'Vida Natural Perú',
-    detalle: '3 productos',
-    total: 'S/ 125.50',
-    estado: 'en_transporte',
-    estadoLabel: 'En transporte',
+const STATUS_MAP: Record<string, EstadoPedido> = {
+  pending_seller: 'validado_vendedor',
+  confirmed: 'despachado',
+  processing: 'en_transporte',
+  shipped: 'en_domicilio',
+  delivered: 'confirmado_cliente',
+  cancelled: 'cancelado',
+};
+
+const STATUS_LABEL_MAP: Record<string, string> = {
+  pending_seller: 'Validado por vendedor',
+  confirmed: 'Despachado',
+  processing: 'En transporte',
+  shipped: 'En domicilio',
+  delivered: 'Confirmado por cliente',
+  cancelled: 'Cancelado',
+};
+
+const STATUS_STEP_MAP: Record<string, number> = {
+  pending_seller: 1,
+  confirmed: 2,
+  processing: 3,
+  shipped: 4,
+  delivered: 5,
+  cancelled: 0,
+};
+
+function parseDateToDisplay(iso: string): { fecha: string; hora: string } {
+  try {
+    const d = new Date(iso);
+    const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Set', 'Oct', 'Nov', 'Dic'];
+    return {
+      fecha: `${d.getDate()} ${meses[d.getMonth()]} ${d.getFullYear()}`,
+      hora: `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`,
+    };
+  } catch {
+    return { fecha: iso, hora: '--' };
+  }
+}
+
+const SHIPPING_TYPE_MAP: Record<string, TipoEnvio> = {
+  delivery: 'domicilio',
+  pickup: 'sucursal',
+  service_home: 'atencion_domicilio',
+  service_store: 'atencion_sede',
+};
+
+function mapOrderResourceToOrder(raw: OrderResource): Order {
+  const item = raw as any;
+  const createdAt = item.createdAt ?? item.created_at;
+  const { fecha, hora } = parseDateToDisplay(createdAt);
+  const items = item.items ?? [];
+  const itemCount = items.length;
+  const firstItem = items[0];
+  const tienda = firstItem?.store?.name ?? firstItem?.store_name ?? item.customer_name ?? 'Tienda';
+  const detalle = itemCount > 0
+    ? `${itemCount} ${itemCount === 1 ? 'producto' : 'productos'}`
+    : 'Sin productos';
+  const statusKey = item.status ?? 'pending_seller';
+  const shippingTypeRaw = item.shipping?.type;
+  const tipoEnvio = shippingTypeRaw ? (SHIPPING_TYPE_MAP[shippingTypeRaw] ?? 'domicilio') : 'domicilio';
+
+  return {
+    id: item.orderNumber ?? item.order_number ?? `#ORD-${item.id}`,
+    originalId: item.id,
+    fecha,
+    hora,
+    tienda,
+    detalle,
+    total: `S/ ${Number(item.total).toFixed(2)}`,
+    estado: STATUS_MAP[statusKey] ?? 'validado_vendedor',
+    estadoLabel: item.statusLabel ?? STATUS_LABEL_MAP[statusKey] ?? statusKey,
     tipo: 'productos',
-    tipo_envio: 'domicilio',
-    currentStep: 3,
-    envio: {
-      direccion: 'Av. Siempre Viva 123, Lima',
-      carrier: 'Olva Courier',
-      tracking: 'OLV-123456789',
-      tracking_url: 'https://www.olvacourier.com/seguimiento/?numero=OLV-123456789',
-    },
-  },
-  {
-    id: '#PED-2024-002',
-    fecha: '14 Feb 2024',
-    hora: '16:45',
-    tienda: 'Tech Store Lima',
-    detalle: '1 producto',
-    total: 'S/ 450.00',
-    estado: 'listo_recojo_agencia',
-    estadoLabel: 'Listo para recojo en agencia',
-    tipo: 'productos',
-    tipo_envio: 'agencia',
-    currentStep: 4,
-    envio: {
-      direccion: 'Calle Falsa 456, Arequipa',
-      carrier: 'Shalom',
-      tracking: 'SHL-987654321',
-      tracking_url: 'https://www.shalom.com.pe/rastreo?guia=SHL-987654321',
-    },
-  },
-  {
-    id: '#PED-2024-003',
-    fecha: '10 Feb 2024',
-    hora: '09:15',
-    tienda: 'Moda & Estilo',
-    detalle: '5 productos',
-    total: 'S/ 280.00',
-    estado: 'listo_recojo_sucursal',
-    estadoLabel: 'Listo para recojo en sucursal',
-    tipo: 'productos',
-    tipo_envio: 'sucursal',
-    currentStep: 4,
-    envio: {
-      direccion: 'Urb. Los Rosales Mz A Lt 5, Trujillo',
-      carrier: '-',
-      tracking: '-',
-      tracking_url: '',
-    },
-  },
-  {
-    id: '#SRV-2024-001',
-    fecha: '16 Feb 2024',
-    hora: '11:00',
-    tienda: 'Clínica Dental Pro',
-    detalle: 'Limpieza Dental Profunda',
-    total: 'S/ 180.00',
-    estado: 'en_camino',
-    estadoLabel: 'En camino',
-    tipo: 'servicios',
-    tipo_envio: 'atencion_domicilio',
-    currentStep: 2,
-  },
-  {
-    id: '#SRV-2024-002',
-    fecha: '12 Feb 2024',
-    hora: '14:20',
-    tienda: 'Centro Estético Lyra',
-    detalle: 'Masaje Relajante (60 min)',
-    total: 'S/ 120.00',
-    estado: 'confirmacion_paciente',
-    estadoLabel: 'Confirmación del paciente',
-    tipo: 'servicios',
-    tipo_envio: 'atencion_sede',
-    currentStep: 2,
-  },
-  {
-    id: '#SRV-2024-003',
-    fecha: '08 Feb 2024',
-    hora: '08:50',
-    tienda: 'Clínica Dental Pro',
-    detalle: 'Consulta Odontológica',
-    total: 'S/ 50.00',
-    estado: 'validacion_centro_salud',
-    estadoLabel: 'Validación del Centro de Salud',
-    tipo: 'servicios',
-    tipo_envio: 'atencion_domicilio',
-    currentStep: 1,
-  },
-];
+    tipo_envio: tipoEnvio,
+    currentStep: STATUS_STEP_MAP[statusKey] ?? 1,
+    envio: item.shipping
+      ? {
+          direccion: combineAddressParts([item.shipping.address, item.shipping.city]),
+          carrier: 'Por determinar',
+          tracking: '-',
+          tracking_url: '',
+        }
+      : undefined,
+  };
+}
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -280,6 +269,11 @@ function getDateBounds(dateValue: string): Date | null {
   if (!dateValue) return null;
   const parsed = new Date(`${dateValue}T00:00:00`);
   return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function combineAddressParts(parts: (string | null | undefined)[]): string {
+  const filtered = parts.filter((p): p is string => !!p);
+  return filtered.length > 0 ? filtered.join(', ') : 'Sin dirección';
 }
 
 // ─── Sub-componente: Stepper de seguimiento ───────────────────────────────────
@@ -424,11 +418,36 @@ export default function CustomerOrdersPage() {
   const { isAuthenticated, loading } = useAuth();
   const router = useRouter();
 
-  const [orders] = useState<Order[]>(mockOrders);
-  const [filteredOrders, setFiltered] = useState<Order[]>(mockOrders);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [filteredOrders, setFiltered] = useState<Order[]>([]);
   const [selectedOrder, setSelected] = useState<Order | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [showLegendModal, setShowLegendModal] = useState(false);
+  const [fetching, setFetching] = useState(true);
+  const [fetchError, setFetchError] = useState('');
+
+  const loadOrders = useCallback(async () => {
+    try {
+      setFetching(true);
+      setFetchError('');
+      const result = await orderApi.list(1);
+      const mapped = (result.data ?? []).map(mapOrderResourceToOrder);
+      setOrders(mapped);
+      setFiltered(mapped);
+    } catch (err) {
+      console.error('Error al cargar pedidos:', err);
+      const msg = err instanceof TypeError ? 'No pudimos conectar con el servidor. Verifica que el backend esté corriendo.' : 'No pudimos cargar tus pedidos. Intenta nuevamente.';
+      setFetchError(msg);
+    } finally {
+      setFetching(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!loading && isAuthenticated) {
+      loadOrders();
+    }
+  }, [loading, isAuthenticated, loadOrders]);
 
   const [filters, setFilters] = useState({
     categoria: 'productos',
@@ -497,10 +516,27 @@ export default function CustomerOrdersPage() {
     setTimeout(() => setSelected(null), 300);
   };
 
-  if (loading) {
+  if (loading || fetching) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-sky-500" />
+      </div>
+    );
+  }
+
+  if (fetchError) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+        <div className="w-20 h-20 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center">
+          <Icon name="AlertCircle" className="w-10 h-10 text-red-500" />
+        </div>
+        <p className="text-lg font-bold text-gray-800 dark:text-[var(--text-primary)]">{fetchError}</p>
+        <button
+          onClick={loadOrders}
+          className="px-6 py-3 rounded-xl bg-sky-500 dark:bg-[var(--brand-green)] text-white font-bold text-sm hover:bg-sky-600 dark:hover:bg-[var(--brand-green-hover)] transition-all"
+        >
+          Reintentar
+        </button>
       </div>
     );
   }
@@ -1141,7 +1177,16 @@ export default function CustomerOrdersPage() {
                 >
                   Cerrar Ventana
                 </button>
-                <button className="py-5 rounded-2xl bg-gradient-to-r from-green-400 to-sky-500 dark:from-[var(--brand-green)] dark:to-[var(--brand-green-hover)] text-white font-black text-xs uppercase tracking-[0.2em] hover:shadow-lg hover:shadow-sky-200 transition-all flex items-center justify-center gap-3">
+                <button
+                  onClick={async () => {
+                    try {
+                      await orderApi.downloadReceipt(selectedOrder.originalId);
+                    } catch (err) {
+                      console.error('Error al descargar comprobante:', err);
+                    }
+                  }}
+                  className="py-5 rounded-2xl bg-gradient-to-r from-green-400 to-sky-500 dark:from-[var(--brand-green)] dark:to-[var(--brand-green-hover)] text-white font-black text-xs uppercase tracking-[0.2em] hover:shadow-lg hover:shadow-sky-200 transition-all flex items-center justify-center gap-3"
+                >
                   <Icon name="Upload" className="w-5 h-5" />
                   Descargar Comprobante
                 </button>

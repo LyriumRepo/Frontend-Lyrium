@@ -64,3 +64,5 @@ export const SkeletonRow = ({ count = 5 }: { count?: number }) => (
     ))}
   </>
 );
+
+export default BaseSkeleton;

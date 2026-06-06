@@ -1,5 +1,14 @@
 'use client';
 
+/**
+ * CartDrawer.tsx — R20: Detalle carrito
+ * Drawer lateral con modificación, actualización y eliminación de productos.
+ * Se conecta a Laravel CartController via cartRepository.ts
+ * Usa carritoStore (Zustand) como fuente de verdad local.
+ *
+ * Ubicación: src/features/public/carrito/components/drawer/CartDrawer.tsx
+ */
+
 import { useEffect, useCallback, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -24,9 +33,13 @@ import type { CartItem, CartResource } from '@/shared/lib/api/cartRepository';
 function fmt(n: number) {
   return `S/ ${n.toFixed(2)}`;
 }
-function img(url?: string | null) {
-  return url && url.startsWith('http') ? url : '/no-image.png';
+function resolveImg(url?: string | null): string {
+  if (!url) return '/no-image.png';
+  if (url.startsWith('http')) return url;
+  if (url.startsWith('/')) return url;
+  return '/no-image.png';
 }
+
 
 // ─── CartLineItem ─────────────────────────────────────────────────────────────
 
@@ -74,7 +87,7 @@ function CartLineItem({
         }}
       >
         <Image
-          src={img(item.product.image)}
+          src={resolveImg(item.product.image)}
           alt={item.product.name}
           fill
           sizes="68px"
@@ -180,6 +193,7 @@ function CartLineItem({
           </span>
         </div>
 
+        {/* Stock warning */}
         {!canIncrease && (
           <p
             className="text-[10px] flex items-center gap-1"

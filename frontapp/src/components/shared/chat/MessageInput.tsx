@@ -6,9 +6,10 @@ import Icon from '@/components/ui/Icon';
 interface MessageInputProps {
   onSend: (message: string) => void;
   placeholder?: string;
+  disabled?: boolean;
 }
 
-export default function MessageInput({ onSend, placeholder = 'Escribe un mensaje...' }: MessageInputProps) {
+export default function MessageInput({ onSend, placeholder = 'Escribe un mensaje...', disabled = false }: MessageInputProps) {
   const [message, setMessage] = useState('');
   const inputId = useId();
 
@@ -34,7 +35,7 @@ export default function MessageInput({ onSend, placeholder = 'Escribe un mensaje
         />
         <button
           type="submit"
-          disabled={!message.trim()}
+          disabled={!message.trim() || disabled}
           aria-label="Enviar mensaje"
           className="w-12 h-12 bg-emerald-500 text-white rounded-full flex items-center justify-center hover:bg-emerald-600 hover:scale-105 active:scale-95 transition-all shadow-lg shadow-emerald-500/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
         >

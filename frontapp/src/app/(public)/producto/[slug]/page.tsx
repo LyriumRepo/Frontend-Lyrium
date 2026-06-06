@@ -1,3 +1,4 @@
+
 // app/(public)/producto/[slug]/page.tsx
 
 import { notFound } from 'next/navigation';
@@ -57,6 +58,7 @@ export default async function ProductoPage({ params }: PageProps) {
         products.filter((p) => p.id !== product.id),
       )
     : [];
+
 
   return (
     <Suspense fallback={<BaseLoading />}>

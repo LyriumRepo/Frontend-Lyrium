@@ -51,6 +51,10 @@ export class WPUserRepository implements IUserRepository {
         throw new Error('TODO Tarea 3: Conectar endpoint de actualización');
     }
 
+    async uploadAvatar(file: File): Promise<{ avatar: string }> {
+        throw new Error('TODO: Avatar upload for WP not implemented');
+    }
+
     async deleteUser(id: number): Promise<boolean> {
         throw new Error('TODO Tarea 3: Conectar endpoint de eliminación');
     }

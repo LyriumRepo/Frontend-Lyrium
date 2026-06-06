@@ -39,23 +39,6 @@ interface KryptonError {
   };
 }
 
-declare global {
-  interface Window {
-    KR?: {
-      onLoaded: (callback: () => void) => void;
-      setFormConfig: (config: { formToken: string }) => Promise<void>;
-      setFormToken: (token: string) => Promise<void>;
-      // ✅ onSubmit — firma correcta: recibe callback, NO es window.KR() directamente
-      onSubmit: (
-        callback: (result: KryptonPaymentSuccessDetail) => boolean | void,
-      ) => void;
-      onError: (callback: (error: KryptonError) => boolean | void) => void;
-    };
-  }
-}
-
-// ── Interfaz pública del hook ─────────────────────────────────────────────────
-
 interface UseIzipayOptions {
   onSuccess: (result: KryptonPaymentSuccessDetail) => void;
 }
@@ -67,8 +50,6 @@ interface UseIzipayReturn {
   loadSmartForm: (formToken: string) => Promise<void>;
   clearError: () => void;
 }
-
-// ── Hook ──────────────────────────────────────────────────────────────────────
 
 export function useIzipay({ onSuccess }: UseIzipayOptions): UseIzipayReturn {
   const [isLoading, setIsLoading] = useState(false);
@@ -91,19 +72,20 @@ export function useIzipay({ onSuccess }: UseIzipayOptions): UseIzipayReturn {
 
     const waitForKR = () => {
       if (cancelled) return;
+      const KR = (window as any).KR;
 
-      if (window.KR && typeof window.KR.onLoaded === 'function') {
-        window.KR.onLoaded(() => {
+      if (KR && typeof KR.onLoaded === 'function') {
+        KR.onLoaded(() => {
           if (cancelled) return;
 
-          window.KR?.setFormConfig({
+          KR.setFormConfig?.({
             formToken: '__publicKey__', // placeholder, se sobreescribe después
 
             'kr-public-key': process.env.NEXT_PUBLIC_IZIPAY_PUBLIC_KEY,
           });
 
           // ✅ CORRECCIÓN: usar window.KR?.onSubmit(...) en lugar de window.KR?.()
-          window.KR?.onSubmit((response) => {
+          KR.onSubmit?.((response: any) => {
             console.log('[Izipay] onSubmit disparado:', response);
 
             const orderStatus = response?.clientAnswer?.orderStatus;
@@ -117,7 +99,7 @@ export function useIzipay({ onSuccess }: UseIzipayOptions): UseIzipayReturn {
             return true;
           });
 
-          window.KR?.onError((err) => {
+          KR.onError?.((err: any) => {
             const errorCode =
               err?.errorCode ?? err?.error?.errorCode ?? 'UNKNOWN';
             const msg =
@@ -165,14 +147,15 @@ export function useIzipay({ onSuccess }: UseIzipayOptions): UseIzipayReturn {
       return;
     }
 
-    if (!window.KR) {
+    const KR = (window as any).KR;
+    if (!KR) {
       setError('El SDK de pago no está listo. Espera un momento.');
       return;
     }
 
     // Verificar que al menos uno de los métodos existe
-    const hasSetFormConfig = typeof window.KR.setFormConfig === 'function';
-    const hasSetFormToken = typeof window.KR.setFormToken === 'function';
+    const hasSetFormConfig = typeof KR.setFormConfig === 'function';
+    const hasSetFormToken = typeof KR.setFormToken === 'function';
 
     if (!hasSetFormConfig && !hasSetFormToken) {
       setError('El SDK de pago no está listo. Espera un momento.');
@@ -185,9 +168,9 @@ export function useIzipay({ onSuccess }: UseIzipayOptions): UseIzipayReturn {
 
       // ✅ Preferir setFormConfig (Smart Form moderno), caer en setFormToken si no existe
       if (hasSetFormConfig) {
-        await window.KR.setFormConfig({ formToken });
+        await KR.setFormConfig({ formToken });
       } else {
-        await window.KR.setFormToken(formToken);
+        await KR.setFormToken(formToken);
       }
 
       console.log('[Izipay] formToken cargado en el Smart Form ✓');

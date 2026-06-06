@@ -43,6 +43,7 @@ export default function PublicHeader() {
                         />
                     </Link>
 
+
                     <div className="flex items-center gap-4">
                         {/* Desktop: Session / Cart */}
                         <div className="hidden md:flex items-center gap-5 text-xs lg:text-[13px] text-sky-600 dark:text-[var(--color-success)]">

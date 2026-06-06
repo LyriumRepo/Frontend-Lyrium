@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import type { LaravelProduct } from "@/features/public/product/types";
 import { useAddToCart } from "@/features/public/product/hooks/useAddToCart";
+import { useWishlist } from "@/shared/hooks/useWishlist";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function formatPrice(price: number): string {
@@ -195,14 +196,16 @@ export function ProductDetailPageClient({
   const [activeTab, setActiveTab] = useState<
     "descripcion" | "atributos" | "tienda"
   >("descripcion");
-  const [wishlisted, setWishlisted] = useState(false);
+  const { isWishlisted, toggle: toggleWishlist } = useWishlist(product.id);
 
   const discount = discountPercent(product.price, product.regular_price);
   const inStock = product.stock > 0;
 
+  const mainAttrs = product.mainAttributes ?? [];
+  const additionalAttrs = product.additionalAttributes ?? [];
   const allAttributes = [
-    ...product.mainAttributes.flatMap((a) => a.values),
-    ...product.additionalAttributes.flatMap((a) => a.values),
+    ...mainAttrs.flatMap((a) => a.values),
+    ...additionalAttrs.flatMap((a) => a.values),
   ];
 
   const {
@@ -362,18 +365,18 @@ export function ProductDetailPageClient({
               </button>
 
               <button
-                onClick={() => setWishlisted((w) => !w)}
+                onClick={toggleWishlist}
                 className={`p-4 rounded-2xl border-2 transition-all ${
-                  wishlisted
+                  isWishlisted
                     ? "border-red-400 text-red-500 bg-red-50 dark:bg-red-900/20"
                     : "border-gray-200 dark:border-[var(--border-subtle)] text-gray-500 hover:border-red-400 hover:text-red-500"
                 }`}
                 aria-label={
-                  wishlisted ? "Quitar de favoritos" : "Agregar a favoritos"
+                  isWishlisted ? "Quitar de favoritos" : "Agregar a favoritos"
                 }
               >
                 <Heart
-                  className={`w-5 h-5 ${wishlisted ? "fill-current" : ""}`}
+                  className={`w-5 h-5 ${isWishlisted ? "fill-current" : ""}`}
                 />
               </button>
 
@@ -533,14 +536,13 @@ export function ProductDetailPageClient({
             <div className="bg-white dark:bg-[var(--bg-secondary)] border border-gray-200 dark:border-[var(--border-subtle)] rounded-2xl p-6 md:p-8">
               {allAttributes.length > 0 ? (
                 <div className="space-y-4">
-                  {product.mainAttributes.length > 0 && (
+                  {mainAttrs.length > 0 && (
                     <div>
                       <h3 className="text-xs font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-3">
                         Características principales
                       </h3>
                       <div className="flex flex-wrap gap-2">
-                        {product.mainAttributes
-                          .flatMap((a) => a.values)
+                        {mainAttrs.flatMap((a) => a.values)
                           .map((val, i) => {
                             const label =
                               typeof val === "object" && val !== null
@@ -563,14 +565,13 @@ export function ProductDetailPageClient({
                       </div>
                     </div>
                   )}
-                  {product.additionalAttributes.length > 0 && (
+                  {additionalAttrs.length > 0 && (
                     <div>
                       <h3 className="text-xs font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-3">
                         Características adicionales
                       </h3>
                       <div className="flex flex-wrap gap-2">
-                        {product.additionalAttributes
-                          .flatMap((a) => a.values)
+                        {additionalAttrs.flatMap((a) => a.values)
                           .map((val, i) => {
                             const label =
                               typeof val === "object" && val !== null

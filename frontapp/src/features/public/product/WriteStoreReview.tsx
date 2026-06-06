@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Star, Loader2, AlertCircle } from 'lucide-react';
-import { Button } from '@/components/UI/button';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { LARAVEL_API_URL } from '@/shared/lib/config/flags';
 
@@ -77,7 +77,7 @@ export function WriteStoreReview({ storeSlug, onSuccess, onCancel }: Props) {
   // ⚠️ NOTA: Asegúrate de definir de dónde viene 'status' si usas NextAuth.
   // Por ahora lo dejamos simulado o puedes usar un estado/hook real aquí:
   // const { status } = useSession();
-  const status = 'authenticated';
+  const status: any = 'authenticated';
 
   if (status === 'unauthenticated') {
     return (

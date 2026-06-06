@@ -1,64 +1,20 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/shared/lib/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import Icon from '@/components/ui/Icon';
-
-interface Address {
-  id: number;
-  etiqueta: 'casa' | 'trabajo' | 'otro';
-  destinatario: string;
-  pais: string;
-  departamento: string;
-  provincia: string;
-  distrito: string;
-  avenida: string;
-  numero: string;
-  pisoLote: string;
-  referencia: string;
-  is_default: boolean;
-}
-
-const mockAddresses: Address[] = [
-  {
-    id: 1,
-    etiqueta: 'casa',
-    destinatario: 'Jeyson Demo',
-    pais: 'Perú',
-    departamento: 'Lima',
-    provincia: 'Lima',
-    distrito: 'Miraflores',
-    avenida: 'Av. Larco',
-    numero: '123',
-    pisoLote: 'Dpto 501',
-    referencia: 'Frente al parque central',
-    is_default: true,
-  },
-  {
-    id: 2,
-    etiqueta: 'trabajo',
-    destinatario: 'Jeyson Demo',
-    pais: 'Perú',
-    departamento: 'Lima',
-    provincia: 'Lima',
-    distrito: 'San Isidro',
-    avenida: 'Av. Javier Prado',
-    numero: '456',
-    pisoLote: 'Piso 10',
-    referencia: 'Edificio Torre Azul',
-    is_default: false,
-  },
-];
+import { addressApi, Address } from '@/shared/lib/api/addressRepository';
 
 export default function CustomerAddressesPage() {
   const { isAuthenticated, loading } = useAuth();
   const router = useRouter();
-  
-  const [addresses, setAddresses] = useState<Address[]>(mockAddresses);
+
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [fetching, setFetching] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingAddress, setEditingAddress] = useState<Address | null>(null);
-  
+
   const [formData, setFormData] = useState<Partial<Address>>({
     etiqueta: undefined,
     destinatario: '',
@@ -68,10 +24,28 @@ export default function CustomerAddressesPage() {
     distrito: '',
     avenida: '',
     numero: '',
-    pisoLote: '',
+    piso_lote: '',
     referencia: '',
     is_default: false,
   });
+
+  const loadAddresses = useCallback(async () => {
+    try {
+      setFetching(true);
+      const data = await addressApi.list();
+      setAddresses(data);
+    } catch {
+      setAddresses([]);
+    } finally {
+      setFetching(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!loading && isAuthenticated) {
+      loadAddresses();
+    }
+  }, [loading, isAuthenticated, loadAddresses]);
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
@@ -90,7 +64,7 @@ export default function CustomerAddressesPage() {
       distrito: '',
       avenida: '',
       numero: '',
-      pisoLote: '',
+      piso_lote: '',
       referencia: '',
       is_default: addresses.length === 0,
     });
@@ -99,42 +73,72 @@ export default function CustomerAddressesPage() {
 
   const openEditModal = (address: Address) => {
     setEditingAddress(address);
-    setFormData({ ...address });
+    setFormData({
+      etiqueta: address.etiqueta,
+      destinatario: address.destinatario,
+      pais: address.pais,
+      departamento: address.departamento,
+      provincia: address.provincia,
+      distrito: address.distrito,
+      avenida: address.avenida,
+      numero: address.numero,
+      piso_lote: address.piso_lote,
+      referencia: address.referencia,
+      is_default: address.is_default,
+    });
     setShowModal(true);
   };
 
-  const deleteAddress = (id: number) => {
-    if (confirm('¿Eliminar Dirección? Esta ubicación deje de estar disponible.')) {
-      setAddresses(addresses.filter(a => a.id !== id));
+  const deleteAddress = async (id: number) => {
+    if (confirm('¿Eliminar Dirección? Esta ubicación dejará de estar disponible.')) {
+      try {
+        await addressApi.delete(id);
+        setAddresses(prev => prev.filter(a => a.id !== id));
+      } catch (err) {
+        console.error('Error al eliminar:', err);
+      }
     }
   };
 
-  const setAsDefault = (id: number) => {
-    setAddresses(addresses.map(a => ({
-      ...a,
-      is_default: a.id === id,
-    })));
+  const setAsDefault = async (id: number) => {
+    try {
+      const updated = await addressApi.setDefault(id);
+      setAddresses(prev => prev.map(a => ({
+        ...a,
+        is_default: a.id === updated.id,
+      })));
+    } catch (err) {
+      console.error('Error al establecer como predeterminada:', err);
+    }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    let updatedAddresses = [...addresses];
-    
-    if (formData.is_default) {
-      updatedAddresses = updatedAddresses.map(a => ({ ...a, is_default: false }));
+    try {
+      const payload = {
+        etiqueta: formData.etiqueta,
+        destinatario: formData.destinatario,
+        pais: formData.pais,
+        departamento: formData.departamento,
+        provincia: formData.provincia,
+        distrito: formData.distrito,
+        avenida: formData.avenida,
+        numero: formData.numero,
+        piso_lote: formData.piso_lote,
+        referencia: formData.referencia,
+        is_default: formData.is_default,
+      };
+      if (editingAddress) {
+        const updated = await addressApi.update(editingAddress.id, payload);
+        setAddresses(prev => prev.map(a => a.id === updated.id ? updated : a));
+      } else {
+        const created = await addressApi.create(payload);
+        setAddresses(prev => [...prev, created]);
+      }
+      setShowModal(false);
+    } catch (err) {
+      console.error('Error al guardar:', err);
     }
-    
-    if (editingAddress) {
-      updatedAddresses = updatedAddresses.map(a => 
-        a.id === editingAddress.id ? { ...a, ...formData } as Address : a
-      );
-    } else {
-      updatedAddresses.push({ ...formData, id: Date.now() } as Address);
-    }
-    
-    setAddresses(updatedAddresses);
-    setShowModal(false);
   };
 
   const getLabelStyles = (etiqueta: string | undefined) => {
@@ -150,7 +154,7 @@ export default function CustomerAddressesPage() {
     }
   };
 
-  if (loading) {
+  if (loading || fetching) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-sky-500"></div>
@@ -232,9 +236,10 @@ export default function CustomerAddressesPage() {
                   </button>
                   <button
                     onClick={() => setAsDefault(address.id)}
-                    className="w-12 h-12 flex items-center justify-center rounded-xl bg-sky-50 dark:bg-[var(--bg-muted)] text-sky-500 dark:text-[var(--icons-green)] hover:bg-sky-100 dark:hover:bg-[#2A3F33] transition-all"
+                    title={address.is_default ? 'Quitar como predeterminada' : 'Establecer como predeterminada'}
+                    className={`group w-12 h-12 flex items-center justify-center rounded-xl transition-all duration-200 ${address.is_default ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-500 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/30' : 'bg-sky-50 dark:bg-[var(--bg-muted)] text-sky-500 dark:text-[var(--icons-green)] hover:bg-sky-100 dark:hover:bg-[#2A3F33]'} hover:scale-110 active:scale-95`}
                   >
-                    <Icon name="Star" className="w-5 h-5" />
+                    <Icon name="Star" className={`w-5 h-5 transition-all duration-200 group-hover:rotate-12 ${address.is_default ? 'fill-current' : ''}`} style={address.is_default ? { fill: 'currentColor' } : undefined} />
                   </button>
                   <button
                     onClick={() => deleteAddress(address.id)}
@@ -388,8 +393,8 @@ export default function CustomerAddressesPage() {
                   <label className="text-[10px] font-black text-gray-400 dark:text-gray-400 uppercase">Piso / Lote / Dpto</label>
                   <input
                     type="text"
-                    value={formData.pisoLote}
-                    onChange={(e) => setFormData({ ...formData, pisoLote: e.target.value })}
+                    value={formData.piso_lote || ''}
+                    onChange={(e) => setFormData({ ...formData, piso_lote: e.target.value })}
                     className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)]"
                   />
                 </div>
@@ -397,7 +402,7 @@ export default function CustomerAddressesPage() {
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-gray-400 dark:text-gray-400 uppercase">Puntos de referencia</label>
                 <textarea
-                  value={formData.referencia}
+                  value={formData.referencia || ''}
                   onChange={(e) => setFormData({ ...formData, referencia: e.target.value })}
                   rows={2}
                   placeholder="Frente al parque, portón verde, etc."
@@ -408,7 +413,7 @@ export default function CustomerAddressesPage() {
                 <label className="flex items-center gap-4 cursor-pointer">
                   <input
                     type="checkbox"
-                    checked={formData.is_default}
+                    checked={formData.is_default || false}
                     onChange={(e) => setFormData({ ...formData, is_default: e.target.checked })}
                     className="w-5 h-5 accent-sky-500 dark:accent-[var(--icons-green)]"
                   />

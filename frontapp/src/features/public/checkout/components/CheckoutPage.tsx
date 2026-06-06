@@ -1,13 +1,3 @@
-/**
- * CheckoutPage.tsx - VERSIÓN ACTUALIZADA
- * ARCHIVO: src/features/public/checkout/components/CheckoutPage.tsx
- *
- * CAMBIOS vs versión anterior:
- *  - Llama a useCheckoutSubmit() al montar → carga el carrito real del backend
- *  - Muestra error si falla la carga
- *  - El resto del comportamiento es idéntico
- */
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -31,7 +21,7 @@ export default function CheckoutPage() {
   const orderResult = useCheckoutStore((s) => s.orderResult);
   const isProcessing = useCheckoutStore((s) => s.isProcessing);
 
-  // ← NUEVO: inicializa el hook que carga el carrito del backend al montar
+  // Hook que carga el carrito del backend al montar
   const { isLoading, error, clearError } = useCheckoutSubmit();
 
   const [showPostCompra, setShowPostCompra] = useState(false);
@@ -48,8 +38,9 @@ export default function CheckoutPage() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#0A0F0D] antialiased">
       <div className="min-h-screen bg-white dark:bg-[var(--bg-primary)]">
-        {/* Sticky header */}
+        {/* Sticky top bar — logo + compact step circles */}
         <div
+          id="checkout-top-wrapper"
           className="sticky top-0 z-[10000] bg-white dark:bg-[var(--bg-secondary)]
           border-b border-gray-100 dark:border-[var(--border-subtle)]
           shadow-[0_1px_4px_rgba(0,0,0,0.06)] dark:shadow-none"
@@ -57,6 +48,7 @@ export default function CheckoutPage() {
           <CheckoutStepBar />
         </div>
 
+        {/* Dynamic header — gradient with step title */}
         <CheckoutHeader />
 
         {/* Error de carga del carrito */}
@@ -80,6 +72,7 @@ export default function CheckoutPage() {
 
         {/* Contenido principal */}
         <div
+          id="checkout-main-content"
           className={`transition-all duration-700 ${isProcessing ? 'blur-sm pointer-events-none' : ''}`}
         >
           <div className="max-w-6xl mx-auto px-4 pt-6 pb-8">
@@ -87,11 +80,9 @@ export default function CheckoutPage() {
             {currentStep === 1 && (
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2">
-                  {/* CartItemList ya lee del checkoutStore que useCheckoutSubmit pobló */}
                   <CartItemList />
                 </div>
                 <div className="lg:col-span-1">
-                  {/* CartSummary muestra el resumen y el botón para avanzar */}
                   <CartSummary onContinue={() => setStep(2)} />
                 </div>
               </div>

@@ -3,7 +3,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Service, Specialist, Appointment } from '../types';
 import { useToast } from '@/shared/lib/context/ToastContext';
-import { serviceApi, bookingApi } from '@/shared/lib/api/serviceRepository';
+import { serviceRepository as serviceApi } from '@/shared/lib/api/serviceRepository';
+import { bookingRepository as bookingApi } from '@/shared/lib/api/bookingRepository';
 import { USE_MOCKS } from '@/shared/lib/config/flags';
 
 export function useSellerServices() {
@@ -31,7 +32,7 @@ export function useSellerServices() {
             avatar_chars: 'JP',
             color: '#f59e0b',
           },
-        ] as Specialist[];
+        ] as unknown as Specialist[];
       }
       try {
         return [] as Specialist[];
@@ -82,7 +83,7 @@ export function useSellerServices() {
               dias: ['Mar', 'Jue'],
             },
           },
-        ] as Service[];
+        ] as unknown as Service[];
       }
       try {
         return (await serviceApi.list()) as unknown as Service[];
@@ -109,7 +110,7 @@ export function useSellerServices() {
             cliente: 'Carlos Rodríguez',
             servicio: 'Evaluación Nutricional Integral',
           },
-        ] as Appointment[];
+        ] as unknown as Appointment[];
       }
       try {
         return (await bookingApi.sellerBookings()) as unknown as Appointment[];

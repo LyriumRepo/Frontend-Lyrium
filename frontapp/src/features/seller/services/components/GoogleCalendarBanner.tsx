@@ -109,7 +109,7 @@ export default function GoogleCalendarBanner() {
     setDisconnecting(true);
     try {
       await disconnectGoogleCalendar();
-      setStatus((prev) =>
+      setStatus((prev: CalendarStatus | null) =>
         prev ? { ...prev, connected: false, calendar_id: null } : null,
       );
       setFeedback({

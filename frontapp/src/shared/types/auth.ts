@@ -10,17 +10,20 @@ export interface User {
     id: number;
     username: string;
     email: string;
+    secondary_email?: string;
     nicename: string;
     display_name: string;
     role: UserRole;
     avatar?: string;
     phone?: string;
+    phone_2?: string;
+    landline?: string;
+    birthday?: string;
     document_type?: 'DNI' | 'CE' | 'PAS' | 'RUC';
     document_number?: string;
     location?: UserLocation;
     admin_nombre?: string;
     admin_dni?: string;
-    phone_2?: string;
 }
 
 export interface AuthState {

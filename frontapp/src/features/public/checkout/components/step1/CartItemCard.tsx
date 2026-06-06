@@ -7,9 +7,12 @@ import type { CartItem } from '@/store/checkoutStore';
 interface Props {
     item: CartItem;
     onToggle: (id: number) => void;
+    onRemove?: (id: number) => void;
+    onIncrease?: (id: number) => void;
+    onDecrease?: (id: number) => void;
 }
 
-export default function CartItemCard({ item, onToggle }: Props) {
+export default function CartItemCard({ item, onToggle, onRemove, onIncrease, onDecrease }: Props) {
     const savings = (item.originalPrice - item.price) * item.quantity;
 
     return (
@@ -54,15 +57,27 @@ export default function CartItemCard({ item, onToggle }: Props) {
                     {/* Qty + Remove */}
                     <div className="flex items-center gap-2">
                         <div className="flex items-center gap-1 border border-gray-200 dark:border-[var(--border-subtle)] rounded-xl overflow-hidden">
-                            <button className="p-1.5 hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] transition-colors text-gray-500 dark:text-[var(--text-muted)]">
+                            <button 
+                                type="button"
+                                onClick={() => onDecrease?.(item.id)}
+                                className="p-1.5 hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] transition-colors text-gray-500 dark:text-[var(--text-muted)]"
+                            >
                                 <Minus className="w-3 h-3" />
                             </button>
                             <span className="px-2 text-sm font-bold text-gray-800 dark:text-[var(--text-primary)]">{item.quantity}</span>
-                            <button className="p-1.5 hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] transition-colors text-gray-500 dark:text-[var(--text-muted)]">
+                            <button 
+                                type="button"
+                                onClick={() => onIncrease?.(item.id)}
+                                className="p-1.5 hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] transition-colors text-gray-500 dark:text-[var(--text-muted)]"
+                            >
                                 <Plus className="w-3 h-3" />
                             </button>
                         </div>
-                        <button className="p-1.5 text-gray-300 dark:text-[var(--text-muted)] hover:text-rose-500 transition-colors rounded-lg hover:bg-rose-50 dark:hover:bg-rose-900/20">
+                        <button 
+                            type="button"
+                            onClick={() => onRemove?.(item.id)}
+                            className="p-1.5 text-gray-300 dark:text-[var(--text-muted)] hover:text-rose-500 transition-colors rounded-lg hover:bg-rose-50 dark:hover:bg-rose-900/20"
+                        >
                             <Trash2 className="w-4 h-4" />
                         </button>
                     </div>

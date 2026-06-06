@@ -536,7 +536,7 @@ export default function ProductModerationModal({
                   )}
 
                   {/* Información nutricional */}
-                  {detail.nutritional_info?.rows?.length > 0 && (
+                  {(detail.nutritional_info?.rows?.length ?? 0) > 0 && (
                     <div
                       className="p-4"
                       style={{
@@ -549,7 +549,7 @@ export default function ProductModerationModal({
                         <Leaf className="w-3 h-3 text-emerald-500" />{' '}
                         Información Nutricional
                       </p>
-                      {detail.nutritional_info.serving_note && (
+                      {detail.nutritional_info?.serving_note && (
                         <p className="text-[10px] italic text-[var(--text-secondary)] mb-3">
                           {detail.nutritional_info.serving_note}
                         </p>
@@ -568,7 +568,7 @@ export default function ProductModerationModal({
                           </tr>
                         </thead>
                         <tbody>
-                          {detail.nutritional_info.rows.map((row, i) => (
+                          {detail.nutritional_info?.rows.map((row, i) => (
                             <tr
                               key={i}
                               style={{

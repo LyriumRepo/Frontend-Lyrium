@@ -1,55 +1,49 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/shared/lib/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import Icon from '@/components/ui/Icon';
-
-interface PaymentMethod {
-  id: number;
-  tipo_metodo: 'tarjeta' | 'yape' | 'plin';
-  documento: string;
-  titular: string;
-  detalle_extra: string;
-  is_default: boolean;
-}
-
-interface BillingData {
-  ruc_dni: string;
-  razon_social: string;
-  direccion_fiscal: string;
-}
-
-const mockMethods: PaymentMethod[] = [
-  { id: 1, tipo_metodo: 'tarjeta', documento: '**** **** **** 4242', titular: 'Jeyson Demo', detalle_extra: '12/25', is_default: true },
-  { id: 2, tipo_metodo: 'yape', documento: '900 000 123', titular: 'Jeyson Demo', detalle_extra: 'Yape Directo', is_default: false },
-];
-
-const mockBilling: BillingData = {
-  ruc_dni: '10745678901',
-  razon_social: 'Jeyson Demo EIRL',
-  direccion_fiscal: 'Av. Principal 123, Lima',
-};
+import { paymentMethodApi, PaymentMethod } from '@/shared/lib/api/paymentMethodRepository';
 
 export default function CustomerPaymentMethodsPage() {
   const { isAuthenticated, loading } = useAuth();
   const router = useRouter();
-  
-  const [methods, setMethods] = useState<PaymentMethod[]>(mockMethods);
-  const [billingData, setBillingData] = useState<BillingData>(mockBilling);
+
+  const [methods, setMethods] = useState<PaymentMethod[]>([]);
+  const [fetching, setFetching] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [activeTab, setActiveTab] = useState<'pagos' | 'facturacion'>('pagos');
   const [editingMethod, setEditingMethod] = useState<PaymentMethod | null>(null);
-  
+
   const [formData, setFormData] = useState<Partial<PaymentMethod>>({
     tipo_metodo: undefined,
     documento: '',
     titular: '',
     detalle_extra: '',
     is_default: false,
+    ruc_dni: '',
+    razon_social: '',
+    direccion_fiscal: '',
   });
 
-  const [billingForm, setBillingForm] = useState<BillingData>(mockBilling);
+  const loadMethods = useCallback(async () => {
+    try {
+      setFetching(true);
+      const data = await paymentMethodApi.list();
+      setMethods(data);
+    } catch {
+      setMethods([]);
+    } finally {
+      setFetching(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!loading && isAuthenticated) {
+      loadMethods();
+    }
+  }, [loading, isAuthenticated, loadMethods]);
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
@@ -65,6 +59,9 @@ export default function CustomerPaymentMethodsPage() {
       titular: '',
       detalle_extra: '',
       is_default: methods.length === 0,
+      ruc_dni: '',
+      razon_social: '',
+      direccion_fiscal: '',
     });
     setActiveTab('pagos');
     setShowModal(true);
@@ -73,48 +70,77 @@ export default function CustomerPaymentMethodsPage() {
   const openEditModal = (method: PaymentMethod) => {
     setEditingMethod(method);
     setFormData({
-      tipo_metodo: method.tipo_metodo as 'tarjeta' | 'yape' | 'plin',
+      tipo_metodo: method.tipo_metodo,
       documento: method.documento,
       titular: method.titular,
       detalle_extra: method.detalle_extra,
       is_default: method.is_default,
+      ruc_dni: method.ruc_dni,
+      razon_social: method.razon_social,
+      direccion_fiscal: method.direccion_fiscal,
     });
     setActiveTab('pagos');
     setShowModal(true);
   };
 
-  const deleteMethod = (id: number) => {
+  const deleteMethod = async (id: number) => {
     if (confirm('¿Eliminar Método? Esta tarjeta o cuenta dejará de estar disponible.')) {
-      setMethods(methods.filter(m => m.id !== id));
+      try {
+        await paymentMethodApi.delete(id);
+        setMethods(prev => prev.filter(m => m.id !== id));
+      } catch (err) {
+        console.error('Error al eliminar:', err);
+      }
     }
   };
 
-  const handleSubmitPayment = (e: React.FormEvent) => {
+  const handleSubmitPayment = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    let updatedMethods = [...methods];
-    
-    if (formData.is_default) {
-      updatedMethods = updatedMethods.map(m => ({ ...m, is_default: false }));
+    try {
+      const payload = {
+        tipo_metodo: formData.tipo_metodo,
+        documento: formData.documento,
+        titular: formData.titular,
+        detalle_extra: formData.detalle_extra,
+        is_default: formData.is_default,
+      };
+      if (editingMethod) {
+        const updated = await paymentMethodApi.update(editingMethod.id, payload);
+        setMethods(prev => prev.map(m => m.id === updated.id ? updated : m));
+      } else {
+        const created = await paymentMethodApi.create(payload);
+        setMethods(prev => [...prev, created]);
+      }
+      setShowModal(false);
+    } catch (err) {
+      console.error('Error al guardar:', err);
     }
-    
-    if (editingMethod) {
-      updatedMethods = updatedMethods.map(m => 
-        m.id === editingMethod.id ? { ...m, ...formData } as PaymentMethod : m
-      );
-    } else {
-      updatedMethods.push({ ...formData, id: Date.now() } as PaymentMethod);
-    }
-    
-    setMethods(updatedMethods);
-    setShowModal(false);
   };
 
-  const handleSubmitBilling = (e: React.FormEvent) => {
+  const handleSubmitBilling = async (e: React.FormEvent) => {
     e.preventDefault();
-    setBillingData(billingForm);
-    alert('Datos guardados correctamente');
-    setShowModal(false);
+    try {
+      const payload = {
+        ruc_dni: formData.ruc_dni,
+        razon_social: formData.razon_social,
+        direccion_fiscal: formData.direccion_fiscal,
+      };
+      if (editingMethod) {
+        const updated = await paymentMethodApi.update(editingMethod.id, payload);
+        setMethods(prev => prev.map(m => m.id === updated.id ? updated : m));
+      } else {
+        const created = await paymentMethodApi.create({
+          tipo_metodo: 'tarjeta',
+          documento: '-',
+          titular: '-',
+          ...payload,
+        });
+        setMethods(prev => [...prev, created]);
+      }
+      setShowModal(false);
+    } catch (err) {
+      console.error('Error al guardar datos fiscales:', err);
+    }
   };
 
   const getMethodStyles = (tipo: string | undefined) => {
@@ -130,7 +156,7 @@ export default function CustomerPaymentMethodsPage() {
     }
   };
 
-  if (loading) {
+  if (loading || fetching) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-sky-500"></div>
@@ -333,7 +359,7 @@ export default function CustomerPaymentMethodsPage() {
                       <label className="text-[10px] font-black text-gray-400 dark:text-gray-400 uppercase">Vencimiento (MM/YY)</label>
                       <input
                         type="text"
-                        value={formData.detalle_extra}
+                        value={formData.detalle_extra || ''}
                         onChange={(e) => setFormData({ ...formData, detalle_extra: e.target.value })}
                         placeholder="00/00"
                         className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)]"
@@ -345,7 +371,7 @@ export default function CustomerPaymentMethodsPage() {
                     <label className="flex items-center gap-4 cursor-pointer">
                       <input
                         type="checkbox"
-                        checked={formData.is_default}
+                        checked={formData.is_default || false}
                         onChange={(e) => setFormData({ ...formData, is_default: e.target.checked })}
                         className="w-5 h-5 accent-sky-500 dark:accent-[var(--icons-green)]"
                       />
@@ -378,8 +404,8 @@ export default function CustomerPaymentMethodsPage() {
                       <label className="text-[10px] font-black text-gray-400 dark:text-gray-400 uppercase">RUC / DNI</label>
                       <input
                         type="text"
-                        value={billingForm.ruc_dni}
-                        onChange={(e) => setBillingForm({ ...billingForm, ruc_dni: e.target.value })}
+                        value={formData.ruc_dni || ''}
+                        onChange={(e) => setFormData({ ...formData, ruc_dni: e.target.value })}
                         required
                         className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)]"
                       />
@@ -388,8 +414,8 @@ export default function CustomerPaymentMethodsPage() {
                       <label className="text-[10px] font-black text-gray-400 dark:text-gray-400 uppercase">Razón Social</label>
                       <input
                         type="text"
-                        value={billingForm.razon_social}
-                        onChange={(e) => setBillingForm({ ...billingForm, razon_social: e.target.value })}
+                        value={formData.razon_social || ''}
+                        onChange={(e) => setFormData({ ...formData, razon_social: e.target.value })}
                         required
                         className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)]"
                       />
@@ -400,8 +426,8 @@ export default function CustomerPaymentMethodsPage() {
                     <label className="text-[10px] font-black text-gray-400 dark:text-gray-400 uppercase">Dirección Fiscal</label>
                     <input
                       type="text"
-                      value={billingForm.direccion_fiscal}
-                      onChange={(e) => setBillingForm({ ...billingForm, direccion_fiscal: e.target.value })}
+                      value={formData.direccion_fiscal || ''}
+                      onChange={(e) => setFormData({ ...formData, direccion_fiscal: e.target.value })}
                       required
                       className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)]"
                     />

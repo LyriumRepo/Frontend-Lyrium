@@ -1,19 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/shared/lib/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import Icon from '@/components/ui/Icon';
-
-interface NotificationSettings {
-  email_order: boolean;
-  email_promotions: boolean;
-  email_newsletter: boolean;
-  sms_order: boolean;
-  push_notifications: boolean;
-}
+import { settingsApi, NotificationSettings } from '@/shared/lib/api/settingsRepository';
 
 const defaultSettings: NotificationSettings = {
+  id: 0,
+  user_id: 0,
   email_order: true,
   email_promotions: true,
   email_newsletter: false,
@@ -25,14 +20,29 @@ export default function CustomerSettingsPage() {
   const { user, isAuthenticated, loading } = useAuth();
   const router = useRouter();
   const [settings, setSettings] = useState<NotificationSettings>(defaultSettings);
+  const [fetching, setFetching] = useState(true);
   const [saving, setSaving] = useState(false);
+
+  const loadSettings = useCallback(async () => {
+    try {
+      setFetching(true);
+      const data = await settingsApi.get();
+      setSettings(data);
+    } catch {
+      setSettings(defaultSettings);
+    } finally {
+      setFetching(false);
+    }
+  }, []);
 
   useEffect(() => {
     if (loading) return;
     if (!isAuthenticated) {
       router.push('/login');
+      return;
     }
-  }, [loading, isAuthenticated, router]);
+    loadSettings();
+  }, [loading, isAuthenticated, router, loadSettings]);
 
   const handleToggle = (key: keyof NotificationSettings) => {
     setSettings(prev => ({ ...prev, [key]: !prev[key] }));
@@ -40,12 +50,23 @@ export default function CustomerSettingsPage() {
 
   const handleSave = async () => {
     setSaving(true);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setSaving(false);
-    alert('Configuración guardada correctamente');
+    try {
+      const updated = await settingsApi.update({
+        email_order: settings.email_order,
+        email_promotions: settings.email_promotions,
+        email_newsletter: settings.email_newsletter,
+        sms_order: settings.sms_order,
+        push_notifications: settings.push_notifications,
+      });
+      setSettings(updated);
+    } catch (err) {
+      console.error('Error al guardar configuración:', err);
+    } finally {
+      setSaving(false);
+    }
   };
 
-  if (loading || !user) {
+  if (loading || fetching) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-sky-500"></div>

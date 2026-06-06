@@ -604,7 +604,7 @@ export const menuItems: MenuItem[] = [
                     },
                 ]
             },
-        ],
+        ]
     },
     {
         label: 'SERVICIOS',

@@ -6,9 +6,7 @@ export class LaravelProductRepository implements IProductRepository {
         return process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://localhost:8000/api';
     }
 
-    
-    // ✅ FIX: La cookie es httpOnly — solo es accesible desde el servidor.
-    // Siempre usar next/headers, nunca document.cookie.
+
     private async getAuthHeaders(): Promise<HeadersInit> {
         const token = await this.getToken();
 
@@ -27,6 +25,8 @@ export class LaravelProductRepository implements IProductRepository {
 
         // SERVIDOR
         try {
+
+
             const { cookies } = await import('next/headers');
 
             const cookieStore = await cookies();
@@ -67,7 +67,7 @@ export class LaravelProductRepository implements IProductRepository {
         const params = new URLSearchParams();
         if (filters?.search) params.set('search', filters.search);
         if (filters?.category) params.set('category', filters.category);
-
+        
         const query = params.toString() ? `?${params.toString()}` : '';
         return this.request<Product[]>(`/products${query}`);
     }
@@ -77,8 +77,8 @@ export class LaravelProductRepository implements IProductRepository {
             const data = await this.request<any>(`/products/${id}`);
             return {
                 id: data.id?.toString() || id,
+                type: data.type || 'physical',
                 name: data.name || '',
-                type: data.type || '',
                 category: data.categories?.[0]?.slug || '',
                 price: parseFloat(data.price || '0'),
                 stock: data.stock || 0,
@@ -87,8 +87,9 @@ export class LaravelProductRepository implements IProductRepository {
                 description: data.description || '',
                 image: data.images?.[0]?.src || '',
                 sticker: data.sticker || null,
-                mainAttributes: data.mainAttributes || [],
-                additionalAttributes: data.additionalAttributes || [],
+                mainAttributes: [],
+                additionalAttributes: [],
+                nutritionalAttributes: [],
                 createdAt: data.created_at || new Date().toISOString(),
             };
         } catch {
@@ -97,37 +98,28 @@ export class LaravelProductRepository implements IProductRepository {
     }
 
     async createProduct(input: CreateProductInput): Promise<Product> {
+        // No enviar imagen si es base64 (muy grande para la DB)
         const image = input.image && !input.image.startsWith('data:') ? input.image : null;
+        // Limpiar atributos vacíos
+        const isNotEmpty = (attr: { values: { label?: string; value?: string } }) =>
+            attr.values && (attr.values.label?.trim() || attr.values.value?.trim());
 
-        // Limpiar mainAttributes cuidando que values es un Record<string, string>
+        const trimValues = (attr: { values: { label?: string; value?: string } }) => ({
+            ...attr,
+            values: {
+                label: attr.values.label?.trim() || '',
+                value: attr.values.value?.trim() || '',
+            },
+        });
+
         const cleanMainAttributes = (input.mainAttributes || [])
-            .map(attr => {
-                // Convertimos el objeto values { key: value } en un array de [key, value]
-                const filteredEntries = Object.entries(attr.values || {})
-                    .filter(([_, value]) => value && value.trim() !== '');
-
-                return {
-                    ...attr,
-                    // Volvemos a transformar el array filtrado en un objeto Record
-                    values: Object.fromEntries(filteredEntries)
-                };
-            })
-            // Opcional: Eliminamos el atributo por completo si su objeto values quedó vacío
-            .filter(attr => Object.keys(attr.values).length > 0);
+            .filter(isNotEmpty)
+            .map(trimValues);
 
         // Limpiar additionalAttributes cuidando que values es un Record<string, string>
         const cleanAdditionalAttributes = (input.additionalAttributes || [])
-            .map(attr => {
-                const filteredEntries = Object.entries(attr.values || {})
-                    .filter(([_, value]) => value && value.trim() !== '');
-
-                return {
-                    ...attr,
-                    values: Object.fromEntries(filteredEntries)
-                };
-            })
-            .filter(attr => Object.keys(attr.values).length > 0);
-
+            .filter(isNotEmpty)
+            .map(trimValues);
         return this.request<Product>('/products', {
             method: 'POST',
             body: JSON.stringify({
@@ -148,21 +140,29 @@ export class LaravelProductRepository implements IProductRepository {
 
     async updateProduct(id: string, input: UpdateProductInput): Promise<Product> {
         const updateData: Record<string, unknown> = {};
-
+        
+        // Always send these fields
         if (input.name !== undefined) updateData.name = input.name;
         if (input.description !== undefined) updateData.description = input.description ?? '';
         if (input.price !== undefined) updateData.price = Number(input.price);
         if (input.stock !== undefined) updateData.stock = Number(input.stock);
         if (input.category !== undefined) updateData.category = input.category || null;
-
+        
+        // Handle image - only send if not base64 and not empty
         if (input.image !== undefined && input.image !== null && !input.image.startsWith('data:')) {
             updateData.image = input.image;
         }
-
+        
         if (input.discountPercentage !== undefined) updateData.discountPercentage = input.discountPercentage;
+        
+        // Sticker
         if (input.sticker !== undefined) updateData.sticker = input.sticker;
+        
+        // Physical fields
         if (input.weight !== undefined) updateData.weight = input.weight ? Number(input.weight) : null;
         if (input.dimensions !== undefined) updateData.dimensions = input.dimensions || null;
+        
+        // Attributes
         if (input.mainAttributes !== undefined) updateData.mainAttributes = input.mainAttributes;
         if (input.additionalAttributes !== undefined) updateData.additionalAttributes = input.additionalAttributes;
 
@@ -173,7 +173,9 @@ export class LaravelProductRepository implements IProductRepository {
     }
 
     async deleteProduct(id: string): Promise<boolean> {
-        await this.request(`/products/${id}`, { method: 'DELETE' });
+        await this.request(`/products/${id}`, {
+            method: 'DELETE',
+        });
         return true;
     }
 
@@ -194,14 +196,14 @@ export class LaravelProductRepository implements IProductRepository {
     async uploadProductImage(productId: string, file: File): Promise<{ url: string }> {
         const token = await this.getToken();
         const baseUrl = this.getBaseUrl();
-
+        
         const formData = new FormData();
         formData.append('file', file);
-
+        
         const response = await fetch(`${baseUrl}/products/${productId}/media`, {
             method: 'POST',
             headers: {
-                ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
             },
             body: formData,
         });

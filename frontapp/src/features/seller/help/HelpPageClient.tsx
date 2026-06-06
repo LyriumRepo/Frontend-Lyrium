@@ -45,7 +45,7 @@ export function HelpPageClient() {
     const closeNewTicketForm = () => setShowNewTicketForm(false);
 
     const createTicket = async (data: NewTicketPayload) => {
-        await handleCreateTicket(data);
+        await handleCreateTicket(data as any);
         closeNewTicketForm();
     };
 

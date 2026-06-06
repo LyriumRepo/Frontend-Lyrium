@@ -111,11 +111,11 @@ export function useChangePassword() {
         // Mapear errores de campo que viene del backend (Laravel 422)
         if (result.errors) {
           const mapped: Record<string, string> = {};
-          if (result.errors.current_password?.[0]) {
-            mapped['actual'] = result.errors.current_password[0];
+          if (result.errors.actual?.[0]) {
+            mapped['actual'] = result.errors.actual[0];
           }
-          if (result.errors.password?.[0]) {
-            mapped['nueva'] = result.errors.password[0];
+          if (result.errors.nueva?.[0]) {
+            mapped['nueva'] = result.errors.nueva[0];
           }
           setFieldErrors(mapped);
         }

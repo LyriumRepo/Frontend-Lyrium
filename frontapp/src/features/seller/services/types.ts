@@ -96,6 +96,11 @@ export interface Appointment {
   sesion: Session;
   cuposOcupados: number;
   estado: 'pendiente' | 'confirmada' | 'cancelada';
+  hora?: string;
+  cliente?: string;
+  servicio?: string;
+  duracionMinutos?: number;
+  especialistaId?: number;
 }
 
 // ─── Lookup maps ──────────────────────────────────────────────────────────────
@@ -193,4 +198,13 @@ export function countTotalSessions(
  */
 export function canPublish(service: Service): boolean {
   return service.especialistasAsignados.length >= 1;
+}
+
+export interface CalendarStatus {
+  connected: boolean;
+  calendar_id?: string | null;
+}
+
+export interface AuthUrlResponse {
+  url: string;
 }

@@ -5,6 +5,29 @@
  */
 
 import { LARAVEL_API_URL } from '@/shared/lib/config/flags';
+import { getToken } from './token-store';
+
+const LARAVEL_BASE_URL = LARAVEL_API_URL.replace(/\/api\/?$/, '');
+
+function resolveImageUrl(url: string | null | undefined): string | undefined {
+  if (!url) return undefined;
+  if (url.startsWith('http')) return url;
+  if (url.startsWith('/')) return `${LARAVEL_BASE_URL}${url}`;
+  return url;
+}
+
+function transformCartResource(data: CartResource): CartResource {
+  return {
+    ...data,
+    items: data.items.map((item) => ({
+      ...item,
+      product: {
+        ...item.product,
+        image: resolveImageUrl(item.product.image),
+      },
+    })),
+  };
+}
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -52,31 +75,8 @@ function getSessionId(): string {
   return sid;
 }
 
-let _tokenCache: { value: string | null; ts: number } | null = null;
-
-async function getAuthToken(): Promise<string | null> {
-  const now = Date.now();
-  if (_tokenCache && now - _tokenCache.ts < 30_000) {
-    return _tokenCache.value;
-  }
-  try {
-    const res = await fetch('/api/auth-token', {
-      credentials: 'include',
-      cache: 'no-store',
-    });
-    if (!res.ok) return null;
-    const { token } = await res.json();
-    const clean = token?.replace(/^["']|["']$/g, '').trim() || null;
-    _tokenCache = { value: clean, ts: now };
-    return clean;
-  } catch {
-    return null;
-  }
-}
-
 async function buildHeaders(): Promise<HeadersInit> {
-  const token = await getAuthToken();
-
+  const token = getToken();
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     Accept: 'application/json',
@@ -116,7 +116,7 @@ async function request<T>(
 export const cartApi = {
   /** Obtiene el carrito actual */
   getCart(): Promise<CartResource> {
-    return request<CartResource>('/cart');
+    return request<CartResource>('/cart').then(transformCartResource);
   },
 
   /** Agrega un producto (o incrementa cantidad si ya existe) */
@@ -124,7 +124,7 @@ export const cartApi = {
     return request<CartResource>('/cart/items', {
       method: 'POST',
       body: JSON.stringify({ product_id: productId, quantity }),
-    });
+    }).then(transformCartResource);
   },
 
   /** Actualiza la cantidad de un ítem (PUT /api/cart/items/{productId}) */
@@ -132,20 +132,20 @@ export const cartApi = {
     return request<CartResource>(`/cart/items/${productId}`, {
       method: 'PUT',
       body: JSON.stringify({ quantity }),
-    });
+    }).then(transformCartResource);
   },
 
   /** Elimina un ítem del carrito (DELETE /api/cart/items/{productId}) */
   removeItem(productId: number): Promise<CartResource> {
     return request<CartResource>(`/cart/items/${productId}`, {
       method: 'DELETE',
-    });
+    }).then(transformCartResource);
   },
 
   /** Vacía el carrito completo */
   clearCart(): Promise<CartResource> {
     return request<CartResource>('/cart/clear', {
       method: 'DELETE',
-    });
+    }).then(transformCartResource);
   },
 };

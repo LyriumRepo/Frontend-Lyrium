@@ -3,6 +3,7 @@
 import { useCallback, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCartDataStore } from "@/features/cart";
+import { getToken } from "@/shared/lib/api/token-store";
 import {
   cartApi,
   type CartResource,
@@ -51,10 +52,7 @@ export function useCartSync(): UseCartSyncReturn {
   const clearLocalCart = useCartDataStore((s) => s.clearCart);
   const setCartItems = useCartDataStore((s) => s.setCartItems);
 
-  const hasToken =
-    typeof window !== "undefined"
-      ? !!document.cookie.match(/laravel_token=/)
-      : false;
+  const hasToken = typeof window !== "undefined" ? !!getToken() : false;
 
   const {
     data: serverCart,

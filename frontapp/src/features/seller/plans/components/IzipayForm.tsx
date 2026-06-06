@@ -20,17 +20,6 @@ interface Props {
   onFailed: () => void;     // Pago fallido
 }
 
-// KR SDK types (global inyectado por el script de Izipay)
-declare global {
-  interface Window {
-    KR?: {
-      setFormConfig: (cfg: Record<string, string>) => Promise<void>;
-      renderElements: (selector: string) => void;
-      onSubmit: (cb: (data: { clientAnswer: { orderStatus: string } }) => boolean) => void;
-    };
-  }
-}
-
 let _scriptLoaded = false;
 let _cssLoaded    = false;
 
@@ -42,7 +31,8 @@ export default function IzipayForm({ config, open, onPaid, onFailed }: Props) {
     initDone.current = false;
 
     function initKR() {
-      if (!window.KR) {
+      const KR = (window as any).KR;
+      if (!KR) {
         setTimeout(initKR, 300);
         return;
       }
@@ -51,15 +41,15 @@ export default function IzipayForm({ config, open, onPaid, onFailed }: Props) {
 
       if (!config) return;
 
-      window.KR.setFormConfig({
+      KR.setFormConfig({
         formToken:       config.formToken,
         'kr-public-key': config.publicKey,
         'kr-language':   'es-PE',
       }).then(() => {
-        window.KR!.renderElements('#izipayFormContainer');
+        KR.renderElements('#izipayFormContainer');
       });
 
-      window.KR.onSubmit((paymentData) => {
+      KR.onSubmit((paymentData: any) => {
         const status = paymentData.clientAnswer.orderStatus;
         if (status === 'PAID') {
           onPaid();

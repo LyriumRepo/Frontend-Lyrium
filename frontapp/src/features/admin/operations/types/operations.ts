@@ -178,3 +178,10 @@ export interface PaginatedResponse<T> {
   data: T[];
   pagination: Pagination;
 }
+
+export interface OperationalKPI {
+  label: string;
+  val: string | number;
+  icon: string;
+  color: string;
+}

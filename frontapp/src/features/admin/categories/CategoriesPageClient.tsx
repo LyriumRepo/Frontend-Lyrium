@@ -64,7 +64,7 @@ export function CategoriesPageClient() {
 
     const handleUploadImage = useCallback(
         async (id: number, file: File) => {
-            await uploadImage(id, file);
+            return await uploadImage(id, file);
         },
         [uploadImage]
     );

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Star, Loader2, AlertCircle } from 'lucide-react';
-import { Button } from '@/components/UI/button';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { LARAVEL_API_URL } from '@/shared/lib/config/flags';
 

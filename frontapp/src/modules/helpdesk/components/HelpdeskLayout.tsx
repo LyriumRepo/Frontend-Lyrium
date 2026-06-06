@@ -109,7 +109,7 @@ export function HelpdeskLayout({
             {selectedTicket ? (
               <ChatView
                 ticket={selectedTicket}
-                onSendMessage={onSendMessage}
+                onSendMessage={(payload) => onSendMessage(payload.text, payload.isQuick)}
                 onCloseTicket={onCloseTicket}
                 isSending={isSending}
                 isClosing={isClosing}

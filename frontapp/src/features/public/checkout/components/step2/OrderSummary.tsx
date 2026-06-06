@@ -12,7 +12,7 @@
  *  - KR.onPaymentSuccess (definido en useIzipay) → setOrderResult + setStep(3)
  */
 
-import { Truck, ShieldCheck, Lock, Tag } from 'lucide-react';
+import { Truck, CreditCard, ShieldCheck, Lock, Tag, AlertCircle, X } from 'lucide-react';
 import { useCheckoutStore } from '@/store/checkoutStore';
 import { useCheckoutSubmit } from '../../hooks/useCheckoutSubmit';
 import { useIzipay } from '../../hooks/useIzipay';

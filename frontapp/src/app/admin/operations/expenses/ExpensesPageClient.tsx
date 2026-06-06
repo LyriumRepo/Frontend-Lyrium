@@ -161,7 +161,7 @@ export function ExpensesPageClient() {
               <option value="">Selecciona proveedor</option>
               {suppliers.map((s) => (
                 <option key={s.id} value={s.id}>
-                  {s.name}
+                  {s.nombre}
                 </option>
               ))}
             </select>
