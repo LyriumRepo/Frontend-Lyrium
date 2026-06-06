@@ -29,7 +29,7 @@ export default function InvoiceTable({ vouchers, onViewDetail }: InvoiceTablePro
                             <th className="px-6 py-5">Pedido</th>
                             <th className="px-6 py-5">Monto</th>
                             <th className="px-6 py-5">Fecha Emisión</th>
-                            <th className="px-6 py-5 text-center">Estado SUNAT</th>
+                            <th className="px-6 py-5 text-center">Estado</th>
                             <th className="px-6 py-5 text-right">Acciones</th>
                         </tr>
                     </thead>

@@ -11,7 +11,7 @@ interface ProductGridProps {
 }
 
 function ProductCard({ producto }: { producto: Producto }) {
-  console.log('Slug recibido:', producto.slug); // Aquí agregamos el log
+  console.log('imagen:', producto.imagen);
   return (
     <Link 
       href={producto.slug ? `/producto/${producto.slug}` : '#'}

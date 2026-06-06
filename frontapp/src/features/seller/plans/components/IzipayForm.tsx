@@ -11,6 +11,7 @@ interface IzipayConfig {
   formToken: string;
   publicKey: string;
   orderId: string;
+  formConfig?: Record<string, string>;
 }
 
 interface Props {
@@ -18,6 +19,16 @@ interface Props {
   open: boolean;
   onPaid: () => void;       // Pago exitoso → mostrar modal de espera SSE
   onFailed: () => void;     // Pago fallido
+}
+
+interface IzipaySdk {
+  setFormConfig: (cfg: Record<string, string>) => Promise<void>;
+  renderElements: (selector: string) => void;
+  onSubmit: (cb: (data: { clientAnswer: { orderStatus: string } }) => boolean) => void;
+}
+
+function getKR(): IzipaySdk | undefined {
+  return (window as unknown as { KR?: IzipaySdk }).KR;
 }
 
 let _scriptLoaded = false;
@@ -31,8 +42,8 @@ export default function IzipayForm({ config, open, onPaid, onFailed }: Props) {
     initDone.current = false;
 
     function initKR() {
-      const KR = (window as any).KR;
-      if (!KR) {
+      const kr = getKR();
+      if (!kr) {
         setTimeout(initKR, 300);
         return;
       }
@@ -41,15 +52,15 @@ export default function IzipayForm({ config, open, onPaid, onFailed }: Props) {
 
       if (!config) return;
 
-      KR.setFormConfig({
-        formToken:       config.formToken,
-        'kr-public-key': config.publicKey,
-        'kr-language':   'es-PE',
-      }).then(() => {
-        KR.renderElements('#izipayFormContainer');
+      kr.setFormConfig({
+        ...config.formConfig,
+        formToken: config.formToken,
       });
-
-      KR.onSubmit((paymentData: any) => {
+      // Renderizar elementos en el contenedor
+      setTimeout(() => {
+        kr.renderElements('#izipayFormContainer');
+      }, 100);
+      kr.onSubmit((paymentData) => {
         const status = paymentData.clientAnswer.orderStatus;
         if (status === 'PAID') {
           onPaid();

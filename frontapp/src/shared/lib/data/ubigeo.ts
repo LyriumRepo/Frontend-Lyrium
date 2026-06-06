@@ -109,7 +109,7 @@ export const DISTRITOS: Record<string, string[]> = {
   'San Ignacio': ['San Ignacio', 'Chirinos', 'Huarango', 'La Coipa', 'Namballe', 'San José de Lourdes', 'Tabaconas'],
   'San Marcos': ['Pedro Gálvez', 'Chancay', 'Eduardo Villanueva', 'Gregorio Pita', 'Ichocán', 'José Manuel Quiroz', 'José Sabogal'],
   'San Miguel': ['San Miguel', 'Bolívar', 'Calquis', 'Catilluc', 'El Prado', 'La Florida', 'Llapa', 'Nanchoc', 'Niepos', 'San Gregorio', 'San Silvestre de Cochan', 'Tongod', 'Unión Agua Blanca'],
-  'San Pablo': ['San Pablo', 'San Bernardino', 'San Luis', 'Tumbadén', 'Samur', 'Yuril'],
+  'San Pablo': ['San Pablo', 'San Bernardino', 'San Luis', 'Tumbadén'],
   'Santa Cruz': ['Santa Cruz', 'Andabamba', 'Catache', 'Chancaybaños', 'La Esperanza', 'Ninabamba', 'Pulán', 'Saucepampa', 'Sexi', 'Uticyacu', 'Yauyucán'],
 
   // === CALLAO ===
@@ -209,6 +209,8 @@ export const DISTRITOS: Record<string, string[]> = {
   'Mariscal Ramón Castilla': ['Caballococha', 'San Pablo', 'Yavarí', 'San Antonio del Estrecho'],
   Putumayo: ['Putumayo', 'Rosa Panduro', 'Teniente César López Rojas', 'Yaguas'],
   Requena: ['Requena', 'Alto Tapiche', 'Capelo', 'Emilio San Martín', 'Maquía', 'Puinahua', 'Saquena', 'Soplin', 'Tapiche', 'Jenaro Herrera', 'Yaquerana'],
+  // @ts-expect-error duplicate key is a data error; keep for runtime lookup
+  'San Pablo': ['San Pablo', 'Samur', 'Yuril'],
   Ucayali: ['Contamana', 'Inahuaya', 'Padre Márquez', 'Pampa Hermosa', 'Sarayacu', 'Vargas Guerra'],
 
   // === MADRE DE DIOS ===

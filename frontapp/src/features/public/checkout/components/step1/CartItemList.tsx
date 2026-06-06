@@ -2,17 +2,16 @@
  * CartItemList.tsx
  * ARCHIVO: src/features/public/checkout/components/step1/CartItemList.tsx
  *
- * Lista de productos del carrito en el paso 1, agrupados por tienda.
+ * Lista de productos del carrito en el paso 1.
  * Lee de useCheckoutStore (que useCheckoutSubmit ya pobló con el carrito real).
- * Sincroniza las operaciones de cantidad y eliminación con el backend.
  */
 
 'use client';
 
-import { Package, Trash2 } from 'lucide-react';
+import Image from 'next/image';
+import { Trash2 } from 'lucide-react';
 import { useCheckoutStore } from '@/store/checkoutStore';
 import { cartApi } from '@/shared/lib/api/cartRepository';
-import CartItemCard from './CartItemCard';
 
 interface Props {
   onDeleteSelected?: () => void;
@@ -71,26 +70,16 @@ export default function CartItemList({ onDeleteSelected }: Props) {
     onDeleteSelected?.();
   }
 
-  // Group by store
-  const stores = cartItems.reduce<Record<number, { name: string; items: typeof cartItems }>>((acc, item) => {
-    const storeId = item.storeId || 0;
-    const storeName = item.storeName || 'Tienda';
-    if (!acc[storeId]) {
-      acc[storeId] = { name: storeName, items: [] };
-    }
-    acc[storeId].items.push(item);
-    return acc;
-  }, {});
-
+  // ── Carrito vacío ──────────────────────────────────────────────────────────
   if (cartItems.length === 0) {
     return (
-      <div className="bg-white dark:bg-[var(--bg-card)] border border-gray-200 dark:border-[var(--border-subtle)] rounded-2xl shadow-sm p-12 text-center space-y-4">
+      <div className="rounded-2xl border border-dashed border-gray-200 dark:border-gray-700 p-12 text-center space-y-4">
         <div className="text-5xl">🛒</div>
         <p className="text-gray-500 dark:text-gray-400 font-medium">
           Tu carrito está vacío
         </p>
         <a
-          href="/productos"
+          href="/tiendas"
           className="inline-block text-sm text-sky-500 hover:underline font-medium"
         >
           Explorar productos →
@@ -100,19 +89,17 @@ export default function CartItemList({ onDeleteSelected }: Props) {
   }
 
   return (
-    <div className="bg-white dark:bg-[var(--bg-card)] border border-gray-200 dark:border-[var(--border-subtle)] rounded-2xl shadow-sm">
-      {/* Header */}
-      <div className="p-4 border-b border-gray-100 dark:border-[var(--border-subtle)] flex items-center justify-between">
-        <label className="flex items-center gap-2 cursor-pointer select-none">
+    <div className="space-y-4">
+      {/* Barra de acciones */}
+      <div className="flex items-center justify-between">
+        <label className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 cursor-pointer select-none">
           <input
             type="checkbox"
             checked={allSelected}
             onChange={(e) => toggleAll(e.target.checked)}
-            className="w-4 h-4 rounded border-gray-300 accent-sky-500"
+            className="w-4 h-4 rounded accent-sky-500"
           />
-          <span className="text-sm text-gray-600 dark:text-[var(--text-secondary)]">
-            Seleccionar todos los artículos
-          </span>
+          Seleccionar todos los artículos
         </label>
 
         {selectedCount > 0 && (
@@ -126,27 +113,87 @@ export default function CartItemList({ onDeleteSelected }: Props) {
         )}
       </div>
 
-      <div className="p-4">
-        {Object.entries(stores).map(([storeId, group]) => (
-          <div key={storeId} className="store-group mb-6 last:mb-0">
-            {/* Store header */}
-            <div className="store-header flex items-center gap-3 px-4 py-3 mb-3 rounded-2xl bg-gradient-to-r from-sky-500/5 to-lime-500/5 dark:from-sky-500/10 dark:to-lime-500/10 border border-sky-500/10 dark:border-[var(--border-subtle)]">
-              <Package className="w-4 h-4 text-sky-500 dark:text-[var(--brand-sky)]" />
-              <h3 className="text-sm font-bold text-gray-800 dark:text-[var(--text-primary)]">
-                {group.name}
-              </h3>
-            </div>
-            {/* Items */}
-            {group.items.map((item) => (
-              <CartItemCard
-                key={item.id}
-                item={item}
-                onToggle={toggleSelect}
-                onRemove={handleRemove}
-                onIncrease={(id) => handleQuantityChange(id, 1)}
-                onDecrease={(id) => handleQuantityChange(id, -1)}
+      {/* Lista de productos */}
+      <div className="space-y-3">
+        {cartItems.map((item) => (
+          <div
+            key={item.id}
+            className={`flex gap-4 p-4 rounded-2xl border transition
+              ${
+                item.selected
+                  ? 'border-sky-200 dark:border-sky-900 bg-sky-50/30 dark:bg-sky-950/20'
+                  : 'border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900/40'
+              }`}
+          >
+            {/* Checkbox */}
+            <div className="pt-1">
+              <input
+                type="checkbox"
+                checked={item.selected}
+                onChange={() => toggleSelect(item.id)}
+                className="w-4 h-4 rounded accent-sky-500 cursor-pointer"
               />
-            ))}
+            </div>
+
+            {/* Imagen */}
+            <div className="w-20 h-20 rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 flex-shrink-0">
+              {item.image ? (
+                <Image
+                  src={item.image}
+                  alt={item.name}
+                  width={80}
+                  height={80}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-2xl">
+                  📦
+                </div>
+              )}
+            </div>
+
+            {/* Info */}
+            <div className="flex-1 min-w-0">
+              <p className="font-medium text-gray-900 dark:text-white text-sm leading-tight line-clamp-2">
+                {item.name}
+              </p>
+              <p className="text-sky-600 dark:text-sky-400 font-bold text-base mt-1">
+                S/ {item.price.toFixed(2)}
+              </p>
+            </div>
+
+            {/* Cantidad + eliminar */}
+            <div className="flex flex-col items-end justify-between gap-2">
+              <button
+                onClick={() => handleRemove(item.id)}
+                className="text-gray-400 hover:text-red-500 transition"
+                title="Eliminar"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+
+              <div className="flex items-center gap-2 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+                <button
+                  onClick={() => handleQuantityChange(item.id, -1)}
+                  className="px-3 py-1.5 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition text-sm font-medium"
+                >
+                  −
+                </button>
+                <span className="w-8 text-center text-sm font-semibold text-gray-900 dark:text-white">
+                  {item.quantity}
+                </span>
+                <button
+                  onClick={() => handleQuantityChange(item.id, +1)}
+                  className="px-3 py-1.5 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition text-sm font-medium"
+                >
+                  +
+                </button>
+              </div>
+
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                S/ {(item.price * item.quantity).toFixed(2)}
+              </p>
+            </div>
           </div>
         ))}
       </div>

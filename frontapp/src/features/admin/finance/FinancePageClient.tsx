@@ -7,6 +7,7 @@ import CardProxPago from './components/CardProxPago';
 import { useToast } from '@/shared/lib/context/ToastContext';
 import BaseLoading from '@/components/ui/BaseLoading';
 import BaseStatCard from '@/components/ui/BaseStatCard';
+import { BaseDatePicker } from '@/components/ui';
 import Icon from '@/components/ui/Icon';
 import { useFinanceAnalytics } from './hooks/useFinanceAnalytics';
 import { formatCurrency } from '@/shared/lib/utils/formatters';
@@ -38,20 +39,12 @@ export function FinancePageClient(_props: FinancePageClientProps) {
     };
 
     const headerActions = (
-        <div className="flex gap-2 bg-white/10 backdrop-blur-md p-2 rounded-2xl border border-white/20">
-            <input
-                type="date"
-                value={filters.startDate}
-                onChange={(e) => setFilters(e.target.value, filters.endDate)}
-                className="text-xs bg-transparent border-none focus:ring-0 text-white placeholder-white/50 cursor-pointer"
-            />
-            <span className="text-white/30">|</span>
-            <input
-                type="date"
-                value={filters.endDate}
-                onChange={(e) => setFilters(filters.startDate, e.target.value)}
-                className="text-xs bg-transparent border-none focus:ring-0 text-white placeholder-white/50 cursor-pointer"
-            />
+        <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md p-2 rounded-2xl border border-white/20">
+            <BaseDatePicker value={filters.startDate}
+                onChange={(v) => setFilters(v, filters.endDate)} placeholder="Desde" />
+            <span className="text-white/30 text-lg font-thin">|</span>
+            <BaseDatePicker value={filters.endDate}
+                onChange={(v) => setFilters(filters.startDate, v)} placeholder="Hasta" />
             <button
                 type="button"
                 onClick={handleApplyFilters}

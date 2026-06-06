@@ -3,9 +3,9 @@
 import { useState, useCallback, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useWishlist } from '@/shared/hooks/useWishlist';
 import {
   ArrowLeft,
-  Home,
   Star,
   Heart,
   Share2,
@@ -44,30 +44,25 @@ import type {
 } from '@/features/public/product/types';
 import { useAddToCart } from '@/features/public/product/hooks/useAddToCart';
 import { useReviews } from '@/features/public/product/hooks/useReview';
-import { useWishlist } from '@/shared/hooks/useWishlist';
+import { useCarritoStore } from '@/store/carritoStore';
 import { useCurrentUser } from '@/features/public/product/hooks/useCurrentUser';
 import { WriteProductReview } from '@/features/public/product/WriteProductReview';
-import { useCarritoStore } from '@/store/carritoStore';
 import { LARAVEL_API_URL } from '@/shared/lib/config/flags';
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function formatPrice(price: number) {
-  return `S/ ${price.toFixed(2)}`;
-}
-
-function discountPercent(price: number, regular: number) {
-  if (!regular || regular <= price) return 0;
-  return Math.round(((regular - price) / regular) * 100);
-}
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('es-PE', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
-}
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from '@/components/ui/Cardt';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Separator } from '@/components/ui/separator';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { cn } from '@/lib/utils';
 
 // ─── Token (mismo mecanismo que WriteProductReview) ───────────────────────────
 
@@ -89,6 +84,52 @@ async function getClientToken(): Promise<string | null> {
   } catch {
     return null;
   }
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function formatPrice(price: number) {
+  return `S/ ${price.toFixed(2)}`;
+}
+
+function discountPercent(price: number, regular: number) {
+  if (!regular || regular <= price) return 0;
+  return Math.round(((regular - price) / regular) * 100);
+}
+
+function formatDate(iso: string) {
+  return new Date(iso).toLocaleDateString('es-PE', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+}
+
+// ─── Stars ────────────────────────────────────────────────────────────────────
+
+function Stars({
+  value,
+  size = 'sm',
+}: {
+  value: number;
+  size?: 'sm' | 'md' | 'lg';
+}) {
+  const sz = { sm: 'w-3 h-3', md: 'w-[14px] h-[14px]', lg: 'w-5 h-5' }[size];
+  return (
+    <div className="flex gap-0.5">
+      {[1, 2, 3, 4, 5].map((n) => (
+        <Star
+          key={n}
+          className={cn(
+            sz,
+            n <= Math.round(value)
+              ? 'fill-yellow-400 text-yellow-400'
+              : 'fill-muted text-muted',
+          )}
+        />
+      ))}
+    </div>
+  );
 }
 
 // ─── Galería ──────────────────────────────────────────────────────────────────
@@ -116,83 +157,66 @@ function ProductGallery({
     '/no-image.png';
 
   return (
-    <div className="space-y-3">
-      {/* Imagen principal */}
-      <div className="relative aspect-square overflow-hidden bg-[#f2f0ea] dark:bg-[var(--bg-secondary)] border border-[rgba(15,14,12,0.08)] dark:border-[var(--border-subtle)] group">
+    <div className="flex flex-col h-full">
+      <div className="relative flex-1 min-h-[400px] lg:min-h-0 rounded-xl overflow-hidden bg-muted border border-border group">
+
         <Image
           key={src}
           src={src}
           alt={images[active]?.alt ?? name}
           fill
-          sizes="(max-width:768px) 100vw, 40vw"
+          sizes="(max-width:768px) 100vw, 50vw"
           className="object-contain p-8 transition-transform duration-500 ease-out group-hover:scale-[1.04]"
           priority
         />
-
-        {/* Flechas de navegación */}
         {images.length > 1 && (
           <>
-            <button
+            <Button
+              variant="outline"
+              size="icon"
               onClick={prev}
               aria-label="Anterior"
-              className="
-                absolute left-3 top-1/2 -translate-y-1/2
-                w-9 h-9 bg-white dark:bg-[var(--bg-card)] border border-[rgba(15,14,12,0.1)] dark:border-[var(--border-subtle)]
-                flex items-center justify-center
-                opacity-0 group-hover:opacity-100 transition-opacity duration-200
-                text-[#3a3935] dark:text-[var(--text-primary)] hover:bg-[#f2f0ea] dark:bg-[var(--bg-secondary)] dark:hover:bg-[var(--bg-card)]
-              "
+              className="absolute left-3 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 backdrop-blur-sm"
             >
               <ChevronLeft className="w-4 h-4" />
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
               onClick={next}
               aria-label="Siguiente"
-              className="
-                absolute right-3 top-1/2 -translate-y-1/2
-                w-9 h-9 bg-white dark:bg-[var(--bg-card)] border border-[rgba(15,14,12,0.1)] dark:border-[var(--border-subtle)]
-                flex items-center justify-center
-                opacity-0 group-hover:opacity-100 transition-opacity duration-200
-                text-[#3a3935] dark:text-[var(--text-primary)] hover:bg-[#f2f0ea] dark:bg-[var(--bg-secondary)] dark:hover:bg-[var(--bg-card)]
-              "
+              className="absolute right-3 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 backdrop-blur-sm"
             >
               <ChevronRight className="w-4 h-4" />
-            </button>
+            </Button>
           </>
         )}
 
-        {/* Contador */}
-        {images.length > 1 && (
-          <div className="absolute bottom-3 right-3 text-[10px] tracking-[.06em] text-[#7a7970] dark:text-[var(--text-secondary)]">
-            {active + 1} / {images.length}
-          </div>
-        )}
       </div>
 
-      {/* Thumbnails */}
       {images.length > 1 && (
-        <div className="flex gap-2 overflow-x-auto pb-1">
+        <div className="grid grid-cols-4 gap-3 mt-4">
           {images.map((img, i) => (
             <button
               key={i}
               onClick={() => setActive(i)}
-              className={`
-                relative w-[60px] h-[60px] flex-shrink-0 overflow-hidden
-                border transition-all duration-200
-                ${
-                  i === active
-                    ? 'border-[#0f0e0c] dark:border-[var(--text-primary)]'
-                    : 'border-transparent opacity-50 hover:opacity-100 hover:border-[rgba(15,14,12,0.3)] dark:hover:border-[var(--border-subtle)]'
-                }
-              `}
+              className={cn(
+                'aspect-square rounded-lg overflow-hidden border-2 transition-all',
+                i === active
+                  ? 'border-[#2d5e42] dark:border-[#4A7C59] ring-2 ring-[#2d5e42]/20 dark:ring-[#4A7C59]/20'
+                  : 'border-border hover:border-[#2d5e42]/50 dark:hover:border-[#4A7C59]/50',
+              )}
             >
-              <Image
-                src={img.thumb ?? img.src}
-                alt={img.alt ?? name}
-                fill
-                sizes="60px"
-                className="object-contain p-1 bg-[#f2f0ea] dark:bg-[var(--bg-secondary)]"
-              />
+              <div className="relative w-full h-full bg-muted">
+                <Image
+                  src={img.thumb ?? img.src}
+                  alt={img.alt ?? name}
+                  fill
+                  sizes="100px"
+                  className="object-contain p-1"
+                />
+              </div>
+
             </button>
           ))}
         </div>
@@ -201,57 +225,137 @@ function ProductGallery({
   );
 }
 
-// ─── Stars ────────────────────────────────────────────────────────────────────
+// ─── StickerBadge ─────────────────────────────────────────────────────────────
 
-function Stars({ value, size = 'sm' }: { value: number; size?: 'sm' | 'md' | 'lg' }) {
-  const sz = size === 'lg' ? 'w-5 h-5' : size === 'md' ? 'w-[14px] h-[14px]' : 'w-[13px] h-[13px]';
-  return (
-    <div className="flex gap-[2px]">
-      {[1, 2, 3, 4, 5].map((n) => (
-        <Star
-          key={n}
-          className={`${sz} ${
-            n <= Math.round(value)
-              ? 'text-[#c9a84c] fill-[#c9a84c]'
-              : 'text-[#e8e5dc] fill-[#e8e5dc]'
-          }`}
-        />
-      ))}
-    </div>
-  );
-}
+// ─── StickerBadge ─────────────────────────────────────────────────────────────
 
-// ─── Sticker ──────────────────────────────────────────────────────────────────
-
-const STICKER_MAP: Record<string, { label: string; className: string }> = {
-  oferta: { label: 'Oferta', className: 'bg-[#c0392b] text-white' },
-  liquidacion: { label: 'Liquidación', className: 'bg-[#c0392b] text-white' },
-  nuevo: { label: 'Nuevo', className: 'bg-[#1a3a2a] dark:bg-green-900 text-[#e8f5ee] dark:text-green-100' },
-  bestseller: { label: 'Más vendido', className: 'bg-[#3a3935] text-white' },
-  envio_gratis: {
-    label: 'Envío gratis',
-    className: 'bg-[#1a3a2a] dark:bg-green-900 text-[#e8f5ee] dark:text-green-100',
-  },
-  descuento: { label: 'Descuento', className: 'bg-[#c9a84c] text-[#0f0e0c] dark:text-[var(--text-primary)]' },
+const STICKER_MAP: Record<
+  string,
+  {
+    label: string;
+    variant: 'default' | 'secondary' | 'destructive' | 'outline';
+  }
+> = {
+  oferta: { label: 'Oferta', variant: 'destructive' },
+  liquidacion: { label: 'Liquidación', variant: 'destructive' },
+  nuevo: { label: 'Nuevo', variant: 'default' },
+  bestseller: { label: 'Más vendido', variant: 'secondary' },
+  envio_gratis: { label: 'Envío gratis', variant: 'default' },
+  descuento: { label: 'Descuento', variant: 'secondary' },
 };
 
 function StickerBadge({ sticker }: { sticker: string | null }) {
   if (!sticker) return null;
   const cfg = STICKER_MAP[sticker] ?? {
     label: sticker,
-    className: 'bg-[#3a3935] text-white',
+    variant: 'secondary' as const,
   };
   return (
-    <span
-      className={`
-        inline-flex items-center gap-1
-        px-2.5 py-[3px] text-[10px] font-medium tracking-[.1em] uppercase
-        ${cfg.className}
-      `}
+    <Badge
+      variant={cfg.variant}
+      className="gap-1 uppercase tracking-[.1em] text-[10px]"
     >
       <Tag className="w-2.5 h-2.5" />
       {cfg.label}
-    </span>
+    </Badge>
+  );
+}
+
+// ─── TypeItem / ProductInfoCards ──────────────────────────────────────────────
+
+function TypeItem({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+}) {
+  return (
+    <Card className="border-border/60">
+      <CardContent className="p-4 flex items-center gap-3">
+        <div className="w-9 h-9 rounded-lg bg-[#2d5e42]/10 dark:bg-[#4A7C59]/20 flex items-center justify-center flex-shrink-0">
+          {icon}
+        </div>
+        <div>
+          <p className="text-xs text-muted-foreground">{label}</p>
+          <p className="font-semibold text-sm text-foreground">{value}</p>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function ProductInfoCards({ product }: { product: LaravelProduct }) {
+  if (product.type === 'digital') {
+    return (
+      <div className="grid grid-cols-2 gap-4">
+        <TypeItem
+          icon={<Download className="w-5 h-5 text-[#2d5e42] dark:text-[#4A7C59]" />}
+          label="Formato"
+          value={product.fileType?.toUpperCase() ?? '—'}
+        />
+        {product.downloadLimit && (
+          <TypeItem
+            icon={<Package className="w-5 h-5 text-[#2d5e42] dark:text-[#4A7C59]" />}
+            label="Descargas"
+            value={`${product.downloadLimit}x`}
+          />
+        )}
+      </div>
+    );
+  }
+  if (product.type === 'service') {
+    return (
+      <div className="grid grid-cols-2 gap-4">
+        <TypeItem
+          icon={<Clock className="w-5 h-5 text-[#2d5e42] dark:text-[#4A7C59]" />}
+          label="Duración"
+          value={`${product.serviceDuration} min`}
+        />
+        <TypeItem
+          icon={<MapPin className="w-5 h-5 text-[#2d5e42] dark:text-[#4A7C59]" />}
+          label="Modalidad"
+          value={product.serviceModality ?? '—'}
+        />
+      </div>
+    );
+  }
+  const items = [
+    product.stock != null && {
+      icon: <Package className="w-5 h-5 text-[#2d5e42] dark:text-[#4A7C59]" />,
+      label: 'Stock',
+      value: `${product.stock} unidades`,
+    },
+    product.weight && {
+      icon: <Weight className="w-5 h-5 text-[#2d5e42] dark:text-[#4A7C59]" />,
+      label: 'Peso',
+      value: `${product.weight} kg`,
+    },
+    product.dimensions && {
+      icon: <Ruler className="w-5 h-5 text-[#2d5e42] dark:text-[#4A7C59]" />,
+      label: 'Dimensiones',
+      value: product.dimensions,
+    },
+    product.sku && {
+      icon: <Calendar className="w-5 h-5 text-[#2d5e42] dark:text-[#4A7C59]" />,
+      label: 'SKU',
+      value: product.sku,
+    },
+  ].filter(Boolean) as {
+    icon: React.ReactNode;
+    label: string;
+    value: string;
+  }[];
+
+  if (items.length === 0) return null;
+  return (
+    <div className="grid grid-cols-2 gap-4">
+      {items.map((item, i) => (
+        <TypeItem key={i} {...item} />
+      ))}
+    </div>
   );
 }
 
@@ -266,84 +370,84 @@ function NutritionalPanel({
   const calorieRow = info.rows.find((r) =>
     r.label.toLowerCase().includes('caloría'),
   );
-
   return (
-    <div className="border border-[rgba(15,14,12,0.1)] dark:border-[var(--border-subtle)]">
-      {/* Header toggle */}
+<Card className="overflow-hidden">
       <button
         onClick={() => setOpen((o) => !o)}
-        className="
-          w-full flex items-center justify-between
-          px-4 py-3
-          hover:bg-[#f2f0ea] dark:bg-[var(--bg-secondary)] dark:hover:bg-[var(--bg-card)] transition-colors duration-150
-        "
+        className="w-full flex items-center justify-between px-4 py-3 hover:bg-muted/50 transition-colors"
       >
         <div className="flex items-center gap-2.5">
-          <Leaf className="w-4 h-4 text-[#2d5e42] dark:text-[var(--brand-green)]" />
-          <span className="text-[11px] font-medium tracking-[.1em] uppercase text-[#3a3935] dark:text-[var(--text-primary)]">
+          <Leaf className="w-4 h-4 text-[#2d5e42] dark:text-[#4A7C59]" />
+          <span className="text-[11px] font-medium tracking-[.1em] uppercase text-muted-foreground">
             Información nutricional
           </span>
           {calorieRow && (
-            <span className="flex items-center gap-1 px-2 py-[2px] bg-[#1a3a2a] dark:bg-green-900 text-[#e8f5ee] dark:text-green-100 text-[10px] tracking-[.06em]">
+            <Badge variant="secondary" className="gap-1 text-[10px]">
               <Flame className="w-2.5 h-2.5" />
               {calorieRow.value}
-            </span>
+            </Badge>
           )}
         </div>
         <ChevronDown
-          className={`w-4 h-4 text-[#7a7970] dark:text-[var(--text-secondary)] transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+className={cn(
+            'w-4 h-4 text-muted-foreground transition-transform duration-200',
+            open && 'rotate-180',
+          )}
         />
       </button>
-
-      {/* Contenido expandible */}
       <div
-        className={`
-          overflow-hidden transition-all duration-300 ease-in-out
-          ${open ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0'}
-        `}
+        className={cn(
+          'overflow-hidden transition-all duration-300',
+          open ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0',
+        )}
       >
-        <div className="border-t border-[rgba(15,14,12,0.08)] dark:border-[var(--border-subtle)]">
-          {info.serving_note && (
-            <p className="px-4 py-2 text-[11px] text-[#7a7970] dark:text-[var(--text-secondary)] italic bg-[#f2f0ea] dark:bg-[var(--bg-secondary)] border-b border-[rgba(15,14,12,0.08)] dark:border-[var(--border-subtle)]">
-              {info.serving_note}
-            </p>
-          )}
-          <table className="w-full text-[12px]">
-            <thead>
-              <tr className="bg-[#f2f0ea] dark:bg-[var(--bg-secondary)]">
-                <th className="px-4 py-2 text-left text-[10px] font-medium tracking-[.1em] uppercase text-[#7a7970] dark:text-[var(--text-secondary)]">
-                  Nutriente
-                </th>
-                <th className="px-4 py-2 text-center text-[10px] font-medium tracking-[.1em] uppercase text-[#7a7970] dark:text-[var(--text-secondary)]">
-                  Cantidad
-                </th>
-                <th className="px-4 py-2 text-right text-[10px] font-medium tracking-[.1em] uppercase text-[#7a7970] dark:text-[var(--text-secondary)]">
-                  % VD
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {info.rows.map((row, i) => (
-                <tr
-                  key={i}
-                  className="border-t border-[rgba(15,14,12,0.05)] dark:border-[var(--border-subtle)] hover:bg-[#f2f0ea] dark:bg-[var(--bg-secondary)] dark:hover:bg-[var(--bg-card)] transition-colors"
+<Separator />
+        {info.serving_note && (
+          <p className="px-4 py-2 text-[11px] italic text-muted-foreground bg-muted/30 border-b border-border">
+            {info.serving_note}
+          </p>
+        )}
+        <table className="w-full text-[12px]">
+          <thead>
+            <tr className="bg-muted/50">
+              {['Nutriente', 'Cantidad', '% VD'].map((h, i) => (
+                <th
+                  key={h}
+                  className={cn(
+                    'px-4 py-2 text-[10px] font-medium tracking-[.1em] uppercase text-muted-foreground',
+                    i === 0
+                      ? 'text-left'
+                      : i === 1
+                        ? 'text-center'
+                        : 'text-right',
+                  )}
                 >
-                  <td className="px-4 py-2.5 font-medium text-[#3a3935] dark:text-[var(--text-primary)]">
-                    {row.label}
-                  </td>
-                  <td className="px-4 py-2.5 text-center font-medium text-[#2d5e42] dark:text-[var(--brand-green)]">
-                    {row.value}
-                  </td>
-                  <td className="px-4 py-2.5 text-right text-[#7a7970] dark:text-[var(--text-secondary)]">
-                    {row.daily_value ?? '—'}
-                  </td>
-                </tr>
+                  {h}
+                </th>
               ))}
-            </tbody>
-          </table>
-        </div>
+            </tr>
+          </thead>
+          <tbody>
+            {info.rows.map((row, i) => (
+              <tr
+                key={i}
+                className="border-t border-border hover:bg-muted/30 transition-colors"
+              >
+                <td className="px-4 py-2.5 font-medium text-foreground">
+                  {row.label}
+                </td>
+                <td className="px-4 py-2.5 text-center font-medium text-primary">
+                  {row.value}
+                </td>
+                <td className="px-4 py-2.5 text-right text-muted-foreground">
+                  {row.daily_value ?? '—'}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
-    </div>
+    </Card>
   );
 }
 
@@ -356,62 +460,51 @@ function CharacteristicsTable({
   characteristics: LaravelProduct['characteristics'];
   additional_info: LaravelProduct['additional_info'];
 }) {
-  const hasMain = Array.isArray(characteristics) && characteristics.length > 0;
-  const hasAdditional = Array.isArray(additional_info) && additional_info.length > 0;
-
-  if (!hasMain && !hasAdditional) {
+const hasMain = characteristics.length > 0;
+  const hasAdditional = additional_info.length > 0;
+  if (!hasMain && !hasAdditional)
     return (
-      <p className="text-[#7a7970] dark:text-[var(--text-secondary)] italic text-sm">
+      <p className="text-sm italic text-muted-foreground">
         Sin características especificadas.
       </p>
     );
-  }
-
   return (
     <div className="space-y-6">
       {hasMain && (
         <div>
-          <h4 className="text-[10px] font-medium tracking-[.12em] uppercase text-[#7a7970] dark:text-[var(--text-secondary)] mb-3">
+<p className="text-[10px] font-medium tracking-[.12em] uppercase text-muted-foreground mb-3">
             Características principales
-          </h4>
-          <table className="w-full text-[13px] border-collapse">
-            <tbody>
-              {characteristics.map((attr, i) => (
-                <tr
-                  key={i}
-                  className="border-b border-[rgba(15,14,12,0.06)] dark:border-[var(--border-subtle)] hover:bg-[#f2f0ea] dark:bg-[var(--bg-secondary)] dark:hover:bg-[var(--bg-card)] transition-colors"
-                >
-                  <td className="py-2.5 pr-4 text-[#7a7970] dark:text-[var(--text-secondary)] font-light w-2/5">
-                    {attr.label}
-                  </td>
-                  <td className="py-2.5 text-[#0f0e0c] dark:text-[var(--text-primary)] font-medium">
-                    {attr.value}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          </p>
+          <ul className="grid md:grid-cols-2 gap-3">
+            {characteristics.map((attr, i) => (
+              <li key={i} className="flex items-start gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2 flex-shrink-0" />
+                <span className="text-sm text-muted-foreground">
+                  <span className="font-medium text-foreground">
+                    {attr.label}:
+                  </span>{' '}
+                  {attr.value}
+                </span>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
-
       {hasAdditional && (
         <div>
-          <h4 className="text-[10px] font-medium tracking-[.12em] uppercase text-[#7a7970] dark:text-[var(--text-secondary)] mb-3">
+<p className="text-[10px] font-medium tracking-[.12em] uppercase text-muted-foreground mb-3">
             Información adicional
-          </h4>
-          <div className="flex flex-wrap gap-2">
+          </p>
+          <div className="grid md:grid-cols-2 gap-4">
             {additional_info.map((attr, i) => (
-              <span
-                key={i}
-                className="
-                  inline-flex items-center gap-1.5
-                  px-3 py-1.5 border border-[#2d5e42] dark:border-[var(--brand-green)]
-                  text-[#2d5e42] dark:text-[var(--brand-green)] text-[11px] tracking-[.06em]
-                "
-              >
-                <span className="opacity-60">{attr.label}:</span>
-                <span>{attr.value}</span>
-              </span>
+<Card key={i}>
+                <CardContent className="p-4 flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">
+                    {attr.label}
+                  </span>
+                  <span className="font-semibold text-sm">{attr.value}</span>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </div>
@@ -431,15 +524,17 @@ function RatingDistribution({ stats }: { stats: ReviewStats }) {
         const pct = Math.round((count / max) * 100);
         return (
           <div key={n} className="flex items-center gap-2 text-[11px]">
-            <span className="w-3 text-right text-[#7a7970] dark:text-[var(--text-secondary)]">{n}</span>
-            <Star className="w-2.5 h-2.5 text-[#c9a84c] fill-[#c9a84c] flex-shrink-0" />
-            <div className="flex-1 h-[4px] bg-[#e8e5dc] dark:bg-[var(--bg-secondary)]">
+<span className="w-3 text-right text-muted-foreground">{n}</span>
+            <Star className="w-2.5 h-2.5 flex-shrink-0 fill-yellow-400 text-yellow-400" />
+            <div className="flex-1 h-[4px] bg-muted rounded-full overflow-hidden">
               <div
-                className="h-full bg-[#c9a84c] transition-all duration-500"
+                className="h-full bg-yellow-400 transition-all duration-500"
                 style={{ width: `${pct}%` }}
               />
             </div>
-            <span className="w-5 text-right text-[#7a7970] dark:text-[var(--text-secondary)]">{count}</span>
+<span className="w-5 text-right text-muted-foreground">
+              {count}
+            </span>
           </div>
         );
       })}
@@ -496,7 +591,7 @@ function EditReviewForm({
   };
 
   return (
-    <div className="space-y-3 pt-1">
+<div className="space-y-3 pt-1">
       <div className="flex gap-1">
         {[1, 2, 3, 4, 5].map((n) => (
           <button
@@ -505,19 +600,19 @@ function EditReviewForm({
             onMouseEnter={() => setHover(n)}
             onMouseLeave={() => setHover(0)}
             onClick={() => setRating(n)}
-            className="focus:outline-none"
           >
             <Star
-              className={`w-5 h-5 transition-colors ${
+              className={cn(
+                'w-6 h-6 transition-colors',
                 n <= (hover || rating)
-                  ? 'text-[#c9a84c] fill-[#c9a84c]'
-                  : 'text-[#e8e5dc] fill-[#e8e5dc]'
-              }`}
+                  ? 'fill-yellow-400 text-yellow-400'
+                  : 'fill-muted text-muted-foreground',
+              )}
             />
           </button>
         ))}
-        <span className="text-xs text-[#c9a84c] self-center ml-1">
-          {LABELS[rating]}
+        <span className="text-xs text-yellow-600 self-center ml-1">
+          {LABELS[rating]}
         </span>
       </div>
 
@@ -527,40 +622,37 @@ function EditReviewForm({
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         placeholder="Título (opcional)"
-        className="w-full border border-[rgba(15,14,12,0.12)] dark:border-[var(--border-subtle)] p-2 text-sm bg-white dark:bg-[var(--bg-card)] focus:outline-none focus:border-[#1a3a2a] dark:focus:border-[var(--brand-green)]"
+        className="w-full border border-input rounded-md p-2 text-sm bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       />
 
-      <textarea
+<textarea
         maxLength={2000}
         value={comment}
         onChange={(e) => setComment(e.target.value)}
         rows={3}
         placeholder="Comentario (opcional)"
-        className="w-full resize-none border border-[rgba(15,14,12,0.12)] dark:border-[var(--border-subtle)] p-2 text-sm bg-white dark:bg-[var(--bg-card)] focus:outline-none focus:border-[#1a3a2a] dark:focus:border-[var(--brand-green)]"
+        className="w-full resize-none border border-input rounded-md p-2 text-sm bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       />
 
       {error && (
-        <p className="text-xs text-[#c0392b] flex items-center gap-1">
-          <AlertCircle className="w-3.5 h-3.5" /> {error}
+        <p className="text-xs text-destructive flex items-center gap-1">
+          <AlertCircle className="w-3.5 h-3.5" /> {error}
         </p>
       )}
 
       <div className="flex gap-2 justify-end">
-        <button
+        <Button
+          variant="outline"
+          size="sm"
           onClick={onCancel}
           disabled={loading}
-          className="px-3 py-1.5 border border-[rgba(15,14,12,0.12)] dark:border-[var(--border-subtle)] text-[11px] font-medium uppercase tracking-[.06em] text-[#7a7970] dark:text-[var(--text-secondary)] hover:bg-[#f2f0ea] dark:bg-[var(--bg-secondary)]"
         >
           Cancelar
-        </button>
-        <button
-          onClick={handleSave}
-          disabled={loading}
-          className="px-3 py-1.5 bg-[#1a3a2a] dark:bg-green-900 text-white text-[11px] font-medium uppercase tracking-[.06em] flex items-center gap-1.5"
-        >
-          {loading && <Loader2 className="w-3 h-3 animate-spin" />}
-          {loading ? 'Guardando...' : 'Guardar cambios'}
-        </button>
+        </Button>
+        <Button size="sm" onClick={handleSave} disabled={loading} className="bg-[#2d5e42] hover:bg-[#1a3a2a] dark:bg-[#4A7C59] dark:hover:bg-[#3D6B4A] text-white">
+          {loading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+          {loading ? 'Guardando…' : 'Guardar cambios'}
+        </Button>
       </div>
     </div>
   );
@@ -582,6 +674,7 @@ function ReviewCard({
   const [deleting, setDeleting] = useState(false);
 
   const isAuthor = String(user?.id) === String(review.user?.id);
+  // ajusta si tu backend devuelve array
   const canAct = isAuthor;
 
   const handleDelete = async () => {
@@ -597,102 +690,100 @@ function ReviewCard({
         },
       });
       if (res.ok) onDeleted?.(review.id);
-    } catch (e) {
-      console.error(e);
     } finally {
       setDeleting(false);
     }
   };
 
   return (
-    <div className="py-5 border-b border-[rgba(15,14,12,0.08)] dark:border-[var(--border-subtle)] last:border-0">
-      <div className="flex items-center gap-3 mb-2.5">
-        {/* Avatar */}
-        <div className="w-9 h-9 rounded-full bg-[#f2f0ea] dark:bg-[var(--bg-secondary)] border border-[rgba(15,14,12,0.1)] dark:border-[var(--border-subtle)] flex items-center justify-center flex-shrink-0 text-[#3a3935] dark:text-[var(--text-primary)] font-medium text-[13px] overflow-hidden">
-          {review.user?.avatar ? (
-            <Image
-              src={review.user.avatar}
-              alt={review.user.name}
-              width={36}
-              height={36}
-              className="rounded-full object-cover"
-            />
-          ) : (
-            (review.user?.name?.charAt(0).toUpperCase() ?? '?')
-          )}
-        </div>
+    <Card>
+      <CardContent className="p-6">
+        <div className="flex items-start gap-4">
+          <Avatar className="w-12 h-12 flex-shrink-0">
+            <AvatarImage src={review.user?.avatar ?? undefined} alt={review.user?.name ?? undefined} />
+            <AvatarFallback>
+              {review.user?.name?.charAt(0).toUpperCase() ?? '?'}
+            </AvatarFallback>
+          </Avatar>
 
-        <div className="flex-1 min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="font-medium text-[13px] text-[#0f0e0c] dark:text-[var(--text-primary)]">
-              {review.user?.name ?? 'Usuario'}
-            </span>
-            {review.isVerifiedPurchase && (
-              <span className="inline-flex items-center gap-1 text-[10px] tracking-[.08em] uppercase text-[#2d5e42] dark:text-[var(--brand-green)]">
-                <BadgeCheck className="w-3 h-3" />
-                Compra verificada
-              </span>
+          <div className="flex-1 space-y-2">
+            <div className="flex items-start justify-between gap-2 flex-wrap">
+              <div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h4 className="font-semibold text-base">
+                    {review.user?.name ?? 'Usuario'}
+                  </h4>
+                  {review.isVerifiedPurchase && (
+                    <Badge variant="secondary" className="text-xs gap-1">
+                      <BadgeCheck className="w-3 h-3" />
+                      Compra verificada
+                    </Badge>
+                  )}
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  {formatDate(review.createdAt)}
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Stars value={review.rating} size="sm" />
+                {canAct && !editing && (
+                  <div className="flex gap-1 ml-2">
+                    {isAuthor && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                        onClick={() => setEditing(true)}
+                        aria-label="Editar reseña"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                      </Button>
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                      onClick={handleDelete}
+                      disabled={deleting}
+                      aria-label="Eliminar reseña"
+                    >
+                      {deleting ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <Trash2 className="w-3.5 h-3.5" />
+                      )}
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {editing ? (
+              <EditReviewForm
+                review={review}
+                onSaved={(updated) => {
+                  onUpdated?.(updated);
+                  setEditing(false);
+                }}
+                onCancel={() => setEditing(false)}
+              />
+            ) : (
+              <>
+                {review.title && (
+                  <p className="font-medium text-sm">{review.title}</p>
+                )}
+                {review.comment && (
+                  <p className="text-muted-foreground text-sm leading-relaxed">
+                    {review.comment}
+                  </p>
+                )}
+              </>
             )}
           </div>
         </div>
-
-        <div className="flex items-center gap-2 ml-auto">
-          <span className="text-[11px] text-[#7a7970] dark:text-[var(--text-secondary)] flex-shrink-0">
-            {formatDate(review.createdAt)}
-          </span>
-          {canAct && !editing && (
-            <div className="flex gap-1">
-              <button
-                onClick={() => setEditing(true)}
-                className="p-1 text-[#7a7970] hover:text-[#0f0e0c] dark:text-[var(--text-secondary)] dark:hover:text-[var(--text-primary)] transition-colors"
-                title="Editar reseña"
-              >
-                <Pencil className="w-3 h-3" />
-              </button>
-              <button
-                onClick={handleDelete}
-                disabled={deleting}
-                className="p-1 text-[#7a7970] hover:text-[#c0392b] dark:text-[var(--text-secondary)] dark:hover:text-[#c0392b] transition-colors"
-                title="Eliminar reseña"
-              >
-                {deleting ? (
-                  <Loader2 className="w-3 h-3 animate-spin" />
-                ) : (
-                  <Trash2 className="w-3 h-3" />
-                )}
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {editing ? (
-        <EditReviewForm
-          review={review}
-          onSaved={(updated) => {
-            onUpdated?.(updated);
-            setEditing(false);
-          }}
-          onCancel={() => setEditing(false)}
-        />
-      ) : (
-        <>
-          <div className="mb-1">
-            <Stars value={review.rating} />
-          </div>
-          {review.title && (
-            <p className="mt-2 font-medium text-[13px] text-[#0f0e0c] dark:text-[var(--text-primary)]">
-              {review.title}
-            </p>
-          )}
-          {review.comment && (
-            <p className="mt-1 text-[12px] text-[#3a3935] dark:text-[var(--text-primary)] leading-relaxed font-light">
-              {review.comment}
-            </p>
-          )}
-        </>
-      )}
-    </div>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -741,286 +832,110 @@ function ReviewsSection({
     );
   };
 
-  if (loading && localReviews.length === 0) {
+  if (loading && localReviews.length === 0)
     return (
       <div className="flex justify-center py-10">
-        <Loader2 className="w-5 h-5 animate-spin text-[#7a7970] dark:text-[var(--text-secondary)]" />
+<Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
       </div>
     );
-  }
 
-  if (error) {
+  if (error)
     return (
-      <div className="flex items-center gap-2 text-[13px] text-[#c0392b] py-4">
+      <div className="flex items-center gap-2 text-sm py-4 text-destructive">
         <AlertCircle className="w-4 h-4" />
         {error}
       </div>
     );
-  }
 
   return (
-    <div className="space-y-6">
-      {/* Resumen */}
-      {stats && stats.count > 0 && (
-        <div className="grid grid-cols-[auto_1fr] gap-6 p-5 bg-[#f2f0ea] dark:bg-[var(--bg-secondary)] border border-[rgba(15,14,12,0.08)] dark:border-[var(--border-subtle)]">
-          <div className="flex flex-col items-center justify-center gap-1.5 border-r border-[rgba(15,14,12,0.08)] dark:border-[var(--border-subtle)] pr-6">
-            <span className="font-['DM_Serif_Display',Georgia,serif] text-5xl text-[#0f0e0c] dark:text-[var(--text-primary)] leading-none">
-              {stats.average.toFixed(1)}
-            </span>
-            <Stars value={stats.average} size="md" />
-            <span className="text-[11px] text-[#7a7970] dark:text-[var(--text-secondary)] tracking-[.04em]">
-              {stats.count} {stats.count === 1 ? 'reseña' : 'reseñas'}
-            </span>
+<Card>
+      <CardHeader>
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          <div>
+            <CardTitle className="text-2xl mb-2">Reseñas de Clientes</CardTitle>
+            <CardDescription className="text-base">
+              {localReviews.length} reseñas verificadas
+            </CardDescription>
           </div>
-          <div className="flex items-center">
-            <div className="w-full">
-              <RatingDistribution stats={stats} />
+          <div className="text-right">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-4xl font-bold text-foreground">
+                {productRating}
+              </span>
+              <Stars value={productRating} size="lg" />
             </div>
+            <p className="text-sm text-muted-foreground">
+              Basado en {productReviewCount} reseñas
+            </p>
           </div>
         </div>
-      )}
 
-      {/* Botón / formulario de nueva reseña */}
-      <div className="mb-4">
-        {!showForm ? (
-          <button
-            onClick={() => setShowForm(true)}
-            className="px-4 py-2 border border-[rgba(15,14,12,0.12)] text-[11px] font-medium tracking-[.1em] uppercase text-[#7a7970] dark:text-[var(--text-secondary)] hover:bg-[#f2f0ea] dark:hover:bg-[var(--bg-card)] transition-colors"
-          >
-            Escribir una reseña
-          </button>
-        ) : (
-          <div className="border border-[rgba(15,14,12,0.08)] dark:border-[var(--border-subtle)] p-5 bg-white dark:bg-[var(--bg-card)]">
-            <WriteProductReview
-              productId={Number(productId)}
-              onSuccess={() => setShowForm(false)}
-              onCancel={() => setShowForm(false)}
-            />
+        {stats && stats.count > 0 && (
+          <div className="mt-4 pt-4 border-t border-border">
+            <RatingDistribution stats={stats} />
           </div>
         )}
-      </div>
+      </CardHeader>
 
-      {/* Lista */}
-      {localReviews.length === 0 ? (
-        <div className="text-center py-12 text-[#7a7970] dark:text-[var(--text-secondary)]">
-          <MessageSquare className="w-8 h-8 mx-auto mb-3 opacity-30" />
-          <p className="font-medium text-[13px]">Sin reseñas aún</p>
-          <p className="text-[12px] mt-1 font-light">
-            Sé el primero en dejar una opinión.
-          </p>
-        </div>
-      ) : (
-        <div>
-          {localReviews.map((r) => (
-            <ReviewCard
-              key={r.id}
-              review={r}
-              onDeleted={handleDeleted}
-              onUpdated={handleUpdated}
-            />
-          ))}
-        </div>
-      )}
-
-      {pagination?.hasMore && (
-        <button
-          onClick={loadMore}
-          disabled={loading}
-          className="
-            w-full py-3 border border-[rgba(15,14,12,0.12)] dark:border-[var(--border-subtle)]
-            text-[11px] font-medium tracking-[.1em] uppercase text-[#7a7970] dark:text-[var(--text-secondary)]
-            hover:bg-[#f2f0ea] dark:bg-[var(--bg-secondary)] dark:hover:bg-[var(--bg-card)] hover:text-[#0f0e0c] dark:text-[var(--text-primary)]
-            transition-all duration-150
-            disabled:opacity-40
-            flex items-center justify-center gap-2
-          "
-        >
-          {loading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-          {loading ? 'Cargando...' : 'Ver más reseñas'}
-        </button>
-      )}
-    </div>
-  );
-}
-
-// ─── ProductTypeInfo ──────────────────────────────────────────────────────────
-
-function ProductTypeInfo({ product }: { product: LaravelProduct }) {
-  if (product.type === 'digital') {
-    return (
-      <div className="grid grid-cols-2 gap-3 p-4 bg-[#f2f0ea] dark:bg-[var(--bg-secondary)] border border-[rgba(15,14,12,0.08)] dark:border-[var(--border-subtle)]">
-        <div className="flex items-center gap-2.5 text-[13px]">
-          <Download className="w-4 h-4 text-[#2d5e42] dark:text-[var(--brand-green)] flex-shrink-0" />
-          <div>
-            <p className="text-[10px] tracking-[.1em] uppercase text-[#7a7970] dark:text-[var(--text-secondary)]">
-              Formato
-            </p>
-            <p className="font-medium text-[#3a3935] dark:text-[var(--text-primary)]">
-              {product.fileType?.toUpperCase() ?? '—'}
-            </p>
-          </div>
-        </div>
-        {product.downloadLimit && (
-          <div className="flex items-center gap-2.5 text-[13px]">
-            <Package className="w-4 h-4 text-[#2d5e42] dark:text-[var(--brand-green)] flex-shrink-0" />
-            <div>
-              <p className="text-[10px] tracking-[.1em] uppercase text-[#7a7970] dark:text-[var(--text-secondary)]">
-                Descargas
-              </p>
-              <p className="font-medium text-[#3a3935] dark:text-[var(--text-primary)]">
-                {product.downloadLimit}x
-              </p>
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  if (product.type === 'service') {
-    return (
-      <div className="grid grid-cols-2 gap-3 p-4 bg-[#f2f0ea] dark:bg-[var(--bg-secondary)] border border-[rgba(15,14,12,0.08)] dark:border-[var(--border-subtle)]">
-        <div className="flex items-center gap-2.5 text-[13px]">
-          <Clock className="w-4 h-4 text-[#2d5e42] dark:text-[var(--brand-green)] flex-shrink-0" />
-          <div>
-            <p className="text-[10px] tracking-[.1em] uppercase text-[#7a7970] dark:text-[var(--text-secondary)]">
-              Duración
-            </p>
-            <p className="font-medium text-[#3a3935] dark:text-[var(--text-primary)]">
-              {product.serviceDuration} min
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2.5 text-[13px]">
-          <MapPin className="w-4 h-4 text-[#2d5e42] dark:text-[var(--brand-green)] flex-shrink-0" />
-          <div>
-            <p className="text-[10px] tracking-[.1em] uppercase text-[#7a7970] dark:text-[var(--text-secondary)]">
-              Modalidad
-            </p>
-            <p className="font-medium text-[#3a3935] dark:text-[var(--text-primary)] capitalize">
-              {product.serviceModality ?? '—'}
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!product.weight && !product.dimensions && !product.expirationDate)
-    return null;
-
-  return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 bg-[#f2f0ea] dark:bg-[var(--bg-secondary)] border border-[rgba(15,14,12,0.08)] dark:border-[var(--border-subtle)]">
-      {product.weight && (
-        <div className="flex items-center gap-2.5 text-[13px]">
-          <Weight className="w-4 h-4 text-[#7a7970] dark:text-[var(--text-secondary)] flex-shrink-0" />
-          <div>
-            <p className="text-[10px] tracking-[.1em] uppercase text-[#7a7970] dark:text-[var(--text-secondary)]">
-              Peso
-            </p>
-            <p className="font-medium text-[#3a3935] dark:text-[var(--text-primary)]">{product.weight} kg</p>
-          </div>
-        </div>
-      )}
-      {product.dimensions && (
-        <div className="flex items-center gap-2.5 text-[13px]">
-          <Ruler className="w-4 h-4 text-[#7a7970] dark:text-[var(--text-secondary)] flex-shrink-0" />
-          <div>
-            <p className="text-[10px] tracking-[.1em] uppercase text-[#7a7970] dark:text-[var(--text-secondary)]">
-              Dimensiones
-            </p>
-            <p className="font-medium text-[#3a3935] dark:text-[var(--text-primary)]">{product.dimensions}</p>
-          </div>
-        </div>
-      )}
-      {product.expirationDate && (
-        <div className="flex items-center gap-2.5 text-[13px]">
-          <Calendar className="w-4 h-4 text-[#7a7970] dark:text-[var(--text-secondary)] flex-shrink-0" />
-          <div>
-            <p className="text-[10px] tracking-[.1em] uppercase text-[#7a7970] dark:text-[var(--text-secondary)]">
-              Vence
-            </p>
-            <p className="font-medium text-[#3a3935] dark:text-[var(--text-primary)]">
-              {product.expirationDate}
-            </p>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ─── Sidebar: Productos relacionados ──────────────────────────────────────────
-
-function RelatedProductsSidebar({ products }: { products: LaravelProduct[] }) {
-  if (products.length === 0) return null;
-
-  return (
-    <aside className="w-full">
-      <h2 className="text-[10px] font-medium tracking-[.12em] uppercase text-[#7a7970] dark:text-[var(--text-secondary)] mb-4 px-1">
-        También te puede gustar
-      </h2>
-      <div className="divide-y divide-[rgba(15,14,12,0.08)]">
-        {products.slice(0, 8).map((rel) => {
-          const relDiscount = discountPercent(rel.price, rel.regular_price);
-          return (
-            <Link
-              key={rel.id}
-              href={`/producto/${rel.slug}`}
-              className="flex gap-3 py-3 group hover:opacity-70 transition-opacity duration-150"
-            >
-              {/* Imagen */}
-              <div className="relative w-[56px] h-[56px] flex-shrink-0 bg-[#f2f0ea] dark:bg-[var(--bg-secondary)] border border-[rgba(15,14,12,0.08)] dark:border-[var(--border-subtle)] overflow-hidden">
-                <Image
-                  src={
-                    rel.images[0]?.medium ??
-                    rel.images[0]?.src ??
-                    '/no-image.png'
-                  }
-                  alt={rel.images[0]?.alt ?? rel.name}
-                  fill
-                  sizes="56px"
-                  className="object-contain p-1"
+<CardContent>
+        {/* Botón / formulario de nueva reseña */}
+        <div className="mb-6">
+            {!showForm ? (
+            <Button variant="outline" onClick={() => setShowForm(true)} className="border-[#2d5e42]/30 dark:border-[#4A7C59]/50 text-[#2d5e42] dark:text-[#4A7C59] hover:bg-[#2d5e42]/10 dark:hover:bg-[#4A7C59]/20">
+              Escribir una reseña
+            </Button>
+          ) : (
+            <Card className="mb-4">
+              <CardContent className="p-6">
+                <WriteProductReview
+                  productId={Number(productId)}
+                  onSuccess={() => setShowForm(false)}
+                  onCancel={() => setShowForm(false)}
                 />
-              </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
 
-              {/* Info */}
-              <div className="flex-1 min-w-0 py-0.5">
-                <p className="text-[12px] text-[#3a3935] dark:text-[var(--text-primary)] line-clamp-2 leading-snug mb-1.5">
-                  {rel.name}
-                </p>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="font-['DM_Serif_Display',Georgia,serif] text-[15px] text-[#0f0e0c] dark:text-[var(--text-primary)]">
-                    {formatPrice(rel.price)}
-                  </span>
-                  {relDiscount > 0 && (
-                    <span className="text-[10px] font-medium text-[#c0392b]">
-                      −{relDiscount}%
-                    </span>
-                  )}
-                </div>
-                {rel.rating.count > 0 && (
-                  <div className="flex items-center gap-1 mt-1">
-                    <Star className="w-2.5 h-2.5 text-[#c9a84c] fill-[#c9a84c]" />
-                    <span className="text-[10px] text-[#7a7970] dark:text-[var(--text-secondary)]">
-                      {rel.rating.average.toFixed(1)} ({rel.rating.count})
-                    </span>
-                  </div>
-                )}
-              </div>
-            </Link>
-          );
-        })}
-      </div>
-    </aside>
+{localReviews.length === 0 ? (
+          <div className="text-center py-12 text-muted-foreground">
+            <MessageSquare className="w-8 h-8 mx-auto mb-3 opacity-30" />
+            <p className="font-medium">Sin reseñas aún</p>
+            <p className="text-sm mt-1">Sé el primero en dejar una opinión.</p>
+          </div>
+        ) : (
+          <ScrollArea className="h-[600px] pr-4">
+            <div className="space-y-4">
+              {localReviews.map((r) => (
+                <ReviewCard
+                  key={r.id}
+                  review={r}
+                  onDeleted={handleDeleted}
+                  onUpdated={handleUpdated}
+                />
+              ))}
+            </div>
+          </ScrollArea>
+        )}
+
+        {pagination?.hasMore && (
+          <Button
+            onClick={loadMore}
+            disabled={loading}
+            className="w-full mt-4 text-[11px] tracking-[.1em] uppercase bg-[#2d5e42] hover:bg-[#1a3a2a] dark:bg-[#4A7C59] dark:hover:bg-[#3D6B4A] text-white"
+          >
+            {loading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+            {loading ? 'Cargando…' : 'Ver más reseñas'}
+          </Button>
+        )}
+      </CardContent>
+    </Card>
   );
 }
 
-// ──────────────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
 // COMPONENTE PRINCIPAL
-// ──────────────────────────────────────────────────────────────────────────────
-
-type TabKey = 'descripcion' | 'caracteristicas' | 'tienda' | 'comentarios';
+// ─────────────────────────────────────────────────────────────────────────────
 
 interface Props {
   product: LaravelProduct;
@@ -1032,578 +947,559 @@ export function ProductDetailPageClient({
   relatedProducts = [],
 }: Props) {
   const [quantity, setQuantity] = useState(1);
-  const [activeTab, setActiveTab] = useState<TabKey>('descripcion');
-  const {
-    addToCart,
-    loading: cartLoading,
-    addedToCart,
-    error: cartError,
-  } = useAddToCart();
+const [wishlisted, setWishlisted] = useState(false);
+  const [relScrollPos, setRelScrollPos] = useState(0);
 
-  const { isWishlisted, toggle: toggleWishlist } = useWishlist(product.id);
-  const openPopup = useCarritoStore((s) => s.openPopup);
+  const { addToCart, loading: cartLoading, error: cartError } = useAddToCart();
   const [localAdded, setLocalAdded] = useState(false);
+  const openPopup = useCarritoStore((s) => s.openPopup);
 
   const handleAddToCart = async () => {
-    if (product.stock <= 0 || cartLoading) return;
+    if (!product.in_stock || cartLoading) return;
     try {
       await addToCart(Number(product.id), quantity);
-      openPopup();
-      setLocalAdded(true);
-      setTimeout(() => setLocalAdded(false), 2200);
-    } catch (err) {
-      console.error(err);
+    } catch {
+      /* handled */
     }
+    openPopup();
+    setLocalAdded(true);
+    setTimeout(() => setLocalAdded(false), 2200);
   };
 
-  const discount = discountPercent(product.price, product.regular_price);
-  const inStock = product.stock > 0;
+  const scrollRelated = (dir: 'left' | 'right') => {
+    const el = document.getElementById('related-scroll');
+    if (!el) return;
+    const amount = 320;
+    const next =
+      dir === 'left'
+        ? Math.max(0, relScrollPos - amount)
+        : Math.min(el.scrollWidth - el.clientWidth, relScrollPos + amount);
+    el.scrollTo({ left: next, behavior: 'smooth' });
+    setRelScrollPos(next);
+  };
 
+  const { isWishlisted, toggle: toggleWishlist } = useWishlist(product.id);
+
+  const discount = discountPercent(product.price, product.regular_price);
+const inStock = product.in_stock;
   const hasNutritional = !!product.nutritional_info?.rows?.length;
-  const characteristics = product.characteristics?.length ? product.characteristics : (product.mainAttributes?.flatMap((a) => a.values) ?? []);
-  const additionalInfo = product.additional_info?.length ? product.additional_info : (product.additionalAttributes?.flatMap((a) => a.values) ?? []);
+  const characteristics = product.mainAttributes?.flatMap((a: { values: { label: string; value: string }[] }) => a.values) ?? [];
+  const additionalInfo = product.additionalAttributes?.flatMap((a: { values: { label: string; value: string }[] }) => a.values) ?? [];
   const hasCharacteristics = characteristics.length > 0 || additionalInfo.length > 0;
 
-  const TABS: { key: TabKey; label: string }[] = [
-    { key: 'descripcion', label: 'Descripción' },
-    {
-      key: 'caracteristicas',
-      label: hasNutritional ? 'Nutrición y características' : 'Características',
-    },
-    { key: 'tienda', label: 'Tienda' },
-    { key: 'comentarios', label: `Reseñas (${product.rating.count})` },
-  ];
-
   return (
-    <main className="min-h-screen bg-[#faf9f6] dark:bg-[var(--bg-primary)]">
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 pt-4 pb-1">
-        {/* Breadcrumb */}
-        <nav className="flex items-center gap-2 text-[11px] tracking-[.06em] text-[#7a7970] dark:text-[var(--text-secondary)] flex-nowrap overflow-x-auto">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-1 hover:text-[#1a3a2a] dark:hover:text-[var(--brand-green)] transition-colors flex-shrink-0"
-          >
-            <Home className="w-3 h-3" />
-            Inicio
-          </Link>
-          {product.categories[0] && (
-            <>
-              <span className="opacity-40 flex-shrink-0">/</span>
-              <Link
-                href={`/productos/${product.categories[0].slug}`}
-                className="hover:text-[#1a3a2a] dark:hover:text-[var(--brand-green)] transition-colors flex-shrink-0"
-              >
-                {product.categories[0].name}
-              </Link>
-            </>
-          )}
-          <span className="opacity-40 flex-shrink-0">/</span>
-          <span className="text-[#0f0e0c] dark:text-[var(--text-primary)] truncate max-w-[220px] flex-shrink-0 font-medium">
-            {product.name}
-          </span>
-        </nav>
+<main className="min-h-screen bg-background text-foreground">
+      {/* Breadcrumb */}
+      <div className="container mx-auto px-4 max-w-7xl py-3 flex items-center gap-2 text-[11px] tracking-[.06em] flex-wrap">
+        <Link
+          href="/"
+          className="text-muted-foreground hover:text-primary transition-colors"
+        >
 
-        {/* Cuerpo */}
-        <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 mt-6">
-          {/* COL 1: Galería */}
-          <div className="w-full lg:w-1/2">
-            <ProductGallery images={product.images} name={product.name} />
-          </div>
+          Inicio
+        </Link>
+        {product.categories[0] && (
+          <>
+<span className="text-muted-foreground/40">/</span>
+            <Link
+              href={`/productos/${product.categories[0].slug}`}
+              className="text-muted-foreground hover:text-primary transition-colors"
 
-          {/* COL 2: Info de compra */}
-          <div className="w-full lg:w-1/2 xl:pr-12">
-            <div className="space-y-6">
-              {/* Badge + Sticker */}
-              <div className="flex flex-wrap items-center gap-2">
-                {product.categories[0] && (
-                  <span className="text-[10px] font-medium tracking-[.12em] uppercase text-[#7a7970] dark:text-[var(--text-secondary)] border-b border-[rgba(15,14,12,0.12)]">
-                    {product.categories[0].name}
-                  </span>
-                )}
+            >
+              {product.categories[0].name}
+            </Link>
+          </>
+        )}
+<span className="text-muted-foreground/40">/</span>
+        <span className="text-foreground truncate max-w-[200px]">
+
+          {product.name}
+        </span>
+      </div>
+
+<div className="container mx-auto px-4 py-8 max-w-7xl">
+        {/* Galería + Info */}
+        <div className="grid lg:grid-cols-2 lg:items-stretch gap-8 mb-12">
+          <ProductGallery images={product.images} name={product.name} />
+
+          <div className="space-y-6">
+            <div>
+              <div className="flex flex-wrap items-center gap-2 mb-3">
+                {product.categories.map((cat) => (
+                  <Link key={cat.slug} href={`/productos/${cat.slug}`}>
+                    <Badge
+                      variant="secondary"
+                      className="hover:bg-secondary/80 transition-colors cursor-pointer"
+                    >
+                      {cat.name}
+                    </Badge>
+                  </Link>
+                ))}
                 <StickerBadge sticker={product.sticker} />
               </div>
-
-              {/* Título */}
-              <div>
-                <h1 className="font-['DM_Serif_Display',Georgia,serif] font-normal text-3xl md:text-4xl text-[#0f0e0c] dark:text-[var(--text-primary)] leading-tight mb-2">
-                  {product.name}
-                </h1>
-                {product.short_description && (
-                  <p className="text-[#5a5950] dark:text-[var(--text-secondary)] text-[13px] leading-relaxed font-light">
-                    {product.short_description}
-                  </p>
-                )}
-
-                {/* Rating básico */}
-                <div className="flex items-center gap-2 mt-3.5">
-                  <Stars value={product.rating.average} size="md" />
-                  <span className="text-[11px] text-[#7a7970] dark:text-[var(--text-secondary)] tracking-[.04em]">
-                    {product.rating.average.toFixed(1)} ({product.rating.count} {product.rating.count === 1 ? 'reseña' : 'reseñas'})
-                  </span>
-                </div>
-              </div>
-
-              <div className="w-full h-px bg-[rgba(15,14,12,0.08)] dark:bg-[var(--border-subtle)]" />
-
-              {/* Precios e inventario */}
-              <div className="space-y-2">
-                <div className="flex items-baseline gap-3">
-                  <span className="font-['DM_Serif_Display',Georgia,serif] text-4xl text-[#0f0e0c] dark:text-[var(--text-primary)]">
-                    {formatPrice(product.price)}
-                  </span>
-                  {discount > 0 && (
-                    <>
-                      <span className="text-sm line-through text-[#7a7970] dark:text-[var(--text-secondary)]">
-                        {formatPrice(product.regular_price)}
-                      </span>
-                      <span className="text-[11px] font-semibold text-[#c0392b] tracking-[.02em]">
-                        −{discount}%
-                      </span>
-                    </>
-                  )}
-                </div>
-                <div className="flex items-center gap-2 text-[12px] font-light">
-                  <span
-                    className={`w-1.5 h-1.5 rounded-full ${
-                      inStock ? 'bg-[#2d5e42] dark:bg-green-700' : 'bg-[#c0392b]'
-                    }`}
-                  />
-                  {inStock
-                    ? `${product.stock} unidades disponibles`
-                    : 'Sin stock'}
-                </div>
-              </div>
-
-              {/* Info física / digital / servicio */}
-              <ProductTypeInfo product={product} />
-
-              {/* Ficha nutritional */}
-              {hasNutritional && (
-                <NutritionalPanel info={product.nutritional_info!} />
+<h1 className="text-4xl font-bold text-foreground mb-2 tracking-tight">
+                {product.name}
+              </h1>
+              {product.short_description && (
+<p className="text-sm text-muted-foreground leading-relaxed mb-3">
+                  {product.short_description}
+                </p>
               )}
-
-              {/* Cantidad */}
-              {inStock && (
-                <div className="flex items-center gap-5">
-                  <span className="text-[11px] tracking-[.1em] uppercase text-[#7a7970] dark:text-[var(--text-secondary)]">
-                    Cantidad
-                  </span>
-                  <div className="flex items-center border border-[rgba(15,14,12,0.12)] dark:border-[var(--border-subtle)]">
-                    <button
-                      onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                      className="w-9 h-9 flex items-center justify-center text-[#3a3935] dark:text-[var(--text-primary)] hover:bg-[#f2f0ea] dark:bg-[var(--bg-secondary)] dark:hover:bg-[var(--bg-card)] transition-colors text-lg"
-                      aria-label="Reducir"
-                    >
-                      −
-                    </button>
-                    <span className="w-10 text-center text-[14px] font-medium text-[#0f0e0c] dark:text-[var(--text-primary)]">
-                      {quantity}
-                    </span>
-                    <button
-                      onClick={() =>
-                        setQuantity((q) => Math.min(product.stock, q + 1))
-                      }
-                      className="w-9 h-9 flex items-center justify-center text-[#3a3935] dark:text-[var(--text-primary)] hover:bg-[#f2f0ea] dark:bg-[var(--bg-secondary)] dark:hover:bg-[var(--bg-card)] transition-colors text-lg"
-                      aria-label="Aumentar"
-                    >
-                      +
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* Error carrito */}
-              {cartError && (
-                <div className="flex items-center gap-2 text-[12px] text-[#c0392b] bg-[#fdf0ee] dark:bg-red-900/30 border border-[rgba(192,57,43,0.2)] px-3 py-2">
-                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                  {cartError}
-                </div>
-              )}
-
-              {/* Acciones */}
-              <div className="flex gap-2">
-                {/* Botón carrito */}
-                <button
-                  onClick={handleAddToCart}
-                  disabled={!inStock || cartLoading}
-                  className={`
-                    flex-1 flex items-center justify-center gap-2.5
-                    font-medium text-[12px] tracking-[.1em] uppercase
-                    py-3.5 px-6
-                    transition-colors duration-150
-                    disabled:opacity-50
-                    ${
-                      localAdded || addedToCart
-                        ? 'bg-[#1a5c34] dark:bg-green-700 text-[#e8f5ee] dark:text-green-100'
-                        : inStock
-                          ? 'bg-[#1a3a2a] dark:bg-green-900 text-[#e8f5ee] dark:text-green-100 hover:bg-[#2d5e42] dark:hover:bg-green-600'
-                          : 'bg-[#7a7970] text-white dark:text-[var(--text-secondary)] cursor-not-allowed'
-                    }
-                  `}
-                >
-                  {cartLoading ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : localAdded || addedToCart ? (
-                    <Check className="w-4 h-4" />
-                  ) : (
-                    <ShoppingCart className="w-4 h-4" />
-                  )}
-                  {cartLoading
-                    ? 'Agregando...'
-                    : localAdded || addedToCart
-                      ? '¡Agregado!'
-                      : inStock
-                        ? 'Agregar al carrito'
-                        : 'Sin stock'}
-                </button>
-
-                {/* Favoritos */}
-                <button
-                  onClick={toggleWishlist}
-                  className={`
-                    w-12 h-12 border flex items-center justify-center
-                    transition-all duration-150
-                    ${
-                      isWishlisted
-                        ? 'border-[#c0392b] text-[#c0392b] bg-[#fdf0ee] dark:bg-red-900/30'
-                        : 'border-[rgba(15,14,12,0.12)] dark:border-[var(--border-subtle)] text-[#7a7970] dark:text-[var(--text-secondary)] hover:border-[#c0392b] hover:text-[#c0392b]'
-                    }
-                  `}
-                  aria-label="Favoritos"
-                >
-                  <Heart
-                    className={`w-[18px] h-[18px] ${isWishlisted ? 'fill-current' : ''}`}
-                  />
-                </button>
-
-                {/* Compartir */}
-                <button
-                  onClick={() =>
-                    navigator.share?.({
-                      title: product.name,
-                      url: window.location.href,
-                      text: product.short_description ?? undefined,
-                    })
-                  }
-                  className="
-                    w-12 h-12 border border-[rgba(15,14,12,0.12)] dark:border-[var(--border-subtle)]
-                    flex items-center justify-center text-[#7a7970] dark:text-[var(--text-secondary)]
-                    hover:border-[#0f0e0c] dark:hover:border-[var(--text-primary)] hover:text-[#0f0e0c] dark:text-[var(--text-primary)]
-                    transition-all duration-150
-                  "
-                  aria-label="Compartir"
-                >
-                  <Share2 className="w-[18px] h-[18px]" />
-                </button>
+              <div className="flex items-center gap-3">
+                <Stars value={product.rating.average} size="lg" />
+                <span className="text-sm text-muted-foreground">
+                  {product.rating.average.toFixed(1)} ({product.rating.count}{' '}
+                  reseñas)
+                </span>
               </div>
-
-              {/* Garantías */}
-              <div className="grid grid-cols-3 gap-2">
-                {[
-                  { icon: Shield, text: 'Compra segura' },
-                  { icon: Truck, text: 'Envío rápido' },
-                  { icon: RotateCcw, text: 'Devoluciones' },
-                ].map(({ icon: Icon, text }) => (
-                  <div
-                    key={text}
-                    className="
-                      flex flex-col items-center gap-1.5 p-3
-                      border border-[rgba(15,14,12,0.08)] dark:border-[var(--border-subtle)]
-                      bg-white dark:bg-[var(--bg-card)] text-center
-                    "
-                  >
-                    <Icon className="w-4 h-4 text-[#2d5e42] dark:text-[var(--brand-green)]" />
-                    <span className="text-[10px] tracking-[.06em] uppercase text-[#7a7970] dark:text-[var(--text-secondary)]">
-                      {text}
-                    </span>
-                  </div>
-                ))}
-              </div>
-
-              {/* Card tienda */}
-              <Link
-                href={`/tienda/${product.store.slug}`}
-                className="
-                  flex items-center gap-4 p-4
-                  border border-[rgba(15,14,12,0.08)] dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)]
-                  hover:border-[#1a3a2a] dark:hover:border-[var(--brand-green)]
-                  transition-colors duration-150 group
-                "
-              >
-                <div className="w-11 h-11 bg-[#1a3a2a] dark:bg-green-900 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                  {product.store.logo ? (
-                    <Image
-                      src={product.store.logo}
-                      alt={product.store.name}
-                      width={44}
-                      height={44}
-                      className="object-cover"
-                    />
-                  ) : (
-                    <Store className="w-5 h-5 text-[#e8f5ee] dark:text-green-100" />
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[10px] tracking-[.08em] uppercase text-[#7a7970] dark:text-[var(--text-secondary)] mb-0.5">
-                    Vendido por
-                  </p>
-                  <p className="font-medium text-[14px] text-[#0f0e0c] dark:text-[var(--text-primary)] flex items-center gap-1">
-                    {product.store.name}
-                    <BadgeCheck className="w-3.5 h-3.5 text-[#2d5e42] dark:text-[var(--brand-green)]" />
-                  </p>
-                  {product.store.phone && (
-                    <p className="text-[11px] text-[#7a7970] dark:text-[var(--text-secondary)] mt-0.5 flex items-center gap-1">
-                      <Phone className="w-3 h-3" />
-                      {product.store.phone}
-                    </p>
-                  )}
-                </div>
-                <ArrowLeft className="w-4 h-4 text-[#7a7970] dark:text-[var(--text-secondary)] rotate-180 group-hover:text-[#1a3a2a] dark:group-hover:text-[var(--brand-green)] dark:hover:text-[var(--brand-green)] transition-colors" />
-              </Link>
             </div>
 
-            {/* Tabs */}
-            <div className="mt-10">
-              {/* Barra de tabs */}
-              <div className="flex border-b border-[rgba(15,14,12,0.1)] dark:border-[var(--border-subtle)] mb-6 overflow-x-auto">
-                {TABS.map(({ key, label }) => (
-                  <button
-                    key={key}
-                    onClick={() => setActiveTab(key)}
-                    className={`
-                      px-5 py-3 text-[11px] tracking-[.1em] uppercase font-medium
-                      border-b-[2px] -mb-px whitespace-nowrap
-                      transition-all duration-150
-                      ${
-                        activeTab === key
-                          ? 'border-[#0f0e0c] dark:border-[var(--text-primary)] text-[#0f0e0c] dark:text-[var(--text-primary)]'
-                          : 'border-transparent text-[#7a7970] dark:text-[var(--text-secondary)] hover:text-[#3a3935] dark:text-[var(--text-primary)]'
-                      }
-                    `}
-                  >
-                    {label}
-                  </button>
-                ))}
+<Separator />
+
+            <div className="space-y-2">
+              <div className="flex items-baseline gap-3 flex-wrap">
+                <span className="text-5xl font-bold text-foreground">
+                  {formatPrice(product.price)}
+                </span>
+                {discount > 0 && (
+                  <>
+                    <span className="text-lg line-through text-muted-foreground">
+                      {formatPrice(product.regular_price)}
+                    </span>
+                    <Badge
+                      variant="destructive"
+                      className="text-xs tracking-[.08em]"
+                    >
+                      −{discount}%
+                    </Badge>
+                  </>
+                )}
               </div>
-
-              {/* Contenido de tabs */}
-              <div className="bg-white dark:bg-[var(--bg-card)] border border-[rgba(15,14,12,0.08)] dark:border-[var(--border-subtle)] p-5 md:p-8">
-                {/* Tab: Descripción */}
-                {activeTab === 'descripcion' && (
-                  <div className="space-y-4">
-                    {product.description ? (
-                      product.description.split('\n').map((p, i) => (
-                        <p
-                          key={i}
-                          className="text-[#3a3935] dark:text-[var(--text-primary)] leading-[1.9] text-[13px] font-light"
-                        >
-                          {p}
-                        </p>
-                      ))
-                    ) : (
-                      <p className="text-[#7a7970] dark:text-[var(--text-secondary)] italic text-[13px]">
-                        Sin descripción disponible.
-                      </p>
-                    )}
-                  </div>
+              <div
+className={cn(
+                  'flex items-center gap-2 text-sm font-medium',
+                  inStock ? 'text-emerald-700 dark:text-emerald-400' : 'text-destructive',
                 )}
+              >
+                <span
+                  className={cn(
+                    'w-1.5 h-1.5 rounded-full',
+                    inStock ? 'bg-emerald-700 dark:bg-emerald-400' : 'bg-destructive',
+                  )}
 
-                {/* Tab: Características / Nutrición */}
-                {activeTab === 'caracteristicas' && (
-                  <div className="space-y-8">
-                    {hasNutritional && (
-                      <div>
-                        <h3 className="text-[10px] font-medium tracking-[.12em] uppercase text-[#7a7970] dark:text-[var(--text-secondary)] mb-4 flex items-center gap-2">
-                          <Leaf className="w-3.5 h-3.5 text-[#2d5e42] dark:text-[var(--brand-green)]" />
-                          Información Nutricional
-                        </h3>
-                        <div className="border border-[rgba(15,14,12,0.08)] dark:border-[var(--border-subtle)] overflow-hidden">
-                          {product.nutritional_info!.serving_note && (
-                            <div className="bg-[#f2f0ea] dark:bg-[var(--bg-secondary)] px-4 py-2.5 border-b border-[rgba(15,14,12,0.08)] dark:border-[var(--border-subtle)]">
-                              <p className="text-[11px] text-[#7a7970] dark:text-[var(--text-secondary)] italic">
-                                {product.nutritional_info!.serving_note}
-                              </p>
-                            </div>
-                          )}
-                          <table className="w-full text-[12px]">
-                            <thead className="bg-[#f2f0ea] dark:bg-[var(--bg-secondary)]">
-                              <tr>
-                                <th className="px-4 py-2.5 text-left text-[10px] font-medium tracking-[.1em] uppercase text-[#7a7970] dark:text-[var(--text-secondary)]">
-                                  Nutriente
-                                </th>
-                                <th className="px-4 py-2.5 text-left text-[10px] font-medium tracking-[.1em] uppercase text-[#7a7970] dark:text-[var(--text-secondary)]">
-                                  Cantidad
-                                </th>
-                                <th className="px-4 py-2.5 text-right text-[10px] font-medium tracking-[.1em] uppercase text-[#7a7970] dark:text-[var(--text-secondary)]">
-                                  % VD*
-                                </th>
-                              </tr>
-                            </thead>
-                            <tbody className="divide-y divide-[rgba(15,14,12,0.05)]">
-                              {product.nutritional_info!.rows.map((row, i) => (
-                                <tr
-                                  key={i}
-                                  className="hover:bg-[#f2f0ea] dark:bg-[var(--bg-secondary)] dark:hover:bg-[var(--bg-card)] transition-colors"
-                                >
-                                  <td className="px-4 py-2.5 font-medium text-[#3a3935] dark:text-[var(--text-primary)]">
-                                    {row.label}
-                                  </td>
-                                  <td className="px-4 py-2.5 text-[#2d5e42] dark:text-[var(--brand-green)] font-medium">
-                                    {row.value}
-                                  </td>
-                                  <td className="px-4 py-2.5 text-right text-[#7a7970] dark:text-[var(--text-secondary)]">
-                                    {row.daily_value ?? '—'}
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      </div>
-                    )}
+                />
+                {inStock
+                  ? `${product.stock} unidades disponibles`
+                  : 'Sin stock'}
+              </div>
+            </div>
 
-                    {hasCharacteristics && (
-                      <div>
-                        {hasNutritional && (
-                          <h3 className="text-[10px] font-medium tracking-[.12em] uppercase text-[#7a7970] dark:text-[var(--text-secondary)] mb-4">
-                            Características
-                          </h3>
-                        )}
-                        <CharacteristicsTable
-                          characteristics={characteristics}
-                          additional_info={additionalInfo}
-                        />
-                      </div>
-                    )}
+            <ProductInfoCards product={product} />
+            {hasNutritional && (
+              <NutritionalPanel info={product.nutritional_info!} />
+            )}
 
-                    {!hasNutritional && !hasCharacteristics && (
-                      <p className="text-[#7a7970] dark:text-[var(--text-secondary)] italic text-[13px]">
-                        Sin información especificada.
-                      </p>
-                    )}
-                  </div>
+            <Separator />
+
+            {inStock && (
+              <div className="flex items-center gap-5">
+                <span className="text-[11px] tracking-[.1em] uppercase text-muted-foreground">
+                  Cantidad
+                </span>
+                <div className="flex items-center border border-border rounded-md overflow-hidden">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                    className="h-9 w-9 rounded-none border-r border-border"
+                    aria-label="Reducir"
+                  >
+                    −
+                  </Button>
+                  <span className="w-10 text-center text-sm font-medium text-foreground">
+                    {quantity}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() =>
+                      setQuantity((q) => Math.min(product.stock, q + 1))
+                    }
+                    className="h-9 w-9 rounded-none border-l border-border"
+                    aria-label="Aumentar"
+                  >
+                    +
+                  </Button>
+                </div>
+              </div>
+            )}
+
+{cartError && (
+              <div className="flex items-center gap-2 text-sm px-3 py-2 text-destructive bg-destructive/10 border border-destructive/25 rounded-md">
+                <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                {cartError}
+              </div>
+            )}
+
+            <div className="flex gap-3">
+              <Button
+                onClick={handleAddToCart}
+                disabled={!inStock || cartLoading}
+                size="lg"
+                className={cn(
+                  'flex-1 text-base h-12 shadow-lg shadow-[#2d5e42]/20 dark:shadow-[#4A7C59]/20',
+                  localAdded
+                    ? 'bg-emerald-700 hover:bg-emerald-700'
+                    : 'bg-[#2d5e42] hover:bg-[#1a3a2a] dark:bg-[#4A7C59] dark:hover:bg-[#3D6B4A] text-white',
                 )}
+              >
+                {cartLoading ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : localAdded ? (
+                  <Check className="w-5 h-5" />
+                ) : (
+                  <ShoppingCart className="w-5 h-5" />
 
-                {/* Tab: Tienda */}
-                {activeTab === 'tienda' && (
-                  <div className="flex items-start gap-5">
-                    <div className="w-14 h-14 bg-[#1a3a2a] dark:bg-green-900 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                )}
+                {cartLoading
+                  ? 'Agregando…'
+                  : localAdded
+                    ? '¡Agregado!'
+                    : inStock
+                      ? 'Añadir al Carrito'
+                      : 'Sin stock'}
+              </Button>
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={() => setWishlisted((w) => !w)}
+                aria-label="Favoritos"
+                className={cn(
+                  'h-12 w-12',
+                  wishlisted &&
+                    'border-destructive text-destructive bg-destructive/10 hover:bg-destructive/20',
+                )}
+              >
+                <Heart
+                  className="w-5 h-5"
+                  style={{ fill: wishlisted ? 'currentColor' : 'transparent' }}
+                />
+              </Button>
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={() =>
+                  navigator.share?.({
+                    title: product.name,
+                    url: window.location.href,
+                  })
+                }
+                aria-label="Compartir"
+                className="h-12 w-12"
+              >
+                <Share2 className="w-5 h-5" />
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-3 gap-3">
+              {[
+                { icon: Shield, text: 'Compra segura' },
+                { icon: Truck, text: 'Envío rápido' },
+                { icon: RotateCcw, text: 'Devoluciones' },
+              ].map(({ icon: Icon, text }) => (
+                <Card key={text} className="border-[#2d5e42]/15 dark:border-[#4A7C59]/25 bg-[#2d5e42]/5 dark:bg-[#4A7C59]/10">
+                  <CardContent className="p-3 flex flex-col items-center gap-1.5 text-center">
+                    <Icon className="w-4 h-4 text-[#2d5e42] dark:text-[#4A7C59]" />
+                    <span className="text-[10px] tracking-[.06em] uppercase text-foreground font-semibold">
+                      {text}
+                    </span>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {product.store?.name && (
+              <Link href={`/tienda/${product.store.slug}`}>
+                <Card className="hover:border-[#2d5e42]/40 dark:hover:border-[#4A7C59]/60 transition-colors cursor-pointer">
+                  <CardContent className="p-4 flex items-center gap-4">
+                    <div className="w-11 h-11 flex items-center justify-center flex-shrink-0 overflow-hidden rounded-lg bg-[#2d5e42] dark:bg-[#4A7C59]">
+
                       {product.store.logo ? (
                         <Image
                           src={product.store.logo}
                           alt={product.store.name}
-                          width={56}
-                          height={56}
-                          className="object-cover"
+                          width={44}
+                          height={44}
+                          className="object-cover rounded-lg"
                         />
                       ) : (
-                        <Store className="w-7 h-7 text-[#e8f5ee] dark:text-green-100" />
+<Store className="w-5 h-5 text-white" />
                       )}
                     </div>
-                    <div className="flex-1">
-                      <h3 className="font-['DM_Serif_Display',Georgia,serif] text-[22px] font-normal text-[#0f0e0c] dark:text-[var(--text-primary)] flex items-center gap-2 mb-3">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs text-muted-foreground mb-0.5">
+                        Marca / Vendido por
+                      </p>
+                      <p className="font-semibold text-lg text-foreground flex items-center gap-1">
                         {product.store.name}
-                        <BadgeCheck className="w-4 h-4 text-[#2d5e42] dark:text-[var(--brand-green)]" />
-                      </h3>
-                      <div className="space-y-1.5">
-                        {product.store.email && (
-                          <p className="text-[12px] text-[#7a7970] dark:text-[var(--text-secondary)] flex items-center gap-2">
-                            <Mail className="w-3.5 h-3.5" />
-                            {product.store.email}
-                          </p>
-                        )}
-                        {product.store.phone && (
-                          <p className="text-[12px] text-[#7a7970] dark:text-[var(--text-secondary)] flex items-center gap-2">
-                            <Phone className="w-3.5 h-3.5" />
-                            {product.store.phone}
-                          </p>
-                        )}
-                      </div>
-                      <Link
-                        href={`/tienda/${product.store.slug}`}
-                        className="
-                          inline-flex items-center gap-2 mt-4
-                          border border-[rgba(15,14,12,0.12)] dark:border-[var(--border-subtle)]
-                          px-4 py-2 text-[11px] tracking-[.08em] uppercase text-[#3a3935] dark:text-[var(--text-primary)]
-                          hover:bg-[#f2f0ea] dark:bg-[var(--bg-secondary)] dark:hover:bg-[var(--bg-card)] transition-colors
-                        "
-                      >
-                        <Store className="w-3.5 h-3.5" />
-                        Ver tienda completa
-                      </Link>
+                        <BadgeCheck className="w-4 h-4 text-[#2d5e42] dark:text-[#4A7C59]" />
+                      </p>
                     </div>
-                  </div>
-                )}
-
-                {/* Tab: Comentarios */}
-                {activeTab === 'comentarios' && (
-                  <ReviewsSection
-                    productId={product.id}
-                    productRating={product.rating.average}
-                    productReviewCount={product.rating.count}
-                  />
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* COL 3: Relacionados (sidebar derecha, solo en xl) */}
-          <div className="hidden xl:block xl:w-[220px] flex-shrink-0">
-            <div className="sticky top-4">
-              <RelatedProductsSidebar products={relatedProducts} />
-            </div>
+                    <ArrowLeft className="w-4 h-4 rotate-180 text-[#2d5e42] dark:text-[#4A7C59]" />
+                  </CardContent>
+                </Card>
+              </Link>
+            )}
           </div>
         </div>
 
-        {/* Relacionados en mobile/lg (abajo, grid) */}
-        {relatedProducts.length > 0 && (
-          <section className="mt-12 xl:hidden">
-            <h2 className="text-[10px] font-medium tracking-[.12em] uppercase text-[#7a7970] dark:text-[var(--text-secondary)] mb-5">
-              También te puede gustar
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-              {relatedProducts.slice(0, 8).map((rel) => (
-                <Link
-                  key={rel.id}
-                  href={`/producto/${rel.slug}`}
-                  className="
-                    group bg-white dark:bg-[var(--bg-card)] border border-[rgba(15,14,12,0.08)] dark:border-[var(--border-subtle)]
-                    overflow-hidden
-                    hover:border-[#1a3a2a] dark:hover:border-[var(--brand-green)]
-                    transition-colors duration-150
-                  "
-                >
-                  <div className="relative aspect-square overflow-hidden bg-[#f2f0ea] dark:bg-[var(--bg-secondary)]">
-                    <Image
-                      src={
-                        rel.images[0]?.medium ??
-                        rel.images[0]?.src ??
-                        '/no-image.png'
-                      }
-                      alt={rel.images[0]?.alt ?? rel.name}
-                      fill
-                      sizes="(max-width:768px) 50vw, 25vw"
-                      className="object-contain p-3 group-hover:scale-[1.04] transition-transform duration-300"
-                    />
-                    {rel.sticker && (
-                      <div className="absolute top-0 left-0">
-                        <StickerBadge sticker={rel.sticker} />
-                      </div>
+{/* Tabs */}
+        <Card className="mb-12">
+          <CardContent className="p-6">
+            <Tabs defaultValue="descripcion" className="w-full">
+              <TabsList className="grid w-full grid-cols-4 mb-6">
+                <TabsTrigger value="descripcion" className="data-[state=active]:border-b-2 data-[state=active]:border-[#2d5e42] dark:data-[state=active]:border-[#4A7C59] rounded-none">Descripción</TabsTrigger>
+                <TabsTrigger value="caracteristicas" className="data-[state=active]:border-b-2 data-[state=active]:border-[#2d5e42] dark:data-[state=active]:border-[#4A7C59] rounded-none">
+                  Características
+                </TabsTrigger>
+                <TabsTrigger value="nutricion" className="data-[state=active]:border-b-2 data-[state=active]:border-[#2d5e42] dark:data-[state=active]:border-[#4A7C59] rounded-none">Nutrición</TabsTrigger>
+                <TabsTrigger value="tienda" className="data-[state=active]:border-b-2 data-[state=active]:border-[#2d5e42] dark:data-[state=active]:border-[#4A7C59] rounded-none">Tienda</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="descripcion" className="space-y-4">
+                <h3 className="text-2xl font-semibold">
+                  Descripción del Producto
+                </h3>
+                {product.description ? (
+                  product.description.split('\n').map((p, i) => (
+                    <p
+                      key={i}
+                      className="text-muted-foreground leading-relaxed text-base"
+                    >
+                      {p}
+                    </p>
+                  ))
+                ) : (
+                  <p className="text-muted-foreground italic">
+                    Sin descripción disponible.
+                  </p>
+                )}
+              </TabsContent>
+
+              <TabsContent value="caracteristicas" className="space-y-4">
+                <h3 className="text-2xl font-semibold">Características</h3>
+                {hasCharacteristics ? (
+                  <CharacteristicsTable
+                    characteristics={product.characteristics}
+                    additional_info={product.additional_info}
+                  />
+                ) : (
+                  <p className="text-muted-foreground italic">
+                    Sin características especificadas.
+                  </p>
+                )}
+              </TabsContent>
+
+              <TabsContent value="nutricion" className="space-y-4">
+                <h3 className="text-2xl font-semibold">
+                  Información Nutricional
+                </h3>
+                {hasNutritional ? (
+                  <div>
+                    {product.nutritional_info!.serving_note && (
+                      <p className="text-sm italic text-muted-foreground mb-4">
+                        {product.nutritional_info!.serving_note}
+                      </p>
+                    )}
+                    <div className="grid md:grid-cols-2 gap-4">
+                      {product.nutritional_info!.rows.map((row, i) => (
+                        <Card key={i}>
+                          <CardContent className="p-4 flex justify-between items-center">
+                            <span className="text-muted-foreground">
+                              {row.label}
+                            </span>
+                            <span className="font-semibold">{row.value}</span>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground italic">
+                    Sin información nutricional.
+                  </p>
+                )}
+              </TabsContent>
+
+              <TabsContent value="tienda" className="space-y-4">
+                <h3 className="text-2xl font-semibold">
+                  Información de la Tienda
+                </h3>
+                <div className="flex items-start gap-5">
+                  <div className="w-14 h-14 flex items-center justify-center flex-shrink-0 overflow-hidden rounded-xl bg-[#2d5e42] dark:bg-[#4A7C59]">
+                    {product.store.logo ? (
+                      <Image
+                        src={product.store.logo}
+                        alt={product.store.name}
+                        width={56}
+                        height={56}
+                        className="object-cover rounded-xl"
+                      />
+                    ) : (
+                      <Store className="w-7 h-7 text-white" />
                     )}
                   </div>
-                  <div className="p-3">
-                    <p className="text-[12px] text-[#3a3935] dark:text-[var(--text-primary)] line-clamp-2 leading-snug">
-                      {rel.name}
-                    </p>
-                    <p className="font-['DM_Serif_Display',Georgia,serif] text-[16px] text-[#0f0e0c] dark:text-[var(--text-primary)] mt-1.5">
-                      {formatPrice(rel.price)}
-                    </p>
+                  <div className="flex-1">
+                    <h4 className="text-xl font-bold flex items-center gap-2 mb-3 text-foreground">
+                      {product.store.name}
+                      <BadgeCheck className="w-4 h-4 text-[#2d5e42] dark:text-[#4A7C59]" />
+                    </h4>
+                    <div className="space-y-1.5">
+                      {product.store.email && (
+                        <p className="text-sm flex items-center gap-2 text-muted-foreground">
+                          <Mail className="w-3.5 h-3.5" />
+                          {product.store.email}
+                        </p>
+                      )}
+                      {product.store.phone && (
+                        <p className="text-sm flex items-center gap-2 text-muted-foreground">
+                          <Phone className="w-3.5 h-3.5" />
+                          {product.store.phone}
+                        </p>
+                      )}
+                    </div>
+                    <Link href={`/tienda/${product.store.slug}`}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="mt-4 gap-2 border-[#2d5e42]/30 dark:border-[#4A7C59]/50 text-[#2d5e42] dark:text-[#4A7C59] hover:bg-[#2d5e42]/10 dark:hover:bg-[#4A7C59]/20"
+                      >
+                        <Store className="w-3.5 h-3.5" />
+                        Ver tienda completa
+                      </Button>
+                    </Link>
                   </div>
-                </Link>
-              ))}
+                </div>
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
+
+        {/* Productos relacionados */}
+        {relatedProducts.length > 0 && (
+          <div className="mb-12">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-3xl font-bold text-foreground">Productos Relacionados</h2>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => scrollRelated('left')}
+                  className="border-[#2d5e42]/30 dark:border-[#4A7C59]/50 text-[#2d5e42] dark:text-[#4A7C59]"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => scrollRelated('right')}
+                  className="border-[#2d5e42]/30 dark:border-[#4A7C59]/50 text-[#2d5e42] dark:text-[#4A7C59]"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </Button>
+              </div>
             </div>
-          </section>
+            <div
+              id="related-scroll"
+              className="flex gap-6 overflow-x-auto scroll-smooth pb-4"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
+              {relatedProducts.map((rel) => {
+                const relDiscount = discountPercent(
+                  rel.price,
+                  rel.regular_price,
+                );
+                return (
+                  <Link
+                    key={rel.id}
+                    href={`/producto/${rel.slug}`}
+                    className="flex-shrink-0 w-80"
+                  >
+                    <Card className="hover:shadow-lg hover:border-[#2d5e42]/30 dark:hover:border-[#4A7C59]/50 transition-all cursor-pointer h-full group">
+                      <CardContent className="p-0">
+                        <div className="relative aspect-square overflow-hidden rounded-t-xl bg-muted">
+                          <Image
+                            src={
+                              rel.images[0]?.medium ??
+                              rel.images[0]?.src ??
+                              '/no-image.png'
+                            }
+                            alt={rel.images[0]?.alt ?? rel.name}
+                            fill
+                            sizes="320px"
+                            className="object-contain p-6 group-hover:scale-105 transition-transform duration-300"
+                          />
+                          {rel.sticker && (
+                            <div className="absolute top-2 left-2">
+                              <StickerBadge sticker={rel.sticker} />
+                            </div>
+                          )}
+                        </div>
+                        <div className="p-5 space-y-3">
+                          <div className="flex flex-wrap items-center gap-1">
+                            {rel.categories.slice(0, 1).map((cat) => (
+                              <Badge
+                                key={cat.slug}
+                                variant="secondary"
+                                className="text-xs"
+                              >
+                                {cat.name}
+                              </Badge>
+                            ))}
+                          </div>
+                          <h3 className="font-semibold text-lg line-clamp-2 text-foreground">
+                            {rel.name}
+                          </h3>
+                          <div className="flex items-center gap-2">
+                            <Stars value={rel.rating.average} size="sm" />
+                            <span className="text-xs text-muted-foreground">
+                              ({rel.rating.count})
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between pt-2">
+                            <div className="flex items-baseline gap-2">
+                              <span className="text-2xl font-bold text-[#2d5e42] dark:text-[#4A7C59]">
+                                {formatPrice(rel.price)}
+                              </span>
+                              {relDiscount > 0 && (
+                                <Badge
+                                  variant="destructive"
+                                  className="text-[10px]"
+                                >
+                                  −{relDiscount}%
+                                </Badge>
+                              )}
+                            </div>
+                            <Button size="sm" className="bg-[#2d5e42] hover:bg-[#1a3a2a] dark:bg-[#4A7C59] dark:hover:bg-[#3D6B4A] text-white" aria-label="Agregar al carrito">
+                              <ShoppingCart className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
         )}
+
+        {/* Reseñas */}
+        <ReviewsSection
+          productId={product.id}
+          productRating={product.rating.average}
+          productReviewCount={product.rating.count}
+        />
       </div>
     </main>
   );

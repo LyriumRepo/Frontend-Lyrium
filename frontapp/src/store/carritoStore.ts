@@ -29,7 +29,6 @@ interface CarritoState {
   priceBoundMax: number;
 
   ui: CarritoUI;
-  clienteId: number;
 
   setProducts: (products: ApiProduct[]) => void;
   setCartItems: (items: ApiCartItem[]) => void;
@@ -103,7 +102,6 @@ export const useCarritoStore = create<CarritoState>((set, get) => ({
     detailProductId: null,
     popupOpen: false, // ← NUEVO
   },
-  clienteId: 1,
 
   setProducts: (products) => {
     const prices = products.map(getPrice).filter((n) => n > 0);

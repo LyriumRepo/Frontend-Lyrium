@@ -3,8 +3,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Chart, { ChartConfiguration } from 'chart.js/auto';
 import { useTheme } from 'next-themes';
+import { companyColors } from '../colors';
 
-interface FinanceChartProps {
+export interface FinanceChartProps {
     type: 'line' | 'bar' | 'doughnut' | 'radar';
     labels: string[];
     data: number[];
@@ -21,7 +22,7 @@ export default function FinanceChart({
     labels,
     data,
     label = '',
-    color = '#0EA5E9',
+    color = companyColors.azulCeleste,
     fill = true,
     tension = 0.4,
     cutout = '75%',

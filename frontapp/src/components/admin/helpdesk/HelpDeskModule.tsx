@@ -334,19 +334,19 @@ export const HelpDeskModule: React.FC<HelpDeskModuleProps> = ({
         switch (tag.toLowerCase()) {
             case 'logística':
             case 'logistica':
-                return 'bg-[var(--brand-teal)]/10 text-[var(--brand-teal)] border border-[var(--brand-teal)]/20 dark:bg-[var(--icons-green)]/10 dark:text-[var(--icons-green)] dark:border-[var(--icons-green)]/20';
+                return 'bg-purple-500/10 text-purple-400 border border-purple-500/20';
             case 'catálogo':
             case 'catalogo':
-                return 'bg-[var(--color-warning)]/10 text-[var(--color-warning)] border border-[var(--color-warning)]/20';
+                return 'bg-amber-500/10 text-amber-400 border border-amber-500/20';
             case 'finanzas':
-                return 'bg-[var(--color-info)]/10 text-[var(--color-info)] border border-[var(--color-info)]/20';
+                return 'bg-blue-500/10 text-blue-400 border border-blue-500/20';
             case 'reembolso':
-                return 'bg-[var(--color-error)]/10 text-[var(--color-error)] border border-[var(--color-error)]/20';
+                return 'bg-rose-500/10 text-rose-400 border border-rose-500/20';
             case 'consulta puntos':
             case 'puntos':
-                return 'bg-[var(--color-success)]/10 text-[var(--color-success)] border border-[var(--color-success)]/20';
+                return 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20';
             default:
-                return 'bg-[var(--text-muted)]/10 text-[var(--text-muted)] border border-[var(--text-muted)]/20';
+                return 'bg-zinc-500/10 text-zinc-400 border border-zinc-500/20';
         }
     };
 
@@ -369,14 +369,14 @@ export const HelpDeskModule: React.FC<HelpDeskModuleProps> = ({
                             }}
                             className={`flex-1 py-3 rounded-[1.4rem] text-[10px] font-black transition-all flex items-center justify-center gap-2 uppercase tracking-wider ${
                                 activeMode === 'vendedores'
-                                    ? 'bg-[var(--bg-card)] text-emerald-400 shadow-md border border-[var(--border-subtle)]/30'
+                                    ? 'bg-[var(--bg-card)] text-[var(--turquesa-500)] shadow-md border border-[var(--border-subtle)]/30'
                                     : 'text-[var(--text-muted)] hover:bg-[var(--bg-card)]/50'
                             }`}
                         >
                             <Store className="w-3.5 h-3.5" /> Vendedores
                             <span className={`px-2 py-0.5 rounded-full text-[9px] font-black transition-all border ${
                                 activeMode === 'vendedores'
-                                    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 shadow-sm'
+                                    ? 'bg-[var(--turquesa-500)]/10 text-[var(--turquesa-500)] border-[var(--turquesa-500)]/20 shadow-sm'
                                     : 'bg-zinc-500/10 dark:bg-zinc-800/40 text-[var(--text-muted)] border-transparent'
                             }`}>
                                 {vendedorConversations.length}
@@ -390,14 +390,14 @@ export const HelpDeskModule: React.FC<HelpDeskModuleProps> = ({
                             }}
                             className={`flex-1 py-3 rounded-[1.4rem] text-[10px] font-black transition-all flex items-center justify-center gap-2 uppercase tracking-wider ${
                                 activeMode === 'clientes'
-                                    ? 'bg-[var(--bg-card)] text-emerald-400 shadow-md border border-[var(--border-subtle)]/30'
+                                    ? 'bg-[var(--bg-card)] text-[var(--turquesa-500)] shadow-md border border-[var(--border-subtle)]/30'
                                     : 'text-[var(--text-muted)] hover:bg-[var(--bg-card)]/50'
                             }`}
                         >
                             <Users className="w-3.5 h-3.5" /> Clientes
                             <span className={`px-2 py-0.5 rounded-full text-[9px] font-black transition-all border ${
                                 activeMode === 'clientes'
-                                    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 shadow-sm'
+                                    ? 'bg-[var(--turquesa-500)]/10 text-[var(--turquesa-500)] border-[var(--turquesa-500)]/20 shadow-sm'
                                     : 'bg-zinc-500/10 dark:bg-zinc-800/40 text-[var(--text-muted)] border-transparent'
                             }`}>
                                 {clienteConversations.length}
@@ -413,7 +413,7 @@ export const HelpDeskModule: React.FC<HelpDeskModuleProps> = ({
                             placeholder={activeMode === 'vendedores' ? "Buscar vendedor..." : "Buscar cliente..."}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-11 pr-4 py-3.5 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-2xl text-xs text-[var(--text-primary)] focus:ring-2 focus:ring-emerald-500/20 outline-none font-bold placeholder:text-[var(--text-muted)]"
+                            className="w-full pl-11 pr-4 py-3.5 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-2xl text-xs text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--turquesa-500)]/20 outline-none font-bold placeholder:text-[var(--text-muted)]"
                         />
                     </div>
 
@@ -428,17 +428,17 @@ export const HelpDeskModule: React.FC<HelpDeskModuleProps> = ({
                                     onClick={() => setActiveChatId(chat.id)}
                                     className={`p-4 rounded-3xl flex gap-3.5 cursor-pointer transition-all border ${
                                         isActive
-                                            ? 'bg-emerald-500/5 border-emerald-500/30 shadow-md shadow-emerald-500/5'
+                                            ? 'bg-[var(--turquesa-500)]/10 border-[var(--turquesa-500)]/30 shadow-md shadow-[var(--turquesa-500)]/5'
                                             : 'hover:bg-[var(--bg-secondary)]/50 border-transparent'
                                     }`}
                                 >
                                     {/* Avatar con Indicador */}
                                     <div className="relative">
-                                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-500/10 to-teal-500/20 text-emerald-400 flex items-center justify-center font-black text-sm shrink-0 border border-emerald-500/10">
+                                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[var(--turquesa-500)]/10 to-[var(--verde-500)]/20 text-[var(--turquesa-500)] flex items-center justify-center font-black text-sm shrink-0 border border-[var(--turquesa-500)]/10">
                                             {chat.avatar}
                                         </div>
                                         {isActive && (
-                                            <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-500 border-2 border-[var(--bg-card)] shadow-[0_0_8px_rgba(16,185,129,0.5)] animate-pulse" />
+                                            <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-[var(--turquesa-500)] border-2 border-[var(--bg-card)] shadow-[0_0_8px_var(--turquesa-500)] animate-pulse" />
                                         )}
                                     </div>
                                     
@@ -471,7 +471,7 @@ export const HelpDeskModule: React.FC<HelpDeskModuleProps> = ({
                             {/* Cabecera del Chat */}
                             <div className="p-5 bg-[var(--bg-secondary)]/50 border-b border-[var(--border-subtle)] flex items-center justify-between gap-4">
                                 <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-500/20 to-teal-500/10 text-emerald-400 flex items-center justify-center font-black text-sm border border-emerald-500/20 shadow-md">
+                                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[var(--turquesa-500)]/20 to-[var(--verde-500)]/10 text-[var(--turquesa-500)] flex items-center justify-center font-black text-sm border border-[var(--turquesa-500)]/20 shadow-md">
                                         {activeChat.avatar}
                                     </div>
                                     <div>
@@ -480,8 +480,8 @@ export const HelpDeskModule: React.FC<HelpDeskModuleProps> = ({
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[9px] font-black uppercase px-2.5 py-1 rounded-full tracking-wider flex items-center gap-1 shadow-sm">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" /> Activo
+                                    <span className="bg-[var(--turquesa-500)]/10 text-[var(--turquesa-500)] border border-[var(--turquesa-500)]/20 text-[9px] font-black uppercase px-2.5 py-1 rounded-full tracking-wider flex items-center gap-1 shadow-sm">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-[var(--turquesa-500)] animate-ping" /> Activo
                                     </span>
                                     <button 
                                         type="button" 
@@ -498,16 +498,17 @@ export const HelpDeskModule: React.FC<HelpDeskModuleProps> = ({
                                 {activeChat.messages.map((msg) => {
                                         const isAdmin = msg.sender === 'admin';
                                         return (
-                                            <div key={msg.id} className={`flex ${isAdmin ? 'justify-end' : 'justify-start'} group/msg`}>
-                                                <div className={`max-w-[70%] p-4 rounded-3xl relative flex flex-col gap-1.5 shadow-sm transition-all ${
+                                            <div key={msg.id} className={`flex ${isAdmin ? 'justify-end animate-bubble-in-right' : 'justify-start animate-bubble-in-left'} group/msg`}
+                                              style={{ animationDelay: `${Math.min(msg.id * 30, 300)}ms` }}>
+                                                <div className={`max-w-[70%] p-4 rounded-3xl relative flex flex-col gap-1.5 shadow-sm transition-all duration-300 hover:shadow-md ${
                                                     isAdmin
-                                                        ? 'bg-gradient-to-br from-emerald-500 to-emerald-400 dark:from-[#3f7a55] dark:to-[#2d5c3d] text-white rounded-tr-none shadow-md shadow-emerald-500/5'
+                                                        ? 'bg-gradient-to-br from-[var(--turquesa-500)] to-[var(--verde-500)] text-white rounded-tr-none shadow-md shadow-[var(--turquesa-500)]/5'
                                                         : 'bg-[var(--bg-secondary)] text-[var(--text-primary)] rounded-tl-none border border-[var(--border-subtle)]'
                                                 }`}>
                                                     
                                                     {/* Remitente */}
                                                     <div className={`text-[9px] font-black uppercase tracking-wider ${
-                                                        isAdmin ? 'text-emerald-100' : 'text-emerald-500 dark:text-emerald-400'
+                                                        isAdmin ? 'text-white/80' : 'text-[var(--icons-green)] dark:text-[var(--icons-green)]'
                                                     }`}>
                                                         {msg.name} <span className="opacity-75 font-normal">({msg.role})</span>
                                                     </div>
@@ -530,7 +531,7 @@ export const HelpDeskModule: React.FC<HelpDeskModuleProps> = ({
                                                             ))}
                                                         </div>
                                                         <span className={`text-[8px] font-bold ${
-                                                            isAdmin ? 'text-emerald-100/75' : 'text-[var(--text-muted)]'
+                                                            isAdmin ? 'text-white/70' : 'text-[var(--text-muted)]'
                                                         }`}>
                                                             {msg.time}
                                                         </span>
@@ -590,11 +591,11 @@ export const HelpDeskModule: React.FC<HelpDeskModuleProps> = ({
                                         placeholder="Escribe un mensaje en el canal de soporte..."
                                         value={typedMessage}
                                         onChange={(e) => setTypedMessage(e.target.value)}
-                                        className="flex-1 pl-4 pr-14 py-4 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-2xl text-xs font-bold focus:ring-2 focus:ring-emerald-500/20 outline-none text-[var(--text-primary)] placeholder:text-[var(--text-muted)]"
+                                        className="flex-1 pl-4 pr-14 py-4 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-2xl text-xs font-bold focus:ring-2 focus:ring-[var(--turquesa-500)]/20 outline-none text-[var(--text-primary)] placeholder:text-[var(--text-muted)]"
                                     />
                                     <button
                                         type="submit"
-                                        className="absolute right-2.5 w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-400 dark:from-[#3f7a55] dark:to-[#2d5c3d] hover:brightness-105 text-white flex items-center justify-center transition active:scale-95 shadow-md shadow-emerald-500/10 border border-[var(--border-subtle)]"
+                                        className="absolute right-2.5 w-11 h-11 rounded-xl bg-[var(--brand-green)] hover:bg-[var(--brand-green-hover)] text-white flex items-center justify-center transition active:scale-95 shadow-md shadow-[var(--brand-green)]/30 border border-[var(--brand-green)]/20"
                                     >
                                         <Send className="w-4 h-4" />
                                     </button>

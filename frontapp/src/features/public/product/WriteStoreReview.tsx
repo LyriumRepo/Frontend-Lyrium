@@ -77,9 +77,9 @@ export function WriteStoreReview({ storeSlug, onSuccess, onCancel }: Props) {
   // ⚠️ NOTA: Asegúrate de definir de dónde viene 'status' si usas NextAuth.
   // Por ahora lo dejamos simulado o puedes usar un estado/hook real aquí:
   // const { status } = useSession();
-  const status: any = 'authenticated';
+  const authenticated = true;
 
-  if (status === 'unauthenticated') {
+  if (!authenticated) {
     return (
       <div className="flex items-center gap-3 p-4 rounded-lg bg-yellow-50 border border-yellow-200 text-sm text-yellow-800">
         <AlertCircle className="w-4 h-4 flex-shrink-0" />

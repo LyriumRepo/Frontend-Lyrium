@@ -18,6 +18,13 @@ export const sellerNavigation: PanelNavigation = [
                 href: '/seller/profile'
             },
             {
+                id: 'seguridad',
+                label: 'Seguridad',
+                description: 'Protege tu cuenta y gestiona tu contraseña',
+                icon: 'Shield',
+                href: '/seller/security'
+            },
+            {
                 id: 'mi-tienda',
                 label: 'Mi Tienda',
                 description: 'Personaliza tu escaparate público y presencia de marca',
@@ -26,10 +33,17 @@ export const sellerNavigation: PanelNavigation = [
             },
             {
                 id: 'catalogo',
-                label: 'Mi Catálogo',
+                label: 'Mis Productos',
                 description: 'Gestión integral de productos, categorías y existencias',
                 icon: 'Package',
                 href: '/seller/catalog'
+            },
+            {
+                id: 'inventario',
+                label: 'Gestión de stock ',
+                description: 'Control de existencias y alertas de stock',
+                icon: 'Boxes',
+                href: '/seller/inventario'
             },
             {
                 id: 'servicios',

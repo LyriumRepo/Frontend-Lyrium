@@ -8,7 +8,6 @@ export interface NotificationSettings {
   email_order: boolean;
   email_promotions: boolean;
   email_newsletter: boolean;
-  sms_order: boolean;
   push_notifications: boolean;
 }
 

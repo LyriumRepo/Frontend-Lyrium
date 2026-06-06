@@ -174,7 +174,7 @@ const SellerRow = ({
               <span className="text-sm font-black text-[var(--text-primary)] truncate max-w-[140px]">
                 {seller.name}
               </span>
-                            {seller.is_banned && (
+              {seller.is_banned && (
                 <span title="Cuenta baneada" className="flex-shrink-0 flex items-center">
                   <Ban className="w-3.5 h-3.5 text-rose-400" />
                 </span>

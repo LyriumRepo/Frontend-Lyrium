@@ -11,15 +11,21 @@ export function useAuth() {
     try {
       const LARAVEL_API =
         process.env.NEXT_PUBLIC_LARAVEL_API_URL || 'http://127.0.0.1:8000/api';
+      const token = localStorage.getItem('laravel_token');
+
+      if (!token) {
+        setIsAuthenticated(false);
+        setLoading(false);
+        return;
+      }
 
       const response = await fetch(`${LARAVEL_API}/auth/validate`, {
         method: 'GET',
         headers: {
           Accept: 'application/json',
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
         },
-        // 🌟 OBLIGATORIO: Para que el navegador envíe la cookie HttpOnly a Laravel
-        credentials: 'include',
       });
 
       if (response.ok) {

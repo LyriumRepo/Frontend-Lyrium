@@ -157,6 +157,13 @@ export interface AuditLogFilters {
 
 // ─── Operations Dashboard ────────────────────────────────────────────────────
 
+export interface OperationalKPI {
+  label: string;
+  val: string | number;
+  icon: string;
+  color: string;
+}
+
 export interface OperationsStats {
   inversion_total: number;
   proveedores_activos: number;

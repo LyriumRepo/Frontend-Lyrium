@@ -3,29 +3,24 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { useQuery } from '@tanstack/react-query';
-import type {
-  Product,
-  ProductAttribute,
-  NutritionalAttribute,
-  ProductSticker,
-  ProductType,
-} from '@/features/seller/catalog/types';
+import { getAllCategories } from '@/shared/lib/api/laravelCategoryRepository';
+import { Product, ProductAttribute, ProductSticker, ProductType, NutritionalAttribute } from '@/features/seller/catalog/types';
 import BaseModal from '@/components/ui/BaseModal';
 import BaseButton from '@/components/ui/BaseButton';
 import { useToast } from '@/shared/lib/context/ToastContext';
 import Icon from '@/components/ui/Icon';
 
 interface Category {
-  id: number;
-  name: string;
-  slug: string;
+    id: number;
+    name: string;
+    slug: string;
 }
 
 interface ProductModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSave: (product: Partial<Product>) => void;
-  productToEdit?: Product | null;
+    isOpen: boolean;
+    onClose: () => void;
+    onSave: (product: Product) => void;
+    productToEdit?: Product | null;
 }
 
 // ─── Helpers de fábrica ───────────────────────────────────────────────────────
@@ -74,6 +69,11 @@ export default function ProductModal({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { showToast } = useToast();
 
+  const { data: categories = [] } = useQuery({
+    queryKey: ['categories'],
+    queryFn: getAllCategories,
+    staleTime: 5 * 60 * 1000,
+  });
 
   // ─── Cargar producto al abrir ──────────────────────────────────────────────
   useEffect(() => {
@@ -139,24 +139,29 @@ export default function ProductModal({
     reader.readAsDataURL(file);
   };
 
-  // ─── Atributos principales / adicionales ───────────────────────────────────
-  const addAttr = (type: 'main' | 'additional') => {
+  const updateAttr = (
+    type: 'main' | 'additional',
+    idx: number,
+    field: 'label' | 'value',
+    val: string,
+  ) => {
     const key = type === 'main' ? 'mainAttributes' : 'additionalAttributes';
-    const current = (formData[key] as ProductAttribute[]) ?? [];
-    if (current.length >= 10) return;
-    set(key as keyof Product, [...current, makeEmptyAttr()]);
+    const arr = [...((formData[key] as ProductAttribute[]) ?? [])];
+    if (arr[idx]) {
+      arr[idx] = {
+        values: { ...arr[idx].values, [field]: val },
+      };
+    }
+    set(key as keyof Product, arr);
   };
 
-    const { data: categories = [] } = useQuery<Category[]>({
-        queryKey: ['seller', 'categories'],
-        queryFn: async () => {
-            const LARAVEL_API_URL = process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://localhost:8000/api';
-            const res = await fetch(`${LARAVEL_API_URL}/categories?type=product&per_page=400`);
-            const data = await res.json();
-            return data.data || data || [];
-        },
-        staleTime: 5 * 60 * 1000,
-    });
+  const addAttr = (type: 'main' | 'additional') => {
+    const key = type === 'main' ? 'mainAttributes' : 'additionalAttributes';
+    const arr = [...((formData[key] as ProductAttribute[]) ?? [])];
+    arr.push(makeEmptyAttr());
+    set(key as keyof Product, arr);
+  };
+
   const removeAttr = (type: 'main' | 'additional', idx: number) => {
     const key = type === 'main' ? 'mainAttributes' : 'additionalAttributes';
     const current = (formData[key] as ProductAttribute[]) ?? [];
@@ -166,36 +171,15 @@ export default function ProductModal({
     );
   };
 
-  const updateAttr = (
-    type: 'main' | 'additional',
-    idx: number,
-    field: 'label' | 'value',
-    val: string,
-  ) => {
-    const key = type === 'main' ? 'mainAttributes' : 'additionalAttributes';
-    const arr = [...((formData[key] as ProductAttribute[]) ?? [])];
-    arr[idx] = {
-      values: {
-        ...(arr[idx]?.values ?? { label: '', value: '' }),
-        [field]: val,
-      },
-    };
-    set(key as keyof Product, arr);
-  };
-
-  // ─── Atributos nutricionales ───────────────────────────────────────────────
   const addNutri = () => {
-    const current = formData.nutritionalAttributes ?? [];
-    if (current.length >= 15) return;
-    set('nutritionalAttributes', [...current, makeEmptyNutri()]);
+    const arr = [...(formData.nutritionalAttributes ?? [])];
+    arr.push(makeEmptyNutri());
+    set('nutritionalAttributes', arr);
   };
 
   const removeNutri = (idx: number) => {
-    const current = formData.nutritionalAttributes ?? [];
-    set(
-      'nutritionalAttributes',
-      current.filter((_, i) => i !== idx),
-    );
+    const arr = [...(formData.nutritionalAttributes ?? [])];
+    set('nutritionalAttributes', arr.filter((_, i) => i !== idx));
   };
 
   const updateNutri = (
@@ -248,10 +232,19 @@ export default function ProductModal({
 
     onSave({
       ...formData,
+      id: formData.id ?? '',
+      name: formData.name ?? '',
+      description: formData.description ?? '',
+      type: formData.type ?? 'physical',
+      category: formData.category ?? '',
+      price: formData.price ?? 0,
+      stock: formData.stock ?? 0,
+      image: formData.image ?? '',
+      sticker: formData.sticker ?? null,
       mainAttributes: cleanAttrs(formData.mainAttributes ?? []),
       additionalAttributes: cleanAttrs(formData.additionalAttributes ?? []),
       nutritionalAttributes: cleanNutri(formData.nutritionalAttributes ?? []),
-    });
+    } as Product);
   };
 
   // ─── Render filas de atributos ─────────────────────────────────────────────

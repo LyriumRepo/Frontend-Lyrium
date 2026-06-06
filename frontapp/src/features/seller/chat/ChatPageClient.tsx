@@ -1,184 +1,388 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
-import Image from 'next/image';
+import React, { useEffect, useRef, useState } from 'react';
 import { useSellerChat } from '@/features/seller/chat/hooks/useSellerChat';
-import Icon from '@/components/ui/Icon';
-import ChatOptionsMenu from './components/ChatOptionsMenu';
-import BaseLoading from '@/components/ui/BaseLoading';
+import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import ChatLayout from '@/components/shared/chat/ChatLayout';
-import MessageBubble from '@/components/shared/chat/MessageBubble';
 import MessageInput from '@/components/shared/chat/MessageInput';
+import BaseLoading from '@/components/ui/BaseLoading';
+import { mockCustomers } from '@/features/seller/chat/hooks/useSellerChat';
+import { ChatCategory } from '@/features/seller/chat/types';
 
-interface ChatPageClientProps {
-    // TODO Tarea 3: Recibir datos iniciales del Server Component
+function NewChatForm({
+    onSubmit,
+    onCancel,
+    isSubmitting
+}: {
+    onSubmit: (data: { customerId: string; category: ChatCategory; subject: string }) => void;
+    onCancel: () => void;
+    isSubmitting: boolean;
+}) {
+    const [customerId, setCustomerId] = useState(mockCustomers[0].id);
+    const [category, setCategory] = useState<ChatCategory>('informacion');
+    const [subject, setSubject] = useState('');
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!subject.trim()) return;
+        onSubmit({ customerId, category, subject });
+    };
+
+    return (
+        <div className="flex flex-col h-full bg-[var(--bg-card)] rounded-3xl border border-gray-200 shadow-sm overflow-hidden">
+            <div className="p-4 border-b border-gray-100">
+                <h3 className="font-semibold text-gray-900 dark:text-white">Nuevo Chat</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-300">Inicia una conversación con un cliente</p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-4">
+                <div>
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-400 mb-1">Cliente</label>
+                    <select
+                        value={customerId}
+                        onChange={(e) => setCustomerId(e.target.value)}
+                        className="w-full px-4 py-2 bg-gray-100 dark:bg-[var(--bg-secondary)] rounded-xl outline-none focus:ring-2 focus:ring-sky-500 dark:focus:ring-[var(--icons-green)]"
+                        required
+                    >
+                        {mockCustomers.map(c => (
+                            <option key={c.id} value={c.id}>{c.name}</option>
+                        ))}
+                    </select>
+                </div>
+
+                <div>
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-400 mb-1">Categoría</label>
+                    <select
+                        value={category}
+                        onChange={(e) => setCategory(e.target.value as ChatCategory)}
+                        className="w-full px-4 py-2 bg-gray-100 dark:bg-[var(--bg-secondary)] rounded-xl outline-none focus:ring-2 focus:ring-sky-500 dark:focus:ring-[var(--icons-green)]"
+                        required
+                    >
+                        <option value="informacion">Solicitud de Información</option>
+                        <option value="positivo">Comentario Positivo</option>
+                        <option value="negativo">Comentario Negativo</option>
+                        <option value="logistica">Logística </option>
+                        <option value="facturacion">Soporte de Facturación </option>
+                    </select>
+                </div>
+
+                <div>
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-400 mb-1">Asunto</label>
+                    <input
+                        type="text"
+                        value={subject}
+                        onChange={(e) => setSubject(e.target.value)}
+                        placeholder="Describe brevemente el motivo"
+                        className="w-full px-4 py-2 bg-gray-100 dark:bg-[var(--bg-secondary)] rounded-xl outline-none focus:ring-2 focus:ring-sky-500 dark:focus:ring-[var(--icons-green)]"
+                        required
+                    />
+                </div>
+
+                <div className="flex gap-2 pt-4">
+                    <button
+                        type="button"
+                        onClick={onCancel}
+                        className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-xl font-medium hover:bg-gray-300 transition-colors"
+                    >
+                        Cancelar
+                    </button>
+                    <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="flex-1 px-4 py-2 bg-sky-500 text-white rounded-xl font-medium hover:bg-sky-600 dark:bg-[var(--brand-green)] dark:hover:bg-[var(--brand-green-hover)] border dark:border-[var(--border-subtle)] transition-colors disabled:opacity-50"
+                    >
+                        {isSubmitting ? 'Iniciando...' : 'Iniciar Chat'}
+                    </button>
+                </div>
+            </form>
+        </div>
+    );
 }
 
-export function ChatPageClient(_props: ChatPageClientProps) {
+export function ChatPageClient() {
     const {
         conversations,
         totalConversations,
         activeConversation,
         setActiveConversation,
+        messages,
         isLoading,
         filters,
         setFilters,
-        isMobileListVisible,
-        setIsMobileListVisible,
         sendMessage,
         clearActiveChat,
-        deleteActiveTicket,
+        isCreating,
+        createConversation,
         criticalCount
     } = useSellerChat();
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const [isMobileListVisible, setIsMobileListVisible] = useState(true);
+    const [filterType, setFilterType] = useState<'cliente' | 'categoria'>('cliente');
+    const [filterValue, setFilterValue] = useState('');
+    const [showFilter, setShowFilter] = useState(false);
+    const [showNewChatForm, setShowNewChatForm] = useState(false);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [activeConversation?.mensajes]);
+    }, [messages]);
 
     const handleSendMessage = (message: string) => {
         sendMessage(message);
     };
 
-    const messages = activeConversation?.mensajes.map(msg => ({
-        sender: msg.sender,
-        content: msg.contenido,
-        timestamp: msg.hora,
-    })) || [];
+    const formatTime = (timestamp: string) => {
+        const date = new Date(timestamp);
+        return date.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
+    };
+
+    const formatDate = (timestamp: string) => {
+        const date = new Date(timestamp);
+        const today = new Date();
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+
+        if (date.toDateString() === today.toDateString()) return 'Hoy';
+        if (date.toDateString() === yesterday.toDateString()) return 'Ayer';
+        return date.toLocaleDateString('es-PE', { day: 'numeric', month: 'short' });
+    };
+
+    const filteredConversations = conversations.filter(conv => {
+        if (!filterValue) return true;
+        if (filterType === 'cliente') {
+            return conv.customerName.toLowerCase().includes(filterValue.toLowerCase());
+        }
+        return conv.category === filterValue;
+    });
 
     const listContent = (
-        <>
-            <div className="p-6 bg-[var(--bg-secondary)]/50 border-b border-[var(--border-subtle)]">
-                <div className="flex items-center gap-4 mb-6">
-                    <div className="w-12 h-12 bg-sky-500 rounded-2xl flex items-center justify-center shadow-lg shadow-sky-500/20 shrink-0">
-                        <Icon name="MessageCircle" className="text-white text-2xl font-black w-6 h-6" />
+        <div className="divide-y divide-gray-100 h-full overflow-y-auto">
+            {/* ── Cabecera con filtro ── */}
+            <div className="p-4 border-b border-gray-100">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h3 className="font-semibold text-gray-900 dark:text-white">Conversaciones</h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-300">
+                            {filteredConversations.length} chats
+                        </p>
                     </div>
-                    <div className="min-w-0">
-                        <h3 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-tight truncate">Centro de Atención</h3>
-                        <p className="text-xs text-[var(--text-secondary)] font-black uppercase tracking-widest truncate">Soporte en Tiempo Real</p>
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3 mb-6">
-                    <div className="bg-[var(--bg-card)] p-4 rounded-3xl border border-[var(--border-subtle)] text-center shadow-sm">
-                        <div className="text-xl font-black text-[var(--text-primary)]">{totalConversations}</div>
-                        <div className="text-xs text-[var(--text-secondary)] font-black uppercase tracking-widest">Total</div>
-                    </div>
-                    <div className="bg-red-500/10 p-4 rounded-3xl border border-red-500/20 text-center shadow-sm">
-                        <div className="text-xl font-black text-red-500">{criticalCount}</div>
-                        <div className="text-xs text-red-500 font-black uppercase tracking-widest">Críticos</div>
-                    </div>
-                </div>
-
-                <div className="space-y-3">
-                    <div className="relative group">
-                        <Icon name="Search" className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] group-focus-within:text-sky-500 transition-colors w-4 h-4" />
-                        <input
-                            type="text"
-                            value={filters.search}
-                            onChange={(e) => setFilters({ search: e.target.value })}
-                            className="w-full pl-12 pr-4 py-3 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl text-xs font-bold text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 transition-all outline-none"
-                            placeholder="Buscar por cliente o DNI..."
-                        />
-                    </div>
-                    <select
-                        value={filters.category}
-                        onChange={(e) => setFilters({ category: e.target.value })}
-                        className="w-full text-xs py-3 px-4 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 font-black uppercase tracking-wider text-[var(--text-primary)] cursor-pointer outline-none shadow-sm"
+                    <button
+                        onClick={() => {
+                            setShowFilter(prev => !prev);
+                            setFilterValue('');
+                        }}
+                        className={`p-2 rounded-xl transition-colors text-xs font-medium border ${showFilter
+                            ? 'bg-sky-100 text-sky-600 border-sky-200 dark:bg-[var(--brand-green)] dark:text-white dark:border-transparent'
+                            : 'bg-gray-100 text-gray-500 border-gray-200 hover:bg-gray-200 dark:bg-[var(--bg-secondary)] dark:border-transparent'
+                            }`}
                     >
-                        <option value="all">TODAS LAS CATEGORÍAS</option>
-                        <option value="info">SOLICITUD DE INFORMACIÓN</option>
-                        <option value="comment">COMENTARIOS</option>
-                        <option value="admin">SOPORTE ADMINISTRATIVO</option>
-                    </select>
+                        Filtrar
+                    </button>
                 </div>
-            </div>
 
-            <div className="flex-1 overflow-y-auto p-4 space-y-2 custom-scrollbar">
-                {conversations.length > 0 ? (
-                    conversations.map(conv => (
-                        <button
-                            key={conv.id}
-                            onClick={() => setActiveConversation(conv)}
-                            className={`w-full p-4 rounded-3xl border transition-all duration-300 group flex items-center gap-4 ${activeConversation?.id === conv.id
-                                ? 'bg-sky-500 border-sky-400 shadow-xl shadow-sky-500/20'
-                                : 'border-transparent hover:bg-[var(--bg-secondary)]'
-                                }`}
-                        >
-                            <div className="relative">
-                                <Image src={conv.avatar} alt={conv.nombre} width={48} height={48} className="rounded-2xl object-cover border-2 border-[var(--bg-card)] shadow-sm group-hover:scale-105 transition-transform" />
-                                {conv.critical && <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-[var(--bg-card)] flex items-center justify-center text-xs text-white font-black">!</span>}
-                            </div>
-                            <div className="flex-1 text-left overflow-hidden">
-                                <div className="flex justify-between items-center mb-1">
-                                    <h4 className={`text-xs font-black uppercase tracking-tight truncate ${activeConversation?.id === conv.id ? 'text-white' : 'text-[var(--text-primary)]'}`}>{conv.nombre}</h4>
-                                    <span className={`text-xs font-black uppercase ${activeConversation?.id === conv.id ? 'text-white/70' : 'text-[var(--text-secondary)]'}`}>{conv.fecha}</span>
-                                </div>
-                                <p className={`text-xs font-bold truncate ${activeConversation?.id === conv.id ? 'text-white/80' : 'text-[var(--text-secondary)]'}`}>{conv.ultimoMensaje}</p>
-                            </div>
-                        </button>
-                    ))
-                ) : (
-                    <div className="p-12 text-center opacity-40">
-                        <Icon name="MessageSquareOff" className="text-4xl mb-4 text-[var(--text-secondary)] mx-auto w-10 h-10" />
-                        <p className="text-xs font-black uppercase tracking-widest text-[var(--text-secondary)] leading-relaxed">Sin resultados para<br />tu búsqueda</p>
+                {/* ── Panel de filtro ── */}
+                {showFilter && (
+                    <div className="mt-3 space-y-2">
+                        <div className="flex rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 text-xs font-medium">
+                            <button
+                                onClick={() => { setFilterType('cliente'); setFilterValue(''); }}
+                                className={`flex-1 py-1.5 transition-colors ${filterType === 'cliente'
+                                    ? 'bg-sky-500 dark:bg-[var(--brand-green)] text-white'
+                                    : 'bg-gray-100 dark:bg-[var(--bg-secondary)] text-gray-500 hover:bg-gray-200'
+                                    }`}
+                            >
+                                Cliente
+                            </button>
+                            <button
+                                onClick={() => { setFilterType('categoria'); setFilterValue(''); }}
+                                className={`flex-1 py-1.5 transition-colors ${filterType === 'categoria'
+                                    ? 'bg-sky-500 dark:bg-[var(--brand-green)] text-white'
+                                    : 'bg-gray-100 dark:bg-[var(--bg-secondary)] text-gray-500 hover:bg-gray-200'
+                                    }`}
+                            >
+                                Categoría
+                            </button>
+                        </div>
+
+                        {filterType === 'cliente' ? (
+                            <input
+                                type="text"
+                                value={filterValue}
+                                onChange={(e) => setFilterValue(e.target.value)}
+                                placeholder="Buscar cliente..."
+                                className="w-full px-3 py-1.5 text-sm bg-gray-100 dark:bg-[var(--bg-secondary)] rounded-xl outline-none focus:ring-2 focus:ring-sky-500 dark:focus:ring-[var(--icons-green)]"
+                            />
+                        ) : (
+                            <select
+                                value={filterValue}
+                                onChange={(e) => setFilterValue(e.target.value)}
+                                className="w-full px-3 py-1.5 text-sm bg-gray-100 dark:bg-[var(--bg-secondary)] rounded-xl outline-none focus:ring-2 focus:ring-sky-500 dark:focus:ring-[var(--icons-green)]"
+                            >
+                                <option value="">Todas las categorías</option>
+                                <option value="informacion">Solicitud de Información</option>
+                                <option value="positivo">Comentario Positivo</option>
+                                <option value="negativo">Comentario Negativo</option>
+                                <option value="logistica">Logística </option>
+                                <option value="facturacion">Soporte de Facturación</option>
+                            </select>
+                        )}
                     </div>
                 )}
             </div>
-        </>
-    );
 
-    const detailContent = !activeConversation ? (
-        <div className="flex-1 flex flex-col items-center justify-center p-12 text-center animate-fadeIn">
-            <div className="w-32 h-32 bg-[var(--bg-card)] rounded-full flex items-center justify-center shadow-xl shadow-black/5 mb-8 border border-[var(--border-subtle)]">
-                <Icon name="MessageCircle" className="text-6xl text-sky-500 opacity-20 w-16 h-16" />
-            </div>
-            <h2 className="text-2xl font-black text-[var(--text-primary)] uppercase tracking-tighter">Buzón de Mensajes</h2>
-            <p className="text-xs text-[var(--text-secondary)] mt-2 font-black uppercase tracking-widest">Selecciona una conversación para leer</p>
-        </div>
-    ) : (
-        <>
-            <div className="p-6 bg-[var(--bg-card)] border-b border-[var(--border-subtle)] flex items-center justify-between shadow-sm">
-                <div className="flex items-center gap-4">
-                    <button
-                        onClick={() => setIsMobileListVisible(true)}
-                        className="md:hidden p-3 bg-[var(--bg-secondary)] text-[var(--text-secondary)] rounded-2xl hover:bg-sky-500/10 transition-all active:scale-90"
-                    >
-                        <Icon name="ChevronLeft" className="w-5 h-5" />
-                    </button>
-                    <Image src={activeConversation.avatar} alt={activeConversation.nombre} width={48} height={48} className="rounded-2xl object-cover border-2 border-emerald-500/20 shadow-sm" />
-                    <div>
-                        <h3 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-tight">{activeConversation.nombre}</h3>
-                        <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-xs text-[var(--text-secondary)] font-black uppercase">{activeConversation.email}</span>
-                            <span className="text-xs text-sky-500 font-black bg-sky-500/10 px-2 py-0.5 rounded-lg uppercase tracking-tight">DNI: {activeConversation.dni}</span>
-                            {activeConversation.critical && <span className="text-xs bg-red-500/10 text-red-500 font-black px-2 py-0.5 rounded-lg uppercase tracking-widest">Prioridad Alta</span>}
+            {/* ── Lista filtrada ── */}
+            {filteredConversations.map((conv) => (
+                <button
+                    key={conv.id}
+                    onClick={() => {
+                        setActiveConversation(conv.id);
+                        setIsMobileListVisible(false);
+                    }}
+                    className={`w-full p-4 text-left hover:bg-gray-50 dark:hover:bg-[var(--brand-green)] transition-colors ${activeConversation?.id === conv.id ? 'bg-sky-50 dark:bg-[var(--brand-green-hover)]' : ''
+                        }`}
+                >
+                    <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 rounded-full bg-sky-100 flex items-center justify-center text-sky-600 dark:text-[var(--brand-green)] font-semibold">
+                            {conv.customerName.charAt(0)}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between">
+                                <span className="font-medium text-gray-900 dark:text-white truncate">{conv.customerName}</span>
+                                <span className="text-xs text-gray-400">{formatDate(conv.lastMessageTime)}</span>
+                            </div>
+                            <div className="flex items-center justify-between mt-1">
+                                <span className="text-sm text-gray-500 dark:text-gray-300 truncate">{conv.lastMessage}</span>
+                                {conv.unreadCount > 0 && (
+                                    <span className="ml-2 px-2 py-0.5 text-xs font-medium bg-sky-500 dark:bg-[var(--icons-green)] text-white dark:text-[var(--brand-green-hover)] rounded-full">
+                                        {conv.unreadCount}
+                                    </span>
+                                )}
+                            </div>
+                            {conv.category && (
+                                <div className="mt-1">
+                                    <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 dark:bg-[var(--bg-secondary)] text-gray-500 dark:text-gray-400">
+                                        {{
+                                            informacion: 'Solicitud de Información',
+                                            positivo: 'Comentario Positivo',
+                                            negativo: 'Comentario Negativo',
+                                            logistica: 'Logística ',
+                                            facturacion: 'Soporte de Facturación',
+                                        }[conv.category]}
+                                    </span>
+                                </div>
+                            )}
                         </div>
                     </div>
-                </div>
+                </button>
+            ))}
 
-                <div className="flex gap-2">
-                    <ChatOptionsMenu onClear={clearActiveChat} onDelete={deleteActiveTicket} />
+            {filteredConversations.length === 0 && (
+                <div className="p-8 text-center text-gray-500">
+                    <p>{filterValue ? 'Sin resultados para este filtro' : 'No hay conversaciones'}</p>
+                </div>
+            )}
+        </div>
+    );
+
+    const chatContent = activeConversation ? (
+        <div className="flex flex-col h-full">
+            <div className="p-4 border-b border-gray-100 bg-white dark:bg-[var(--bg-secondary)]">
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-sky-100 flex items-center justify-center text-sky-600 dark:text-[var(--brand-green)] font-semibold">
+                        {activeConversation.customerName.charAt(0)}
+                    </div>
+                    <div>
+                        <h3 className="font-semibold text-gray-900 dark:text-white">{activeConversation.customerName}</h3>
+                        {activeConversation.subject && (
+                            <p className="text-sm text-gray-500 dark:text-gray-300">{activeConversation.subject}</p>
+                        )}
+                    </div>
                 </div>
             </div>
+            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-white dark:bg-[var(--bg-secondary)]">
+                {messages.map((msg) => {
+                    const isSeller = msg.senderType === 'seller';
 
-            <div className="flex-1 min-h-0 overflow-y-auto p-4 md:p-8 space-y-6 custom-scrollbar bg-[var(--bg-secondary)]/20">
-                <MessageBubble messages={messages} />
+                    return (
+                        <div
+                            key={msg.id}
+                            className={`flex ${isSeller ? 'justify-end' : 'justify-start'}`}
+                        >
+                            <div
+                                className={`flex max-w-[50%] items-end gap-3 ${isSeller ? 'flex-row-reverse' : 'flex-row'
+                                    }`}
+                            >
+                                <div
+                                    className={`w-9 h-9 shrink-0 rounded-full flex items-center justify-center text-[10px] font-black shadow-sm ${isSeller
+                                        ? 'bg-emerald-500 text-white'
+                                        : 'bg-sky-500 text-white'
+                                        }`}
+                                >
+                                    {isSeller ? 'Tú' : activeConversation.customerName.charAt(0)}
+                                </div>
+
+                                <div
+                                    className={`relative rounded-3xl px-4 py-3 shadow-sm border backdrop-blur-sm ${isSeller
+                                        ? 'bg-gradient-to-br from-emerald-500 to-emerald-600 text-white border-emerald-400/20 rounded-br-md'
+                                        : 'bg-white dark:bg-gray-100 text-slate-800 border-gray-200 rounded-bl-md'
+                                        }`}
+                                >
+                                    <div className="mb-1 flex items-center gap-2">
+                                        <p
+                                            className={`text-[11px] font-black uppercase tracking-[0.16em] ${isSeller ? 'text-emerald-100' : 'text-sky-600'
+                                                }`}
+                                        >
+                                            {isSeller ? 'Tú' : activeConversation.customerName}
+                                        </p>
+                                        <span
+                                            className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${isSeller
+                                                ? 'bg-white/15 text-emerald-50'
+                                                : 'bg-sky-50 text-sky-700'
+                                                }`}
+                                        >
+                                            {isSeller ? 'Vendedor' : 'Cliente'}
+                                        </span>
+                                    </div>
+
+                                    <p className="text-sm leading-relaxed whitespace-pre-wrap break-all">
+                                        {msg.content}
+                                    </p>
+
+                                    <div className="mt-2 flex justify-end">
+                                        <p
+                                            className={`text-[10px] font-medium ${isSeller ? 'text-emerald-100/80' : 'text-gray-400'
+                                                }`}
+                                        >
+                                            {formatTime(msg.timestamp)}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    );
+                })}
                 <div ref={messagesEndRef} />
             </div>
-
-            <div className="flex-shrink-0">
-                <MessageInput onSend={handleSendMessage} />
+            <MessageInput onSend={handleSendMessage} placeholder="Escribe un mensaje..." />
+        </div>
+    ) : (
+        <div className="flex-1 flex items-center justify-center text-gray-500">
+            <div className="text-center">
+                <p className="text-lg mb-2">Selecciona una conversación</p>
+                <p className="text-sm">Elige un chat para comenzar a chatear</p>
             </div>
-        </>
+        </div>
     );
 
     if (isLoading) {
         return (
-            <div className="w-full bg-[var(--bg-card)] rounded-[2.5rem] shadow-xl shadow-black/5 border border-[var(--border-subtle)] overflow-hidden flex flex-col md:flex-row animate-fadeIn"
-                style={{ height: 'calc(100vh - 160px)', minHeight: '600px' }}>
-                <div className="w-full md:w-80 shrink-0 flex items-center justify-center">
+            <div className="flex flex-col h-[calc(100vh-140px)] animate-fadeIn">
+                <ModuleHeader
+                    title="Chat con Clientes"
+                    subtitle="Comunicación directa con tus clientes"
+                    icon="Messages"
+                />
+                <div className="flex-1 flex items-center justify-center">
                     <BaseLoading message="Cargando conversaciones..." />
                 </div>
             </div>
@@ -186,12 +390,42 @@ export function ChatPageClient(_props: ChatPageClientProps) {
     }
 
     return (
-        <div className="min-h-[calc(100vh-8rem)] h-full overflow-hidden pb-4">
-            <ChatLayout
-                list={listContent}
-                detail={detailContent}
-                listWidth="col-span-4"
+        <div className="flex flex-col h-[calc(100vh-140px)] animate-fadeIn">
+            <ModuleHeader
+                title="Chat con Clientes"
+                subtitle="Comunicación directa con tus clientes"
+                icon="Messages"
+                actions={
+                    !showNewChatForm ? (
+                        <button
+                            onClick={() => setShowNewChatForm(true)}
+                            className="px-4 py-2 bg-white text-sky-600 dark:text-[var(--brand-green)] rounded-xl font-medium hover:bg-sky-50 transition-colors"
+                        >
+                            + Nuevo Chat
+                        </button>
+                    ) : null
+                }
             />
+
+            {showNewChatForm ? (
+                <div className="flex-1 flex items-center justify-center px-8">
+                    <div className="w-full max-w-xl">
+                        <NewChatForm
+                            onSubmit={(data) => {
+                                createConversation(data);
+                                setShowNewChatForm(false);
+                            }}
+                            onCancel={() => setShowNewChatForm(false)}
+                            isSubmitting={isCreating}
+                        />
+                    </div>
+                </div>
+            ) : (
+                <ChatLayout
+                    list={listContent}
+                    detail={chatContent}
+                />
+            )}
         </div>
     );
 }

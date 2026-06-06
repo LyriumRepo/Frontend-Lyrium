@@ -1,132 +1,97 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Icon from '@/components/ui/Icon';
 
 interface IntroCoverProps {
-    title: string;
-    subtitle: string;
-    icon: string;
-    buttonText: string;
-    buttonIcon?: string;
-    onEnter: () => void;
-    autoHideAfter?: number;
-    backgroundImage?: string;
-    iconSize?: string;
+  title: string;
+  subtitle: string;
+  icon?: string;
+  buttonText?: string;
+  buttonIcon?: string;
+  onEnter: () => void;
+  autoHideAfter?: number;
+  backgroundImage?: string;
+  iconSize?: string;
 }
 
 export default function IntroCover({
-    title,
-    subtitle,
-    icon,
-    buttonText,
-    buttonIcon = 'ArrowRight',
-    onEnter,
-    autoHideAfter = 3000,
-    backgroundImage = '',
-    iconSize = '120px',
+  title,
+  subtitle,
+  icon = 'ShoppingBag',
+  buttonText = 'Entrar',
+  buttonIcon,
+  onEnter,
+  autoHideAfter = 0,
+  backgroundImage,
 }: IntroCoverProps) {
-    const [showIntro, setShowIntro] = useState(true);
-    const [isExiting, setIsExiting] = useState(false);
+  const [visible, setVisible] = useState(true);
+  const [exiting, setExiting] = useState(false);
 
-    useEffect(() => {
-        if (autoHideAfter > 0) {
-            const timer = setTimeout(() => {
-                setIsExiting(true);
-                setTimeout(() => setShowIntro(false), 800);
-            }, autoHideAfter);
-            return () => clearTimeout(timer);
-        }
-    }, [autoHideAfter]);
+  useEffect(() => {
+    if (autoHideAfter && autoHideAfter > 0) {
+      const timer = setTimeout(() => {
+        handleEnter();
+      }, autoHideAfter);
+      return () => clearTimeout(timer);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoHideAfter]);
 
-    const handleEnter = () => {
-        setIsExiting(true);
-        setTimeout(() => {
-            onEnter();
-        }, 800);
-    };
+  const handleEnter = () => {
+    setExiting(true);
+    setTimeout(() => {
+      setVisible(false);
+      onEnter();
+    }, 500);
+  };
 
-    if (!showIntro) return null;
+  if (!visible) return null;
 
-    const introCoverStyle: React.CSSProperties = backgroundImage 
-        ? {
-            background: `linear-gradient(135deg, var(--intro-g1) 0%, var(--intro-g2) 60%, var(--intro-g3) 100%), url(${backgroundImage}) center/cover no-repeat`,
-            transition: 'opacity 0.8s ease, transform 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55)',
-        }
-        : {
-            background: 'linear-gradient(135deg, #0ea5e9 0%, #38bdf8 50%, #84cc16 100%)',
-            transition: 'opacity 0.8s ease, transform 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55)',
-        };
+  return (
+    <div
+      className={`
+        fixed inset-0 z-[100] flex flex-col items-center justify-center
+        transition-all duration-500
+        ${exiting ? 'opacity-0 scale-105' : 'opacity-100 scale-100'}
+      `}
+    >
+      {backgroundImage && (
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{ backgroundImage: `url(${backgroundImage})` }}
+        />
+      )}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/80" />
 
-    return (
-        <div 
-            className={`fixed inset-0 w-full h-screen z-[9999] flex items-center justify-center ${isExiting ? 'opacity-0 translate-y-[-100px] scale-95' : ''}`}
-            style={introCoverStyle}
+      <div className="relative z-10 flex flex-col items-center text-center px-6 max-w-lg">
+        {icon && (
+          <div className="w-24 h-24 rounded-[3rem] bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center mb-8 shadow-2xl animate-bounce-subtle">
+            <Icon name={icon} className="w-12 h-12 text-white" />
+          </div>
+        )}
+
+        <h1 className="text-4xl md:text-5xl font-black text-white tracking-tight mb-4 leading-tight">
+          {title}
+        </h1>
+
+        <p className="text-lg text-white/70 font-medium mb-10 max-w-sm">
+          {subtitle}
+        </p>
+
+        <button
+          onClick={handleEnter}
+          className="group relative inline-flex items-center gap-3 px-10 py-5 bg-white text-gray-900 rounded-[2rem] font-black text-sm uppercase tracking-widest shadow-2xl hover:shadow-[0_20px_60px_rgba(255,255,255,0.15)] hover:-translate-y-1 transition-all duration-300 active:scale-[0.97]"
         >
-            {/* Overlay */}
-            <div 
-                className="absolute inset-0 z-[1]" 
-                style={{ background: 'radial-gradient(circle at 50% 50%, transparent 0%, rgba(0, 0, 0, 0.3) 100%)' }}
-            />
-            
-            {/* Floating particles */}
-            <div className="absolute inset-0 pointer-events-none overflow-hidden z-[1]">
-                <div className="absolute top-[10%] left-[10%] w-24 h-24 bg-white/30 dark:bg-white/20 rounded-full animate-float-particle" />
-                <div className="absolute top-[60%] right-[15%] w-36 h-36 bg-white/30 dark:bg-white/20 rounded-full animate-float-particle" style={{ animationDelay: '5s' }} />
-                <div className="absolute bottom-[15%] left-[20%] w-20 h-20 bg-white/30 dark:bg-white/20 rounded-full animate-float-particle" style={{ animationDelay: '10s' }} />
-            </div>
-
-            {/* Contenido */}
-            <div className="relative z-[2] text-center max-w-[800px] p-10">
-                <div className="mb-10 animate-float">
-                    <Icon 
-                        name={icon} 
-                        className="mx-auto text-white dark:text-white/80" 
-                        style={{ 
-                            fontSize: iconSize, 
-                            width: iconSize, 
-                            height: iconSize, 
-                            filter: 'drop-shadow(0 10px 30px rgba(0, 0, 0, 0.3))' 
-                        }} 
-                    />
-                </div>
-                
-                <h1 
-                    className="text-6xl font-black text-white dark:text-white/80 mb-5 leading-tight"
-                    style={{ 
-                        textShadow: '0 4px 20px rgba(0, 0, 0, 0.4)',
-                        animation: 'fadeInUp 1s ease-out 0.2s both'
-                    }}
-                >
-                    {title}
-                </h1>
-                
-                <p 
-                    className="text-xl text-white/95 mb-12 leading-relaxed"
-                    style={{ 
-                        textShadow: '0 2px 10px rgba(0, 0, 0, 0.3)',
-                        animation: 'fadeInUp 1s ease-out 0.4s both'
-                    }}
-                >
-                    {subtitle}
-                </p>
-                
-                <button
-                    type="button"
-                    onClick={handleEnter}
-                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleEnter(); }}
-                    aria-label={buttonText}
-                    className="inline-flex items-center gap-3 py-5 px-12 bg-white dark:bg-white/80 text-sky-500 dark:text-[var(--brand-green)] rounded-full text-lg font-bold cursor-pointer uppercase tracking-wider"
-                    style={{ 
-                        boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
-                        transition: 'box-shadow 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55), transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55)',
-                        animation: 'fadeInUp 1s ease-out 0.6s both, pulse 2s ease-in-out 2s infinite'
-                    }}
-                >
-                    <span>{buttonText}</span>
-                    <Icon name={buttonIcon} className="w-6 h-6" />
-                </button>
-            </div>
-        </div>
-    );
+          {buttonIcon ? (
+            <Icon name={buttonIcon} className="w-5 h-5" />
+          ) : null}
+          {buttonText}
+          <span className="inline-block transition-transform group-hover:translate-x-1">
+            →
+          </span>
+        </button>
+      </div>
+    </div>
+  );
 }

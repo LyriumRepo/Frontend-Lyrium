@@ -1,150 +1,188 @@
-'use client';
+import { useState, useCallback } from 'react';
+import { SellerConversation, SellerMessage, SellerChatFilters, ChatCategory } from '../types';
 
-import { useState, useEffect, useRef } from 'react';
-import { chatApi, ChatConversation as ApiConversation, ChatMessage as ApiMessage } from '@/shared/lib/api/chatRepository';
-import { ChatConversation, ChatMessage, ChatFilters } from '../types';
+export const mockCustomers = [
+    { id: 'customer-1', name: 'Ana Torres' },
+    { id: 'customer-2', name: 'Luis Ramírez' },
+    { id: 'customer-3', name: 'Sofía Mendoza' },
+];
 
-const CATEGORY_LABELS: Record<string, string> = {
-    informacion: 'info',
-    positivo: 'comment',
-    negativo: 'comment',
-    logistica: 'admin',
-    facturacion: 'admin',
+const mockConversations: SellerConversation[] = [
+    {
+        id: '1',
+        customerId: 'customer-1',
+        customerName: 'Ana Torres',
+        lastMessage: 'Gracias, esperaré el envío.',
+        lastMessageTime: '2025-03-11T10:30:00',
+        unreadCount: 2,
+        status: 'active',
+        category: 'logistica',
+        subject: 'Consulta sobre envío'
+    },
+    {
+        id: '2',
+        customerId: 'customer-2',
+        customerName: 'Luis Ramírez',
+        lastMessage: '¿Tienen ese modelo en azul?',
+        lastMessageTime: '2025-03-10T15:45:00',
+        unreadCount: 0,
+        status: 'active',
+        category: 'informacion',
+        subject: 'Disponibilidad de producto'
+    }
+];
+
+const mockMessages: Record<string, SellerMessage[]> = {
+    '1': [
+        {
+            id: 'm1',
+            conversationId: '1',
+            senderId: 'customer-1',
+            senderName: 'Ana Torres',
+            senderType: 'customer',
+            content: 'Hola, ¿cuándo llega mi pedido?',
+            timestamp: '2025-03-11T10:00:00',
+            read: true
+        },
+        {
+            id: 'm2',
+            conversationId: '1',
+            senderId: 'seller-1',
+            senderName: 'Yo',
+            senderType: 'seller',
+            content: 'Hola Ana, tu pedido está en camino, llegará mañana.',
+            timestamp: '2025-03-11T10:15:00',
+            read: true
+        },
+        {
+            id: 'm3',
+            conversationId: '1',
+            senderId: 'customer-1',
+            senderName: 'Ana Torres',
+            senderType: 'customer',
+            content: 'Gracias, esperaré el envío.',
+            timestamp: '2025-03-11T10:30:00',
+            read: false
+        }
+    ],
+    '2': [
+        {
+            id: 'm4',
+            conversationId: '2',
+            senderId: 'customer-2',
+            senderName: 'Luis Ramírez',
+            senderType: 'customer',
+            content: '¿Tienen ese modelo en azul?',
+            timestamp: '2025-03-10T15:45:00',
+            read: false
+        }
+    ]
 };
 
-function formatTime(iso: string): string {
-    try {
-        const d = new Date(iso);
-        const now = new Date();
-        const diffDays = Math.floor((now.getTime() - d.getTime()) / 86400000);
-        if (diffDays === 0) return d.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
-        if (diffDays === 1) return 'AYER';
-        if (diffDays < 7) return d.toLocaleDateString('es-PE', { weekday: 'long' }).toUpperCase();
-        return d.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit' });
-    } catch {
-        return iso;
-    }
-}
-
-function mapConversation(api: ApiConversation): ChatConversation {
-    return {
-        id: parseInt(api.id, 10),
-        nombre: api.customerName ?? api.sellerName,
-        email: api.customerEmail ?? '',
-        dni: api.customerDocumentNumber ?? '',
-        avatar: api.customerAvatar ?? api.sellerAvatar ?? '',
-        ultimoMensaje: api.lastMessage,
-        fecha: formatTime(api.lastMessageTime),
-        type: (CATEGORY_LABELS[api.category ?? ''] ?? 'info') as ChatConversation['type'],
-        critical: false,
-        mensajes: [],
-    };
-}
-
-function mapMessage(msg: ApiMessage, isFromCustomer: boolean): ChatMessage {
-    return {
-        id: parseInt(msg.id, 10),
-        sender: isFromCustomer ? 'other' : 'user',
-        contenido: msg.content,
-        hora: msg.timestamp,
-        status: msg.read ? 'read' : 'sent',
-    };
-}
-
 export function useSellerChat() {
-    const [conversations, setConversations] = useState<ChatConversation[]>([]);
-    const [activeConversationId, setActiveConversationId] = useState<number | null>(null);
-    const [filters, setFiltersState] = useState<ChatFilters>({
-        search: '',
-        category: 'all'
+    const [conversations, setConversations] = useState<SellerConversation[]>(mockConversations);
+    const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
+    const [filters, setFilters] = useState<SellerChatFilters>({
+        status: 'all',
+        search: ''
     });
-    const [isMobileListVisible, setIsMobileListVisible] = useState(true);
-    const [isLoading, setIsLoading] = useState(true);
-    const [messagesCache, setMessagesCache] = useState<Record<number, ChatMessage[]>>({});
-    const messagesCacheRef = useRef<Record<number, ChatMessage[]>>({});
+    const [isLoading, setIsLoading] = useState(false);
 
-    useEffect(() => {
-        messagesCacheRef.current = messagesCache;
-    }, [messagesCache]);
+    const activeConversation = conversations.find(c => c.id === activeConversationId);
+    const messages = activeConversationId ? mockMessages[activeConversationId] || [] : [];
 
-    const activeConversation = conversations.find(c => c.id === activeConversationId) ?? null;
+    const totalConversations = conversations.length;
+    const criticalCount = conversations.filter(c => c.unreadCount > 0).length;
+    const [isCreating, setIsCreating] = useState(false);
 
-    useEffect(() => {
-        setIsLoading(true);
-        chatApi.list()
-            .then(data => {
-                setConversations(data.map(mapConversation));
-            })
-            .catch(() => {})
-            .finally(() => setIsLoading(false));
+    const setActiveConversation = useCallback((id: string | null) => {
+        setActiveConversationId(id);
+        if (id) {
+            setConversations(prev => prev.map(c =>
+                c.id === id ? { ...c, unreadCount: 0 } : c
+            ));
+        }
     }, []);
 
-    useEffect(() => {
-        if (activeConversationId && !messagesCacheRef.current[activeConversationId]) {
-            chatApi.getMessages(String(activeConversationId))
-                .then(result => {
-                    const apiMsgs = result.data;
-                    const msgs = apiMsgs.map(m => mapMessage(m, m.senderType === 'customer'));
-                    setMessagesCache(prev => ({ ...prev, [activeConversationId!]: msgs }));
-                })
-                .catch(() => {});
+    const sendMessage = useCallback((content: string) => {
+        if (!activeConversationId) return;
+
+        const newMessage: SellerMessage = {
+            id: `m${Date.now()}`,
+            conversationId: activeConversationId,
+            senderId: 'seller-1',
+            senderName: 'Yo',
+            senderType: 'seller',
+            content,
+            timestamp: new Date().toISOString(),
+            read: true
+        };
+
+        if (!mockMessages[activeConversationId]) {
+            mockMessages[activeConversationId] = [];
         }
+        mockMessages[activeConversationId].push(newMessage);
+
+        setConversations(prev => prev.map(c =>
+            c.id === activeConversationId
+                ? { ...c, lastMessage: content, lastMessageTime: new Date().toISOString() }
+                : c
+        ));
     }, [activeConversationId]);
 
-    const filteredConversations = conversations.filter(conv => {
-        const matchesSearch = conv.nombre.toLowerCase().includes(filters.search.toLowerCase()) ||
-            conv.dni.includes(filters.search) ||
-            conv.ultimoMensaje.toLowerCase().includes(filters.search.toLowerCase());
-        const matchesCategory = filters.category === 'all' || conv.type === filters.category;
-        return matchesSearch && matchesCategory;
-    });
+    const clearActiveChat = useCallback(() => {
+        setActiveConversationId(null);
+    }, []);
 
-    const criticalCount = 0;
+    const archiveConversation = useCallback((id: string) => {
+        setConversations(prev => prev.map(c =>
+            c.id === id ? { ...c, status: 'archived' } : c
+        ));
+    }, []);
+
+    const createConversation = useCallback(async (data: {
+        customerId: string;
+        category: ChatCategory;
+        subject: string;
+    }) => {
+        setIsCreating(true);
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        const customer = mockCustomers.find(c => c.id === data.customerId);
+        if (!customer) { setIsCreating(false); return; }
+
+        const newConversation: SellerConversation = {
+            id: `conv-${Date.now()}`,
+            customerId: customer.id,
+            customerName: customer.name,
+            lastMessage: data.subject,
+            lastMessageTime: new Date().toISOString(),
+            unreadCount: 0,
+            status: 'active',
+            category: data.category,
+            subject: data.subject,
+        };
+
+        mockMessages[newConversation.id] = [];
+        setConversations(prev => [newConversation, ...prev]);
+        setActiveConversationId(newConversation.id);
+        setIsCreating(false);
+    }, []);
 
     return {
-        conversations: filteredConversations,
-        totalConversations: conversations.length,
-        activeConversation: activeConversation
-            ? { ...activeConversation, mensajes: messagesCache[activeConversationId!] ?? [] }
-            : null,
-        setActiveConversation: (conv: ChatConversation | null) => {
-            setActiveConversationId(conv?.id ?? null);
-            if (conv && typeof window !== 'undefined' && window.innerWidth < 768) {
-                setIsMobileListVisible(false);
-            }
-        },
+        conversations,
+        totalConversations,
+        activeConversation: activeConversation || null,
+        setActiveConversation,
+        messages,
         isLoading,
         filters,
-        setFilters: (newFilters: Partial<ChatFilters>) => setFiltersState(prev => ({ ...prev, ...newFilters })),
-        isMobileListVisible,
-        setIsMobileListVisible,
-        sendMessage: async (content: string) => {
-            if (!activeConversationId || !content.trim()) return;
-            const apiMsg = await chatApi.sendMessage(String(activeConversationId), content).catch(() => null);
-            if (!apiMsg) return;
-            const msg = mapMessage(apiMsg, apiMsg.senderType === 'customer');
-            setMessagesCache(prev => ({
-                ...prev,
-                [activeConversationId!]: [...(prev[activeConversationId!] ?? []), msg],
-            }));
-            setConversations(prev => prev.map(c =>
-                c.id === activeConversationId
-                    ? { ...c, ultimoMensaje: content, fecha: formatTime(apiMsg.timestamp) }
-                    : c
-            ));
-        },
-        clearActiveChat: () => {
-            if (activeConversationId) {
-                setMessagesCache(prev => ({ ...prev, [activeConversationId]: [] }));
-            }
-        },
-        deleteActiveTicket: async () => {
-            if (!activeConversationId) return;
-            await chatApi.archive(String(activeConversationId)).catch(() => {});
-            setConversations(prev => prev.filter(c => c.id !== activeConversationId));
-            setActiveConversationId(null);
-            setIsMobileListVisible(true);
-        },
-        criticalCount,
+        setFilters,
+        sendMessage,
+        clearActiveChat,
+        archiveConversation,
+        isCreating,
+        createConversation,
+        criticalCount
     };
 }

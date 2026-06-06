@@ -39,16 +39,14 @@ interface KryptonError {
   detailedErrorMessage?: string;
 }
 
-declare global {
-  interface Window {
-    KR?: {
-      setFormToken: (token: string) => Promise<void>;
-      onPaymentSuccess: (
-        callback: (result: KryptonPaymentSuccessDetail) => void,
-      ) => void;
-      onError: (callback: (error: KryptonError) => void) => void;
-    };
-  }
+interface CulqiKR {
+  setFormToken: (token: string) => Promise<void>;
+  onPaymentSuccess: (callback: (result: KryptonPaymentSuccessDetail) => void) => void;
+  onError: (callback: (error: KryptonError) => void) => void;
+}
+
+function getCulqiKR(): CulqiKR | undefined {
+  return (window as unknown as { KR?: CulqiKR }).KR;
 }
 
 // ── Interfaz pública del hook ─────────────────────────────────────────────────
@@ -85,15 +83,14 @@ export function useIzipay({ onSuccess }: UseIzipayOptions): UseIzipayReturn {
     const register = () => {
       if (typeof window === 'undefined') return;
 
-      if (window.KR) {
-        // Pago exitoso — Izipay ya cobró; solo avisamos al componente padre
-        window.KR.onPaymentSuccess((result) => {
+      const kr = getCulqiKR();
+      if (kr) {
+        kr.onPaymentSuccess((result) => {
           console.log('[Izipay] pago exitoso', result);
           onSuccess(result);
         });
 
-        // Error del SDK (tarjeta rechazada, timeout, etc.)
-        window.KR.onError((err) => {
+        kr.onError((err) => {
           console.error('[Izipay] error', err);
           setError(
             err.detailedErrorMessage ||
@@ -130,7 +127,8 @@ export function useIzipay({ onSuccess }: UseIzipayOptions): UseIzipayReturn {
       return;
     }
 
-    if (!window.KR) {
+    const kr = getCulqiKR();
+    if (!kr) {
       setError(
         'El SDK de pago no está disponible. Recarga la página e intenta nuevamente.',
       );
@@ -140,7 +138,7 @@ export function useIzipay({ onSuccess }: UseIzipayOptions): UseIzipayReturn {
     try {
       setIsLoading(true);
       setError(null);
-      await window.KR.setFormToken(formToken);
+      await kr.setFormToken(formToken);
     } catch (err) {
       const msg =
         err instanceof Error

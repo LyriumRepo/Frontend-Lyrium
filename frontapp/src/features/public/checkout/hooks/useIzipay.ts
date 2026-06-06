@@ -5,7 +5,7 @@
  * ARCHIVO: src/features/public/checkout/hooks/useIzipay.ts
  *
  * CORRECCIONES:
- *  - Bug 1: window.KR?.((response) => {}) era sintaxis inválida → corregido a window.KR?.onSubmit(...)
+ *  - Bug 1: getKR()?.((response) => {}) era sintaxis inválida → corregido a getKR()?.onSubmit(...)
  *  - Bug 2: Se espera correctamente a que onLoaded dispare antes de registrar listeners
  *  - Bug 3: setFormConfig ahora hace fallback limpio a setFormToken si no existe
  */
@@ -39,6 +39,22 @@ interface KryptonError {
   };
 }
 
+interface IzipayKR {
+  onLoaded: (callback: () => void) => void;
+  setFormConfig: (config: Record<string, string>) => Promise<void>;
+  setFormToken: (token: string) => Promise<void>;
+  onSubmit: (
+    callback: (result: KryptonPaymentSuccessDetail) => boolean | void,
+  ) => void;
+  onError: (callback: (error: KryptonError) => boolean | void) => void;
+}
+
+function getKR(): IzipayKR | undefined {
+  return (window as unknown as { KR?: IzipayKR }).KR;
+}
+
+// ── Interfaz pública del hook ─────────────────────────────────────────────────
+
 interface UseIzipayOptions {
   onSuccess: (result: KryptonPaymentSuccessDetail) => void;
 }
@@ -50,6 +66,8 @@ interface UseIzipayReturn {
   loadSmartForm: (formToken: string) => Promise<void>;
   clearError: () => void;
 }
+
+// ── Hook ──────────────────────────────────────────────────────────────────────
 
 export function useIzipay({ onSuccess }: UseIzipayOptions): UseIzipayReturn {
   const [isLoading, setIsLoading] = useState(false);
@@ -72,34 +90,32 @@ export function useIzipay({ onSuccess }: UseIzipayOptions): UseIzipayReturn {
 
     const waitForKR = () => {
       if (cancelled) return;
-      const KR = (window as any).KR;
 
-      if (KR && typeof KR.onLoaded === 'function') {
-        KR.onLoaded(() => {
+      const kr = getKR();
+      if (kr && typeof kr.onLoaded === 'function') {
+        kr.onLoaded(() => {
           if (cancelled) return;
 
-          KR.setFormConfig?.({
-            formToken: '__publicKey__', // placeholder, se sobreescribe después
+          kr.setFormConfig({
+            formToken: '__publicKey__',
 
-            'kr-public-key': process.env.NEXT_PUBLIC_IZIPAY_PUBLIC_KEY,
+            'kr-public-key': process.env.NEXT_PUBLIC_IZIPAY_PUBLIC_KEY ?? '',
           });
 
-          // ✅ CORRECCIÓN: usar window.KR?.onSubmit(...) en lugar de window.KR?.()
-          KR.onSubmit?.((response: any) => {
+          kr.onSubmit((response) => {
             console.log('[Izipay] onSubmit disparado:', response);
 
             const orderStatus = response?.clientAnswer?.orderStatus;
 
             if (orderStatus === 'PAID') {
               onSuccessRef.current(response);
-              // Retornar false evita que el SDK haga redirect automático
               return false;
             }
 
             return true;
           });
 
-          KR.onError?.((err: any) => {
+          kr.onError((err) => {
             const errorCode =
               err?.errorCode ?? err?.error?.errorCode ?? 'UNKNOWN';
             const msg =
@@ -124,7 +140,7 @@ export function useIzipay({ onSuccess }: UseIzipayOptions): UseIzipayReturn {
 
       attempts++;
       if (attempts >= MAX_ATTEMPTS) {
-        console.error('[Izipay] Timeout esperando window.KR');
+        console.error('[Izipay] Timeout esperando getKR()');
         setError(
           'No se pudo inicializar la pasarela de pago. Recarga la página.',
         );
@@ -147,15 +163,14 @@ export function useIzipay({ onSuccess }: UseIzipayOptions): UseIzipayReturn {
       return;
     }
 
-    const KR = (window as any).KR;
-    if (!KR) {
+    const kr = getKR();
+    if (!kr) {
       setError('El SDK de pago no está listo. Espera un momento.');
       return;
     }
 
-    // Verificar que al menos uno de los métodos existe
-    const hasSetFormConfig = typeof KR.setFormConfig === 'function';
-    const hasSetFormToken = typeof KR.setFormToken === 'function';
+    const hasSetFormConfig = typeof kr.setFormConfig === 'function';
+    const hasSetFormToken = typeof kr.setFormToken === 'function';
 
     if (!hasSetFormConfig && !hasSetFormToken) {
       setError('El SDK de pago no está listo. Espera un momento.');
@@ -166,11 +181,10 @@ export function useIzipay({ onSuccess }: UseIzipayOptions): UseIzipayReturn {
       setIsLoading(true);
       setError(null);
 
-      // ✅ Preferir setFormConfig (Smart Form moderno), caer en setFormToken si no existe
       if (hasSetFormConfig) {
-        await KR.setFormConfig({ formToken });
+        await kr.setFormConfig({ formToken });
       } else {
-        await KR.setFormToken(formToken);
+        await kr.setFormToken(formToken);
       }
 
       console.log('[Izipay] formToken cargado en el Smart Form ✓');

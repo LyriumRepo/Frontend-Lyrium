@@ -9,6 +9,15 @@ export interface ChatSeller {
   avatar?: string;
 }
 
+export interface ChatAttachment {
+  id: string;
+  file_name: string;
+  mime_type: string;
+  file_size: number;
+  url: string;
+  download_url: string;
+}
+
 export interface ChatConversation {
   id: string;
   sellerId: string;
@@ -37,6 +46,7 @@ export interface ChatMessage {
   content: string;
   timestamp: string;
   read: boolean;
+  attachments?: ChatAttachment[];
 }
 
 interface RawConversation {
@@ -58,6 +68,15 @@ interface RawConversation {
   messages?: RawMessage[];
 }
 
+interface RawAttachment {
+  id: string;
+  file_name: string;
+  mime_type: string;
+  file_size: number;
+  url: string;
+  download_url: string;
+}
+
 interface RawMessage {
   id: string;
   conversation_id: string;
@@ -67,6 +86,7 @@ interface RawMessage {
   content: string;
   timestamp: string;
   read: boolean;
+  attachments?: RawAttachment[];
 }
 
 export interface CreateChatPayload {
@@ -97,6 +117,17 @@ function mapConversation(raw: RawConversation): ChatConversation {
   };
 }
 
+function mapAttachment(raw: RawAttachment): ChatAttachment {
+  return {
+    id: raw.id,
+    file_name: raw.file_name,
+    mime_type: raw.mime_type,
+    file_size: raw.file_size,
+    url: raw.url,
+    download_url: raw.download_url,
+  };
+}
+
 function mapMessage(raw: RawMessage): ChatMessage {
   return {
     id: raw.id,
@@ -107,6 +138,7 @@ function mapMessage(raw: RawMessage): ChatMessage {
     content: raw.content,
     timestamp: raw.timestamp,
     read: raw.read,
+    attachments: raw.attachments?.map(mapAttachment),
   };
 }
 
@@ -126,6 +158,24 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
     throw new Error(error.message || error.error || `API Error: ${response.status}`);
   }
   if (response.status === 204) return {} as T;
+  const text = await response.text();
+  return text ? JSON.parse(text) : {} as T;
+}
+
+async function multipartRequest<T>(endpoint: string, formData: FormData): Promise<T> {
+  const headers = await getAuthHeaders();
+  const response = await fetch(`${LARAVEL_API_URL}${endpoint}`, {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+      ...headers,
+    },
+    body: formData,
+  });
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ message: `HTTP ${response.status}` }));
+    throw new Error(error.message || error.error || `API Error: ${response.status}`);
+  }
   const text = await response.text();
   return text ? JSON.parse(text) : {} as T;
 }
@@ -158,6 +208,22 @@ export const chatApi = {
       method: 'POST',
       body: JSON.stringify({ content }),
     });
+    return mapMessage(response.data!);
+  },
+
+  sendMessageWithAttachment: async (conversationId: string, content: string, files: File[]): Promise<ChatMessage> => {
+    const formData = new FormData();
+    if (content.trim()) {
+      formData.append('content', content);
+    }
+    files.forEach((file) => {
+      formData.append('attachments[]', file);
+    });
+
+    const response = await multipartRequest<ApiResponse<RawMessage>>(
+      `/conversations/${conversationId}/messages/attachments`,
+      formData,
+    );
     return mapMessage(response.data!);
   },
 

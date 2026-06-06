@@ -568,7 +568,7 @@ export default function ProductModerationModal({
                           </tr>
                         </thead>
                         <tbody>
-                          {detail.nutritional_info?.rows.map((row, i) => (
+                          {detail.nutritional_info?.rows?.map((row, i) => (
                             <tr
                               key={i}
                               style={{

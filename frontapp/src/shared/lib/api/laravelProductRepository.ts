@@ -14,10 +14,12 @@ function resolveImageUrl(url: string | null | undefined): string | undefined {
   return url;
 }
 
-function transformProduct(product: LaravelProduct): LaravelProduct {
+type TransformedProduct = LaravelProduct & { image: string | null };
+
+function transformProduct(product: LaravelProduct): TransformedProduct {
   return {
     ...product,
-    image: resolveImageUrl(product.image) ?? null,
+    image: resolveImageUrl(product.images?.[0]?.src) ?? null,
     images: product.images?.map((img) => ({
       ...img,
       src: resolveImageUrl(img.src) ?? img.src,

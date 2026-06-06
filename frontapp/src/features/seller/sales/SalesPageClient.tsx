@@ -1,11 +1,12 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import SalesKPIs from './components/SalesKPIs';
 import SalesFilters from './components/SalesFilters';
 import OrderCard from './components/OrderCard';
 import OrderDetailModal from './components/OrderDetailModal';
+import BaseModal from '@/components/ui/BaseModal';
 import { Order, SalesKPI } from '@/features/seller/sales/types';
 import { useToast } from '@/shared/lib/context/ToastContext';
 import BaseLoading from '@/components/ui/BaseLoading';
@@ -37,6 +38,7 @@ export function SalesPageClient(props: SalesPageClientProps) {
     } = useSellerSales();
 
     const { showToast } = useToast();
+    const [selectedKpi, setSelectedKpi] = useState<SalesKPI | null>(null);
 
     const handleExport = (type: 'excel' | 'pdf') => {
         showToast(`Generando reporte ${type.toUpperCase()}... El documento se descargará en breve.`, "info");
@@ -54,7 +56,7 @@ export function SalesPageClient(props: SalesPageClientProps) {
                 <BaseLoading message="Cargando Centro de Control de Ventas..." />
             ) : (
                 <>
-                    <SalesKPIs kpis={kpis} />
+                    <SalesKPIs kpis={kpis} onKpiClick={setSelectedKpi} />
 
                     <SalesFilters
                         dateStart={filters.dateStart}
@@ -86,7 +88,28 @@ export function SalesPageClient(props: SalesPageClientProps) {
                         </div>
                     )}
 
-                    {/* Modal */}
+                    {/* KPI Modal */}
+                    <BaseModal isOpen={!!selectedKpi} onClose={() => setSelectedKpi(null)}
+                        title={selectedKpi?.label ?? ''} subtitle={selectedKpi?.status ?? ''} size="md">
+                        <div className="space-y-6">
+                            <div className="bg-gray-900 p-6 rounded-[2rem] text-center">
+                                <p className="text-5xl font-black text-white">
+                                    {selectedKpi?.label === 'Ingresos Mensuales'
+                                        ? `S/ ${(selectedKpi?.count ?? 0).toLocaleString()}`
+                                        : selectedKpi?.count}
+                                </p>
+                                <p className="text-[10px] font-black text-white/60 uppercase tracking-widest mt-2">{selectedKpi?.label}</p>
+                            </div>
+                            <div className="p-4 rounded-2xl bg-[var(--bg-secondary)]">
+                                <p className="text-xs font-bold text-[var(--text-secondary)] text-center">{selectedKpi?.status}</p>
+                            </div>
+                            <p className="text-[10px] font-bold text-[var(--text-muted)] text-center">
+                                Este indicador resume el rendimiento de tus ventas. Los datos se actualizan en tiempo real conforme se procesan nuevos pedidos.
+                            </p>
+                        </div>
+                    </BaseModal>
+
+                    {/* Order Modal */}
                     <OrderDetailModal
                         order={selectedOrder!}
                         isOpen={!!selectedOrder}

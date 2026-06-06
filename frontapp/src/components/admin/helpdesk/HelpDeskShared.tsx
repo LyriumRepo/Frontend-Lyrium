@@ -3,12 +3,12 @@ import { Priority } from '@/lib/types/admin/helpdesk';
 
 export const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
     const classes: Record<string, string> = {
-        'Abierto': 'bg-emerald-500 text-white',
-        'abierto': 'bg-emerald-500 text-white',
+        'Abierto': 'bg-[var(--turquesa-500)] text-white',
+        'abierto': 'bg-[var(--turquesa-500)] text-white',
         'En Proceso': 'bg-amber-400 text-white',
         'proceso': 'bg-amber-400 text-white',
-        'Resuelto': 'bg-sky-500 text-white',
-        'resuelto': 'bg-sky-500 text-white',
+        'Resuelto': 'bg-[var(--turquesa-500)] text-white',
+        'resuelto': 'bg-[var(--turquesa-500)] text-white',
         'Cerrado': 'bg-red-500 text-white',
         'cerrado': 'bg-red-500 text-white',
         'Reabierto': 'bg-cyan-600 text-white',
@@ -26,8 +26,8 @@ export const PriorityDot: React.FC<{ priority: string }> = ({ priority }) => {
     const classes: Record<string, string> = {
         'Baja': 'bg-gray-300',
         'baja': 'bg-gray-300',
-        'Media': 'bg-sky-400',
-        'media': 'bg-sky-400',
+        'Media': 'bg-[var(--turquesa-500)]',
+        'media': 'bg-[var(--turquesa-500)]',
         'Alta': 'bg-amber-400',
         'alta': 'bg-amber-400',
         'Crítica': 'bg-red-500',

@@ -9,13 +9,14 @@ const nextConfig: NextConfig = {
     },
   },
 
-  async rewrites() {
-    const storageUrl = process.env.NEXT_PUBLIC_LARAVEL_STORAGE_URL ?? 'http://127.0.0.1:8000';
-    return [
-      { source: '/backend/:path*', destination: `${storageUrl}/:path*` },
-      { source: '/storage/:path*', destination: `${storageUrl}/storage/:path*` }
-    ];
-  },
+async rewrites() {
+  const storageUrl = process.env.NEXT_PUBLIC_LARAVEL_STORAGE_URL ?? 'http://127.0.0.1:8000';
+  return [
+    { source: '/backend/:path*', destination: `${storageUrl}/:path*` },
+    { source: '/storage/:path*', destination: `${storageUrl}/storage/:path*` }
+  ];
+},
+
 
   onDemandEntries: {
     maxInactiveAge: 25 * 1000,
@@ -28,6 +29,7 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       { protocol: 'https', hostname: 'i.pravatar.cc' },
       { protocol: 'https', hostname: 'lyriumbiomarketplace.com' },
+
       {
         protocol: 'https',
         hostname: '**.woocommerce.com',

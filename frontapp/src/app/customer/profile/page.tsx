@@ -206,10 +206,9 @@ export default function CustomerProfilePage() {
       await userRepository.updateUser(user.id, updatePayload as any);
 
       setIsEditMode(false);
-      window.location.reload();
     } catch (err) {
       console.error('Error al guardar perfil:', err);
-      alert('Ocurrió un error al guardar los cambios. Intenta nuevamente.');
+      setErrors({ nombres: 'Ocurrió un error al guardar los cambios. Intenta nuevamente.' });
     } finally {
       setSaving(false);
       setUploadingAvatar(false);

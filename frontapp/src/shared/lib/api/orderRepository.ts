@@ -100,6 +100,10 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 }
 
 export const orderApi = {
+  getActiveCount: async (): Promise<number> => {
+    const response = await request<{ success: boolean; data: { count: number } }>('/orders/active-count');
+    return response.data?.count ?? 0;
+  },
   list: async (page = 1): Promise<{ data: OrderResource[]; pagination: { current_page: number; per_page: number; total: number; total_pages: number } }> => {
     const response = await request<ApiResponse<unknown>>(`/orders?page=${page}`);
     const payload = response.data as any;
@@ -169,6 +173,13 @@ export const orderApi = {
     return response.data!;
   },
 
+  requestReceipt: async (orderId: number): Promise<{ conversationId: string }> => {
+    const response = await request<{ success: boolean; data: { id: string }; message: string }>(`/orders/${orderId}/request-receipt`, {
+      method: 'POST',
+    });
+    return { conversationId: response.data.id };
+  },
+
   downloadReceipt: async (orderId: number): Promise<void> => {
     const headers = await getAuthHeaders();
     const response = await fetch(`${LARAVEL_API_URL}/orders/${orderId}/receipt`, {
@@ -188,6 +199,31 @@ export const orderApi = {
     const a = document.createElement('a');
     a.href = url;
     a.download = `comprobante-${orderId}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  },
+
+  downloadPaymentConfirmation: async (orderId: number): Promise<void> => {
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${LARAVEL_API_URL}/orders/${orderId}/payment-confirmation`, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/pdf',
+        ...headers,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Error al descargar la confirmación de pago');
+    }
+
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `confirmacion-pago-${orderId}.pdf`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);

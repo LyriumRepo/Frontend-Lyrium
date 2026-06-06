@@ -1,110 +1,75 @@
 'use client';
 
-import React, { useId } from 'react';
-import Icon from './Icon';
+import React from 'react';
+import Icon from '@/components/ui/Icon';
 
-export interface InputFieldProps {
-    label?: string;
-    name: string;
-    value: string | number;
-    onChange: (value: string) => void;
-    type?: 'text' | 'number' | 'email' | 'date' | 'password' | 'tel' | 'url';
-    placeholder?: string;
-    icon?: string;
-    iconPosition?: 'left' | 'right';
-    error?: string;
-    disabled?: boolean;
-    required?: boolean;
-    maxLength?: number;
-    min?: number;
-    max?: number;
-    step?: number;
-    className?: string;
-    inputClassName?: string;
+interface BaseInputFieldProps {
+  label?: string;
+  name: string;
+  value: string;
+  onChange: (value: string) => void;
+  error?: string;
+  placeholder?: string;
+  type?: string;
+  className?: string;
+  required?: boolean;
+  icon?: string;
+  inputClassName?: string;
 }
 
 export default function BaseInputField({
-    label,
-    name,
-    value,
-    onChange,
-    type = 'text',
-    placeholder,
-    icon,
-    iconPosition = 'left',
-    error,
-    disabled = false,
-    required = false,
-    maxLength,
-    min,
-    max,
-    step,
-    className = '',
-    inputClassName = ''
-}: InputFieldProps) {
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        onChange(e.target.value);
-    };
-
-    const hasIcon = !!icon;
-    const iconLeft = hasIcon && iconPosition === 'left';
-    const iconRight = hasIcon && iconPosition === 'right';
-
-    const inputPaddingLeft = iconLeft ? 'pl-12' : 'pl-4';
-    const inputPaddingRight = iconRight ? 'pr-12' : 'pr-4';
-
-    const inputId = useId();
-    const errorId = `${inputId}-error`;
-
-    return (
-        <div className={`space-y-2 ${className}`}>
-            {label && (
-                <label htmlFor={inputId} className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1 block">
-                    {label}
-                    {required && <span className="text-[var(--color-error)] ml-1" aria-hidden="true">*</span>}
-                </label>
-            )}
-            <div className="relative">
-                {iconLeft && (
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--brand-sky)] pointer-events-none" aria-hidden="true">
-                        <Icon name={icon} className="text-lg" />
-                    </div>
-                )}
-                <input
-                    id={inputId}
-                    type={type}
-                    value={value}
-                    onChange={handleChange}
-                    placeholder={placeholder}
-                    disabled={disabled}
-                    required={required}
-                    maxLength={maxLength}
-                    min={min}
-                    max={max}
-                    step={step}
-                    aria-invalid={!!error}
-                    aria-describedby={error ? errorId : undefined}
-                    aria-required={required}
-                    className={`
-                        w-full ${inputPaddingLeft} ${inputPaddingRight} py-3 
-                        bg-[var(--bg-secondary)] border-none rounded-2xl 
-                        focus:ring-2 focus:ring-[var(--ring-focus)] 
-                        transition-all font-bold text-[var(--text-primary)]
-                        outline-none
-                        disabled:opacity-50 disabled:cursor-not-allowed
-                        ${error ? 'ring-2 ring-[var(--color-error)]/50' : ''}
-                        ${inputClassName}
-                    `}
-                />
-                {iconRight && (
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--brand-sky)] pointer-events-none" aria-hidden="true">
-                        <Icon name={icon} className="text-lg" />
-                    </div>
-                )}
-            </div>
-            {error && (
-                <p id={errorId} className="text-[10px] font-black text-[var(--color-error)] ml-1" role="alert">{error}</p>
-            )}
-        </div>
-    );
+  label,
+  name,
+  value,
+  onChange,
+  error,
+  placeholder,
+  type = 'text',
+  className = '',
+  required,
+  icon,
+  inputClassName = '',
+}: BaseInputFieldProps) {
+  return (
+    <div className={`space-y-1.5 ${className}`}>
+      {label && (
+        <label
+          htmlFor={name}
+          className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1"
+        >
+          {label}
+          {required && <span className="text-red-500 ml-0.5">*</span>}
+        </label>
+      )}
+      <div className="relative">
+        {icon && (
+          <Icon
+            name={icon}
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] w-4 h-4"
+          />
+        )}
+        <input
+          id={name}
+          name={name}
+          type={type}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          required={required}
+          className={`
+            w-full px-5 py-3 bg-[var(--bg-secondary)] border border-[var(--border-subtle)]
+            rounded-2xl font-bold text-[var(--text-primary)]
+            focus:ring-4 focus:ring-sky-500/10 focus:bg-[var(--bg-card)] focus:border-sky-500/30
+            transition-all outline-none placeholder:text-[var(--text-muted)]
+            ${icon ? 'pl-12' : ''}
+            ${error ? 'border-red-500 ring-4 ring-red-500/10' : ''}
+            ${inputClassName}
+          `}
+        />
+      </div>
+      {error && (
+        <p className="text-[10px] font-bold text-red-500 ml-1 mt-1">{error}</p>
+      )}
+    </div>
+  );
 }

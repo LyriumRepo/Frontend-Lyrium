@@ -15,6 +15,15 @@ export interface CustomerConversation {
   messages?: CustomerMessage[];
 }
 
+export interface CustomerAttachment {
+  id: string;
+  file_name: string;
+  mime_type: string;
+  file_size: number;
+  url: string;
+  download_url: string;
+}
+
 export interface CustomerMessage {
   id: string;
   conversationId: string;
@@ -24,6 +33,7 @@ export interface CustomerMessage {
   content: string;
   timestamp: string;
   read: boolean;
+  attachments?: CustomerAttachment[];
 }
 
 export interface CustomerChatFilters {

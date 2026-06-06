@@ -55,6 +55,8 @@ export default function CustomerWishlistPage() {
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
   const [fetching, setFetching] = useState(true);
   const [fetchError, setFetchError] = useState('');
+  const [removeError, setRemoveError] = useState('');
+  const [confirmRemoveId, setConfirmRemoveId] = useState<number | null>(null);
 
   const loadItems = useCallback(async () => {
     try {
@@ -90,13 +92,14 @@ export default function CustomerWishlistPage() {
   });
 
   const removeFromWishlist = async (id: number) => {
-    if (!confirm('¿Quitar de Favoritos? El producto saldrá de tu lista de deseos.')) return;
+    setConfirmRemoveId(null);
+    setRemoveError('');
     try {
       await wishlistApi.remove(id);
       setItems(prev => prev.filter(item => item.id !== id));
     } catch (err) {
       console.error('Error al eliminar de la lista:', err);
-      alert('Ocurrió un error al eliminar el producto.');
+      setRemoveError('Ocurrió un error al eliminar el producto.');
     }
   };
 
@@ -204,7 +207,7 @@ export default function CustomerWishlistPage() {
                 )}
 
                 <button
-                  onClick={() => removeFromWishlist(item.id)}
+                  onClick={() => setConfirmRemoveId(item.id)}
                   className="absolute top-3 right-3 w-10 h-10 bg-white dark:bg-[var(--bg-secondary)] rounded-full flex items-center justify-center shadow-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
                 >
                   <Icon name="Heart" className="w-5 h-5 text-red-500 fill-red-500" />
@@ -230,6 +233,32 @@ export default function CustomerWishlistPage() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {removeError && (
+        <div className="fixed bottom-6 right-6 p-4 rounded-2xl bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800 shadow-2xl flex items-start gap-3 z-50 animate-fadeIn">
+          <Icon name="AlertCircle" className="w-5 h-5 text-rose-500 shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-semibold text-rose-700 dark:text-rose-400">{removeError}</p>
+            <button onClick={() => setRemoveError('')} className="text-[10px] font-bold text-rose-500 hover:underline mt-1">Cerrar</button>
+          </div>
+        </div>
+      )}
+
+      {confirmRemoveId !== null && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setConfirmRemoveId(null)}>
+          <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-[2rem] p-8 max-w-sm mx-4 shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="w-14 h-14 rounded-full bg-rose-50 dark:bg-rose-900/20 flex items-center justify-center mx-auto mb-4">
+              <Icon name="Heart" className="w-7 h-7 text-rose-500" />
+            </div>
+            <h3 className="text-lg font-black text-center text-gray-800 dark:text-[var(--text-primary)] mb-2">¿Quitar de Favoritos?</h3>
+            <p className="text-sm text-gray-500 dark:text-[var(--text-muted)] text-center mb-6">El producto saldrá de tu lista de deseos.</p>
+            <div className="flex gap-3">
+              <button onClick={() => setConfirmRemoveId(null)} className="flex-1 py-3 rounded-xl bg-gray-100 dark:bg-[var(--bg-muted)] text-gray-600 dark:text-[var(--text-primary)] font-black text-xs uppercase tracking-widest hover:bg-gray-200 dark:hover:bg-[#2A3F33] transition-all">Cancelar</button>
+              <button onClick={() => removeFromWishlist(confirmRemoveId)} className="flex-1 py-3 rounded-xl bg-rose-500 text-white font-black text-xs uppercase tracking-widest hover:bg-rose-600 transition-all">Eliminar</button>
+            </div>
+          </div>
         </div>
       )}
     </div>

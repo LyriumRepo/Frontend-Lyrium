@@ -14,6 +14,7 @@ export default function CustomerAddressesPage() {
   const [fetching, setFetching] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingAddress, setEditingAddress] = useState<Address | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
 
   const [formData, setFormData] = useState<Partial<Address>>({
     etiqueta: undefined,
@@ -90,13 +91,12 @@ export default function CustomerAddressesPage() {
   };
 
   const deleteAddress = async (id: number) => {
-    if (confirm('¿Eliminar Dirección? Esta ubicación dejará de estar disponible.')) {
-      try {
-        await addressApi.delete(id);
-        setAddresses(prev => prev.filter(a => a.id !== id));
-      } catch (err) {
-        console.error('Error al eliminar:', err);
-      }
+    setConfirmDeleteId(null);
+    try {
+      await addressApi.delete(id);
+      setAddresses(prev => prev.filter(a => a.id !== id));
+    } catch (err) {
+      console.error('Error al eliminar:', err);
     }
   };
 
@@ -182,13 +182,20 @@ export default function CustomerAddressesPage() {
         </button>
       </div>
 
+      <div className="p-4 bg-amber-50 dark:bg-amber-900/10 rounded-2xl border border-amber-200 dark:border-amber-800/30 flex items-start gap-3">
+        <Icon name="Star" className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+        <p className="text-xs font-bold text-amber-800 dark:text-amber-300">
+          Marca con la estrella <Icon name="Star" className="w-3.5 h-3.5 inline fill-current text-amber-500" /> la dirección que usarás por defecto en tus envíos. Solo puede haber una dirección principal.
+        </p>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {addresses.map((address) => {
           const styles = getLabelStyles(address.etiqueta);
           return (
             <div
               key={address.id}
-              className={`bg-white dark:bg-[var(--bg-secondary)] rounded-[2.5rem] shadow-2xl overflow-hidden group/card hover:-translate-y-2 transition-all duration-500 ${address.is_default ? 'bg-gradient-to-br from-white to-sky-50/30 dark:from-[var(--bg-secondary)] dark:to-[var(--bg-muted)]' : ''}`}
+              className={`rounded-[2.5rem] shadow-2xl overflow-hidden group/card hover:-translate-y-2 transition-all duration-500 ${address.is_default ? 'bg-gradient-to-br from-emerald-50 to-sky-50 dark:from-[#1a3a2a]/40 dark:to-[#0d1a12]/60 ring-2 ring-emerald-300 dark:ring-[#4A7C59]/50' : 'bg-white dark:bg-[var(--bg-secondary)]'}`}
             >
               <div className={`h-2 bg-gradient-to-r ${styles.grad}`}></div>
               <div className="p-8">
@@ -197,8 +204,9 @@ export default function CustomerAddressesPage() {
                     <Icon name={styles.icon as any} className={`w-7 h-7 ${styles.color}`} />
                   </div>
                   {address.is_default && (
-                    <span className="px-3 py-1 bg-sky-50 dark:bg-[var(--bg-muted)] text-sky-600 dark:text-[#6BAF7B] text-[9px] font-black uppercase rounded-full border border-sky-100 dark:border-[var(--border-subtle)]">
-                      Predeterminada
+                    <span className="px-3 py-1 bg-gradient-to-r from-emerald-500 to-sky-500 dark:from-[var(--brand-green)] dark:to-[#4A7C59] text-white text-[9px] font-black uppercase rounded-full shadow-sm flex items-center gap-1">
+                      <Icon name="Star" className="w-3 h-3 fill-current" />
+                      Principal
                     </span>
                   )}
                 </div>
@@ -236,13 +244,13 @@ export default function CustomerAddressesPage() {
                   </button>
                   <button
                     onClick={() => setAsDefault(address.id)}
-                    title={address.is_default ? 'Quitar como predeterminada' : 'Establecer como predeterminada'}
-                    className={`group w-12 h-12 flex items-center justify-center rounded-xl transition-all duration-200 ${address.is_default ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-500 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/30' : 'bg-sky-50 dark:bg-[var(--bg-muted)] text-sky-500 dark:text-[var(--icons-green)] hover:bg-sky-100 dark:hover:bg-[#2A3F33]'} hover:scale-110 active:scale-95`}
+                    title={address.is_default ? 'Dirección principal actual' : 'Establecer como dirección principal'}
+                    className={`group w-12 h-12 flex items-center justify-center rounded-xl transition-all duration-200 ${address.is_default ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-500 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/30 ring-2 ring-amber-300 dark:ring-amber-700' : 'bg-sky-50 dark:bg-[var(--bg-muted)] text-sky-500 dark:text-[var(--icons-green)] hover:bg-sky-100 dark:hover:bg-[#2A3F33]'} hover:scale-110 active:scale-95`}
                   >
-                    <Icon name="Star" className={`w-5 h-5 transition-all duration-200 group-hover:rotate-12 ${address.is_default ? 'fill-current' : ''}`} style={address.is_default ? { fill: 'currentColor' } : undefined} />
+                    <Icon name="Star" className={`w-5 h-5 transition-all duration-200 group-hover:rotate-12 ${address.is_default ? 'fill-current text-amber-500' : ''}`} style={address.is_default ? { fill: 'currentColor' } : undefined} />
                   </button>
                   <button
-                    onClick={() => deleteAddress(address.id)}
+                    onClick={() => setConfirmDeleteId(address.id)}
                     className="w-12 h-12 flex items-center justify-center rounded-xl bg-red-50 dark:bg-red-900/20 text-red-500 hover:bg-red-100 transition-all"
                   >
                     <Icon name="Trash2" className="w-5 h-5" />
@@ -438,6 +446,22 @@ export default function CustomerAddressesPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {confirmDeleteId !== null && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setConfirmDeleteId(null)}>
+          <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-[2rem] p-8 max-w-sm mx-4 shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="w-14 h-14 rounded-full bg-rose-50 dark:bg-rose-900/20 flex items-center justify-center mx-auto mb-4">
+              <Icon name="MapPin" className="w-7 h-7 text-rose-500" />
+            </div>
+            <h3 className="text-lg font-black text-center text-gray-800 dark:text-[var(--text-primary)] mb-2">¿Eliminar Dirección?</h3>
+            <p className="text-sm text-gray-500 dark:text-[var(--text-muted)] text-center mb-6">Esta ubicación dejará de estar disponible.</p>
+            <div className="flex gap-3">
+              <button onClick={() => setConfirmDeleteId(null)} className="flex-1 py-3 rounded-xl bg-gray-100 dark:bg-[var(--bg-muted)] text-gray-600 dark:text-[var(--text-primary)] font-black text-xs uppercase tracking-widest hover:bg-gray-200 dark:hover:bg-[#2A3F33] transition-all">Cancelar</button>
+              <button onClick={() => deleteAddress(confirmDeleteId)} className="flex-1 py-3 rounded-xl bg-rose-500 text-white font-black text-xs uppercase tracking-widest hover:bg-rose-600 transition-all">Eliminar</button>
+            </div>
           </div>
         </div>
       )}

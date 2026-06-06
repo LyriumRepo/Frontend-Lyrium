@@ -64,7 +64,7 @@ export const BalanceTab: React.FC<{ resume: FinanceSummary; monthly: MonthlyLiqu
 const CashInStatusBadge: React.FC<{ status: CashInStatus }> = ({ status }) => {
     switch (status) {
         case CashInStatus.PENDING_VALIDATION: return <span className="px-3 py-1 bg-amber-500/10 text-amber-500 text-[9px] font-black uppercase rounded-lg border border-amber-500/20">En Revisión</span>;
-        case CashInStatus.VALIDATED: return <span className="px-3 py-1 bg-emerald-500/10 text-emerald-500 text-[9px] font-black uppercase rounded-lg border border-emerald-500/20">Validado / Rapifac</span>;
+        case CashInStatus.VALIDATED: return <span className="px-3 py-1 bg-emerald-500/10 text-emerald-500 text-[9px] font-black uppercase rounded-lg border border-emerald-500/20">Validado / NubeFact</span>;
         case CashInStatus.REJECTED: return <span className="px-3 py-1 bg-red-500/10 text-red-500 text-[9px] font-black uppercase rounded-lg border border-red-500/20">Rechazado</span>;
         default: return <span className="px-3 py-1 bg-[var(--bg-secondary)] text-[var(--text-muted)] text-[9px] font-black uppercase rounded-lg border border-[var(--border-subtle)]">{status}</span>;
     }

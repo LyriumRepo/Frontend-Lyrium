@@ -507,6 +507,7 @@ export function SupportPageClient() {
   } = useCustomerSupport();
 
   const [showNewTicketForm, setShowNewTicketForm] = useState(false);
+  const [showMobileList, setShowMobileList] = useState(false);
 
   if (isLoading) {
     return (
@@ -551,12 +552,43 @@ export function SupportPageClient() {
 
       <div className="flex-1 flex gap-4 overflow-hidden">
         {!showNewTicketForm && (
-          <div className="w-[320px] shrink-0 hidden md:block">
-            <TicketList
-              tickets={tickets}
-              activeTicketId={activeTicketId}
-              onSelect={setActiveTicketId}
-            />
+          <>
+            <div className="w-[320px] shrink-0 hidden md:block">
+              <TicketList
+                tickets={tickets}
+                activeTicketId={activeTicketId}
+                onSelect={setActiveTicketId}
+              />
+            </div>
+            {activeTicket && (
+              <button
+                onClick={() => setShowMobileList(true)}
+                className="md:hidden fixed bottom-24 left-4 z-40 w-12 h-12 rounded-full bg-white dark:bg-[var(--bg-secondary)] shadow-2xl border border-gray-200 dark:border-[var(--border-subtle)] flex items-center justify-center"
+              >
+                <Icon name="Menu" className="w-5 h-5 text-gray-600 dark:text-[var(--text-primary)]" />
+              </button>
+            )}
+          </>
+        )}
+
+        {showMobileList && (
+          <div className="fixed inset-0 z-50 md:hidden" onClick={() => setShowMobileList(false)}>
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+            <div className="absolute left-0 top-0 bottom-0 w-[300px] bg-white dark:bg-[var(--bg-secondary)] shadow-2xl" onClick={e => e.stopPropagation()}>
+              <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-[var(--border-subtle)]">
+                <h3 className="font-black text-sm text-gray-800 dark:text-[var(--text-primary)]">Mis Tickets</h3>
+                <button onClick={() => setShowMobileList(false)} className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-[#1A3A32] transition-colors">
+                  <Icon name="X" className="w-5 h-5 text-gray-500" />
+                </button>
+              </div>
+              <div className="h-[calc(100%-57px)]">
+                <TicketList
+                  tickets={tickets}
+                  activeTicketId={activeTicketId}
+                  onSelect={(id) => { setActiveTicketId(id); setShowMobileList(false); }}
+                />
+              </div>
+            </div>
           </div>
         )}
 

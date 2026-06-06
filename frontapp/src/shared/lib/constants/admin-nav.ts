@@ -2,13 +2,20 @@ import { PanelNavigation } from '@/shared/types/navigation';
 
 export const adminNavigation: PanelNavigation = [
     {
-        title: 'Gestión de Vendores',
+        title: 'Gestión de Vendedores',
         items: [
             {
                 id: 'sellers',
                 label: 'Control de Vendedores',
                 href: '/admin/sellers',
                 icon: 'Users',
+            },
+
+            {
+                id: 'seller-requests',
+                label: 'Solicitudes de Registro',
+                href: '/admin/sellers/solicitudes',
+                icon: 'ClipboardList',
             },
         ],
     },
@@ -19,7 +26,7 @@ export const adminNavigation: PanelNavigation = [
                 id: 'helpdesk',
                 label: 'Mesa de Ayuda',
                 href: '/admin/helpdesk',
-                icon: 'Help',
+                icon: 'HelpCircle',
             },
         ],
     },
@@ -30,7 +37,7 @@ export const adminNavigation: PanelNavigation = [
                 id: 'finance',
                 label: 'Centro de Finanzas y Estadísticas',
                 href: '/admin/finance',
-                icon: 'Sales',
+                icon: 'TrendingUp',
             },
             {
                 id: 'payments',
@@ -39,9 +46,9 @@ export const adminNavigation: PanelNavigation = [
                 icon: 'Landmark',
             },
             {
-                id: 'rapifac',
-                label: 'Facturación Rápida',
-                href: '/admin/rapifac',
+                id: 'invoices',
+                label: 'Facturación Electrónica',
+                href: '/admin/invoices',
                 icon: 'Receipt',
             },
         ],
@@ -85,6 +92,12 @@ export const adminNavigation: PanelNavigation = [
                 label: 'Planes y Suscripciones',
                 href: '/admin/planes',
                 icon: 'Sparkles',
+            },
+            {
+                id: 'seguridad',
+                label: 'Seguridad',
+                href: '/admin/security',
+                icon: 'Shield',
             },
         ],
     },

@@ -88,7 +88,7 @@ export function AuthContainer({ onSuccess }: AuthContainerProps) {
     const isRegister = mode === 'register';
 
     return (
-        <div className="min-h-screen bg-[#F8F9FA] dark:bg-[var(--bg-primary)] flex items-center justify-center p-4">
+        <div className="h-full bg-[#F8F9FA] dark:bg-[var(--bg-primary)] flex items-center justify-center p-4">
             <div className="relative w-full max-w-[1200px] min-h-[650px] bg-white dark:bg-[var(--bg-secondary)] rounded-[30px] shadow-[0_40px_100px_rgba(0,0,0,0.1)] overflow-hidden flex">
                 
                 {/* Left Side Panel - visible siempre */}

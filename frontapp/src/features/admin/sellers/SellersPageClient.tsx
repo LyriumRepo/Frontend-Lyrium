@@ -24,6 +24,7 @@ import ProductModerationModal from '@/components/admin/sellers/ProductModeration
 import { useContratos } from '@/features/admin/contracts/hooks/useContratos';
 import { ContratosModule } from '@/components/admin/contracts/ContractsModule';
 import { ContractDetailModal } from '@/components/admin/contracts/ContractDetailModal';
+import { exportToCSV } from '@/shared/lib/utils/export';
 
 interface TabButtonProps {
   active: boolean;
@@ -251,6 +252,21 @@ export function SellersPageClient(_props: SellersPageClientProps) {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const combinedSellers = filteredSellers;
+
+  const handleExport = () => {
+    if (filteredSellers.length) return;
+    const headers = ['ID', 'Nombre', 'Empresa', 'Email', 'Estado', 'Contratos'];
+    const csvData = filteredSellers.map((s) => [
+      s.id,
+      s.name,
+      s.company,
+      s.email,
+      s.status,
+      s.contractStatus,
+    ]);
+    const dateStr = new Date().toISOString().split('T')[0];
+    exportToCSV(headers, csvData, `padron-vendedores-${dateStr}.csv`);
+  };
 
   const handleStatusSubmit = async ({
     status,
