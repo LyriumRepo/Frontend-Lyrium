@@ -100,11 +100,24 @@ export default function SmartSidebar({
         localStorage.setItem(storageKey, JSON.stringify(newState));
     };
 
+    // Aplana todos los hrefs del navigation para comparar entre sí
+    const allNavHrefs = useMemo(() => {
+        const sections = (Array.isArray(navigation) && typeof navigation[0] === 'object' && 'items' in navigation[0])
+            ? (navigation as any[])
+            : [{ items: navigation }];
+        return sections.flatMap((s: any) => s.items.map((item: NavItem) => item.href));
+    }, [navigation]);
+
     const isActive = (href: string) => {
-        if (href === '/admin' || href === '/logistics' || href === '/seller') {
-            return pathname === href;
-        }
-        return pathname.startsWith(href);
+        // Coincidencia exacta siempre gana
+        if (pathname === href) return true;
+        // Prefix-match: exigir que continúe con '/' para no activar segmentos parciales
+        if (!pathname.startsWith(href + '/')) return false;
+        // No activar si hay un sibling con match más específico para este pathname
+        const hasSiblingMatch = allNavHrefs.some(
+            (otherHref) => otherHref !== href && pathname.startsWith(otherHref)
+        );
+        return !hasSiblingMatch;
     };
 
     // Renderizado optimizado para evitar saltos de hidratación

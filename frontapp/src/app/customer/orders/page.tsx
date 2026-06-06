@@ -12,7 +12,6 @@ import ClientRescheduleModal, { SelectedSpecialist } from './ClientRescheduleMod
 type TipoEnvio =
   | 'domicilio'
   | 'agencia'
-  | 'sucursal'
   | 'atencion_domicilio'
   | 'atencion_sede';
 
@@ -22,7 +21,6 @@ type EstadoPedido =
   | 'en_transporte'
   | 'en_domicilio'
   | 'listo_recojo_agencia'
-  | 'listo_recojo_sucursal'
   | 'confirmado_cliente'
   | 'validacion_centro_salud'
   | 'en_camino'
@@ -95,18 +93,6 @@ const FLOW_CONFIG: Record<
       { id: 5, label: 'Confirmado', icon: 'UserCheck' },
     ],
   },
-  sucursal: {
-    label: 'Recojo en Sucursal',
-    icon: 'Store',
-    color: 'text-[#59a6cb]',
-    accent: 'bg-[#59a6cb]/10 border-[#59a6cb]/20 text-[#59a6cb]',
-    steps: [
-      { id: 1, label: 'Validado', icon: 'CheckSquare' },
-      { id: 2, label: 'Despachado', icon: 'Package' },
-      { id: 3, label: 'Listo Sucursal', icon: 'Store' },
-      { id: 4, label: 'Confirmado', icon: 'UserCheck' },
-    ],
-  },
   atencion_domicilio: {
     label: 'Atención a Domicilio',
     icon: 'Home',
@@ -169,25 +155,6 @@ const mockOrders: Order[] = [
       carrier: 'Shalom',
       tracking: 'SHL-987654321',
       tracking_url: 'https://www.shalom.com.pe/rastreo?guia=SHL-987654321',
-    },
-  },
-  {
-    id: '#PED-2024-003',
-    fecha: '10 Feb 2024',
-    hora: '09:15',
-    tienda: 'Moda & Estilo',
-    detalle: '5 productos',
-    total: 'S/ 280.00',
-    estado: 'listo_recojo_sucursal',
-    estadoLabel: 'Listo para recojo en sucursal',
-    tipo: 'productos',
-    tipo_envio: 'sucursal',
-    currentStep: 4,
-    envio: {
-      direccion: 'Urb. Los Rosales Mz A Lt 5, Trujillo',
-      carrier: '-',
-      tracking: '-',
-      tracking_url: '',
     },
   },
   {
@@ -283,8 +250,6 @@ const getStatusStyles = (estado: EstadoPedido) => {
       return { bg: 'bg-emerald-100', text: 'text-emerald-700', icon: 'Home' };
     case 'listo_recojo_agencia':
       return { bg: 'bg-emerald-100', text: 'text-emerald-700', icon: 'MapPin' };
-    case 'listo_recojo_sucursal':
-      return { bg: 'bg-emerald-100', text: 'text-emerald-700', icon: 'Store' };
     case 'confirmado_cliente':
       return { bg: 'bg-green-100', text: 'text-green-700', icon: 'CheckCircle' };
 
@@ -416,16 +381,13 @@ function TrackingCard({ envio, tipoEnvio }: { envio: EnvioInfo; tipoEnvio: TipoE
           <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-0.5">
             {tipoEnvio === 'domicilio'
               ? 'Dirección de entrega'
-              : tipoEnvio === 'agencia'
-                ? 'Ciudad / Agencia'
-                : 'Sucursal'}
+              : 'Ciudad / Agencia'}
           </p>
           <p className="text-sm font-bold text-gray-700 dark:text-[var(--text-primary)]">{envio.direccion}</p>
         </div>
       </div>
 
-      {tipoEnvio !== 'sucursal' && (
-        <div className="flex items-start gap-3">
+      <div className="flex items-start gap-3">
           <div className="w-10 h-10 bg-white dark:bg-[var(--bg-secondary)] rounded-xl flex items-center justify-center text-sky-500 dark:text-[var(--icons-green)] border border-gray-100 dark:border-[var(--border-subtle)] flex-shrink-0 shadow-sm">
             <Icon name="Truck" className="w-4 h-4" />
           </div>
@@ -446,7 +408,6 @@ function TrackingCard({ envio, tipoEnvio }: { envio: EnvioInfo; tipoEnvio: TipoE
             )}
           </div>
         </div>
-      )}
 
       {hasTracking && hasUrl && (
         <a
@@ -597,7 +558,6 @@ export default function CustomerOrdersPage() {
       ? [
         { value: 'domicilio', label: 'Entrega a domicilio' },
         { value: 'agencia', label: 'Recojo en agencia' },
-        { value: 'sucursal', label: 'Recojo en sucursal' },
       ]
       : [
         { value: 'atencion_domicilio', label: 'Atención a domicilio' },
@@ -617,13 +577,6 @@ export default function CustomerOrdersPage() {
       { value: 'despachado', label: 'Despachado' },
       { value: 'en_transporte', label: 'En transporte' },
       { value: 'listo_recojo_agencia', label: 'Listo para recojo en agencia' },
-      { value: 'confirmado_cliente', label: 'Confirmado por cliente' },
-    ],
-    sucursal: [
-      { value: 'validado_vendedor', label: 'Validado por vendedor' },
-      { value: 'despachado', label: 'Despachado' },
-      { value: 'en_transporte', label: 'En transporte' },
-      { value: 'listo_recojo_sucursal', label: 'Listo para recojo en sucursal' },
       { value: 'confirmado_cliente', label: 'Confirmado por cliente' },
     ],
     atencion_domicilio: [
@@ -996,12 +949,6 @@ export default function CustomerOrdersPage() {
                     </p>
                   </div>
 
-                  <div className="p-4 rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)] bg-gray-50 dark:bg-[var(--bg-muted)]/50">
-                    <p className="font-black text-gray-800 dark:text-[var(--text-primary)]">3. Recojo en sucursal</p>
-                    <p className="text-sm text-gray-600 dark:text-[var(--text-muted)] mt-1">
-                      Si deseas acudir presencialmente a la tienda correspondiente.
-                    </p>
-                  </div>
                 </div>
               </section>
 
@@ -1064,7 +1011,7 @@ export default function CustomerOrdersPage() {
                   <div className="p-4 rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)] bg-gray-50 dark:bg-[var(--bg-muted)]/50">
                     <p className="font-black text-gray-800 dark:text-[var(--text-primary)]">Listo para recojo</p>
                     <p className="text-sm text-gray-600 dark:text-[var(--text-muted)] mt-1">
-                      Su pedido de producto está listo para que lo recoja en agencia logística o en sucursal.
+                      Su pedido de producto está listo para que lo recoja en agencia logística.
                     </p>
                   </div>
 

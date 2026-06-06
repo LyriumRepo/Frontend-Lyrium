@@ -2,13 +2,20 @@ import { PanelNavigation } from '@/shared/types/navigation';
 
 export const adminNavigation: PanelNavigation = [
     {
-        title: 'Gestión de Vendores',
+        title: 'Gestión de Vendedores',
         items: [
             {
                 id: 'sellers',
                 label: 'Control de Vendedores',
                 href: '/admin/sellers',
                 icon: 'Users',
+            },
+
+            {
+                id: 'seller-requests',
+                label: 'Solicitudes de Registro',
+                href: '/admin/sellers/solicitudes',
+                icon: 'ClipboardList',
             },
         ],
     },
