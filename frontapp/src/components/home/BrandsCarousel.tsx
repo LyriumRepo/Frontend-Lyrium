@@ -85,7 +85,7 @@ export default function BrandsCarousel({ marcas }: BrandsCarouselProps) {
         onMouseLeave={handleMouseUp}
       >
         <div
-          className="flex transition-transform duration-700 gap-4"
+          className="flex transition-transform duration-700 divide-x-2 divide-gray-800 dark:divide-gray-200"
           style={{
             transform: `translateX(-${current * (100 / itemsPerView)}%)`,
           }}
@@ -98,7 +98,7 @@ export default function BrandsCarousel({ marcas }: BrandsCarouselProps) {
             return (
               <div
                 key={marca.id}
-                className="flex-shrink-0 w-[calc(50%-0.5rem)] sm:w-[calc(33.333%-0.67rem)] lg:w-[calc(25%-0.75rem)] xl:w-[calc(20%-0.8rem)]"
+                className="flex-shrink-0 w-1/2 sm:w-1/3 lg:w-1/4 xl:w-1/5"
               >
                 <div className="h-38 md:h-46 flex items-center justify-center p-1 bg-white dark:bg-gray-900 w-full">
                                    <article className="group cursor-pointer transition-all duration-300 w-full h-full relative rounded-2xl overflow-hidden">
