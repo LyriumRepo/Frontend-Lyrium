@@ -21,8 +21,6 @@ const LARAVEL_BASE_URL = (process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://loc
 
 const HOME_SECTIONS = [
     { slug: 'productos-digestion-saludable', titulo: 'Digestión saludable' },
-    { slug: 'productos-belleza', titulo: 'Belleza' },
-    { slug: 'servicios-medicos', titulo: 'Servicios Médicos' },
 ];
 
 const transformUrl = (url: string | undefined | null): string => {
