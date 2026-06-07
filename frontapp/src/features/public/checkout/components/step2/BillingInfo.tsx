@@ -15,6 +15,7 @@ import { paymentMethodApi, type PaymentMethod } from '@/shared/lib/api/paymentMe
 export default function BillingInfo() {
   const selectedPaymentMethodId = useCheckoutStore((s) => s.orderData.selectedPaymentMethodId);
   const setOrderData = useCheckoutStore((s) => s.setOrderData);
+  const isMockMode = !process.env.NEXT_PUBLIC_IZIPAY_PUBLIC_KEY;
 
   const [savedCards, setSavedCards] = useState<PaymentMethod[]>([]);
   const [savedYapePlin, setSavedYapePlin] = useState<PaymentMethod[]>([]);
@@ -177,17 +178,31 @@ export default function BillingInfo() {
       {/* Smart Form — only shown when no saved method is selected */}
       {!selectedPaymentMethodId && (
         <>
-          <div className="p-4 bg-sky-50 dark:bg-sky-900/20 rounded-xl border border-sky-100 dark:border-sky-800/40">
-            <p className="text-sm text-sky-800 dark:text-sky-300 leading-relaxed">
-              Haz clic en <span className="font-bold">&quot;Realizar pedido&quot;</span> para
-              cargar el formulario seguro de pago aquí abajo.
-            </p>
-          </div>
+          {isMockMode ? (
+            <div className="p-4 bg-amber-50 dark:bg-amber-950/20 rounded-xl border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 flex items-start gap-3">
+              <span className="text-lg">🛡️</span>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wider mb-1">Modo de Simulación Activo</p>
+                <p className="text-xs leading-relaxed">
+                  No se detectaron credenciales reales de Izipay en el entorno. Al hacer clic en <span className="font-bold">&quot;Realizar pedido&quot;</span>, se simulará un pago exitoso y se generará el comprobante electrónico correspondiente.
+                </p>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="p-4 bg-sky-50 dark:bg-sky-900/20 rounded-xl border border-sky-100 dark:border-sky-800/40">
+                <p className="text-sm text-sky-800 dark:text-sky-300 leading-relaxed">
+                  Haz clic en <span className="font-bold">&quot;Realizar pedido&quot;</span> para
+                  cargar el formulario seguro de pago aquí abajo.
+                </p>
+              </div>
 
-          <div className="kr-smart-form" kr-card-form-expanded="true">
-            <button className="kr-payment-button" />
-            <div className="kr-form-error" />
-          </div>
+              <div className="kr-smart-form" kr-card-form-expanded="true">
+                <button className="kr-payment-button" />
+                <div className="kr-form-error" />
+              </div>
+            </>
+          )}
         </>
       )}
 

@@ -150,7 +150,7 @@ export default function OrderConfirmation() {
                   className="flex gap-3 items-center bg-white dark:bg-[var(--bg-card)] rounded-2xl p-3 border border-gray-100 dark:border-[var(--border-subtle)]"
                 >
                   <Image
-                    src={item.image}
+                    src={typeof item.image === 'string' && item.image.trim() !== '' ? item.image : '/img/no-image.png'}
                     alt={item.name}
                     width={56}
                     height={56}

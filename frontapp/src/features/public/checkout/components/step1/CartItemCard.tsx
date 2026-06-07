@@ -31,7 +31,7 @@ export default function CartItemCard({ item, onToggle, onRemove, onIncrease, onD
             {/* Image */}
             <div className="item-image-wrapper w-[90px] h-[90px] rounded-xl overflow-hidden bg-gray-50 dark:bg-[var(--bg-muted)] border border-gray-100 dark:border-[var(--border-subtle)] flex-shrink-0">
                 <Image
-                    src={item.image}
+                    src={typeof item.image === 'string' && item.image.trim() !== '' ? item.image : '/img/no-image.png'}
                     alt={item.name}
                     width={90}
                     height={90}

@@ -597,9 +597,10 @@ export function SellersPageClient(_props: SellersPageClientProps) {
               </div>
               <BaseButton 
                 onClick={contractsActions.openTemplates} 
-                variant="primary" 
+                variant="secondary" 
                 leftIcon="FolderOpen" 
                 size="md"
+                className="bg-sky-500 hover:bg-sky-600 active:bg-sky-700 dark:bg-[var(--brand-green)] dark:hover:bg-[var(--brand-green-hover)] text-white border-0 shadow-lg shadow-sky-500/25 dark:shadow-none transition-all duration-300"
               >
                 Plantillas Legales
               </BaseButton>

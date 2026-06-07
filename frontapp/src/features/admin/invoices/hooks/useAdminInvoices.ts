@@ -29,13 +29,8 @@ function calcKPIs(invoices: Voucher[]): AdminInvoiceKPIs {
 }
 
 function getToken(): string | null {
-    if (typeof document === 'undefined') return null;
-    const cookies = document.cookie.split(';').reduce((acc, cookie) => {
-        const [key, ...vals] = cookie.trim().split('=');
-        if (key) acc[key] = decodeURIComponent(vals.join('='));
-        return acc;
-    }, {} as Record<string, string>);
-    return cookies['laravel_token'] ?? null;
+    if (typeof window === 'undefined') return null;
+    return localStorage.getItem('laravel_token');
 }
 
 export function useAdminInvoices() {
@@ -62,10 +57,16 @@ export function useAdminInvoices() {
             if (!res.ok) {
                 throw new Error(`API error: ${res.status}`);
             }
-            const json = await res.json() as { success: boolean; data: Voucher[]; error?: string };
+            const json = await res.json() as { success: boolean; data: any; error?: string };
             if (!json.success) throw new Error(json.error ?? 'Error desconocido');
-            setInvoices(json.data || []);
-            setKpis(calcKPIs(json.data || []));
+            
+            const rawData = json.data;
+            const invoiceList: Voucher[] = Array.isArray(rawData)
+                ? rawData
+                : (rawData && Array.isArray(rawData.data) ? rawData.data : []);
+
+            setInvoices(invoiceList);
+            setKpis(calcKPIs(invoiceList));
         } catch (err: unknown) {
             setError(err instanceof Error ? err.message : 'Error al cargar facturas');
         } finally {

@@ -17,7 +17,7 @@ export default function CardProxPago({ data, formatCurrency }: CardProxPagoProps
 
             <div className="relative z-10">
                 <div className="flex justify-between items-start mb-6">
-                    <div className="w-12 h-12 bg-sky-500 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-sky-100 group-hover:scale-110 group-hover:rotate-3 transition-transform">
+                    <div className="w-12 h-12 bg-sky-500 text-white rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-transform">
                         <Icon name="CalendarCheck" className="text-2xl w-6 h-6" />
                     </div>
                 </div>

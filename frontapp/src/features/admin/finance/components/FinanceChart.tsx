@@ -18,6 +18,7 @@ interface FinanceChartProps {
     tension?: number;
     cutout?: string;
     height?: string;
+    horizontal?: boolean;
 }
 
 export default function FinanceChart({
@@ -30,7 +31,8 @@ export default function FinanceChart({
     fill = true,
     tension = 0.4,
     cutout = '75%',
-    height = '200px'
+    height = '200px',
+    horizontal = false
 }: FinanceChartProps) {
     const chartRef = useRef<HTMLCanvasElement>(null);
     const chartInstance = useRef<Chart | null>(null);
@@ -80,12 +82,12 @@ export default function FinanceChart({
                 let bgStyle: any = `${itemColor}15`;
 
                 if (type === 'bar') {
-                    const barGrad = ctx.createLinearGradient(0, 0, 0, 200);
+                    const barGrad = horizontal ? ctx.createLinearGradient(0, 0, 200, 0) : ctx.createLinearGradient(0, 0, 0, 200);
                     barGrad.addColorStop(0, itemColor);
                     barGrad.addColorStop(1, `${itemColor}05`);
                     bgStyle = barGrad;
                 } else if (type === 'line' && fill) {
-                    const lineGrad = ctx.createLinearGradient(0, 0, 0, 200);
+                    const lineGrad = horizontal ? ctx.createLinearGradient(0, 0, 200, 0) : ctx.createLinearGradient(0, 0, 0, 200);
                     lineGrad.addColorStop(0, `${itemColor}25`);
                     lineGrad.addColorStop(1, 'transparent');
                     bgStyle = lineGrad;
@@ -114,12 +116,12 @@ export default function FinanceChart({
                 : (fill ? `${resolvedColor}1A` : 'transparent');
 
             if (type === 'bar') {
-                const barGrad = ctx.createLinearGradient(0, 0, 0, 200);
+                const barGrad = horizontal ? ctx.createLinearGradient(0, 0, 200, 0) : ctx.createLinearGradient(0, 0, 0, 200);
                 barGrad.addColorStop(0, resolvedColor);
                 barGrad.addColorStop(1, `${resolvedColor}10`);
                 backgroundStyle = barGrad;
             } else if (type === 'line' && fill) {
-                const lineGrad = ctx.createLinearGradient(0, 0, 0, 200);
+                const lineGrad = horizontal ? ctx.createLinearGradient(0, 0, 200, 0) : ctx.createLinearGradient(0, 0, 0, 200);
                 lineGrad.addColorStop(0, `${resolvedColor}35`);
                 lineGrad.addColorStop(1, 'transparent');
                 backgroundStyle = lineGrad;
@@ -150,6 +152,7 @@ export default function FinanceChart({
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                indexAxis: horizontal ? 'y' : 'x',
                 cutout: type === 'doughnut' ? cutout : undefined,
                 plugins: {
                     legend: { 
@@ -183,7 +186,7 @@ export default function FinanceChart({
                             color: isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.06)' 
                         },
                         pointLabels: {
-                            color: isDark ? '#f1f5f9' : '#1e293b', // Bright labels in dark mode
+                            color: isDark ? '#f1f5f9' : '#1e293b',
                             font: { 
                                 size: 10, 
                                 weight: 'black',
@@ -192,7 +195,7 @@ export default function FinanceChart({
                         },
                         ticks: {
                             showLabelBackdrop: false,
-                            backdropColor: 'transparent', // Transparent backdrop
+                            backdropColor: 'transparent',
                             color: isDark ? '#cbd5e1' : '#475569',
                             font: { 
                                 size: 9, 
@@ -200,7 +203,17 @@ export default function FinanceChart({
                             }
                         }
                     }
-                } : (type !== 'doughnut' ? {
+                } : (type !== 'doughnut' ? (horizontal ? {
+                    y: {
+                        grid: { display: false },
+                        ticks: { font: { size: 9, weight: 'bold' }, color: tickColor }
+                    },
+                    x: {
+                        beginAtZero: true,
+                        grid: { color: gridColor },
+                        ticks: { font: { size: 9, weight: 'bold' }, color: tickColor }
+                    }
+                } : {
                     y: {
                         beginAtZero: true,
                         grid: { color: gridColor },
@@ -210,7 +223,7 @@ export default function FinanceChart({
                         grid: { display: false },
                         ticks: { font: { size: 9, weight: 'bold' }, color: tickColor }
                     }
-                } : undefined)
+                }) : undefined)
             } as any
         };
 

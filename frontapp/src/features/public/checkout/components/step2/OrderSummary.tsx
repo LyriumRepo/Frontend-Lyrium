@@ -4,6 +4,7 @@ import { Truck, ShieldCheck, Lock, Tag, Wallet } from 'lucide-react';
 import { useCheckoutStore } from '@/store/checkoutStore';
 import { useCheckoutSubmit } from '../../hooks/useCheckoutSubmit';
 import { useIzipay } from '../../hooks/useIzipay';
+import { izipayPaymentApi } from '@/shared/lib/api/paymentRepository';
 import { orderApi } from '@/shared/lib/api/OrdenRepository';
 import { useCallback } from 'react';
 import type { DeliveryMethod } from '@/store/checkoutStore';
@@ -105,6 +106,27 @@ export default function OrderSummary() {
         setStep(3);
       } catch (err) {
         console.error('[chargeWithToken] error', err);
+      }
+      return;
+    }
+
+    const isMockMode = !process.env.NEXT_PUBLIC_IZIPAY_PUBLIC_KEY;
+
+    if (isMockMode) {
+      try {
+        const confirmResult = await izipayPaymentApi.confirm(result.orderId);
+        setOrderResult({
+          orderId: result.orderId,
+          email: personalData.email,
+          total: total,
+          items: cartItems,
+          personalData,
+          shippingData,
+          orderData,
+        });
+        setStep(3);
+      } catch (err: any) {
+        console.error('[Izipay MOCK] Error al confirmar pago simulado:', err);
       }
       return;
     }

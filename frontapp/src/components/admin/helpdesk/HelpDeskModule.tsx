@@ -502,13 +502,13 @@ export const HelpDeskModule: React.FC<HelpDeskModuleProps> = ({
                                               style={{ animationDelay: `${Math.min(msg.id * 30, 300)}ms` }}>
                                                 <div className={`max-w-[70%] p-4 rounded-3xl relative flex flex-col gap-1.5 shadow-sm transition-all duration-300 hover:shadow-md ${
                                                     isAdmin
-                                                        ? 'bg-gradient-to-br from-[var(--turquesa-500)] to-[var(--verde-500)] text-white rounded-tr-none shadow-md shadow-[var(--turquesa-500)]/5'
+                                                        ? 'bg-sky-500 dark:bg-[var(--brand-green)] text-white rounded-tr-none shadow-md shadow-sky-500/5 dark:shadow-none border-0'
                                                         : 'bg-[var(--bg-secondary)] text-[var(--text-primary)] rounded-tl-none border border-[var(--border-subtle)]'
                                                 }`}>
                                                     
                                                     {/* Remitente */}
                                                     <div className={`text-[9px] font-black uppercase tracking-wider ${
-                                                        isAdmin ? 'text-white/80' : 'text-[var(--icons-green)] dark:text-[var(--icons-green)]'
+                                                        isAdmin ? 'text-white/80' : 'text-emerald-600 dark:text-emerald-500'
                                                     }`}>
                                                         {msg.name} <span className="opacity-75 font-normal">({msg.role})</span>
                                                     </div>
@@ -591,11 +591,11 @@ export const HelpDeskModule: React.FC<HelpDeskModuleProps> = ({
                                         placeholder="Escribe un mensaje en el canal de soporte..."
                                         value={typedMessage}
                                         onChange={(e) => setTypedMessage(e.target.value)}
-                                        className="flex-1 pl-4 pr-14 py-4 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-2xl text-xs font-bold focus:ring-2 focus:ring-[var(--turquesa-500)]/20 outline-none text-[var(--text-primary)] placeholder:text-[var(--text-muted)]"
+                                        className="flex-1 pl-4 pr-14 py-4 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-2xl text-xs font-bold focus:ring-2 focus:ring-sky-500/20 outline-none text-[var(--text-primary)] placeholder:text-[var(--text-muted)]"
                                     />
                                     <button
                                         type="submit"
-                                        className="absolute right-2.5 w-11 h-11 rounded-xl bg-[var(--brand-green)] hover:bg-[var(--brand-green-hover)] text-white flex items-center justify-center transition active:scale-95 shadow-md shadow-[var(--brand-green)]/30 border border-[var(--brand-green)]/20"
+                                        className="absolute right-2.5 w-11 h-11 rounded-xl bg-sky-500 hover:bg-sky-600 active:bg-sky-700 dark:bg-[var(--brand-green)] dark:hover:bg-[var(--brand-green-hover)] text-white flex items-center justify-center transition active:scale-95 shadow-md shadow-sky-500/20 dark:shadow-none border-0"
                                     >
                                         <Send className="w-4 h-4" />
                                     </button>

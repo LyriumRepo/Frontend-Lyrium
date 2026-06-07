@@ -84,6 +84,13 @@ export function useIzipay({ onSuccess }: UseIzipayOptions): UseIzipayReturn {
     if (listenersRegistered.current) return;
     if (typeof window === 'undefined') return;
 
+    const publicKey = process.env.NEXT_PUBLIC_IZIPAY_PUBLIC_KEY;
+    if (!publicKey) {
+      console.log('[Izipay] NEXT_PUBLIC_IZIPAY_PUBLIC_KEY no configurada. Ejecutando en modo simulación (MOCK).');
+      setIsSdkReady(true);
+      return;
+    }
+
     let attempts = 0;
     const MAX_ATTEMPTS = 50; // 10 segundos
     let cancelled = false;
