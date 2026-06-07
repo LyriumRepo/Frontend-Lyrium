@@ -112,173 +112,35 @@ function OfferBlock({
 }) {
 
   const [bgIndex, setBgIndex] = useState(0);
-  const [currentPage, setCurrentPage] = useState(0);
-  const [itemsPerView, setItemsPerView] = useState(5);
 
-   
   useEffect(() => {
-    if (productos.length === 0 && fallbackImages.length > 0) {
+    if (fallbackImages.length > 0) {
       const interval = setInterval(() => {
         setBgIndex((prev) => (prev + 1) % fallbackImages.length);
       }, 4000);
 
       return () => clearInterval(interval);
     }
-  }, [productos.length, fallbackImages]);
+  }, [fallbackImages]);
 
- 
-  useEffect(() => {
-    const esServiciosVacio = titulo === "Las mejores ofertas de Servicios" && productos.length === 0;
-    if (!enableCardCarousel && !esServiciosVacio) return;
-
-    const updateItemsPerView = () => {
-      if (window.innerWidth < 640) setItemsPerView(1);
-      else if (window.innerWidth < 900) setItemsPerView(2);
-      else if (window.innerWidth < 1200) setItemsPerView(3);
-      else {
-       
-        setItemsPerView(esServiciosVacio ? 3 : 5);
-      }
-    };
-
-    updateItemsPerView();
-    window.addEventListener('resize', updateItemsPerView);
-    return () => window.removeEventListener('resize', updateItemsPerView);
-  }, [enableCardCarousel, titulo, productos.length]);
-
-  
-  const totalPages = Math.max(1, Math.ceil(productos.length / itemsPerView));
-  const esServiciosVacio = titulo === "Las mejores ofertas de Servicios" && productos.length === 0;
-  
- 
-  const totalPagesServices = esServiciosVacio ? Math.max(1, homeData.ofertasServicios.length - itemsPerView + 1) : 1;
-  // 4. Desplazamiento automático para carrusel normal
-  useEffect(() => {
-    if (!enableCardCarousel || totalPages <= 1 || productos.length === 0) return;
-
-    const interval = setInterval(() => {
-      setCurrentPage((prev) => (prev >= totalPages - 1 ? 0 : prev + 1));
-    }, 4500);
-
-    return () => clearInterval(interval);
-  }, [enableCardCarousel, totalPages, productos.length]);
-
-  // 5. Desplazamiento automático específico para Servicios vacíos
-  useEffect(() => {
-    if (!esServiciosVacio || totalPagesServices <= 1) return;
-
-    const interval = setInterval(() => {
-      setCurrentPage((prev) => (prev >= totalPagesServices - 1 ? 0 : prev + 1));
-    }, 4500);
-
-    return () => clearInterval(interval);
-  }, [esServiciosVacio, totalPagesServices]);
-
-  // 6. Resetear la página si excede el límite al cambiar tamaño de pantalla
-  useEffect(() => {
-    const maxPages = esServiciosVacio ? totalPagesServices : totalPages;
-    if (currentPage >= maxPages) {
-      setCurrentPage(0);
-    }
-  }, [currentPage, totalPages, totalPagesServices, esServiciosVacio]);
-
- 
-    if (productos.length === 0) {
-    let productosAMostrar: Producto[] = [];
-    let animationName = '';
-
+  let productosAMostrar = productos;
+  if (productos.length === 0) {
     if (titulo === "Las mejores ofertas de Servicios" || titulo === "Las mejores ofertas de servicios") {
       productosAMostrar = homeData.ofertasServicios;
-      animationName = 'infiniteScrollServices';
     } else if (titulo === "Las mejores ofertas de productos" || titulo === "Las mejores ofertas de Productos") {
       productosAMostrar = homeData.ofertasProductos;
-      animationName = 'infiniteScrollProducts';
     } else if (titulo === "Productos Nuevos" || titulo === "Productos nuevos") {
       productosAMostrar = homeData.productosNuevos;
-      animationName = 'infiniteScrollNewProducts';
     }
+  }
 
-    if (productosAMostrar.length > 0) {
-      const allItems = [...productosAMostrar, ...productosAMostrar];
+  const animationName = titulo === "Las mejores ofertas de Servicios" || titulo === "Las mejores ofertas de servicios"
+    ? 'infiniteScrollServices'
+    : titulo === "Las mejores ofertas de productos" || titulo === "Las mejores ofertas de Productos"
+    ? 'infiniteScrollProducts'
+    : 'infiniteScrollNewProducts';
 
-      return (
-        <section className="space-y-4 md:space-y-6 flex flex-col items-center">
-          {/* Estilos CSS para el desplazamiento continuo y efecto de pausa en Hover */}
-          <style dangerouslySetInnerHTML={{ __html: `
-            @keyframes ${animationName} {
-              0% {
-                transform: translateX(0);
-              }
-              100% {
-                transform: translateX(-50%);
-              }
-            }
-            .animate-${animationName} {
-              animation: ${animationName} 24s linear infinite;
-            }
-            .animate-${animationName}:hover {
-              animation-play-state: paused;
-            }
-          `}} />
-
-          <div className="w-[1467px] max-w-full pl-10 pr-4 space-y-4">
-            <h2 className="text-xl md:text-2xl font-bold pl-8">{titulo}</h2>
-
-            <div className="relative w-full h-[650px] rounded-[30px] shadow-2xl overflow-hidden">
-              {/* Carrusel fondo */}
-              <div className="absolute inset-0">
-                {fallbackImages.map((img, i) => (
-                  <div
-                    key={i}
-                    className={`absolute inset-0 bg-cover bg-no-repeat bg-center transition-opacity duration-1000 ${
-                      i === bgIndex ? 'opacity-100' : 'opacity-0'
-                    }`}
-                    style={{ 
-                      backgroundImage: `url('${img}?v=1.2')`,
-                      backgroundAttachment: 'fixed',
-                      backgroundPosition: backgroundPosition || 'center 15%',
-                      backgroundRepeat: 'no-repeat'
-                    }}
-                  />
-                ))}
-              </div>
-
-              {/* Overlay original */}
-              <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
-
-              {/* Contenedor del scroll continuo alineado a la derecha */}
-              <div className="relative z-10 p-4 pb-0 md:p-8 md:pb-0 h-full flex flex-col justify-end">
-                <div 
-                  className="w-full mx-auto overflow-hidden"
-                  style={{ 
-                    maxWidth: '1200px',
-                    maskImage: 'linear-gradient(to right, transparent, black 4%, black 96%, transparent)',
-                    WebkitMaskImage: 'linear-gradient(to right, transparent, black 4%, black 96%, transparent)',
-                  }}
-                >
-                  <div
-                    className={`flex gap-5 animate-${animationName}`}
-                    style={{ width: 'max-content' }}
-                  >
-                    {allItems.map((producto, index) => (
-                      <OfferCard
-                        key={`${producto.id}-${index}`}
-                        producto={producto}
-                        allProducts={productosAMostrar}
-                        onAddToCart={onAddToCart}
-                        onQuickView={onQuickView}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      );
-    }
-
-    // Estado vacío de fallback por defecto
+  if (productosAMostrar.length === 0) {
     return (
       <section className="space-y-4 md:space-y-6 flex flex-col items-center">
         <div className="w-[1467px] max-w-full pl-10 pr-4 space-y-4">
@@ -317,7 +179,9 @@ function OfferBlock({
       </section>
     );
   }
- 
+
+  const allItems = [...productosAMostrar, ...productosAMostrar];
+
   return (
     <section className="space-y-4 md:space-y-6 flex flex-col items-center w-full">
       <div className="w-[1467px] max-w-full pl-10 pr-4 flex justify-between items-center">
@@ -328,17 +192,43 @@ function OfferBlock({
       </div>
 
       <div className="relative w-[1467px] max-w-full h-[650px] rounded-[30px] shadow-2xl overflow-hidden mx-auto">
-        <div
-          className="absolute inset-0 bg-cover bg-no-repeat bg-center"
-          style={{ 
-            backgroundImage: `url('${backgroundImage}?v=1.2')`,
-            backgroundAttachment: 'fixed',
-            backgroundPosition: backgroundPosition || 'center 15%',
-            backgroundRepeat: 'no-repeat'
-          }}
-        />
+        <div className="absolute inset-0">
+          {fallbackImages.map((img, i) => (
+            <div
+              key={i}
+              className={`absolute inset-0 bg-cover bg-no-repeat bg-center transition-opacity duration-1000 ${
+                i === bgIndex ? 'opacity-100' : 'opacity-0'
+              }`}
+              style={{ 
+                backgroundImage: `url('${img}?v=1.2')`,
+                backgroundAttachment: 'fixed',
+                backgroundPosition: backgroundPosition || 'center 15%',
+                backgroundRepeat: 'no-repeat'
+              }}
+            />
+          ))}
+        </div>
+
+        <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
 
         <div className="relative z-10 p-4 pb-0 md:p-8 md:pb-0 h-full flex flex-col justify-end">
+          <style dangerouslySetInnerHTML={{ __html: `
+            @keyframes ${animationName} {
+              0% {
+                transform: translateX(0);
+              }
+              100% {
+                transform: translateX(-50%);
+              }
+            }
+            .animate-${animationName} {
+              animation: ${animationName} 24s linear infinite;
+            }
+            .animate-${animationName}:hover {
+              animation-play-state: paused;
+            }
+          `}} />
+
           <div 
             className="w-full mx-auto overflow-hidden"
             style={{ 
@@ -347,54 +237,21 @@ function OfferBlock({
               WebkitMaskImage: 'linear-gradient(to right, transparent, black 4%, black 96%, transparent)',
             }}
           >
-            {enableCardCarousel ? (
-              <div
-                className="flex gap-5 will-change-transform"
-                style={{
-                  transition: 'transform 0.7s cubic-bezier(0.22, 0.61, 0.36, 1)',
-                  transform: `translateX(-${currentPage * itemsPerView * 240}px)`,
-                }}
-              >
-                {productos.map((producto) => (
-                  <OfferCard
-                    key={producto.id}
-                    producto={producto}
-                    allProducts={productos}
-                    onAddToCart={onAddToCart}
-                    onQuickView={onQuickView}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="flex overflow-x-auto gap-4">
-                {productos.map((producto) => (
-                  <OfferCard
-                    key={producto.id}
-                    producto={producto}
-                    allProducts={productos}
-                    onAddToCart={onAddToCart}
-                    onQuickView={onQuickView}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-
-          {enableCardCarousel && totalPages > 1 && (
-            <div className="flex justify-center gap-2 mt-4">
-              {Array.from({ length: totalPages }).map((_, index) => (
-                <button
-                  key={`offer-page-${index}`}
-                  type="button"
-                  onClick={() => setCurrentPage(index)}
-                  className={`h-2 rounded-full transition-all duration-300 ${
-                    index === currentPage ? 'w-6 bg-indigo-500' : 'w-2 bg-white/70'
-                  }`}
-                  aria-label={`Ir a la página ${index + 1}`}
+            <div
+              className={`flex gap-5 animate-${animationName}`}
+              style={{ width: 'max-content' }}
+            >
+              {allItems.map((producto, index) => (
+                <OfferCard
+                  key={`${producto.id}-${index}`}
+                  producto={producto}
+                  allProducts={productosAMostrar}
+                  onAddToCart={onAddToCart}
+                  onQuickView={onQuickView}
                 />
               ))}
             </div>
-          )}
+          </div>
         </div>
       </div>
     </section>
