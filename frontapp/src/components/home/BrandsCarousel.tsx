@@ -85,8 +85,10 @@ export default function BrandsCarousel({ marcas }: BrandsCarouselProps) {
         onMouseLeave={handleMouseUp}
       >
         <div
-          className="flex transition-transform duration-700 divide-x-2 divide-gray-800 dark:divide-gray-200"
-          style={{ transform: `translateX(-${current * (100 / itemsPerView)}%)` }}
+          className="flex transition-transform duration-700 gap-4"
+          style={{
+            transform: `translateX(-${current * (100 / itemsPerView)}%)`,
+          }}
         >
           {marcas.map((marca, index) => {
            

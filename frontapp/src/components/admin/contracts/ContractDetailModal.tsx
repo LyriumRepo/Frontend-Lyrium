@@ -290,7 +290,7 @@ export const ContractDetailModal: React.FC<ContractDetailModalProps> = ({
                                 onClick={() => handleUpdateStatus('ACTIVE')}
                                 variant="primary"
                                 disabled={!isFormComplete}
-                                className="w-full h-14 rounded-[1.2rem] flex items-center justify-center gap-3 shadow-xl shadow-[var(--brand-green)]/20 !bg-[var(--brand-green)] hover:!bg-[var(--brand-green-hover)] text-white font-black text-xs uppercase tracking-widest disabled:opacity-45 disabled:cursor-not-allowed duration-300"
+                                className="w-full h-14 rounded-[1.2rem] flex items-center justify-center gap-3 shadow-xl shadow-[var(--brand-green)]/20 from-transparent to-transparent !bg-[var(--brand-green)] hover:!bg-[var(--brand-green-hover)] text-white font-black text-xs uppercase tracking-widest disabled:opacity-45 disabled:cursor-not-allowed duration-300"
                             >
                                 <CheckCircle className="w-5 h-5 shrink-0" /> Validar y Activar
                             </BaseButton>
@@ -308,7 +308,7 @@ export const ContractDetailModal: React.FC<ContractDetailModalProps> = ({
                             <BaseButton
                                 onClick={() => handleUpdateStatus('ACTIVE')}
                                 variant="primary"
-                                className="w-full h-14 rounded-[1.2rem] flex items-center justify-center gap-3 shadow-xl shadow-[var(--brand-green)]/20 !bg-[var(--brand-green)] hover:!bg-[var(--brand-green-hover)] text-white font-black text-xs uppercase tracking-widest duration-300"
+                                className="w-full h-14 rounded-[1.2rem] flex items-center justify-center gap-3 shadow-xl shadow-[var(--brand-green)]/20 from-transparent to-transparent !bg-[var(--brand-green)] hover:!bg-[var(--brand-green-hover)] text-white font-black text-xs uppercase tracking-widest duration-300"
                             >
                                 <CheckCircle className="w-5 h-5 shrink-0" /> Validar y Activar
                             </BaseButton>
