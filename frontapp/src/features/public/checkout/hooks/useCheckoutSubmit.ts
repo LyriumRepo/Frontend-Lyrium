@@ -50,14 +50,21 @@ export function useCheckoutSubmit(): UseCheckoutSubmitReturn {
   const [error, setError] = useState<string | null>(null);
 
   const setCartItems = useCheckoutStore((s) => s.setCartItems);
+  const setCartLoaded = useCheckoutStore((s) => s.setCartLoaded);
+  const cartLoaded = useCheckoutStore((s) => s.cartLoaded);
   const setProcessing = useCheckoutStore((s) => s.setProcessing);
   const personalData = useCheckoutStore((s) => s.personalData);
   const shippingData = useCheckoutStore((s) => s.shippingData);
   const orderData = useCheckoutStore((s) => s.orderData);
   const cartItems = useCheckoutStore((s) => s.cartItems);
 
-  // ── 1. Al montar: cargar carrito del backend → checkoutStore ─────────────
+  // ── 1. Al montar: cargar carrito del backend → checkoutStore (solo una vez) ─
   useEffect(() => {
+    if (cartLoaded) {
+      setIsLoading(false);
+      return;
+    }
+
     let cancelled = false;
 
     async function loadCart() {
@@ -69,6 +76,7 @@ export function useCheckoutSubmit(): UseCheckoutSubmitReturn {
 
         if (!cart.items || cart.items.length === 0) {
           setCartItems([]);
+          setCartLoaded(true);
           return;
         }
 
@@ -85,6 +93,7 @@ export function useCheckoutSubmit(): UseCheckoutSubmitReturn {
         }));
 
         setCartItems(checkoutItems);
+        setCartLoaded(true);
       } catch (err) {
         if (!cancelled) {
           console.error('Error cargando carrito en checkout:', err);
@@ -99,7 +108,7 @@ export function useCheckoutSubmit(): UseCheckoutSubmitReturn {
     return () => {
       cancelled = true;
     };
-  }, [setCartItems]);
+  }, [cartLoaded, setCartItems, setCartLoaded]);
 
   // ── 2. submitOrder: SOLO crea la orden — sin cobro ───────────────────────
   const submitOrder =
@@ -147,6 +156,7 @@ export function useCheckoutSubmit(): UseCheckoutSubmitReturn {
           shipping_postal_code: shippingData.zipCode || undefined,
           shipping_notes: shippingData.referencia || undefined,
           shipping_cost: orderData.deliveryCost,
+          shipping_type: orderData.deliveryMethod,
           coupon_code: orderData.promoCode || undefined,
         });
 

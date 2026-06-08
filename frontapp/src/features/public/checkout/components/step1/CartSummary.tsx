@@ -11,7 +11,6 @@
 
 import { ShoppingBag, Tag, Truck, ArrowRight, Loader2 } from 'lucide-react';
 import { useCheckoutStore } from '@/store/checkoutStore';
-import { useCheckoutSubmit } from '../../hooks/useCheckoutSubmit';
 
 interface Props {
   onContinue: () => void;
@@ -19,7 +18,8 @@ interface Props {
 
 export default function CartSummary({ onContinue }: Props) {
   const cartItems = useCheckoutStore((s) => s.cartItems);
-  const { isLoading } = useCheckoutSubmit();
+  const cartLoaded = useCheckoutStore((s) => s.cartLoaded);
+  const isLoading = !cartLoaded;
 
   const selectedItems = cartItems.filter((i) => i.selected);
 
@@ -33,7 +33,7 @@ export default function CartSummary({ onContinue }: Props) {
     0,
   );
   const shipping = subtotal > 0 ? 10.0 : 0;
-  const igv = subtotal * 0.16;
+  const igv = subtotal * 0.18;
   const total = subtotal + shipping;
 
   // ── Skeleton mientras carga ────────────────────────────────────────────────

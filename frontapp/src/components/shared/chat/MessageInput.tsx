@@ -74,7 +74,7 @@ export default function MessageInput({ onSend, placeholder = 'Escribe un mensaje
   };
 
   return (
-    <form onSubmit={handleSubmit} className="border-t border-[var(--border-subtle)] bg-[var(--bg-primary)]" aria-label="Formulario de mensaje">
+    <form onSubmit={handleSubmit} className="border-t border-white/20 dark:border-[var(--border-subtle)]/50 bg-white/50 dark:bg-[var(--bg-primary)]/50 backdrop-blur-xl" aria-label="Formulario de mensaje">
       {typing && (
         <div className="px-6 py-2">
           <div className="flex items-center gap-1.5">
@@ -106,7 +106,7 @@ export default function MessageInput({ onSend, placeholder = 'Escribe un mensaje
       )}
 
       <div className="p-4 flex gap-3 items-end">
-        <div className="flex-1 flex items-center gap-2 bg-[var(--bg-secondary)] px-4 rounded-2xl border border-[var(--border-subtle)] focus-within:border-[var(--icons-green)]/50 dark:focus-within:border-[var(--icons-green)]/50 focus-within:ring-2 focus-within:ring-[var(--icons-green)]/10 dark:focus-within:ring-[var(--icons-green)]/20 transition-all">
+        <div className="flex-1 flex items-center gap-2 bg-white/60 dark:bg-[var(--bg-secondary)]/60 backdrop-blur-md px-4 rounded-2xl border border-white/30 dark:border-[var(--border-subtle)]/50 focus-within:border-[var(--icons-green)]/50 dark:focus-within:border-[var(--icons-green)]/50 focus-within:ring-2 focus-within:ring-[var(--icons-green)]/10 dark:focus-within:ring-[var(--icons-green)]/20 transition-all">
           <label htmlFor={inputId} className="sr-only">Escribir mensaje</label>
           <input
             ref={inputRef}

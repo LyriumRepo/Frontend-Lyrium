@@ -1,30 +1,43 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useFcmToken } from '@/shared/hooks/useFcmToken';
 import { useNotifications } from '@/shared/lib/context/NotificationContext';
 
-/**
- * Hook para centralizar la sincronización de eventos en tiempo real.
- * Puede conectarse a Pusher, Laravel Echo o realizar Polling.
- */
+interface ForegroundPushDetail {
+    title?: string;
+    body?: string;
+    url?: string;
+    type?: string;
+    id?: string | number;
+}
+
 export const useSyncNotifications = () => {
     const { addNotification } = useNotifications();
+    useFcmToken();
 
     useEffect(() => {
-        // En una implementación real, aquí configuraríamos el WebSocket:
-        // const channel = pusher.subscribe('admin-alerts');
-        // channel.bind('new-alert', (data) => addNotification(data));
+        const handleForegroundPush = (event: Event) => {
+            const detail = (event as CustomEvent<ForegroundPushDetail>).detail ?? {};
 
-        // Simulación de evento externo después de 10 segundos
-        const timer = setTimeout(() => {
             addNotification({
-                level: 'SECURITY',
-                title: 'Nueva Solicitud de Retiro',
-                message: 'El vendedor "OrganicPeru" solicita S/ 1,500.00. Pendiente de validación.',
+                level: 'INFO',
+                title: detail.title || 'Notificacion',
+                message: detail.body || 'Nueva notificacion recibida',
+                metadata: {
+                    type: detail.type || 'fcm_foreground',
+                    entityId: detail.id ? String(detail.id) : undefined,
+                },
+                action: {
+                    type: 'orders',
+                    id: detail.id,
+                    label: 'Ver detalle',
+                },
             });
-        }, 15000);
+        };
 
-        return () => clearTimeout(timer);
+        window.addEventListener('lyrium-fcm-foreground', handleForegroundPush);
+        return () => window.removeEventListener('lyrium-fcm-foreground', handleForegroundPush);
     }, [addNotification]);
 
     return null;

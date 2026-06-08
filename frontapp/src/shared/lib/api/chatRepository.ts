@@ -18,12 +18,19 @@ export interface ChatAttachment {
   download_url: string;
 }
 
+export interface ChatCustomer {
+  id: string;
+  name: string;
+  email: string;
+}
+
 export interface ChatConversation {
   id: string;
   sellerId: string;
   sellerName: string;
   sellerStore: string;
   sellerAvatar?: string;
+  customerId?: string;
   customerName?: string;
   customerEmail?: string;
   customerDocumentNumber?: string;
@@ -55,6 +62,7 @@ interface RawConversation {
   seller_name: string;
   seller_store: string;
   seller_avatar: string;
+  customer_id?: string;
   customer_name?: string;
   customer_email?: string;
   customer_document_number?: string;
@@ -94,6 +102,7 @@ export interface CreateChatPayload {
   category: string;
   subject: string;
   message: string;
+  customer_user_id?: string;
 }
 
 function mapConversation(raw: RawConversation): ChatConversation {
@@ -103,6 +112,7 @@ function mapConversation(raw: RawConversation): ChatConversation {
     sellerName: raw.seller_name,
     sellerStore: raw.seller_store,
     sellerAvatar: raw.seller_avatar,
+    customerId: raw.customer_id,
     customerName: raw.customer_name,
     customerEmail: raw.customer_email,
     customerDocumentNumber: raw.customer_document_number,
@@ -242,6 +252,17 @@ export const chatApi = {
 
   archive: async (conversationId: string): Promise<void> => {
     await request(`/conversations/${conversationId}/archive`, { method: 'PUT' });
+  },
+
+  myStores: async (): Promise<{ id: string; name: string }[]> => {
+    const response = await request<ApiResponse<{ id: string; name: string }[]>>('/conversations/my-stores');
+    return Array.isArray(response.data) ? response.data : [];
+  },
+
+  customers: async (query?: string): Promise<ChatCustomer[]> => {
+    const q = query ? `?q=${encodeURIComponent(query)}` : '';
+    const response = await request<ApiResponse<ChatCustomer[]>>(`/conversations/customers${q}`);
+    return Array.isArray(response.data) ? response.data : [];
   },
 
   stores: async (): Promise<ChatSeller[]> => {

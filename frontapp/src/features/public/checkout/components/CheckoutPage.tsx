@@ -24,7 +24,6 @@ import OrderSummary from './step2/OrderSummary';
 import OrderConfirmation from './step3/OrderConfirmation';
 import ModalPostCompra from './modals/ModalPostCompra';
 import ModalRegistroUsuario from './modals/ModalRegistroUsuario';
-import IzipayCheckoutForm from './IzipayCheckoutForm';
 
 export default function CheckoutPage() {
   const currentStep = useCheckoutStore((s) => s.currentStep);

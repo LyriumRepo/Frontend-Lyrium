@@ -45,8 +45,8 @@ export function useFcmToken() {
       let perm = Notification.permission;
       if (perm === 'default') {
         perm = await Notification.requestPermission();
-        setPermission(perm);
       }
+      setPermission(perm);
 
       if (perm !== 'granted') {
         setLoading(false);
@@ -114,10 +114,14 @@ export function useFcmToken() {
   }, [isAuthenticated, user, requestPermissionAndGetToken]);
 
   useEffect(() => {
-    if (permission !== 'granted') return;
     if (!isAuthenticated) return;
 
     registerDevice();
+  }, [isAuthenticated, registerDevice]);
+
+  useEffect(() => {
+    if (permission !== 'granted') return;
+    if (!isAuthenticated) return;
 
     const messaging = getFirebaseMessaging();
     const unsubscribe = onMessage(messaging, (payload) => {
@@ -128,6 +132,8 @@ export function useFcmToken() {
             title: notification.title,
             body: notification.body || '',
             url: data?.url || '/customer/orders',
+            type: data?.type,
+            id: data?.order_id || data?.ticket_id || data?.store_id,
           },
         });
         window.dispatchEvent(event);
@@ -137,7 +143,7 @@ export function useFcmToken() {
     return () => {
       unsubscribe();
     };
-  }, [permission, isAuthenticated, registerDevice]);
+  }, [permission, isAuthenticated]);
 
   return {
     fcmToken,

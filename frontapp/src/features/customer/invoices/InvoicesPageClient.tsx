@@ -5,6 +5,8 @@ import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import BaseLoading from '@/components/ui/BaseLoading';
 import Icon from '@/components/ui/Icon';
 import { invoiceApi } from '@/shared/lib/api/invoiceRepository';
+import { getAuthHeaders } from '@/shared/lib/api/token-store';
+import { LARAVEL_API_URL } from '@/shared/lib/config/flags';
 import type { Voucher } from '@/shared/types/invoices';
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: string }> = {
@@ -171,9 +173,54 @@ export function InvoicesPageClient() {
                                                             {formatCurrency(inv.amount)}
                                                         </span>
                                                     </div>
+                                                    </div>
+                                                    <StatusBadge status={inv.sunat_status} />
                                                 </div>
-                                                <StatusBadge status={inv.sunat_status} />
                                             </div>
+                                            <p className="text-xs text-gray-400 dark:text-[var(--text-muted)] mt-2 leading-relaxed">
+                                                {statusLabels[inv.sunat_status] ?? 'Estado no disponible'}
+                                            </p>
+                                            <div className="flex gap-2 mt-3">
+                                                <button
+                                                    onClick={async () => {
+                                                        try {
+                                                            await invoiceApi.downloadPdf(inv.id, `${inv.series}-${inv.number}.pdf`);
+                                                        } catch {
+                                                            // silent
+                                                        }
+                                                    }}
+                                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sky-50 dark:bg-[#1A3A32] text-sky-600 dark:text-[var(--icons-green)] text-[10px] font-bold hover:bg-sky-100 dark:hover:bg-[#1f3a2a] transition-all"
+                                                >
+                                                    <Icon name="Download" className="w-3.5 h-3.5" />
+                                                    Descargar PDF
+                                                </button>
+                                                <button
+                                                    onClick={async () => {
+                                                        try {
+                                                            const blob = await fetch(`${LARAVEL_API_URL}/invoices/${inv.id}/pdf`, {
+                                                                headers: { Accept: 'application/pdf', ...(await getAuthHeaders()) as Record<string, string> },
+                                                            }).then(r => r.blob());
+                                                            const file = new File([blob], `${inv.series}-${inv.number}.pdf`, { type: 'application/pdf' });
+                                                            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                                                                await navigator.share({ files: [file], title: `Comprobante ${inv.series}-${inv.number}` });
+                                                            } else {
+                                                                const url = URL.createObjectURL(blob);
+                                                                await navigator.share({ url, title: `Comprobante ${inv.series}-${inv.number}` });
+                                                                URL.revokeObjectURL(url);
+                                                            }
+                                                        } catch (err: any) {
+                                                            if (err?.name !== 'AbortError') console.error('Error al compartir:', err);
+                                                        }
+                                                    }}
+                                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gray-50 dark:bg-[var(--bg-muted)] text-gray-600 dark:text-gray-300 text-[10px] font-bold hover:bg-gray-100 dark:hover:bg-[#2A3F33] transition-all"
+                                                >
+                                                    <Icon name="Share2" className="w-3.5 h-3.5" />
+                                                    Compartir
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                                             <p className="text-xs text-gray-400 dark:text-[var(--text-muted)] mt-2 leading-relaxed">
                                                 {statusLabels[inv.sunat_status] ?? 'Estado no disponible'}
                                             </p>

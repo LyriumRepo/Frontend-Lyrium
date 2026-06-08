@@ -28,11 +28,12 @@ export default function ChatLayout({
     <div className={`grid grid-cols-12 ${CHAT_CONFIG.spacing.gap} h-full min-h-0`}>
       <div className={`
         ${listWidth} 
-        ${CHAT_CONFIG.card.bg} 
+        bg-white/70 dark:bg-[var(--bg-secondary)]/70
+        backdrop-blur-xl
         ${CHAT_CONFIG.card.rounded} 
         border 
-        ${CHAT_CONFIG.card.border} 
-        shadow-sm 
+        border-white/20 dark:border-[var(--border-subtle)]/50
+        shadow-lg shadow-black/5
         overflow-hidden 
         flex 
         flex-col
@@ -42,11 +43,12 @@ export default function ChatLayout({
       
       <div className={`
         ${detailWidth} 
-        ${CHAT_CONFIG.card.bg} 
+        bg-white/70 dark:bg-[var(--bg-secondary)]/70
+        backdrop-blur-xl
         ${CHAT_CONFIG.card.rounded} 
         border 
-        ${CHAT_CONFIG.card.border} 
-        shadow-sm 
+        border-white/20 dark:border-[var(--border-subtle)]/50
+        shadow-lg shadow-black/5
         overflow-hidden 
         flex 
         flex-col 

@@ -18,8 +18,8 @@ messaging.onBackgroundMessage((payload) => {
   const title = notification?.title || 'Lyrium';
   const options = {
     body: notification?.body || '',
-    icon: notification?.icon || '/img/lyrium-icon.png',
-    badge: '/img/lyrium-icon.png',
+    icon: notification?.icon || '/img/iconologo.png',
+    badge: '/img/iconologo.png',
     data: data || {},
   };
 

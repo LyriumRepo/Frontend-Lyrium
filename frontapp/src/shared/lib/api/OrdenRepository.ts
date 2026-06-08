@@ -55,6 +55,7 @@ export interface CreateOrderPayload {
   shipping_postal_code?: string;
   shipping_notes?: string;
   shipping_cost?: number;
+  shipping_type?: string;
   coupon_code?: string;
   notes?: string;
 }

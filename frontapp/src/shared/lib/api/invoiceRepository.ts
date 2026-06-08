@@ -59,4 +59,33 @@ export const invoiceApi = {
         const res = await authFetch<{ success: boolean; data: Voucher[]; pagination: any }>(`/customer/invoices${qs}`);
         return { data: res.data || [], pagination: res.pagination || { page: 1, perPage: 20, total: 0, totalPages: 0, hasMore: false } };
     },
+
+    downloadPdf: async (id: string, filename?: string): Promise<void> => {
+        const authHeaders = await getAuthHeaders();
+        const response = await fetch(`${LARAVEL_API_URL}/invoices/${id}/pdf`, {
+            headers: {
+                'Accept': 'application/pdf',
+                ...(authHeaders as Record<string, string>),
+            },
+        });
+        if (!response.ok) throw new Error('Error al descargar el PDF');
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename || `comprobante-${id}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    },
+
+    shareLink: async (id: string): Promise<string | null> => {
+        try {
+            const res = await authFetch<{ success: boolean; data: { url: string } }>(`/invoices/${id}/share-link`);
+            return res.data?.url ?? null;
+        } catch {
+            return null;
+        }
+    },
 };

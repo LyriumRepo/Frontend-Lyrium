@@ -75,6 +75,7 @@ interface CheckoutState {
     isProcessing: boolean;
 
     cartItems: CartItem[];
+    cartLoaded: boolean;
     personalData: PersonalData;
     shippingData: ShippingData;
     orderData: OrderData;
@@ -87,6 +88,7 @@ interface CheckoutState {
     setStep: (step: 1 | 2 | 3) => void;
     setProcessing: (v: boolean) => void;
     setCartItems: (items: CartItem[]) => void;
+    setCartLoaded: (v: boolean) => void;
     toggleSelectItem: (id: number) => void;
     toggleSelectAll: (selected: boolean) => void;
     setPersonalData: (data: Partial<PersonalData>) => void;
@@ -129,6 +131,7 @@ export const useCheckoutStore = create<CheckoutState>((set) => ({
     currentStep: 1,
     isProcessing: false,
     cartItems: [],
+    cartLoaded: false,
     personalData: defaultPersonal,
     shippingData: defaultShipping,
     orderData: defaultOrder,
@@ -139,6 +142,7 @@ export const useCheckoutStore = create<CheckoutState>((set) => ({
     setStep: (step) => set({ currentStep: step }),
     setProcessing: (v) => set({ isProcessing: v }),
     setCartItems: (items) => set({ cartItems: items }),
+    setCartLoaded: (v) => set({ cartLoaded: v }),
     toggleSelectItem: (id) =>
         set((s) => ({
             cartItems: s.cartItems.map((i) =>
@@ -160,6 +164,7 @@ export const useCheckoutStore = create<CheckoutState>((set) => ({
         set({
             currentStep: 1,
             cartItems: [],
+            cartLoaded: false,
             personalData: defaultPersonal,
             shippingData: defaultShipping,
             orderData: defaultOrder,

@@ -103,10 +103,9 @@ export default function CustomerAddressesPage() {
   const setAsDefault = async (id: number) => {
     try {
       const updated = await addressApi.setDefault(id);
-      setAddresses(prev => prev.map(a => ({
-        ...a,
-        is_default: a.id === updated.id,
-      })));
+      setAddresses(prev => prev.map(a =>
+        a.id === updated.id ? { ...a, is_default: updated.is_default } : a
+      ));
     } catch (err) {
       console.error('Error al establecer como predeterminada:', err);
     }
@@ -185,7 +184,7 @@ export default function CustomerAddressesPage() {
       <div className="p-4 bg-amber-50 dark:bg-amber-900/10 rounded-2xl border border-amber-200 dark:border-amber-800/30 flex items-start gap-3">
         <Icon name="Star" className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
         <p className="text-xs font-bold text-amber-800 dark:text-amber-300">
-          Marca con la estrella <Icon name="Star" className="w-3.5 h-3.5 inline fill-current text-amber-500" /> la dirección que usarás por defecto en tus envíos. Solo puede haber una dirección principal.
+          Marca con la estrella <Icon name="Star" className="w-3.5 h-3.5 inline fill-current text-amber-500" /> las direcciones que usarás por defecto. Puedes tener varias direcciones principales.
         </p>
       </div>
 
@@ -426,7 +425,7 @@ export default function CustomerAddressesPage() {
                     className="w-5 h-5 accent-sky-500 dark:accent-[var(--icons-green)]"
                   />
                   <span className="text-xs font-bold text-gray-600 dark:text-gray-400 dark:text-[var(--text-primary)] uppercase">
-                    Establecer como dirección principal
+                    Marcar como dirección principal
                   </span>
                 </label>
               </div>

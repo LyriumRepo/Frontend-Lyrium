@@ -26,7 +26,7 @@ export default function FinanceChart({
     fill = true,
     tension = 0.4,
     cutout = '75%',
-    height = '200px'
+    height = '260px'
 }: FinanceChartProps) {
     const chartRef = useRef<HTMLCanvasElement>(null);
     const chartInstance = useRef<Chart | null>(null);
@@ -67,6 +67,7 @@ export default function FinanceChart({
                     pointBackgroundColor: color,
                     pointBorderColor: pointBorder,
                     pointRadius: type === 'line' ? 4 : 0,
+                    pointHoverRadius: type === 'line' ? 7 : 5,
                     borderRadius: type === 'bar' ? 8 : 0,
                 }]
             },
@@ -76,7 +77,19 @@ export default function FinanceChart({
                 cutout: type === 'doughnut' ? cutout : undefined,
                 plugins: {
                     legend: { display: false },
-                    tooltip: { enabled: true }
+                    tooltip: {
+                        enabled: true,
+                        backgroundColor: isDark ? 'rgba(30, 48, 40, 0.95)' : 'rgba(15, 23, 42, 0.9)',
+                        titleColor: '#f8fafc',
+                        bodyColor: '#e2e8f0',
+                        borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.15)',
+                        borderWidth: 1,
+                        padding: 12,
+                        bodyFont: { size: 12, weight: 'bold' } as any,
+                        titleFont: { size: 11, weight: 'bold' } as any,
+                        cornerRadius: 8,
+                        displayColors: false,
+                    }
                 },
                 scales: type === 'radar' ? {
                     r: {
