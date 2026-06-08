@@ -33,13 +33,6 @@ function OfferCard({
   const [imgError, setImgError] = useState(false);
 
   const getFallbackImage = () => {
-    const validImages = allProducts
-      .filter(p => p.imagen && p.imagen !== producto.imagen && p.imagen !== '')
-      .map(p => p.imagen);
-
-    if (validImages.length > 0) {
-      return validImages[Math.floor(Math.random() * validImages.length)];
-    }
     return '/img/no-image.png';
   };
 
@@ -124,12 +117,84 @@ function OfferBlock({
   }, [fallbackImages]);
 
   let productosAMostrar = productos;
-  if (productos.length === 0) {
-    if (titulo === "Las mejores ofertas de Servicios" || titulo === "Las mejores ofertas de servicios") {
-      productosAMostrar = homeData.ofertasServicios;
-    } else if (titulo === "Las mejores ofertas de productos" || titulo === "Las mejores ofertas de Productos") {
-      productosAMostrar = homeData.ofertasProductos;
-    } else if (titulo === "Productos Nuevos" || titulo === "Productos nuevos") {
+  if (titulo === "Las mejores ofertas de productos" || titulo === "Las mejores ofertas de Productos") {
+    productosAMostrar = [
+      {
+        id: 27,
+        titulo: "Programas de Rehabilitación Integral",
+        precio: 60.00,
+        imagen: "/img/Inicio/5/1.png",
+        estrellas: "★★★★★",
+        slug: "programas-rehabilitacion-integral",
+        vendedor: { slug: "norclab", nombre: "Norclab" },
+        categorias: ["Servicios Médicos"]
+      },
+      {
+        id: 36,
+        titulo: "Masajes Corporales",
+        precio: 30.00,
+        imagen: "/img/Inicio/5/2.png",
+        estrellas: "★★★★★",
+        slug: "masajes-corporales",
+        vendedor: { slug: "pimo", nombre: "Pimó" },
+        categorias: ["Bienestar"]
+      },
+      {
+        id: 34,
+        titulo: "Blanqueamiento Dental",
+        precio: 120.00,
+        imagen: "/img/Inicio/5/3.png",
+        estrellas: "★★★★★",
+        slug: "blanqueamiento-dental",
+        vendedor: { slug: "rydent", nombre: "RyDent" },
+        categorias: ["Servicios Médicos"]
+      },
+      {
+        id: 35,
+        titulo: "Diagnóstico Unipolar",
+        precio: 120.00,
+        imagen: "/img/Inicio/5/4.png",
+        estrellas: "★★★★★",
+        slug: "diagnostico-unipolar",
+        vendedor: { slug: "centro-medico", nombre: "Centro Médico" },
+        categorias: ["Servicios Médicos"]
+      }
+    ];
+  } else if (titulo === "Las mejores ofertas de Servicios" || titulo === "Las mejores ofertas de servicios") {
+    productosAMostrar = [
+      {
+        id: 21,
+        titulo: "Ecografía Obstétrica",
+        precio: 80.00,
+        imagen: "/img/Inicio/4/3.png",
+        estrellas: "★★★★★",
+        slug: "ecografia-obstetrica",
+        vendedor: { slug: "centromedicodigital", nombre: "Centro Médico Digital" },
+        categorias: ["Servicios Médicos"]
+      },
+      {
+        id: 23,
+        titulo: "EXTRACTO DE ALGARROBO",
+        precio: 38.00,
+        imagen: "/img/Inicio/4/1.png",
+        estrellas: "★★★★★",
+        slug: "extracto-de-algarrobo",
+        vendedor: { slug: "riquesascampesinas", nombre: "Riquesas Campesinas" },
+        categorias: ["Digestión Saludable"]
+      },
+      {
+        id: 22,
+        titulo: "Profilaxis /Destartarización",
+        precio: 50.00,
+        imagen: "/img/Inicio/4/2.png",
+        estrellas: "★★★★★",
+        slug: "profilaxis-destartraje-fluor",
+        vendedor: { slug: "rydent", nombre: "RyDent" },
+        categorias: ["Servicios Médicos"]
+      }
+    ];
+  } else if (productos.length === 0) {
+    if (titulo === "Productos Nuevos" || titulo === "Productos nuevos") {
       productosAMostrar = homeData.productosNuevos;
     }
   }
@@ -154,8 +219,8 @@ function OfferBlock({
                   className={`absolute inset-0 bg-cover bg-no-repeat bg-center transition-opacity duration-1000 ${
                     i === bgIndex ? 'opacity-100' : 'opacity-0'
                   }`}
-                  style={{ 
-                    backgroundImage: `url('${img}?v=1.2')`,
+                  style={{
+                    backgroundImage: `url('${img}')`,
                     backgroundAttachment: 'fixed',
                     backgroundPosition: backgroundPosition || 'center 15%',
                     backgroundRepeat: 'no-repeat'
@@ -199,8 +264,8 @@ function OfferBlock({
               className={`absolute inset-0 bg-cover bg-no-repeat bg-center transition-opacity duration-1000 ${
                 i === bgIndex ? 'opacity-100' : 'opacity-0'
               }`}
-              style={{ 
-                backgroundImage: `url('${img}?v=1.2')`,
+              style={{
+                backgroundImage: `url('${img}')`,
                 backgroundAttachment: 'fixed',
                 backgroundPosition: backgroundPosition || 'center 15%',
                 backgroundRepeat: 'no-repeat'
@@ -211,7 +276,7 @@ function OfferBlock({
 
         <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
 
-        <div className="relative z-10 p-4 pb-0 md:p-8 md:pb-0 h-full flex flex-col justify-end">
+        <div className="relative z-10 p-4 pb-6 md:p-8 md:pb-10 h-full flex flex-col justify-end">
           <style dangerouslySetInnerHTML={{ __html: `
             @keyframes ${animationName} {
               0% {

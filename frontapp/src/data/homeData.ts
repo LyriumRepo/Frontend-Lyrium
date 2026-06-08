@@ -92,18 +92,16 @@ export const homeData: HomeData = {
     { id: 7, icono: 'globe', titulo: 'Donde quieras', descripcion: 'Envíos a todo el Perú' },
   ],
   ofertasServicios: [
-    { id: 1, titulo: 'EXTRACTO DE ALGARROBO', precio: 38, imagen: '/img/Inicio/4/1.png', estrellas: '★★★★★', vendedor: { slug: 'riquesascampesinas', nombre: 'Riquesas Campesinas' }, categorias: ['Digestión Saludable'] },
-    { id: 2, titulo: 'Profilaxis /Destartarización', precio: 50, imagen: '/img/Inicio/4/2.png', estrellas: '★★★★★', vendedor: { slug: 'rydent', nombre: 'RyDent' }, categorias: ['Servicios Médicos'] },
-    { id: 3, titulo: 'Ecografía Obstétrica', precio: 80, imagen: '/img/Inicio/4/3.png', estrellas: '★★★★★', vendedor: { slug: 'centromedicodigital', nombre: 'Centro Médico Digital' }, categorias: ['Servicios Médicos'] },
-
+    { id: 21, titulo: 'Ecografía Obstétrica', precio: 80, imagen: '/img/Inicio/4/3.png', estrellas: '★★★★★', vendedor: { slug: 'centromedicodigital', nombre: 'Centro Médico Digital' }, categorias: ['Servicios Médicos'] },
+    { id: 23, titulo: 'EXTRACTO DE ALGARROBO', precio: 38, imagen: '/img/Inicio/4/1.png', estrellas: '★★★★★', vendedor: { slug: 'riquesascampesinas', nombre: 'Riquesas Campesinas' }, categorias: ['Digestión Saludable'] },
+    { id: 22, titulo: 'Profilaxis /Destartarización', precio: 50, imagen: '/img/Inicio/4/2.png', estrellas: '★★★★★', vendedor: { slug: 'rydent', nombre: 'RyDent' }, categorias: ['Servicios Médicos'] },
   ],
 
   ofertasProductos: [
-    { id: 1, titulo: 'Extracto de Algarrobo', precio: 38, imagen: '/img/Inicio/5/1.png', estrellas: '★★★★★', vendedor: { slug: 'riquesascampesinas', nombre: 'Riquesas Campesinas' }, categorias: ['Digestión Saludable'] },
-    { id: 2, titulo: 'Profilaxis Dental', precio: 50, imagen: '/img/Inicio/5/2.png', estrellas: '★★★★★', vendedor: { slug: 'rydent', nombre: 'RyDent' }, categorias: ['Servicios Médicos'] },
-    { id: 3, titulo: 'Ecografía Obstétrica', precio: 80, imagen: '/img/Inicio/5/3.png', estrellas: '★★★★★', vendedor: { slug: 'centromedicodigital', nombre: 'Centro Médico Digital' }, categorias: ['Servicios Médicos'] },
-    { id: 4, titulo: 'Extracto de Algarrobo', precio: 38, imagen: '/img/Inicio/5/4.png', estrellas: '★★★★★', vendedor: { slug: 'riquesascampesinas', nombre: 'Riquesas Campesinas' }, categorias: ['Digestión Saludable'] },
-    { id: 5, titulo: 'Profilaxis Dental', precio: 50, imagen: '/img/Inicio/5/1.png', estrellas: '★★★★★', vendedor: { slug: 'rydent', nombre: 'RyDent' }, categorias: ['Servicios Médicos'] },
+    { id: 27, titulo: 'Programas de Rehabilitación Integral', precio: 60, imagen: '/img/Inicio/5/1.png', estrellas: '★★★★★', vendedor: { slug: 'norclab', nombre: 'Norclab' }, categorias: ['Servicios Médicos'] },
+    { id: 36, titulo: 'Masajes Corporales', precio: 30, imagen: '/img/Inicio/5/2.png', estrellas: '★★★★★', vendedor: { slug: 'pimo', nombre: 'Pimó' }, categorias: ['Bienestar'] },
+    { id: 34, titulo: 'Blanqueamiento Dental', precio: 120, imagen: '/img/Inicio/5/3.png', estrellas: '★★★★★', vendedor: { slug: 'rydent', nombre: 'RyDent' }, categorias: ['Servicios Médicos'] },
+    { id: 35, titulo: 'Diagnóstico Unipolar', precio: 120, imagen: '/img/Inicio/5/4.png', estrellas: '★★★★★', vendedor: { slug: 'centro-medico', nombre: 'Centro Médico' }, categorias: ['Servicios Médicos'] },
   ],
 
 

@@ -2,7 +2,7 @@ import React from 'react';
 import { StatusBadge, ModalityBadge, KpiCard, ExpiryTrafficLight } from './ContractsUIComponents';
 import { Contract } from '@/lib/types/admin/contracts';
 import { ContractKPI } from '@/features/admin/contracts/types';
-import { Search, Plus, ArrowRight, ChevronRight, FileText, Calendar, Shield, Hash, Landmark } from 'lucide-react';
+import { Search, Plus, ArrowRight, ChevronRight, FileText, Calendar, Shield, Hash, Landmark, Files, CheckCircle, Hourglass, AlertOctagon } from 'lucide-react';
 import Skeleton from '@/components/ui/Skeleton';
 
 interface ContratosModuleProps {
@@ -71,8 +71,18 @@ export const ContratosModule: React.FC<ContratosModuleProps> = ({ state, actions
                             <span className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest leading-none">
                                 {kpi.label}
                             </span>
-                            <div className="p-2.5 bg-[var(--icons-green)]/10 text-[var(--brand-green)] dark:text-[var(--icons-green)] rounded-xl">
-                                <FileText className="w-5 h-5" />
+                            <div className={`p-2.5 rounded-xl ${
+                                kpi.color === 'emerald' ? 'bg-emerald-500/10 text-emerald-500 dark:text-emerald-400' :
+                                kpi.color === 'amber' ? 'bg-amber-500/10 text-amber-500 dark:text-amber-400' :
+                                kpi.color === 'red' ? 'bg-red-500/10 text-red-500 dark:text-red-400' :
+                                kpi.color === 'indigo' ? 'bg-indigo-500/10 text-indigo-500 dark:text-indigo-400' :
+                                'bg-[var(--icons-green)]/10 text-[var(--brand-green)] dark:text-[var(--icons-green)]'
+                            }`}>
+                                {kpi.icon === 'Files' && <Files className="w-5 h-5" />}
+                                {kpi.icon === 'CheckCircle' && <CheckCircle className="w-5 h-5" />}
+                                {kpi.icon === 'Hourglass' && <Hourglass className="w-5 h-5" />}
+                                {kpi.icon === 'AlertOctagon' && <AlertOctagon className="w-5 h-5" />}
+                                {!['Files', 'CheckCircle', 'Hourglass', 'AlertOctagon'].includes(kpi.icon) && <FileText className="w-5 h-5" />}
                             </div>
                         </div>
                         <div className="mt-4">

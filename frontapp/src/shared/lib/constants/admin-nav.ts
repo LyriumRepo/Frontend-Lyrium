@@ -10,13 +10,6 @@ export const adminNavigation: PanelNavigation = [
                 href: '/admin/sellers',
                 icon: 'Users',
             },
-
-            {
-                id: 'seller-requests',
-                label: 'Solicitudes de Registro',
-                href: '/admin/sellers/solicitudes',
-                icon: 'ClipboardList',
-            },
         ],
     },
     {
