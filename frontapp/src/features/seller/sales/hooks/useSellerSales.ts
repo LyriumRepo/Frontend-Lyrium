@@ -70,7 +70,7 @@ export function useSellerSales() {
         orderType: null,
     });
 
-    const { data, isLoading, error, refetch } = useQuery({
+    const { data, isFetching, isLoading, error, refetch } = useQuery({
         queryKey: ['seller', 'sales', filters],
         queryFn: async () => {
             const allOrders = await orderRepository.getOrders();
@@ -82,6 +82,7 @@ export function useSellerSales() {
             });
             return { orders, kpis: computeKPIs(orders) };
         },
+        placeholderData: (previousData) => previousData,
         staleTime: 5 * 60 * 1000,
     });
 
@@ -120,6 +121,7 @@ export function useSellerSales() {
         orders: data?.orders || [],
         kpis: data?.kpis || [],
         isLoading,
+        isFetching,
         selectedOrder,
         setSelectedOrder: (order: Order | null) => setSelectedOrderId(order?.id || null),
         filters,

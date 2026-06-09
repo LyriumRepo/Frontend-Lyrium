@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/shared/lib/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import Icon from '@/components/ui/Icon';
+import { userRepository } from '@/shared/lib/api/factory';
 
 interface ProfileFormData {
   nombres: string;
@@ -40,6 +41,10 @@ export default function CustomerProfilePage() {
   const [formData, setFormData] = useState<ProfileFormData>(initialData);
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<keyof ProfileFormData, string>>>({});
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (loading) return;
@@ -52,16 +57,16 @@ export default function CustomerProfilePage() {
   useEffect(() => {
     if (user) {
       setFormData({
-        nombres: user.nicename?.split(' ')[0] || '',
-        apellidos: user.nicename?.split(' ').slice(1).join(' ') || '',
+        nombres: user.display_name?.split(' ').slice(0, -1).join(' ') || user.nicename?.split(' ')[0] || '',
+        apellidos: user.display_name?.split(' ').slice(-1).join(' ') || user.nicename?.split(' ').slice(1).join(' ') || '',
         correo: user.email || '',
-        correo_secundario: '',
-        telefono: '',
-        celular_secundario: '',
-        telefono_fijo: '',
-        fecha_cumpleanos: '',
-        tipo_documento: 'DNI',
-        numero_documento: '',
+        correo_secundario: user.secondary_email || '',
+        telefono: user.phone || '',
+        celular_secundario: user.phone_2 || '',
+        telefono_fijo: user.landline || '',
+        fecha_cumpleanos: user.birthday || '',
+        tipo_documento: user.document_type || 'DNI',
+        numero_documento: user.document_number || '',
         foto: user.avatar || '',
       });
     }
@@ -152,18 +157,61 @@ export default function CustomerProfilePage() {
     return Object.keys(newErrors).length === 0;
   };
 
+  const handleAvatarSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setAvatarFile(file);
+    const previewUrl = URL.createObjectURL(file);
+    setAvatarPreview(previewUrl);
+    setFormData(prev => ({ ...prev, foto: previewUrl }));
+  };
+
   const handleSave = async () => {
-    if (!validateForm()) return;
+    if (!validateForm() || !user) return;
 
     try {
       setSaving(true);
 
-      // Aquí iría tu lógica real de guardado
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      let avatarUrl = formData.foto;
+
+      if (avatarFile) {
+        setUploadingAvatar(true);
+        const result = await userRepository.uploadAvatar(avatarFile);
+        avatarUrl = result.avatar;
+        setAvatarFile(null);
+        setAvatarPreview(null);
+        setUploadingAvatar(false);
+      }
+
+      const updatePayload: Record<string, string | undefined> = {
+        display_name: `${formData.nombres} ${formData.apellidos}`.trim(),
+        email: formData.correo,
+        secondary_email: formData.correo_secundario || undefined,
+        phone: formData.telefono,
+        phone_2: formData.celular_secundario || undefined,
+        landline: formData.telefono_fijo || undefined,
+        birthday: formData.fecha_cumpleanos || undefined,
+        document_type: formData.tipo_documento,
+        document_number: formData.numero_documento.replace(/\D/g, ''),
+        avatar: avatarUrl || undefined,
+      };
+
+      Object.keys(updatePayload).forEach(key => {
+        if (updatePayload[key] === undefined) {
+          delete updatePayload[key];
+        }
+      });
+
+      await userRepository.updateUser(user.id, updatePayload as any);
 
       setIsEditMode(false);
+    } catch (err) {
+      console.error('Error al guardar perfil:', err);
+      setErrors({ nombres: 'Ocurrió un error al guardar los cambios. Intenta nuevamente.' });
     } finally {
       setSaving(false);
+      setUploadingAvatar(false);
     }
   };
 
@@ -528,8 +576,8 @@ export default function CustomerProfilePage() {
             <div className="p-8 flex flex-col items-center">
               <div className="relative group mb-6">
                 <div className="w-40 h-40 rounded-3xl overflow-hidden border-4 border-sky-100 shadow-xl group-hover:scale-105 transition-all duration-500">
-                  {formData.foto ? (
-                    <img src={formData.foto} alt="Foto de Perfil" className="w-full h-full object-cover" />
+                  {avatarPreview || formData.foto ? (
+                    <img src={avatarPreview || formData.foto} alt="Foto de Perfil" className="w-full h-full object-cover" />
                   ) : (
                     <div className="w-full h-full bg-gray-100 dark:bg-[var(--bg-muted)] flex items-center justify-center">
                       <Icon name="User" className="w-16 h-16 text-gray-400 dark:text-gray-400" />
@@ -538,15 +586,25 @@ export default function CustomerProfilePage() {
                 </div>
               </div>
 
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/gif,image/webp"
+                onChange={handleAvatarSelect}
+                className="hidden"
+              />
+
               <div className="text-center space-y-2">
-                <p className="text-xs font-bold text-gray-600 dark:text-gray-400">Formatos: JPG, PNG</p>
-                <p className="text-xs font-bold text-gray-600 dark:text-gray-400">Tamaño máximo: 2MB</p>
+                <p className="text-xs font-bold text-gray-600 dark:text-gray-400">Formatos: JPG, PNG, WEBP</p>
+                <p className="text-xs font-bold text-gray-600 dark:text-gray-400">Tamaño máximo: 5MB</p>
                 {isEditMode && (
                   <button
                     type="button"
-                    className="mt-4 px-6 py-2 rounded-lg bg-sky-50 text-sky-600 dark:text-[var(--brand-green)] text-sm font-bold hover:bg-sky-100 dark:hover:bg-lime-100 transition-colors"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploadingAvatar}
+                    className="mt-4 px-6 py-2 rounded-lg bg-sky-50 text-sky-600 dark:text-[var(--brand-green)] text-sm font-bold hover:bg-sky-100 dark:hover:bg-lime-100 transition-colors disabled:opacity-50"
                   >
-                    Cambiar Foto
+                    {uploadingAvatar ? 'Subiendo...' : 'Cambiar Foto'}
                   </button>
                 )}
               </div>

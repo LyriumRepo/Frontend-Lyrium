@@ -1,27 +1,25 @@
 'use client';
 
+import { useEffect } from "react";
 import {
+  Loader2,
   ShoppingBag,
   Sparkles,
   Info,
-  ShoppingCart,
-  Loader2,
-  AlertCircle,
-} from 'lucide-react';
-import { useCarritoStore } from '@/store/carritoStore';
+} from "lucide-react";
+import { useCarritoStore } from "@/store/carritoStore";
 import { useCarritoCatalog } from '../hooks/useCarritoCatalog';
 import FilterBar from './FilterBar';
 import ProductGrid from './ProductGrid';
 import CartDrawer from './drawer/CartDrawer';
-import CartPopup from './CartPopup'; // ← NUEVO
+import CartPopup from './CartPopup';
 import ProductDetailModal from './modals/ProductDetailModal';
 import { useAddToCart } from '@/features/public/product/hooks/useAddToCart';
-import AuthRequiredModal from '@/shared/compoments/AuthRequiredModal';
+import AuthRequiredModal from '@/shared/components/AuthRequiredModal';
 import { useAuthStore } from '@/shared/hooks/useAuthstore';
-import { useEffect } from 'react';
 
 export default function CarritoPage() {
-  const { isLoading, isError, refetch } = useCarritoCatalog();
+  const { isLoading, isError } = useCarritoCatalog();
   const { validate, showCheckoutModal, setShowCheckoutModal } = useAuthStore();
   useEffect(() => {
     validate();
@@ -33,15 +31,13 @@ export default function CarritoPage() {
   const openDetailModal = useCarritoStore((s) => s.openDetailModal);
   const updateItemQuantity = useCarritoStore((s) => s.updateQuantity);
   const removeFromCart = useCarritoStore((s) => s.removeFromCart);
-  const openPopup = useCarritoStore((s) => s.openPopup); // ← NUEVO
+  const openPopup = useCarritoStore((s) => s.openPopup);
 
   const { addToCart: addToCartApi } = useAddToCart();
 
-  // ── Handlers ──────────────────────────────────────────────────────────────
-
   const handleAdd = async (id: number | string) => {
-    await addToCartApi(Number(id), 1); // llama a Laravel
-    openPopup(); // ← muestra popup en lugar de abrir drawer
+    await addToCartApi(Number(id), 1);
+    openPopup();
   };
 
   const handleView = (id: number | string) => {
@@ -64,12 +60,9 @@ export default function CarritoPage() {
 
   const handleDelete = (id: number | string) => removeFromCart(Number(id));
 
-  const cartCount = cartItems.reduce((a, i) => a + Number(i.cantidad ?? 0), 0);
-
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-[var(--bg-primary)]">
       <div className="max-w-7xl mx-auto px-4 py-10">
-        {/* ── Hero / Filtros ── */}
         <div
           className="rounded-3xl px-6 py-6 md:px-8 md:py-7 mb-7"
           style={{
@@ -94,23 +87,9 @@ export default function CarritoPage() {
                 Busca, compara y añade al carrito en un clic.
               </p>
             </div>
-
-            <button
-              onClick={openCart}
-              className="relative self-start lg:self-center inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-sky-500 text-white font-medium hover:bg-sky-600 transition shadow-lg shadow-sky-200/50"
-            >
-              <ShoppingCart className="w-4 h-4" />
-              Ver carrito
-              {cartCount > 0 && (
-                <span className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-emerald-500 text-white text-[10px] font-black grid place-items-center border-2 border-white">
-                  {cartCount}
-                </span>
-              )}
-            </button>
           </div>
         </div>
 
-        {/* ── Estados ── */}
         {isLoading && (
           <div className="flex items-center justify-center py-20 gap-3 text-slate-500">
             <Loader2 className="w-6 h-6 animate-spin text-sky-500" />
@@ -118,30 +97,13 @@ export default function CarritoPage() {
           </div>
         )}
 
-        {isError && !isLoading && (
-          <div className="flex flex-col items-center justify-center py-16 gap-4 text-center">
-            <div className="w-14 h-14 rounded-2xl bg-red-50 grid place-items-center">
-              <AlertCircle className="w-7 h-7 text-red-400" />
-            </div>
-            <p className="text-slate-700 font-medium">
-              No se pudieron cargar los productos
-            </p>
-            <button
-              onClick={() => refetch()}
-              className="px-4 py-2 bg-sky-500 text-white text-sm font-bold rounded-xl hover:bg-sky-600 transition"
-            >
-              Reintentar
-            </button>
-          </div>
-        )}
-
         {!isLoading && !isError && (
           <ProductGrid onAdd={handleAdd} onView={handleView} />
         )}
       </div>
-      {/* ── Portales ── */}
+
       <CartDrawer />
-      <CartPopup /> {/* ← NUEVO */}
+      <CartPopup />
       <ProductDetailModal
         onAdd={handleAdd}
         onOpenCart={openCart}

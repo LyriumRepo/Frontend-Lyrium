@@ -7,6 +7,11 @@ export type ProductSticker =
   | 'nuevo'
   | 'bestseller'
   | 'envio_gratis'
+  | 'organic'
+  | 'natural'
+  | 'eco'
+  | 'premium'
+  | 'vegan'
   | null;
 
 export type ProductType = 'physical' | 'digital' | 'service';
@@ -93,6 +98,7 @@ export interface ProductPayload {
   price: number;
   stock: number;
   category?: string | null;
+  image?: string | null;
   discountPercentage?: number | null;
   sticker?: ProductSticker;
 

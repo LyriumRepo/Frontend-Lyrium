@@ -1,6 +1,6 @@
 import React from 'react';
 import { ContractStatus, ContractKPI, ContractModality, AuditEvent, ExpiryUrgency } from '@/lib/types/admin/contracts';
-import { CheckCircle, AlertTriangle, AlertOctagon, Clock, XCircle, Handshake, Cloud } from 'lucide-react';
+import { CheckCircle, AlertTriangle, AlertOctagon, Clock, XCircle, Handshake, Cloud, Files, Hourglass } from 'lucide-react';
 
 const colorMap: Record<string, string> = {
     emerald: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
@@ -19,7 +19,7 @@ const borderMap: Record<string, string> = {
 export const StatusBadge: React.FC<{ status: ContractStatus, large?: boolean }> = ({ status, large }) => {
     const configs = {
         ACTIVE: { label: 'Vigente', class: colorMap.emerald },
-        PENDING: { label: 'En Revisión / Pendiente', class: colorMap.amber },
+        PENDING: { label: 'En Revisión / Pendiente', class: 'bg-[var(--icons-green)] text-[var(--brand-green-hover)] border-transparent' },
         EXPIRED: { label: 'Vencido / Expirado', class: colorMap.red }
     };
     const config = configs[status] || configs.PENDING;
@@ -92,9 +92,9 @@ export const KpiCard: React.FC<{ kpi: ContractKPI }> = ({ kpi }) => (
             <p className="text-2xl font-black text-[var(--text-primary)] tracking-tighter">{kpi.val}</p>
         </div>
         <div className={`p-4 ${colorMap[kpi.color] || colorMap.indigo} rounded-2xl`}>
-            {kpi.icon === 'Files' && <Clock className="w-7 h-7" />}
+            {kpi.icon === 'Files' && <Files className="w-7 h-7" />}
             {kpi.icon === 'CheckCircle' && <CheckCircle className="w-7 h-7" />}
-            {kpi.icon === 'Hourglass' && <Clock className="w-7 h-7" />}
+            {kpi.icon === 'Hourglass' && <Hourglass className="w-7 h-7" />}
             {kpi.icon === 'AlertOctagon' && <AlertOctagon className="w-7 h-7" />}
         </div>
     </div>

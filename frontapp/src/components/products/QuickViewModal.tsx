@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Star, Heart, ShoppingCart, Truck, Clock, ShieldCheck, Minus, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 import BaseModal from '@/components/ui/BaseModal';
 import { Producto } from '@/types/public';
+import { useAuthGuard } from '@/shared/hooks/useAuthGuard';
 
 interface QuickViewModalProps {
   isOpen: boolean;
@@ -34,6 +35,24 @@ const defaultTienda: TiendaInfo = {
   reviews: 0,
 };
 
+const recommendedProducts: Producto[] = [
+  {
+    id: 1, titulo: 'Vitamina C Natural 1000mg', precio: 45.00,
+    imagen: '/img/no-image.png', categoria: 'Suplementos', slug: 'vitamina-c',
+    descripcion: 'Refuerza tu sistema inmunológico',
+  },
+  {
+    id: 2, titulo: 'Probióticos Digestivos 60 cápsulas', precio: 38.00,
+    imagen: '/img/no-image.png', categoria: 'Digestión', slug: 'probioticos',
+    descripcion: 'Equilibra tu flora intestinal',
+  },
+  {
+    id: 3, titulo: 'Aceite de Coco Orgánico 500ml', precio: 29.00,
+    imagen: '/img/no-image.png', categoria: 'Alimentación', slug: 'aceite-coco',
+    descripcion: '100% natural y prensado en frío',
+  },
+];
+
 export default function QuickViewModal({ 
   isOpen, 
   onClose, 
@@ -44,17 +63,29 @@ export default function QuickViewModal({
 }: QuickViewProps) {
   const [cantidad, setCantidad] = useState(1);
   const [imagenActual, setImagenActual] = useState(0);
+  const { isAuthenticated } = useAuthGuard();
   
   const imagenes = producto?.imagen ? [producto.imagen] : [];
   
   const precioAnterior = producto?.precioAnterior ?? producto?.precioOferta;
   const tieneDescuento = precioAnterior && precioAnterior > (producto?.precio ?? 0);
 
+  useEffect(() => {
+    if (isOpen) {
+      setCantidad(1);
+      setImagenActual(0);
+    }
+  }, [isOpen]);
+
   const handleCantidadChange = (delta: number) => {
     setCantidad(prev => Math.max(1, Math.min(99, prev + delta)));
   };
 
   const handleAddToCart = () => {
+    if (!isAuthenticated) {
+      window.location.href = '/login';
+      return;
+    }
     if (producto && onAddToCart) {
       onAddToCart(producto, cantidad);
       onClose();
@@ -62,6 +93,10 @@ export default function QuickViewModal({
   };
 
   const handleAddToWishlist = () => {
+    if (!isAuthenticated) {
+      window.location.href = '/login';
+      return;
+    }
     if (producto && onAddToWishlist) {
       onAddToWishlist(producto);
     }
@@ -79,14 +114,13 @@ export default function QuickViewModal({
     <BaseModal
       isOpen={isOpen}
       onClose={onClose}
-      title={producto?.titulo}
-      size="2xl"
+      title={producto?.titulo ?? ''}
+      size="4xl"
       showCloseButton
     >
       <div className="grid grid-cols-1 md:grid-cols-[320px_1fr] gap-6">
         {/* Columna izquierda: Galería */}
         <div className="flex flex-col gap-3">
-          {/* Imagen principal */}
           <div className="relative aspect-square bg-gray-100 dark:bg-[var(--bg-muted)] rounded-xl overflow-hidden flex items-center justify-center">
             {imagenes.length > 1 && (
               <>
@@ -117,7 +151,6 @@ export default function QuickViewModal({
             )}
           </div>
           
-          {/* Miniaturas */}
           {imagenes.length > 1 && (
             <div className="flex gap-2 justify-center">
               {imagenes.map((img, idx) => (
@@ -139,14 +172,12 @@ export default function QuickViewModal({
         
         {/* Columna derecha: Info */}
         <div className="flex flex-col">
-          {/* Categoría */}
           {producto?.categoria && (
             <span className="text-sm text-sky-600 dark:text-[var(--brand-sky)] mb-1">
               {producto.categoria}
             </span>
           )}
           
-          {/* Rating y código */}
           <div className="flex items-center gap-3 mb-3 text-sm flex-wrap">
             <div className="flex items-center gap-0.5">
               {renderEstrellas(producto?.estrellas)}
@@ -158,7 +189,6 @@ export default function QuickViewModal({
             )}
           </div>
           
-          {/* Precio y stock */}
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-baseline gap-2">
               <span className="text-2xl font-bold text-gray-800 dark:text-[var(--text-primary)]">
@@ -177,16 +207,13 @@ export default function QuickViewModal({
             )}
           </div>
           
-          {/* Descripción */}
           {producto?.descripcion && (
             <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed mb-4">
               {producto.descripcion}
             </p>
           )}
           
-          {/* Cantidad y botón añadir */}
           <div className="flex gap-3 mb-4">
-            {/* Contador */}
             <div className="inline-flex items-center border border-gray-200 dark:border-[var(--border-subtle)] rounded-lg h-10 bg-white dark:bg-[var(--bg-card)]">
               <button 
                 onClick={() => handleCantidadChange(-1)}
@@ -210,7 +237,6 @@ export default function QuickViewModal({
               </button>
             </div>
             
-            {/* Botón carrito */}
             <button 
               onClick={handleAddToCart}
               className="flex-1 h-10 px-5 bg-sky-500 hover:bg-sky-600 dark:bg-[var(--brand-sky)] dark:hover:bg-sky-600 text-white font-semibold text-sm rounded-lg flex items-center justify-center gap-2 transition-colors"
@@ -220,7 +246,6 @@ export default function QuickViewModal({
             </button>
           </div>
           
-          {/* Acciones secundarias */}
           <div className="flex gap-5 mb-4 pb-4 border-b border-gray-100 dark:border-[var(--border-subtle)]">
             <button 
               onClick={handleAddToWishlist}
@@ -231,7 +256,6 @@ export default function QuickViewModal({
             </button>
           </div>
           
-          {/* Info de la tienda */}
           <Link 
             href={`/tienda/${tienda.slug}`}
             className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-[var(--bg-muted)] rounded-lg mb-4 hover:bg-gray-100 dark:hover:bg-[var(--bg-hover)] transition-colors"
@@ -257,7 +281,6 @@ export default function QuickViewModal({
             </div>
           </Link>
           
-          {/* Beneficios */}
           <div className="flex flex-col gap-2 mb-4">
             <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
               <Truck className="w-4 h-4 text-green-500" />
@@ -272,6 +295,38 @@ export default function QuickViewModal({
               <span>Garantía de devolución de dinero</span>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Productos recomendados */}
+      <div className="mt-6 pt-6 border-t border-gray-100 dark:border-[var(--border-subtle)]">
+        <h3 className="text-base font-bold text-gray-900 dark:text-[var(--text-primary)] mb-4">
+          Productos recomendados
+        </h3>
+        <div className="grid grid-cols-3 gap-3">
+          {recommendedProducts.map((rec) => (
+            <Link
+              key={rec.id}
+              href={rec.slug ? `/producto/${rec.slug}` : '#'}
+              onClick={onClose}
+              className="group flex flex-col items-center text-center p-3 rounded-xl bg-gray-50 dark:bg-[var(--bg-muted)] hover:bg-gray-100 dark:hover:bg-[var(--bg-hover)] transition-colors"
+            >
+              <div className="w-full aspect-square relative rounded-lg overflow-hidden mb-2 bg-white dark:bg-[var(--bg-card)]">
+                <Image
+                  src={rec.imagen}
+                  alt={rec.titulo}
+                  fill
+                  className="object-contain p-2 group-hover:scale-105 transition-transform"
+                />
+              </div>
+              <span className="text-xs font-medium text-gray-800 dark:text-[var(--text-primary)] line-clamp-2 mb-1">
+                {rec.titulo}
+              </span>
+              <span className="text-xs font-bold text-sky-600 dark:text-[var(--brand-sky)]">
+                S/{rec.precio.toFixed(2)}
+              </span>
+            </Link>
+          ))}
         </div>
       </div>
     </BaseModal>

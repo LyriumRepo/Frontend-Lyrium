@@ -1,33 +1,8 @@
-/**
- * ═══════════════════════════════════════════════════════════════════════════
- * SERVICES MASTER MANAGEMENT PAGE - Server Component
- * * Responsabilidades:
- * - Realizar el fetch de datos iniciales en el Servidor (SSR)
- * - Inyectar los datos en el árbol del cliente de forma fluida
- * - Prevenir parpadeos visuales al cambiar de rutas
- * ═══════════════════════════════════════════════════════════════════════════
- */
-
-export const dynamic = 'force-dynamic';
-
 import { Suspense } from 'react';
-import {
-  getServicesAction,
-  getSpecialistsAction,
-  getAppointmentsAction,
-} from '@/shared/lib/actions/services';
 import { ServicesPageClient } from '@/features/seller/services/ServicesPageClient';
 import BaseLoading from '@/components/ui/BaseLoading';
 
-export default async function ServicesPage() {
-  // Ejecuta la recopilación de datos en paralelo en el servidor de Next.js
-  const [initialServices, initialSpecialists, initialAppointments] =
-    await Promise.all([
-      getServicesAction(),
-      getSpecialistsAction(),
-      getAppointmentsAction(),
-    ]);
-
+export default function ServicesPage() {
   return (
     <Suspense
       fallback={
@@ -41,11 +16,7 @@ export default async function ServicesPage() {
         </div>
       }
     >
-      <ServicesPageClient
-        initialServices={initialServices}
-        initialSpecialists={initialSpecialists}
-        initialAppointments={initialAppointments}
-      />
+      <ServicesPageClient />
     </Suspense>
   );
 }

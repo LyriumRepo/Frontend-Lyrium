@@ -1,138 +1,68 @@
-import React, { ReactNode, CSSProperties } from "react";
-import Icon from "./Icon";
-import { Loader2 } from "lucide-react";
+'use client';
 
-type ButtonVariant =
-  | "primary"
-  | "secondary"
-  | "tertiary"
-  | "ghost"
-  | "danger"
-  | "action"
-  | "outline";
-type ButtonSize = "sm" | "md" | "lg" | "xl";
+import React from 'react';
+import Icon from '@/components/ui/Icon';
 
-interface BaseButtonProps {
-  variant?: ButtonVariant;
-  size?: ButtonSize;
-  isLoading?: boolean;
+interface BaseButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'action' | 'outline';
+  size?: 'sm' | 'md' | 'lg';
   leftIcon?: string;
-  rightIcon?: string;
   fullWidth?: boolean;
-  children?: ReactNode;
-  className?: string;
-  disabled?: boolean;
-  type?: "button" | "submit" | "reset";
-  onClick?: () => void;
-  style?: CSSProperties;
-  title?: string;
-  id?: string;
+  isLoading?: boolean;
 }
 
-const variantClasses: Record<ButtonVariant, string> = {
-  primary: `
-        bg-sky-500 dark:bg-[var(--brand-green)] text-white
-        hover:bg-sky-600 dark:hover:bg-[var(--brand-green-hover)]
-        focus:ring-2 focus:ring-sky-500/50 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-transparent
-        active:bg-sky-700
-    `,
-  secondary: `
-        bg-emerald-500 text-white
-        hover:bg-emerald-600
-        focus:ring-2 focus:ring-emerald-500/50 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-transparent
-        active:bg-emerald-700
-    `,
-  tertiary: `
-        bg-lime-500 text-white
-        hover:bg-lime-600
-        focus:ring-2 focus:ring-lime-500/50 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-transparent
-        active:bg-lime-700
-    `,
-  ghost: `
-        bg-transparent text-[var(--text-secondary)] dark:hover:text-[var(--brand-green-hover)]
-        hover:bg-[var(--bg-hover)] dark:hover:bg-gray-100
-        focus:ring-2 focus:ring-[var(--ring-focus)] focus:ring-offset-2 focus:ring-offset-[var(--bg-card)]
-        active:bg-[var(--bg-secondary)]
-    `,
-  danger: `
-        bg-rose-500 text-white
-        hover:bg-rose-600
-        focus:ring-2 focus:ring-rose-500/50 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-transparent
-        active:bg-rose-700
-    `,
-  outline: `
-    border border-gray-300 dark:border-[var(--border-subtle)]
-    bg-transparent
-    text-gray-700 dark:text-[var(--text-primary)]
-    hover:bg-gray-100 dark:hover:bg-[var(--bg-hover)]
-    focus:ring-2 focus:ring-sky-500/40
-    `,
-  action: `
-        relative z-10 flex items-center gap-2 px-6 py-3 rounded-xl
-        bg-[var(--bg-card)] backdrop-blur-md text-[var(--text-primary)] font-black text-xs
-        border border-[var(--border-subtle)] hover:bg-[var(--bg-card)] hover:text-[var(--brand-sky)] dark:hover:text-[var(--icons-green)]
-        transition-all shadow-lg shadow-black/5 uppercase tracking-widest
-    `,
+const variantStyles: Record<string, string> = {
+  primary:
+    'bg-gradient-to-r from-sky-500 to-indigo-500 text-white shadow-lg shadow-sky-500/25 hover:shadow-xl hover:shadow-sky-500/30 hover:-translate-y-0.5',
+  secondary:
+    'bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-subtle)] hover:bg-[var(--bg-secondary)] hover:border-[var(--border-default)]',
+  ghost:
+    'bg-transparent text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]',
+  danger:
+    'bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-lg shadow-rose-500/25 hover:shadow-xl hover:shadow-rose-500/30 hover:-translate-y-0.5',
+  action:
+    'bg-gradient-to-r from-emerald-400 via-sky-500 to-indigo-500 text-white shadow-lg shadow-sky-500/25 hover:shadow-xl hover:shadow-sky-500/30 hover:-translate-y-0.5',
+  outline:
+    'bg-transparent border-2 border-[var(--border-subtle)] text-[var(--text-primary)] hover:border-sky-500/50 hover:text-sky-500',
 };
 
-const sizeClasses: Record<ButtonSize, string> = {
-  sm: "px-5 py-2.5 text-xs rounded-xl gap-2",
-  md: "px-8 py-4 text-sm rounded-3xl gap-3",
-  lg: "px-10 py-5 text-sm rounded-3xl gap-3",
-  xl: "px-14 py-6 text-sm rounded-3xl gap-3",
+const sizeStyles: Record<string, string> = {
+  sm: 'px-4 py-2 text-[10px]',
+  md: 'px-6 py-3 text-xs',
+  lg: 'px-8 py-4 text-sm',
 };
 
 export default function BaseButton({
-  variant = "primary",
-  size = "sm",
-  isLoading = false,
-  leftIcon,
-  rightIcon,
-  fullWidth = false,
   children,
-  className = "",
+  variant = 'primary',
+  size = 'md',
+  leftIcon,
+  fullWidth,
+  isLoading,
   disabled,
-  type = "button",
-  onClick,
-  style,
-  title,
-  id,
+  className = '',
+  ...props
 }: BaseButtonProps) {
-  const baseStyles = `
-        inline-flex items-center justify-center
-        font-black uppercase tracking-wider
-        transition-colors duration-200
-        disabled:opacity-40 disabled:pointer-events-none
-        outline-none
-    `
-    .trim()
-    .replace(/\s+/g, " ");
-
   return (
     <button
-      className={`
-                ${baseStyles}
-                ${variantClasses[variant]}
-                ${sizeClasses[size]}
-                ${fullWidth ? "w-full" : ""}
-                ${className}
-            `}
       disabled={disabled || isLoading}
-      type={type}
-      onClick={onClick}
-      style={style}
-      title={title}
-      id={id}
+      className={`
+        inline-flex items-center justify-center gap-2 font-black uppercase tracking-widest rounded-2xl
+        transition-all duration-200 active:scale-[0.97]
+        disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 disabled:hover:translate-y-0
+        ${variantStyles[variant] || variantStyles.primary}
+        ${sizeStyles[size] || sizeStyles.md}
+        ${fullWidth ? 'w-full' : ''}
+        ${className}
+      `}
+      {...props}
     >
       {isLoading ? (
-        <Loader2 className="w-4 h-4 animate-spin" />
-      ) : (
-        <>
-          {leftIcon && <Icon name={leftIcon} className="w-4 h-4" />}
-          {children}
-          {rightIcon && <Icon name={rightIcon} className="w-4 h-4" />}
-        </>
-      )}
+        <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+      ) : leftIcon ? (
+        <Icon name={leftIcon} className="w-4 h-4" />
+      ) : null}
+      {children}
     </button>
   );
 }

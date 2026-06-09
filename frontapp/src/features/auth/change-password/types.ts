@@ -15,8 +15,8 @@ export interface ChangePasswordSuccessResponse {
 export interface ChangePasswordErrorResponse {
   message: string;
   errors?: {
-    current_password?: string[];
-    password?: string[];
+    actual?: string[];
+    nueva?: string[];
   };
 }
 

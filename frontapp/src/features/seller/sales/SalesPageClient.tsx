@@ -1,11 +1,14 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import SalesKPIs from './components/SalesKPIs';
 import SalesFilters from './components/SalesFilters';
 import SalesTable from './components/SalesTable';
 import OrderDetailModal from './components/OrderDetailModal';
+import BaseModal from '@/components/ui/BaseModal';
+import BaseLoading from '@/components/ui/BaseLoading';
+import { SalesKPI } from '@/features/seller/sales/types';
 import { useToast } from '@/shared/lib/context/ToastContext';
 import { useSellerSales } from '@/features/seller/sales/hooks/useSellerSales';
 import { mapOrdersToExportRows } from '@/features/seller/sales/export/mappers';
@@ -22,6 +25,7 @@ export function SalesPageClient(_props?: SalesPageClientProps) {
         orders,
         kpis,
         isLoading,
+        isFetching,
         selectedOrder,
         setSelectedOrder,
         filters,
@@ -34,6 +38,7 @@ export function SalesPageClient(_props?: SalesPageClientProps) {
     } = useSellerSales();
 
     const { showToast } = useToast();
+    const [selectedKpi, setSelectedKpi] = useState<SalesKPI | null>(null);
 
     const handleExport = async (type: 'excel' | 'pdf') => {
         if (type === 'excel') {
@@ -73,7 +78,7 @@ export function SalesPageClient(_props?: SalesPageClientProps) {
                 icon="Sales"
             />
 
-            <SalesKPIs kpis={kpis} />
+            <SalesKPIs kpis={kpis} onKpiClick={setSelectedKpi} />
 
             <SalesFilters
                 dateStart={filters.dateStart}
@@ -85,24 +90,62 @@ export function SalesPageClient(_props?: SalesPageClientProps) {
                 onExport={handleExport}
             />
 
-            <SalesTable
-                data={orders}
-                loading={isLoading}
-                onViewDetail={(order) => setSelectedOrder(order)}
-                onConfirm={(orderId) => advanceStep(orderId)}
-                onCancel={(orderId) => cancelOrder(orderId)}
-                isAdvancing={isAdvancing}
-                isCancelling={isCancelling}
-            />
+            {isLoading && orders.length === 0 ? (
+                <BaseLoading message="Cargando Centro de Control de Ventas..." />
+            ) : (
+                <>
+            <div className="relative">
+              {isFetching && orders.length > 0 && (
+                <div className="absolute inset-0 bg-[var(--bg-card)]/60 backdrop-blur-[1px] z-10 flex items-center justify-center rounded-2xl">
+                  <div className="flex items-center gap-3 px-5 py-3 bg-[var(--bg-card)] rounded-2xl shadow-lg border border-[var(--border-subtle)]">
+                    <div className="w-4 h-4 border-2 border-[#69BEEB] border-t-transparent rounded-full animate-spin"></div>
+                    <span className="text-xs font-bold text-[var(--text-secondary)]">Actualizando datos...</span>
+                  </div>
+                </div>
+              )}
+              <SalesTable
+                  data={orders}
+                  loading={false}
+                  onViewDetail={(order) => setSelectedOrder(order)}
+                  onConfirm={(orderId) => advanceStep(orderId)}
+                  onCancel={(orderId) => cancelOrder(orderId)}
+                  isAdvancing={isAdvancing}
+                  isCancelling={isCancelling}
+              />
+            </div>
 
-            <OrderDetailModal
-                order={selectedOrder!}
-                isOpen={!!selectedOrder}
-                onClose={() => setSelectedOrder(null)}
-                onAdvanceStep={async (id) => {
-                    await advanceStep(id);
-                }}
-            />
+                    {/* KPI Modal */}
+                    <BaseModal isOpen={!!selectedKpi} onClose={() => setSelectedKpi(null)}
+                        title={selectedKpi?.label ?? ''} subtitle={selectedKpi?.status ?? ''} size="md">
+                        <div className="space-y-6">
+                            <div className="bg-gray-900 p-6 rounded-[2rem] text-center">
+                                <p className="text-5xl font-black text-white">
+                                    {selectedKpi?.label === 'Ingresos Mensuales'
+                                        ? `S/ ${(selectedKpi?.count ?? 0).toLocaleString()}`
+                                        : selectedKpi?.count}
+                                </p>
+                                <p className="text-[10px] font-black text-white/60 uppercase tracking-widest mt-2">{selectedKpi?.label}</p>
+                            </div>
+                            <div className="p-4 rounded-2xl bg-[var(--bg-secondary)]">
+                                <p className="text-xs font-bold text-[var(--text-secondary)] text-center">{selectedKpi?.status}</p>
+                            </div>
+                            <p className="text-[10px] font-bold text-[var(--text-muted)] text-center">
+                                Este indicador resume el rendimiento de tus ventas. Los datos se actualizan en tiempo real conforme se procesan nuevos pedidos.
+                            </p>
+                        </div>
+                    </BaseModal>
+
+                    {/* Order Modal */}
+                    <OrderDetailModal
+                        order={selectedOrder!}
+                        isOpen={!!selectedOrder}
+                        onClose={() => setSelectedOrder(null)}
+                        onAdvanceStep={async (id) => {
+                            await advanceStep(id);
+                        }}
+                    />
+                </>
+            )}
         </div>
     );
 }

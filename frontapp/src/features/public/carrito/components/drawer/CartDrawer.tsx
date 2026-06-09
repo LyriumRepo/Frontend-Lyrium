@@ -28,6 +28,7 @@ function img(url?: string | null) {
   return url && url.startsWith('http') ? url : '/no-image.png';
 }
 
+
 // ─── CartLineItem ─────────────────────────────────────────────────────────────
 
 interface LineProps {

@@ -1,6 +1,7 @@
 import { PublicHeader, PublicFooter } from '@/components/layout/public';
 // 1. Importamos el nuevo CartDrawer
 import CartDrawer from '@/features/public/carrito/components/drawer/CartDrawer';
+import ChatBotWidget from '@/features/chatbot/components/ChatBotWidget';
 
 export default function PublicLayout({
     children,
@@ -20,6 +21,7 @@ export default function PublicLayout({
             {/* 2. Reemplazamos PublicCartDrawer por tu nuevo CartDrawer 
                 que escucha a carritoStore.ui.cartOpen */}
             <CartDrawer />
+            <ChatBotWidget />
         </div>
     );
 }

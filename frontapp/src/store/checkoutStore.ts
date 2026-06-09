@@ -57,6 +57,7 @@ export interface OrderData {
     promoCode: string;
     discount: number;
     savePayment: boolean;
+    selectedPaymentMethodId: number | null;
 }
 
 export interface OrderResult {
@@ -79,6 +80,10 @@ interface CheckoutState {
     orderData: OrderData;
     orderResult: OrderResult | null;
 
+    // Payment
+    pendingPaymentOrderId: string | null;
+    isPaymentModalOpen: boolean;
+
     setStep: (step: 1 | 2 | 3) => void;
     setProcessing: (v: boolean) => void;
     setCartItems: (items: CartItem[]) => void;
@@ -88,6 +93,8 @@ interface CheckoutState {
     setShippingData: (data: Partial<ShippingData>) => void;
     setOrderData: (data: Partial<OrderData>) => void;
     setOrderResult: (result: OrderResult) => void;
+    setPendingPayment: (orderId: string | null) => void;
+    setPaymentModalOpen: (open: boolean) => void;
     reset: () => void;
 }
 
@@ -115,6 +122,7 @@ const defaultOrder: OrderData = {
     promoCode: '',
     discount: 0,
     savePayment: false,
+    selectedPaymentMethodId: null,
 };
 
 export const useCheckoutStore = create<CheckoutState>((set) => ({
@@ -125,6 +133,8 @@ export const useCheckoutStore = create<CheckoutState>((set) => ({
     shippingData: defaultShipping,
     orderData: defaultOrder,
     orderResult: null,
+    pendingPaymentOrderId: null,
+    isPaymentModalOpen: false,
 
     setStep: (step) => set({ currentStep: step }),
     setProcessing: (v) => set({ isProcessing: v }),
@@ -144,6 +154,8 @@ export const useCheckoutStore = create<CheckoutState>((set) => ({
     setOrderData: (data) =>
         set((s) => ({ orderData: { ...s.orderData, ...data } })),
     setOrderResult: (result) => set({ orderResult: result }),
+    setPendingPayment: (orderId) => set({ pendingPaymentOrderId: orderId, isPaymentModalOpen: orderId !== null }),
+    setPaymentModalOpen: (open) => set({ isPaymentModalOpen: open }),
     reset: () =>
         set({
             currentStep: 1,
@@ -152,5 +164,7 @@ export const useCheckoutStore = create<CheckoutState>((set) => ({
             shippingData: defaultShipping,
             orderData: defaultOrder,
             orderResult: null,
+            pendingPaymentOrderId: null,
+            isPaymentModalOpen: false,
         }),
 }));

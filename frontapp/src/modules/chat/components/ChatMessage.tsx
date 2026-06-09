@@ -41,7 +41,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
         <div
           className={`relative max-w-full rounded-[1.75rem] border p-4 text-sm font-medium leading-7 shadow-sm transition-all ${
             isUser
-              ? 'rounded-tr-sm border-emerald-400/40 bg-gradient-to-br from-emerald-500 to-emerald-400 text-white dark:border-emerald-300/20 dark:from-[#3f7a55] dark:to-[#2d5c3d]'
+              ? 'rounded-tr-sm border-[var(--turquesa-500)]/30 bg-gradient-to-br from-[var(--turquesa-500)] to-[var(--verde-500)] text-white dark:border-[var(--icons-green)]/20'
               : 'rounded-tl-sm border-[var(--border-subtle)] bg-[var(--bg-card)] text-[var(--text-primary)]'
           }`}
         >

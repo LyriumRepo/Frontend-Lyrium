@@ -175,16 +175,14 @@ const SellerRow = ({
                 {seller.name}
               </span>
               {seller.is_banned && (
-                <Ban
-                  className="w-3.5 h-3.5 text-rose-400 flex-shrink-0"
-                  title="Cuenta baneada"
-                />
+                <span title="Cuenta baneada" className="flex-shrink-0 flex items-center">
+                  <Ban className="w-3.5 h-3.5 text-rose-400" />
+                </span>
               )}
               {seller.email_verified && (
-                <BadgeCheck
-                  className="w-3.5 h-3.5 text-sky-400 flex-shrink-0"
-                  title="Email verificado"
-                />
+                <span title="Email verificado" className="flex-shrink-0 flex items-center">
+                  <BadgeCheck className="w-3.5 h-3.5 text-sky-400" />
+                </span>
               )}
             </div>
             <p className="text-[11px] text-[var(--text-secondary)] truncate max-w-[160px]">

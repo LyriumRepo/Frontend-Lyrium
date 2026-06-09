@@ -3,20 +3,25 @@
 import { cookies } from 'next/headers';
 import type { ChangePasswordPayload, ChangePasswordResult } from '@/features/auth/change-password/types';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api';
+const API_BASE = process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://localhost:8000/api';
 
 export async function changePasswordAction(
   payload: ChangePasswordPayload,
 ): Promise<ChangePasswordResult> {
   // ── Leer el token de sesión (Sanctum) ──────────────────────────────────────
   const cookieStore = await cookies();
-  const token = cookieStore.get('auth_token')?.value;
+  const token = cookieStore.get('laravel_token')?.value;
 
   if (!token) {
     return { success: false, message: 'No autenticado. Por favor inicia sesión.' };
   }
 
   try {
+    const laravelPayload = {
+      actual: payload.current_password,
+      nueva: payload.password,
+    };
+
     const res = await fetch(`${API_BASE}/users/profile/password`, {
       method: 'PUT',
       headers: {
@@ -24,7 +29,7 @@ export async function changePasswordAction(
         Accept: 'application/json',
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(laravelPayload),
       // No cachear respuestas de mutación
       cache: 'no-store',
     });

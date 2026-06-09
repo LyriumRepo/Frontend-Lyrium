@@ -4,9 +4,10 @@ import BaseStatCard from '@/components/ui/BaseStatCard';
 
 interface SalesKPIsProps {
     kpis: SalesKPI[];
+    onKpiClick?: (kpi: SalesKPI) => void;
 }
 
-export default function SalesKPIs({ kpis }: SalesKPIsProps) {
+export default function SalesKPIs({ kpis, onKpiClick }: SalesKPIsProps) {
     type ColorType = 'sky' | 'indigo' | 'amber' | 'rose' | 'emerald' | 'violet';
 
     const mapColor = (color: string): ColorType => {
@@ -36,6 +37,7 @@ export default function SalesKPIs({ kpis }: SalesKPIsProps) {
                         color={mapColor(kpi.color)}
                         description={kpi.status}
                         suffix={isMonetary ? undefined : 'Ord.'}
+                        onClick={() => onKpiClick?.(kpi)}
                     />
                 );
             })}

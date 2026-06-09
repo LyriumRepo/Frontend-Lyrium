@@ -47,7 +47,7 @@ export const MOCK_TREASURY_DATA: TreasuryData = {
             status: CashInStatus.VALIDATED,
             customer: { id: 'CUST-992', name: 'Inversiones XYZ', taxId: '20123456781' },
             voucherUrl: '/assets/vouchers/v-8822.pdf',
-            rapifacDocumentUrl: '/assets/invoices/F001-332.pdf',
+            nubefactDocumentUrl: '/assets/invoices/F001-332.pdf',
             orderHierarchy: { company: 'Comercializadora Sur', seller: 'SEL-055', customer: 'CUST-992' },
             auditTrail: 'LOG-882',
             timeline: [

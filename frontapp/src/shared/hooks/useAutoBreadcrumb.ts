@@ -11,7 +11,7 @@ const routeLabels: Record<string, string> = {
     '/admin/operations': 'Operaciones',
     '/admin/operations/expenses': 'Gastos',
     '/admin/inventory': 'Inventario',
-    '/admin/rapifac': 'Facturación',
+    '/admin/invoices': 'Facturación',
     '/admin/categories': 'Categorías',
     '/admin/contracts': 'Contratos',
     '/admin/reviews': 'Reseñas',

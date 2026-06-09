@@ -7,19 +7,21 @@ import ChatLayout from '@/components/shared/chat/ChatLayout';
 import MessageBubble from '@/components/shared/chat/MessageBubble';
 import MessageInput from '@/components/shared/chat/MessageInput';
 import BaseLoading from '@/components/ui/BaseLoading';
-import { mockSellers } from '@/features/customer/chat/hooks/useCustomerChat';
 import { ChatCategory } from '@/features/customer/chat/types';
+import type { ChatSeller } from '@/shared/lib/api/chatRepository';
 
 function NewChatForm({
     onSubmit,
     onCancel,
-    isSubmitting
+    isSubmitting,
+    sellers = []
 }: {
     onSubmit: (data: { sellerId: string; category: ChatCategory; subject: string }) => void;
     onCancel: () => void;
     isSubmitting: boolean;
+    sellers: ChatSeller[];
 }) {
-    const [sellerId, setSellerId] = useState(mockSellers[0].id);
+    const [sellerId, setSellerId] = useState(sellers[0]?.id ?? '');
     const [category, setCategory] = useState<ChatCategory>('informacion');
     const [subject, setSubject] = useState('');
 
@@ -45,7 +47,7 @@ function NewChatForm({
                         className="w-full px-4 py-2 bg-gray-100 dark:bg-[var(--bg-secondary)] rounded-xl outline-none focus:ring-2 focus:ring-sky-500 dark:focus:ring-[var(--icons-green)]"
                         required
                     >
-                        {mockSellers.map(s => (
+                        {sellers.map(s => (
                             <option key={s.id} value={s.id}>{s.store} — {s.name}</option>
                         ))}
                     </select>
@@ -100,9 +102,10 @@ function NewChatForm({
     );
 }
 
-export function ChatPageClient() {
+export function ChatPageClient({ conversationId }: { conversationId?: string }) {
     const {
         conversations,
+        sellers,
         totalConversations,
         activeConversation,
         setActiveConversation,
@@ -115,7 +118,7 @@ export function ChatPageClient() {
         isCreating,
         createConversation,
         criticalCount
-    } = useCustomerChat();
+    } = useCustomerChat(conversationId);
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const [isMobileListVisible, setIsMobileListVisible] = useState(true);
@@ -396,7 +399,7 @@ export function ChatPageClient() {
                 title="Chat con Vendedores"
                 subtitle="Comunicación directa con los vendedores"
                 icon="Messages"
-                actions={                               // ← nuevo bloque actions
+                actions={
                     !showNewChatForm ? (
                         <button
                             onClick={() => setShowNewChatForm(true)}
@@ -412,6 +415,7 @@ export function ChatPageClient() {
                 <div className="flex-1 flex items-center justify-center px-8">
                     <div className="w-full max-w-xl">
                         <NewChatForm
+                            sellers={sellers}
                             onSubmit={(data) => {
                                 createConversation(data);
                                 setShowNewChatForm(false);

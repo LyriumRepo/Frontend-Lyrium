@@ -1,21 +1,10 @@
 'use client';
 
-/**
- * OrderSummary.tsx
- *
- * CAMBIO vs versión Culqi:
- *  - Eliminado: useCulqi, openCheckout
- *  - Agregado: useIzipay, flujo en 3 pasos al hacer clic en "Realizar pedido":
- *      1. submitOrder()           → crea la orden, obtiene orderId
- *      2. createIzipaySession()   → obtiene formToken del backend
- *      3. loadSmartForm(token)    → Krypton inyecta el formulario en BillingInfo
- *  - KR.onPaymentSuccess (definido en useIzipay) → setOrderResult + setStep(3)
- */
-
-import { Truck, ShieldCheck, Lock, Tag } from 'lucide-react';
+import { Truck, ShieldCheck, Lock, Tag, Wallet } from 'lucide-react';
 import { useCheckoutStore } from '@/store/checkoutStore';
 import { useCheckoutSubmit } from '../../hooks/useCheckoutSubmit';
 import { useIzipay } from '../../hooks/useIzipay';
+import { izipayPaymentApi } from '@/shared/lib/api/paymentRepository';
 import { orderApi } from '@/shared/lib/api/OrdenRepository';
 import { useCallback } from 'react';
 import type { DeliveryMethod } from '@/store/checkoutStore';
@@ -54,7 +43,6 @@ export default function OrderSummary() {
 
   const { submitOrder, isSubmitting, error: submitError } = useCheckoutSubmit();
 
-  // useIzipay registra listeners de KR.onPaymentSuccess / KR.onError
   const {
     loadSmartForm,
     isLoading: izipayLoading,
@@ -62,8 +50,6 @@ export default function OrderSummary() {
   } = useIzipay({
     onSuccess: useCallback(
       (result) => {
-        // El pago fue exitoso — Izipay ya cobró vía webhook
-        // Solo avanzamos al paso 3 con los datos que ya tenemos
         setOrderResult({
           orderId: result.clientAnswer.orderDetails.orderId,
           email: personalData.email,
@@ -98,18 +84,53 @@ export default function OrderSummary() {
     setOrderData({ deliveryMethod: value, deliveryCost: option?.cost ?? 0 });
   };
 
-  /**
-   * Flujo principal al hacer clic en "Realizar pedido":
-   * 1. Crear orden → orderId
-   * 2. Crear sesión Izipay → formToken
-   * 3. Inyectar formToken → Smart Form visible en BillingInfo
-   */
   const handlePagar = async () => {
-    // Paso 1: crear orden
     const result = await submitOrder();
-    if (!result) return; // submitOrder ya seteó el error
+    if (!result) return;
 
-    // Paso 2: obtener formToken del backend
+    if (orderData.selectedPaymentMethodId) {
+      try {
+        const chargeResult = await orderApi.chargeWithToken({
+          order_id: result.orderId,
+          payment_method_id: orderData.selectedPaymentMethodId,
+        });
+        setOrderResult({
+          orderId: chargeResult.order_id,
+          email: personalData.email,
+          total: total,
+          items: cartItems,
+          personalData,
+          shippingData,
+          orderData,
+        });
+        setStep(3);
+      } catch (err) {
+        console.error('[chargeWithToken] error', err);
+      }
+      return;
+    }
+
+    const isMockMode = !process.env.NEXT_PUBLIC_IZIPAY_PUBLIC_KEY;
+
+    if (isMockMode) {
+      try {
+        const confirmResult = await izipayPaymentApi.confirm(result.orderId);
+        setOrderResult({
+          orderId: result.orderId,
+          email: personalData.email,
+          total: total,
+          items: cartItems,
+          personalData,
+          shippingData,
+          orderData,
+        });
+        setStep(3);
+      } catch (err: any) {
+        console.error('[Izipay MOCK] Error al confirmar pago simulado:', err);
+      }
+      return;
+    }
+
     let session;
     try {
       session = await orderApi.createIzipaySession({
@@ -121,10 +142,7 @@ export default function OrderSummary() {
       return;
     }
 
-    // Paso 3: inyectar token en el Smart Form
     await loadSmartForm(session.form_token);
-    // A partir de aquí el usuario ve el formulario en BillingInfo y paga.
-    // KR.onPaymentSuccess → setOrderResult + setStep(3)
   };
 
   const displayError = submitError || izipayError;
@@ -132,21 +150,27 @@ export default function OrderSummary() {
 
   return (
     <div className="bg-white dark:bg-[var(--bg-card)] border border-gray-200 dark:border-[var(--border-subtle)] rounded-2xl shadow-sm sticky top-[100px]">
-      {/* Header */}
       <div className="px-5 py-4 bg-gradient-to-r from-sky-500 to-sky-400 flex items-center gap-2 rounded-t-2xl">
         <span className="text-white text-2xl">🧾</span>
         <h3 className="font-bold text-white">Resumen del Pedido</h3>
       </div>
 
       <div className="p-5 space-y-4">
-        {/* Error unificado */}
         {displayError && (
           <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 text-xs">
             {displayError}
           </div>
         )}
 
-        {/* Método de envío */}
+        {orderData.selectedPaymentMethodId && (
+          <div className="p-3 rounded-xl bg-sky-50 dark:bg-sky-900/20 border border-sky-200 dark:border-sky-800 flex items-center gap-2">
+            <Wallet className="w-4 h-4 text-sky-600 dark:text-[var(--icons-green)] shrink-0" />
+            <p className="text-xs font-bold text-sky-700 dark:text-sky-300">
+              Pagando con tarjeta guardada
+            </p>
+          </div>
+        )}
+
         <div className="flex flex-col gap-1">
           <label className="text-xs font-bold text-gray-600 dark:text-[var(--text-secondary)] uppercase tracking-wide flex items-center gap-1">
             <Truck className="w-4 h-4" /> Método de Envío
@@ -168,7 +192,6 @@ export default function OrderSummary() {
 
         <div className="h-px bg-gray-100 dark:bg-[var(--border-subtle)]" />
 
-        {/* Código promocional */}
         <div className="flex gap-2">
           <div className="relative flex-1">
             <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -190,7 +213,6 @@ export default function OrderSummary() {
 
         <div className="h-px bg-gray-100 dark:bg-[var(--border-subtle)]" />
 
-        {/* Desglose */}
         <div className="space-y-2 text-sm">
           <div className="flex justify-between text-gray-500 dark:text-[var(--text-muted)]">
             <span>Subtotal ({selectedItems.length} productos)</span>
@@ -216,7 +238,6 @@ export default function OrderSummary() {
           )}
         </div>
 
-        {/* Total */}
         <div className="pt-3 border-t-2 border-gray-100 dark:border-[var(--border-subtle)] flex justify-between items-center">
           <span className="font-bold text-gray-800 dark:text-[var(--text-primary)]">
             Total
@@ -227,7 +248,6 @@ export default function OrderSummary() {
         </div>
       </div>
 
-      {/* Botón — orquesta el flujo Izipay */}
       <div className="px-5 pb-5">
         <button
           type="button"
@@ -240,7 +260,11 @@ export default function OrderSummary() {
           ) : (
             <ShieldCheck className="w-5 h-5" />
           )}
-          {isBusy ? 'Procesando...' : 'Realizar pedido'}
+          {isBusy
+            ? 'Procesando...'
+            : orderData.selectedPaymentMethodId
+              ? 'Pagar con tarjeta guardada'
+              : 'Realizar pedido'}
         </button>
         <p className="text-xs text-center text-gray-400 dark:text-[var(--text-muted)] mt-3 flex items-center justify-center gap-1">
           <Lock className="w-3 h-3" /> Pago 100% seguro con Izipay

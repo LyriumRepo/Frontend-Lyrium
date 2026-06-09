@@ -22,7 +22,9 @@
  */
 
 import { LARAVEL_API_URL } from '@/shared/lib/config/flags';
+import { getAuthHeaders } from './token-store';
 import type { ApiResponse } from '@/shared/lib/api/base-client';
+import { bookingRepository } from './bookingRepository';
 
 // ─── Tipos de respuesta del backend ──────────────────────────────────────────
 
@@ -119,27 +121,6 @@ export interface PaginatedServices {
     per_page: number;
     total: number;
   };
-}
-
-// ─── Helper: Auth headers ─────────────────────────────────────────────────────
-
-async function getAuthHeaders(): Promise<HeadersInit> {
-  const base: Record<string, string> = {
-    'Content-Type': 'application/json',
-    Accept: 'application/json',
-  };
-
-  try {
-    const res = await fetch('/api/auth-token');
-    if (res.ok) {
-      const { token } = await res.json();
-      if (token) base['Authorization'] = `Bearer ${token}`;
-    }
-  } catch {
-    /* sin token — continúa sin auth */
-  }
-
-  return base;
 }
 
 // ─── Request base ─────────────────────────────────────────────────────────────
@@ -277,7 +258,7 @@ export const serviceRepository = {
    */
   async list(perPage = 50): Promise<ServiceResponse[]> {
     const paginated = await request<PaginatedServices>(
-      `/services/me?per_page=${perPage}`,
+      `/seller/services?per_page=${perPage}`,
     );
     // Si el backend devuelve paginado, extraer data; si devuelve array, devolver directo
     return Array.isArray(paginated) ? paginated : (paginated.data ?? []);
@@ -353,3 +334,5 @@ export const serviceRepository = {
     return serviceRepository.update(id, { status: 'inactive' });
   },
 };
+
+export { serviceRepository as serviceApi, bookingRepository as bookingApi };

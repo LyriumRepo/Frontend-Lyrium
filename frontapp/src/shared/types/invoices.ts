@@ -19,22 +19,31 @@ export interface Voucher {
     amount: number;
     emission_date: string;
     sunat_status: VoucherStatus;
-    pdf_path?: string;
-    xml_path?: string;
-    cdr_path?: string;
+    pdf_url?: string;
     history: VoucherHistory[];
+    store_id?: string | null;
+    invoice_number?: string;
+    provider?: string;
+    provider_invoice_id?: string | null;
+    authorization_code?: string | null;
+    qr_data?: string | null;
+    xml_url?: string | null;
+    cdr_url?: string | null;
 }
 
 export interface InvoiceKPIs {
     totalFacturado: number;
     successRate: number;
     pendingCount: number;
-    rejectedCount: number;
+    totalComprobantes: number;
 }
 
 export interface CreateInvoiceInput {
-    order_id: string;
     type: VoucherType;
     customer_name: string;
     customer_ruc: string;
+    series: string;
+    number: string;
+    amount: number;
+    order_id: string;
 }

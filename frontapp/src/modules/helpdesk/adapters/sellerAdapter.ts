@@ -23,7 +23,7 @@ interface SellerTicket {
   };
 }
 
-export function adaptSellerTicketListItem(ticket: SellerTicket): UnifiedTicketListItem {
+export function adaptSellerTicketListItem(ticket: any): UnifiedTicketListItem {
   const category = ticket.type || ticket.tipo;
   
   return {
@@ -44,6 +44,6 @@ export function adaptSellerTicketListItem(ticket: SellerTicket): UnifiedTicketLi
   };
 }
 
-export function adaptSellerTicketList(tickets: SellerTicket[]): UnifiedTicketListItem[] {
+export function adaptSellerTicketList(tickets: any[]): UnifiedTicketListItem[] {
   return tickets.map(adaptSellerTicketListItem);
 }

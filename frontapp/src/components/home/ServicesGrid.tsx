@@ -85,7 +85,7 @@ export default function ServicesGrid({ categorias }: ServicesGridProps) {
           </p>
         </div>
       ) : (
-        <div 
+                   <div 
           ref={containerRef}
           className="relative overflow-hidden cursor-grab active:cursor-grabbing"
           onMouseDown={handleMouseDown}
@@ -99,22 +99,27 @@ export default function ServicesGrid({ categorias }: ServicesGridProps) {
               transform: `translateX(-${current * (100 / itemsPerView)}%)`,
             }}
           >
-            {categorias.map((categoria) => (
-              <div
-                key={categoria.id}
-                className="flex-shrink-0 w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(25%-0.75rem)]"
-              >
-                <article className="rounded-[2.5rem] overflow-hidden shadow-md bg-white dark:bg-[var(--bg-card)] group cursor-default h-44 md:h-52 border border-gray-100 dark:border-[var(--border-subtle)]">
-                  <Image
-                    src={categoria.imagen || '/img/no-image.png'}
-                    alt={categoria.nombre}
-                    width={400}
-                    height={300}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                  />
-                </article>
-              </div>
-            ))}
+            {categorias.map((categoria, index) => {
+              const imageNumber = (index % 7) + 1;
+              const localImage = `/img/categorias_de_servicios/${imageNumber}.png`;
+
+              return (
+                <div
+                  key={categoria.id}
+                  className="flex-shrink-0 w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(25%-0.75rem)]"
+                >
+                  <article className="rounded-[2.5rem] overflow-hidden shadow-md bg-white dark:bg-[var(--bg-card)] group cursor-default h-56 md:h-64 border border-gray-100 dark:border-[var(--border-subtle)]">
+                    <Image
+                      src={localImage}
+                      alt={categoria.nombre}
+                      width={400}
+                      height={300}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
+                  </article>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

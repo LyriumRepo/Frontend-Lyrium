@@ -152,8 +152,8 @@ export const rateLimiters = {
     maxRequests: 30,
   }),
   
-  rapifac: createRateLimiter({
-    windowMs: 60 * 1000,
-    maxRequests: 10,
-  }),
+    nubefact: createRateLimiter({
+        windowMs: 60 * 1000,
+        maxRequests: 10,
+    }),
 };

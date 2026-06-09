@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useWishlist } from '@/shared/hooks/useWishlist';
 import {
   ArrowLeft,
   Star,
@@ -48,19 +49,19 @@ import { useCurrentUser } from '@/features/public/product/hooks/useCurrentUser';
 import { WriteProductReview } from '@/features/public/product/WriteProductReview';
 import { LARAVEL_API_URL } from '@/shared/lib/config/flags';
 
-import { Button } from '@/components/UI/button';
-import { Badge } from '@/components/UI/badge';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
   CardDescription,
-} from '@/components/UI/Cardt';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/UI/tabs';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/UI/avatar';
-import { Separator } from '@/components/UI/separator';
-import { ScrollArea } from '@/components/UI/scroll-area';
+} from '@/components/ui/Cardt';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Separator } from '@/components/ui/separator';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 
 // ─── Token (mismo mecanismo que WriteProductReview) ───────────────────────────
@@ -83,7 +84,7 @@ async function getClientToken(): Promise<string | null> {
   } catch {
     return null;
   }
-}
+}
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -156,8 +157,9 @@ function ProductGallery({
     '/no-image.png';
 
   return (
-    <div className="space-y-4">
-      <div className="relative aspect-square rounded-xl overflow-hidden bg-muted border border-border group">
+    <div className="flex flex-col h-full">
+      <div className="relative flex-1 min-h-[400px] lg:min-h-0 rounded-xl overflow-hidden bg-muted border border-border group">
+
         <Image
           key={src}
           src={src}
@@ -189,10 +191,11 @@ function ProductGallery({
             </Button>
           </>
         )}
+
       </div>
 
       {images.length > 1 && (
-        <div className="grid grid-cols-4 gap-3">
+        <div className="grid grid-cols-4 gap-3 mt-4">
           {images.map((img, i) => (
             <button
               key={i}
@@ -200,8 +203,8 @@ function ProductGallery({
               className={cn(
                 'aspect-square rounded-lg overflow-hidden border-2 transition-all',
                 i === active
-                  ? 'border-primary ring-2 ring-primary/20'
-                  : 'border-border hover:border-primary/50',
+                  ? 'border-[#2d5e42] dark:border-[#4A7C59] ring-2 ring-[#2d5e42]/20 dark:ring-[#4A7C59]/20'
+                  : 'border-border hover:border-[#2d5e42]/50 dark:hover:border-[#4A7C59]/50',
               )}
             >
               <div className="relative w-full h-full bg-muted">
@@ -213,6 +216,7 @@ function ProductGallery({
                   className="object-contain p-1"
                 />
               </div>
+
             </button>
           ))}
         </div>
@@ -237,7 +241,7 @@ const STICKER_MAP: Record<
   nuevo: { label: 'Nuevo', variant: 'default' },
   bestseller: { label: 'Más vendido', variant: 'secondary' },
   envio_gratis: { label: 'Envío gratis', variant: 'default' },
-  descuento: { label: 'Descuento', variant: 'secondary' },
+  descuento: { label: 'Descuento', variant: 'secondary' },
 };
 
 function StickerBadge({ sticker }: { sticker: string | null }) {
@@ -269,12 +273,14 @@ function TypeItem({
   value: string;
 }) {
   return (
-    <Card>
+    <Card className="border-border/60">
       <CardContent className="p-4 flex items-center gap-3">
-        {icon}
+        <div className="w-9 h-9 rounded-lg bg-[#2d5e42]/10 dark:bg-[#4A7C59]/20 flex items-center justify-center flex-shrink-0">
+          {icon}
+        </div>
         <div>
           <p className="text-xs text-muted-foreground">{label}</p>
-          <p className="font-semibold text-sm">{value}</p>
+          <p className="font-semibold text-sm text-foreground">{value}</p>
         </div>
       </CardContent>
     </Card>
@@ -286,13 +292,13 @@ function ProductInfoCards({ product }: { product: LaravelProduct }) {
     return (
       <div className="grid grid-cols-2 gap-4">
         <TypeItem
-          icon={<Download className="w-5 h-5 text-primary" />}
+          icon={<Download className="w-5 h-5 text-[#2d5e42] dark:text-[#4A7C59]" />}
           label="Formato"
           value={product.fileType?.toUpperCase() ?? '—'}
         />
         {product.downloadLimit && (
           <TypeItem
-            icon={<Package className="w-5 h-5 text-primary" />}
+            icon={<Package className="w-5 h-5 text-[#2d5e42] dark:text-[#4A7C59]" />}
             label="Descargas"
             value={`${product.downloadLimit}x`}
           />
@@ -304,12 +310,12 @@ function ProductInfoCards({ product }: { product: LaravelProduct }) {
     return (
       <div className="grid grid-cols-2 gap-4">
         <TypeItem
-          icon={<Clock className="w-5 h-5 text-primary" />}
+          icon={<Clock className="w-5 h-5 text-[#2d5e42] dark:text-[#4A7C59]" />}
           label="Duración"
           value={`${product.serviceDuration} min`}
         />
         <TypeItem
-          icon={<MapPin className="w-5 h-5 text-primary" />}
+          icon={<MapPin className="w-5 h-5 text-[#2d5e42] dark:text-[#4A7C59]" />}
           label="Modalidad"
           value={product.serviceModality ?? '—'}
         />
@@ -318,22 +324,22 @@ function ProductInfoCards({ product }: { product: LaravelProduct }) {
   }
   const items = [
     product.stock != null && {
-      icon: <Package className="w-5 h-5 text-primary" />,
+      icon: <Package className="w-5 h-5 text-[#2d5e42] dark:text-[#4A7C59]" />,
       label: 'Stock',
       value: `${product.stock} unidades`,
     },
     product.weight && {
-      icon: <Weight className="w-5 h-5 text-primary" />,
+      icon: <Weight className="w-5 h-5 text-[#2d5e42] dark:text-[#4A7C59]" />,
       label: 'Peso',
       value: `${product.weight} kg`,
     },
     product.dimensions && {
-      icon: <Ruler className="w-5 h-5 text-primary" />,
+      icon: <Ruler className="w-5 h-5 text-[#2d5e42] dark:text-[#4A7C59]" />,
       label: 'Dimensiones',
       value: product.dimensions,
     },
     product.sku && {
-      icon: <Calendar className="w-5 h-5 text-primary" />,
+      icon: <Calendar className="w-5 h-5 text-[#2d5e42] dark:text-[#4A7C59]" />,
       label: 'SKU',
       value: product.sku,
     },
@@ -365,28 +371,28 @@ function NutritionalPanel({
     r.label.toLowerCase().includes('caloría'),
   );
   return (
-    <Card className="overflow-hidden">
+<Card className="overflow-hidden">
       <button
         onClick={() => setOpen((o) => !o)}
         className="w-full flex items-center justify-between px-4 py-3 hover:bg-muted/50 transition-colors"
       >
         <div className="flex items-center gap-2.5">
-          <Leaf className="w-4 h-4 text-green-600" />
+          <Leaf className="w-4 h-4 text-[#2d5e42] dark:text-[#4A7C59]" />
           <span className="text-[11px] font-medium tracking-[.1em] uppercase text-muted-foreground">
             Información nutricional
           </span>
           {calorieRow && (
-            <Badge variant="secondary" className="gap-1 text-[10px]">
+            <Badge variant="secondary" className="gap-1 text-[10px]">
               <Flame className="w-2.5 h-2.5" />
               {calorieRow.value}
             </Badge>
           )}
         </div>
         <ChevronDown
-          className={cn(
+className={cn(
             'w-4 h-4 text-muted-foreground transition-transform duration-200',
             open && 'rotate-180',
-          )}
+          )}
         />
       </button>
       <div
@@ -395,7 +401,7 @@ function NutritionalPanel({
           open ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0',
         )}
       >
-        <Separator />
+<Separator />
         {info.serving_note && (
           <p className="px-4 py-2 text-[11px] italic text-muted-foreground bg-muted/30 border-b border-border">
             {info.serving_note}
@@ -417,7 +423,7 @@ function NutritionalPanel({
                   )}
                 >
                   {h}
-                </th>
+                </th>
               ))}
             </tr>
           </thead>
@@ -454,11 +460,11 @@ function CharacteristicsTable({
   characteristics: LaravelProduct['characteristics'];
   additional_info: LaravelProduct['additional_info'];
 }) {
-  const hasMain = characteristics.length > 0;
+const hasMain = characteristics.length > 0;
   const hasAdditional = additional_info.length > 0;
   if (!hasMain && !hasAdditional)
     return (
-      <p className="text-sm italic text-muted-foreground">
+      <p className="text-sm italic text-muted-foreground">
         Sin características especificadas.
       </p>
     );
@@ -466,7 +472,7 @@ function CharacteristicsTable({
     <div className="space-y-6">
       {hasMain && (
         <div>
-          <p className="text-[10px] font-medium tracking-[.12em] uppercase text-muted-foreground mb-3">
+<p className="text-[10px] font-medium tracking-[.12em] uppercase text-muted-foreground mb-3">
             Características principales
           </p>
           <ul className="grid md:grid-cols-2 gap-3">
@@ -481,24 +487,24 @@ function CharacteristicsTable({
                 </span>
               </li>
             ))}
-          </ul>
+          </ul>
         </div>
       )}
       {hasAdditional && (
         <div>
-          <p className="text-[10px] font-medium tracking-[.12em] uppercase text-muted-foreground mb-3">
+<p className="text-[10px] font-medium tracking-[.12em] uppercase text-muted-foreground mb-3">
             Información adicional
           </p>
           <div className="grid md:grid-cols-2 gap-4">
             {additional_info.map((attr, i) => (
-              <Card key={i}>
+<Card key={i}>
                 <CardContent className="p-4 flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">
                     {attr.label}
                   </span>
                   <span className="font-semibold text-sm">{attr.value}</span>
                 </CardContent>
-              </Card>
+              </Card>
             ))}
           </div>
         </div>
@@ -518,17 +524,17 @@ function RatingDistribution({ stats }: { stats: ReviewStats }) {
         const pct = Math.round((count / max) * 100);
         return (
           <div key={n} className="flex items-center gap-2 text-[11px]">
-            <span className="w-3 text-right text-muted-foreground">{n}</span>
+<span className="w-3 text-right text-muted-foreground">{n}</span>
             <Star className="w-2.5 h-2.5 flex-shrink-0 fill-yellow-400 text-yellow-400" />
-            <div className="flex-1 h-[4px] bg-muted rounded-full overflow-hidden">
+            <div className="flex-1 h-[4px] bg-muted rounded-full overflow-hidden">
               <div
                 className="h-full bg-yellow-400 transition-all duration-500"
                 style={{ width: `${pct}%` }}
               />
             </div>
-            <span className="w-5 text-right text-muted-foreground">
+<span className="w-5 text-right text-muted-foreground">
               {count}
-            </span>
+            </span>
           </div>
         );
       })}
@@ -585,7 +591,7 @@ function EditReviewForm({
   };
 
   return (
-    <div className="space-y-3 pt-1">
+<div className="space-y-3 pt-1">
       <div className="flex gap-1">
         {[1, 2, 3, 4, 5].map((n) => (
           <button
@@ -606,7 +612,7 @@ function EditReviewForm({
           </button>
         ))}
         <span className="text-xs text-yellow-600 self-center ml-1">
-          {LABELS[rating]}
+          {LABELS[rating]}
         </span>
       </div>
 
@@ -619,7 +625,7 @@ function EditReviewForm({
         className="w-full border border-input rounded-md p-2 text-sm bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       />
 
-      <textarea
+<textarea
         maxLength={2000}
         value={comment}
         onChange={(e) => setComment(e.target.value)}
@@ -630,7 +636,7 @@ function EditReviewForm({
 
       {error && (
         <p className="text-xs text-destructive flex items-center gap-1">
-          <AlertCircle className="w-3.5 h-3.5" /> {error}
+          <AlertCircle className="w-3.5 h-3.5" /> {error}
         </p>
       )}
 
@@ -643,7 +649,7 @@ function EditReviewForm({
         >
           Cancelar
         </Button>
-        <Button size="sm" onClick={handleSave} disabled={loading}>
+        <Button size="sm" onClick={handleSave} disabled={loading} className="bg-[#2d5e42] hover:bg-[#1a3a2a] dark:bg-[#4A7C59] dark:hover:bg-[#3D6B4A] text-white">
           {loading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
           {loading ? 'Guardando…' : 'Guardar cambios'}
         </Button>
@@ -694,7 +700,7 @@ function ReviewCard({
       <CardContent className="p-6">
         <div className="flex items-start gap-4">
           <Avatar className="w-12 h-12 flex-shrink-0">
-            <AvatarImage src={review.user?.avatar} alt={review.user?.name} />
+            <AvatarImage src={review.user?.avatar ?? undefined} alt={review.user?.name ?? undefined} />
             <AvatarFallback>
               {review.user?.name?.charAt(0).toUpperCase() ?? '?'}
             </AvatarFallback>
@@ -829,7 +835,7 @@ function ReviewsSection({
   if (loading && localReviews.length === 0)
     return (
       <div className="flex justify-center py-10">
-        <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+<Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
       </div>
     );
 
@@ -842,11 +848,11 @@ function ReviewsSection({
     );
 
   return (
-    <Card>
+<Card>
       <CardHeader>
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
-            <CardTitle className="text-3xl mb-2">Reseñas de Clientes</CardTitle>
+            <CardTitle className="text-2xl mb-2">Reseñas de Clientes</CardTitle>
             <CardDescription className="text-base">
               {localReviews.length} reseñas verificadas
             </CardDescription>
@@ -866,16 +872,16 @@ function ReviewsSection({
 
         {stats && stats.count > 0 && (
           <div className="mt-4 pt-4 border-t border-border">
-            <RatingDistribution stats={stats} />
+            <RatingDistribution stats={stats} />
           </div>
         )}
       </CardHeader>
 
-      <CardContent>
+<CardContent>
         {/* Botón / formulario de nueva reseña */}
         <div className="mb-6">
-          {!showForm ? (
-            <Button variant="outline" onClick={() => setShowForm(true)}>
+            {!showForm ? (
+            <Button variant="outline" onClick={() => setShowForm(true)} className="border-[#2d5e42]/30 dark:border-[#4A7C59]/50 text-[#2d5e42] dark:text-[#4A7C59] hover:bg-[#2d5e42]/10 dark:hover:bg-[#4A7C59]/20">
               Escribir una reseña
             </Button>
           ) : (
@@ -884,14 +890,14 @@ function ReviewsSection({
                 <WriteProductReview
                   productId={Number(productId)}
                   onSuccess={() => setShowForm(false)}
-                  onCancel={() => setShowForm(false)}
+                  onCancel={() => setShowForm(false)}
                 />
               </CardContent>
             </Card>
           )}
         </div>
 
-        {localReviews.length === 0 ? (
+{localReviews.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">
             <MessageSquare className="w-8 h-8 mx-auto mb-3 opacity-30" />
             <p className="font-medium">Sin reseñas aún</p>
@@ -914,17 +920,16 @@ function ReviewsSection({
 
         {pagination?.hasMore && (
           <Button
-            variant="outline"
             onClick={loadMore}
             disabled={loading}
-            className="w-full mt-4 text-[11px] tracking-[.1em] uppercase"
+            className="w-full mt-4 text-[11px] tracking-[.1em] uppercase bg-[#2d5e42] hover:bg-[#1a3a2a] dark:bg-[#4A7C59] dark:hover:bg-[#3D6B4A] text-white"
           >
             {loading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
             {loading ? 'Cargando…' : 'Ver más reseñas'}
           </Button>
         )}
       </CardContent>
-    </Card>
+    </Card>
   );
 }
 
@@ -942,7 +947,7 @@ export function ProductDetailPageClient({
   relatedProducts = [],
 }: Props) {
   const [quantity, setQuantity] = useState(1);
-  const [wishlisted, setWishlisted] = useState(false);
+const [wishlisted, setWishlisted] = useState(false);
   const [relScrollPos, setRelScrollPos] = useState(0);
 
   const { addToCart, loading: cartLoading, error: cartError } = useAddToCart();
@@ -971,46 +976,50 @@ export function ProductDetailPageClient({
         : Math.min(el.scrollWidth - el.clientWidth, relScrollPos + amount);
     el.scrollTo({ left: next, behavior: 'smooth' });
     setRelScrollPos(next);
-  };
+  };
+
+  const { isWishlisted, toggle: toggleWishlist } = useWishlist(product.id);
 
   const discount = discountPercent(product.price, product.regular_price);
-  const inStock = product.in_stock;
+const inStock = product.in_stock;
   const hasNutritional = !!product.nutritional_info?.rows?.length;
-  const hasCharacteristics =
-    product.characteristics.length > 0 || product.additional_info.length > 0;
+  const characteristics = product.mainAttributes?.flatMap((a: { values: { label: string; value: string }[] }) => a.values) ?? [];
+  const additionalInfo = product.additionalAttributes?.flatMap((a: { values: { label: string; value: string }[] }) => a.values) ?? [];
+  const hasCharacteristics = characteristics.length > 0 || additionalInfo.length > 0;
 
   return (
-    <main className="min-h-screen bg-background text-foreground">
+<main className="min-h-screen bg-background text-foreground">
       {/* Breadcrumb */}
-      <div className="bg-card border-b border-border">
-        <div className="container mx-auto px-4 max-w-7xl py-3 flex items-center gap-2 text-[11px] tracking-[.06em] flex-wrap">
-          <Link
-            href="/"
-            className="text-muted-foreground hover:text-primary transition-colors"
-          >
-            Inicio
-          </Link>
-          {product.categories[0] && (
-            <>
-              <span className="text-muted-foreground/40">/</span>
-              <Link
-                href={`/productos/${product.categories[0].slug}`}
-                className="text-muted-foreground hover:text-primary transition-colors"
-              >
-                {product.categories[0].name}
-              </Link>
-            </>
-          )}
-          <span className="text-muted-foreground/40">/</span>
-          <span className="text-foreground truncate max-w-[200px]">
-            {product.name}
-          </span>
-        </div>
+      <div className="container mx-auto px-4 max-w-7xl py-3 flex items-center gap-2 text-[11px] tracking-[.06em] flex-wrap">
+        <Link
+          href="/"
+          className="text-muted-foreground hover:text-primary transition-colors"
+        >
+
+          Inicio
+        </Link>
+        {product.categories[0] && (
+          <>
+<span className="text-muted-foreground/40">/</span>
+            <Link
+              href={`/productos/${product.categories[0].slug}`}
+              className="text-muted-foreground hover:text-primary transition-colors"
+
+            >
+              {product.categories[0].name}
+            </Link>
+          </>
+        )}
+<span className="text-muted-foreground/40">/</span>
+        <span className="text-foreground truncate max-w-[200px]">
+
+          {product.name}
+        </span>
       </div>
 
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
+<div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Galería + Info */}
-        <div className="grid lg:grid-cols-2 gap-8 mb-12">
+        <div className="grid lg:grid-cols-2 lg:items-stretch gap-8 mb-12">
           <ProductGallery images={product.images} name={product.name} />
 
           <div className="space-y-6">
@@ -1023,16 +1032,16 @@ export function ProductDetailPageClient({
                       className="hover:bg-secondary/80 transition-colors cursor-pointer"
                     >
                       {cat.name}
-                    </Badge>
+                    </Badge>
                   </Link>
                 ))}
                 <StickerBadge sticker={product.sticker} />
               </div>
-              <h1 className="text-4xl font-bold text-foreground mb-2 tracking-tight">
+<h1 className="text-4xl font-bold text-foreground mb-2 tracking-tight">
                 {product.name}
               </h1>
               {product.short_description && (
-                <p className="text-sm text-muted-foreground leading-relaxed mb-3">
+<p className="text-sm text-muted-foreground leading-relaxed mb-3">
                   {product.short_description}
                 </p>
               )}
@@ -1040,12 +1049,12 @@ export function ProductDetailPageClient({
                 <Stars value={product.rating.average} size="lg" />
                 <span className="text-sm text-muted-foreground">
                   {product.rating.average.toFixed(1)} ({product.rating.count}{' '}
-                  reseñas)
+                  reseñas)
                 </span>
               </div>
             </div>
 
-            <Separator />
+<Separator />
 
             <div className="space-y-2">
               <div className="flex items-baseline gap-3 flex-wrap">
@@ -1064,19 +1073,20 @@ export function ProductDetailPageClient({
                       −{discount}%
                     </Badge>
                   </>
-                )}
+                )}
               </div>
               <div
-                className={cn(
-                  'flex items-center gap-2 text-sm',
-                  inStock ? 'text-green-600' : 'text-destructive',
+className={cn(
+                  'flex items-center gap-2 text-sm font-medium',
+                  inStock ? 'text-emerald-700 dark:text-emerald-400' : 'text-destructive',
                 )}
               >
                 <span
                   className={cn(
                     'w-1.5 h-1.5 rounded-full',
-                    inStock ? 'bg-green-600' : 'bg-destructive',
+                    inStock ? 'bg-emerald-700 dark:bg-emerald-400' : 'bg-destructive',
                   )}
+
                 />
                 {inStock
                   ? `${product.stock} unidades disponibles`
@@ -1102,7 +1112,7 @@ export function ProductDetailPageClient({
                     size="icon"
                     onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                     className="h-9 w-9 rounded-none border-r border-border"
-                    aria-label="Reducir"
+                    aria-label="Reducir"
                   >
                     −
                   </Button>
@@ -1124,7 +1134,7 @@ export function ProductDetailPageClient({
               </div>
             )}
 
-            {cartError && (
+{cartError && (
               <div className="flex items-center gap-2 text-sm px-3 py-2 text-destructive bg-destructive/10 border border-destructive/25 rounded-md">
                 <AlertCircle className="w-4 h-4 flex-shrink-0" />
                 {cartError}
@@ -1137,8 +1147,10 @@ export function ProductDetailPageClient({
                 disabled={!inStock || cartLoading}
                 size="lg"
                 className={cn(
-                  'flex-1 text-base h-12',
-                  localAdded && 'bg-green-700 hover:bg-green-700',
+                  'flex-1 text-base h-12 shadow-lg shadow-[#2d5e42]/20 dark:shadow-[#4A7C59]/20',
+                  localAdded
+                    ? 'bg-emerald-700 hover:bg-emerald-700'
+                    : 'bg-[#2d5e42] hover:bg-[#1a3a2a] dark:bg-[#4A7C59] dark:hover:bg-[#3D6B4A] text-white',
                 )}
               >
                 {cartLoading ? (
@@ -1147,6 +1159,7 @@ export function ProductDetailPageClient({
                   <Check className="w-5 h-5" />
                 ) : (
                   <ShoppingCart className="w-5 h-5" />
+
                 )}
                 {cartLoading
                   ? 'Agregando…'
@@ -1188,16 +1201,16 @@ export function ProductDetailPageClient({
               </Button>
             </div>
 
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-3 gap-3">
               {[
                 { icon: Shield, text: 'Compra segura' },
                 { icon: Truck, text: 'Envío rápido' },
                 { icon: RotateCcw, text: 'Devoluciones' },
               ].map(({ icon: Icon, text }) => (
-                <Card key={text}>
+                <Card key={text} className="border-[#2d5e42]/15 dark:border-[#4A7C59]/25 bg-[#2d5e42]/5 dark:bg-[#4A7C59]/10">
                   <CardContent className="p-3 flex flex-col items-center gap-1.5 text-center">
-                    <Icon className="w-4 h-4 text-primary" />
-                    <span className="text-[10px] tracking-[.06em] uppercase text-muted-foreground">
+                    <Icon className="w-4 h-4 text-[#2d5e42] dark:text-[#4A7C59]" />
+                    <span className="text-[10px] tracking-[.06em] uppercase text-foreground font-semibold">
                       {text}
                     </span>
                   </CardContent>
@@ -1207,9 +1220,10 @@ export function ProductDetailPageClient({
 
             {product.store?.name && (
               <Link href={`/tienda/${product.store.slug}`}>
-                <Card className="hover:border-primary transition-colors cursor-pointer">
+                <Card className="hover:border-[#2d5e42]/40 dark:hover:border-[#4A7C59]/60 transition-colors cursor-pointer">
                   <CardContent className="p-4 flex items-center gap-4">
-                    <div className="w-11 h-11 flex items-center justify-center flex-shrink-0 overflow-hidden rounded-lg bg-primary">
+                    <div className="w-11 h-11 flex items-center justify-center flex-shrink-0 overflow-hidden rounded-lg bg-[#2d5e42] dark:bg-[#4A7C59]">
+
                       {product.store.logo ? (
                         <Image
                           src={product.store.logo}
@@ -1219,7 +1233,7 @@ export function ProductDetailPageClient({
                           className="object-cover rounded-lg"
                         />
                       ) : (
-                        <Store className="w-5 h-5 text-primary-foreground" />
+<Store className="w-5 h-5 text-white" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -1228,10 +1242,10 @@ export function ProductDetailPageClient({
                       </p>
                       <p className="font-semibold text-lg text-foreground flex items-center gap-1">
                         {product.store.name}
-                        <BadgeCheck className="w-4 h-4 text-primary" />
-                      </p>
+                        <BadgeCheck className="w-4 h-4 text-[#2d5e42] dark:text-[#4A7C59]" />
+                      </p>
                     </div>
-                    <ArrowLeft className="w-4 h-4 rotate-180 text-muted-foreground" />
+                    <ArrowLeft className="w-4 h-4 rotate-180 text-[#2d5e42] dark:text-[#4A7C59]" />
                   </CardContent>
                 </Card>
               </Link>
@@ -1239,17 +1253,17 @@ export function ProductDetailPageClient({
           </div>
         </div>
 
-        {/* Tabs */}
+{/* Tabs */}
         <Card className="mb-12">
           <CardContent className="p-6">
             <Tabs defaultValue="descripcion" className="w-full">
               <TabsList className="grid w-full grid-cols-4 mb-6">
-                <TabsTrigger value="descripcion">Descripción</TabsTrigger>
-                <TabsTrigger value="caracteristicas">
+                <TabsTrigger value="descripcion" className="data-[state=active]:border-b-2 data-[state=active]:border-[#2d5e42] dark:data-[state=active]:border-[#4A7C59] rounded-none">Descripción</TabsTrigger>
+                <TabsTrigger value="caracteristicas" className="data-[state=active]:border-b-2 data-[state=active]:border-[#2d5e42] dark:data-[state=active]:border-[#4A7C59] rounded-none">
                   Características
                 </TabsTrigger>
-                <TabsTrigger value="nutricion">Nutrición</TabsTrigger>
-                <TabsTrigger value="tienda">Tienda</TabsTrigger>
+                <TabsTrigger value="nutricion" className="data-[state=active]:border-b-2 data-[state=active]:border-[#2d5e42] dark:data-[state=active]:border-[#4A7C59] rounded-none">Nutrición</TabsTrigger>
+                <TabsTrigger value="tienda" className="data-[state=active]:border-b-2 data-[state=active]:border-[#2d5e42] dark:data-[state=active]:border-[#4A7C59] rounded-none">Tienda</TabsTrigger>
               </TabsList>
 
               <TabsContent value="descripcion" className="space-y-4">
@@ -1322,7 +1336,7 @@ export function ProductDetailPageClient({
                   Información de la Tienda
                 </h3>
                 <div className="flex items-start gap-5">
-                  <div className="w-14 h-14 flex items-center justify-center flex-shrink-0 overflow-hidden rounded-xl bg-primary">
+                  <div className="w-14 h-14 flex items-center justify-center flex-shrink-0 overflow-hidden rounded-xl bg-[#2d5e42] dark:bg-[#4A7C59]">
                     {product.store.logo ? (
                       <Image
                         src={product.store.logo}
@@ -1332,13 +1346,13 @@ export function ProductDetailPageClient({
                         className="object-cover rounded-xl"
                       />
                     ) : (
-                      <Store className="w-7 h-7 text-primary-foreground" />
+                      <Store className="w-7 h-7 text-white" />
                     )}
                   </div>
                   <div className="flex-1">
                     <h4 className="text-xl font-bold flex items-center gap-2 mb-3 text-foreground">
                       {product.store.name}
-                      <BadgeCheck className="w-4 h-4 text-primary" />
+                      <BadgeCheck className="w-4 h-4 text-[#2d5e42] dark:text-[#4A7C59]" />
                     </h4>
                     <div className="space-y-1.5">
                       {product.store.email && (
@@ -1358,12 +1372,12 @@ export function ProductDetailPageClient({
                       <Button
                         variant="outline"
                         size="sm"
-                        className="mt-4 gap-2"
+                        className="mt-4 gap-2 border-[#2d5e42]/30 dark:border-[#4A7C59]/50 text-[#2d5e42] dark:text-[#4A7C59] hover:bg-[#2d5e42]/10 dark:hover:bg-[#4A7C59]/20"
                       >
                         <Store className="w-3.5 h-3.5" />
                         Ver tienda completa
                       </Button>
-                    </Link>
+                    </Link>
                   </div>
                 </div>
               </TabsContent>
@@ -1375,12 +1389,13 @@ export function ProductDetailPageClient({
         {relatedProducts.length > 0 && (
           <div className="mb-12">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-3xl font-bold">Productos Relacionados</h2>
+              <h2 className="text-3xl font-bold text-foreground">Productos Relacionados</h2>
               <div className="flex gap-2">
                 <Button
                   variant="outline"
                   size="icon"
                   onClick={() => scrollRelated('left')}
+                  className="border-[#2d5e42]/30 dark:border-[#4A7C59]/50 text-[#2d5e42] dark:text-[#4A7C59]"
                 >
                   <ChevronLeft className="w-5 h-5" />
                 </Button>
@@ -1388,6 +1403,7 @@ export function ProductDetailPageClient({
                   variant="outline"
                   size="icon"
                   onClick={() => scrollRelated('right')}
+                  className="border-[#2d5e42]/30 dark:border-[#4A7C59]/50 text-[#2d5e42] dark:text-[#4A7C59]"
                 >
                   <ChevronRight className="w-5 h-5" />
                 </Button>
@@ -1409,7 +1425,7 @@ export function ProductDetailPageClient({
                     href={`/producto/${rel.slug}`}
                     className="flex-shrink-0 w-80"
                   >
-                    <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full group">
+                    <Card className="hover:shadow-lg hover:border-[#2d5e42]/30 dark:hover:border-[#4A7C59]/50 transition-all cursor-pointer h-full group">
                       <CardContent className="p-0">
                         <div className="relative aspect-square overflow-hidden rounded-t-xl bg-muted">
                           <Image
@@ -1452,7 +1468,7 @@ export function ProductDetailPageClient({
                           </div>
                           <div className="flex items-center justify-between pt-2">
                             <div className="flex items-baseline gap-2">
-                              <span className="text-2xl font-bold text-foreground">
+                              <span className="text-2xl font-bold text-[#2d5e42] dark:text-[#4A7C59]">
                                 {formatPrice(rel.price)}
                               </span>
                               {relDiscount > 0 && (
@@ -1464,7 +1480,7 @@ export function ProductDetailPageClient({
                                 </Badge>
                               )}
                             </div>
-                            <Button size="sm" aria-label="Agregar al carrito">
+                            <Button size="sm" className="bg-[#2d5e42] hover:bg-[#1a3a2a] dark:bg-[#4A7C59] dark:hover:bg-[#3D6B4A] text-white" aria-label="Agregar al carrito">
                               <ShoppingCart className="w-4 h-4" />
                             </Button>
                           </div>

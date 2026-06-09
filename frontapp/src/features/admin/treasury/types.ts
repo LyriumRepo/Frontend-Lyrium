@@ -58,7 +58,7 @@ export interface CashInPayment extends BasePayment {
         taxId?: string;
     };
     voucherUrl?: string;
-    rapifacDocumentUrl?: string;
+    nubefactDocumentUrl?: string;
     orderHierarchy: {
         company: string;
         seller: string;

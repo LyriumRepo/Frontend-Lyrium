@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import { useMesaAyuda } from './hooks/useMesaAyuda';
 import { HelpDeskModule } from '@/components/admin/helpdesk/HelpDeskModule';
@@ -42,6 +42,7 @@ export function HelpdeskPageClient(_props: HelpdeskPageClientProps) {
         loadingMoreMessages,
         hasMoreMessages,
     } = useMesaAyuda();
+
 
     const handleEscalate = () => {
         if (actions) actions.escalateTicket();
@@ -89,7 +90,11 @@ export function HelpdeskPageClient(_props: HelpdeskPageClientProps) {
 
     return (
         <div className="space-y-6 animate-fadeIn font-industrial">
-            <ModuleHeader title="Mesa de Ayuda Admin" subtitle="Gestión centralizada de tickets y soporte" icon="Headset" />
+            <ModuleHeader 
+                title="Mesa de Ayuda Admin" 
+                subtitle="Gestión centralizada de tickets y soporte" 
+                icon="Headset" 
+            />
             <HelpDeskModule
                 data={data ?? null}
                 loading={loading}

@@ -11,8 +11,8 @@ import { Package, FolderOpen } from 'lucide-react';
 import { createPortal } from 'react-dom';
 
 interface SearchBarProps {
-  categoriasServicios: Categoria[];
-  categoriasProductos: Categoria[];
+  categoriasServicios?: Categoria[];
+  categoriasProductos?: Categoria[];
   // Props opcionales para pre-rellenar desde la página de resultados
   initialQuery?: string;
   initialCategory?: string;
@@ -22,7 +22,7 @@ interface SearchBarProps {
   autoSearch?: boolean;
 }
 
-export default function SearchBar({ categoriasServicios, categoriasProductos, initialQuery = '', initialCategory = '', initialMinPrice = '', initialMaxPrice = '', initialOffer = '', autoSearch = false, }: SearchBarProps) {
+export default function SearchBar({ categoriasServicios = [], categoriasProductos = [], initialQuery = '', initialCategory = '', initialMinPrice = '', initialMaxPrice = '', initialOffer = '', autoSearch = false, }: SearchBarProps) {
   const router = useRouter();
   const categoryName = useMemo(() => {
     if (!initialCategory) return '';

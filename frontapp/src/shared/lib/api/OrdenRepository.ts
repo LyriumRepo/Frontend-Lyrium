@@ -76,6 +76,18 @@ export interface IzipaySessionResult {
   transaction_id: number; // ID local en izipay_order_transactions
 }
 
+export interface ChargeWithTokenPayload {
+  order_id: string;
+  payment_method_id: number;
+}
+
+export interface ChargeWithTokenResult {
+  message: string;
+  order_id: string;
+  transaction_id: string;
+  invoices_creadas: number;
+}
+
 export interface IzipayStatusResult {
   order_id: string;
   order_number: string;
@@ -177,5 +189,9 @@ export const orderApi = {
    */
   getIzipayStatus(orderId: string): Promise<IzipayStatusResult> {
     return get<IzipayStatusResult>(`/payments/izipay/status/${orderId}`);
+  },
+
+  chargeWithToken(payload: ChargeWithTokenPayload): Promise<ChargeWithTokenResult> {
+    return post<ChargeWithTokenResult>('/payments/izipay/charge-with-token', payload);
   },
 };

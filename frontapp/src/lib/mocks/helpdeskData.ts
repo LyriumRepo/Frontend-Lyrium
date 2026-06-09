@@ -79,11 +79,11 @@ export const MOCK_HELPDESK_DATA: MesaAyudaData = {
             id: 1,
             titulo: "¿Cómo configurar mi pasarela de pagos?",
             categoria: "Pagos & Cobros",
-            contenido: "Para configurar su pasarela, diríjase al módulo 'Mis Datos' > 'Finanzas' y complete el formulario de vinculación con Rapifac.",
+            contenido: "Para configurar su pasarela, diríjase al módulo 'Mis Datos' > 'Finanzas' y complete el formulario de vinculación con NubeFact.",
             visitas: 1240,
             util_si: 450,
             util_no: 12,
-            palabras_clave: ["pagos", "configuración", "rapifac"]
+            palabras_clave: ["pagos", "configuración", "nubefact"]
         },
         {
             id: 2,

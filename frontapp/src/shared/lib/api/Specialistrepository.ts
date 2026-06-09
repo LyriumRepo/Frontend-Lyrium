@@ -14,6 +14,7 @@
  */
 
 import { LARAVEL_API_URL } from '@/shared/lib/config/flags';
+import { getAuthHeaders } from './token-store';
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -79,27 +80,6 @@ export function mapResponseToFrontend(
     document_type: sp.document_type,
     document_number: sp.document_number,
   };
-}
-
-// ─── Auth headers ─────────────────────────────────────────────────────────────
-
-async function getAuthHeaders(): Promise<HeadersInit> {
-  const base: Record<string, string> = {
-    'Content-Type': 'application/json',
-    Accept: 'application/json',
-  };
-
-  try {
-    const res = await fetch('/api/auth-token');
-    if (res.ok) {
-      const { token } = await res.json();
-      if (token) base['Authorization'] = `Bearer ${token}`;
-    }
-  } catch {
-    /* sin token */
-  }
-
-  return base;
 }
 
 // ─── Request base ─────────────────────────────────────────────────────────────

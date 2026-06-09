@@ -9,13 +9,6 @@ import {
     ChevronDown,
     Plus,
     Minus,
-    Heart,
-    Store,
-    Tag,
-    ShieldCheck,
-    Zap,
-    Clock,
-    Globe,
     Users,
     ShoppingCart,
     Store as StoreIcon,
@@ -53,18 +46,6 @@ export default function FAQPage() {
         }
     };
 
-    const getIconComponent = (iconName: string) => {
-        switch (iconName) {
-            case 'heart': return <Heart className="w-10 h-10 text-sky-600 group-hover:scale-125 transition-transform duration-500" />;
-            case 'store': return <Store className="w-10 h-10 text-emerald-600 group-hover:scale-125 transition-transform duration-500" />;
-            case 'tag': return <Tag className="w-10 h-10 text-amber-600 group-hover:scale-125 transition-transform duration-500" />;
-            case 'shield': return <ShieldCheck className="w-10 h-10 text-violet-600 group-hover:scale-125 transition-transform duration-500" />;
-            case 'zap': return <Zap className="w-10 h-10 text-lime-600 group-hover:scale-125 transition-transform duration-500" />;
-            case 'clock': return <Clock className="w-10 h-10 text-slate-600 group-hover:scale-125 transition-transform duration-500" />;
-            case 'globe': return <Globe className="w-10 h-10 text-rose-600 group-hover:scale-125 transition-transform duration-500" />;
-            default: return null;
-        }
-    };
 
     const getCategoryIcon = (id: string) => {
         switch (id) {
@@ -215,13 +196,21 @@ export default function FAQPage() {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
-                    {benefitsData.slice(0, 4).map((benefit) => (
+                    {benefitsData.slice(0, 4).map((benefit, index) => (
                         <div key={benefit.title} className="benefit-card group shine-effect rounded-[40px] border-2 border-gray-100 bg-white dark:bg-[var(--bg-secondary)] shadow-xl hover:shadow-2xl p-10 text-center transition-all duration-500 hover:-translate-y-4">
-                            <div className={`benefit-icon-wrap mx-auto w-20 h-20 rounded-[28px] bg-slate-50 flex items-center justify-center mb-8 shadow-inner group-hover:bg-white group-hover:rotate-6 transition-all duration-500`}>
-                                {getIconComponent(benefit.icon)}
+                            <div className="mx-auto w-16 h-16 mb-8 overflow-hidden relative transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6">
+                                <div className="absolute top-[-10px] left-1/2 -translate-x-1/2 w-28 h-28">
+                                    <Image
+                                        src={`/img/Inicio/11/${index + 2}.png`}
+                                        alt={benefit.title}
+                                        fill
+                                        className="object-contain object-top"
+                                        sizes="112px"
+                                    />
+                                </div>
                             </div>
                             <h4 className="font-black tracking-tight text-[#333333] dark:text-white text-lg mb-3 text-[20px]">{benefit.title}</h4>
-                            <p className="text-gray-500 dark:text-white/90 font-sm text-[14px]"> 
+                            <p className="text-gray-500 dark:text-white/90 font-sm text-[14px]">
                                 {benefit.description}
                             </p>
                         </div>
@@ -229,10 +218,18 @@ export default function FAQPage() {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
-                    {benefitsData.slice(4).map((benefit) => (
+                    {benefitsData.slice(4).map((benefit, index) => (
                         <div key={benefit.title} className="benefit-card group shine-effect rounded-[40px] border-2 border-gray-100 bg-white dark:bg-[var(--bg-secondary)] shadow-xl hover:shadow-2xl p-10 text-center transition-all duration-500 hover:-translate-y-4">
-                            <div className={`benefit-icon-wrap mx-auto w-20 h-20 rounded-[28px] bg-slate-50 flex items-center justify-center mb-8 shadow-inner group-hover:bg-white group-hover:rotate-6 transition-all duration-500`}>
-                                {getIconComponent(benefit.icon)}
+                            <div className="mx-auto w-16 h-16 mb-8 overflow-hidden relative transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6">
+                                <div className="absolute top-[-10px] left-1/2 -translate-x-1/2 w-28 h-28">
+                                    <Image
+                                        src={`/img/Inicio/11/${index + 6}.png`}
+                                        alt={benefit.title}
+                                        fill
+                                        className="object-contain object-top"
+                                        sizes="112px"
+                                    />
+                                </div>
                             </div>
                             <h4 className="font-black tracking-tight text-[#333333] dark:text-white text-lg mb-3 text-[20px]">{benefit.title}</h4>
                             <p className="text-gray-500 dark:text-white/90 font-sm text-[14px] leading-relaxed">

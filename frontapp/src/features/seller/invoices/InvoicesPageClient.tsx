@@ -1,26 +1,16 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import { useSellerInvoices } from '@/features/seller/invoices/hooks/useSellerInvoices';
-import { VoucherStatus, VoucherType } from '@/features/seller/invoices/types';
 
 import InvoiceKPIsDisplay from './components/InvoiceKPIs';
 import InvoiceFilters from './components/InvoiceFilters';
 import InvoiceTable from './components/InvoiceTable';
 import InvoiceDrawer from './components/InvoiceDrawer';
-import EmitInvoiceModal from './components/EmitInvoiceModal';
-import Icon from '@/components/ui/Icon';
-import BaseButton from '@/components/ui/BaseButton';
 import BaseLoading from '@/components/ui/BaseLoading';
 
-interface InvoicesPageClientProps {
-    // TODO Tarea 3: Recibir datos iniciales del Server Component
-}
-
-export function InvoicesPageClient(_props: InvoicesPageClientProps) {
-    const [isModalOpen, setIsModalOpen] = useState(false);
-
+export function InvoicesPageClient() {
     const {
         vouchers: filteredVouchers,
         kpis,
@@ -32,29 +22,18 @@ export function InvoicesPageClient(_props: InvoicesPageClientProps) {
         clearFilters,
         handleViewDetail,
         handleCloseDrawer,
-        handleRetryInvoice,
-        emitNewInvoice,
     } = useSellerInvoices();
 
     if (isLoading && filteredVouchers.length === 0) {
-        return <BaseLoading message="Sincronizando con SUNAT vía Rapifac..." />;
+        return <BaseLoading message="Cargando comprobantes electrónicos..." />;
     }
 
     return (
         <div className="space-y-8 pb-20 animate-fadeIn">
             <ModuleHeader
                 title="Mis Comprobantes"
-                subtitle="Gestión de facturación electrónica y sincronización SUNAT vía Rapifac"
+                subtitle="Los comprobantes se generan automáticamente al confirmarse el pago"
                 icon="Receipt"
-                actions={
-                    <BaseButton
-                        variant="action"
-                        leftIcon="PlusCircle"
-                        onClick={() => setIsModalOpen(true)}
-                    >
-                        Nueva Factura
-                    </BaseButton>
-                }
             />
 
             <InvoiceKPIsDisplay kpis={kpis} />
@@ -63,6 +42,8 @@ export function InvoicesPageClient(_props: InvoicesPageClientProps) {
                 search={filters.search}
                 status={filters.status}
                 type={filters.type}
+                dateFrom={filters.dateFrom}
+                dateTo={filters.dateTo}
                 onFilterChange={setFilters}
                 onClear={clearFilters}
             />
@@ -76,13 +57,6 @@ export function InvoicesPageClient(_props: InvoicesPageClientProps) {
                 voucher={selectedVoucher}
                 isOpen={isDrawerOpen}
                 onClose={handleCloseDrawer}
-                onRetry={handleRetryInvoice}
-            />
-
-            <EmitInvoiceModal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                onEmit={emitNewInvoice}
             />
         </div>
     );

@@ -23,6 +23,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useCheckoutStore } from '@/store/checkoutStore';
 import { cartApi } from '@/shared/lib/api/cartRepository';
 import { orderApi } from '@/shared/lib/api/OrdenRepository';
+import { addressApi } from '@/shared/lib/api/addressRepository';
 import type { CartItem } from '@/store/checkoutStore';
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
@@ -148,6 +149,30 @@ export function useCheckoutSubmit(): UseCheckoutSubmitReturn {
           shipping_cost: orderData.deliveryCost,
           coupon_code: orderData.promoCode || undefined,
         });
+
+        // Guardar dirección si el usuario marcó la opción
+        if (shippingData.saveAddress) {
+          try {
+            const fullName =
+              `${personalData.name} ${personalData.apellidoPaterno} ${personalData.apellidoMaterno}`.trim();
+            await addressApi.create({
+              etiqueta: 'casa',
+              destinatario: fullName || personalData.name,
+              pais: shippingData.pais || 'Perú',
+              departamento: shippingData.departamento,
+              provincia: shippingData.provincia,
+              distrito: shippingData.distrito,
+              avenida: shippingData.avenida,
+              numero: shippingData.numero,
+              piso_lote: shippingData.pisoLote || null,
+              referencia: shippingData.referencia || null,
+              is_default: false,
+            });
+          } catch {
+            // Fallo silencioso — no bloqueamos la orden si falla el guardado
+            console.warn('No se pudo guardar la dirección automáticamente.');
+          }
+        }
 
         // Devolvemos orderId y email para que OrderSummary llame a createIzipaySession
         return { orderId: order.id, email: personalData.email };

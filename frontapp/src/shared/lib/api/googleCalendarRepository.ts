@@ -1,4 +1,5 @@
-import {
+import { getToken } from './token-store';
+import type {
   CalendarStatus,
   AuthUrlResponse,
 } from "@/features/seller/services/types";
@@ -7,23 +8,12 @@ import {
 const LARAVEL_API_URL =
   process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? "http://localhost:8000/api";
 
-// ─── Helper de extracción de Cookies nativo ──────────────────────────────────
-function getLaravelToken(): string | null {
-  if (typeof window === "undefined") return null;
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; laravel_token=`);
-  if (parts.length === 2) {
-    return decodeURIComponent(parts.pop()?.split(";").shift() || "");
-  }
-  return null;
-}
-
 // ─── Helper request() siguiendo tu patrón de arquitectura ────────────────────
 async function request<T>(
   endpoint: string,
   options: RequestInit = {},
 ): Promise<T> {
-  const token = getLaravelToken();
+  const token = getToken();
   const url = `${LARAVEL_API_URL}${endpoint}`;
 
   const res = await fetch(url, {

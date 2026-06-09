@@ -139,16 +139,16 @@ export default function ProductFilters({ onFilterChange, initialFilters }: Produ
         </div>
         <div className="flex items-center gap-2">
           {hasActiveFilters && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                clearFilters();
-              }}
-              className="text-xs text-rose-500 hover:text-rose-600 font-medium"
-            >
-              Limpiar
-            </button>
-          )}
+  <span
+    onClick={(e) => {
+      e.stopPropagation();
+      clearFilters();
+    }}
+    className="text-xs text-rose-500 hover:text-rose-600 font-medium cursor-pointer select-none"
+  >
+    Limpiar
+  </span>
+)}
           <svg 
             className={`w-4 h-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} 
             fill="none" 

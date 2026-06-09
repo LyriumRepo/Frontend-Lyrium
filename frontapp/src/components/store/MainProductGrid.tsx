@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { Search, SlidersHorizontal, Funnel, Star, Eye, Filter } from 'lucide-react';
+import { Search, SlidersHorizontal, Funnel, Star, Eye, Filter, ShoppingCart } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Producto } from '@/types/public';
+import { useCarritoStore } from '@/store/carritoStore';
 import QuickViewModal from '@/components/products/QuickViewModal';
 
 type Ordenamiento = 'recientes' | 'precio-asc' | 'precio-desc' | 'nombre' | 'popular';
@@ -39,6 +40,8 @@ const ordenOptions = [
 ];
 
 export default function MainProductGrid({ productos }: MainProductGridProps) {
+  const addToCart = useCarritoStore((s) => s.addToCart);
+  const openCart = useCarritoStore((s) => s.openCart);
   const [busqueda, setBusqueda] = useState('');
   const [ordenamiento, setOrdenamiento] = useState<Ordenamiento>('recientes');
   const [filtroRapido, setFiltroRapido] = useState<FiltroRapido>('todos');
@@ -90,7 +93,8 @@ export default function MainProductGrid({ productos }: MainProductGridProps) {
   };
 
   const handleAddToCart = (producto: Producto) => {
-    console.log('Añadir al carrito:', producto);
+    addToCart(producto);
+    openCart();
   };
 
   const renderEstrellas = (estrellas?: string) => {
@@ -274,6 +278,11 @@ export default function MainProductGrid({ productos }: MainProductGridProps) {
                       {sticker.label}
                     </span>
                   )}
+
+                  <div className="hidden md:flex absolute inset-0 bg-black/0 group-hover:bg-black/10 items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                    <button onClick={() => handleQuickView(producto)} className="bg-white p-2 rounded-full shadow-lg"><Eye className="w-4 h-4" /></button>
+                    <button onClick={() => handleAddToCart(producto)} className="bg-sky-500 p-2 rounded-full shadow-lg"><ShoppingCart className="w-4 h-4 text-white" /></button>
+                  </div>
                 </div>
 
                 {/* Info */}
@@ -299,6 +308,9 @@ export default function MainProductGrid({ productos }: MainProductGridProps) {
                       </span>
                     )}
                   </div>
+                  <button onClick={() => handleAddToCart(producto)} className="mt-2 w-full py-2 bg-sky-500 hover:bg-sky-600 text-white text-sm font-medium rounded-lg flex items-center justify-center gap-2 transition-colors md:hidden">
+                    <ShoppingCart className="w-4 h-4" /> Añadir
+                  </button>
                 </div>
               </div>
             );

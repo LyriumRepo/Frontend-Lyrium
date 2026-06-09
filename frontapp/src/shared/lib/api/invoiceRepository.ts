@@ -1,43 +1,62 @@
 import { LARAVEL_API_URL } from '@/shared/lib/config/flags';
-import type { ApiResponse } from '@/shared/lib/api/base-client';
-import type { Voucher, CreateInvoiceInput } from '@/shared/types/invoices';
+import { getAuthHeaders } from '@/shared/lib/api/token-store';
+import type { Voucher, InvoiceKPIs } from '@/shared/types/invoices';
 
-async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
+async function authFetch<T>(endpoint: string, options?: RequestInit): Promise<T> {
+    const authHeaders = await getAuthHeaders();
+    const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        ...(authHeaders as Record<string, string>),
+    };
+
     const response = await fetch(`${LARAVEL_API_URL}${endpoint}`, {
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-        },
         ...options,
+        headers: { ...headers, ...(options?.headers as Record<string, string> || {}) },
     });
 
     if (!response.ok) {
-        throw new Error(`API Error: ${response.status}`);
+        const errBody = await response.json().catch(() => ({ message: `HTTP ${response.status}` }));
+        throw new Error(errBody.error || errBody.message || `API Error: ${response.status}`);
     }
 
     return response.json();
 }
 
 export const invoiceApi = {
-    list: async (): Promise<Voucher[]> => {
-        const response = await request<ApiResponse<Voucher[]>>('/invoices');
-        return response.data || [];
+    list: async (params?: { status?: string; type?: string; page?: number; per_page?: number }): Promise<Voucher[]> => {
+        const query = new URLSearchParams();
+        if (params?.status && params.status !== 'ALL') query.set('status', params.status);
+        if (params?.type && params.type !== 'ALL') query.set('type', params.type);
+        if (params?.page) query.set('page', String(params.page));
+        if (params?.per_page) query.set('per_page', String(params.per_page));
+        const qs = query.toString() ? `?${query.toString()}` : '';
+        const res = await authFetch<{ success: boolean; data: { data: Voucher[]; pagination: any } }>(`/seller/invoices${qs}`);
+        return res.data?.data || [];
     },
 
     getById: async (id: string): Promise<Voucher | null> => {
         try {
-            const response = await request<ApiResponse<Voucher>>(`/invoices/${id}`);
-            return response.data || null;
+            const res = await authFetch<{ success: boolean; data: Voucher }>(`/invoices/${id}`);
+            return res.data || null;
         } catch {
             return null;
         }
     },
 
-    create: async (orderId: string, input: CreateInvoiceInput): Promise<Voucher> => {
-        const response = await request<ApiResponse<Voucher>>(`/orders/${orderId}/invoice`, {
-            method: 'POST',
-            body: JSON.stringify(input),
-        });
-        return response.data as Voucher;
+    kpis: async (): Promise<InvoiceKPIs> => {
+        const res = await authFetch<{ success: boolean; data: InvoiceKPIs }>('/seller/invoices/kpis');
+        return res.data;
+    },
+
+    /* --- Customer invoices (Mis Comprobantes) --- */
+
+    customerList: async (params?: { type?: string; page?: number }): Promise<{ data: Voucher[]; pagination: { page: number; perPage: number; total: number; totalPages: number; hasMore: boolean } }> => {
+        const query = new URLSearchParams();
+        if (params?.type && params.type !== 'ALL') query.set('type', params.type);
+        if (params?.page) query.set('page', String(params.page));
+        const qs = query.toString() ? `?${query.toString()}` : '';
+        const res = await authFetch<{ success: boolean; data: Voucher[]; pagination: any }>(`/customer/invoices${qs}`);
+        return { data: res.data || [], pagination: res.pagination || { page: 1, perPage: 20, total: 0, totalPages: 0, hasMore: false } };
     },
 };

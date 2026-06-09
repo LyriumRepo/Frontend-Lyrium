@@ -3,16 +3,28 @@
 import React from 'react';
 import Icon from '@/components/ui/Icon';
 
+export interface MessageAttachment {
+  id: string;
+  file_name: string;
+  mime_type: string;
+  file_size: number;
+  url: string;
+  download_url: string;
+}
+
 export interface Message {
   id?: string;
   sender: string;
   content: string;
   timestamp: string;
+  read_at?: string | null;
+  attachments?: MessageAttachment[];
 }
 
 interface MessageBubbleProps {
   messages: Message[];
   currentUserId?: string;
+  onMarkRead?: (messageId: string) => void;
 }
 
 const isSentByMe = (message: Message, currentUserId?: string): boolean => {
@@ -22,28 +34,132 @@ const isSentByMe = (message: Message, currentUserId?: string): boolean => {
   return message.sender === 'user' || message.sender === 'operator';
 };
 
-export default function MessageBubble({ messages, currentUserId }: MessageBubbleProps) {
+function formatTime(iso: string) {
+  try {
+    return new Date(iso).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
+  } catch {
+    return '';
+  }
+}
+
+function formatDateSeparator(iso: string) {
+  try {
+    const d = new Date(iso);
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    if (d.toDateString() === today.toDateString()) return 'Hoy';
+    if (d.toDateString() === yesterday.toDateString()) return 'Ayer';
+    return d.toLocaleDateString('es-PE', { day: 'numeric', month: 'long', year: 'numeric' });
+  } catch {
+    return '';
+  }
+}
+
+export function TypingIndicator() {
   return (
-    <div className="space-y-6">
-      {messages.map((msg) => {
+    <div className="flex justify-start animate-fadeIn">
+      <div className="bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-2xl rounded-tl-none px-5 py-4 shadow-sm max-w-[75%]">
+        <div className="flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-[var(--icons-green)]/40 dark:bg-[var(--icons-green)]/40 animate-pulse-dot" style={{ animationDelay: '0ms' }} />
+          <span className="w-2 h-2 rounded-full bg-[var(--icons-green)]/40 dark:bg-[var(--icons-green)]/40 animate-pulse-dot" style={{ animationDelay: '150ms' }} />
+          <span className="w-2 h-2 rounded-full bg-[var(--icons-green)]/40 dark:bg-[var(--icons-green)]/40 animate-pulse-dot" style={{ animationDelay: '300ms' }} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function shouldShowDateSeparator(prevIso: string | null, currIso: string): boolean {
+  if (!prevIso) return true;
+  try {
+    const prev = new Date(prevIso);
+    const curr = new Date(currIso);
+    return prev.toDateString() !== curr.toDateString();
+  } catch {
+    return true;
+  }
+}
+
+export default function MessageBubble({ messages, currentUserId, onMarkRead }: MessageBubbleProps) {
+  return (
+    <div className="space-y-0.5 px-4 py-4">
+      {messages.map((msg, idx) => {
         const isSent = isSentByMe(msg, currentUserId);
-        
+        const prevMsg = idx > 0 ? messages[idx - 1] : null;
+        const showDate = shouldShowDateSeparator(prevMsg?.timestamp ?? null, msg.timestamp);
+        const isRead = !!msg.read_at;
+
+        React.useEffect(() => {
+          if (!isSent && msg.id && !isRead && onMarkRead) {
+            onMarkRead(msg.id);
+          }
+        }, [msg.id, isSent, isRead, onMarkRead]);
+
         return (
-          <div key={msg.id || msg.timestamp} className={`flex ${isSent ? 'justify-end' : 'justify-start'} animate-fadeIn`}>
-            <div className={`max-w-[75%] p-5 rounded-[2rem] shadow-sm transform transition-all hover:scale-[1.01] ${
-              isSent
-                ? 'bg-emerald-500 text-white rounded-tr-none shadow-emerald-100'
-                : 'bg-sky-500 text-white rounded-tl-none shadow-sky-100'
-            }`}>
-              <p className="text-xs font-medium leading-relaxed">{msg.content}</p>
-              <div className="flex items-center justify-end gap-1 mt-2">
-                <p className={`text-[8px] font-black uppercase tracking-tighter ${isSent ? 'text-emerald-200' : 'text-sky-200'}`}>
-                  {new Date(msg.timestamp).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })}
-                </p>
-                {isSent && <Icon name="CheckCheck" className="w-3 h-3 text-emerald-200" />}
+          <React.Fragment key={msg.id || msg.timestamp + idx}>
+            {showDate && (
+              <div className="flex justify-center my-4 animate-fadeIn">
+                <span className="px-4 py-1.5 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-full text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-wider shadow-sm">
+                  {formatDateSeparator(msg.timestamp)}
+                </span>
+              </div>
+            )}
+
+            <div
+              className={`flex ${isSent ? 'justify-end' : 'justify-start'} ${idx > 0 && !showDate ? 'mt-0.5' : 'mt-2'} animate-fadeIn`}
+              style={{ animationDelay: `${Math.min(idx * 20, 300)}ms` }}
+            >
+              <div
+                className={`max-w-[82%] md:max-w-[68%] ${
+                  isSent
+                    ? 'bg-gradient-to-br from-[var(--turquesa-500)] to-[var(--verde-500)] text-white rounded-[1.75rem] rounded-br-md shadow-lg shadow-[var(--turquesa-500)]/30 dark:shadow-[var(--turquesa-500)]/20'
+                    : 'bg-white dark:bg-[#1A2E25] border border-gray-100 dark:border-[#2A4035] text-[var(--text-primary)] rounded-[1.75rem] rounded-bl-md shadow-sm'
+                } px-5 py-3.5 transition-all duration-200 hover:shadow-md`}
+              >
+                {msg.content && (
+                  <p className={`text-sm leading-relaxed ${isSent ? 'text-white' : 'text-gray-800 dark:text-gray-100'} whitespace-pre-wrap break-words`}>
+                    {msg.content}
+                  </p>
+                )}
+
+                {msg.attachments && msg.attachments.length > 0 && (
+                  <div className={`mt-2.5 space-y-2 ${msg.content ? 'border-t border-white/10 pt-2.5' : ''}`}>
+                    {msg.attachments.map((att) => (
+                      <a key={att.id} href={att.download_url} target="_blank" rel="noopener noreferrer"
+                        className={`flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 ${
+                          isSent
+                            ? 'bg-white/10 text-white/90 hover:bg-white/20 active:scale-[0.98]'
+                            : 'bg-gray-50 dark:bg-[#24382E] text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-[#2A4035] active:scale-[0.98]'
+                        }`}>
+                        <Icon name="FileText" className="w-4 h-4 shrink-0" />
+                        <span className="truncate flex-1">{att.file_name}</span>
+                        <span className="text-[9px] opacity-60">{(att.file_size / 1024).toFixed(0)}KB</span>
+                        <Icon name="Download" className="w-3.5 h-3.5 shrink-0" />
+                      </a>
+                    ))}
+                  </div>
+                )}
+
+                <div className={`flex items-center gap-1.5 mt-1.5 ${isSent ? 'justify-end' : 'justify-start'}`}>
+                  <span className={`text-[10px] font-medium ${isSent ? 'text-white/50' : 'text-gray-400 dark:text-gray-500'}`}>
+                    {formatTime(msg.timestamp)}
+                  </span>
+                  {isSent && (
+                    isRead ? (
+                      <div className="relative">
+                        <Icon name="CheckCheck" className="w-3.5 h-3.5 text-[var(--turquesaClaro-500)] dark:text-[var(--turquesaClaro-500)] animate-check-pop" />
+                        <span className="absolute -top-2 -right-1 w-1.5 h-1.5 bg-[var(--turquesaClaro-500)] rounded-full" />
+                      </div>
+                    ) : (
+                      <Icon name="Check" className="w-3.5 h-3.5 text-white/40" />
+                    )
+                  )}
+                </div>
               </div>
             </div>
-          </div>
+          </React.Fragment>
         );
       })}
     </div>

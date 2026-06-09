@@ -186,57 +186,67 @@ export function mapWooServiceCategoryToLocal(categories: WooCategory[]) {
 }
 
 export async function getProductsByCategorySlug(categoryParam: string, perPage = 20): Promise<WooProduct[]> {
-  const auth = buildAuthParams();
-  
-  let categoryId: number | null = null;
-  
-  if (/^\d+$/.test(categoryParam)) {
-    categoryId = parseInt(categoryParam, 10);
-  } else {
-    const category = await getCategoryBySlug(categoryParam);
-    categoryId = category?.id || null;
-  }
-  
-  if (!categoryId) {
+  try {
+    const auth = buildAuthParams();
+    
+    let categoryId: number | null = null;
+    
+    if (/^\d+$/.test(categoryParam)) {
+      categoryId = parseInt(categoryParam, 10);
+    } else {
+      const category = await getCategoryBySlug(categoryParam);
+      categoryId = category?.id || null;
+    }
+    
+    if (!categoryId) {
+      return [];
+    }
+    
+    const url = `https://lyriumbiomarketplace.com/wp-json/wc/v3/products?${auth}&category=${categoryId}&per_page=${perPage}`;
+    
+    const res = await fetch(url, { next: { revalidate: 300 } });
+    if (!res.ok) {
+      console.error('Failed to fetch products:', categoryParam, res.status);
+      return [];
+    }
+    const data = await res.json();
+    return Array.isArray(data) ? data : [];
+  } catch (error) {
+    console.error('Error fetching products by category:', categoryParam, error);
     return [];
   }
-  
-  const url = `https://lyriumbiomarketplace.com/wp-json/wc/v3/products?${auth}&category=${categoryId}&per_page=${perPage}`;
-  
-  const res = await fetch(url, { next: { revalidate: 300 } });
-  if (!res.ok) {
-    console.error('Failed to fetch products:', categoryParam, res.status);
-    return [];
-  }
-  const data = await res.json();
-  return Array.isArray(data) ? data : [];
 }
 
 export async function getCategoryBySlug(categoryParam: string): Promise<WooCategory | null> {
-  const auth = buildAuthParams();
-  const isNumeric = /^\d+$/.test(categoryParam);
-  
-  let url: string;
-  if (isNumeric) {
-    url = `https://lyriumbiomarketplace.com/wp-json/wc/v3/products/categories/${categoryParam}?${auth}`;
-  } else {
-    url = `https://lyriumbiomarketplace.com/wp-json/wc/v3/products/categories?${auth}&slug=${encodeURIComponent(categoryParam)}`;
-  }
-  
-  const res = await fetch(url, { next: { revalidate: 300 } });
-  if (!res.ok) {
-    console.error('Failed to fetch category:', categoryParam, res.status);
+  try {
+    const auth = buildAuthParams();
+    const isNumeric = /^\d+$/.test(categoryParam);
+    
+    let url: string;
+    if (isNumeric) {
+      url = `https://lyriumbiomarketplace.com/wp-json/wc/v3/products/categories/${categoryParam}?${auth}`;
+    } else {
+      url = `https://lyriumbiomarketplace.com/wp-json/wc/v3/products/categories?${auth}&slug=${encodeURIComponent(categoryParam)}`;
+    }
+    
+    const res = await fetch(url, { next: { revalidate: 300 } });
+    if (!res.ok) {
+      console.error('Failed to fetch category:', categoryParam, res.status);
+      return null;
+    }
+    
+    const data = await res.json();
+    
+    if (isNumeric && data.id) {
+      return data as WooCategory;
+    }
+    
+    const categories: WooCategory[] = Array.isArray(data) ? data : [];
+    return categories[0] || null;
+  } catch (error) {
+    console.error('Error fetching category by slug:', categoryParam, error);
     return null;
   }
-  
-  const data = await res.json();
-  
-  if (isNumeric && data.id) {
-    return data as WooCategory;
-  }
-  
-  const categories: WooCategory[] = Array.isArray(data) ? data : [];
-  return categories[0] || null;
 }
 
 export function mapWooProductToLocal(product: WooProduct): Producto {
