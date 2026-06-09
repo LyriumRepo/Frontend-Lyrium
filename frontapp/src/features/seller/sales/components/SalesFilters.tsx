@@ -1,7 +1,9 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import Icon from '@/components/ui/Icon';
+import CalendarPopover from './CalendarPopover';
+import { Info } from 'lucide-react';
 
 interface SalesFiltersProps {
     dateStart: string | null;
@@ -20,36 +22,102 @@ const ORDER_TYPE_OPTIONS: { value: string | null; label: string; icon: string }[
     { value: 'mixed', label: 'Mixtas', icon: 'Layers' },
 ];
 
+function formatDisplayDate(dateStr: string): string {
+    if (!dateStr) return '';
+    const d = new Date(dateStr + 'T12:00:00');
+    return d.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+
 export default function SalesFilters({ dateStart, dateEnd, orderType, onDateChange, onOrderTypeChange, onClear, onExport }: SalesFiltersProps) {
+    const [activePicker, setActivePicker] = useState<'start' | 'end' | null>(null);
+    const startRef = useRef<HTMLDivElement | null>(null);
+    const endRef = useRef<HTMLDivElement | null>(null);
+
+    // Export info alert state
+    const [showExportHint, setShowExportHint] = useState(false);
+    const prevDateEndRef = useRef(dateEnd);
+    useEffect(() => {
+        if (dateEnd && prevDateEndRef.current !== dateEnd) {
+            setShowExportHint(true);
+            const timer = setTimeout(() => setShowExportHint(false), 4500);
+            return () => clearTimeout(timer);
+        }
+        prevDateEndRef.current = dateEnd;
+    }, [dateEnd]);
+
+    const closePicker = useCallback(() => setActivePicker(null), []);
+
     return (
         <div className="glass-card p-6">
             <div className="flex flex-col lg:flex-row items-end gap-6">
                 <div className="flex flex-col sm:flex-row gap-4 flex-1 w-full">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1 w-full">
                         <div className="space-y-2">
-                            <label htmlFor="date-start" className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1">Fecha Inicio</label>
-                            <div className="relative">
-                                <Icon name="Calendar" className="absolute left-4 top-1/2 -translate-y-1/2 text-[#69BEEB] text-lg" />
-                                <input
-                                    id="date-start"
-                                    type="date"
-                                    value={dateStart || ''}
-                                    onChange={(e) => onDateChange('dateStart', e.target.value)}
-                                    className="w-full pl-12 pr-4 py-3 bg-[var(--bg-secondary)]/50 border-none rounded-2xl focus:ring-2 focus:ring-[#69BEEB]/20 transition-all font-bold text-[var(--text-primary)]"
-                                />
+                            <label className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1">Fecha Inicio</label>
+                            <div className="relative group">
+                                <Icon name="Calendar" className="absolute left-4 top-1/2 -translate-y-1/2 text-[#69BEEB] dark:text-[#66D6A8] group-focus-within:text-[#69BEEB] dark:group-focus-within:text-[#66D6A8] transition-colors text-lg pointer-events-none z-10" />
+                                <div
+                                    ref={startRef}
+                                    role="button"
+                                    tabIndex={0}
+                                    onClick={() => setActivePicker(activePicker === 'start' ? null : 'start')}
+                                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setActivePicker(activePicker === 'start' ? null : 'start'); }}
+                                    className={'w-full pl-12 pr-4 py-3 bg-[var(--bg-secondary)]/50 border-2 rounded-2xl transition-all font-bold text-[var(--text-primary)] cursor-pointer flex items-center ' + (activePicker === 'start' ? 'border-[#69BEEB] dark:border-[#66D6A8] ring-2 ring-[#69BEEB]/15 dark:ring-[#66D6A8]/15' : 'border-transparent')}
+                                >
+                                    <span className={dateStart ? 'text-[var(--text-primary)]' : 'text-gray-400 dark:text-gray-600'}>
+                                        {dateStart ? formatDisplayDate(dateStart) : 'Seleccionar'}
+                                    </span>
+                                </div>
+                                {activePicker === 'start' && (
+                                    <CalendarPopover
+                                        value={dateStart || ''}
+                                        onChange={(v) => onDateChange('dateStart', v)}
+                                        onClose={closePicker}
+                                        triggerRef={startRef}
+                                        rangeStart={null}
+                                        rangeEnd={dateEnd}
+                                    />
+                                )}
                             </div>
                         </div>
                         <div className="space-y-2">
-                            <label htmlFor="date-end" className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1">Fecha Fin</label>
-                            <div className="relative">
-                                <Icon name="Calendar" className="absolute left-4 top-1/2 -translate-y-1/2 text-[#69BEEB] text-lg" />
-                                <input
-                                    id="date-end"
-                                    type="date"
-                                    value={dateEnd || ''}
-                                    onChange={(e) => onDateChange('dateEnd', e.target.value)}
-                                    className="w-full pl-12 pr-4 py-3 bg-[var(--bg-secondary)]/50 border-none rounded-2xl focus:ring-2 focus:ring-[#69BEEB]/20 transition-all font-bold text-[var(--text-primary)]"
-                                />
+                            <label className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1">Fecha Fin</label>
+                            <div className="relative group">
+                                <Icon name="Calendar" className="absolute left-4 top-1/2 -translate-y-1/2 text-[#69BEEB] dark:text-[#66D6A8] group-focus-within:text-[#69BEEB] dark:group-focus-within:text-[#66D6A8] transition-colors text-lg pointer-events-none z-10" />
+                                <div
+                                    ref={endRef}
+                                    role="button"
+                                    tabIndex={0}
+                                    onClick={() => setActivePicker(activePicker === 'end' ? null : 'end')}
+                                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setActivePicker(activePicker === 'end' ? null : 'end'); }}
+                                    className={'w-full pl-12 pr-4 py-3 bg-[var(--bg-secondary)]/50 border-2 rounded-2xl transition-all font-bold text-[var(--text-primary)] cursor-pointer flex items-center ' + (activePicker === 'end' ? 'border-[#69BEEB] dark:border-[#66D6A8] ring-2 ring-[#69BEEB]/15 dark:ring-[#66D6A8]/15' : 'border-transparent')}
+                                >
+                                    <span className={dateEnd ? 'text-[var(--text-primary)]' : 'text-gray-400 dark:text-gray-600'}>
+                                        {dateEnd ? formatDisplayDate(dateEnd) : 'Seleccionar'}
+                                    </span>
+                                </div>
+                                {activePicker === 'end' && (
+                                    <CalendarPopover
+                                        value={dateEnd || ''}
+                                        onChange={(v) => onDateChange('dateEnd', v)}
+                                        onClose={closePicker}
+                                        triggerRef={endRef}
+                                        rangeStart={dateStart}
+                                        rangeEnd={null}
+                                    />
+                                )}
+
+                                {/* Export info hint — floating near date-end */}
+                                {showExportHint && (
+                                    <div className="absolute top-0 -translate-y-full -mt-2 z-50 animate-fadeIn translate-x-20">
+                                        <div className="bg-white dark:bg-[#182420] rounded-2xl shadow-lg border border-[#4EC7B8]/20 dark:border-[#4EC7B8]/10 px-4 py-2.5 flex items-center gap-2.5 whitespace-nowrap">
+                                            <Info className="w-4 h-4 text-[#66D6A8] shrink-0" />
+                                            <span className="text-xs font-semibold text-gray-600 dark:text-gray-300 leading-snug">
+                                                Las exportaciones reflejan los filtros aplicados.
+                                            </span>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>

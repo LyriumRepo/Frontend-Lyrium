@@ -211,7 +211,7 @@ export const menuItems: MenuItem[] = [
         children: [
             { 
                 label: 'Bebés y recién nacidos', 
-                href: '/productos/bebes',
+                href: '/buscar?category=bebes-recacidos',
                 children: [
                     { 
                         label: 'Alimentación', 

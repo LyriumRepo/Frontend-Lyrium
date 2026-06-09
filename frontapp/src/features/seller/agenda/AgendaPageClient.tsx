@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import DayActivityModal from './components/DayActivityModal';
+import DayEventListModal from './components/DayEventListModal';
 import Icon from '@/components/ui/Icon';
 import BaseLoading from '@/components/ui/BaseLoading';
 import { useAgenda, generateCalendarDays } from '@/features/seller/agenda/hooks/useAgenda';
@@ -11,7 +12,7 @@ import type { AgendaFilterType } from '@/features/seller/agenda/types';
 export function AgendaPageClient() {
     const { events, currentMonth, isLoading, filterType, setFilterType, nextMonth, prevMonth } = useAgenda();
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
 
     const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
     const monthDisplay = `${monthNames[currentMonth.getMonth()]} ${currentMonth.getFullYear()}`;
@@ -116,13 +117,13 @@ export function AgendaPageClient() {
                                 onClick={() => {
                                     if (!cell.isOtherMonth) {
                                         setSelectedDate(cell.date);
-                                        setIsModalOpen(true);
+                                        setSelectedEventId(null);
                                     }
                                 }}
                                 onKeyDown={(e) => {
                                     if (!cell.isOtherMonth && (e.key === 'Enter' || e.key === ' ')) {
                                         setSelectedDate(cell.date);
-                                        setIsModalOpen(true);
+                                        setSelectedEventId(null);
                                     }
                                 }}
                                 className={`min-h-[140px] p-3 transition-all relative group
@@ -136,19 +137,38 @@ export function AgendaPageClient() {
                                 </span>
 
                                 <div className="space-y-1.5 mt-2">
-                                    {dayEvents.map(event => (
+                                    {dayEvents.slice(0, 2).map(event => (
                                         <div
                                             key={event.id}
-                                            className={`text-xs font-extrabold p-1.5 px-2 rounded-lg border-l-[3px] shadow-sm flex items-center gap-1.5 whitespace-nowrap overflow-hidden
+                                            role="button"
+                                            tabIndex={0}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setSelectedDate(cell.date);
+                                                setSelectedEventId(event.id);
+                                            }}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter' || e.key === ' ') {
+                                                    e.stopPropagation();
+                                                    setSelectedDate(cell.date);
+                                                    setSelectedEventId(event.id);
+                                                }
+                                            }}
+                                            className={`text-xs font-extrabold p-1.5 px-2 rounded-lg border-l-[3px] shadow-sm flex items-center gap-1.5 whitespace-nowrap overflow-hidden cursor-pointer
                                                 ${event.type === 'order'
-                                                    ? 'border-l-amber-500 bg-amber-500/10 text-amber-500'
-                                                    : 'border-l-sky-500 bg-sky-500/10 text-sky-500'}
+                                                    ? 'border-l-amber-500 bg-amber-500/10 text-amber-500 hover:bg-amber-500/20'
+                                                    : 'border-l-sky-500 bg-sky-500/10 text-sky-500 hover:bg-sky-500/20'}
                                             `}
                                         >
                                             <Icon name={event.type === 'order' ? 'Package' : 'Clock'} className="w-3 h-3 flex-shrink-0 fill-current" />
                                             <span className="truncate">{event.time} - {event.subtitle}</span>
                                         </div>
                                     ))}
+                                    {dayEvents.length > 2 && (
+                                        <div className="flex items-center justify-center gap-1 pt-1">
+                                            <span className="text-sm font-black tracking-[0.3em] text-[var(--text-secondary)]/60">···</span>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         );
@@ -156,11 +176,19 @@ export function AgendaPageClient() {
                 </div>
             </div>
 
-            <DayActivityModal
-                isOpen={isModalOpen}
+            <DayEventListModal
+                isOpen={selectedDate !== null}
                 date={selectedDate}
                 allEvents={events}
-                onClose={() => setIsModalOpen(false)}
+                onClose={() => { setSelectedDate(null); setSelectedEventId(null); }}
+                onSelectEvent={(id) => setSelectedEventId(id)}
+            />
+
+            <DayActivityModal
+                isOpen={selectedEventId !== null}
+                eventId={selectedEventId}
+                allEvents={events}
+                onClose={() => setSelectedEventId(null)}
             />
         </div>
     );

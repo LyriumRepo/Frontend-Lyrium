@@ -92,6 +92,8 @@ export default function SearchAutocomplete({
       } else {
         window.location.href = `/producto/${result.slug}`;
       }
+    } else if (result.type === 'service' && result.slug) {
+      window.location.href = `/servicios/${result.slug}`;
     } else if (result.type === 'category' && result.slug) {
       window.location.href = `/productos/${result.slug}`;
     }
@@ -165,6 +167,8 @@ export default function SearchAutocomplete({
                       <div className="flex items-center gap-2">
                         {result.type === 'product' ? (
                           <Package className="w-4 h-4 text-sky-500 flex-shrink-0" />
+                        ) : result.type === 'service' ? (
+                          <Package className="w-4 h-4 text-purple-500 flex-shrink-0" />
                         ) : (
                           <FolderOpen className="w-4 h-4 text-green-500 flex-shrink-0" />
                         )}
@@ -172,7 +176,7 @@ export default function SearchAutocomplete({
                           {result.titulo}
                         </span>
                       </div>
-                      {result.type === 'product' && result.precio !== undefined && (
+                      {(result.type === 'product' || result.type === 'service') && result.precio !== undefined && (
                                       <span className="text-sm font-bold text-sky-600 dark:text-[var(--color-success)]">
                           S/{result.precio.toFixed(2)}
                         </span>

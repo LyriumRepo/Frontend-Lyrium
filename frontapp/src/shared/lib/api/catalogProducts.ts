@@ -77,42 +77,96 @@ export async function searchProducts({
   sticker,
   category,
 }: SearchProductsParams = {}) {
-  const params = new URLSearchParams();
-  
-  if (query)    params.set('search', query);
-  if (perPage)  params.set('per_page', String(perPage));
-  if (minPrice) params.set('min_price', minPrice);
-  if (maxPrice) params.set('max_price', maxPrice);
-  if (onSale)   params.set('on_sale', 'true');
-  if (sticker)  params.set('sticker', sticker);
-  if (category) params.set('category', category);
+  try {
+    const params = new URLSearchParams();
+    
+    if (query)    params.set('search', query);
+    if (perPage)  params.set('per_page', String(perPage));
+    if (minPrice) params.set('min_price', minPrice);
+    if (maxPrice) params.set('max_price', maxPrice);
+    if (onSale)   params.set('on_sale', 'true');
+    if (sticker)  params.set('sticker', sticker);
+    if (category) params.set('category', category);
 
-  const res = await fetch(`${API}/products?${params.toString()}`, {
-    next: { revalidate: 60 },
-  });
+    const res = await fetch(`${API}/products?${params.toString()}`, {
+      next: { revalidate: 60 },
+    });
 
-  const json = await res.json();
-  return Array.isArray(json.data) ? json.data : [];
+    if (!res.ok) return [];
+    const json = await res.json();
+    return Array.isArray(json.data) ? json.data : [];
+  } catch {
+    return [];
+  }
 }
 
 export async function searchCategories(query: string, perPage = 10) {
-  const res = await fetch(
-    `${API}/categories?search=${encodeURIComponent(query)}&per_page=${perPage}`,
-    {
-      next: { revalidate: 60 }
-    }
-  );
+  try {
+    const res = await fetch(
+      `${API}/categories?search=${encodeURIComponent(query)}&per_page=${perPage}`,
+      {
+        next: { revalidate: 60 }
+      }
+    );
 
-  if (!res.ok) {
-    console.error('Failed to search categories', res.status);
+    if (!res.ok) return [];
+
+    const json = await res.json();
+
+    return Array.isArray(json.data)
+      ? json.data
+      : [];
+  } catch {
     return [];
   }
+}
 
-  const json = await res.json();
+export async function searchServices(params: {
+  query?: string;
+  perPage?: number;
+  category?: string;
+} = {}) {
+  try {
+    const { query = '', perPage = 10, category } = params;
+    const urlParams = new URLSearchParams();
 
-  return Array.isArray(json.data)
-    ? json.data
-    : [];
+    if (query) urlParams.set('search', query);
+    if (perPage) urlParams.set('per_page', String(perPage));
+    if (category) urlParams.set('category_slug', category);
+
+    const res = await fetch(`${API}/services?${urlParams.toString()}`, {
+      next: { revalidate: 60 },
+    });
+
+    if (!res.ok) return [];
+
+    const json = await res.json();
+    return Array.isArray(json.data) ? json.data : [];
+  } catch {
+    return [];
+  }
+}
+
+export function mapServiceToLocal(service: any): Producto | null {
+  if (!service) return null;
+
+  const price = Number(service.price || 0);
+
+  return {
+    id: Number(service.id),
+    titulo: service.name,
+    precio: price,
+    imagen: service.image || '/img/no-image.png',
+    categoria: service.category || '',
+    slug: service.slug,
+    descripcion: service.description,
+    enlace: `/servicios/${service.slug}`,
+    vendedor: service.store_name
+      ? { slug: service.store?.slug ?? '', nombre: service.store_name }
+      : undefined,
+    tipo: 'service',
+    duration_minutes: service.duration_minutes,
+  };
 }
 
 
@@ -146,5 +200,6 @@ export function mapCatalogProductToLocal(product: any): Producto {
           nombre: product.store.name,
         }
       : undefined,
+    tipo: 'product',
   };
 }

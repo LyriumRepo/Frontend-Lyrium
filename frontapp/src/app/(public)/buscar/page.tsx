@@ -16,6 +16,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   const repo = new LaravelHomeRepository();
   let categoriasServicios: Categoria[] = [];
   let categoriasProductos: Categoria[] = [];
+  let categoryName = '';
 
   try {
     const [serviceCats, productCats] = await Promise.all([
@@ -24,6 +25,25 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     ]);
     categoriasServicios = serviceCats;
     categoriasProductos = productCats;
+
+    if (category && !q) {
+      const allCats = [...serviceCats, ...productCats];
+      const found = allCats.find(c => c.slug === category || c.slug === category.split('/').pop());
+      if (found) {
+        categoryName = found.nombre;
+      } else {
+        // Fallback: fetch category by slug (cubre categorías de 3er nivel)
+        const apiUrl = process.env.NEXT_PUBLIC_LARAVEL_API_URL || 'http://127.0.0.1:8000/api';
+        const res = await fetch(`${apiUrl}/categories/slug/${category}`, {
+          headers: { Accept: 'application/json' },
+          next: { revalidate: 60 },
+        });
+        if (res.ok) {
+          const json = await res.json();
+          if (json.data?.name) categoryName = json.data.name;
+        }
+      }
+    }
   } catch {
     // fallback: arrays vacíos, la barra igual se renderiza
   }
@@ -52,9 +72,9 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-[var(--text-primary)]">
-            {q}
+            {categoryName || q || (category ? `Categoría: ${category}` : '')}
           </h1>
-          {category && (
+          {category && q && (
             <p className="text-gray-500 dark:text-[var(--text-secondary)] mt-2">
               Filtrando por categoría: {category}
             </p>

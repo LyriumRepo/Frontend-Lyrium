@@ -37,6 +37,8 @@ export interface Producto {
   };
   categorias?: string[];
   descripcionCorta?: string;
+  tipo?: 'product' | 'service';
+  duration_minutes?: number;
 }
 
 export interface Marca {
@@ -84,7 +86,7 @@ export interface HomeData {
 
 export interface SearchResult {
   id: number;
-  type: 'product' | 'category';
+  type: 'product' | 'service' | 'category';
   titulo: string;
   precio?: number;
   imagen: string;

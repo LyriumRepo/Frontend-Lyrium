@@ -8,7 +8,7 @@ import {
   createColumnHelper,
 } from '@tanstack/react-table';
 import { Order, OrderType } from '@/features/seller/sales/types';
-import { formatCurrency, formatDate } from '@/shared/lib/utils/formatters';
+import { formatCurrency } from '@/shared/lib/utils/formatters';
 import Icon from '@/components/ui/Icon';
 
 const columnHelper = createColumnHelper<Order>();
@@ -168,7 +168,7 @@ export default function SalesTable({
   const columns = React.useMemo(
     () => [
       columnHelper.accessor('orderNumber', {
-        header: 'Orden',
+        header: 'Número de Orden',
         cell: (info) => (
           <span className="text-xs font-black text-sky-600 bg-sky-50 px-2 py-1 rounded-lg border border-sky-100 font-mono tracking-tight whitespace-nowrap truncate max-w-[160px] block">
             {info.getValue()}
@@ -188,7 +188,7 @@ export default function SalesTable({
         ),
       }),
       columnHelper.accessor('itemsSummary', {
-        header: 'Resumen',
+        header: 'Concepto',
         cell: (info) => (
           <span className="text-xs font-semibold text-[var(--text-secondary)] truncate max-w-[200px] block">
             {info.getValue() || '-'}
@@ -197,7 +197,7 @@ export default function SalesTable({
       }),
       columnHelper.display({
         id: 'deliveryType',
-        header: 'Tipo de atención / entrega',
+        header: 'Modalidad',
         cell: (info) => <DeliveryBadge order={info.row.original} />,
       }),
       columnHelper.accessor('unidades', {
@@ -216,7 +216,7 @@ export default function SalesTable({
         },
       }),
       columnHelper.accessor('estado', {
-        header: 'Estado',
+        header: 'Estado de la Orden',
         cell: (info) => {
           const order = info.row.original;
           const config = ORDER_STATUS_CONFIG[order.estado] ?? { class: 'bg-gray-100 text-gray-600' };
@@ -233,11 +233,19 @@ export default function SalesTable({
       }),
       columnHelper.accessor('fecha', {
         header: 'Fecha',
-        cell: (info) => (
-          <span className="text-xs font-bold text-[var(--text-secondary)] whitespace-nowrap">
-            {formatDate(info.getValue())}
-          </span>
-        ),
+        cell: (info) => {
+          const d = new Date(info.getValue());
+          return (
+            <div className="leading-tight">
+              <div className="text-xs font-bold text-[var(--text-secondary)] whitespace-nowrap">
+                {d.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+              </div>
+              <div className="text-[10px] text-[var(--text-placeholder)] whitespace-nowrap mt-0.5">
+                {d.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })}
+              </div>
+            </div>
+          );
+        },
       }),
       columnHelper.display({
         id: 'actions',
@@ -295,7 +303,7 @@ export default function SalesTable({
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-[var(--bg-secondary)]">
-                {['Orden', 'Tipo', 'Cliente', 'Resumen', 'Atención / Entrega', 'Cant.', 'Pago', 'Estado', 'Total', 'Fecha', 'Acciones'].map((h) => (
+                {['Número de Orden', 'Tipo', 'Cliente', 'Concepto', 'Modalidad', 'Cant.', 'Pago', 'Estado de la Orden', 'Total', 'Fecha', 'Acciones'].map((h) => (
                   <th key={h} className="px-6 py-5 text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest border-b border-[var(--border-subtle)]">
                     {h}
                   </th>
