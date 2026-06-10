@@ -5,10 +5,11 @@
  * Solo crea la orden — la carga del carrito se hace en useCartLoader.
  */
 
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useCheckoutStore } from '@/store/checkoutStore';
 import { orderApi } from '@/shared/lib/api/OrdenRepository';
 import { addressApi } from '@/shared/lib/api/addressRepository';
+import { cartApi } from '@/shared/lib/api/cartRepository';
 import type { CartItem } from '@/store/checkoutStore';
 
 interface SubmitOrderResult {
@@ -32,6 +33,56 @@ export function useCheckoutSubmit(): UseCheckoutSubmitReturn {
   const setProcessing = useCheckoutStore((s) => s.setProcessing);
   const setIsSubmitting = useCheckoutStore((s) => s.setIsSubmitting);
   const setSubmitError = useCheckoutStore((s) => s.setSubmitError);
+  const setCartItems = useCheckoutStore((s) => s.setCartItems);
+  const setCartLoaded = useCheckoutStore((s) => s.setCartLoaded);
+  const setCartLoading = useCheckoutStore((s) => s.setCartLoading);
+  const cartLoaded = useCheckoutStore((s) => s.cartLoaded);
+
+  // ── Safety net: cargar carrito si useCartLoader no lo hizo ─────────────
+  useEffect(() => {
+    if (cartLoaded) return;
+
+    let cancelled = false;
+
+    async function loadCart() {
+      try {
+        setCartLoading(true);
+        const cart = await cartApi.getCart();
+
+        if (cancelled) return;
+
+        if (!cart.items || cart.items.length === 0) {
+          setCartItems([]);
+          setCartLoaded(true);
+          return;
+        }
+
+        const checkoutItems: CartItem[] = cart.items.map((item) => ({
+          id: item.productId,
+          storeId: 0,
+          storeName: '',
+          name: item.product.name,
+          image: item.product.image ?? '',
+          price: item.product.price,
+          originalPrice: item.product.price,
+          quantity: item.quantity,
+          selected: true,
+        }));
+
+        setCartItems(checkoutItems);
+        setCartLoaded(true);
+      } catch (err) {
+        if (!cancelled) {
+          console.error('Error cargando carrito en checkout:', err);
+        }
+      } finally {
+        if (!cancelled) setCartLoading(false);
+      }
+    }
+
+    loadCart();
+    return () => { cancelled = true; };
+  }, [cartLoaded, setCartItems, setCartLoaded, setCartLoading]);
 
   const submitOrder =
     useCallback(async (): Promise<SubmitOrderResult | null> => {

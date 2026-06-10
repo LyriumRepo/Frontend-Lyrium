@@ -59,6 +59,12 @@ export function useCustomerChat(initialConversationId?: string) {
     loadSellers();
   }, [loadConversations, loadSellers]);
 
+  // Polling: reload conversations every 10s for real-time updates
+  useEffect(() => {
+    const id = setInterval(() => loadConversations(), 10000);
+    return () => clearInterval(id);
+  }, [loadConversations]);
+
   useEffect(() => {
     if (activeConversationId) {
       chatApi.getMessages(activeConversationId).then(result => {

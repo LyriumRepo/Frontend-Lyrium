@@ -1,61 +1,86 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useSellerChat } from '@/features/seller/chat/hooks/useSellerChat';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import ChatLayout from '@/components/shared/chat/ChatLayout';
+import MessageBubble from '@/components/shared/chat/MessageBubble';
 import MessageInput from '@/components/shared/chat/MessageInput';
+import ConversationList from '@/components/shared/chat/ConversationList';
 import BaseLoading from '@/components/ui/BaseLoading';
-import { mockCustomers } from '@/features/seller/chat/hooks/useSellerChat';
 import { ChatCategory } from '@/features/seller/chat/types';
+import type { Message as BubbleMessage } from '@/components/shared/chat/MessageBubble';
+import type { Conversation } from '@/components/shared/chat/ConversationList';
+import type { ChatCustomer } from '@/shared/lib/api/chatRepository';
 
 function NewChatForm({
     onSubmit,
     onCancel,
-    isSubmitting
+    isSubmitting,
+    stores = [],
+    customers = []
 }: {
-    onSubmit: (data: { customerId: string; category: ChatCategory; subject: string }) => void;
+    onSubmit: (data: { storeId: string; customerId: string; category: ChatCategory; subject: string }) => void;
     onCancel: () => void;
     isSubmitting: boolean;
+    stores: { id: string; name: string }[];
+    customers: ChatCustomer[];
 }) {
-    const [customerId, setCustomerId] = useState(mockCustomers[0].id);
+    const [storeId, setStoreId] = useState(stores[0]?.id ?? '');
+    const [customerId, setCustomerId] = useState(customers[0]?.id ?? '');
     const [category, setCategory] = useState<ChatCategory>('informacion');
     const [subject, setSubject] = useState('');
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!subject.trim()) return;
-        onSubmit({ customerId, category, subject });
+        if (!subject.trim() || !storeId) return;
+        onSubmit({ storeId, customerId, category, subject });
     };
 
     return (
-        <div className="flex flex-col h-full bg-[var(--bg-card)] rounded-3xl border border-gray-200 shadow-sm overflow-hidden">
-            <div className="p-4 border-b border-gray-100">
-                <h3 className="font-semibold text-gray-900 dark:text-white">Nuevo Chat</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-300">Inicia una conversación con un cliente</p>
+        <div className="flex flex-col h-full bg-[var(--bg-card)] rounded-3xl border border-[var(--border-subtle)] shadow-sm overflow-hidden">
+            <div className="p-4 border-b border-[var(--border-subtle)]">
+                <h3 className="text-sm font-black uppercase tracking-wider text-[var(--text-primary)]">Nuevo Chat</h3>
+                <p className="text-xs text-[var(--text-secondary)] mt-1">Inicia una conversación con un cliente</p>
             </div>
 
             <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-4">
                 <div>
-                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-400 mb-1">Cliente</label>
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-1.5">Tu Tienda</label>
                     <select
-                        value={customerId}
-                        onChange={(e) => setCustomerId(e.target.value)}
-                        className="w-full px-4 py-2 bg-gray-100 dark:bg-[var(--bg-secondary)] rounded-xl outline-none focus:ring-2 focus:ring-sky-500 dark:focus:ring-[var(--icons-green)]"
+                        value={storeId}
+                        onChange={(e) => setStoreId(e.target.value)}
+                        className="w-full px-4 py-2.5 bg-[var(--bg-secondary)] rounded-xl outline-none text-sm font-medium text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--turquesa-500)]/20 border border-[var(--border-subtle)]"
                         required
                     >
-                        {mockCustomers.map(c => (
-                            <option key={c.id} value={c.id}>{c.name}</option>
+                        {stores.length === 0 && <option value="">Sin tiendas</option>}
+                        {stores.map(s => (
+                            <option key={s.id} value={s.id}>{s.name}</option>
                         ))}
                     </select>
                 </div>
 
                 <div>
-                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-400 mb-1">Categoría</label>
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-1.5">Cliente</label>
+                    <select
+                        value={customerId}
+                        onChange={(e) => setCustomerId(e.target.value)}
+                        className="w-full px-4 py-2.5 bg-[var(--bg-secondary)] rounded-xl outline-none text-sm font-medium text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--turquesa-500)]/20 border border-[var(--border-subtle)]"
+                        required
+                    >
+                        {customers.length === 0 && <option value="">Sin clientes</option>}
+                        {customers.map(c => (
+                            <option key={c.id} value={c.id}>{c.name} — {c.email}</option>
+                        ))}
+                    </select>
+                </div>
+
+                <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-1.5">Categoría</label>
                     <select
                         value={category}
                         onChange={(e) => setCategory(e.target.value as ChatCategory)}
-                        className="w-full px-4 py-2 bg-gray-100 dark:bg-[var(--bg-secondary)] rounded-xl outline-none focus:ring-2 focus:ring-sky-500 dark:focus:ring-[var(--icons-green)]"
+                        className="w-full px-4 py-2.5 bg-[var(--bg-secondary)] rounded-xl outline-none text-sm font-medium text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--turquesa-500)]/20 border border-[var(--border-subtle)]"
                         required
                     >
                         <option value="informacion">Solicitud de Información</option>
@@ -67,13 +92,13 @@ function NewChatForm({
                 </div>
 
                 <div>
-                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-400 mb-1">Asunto</label>
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-1.5">Asunto</label>
                     <input
                         type="text"
                         value={subject}
                         onChange={(e) => setSubject(e.target.value)}
                         placeholder="Describe brevemente el motivo"
-                        className="w-full px-4 py-2 bg-gray-100 dark:bg-[var(--bg-secondary)] rounded-xl outline-none focus:ring-2 focus:ring-sky-500 dark:focus:ring-[var(--icons-green)]"
+                        className="w-full px-4 py-2.5 bg-[var(--bg-secondary)] rounded-xl outline-none text-sm font-medium text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--turquesa-500)]/20 border border-[var(--border-subtle)]"
                         required
                     />
                 </div>
@@ -82,14 +107,14 @@ function NewChatForm({
                     <button
                         type="button"
                         onClick={onCancel}
-                        className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-xl font-medium hover:bg-gray-300 transition-colors"
+                        className="flex-1 px-4 py-2.5 bg-gray-200 dark:bg-[var(--bg-secondary)] text-gray-700 dark:text-[var(--text-secondary)] rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-gray-300 dark:hover:bg-[#2A3F33] transition-colors"
                     >
                         Cancelar
                     </button>
                     <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="flex-1 px-4 py-2 bg-sky-500 text-white rounded-xl font-medium hover:bg-sky-600 dark:bg-[var(--brand-green)] dark:hover:bg-[var(--brand-green-hover)] border dark:border-[var(--border-subtle)] transition-colors disabled:opacity-50"
+                        className="flex-1 px-4 py-2.5 bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--verde-500)] text-white rounded-xl font-bold text-xs uppercase tracking-wider hover:opacity-90 transition-all disabled:opacity-50 shadow-lg shadow-[var(--turquesa-500)]/20"
                     >
                         {isSubmitting ? 'Iniciando...' : 'Iniciar Chat'}
                     </button>
@@ -102,6 +127,8 @@ function NewChatForm({
 export function ChatPageClient() {
     const {
         conversations,
+        customers,
+        stores,
         totalConversations,
         activeConversation,
         setActiveConversation,
@@ -131,21 +158,10 @@ export function ChatPageClient() {
         sendMessage(message);
     };
 
-    const formatTime = (timestamp: string) => {
-        const date = new Date(timestamp);
-        return date.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
-    };
-
-    const formatDate = (timestamp: string) => {
-        const date = new Date(timestamp);
-        const today = new Date();
-        const yesterday = new Date(today);
-        yesterday.setDate(yesterday.getDate() - 1);
-
-        if (date.toDateString() === today.toDateString()) return 'Hoy';
-        if (date.toDateString() === yesterday.toDateString()) return 'Ayer';
-        return date.toLocaleDateString('es-PE', { day: 'numeric', month: 'short' });
-    };
+    const handleConversationSelect = useCallback((id: string) => {
+        setActiveConversation(id);
+        setIsMobileListVisible(false);
+    }, [setActiveConversation]);
 
     const filteredConversations = conversations.filter(conv => {
         if (!filterValue) return true;
@@ -155,14 +171,31 @@ export function ChatPageClient() {
         return conv.category === filterValue;
     });
 
+    const mappedConversations: Conversation[] = filteredConversations.map(conv => ({
+        id: conv.id,
+        name: conv.customerName,
+        lastMessage: conv.lastMessage,
+        lastMessageTime: conv.lastMessageTime,
+        unreadCount: conv.unreadCount,
+        category: conv.category,
+        isActive: activeConversation?.id === conv.id,
+    }));
+
+    const mappedMessages: BubbleMessage[] = messages.map(msg => ({
+        id: msg.id,
+        sender: msg.senderId,
+        content: msg.content,
+        timestamp: msg.timestamp,
+        read_at: msg.read ? msg.timestamp : null,
+    }));
+
     const listContent = (
-        <div className="divide-y divide-gray-100 h-full overflow-y-auto">
-            {/* ── Cabecera con filtro ── */}
-            <div className="p-4 border-b border-gray-100">
+        <div className="flex flex-col h-full">
+            <div className="p-4 border-b border-[var(--border-subtle)] shrink-0">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h3 className="font-semibold text-gray-900 dark:text-white">Conversaciones</h3>
-                        <p className="text-sm text-gray-500 dark:text-gray-300">
+                        <h3 className="text-sm font-black uppercase tracking-wider text-[var(--text-primary)]">Conversaciones</h3>
+                        <p className="text-[10px] font-medium text-[var(--text-secondary)] mt-0.5">
                             {filteredConversations.length} chats
                         </p>
                     </div>
@@ -171,34 +204,36 @@ export function ChatPageClient() {
                             setShowFilter(prev => !prev);
                             setFilterValue('');
                         }}
-                        className={`p-2 rounded-xl transition-colors text-xs font-medium border ${showFilter
-                            ? 'bg-sky-100 text-sky-600 border-sky-200 dark:bg-[var(--brand-green)] dark:text-white dark:border-transparent'
-                            : 'bg-gray-100 text-gray-500 border-gray-200 hover:bg-gray-200 dark:bg-[var(--bg-secondary)] dark:border-transparent'
-                            }`}
+                        className={`px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-wider border transition-colors shrink-0 ${
+                            showFilter
+                                ? 'bg-[var(--turquesa-500)] text-white border-[var(--turquesa-500)] shadow-sm'
+                                : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:bg-gray-200 dark:hover:bg-[#2A3F33]'
+                        }`}
                     >
                         Filtrar
                     </button>
                 </div>
 
-                {/* ── Panel de filtro ── */}
                 {showFilter && (
                     <div className="mt-3 space-y-2">
-                        <div className="flex rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 text-xs font-medium">
+                        <div className="flex rounded-xl overflow-hidden border border-[var(--border-subtle)] text-[10px] font-bold">
                             <button
                                 onClick={() => { setFilterType('cliente'); setFilterValue(''); }}
-                                className={`flex-1 py-1.5 transition-colors ${filterType === 'cliente'
-                                    ? 'bg-sky-500 dark:bg-[var(--brand-green)] text-white'
-                                    : 'bg-gray-100 dark:bg-[var(--bg-secondary)] text-gray-500 hover:bg-gray-200'
-                                    }`}
+                                className={`flex-1 py-1.5 uppercase tracking-wider transition-colors ${
+                                    filterType === 'cliente'
+                                        ? 'bg-[var(--turquesa-500)] text-white'
+                                        : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-gray-200 dark:hover:bg-[#2A3F33]'
+                                }`}
                             >
                                 Cliente
                             </button>
                             <button
                                 onClick={() => { setFilterType('categoria'); setFilterValue(''); }}
-                                className={`flex-1 py-1.5 transition-colors ${filterType === 'categoria'
-                                    ? 'bg-sky-500 dark:bg-[var(--brand-green)] text-white'
-                                    : 'bg-gray-100 dark:bg-[var(--bg-secondary)] text-gray-500 hover:bg-gray-200'
-                                    }`}
+                                className={`flex-1 py-1.5 uppercase tracking-wider transition-colors ${
+                                    filterType === 'categoria'
+                                        ? 'bg-[var(--turquesa-500)] text-white'
+                                        : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-gray-200 dark:hover:bg-[#2A3F33]'
+                                }`}
                             >
                                 Categoría
                             </button>
@@ -210,13 +245,13 @@ export function ChatPageClient() {
                                 value={filterValue}
                                 onChange={(e) => setFilterValue(e.target.value)}
                                 placeholder="Buscar cliente..."
-                                className="w-full px-3 py-1.5 text-sm bg-gray-100 dark:bg-[var(--bg-secondary)] rounded-xl outline-none focus:ring-2 focus:ring-sky-500 dark:focus:ring-[var(--icons-green)]"
+                                className="w-full px-3 py-1.5 text-sm bg-[var(--bg-secondary)] rounded-xl outline-none text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--turquesa-500)]/20 border border-[var(--border-subtle)]"
                             />
                         ) : (
                             <select
                                 value={filterValue}
                                 onChange={(e) => setFilterValue(e.target.value)}
-                                className="w-full px-3 py-1.5 text-sm bg-gray-100 dark:bg-[var(--bg-secondary)] rounded-xl outline-none focus:ring-2 focus:ring-sky-500 dark:focus:ring-[var(--icons-green)]"
+                                className="w-full px-3 py-1.5 text-sm bg-[var(--bg-secondary)] rounded-xl outline-none text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--turquesa-500)]/20 border border-[var(--border-subtle)]"
                             >
                                 <option value="">Todas las categorías</option>
                                 <option value="informacion">Solicitud de Información</option>
@@ -230,146 +265,63 @@ export function ChatPageClient() {
                 )}
             </div>
 
-            {/* ── Lista filtrada ── */}
-            {filteredConversations.map((conv) => (
-                <button
-                    key={conv.id}
-                    onClick={() => {
-                        setActiveConversation(conv.id);
-                        setIsMobileListVisible(false);
-                    }}
-                    className={`w-full p-4 text-left hover:bg-gray-50 dark:hover:bg-[var(--brand-green)] transition-colors ${activeConversation?.id === conv.id ? 'bg-sky-50 dark:bg-[var(--brand-green-hover)]' : ''
-                        }`}
-                >
-                    <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 rounded-full bg-sky-100 flex items-center justify-center text-sky-600 dark:text-[var(--brand-green)] font-semibold">
-                            {conv.customerName.charAt(0)}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between">
-                                <span className="font-medium text-gray-900 dark:text-white truncate">{conv.customerName}</span>
-                                <span className="text-xs text-gray-400">{formatDate(conv.lastMessageTime)}</span>
-                            </div>
-                            <div className="flex items-center justify-between mt-1">
-                                <span className="text-sm text-gray-500 dark:text-gray-300 truncate">{conv.lastMessage}</span>
-                                {conv.unreadCount > 0 && (
-                                    <span className="ml-2 px-2 py-0.5 text-xs font-medium bg-sky-500 dark:bg-[var(--icons-green)] text-white dark:text-[var(--brand-green-hover)] rounded-full">
-                                        {conv.unreadCount}
-                                    </span>
-                                )}
-                            </div>
-                            {conv.category && (
-                                <div className="mt-1">
-                                    <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 dark:bg-[var(--bg-secondary)] text-gray-500 dark:text-gray-400">
-                                        {{
-                                            informacion: 'Solicitud de Información',
-                                            positivo: 'Comentario Positivo',
-                                            negativo: 'Comentario Negativo',
-                                            logistica: 'Logística ',
-                                            facturacion: 'Soporte de Facturación',
-                                        }[conv.category]}
-                                    </span>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </button>
-            ))}
-
-            {filteredConversations.length === 0 && (
-                <div className="p-8 text-center text-gray-500">
-                    <p>{filterValue ? 'Sin resultados para este filtro' : 'No hay conversaciones'}</p>
-                </div>
-            )}
+            <ConversationList
+                conversations={mappedConversations}
+                activeId={activeConversation?.id}
+                onSelect={handleConversationSelect}
+                accentColor="turquesa"
+            />
         </div>
     );
 
     const chatContent = activeConversation ? (
         <div className="flex flex-col h-full">
-            <div className="p-4 border-b border-gray-100 bg-white dark:bg-[var(--bg-secondary)]">
+            <div className="p-4 border-b border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-secondary)] shrink-0">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-sky-100 flex items-center justify-center text-sky-600 dark:text-[var(--brand-green)] font-semibold">
+                    <div className="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-[var(--turquesa-500)] to-[var(--verde-500)] flex items-center justify-center text-white font-black text-sm shadow-sm">
                         {activeConversation.customerName.charAt(0)}
                     </div>
-                    <div>
-                        <h3 className="font-semibold text-gray-900 dark:text-white">{activeConversation.customerName}</h3>
+                    <div className="min-w-0">
+                        <h3 className="text-sm font-black uppercase tracking-wider text-[var(--text-primary)] truncate">
+                            {activeConversation.customerName}
+                        </h3>
                         {activeConversation.subject && (
-                            <p className="text-sm text-gray-500 dark:text-gray-300">{activeConversation.subject}</p>
+                            <p className="text-xs text-[var(--text-secondary)]">{activeConversation.subject}</p>
                         )}
                     </div>
                 </div>
             </div>
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-white dark:bg-[var(--bg-secondary)]">
-                {messages.map((msg) => {
-                    const isSeller = msg.senderType === 'seller';
 
-                    return (
-                        <div
-                            key={msg.id}
-                            className={`flex ${isSeller ? 'justify-end' : 'justify-start'}`}
-                        >
-                            <div
-                                className={`flex max-w-[50%] items-end gap-3 ${isSeller ? 'flex-row-reverse' : 'flex-row'
-                                    }`}
-                            >
-                                <div
-                                    className={`w-9 h-9 shrink-0 rounded-full flex items-center justify-center text-[10px] font-black shadow-sm ${isSeller
-                                        ? 'bg-emerald-500 text-white'
-                                        : 'bg-sky-500 text-white'
-                                        }`}
-                                >
-                                    {isSeller ? 'Tú' : activeConversation.customerName.charAt(0)}
-                                </div>
-
-                                <div
-                                    className={`relative rounded-3xl px-4 py-3 shadow-sm border backdrop-blur-sm ${isSeller
-                                        ? 'bg-gradient-to-br from-emerald-500 to-emerald-600 text-white border-emerald-400/20 rounded-br-md'
-                                        : 'bg-white dark:bg-gray-100 text-slate-800 border-gray-200 rounded-bl-md'
-                                        }`}
-                                >
-                                    <div className="mb-1 flex items-center gap-2">
-                                        <p
-                                            className={`text-[11px] font-black uppercase tracking-[0.16em] ${isSeller ? 'text-emerald-100' : 'text-sky-600'
-                                                }`}
-                                        >
-                                            {isSeller ? 'Tú' : activeConversation.customerName}
-                                        </p>
-                                        <span
-                                            className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${isSeller
-                                                ? 'bg-white/15 text-emerald-50'
-                                                : 'bg-sky-50 text-sky-700'
-                                                }`}
-                                        >
-                                            {isSeller ? 'Vendedor' : 'Cliente'}
-                                        </span>
-                                    </div>
-
-                                    <p className="text-sm leading-relaxed whitespace-pre-wrap break-all">
-                                        {msg.content}
-                                    </p>
-
-                                    <div className="mt-2 flex justify-end">
-                                        <p
-                                            className={`text-[10px] font-medium ${isSeller ? 'text-emerald-100/80' : 'text-gray-400'
-                                                }`}
-                                        >
-                                            {formatTime(msg.timestamp)}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    );
-                })}
+            <div className="flex-1 overflow-y-auto bg-white dark:bg-[var(--bg-secondary)]">
+                <MessageBubble
+                    messages={mappedMessages}
+                    isSentOverride={(msg) => {
+                        const original = messages.find(m => m.id === msg.id);
+                        return original?.senderType === 'seller';
+                    }}
+                    meta={{
+                        currentUserName: 'Tú',
+                        currentUserRole: 'Vendedor',
+                        otherName: activeConversation.customerName,
+                        otherRole: 'Cliente',
+                        showAvatar: true,
+                    }}
+                />
                 <div ref={messagesEndRef} />
             </div>
+
             <MessageInput onSend={handleSendMessage} placeholder="Escribe un mensaje..." />
         </div>
     ) : (
-        <div className="flex-1 flex items-center justify-center text-gray-500">
-            <div className="text-center">
-                <p className="text-lg mb-2">Selecciona una conversación</p>
-                <p className="text-sm">Elige un chat para comenzar a chatear</p>
+        <div className="flex-1 flex items-center justify-center">
+            <div className="text-center px-8">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[var(--turquesa-500)]/10 to-[var(--verde-500)]/10 flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-8 h-8 text-[var(--turquesa-500)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                </div>
+                <p className="text-sm font-black uppercase tracking-wider text-[var(--text-primary)] mb-1">Selecciona una conversación</p>
+                <p className="text-xs text-[var(--text-secondary)]">Elige un chat de la lista para comenzar</p>
             </div>
         </div>
     );
@@ -399,7 +351,7 @@ export function ChatPageClient() {
                     !showNewChatForm ? (
                         <button
                             onClick={() => setShowNewChatForm(true)}
-                            className="px-4 py-2 bg-white text-sky-600 dark:text-[var(--brand-green)] rounded-xl font-medium hover:bg-sky-50 transition-colors"
+                            className="px-4 py-2 bg-white dark:bg-[var(--bg-secondary)] text-[var(--turquesa-500)] dark:text-[var(--turquesa-500)] rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-gray-50 dark:hover:bg-[#2A3F33] transition-colors border border-[var(--border-subtle)] shadow-sm"
                         >
                             + Nuevo Chat
                         </button>
@@ -411,6 +363,8 @@ export function ChatPageClient() {
                 <div className="flex-1 flex items-center justify-center px-8">
                     <div className="w-full max-w-xl">
                         <NewChatForm
+                            stores={stores}
+                            customers={customers}
                             onSubmit={(data) => {
                                 createConversation(data);
                                 setShowNewChatForm(false);

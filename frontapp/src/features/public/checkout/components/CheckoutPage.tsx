@@ -15,7 +15,6 @@ import OrderConfirmation from './step3/OrderConfirmation';
 import BoletaView from './step4/BoletaView';
 import ModalPostCompra from './modals/ModalPostCompra';
 import ModalRegistroUsuario from './modals/ModalRegistroUsuario';
-import IzipayCheckoutForm from './IzipayCheckoutForm';
 
 export default function CheckoutPage() {
   const currentStep = useCheckoutStore((s) => s.currentStep);

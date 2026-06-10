@@ -1,188 +1,221 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { SellerConversation, SellerMessage, SellerChatFilters, ChatCategory } from '../types';
-
-export const mockCustomers = [
-    { id: 'customer-1', name: 'Ana Torres' },
-    { id: 'customer-2', name: 'Luis Ramírez' },
-    { id: 'customer-3', name: 'Sofía Mendoza' },
-];
-
-const mockConversations: SellerConversation[] = [
-    {
-        id: '1',
-        customerId: 'customer-1',
-        customerName: 'Ana Torres',
-        lastMessage: 'Gracias, esperaré el envío.',
-        lastMessageTime: '2025-03-11T10:30:00',
-        unreadCount: 2,
-        status: 'active',
-        category: 'logistica',
-        subject: 'Consulta sobre envío'
-    },
-    {
-        id: '2',
-        customerId: 'customer-2',
-        customerName: 'Luis Ramírez',
-        lastMessage: '¿Tienen ese modelo en azul?',
-        lastMessageTime: '2025-03-10T15:45:00',
-        unreadCount: 0,
-        status: 'active',
-        category: 'informacion',
-        subject: 'Disponibilidad de producto'
-    }
-];
-
-const mockMessages: Record<string, SellerMessage[]> = {
-    '1': [
-        {
-            id: 'm1',
-            conversationId: '1',
-            senderId: 'customer-1',
-            senderName: 'Ana Torres',
-            senderType: 'customer',
-            content: 'Hola, ¿cuándo llega mi pedido?',
-            timestamp: '2025-03-11T10:00:00',
-            read: true
-        },
-        {
-            id: 'm2',
-            conversationId: '1',
-            senderId: 'seller-1',
-            senderName: 'Yo',
-            senderType: 'seller',
-            content: 'Hola Ana, tu pedido está en camino, llegará mañana.',
-            timestamp: '2025-03-11T10:15:00',
-            read: true
-        },
-        {
-            id: 'm3',
-            conversationId: '1',
-            senderId: 'customer-1',
-            senderName: 'Ana Torres',
-            senderType: 'customer',
-            content: 'Gracias, esperaré el envío.',
-            timestamp: '2025-03-11T10:30:00',
-            read: false
-        }
-    ],
-    '2': [
-        {
-            id: 'm4',
-            conversationId: '2',
-            senderId: 'customer-2',
-            senderName: 'Luis Ramírez',
-            senderType: 'customer',
-            content: '¿Tienen ese modelo en azul?',
-            timestamp: '2025-03-10T15:45:00',
-            read: false
-        }
-    ]
-};
+import { chatApi, ChatCustomer } from '@/shared/lib/api/chatRepository';
 
 export function useSellerChat() {
-    const [conversations, setConversations] = useState<SellerConversation[]>(mockConversations);
-    const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
-    const [filters, setFilters] = useState<SellerChatFilters>({
-        status: 'all',
-        search: ''
-    });
-    const [isLoading, setIsLoading] = useState(false);
+  const [conversations, setConversations] = useState<SellerConversation[]>([]);
+  const [customers, setCustomers] = useState<ChatCustomer[]>([]);
+  const [stores, setStores] = useState<{ id: string; name: string }[]>([]);
+  const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
+  const [filters, setFilters] = useState<SellerChatFilters>({
+    status: 'all',
+    search: '',
+  });
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSending, setIsSending] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const initialSelectionDone = useRef(false);
 
-    const activeConversation = conversations.find(c => c.id === activeConversationId);
-    const messages = activeConversationId ? mockMessages[activeConversationId] || [] : [];
+  const activeConversation = conversations.find(c => c.id === activeConversationId) ?? null;
+  const [messages, setMessages] = useState<SellerMessage[]>([]);
 
-    const totalConversations = conversations.length;
-    const criticalCount = conversations.filter(c => c.unreadCount > 0).length;
-    const [isCreating, setIsCreating] = useState(false);
+  const totalConversations = conversations.length;
+  const criticalCount = conversations.filter(c => c.unreadCount > 0).length;
 
-    const setActiveConversation = useCallback((id: string | null) => {
-        setActiveConversationId(id);
-        if (id) {
-            setConversations(prev => prev.map(c =>
-                c.id === id ? { ...c, unreadCount: 0 } : c
-            ));
-        }
-    }, []);
+  const loadConversations = useCallback(async () => {
+    try {
+      setError(null);
+      const data = await chatApi.list();
+      const mapped: SellerConversation[] = data.map(c => ({
+        id: c.id,
+        customerId: c.customerId ?? c.sellerId,
+        customerName: c.customerName ?? 'Cliente',
+        lastMessage: c.lastMessage,
+        lastMessageTime: c.lastMessageTime,
+        unreadCount: c.unreadCount,
+        status: c.status,
+        category: c.category as ChatCategory | undefined,
+        subject: c.subject,
+      }));
+      setConversations(mapped);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al cargar conversaciones');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
-    const sendMessage = useCallback((content: string) => {
-        if (!activeConversationId) return;
+  const loadStores = useCallback(async () => {
+    try {
+      const data = await chatApi.myStores();
+      setStores(data);
+    } catch {
+    }
+  }, []);
 
-        const newMessage: SellerMessage = {
-            id: `m${Date.now()}`,
-            conversationId: activeConversationId,
-            senderId: 'seller-1',
-            senderName: 'Yo',
-            senderType: 'seller',
-            content,
-            timestamp: new Date().toISOString(),
-            read: true
-        };
+  const loadCustomers = useCallback(async () => {
+    try {
+      const data = await chatApi.customers();
+      setCustomers(data);
+    } catch {
+    }
+  }, []);
 
-        if (!mockMessages[activeConversationId]) {
-            mockMessages[activeConversationId] = [];
-        }
-        mockMessages[activeConversationId].push(newMessage);
-
-        setConversations(prev => prev.map(c =>
-            c.id === activeConversationId
-                ? { ...c, lastMessage: content, lastMessageTime: new Date().toISOString() }
-                : c
-        ));
-    }, [activeConversationId]);
-
-    const clearActiveChat = useCallback(() => {
-        setActiveConversationId(null);
-    }, []);
-
-    const archiveConversation = useCallback((id: string) => {
-        setConversations(prev => prev.map(c =>
-            c.id === id ? { ...c, status: 'archived' } : c
-        ));
-    }, []);
-
-    const createConversation = useCallback(async (data: {
-        customerId: string;
-        category: ChatCategory;
-        subject: string;
-    }) => {
-        setIsCreating(true);
-        await new Promise(resolve => setTimeout(resolve, 500));
-
-        const customer = mockCustomers.find(c => c.id === data.customerId);
-        if (!customer) { setIsCreating(false); return; }
-
-        const newConversation: SellerConversation = {
-            id: `conv-${Date.now()}`,
-            customerId: customer.id,
-            customerName: customer.name,
-            lastMessage: data.subject,
-            lastMessageTime: new Date().toISOString(),
-            unreadCount: 0,
-            status: 'active',
-            category: data.category,
-            subject: data.subject,
-        };
-
-        mockMessages[newConversation.id] = [];
-        setConversations(prev => [newConversation, ...prev]);
-        setActiveConversationId(newConversation.id);
-        setIsCreating(false);
-    }, []);
-
-    return {
-        conversations,
-        totalConversations,
-        activeConversation: activeConversation || null,
-        setActiveConversation,
-        messages,
-        isLoading,
-        filters,
-        setFilters,
-        sendMessage,
-        clearActiveChat,
-        archiveConversation,
-        isCreating,
-        createConversation,
-        criticalCount
+  // Polling: reload conversations every 10s
+  useEffect(() => {
+    pollingRef.current = setInterval(() => {
+      loadConversations();
+    }, 10000);
+    return () => {
+      if (pollingRef.current) clearInterval(pollingRef.current);
     };
+  }, [loadConversations]);
+
+  useEffect(() => {
+    loadConversations();
+    loadCustomers();
+    loadStores();
+  }, [loadConversations, loadCustomers, loadStores]);
+
+  useEffect(() => {
+    if (activeConversationId) {
+      chatApi.getMessages(activeConversationId).then(result => {
+        setMessages(result.data.map(m => ({
+          id: m.id,
+          conversationId: m.conversationId,
+          senderId: m.senderId,
+          senderName: m.senderName,
+          senderType: m.senderType as 'seller' | 'customer',
+          content: m.content,
+          timestamp: m.timestamp,
+          read: m.read,
+        })));
+      }).catch(() => {
+        setMessages([]);
+      });
+    } else {
+      setMessages([]);
+    }
+  }, [activeConversationId]);
+
+  const setActiveConversation = useCallback((id: string | null) => {
+    setActiveConversationId(id);
+    if (id) {
+      chatApi.markRead(id).catch(() => {});
+      setConversations(prev => prev.map(c =>
+        c.id === id ? { ...c, unreadCount: 0 } : c
+      ));
+    }
+  }, []);
+
+  const sendMessage = useCallback(async (content: string, files?: File[]) => {
+    if (!activeConversationId) return;
+    if (!content.trim() && (!files || files.length === 0)) return;
+
+    setIsSending(true);
+    try {
+      const newMessage = files && files.length > 0
+        ? await chatApi.sendMessageWithAttachment(activeConversationId, content, files)
+        : await chatApi.sendMessage(activeConversationId, content);
+      setMessages(prev => [...prev, {
+        id: newMessage.id,
+        conversationId: newMessage.conversationId,
+        senderId: newMessage.senderId,
+        senderName: newMessage.senderName,
+        senderType: newMessage.senderType as 'seller' | 'customer',
+        content: newMessage.content,
+        timestamp: newMessage.timestamp,
+        read: newMessage.read,
+      }]);
+      setConversations(prev => prev.map(c =>
+        c.id === activeConversationId
+          ? { ...c, lastMessage: content || '(archivo adjunto)', lastMessageTime: newMessage.timestamp }
+          : c
+      ));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al enviar mensaje');
+    } finally {
+      setIsSending(false);
+    }
+  }, [activeConversationId]);
+
+  const clearActiveChat = useCallback(() => {
+    setActiveConversationId(null);
+    setMessages([]);
+  }, []);
+
+  const archiveConversation = useCallback(async (id: string) => {
+    try {
+      await chatApi.archive(id);
+      setConversations(prev => prev.map(c =>
+        c.id === id ? { ...c, status: 'archived' as const } : c
+      ));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al archivar');
+    }
+  }, []);
+
+  const createConversation = useCallback(async (data: {
+    storeId: string;
+    customerId: string;
+    category: ChatCategory;
+    subject: string;
+  }) => {
+    setIsCreating(true);
+    try {
+      const newConversation = await chatApi.create({
+        store_id: data.storeId,
+        customer_user_id: data.customerId,
+        category: data.category,
+        subject: data.subject,
+        message: data.subject,
+      });
+      const mapped: SellerConversation = {
+        id: newConversation.id,
+        customerId: newConversation.customerId ?? data.customerId,
+        customerName: newConversation.customerName ?? 'Cliente',
+        lastMessage: newConversation.lastMessage,
+        lastMessageTime: newConversation.lastMessageTime,
+        unreadCount: 0,
+        status: 'active',
+        category: data.category,
+        subject: data.subject,
+      };
+      setConversations(prev => [mapped, ...prev]);
+      setActiveConversationId(newConversation.id);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al crear conversación');
+    } finally {
+      setIsCreating(false);
+    }
+  }, []);
+
+  const refresh = useCallback(() => {
+    setIsLoading(true);
+    loadConversations();
+  }, [loadConversations]);
+
+  return {
+    conversations,
+    customers,
+    stores,
+    totalConversations,
+    activeConversation,
+    setActiveConversation,
+    messages,
+    isLoading,
+    error,
+    filters,
+    setFilters,
+    sendMessage,
+    isSending,
+    clearActiveChat,
+    archiveConversation,
+    isCreating,
+    createConversation,
+    criticalCount,
+    refresh,
+  };
 }

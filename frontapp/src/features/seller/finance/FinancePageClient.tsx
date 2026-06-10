@@ -339,7 +339,7 @@ export function FinancePageClient() {
                     <Icon name="AlertOctagon" className="w-5 h-5" />
                   </div>
                 </div>
-                <div className="w-full h-[200px]">
+                <div className="w-full h-[260px]">
                   <FinanceChart type="doughnut" labels={data.defectuosos.labels} data={data.defectuosos.data} color={chartColorMap.defectuosos} />
                 </div>
                 <p className="text-2xl font-black mt-6" style={{ color: companyColors.turquesa }}>{data.defectuosos.data[1] ?? 0}%</p>
@@ -404,7 +404,7 @@ export function FinancePageClient() {
                     <Icon name="Clock" className="w-5 h-5" />
                   </div>
                 </div>
-                <div className="relative w-40 h-40 mx-auto mb-4">
+                <div className="relative w-52 h-52 mx-auto mb-4">
                   <svg viewBox="0 0 120 120" className="w-full h-full">
                     <circle cx="60" cy="60" r="54" fill="none" stroke="currentColor" strokeWidth="8" className="text-gray-200 dark:text-gray-700" />
                     <circle cx="60" cy="60" r="54" fill="none" stroke={chartColorMap.tiempoRespuesta} strokeWidth="8" strokeLinecap="round"

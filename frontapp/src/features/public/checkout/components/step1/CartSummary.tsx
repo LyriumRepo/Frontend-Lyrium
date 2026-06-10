@@ -18,7 +18,8 @@ interface Props {
 
 export default function CartSummary({ onContinue }: Props) {
   const cartItems = useCheckoutStore((s) => s.cartItems);
-  const isLoading = useCheckoutStore((s) => s.cartLoading);
+  const cartLoaded = useCheckoutStore((s) => s.cartLoaded);
+  const isLoading = !cartLoaded;
 
   const selectedItems = cartItems.filter((i) => i.selected);
 
@@ -32,8 +33,8 @@ export default function CartSummary({ onContinue }: Props) {
     0,
   );
   const shipping = subtotal > 0 ? 10.0 : 0;
-  const igv = (subtotal + shipping) * 0.16;
-  const total = subtotal + shipping + igv;
+  const igv = subtotal * 0.18;
+  const total = subtotal + shipping;
 
   // ── Skeleton mientras carga ────────────────────────────────────────────────
   if (isLoading) {

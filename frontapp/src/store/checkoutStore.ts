@@ -82,6 +82,7 @@ interface CheckoutState {
     submitError: string | null;
 
     cartItems: CartItem[];
+    cartLoaded: boolean;
     personalData: PersonalData;
     shippingData: ShippingData;
     orderData: OrderData;
@@ -98,6 +99,7 @@ interface CheckoutState {
     setIsSubmitting: (v: boolean) => void;
     setSubmitError: (v: string | null) => void;
     setCartItems: (items: CartItem[]) => void;
+    setCartLoaded: (v: boolean) => void;
     toggleSelectItem: (id: number) => void;
     toggleSelectAll: (selected: boolean) => void;
     setPersonalData: (data: Partial<PersonalData>) => void;
@@ -146,6 +148,7 @@ export const useCheckoutStore = create<CheckoutState>((set) => ({
     isSubmitting: false,
     submitError: null,
     cartItems: [],
+    cartLoaded: false,
     personalData: defaultPersonal,
     shippingData: defaultShipping,
     orderData: defaultOrder,
@@ -160,6 +163,7 @@ export const useCheckoutStore = create<CheckoutState>((set) => ({
     setIsSubmitting: (v) => set({ isSubmitting: v }),
     setSubmitError: (v) => set({ submitError: v }),
     setCartItems: (items) => set({ cartItems: items }),
+    setCartLoaded: (v) => set({ cartLoaded: v }),
     toggleSelectItem: (id) =>
         set((s) => ({
             cartItems: s.cartItems.map((i) =>
@@ -185,6 +189,7 @@ export const useCheckoutStore = create<CheckoutState>((set) => ({
             isSubmitting: false,
             submitError: null,
             cartItems: [],
+            cartLoaded: false,
             personalData: defaultPersonal,
             shippingData: defaultShipping,
             orderData: defaultOrder,
