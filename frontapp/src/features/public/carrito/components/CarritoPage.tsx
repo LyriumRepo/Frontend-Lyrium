@@ -6,6 +6,7 @@ import {
   ShoppingBag,
   Sparkles,
   Info,
+  AlertCircle,
 } from "lucide-react";
 import { useCarritoStore } from "@/store/carritoStore";
 import { useCarritoCatalog } from '../hooks/useCarritoCatalog';
@@ -19,7 +20,7 @@ import AuthRequiredModal from '@/shared/components/AuthRequiredModal';
 import { useAuthStore } from '@/shared/hooks/useAuthstore';
 
 export default function CarritoPage() {
-  const { isLoading, isError } = useCarritoCatalog();
+  const { isLoading, isError, refetch } = useCarritoCatalog();
   const { validate, showCheckoutModal, setShowCheckoutModal } = useAuthStore();
   useEffect(() => {
     validate();
@@ -91,12 +92,28 @@ export default function CarritoPage() {
         </div>
 
         {isLoading && (
-          <div className="flex items-center justify-center py-20 gap-3 text-slate-500">
+          <div className="flex items-center justify-center py-20 gap-3 text-slate-500 dark:text-[var(--text-muted)]">
             <Loader2 className="w-6 h-6 animate-spin text-sky-500" />
             <span className="text-sm">Cargando productos...</span>
           </div>
         )}
 
+        {isError && !isLoading && (
+          <div className="flex flex-col items-center justify-center py-16 gap-4 text-center">
+            <div className="w-14 h-14 rounded-2xl bg-red-50 dark:bg-red-900/20 grid place-items-center">
+              <AlertCircle className="w-7 h-7 text-red-400" />
+            </div>
+            <p className="text-slate-700 dark:text-[var(--text-primary)] font-medium">
+              No se pudieron cargar los productos
+            </p>
+            <button
+              onClick={() => refetch()}
+              className="px-4 py-2 bg-sky-500 text-white text-sm font-bold rounded-xl hover:bg-sky-600 transition"
+            >
+              Reintentar
+            </button>
+          </div>
+        )}
         {!isLoading && !isError && (
           <ProductGrid onAdd={handleAdd} onView={handleView} />
         )}

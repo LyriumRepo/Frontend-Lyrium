@@ -55,6 +55,7 @@ export interface PlanData {
   compactVisibleCount?: number;
   isActive?: boolean;
   orden?: number;
+  commission_rate?: number;
 }
 
 export interface PlansMap {

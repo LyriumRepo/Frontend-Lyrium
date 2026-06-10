@@ -1,8 +1,10 @@
+export const dynamic = 'force-dynamic';
+
 import { Suspense } from 'react';
 import { ServicesPageClient } from '@/features/seller/services/ServicesPageClient';
 import BaseLoading from '@/components/ui/BaseLoading';
 
-export default function ServicesPage() {
+export default async function ServicesPage() {
   return (
     <Suspense
       fallback={

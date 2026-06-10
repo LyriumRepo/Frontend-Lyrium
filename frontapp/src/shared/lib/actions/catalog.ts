@@ -77,12 +77,12 @@ function mapLaravelProduct(p: any): Product {
     serviceModality: p.serviceModality ?? null,
     serviceLocation: p.serviceLocation ?? null,
 
-    // Atributos — ya vienen mapeados desde ProductResource
+    // Atributos — convertir de { label, value } a string[] para el form
     mainAttributes: (p.characteristics ?? []).map((c: any) => ({
-      values: { label: c.label ?? '', value: c.value ?? '' },
+        values: [c.label ?? '', c.value ?? ''],
     })),
     additionalAttributes: (p.additional_info ?? []).map((c: any) => ({
-      values: { label: c.label ?? '', value: c.value ?? '' },
+        values: [c.label ?? '', c.value ?? ''],
     })),
     nutritionalAttributes: (p.nutritional_info?.rows ?? []).map((r: any) => ({
       values: {

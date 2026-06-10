@@ -156,7 +156,7 @@ export function mapServiceToLocal(service: any): Producto | null {
     id: Number(service.id),
     titulo: service.name,
     precio: price,
-    imagen: service.image || '/img/no-image.png',
+    imagen: service.image || '',
     categoria: service.category || '',
     slug: service.slug,
     descripcion: service.description,

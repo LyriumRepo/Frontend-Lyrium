@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@laravel/echo-react": "^2.3.1",
+    "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-avatar": "^1.1.11",
     "@radix-ui/react-scroll-area": "^1.2.10",
     "@radix-ui/react-separator": "^1.1.8",
@@ -21,6 +22,7 @@
     "@tanstack/react-table": "^8.21.3",
     "animejs": "^3.2.2",
     "axios": "^1.13.5",
+    "canvas-confetti": "^1.9.4",
     "chart.js": "^4.5.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -48,6 +50,7 @@
     "@playwright/test": "^1.58.2",
     "@tailwindcss/postcss": "^4",
     "@types/animejs": "^3.1.13",
+    "@types/canvas-confetti": "^1.9.0",
     "@types/dompurify": "^3.0.5",
     "@types/file-saver": "^2.0.7",
     "@types/node": "^20",

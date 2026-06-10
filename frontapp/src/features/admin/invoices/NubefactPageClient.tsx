@@ -43,7 +43,7 @@ export function NubefactPageClient(_props: NubefactPageClientProps) {
 
     const handleExportCSV = () => {
         const headers = ['ID', 'Tienda ID', 'Tipo', 'Serie', 'Número', 'Cliente', 'RUC', 'Monto', 'Estado', 'Fecha'];
-        const rows = (invoices || []).map(i => [i.id, i.store_id ?? '-', i.type, i.series, i.number, i.customer_name, i.customer_ruc, i.amount.toFixed(2), i.sunat_status, new Date(i.emission_date).toLocaleDateString('es-PE')]);
+        const rows = (invoices || []).map(i => [i.id, i.stores.map(s => s.id).join(', ') || '-', i.type, i.series, i.number, i.customer_name, i.customer_ruc, i.amount.toFixed(2), i.sunat_status, new Date(i.emission_date).toLocaleDateString('es-PE')]);
         const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
@@ -135,7 +135,7 @@ export function NubefactPageClient(_props: NubefactPageClientProps) {
                                                     </div>
                                                     <div>
                                                         <div className="text-[11px] font-black text-[var(--brand-sky)] uppercase tracking-tight">{invoice.type}</div>
-                                                        <div className="text-[13px] font-black text-gray-900 dark:text-[var(--text-primary)] mt-0.5">Tienda #{invoice.store_id ?? invoice.id}</div>
+                                                        <div className="text-[13px] font-black text-gray-900 dark:text-[var(--text-primary)] mt-0.5">Tienda #{invoice.stores[0]?.name ?? invoice.id}</div>
                                                     </div>
                                                 </div>
                                             </td>

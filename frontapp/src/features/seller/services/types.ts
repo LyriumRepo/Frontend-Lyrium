@@ -64,6 +64,9 @@ export interface SpecialistHorario {
 export interface Service {
   id: number;
   denominacion: string;
+  descripcion?: string;
+  beneficios?: string;
+  imagen?: string;
   categoria: string;
   duracion: number;
   diasAtencion: AttendanceDay[];
@@ -75,6 +78,9 @@ export interface Service {
   estado: ServiceEstado;
   domicilio: boolean;
   anticipacionReserva: AnticipacionReserva;
+  sticker?: 'nuevo' | 'descuento' | 'oferta' | 'liquidacion' | 'bestseller' | 'envio_gratis' | null;
+  discountPercentage?: number | null;
+  etiquetas?: EtiquetaConfig;
 }
 
 export type AppointmentEstado = 'pendiente' | 'confirmada' | 'cancelada';
@@ -90,10 +96,10 @@ export interface Appointment {
 }
 
 export const DOCUMENT_TYPE_LABELS: Record<DocumentType, string> = {
-  dni:                'DNI',
+  dni: 'DNI',
   carnet_extranjeria: 'Carnet de Extranjería',
-  pasaporte:          'Pasaporte',
-  ruc:                'RUC',
+  pasaporte: 'Pasaporte',
+  ruc: 'RUC',
 };
 
 export const SPECIALIST_CATEGORIES = [
@@ -102,20 +108,20 @@ export const SPECIALIST_CATEGORIES = [
   'Belleza y Estética',
 ] as const;
 
-export type SpecialistCategory = typeof SPECIALIST_CATEGORIES[number];
+export type SpecialistCategory = (typeof SPECIALIST_CATEGORIES)[number];
 
 export const WEEK_DAYS: WeekDay[] = [
   'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo',
 ];
 
 export const WEEK_DAY_SHORT: Record<WeekDay, string> = {
-  Lunes:     'Lun',
-  Martes:    'Mar',
+  Lunes: 'Lun',
+  Martes: 'Mar',
   Miércoles: 'Mié',
-  Jueves:    'Jue',
-  Viernes:   'Vie',
-  Sábado:    'Sáb',
-  Domingo:   'Dom',
+  Jueves: 'Jue',
+  Viernes: 'Vie',
+  Sábado: 'Sáb',
+  Domingo: 'Dom',
 };
 
 export const ANTICIPACION_LABELS: Record<AnticipacionReserva, string> = {
@@ -153,12 +159,57 @@ export function calculateSessions(
   return sessions;
 }
 
-export function countTotalSessions(diasAtencion: AttendanceDay[], duracion: number): number {
-  return diasAtencion.reduce((total, day) =>
-    total + day.bloques.reduce((t, bloque) =>
-      t + calculateSessions(bloque, duracion).length, 0), 0);
+export function countTotalSessions(
+  diasAtencion: AttendanceDay[],
+  duracion: number,
+): number {
+  return diasAtencion.reduce(
+    (total, day) =>
+      total +
+      day.bloques.reduce(
+        (t, bloque) => t + calculateSessions(bloque, duracion).length,
+        0,
+      ),
+    0,
+  );
 }
 
 export function canPublish(service: Service): boolean {
   return service.especialistasAsignados.length >= 1;
+}
+
+// ─── Etiquetas / Stickers ──────────────────────────────────────────────────────
+
+export interface EtiquetaDescuentoData { valor: number; inicio: string; fin: string | null; }
+export interface EtiquetaOfertaData    { valor: number; inicio: string; fin: string; }
+export interface EtiquetaEdicionData   { inicio: string; fin: string; }
+export interface EtiquetaPromocionData { productosIds: string[]; }
+export interface EtiquetaConfig {
+  nuevo: boolean;
+  descuento?:      EtiquetaDescuentoData;
+  oferta?:         EtiquetaOfertaData;
+  edicionLimitada?: EtiquetaEdicionData;
+  promocion?:      EtiquetaPromocionData;
+}
+
+export function serviceEtiquetasFromService(service: Service): EtiquetaConfig {
+  const stored = (service as any).etiquetas;
+  if (stored) return stored;
+
+  const today = new Date().toISOString().split('T')[0];
+  const nextMonth = new Date(); nextMonth.setMonth(nextMonth.getMonth() + 1);
+  const nextMonthStr = nextMonth.toISOString().split('T')[0];
+
+  switch (service.sticker) {
+    case 'nuevo':
+      return { nuevo: true };
+    case 'descuento':
+      return { nuevo: false, descuento: { valor: service.discountPercentage ?? 20, inicio: today, fin: null } };
+    case 'oferta':
+      return { nuevo: false, oferta: { valor: service.discountPercentage ?? 30, inicio: today, fin: nextMonthStr } };
+    case 'liquidacion':
+      return { nuevo: false, edicionLimitada: { inicio: today, fin: nextMonthStr } };
+    default:
+      return { nuevo: false };
+  }
 }

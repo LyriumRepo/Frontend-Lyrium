@@ -14,6 +14,7 @@ export interface CartItem {
     originalPrice: number;
     quantity: number;
     selected: boolean;
+    service_address?: string | null;
 }
 
 export interface PersonalData {
@@ -58,6 +59,8 @@ export interface OrderData {
     discount: number;
     savePayment: boolean;
     selectedPaymentMethodId: number | null;
+    liriosUsed: number;
+    liriosDiscount: number;
 }
 
 export interface OrderResult {
@@ -71,8 +74,12 @@ export interface OrderResult {
 }
 
 interface CheckoutState {
-    currentStep: 1 | 2 | 3;
+    currentStep: 1 | 2 | 3 | 4;
     isProcessing: boolean;
+    cartLoading: boolean;
+    cartError: string | null;
+    isSubmitting: boolean;
+    submitError: string | null;
 
     cartItems: CartItem[];
     personalData: PersonalData;
@@ -84,8 +91,12 @@ interface CheckoutState {
     pendingPaymentOrderId: string | null;
     isPaymentModalOpen: boolean;
 
-    setStep: (step: 1 | 2 | 3) => void;
+    setStep: (step: 1 | 2 | 3 | 4) => void;
     setProcessing: (v: boolean) => void;
+    setCartLoading: (v: boolean) => void;
+    setCartError: (v: string | null) => void;
+    setIsSubmitting: (v: boolean) => void;
+    setSubmitError: (v: string | null) => void;
     setCartItems: (items: CartItem[]) => void;
     toggleSelectItem: (id: number) => void;
     toggleSelectAll: (selected: boolean) => void;
@@ -123,11 +134,17 @@ const defaultOrder: OrderData = {
     discount: 0,
     savePayment: false,
     selectedPaymentMethodId: null,
+    liriosUsed: 0,
+    liriosDiscount: 0,
 };
 
 export const useCheckoutStore = create<CheckoutState>((set) => ({
     currentStep: 1,
     isProcessing: false,
+    cartLoading: false,
+    cartError: null,
+    isSubmitting: false,
+    submitError: null,
     cartItems: [],
     personalData: defaultPersonal,
     shippingData: defaultShipping,
@@ -138,6 +155,10 @@ export const useCheckoutStore = create<CheckoutState>((set) => ({
 
     setStep: (step) => set({ currentStep: step }),
     setProcessing: (v) => set({ isProcessing: v }),
+    setCartLoading: (v) => set({ cartLoading: v }),
+    setCartError: (v) => set({ cartError: v }),
+    setIsSubmitting: (v) => set({ isSubmitting: v }),
+    setSubmitError: (v) => set({ submitError: v }),
     setCartItems: (items) => set({ cartItems: items }),
     toggleSelectItem: (id) =>
         set((s) => ({
@@ -159,6 +180,10 @@ export const useCheckoutStore = create<CheckoutState>((set) => ({
     reset: () =>
         set({
             currentStep: 1,
+            cartLoading: false,
+            cartError: null,
+            isSubmitting: false,
+            submitError: null,
             cartItems: [],
             personalData: defaultPersonal,
             shippingData: defaultShipping,

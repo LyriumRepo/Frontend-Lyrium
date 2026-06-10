@@ -70,12 +70,12 @@ export default function BaseModal({
           relative w-full ${sizeStyles[size] || sizeStyles.md}
           bg-[var(--bg-card)] rounded-[2.5rem] shadow-2xl
           border border-[var(--border-subtle)]
-          overflow-hidden animate-scaleIn
+          flex flex-col max-h-[90vh] animate-scaleIn
           ${className}
         `}
       >
         <div
-          className={`relative px-8 pt-8 pb-6 -mx-0 -mt-0 rounded-t-[2.5rem] ${!headerBgColor ? `bg-gradient-to-r ${accentColor}` : ''}`}
+          className={`relative shrink-0 px-8 pt-8 pb-6 -mx-0 -mt-0 rounded-t-[2.5rem] ${!headerBgColor ? `bg-gradient-to-r ${accentColor}` : ''}`}
           style={headerBgColor ? { background: `linear-gradient(to right, ${headerBgColor}, ${headerBgColor}dd)` } : undefined}
         >
           <button
@@ -95,7 +95,7 @@ export default function BaseModal({
             )}
           </div>
         </div>
-        <div className="p-8">{children}</div>
+        <div className="p-8 overflow-y-auto">{children}</div>
       </div>
     </div>
   );

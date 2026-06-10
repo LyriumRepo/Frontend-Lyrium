@@ -10,6 +10,7 @@ import {
     WEEK_DAY_SHORT,
     countTotalSessions,
     calculateSessions,
+    serviceEtiquetasFromService,
 } from '@/features/seller/services/types';
 import BaseDrawer from '@/components/ui/BaseDrawer';
 import Icon from '@/components/ui/Icon';
@@ -179,6 +180,29 @@ export default function ServiceDetailModal({
                         </div>
                     </div>
                 </div>
+
+                {/* ── Etiquetas ── */}
+                {(() => {
+                    const etiquetas = serviceEtiquetasFromService(service);
+                    const has = etiquetas.nuevo || etiquetas.descuento || etiquetas.oferta || etiquetas.edicionLimitada;
+                    if (!has) return null;
+                    return (
+                        <div className="flex gap-2 flex-wrap">
+                            {etiquetas.nuevo && (
+                                <span className="px-2 py-1 rounded-md text-xs font-black uppercase tracking-wider" style={{ background: '#ADEBB3', color: '#0d3318' }}>Nuevo</span>
+                            )}
+                            {etiquetas.descuento && (
+                                <span className="px-2 py-1 rounded-md text-xs font-black uppercase tracking-wider" style={{ background: 'linear-gradient(135deg,#dc2626,#f87171)', color: 'white' }}>-{etiquetas.descuento.valor}%</span>
+                            )}
+                            {etiquetas.oferta && (
+                                <span className="px-2 py-1 rounded-md text-xs font-black uppercase tracking-wider" style={{ background: 'linear-gradient(135deg,#991b1b,#dc2626)', color: 'white' }}>−{etiquetas.oferta.valor}% Oferta</span>
+                            )}
+                            {etiquetas.edicionLimitada && (
+                                <span className="px-2 py-1 rounded-md text-xs font-bold uppercase tracking-wider" style={{ background: '#59a6cb', color: '#1a2e3a' }}>Ed. Limitada</span>
+                            )}
+                        </div>
+                    );
+                })()}
 
                 {/* ── Disponibilidad ── */}
                 <div className="space-y-3">

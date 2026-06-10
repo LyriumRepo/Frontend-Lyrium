@@ -165,7 +165,7 @@ export const useControlVendedores = () => {
       date: p.created_at
         ? new Date(p.created_at).toLocaleDateString('es-PE')
         : '',
-      imageUrl: p.image ?? undefined,
+      imageUrl: p.images?.[0]?.src ?? undefined,
       rejection_reason: p.rejection_reason,
     }));
   }, [productsData]);
