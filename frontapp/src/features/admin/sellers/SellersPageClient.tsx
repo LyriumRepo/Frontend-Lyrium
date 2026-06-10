@@ -5,11 +5,14 @@ import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import BaseButton from '@/components/ui/BaseButton';
 import { useControlVendedores } from '@/features/admin/sellers/hooks/useControlVendedores';
 import {
+  StatsOverview,
   ProductModeration,
   AuditLog,
 } from '@/components/admin/sellers/ModuleSections';
+import SellerList from '@/components/admin/SellerList';
 import {
   Users,
+  Search,
   CheckCircle,
   ShieldCheck,
   ShieldAlert,
@@ -224,6 +227,7 @@ export function SellersPageClient(_props: SellersPageClientProps) {
     stats,
     statsData,
     filteredSellers,
+    filters,
     actions,
     setFilters,
     productsLoading,
@@ -254,7 +258,7 @@ export function SellersPageClient(_props: SellersPageClientProps) {
   const combinedSellers = filteredSellers;
 
   const handleExport = () => {
-    if (filteredSellers.length) return;
+    if (!filteredSellers.length) return;
     const headers = ['ID', 'Nombre', 'Empresa', 'Email', 'Estado', 'Contratos'];
     const csvData = filteredSellers.map((s) => [
       s.id,
@@ -338,6 +342,13 @@ export function SellersPageClient(_props: SellersPageClientProps) {
 
       <div className="flex flex-wrap gap-2 border-b border-[var(--border-subtle)] py-5 pb-6 overflow-x-auto no-scrollbar scroll-smooth">
         <TabButton
+          active={currentTab === 'vendedores'}
+          onClick={() => setCurrentTab('vendedores')}
+          label="Gestión de Vendedores"
+          icon={<Users className="w-5 h-5" />}
+          badge={stats.pending}
+        />
+        <TabButton
           active={currentTab === 'aprobacion'}
           onClick={() => setCurrentTab('aprobacion')}
           label="Aprobación de Productos"
@@ -370,6 +381,30 @@ export function SellersPageClient(_props: SellersPageClientProps) {
       </div>
 
       <div className="min-h-[500px]">
+
+        {currentTab === 'vendedores' && (
+          <div className="space-y-6 animate-fadeIn">
+            <StatsOverview stats={{ ...stats, pending: stats.pending }} />
+            <div className="bg-[var(--bg-card)] p-6 rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm flex items-center gap-4">
+              <div className="flex-1 relative">
+                <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] w-5 h-5" />
+                <input
+                  type="text"
+                  placeholder="Buscar por Nombre, Empresa o ID..."
+                  value={filters.sellerSearch}
+                  onChange={(e) =>
+                    setFilters((prev) => ({ ...prev, sellerSearch: e.target.value }))
+                  }
+                  className="w-full h-12 pl-14 pr-5 rounded-full border border-[var(--border-subtle)] bg-[var(--bg-canvas)] text-sm font-semibold placeholder:text-[var(--text-tertiary)] focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-500 transition-all"
+                />
+              </div>
+              <BaseButton onClick={handleExport} variant="secondary" leftIcon="Download" size="md" className="bg-emerald-500 text-white hover:bg-emerald-600 border-0 shadow-sm">
+                Exportar Padrón
+              </BaseButton>
+            </div>
+            <SellerList sellers={filteredSellers} loading={loading} />
+          </div>
+        )}
 
         {currentTab === 'aprobacion' && (
           <div className="animate-fadeIn">

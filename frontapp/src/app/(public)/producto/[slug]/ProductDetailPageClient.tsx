@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useCallback, useEffect, useRef } from 'react';
 import Image from 'next/image';
@@ -59,7 +59,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 
-// ─── Token ─────────────────────────────────────────────
+// ─── Token ────────────────────────────────────────────────────────────────────
 
 let _tokenCache: { value: string | null; ts: number } | null = null;
 
@@ -81,7 +81,7 @@ async function getClientToken(): Promise<string | null> {
   }
 }
 
-// ────────────────────────────────────────────────── Helpers ──────────────────────────────────────────────────
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function formatPrice(price: number) {
   return `S/ ${price.toFixed(2)}`;
@@ -100,7 +100,7 @@ function formatDate(iso: string) {
   });
 }
 
-// ────────────────────────────────────────────────── Stars ──────────────────────────────────────────────────
+// ─── Stars ────────────────────────────────────────────────────────────────────
 
 function Stars({
   value,
@@ -127,7 +127,7 @@ function Stars({
   );
 }
 
-// ────────────────────────────────────────────────── StickerBadge ──────────────────────────────────────────────────
+// ─── StickerBadge ─────────────────────────────────────────────────────────────
 
 const STICKER_MAP: Record<
   string,
@@ -137,7 +137,7 @@ const STICKER_MAP: Record<
   }
 > = {
   oferta: { label: 'Oferta', variant: 'destructive' },
-  liquidacion: { label: 'Liquidacín', variant: 'destructive' },
+  liquidacion: { label: 'Liquidación', variant: 'destructive' },
   nuevo: { label: 'Nuevo', variant: 'default' },
   bestseller: { label: 'Más vendido', variant: 'secondary' },
   envio_gratis: { label: 'Envío gratis', variant: 'default' },
@@ -161,7 +161,7 @@ function StickerBadge({ sticker }: { sticker: string | null }) {
   );
 }
 
-// ────────────────────────────────────────────────── TypeItem / ProductInfoCards ──────────────────────────────────────────────────
+// ─── TypeItem / ProductInfoCards ──────────────────────────────────────────────
 
 function TypeItem({
   icon,
@@ -194,7 +194,7 @@ function ProductInfoCards({ product }: { product: LaravelProduct }) {
         <TypeItem
           icon={<Download className="w-4 h-4" />}
           label="Formato"
-          value={product.fileType?.toUpperCase() ?? 'N/A'}
+          value={product.fileType?.toUpperCase() ?? '—'}
         />
         {product.downloadLimit && (
           <TypeItem
@@ -211,13 +211,13 @@ function ProductInfoCards({ product }: { product: LaravelProduct }) {
       <div className="grid grid-cols-2 gap-4">
         <TypeItem
           icon={<Clock className="w-4 h-4" />}
-          label="Duracín"
+          label="Duración"
           value={`${product.serviceDuration} min`}
         />
         <TypeItem
           icon={<MapPin className="w-4 h-4" />}
           label="Modalidad"
-          value={product.serviceModality ?? 'N/A'}
+          value={product.serviceModality ?? '—'}
         />
       </div>
     );
@@ -259,7 +259,7 @@ function ProductInfoCards({ product }: { product: LaravelProduct }) {
   );
 }
 
-// ────────────────────────────────────────────────── CharacteristicsTable ──────────────────────────────────────────────────
+// ─── CharacteristicsTable ─────────────────────────────────────────────────────
 
 function CharacteristicsTable({
   characteristics,
@@ -303,7 +303,7 @@ function CharacteristicsTable({
       {hasAdditional && (
         <div>
           <p className="text-[10px] font-semibold tracking-[.12em] uppercase text-teal-600 mb-3">
-            Informacín adicional
+            Información adicional
           </p>
           <div className="grid md:grid-cols-2 gap-4">
             {additional_info.map((attr, i) => (
@@ -325,7 +325,7 @@ function CharacteristicsTable({
   );
 }
 
-// ────────────────────────────────────────────────── EditReviewForm ──────────────────────────────────────────────────
+// ─── EditReviewForm ───────────────────────────────────────────────────────────
 
 function EditReviewForm({
   review,
@@ -435,14 +435,14 @@ function EditReviewForm({
           className="bg-teal-500 hover:bg-teal-600 text-white"
         >
           {loading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-          {loading ? 'Guardando...' : 'Guardar cambios'}
+          {loading ? 'Guardando…' : 'Guardar cambios'}
         </Button>
       </div>
     </div>
   );
 }
 
-// ────────────────────────────────────────────────── ReviewCard ──────────────────────────────────────────────────
+// ─── ReviewCard ───────────────────────────────────────────────────────────────
 
 function ReviewCard({
   review,
@@ -461,7 +461,7 @@ function ReviewCard({
   const canAct = isAuthor;
 
   const handleDelete = async () => {
-    if (!confirm('-+Eliminar esta reséa?')) return;
+    if (!confirm('¿Eliminar esta reseña?')) return;
     setDeleting(true);
     try {
       const token = await getClientToken();
@@ -516,7 +516,7 @@ function ReviewCard({
                         size="icon"
                         className="h-7 w-7 text-muted-foreground hover:text-foreground"
                         onClick={() => setEditing(true)}
-                        aria-label="Editar reséa"
+                        aria-label="Editar reseña"
                       >
                         <Pencil className="w-3.5 h-3.5" />
                       </Button>
@@ -527,7 +527,7 @@ function ReviewCard({
                       className="h-7 w-7 text-muted-foreground hover:text-destructive"
                       onClick={handleDelete}
                       disabled={deleting}
-                      aria-label="Eliminar reséa"
+                      aria-label="Eliminar reseña"
                     >
                       {deleting ? (
                         <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -567,7 +567,7 @@ function ReviewCard({
   );
 }
 
-// ────────────────────────────────────────────────── ReviewsSection ──────────────────────────────────────────────────
+// ─── ReviewsSection ───────────────────────────────────────────────────────────
 
 function ReviewsSection({
   productId,
@@ -631,17 +631,17 @@ function ReviewsSection({
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
           <div>
             <CardTitle className="text-3xl font-bold text-foreground mb-1">
-              Reséas de Clientes
+              Reseñas de Clientes
             </CardTitle>
             <CardDescription className="text-base text-foreground/80">
-              {totalReviews} reséas reales
+              {totalReviews} reseñas reales
             </CardDescription>
           </div>
           <Link
             href="#reviews-list"
             className="text-sm font-semibold text-teal-600 hover:text-teal-500"
           >
-            Ver todas las reséas
+            Ver todas las reseñas
           </Link>
         </div>
       </CardHeader>
@@ -660,7 +660,7 @@ function ReviewsSection({
               <div className="mt-4 flex items-center gap-3">
                 <Stars value={productRating} size="lg" />
                 <span className="text-sm font-semibold text-foreground">
-                  {totalReviews} reséas
+                  {totalReviews} reseñas
                 </span>
               </div>
             </div>
@@ -691,7 +691,7 @@ function ReviewsSection({
               className="mt-6 w-full justify-start border-teal-300 text-teal-700 hover:bg-teal-50 dark:border-teal-700 dark:text-teal-400 dark:hover:bg-teal-950/30"
               onClick={() => setShowForm(true)}
             >
-              Escribir una reséa
+              Escribir una reseña
             </Button>
             {showForm && (
               <div className="mt-5 rounded-3xl border border-teal-100 dark:border-teal-900/30 bg-card p-4">
@@ -709,9 +709,9 @@ function ReviewsSection({
             {localReviews.length === 0 ? (
               <div className="rounded-3xl border border-border bg-card p-8 text-center text-foreground">
                 <MessageSquare className="w-10 h-10 mx-auto mb-4 text-teal-300" />
-                <p className="text-lg font-bold">Sin reséas án</p>
+                <p className="text-lg font-bold">Sin reseñas aún</p>
                 <p className="text-sm text-foreground/80 mt-2">
-                  Sé el primero en dejar una opinín.
+                  Sé el primero en dejar una opinión.
                 </p>
               </div>
             ) : (
@@ -734,7 +734,7 @@ function ReviewsSection({
                 className="w-full mt-1 text-[11px] tracking-[.1em] uppercase border-teal-300 text-teal-700 hover:bg-teal-50"
               >
                 {loading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                {loading ? 'Cargando...' : 'Ver más reséas'}
+                {loading ? 'Cargando…' : 'Ver más reseñas'}
               </Button>
             )}
           </section>
@@ -744,7 +744,7 @@ function ReviewsSection({
   );
 }
 
-// ────────────────────────────────────────────────── ProductTabs (Nivel 2) ──────────────────────────────────────────────────
+// ─── ProductTabs (Nivel 2) ────────────────────────────────────────────────────
 
 type TabId = 'descripcion' | 'caracteristicas' | 'nutricion';
 
@@ -757,7 +757,7 @@ function ProductTabs({ product }: { product: LaravelProduct }) {
   const tabs: { id: TabId; label: string; icon: React.ReactNode }[] = [
     {
       id: 'descripcion',
-      label: 'Descripcín',
+      label: 'Descripción',
       icon: <FileText className="w-4 h-4" />,
     },
     ...(hasCharacteristics
@@ -830,7 +830,7 @@ function ProductTabs({ product }: { product: LaravelProduct }) {
               </div>
             ) : (
               <p className="text-sm text-foreground/60 italic">
-                Sin descripcín disponible.
+                Sin descripción disponible.
               </p>
             )}
           </div>
@@ -872,7 +872,7 @@ function ProductTabs({ product }: { product: LaravelProduct }) {
   );
 }
 
-// ────────────────────────────────────────────────── RelatedProductsCarousel (auto-scroll infinito) ──────────────────────────────────────────────────
+// ─── RelatedProductsCarousel (auto-scroll infinito) ──────────────────────────
 
 function RelatedProductCard({ rel }: { rel: LaravelProduct }) {
   const relDiscount = discountPercent(rel.price, rel.regular_price);
@@ -902,7 +902,7 @@ function RelatedProductCard({ rel }: { rel: LaravelProduct }) {
             {relDiscount > 0 && (
               <div className="absolute top-2 right-2">
                 <Badge variant="destructive" className="text-[10px] font-bold">
-                  ──────────────────────────────────────────────────{relDiscount}%
+                  −{relDiscount}%
                 </Badge>
               </div>
             )}
@@ -952,11 +952,11 @@ function RelatedProductsCarousel({ products }: { products: LaravelProduct[] }) {
   const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const SPEED = 0.5;
   const CARD_STEP = 296; // ancho de card + gap aprox
-  const RESUME_DELAY = 2500; // ms antes de reanudar auto-scroll tras interaccín manual
+  const RESUME_DELAY = 2500; // ms antes de reanudar auto-scroll tras interacción manual
 
   const items = [...products, ...products];
 
-  // Pausa temporal y programa reanudacín automática
+  // Pausa temporal y programa reanudación automática
   const pauseTemporarily = () => {
     pausedRef.current = true;
     if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
@@ -965,7 +965,7 @@ function RelatedProductsCarousel({ products }: { products: LaravelProduct[] }) {
     }, RESUME_DELAY);
   };
 
-  // Mueve el carrusel en una direccín, respetando el loop infinito
+  // Mueve el carrusel en una dirección, respetando el loop infinito
   const shift = (direction: 'left' | 'right') => {
     const track = trackRef.current;
     if (!track) return;
@@ -976,10 +976,10 @@ function RelatedProductsCarousel({ products }: { products: LaravelProduct[] }) {
     // Mantener dentro del rango [0, half)
     if (next < 0) next += half;
     if (next >= half) next -= half;
-    // Animacín suave manual con requestAnimationFrame
+    // Animación suave manual con requestAnimationFrame
     const start = posRef.current;
     const diff = next - start;
-    // Si el salto es muy grande (wrap-around), ajusta direccín
+    // Si el salto es muy grande (wrap-around), ajusta dirección
     const adjustedDiff =
       Math.abs(diff) > half / 2 ? (diff > 0 ? diff - half : diff + half) : diff;
     const duration = 300;
@@ -1019,7 +1019,7 @@ function RelatedProductsCarousel({ products }: { products: LaravelProduct[] }) {
     };
   }, []);
 
-  // Rueda del mouse ────────────────────────────────────────────────── scroll horizontal
+  // Rueda del mouse — scroll horizontal
   useEffect(() => {
     const wrap = wrapRef.current;
     if (!wrap) return;
@@ -1125,7 +1125,7 @@ function RelatedProductsCarousel({ products }: { products: LaravelProduct[] }) {
   );
 }
 
-// ────────────────────────────────────────────────── Componente Principal ──────────────────────────────────────────────────
+// ─── Componente Principal ────────────────────────────────────────────────────
 
 export function ProductDetailPageClient({
   product,
@@ -1151,7 +1151,7 @@ export function ProductDetailPageClient({
 
   return (
     <main className="max-w-7xl mx-auto px-4 py-6 space-y-10">
-      {/* Navegacín */}
+      {/* Navegación */}
       <Link href="/catalogo">
         <Button
           variant="ghost"
@@ -1163,7 +1163,7 @@ export function ProductDetailPageClient({
         </Button>
       </Link>
 
-      {/* ────────────────────────────────────────────────── NIVEL 1: Imagen + Info de compra ────────────────────────────────────────────────── */}
+      {/* ── NIVEL 1: Imagen + Info de compra ─────────────────────────────── */}
       <div className="grid lg:grid-cols-[1fr_520px] gap-8 items-start">
         {/* Columna izquierda: galería */}
         <div className="sticky top-24 space-y-4">
@@ -1201,7 +1201,7 @@ export function ProductDetailPageClient({
               <Stars value={product.rating.average} size="lg" />
               <span className="text-sm font-semibold text-muted-foreground">
                 {product.rating.average.toFixed(1)} ({product.rating.count}{' '}
-                reséas)
+                reseñas)
               </span>
             </div>
           </div>
@@ -1253,7 +1253,7 @@ export function ProductDetailPageClient({
                   className="h-9 w-9 rounded-none border-r border-border"
                   aria-label="Reducir"
                 >
-                  ──────────────────────────────────────────────────
+                  −
                 </Button>
                 <span className="w-10 text-center text-sm font-bold text-foreground">
                   {quantity}
@@ -1280,7 +1280,7 @@ export function ProductDetailPageClient({
             </div>
           )}
 
-          {/* Botones de accín */}
+          {/* Botones de acción */}
           <div className="flex gap-3">
             <Button
               onClick={handleAddToCart}
@@ -1299,11 +1299,11 @@ export function ProductDetailPageClient({
                 <ShoppingCart className="w-5 h-5" />
               )}
               {cartLoading
-                ? 'Agregando...'
+                ? 'Agregando…'
                 : localAdded
                   ? '¡Agregado!'
                   : inStock
-                    ? 'Áadir al Carrito'
+                    ? 'Añadir al Carrito'
                     : 'Sin stock'}
             </Button>
             <Button
@@ -1339,7 +1339,7 @@ export function ProductDetailPageClient({
             </Button>
           </div>
 
-          {/* ────────────────────────────────────────────────── Métodos de pago con fondo turquesa ────────────────────────────────────────────────── */}
+          {/* ── Métodos de pago con fondo turquesa ── */}
           <div className="rounded-xl bg-gradient-to-r from-teal-500 to-cyan-500 p-4">
             <p className="text-[10px] font-bold tracking-[.1em] uppercase text-white/80 mb-3 text-center">
               Medios de pago aceptados
@@ -1422,19 +1422,19 @@ export function ProductDetailPageClient({
         </div>
       </div>
 
-      {/* ────────────────────────────────────────────────── NIVEL 2: Tabs debajo de la imagen ────────────────────────────────────────────────── */}
+      {/* ── NIVEL 2: Tabs debajo de la imagen ────────────────────────────── */}
       <div className="lg:w-[calc(100%-540px)]">
         <ProductTabs product={product} />
       </div>
 
-      {/* ────────────────────────────────────────────────── NIVEL 3: Reséas ────────────────────────────────────────────────── */}
+      {/* ── NIVEL 3: Reseñas ──────────────────────────────────────────────── */}
       <ReviewsSection
         productId={product.id}
         productRating={product.rating.average}
         productReviewCount={product.rating.count}
       />
 
-      {/* ────────────────────────────────────────────────── NIVEL 4: Productos relacionados (auto-scroll infinito) ────────────────────────────────────────────────── */}
+      {/* ── NIVEL 4: Productos relacionados (auto-scroll infinito) ───────── */}
       {relatedProducts.length > 0 && (
         <RelatedProductsCarousel products={relatedProducts} />
       )}
@@ -1442,7 +1442,7 @@ export function ProductDetailPageClient({
   );
 }
 
-// ────────────────────────────────────────────────── Galería ──────────────────────────────────────────────────
+// ─── Galería ──────────────────────────────────────────────────────────────────
 
 function ProductGallery({
   images,

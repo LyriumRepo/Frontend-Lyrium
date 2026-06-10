@@ -55,7 +55,7 @@ function mapContractStatus(
 
 export const useControlVendedores = () => {
   const queryClient = useQueryClient();
-  const [currentTab, setCurrentTab] = useState<TabKey>('aprobacion');
+  const [currentTab, setCurrentTab] = useState<TabKey>('vendedores');
   const [filters, setFilters] = useState<SellerFilters>({
     sellerSearch: '',
     status: '',
@@ -114,12 +114,13 @@ export const useControlVendedores = () => {
   });
 
   // ── Derived: Stats para las 4 cards ───────────────────────────────────────
-  const stats = useMemo((): Stats & { pendingProducts: number } => {
+  const stats = useMemo((): Stats & { pendingProducts: number; pending: number } => {
     const s = statsData;
     return {
       totalSellers: s?.total ?? 0,
       activeSellers: s?.active ?? 0,
       pendingProducts: productsData?.meta?.total ?? 0,
+      pending: s?.pending ?? 0,
       alerts: s?.alerts ?? 0,
     };
   }, [statsData, productsData]);
