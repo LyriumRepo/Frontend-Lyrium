@@ -38,7 +38,6 @@ export default function TokenizeNewCardModal({ onClose, onSuccess }: Props) {
     exp_year: '',
     brand: '',
   });
-
   const initSession = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -128,6 +127,7 @@ export default function TokenizeNewCardModal({ onClose, onSuccess }: Props) {
         card_brand: data.brand,
         card_exp_month: data.expMonth,
         card_exp_year: data.expYear,
+        detalle_extra: 'debito',
         is_default: false,
       });
       onSuccess();

@@ -1,10 +1,84 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useAuth } from '@/shared/lib/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import Icon from '@/components/ui/Icon';
 import { userRepository } from '@/shared/lib/api/factory';
+
+const CONFETTI_COLORS = [
+  '#2A5A4D', '#64c695', '#9cb04e',
+  '#fbbf24', '#f472b6', '#60a5fa',
+  '#a78bfa', '#fb923c', '#34d399',
+];
+
+function BirthdayCelebration({ name }: { name: string }) {
+  const [opacity, setOpacity] = useState(0);
+  const [gone, setGone] = useState(false);
+
+  const particles = useMemo(() =>
+    Array.from({ length: 38 }, (_, i) => ({
+      id: i,
+      left: Math.random() * 100,
+      delay: Math.random() * 2.8,
+      duration: 2.8 + Math.random() * 2,
+      color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
+      size: 6 + Math.random() * 9,
+      isRect: Math.random() > 0.45,
+      rotate: Math.random() * 360,
+    }))
+  , []);
+
+  useEffect(() => {
+    const t0 = setTimeout(() => setOpacity(1), 60);
+    const t1 = setTimeout(() => setOpacity(0), 4200);
+    const t2 = setTimeout(() => setGone(true), 5400);
+    return () => { clearTimeout(t0); clearTimeout(t1); clearTimeout(t2); };
+  }, []);
+
+  if (gone) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-[400] pointer-events-none"
+      style={{ opacity, transition: 'opacity 1s ease' }}
+    >
+      {particles.map(p => (
+        <div
+          key={p.id}
+          style={{
+            position: 'absolute',
+            left: `${p.left}%`,
+            top: '-20px',
+            width: p.isRect ? `${p.size * 0.5}px` : `${p.size}px`,
+            height: `${p.size}px`,
+            backgroundColor: p.color,
+            borderRadius: p.isRect ? '2px' : '50%',
+            animation: `confettiFall ${p.duration}s ${p.delay}s ease-in both`,
+            transform: `rotate(${p.rotate}deg)`,
+          }}
+        />
+      ))}
+
+      <div className="fixed top-[72px] left-0 right-0 flex justify-center px-4" style={{ zIndex: 401 }}>
+        <div
+          style={{ animation: 'birthdayBannerIn 5.2s ease forwards' }}
+          className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-7 py-4 rounded-2xl shadow-2xl flex items-center gap-4 max-w-sm w-full"
+        >
+          <span style={{ fontSize: '30px', animation: 'birthdaySpin 2s linear infinite' }}>🎂</span>
+          <div className="flex-1 min-w-0">
+            <p className="font-black text-base leading-tight truncate">
+              ¡Feliz cumpleaños, {name}!
+            </p>
+            <p className="text-xs text-white/80 font-medium mt-0.5">
+              La familia Lyrium celebra tu día 🌿🎉
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 interface ProfileFormData {
   nombres: string;
@@ -64,7 +138,7 @@ export default function CustomerProfilePage() {
         telefono: user.phone || '',
         celular_secundario: user.phone_2 || '',
         telefono_fijo: user.landline || '',
-        fecha_cumpleanos: user.birthday || '',
+        fecha_cumpleanos: user.birthday ? user.birthday.substring(0, 10) : '',
         tipo_documento: user.document_type || 'DNI',
         numero_documento: user.document_number || '',
         foto: user.avatar || '',
@@ -138,7 +212,6 @@ export default function CustomerProfilePage() {
   const requiredFields: { key: keyof ProfileFormData; label: string }[] = [
     { key: 'nombres', label: 'Nombres' },
     { key: 'apellidos', label: 'Apellidos' },
-    { key: 'correo', label: 'Correo Principal' },
     { key: 'telefono', label: 'Celular Principal' },
     { key: 'tipo_documento', label: 'Tipo de Documento' },
     { key: 'numero_documento', label: 'Número de Documento' },
@@ -185,8 +258,7 @@ export default function CustomerProfilePage() {
       }
 
       const updatePayload: Record<string, string | undefined> = {
-        display_name: `${formData.nombres} ${formData.apellidos}`.trim(),
-        email: formData.correo,
+        name: `${formData.nombres} ${formData.apellidos}`.trim(),
         secondary_email: formData.correo_secundario || undefined,
         phone: formData.telefono,
         phone_2: formData.celular_secundario || undefined,
@@ -206,9 +278,29 @@ export default function CustomerProfilePage() {
       await userRepository.updateUser(user.id, updatePayload as any);
 
       setIsEditMode(false);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error al guardar perfil:', err);
-      setErrors({ nombres: 'Ocurrió un error al guardar los cambios. Intenta nuevamente.' });
+      if (err?.validationErrors) {
+        const fieldMap: Record<string, keyof ProfileFormData> = {
+          name: 'nombres',
+          email: 'correo',
+          secondary_email: 'correo_secundario',
+          phone: 'telefono',
+          phone_2: 'celular_secundario',
+          landline: 'telefono_fijo',
+          birthday: 'fecha_cumpleanos',
+          document_type: 'tipo_documento',
+          document_number: 'numero_documento',
+        };
+        const newErrors: Partial<Record<keyof ProfileFormData, string>> = {};
+        Object.entries(err.validationErrors as Record<string, string[]>).forEach(([field, msgs]) => {
+          const mapped = fieldMap[field];
+          if (mapped) newErrors[mapped] = msgs[0];
+        });
+        setErrors(Object.keys(newErrors).length > 0 ? newErrors : { nombres: err.message });
+      } else {
+        setErrors({ nombres: err?.message || 'Ocurrió un error al guardar los cambios. Intenta nuevamente.' });
+      }
     } finally {
       setSaving(false);
       setUploadingAvatar(false);
@@ -304,6 +396,14 @@ export default function CustomerProfilePage() {
 
   const birthdayContent = getBirthdayContent(formData.fecha_cumpleanos);
 
+  const isBirthday = useMemo(() => {
+    if (!formData.fecha_cumpleanos) return false;
+    const parts = parseBirthday(formData.fecha_cumpleanos);
+    if (!parts) return false;
+    const today = new Date();
+    return today.getMonth() + 1 === parts.month && today.getDate() === parts.day;
+  }, [formData.fecha_cumpleanos]);
+
   if (loading || !user) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -319,7 +419,11 @@ export default function CustomerProfilePage() {
         : 'border-gray-200 dark:border-[var(--border-subtle)] focus:border-sky-500 dark:focus:border-[var(--brand-green)] focus:ring-2 focus:ring-sky-100 dark:focus:ring-[var(--icons-green)]'
     }`;
 
+  const firstName = (user.display_name ?? user.nicename ?? '').split(' ')[0] || 'amigo';
+
   return (
+    <>
+    {isBirthday && <BirthdayCelebration name={firstName} />}
     <div className="space-y-8 animate-fadeIn">
       <div className="flex items-center justify-between">
         <div>
@@ -411,20 +515,19 @@ export default function CustomerProfilePage() {
 
               <div className="space-y-1">
                 <label className="text-[10px] font-black text-gray-400 dark:text-gray-300 uppercase tracking-widest ml-1">
-                  Correo Principal <span className="text-red-500">*</span>
+                  Correo Principal
                 </label>
                 <input
                   type="email"
                   name="correo"
                   value={formData.correo}
-                  onChange={handleChange}
-                  readOnly={!isEditMode}
+                  readOnly
                   placeholder="usuario@ejemplo.com"
-                  className={inputClassName('correo')}
+                  className="w-full text-sm font-bold text-gray-500 dark:text-[var(--text-secondary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-3 border-2 border-gray-100 dark:border-[var(--border-subtle)] rounded-xl outline-none cursor-default select-none"
                 />
-                {errors.correo && (
-                  <p className="text-xs text-red-500 font-semibold ml-1">{errors.correo}</p>
-                )}
+                <p className="text-[9px] text-gray-400 dark:text-gray-500 ml-1">
+                  Para cambiar el correo, contacta a soporte
+                </p>
               </div>
 
               <div className="space-y-1">
@@ -645,5 +748,6 @@ export default function CustomerProfilePage() {
         </div>
       </form>
     </div>
+    </>
   );
 }

@@ -27,31 +27,29 @@ export default function ChatLayout({
   return (
     <div className={`grid grid-cols-12 ${CHAT_CONFIG.spacing.gap} h-full min-h-0`}>
       <div className={`
-        ${listWidth} 
-        bg-white/70 dark:bg-[var(--bg-secondary)]/70
-        backdrop-blur-xl
-        ${CHAT_CONFIG.card.rounded} 
-        border 
-        border-white/20 dark:border-[var(--border-subtle)]/50
-        shadow-lg shadow-black/5
-        overflow-hidden 
-        flex 
+        ${listWidth}
+        bg-[var(--bg-card)]
+        rounded-[2.5rem]
+        border
+        border-[var(--border-subtle)]
+        shadow-sm
+        overflow-hidden
+        flex
         flex-col
       `}>
         {list}
       </div>
-      
+
       <div className={`
-        ${detailWidth} 
-        bg-white/70 dark:bg-[var(--bg-secondary)]/70
-        backdrop-blur-xl
-        ${CHAT_CONFIG.card.rounded} 
-        border 
-        border-white/20 dark:border-[var(--border-subtle)]/50
-        shadow-lg shadow-black/5
-        overflow-hidden 
-        flex 
-        flex-col 
+        ${detailWidth}
+        bg-[var(--bg-card)]
+        rounded-[2.5rem]
+        border
+        border-[var(--border-subtle)]
+        shadow-xl
+        overflow-hidden
+        flex
+        flex-col
         min-h-0
       `}>
         {detail}

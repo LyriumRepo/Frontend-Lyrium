@@ -144,7 +144,7 @@ export function HelpdeskLayout({
                 value={newTicketSubject}
                 onChange={(e) => setNewTicketSubject(e.target.value)}
                 placeholder="Describe brevemente el problema..."
-                className="w-full px-4 py-3.5 bg-[var(--bg-secondary)]/50 border-none rounded-2xl text-xs font-medium text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:ring-2 focus:ring-sky-500/20"
+                className="w-full px-4 py-3.5 bg-[var(--bg-secondary)]/50 border-none rounded-2xl text-xs font-medium text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:ring-2 focus:ring-[var(--turquesa-500)]/20"
               />
             </div>
             <div>
@@ -154,7 +154,7 @@ export function HelpdeskLayout({
                 onChange={(e) => setNewTicketContent(e.target.value)}
                 placeholder="Proporciona detalles adicionales..."
                 rows={4}
-                className="w-full px-4 py-3.5 bg-[var(--bg-secondary)]/50 border-none rounded-2xl text-xs font-medium text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:ring-2 focus:ring-sky-500/20 resize-none"
+                className="w-full px-4 py-3.5 bg-[var(--bg-secondary)]/50 border-none rounded-2xl text-xs font-medium text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:ring-2 focus:ring-[var(--turquesa-500)]/20 resize-none"
               />
             </div>
             <div className="flex justify-end gap-3 pt-4">

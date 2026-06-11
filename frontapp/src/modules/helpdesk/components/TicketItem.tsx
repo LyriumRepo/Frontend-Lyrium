@@ -11,9 +11,9 @@ const statusConfig: Record<string, { label: string; class: string; border: strin
   in_progress: { label: 'En Proceso', class: 'bg-lime-400 text-white', border: 'border-lime-400' },
   'En Proceso': { label: 'En Proceso', class: 'bg-lime-400 text-white', border: 'border-lime-400' },
   proceso: { label: 'En Proceso', class: 'bg-lime-400 text-white', border: 'border-lime-400' },
-  resolved: { label: 'Resuelto', class: 'bg-sky-500 text-white', border: 'border-sky-500' },
-  Resuelto: { label: 'Resuelto', class: 'bg-sky-500 text-white', border: 'border-sky-500' },
-  resuelto: { label: 'Resuelto', class: 'bg-sky-500 text-white', border: 'border-sky-500' },
+  resolved: { label: 'Resuelto', class: 'bg-[var(--turquesa-500)] text-white', border: 'border-[var(--turquesa-500)]' },
+  Resuelto: { label: 'Resuelto', class: 'bg-[var(--turquesa-500)] text-white', border: 'border-[var(--turquesa-500)]' },
+  resuelto: { label: 'Resuelto', class: 'bg-[var(--turquesa-500)] text-white', border: 'border-[var(--turquesa-500)]' },
   closed: { label: 'Cerrado', class: 'bg-red-500 text-white', border: 'border-red-500' },
   Cerrado: { label: 'Cerrado', class: 'bg-red-500 text-white', border: 'border-red-500' },
   cerrado: { label: 'Cerrado', class: 'bg-red-500 text-white', border: 'border-red-500' },
@@ -36,7 +36,7 @@ const priorityColors: Record<string, string> = {
 const categoryLabels: Record<string, { label: string; color: string }> = {
   tech: { label: 'Tecnico', color: 'bg-blue-500/10 text-blue-600 dark:bg-blue-500/15 dark:text-blue-300' },
   admin: { label: 'Admin', color: 'bg-slate-500/10 text-slate-600 dark:bg-slate-400/15 dark:text-slate-300' },
-  info: { label: 'Info', color: 'bg-sky-500/10 text-sky-600 dark:bg-sky-500/15 dark:text-sky-300' },
+  info: { label: 'Info', color: 'bg-[var(--turquesa-500)]/10 text-[var(--turquesa-500)] dark:bg-[var(--turquesa-500)]/15 dark:text-[var(--turquesa-500)]' },
   comment: { label: 'Elogio', color: 'bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-300' },
   followup: { label: 'Seguimiento', color: 'bg-amber-500/10 text-amber-600 dark:bg-amber-500/15 dark:text-amber-300' },
   payments: { label: 'Pagos', color: 'bg-rose-500/10 text-rose-600 dark:bg-rose-500/15 dark:text-rose-300' },
@@ -54,14 +54,14 @@ export function TicketItem({ ticket, isActive, onClick, showPriority = true, sho
       tabIndex={0}
       onClick={() => onClick(ticket.id)}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClick(ticket.id); }}
-      className={`group cursor-pointer rounded-[1.55rem] border border-transparent border-l-4 bg-[var(--bg-input)]/78 p-4 transition-all hover:border-sky-200 hover:bg-[var(--bg-card)] hover:shadow-[0_18px_36px_-28px_rgba(15,23,42,0.35)] dark:hover:border-[var(--border-focus)] dark:hover:shadow-[0_22px_42px_-30px_rgba(0,0,0,0.7)] ${status.border} ${isActive ? '!border-[var(--border-focus)] !border-l-[var(--border-focus)] !bg-[var(--bg-card)] !shadow-[0_22px_45px_-30px_rgba(15,23,42,0.25)] dark:!shadow-[0_22px_48px_-32px_rgba(0,0,0,0.7)]' : ''}`}
+      className={`group cursor-pointer rounded-[1.55rem] border border-transparent border-l-4 bg-[var(--bg-input)]/78 p-4 transition-all hover:border-[var(--turquesa-500)]/30 hover:bg-[var(--bg-card)] hover:shadow-[0_18px_36px_-28px_rgba(15,23,42,0.35)] dark:hover:border-[var(--turquesa-500)]/20 dark:hover:shadow-[0_22px_42px_-30px_rgba(0,0,0,0.7)] ${status.border} ${isActive ? '!border-[var(--turquesa-500)] !border-l-[var(--turquesa-500)] !bg-[var(--bg-card)] !shadow-[0_22px_45px_-30px_rgba(15,23,42,0.25)] dark:!shadow-[0_22px_48px_-32px_rgba(0,0,0,0.7)]' : ''}`}
     >
       <div className="mb-3 flex items-start justify-between gap-3">
         <div className="flex min-w-0 items-center gap-2">
           {showPriority && ticket.priority && (
             <span className={`h-2 w-2 rounded-full ${priorityColors[ticket.priority] || 'bg-slate-400'}`} title={ticket.priority} />
           )}
-          <span className="rounded-full bg-sky-500/10 px-2 py-1 text-[10px] font-black uppercase text-sky-700 dark:bg-sky-500/15 dark:text-sky-300">
+          <span className="rounded-full bg-[var(--turquesa-500)]/10 px-2 py-1 text-[10px] font-black uppercase text-[var(--turquesa-500)] dark:bg-[var(--turquesa-500)]/15 dark:text-[var(--turquesa-500)]">
             #{ticket.displayId}
           </span>
         </div>
@@ -83,7 +83,7 @@ export function TicketItem({ ticket, isActive, onClick, showPriority = true, sho
             ? 'font-black text-[var(--text-primary)]'
             : isActive
               ? 'font-black text-[var(--text-primary)]'
-              : 'font-semibold text-[var(--text-primary)] group-hover:text-sky-600 dark:group-hover:text-sky-300'
+              : 'font-semibold text-[var(--text-primary)] group-hover:text-[var(--turquesa-500)]'
         }`}
       >
         {ticket.title}

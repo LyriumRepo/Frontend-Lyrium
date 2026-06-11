@@ -63,6 +63,7 @@ export default function TiendaPage({ params }: StorePageProps) {
           cover: storeData.banner || storeData.banner,
           banner: storeData.banner || '',
           descripcion: storeData.description || '',
+          actividad: storeData.activity || '',
           direccion: storeData.address || '',
           categoria: storeData.category?.name || '',
           category_id: storeData.category_id,
@@ -77,6 +78,19 @@ export default function TiendaPage({ params }: StorePageProps) {
           whatsapp: storeData.whatsapp,
           gallery: storeData.gallery || [],
           status: storeData.status,
+          policies: {
+            shipping: storeData.policies?.shipping_pdf || storeData.shippingPdf || null,
+            returns: storeData.policies?.return_pdf || storeData.returnPdf || null,
+            privacy: storeData.policies?.privacy_pdf || storeData.privacyPdf || null,
+          },
+          branches: (storeData.branches || []).map((b: any) => ({
+            name: b.name || '',
+            address: b.address || '',
+            department: b.department || '',
+            phone: b.phone || '',
+            hours: b.hours || '',
+            mapsUrl: b.maps_url || b.mapsUrl || '',
+          })),
         };
 
         const products = rawProducts.map((p: any) => ({
@@ -99,6 +113,8 @@ export default function TiendaPage({ params }: StorePageProps) {
           ...(storeData.tiktok ? [{ key: 'tiktok' as const, url: storeData.tiktok }] : []),
           ...(storeData.whatsapp ? [{ key: 'whatsapp' as const, url: storeData.whatsapp }] : []),
           ...(storeData.youtube ? [{ key: 'youtube' as const, url: storeData.youtube }] : []),
+          ...(storeData.twitter ? [{ key: 'twitter' as const, url: storeData.twitter }] : []),
+          ...(storeData.linkedin ? [{ key: 'linkedin' as const, url: storeData.linkedin }] : []),
           ...(storeData.website ? [{ key: 'web' as const, url: storeData.website }] : []),
         ];
 
@@ -200,6 +216,76 @@ export default function TiendaPage({ params }: StorePageProps) {
           <AdBannersGrid />
 
           {planLayout === 'premium' && <StoreInfoCard tienda={store} horarios={{}} />}
+
+          {store.descripcion && (
+            <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-2xl p-6 border border-gray-100 dark:border-[var(--border-subtle)] shadow-sm">
+              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Sobre Nosotros</p>
+              <p className="text-sm text-gray-600 dark:text-[var(--text-secondary)] leading-relaxed">{store.descripcion}</p>
+            </div>
+          )}
+
+          {(store.actividad || store.telefono || store.correo || store.branches.length > 0 || store.policies.shipping || store.policies.returns || store.policies.privacy) && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {store.actividad && (
+                <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-2xl p-5 border border-gray-100 dark:border-[var(--border-subtle)] shadow-sm">
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Actividad</p>
+                  <p className="text-sm font-bold text-gray-700 dark:text-[var(--text-primary)]">{store.actividad}</p>
+                </div>
+              )}
+              {(store.telefono || store.correo) && (
+                <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-2xl p-5 border border-gray-100 dark:border-[var(--border-subtle)] shadow-sm space-y-2">
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Contacto</p>
+                  {store.telefono && (
+                    <a href={`tel:${store.telefono}`} className="flex items-center gap-2 text-xs font-bold text-gray-700 dark:text-[var(--text-primary)] hover:text-sky-600 transition-colors">
+                      📞 {store.telefono}
+                    </a>
+                  )}
+                  {store.correo && (
+                    <a href={`mailto:${store.correo}`} className="flex items-center gap-2 text-xs font-bold text-sky-600 hover:underline">
+                      ✉️ {store.correo}
+                    </a>
+                  )}
+                </div>
+              )}
+              {(store.policies.shipping || store.policies.returns || store.policies.privacy) && (
+                <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-2xl p-5 border border-gray-100 dark:border-[var(--border-subtle)] shadow-sm space-y-2">
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Políticas</p>
+                  {store.policies.shipping && (
+                    <a href={store.policies.shipping} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-xs font-bold text-sky-600 hover:underline">
+                      📦 Política de envíos
+                    </a>
+                  )}
+                  {store.policies.returns && (
+                    <a href={store.policies.returns} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-xs font-bold text-sky-600 hover:underline">
+                      🔄 Política de devoluciones
+                    </a>
+                  )}
+                  {store.policies.privacy && (
+                    <a href={store.policies.privacy} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-xs font-bold text-sky-600 hover:underline">
+                      🔒 Política de privacidad
+                    </a>
+                  )}
+                </div>
+              )}
+              {store.branches.length > 0 && (
+                <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-2xl p-5 border border-gray-100 dark:border-[var(--border-subtle)] shadow-sm">
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Sucursales</p>
+                  <div className="space-y-3">
+                    {store.branches.slice(0, 3).map((b: any, i: number) => (
+                      <div key={i} className="text-xs font-bold text-gray-700 dark:text-[var(--text-primary)]">
+                        <p className="font-black">{b.name}</p>
+                        <p className="text-gray-500 dark:text-[var(--text-secondary)] font-medium">{b.address}{b.department ? `, ${b.department}` : ''}</p>
+                        {b.hours && <p className="text-gray-400 font-medium">{b.hours}</p>}
+                        {b.mapsUrl && (
+                          <a href={b.mapsUrl} target="_blank" rel="noopener noreferrer" className="text-sky-500 hover:underline">Ver en mapa</a>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           <hr className="border-gray-200 dark:border-gray-800 my-8" />
 

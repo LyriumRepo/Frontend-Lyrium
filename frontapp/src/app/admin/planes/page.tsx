@@ -46,12 +46,22 @@ export default function AdminPage() {
   const s = state;
 
   return (
-    <div className="max-w-7xl mx-auto p-5">
+    <div className="max-w-7xl mx-auto p-5 min-h-screen bg-[var(--bg-secondary)]">
+      {/* Cabecera */}
+      <div className="mb-6">
+        <div className="h-1 w-16 rounded-full bg-gradient-to-r from-[var(--brand-teal)] to-[var(--brand-lime)] mb-4" />
+        <h1 className="text-2xl font-black text-[var(--text-primary)] tracking-tight">Planes y Suscripciones</h1>
+        <p className="text-sm text-[var(--text-secondary)] mt-1">Gestión completa de planes, pagos y vendedores</p>
+      </div>
+
       {/* Pestañas */}
-      <div className="flex gap-2.5 mb-6 overflow-y-auto scrollbar-hide">
+      <div className="flex gap-2 mb-6 overflow-x-auto scrollbar-hide pb-1">
         {TABS.map(t => (
-          <button key={t.key} className={`px-5 py-3 border-2 border-gray-200 bg-white rounded-xl text-sm font-semibold text-gray-500 cursor-pointer transition-all duration-300 flex items-center gap-2
-            ${s.activeTab === t.key ? 'bg-white text-black border-black' : 'hover:border-gray-400 hover:text-gray-700'}`}
+          <button key={t.key}
+            className={`px-4 py-2.5 rounded-xl text-sm font-semibold cursor-pointer transition-all duration-200 flex items-center gap-2 whitespace-nowrap border
+              ${s.activeTab === t.key
+                ? 'bg-[var(--brand-teal)] text-white border-[var(--brand-teal)] shadow-sm'
+                : 'bg-[var(--bg-card)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-[var(--brand-teal)] hover:text-[var(--brand-teal)]'}`}
             onClick={() => admin.switchTab(t.key as never)}>
             {t.icon}{t.label}
           </button>
@@ -104,45 +114,45 @@ export default function AdminPage() {
       {/* Editor de planes */}
       <PlanEditorModal open={s.editorOpen} title={s.editorTitle} activeTab={s.editorTab} editingPlan={s.editingPlan} editFeatures={s.editFeatures} editDetailedBenefits={s.editDetailedBenefits} onClose={admin.closePlanEditor} onSave={admin.savePlan} onTabChange={admin.setEditorTab} onUpdatePlan={admin.updateEditingPlan} onAddFeature={admin.addFeature} onUpdateFeature={admin.updateFeature} onRemoveFeature={admin.removeFeature} onAddDetailedBenefit={admin.addDetailedBenefit} onUpdateDetailedBenefit={admin.updateDetailedBenefit} onRemoveDetailedBenefit={admin.removeDetailedBenefit} onImageUpload={admin.handleImageUpload} />
 
-{/* Modal eliminar */}
+      {/* Modal eliminar */}
       <Modal open={s.modals.deleteConfirm} onClose={() => setModal('deleteConfirm', false)} className="max-w-md mx-auto text-center">
-        <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-5">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+        <div className="w-14 h-14 bg-[var(--bg-danger)] rounded-2xl flex items-center justify-center mx-auto mb-5">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-error)" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
         </div>
-        <h2 className="text-xl font-extrabold text-gray-800 mb-3">¿Eliminar plan?</h2>
-        <p className="text-sm text-gray-400 mb-6">Esta acción no se puede deshacer. El plan será eliminado permanentemente.</p>
+        <h2 className="text-xl font-extrabold text-[var(--text-primary)] mb-2">¿Eliminar plan?</h2>
+        <p className="text-sm text-[var(--text-secondary)] mb-6">Esta acción no se puede deshacer. El plan será eliminado permanentemente.</p>
         <div className="flex gap-3">
-          <button className="flex-1 px-6 py-3 border-2 border-gray-200 bg-transparent text-gray-600 rounded-xl text-sm font-bold cursor-pointer transition-all hover:border-gray-400 hover:text-gray-800"
+          <button className="flex-1 px-6 py-3 border border-[var(--border-subtle)] bg-transparent text-[var(--text-secondary)] rounded-xl text-sm font-bold cursor-pointer transition-all hover:border-[var(--text-primary)] hover:text-[var(--text-primary)]"
             onClick={() => setModal('deleteConfirm', false)}>Cancelar</button>
-          <button className="flex-1 px-6 py-3 border-none bg-red-500 text-white rounded-xl text-sm font-bold cursor-pointer transition-all hover:bg-red-600"
+          <button className="flex-1 px-6 py-3 border-none bg-[var(--color-error)] text-white rounded-xl text-sm font-bold cursor-pointer transition-all hover:opacity-90"
             onClick={admin.confirmDelete}>Sí, eliminar</button>
         </div>
       </Modal>
 
       {/* Modal restaurar */}
       <Modal open={s.modals.restoreConfirm} onClose={() => setModal('restoreConfirm', false)} className="max-w-md mx-auto text-center">
-        <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-5">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#f5420b" strokeWidth="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+        <div className="w-14 h-14 bg-amber-100 dark:bg-amber-900/20 rounded-2xl flex items-center justify-center mx-auto mb-5">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
         </div>
-        <h2 className="text-xl font-extrabold text-gray-800 mb-3">¿Restaurar plan?</h2>
-        <p className="text-sm text-gray-400 mb-6">{s.restoreConfirmText || 'El plan volverá a su configuración original. Los cambios se perderán.'}</p>
+        <h2 className="text-xl font-extrabold text-[var(--text-primary)] mb-2">¿Restaurar plan?</h2>
+        <p className="text-sm text-[var(--text-secondary)] mb-6">{s.restoreConfirmText || 'El plan volverá a su configuración original. Los cambios se perderán.'}</p>
         <div className="flex gap-3">
-          <button className="flex-1 px-6 py-3 border-2 border-gray-200 bg-transparent text-gray-600 rounded-xl text-sm font-bold cursor-pointer transition-all hover:border-gray-400 hover:text-gray-800"
+          <button className="flex-1 px-6 py-3 border border-[var(--border-subtle)] bg-transparent text-[var(--text-secondary)] rounded-xl text-sm font-bold cursor-pointer transition-all hover:border-[var(--text-primary)] hover:text-[var(--text-primary)]"
             onClick={() => setModal('restoreConfirm', false)}>Cancelar</button>
-          <button className="flex-1 px-6 py-3 border-none bg-orange-500 text-white rounded-xl text-sm font-bold cursor-pointer transition-all hover:bg-orange-600"
+          <button className="flex-1 px-6 py-3 border-none bg-amber-500 text-white rounded-xl text-sm font-bold cursor-pointer transition-all hover:bg-amber-600"
             onClick={admin.confirmRestore}>Sí, restaurar</button>
         </div>
       </Modal>
 
       {/* Modal desactivar */}
       <Modal open={s.modals.deactivateConfirm} onClose={() => setModal('deactivateConfirm', false)} className="max-w-md mx-auto text-center">
-        <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-5">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <div className="w-14 h-14 bg-amber-100 dark:bg-amber-900/20 rounded-2xl flex items-center justify-center mx-auto mb-5">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
         </div>
-        <h2 className="text-xl font-extrabold text-gray-800 mb-3">¿Desactivar plan?</h2>
-        <p className="text-sm text-gray-400 mb-6">El plan dejará de ser visible para los usuarios. Podrás reactivarlo cuando quieras.</p>
+        <h2 className="text-xl font-extrabold text-[var(--text-primary)] mb-2">¿Desactivar plan?</h2>
+        <p className="text-sm text-[var(--text-secondary)] mb-6">El plan dejará de ser visible para los usuarios. Podrás reactivarlo cuando quieras.</p>
         <div className="flex gap-3">
-          <button className="flex-1 px-6 py-3 border-2 border-gray-200 bg-transparent text-gray-600 rounded-xl text-sm font-bold cursor-pointer transition-all hover:border-gray-400 hover:text-gray-800"
+          <button className="flex-1 px-6 py-3 border border-[var(--border-subtle)] bg-transparent text-[var(--text-secondary)] rounded-xl text-sm font-bold cursor-pointer transition-all hover:border-[var(--text-primary)] hover:text-[var(--text-primary)]"
             onClick={() => setModal('deactivateConfirm', false)}>No, mantener</button>
           <button className="flex-1 px-6 py-3 border-none bg-amber-500 text-white rounded-xl text-sm font-bold cursor-pointer transition-all hover:bg-amber-600"
             onClick={admin.confirmDeactivate}>Sí, desactivar</button>
@@ -151,14 +161,14 @@ export default function AdminPage() {
 
       {/* Modal error imagen */}
       <Modal open={s.modals.imageError} onClose={() => setModal('imageError', false)} className="max-w-md mx-auto text-center">
-        <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-5">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <div className="w-14 h-14 bg-[var(--bg-danger)] rounded-2xl flex items-center justify-center mx-auto mb-5">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-error)" strokeWidth="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
         </div>
-        <h2 className="text-xl font-extrabold text-gray-800 mb-3">Error al cargar imagen</h2>
-        <p className="text-sm text-gray-400 mb-2">{s.imageErrorMsg}</p>
-        <p className="text-xs text-gray-400 mb-6">{s.imageErrorSuggestion}</p>
+        <h2 className="text-xl font-extrabold text-[var(--text-primary)] mb-2">Error al cargar imagen</h2>
+        <p className="text-sm text-[var(--text-secondary)] mb-2">{s.imageErrorMsg}</p>
+        <p className="text-xs text-[var(--text-secondary)] mb-6">{s.imageErrorSuggestion}</p>
         <div className="flex justify-center">
-          <button className="px-6 py-3 border-none bg-emerald-500 text-white rounded-xl text-sm font-bold cursor-pointer transition-all hover:bg-emerald-600 hover:-translate-y-0.5"
+          <button className="px-6 py-3 border-none bg-[var(--brand-teal)] text-white rounded-xl text-sm font-bold cursor-pointer transition-all hover:opacity-90 hover:-translate-y-0.5"
             onClick={() => setModal('imageError', false)}>Intentar de nuevo</button>
         </div>
       </Modal>

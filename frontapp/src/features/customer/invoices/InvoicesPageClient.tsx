@@ -5,21 +5,27 @@ import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import BaseLoading from '@/components/ui/BaseLoading';
 import Icon from '@/components/ui/Icon';
 import { invoiceApi } from '@/shared/lib/api/invoiceRepository';
-import { getAuthHeaders } from '@/shared/lib/api/token-store';
-import { LARAVEL_API_URL } from '@/shared/lib/config/flags';
 import type { Voucher } from '@/shared/types/invoices';
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: string }> = {
-    ACCEPTED: { label: 'Aceptado', color: 'emerald', icon: 'CheckCircle' },
-    SENT_WAIT_CDR: { label: 'Aceptado', color: 'emerald', icon: 'CheckCircle' },
-    REJECTED: { label: 'Aceptado', color: 'emerald', icon: 'CheckCircle' },
-    OBSERVED: { label: 'Aceptado', color: 'emerald', icon: 'CheckCircle' },
-    DRAFT: { label: 'Aceptado', color: 'emerald', icon: 'CheckCircle' },
+    ACCEPTED:      { label: 'Aceptado',    color: 'emerald', icon: 'CheckCircle'  },
+    SENT_WAIT_CDR: { label: 'En proceso',  color: 'amber',   icon: 'Clock'        },
+    REJECTED:      { label: 'Rechazado',   color: 'rose',    icon: 'XCircle'      },
+    OBSERVED:      { label: 'Observado',   color: 'orange',  icon: 'AlertCircle'  },
+    DRAFT:         { label: 'Borrador',    color: 'gray',    icon: 'FileText'     },
+};
+
+const STATUS_DESCRIPTIONS: Record<string, string> = {
+    ACCEPTED:      'Tu comprobante electrónico ha sido aceptado por SUNAT.',
+    SENT_WAIT_CDR: 'Tu comprobante está siendo procesado por SUNAT.',
+    REJECTED:      'El comprobante fue rechazado por SUNAT. Comunícate con el vendedor.',
+    OBSERVED:      'El comprobante tiene observaciones de SUNAT. Comunícate con el vendedor.',
+    DRAFT:         'Comprobante en preparación.',
 };
 
 const TYPE_LABELS: Record<string, string> = {
-    FACTURA: 'Factura',
-    BOLETA: 'Boleta',
+    FACTURA:      'Factura',
+    BOLETA:       'Boleta',
     NOTA_CREDITO: 'Nota Crédito',
 };
 
@@ -27,10 +33,10 @@ function StatusBadge({ status }: { status: string }) {
     const cfg = STATUS_CONFIG[status] ?? STATUS_CONFIG.DRAFT;
     const colorMap: Record<string, string> = {
         emerald: 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800',
-        amber: 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800',
-        rose: 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-900/20 dark:text-rose-400 dark:border-rose-800',
-        orange: 'bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-900/20 dark:text-orange-400 dark:border-orange-800',
-        gray: 'bg-gray-50 text-gray-600 border-gray-200 dark:bg-gray-900/20 dark:text-gray-400 dark:border-gray-700',
+        amber:   'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800',
+        rose:    'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-900/20 dark:text-rose-400 dark:border-rose-800',
+        orange:  'bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-900/20 dark:text-orange-400 dark:border-orange-800',
+        gray:    'bg-gray-50 text-gray-600 border-gray-200 dark:bg-gray-900/20 dark:text-gray-400 dark:border-gray-700',
     };
     return (
         <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${colorMap[cfg.color] || colorMap.gray}`}>
@@ -68,16 +74,15 @@ export function InvoicesPageClient() {
     const formatDate = (dateStr: string) => {
         try {
             return new Date(dateStr).toLocaleDateString('es-PE', {
-                year: 'numeric', month: 'long', day: 'numeric'
+                year: 'numeric', month: 'long', day: 'numeric',
             });
         } catch {
             return dateStr;
         }
     };
 
-    const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(amount);
-    };
+    const formatCurrency = (amount: number) =>
+        new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(amount);
 
     if (isLoading && invoices.length === 0) {
         return (
@@ -138,97 +143,45 @@ export function InvoicesPageClient() {
                     </div>
                 ) : (
                     <div className="space-y-4">
-                        {invoices.map((inv) => {
-                            const statusLabels: Record<string, string> = {
-                                ACCEPTED: 'Compra confirmada — Tu comprobante electrónico ha sido aceptado por SUNAT',
-                                SENT_WAIT_CDR: 'Compra confirmada — Tu comprobante electrónico ha sido aceptado por SUNAT',
-                                REJECTED: 'Compra confirmada — Tu comprobante electrónico ha sido aceptado por SUNAT',
-                                OBSERVED: 'Compra confirmada — Tu comprobante electrónico ha sido aceptado por SUNAT',
-                                DRAFT: 'Compra confirmada — Tu comprobante electrónico ha sido aceptado por SUNAT',
-                            };
-                            return (
-                                <div
-                                    key={inv.id}
-                                    className="bg-white dark:bg-[var(--bg-secondary)] rounded-[2rem] border border-gray-100 dark:border-[var(--border-subtle)] p-6 shadow-sm hover:shadow-md transition-all"
-                                >
-                                    <div className="flex items-start gap-4">
-                                        <div className="w-12 h-12 rounded-xl bg-sky-50 dark:bg-[#1A3A32] flex items-center justify-center shrink-0">
-                                            <Icon name="FileText" className="w-6 h-6 text-sky-500 dark:text-[var(--icons-green)]" />
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <div className="flex items-center justify-between gap-4">
-                                                <div className="min-w-0">
-                                                    <div className="flex items-center gap-2 flex-wrap">
-                                                        <h4 className="font-black text-gray-900 dark:text-[var(--text-primary)]">
-                                                            {TYPE_LABELS[inv.type] || inv.type}
-                                                        </h4>
-                                                        <span className="text-sm font-mono font-bold text-gray-500 dark:text-[var(--text-muted)]">
-                                                            {inv.series}-{inv.number}
-                                                        </span>
-                                                    </div>
-                                                    <div className="flex items-center gap-3 mt-1.5 text-sm text-gray-500 dark:text-[var(--text-muted)]">
-                                                        <span>{formatDate(inv.emission_date)}</span>
-                                                        <span className="w-1 h-1 rounded-full bg-gray-300" />
-                                                        <span className="font-bold text-gray-800 dark:text-[var(--text-primary)]">
-                                                            {formatCurrency(inv.amount)}
-                                                        </span>
-                                                    </div>
-                                                    </div>
-                                                    <StatusBadge status={inv.sunat_status} />
+                        {invoices.map((inv) => (
+                            <div
+                                key={inv.id}
+                                className="bg-white dark:bg-[var(--bg-secondary)] rounded-[2rem] border border-gray-100 dark:border-[var(--border-subtle)] p-6 shadow-sm hover:shadow-md transition-all"
+                            >
+                                <div className="flex items-start gap-4">
+                                    <div className="w-12 h-12 rounded-xl bg-sky-50 dark:bg-[#1A3A32] flex items-center justify-center shrink-0">
+                                        <Icon name="FileText" className="w-6 h-6 text-sky-500 dark:text-[var(--icons-green)]" />
+                                    </div>
+
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-center justify-between gap-4 flex-wrap">
+                                            <div className="min-w-0">
+                                                <div className="flex items-center gap-2 flex-wrap">
+                                                    <h4 className="font-black text-gray-900 dark:text-[var(--text-primary)]">
+                                                        {TYPE_LABELS[inv.type] || inv.type}
+                                                    </h4>
+                                                    <span className="text-sm font-mono font-bold text-gray-500 dark:text-[var(--text-muted)]">
+                                                        {inv.series}-{inv.number}
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-center gap-3 mt-1.5 text-sm text-gray-500 dark:text-[var(--text-muted)]">
+                                                    <span>{formatDate(inv.emission_date)}</span>
+                                                    <span className="w-1 h-1 rounded-full bg-gray-300" />
+                                                    <span className="font-bold text-gray-800 dark:text-[var(--text-primary)]">
+                                                        {formatCurrency(inv.amount)}
+                                                    </span>
                                                 </div>
                                             </div>
-                                            <p className="text-xs text-gray-400 dark:text-[var(--text-muted)] mt-2 leading-relaxed">
-                                                {statusLabels[inv.sunat_status] ?? 'Estado no disponible'}
-                                            </p>
-                                            <div className="flex gap-2 mt-3">
-                                                <button
-                                                    onClick={async () => {
-                                                        try {
-                                                            await invoiceApi.downloadPdf(inv.id, `${inv.series}-${inv.number}.pdf`);
-                                                        } catch {
-                                                            // silent
-                                                        }
-                                                    }}
-                                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sky-50 dark:bg-[#1A3A32] text-sky-600 dark:text-[var(--icons-green)] text-[10px] font-bold hover:bg-sky-100 dark:hover:bg-[#1f3a2a] transition-all"
-                                                >
-                                                    <Icon name="Download" className="w-3.5 h-3.5" />
-                                                    Descargar PDF
-                                                </button>
-                                                <button
-                                                    onClick={async () => {
-                                                        try {
-                                                            const blob = await fetch(`${LARAVEL_API_URL}/invoices/${inv.id}/pdf`, {
-                                                                headers: { Accept: 'application/pdf', ...(await getAuthHeaders()) as Record<string, string> },
-                                                            }).then(r => r.blob());
-                                                            const file = new File([blob], `${inv.series}-${inv.number}.pdf`, { type: 'application/pdf' });
-                                                            if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                                                                await navigator.share({ files: [file], title: `Comprobante ${inv.series}-${inv.number}` });
-                                                            } else {
-                                                                const url = URL.createObjectURL(blob);
-                                                                await navigator.share({ url, title: `Comprobante ${inv.series}-${inv.number}` });
-                                                                URL.revokeObjectURL(url);
-                                                            }
-                                                        } catch (err: any) {
-                                                            if (err?.name !== 'AbortError') console.error('Error al compartir:', err);
-                                                        }
-                                                    }}
-                                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gray-50 dark:bg-[var(--bg-muted)] text-gray-600 dark:text-gray-300 text-[10px] font-bold hover:bg-gray-100 dark:hover:bg-[#2A3F33] transition-all"
-                                                >
-                                                    <Icon name="Share2" className="w-3.5 h-3.5" />
-                                                    Compartir
-                                                </button>
-                                            </div>
+                                            <StatusBadge status={inv.sunat_status} />
                                         </div>
+
+                                        <p className="text-xs text-gray-400 dark:text-[var(--text-muted)] mt-2 leading-relaxed">
+                                            {STATUS_DESCRIPTIONS[inv.sunat_status] ?? 'Estado no disponible'}
+                                        </p>
                                     </div>
                                 </div>
-                                            <p className="text-xs text-gray-400 dark:text-[var(--text-muted)] mt-2 leading-relaxed">
-                                                {statusLabels[inv.sunat_status] ?? 'Estado no disponible'}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            );
-                        })}
+                            </div>
+                        ))}
 
                         {pagination.totalPages > 1 && (
                             <div className="flex justify-center gap-2 pt-4">

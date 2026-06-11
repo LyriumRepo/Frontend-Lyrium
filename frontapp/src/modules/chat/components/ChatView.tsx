@@ -24,9 +24,9 @@ function SurveyArea({ onSubmit }: { onSubmit?: (rating: number, comment: string)
   };
 
   return (
-    <div className="animate-fadeIn rounded-b-[2.5rem] border-t-2 border-dashed border-sky-100 bg-[var(--bg-secondary)]/70 p-8 dark:border-[var(--border-focus)]/40">
+    <div className="animate-fadeIn rounded-b-[2.5rem] border-t-2 border-dashed border-[var(--turquesa-500)]/20 bg-[var(--bg-secondary)]/70 p-8 dark:border-[var(--border-focus)]/40">
       <div className="mx-auto flex max-w-lg flex-col items-center text-center">
-        <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-[2rem] bg-[var(--bg-card)] text-sky-500 shadow-sm dark:text-emerald-300">
+        <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-[2rem] bg-[var(--turquesa-500)]/10 text-[var(--turquesa-500)] shadow-sm">
           <Headset className="h-7 w-7" />
         </div>
         <h3 className="mb-2 text-xl font-black tracking-tight text-[var(--text-primary)]">Tu opinion nos ayuda a mejorar</h3>
@@ -40,7 +40,7 @@ function SurveyArea({ onSubmit }: { onSubmit?: (rating: number, comment: string)
               aria-label={`Calificar con ${star} estrellas`}
               onClick={() => setRating(star)}
               className={`flex h-12 w-12 items-center justify-center rounded-2xl border-2 bg-[var(--bg-card)] text-2xl shadow-sm transition-all ${
-                rating >= star ? 'border-sky-200 text-sky-400 dark:border-[var(--border-focus)] dark:text-emerald-300' : 'border-transparent text-gray-300 hover:text-sky-200 dark:text-[var(--text-muted)] dark:hover:text-emerald-300'
+                rating >= star ? 'border-[var(--turquesa-500)]/30 text-[var(--turquesa-500)]' : 'border-transparent text-gray-300 hover:text-[var(--turquesa-500)]/50 dark:text-[var(--text-muted)] dark:hover:text-[var(--turquesa-500)]'
               }`}
             >
               <Star className={`h-8 w-8 ${rating >= star ? 'animate-pulse fill-current' : ''}`} />
@@ -53,14 +53,14 @@ function SurveyArea({ onSubmit }: { onSubmit?: (rating: number, comment: string)
           onChange={(e) => setComment(e.target.value)}
           aria-label="Comentario adicional para la encuesta"
           rows={2}
-          className="mb-6 w-full rounded-2xl border-none bg-[var(--bg-card)] p-4 text-xs font-medium text-[var(--text-primary)] shadow-sm outline-none placeholder:text-[var(--text-secondary)] focus:ring-2 focus:ring-sky-500/10 dark:focus:ring-[var(--ring-focus)]"
+          className="mb-6 w-full rounded-2xl border-none bg-[var(--bg-card)] p-4 text-xs font-medium text-[var(--text-primary)] shadow-sm outline-none placeholder:text-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--turquesa-500)]/10"
           placeholder="Tienes algun comentario adicional? (Opcional)"
         />
 
         <button
           onClick={handleSubmit}
           disabled={rating === 0 || isSubmitting}
-          className="min-w-[200px] rounded-[1.5rem] bg-sky-500 px-12 py-4 text-xs font-black uppercase tracking-widest text-white shadow-xl shadow-sky-500/20 transition-all hover:bg-sky-600 active:scale-95 disabled:bg-[var(--bg-secondary)] disabled:text-[var(--text-secondary)] disabled:shadow-none dark:shadow-black/30"
+          className="min-w-[200px] rounded-[1.5rem] bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--verde-500)] px-12 py-4 text-xs font-black uppercase tracking-widest text-white shadow-xl shadow-[var(--turquesa-500)]/20 transition-all hover:opacity-90 active:scale-95 disabled:bg-[var(--bg-secondary)] disabled:text-[var(--text-secondary)] disabled:shadow-none"
         >
           {isSubmitting ? <Loader2 className="mx-auto h-5 w-5 animate-spin" /> : 'Enviar encuesta y finalizar'}
         </button>
@@ -102,7 +102,7 @@ function StatusBadge({ status }: { status: TicketStatus }) {
   const statusClasses: Record<string, string> = {
     open: 'bg-emerald-400 text-white',
     in_progress: 'bg-lime-400 text-white',
-    resolved: 'bg-sky-500 text-white',
+    resolved: 'bg-[var(--turquesa-500)] text-white',
     closed: 'bg-red-500 text-white',
     reopened: 'bg-amber-400 text-white',
   };
@@ -207,13 +207,13 @@ export function ChatView({
           </button>
         )}
 
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-cyan-400 text-white shadow-md shadow-sky-100 dark:shadow-black/20">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--turquesa-500)] to-[var(--verde-500)] text-white shadow-md shadow-[var(--turquesa-500)]/10 dark:shadow-black/20">
           {ticket.escalated ? <ShieldCheck className="h-4 w-4" /> : <Headset className="h-4 w-4" />}
         </div>
 
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-[10px] font-black text-sky-500">{ticket.displayId}</span>
+            <span className="text-[10px] font-black text-[var(--turquesa-500)]">{ticket.displayId}</span>
             <StatusBadge status={ticket.status} />
             {ticket.surveyRequired && (
               <span className="rounded-md bg-amber-500 px-1.5 py-0.5 text-[8px] font-black uppercase text-white">
@@ -272,7 +272,7 @@ export function ChatView({
             <button
               type="button"
               onClick={onLoadMore}
-              className="rounded-full bg-[var(--bg-secondary)] px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest text-sky-500 transition hover:bg-[var(--bg-hover)]"
+              className="rounded-full bg-[var(--bg-secondary)] px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest text-[var(--turquesa-500)] transition hover:bg-[var(--bg-hover)]"
             >
               Cargar mensajes anteriores
             </button>
@@ -337,7 +337,7 @@ export function ChatView({
             <button
               type="button"
               onClick={() => setShowQuickReplies(!showQuickReplies)}
-              className="w-fit text-[9px] font-black uppercase tracking-[0.2em] text-sky-500 transition hover:text-sky-600"
+              className="w-fit text-[9px] font-black uppercase tracking-[0.2em] text-[var(--turquesa-500)] transition hover:text-[var(--verde-500)]"
             >
               {showQuickReplies ? 'Ocultar respuestas' : 'Respuestas rapidas'}
             </button>
@@ -349,7 +349,7 @@ export function ChatView({
                     key={idx}
                     type="button"
                     onClick={() => handleQuickReply(qr)}
-                    className="rounded-full border border-[var(--border-subtle)] bg-[var(--bg-card)] px-3 py-1.5 text-[10px] font-bold text-[var(--text-secondary)] transition-all hover:border-sky-100 hover:bg-sky-50 hover:text-sky-600 dark:hover:border-[var(--border-focus)] dark:hover:bg-[var(--bg-hover)] dark:hover:text-emerald-300"
+                    className="rounded-full border border-[var(--border-subtle)] bg-[var(--bg-card)] px-3 py-1.5 text-[10px] font-bold text-[var(--text-secondary)] transition-all hover:border-[var(--turquesa-500)]/30 hover:bg-[var(--turquesa-500)]/5 hover:text-[var(--turquesa-500)] dark:hover:border-[var(--turquesa-500)]/20 dark:hover:bg-[var(--bg-hover)] dark:hover:text-[var(--turquesa-500)]"
                   >
                     {qr.length > 42 ? `${qr.substring(0, 42)}...` : qr}
                   </button>

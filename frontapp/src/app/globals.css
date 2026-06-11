@@ -346,6 +346,11 @@
         animation: fadeIn 0.3s ease-out forwards;
     }
 
+    /* alias camelCase usado en 120+ lugares */
+    .animate-fadeIn {
+        animation: fadeIn 0.3s ease-out forwards;
+    }
+
     @keyframes fadeSlideIn {
         from {
             opacity: 0;
@@ -441,6 +446,25 @@
     .animate-slide-down { animation: slideDown 0.25s ease-out forwards; }
     .animate-avatar-appear { animation: avatarAppear 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
     .animate-list-item-slide { animation: listItemSlide 0.3s ease-out forwards; }
+
+    /* --- Birthday celebration animations --- */
+    @keyframes confettiFall {
+        0%   { transform: translateY(-20px) rotate(0deg) scale(1); opacity: 1; }
+        70%  { opacity: 1; }
+        100% { transform: translateY(105vh) rotate(720deg) scale(0.6); opacity: 0; }
+    }
+
+    @keyframes birthdayBannerIn {
+        0%   { opacity: 0; transform: translateY(-16px) scale(0.92); }
+        12%  { opacity: 1; transform: translateY(0) scale(1); }
+        80%  { opacity: 1; transform: translateY(0) scale(1); }
+        100% { opacity: 0; transform: translateY(-10px) scale(0.96); }
+    }
+
+    @keyframes birthdaySpin {
+        from { transform: rotate(0deg); }
+        to   { transform: rotate(360deg); }
+    }
 
     /* --- Finance module stagger animations --- */
     @keyframes cardEntrance {

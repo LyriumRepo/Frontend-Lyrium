@@ -265,7 +265,7 @@ export function ChatPageClient({ conversationId }: { conversationId?: string }) 
 
     const chatContent = activeConversation ? (
         <div className="flex flex-col h-full">
-            <div className="p-4 border-b border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-secondary)] shrink-0">
+            <div className="p-5 border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)]/50 shrink-0">
                 <div className="flex items-center gap-3">
                     <div className="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-[var(--turquesa-500)] to-[var(--verde-500)] flex items-center justify-center text-white font-black text-sm shadow-sm">
                         {activeConversation.sellerName.charAt(0)}
@@ -279,7 +279,7 @@ export function ChatPageClient({ conversationId }: { conversationId?: string }) 
                 </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto bg-white dark:bg-[var(--bg-secondary)]">
+            <div className="flex-1 overflow-y-auto bg-[var(--bg-card)]/50 custom-scrollbar">
                 <MessageBubble
                     messages={mappedMessages}
                     isSentOverride={(msg) => {
@@ -319,7 +319,7 @@ export function ChatPageClient({ conversationId }: { conversationId?: string }) 
                 <ModuleHeader
                     title="Chat con Vendedores"
                     subtitle="Comunicación directa con los vendedores"
-                    icon="Messages"
+                    icon="MessageSquare"
                 />
                 <div className="flex-1 flex items-center justify-center">
                     <BaseLoading message="Cargando conversaciones..." />
@@ -333,7 +333,7 @@ export function ChatPageClient({ conversationId }: { conversationId?: string }) 
             <ModuleHeader
                 title="Chat con Vendedores"
                 subtitle="Comunicación directa con los vendedores"
-                icon="Messages"
+                icon="MessageSquare"
                 actions={
                     !showNewChatForm ? (
                         <button

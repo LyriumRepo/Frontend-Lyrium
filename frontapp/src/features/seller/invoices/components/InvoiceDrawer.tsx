@@ -35,6 +35,7 @@ export default function InvoiceDrawer({ voucher, isOpen, onClose }: InvoiceDrawe
     const statusClasses = statusColorClasses[status.color] || statusColorClasses.gray;
 
     const [isDownloading, setIsDownloading] = useState(false);
+    const [shareStatus, setShareStatus] = useState<'idle' | 'copied'>('idle');
 
     const handleDownloadPdf = useCallback(async (v: Voucher) => {
         if (isDownloading) return;
@@ -64,6 +65,28 @@ export default function InvoiceDrawer({ voucher, isOpen, onClose }: InvoiceDrawe
             setIsDownloading(false);
         }
     }, [isDownloading]);
+
+    const handleSharePdf = useCallback(async (v: Voucher) => {
+        const text = `Comprobante Lyrium\n${v.series}-${v.number}\nTotal: ${formatCurrency(v.amount)}\nFecha: ${new Date(v.emission_date).toLocaleDateString('es-PE', { day: '2-digit', month: 'long', year: 'numeric' })}`;
+        const title = `Factura ${v.series}-${v.number}`;
+
+        if (typeof navigator !== 'undefined' && navigator.share) {
+            try {
+                await navigator.share({ title, text });
+                return;
+            } catch {
+                // User cancelled — fall through to clipboard
+            }
+        }
+
+        try {
+            await navigator.clipboard.writeText(text);
+            setShareStatus('copied');
+            setTimeout(() => setShareStatus('idle'), 2000);
+        } catch {
+            // Both methods failed silently
+        }
+    }, []);
 
     return (
         <div className="fixed inset-0 z-[99999] flex items-center justify-end">
@@ -103,12 +126,15 @@ export default function InvoiceDrawer({ voucher, isOpen, onClose }: InvoiceDrawe
                         </div>
                     </div>
 
-                    <div className="space-y-4">
+                    <div className="space-y-3">
                         <h3 className="text-xs font-black text-[var(--text-secondary)] uppercase tracking-widest flex items-center gap-2">
-                            <Icon name="DollarSign" className="w-4 h-4" /> Monto Total
+                            <Icon name="DollarSign" className="w-4 h-4" /> Comisión
                         </h3>
-                        <div className="bg-gray-900 p-6 rounded-[2rem]">
-                            <p className="text-3xl font-black text-white">{formatCurrency(voucher.amount)}</p>
+                        <div className="bg-[var(--bg-secondary)] rounded-2xl p-5 border border-[var(--border-subtle)]">
+                            <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest mb-2">Desglose</p>
+                            <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+                                El desglose exacto (Base Imponible, IGV y Total) se encuentra en la <span className="font-black text-[var(--text-primary)]">Factura PDF</span>. Descárgala abajo.
+                            </p>
                         </div>
                     </div>
 
@@ -169,6 +195,13 @@ export default function InvoiceDrawer({ voucher, isOpen, onClose }: InvoiceDrawe
                 </div>
 
                 <div className="p-8 border-t border-[var(--border-subtle)] bg-[var(--bg-card)]/80 backdrop-blur-xl flex gap-4">
+                    <button
+                        onClick={() => handleSharePdf(voucher)}
+                        className="flex items-center justify-center gap-2 flex-1 py-4 bg-[var(--bg-secondary)] text-[var(--text-secondary)] rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-[var(--bg-hover)] transition-all"
+                    >
+                        <Icon name={shareStatus === 'copied' ? 'ClipboardCheck' : 'Share2'} className="w-4 h-4" />
+                        {shareStatus === 'copied' ? 'Copiado' : 'Compartir'}
+                    </button>
                     <button
                         onClick={onClose}
                         className="flex-1 py-4 bg-[var(--bg-secondary)] text-[var(--text-secondary)] rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-[var(--bg-hover)] transition-all"

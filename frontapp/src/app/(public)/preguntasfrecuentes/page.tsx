@@ -4,7 +4,7 @@ import { useState, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
-    Phone,
+    MessageCircle,
     Mail,
     ChevronDown,
     Plus,
@@ -254,14 +254,14 @@ export default function FAQPage() {
                 </p>
 
                 <div className="flex flex-col sm:flex-row justify-center gap-6 relative z-10 pt-4">
-                    <Link
-                        href="https://wa.me/51937093420"
-                        target="_blank"
-                        className="inline-flex items-center gap-3 bg-white text-sky-600 dark:text-[var(--brand-green)] px-8 py-4 rounded-2xl font-black uppercase tracking-widest hover:bg-sky-50 transition-colors shadow-lg"
+                    <button
+                        type="button"
+                        onClick={() => window.dispatchEvent(new CustomEvent('lyrium:open-chatbot'))}
+                        className="inline-flex items-center gap-3 bg-white text-sky-600 dark:text-[var(--brand-green)] px-8 py-4 rounded-2xl font-black uppercase tracking-widest hover:bg-sky-50 transition-colors shadow-lg cursor-pointer"
                     >
-                        <Phone className="w-6 h-6" />
-                        WhatsApp
-                    </Link>
+                        <MessageCircle className="w-6 h-6" />
+                        Chat en Línea
+                    </button>
                     <Link
                         href="mailto:ventas@lyriumbiomarketplace.com"
                         className="inline-flex items-center gap-3 bg-sky-600 dark:bg-[var(--brand-green)] dark:hover:bg-[var(--brand-green-hover)] border-2 border-white/30 text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest hover:bg-sky-700 transition-colors shadow-lg"

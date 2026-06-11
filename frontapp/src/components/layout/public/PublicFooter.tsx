@@ -33,9 +33,14 @@ export default function PublicFooter() {
                         <a href="https://www.tiktok.com/@lyrium.biomarkep" target="_blank" className="social-icon-btn dark:text-[var(--text-secondary)] dark:hover:text-[#9BAF9F]" title="Síguenos en TikTok">
                             <Icon name="Music" className="text-xl" />
                         </a>
-                        <a href="https://wa.me/51937093420" target="_blank" className="social-icon-btn dark:text-[var(--text-secondary)] dark:hover:text-[#9BAF9F]" title="Contáctanos por WhatsApp">
+                        <button
+                            type="button"
+                            onClick={() => window.dispatchEvent(new CustomEvent('lyrium:open-chatbot'))}
+                            className="social-icon-btn dark:text-[var(--text-secondary)] dark:hover:text-[#9BAF9F]"
+                            title="Chatea con nuestro asistente virtual"
+                        >
                             <Icon name="MessageCircle" className="text-xl" />
-                        </a>
+                        </button>
                         <a href="mailto:soporte@lyrium.pe" target="_blank" className="social-icon-btn dark:text-[var(--text-secondary)] dark:hover:text-[#9BAF9F]" title="Envíanos un correo">
                             <Icon name="Mail" className="text-xl text-sky-200 dark:text-[var(--text-secondary)]" />
                         </a>

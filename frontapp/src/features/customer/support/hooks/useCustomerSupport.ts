@@ -16,8 +16,11 @@ function mapBackendStatus(status: string): TicketStatus {
 const BACKEND_TO_CATEGORY: Record<string, TicketCategory> = {
   info: 'informacion',
   tech: 'tecnico',
-  comment: 'positivo',
-  admin: 'informacion',
+  comment: 'positivo',       // legacy fallback for old tickets
+  positivo: 'positivo',
+  negativo: 'negativo',
+  admin: 'critico',          // was incorrectly 'informacion'
+  critico: 'critico',
   followup: 'informacion',
   payments: 'informacion',
   documentation: 'informacion',
@@ -149,8 +152,8 @@ export function useCustomerSupport() {
 
       const CATEGORY_TO_BACKEND: Record<string, string> = {
         informacion: 'info',
-        positivo: 'comment',
-        negativo: 'comment',
+        positivo: 'positivo',
+        negativo: 'negativo',
         tecnico: 'tech',
         critico: 'admin',
       };

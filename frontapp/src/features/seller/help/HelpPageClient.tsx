@@ -66,13 +66,13 @@ function TicketList({
     });
 
     return (
-        <div className="flex flex-col h-full min-h-0 bg-[var(--bg-card)] rounded-3xl border border-gray-200 shadow-sm overflow-hidden">
+        <div className="flex flex-col h-full min-h-0 bg-[var(--bg-card)] rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm overflow-hidden">
             {/* ── Cabecera con filtro ── */}
-            <div className="p-4 border-b border-gray-100">
+            <div className="p-5 border-b border-[var(--border-subtle)]">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h3 className="font-semibold text-gray-900 dark:text-white">Mis Tickets</h3>
-                        <p className="text-sm text-gray-500 dark:text-gray-300">
+                        <h3 className="text-sm font-black uppercase tracking-wider text-[var(--text-primary)]">Mis Tickets</h3>
+                        <p className="text-[10px] font-medium text-[var(--text-secondary)] mt-0.5">
                             {filteredTickets.length} tickets
                         </p>
                     </div>
@@ -81,9 +81,9 @@ function TicketList({
                             setShowFilter(prev => !prev);
                             setFilterValue('');
                         }}
-                        className={`p-2 rounded-xl transition-colors text-xs font-medium border ${showFilter
-                                ? 'bg-sky-100 text-sky-600 border-sky-200 dark:bg-[var(--brand-green)] dark:text-white dark:border-transparent'
-                                : 'bg-gray-100 text-gray-500 border-gray-200 hover:bg-gray-200 dark:bg-[var(--bg-secondary)] dark:border-transparent'
+                        className={`px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-wider border transition-colors shrink-0 ${showFilter
+                                ? 'bg-[var(--turquesa-500)] text-white border-[var(--turquesa-500)] shadow-sm'
+                                : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:bg-gray-200 dark:hover:bg-[#2A3F33]'
                             }`}
                     >
                         Filtrar
@@ -92,22 +92,22 @@ function TicketList({
 
                 {/* ── Panel de filtro ── */}
                 {showFilter && (
-                    <div className="mt-3 space-y-2">
-                        <div className="flex rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 text-xs font-medium">
+                    <div className="mt-3 space-y-2 animate-fadeIn">
+                        <div className="flex rounded-xl overflow-hidden border border-[var(--border-subtle)] text-[10px] font-bold">
                             <button
                                 onClick={() => { setFilterType('asunto'); setFilterValue(''); }}
-                                className={`flex-1 py-1.5 transition-colors ${filterType === 'asunto'
-                                        ? 'bg-sky-500 dark:bg-[var(--brand-green)] text-white'
-                                        : 'bg-gray-100 dark:bg-[var(--bg-secondary)] text-gray-500 hover:bg-gray-200'
+                                className={`flex-1 py-1.5 uppercase tracking-wider transition-colors ${filterType === 'asunto'
+                                        ? 'bg-[var(--turquesa-500)] text-white'
+                                        : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-gray-200 dark:hover:bg-[#2A3F33]'
                                     }`}
                             >
                                 Asunto
                             </button>
                             <button
                                 onClick={() => { setFilterType('categoria'); setFilterValue(''); }}
-                                className={`flex-1 py-1.5 transition-colors ${filterType === 'categoria'
-                                        ? 'bg-sky-500 dark:bg-[var(--brand-green)] text-white'
-                                        : 'bg-gray-100 dark:bg-[var(--bg-secondary)] text-gray-500 hover:bg-gray-200'
+                                className={`flex-1 py-1.5 uppercase tracking-wider transition-colors ${filterType === 'categoria'
+                                        ? 'bg-[var(--turquesa-500)] text-white'
+                                        : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-gray-200 dark:hover:bg-[#2A3F33]'
                                     }`}
                             >
                                 Categoría
@@ -120,13 +120,13 @@ function TicketList({
                                 value={filterValue}
                                 onChange={(e) => setFilterValue(e.target.value)}
                                 placeholder="Buscar por asunto..."
-                                className="w-full px-3 py-1.5 text-sm bg-gray-100 dark:bg-[var(--bg-secondary)] rounded-xl outline-none focus:ring-2 focus:ring-sky-500 dark:focus:ring-[var(--icons-green)]"
+                                className="w-full px-3 py-1.5 text-sm bg-[var(--bg-secondary)] rounded-xl outline-none text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--turquesa-500)]/20 border border-[var(--border-subtle)]"
                             />
                         ) : (
                             <select
                                 value={filterValue}
                                 onChange={(e) => setFilterValue(e.target.value)}
-                                className="w-full px-3 py-1.5 text-sm bg-gray-100 dark:bg-[var(--bg-secondary)] rounded-xl outline-none focus:ring-2 focus:ring-sky-500 dark:focus:ring-[var(--icons-green)]"
+                                className="w-full px-3 py-1.5 text-sm bg-[var(--bg-secondary)] rounded-xl outline-none text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--turquesa-500)]/20 border border-[var(--border-subtle)]"
                             >
                                 <option value="">Todas las categorías</option>
                                 <option value="positivo">Comentario Positivo</option>
@@ -141,28 +141,30 @@ function TicketList({
             </div>
 
             {/* ── Lista filtrada ── */}
-            <div className="flex-1 overflow-y-auto divide-y divide-gray-100">
+            <div className="flex-1 overflow-y-auto divide-y divide-[var(--border-subtle)]">
                 {filteredTickets.map((ticket) => (
                     <button
                         key={ticket.id}
                         onClick={() => onSelect(ticket.id)}
-                        className={`w-full p-4 text-left hover:bg-gray-50 dark:hover:bg-[var(--brand-green)] transition-colors ${activeTicketId === ticket.id ? 'bg-sky-50 dark:bg-[var(--brand-green-hover)]' : ''
+                        className={`w-full p-4 text-left transition-colors ${activeTicketId === ticket.id
+                            ? 'bg-[var(--turquesa-500)]/10 border-l-2 border-[var(--turquesa-500)]'
+                            : 'hover:bg-[var(--bg-secondary)]/50'
                             }`}
                     >
                         <div className="flex items-start justify-between gap-2">
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 mb-1">
-                                    <span className="text-xs font-mono text-gray-400 dark:text-gray-300">#{ticket.ticketNumber}</span>
-                                    <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${getStatusColor(ticket.status)}`}>
+                                    <span className="text-[10px] font-mono text-[var(--text-muted)]">#{ticket.ticketNumber}</span>
+                                    <span className={`px-2 py-0.5 text-[9px] font-black uppercase tracking-wider rounded-full ${getStatusColor(ticket.status)}`}>
                                         {getStatusLabel(ticket.status)}
                                     </span>
                                 </div>
-                                <h4 className="font-medium text-gray-900 dark:text-white truncate">{ticket.subject}</h4>
-                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">{ticket.description}</p>
+                                <h4 className="text-xs font-black text-[var(--text-primary)] truncate uppercase tracking-tight">{ticket.subject}</h4>
+                                <p className="text-[10px] text-[var(--text-secondary)] mt-1 line-clamp-2 font-medium">{ticket.description}</p>
                                 <div className="flex items-center gap-3 mt-2">
-                                    <span className="text-xs text-gray-400">{getCategoryLabel(ticket.category)}</span>
-                                    <span className="text-xs text-gray-400">•</span>
-                                    <span className="text-xs text-gray-400">{formatDate(ticket.createdAt)}</span>
+                                    <span className="text-[9px] text-[var(--text-muted)] font-medium">{getCategoryLabel(ticket.category)}</span>
+                                    <span className="text-[9px] text-[var(--text-muted)]">•</span>
+                                    <span className="text-[9px] text-[var(--text-muted)] font-medium">{formatDate(ticket.createdAt)}</span>
                                 </div>
                             </div>
                         </div>
@@ -222,89 +224,69 @@ function TicketChat({
     };
 
     return (
-        <div className="flex flex-col h-full bg-[var(--bg-card)] rounded-3xl border border-gray-200 shadow-sm overflow-hidden">
-            <div className="p-4 border-b border-gray-100">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h3 className="font-semibold text-gray-900 dark:text-white">{ticket.subject}</h3>
-                        <p className="text-sm text-gray-500 dark:text-gray-300">#{ticket.ticketNumber} • {formatDate(ticket.createdAt)}</p>
+        <div className="flex flex-col h-full bg-[var(--bg-card)] rounded-[2.5rem] border border-[var(--border-subtle)] shadow-xl overflow-hidden">
+            {/* Cabecera */}
+            <div className="p-5 bg-[var(--bg-secondary)]/50 border-b border-[var(--border-subtle)] flex items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[var(--turquesa-500)]/20 to-[var(--verde-500)]/10 text-[var(--turquesa-500)] flex items-center justify-center font-black text-sm border border-[var(--turquesa-500)]/20 shadow-md shrink-0">
+                        {ticket.subject.charAt(0).toUpperCase()}
                     </div>
-                    <span className={`px-3 py-1 text-xs font-medium rounded-full ${getStatusColor(ticket.status)}`}>
+                    <div>
+                        <h3 className="text-sm font-black text-[var(--text-primary)] leading-none uppercase tracking-tight">{ticket.subject}</h3>
+                        <p className="text-[10px] text-[var(--text-muted)] font-semibold mt-1.5 tracking-wide">#{ticket.ticketNumber} · {formatDate(ticket.createdAt)}</p>
+                    </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                    <span className={`px-2.5 py-1 text-[9px] font-black uppercase tracking-widest rounded-full ${getStatusColor(ticket.status)}`}>
                         {ticket.status === 'open' ? 'Abierto' :
                             ticket.status === 'in_progress' ? 'En proceso' :
                                 ticket.status === 'pending' ? 'Pendiente' :
                                     ticket.status === 'resolved' ? 'Resuelto' : 'Cerrado'}
                     </span>
+                    {['open', 'in_progress', 'pending'].includes(ticket.status as TicketStatus) && (
+                        <button
+                            onClick={onCloseTicket}
+                            disabled={isClosing}
+                            className="px-3 py-1.5 rounded-xl bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 font-bold text-[10px] uppercase tracking-wider border border-rose-200 dark:border-rose-800 hover:bg-rose-100 disabled:opacity-50 transition-all"
+                        >
+                            {isClosing ? '...' : 'Cerrar'}
+                        </button>
+                    )}
                 </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-white dark:bg-[var(--bg-secondary)]">
+            {/* Mensajes */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-[var(--bg-card)]/50 custom-scrollbar">
                 {ticket.messages.length === 0 ? (
-                    <div className="text-center text-gray-500 py-8">
-                        <p>No hay mensajes aún</p>
-                        <p className="text-sm">Envía un mensaje para comenzar la conversación</p>
+                    <div className="flex flex-col items-center justify-center h-full text-center py-12">
+                        <div className="w-14 h-14 rounded-full bg-[var(--turquesa-500)]/10 flex items-center justify-center mx-auto mb-4">
+                            <svg className="w-7 h-7 text-[var(--turquesa-500)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                            </svg>
+                        </div>
+                        <p className="text-sm font-black uppercase tracking-wider text-[var(--text-primary)] mb-1">Sin mensajes aún</p>
+                        <p className="text-xs text-[var(--text-secondary)]">Envía un mensaje para comenzar la conversación</p>
                     </div>
                 ) : (
                     ticket.messages.map((msg) => {
                         const isSeller = msg.senderType === 'seller';
-
                         return (
-                            <div
-                                key={msg.id}
-                                className={`flex ${isSeller ? 'justify-end' : 'justify-start'}`}
-                            >
-                                <div
-                                    className={`flex max-w-[50%] items-end gap-3 ${isSeller ? 'flex-row-reverse' : 'flex-row'
-                                        }`}
-                                >
-                                    <div
-                                        className={`w-9 h-9 shrink-0 rounded-full flex items-center justify-center text-[10px] font-black shadow-sm ${isSeller
-                                            ? 'bg-sky-500 text-white'
-                                            : 'bg-emerald-500 text-white'
-                                            }`}
-                                    >
-                                        {msg.senderName
-                                            .split(' ')
-                                            .map((w) => w[0])
-                                            .slice(0, 2)
-                                            .join('')}
+                            <div key={msg.id} className={`flex ${isSeller ? 'justify-end animate-bubble-in-right' : 'justify-start animate-bubble-in-left'} group/msg`}>
+                                <div className={`max-w-[70%] p-4 rounded-3xl relative flex flex-col gap-1.5 shadow-sm transition-all duration-300 hover:shadow-md ${
+                                    isSeller
+                                        ? 'bg-gradient-to-br from-[var(--turquesa-500)] to-[var(--verde-500)] text-white rounded-tr-none shadow-md shadow-[var(--turquesa-500)]/5'
+                                        : 'bg-[var(--bg-secondary)] text-[var(--text-primary)] rounded-tl-none border border-[var(--border-subtle)]'
+                                }`}>
+                                    <div className={`text-[9px] font-black uppercase tracking-wider ${
+                                        isSeller ? 'text-white/80' : 'text-[var(--icons-green)]'
+                                    }`}>
+                                        {msg.senderName} <span className="opacity-75 font-normal">({isSeller ? 'Tú' : 'Soporte'})</span>
                                     </div>
-
-                                    <div
-                                        className={`relative rounded-3xl px-4 py-3 shadow-sm border backdrop-blur-sm ${isSeller
-                                            ? 'bg-gradient-to-br from-sky-500 to-sky-600 text-white border-sky-400/20 rounded-br-md'
-                                            : 'bg-white dark:bg-gray-100 text-slate-800 border-gray-200 rounded-bl-md'
-                                            }`}
-                                    >
-                                        <div className="mb-1 flex items-center gap-2">
-                                            <p
-                                                className={`text-[11px] font-black uppercase tracking-[0.16em] ${isSeller ? 'text-sky-100' : 'text-emerald-600'
-                                                    }`}
-                                            >
-                                                {msg.senderName}
-                                            </p>
-                                            <span
-                                                className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${isSeller
-                                                    ? 'bg-white/15 text-sky-50'
-                                                    : 'bg-emerald-50 text-emerald-700'
-                                                    }`}
-                                            >
-                                                {isSeller ? 'Tú' : 'Soporte'}
-                                            </span>
-                                        </div>
-
-                                        <p className="text-sm leading-relaxed whitespace-pre-wrap break-all">
-                                            {msg.content}
-                                        </p>
-
-                                        <div className="mt-2 flex justify-end">
-                                            <p
-                                                className={`text-[10px] font-medium ${isSeller ? 'text-sky-100/80' : 'text-gray-400'
-                                                    }`}
-                                            >
-                                                {formatTime(msg.createdAt)}
-                                            </p>
-                                        </div>
+                                    <p className="text-xs font-semibold leading-relaxed break-words">{msg.content}</p>
+                                    <div className="flex items-center justify-end mt-1.5">
+                                        <span className={`text-[8px] font-bold ${isSeller ? 'text-white/70' : 'text-[var(--text-muted)]'}`}>
+                                            {formatTime(msg.createdAt)}
+                                        </span>
                                     </div>
                                 </div>
                             </div>
@@ -313,37 +295,28 @@ function TicketChat({
                 )}
             </div>
 
-            {ticket.status !== 'resolved' && (
-                <div className="p-3 border-t border-gray-100 dark:border-white/10">
-                    <div className="flex flex-wrap items-center gap-2">
+            {/* Input */}
+            {ticket.status !== 'resolved' && ticket.status !== 'closed' && (
+                <div className="p-4 bg-[var(--bg-secondary)]/50 border-t border-[var(--border-subtle)]">
+                    <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="flex gap-3 items-center relative">
                         <input
                             type="text"
                             value={message}
                             onChange={(e) => setMessage(e.target.value)}
-                            onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-                            placeholder="Escribe un mensaje..."
-                            className="flex-1 min-w-0 px-4 py-2.5 bg-white dark:bg-[var(--bg-secondary)] rounded-full outline-none border-2 border-gray-300 dark:border-transparent focus:ring-2 focus:ring-sky-500 dark:focus:ring-[var(--icons-green)]"
+                            placeholder="Escribe un mensaje en el canal de soporte..."
+                            className="flex-1 pl-4 pr-14 py-4 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-2xl text-xs font-bold focus:ring-2 focus:ring-[var(--turquesa-500)]/20 outline-none text-[var(--text-primary)] placeholder:text-[var(--text-muted)]"
                             disabled={isSending}
                         />
-
                         <button
-                            onClick={handleSend}
+                            type="submit"
                             disabled={isSending || !message.trim()}
-                            className="shrink-0 px-4 py-2.5 bg-sky-500 dark:bg-[var(--brand-green)] text-white rounded-full font-medium disabled:opacity-50 hover:bg-sky-600 dark:hover:bg-[var(--brand-green-hover)] border border-sky-200 dark:border-[var(--border-subtle)] transition-colors"
+                            className="absolute right-2.5 w-11 h-11 rounded-xl bg-[var(--brand-green)] hover:bg-[var(--brand-green-hover)] text-white flex items-center justify-center transition active:scale-95 shadow-md shadow-[var(--brand-green)]/30 border border-[var(--brand-green)]/20 disabled:opacity-50"
                         >
-                            {isSending ? 'Enviando...' : 'Enviar'}
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                            </svg>
                         </button>
-
-                        {['open', 'in_progress', 'pending'].includes(ticket.status as TicketStatus) && (
-                            <button
-                                onClick={onCloseTicket}
-                                disabled={isClosing}
-                                className="shrink-0 inline-flex items-center justify-center rounded-full border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-semibold text-red-700 shadow-sm transition-all duration-200 hover:border-red-300 hover:bg-red-100 hover:text-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:border-gray-200 disabled:bg-gray-100 disabled:text-gray-400"
-                            >
-                                {isClosing ? "Cerrando..." : "Cerrar ticket"}
-                            </button>
-                        )}
-                    </div>
+                    </form>
                 </div>
             )}
         </div>
@@ -369,49 +342,49 @@ function NewTicketForm({
     };
 
     return (
-        <div className="flex flex-col h-full bg-[var(--bg-card)] rounded-3xl border border-gray-200 shadow-sm overflow-hidden">
-            <div className="p-4 border-b border-gray-100">
-                <h3 className="font-semibold text-gray-900 dark:text-white">Nuevo Ticket</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-300">Crea una nueva solicitud de soporte</p>
+        <div className="flex flex-col h-full bg-[var(--bg-card)] rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm overflow-hidden">
+            <div className="p-5 border-b border-[var(--border-subtle)]">
+                <h3 className="text-sm font-black uppercase tracking-wider text-[var(--text-primary)]">Nuevo Ticket</h3>
+                <p className="text-xs text-[var(--text-secondary)] mt-1">Crea una nueva solicitud de soporte</p>
             </div>
 
             <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-4">
                 <div>
-                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-400 mb-1">Categoría</label>
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-1.5">Categoría</label>
                     <select
                         value={category}
                         onChange={(e) => setCategory(e.target.value)}
-                        className="w-full px-4 py-2 bg-gray-100 dark:bg-[var(--bg-secondary)] rounded-xl outline-none focus:ring-2 focus:ring-sky-500 dark:focus:ring-[var(--icons-green)]"
+                        className="w-full px-4 py-2.5 bg-[var(--bg-secondary)] rounded-xl outline-none text-sm font-medium text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--turquesa-500)]/20 border border-[var(--border-subtle)]"
                         required
                     >
                         <option value="positivo">Comentario Positivo</option>
                         <option value="negativo">Comentario Negativo</option>
                         <option value="informacion">Solicitud de Información</option>
                         <option value="tecnico">Soporte Técnico</option>
-                        <option value="critico">Soporte Técnico Critico</option>
+                        <option value="critico">Soporte Técnico Crítico</option>
                     </select>
                 </div>
 
                 <div>
-                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-400 mb-1">Asunto</label>
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-1.5">Asunto</label>
                     <input
                         type="text"
                         value={subject}
                         onChange={(e) => setSubject(e.target.value)}
                         placeholder="Describe brevemente el problema"
-                        className="w-full px-4 py-2 bg-gray-100 dark:bg-[var(--bg-secondary)] rounded-xl outline-none focus:ring-2 focus:ring-sky-500 dark:focus:ring-[var(--icons-green)]"
+                        className="w-full px-4 py-2.5 bg-[var(--bg-secondary)] rounded-xl outline-none text-sm font-medium text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--turquesa-500)]/20 border border-[var(--border-subtle)]"
                         required
                     />
                 </div>
 
                 <div>
-                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Descripción</label>
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-1.5">Descripción</label>
                     <textarea
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                         placeholder="Explica detalladamente tu problema..."
                         rows={5}
-                        className="w-full px-4 py-2 bg-gray-100 dark:bg-[var(--bg-secondary)] rounded-xl outline-none focus:ring-2 focus:ring-sky-500 dark:focus:ring-[var(--icons-green)] resize-none"
+                        className="w-full px-4 py-2.5 bg-[var(--bg-secondary)] rounded-xl outline-none text-sm font-medium text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--turquesa-500)]/20 border border-[var(--border-subtle)] resize-none"
                         required
                     />
                 </div>
@@ -420,14 +393,14 @@ function NewTicketForm({
                     <button
                         type="button"
                         onClick={onCancel}
-                        className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-xl font-medium hover:bg-gray-300 transition-colors"
+                        className="flex-1 px-4 py-2.5 bg-[var(--bg-secondary)] text-[var(--text-secondary)] rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-gray-200 dark:hover:bg-[#2A3F33] transition-colors border border-[var(--border-subtle)]"
                     >
                         Cancelar
                     </button>
                     <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="flex-1 px-4 py-2 bg-sky-500 text-white rounded-xl font-medium hover:bg-sky-600 dark:bg-[var(--brand-green)] dark:hover:bg-[var(--brand-green-hover)] border dark:border-[var(--border-subtle)] transition-colors disabled:opacity-50"
+                        className="flex-1 px-4 py-2.5 bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--verde-500)] text-white rounded-xl font-bold text-xs uppercase tracking-wider hover:opacity-90 transition-all disabled:opacity-50 shadow-lg shadow-[var(--turquesa-500)]/20"
                     >
                         {isSubmitting ? 'Creando...' : 'Crear Ticket'}
                     </button>
@@ -479,7 +452,7 @@ export function HelpPageClient() {
                     !showNewTicketForm && !activeTicket ? (
                         <button
                             onClick={() => setShowNewTicketForm(true)}
-                            className="px-4 py-2 bg-white text-sky-600 dark:text-[var(--brand-green)] rounded-xl font-medium hover:bg-sky-50 transition-colors"
+                            className="px-4 py-2 bg-white dark:bg-[var(--bg-secondary)] text-[var(--turquesa-500)] rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-[var(--turquesa-500)]/10 transition-colors border border-[var(--border-subtle)] shadow-sm"
                         >
                             + Nuevo Ticket
                         </button>
@@ -487,9 +460,9 @@ export function HelpPageClient() {
                 }
             />
 
-            <div className="flex-1 flex gap-4 overflow-hidden">
+            <div className="flex-1 flex gap-6 overflow-hidden">
                 {!showNewTicketForm && (
-                    <div className="w-[290px] shrink-0">
+                    <div className="w-96 shrink-0">
                         <TicketList
                             tickets={tickets}
                             activeTicketId={activeTicketId}
@@ -517,10 +490,15 @@ export function HelpPageClient() {
                             isClosing={isClosing}
                         />
                     ) : (
-                        <div className="h-full flex items-center justify-center text-gray-500">
-                            <div className="text-center">
-                                <p className="text-lg mb-2">Selecciona un ticket</p>
-                                <p className="text-sm">O crea uno nuevo si tienes alguna consulta</p>
+                        <div className="h-full flex items-center justify-center bg-[var(--bg-card)] rounded-[2.5rem] border border-[var(--border-subtle)]">
+                            <div className="text-center px-8">
+                                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[var(--turquesa-500)]/10 to-[var(--verde-500)]/10 flex items-center justify-center mx-auto mb-4">
+                                    <svg className="w-8 h-8 text-[var(--turquesa-500)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                    </svg>
+                                </div>
+                                <p className="text-sm font-black uppercase tracking-wider text-[var(--text-primary)] mb-1">Selecciona un ticket</p>
+                                <p className="text-xs text-[var(--text-secondary)]">O crea uno nuevo si tienes alguna consulta</p>
                             </div>
                         </div>
                     )}
