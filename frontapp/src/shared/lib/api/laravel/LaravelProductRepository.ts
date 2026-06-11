@@ -58,6 +58,7 @@ export class LaravelProductRepository implements IProductRepository {
             id: String(data.id ?? ''),
             name: data.name ?? '',
             slug: data.slug ?? '',
+            sku: data.sku ?? null,
             type: data.type ?? 'physical',
             description: data.description ?? '',
             short_description: data.short_description ?? null,

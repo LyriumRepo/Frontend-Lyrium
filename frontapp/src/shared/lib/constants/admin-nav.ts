@@ -63,7 +63,7 @@ export const adminNavigation: PanelNavigation = [
         items: [
             {
                 id: 'security',
-                label: 'Centro de Seguridad',
+                label: 'Seguridad',
                 href: '/admin/security',
                 icon: 'Shield',
             },
@@ -89,12 +89,6 @@ export const adminNavigation: PanelNavigation = [
                 label: 'Planes y Suscripciones',
                 href: '/admin/planes',
                 icon: 'Sparkles',
-            },
-            {
-                id: 'seguridad',
-                label: 'Seguridad',
-                href: '/admin/security',
-                icon: 'Shield',
             },
         ],
     },

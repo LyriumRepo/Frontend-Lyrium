@@ -32,6 +32,7 @@ export function SalesPageClient(_props?: SalesPageClientProps) {
         updateFilters,
         clearFilters,
         advanceStep,
+        shipWithCarrier,
         cancelOrder,
         isAdvancing,
         isCancelling
@@ -142,6 +143,9 @@ export function SalesPageClient(_props?: SalesPageClientProps) {
                         onClose={() => setSelectedOrder(null)}
                         onAdvanceStep={async (id) => {
                             await advanceStep(id);
+                        }}
+                        onShipWithCarrier={async (orderId, carrierCode, carrierData) => {
+                            await shipWithCarrier(orderId, carrierCode, carrierData);
                         }}
                     />
                 </>

@@ -237,7 +237,7 @@ export async function generateOrderPdf(order: Order): Promise<void> {
             ['Referencia', order.envio.notes || '—'],
             ['Tipo de entrega', order.tipo_envio === 'domicilio' ? 'A Domicilio'
                 : order.tipo_envio === 'agencia' ? 'Por Agencia'
-                : order.tipo_envio === 'sucursal' ? 'Recojo en Sucursal' : '—'],
+                : '—'],
         ], y, ML, CW);
 
         const svc = order.serviceItems[0];
@@ -260,7 +260,7 @@ export async function generateOrderPdf(order: Order): Promise<void> {
             ['Referencia', order.envio.notes || '—'],
             ['Tipo de entrega', order.tipo_envio === 'domicilio' ? 'A Domicilio'
                 : order.tipo_envio === 'agencia' ? 'Por Agencia'
-                : order.tipo_envio === 'sucursal' ? 'Recojo en Sucursal' : '—'],
+                : '—'],
         ], y, ML, CW);
     } else if (hasServices) {
         const svc = order.serviceItems[0];

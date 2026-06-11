@@ -45,6 +45,7 @@ export interface Product {
   id: string;
   name: string;
   slug?: string;
+  sku?: string | null;
   type: ProductType;
   category: string;
   categories?: { name: string; slug: string }[];

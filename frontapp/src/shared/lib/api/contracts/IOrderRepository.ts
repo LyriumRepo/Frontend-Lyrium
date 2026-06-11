@@ -22,6 +22,8 @@ export interface UpdateOrderInput {
     status?: OrderStatus;
     tracking?: string;
     notes?: string;
+    carrier_code?: string;
+    carrier_data?: Record<string, string>;
 }
 
 export interface IOrderRepository {

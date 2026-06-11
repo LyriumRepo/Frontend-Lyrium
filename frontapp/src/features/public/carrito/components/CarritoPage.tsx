@@ -7,6 +7,7 @@ import {
   Sparkles,
   Info,
   AlertCircle,
+  ShoppingCart,
 } from "lucide-react";
 import { useCarritoStore } from "@/store/carritoStore";
 import { useCarritoCatalog } from '../hooks/useCarritoCatalog';
@@ -61,6 +62,8 @@ export default function CarritoPage() {
 
   const handleDelete = (id: number | string) => removeFromCart(Number(id));
 
+  const cartCount = cartItems.reduce((a, i) => a + Number(i.cantidad ?? 0), 0);
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-[var(--bg-primary)]">
       <div className="max-w-7xl mx-auto px-4 py-10">
@@ -88,6 +91,19 @@ export default function CarritoPage() {
                 Busca, compara y añade al carrito en un clic.
               </p>
             </div>
+
+            <button
+              onClick={openCart}
+              className="relative self-start lg:self-center inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-sky-500 text-white font-medium hover:bg-sky-600 transition shadow-lg shadow-sky-200/50"
+            >
+              <ShoppingCart className="w-4 h-4" />
+              Ver carrito
+              {cartCount > 0 && (
+                <span className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-emerald-500 text-white text-[10px] font-black grid place-items-center border-2 border-white">
+                  {cartCount}
+                </span>
+              )}
+            </button>
           </div>
         </div>
 

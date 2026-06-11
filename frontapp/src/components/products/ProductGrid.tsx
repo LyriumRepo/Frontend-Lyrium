@@ -6,6 +6,22 @@ import { ShoppingCart, Eye, Clock, Tag, Calendar, Check, Loader2 } from 'lucide-
 import { Producto } from '@/types/public';
 import { useState, useCallback } from 'react';
 
+const stickerConfig: Record<string, { label: string; class: string }> = {
+  oferta: { label: 'Oferta', class: 'bg-red-500' },
+  promo: { label: 'Promo', class: 'bg-orange-500' },
+  nuevo: { label: 'Nuevo', class: 'bg-green-500' },
+  limitado: { label: 'Limitado', class: 'bg-purple-500' },
+  liquidacion: { label: 'Liquidación', class: 'bg-red-600' },
+  descuento: { label: 'Descuento', class: 'bg-red-500' },
+  bestseller: { label: 'Best Seller', class: 'bg-amber-500' },
+  envio_gratis: { label: 'Envío Gratis', class: 'bg-teal-500' },
+  organic: { label: 'Orgánico', class: 'bg-emerald-600' },
+  natural: { label: 'Natural', class: 'bg-green-600' },
+  eco: { label: 'Eco', class: 'bg-lime-600' },
+  premium: { label: 'Premium', class: 'bg-purple-500' },
+  vegan: { label: 'Vegano', class: 'bg-green-700' },
+};
+
 interface ProductGridProps {
   productos: Producto[];
   loading?: boolean;
@@ -77,9 +93,8 @@ function ProductCard({ producto }: { producto: Producto }) {
           </span>
         )}
         {producto.tag && (
-          <span className="absolute top-2 right-2 px-2 py-0.5 bg-sky-500 text-white text-xs font-bold rounded-full flex items-center gap-1">
-            <Tag className="w-2.5 h-2.5" />
-            {producto.tag}
+          <span className={`absolute top-3 right-3 text-white text-xs font-bold px-2 py-1 rounded-full ${stickerConfig[producto.tag.toLowerCase()]?.class ?? 'bg-gray-500'}`}>
+            {stickerConfig[producto.tag.toLowerCase()]?.label ?? producto.tag}
           </span>
         )}
         {outOfStock && (
@@ -168,9 +183,8 @@ function ServiceCard({ producto }: { producto: Producto }) {
           </span>
         )}
         {producto.tag && (
-          <span className="absolute top-2 right-2 px-2 py-0.5 bg-sky-500 text-white text-xs font-bold rounded-full flex items-center gap-1">
-            <Tag className="w-2.5 h-2.5" />
-            {producto.tag}
+          <span className={`absolute top-3 right-3 text-white text-xs font-bold px-2 py-1 rounded-full ${stickerConfig[producto.tag.toLowerCase()]?.class ?? 'bg-gray-500'}`}>
+            {stickerConfig[producto.tag.toLowerCase()]?.label ?? producto.tag}
           </span>
         )}
       </Link>

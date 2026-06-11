@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Order, ItemStatus, ServiceOrderItem, ORDER_STATUS_LABELS, OrderType, TipoEnvio } from '@/features/seller/sales/types';
+import { Order, ItemStatus, ServiceOrderItem, ORDER_STATUS_LABELS, OrderType, TipoEnvio, ShippingInfo } from '@/features/seller/sales/types';
 import ProductOrderStepper from './OrderStepper';
 import ServiceOrderStepper, { ServiceFlowType } from './ServiceOrderStepper';
 import OrderItemList from './OrderItemList';
@@ -9,6 +9,8 @@ import Icon from '@/components/ui/Icon';
 import { formatDate, formatDateTime } from '@/shared/lib/utils/formatters';
 import { generateOrderPdf } from '../utils/generateOrderPdf';
 import SalesLegendModal from './SalesLegendModal';
+import LogisticsModal from './LogisticsModal';
+import { CARRIERS, CARRIER_CODES } from '@/features/seller/sales/config/logistics';
 
 interface OrderDetailModalProps {
     order: Order;
@@ -18,6 +20,7 @@ interface OrderDetailModalProps {
     onConfirmItem?: (orderId: string, itemId: string) => Promise<void>;
     onCancelItem?: (orderId: string, itemId: string) => Promise<void>;
     onUpdateItemStatus?: (orderId: string, itemId: string, status: ItemStatus) => Promise<void>;
+    onShipWithCarrier?: (orderId: string, carrierCode: string, carrierData: Record<string, string>) => Promise<void>;
 }
 
 type StepAction = { label: string; icon: string };
@@ -36,17 +39,11 @@ const PRODUCT_FLOW_ACTIONS: Record<TipoEnvio, Record<number, StepAction>> = {
         3: { label: 'Confirmar En Transporte',      icon: 'Truck'        },
         4: { label: 'Listo para Recojo en Agencia', icon: 'ScanBarcode'  },
     },
-    sucursal: {
-        1: { label: 'Confirmar Validación',          icon: 'CheckCircle2' },
-        2: { label: 'Marcar Despachado',              icon: 'Package'      },
-        3: { label: 'Listo para Recojo en Sucursal',  icon: 'Store'        },
-     },
 };
 
 const PRODUCT_MAX_STEP: Record<TipoEnvio, number> = {
     domicilio: 5,
     agencia:   5,
-    sucursal:  4,
 };
 
 // ── Service flow configs ──
@@ -193,13 +190,16 @@ function ServiceItemRow({ item }: { item: ServiceOrderItem }) {
 
 export default function OrderDetailModal({
     order, isOpen, onClose, onAdvanceStep,
-    onConfirmItem, onCancelItem, onUpdateItemStatus
+    onConfirmItem, onCancelItem, onUpdateItemStatus,
+    onShipWithCarrier
 }: OrderDetailModalProps) {
     const [isAdvancing, setIsAdvancing] = useState(false);
     const [openSection, setOpenSection] = useState<'products' | 'services' | null>(
         order?.orderType === 'mixed' ? 'products' : null
     );
     const [showLegend, setShowLegend] = useState(false);
+    const [showLogistics, setShowLogistics] = useState(false);
+    const [pendingAdvance, setPendingAdvance] = useState(false);
 
     if (!order) return null;
 
@@ -238,8 +238,21 @@ export default function OrderDetailModal({
     const { departamento, provincia, distrito } = parseCity(order.envio.city);
 
     const handleAdvance = async () => {
+    const isLogisticsStep = tipoEnvio === 'agencia' && productAction?.label === 'Confirmar En Transporte';
+        if (isLogisticsStep && onShipWithCarrier) {
+            setShowLogistics(true);
+            return;
+        }
         setIsAdvancing(true);
         await onAdvanceStep(order.id);
+        setIsAdvancing(false);
+    };
+
+    const handleShipWithCarrier = async (carrierCode: string, carrierData: Record<string, string>) => {
+        if (!onShipWithCarrier) return;
+        setShowLogistics(false);
+        setIsAdvancing(true);
+        await onShipWithCarrier(order.id, carrierCode, carrierData);
         setIsAdvancing(false);
     };
 
@@ -800,6 +813,15 @@ export default function OrderDetailModal({
             </div>
         </BaseDrawer>
         <SalesLegendModal isOpen={showLegend} onClose={() => setShowLegend(false)} />
+        {onShipWithCarrier && (
+            <LogisticsModal
+                isOpen={showLogistics}
+                onClose={() => setShowLogistics(false)}
+                onConfirm={handleShipWithCarrier}
+                detectedCarrier={order.envio.carrierCode ?? null}
+                existingData={order.envio.carrierData ?? null}
+            />
+        )}
         </>
     );
 }

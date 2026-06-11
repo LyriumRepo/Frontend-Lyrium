@@ -84,7 +84,7 @@ export default function CustomerSecurityPage() {
                     Protección de Cuenta
                   </h3>
                   <p className="text-[10px] font-bold text-sky-100 uppercase tracking-[0.2em]">
-                    Centro de Seguridad Avanzada
+                    Centro de Seguridad
                   </p>
                 </div>
               </div>

@@ -96,6 +96,20 @@ export function useSellerSales() {
         }
     });
 
+    const shipWithCarrierMutation = useMutation({
+        mutationFn: async ({ orderId, carrierCode, carrierData }: { orderId: string; carrierCode: string; carrierData: Record<string, string> }) => {
+            await orderRepository.updateOrder(orderId, {
+                status: 'shipped',
+                carrier_code: carrierCode,
+                carrier_data: carrierData,
+            });
+            return orderId;
+        },
+        onSuccess: async () => {
+            await queryClient.refetchQueries({ queryKey: ['seller', 'sales'] });
+        }
+    });
+
     const cancelOrderMutation = useMutation({
         mutationFn: async (orderId: string) => {
             await orderRepository.updateOrder(orderId, { status: 'cancelled' });
@@ -130,6 +144,9 @@ export function useSellerSales() {
         clearFilters: () => setFilters({ dateStart: null, dateEnd: null, orderType: null }),
         advanceStep: (id: string) => advanceStepMutation.mutateAsync(id),
         isAdvancing: advanceStepMutation.isPending,
+        shipWithCarrier: (orderId: string, carrierCode: string, carrierData: Record<string, string>) =>
+            shipWithCarrierMutation.mutateAsync({ orderId, carrierCode, carrierData }),
+        isShipping: shipWithCarrierMutation.isPending,
         cancelOrder: (id: string) => cancelOrderMutation.mutateAsync(id),
         isCancelling: cancelOrderMutation.isPending,
         refresh: refetch

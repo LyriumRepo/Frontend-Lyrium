@@ -16,6 +16,7 @@ export function resolveImg(url?: string | null): string {
 export interface ApiProduct {
     id: number | string;
     nombre: string;
+    tag?: string;
     sku?: string;
     categoria_nombre?: string;
     imagen_url?: string;

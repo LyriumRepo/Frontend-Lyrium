@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import Icon from '@/components/ui/Icon';
 
 export interface MessageAttachment {
@@ -94,6 +94,15 @@ function shouldShowDateSeparator(prevIso: string | null, currIso: string): boole
 }
 
 export default function MessageBubble({ messages, currentUserId, onMarkRead, meta, isSentOverride }: MessageBubbleProps) {
+  useEffect(() => {
+    messages.forEach((msg) => {
+      const isSent = isSentByMe(msg, currentUserId, isSentOverride);
+      if (!isSent && msg.id && !msg.read_at && onMarkRead) {
+        onMarkRead(msg.id);
+      }
+    });
+  }, [messages, currentUserId, onMarkRead, isSentOverride]);
+
   return (
     <div className="space-y-0.5 px-4 py-4">
       {messages.map((msg, idx) => {
@@ -104,12 +113,6 @@ export default function MessageBubble({ messages, currentUserId, onMarkRead, met
 
         const sameSenderAsPrev = prevMsg && isSentByMe(prevMsg, currentUserId, isSentOverride) === isSent;
         const showMeta = meta?.showAvatar && !sameSenderAsPrev;
-
-        React.useEffect(() => {
-          if (!isSent && msg.id && !isRead && onMarkRead) {
-            onMarkRead(msg.id);
-          }
-        }, [msg.id, isSent, isRead, onMarkRead]);
 
         const avatarInitials = (name: string | undefined, fallback: string) =>
           (name ?? fallback).charAt(0).toUpperCase();
