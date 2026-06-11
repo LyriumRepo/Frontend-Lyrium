@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { getToken, deleteToken, onMessage } from 'firebase/messaging';
+import { getToken, deleteToken, onMessage, onNewToken } from 'firebase/messaging';
 import { getFirebaseMessaging } from '@/shared/lib/firebase/config';
 import { deviceApi } from '@/shared/lib/api/deviceRepository';
 import { useAuth } from '@/shared/lib/context/AuthContext';
@@ -144,6 +144,39 @@ export function useFcmToken() {
       unsubscribe();
     };
   }, [permission, isAuthenticated]);
+
+  useEffect(() => {
+    if (permission !== 'granted') return;
+    if (!isAuthenticated) return;
+
+    const messaging = getFirebaseMessaging();
+    const unsubscribe = onNewToken(messaging, async (newToken) => {
+      const oldToken = getStoredToken();
+      setFcmToken(newToken);
+      setStoredToken(newToken);
+
+      try {
+        if (oldToken && oldToken !== newToken) {
+          await deviceApi.unregister(oldToken);
+        }
+        await deviceApi.register(newToken, 'web', navigator.userAgent);
+      } catch (err) {
+        console.error('[useFcmToken] Token refresh registration error:', err);
+      }
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [permission, isAuthenticated]);
+
+  const prevAuthRef = useRef(isAuthenticated);
+  useEffect(() => {
+    if (prevAuthRef.current && !isAuthenticated) {
+      unregisterToken();
+    }
+    prevAuthRef.current = isAuthenticated;
+  }, [isAuthenticated, unregisterToken]);
 
   return {
     fcmToken,
