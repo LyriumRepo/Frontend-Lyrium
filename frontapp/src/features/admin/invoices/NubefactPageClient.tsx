@@ -39,11 +39,26 @@ function StatusBadge({ status }: { status: string }) {
 
 interface NubefactPageClientProps { }
 export function NubefactPageClient(_props: NubefactPageClientProps) {
-    const { invoices, kpis, isLoading, error, search, setSearch, refresh } = useAdminInvoices();
+    const {
+        invoices,
+        kpis,
+        isLoading,
+        error,
+        search,
+        setSearch,
+        storeSearch,
+        setStoreSearch,
+        dateFilter,
+        setDateFilter,
+        typeFilter,
+        setTypeFilter,
+        getStoreName,
+        refresh
+    } = useAdminInvoices();
 
     const handleExportCSV = () => {
-        const headers = ['ID', 'Tienda ID', 'Tipo', 'Serie', 'Número', 'Cliente', 'RUC', 'Monto', 'Estado', 'Fecha'];
-        const rows = (invoices || []).map(i => [i.id, i.store_id ?? '-', i.type, i.series, i.number, i.customer_name, i.customer_ruc, i.amount.toFixed(2), i.sunat_status, new Date(i.emission_date).toLocaleDateString('es-PE')]);
+        const headers = ['ID', 'Tienda', 'Tipo', 'Serie', 'Número', 'Cliente', 'RUC', 'Monto', 'Estado', 'Fecha'];
+        const rows = (invoices || []).map(i => [i.id, getStoreName(i.store_id), i.type, i.series, i.number, i.customer_name, i.customer_ruc, i.amount.toFixed(2), i.sunat_status, new Date(i.emission_date).toLocaleDateString('es-PE')]);
         const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
@@ -97,20 +112,55 @@ export function NubefactPageClient(_props: NubefactPageClientProps) {
                         ))}
                     </div>
                     <div className="bg-white dark:bg-[var(--bg-card)] rounded-[2.5rem] border border-gray-100 dark:border-[var(--border-subtle)] shadow-sm overflow-hidden flex flex-col">
-                        <div className="p-8 border-b border-gray-50 dark:border-[var(--border-subtle)]/50 flex flex-col md:flex-row md:items-center justify-between gap-6 bg-gray-50/30 dark:bg-[var(--bg-muted)]/20">
-                            <div>
-                                <h3 className="text-xl font-black text-gray-900 dark:text-[var(--text-primary)] tracking-tight">Comprobantes Recientes</h3>
-                                <p className="text-[10px] text-gray-400 dark:text-[var(--text-muted)] font-bold uppercase tracking-widest mt-1">Sincronizado con NubeFact</p>
+                        <div className="p-8 border-b border-gray-50 dark:border-[var(--border-subtle)]/50 space-y-6 bg-gray-50/30 dark:bg-[var(--bg-muted)]/20">
+                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                                <div>
+                                    <h3 className="text-xl font-black text-gray-900 dark:text-[var(--text-primary)] tracking-tight">Comprobantes Recientes</h3>
+                                    <p className="text-[10px] text-gray-400 dark:text-[var(--text-muted)] font-bold uppercase tracking-widest mt-1">Sincronizado con NubeFact</p>
+                                </div>
                             </div>
-                            <div className="relative w-full md:w-96">
-                                <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-[var(--text-muted)] w-5 h-5" />
-                                <input
-                                    type="text"
-                                    placeholder="Buscar..."
-                                    className="w-full pl-14 pr-6 py-4 bg-white dark:bg-[var(--bg-input)] border-gray-100 dark:border-[var(--border-subtle)] border rounded-2xl text-sm font-bold focus:ring-4 focus:ring-sky-500/10 dark:focus:ring-[var(--brand-green)]/15 text-gray-900 dark:text-[var(--text-primary)] placeholder-gray-400 dark:placeholder-[var(--text-muted)] transition-all outline-none"
-                                    value={search}
-                                    onChange={(e) => setSearch(e.target.value)}
-                                />
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                <div className="relative">
+                                    <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-[var(--text-muted)] w-5 h-5" />
+                                    <input
+                                        type="text"
+                                        placeholder="Buscar..."
+                                        className="w-full pl-14 pr-6 py-4 bg-white dark:bg-[var(--bg-input)] border-gray-100 dark:border-[var(--border-subtle)] border rounded-2xl text-sm font-bold focus:ring-4 focus:ring-sky-500/10 dark:focus:ring-[var(--brand-green)]/15 text-gray-900 dark:text-[var(--text-primary)] placeholder-gray-400 dark:placeholder-[var(--text-muted)] transition-all outline-none"
+                                        value={search}
+                                        onChange={(e) => setSearch(e.target.value)}
+                                    />
+                                </div>
+                                <div className="relative">
+                                    <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-[var(--text-muted)] w-5 h-5" />
+                                    <input
+                                        type="text"
+                                        placeholder="Buscar por tienda..."
+                                        className="w-full pl-14 pr-6 py-4 bg-white dark:bg-[var(--bg-input)] border-gray-100 dark:border-[var(--border-subtle)] border rounded-2xl text-sm font-bold focus:ring-4 focus:ring-sky-500/10 dark:focus:ring-[var(--brand-green)]/15 text-gray-900 dark:text-[var(--text-primary)] placeholder-gray-400 dark:placeholder-[var(--text-muted)] transition-all outline-none"
+                                        value={storeSearch}
+                                        onChange={(e) => setStoreSearch(e.target.value)}
+                                    />
+                                </div>
+                                <div>
+                                    <input
+                                        type="date"
+                                        className="w-full px-6 py-4 bg-white dark:bg-[var(--bg-input)] border-gray-100 dark:border-[var(--border-subtle)] border rounded-2xl text-sm font-bold focus:ring-4 focus:ring-sky-500/10 dark:focus:ring-[var(--brand-green)]/15 text-gray-900 dark:text-[var(--text-primary)] transition-all outline-none"
+                                        value={dateFilter}
+                                        onChange={(e) => setDateFilter(e.target.value)}
+                                    />
+                                </div>
+                                <div>
+                                    <select
+                                        className="w-full px-6 py-4 bg-white dark:bg-[var(--bg-input)] border-gray-100 dark:border-[var(--border-subtle)] border rounded-2xl text-sm font-bold focus:ring-4 focus:ring-sky-500/10 dark:focus:ring-[var(--brand-green)]/15 text-gray-900 dark:text-[var(--text-primary)] transition-all outline-none cursor-pointer"
+                                        value={typeFilter}
+                                        onChange={(e) => setTypeFilter(e.target.value)}
+                                    >
+                                        <option value="ALL">Todos los tipos</option>
+                                        <option value="FACTURA">Factura</option>
+                                        <option value="BOLETA">Boleta</option>
+                                        <option value="NOTA_CREDITO">Nota de Crédito</option>
+                                        <option value="NOTA_DEBITO">Nota de Débito</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
                         <div className="overflow-x-auto">
@@ -135,7 +185,7 @@ export function NubefactPageClient(_props: NubefactPageClientProps) {
                                                     </div>
                                                     <div>
                                                         <div className="text-[11px] font-black text-[var(--brand-sky)] uppercase tracking-tight">{invoice.type}</div>
-                                                        <div className="text-[13px] font-black text-gray-900 dark:text-[var(--text-primary)] mt-0.5">Tienda #{invoice.store_id ?? invoice.id}</div>
+                                                        <div className="text-[13px] font-black text-gray-900 dark:text-[var(--text-primary)] mt-0.5">{getStoreName(invoice.store_id)}</div>
                                                     </div>
                                                 </div>
                                             </td>

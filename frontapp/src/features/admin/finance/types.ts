@@ -1,3 +1,30 @@
+export interface FinanceChartData {
+    labels: string[];
+    data: number[];
+    trend?: string;
+}
+
+export interface FinancialBreakdown {
+    totalConIgv: number;
+    totalIgv: number;
+    totalCommission: number;
+    totalNeto: number;
+    totalPending: number;
+    totalCompleted: number;
+    pendingCount: number;
+    completedCount: number;
+}
+
+export interface RecentInvoice {
+    id: string;
+    series: string;
+    number: string;
+    type: string;
+    sunat_status: string;
+    total: number;
+    emission_date: string;
+}
+
 export interface TopBuyer {
     id: string;
     name: string;
@@ -11,12 +38,6 @@ export interface HeatmapData {
     day: string;
     hour: number;
     value: number;
-}
-
-export interface FinanceChartData {
-    labels: string[];
-    data: number[];
-    trend?: string;
 }
 
 export interface FinanceData {
@@ -34,6 +55,9 @@ export interface FinanceData {
     defectuosos: FinanceChartData;
     tiempoRespuesta: FinanceChartData;
     stockRotacion: FinanceChartData;
+    csat: FinanceChartData;
+    desgloseFinanciero: FinancialBreakdown;
+    comprobantesRecientes: RecentInvoice[];
     heatmap: HeatmapData[];
     topBuyers: TopBuyer[];
 }

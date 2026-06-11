@@ -159,7 +159,7 @@ export const ContratosModule: React.FC<ContratosModuleProps> = ({ state, actions
                             <tr className="bg-[var(--bg-secondary)]/50 border-b border-[var(--border-subtle)] text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest">
                                 <th className="px-8 py-6">ID Contrato</th>
                                 <th className="px-8 py-6">Entidad Vendedora</th>
-                                <th className="px-8 py-6">Ventana de Vigencia</th>
+                                <th className="px-8 py-6 min-w-[280px]">Ventana de Vigencia</th>
                                 <th className="px-8 py-6">Configuración</th>
                                 <th className="px-8 py-6">Estatus</th>
                                 <th className="px-8 py-6 text-right">Acción</th>
@@ -189,9 +189,9 @@ export const ContratosModule: React.FC<ContratosModuleProps> = ({ state, actions
                                             <p className="text-xs font-black text-[var(--text-primary)] uppercase tracking-tight">{c.company}</p>
                                             <p className="text-[9px] text-[var(--text-muted)] font-black uppercase tracking-widest mt-0.5">RUC {c.ruc}</p>
                                         </td>
-                                        <td className="px-8 py-6">
+                                        <td className="px-8 py-6 min-w-[280px]">
                                             <div className="space-y-1.5">
-                                                <div className="flex items-center gap-2 text-[10px] font-black text-[var(--text-secondary)] uppercase italic">
+                                                <div className="flex items-center gap-2 text-[10px] font-black text-[var(--text-secondary)] uppercase italic whitespace-nowrap">
                                                     <span>{c.start}</span>
                                                     <ArrowRight className="w-3 h-3 text-[var(--text-muted)]" />
                                                     <span>{c.end || '---'}</span>

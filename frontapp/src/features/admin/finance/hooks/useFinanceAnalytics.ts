@@ -1,11 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { FinanceData } from '../types';
 import { MOCK_FINANCE_DATA } from '../mock';
-import { orderRepository } from '@/shared/lib/api/factory';
-import { USE_MOCKS } from '@/shared/lib/config/flags';
 
 export interface FinanceFilters {
     startDate: string;
@@ -18,24 +15,7 @@ export function useFinanceAnalytics() {
         startDate: '',
         endDate: ''
     });
-
-    const { data, isLoading, refetch } = useQuery({
-        queryKey: ['admin', 'finance-data-panel', filters],
-        queryFn: async () => {
-            if (USE_MOCKS) {
-                return MOCK_FINANCE_DATA as FinanceData;
-            }
-
-            try {
-                const orders = await orderRepository.getOrders();
-                return { orders } as unknown as FinanceData;
-            } catch (e) {
-                console.warn('FALLBACK: Finance data error', e);
-                return MOCK_FINANCE_DATA as FinanceData;
-            }
-        },
-        staleTime: 10 * 60 * 1000,
-    });
+    const [isRefreshing, setIsRefreshing] = useState(false);
 
     const setFilters = (startDate: string, endDate: string) => {
         setFiltersState({ startDate, endDate });
@@ -43,17 +23,22 @@ export function useFinanceAnalytics() {
 
     const isVisible = (tabId: string) => activeTab === 'all' || activeTab === tabId;
 
+    const applyFilters = async () => {
+        setIsRefreshing(true);
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        setIsRefreshing(false);
+        return true;
+    };
+
     return {
-        data: data || null,
-        isLoading,
+        data: MOCK_FINANCE_DATA,
+        isLoading: false,
         activeTab,
         setActiveTab,
         filters,
         setFilters,
-        applyFilters: async () => {
-            await refetch();
-            return true;
-        },
-        isVisible
+        applyFilters,
+        isVisible,
+        isRefreshing
     };
 }

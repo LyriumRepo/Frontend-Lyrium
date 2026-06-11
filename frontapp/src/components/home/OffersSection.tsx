@@ -44,8 +44,8 @@ function OfferCard({
   };
 
   return (
-      <article className="w-[220px] shrink-0 bg-white/[0.92] dark:bg-[var(--bg-secondary)]/92 backdrop-blur-lg border border-white/40 dark:border-[var(--border-subtle)]/50 rounded-[20px] p-3 shadow-md group transition-all duration-300 hover:-translate-y-[5px] flex flex-col items-center relative">
-      <div className="relative w-full aspect-square rounded-[18px] overflow-hidden bg-white dark:bg-[var(--bg-muted)] flex items-center justify-center">
+      <article className="w-[220px] shrink-0 bg-[var(--bg-danger)] dark:bg-[#1E3028] backdrop-blur-lg border border-transparent rounded-[20px] p-3 shadow-md group transition-all duration-300 hover:-translate-y-[5px] flex flex-col items-center relative">
+      <div className="relative w-full aspect-square rounded-[18px] overflow-hidden bg-transparent flex items-center justify-center">
                   <Image
             src={imgSrc}
             alt={producto.titulo}
@@ -69,8 +69,8 @@ function OfferCard({
       </div>
 
        <div className="mt-3 w-full text-center flex flex-col items-center">
-        <h3 className="text-[13px] font-bold truncate w-full">{producto.titulo}</h3>
-        <p className="text-[15px] font-extrabold">S/ {producto.precio.toFixed(2)}</p>
+        <h3 className="text-[13px] font-bold truncate w-full text-slate-900 dark:text-white">{producto.titulo}</h3>
+        <p className="text-[15px] font-extrabold text-rose-600 dark:text-white">S/ {producto.precio.toFixed(2)}</p>
         <div className="flex justify-center gap-0.5 mt-1">
           {Array.from({ length: 5 }).map((_, idx) => {
             const isFilled = idx < (producto.estrellas ? producto.estrellas.length : 5);

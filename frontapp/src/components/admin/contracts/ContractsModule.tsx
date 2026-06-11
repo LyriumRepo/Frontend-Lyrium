@@ -168,7 +168,7 @@ export const ContratosModule: React.FC<ContratosModuleProps> = ({ state, actions
                             <tr className="bg-[var(--bg-secondary)]/50 border-b border-[var(--border-subtle)] text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest">
                                 <th scope="col" className="px-8 py-5 whitespace-nowrap">ID Expediente</th>
                                 <th scope="col" className="px-8 py-5 whitespace-nowrap">Razón Social / RUC</th>
-                                <th scope="col" className="px-8 py-5 whitespace-nowrap">Vigencia Temporal</th>
+                                <th scope="col" className="px-8 py-5 whitespace-nowrap min-w-[280px]">Vigencia Temporal</th>
                                 <th scope="col" className="px-8 py-5 whitespace-nowrap">Modalidad</th>
                                 <th scope="col" className="px-8 py-5 whitespace-nowrap">Plan</th>
                                 <th scope="col" className="px-8 py-5 whitespace-nowrap text-center">Estado Legal</th>
@@ -208,9 +208,9 @@ export const ContratosModule: React.FC<ContratosModuleProps> = ({ state, actions
                                     </td>
 
                                     {/* Vigencia */}
-                                    <td className="px-8 py-6">
+                                    <td className="px-8 py-6 min-w-[280px]">
                                         <div className="flex flex-col gap-1.5">
-                                            <p className="text-[11px] font-black text-[var(--text-secondary)] uppercase flex items-center gap-2">
+                                            <p className="text-[11px] font-black text-[var(--text-secondary)] uppercase flex items-center gap-2 whitespace-nowrap">
                                                 <Calendar className="w-3.5 h-3.5 text-[var(--text-muted)] shrink-0" />
                                                 {c.start || '—'} 
                                                 <ArrowRight className="w-3.5 h-3.5 text-[var(--text-muted)] shrink-0" /> 
