@@ -73,7 +73,7 @@ function MarketplaceSection({ title, bannerImage, products }: MarketplaceSection
                   className="w-1/3 flex-shrink-0 px-2"
                 >
                   <div
-                    className="group bg-white dark:bg-[var(--bg-secondary)]/92 rounded-[14px] p-5 text-center shadow-[0_8px_25px_rgba(15,23,42,0.05)] dark:shadow-[0_8px_25px_rgba(0,0,0,0.3)] border border-slate-100 dark:border-[var(--border-subtle)]/50 transition-all duration-300 hover:-translate-y-[6px] hover:shadow-[0_15px_35px_rgba(15,23,42,0.1)] dark:hover:shadow-[0_15px_35px_rgba(0,0,0,0.5)] flex flex-col justify-between h-full min-h-[360px] cursor-default"
+                    className="group bg-[#1E3028] rounded-[14px] p-5 text-center shadow-[0_8px_25px_rgba(0,0,0,0.15)] border border-transparent transition-all duration-300 hover:-translate-y-[6px] hover:shadow-[0_15px_35px_rgba(0,0,0,0.3)] flex flex-col justify-between h-full min-h-[360px] cursor-default"
                   >
                    
                     <div className="relative overflow-hidden w-full h-[220px] mb-4 flex items-center justify-center group-hover:scale-[1.05] transition-transform duration-300">
@@ -89,17 +89,17 @@ function MarketplaceSection({ title, bannerImage, products }: MarketplaceSection
 
                     
                     <div className="mt-auto">
-                      <h3 className="text-[14px] font-bold text-sky-500 dark:text-sky-400 mb-1 hover:text-sky-600 transition-colors line-clamp-2 px-1">
+                      <h3 className="text-[14px] font-bold text-white dark:text-white mb-1 hover:text-sky-100 transition-colors line-clamp-2 px-1">
                         {product.title}
                       </h3>
-                      <p className="text-[16px] font-black text-slate-800 dark:text-[var(--text-primary)]">
+                      <p className="text-[16px] font-black text-white dark:text-white">
                         S/ {product.price.toFixed(2)}
                       </p>
                       
                       
                       <div className="flex justify-center gap-0.5 mt-2">
                         {Array.from({ length: product.rating }).map((_, i) => (
-                          <Star key={i} className="w-3.5 h-3.5 text-amber-400 fill-none" />
+                          <Star key={i} className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
                         ))}
                       </div>
                     </div>

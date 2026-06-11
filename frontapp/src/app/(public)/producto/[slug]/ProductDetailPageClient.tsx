@@ -1,9 +1,8 @@
-'use client';
+﻿'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useWishlist } from '@/shared/hooks/useWishlist';
 import {
   ArrowLeft,
   Star,
@@ -22,8 +21,6 @@ import {
   RotateCcw,
   BadgeCheck,
   Tag,
-  Phone,
-  Mail,
   Loader2,
   AlertCircle,
   Check,
@@ -31,11 +28,11 @@ import {
   Download,
   Clock,
   MapPin,
-  Flame,
-  Leaf,
-  ChevronDown,
   Pencil,
   Trash2,
+  FileText,
+  Zap,
+  Salad,
 } from 'lucide-react';
 import type {
   LaravelProduct,
@@ -58,13 +55,11 @@ import {
   CardTitle,
   CardDescription,
 } from '@/components/ui/Cardt';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 
-// ─── Token (mismo mecanismo que WriteProductReview) ───────────────────────────
+// ─── Token ────────────────────────────────────────────────────────────────────
 
 let _tokenCache: { value: string | null; ts: number } | null = null;
 
@@ -84,7 +79,7 @@ async function getClientToken(): Promise<string | null> {
   } catch {
     return null;
   }
-}
+}
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -132,101 +127,6 @@ function Stars({
   );
 }
 
-// ─── Galería ──────────────────────────────────────────────────────────────────
-
-function ProductGallery({
-  images,
-  name,
-}: {
-  images: LaravelProduct['images'];
-  name: string;
-}) {
-  const [active, setActive] = useState(0);
-  const prev = useCallback(
-    () => setActive((i) => (i === 0 ? images.length - 1 : i - 1)),
-    [images.length],
-  );
-  const next = useCallback(
-    () => setActive((i) => (i === images.length - 1 ? 0 : i + 1)),
-    [images.length],
-  );
-  const src =
-    images[active]?.large ??
-    images[active]?.medium ??
-    images[active]?.src ??
-    '/no-image.png';
-
-  return (
-    <div className="flex flex-col h-full">
-      <div className="relative flex-1 min-h-[400px] lg:min-h-0 rounded-xl overflow-hidden bg-muted border border-border group">
-
-        <Image
-          key={src}
-          src={src}
-          alt={images[active]?.alt ?? name}
-          fill
-          sizes="(max-width:768px) 100vw, 50vw"
-          className="object-contain p-8 transition-transform duration-500 ease-out group-hover:scale-[1.04]"
-          priority
-        />
-        {images.length > 1 && (
-          <>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={prev}
-              aria-label="Anterior"
-              className="absolute left-3 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 backdrop-blur-sm"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={next}
-              aria-label="Siguiente"
-              className="absolute right-3 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 backdrop-blur-sm"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </Button>
-          </>
-        )}
-
-      </div>
-
-      {images.length > 1 && (
-        <div className="grid grid-cols-4 gap-3 mt-4">
-          {images.map((img, i) => (
-            <button
-              key={i}
-              onClick={() => setActive(i)}
-              className={cn(
-                'aspect-square rounded-lg overflow-hidden border-2 transition-all',
-                i === active
-                  ? 'border-[#2d5e42] dark:border-[#4A7C59] ring-2 ring-[#2d5e42]/20 dark:ring-[#4A7C59]/20'
-                  : 'border-border hover:border-[#2d5e42]/50 dark:hover:border-[#4A7C59]/50',
-              )}
-            >
-              <div className="relative w-full h-full bg-muted">
-                <Image
-                  src={img.thumb ?? img.src}
-                  alt={img.alt ?? name}
-                  fill
-                  sizes="100px"
-                  className="object-contain p-1"
-                />
-              </div>
-
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ─── StickerBadge ─────────────────────────────────────────────────────────────
-
 // ─── StickerBadge ─────────────────────────────────────────────────────────────
 
 const STICKER_MAP: Record<
@@ -241,7 +141,7 @@ const STICKER_MAP: Record<
   nuevo: { label: 'Nuevo', variant: 'default' },
   bestseller: { label: 'Más vendido', variant: 'secondary' },
   envio_gratis: { label: 'Envío gratis', variant: 'default' },
-  descuento: { label: 'Descuento', variant: 'secondary' },
+  descuento: { label: 'Descuento', variant: 'secondary' },
 };
 
 function StickerBadge({ sticker }: { sticker: string | null }) {
@@ -273,14 +173,14 @@ function TypeItem({
   value: string;
 }) {
   return (
-    <Card className="border-border/60">
-      <CardContent className="p-4 flex items-center gap-3">
-        <div className="w-9 h-9 rounded-lg bg-[#2d5e42]/10 dark:bg-[#4A7C59]/20 flex items-center justify-center flex-shrink-0">
-          {icon}
-        </div>
+    <Card>
+      <CardContent className="p-3 flex items-center gap-2">
+        <div className="text-teal-500 shrink-0">{icon}</div>
         <div>
-          <p className="text-xs text-muted-foreground">{label}</p>
-          <p className="font-semibold text-sm text-foreground">{value}</p>
+          <p className="text-[10px] font-semibold text-foreground/70">
+            {label}
+          </p>
+          <p className="font-bold text-sm text-foreground">{value}</p>
         </div>
       </CardContent>
     </Card>
@@ -292,13 +192,13 @@ function ProductInfoCards({ product }: { product: LaravelProduct }) {
     return (
       <div className="grid grid-cols-2 gap-4">
         <TypeItem
-          icon={<Download className="w-5 h-5 text-[#2d5e42] dark:text-[#4A7C59]" />}
+          icon={<Download className="w-4 h-4" />}
           label="Formato"
           value={product.fileType?.toUpperCase() ?? '—'}
         />
         {product.downloadLimit && (
           <TypeItem
-            icon={<Package className="w-5 h-5 text-[#2d5e42] dark:text-[#4A7C59]" />}
+            icon={<Package className="w-4 h-4" />}
             label="Descargas"
             value={`${product.downloadLimit}x`}
           />
@@ -310,12 +210,12 @@ function ProductInfoCards({ product }: { product: LaravelProduct }) {
     return (
       <div className="grid grid-cols-2 gap-4">
         <TypeItem
-          icon={<Clock className="w-5 h-5 text-[#2d5e42] dark:text-[#4A7C59]" />}
+          icon={<Clock className="w-4 h-4" />}
           label="Duración"
           value={`${product.serviceDuration} min`}
         />
         <TypeItem
-          icon={<MapPin className="w-5 h-5 text-[#2d5e42] dark:text-[#4A7C59]" />}
+          icon={<MapPin className="w-4 h-4" />}
           label="Modalidad"
           value={product.serviceModality ?? '—'}
         />
@@ -324,22 +224,22 @@ function ProductInfoCards({ product }: { product: LaravelProduct }) {
   }
   const items = [
     product.stock != null && {
-      icon: <Package className="w-5 h-5 text-[#2d5e42] dark:text-[#4A7C59]" />,
+      icon: <Package className="w-4 h-4" />,
       label: 'Stock',
       value: `${product.stock} unidades`,
     },
     product.weight && {
-      icon: <Weight className="w-5 h-5 text-[#2d5e42] dark:text-[#4A7C59]" />,
+      icon: <Weight className="w-4 h-4" />,
       label: 'Peso',
       value: `${product.weight} kg`,
     },
     product.dimensions && {
-      icon: <Ruler className="w-5 h-5 text-[#2d5e42] dark:text-[#4A7C59]" />,
+      icon: <Ruler className="w-4 h-4" />,
       label: 'Dimensiones',
       value: product.dimensions,
     },
     product.sku && {
-      icon: <Calendar className="w-5 h-5 text-[#2d5e42] dark:text-[#4A7C59]" />,
+      icon: <Calendar className="w-4 h-4" />,
       label: 'SKU',
       value: product.sku,
     },
@@ -359,98 +259,6 @@ function ProductInfoCards({ product }: { product: LaravelProduct }) {
   );
 }
 
-// ─── NutritionalPanel ─────────────────────────────────────────────────────────
-
-function NutritionalPanel({
-  info,
-}: {
-  info: NonNullable<LaravelProduct['nutritional_info']>;
-}) {
-  const [open, setOpen] = useState(false);
-  const calorieRow = info.rows.find((r) =>
-    r.label.toLowerCase().includes('caloría'),
-  );
-  return (
-<Card className="overflow-hidden">
-      <button
-        onClick={() => setOpen((o) => !o)}
-        className="w-full flex items-center justify-between px-4 py-3 hover:bg-muted/50 transition-colors"
-      >
-        <div className="flex items-center gap-2.5">
-          <Leaf className="w-4 h-4 text-[#2d5e42] dark:text-[#4A7C59]" />
-          <span className="text-[11px] font-medium tracking-[.1em] uppercase text-muted-foreground">
-            Información nutricional
-          </span>
-          {calorieRow && (
-            <Badge variant="secondary" className="gap-1 text-[10px]">
-              <Flame className="w-2.5 h-2.5" />
-              {calorieRow.value}
-            </Badge>
-          )}
-        </div>
-        <ChevronDown
-className={cn(
-            'w-4 h-4 text-muted-foreground transition-transform duration-200',
-            open && 'rotate-180',
-          )}
-        />
-      </button>
-      <div
-        className={cn(
-          'overflow-hidden transition-all duration-300',
-          open ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0',
-        )}
-      >
-<Separator />
-        {info.serving_note && (
-          <p className="px-4 py-2 text-[11px] italic text-muted-foreground bg-muted/30 border-b border-border">
-            {info.serving_note}
-          </p>
-        )}
-        <table className="w-full text-[12px]">
-          <thead>
-            <tr className="bg-muted/50">
-              {['Nutriente', 'Cantidad', '% VD'].map((h, i) => (
-                <th
-                  key={h}
-                  className={cn(
-                    'px-4 py-2 text-[10px] font-medium tracking-[.1em] uppercase text-muted-foreground',
-                    i === 0
-                      ? 'text-left'
-                      : i === 1
-                        ? 'text-center'
-                        : 'text-right',
-                  )}
-                >
-                  {h}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {info.rows.map((row, i) => (
-              <tr
-                key={i}
-                className="border-t border-border hover:bg-muted/30 transition-colors"
-              >
-                <td className="px-4 py-2.5 font-medium text-foreground">
-                  {row.label}
-                </td>
-                <td className="px-4 py-2.5 text-center font-medium text-primary">
-                  {row.value}
-                </td>
-                <td className="px-4 py-2.5 text-right text-muted-foreground">
-                  {row.daily_value ?? '—'}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </Card>
-  );
-}
-
 // ─── CharacteristicsTable ─────────────────────────────────────────────────────
 
 function CharacteristicsTable({
@@ -460,11 +268,11 @@ function CharacteristicsTable({
   characteristics: LaravelProduct['characteristics'];
   additional_info: LaravelProduct['additional_info'];
 }) {
-const hasMain = characteristics.length > 0;
+  const hasMain = characteristics.length > 0;
   const hasAdditional = additional_info.length > 0;
   if (!hasMain && !hasAdditional)
     return (
-      <p className="text-sm italic text-muted-foreground">
+      <p className="text-sm font-semibold italic text-foreground/60">
         Sin características especificadas.
       </p>
     );
@@ -472,72 +280,47 @@ const hasMain = characteristics.length > 0;
     <div className="space-y-6">
       {hasMain && (
         <div>
-<p className="text-[10px] font-medium tracking-[.12em] uppercase text-muted-foreground mb-3">
+          <p className="text-[10px] font-semibold tracking-[.12em] uppercase text-teal-600 mb-3">
             Características principales
           </p>
           <ul className="grid md:grid-cols-2 gap-3">
             {characteristics.map((attr, i) => (
               <li key={i} className="flex items-start gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2 flex-shrink-0" />
-                <span className="text-sm text-muted-foreground">
-                  <span className="font-medium text-foreground">
+                <div className="w-1.5 h-1.5 rounded-full bg-teal-500 mt-2 flex-shrink-0" />
+                <span className="text-sm text-foreground">
+                  <span className="font-bold text-foreground">
                     {attr.label}:
                   </span>{' '}
-                  {attr.value}
+                  <span className="font-semibold text-foreground/80">
+                    {attr.value}
+                  </span>
                 </span>
               </li>
             ))}
-          </ul>
+          </ul>
         </div>
       )}
       {hasAdditional && (
         <div>
-<p className="text-[10px] font-medium tracking-[.12em] uppercase text-muted-foreground mb-3">
+          <p className="text-[10px] font-semibold tracking-[.12em] uppercase text-teal-600 mb-3">
             Información adicional
           </p>
           <div className="grid md:grid-cols-2 gap-4">
             {additional_info.map((attr, i) => (
-<Card key={i}>
-                <CardContent className="p-4 flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">
+              <Card key={i} className="border-teal-100 dark:border-teal-900/30">
+                <CardContent className="p-4">
+                  <p className="text-[10px] font-semibold tracking-[.08em] uppercase text-teal-500 mb-1">
                     {attr.label}
-                  </span>
-                  <span className="font-semibold text-sm">{attr.value}</span>
+                  </p>
+                  <p className="font-bold text-sm text-foreground">
+                    {attr.value}
+                  </p>
                 </CardContent>
-              </Card>
+              </Card>
             ))}
           </div>
         </div>
       )}
-    </div>
-  );
-}
-
-// ─── RatingDistribution ───────────────────────────────────────────────────────
-
-function RatingDistribution({ stats }: { stats: ReviewStats }) {
-  const max = Math.max(...Object.values(stats.distribution), 1);
-  return (
-    <div className="space-y-1.5">
-      {([5, 4, 3, 2, 1] as const).map((n) => {
-        const count = stats.distribution[n] ?? 0;
-        const pct = Math.round((count / max) * 100);
-        return (
-          <div key={n} className="flex items-center gap-2 text-[11px]">
-<span className="w-3 text-right text-muted-foreground">{n}</span>
-            <Star className="w-2.5 h-2.5 flex-shrink-0 fill-yellow-400 text-yellow-400" />
-            <div className="flex-1 h-[4px] bg-muted rounded-full overflow-hidden">
-              <div
-                className="h-full bg-yellow-400 transition-all duration-500"
-                style={{ width: `${pct}%` }}
-              />
-            </div>
-<span className="w-5 text-right text-muted-foreground">
-              {count}
-            </span>
-          </div>
-        );
-      })}
     </div>
   );
 }
@@ -591,7 +374,7 @@ function EditReviewForm({
   };
 
   return (
-<div className="space-y-3 pt-1">
+    <div className="space-y-3 pt-1">
       <div className="flex gap-1">
         {[1, 2, 3, 4, 5].map((n) => (
           <button
@@ -612,34 +395,30 @@ function EditReviewForm({
           </button>
         ))}
         <span className="text-xs text-yellow-600 self-center ml-1">
-          {LABELS[rating]}
+          {LABELS[rating]}
         </span>
       </div>
-
       <input
         type="text"
         maxLength={255}
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         placeholder="Título (opcional)"
-        className="w-full border border-input rounded-md p-2 text-sm bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="w-full border border-input rounded-md p-2 text-sm bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400"
       />
-
-<textarea
+      <textarea
         maxLength={2000}
         value={comment}
         onChange={(e) => setComment(e.target.value)}
         rows={3}
         placeholder="Comentario (opcional)"
-        className="w-full resize-none border border-input rounded-md p-2 text-sm bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="w-full resize-none border border-input rounded-md p-2 text-sm bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400"
       />
-
       {error && (
         <p className="text-xs text-destructive flex items-center gap-1">
-          <AlertCircle className="w-3.5 h-3.5" /> {error}
+          <AlertCircle className="w-3.5 h-3.5" /> {error}
         </p>
       )}
-
       <div className="flex gap-2 justify-end">
         <Button
           variant="outline"
@@ -649,7 +428,12 @@ function EditReviewForm({
         >
           Cancelar
         </Button>
-        <Button size="sm" onClick={handleSave} disabled={loading} className="bg-[#2d5e42] hover:bg-[#1a3a2a] dark:bg-[#4A7C59] dark:hover:bg-[#3D6B4A] text-white">
+        <Button
+          size="sm"
+          onClick={handleSave}
+          disabled={loading}
+          className="bg-teal-500 hover:bg-teal-600 text-white"
+        >
           {loading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
           {loading ? 'Guardando…' : 'Guardar cambios'}
         </Button>
@@ -674,7 +458,6 @@ function ReviewCard({
   const [deleting, setDeleting] = useState(false);
 
   const isAuthor = String(user?.id) === String(review.user?.id);
-  // ajusta si tu backend devuelve array
   const canAct = isAuthor;
 
   const handleDelete = async () => {
@@ -705,12 +488,11 @@ function ReviewCard({
               {review.user?.name?.charAt(0).toUpperCase() ?? '?'}
             </AvatarFallback>
           </Avatar>
-
           <div className="flex-1 space-y-2">
             <div className="flex items-start justify-between gap-2 flex-wrap">
               <div>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h4 className="font-semibold text-base">
+                  <h4 className="font-bold text-base">
                     {review.user?.name ?? 'Usuario'}
                   </h4>
                   {review.isVerifiedPurchase && (
@@ -720,11 +502,10 @@ function ReviewCard({
                     </Badge>
                   )}
                 </div>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm font-semibold text-muted-foreground">
                   {formatDate(review.createdAt)}
                 </p>
               </div>
-
               <div className="flex items-center gap-2">
                 <Stars value={review.rating} size="sm" />
                 {canAct && !editing && (
@@ -758,7 +539,6 @@ function ReviewCard({
                 )}
               </div>
             </div>
-
             {editing ? (
               <EditReviewForm
                 review={review}
@@ -807,35 +587,30 @@ function ReviewsSection({
     loadMore,
   } = useReviews(productId);
 
-  // Normalizar array
   const reviews: LaravelReview[] = Array.isArray(rawReviews)
     ? rawReviews
     : ((rawReviews as any)?.data ?? (rawReviews as any)?.reviews ?? []);
 
-  // Estado local para ediciones/borrados optimistas
   const [localReviews, setLocalReviews] = useState<LaravelReview[]>([]);
   const [showForm, setShowForm] = useState(false);
 
-  // Sincronizar cuando el hook carga datos
   useEffect(() => {
     setLocalReviews(reviews);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rawReviews]);
 
-  const handleDeleted = (id: string) => {
+  const handleDeleted = (id: string) =>
     setLocalReviews((prev) => prev.filter((r) => r.id !== id));
-  };
 
-  const handleUpdated = (updated: LaravelReview) => {
+  const handleUpdated = (updated: LaravelReview) =>
     setLocalReviews((prev) =>
       prev.map((r) => (r.id === updated.id ? updated : r)),
     );
-  };
 
   if (loading && localReviews.length === 0)
     return (
       <div className="flex justify-center py-10">
-<Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+        <Loader2 className="w-5 h-5 animate-spin text-teal-500" />
       </div>
     );
 
@@ -847,660 +622,977 @@ function ReviewsSection({
       </div>
     );
 
+  const totalReviews = stats?.count ?? productReviewCount;
+  const distributionTotal = Math.max(totalReviews, 1);
+
   return (
-<Card>
-      <CardHeader>
-        <div className="flex items-center justify-between flex-wrap gap-4">
+    <Card className="border border-border bg-card">
+      <CardHeader className="pb-0">
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
           <div>
-            <CardTitle className="text-2xl mb-2">Reseñas de Clientes</CardTitle>
-            <CardDescription className="text-base">
-              {localReviews.length} reseñas verificadas
+            <CardTitle className="text-3xl font-bold text-foreground mb-1">
+              Reseñas de Clientes
+            </CardTitle>
+            <CardDescription className="text-base text-foreground/80">
+              {totalReviews} reseñas reales
             </CardDescription>
           </div>
-          <div className="text-right">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-4xl font-bold text-foreground">
-                {productRating}
-              </span>
-              <Stars value={productRating} size="lg" />
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Basado en {productReviewCount} reseñas
-            </p>
-          </div>
+          <Link
+            href="#reviews-list"
+            className="text-sm font-semibold text-teal-600 hover:text-teal-500"
+          >
+            Ver todas las reseñas
+          </Link>
         </div>
-
-        {stats && stats.count > 0 && (
-          <div className="mt-4 pt-4 border-t border-border">
-            <RatingDistribution stats={stats} />
-          </div>
-        )}
       </CardHeader>
 
-<CardContent>
-        {/* Botón / formulario de nueva reseña */}
-        <div className="mb-6">
-            {!showForm ? (
-            <Button variant="outline" onClick={() => setShowForm(true)} className="border-[#2d5e42]/30 dark:border-[#4A7C59]/50 text-[#2d5e42] dark:text-[#4A7C59] hover:bg-[#2d5e42]/10 dark:hover:bg-[#4A7C59]/20">
+      <CardContent className="pt-0">
+        <div className="grid lg:grid-cols-[320px_minmax(0,1fr)] gap-6">
+          {/* Resumen */}
+          <section className="rounded-3xl border border-teal-100 dark:border-teal-900/30 bg-gradient-to-br from-teal-50/60 to-cyan-50/40 dark:from-teal-950/20 dark:to-cyan-950/10 p-6">
+            <h3 className="text-lg font-bold text-foreground mb-4">
+              Resumen de Calificaciones
+            </h3>
+            <div className="pb-4 border-b border-teal-100 dark:border-teal-900/30 mb-6">
+              <div className="text-5xl font-bold text-foreground">
+                {productRating.toFixed(1)}
+              </div>
+              <div className="mt-4 flex items-center gap-3">
+                <Stars value={productRating} size="lg" />
+                <span className="text-sm font-semibold text-foreground">
+                  {totalReviews} reseñas
+                </span>
+              </div>
+            </div>
+            <div className="space-y-3">
+              {([5, 4, 3, 2, 1] as const).map((n) => {
+                const count = stats?.distribution[n] ?? 0;
+                const pct = Math.round((count / distributionTotal) * 100);
+                return (
+                  <div key={n} className="flex items-center gap-3">
+                    <span className="w-24 text-sm font-semibold text-foreground">
+                      {n} estrellas
+                    </span>
+                    <div className="flex-1 h-2 rounded-full bg-teal-100 dark:bg-teal-900/30 overflow-hidden">
+                      <div
+                        className="h-full bg-teal-500"
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                    <span className="w-10 text-right text-sm font-semibold text-foreground">
+                      {count}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+            <Button
+              variant="outline"
+              className="mt-6 w-full justify-start border-teal-300 text-teal-700 hover:bg-teal-50 dark:border-teal-700 dark:text-teal-400 dark:hover:bg-teal-950/30"
+              onClick={() => setShowForm(true)}
+            >
               Escribir una reseña
             </Button>
-          ) : (
-            <Card className="mb-4">
-              <CardContent className="p-6">
+            {showForm && (
+              <div className="mt-5 rounded-3xl border border-teal-100 dark:border-teal-900/30 bg-card p-4">
                 <WriteProductReview
                   productId={Number(productId)}
                   onSuccess={() => setShowForm(false)}
-                  onCancel={() => setShowForm(false)}
+                  onCancel={() => setShowForm(false)}
                 />
-              </CardContent>
-            </Card>
-          )}
+              </div>
+            )}
+          </section>
+
+          {/* Lista */}
+          <section className="space-y-4">
+            {localReviews.length === 0 ? (
+              <div className="rounded-3xl border border-border bg-card p-8 text-center text-foreground">
+                <MessageSquare className="w-10 h-10 mx-auto mb-4 text-teal-300" />
+                <p className="text-lg font-bold">Sin reseñas aún</p>
+                <p className="text-sm text-foreground/80 mt-2">
+                  Sé el primero en dejar una opinión.
+                </p>
+              </div>
+            ) : (
+              <div id="reviews-list" className="space-y-4">
+                {localReviews.map((r) => (
+                  <ReviewCard
+                    key={r.id}
+                    review={r}
+                    onDeleted={handleDeleted}
+                    onUpdated={handleUpdated}
+                  />
+                ))}
+              </div>
+            )}
+            {pagination?.hasMore && (
+              <Button
+                variant="outline"
+                onClick={loadMore}
+                disabled={loading}
+                className="w-full mt-1 text-[11px] tracking-[.1em] uppercase border-teal-300 text-teal-700 hover:bg-teal-50"
+              >
+                {loading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                {loading ? 'Cargando…' : 'Ver más reseñas'}
+              </Button>
+            )}
+          </section>
         </div>
-
-{localReviews.length === 0 ? (
-          <div className="text-center py-12 text-muted-foreground">
-            <MessageSquare className="w-8 h-8 mx-auto mb-3 opacity-30" />
-            <p className="font-medium">Sin reseñas aún</p>
-            <p className="text-sm mt-1">Sé el primero en dejar una opinión.</p>
-          </div>
-        ) : (
-          <ScrollArea className="h-[600px] pr-4">
-            <div className="space-y-4">
-              {localReviews.map((r) => (
-                <ReviewCard
-                  key={r.id}
-                  review={r}
-                  onDeleted={handleDeleted}
-                  onUpdated={handleUpdated}
-                />
-              ))}
-            </div>
-          </ScrollArea>
-        )}
-
-        {pagination?.hasMore && (
-          <Button
-            onClick={loadMore}
-            disabled={loading}
-            className="w-full mt-4 text-[11px] tracking-[.1em] uppercase bg-[#2d5e42] hover:bg-[#1a3a2a] dark:bg-[#4A7C59] dark:hover:bg-[#3D6B4A] text-white"
-          >
-            {loading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-            {loading ? 'Cargando…' : 'Ver más reseñas'}
-          </Button>
-        )}
       </CardContent>
-    </Card>
+    </Card>
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// COMPONENTE PRINCIPAL
-// ─────────────────────────────────────────────────────────────────────────────
+// ─── ProductTabs (Nivel 2) ────────────────────────────────────────────────────
 
-interface Props {
-  product: LaravelProduct;
-  relatedProducts?: LaravelProduct[];
+type TabId = 'descripcion' | 'caracteristicas' | 'nutricion';
+
+function ProductTabs({ product }: { product: LaravelProduct }) {
+  const hasCharacteristics =
+    (product.characteristics?.length ?? 0) > 0 ||
+    (product.additional_info?.length ?? 0) > 0;
+  const hasNutritional = !!product.nutritional_info?.rows?.length;
+
+  const tabs: { id: TabId; label: string; icon: React.ReactNode }[] = [
+    {
+      id: 'descripcion',
+      label: 'Descripción',
+      icon: <FileText className="w-4 h-4" />,
+    },
+    ...(hasCharacteristics
+      ? [
+          {
+            id: 'caracteristicas' as TabId,
+            label: 'Características',
+            icon: <Zap className="w-4 h-4" />,
+          },
+        ]
+      : []),
+    ...(hasNutritional
+      ? [
+          {
+            id: 'nutricion' as TabId,
+            label: 'Nutricional',
+            icon: <Salad className="w-4 h-4" />,
+          },
+        ]
+      : []),
+  ];
+
+  const [active, setActive] = useState<TabId>('descripcion');
+
+  return (
+    <div className="mt-6">
+      {/* Tab headers */}
+      <div className="flex border-b border-border overflow-x-auto">
+        {tabs.map((tab) => {
+          const isActive = active === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActive(tab.id)}
+              className={cn(
+                'flex items-center gap-2 px-5 py-3 text-sm font-semibold whitespace-nowrap transition-all duration-200 border-b-2 -mb-px',
+                isActive
+                  ? 'border-teal-500 text-teal-600 dark:text-teal-400 bg-teal-50/60 dark:bg-teal-950/30'
+                  : 'border-transparent text-muted-foreground hover:text-foreground hover:border-teal-200',
+              )}
+            >
+              <span
+                className={cn(
+                  'transition-colors',
+                  isActive ? 'text-teal-500' : 'text-muted-foreground',
+                )}
+              >
+                {tab.icon}
+              </span>
+              {tab.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Tab content */}
+      <div className="mt-5 rounded-xl border border-teal-100 dark:border-teal-900/30 bg-teal-50/30 dark:bg-teal-950/10 p-5">
+        {active === 'descripcion' && (
+          <div>
+            {product.description ? (
+              <div className="space-y-3">
+                {product.description.split('\n').map((p, i) => (
+                  <p
+                    key={i}
+                    className="text-sm text-foreground leading-relaxed"
+                  >
+                    {p}
+                  </p>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-foreground/60 italic">
+                Sin descripción disponible.
+              </p>
+            )}
+          </div>
+        )}
+
+        {active === 'caracteristicas' && (
+          <CharacteristicsTable
+            characteristics={product.characteristics}
+            additional_info={product.additional_info}
+          />
+        )}
+
+        {active === 'nutricion' && hasNutritional && (
+          <div>
+            {product.nutritional_info!.serving_note && (
+              <p className="text-sm italic text-foreground/70 mb-4">
+                {product.nutritional_info!.serving_note}
+              </p>
+            )}
+            <div className="grid md:grid-cols-2 gap-3">
+              {product.nutritional_info!.rows.map((row, i) => (
+                <div
+                  key={i}
+                  className="flex justify-between items-center rounded-lg border border-teal-100 dark:border-teal-900/30 bg-white dark:bg-teal-950/20 px-4 py-3"
+                >
+                  <span className="font-semibold text-foreground/70 text-sm">
+                    {row.label}
+                  </span>
+                  <span className="font-bold text-sm text-teal-700 dark:text-teal-400">
+                    {row.value}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
+
+// ─── RelatedProductsCarousel (auto-scroll infinito) ──────────────────────────
+
+function RelatedProductCard({ rel }: { rel: LaravelProduct }) {
+  const relDiscount = discountPercent(rel.price, rel.regular_price);
+  return (
+    <Link
+      href={`/producto/${rel.slug}`}
+      className="flex-shrink-0 w-72"
+      tabIndex={0}
+    >
+      <Card className="group cursor-pointer h-full overflow-hidden border-border/60 hover:border-teal-400 hover:shadow-xl hover:-translate-y-2 transition-all duration-300">
+        <CardContent className="p-0">
+          <div className="relative aspect-square overflow-hidden bg-gradient-to-b from-gray-50 to-white dark:from-[var(--bg-muted)] dark:to-[var(--bg-card)] border-b border-border/40">
+            <Image
+              src={
+                rel.images[0]?.medium ?? rel.images[0]?.src ?? '/no-image.png'
+              }
+              alt={rel.images[0]?.alt ?? rel.name}
+              fill
+              sizes="288px"
+              className="object-contain p-6 group-hover:scale-110 transition-transform duration-500 ease-out"
+            />
+            {rel.sticker && (
+              <div className="absolute top-2 left-2">
+                <StickerBadge sticker={rel.sticker} />
+              </div>
+            )}
+            {relDiscount > 0 && (
+              <div className="absolute top-2 right-2">
+                <Badge variant="destructive" className="text-[10px] font-bold">
+                  −{relDiscount}%
+                </Badge>
+              </div>
+            )}
+          </div>
+          <div className="p-4 space-y-2">
+            <div className="flex flex-wrap items-center gap-1">
+              {rel.categories.slice(0, 1).map((cat) => (
+                <Badge key={cat.slug} variant="secondary" className="text-xs">
+                  {cat.name}
+                </Badge>
+              ))}
+            </div>
+            <h3 className="font-bold text-sm line-clamp-2 text-foreground group-hover:text-teal-600 transition-colors leading-snug">
+              {rel.name}
+            </h3>
+            <div className="flex items-center gap-1.5">
+              <Stars value={rel.rating.average} size="sm" />
+              <span className="text-xs text-muted-foreground">
+                ({rel.rating.count})
+              </span>
+            </div>
+            <div className="flex items-center justify-between pt-1">
+              <span className="text-xl font-bold text-foreground">
+                {formatPrice(rel.price)}
+              </span>
+              <Button
+                size="sm"
+                aria-label="Agregar al carrito"
+                className="opacity-0 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0 transition-all duration-200 bg-teal-500 hover:bg-teal-600 h-8 w-8 p-0"
+              >
+                <ShoppingCart className="w-3.5 h-3.5" />
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </Link>
+  );
+}
+
+function RelatedProductsCarousel({ products }: { products: LaravelProduct[] }) {
+  const trackRef = useRef<HTMLDivElement>(null);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const animRef = useRef<number>(0);
+  const pausedRef = useRef(false);
+  const posRef = useRef(0);
+  const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const SPEED = 0.5;
+  const CARD_STEP = 296; // ancho de card + gap aprox
+  const RESUME_DELAY = 2500; // ms antes de reanudar auto-scroll tras interacción manual
+
+  const items = [...products, ...products];
+
+  // Pausa temporal y programa reanudación automática
+  const pauseTemporarily = () => {
+    pausedRef.current = true;
+    if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
+    resumeTimerRef.current = setTimeout(() => {
+      pausedRef.current = false;
+    }, RESUME_DELAY);
+  };
+
+  // Mueve el carrusel en una dirección, respetando el loop infinito
+  const shift = (direction: 'left' | 'right') => {
+    const track = trackRef.current;
+    if (!track) return;
+    pauseTemporarily();
+    const half = track.scrollWidth / 2;
+    let next =
+      posRef.current + (direction === 'right' ? CARD_STEP : -CARD_STEP);
+    // Mantener dentro del rango [0, half)
+    if (next < 0) next += half;
+    if (next >= half) next -= half;
+    // Animación suave manual con requestAnimationFrame
+    const start = posRef.current;
+    const diff = next - start;
+    // Si el salto es muy grande (wrap-around), ajusta dirección
+    const adjustedDiff =
+      Math.abs(diff) > half / 2 ? (diff > 0 ? diff - half : diff + half) : diff;
+    const duration = 300;
+    const startTime = performance.now();
+    const animate = (now: number) => {
+      const elapsed = now - startTime;
+      const t = Math.min(elapsed / duration, 1);
+      const ease = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t; // easeInOut
+      let current = start + adjustedDiff * ease;
+      if (current < 0) current += half;
+      if (current >= half) current -= half;
+      posRef.current = current;
+      track.style.transform = `translateX(-${current}px)`;
+      if (t < 1) requestAnimationFrame(animate);
+    };
+    requestAnimationFrame(animate);
+  };
+
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+
+    const step = () => {
+      if (!pausedRef.current) {
+        posRef.current += SPEED;
+        const half = track.scrollWidth / 2;
+        if (posRef.current >= half) posRef.current = 0;
+        track.style.transform = `translateX(-${posRef.current}px)`;
+      }
+      animRef.current = requestAnimationFrame(step);
+    };
+
+    animRef.current = requestAnimationFrame(step);
+    return () => {
+      cancelAnimationFrame(animRef.current);
+      if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
+    };
+  }, []);
+
+  // Rueda del mouse — scroll horizontal
+  useEffect(() => {
+    const wrap = wrapRef.current;
+    if (!wrap) return;
+    const onWheel = (e: WheelEvent) => {
+      // Solo si hay más delta vertical que horizontal (scroll vertical del usuario)
+      if (Math.abs(e.deltaY) < Math.abs(e.deltaX)) return;
+      e.preventDefault();
+      shift(e.deltaY > 0 ? 'right' : 'left');
+    };
+    wrap.addEventListener('wheel', onWheel, { passive: false });
+    return () => wrap.removeEventListener('wheel', onWheel);
+  }, []);
+
+  return (
+    <div className="mb-12">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h2 className="text-3xl font-bold">Productos Relacionados</h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            Usa las flechas o la rueda del mouse para explorar
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="relative flex h-2.5 w-2.5">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75" />
+            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-teal-500" />
+          </span>
+          <span className="text-xs font-semibold text-teal-600 dark:text-teal-400 uppercase tracking-wider">
+            Auto-scroll
+          </span>
+        </div>
+      </div>
+
+      {/* Contenedor con flechas superpuestas */}
+      <div className="relative group/carousel">
+        {/* Flecha izquierda */}
+        <button
+          onClick={() => shift('left')}
+          aria-label="Anterior"
+          className="absolute left-2 top-1/2 -translate-y-1/2 z-20
+            w-10 h-10 rounded-full bg-white dark:bg-zinc-800 shadow-lg
+            border border-teal-100 dark:border-teal-900/40
+            flex items-center justify-center
+            text-teal-600 dark:text-teal-400
+            hover:bg-teal-50 dark:hover:bg-teal-950/40 hover:border-teal-400
+            transition-all duration-200
+            opacity-0 group-hover/carousel:opacity-100
+            -translate-x-1 group-hover/carousel:translate-x-0"
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </button>
+
+        {/* Flecha derecha */}
+        <button
+          onClick={() => shift('right')}
+          aria-label="Siguiente"
+          className="absolute right-2 top-1/2 -translate-y-1/2 z-20
+            w-10 h-10 rounded-full bg-white dark:bg-zinc-800 shadow-lg
+            border border-teal-100 dark:border-teal-900/40
+            flex items-center justify-center
+            text-teal-600 dark:text-teal-400
+            hover:bg-teal-50 dark:hover:bg-teal-950/40 hover:border-teal-400
+            transition-all duration-200
+            opacity-0 group-hover/carousel:opacity-100
+            translate-x-1 group-hover/carousel:translate-x-0"
+        >
+          <ChevronRight className="w-5 h-5" />
+        </button>
+
+        {/* Fade + overflow */}
+        <div
+          ref={wrapRef}
+          className="overflow-hidden relative"
+          style={{
+            maskImage:
+              'linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)',
+            WebkitMaskImage:
+              'linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)',
+          }}
+          onMouseEnter={() => {
+            pausedRef.current = true;
+            if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
+          }}
+          onMouseLeave={() => {
+            pausedRef.current = false;
+          }}
+          onTouchStart={() => pauseTemporarily()}
+          onTouchEnd={() => {}}
+        >
+          <div
+            ref={trackRef}
+            className="flex gap-5 will-change-transform py-4 px-2"
+            style={{ width: 'max-content' }}
+          >
+            {items.map((rel, i) => (
+              <RelatedProductCard key={`${rel.id}-${i}`} rel={rel} />
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Componente Principal ────────────────────────────────────────────────────
 
 export function ProductDetailPageClient({
   product,
-  relatedProducts = [],
-}: Props) {
+  relatedProducts,
+}: {
+  product: LaravelProduct;
+  relatedProducts: LaravelProduct[];
+}) {
   const [quantity, setQuantity] = useState(1);
-const [wishlisted, setWishlisted] = useState(false);
-  const [relScrollPos, setRelScrollPos] = useState(0);
+  const [wishlisted, setWishlisted] = useState(false);
 
-  const { addToCart, loading: cartLoading, error: cartError } = useAddToCart();
-  const [localAdded, setLocalAdded] = useState(false);
-  const openPopup = useCarritoStore((s) => s.openPopup);
+  const {
+    addToCart,
+    loading: cartLoading,
+    error: cartError,
+    addedToCart: localAdded,
+  } = useAddToCart();
 
-  const handleAddToCart = async () => {
-    if (!product.in_stock || cartLoading) return;
-    try {
-      await addToCart(Number(product.id), quantity);
-    } catch {
-      /* handled */
-    }
-    openPopup();
-    setLocalAdded(true);
-    setTimeout(() => setLocalAdded(false), 2200);
-  };
-
-  const scrollRelated = (dir: 'left' | 'right') => {
-    const el = document.getElementById('related-scroll');
-    if (!el) return;
-    const amount = 320;
-    const next =
-      dir === 'left'
-        ? Math.max(0, relScrollPos - amount)
-        : Math.min(el.scrollWidth - el.clientWidth, relScrollPos + amount);
-    el.scrollTo({ left: next, behavior: 'smooth' });
-    setRelScrollPos(next);
-  };
-
-  const { isWishlisted, toggle: toggleWishlist } = useWishlist(product.id);
+  const inStock = product.stock > 0;
+  const handleAddToCart = () => addToCart(Number(product.id), quantity);
 
   const discount = discountPercent(product.price, product.regular_price);
-const inStock = product.in_stock;
-  const hasNutritional = !!product.nutritional_info?.rows?.length;
-  const characteristics = product.mainAttributes?.flatMap((a: { values: { label: string; value: string }[] }) => a.values) ?? [];
-  const additionalInfo = product.additionalAttributes?.flatMap((a: { values: { label: string; value: string }[] }) => a.values) ?? [];
-  const hasCharacteristics = characteristics.length > 0 || additionalInfo.length > 0;
 
   return (
-<main className="min-h-screen bg-background text-foreground">
-      {/* Breadcrumb */}
-      <div className="container mx-auto px-4 max-w-7xl py-3 flex items-center gap-2 text-[11px] tracking-[.06em] flex-wrap">
-        <Link
-          href="/"
-          className="text-muted-foreground hover:text-primary transition-colors"
+    <main className="max-w-7xl mx-auto px-4 py-6 space-y-10">
+      {/* Navegación */}
+      <Link href="/catalogo">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="gap-2 text-muted-foreground"
         >
+          <ArrowLeft className="w-4 h-4" />
+          Volver al catálogo
+        </Button>
+      </Link>
 
-          Inicio
-        </Link>
-        {product.categories[0] && (
-          <>
-<span className="text-muted-foreground/40">/</span>
-            <Link
-              href={`/productos/${product.categories[0].slug}`}
-              className="text-muted-foreground hover:text-primary transition-colors"
-
-            >
-              {product.categories[0].name}
-            </Link>
-          </>
-        )}
-<span className="text-muted-foreground/40">/</span>
-        <span className="text-foreground truncate max-w-[200px]">
-
-          {product.name}
-        </span>
-      </div>
-
-<div className="container mx-auto px-4 py-8 max-w-7xl">
-        {/* Galería + Info */}
-        <div className="grid lg:grid-cols-2 lg:items-stretch gap-8 mb-12">
+      {/* ── NIVEL 1: Imagen + Info de compra ─────────────────────────────── */}
+      <div className="grid lg:grid-cols-[1fr_520px] gap-8 items-start">
+        {/* Columna izquierda: galería */}
+        <div className="sticky top-24 space-y-4">
           <ProductGallery images={product.images} name={product.name} />
-
-          <div className="space-y-6">
-            <div>
-              <div className="flex flex-wrap items-center gap-2 mb-3">
-                {product.categories.map((cat) => (
-                  <Link key={cat.slug} href={`/productos/${cat.slug}`}>
-                    <Badge
-                      variant="secondary"
-                      className="hover:bg-secondary/80 transition-colors cursor-pointer"
-                    >
-                      {cat.name}
-                    </Badge>
-                  </Link>
-                ))}
-                <StickerBadge sticker={product.sticker} />
-              </div>
-<h1 className="text-4xl font-bold text-foreground mb-2 tracking-tight">
-                {product.name}
-              </h1>
-              {product.short_description && (
-<p className="text-sm text-muted-foreground leading-relaxed mb-3">
-                  {product.short_description}
-                </p>
-              )}
-              <div className="flex items-center gap-3">
-                <Stars value={product.rating.average} size="lg" />
-                <span className="text-sm text-muted-foreground">
-                  {product.rating.average.toFixed(1)} ({product.rating.count}{' '}
-                  reseñas)
-                </span>
-              </div>
-            </div>
-
-<Separator />
-
-            <div className="space-y-2">
-              <div className="flex items-baseline gap-3 flex-wrap">
-                <span className="text-5xl font-bold text-foreground">
-                  {formatPrice(product.price)}
-                </span>
-                {discount > 0 && (
-                  <>
-                    <span className="text-lg line-through text-muted-foreground">
-                      {formatPrice(product.regular_price)}
-                    </span>
-                    <Badge
-                      variant="destructive"
-                      className="text-xs tracking-[.08em]"
-                    >
-                      −{discount}%
-                    </Badge>
-                  </>
-                )}
-              </div>
-              <div
-className={cn(
-                  'flex items-center gap-2 text-sm font-medium',
-                  inStock ? 'text-emerald-700 dark:text-emerald-400' : 'text-destructive',
-                )}
-              >
-                <span
-                  className={cn(
-                    'w-1.5 h-1.5 rounded-full',
-                    inStock ? 'bg-emerald-700 dark:bg-emerald-400' : 'bg-destructive',
-                  )}
-
-                />
-                {inStock
-                  ? `${product.stock} unidades disponibles`
-                  : 'Sin stock'}
-              </div>
-            </div>
-
-            <ProductInfoCards product={product} />
-            {hasNutritional && (
-              <NutritionalPanel info={product.nutritional_info!} />
-            )}
-
-            <Separator />
-
-            {inStock && (
-              <div className="flex items-center gap-5">
-                <span className="text-[11px] tracking-[.1em] uppercase text-muted-foreground">
-                  Cantidad
-                </span>
-                <div className="flex items-center border border-border rounded-md overflow-hidden">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                    className="h-9 w-9 rounded-none border-r border-border"
-                    aria-label="Reducir"
-                  >
-                    −
-                  </Button>
-                  <span className="w-10 text-center text-sm font-medium text-foreground">
-                    {quantity}
-                  </span>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() =>
-                      setQuantity((q) => Math.min(product.stock, q + 1))
-                    }
-                    className="h-9 w-9 rounded-none border-l border-border"
-                    aria-label="Aumentar"
-                  >
-                    +
-                  </Button>
-                </div>
-              </div>
-            )}
-
-{cartError && (
-              <div className="flex items-center gap-2 text-sm px-3 py-2 text-destructive bg-destructive/10 border border-destructive/25 rounded-md">
-                <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                {cartError}
-              </div>
-            )}
-
-            <div className="flex gap-3">
-              <Button
-                onClick={handleAddToCart}
-                disabled={!inStock || cartLoading}
-                size="lg"
-                className={cn(
-                  'flex-1 text-base h-12 shadow-lg shadow-[#2d5e42]/20 dark:shadow-[#4A7C59]/20',
-                  localAdded
-                    ? 'bg-emerald-700 hover:bg-emerald-700'
-                    : 'bg-[#2d5e42] hover:bg-[#1a3a2a] dark:bg-[#4A7C59] dark:hover:bg-[#3D6B4A] text-white',
-                )}
-              >
-                {cartLoading ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                ) : localAdded ? (
-                  <Check className="w-5 h-5" />
-                ) : (
-                  <ShoppingCart className="w-5 h-5" />
-
-                )}
-                {cartLoading
-                  ? 'Agregando…'
-                  : localAdded
-                    ? '¡Agregado!'
-                    : inStock
-                      ? 'Añadir al Carrito'
-                      : 'Sin stock'}
-              </Button>
-              <Button
-                variant="outline"
-                size="lg"
-                onClick={() => setWishlisted((w) => !w)}
-                aria-label="Favoritos"
-                className={cn(
-                  'h-12 w-12',
-                  wishlisted &&
-                    'border-destructive text-destructive bg-destructive/10 hover:bg-destructive/20',
-                )}
-              >
-                <Heart
-                  className="w-5 h-5"
-                  style={{ fill: wishlisted ? 'currentColor' : 'transparent' }}
-                />
-              </Button>
-              <Button
-                variant="outline"
-                size="lg"
-                onClick={() =>
-                  navigator.share?.({
-                    title: product.name,
-                    url: window.location.href,
-                  })
-                }
-                aria-label="Compartir"
-                className="h-12 w-12"
-              >
-                <Share2 className="w-5 h-5" />
-              </Button>
-            </div>
-
-            <div className="grid grid-cols-3 gap-3">
-              {[
-                { icon: Shield, text: 'Compra segura' },
-                { icon: Truck, text: 'Envío rápido' },
-                { icon: RotateCcw, text: 'Devoluciones' },
-              ].map(({ icon: Icon, text }) => (
-                <Card key={text} className="border-[#2d5e42]/15 dark:border-[#4A7C59]/25 bg-[#2d5e42]/5 dark:bg-[#4A7C59]/10">
-                  <CardContent className="p-3 flex flex-col items-center gap-1.5 text-center">
-                    <Icon className="w-4 h-4 text-[#2d5e42] dark:text-[#4A7C59]" />
-                    <span className="text-[10px] tracking-[.06em] uppercase text-foreground font-semibold">
-                      {text}
-                    </span>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
-            {product.store?.name && (
-              <Link href={`/tienda/${product.store.slug}`}>
-                <Card className="hover:border-[#2d5e42]/40 dark:hover:border-[#4A7C59]/60 transition-colors cursor-pointer">
-                  <CardContent className="p-4 flex items-center gap-4">
-                    <div className="w-11 h-11 flex items-center justify-center flex-shrink-0 overflow-hidden rounded-lg bg-[#2d5e42] dark:bg-[#4A7C59]">
-
-                      {product.store.logo ? (
-                        <Image
-                          src={product.store.logo}
-                          alt={product.store.name}
-                          width={44}
-                          height={44}
-                          className="object-cover rounded-lg"
-                        />
-                      ) : (
-<Store className="w-5 h-5 text-white" />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs text-muted-foreground mb-0.5">
-                        Marca / Vendido por
-                      </p>
-                      <p className="font-semibold text-lg text-foreground flex items-center gap-1">
-                        {product.store.name}
-                        <BadgeCheck className="w-4 h-4 text-[#2d5e42] dark:text-[#4A7C59]" />
-                      </p>
-                    </div>
-                    <ArrowLeft className="w-4 h-4 rotate-180 text-[#2d5e42] dark:text-[#4A7C59]" />
-                  </CardContent>
-                </Card>
-              </Link>
-            )}
-          </div>
         </div>
 
-{/* Tabs */}
-        <Card className="mb-12">
-          <CardContent className="p-6">
-            <Tabs defaultValue="descripcion" className="w-full">
-              <TabsList className="grid w-full grid-cols-4 mb-6">
-                <TabsTrigger value="descripcion" className="data-[state=active]:border-b-2 data-[state=active]:border-[#2d5e42] dark:data-[state=active]:border-[#4A7C59] rounded-none">Descripción</TabsTrigger>
-                <TabsTrigger value="caracteristicas" className="data-[state=active]:border-b-2 data-[state=active]:border-[#2d5e42] dark:data-[state=active]:border-[#4A7C59] rounded-none">
-                  Características
-                </TabsTrigger>
-                <TabsTrigger value="nutricion" className="data-[state=active]:border-b-2 data-[state=active]:border-[#2d5e42] dark:data-[state=active]:border-[#4A7C59] rounded-none">Nutrición</TabsTrigger>
-                <TabsTrigger value="tienda" className="data-[state=active]:border-b-2 data-[state=active]:border-[#2d5e42] dark:data-[state=active]:border-[#4A7C59] rounded-none">Tienda</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="descripcion" className="space-y-4">
-                <h3 className="text-2xl font-semibold">
-                  Descripción del Producto
-                </h3>
-                {product.description ? (
-                  product.description.split('\n').map((p, i) => (
-                    <p
-                      key={i}
-                      className="text-muted-foreground leading-relaxed text-base"
+        {/* Columna derecha: info de compra */}
+        <div className="space-y-5">
+          {/* Categorías + título */}
+          <div>
+            {product.categories.length > 0 && (
+              <div className="flex flex-wrap items-center gap-2 mb-4">
+                {product.categories.slice(0, 3).map((cat) => (
+                  <Link key={cat.slug} href={`/categoria/${cat.slug}`}>
+                    <Badge
+                      variant="secondary"
+                      className="text-xs font-bold uppercase tracking-wider px-2.5 py-1"
                     >
-                      {p}
-                    </p>
-                  ))
-                ) : (
-                  <p className="text-muted-foreground italic">
-                    Sin descripción disponible.
-                  </p>
-                )}
-              </TabsContent>
+                      {cat.name}
+                    </Badge>
+                  </Link>
+                ))}
+                <StickerBadge sticker={product.sticker ?? null} />
+              </div>
+            )}
+            <h1 className="text-4xl font-bold text-foreground mb-2 tracking-tight">
+              {product.name}
+            </h1>
+            {product.short_description && (
+              <p className="text-sm font-semibold text-muted-foreground leading-relaxed mb-3">
+                {product.short_description}
+              </p>
+            )}
+            <div className="flex items-center gap-3">
+              <Stars value={product.rating.average} size="lg" />
+              <span className="text-sm font-semibold text-muted-foreground">
+                {product.rating.average.toFixed(1)} ({product.rating.count}{' '}
+                reseñas)
+              </span>
+            </div>
+          </div>
 
-              <TabsContent value="caracteristicas" className="space-y-4">
-                <h3 className="text-2xl font-semibold">Características</h3>
-                {hasCharacteristics ? (
-                  <CharacteristicsTable
-                    characteristics={product.characteristics}
-                    additional_info={product.additional_info}
+          <Separator />
+
+          {/* Precio */}
+          <div className="space-y-2">
+            <div className="flex items-baseline gap-3 flex-wrap">
+              <span className="text-5xl font-bold text-foreground">
+                {formatPrice(product.price)}
+              </span>
+              {discount > 0 && (
+                <>
+                  <span className="text-lg line-through font-semibold text-muted-foreground">
+                    {formatPrice(product.regular_price)}
+                  </span>
+                  <Badge
+                    variant="destructive"
+                    className="text-sm font-bold px-2 py-0.5"
+                  >
+                    -{discount}%
+                  </Badge>
+                </>
+              )}
+            </div>
+            {product.stock !== undefined && (
+              <p className="text-sm font-semibold text-muted-foreground">
+                {product.stock > 0
+                  ? `Stock: ${product.stock} unidades`
+                  : 'No disponible'}
+              </p>
+            )}
+          </div>
+
+          <Separator />
+
+          {/* Cantidad */}
+          {inStock && (
+            <div>
+              <p className="text-xs font-bold text-muted-foreground mb-2 uppercase tracking-wider">
+                Cantidad
+              </p>
+              <div className="flex items-center border border-border rounded-lg w-fit">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                  className="h-9 w-9 rounded-none border-r border-border"
+                  aria-label="Reducir"
+                >
+                  −
+                </Button>
+                <span className="w-10 text-center text-sm font-bold text-foreground">
+                  {quantity}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() =>
+                    setQuantity((q) => Math.min(product.stock, q + 1))
+                  }
+                  className="h-9 w-9 rounded-none border-l border-border"
+                  aria-label="Aumentar"
+                >
+                  +
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {cartError && (
+            <div className="flex items-center gap-2 text-sm px-3 py-2 text-destructive bg-destructive/10 border border-destructive/25 rounded-md">
+              <AlertCircle className="w-4 h-4 flex-shrink-0" />
+              {cartError}
+            </div>
+          )}
+
+          {/* Botones de acción */}
+          <div className="flex gap-3">
+            <Button
+              onClick={handleAddToCart}
+              disabled={!inStock || cartLoading}
+              size="lg"
+              className={cn(
+                'flex-1 text-base h-12 bg-teal-500 hover:bg-teal-600 text-white',
+                localAdded && 'bg-green-600 hover:bg-green-600',
+              )}
+            >
+              {cartLoading ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : localAdded ? (
+                <Check className="w-5 h-5" />
+              ) : (
+                <ShoppingCart className="w-5 h-5" />
+              )}
+              {cartLoading
+                ? 'Agregando…'
+                : localAdded
+                  ? '¡Agregado!'
+                  : inStock
+                    ? 'Añadir al Carrito'
+                    : 'Sin stock'}
+            </Button>
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={() => setWishlisted((w) => !w)}
+              aria-label="Favoritos"
+              className={cn(
+                'h-12 w-12',
+                wishlisted
+                  ? 'border-rose-400 text-rose-500 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/20'
+                  : 'hover:border-teal-300',
+              )}
+            >
+              <Heart
+                className="w-5 h-5"
+                style={{ fill: wishlisted ? 'currentColor' : 'transparent' }}
+              />
+            </Button>
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={() =>
+                navigator.share?.({
+                  title: product.name,
+                  url: window.location.href,
+                })
+              }
+              aria-label="Compartir"
+              className="h-12 w-12 hover:border-teal-300"
+            >
+              <Share2 className="w-5 h-5" />
+            </Button>
+          </div>
+
+          {/* ── Métodos de pago con fondo turquesa ── */}
+          <div className="rounded-xl bg-gradient-to-r from-teal-500 to-cyan-500 p-4">
+            <p className="text-[10px] font-bold tracking-[.1em] uppercase text-white/80 mb-3 text-center">
+              Medios de pago aceptados
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              {[
+                { src: '/img/intro/visa1.png', alt: 'Visa' },
+                { src: '/img/intro/mastercard.png', alt: 'Mastercard' },
+                { src: '/img/intro/amex1.png', alt: 'American Express' },
+                { src: '/img/intro/yape.png', alt: 'Yape' },
+                { src: '/img/intro/logo-plin.png', alt: 'Plin' },
+              ].map(({ src, alt }) => (
+                <div
+                  key={alt}
+                  className="bg-gray-900 rounded-lg px-3 py-2 flex items-center justify-center shadow-sm"
+                >
+                  <Image
+                    src={src}
+                    alt={alt}
+                    width={50}
+                    height={30}
+                    className="h-8 w-auto object-contain"
                   />
-                ) : (
-                  <p className="text-muted-foreground italic">
-                    Sin características especificadas.
-                  </p>
-                )}
-              </TabsContent>
+                </div>
+              ))}
+            </div>
+          </div>
 
-              <TabsContent value="nutricion" className="space-y-4">
-                <h3 className="text-2xl font-semibold">
-                  Información Nutricional
-                </h3>
-                {hasNutritional ? (
-                  <div>
-                    {product.nutritional_info!.serving_note && (
-                      <p className="text-sm italic text-muted-foreground mb-4">
-                        {product.nutritional_info!.serving_note}
-                      </p>
-                    )}
-                    <div className="grid md:grid-cols-2 gap-4">
-                      {product.nutritional_info!.rows.map((row, i) => (
-                        <Card key={i}>
-                          <CardContent className="p-4 flex justify-between items-center">
-                            <span className="text-muted-foreground">
-                              {row.label}
-                            </span>
-                            <span className="font-semibold">{row.value}</span>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  <p className="text-muted-foreground italic">
-                    Sin información nutricional.
-                  </p>
-                )}
-              </TabsContent>
+          {/* Garantías */}
+          <div className="grid grid-cols-3 gap-2">
+            {[
+              { icon: Shield, text: 'Compra segura' },
+              { icon: Truck, text: 'Envío rápido' },
+              { icon: RotateCcw, text: 'Devoluciones' },
+            ].map(({ icon: Icon, text }) => (
+              <div
+                key={text}
+                className="flex flex-col items-center gap-1.5 text-center p-3 rounded-xl border border-teal-100 dark:border-teal-900/30 bg-teal-50/50 dark:bg-teal-950/10"
+              >
+                <Icon className="w-4 h-4 text-teal-500" />
+                <span className="text-[10px] font-semibold tracking-[.06em] uppercase text-teal-700 dark:text-teal-400">
+                  {text}
+                </span>
+              </div>
+            ))}
+          </div>
 
-              <TabsContent value="tienda" className="space-y-4">
-                <h3 className="text-2xl font-semibold">
-                  Información de la Tienda
-                </h3>
-                <div className="flex items-start gap-5">
-                  <div className="w-14 h-14 flex items-center justify-center flex-shrink-0 overflow-hidden rounded-xl bg-[#2d5e42] dark:bg-[#4A7C59]">
+          {/* Tienda */}
+          {product.store?.name && (
+            <Link href={`/tienda/${product.store.slug}`}>
+              <Card className="hover:border-teal-400 transition-colors cursor-pointer">
+                <CardContent className="p-4 flex items-center gap-4">
+                  <div className="w-11 h-11 flex items-center justify-center flex-shrink-0 overflow-hidden rounded-lg bg-muted">
                     {product.store.logo ? (
                       <Image
                         src={product.store.logo}
                         alt={product.store.name}
-                        width={56}
-                        height={56}
-                        className="object-cover rounded-xl"
+                        width={44}
+                        height={44}
+                        className="object-cover rounded-lg"
                       />
                     ) : (
-                      <Store className="w-7 h-7 text-white" />
+                      <Store className="w-5 h-5 text-muted-foreground" />
                     )}
                   </div>
-                  <div className="flex-1">
-                    <h4 className="text-xl font-bold flex items-center gap-2 mb-3 text-foreground">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold text-muted-foreground mb-0.5">
+                      Marca / Vendido por
+                    </p>
+                    <p className="font-bold text-lg text-foreground flex items-center gap-1">
                       {product.store.name}
-                      <BadgeCheck className="w-4 h-4 text-[#2d5e42] dark:text-[#4A7C59]" />
-                    </h4>
-                    <div className="space-y-1.5">
-                      {product.store.email && (
-                        <p className="text-sm flex items-center gap-2 text-muted-foreground">
-                          <Mail className="w-3.5 h-3.5" />
-                          {product.store.email}
-                        </p>
-                      )}
-                      {product.store.phone && (
-                        <p className="text-sm flex items-center gap-2 text-muted-foreground">
-                          <Phone className="w-3.5 h-3.5" />
-                          {product.store.phone}
-                        </p>
-                      )}
-                    </div>
-                    <Link href={`/tienda/${product.store.slug}`}>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="mt-4 gap-2 border-[#2d5e42]/30 dark:border-[#4A7C59]/50 text-[#2d5e42] dark:text-[#4A7C59] hover:bg-[#2d5e42]/10 dark:hover:bg-[#4A7C59]/20"
-                      >
-                        <Store className="w-3.5 h-3.5" />
-                        Ver tienda completa
-                      </Button>
-                    </Link>
+                      <BadgeCheck className="w-4 h-4 text-teal-500" />
+                    </p>
                   </div>
-                </div>
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
-
-        {/* Productos relacionados */}
-        {relatedProducts.length > 0 && (
-          <div className="mb-12">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-3xl font-bold text-foreground">Productos Relacionados</h2>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => scrollRelated('left')}
-                  className="border-[#2d5e42]/30 dark:border-[#4A7C59]/50 text-[#2d5e42] dark:text-[#4A7C59]"
-                >
-                  <ChevronLeft className="w-5 h-5" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => scrollRelated('right')}
-                  className="border-[#2d5e42]/30 dark:border-[#4A7C59]/50 text-[#2d5e42] dark:text-[#4A7C59]"
-                >
-                  <ChevronRight className="w-5 h-5" />
-                </Button>
-              </div>
-            </div>
-            <div
-              id="related-scroll"
-              className="flex gap-6 overflow-x-auto scroll-smooth pb-4"
-              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-            >
-              {relatedProducts.map((rel) => {
-                const relDiscount = discountPercent(
-                  rel.price,
-                  rel.regular_price,
-                );
-                return (
-                  <Link
-                    key={rel.id}
-                    href={`/producto/${rel.slug}`}
-                    className="flex-shrink-0 w-80"
-                  >
-                    <Card className="hover:shadow-lg hover:border-[#2d5e42]/30 dark:hover:border-[#4A7C59]/50 transition-all cursor-pointer h-full group">
-                      <CardContent className="p-0">
-                        <div className="relative aspect-square overflow-hidden rounded-t-xl bg-muted">
-                          <Image
-                            src={
-                              rel.images[0]?.medium ??
-                              rel.images[0]?.src ??
-                              '/no-image.png'
-                            }
-                            alt={rel.images[0]?.alt ?? rel.name}
-                            fill
-                            sizes="320px"
-                            className="object-contain p-6 group-hover:scale-105 transition-transform duration-300"
-                          />
-                          {rel.sticker && (
-                            <div className="absolute top-2 left-2">
-                              <StickerBadge sticker={rel.sticker} />
-                            </div>
-                          )}
-                        </div>
-                        <div className="p-5 space-y-3">
-                          <div className="flex flex-wrap items-center gap-1">
-                            {rel.categories.slice(0, 1).map((cat) => (
-                              <Badge
-                                key={cat.slug}
-                                variant="secondary"
-                                className="text-xs"
-                              >
-                                {cat.name}
-                              </Badge>
-                            ))}
-                          </div>
-                          <h3 className="font-semibold text-lg line-clamp-2 text-foreground">
-                            {rel.name}
-                          </h3>
-                          <div className="flex items-center gap-2">
-                            <Stars value={rel.rating.average} size="sm" />
-                            <span className="text-xs text-muted-foreground">
-                              ({rel.rating.count})
-                            </span>
-                          </div>
-                          <div className="flex items-center justify-between pt-2">
-                            <div className="flex items-baseline gap-2">
-                              <span className="text-2xl font-bold text-[#2d5e42] dark:text-[#4A7C59]">
-                                {formatPrice(rel.price)}
-                              </span>
-                              {relDiscount > 0 && (
-                                <Badge
-                                  variant="destructive"
-                                  className="text-[10px]"
-                                >
-                                  −{relDiscount}%
-                                </Badge>
-                              )}
-                            </div>
-                            <Button size="sm" className="bg-[#2d5e42] hover:bg-[#1a3a2a] dark:bg-[#4A7C59] dark:hover:bg-[#3D6B4A] text-white" aria-label="Agregar al carrito">
-                              <ShoppingCart className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* Reseñas */}
-        <ReviewsSection
-          productId={product.id}
-          productRating={product.rating.average}
-          productReviewCount={product.rating.count}
-        />
+                  <ArrowLeft className="w-4 h-4 rotate-180 text-muted-foreground" />
+                </CardContent>
+              </Card>
+            </Link>
+          )}
+        </div>
       </div>
+
+      {/* ── NIVEL 2: Tabs debajo de la imagen ────────────────────────────── */}
+      <div className="lg:w-[calc(100%-540px)]">
+        <ProductTabs product={product} />
+      </div>
+
+      {/* ── NIVEL 3: Reseñas ──────────────────────────────────────────────── */}
+      <ReviewsSection
+        productId={product.id}
+        productRating={product.rating.average}
+        productReviewCount={product.rating.count}
+      />
+
+      {/* ── NIVEL 4: Productos relacionados (auto-scroll infinito) ───────── */}
+      {relatedProducts.length > 0 && (
+        <RelatedProductsCarousel products={relatedProducts} />
+      )}
     </main>
+  );
+}
+
+// ─── Galería ──────────────────────────────────────────────────────────────────
+
+function ProductGallery({
+  images,
+  name,
+}: {
+  images: LaravelProduct['images'];
+  name: string;
+}) {
+  const [active, setActive] = useState(0);
+  const [zooming, setZooming] = useState(false);
+  const [zoomPos, setZoomPos] = useState({ x: 50, y: 50 });
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const lastTap = useRef(0);
+
+  const prev = useCallback(
+    () => setActive((i) => (i === 0 ? images.length - 1 : i - 1)),
+    [images.length],
+  );
+  const next = useCallback(
+    () => setActive((i) => (i === images.length - 1 ? 0 : i + 1)),
+    [images.length],
+  );
+
+  const src =
+    images[active]?.large ??
+    images[active]?.medium ??
+    images[active]?.src ??
+    '/no-image.png';
+
+  const handlePointer = (clientX: number, clientY: number) => {
+    const el = containerRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const nx = Math.max(
+      0,
+      Math.min(100, ((clientX - rect.left) / rect.width) * 100),
+    );
+    const ny = Math.max(
+      0,
+      Math.min(100, ((clientY - rect.top) / rect.height) * 100),
+    );
+    setZoomPos({ x: nx, y: ny });
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const now = Date.now();
+    const t = e.touches[0];
+    if (now - lastTap.current < 300) {
+      handlePointer(t.clientX, t.clientY);
+      setZooming((s) => !s);
+      lastTap.current = 0;
+      return;
+    }
+    lastTap.current = now;
+  };
+
+  return (
+    <div className="space-y-4">
+      <div
+        ref={containerRef}
+        className="relative aspect-square rounded-xl overflow-hidden bg-white border border-teal-100 dark:border-teal-900/30 group"
+        onMouseLeave={() => setZooming(false)}
+        onTouchStart={handleTouchStart}
+        onTouchMove={(e) => {
+          if (!zooming) return;
+          const t = e.touches[0];
+          handlePointer(t.clientX, t.clientY);
+        }}
+      >
+        <Image
+          key={src}
+          src={src}
+          alt={images[active]?.alt ?? name}
+          fill
+          sizes="(max-width:768px) 100vw, 50vw"
+          className="object-contain p-8 transition-transform duration-500 ease-out group-hover:scale-[1.04]"
+          onMouseMove={(e: any) => {
+            handlePointer(e.clientX, e.clientY);
+            setZooming(true);
+          }}
+          priority
+        />
+
+        {/* Lupa */}
+        <div
+          aria-hidden
+          className={cn(
+            'pointer-events-none absolute w-40 h-40 rounded-full border border-teal-200 bg-no-repeat bg-center transform -translate-x-1/2 -translate-y-1/2',
+            zooming ? 'opacity-100 block' : 'opacity-0 hidden md:block',
+          )}
+          style={{
+            left: `${zoomPos.x}%`,
+            top: `${zoomPos.y}%`,
+            backgroundImage: `url(${src})`,
+            backgroundSize: '250%',
+            backgroundPosition: `${zoomPos.x}% ${zoomPos.y}%`,
+            transition: 'opacity 120ms linear',
+          }}
+        />
+
+        {images.length > 1 && (
+          <>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={prev}
+              aria-label="Anterior"
+              className="absolute left-3 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 backdrop-blur-sm hover:border-teal-400"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={next}
+              aria-label="Siguiente"
+              className="absolute right-3 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 backdrop-blur-sm hover:border-teal-400"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </>
+        )}
+      </div>
+
+      {images.length > 1 && (
+        <div className="grid grid-cols-4 gap-3">
+          {images.map((img, i) => (
+            <button
+              key={i}
+              onClick={() => setActive(i)}
+              className={cn(
+                'aspect-square rounded-lg overflow-hidden border-2 transition-all',
+                i === active
+                  ? 'border-teal-500 ring-2 ring-teal-400/30'
+                  : 'border-border hover:border-teal-300',
+              )}
+            >
+              <div className="relative w-full h-full bg-white">
+                <Image
+                  src={img.thumb ?? img.src}
+                  alt={img.alt ?? name}
+                  fill
+                  sizes="100px"
+                  className="object-contain p-1"
+                />
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }

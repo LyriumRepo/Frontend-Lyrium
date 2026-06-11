@@ -36,10 +36,10 @@ export const useTreasury = () => {
     const kpis = useMemo(() => {
         if (!data) return [];
         return [
-            { label: 'Utilidad Neta del Mes', val: `S/ ${data.resumen.utilidad_neta.toLocaleString()}`, color: 'emerald', icon: 'ChartLineUp' },
-            { label: 'Pagos Pendientes (Cash-In)', val: data.cashIn.filter(p => p.status === 'PENDING_VALIDATION').length.toString(), color: 'amber', icon: 'Clock' },
-            { label: 'Liquidaciones (Cash-Out)', val: data.cashOut.filter(p => p.status === 'SCHEDULED' || p.status === 'PROCESSING').length.toString(), color: 'indigo', icon: 'ArrowsLeftRight' },
-            { label: 'Disputas Activas', val: data.cashOut.filter(p => p.status === 'DISPUTED').length.toString(), color: 'red', icon: 'WarningCircle' }
+            { label: 'Utilidad Neta del Mes', val: `S/ ${data.resumen.utilidad_neta.toLocaleString()}`, borderClass: 'border-[var(--color-success)]', bgClass: 'bg-[var(--color-success)]/10 text-[var(--color-success)]', icon: 'ChartLineUp', color: 'emerald' },
+            { label: 'Pagos Pendientes (Cash-In)', val: data.cashIn.filter(p => p.status === 'PENDING_VALIDATION').length.toString(), borderClass: 'border-[var(--color-warning)]', bgClass: 'bg-[var(--color-warning)]/10 text-[var(--color-warning)]', icon: 'Clock', color: 'amber' },
+            { label: 'Liquidaciones (Cash-Out)', val: data.cashOut.filter(p => p.status === 'SCHEDULED' || p.status === 'PROCESSING').length.toString(), borderClass: 'border-[var(--color-info)]', bgClass: 'bg-[var(--color-info)]/10 text-[var(--color-info)]', icon: 'ArrowsLeftRight', color: 'sky' },
+            { label: 'Disputas Activas', val: data.cashOut.filter(p => p.status === 'DISPUTED').length.toString(), borderClass: 'border-[var(--color-error)]', bgClass: 'bg-[var(--color-error)]/10 text-[var(--color-error)]', icon: 'WarningCircle', color: 'red' }
         ];
     }, [data]);
 

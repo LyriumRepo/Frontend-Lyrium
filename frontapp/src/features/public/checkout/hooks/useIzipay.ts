@@ -84,6 +84,13 @@ export function useIzipay({ onSuccess }: UseIzipayOptions): UseIzipayReturn {
     if (listenersRegistered.current) return;
     if (typeof window === 'undefined') return;
 
+    const publicKey = process.env.NEXT_PUBLIC_IZIPAY_PUBLIC_KEY;
+    if (!publicKey) {
+      console.log('[Izipay] NEXT_PUBLIC_IZIPAY_PUBLIC_KEY no configurada. Ejecutando en modo simulación (MOCK).');
+      setIsSdkReady(true);
+      return;
+    }
+
     let attempts = 0;
     const MAX_ATTEMPTS = 50; // 10 segundos
     let cancelled = false;
@@ -96,11 +103,9 @@ export function useIzipay({ onSuccess }: UseIzipayOptions): UseIzipayReturn {
         kr.onLoaded(() => {
           if (cancelled) return;
 
-          kr.setFormConfig({
-            formToken: '__publicKey__',
-
-            'kr-public-key': process.env.NEXT_PUBLIC_IZIPAY_PUBLIC_KEY ?? '',
-          });
+          // NOTA: La public key ya se configuró via kr-public-key en el <script> del layout.
+          // NO llamar a setFormConfig aquí porque con un formToken placeholder rompe el SDK.
+          // setFormConfig se llama únicamente en loadSmartForm con el formToken real.
 
           kr.onSubmit((response) => {
             console.log('[Izipay] onSubmit disparado:', response);

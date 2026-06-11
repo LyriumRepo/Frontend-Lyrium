@@ -59,6 +59,15 @@ export default function FinanceChart({
         const ctx = chartRef.current.getContext('2d');
         if (!ctx) return;
 
+        const resolveColor = (c: string) => {
+            if (typeof window !== 'undefined' && c.startsWith('--')) {
+                return getComputedStyle(document.documentElement).getPropertyValue(c).trim() || '#0ea5e9';
+            }
+            return c;
+        };
+
+        const resolvedColor = resolveColor(color);
+
         const config: ChartConfiguration = {
             type,
             data: {
@@ -66,12 +75,12 @@ export default function FinanceChart({
                 datasets: [{
                     label,
                     data,
-                    borderColor: color,
-                    backgroundColor: type === 'doughnut' ? [color, isDark ? '#1E3028' : '#F1F5F9'] : (fill ? `${color}1A` : 'transparent'),
+                    borderColor: resolvedColor,
+                    backgroundColor: type === 'doughnut' ? [resolvedColor, isDark ? '#1E3028' : '#F1F5F9'] : (fill ? `${resolvedColor}1A` : 'transparent'),
                     borderWidth: type === 'doughnut' ? 0 : 3,
                     tension: type === 'line' ? tension : 0,
                     fill: type === 'line' ? fill : false,
-                    pointBackgroundColor: color,
+                    pointBackgroundColor: resolvedColor,
                     pointBorderColor: pointBorder,
                     pointRadius: type === 'line' ? 4 : 0,
                     pointHoverRadius: type === 'line' ? 7 : 5,

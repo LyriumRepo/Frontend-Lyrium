@@ -28,6 +28,7 @@ export type BookingStatus =
   | "completed"
   | "cancelled"
   | "no_show"
+  | "on_the_way"
   | "rescheduled";
 
 export type PaymentStatus = "pending" | "paid" | "refunded" | "failed";
@@ -50,6 +51,7 @@ export interface BookingResponse {
   customer_name: string;
   customer_email: string;
   customer_phone: string;
+  specialist?: { id: number; name: string };
   // Fecha y hora separados (como los devuelve ServiceBookingResource)
   date: string; // 'YYYY-MM-DD'
   start_time: string; // 'HH:MM'
@@ -62,6 +64,7 @@ export interface BookingResponse {
   seller_notes?: string;
   reschedule_token?: string;
   no_show_reason?: string;
+  is_home_service?: boolean;
   can_cancel?: boolean;
   can_reschedule?: boolean;
   confirmed_at?: string;
@@ -165,6 +168,22 @@ export const bookingRepository = {
   },
 
   /**
+   * Califica una reserva completada.
+   * POST /api/bookings/:id/rate
+   */
+  async rate(id: number, data: { rating: number; comment?: string }): Promise<any> {
+    const headers = await getAuthHeaders();
+    const res = await fetch(`${LARAVEL_API_URL}/bookings/${id}/rate`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(data),
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.message ?? 'Error al calificar');
+    return json;
+  },
+
+  /**
    * Reagenda una reserva usando el token de reagendamiento.
    * POST /api/bookings/:id/reschedule
    */
@@ -214,6 +233,36 @@ export const bookingRepository = {
     return request<BookingResponse>(`/bookings/${id}/no-show`, {
       method: "PUT",
       body: JSON.stringify({ reason }),
+    });
+  },
+
+  /**
+   * Marca una reserva como completada (seller).
+   * PUT /api/bookings/:id/complete
+   */
+  async complete(id: number): Promise<BookingResponse> {
+    return request<BookingResponse>(`/bookings/${id}/complete`, {
+      method: "PUT",
+    });
+  },
+
+  /**
+   * Marca una reserva confirmada como "en camino" (seller, solo domicilio).
+   * PUT /api/bookings/:id/on-the-way
+   */
+  async markOnTheWay(id: number): Promise<BookingResponse> {
+    return request<BookingResponse>(`/bookings/${id}/on-the-way`, {
+      method: "PUT",
+    });
+  },
+
+  /**
+   * Cliente confirma que recibió la atención.
+   * PUT /api/bookings/:id/confirm-completion
+   */
+  async confirmCompletion(id: number): Promise<BookingResponse> {
+    return request<BookingResponse>(`/bookings/${id}/confirm-completion`, {
+      method: "PUT",
     });
   },
 

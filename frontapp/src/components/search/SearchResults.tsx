@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Search, Filter, X, SlidersHorizontal } from 'lucide-react';
-import { searchProducts, searchCategories, mapCatalogProductToLocal } from '@/shared/lib/api/catalogProducts';
+import { searchProducts, searchCategories, searchServices, mapCatalogProductToLocal, mapServiceToLocal } from '@/shared/lib/api/catalogProducts';
 import ProductGrid from '@/components/products/ProductGrid';
 import { Producto, Categoria } from '@/types/public';
 import SearchBar from '@/components/home/SearchBar';
@@ -45,14 +45,15 @@ function SearchResultsContent({ initialQuery = '', initialCategory = '' }: Searc
     setOnSale(sale);
     setSticker(stickerP);
 
-    if (!q) return;
+    if (!q && !cat) return;
 
     const fetchResults = async () => {
       setIsLoading(true);
       try {
-        const [productsResult, categoriesResult] = await Promise.all([
+        const isCategoryBrowse = !!cat && !q;
+        const results = await Promise.allSettled([
           searchProducts({
-            query: q,
+            query: isCategoryBrowse ? '' : q,
             perPage: 50,
             minPrice: min || undefined,
             maxPrice: max || undefined,
@@ -60,11 +61,20 @@ function SearchResultsContent({ initialQuery = '', initialCategory = '' }: Searc
             sticker: stickerP || undefined,
             category: cat || undefined,
           }),
-          searchCategories(q, 10),
+          searchCategories(isCategoryBrowse ? cat : q, 10),
+          searchServices({ query: isCategoryBrowse ? '' : q, perPage: 50, category: cat || undefined }),
         ]);
+
+        const productsResult = results[0].status === 'fulfilled' ? results[0].value : [];
+        const categoriesResult = results[1].status === 'fulfilled' ? results[1].value : [];
+        const servicesResult = results[2].status === 'fulfilled' ? results[2].value : [];
 
         const mappedProducts: Producto[] = (Array.isArray(productsResult) ? productsResult : [])
           .map(mapCatalogProductToLocal)
+          .filter((p): p is Producto => p !== null);
+
+        const mappedServices: Producto[] = (Array.isArray(servicesResult) ? servicesResult : [])
+          .map(mapServiceToLocal)
           .filter((p): p is Producto => p !== null);
 
         const mappedCategories = (Array.isArray(categoriesResult) ? categoriesResult : [])
@@ -76,13 +86,12 @@ function SearchResultsContent({ initialQuery = '', initialCategory = '' }: Searc
             slug: c.slug,
           }));
 
-        setProducts(mappedProducts);
+        const allProducts = [...mappedProducts, ...mappedServices];
+        setProducts(allProducts);
         setCategories(mappedCategories);
-        setTotalResults(mappedProducts.length);
+        setTotalResults(allProducts.length);
       } catch (error) {
-        console.error('Search error:', error);
-        setProducts([]);
-        setCategories([]);
+        console.error('Search render error:', error);
       } finally {
         setIsLoading(false);
       }
@@ -108,7 +117,7 @@ function SearchResultsContent({ initialQuery = '', initialCategory = '' }: Searc
   };
 
   const handleCategoryClick = (categorySlug: string) => {
-    router.push(`/productos/${categorySlug}`);
+    router.push(`/buscar?category=${categorySlug}`);
   };
 
   const clearFilters = () => {
@@ -116,7 +125,7 @@ function SearchResultsContent({ initialQuery = '', initialCategory = '' }: Searc
     setPriceMax('');
   };
 
-  if (!query) {
+  if (!query && !selectedCategory) {
     return (
       <div className="text-center py-16">
         <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gray-100 dark:bg-gray-800 mb-4">
@@ -157,7 +166,7 @@ function SearchResultsContent({ initialQuery = '', initialCategory = '' }: Searc
         <p className="text-sm text-gray-500 dark:text-[var(--text-placeholder)] mb-4">
           {isLoading
             ? 'Buscando...'
-            : `${filteredProducts.length} resultado${filteredProducts.length !== 1 ? 's' : ''} para "${query}"`}
+            : `${filteredProducts.length} resultado${filteredProducts.length !== 1 ? 's' : ''}${query ? ` para "${query}"` : selectedCategory ? ' en categoría seleccionada' : ''}`}
         </p>
 
         {isLoading ? (
@@ -173,7 +182,7 @@ function SearchResultsContent({ initialQuery = '', initialCategory = '' }: Searc
               No se encontraron productos
             </h3>
             <p className="text-gray-500 dark:text-[var(--text-secondary)] max-w-md mx-auto">
-              Prueba con otros términos de búsqueda o explora nuestras categorías
+              {selectedCategory ? 'No se encontraron productos o servicios en esta categoría' : 'Prueba con otros términos de búsqueda o explora nuestras categorías'}
             </p>
           </div>
         )}

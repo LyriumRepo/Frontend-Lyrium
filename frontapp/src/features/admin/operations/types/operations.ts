@@ -75,6 +75,7 @@ export interface ExpenseStats {
 export interface ExpenseFilters {
   search?: string;
   status?: 'Pagado' | 'Pendiente' | 'Anulado';
+  voucher_type?: string;
   supplier_id?: number;
   from?: string;
   to?: string;
@@ -184,4 +185,11 @@ export interface Pagination {
 export interface PaginatedResponse<T> {
   data: T[];
   pagination: Pagination;
+}
+
+export interface OperationalKPI {
+  label: string;
+  val: string | number;
+  icon: string;
+  color: string;
 }

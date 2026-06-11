@@ -3,52 +3,116 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Order, SalesKPI } from '../types';
-import { MOCK_ORDERS, MOCK_KPIS } from '../mock';
 import { orderRepository } from '@/shared/lib/api/factory';
-import { USE_MOCKS } from '@/shared/lib/config/flags';
+
+function computeKPIs(orders: Order[]): SalesKPI[] {
+    const total = orders.length;
+    const totalRevenue = orders.reduce((sum, o) => sum + o.total, 0);
+
+    const pending = orders.filter(o => o.estado === 'pending_seller').length;
+    const confirmed = orders.filter(o => o.estado === 'confirmed').length;
+    const processing = orders.filter(o => o.estado === 'processing').length;
+    const shipped = orders.filter(o => o.estado === 'shipped').length;
+    const delivered = orders.filter(o => o.estado === 'delivered').length;
+    const cancelled = orders.filter(o => o.estado === 'cancelled').length;
+
+    const inProcess = confirmed + processing + shipped;
+
+    const productCount = orders.filter(o => o.orderType === 'product').length;
+    const serviceCount = orders.filter(o => o.orderType === 'service').length;
+    const mixedCount = orders.filter(o => o.orderType === 'mixed').length;
+
+    return [
+        {
+            label: 'Ventas Totales',
+            count: totalRevenue,
+            status: `${total} órdenes | ${productCount} prod, ${serviceCount} serv, ${mixedCount} mixtas`,
+            icon: 'DollarSign',
+            color: 'emerald',
+        },
+        {
+            label: 'Total Órdenes',
+            count: total,
+            status: `${delivered} completadas · ${cancelled} canceladas`,
+            icon: 'ShoppingBag',
+            color: 'sky',
+        },
+        {
+            label: 'Pendientes',
+            count: pending,
+            status: total > 0 ? `${Math.round((pending / total) * 100)}% requieren acción` : 'Sin datos',
+            icon: 'Clock',
+            color: 'amber',
+        },
+        {
+            label: 'En Proceso',
+            count: inProcess,
+            status: `${processing} en preparación · ${shipped} en camino`,
+            icon: 'Package',
+            color: 'indigo',
+        },
+        {
+            label: 'Completadas',
+            count: delivered,
+            status: `+ ${cancelled} canceladas de ${total}`,
+            icon: 'CheckCircle',
+            color: 'violet',
+        },
+    ];
+}
 
 export function useSellerSales() {
     const queryClient = useQueryClient();
     const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
-    const [filters, setFilters] = useState<{ dateStart: string | null; dateEnd: string | null }>({
+    const [filters, setFilters] = useState<{ dateStart: string | null; dateEnd: string | null; orderType: string | null }>({
         dateStart: null,
-        dateEnd: null
+        dateEnd: null,
+        orderType: null,
     });
 
-    const { data, isLoading, refetch } = useQuery({
+    const { data, isFetching, isLoading, error, refetch } = useQuery({
         queryKey: ['seller', 'sales', filters],
         queryFn: async () => {
-            if (USE_MOCKS) {
-                let filteredOrders = MOCK_ORDERS;
-                if (filters.dateStart || filters.dateEnd) {
-                    filteredOrders = MOCK_ORDERS.filter(o => {
-                        const oDate = new Date(o.fecha + 'T00:00:00');
-                        const start = filters.dateStart ? new Date(filters.dateStart + 'T00:00:00') : null;
-                        const end = filters.dateEnd ? new Date(filters.dateEnd + 'T00:00:00') : null;
-                        if (start && oDate < start) return false;
-                        if (end && oDate > end) return false;
-                        return true;
-                    });
-                }
-                return { orders: filteredOrders as Order[], kpis: MOCK_KPIS as SalesKPI[] };
-            }
-
-            try {
-                const orders = await orderRepository.getOrders();
-                return { orders, kpis: [] as SalesKPI[] };
-            } catch (error) {
-                console.warn('FALLBACK: orderRepository.getOrders() error', error);
-                return { orders: MOCK_ORDERS as Order[], kpis: MOCK_KPIS as SalesKPI[] };
-            }
+            const allOrders = await orderRepository.getOrders();
+            const orders = allOrders.filter(order => {
+                if (filters.dateStart && order.fecha < filters.dateStart) return false;
+                if (filters.dateEnd && order.fecha > filters.dateEnd) return false;
+                if (filters.orderType && order.orderType !== filters.orderType) return false;
+                return true;
+            });
+            return { orders, kpis: computeKPIs(orders) };
         },
+        placeholderData: (previousData) => previousData,
         staleTime: 5 * 60 * 1000,
     });
 
     const advanceStepMutation = useMutation({
         mutationFn: async (orderId: string) => {
-            if (!USE_MOCKS) {
-                await orderRepository.advanceOrderStep(orderId);
-            }
+            await orderRepository.advanceOrderStep(orderId);
+            return orderId;
+        },
+        onSuccess: async () => {
+            await queryClient.refetchQueries({ queryKey: ['seller', 'sales'] });
+        }
+    });
+
+    const shipWithCarrierMutation = useMutation({
+        mutationFn: async ({ orderId, carrierCode, carrierData }: { orderId: string; carrierCode: string; carrierData: Record<string, string> }) => {
+            await orderRepository.updateOrder(orderId, {
+                status: 'shipped',
+                carrier_code: carrierCode,
+                carrier_data: carrierData,
+            });
+            return orderId;
+        },
+        onSuccess: async () => {
+            await queryClient.refetchQueries({ queryKey: ['seller', 'sales'] });
+        }
+    });
+
+    const cancelOrderMutation = useMutation({
+        mutationFn: async (orderId: string) => {
+            await orderRepository.updateOrder(orderId, { status: 'cancelled' });
             return orderId;
         },
         onSuccess: (orderId) => {
@@ -57,10 +121,11 @@ export function useSellerSales() {
                 return {
                     ...old,
                     orders: old.orders.map((o: Order) =>
-                        o.id === orderId ? { ...o, currentStep: Math.min(o.currentStep + 1, 5) } : o
+                        o.id === orderId ? { ...o, estado: 'cancelled', currentStep: 0 } : o
                     )
                 };
             });
+            refetch();
         }
     });
 
@@ -70,14 +135,20 @@ export function useSellerSales() {
         orders: data?.orders || [],
         kpis: data?.kpis || [],
         isLoading,
+        isFetching,
         selectedOrder,
         setSelectedOrder: (order: Order | null) => setSelectedOrderId(order?.id || null),
         filters,
-        updateFilters: (newFilters: { dateStart?: string | null; dateEnd?: string | null }) =>
+        updateFilters: (newFilters: { dateStart?: string | null; dateEnd?: string | null; orderType?: string | null }) =>
             setFilters({ ...filters, ...newFilters }),
-        clearFilters: () => setFilters({ dateStart: null, dateEnd: null }),
+        clearFilters: () => setFilters({ dateStart: null, dateEnd: null, orderType: null }),
         advanceStep: (id: string) => advanceStepMutation.mutateAsync(id),
         isAdvancing: advanceStepMutation.isPending,
+        shipWithCarrier: (orderId: string, carrierCode: string, carrierData: Record<string, string>) =>
+            shipWithCarrierMutation.mutateAsync({ orderId, carrierCode, carrierData }),
+        isShipping: shipWithCarrierMutation.isPending,
+        cancelOrder: (id: string) => cancelOrderMutation.mutateAsync(id),
+        isCancelling: cancelOrderMutation.isPending,
         refresh: refetch
     };
 }

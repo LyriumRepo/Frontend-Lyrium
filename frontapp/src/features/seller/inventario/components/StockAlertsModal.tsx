@@ -75,7 +75,7 @@ export function StockAlertsModal({ isOpen, alerts, onClose }: Props) {
                             </thead>
                             <tbody>
                                 {sorted.map((item) => {
-                                    const available = Math.max(0, item.stock - item.reserved);
+                                    const available = Math.max(0, item.stock - (item.reserved ?? 0));
                                     const status    = getStockStatus(item);
                                     return (
                                         <tr

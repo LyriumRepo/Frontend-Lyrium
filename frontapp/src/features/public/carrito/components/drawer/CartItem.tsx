@@ -36,10 +36,10 @@ export default function CartItem({
 
   if (isFirst) {
     return (
-      <div className="relative border border-gray-200 rounded-2xl p-4 bg-gradient-to-br from-sky-50/30 to-white">
+      <div className="relative border border-gray-200 dark:border-[var(--border-subtle)] rounded-2xl p-4 bg-gradient-to-br from-sky-50/30 to-white dark:from-sky-900/10 dark:to-[var(--bg-card)]">
         <button
           onClick={() => onDelete(item.id)}
-          className="absolute right-2 top-2 w-6 h-6 rounded-full bg-white hover:bg-red-50 text-gray-400 hover:text-red-500 grid place-items-center text-xs transition shadow-sm border border-gray-200"
+          className="absolute right-2 top-2 w-6 h-6 rounded-full bg-white dark:bg-[var(--bg-card)] hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-400 dark:text-[var(--text-muted)] hover:text-red-500 dark:hover:text-red-400 grid place-items-center text-xs transition shadow-sm border border-gray-200 dark:border-[var(--border-subtle)]"
           title="Eliminar"
         >
           <X className="w-3 h-3" />
@@ -48,7 +48,7 @@ export default function CartItem({
         <div className="flex gap-4">
           <button
             onClick={() => onView(item.producto_id)}
-            className="w-24 h-24 rounded-xl overflow-hidden bg-white shrink-0 border-2 border-sky-100 shadow-sm"
+            className="w-24 h-24 rounded-xl overflow-hidden bg-white dark:bg-[var(--bg-muted)] shrink-0 border-2 border-sky-100 dark:border-[var(--border-subtle)] shadow-sm"
           >
             <img
               src={imgSrc}
@@ -65,31 +65,31 @@ export default function CartItem({
               onClick={() => onView(item.producto_id)}
               className="text-left w-full"
             >
-              <p className="text-base font-semibold text-gray-900 line-clamp-2 leading-tight">
+              <p className="text-base font-semibold text-gray-900 dark:text-[var(--text-primary)] line-clamp-2 leading-tight">
                 {nombre}
               </p>
             </button>
-            <p className="text-xs text-gray-500 mt-1">🏪 Vendedor: Lyrium</p>
+            <p className="text-xs text-gray-500 dark:text-[var(--text-muted)] mt-1">🏪 Vendedor: Lyrium</p>
 
             <div className="flex items-center justify-between mt-3">
-              <div className="inline-flex items-center border-2 border-gray-200 rounded-lg overflow-hidden bg-white">
+              <div className="inline-flex items-center border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-lg overflow-hidden bg-white dark:bg-[var(--bg-card)]">
                 <button
                   onClick={() => onDecrease(item.id)}
-                  className="w-9 h-9 hover:bg-gray-50 grid place-items-center text-gray-600 transition"
+                  className="w-9 h-9 hover:bg-gray-50 dark:hover:bg-[var(--bg-muted)] grid place-items-center text-gray-600 dark:text-[var(--text-secondary)] transition"
                 >
                   <Minus className="w-3 h-3" />
                 </button>
-                <span className="w-12 h-9 grid place-items-center text-sm font-semibold text-gray-800 border-x-2 border-gray-200">
+                <span className="w-12 h-9 grid place-items-center text-sm font-semibold text-gray-800 dark:text-[var(--text-primary)] border-x-2 border-gray-200 dark:border-[var(--border-subtle)]">
                   {cant}
                 </span>
                 <button
                   onClick={() => onIncrease(item.id)}
-                  className="w-9 h-9 hover:bg-gray-50 grid place-items-center text-gray-600 transition"
+                  className="w-9 h-9 hover:bg-gray-50 dark:hover:bg-[var(--bg-muted)] grid place-items-center text-gray-600 dark:text-[var(--text-secondary)] transition"
                 >
                   <Plus className="w-3 h-3" />
                 </button>
               </div>
-              <span className="text-lg font-bold text-sky-600">
+              <span className="text-lg font-bold text-sky-600 dark:text-sky-400">
                 {money(lineTotal)}
               </span>
             </div>
@@ -100,10 +100,10 @@ export default function CartItem({
   }
 
   return (
-    <div className="relative border-b border-gray-100 pb-3">
+    <div className="relative border-b border-gray-100 dark:border-[var(--border-subtle)] pb-3">
       <button
         onClick={() => onDelete(item.id)}
-        className="absolute -left-1 -top-1 w-5 h-5 rounded-full bg-gray-200 hover:bg-red-100 text-gray-500 hover:text-red-600 grid place-items-center text-xs transition"
+        className="absolute -left-1 -top-1 w-5 h-5 rounded-full bg-gray-200 dark:bg-[var(--bg-muted)] hover:bg-red-100 dark:hover:bg-red-900/20 text-gray-500 dark:text-[var(--text-muted)] hover:text-red-600 dark:hover:text-red-400 grid place-items-center text-xs transition"
         title="Eliminar"
       >
         <X className="w-2.5 h-2.5" />
@@ -112,7 +112,7 @@ export default function CartItem({
       <div className="flex gap-3 pl-3">
         <button
           onClick={() => onView(item.producto_id)}
-          className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 shrink-0 border border-gray-200"
+          className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 dark:bg-[var(--bg-muted)] shrink-0 border border-gray-200 dark:border-[var(--border-subtle)]"
         >
           <img
             src={imgSrc}
@@ -130,28 +130,28 @@ export default function CartItem({
               onClick={() => onView(item.producto_id)}
               className="text-left flex-1"
             >
-              <p className="text-sm font-medium text-gray-800 line-clamp-1">
+              <p className="text-sm font-medium text-gray-800 dark:text-[var(--text-primary)] line-clamp-1">
                 {nombre}
               </p>
             </button>
-            <span className="text-sm font-semibold text-gray-800 whitespace-nowrap">
+            <span className="text-sm font-semibold text-gray-800 dark:text-[var(--text-primary)] whitespace-nowrap">
               {money(lineTotal)}
             </span>
           </div>
-          <p className="text-xs text-gray-500 mt-0.5">Vendedor: Lyrium</p>
-          <div className="mt-2 inline-flex items-center border border-gray-300 rounded overflow-hidden">
+          <p className="text-xs text-gray-500 dark:text-[var(--text-muted)] mt-0.5">Vendedor: Lyrium</p>
+          <div className="mt-2 inline-flex items-center border border-gray-300 dark:border-[var(--border-subtle)] rounded overflow-hidden">
             <button
               onClick={() => onDecrease(item.id)}
-              className="w-7 h-7 hover:bg-gray-100 grid place-items-center text-gray-600 transition"
+              className="w-7 h-7 hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] grid place-items-center text-gray-600 dark:text-[var(--text-secondary)] transition"
             >
               <Minus className="w-2.5 h-2.5" />
             </button>
-            <span className="w-9 h-7 grid place-items-center text-xs text-gray-800 border-x border-gray-300 bg-gray-50">
+            <span className="w-9 h-7 grid place-items-center text-xs text-gray-800 dark:text-[var(--text-primary)] border-x border-gray-300 dark:border-[var(--border-subtle)] bg-gray-50 dark:bg-[var(--bg-muted)]">
               {cant}
             </span>
             <button
               onClick={() => onIncrease(item.id)}
-              className="w-7 h-7 hover:bg-gray-100 grid place-items-center text-gray-600 transition"
+              className="w-7 h-7 hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] grid place-items-center text-gray-600 dark:text-[var(--text-secondary)] transition"
             >
               <Plus className="w-2.5 h-2.5" />
             </button>

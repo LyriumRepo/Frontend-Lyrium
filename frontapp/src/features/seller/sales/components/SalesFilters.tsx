@@ -1,53 +1,154 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import Icon from '@/components/ui/Icon';
+import CalendarPopover from './CalendarPopover';
+import { Info } from 'lucide-react';
 
 interface SalesFiltersProps {
     dateStart: string | null;
     dateEnd: string | null;
+    orderType: string | null;
     onDateChange: (type: 'dateStart' | 'dateEnd', value: string) => void;
+    onOrderTypeChange: (value: string | null) => void;
     onClear: () => void;
     onExport: (type: 'excel' | 'pdf') => void;
 }
 
-export default function SalesFilters({ dateStart, dateEnd, onDateChange, onClear, onExport }: SalesFiltersProps) {
+const ORDER_TYPE_OPTIONS: { value: string | null; label: string; icon: string }[] = [
+    { value: null, label: 'Todas', icon: 'LayoutGrid' },
+    { value: 'product', label: 'Productos', icon: 'Package' },
+    { value: 'service', label: 'Servicios', icon: 'Briefcase' },
+    { value: 'mixed', label: 'Mixtas', icon: 'Layers' },
+];
+
+function formatDisplayDate(dateStr: string): string {
+    if (!dateStr) return '';
+    const d = new Date(dateStr + 'T12:00:00');
+    return d.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+
+export default function SalesFilters({ dateStart, dateEnd, orderType, onDateChange, onOrderTypeChange, onClear, onExport }: SalesFiltersProps) {
+    const [activePicker, setActivePicker] = useState<'start' | 'end' | null>(null);
+    const startRef = useRef<HTMLDivElement | null>(null);
+    const endRef = useRef<HTMLDivElement | null>(null);
+
+    // Export info alert state
+    const [showExportHint, setShowExportHint] = useState(false);
+    const prevDateEndRef = useRef(dateEnd);
+    useEffect(() => {
+        if (dateEnd && prevDateEndRef.current !== dateEnd) {
+            setShowExportHint(true);
+            const timer = setTimeout(() => setShowExportHint(false), 4500);
+            return () => clearTimeout(timer);
+        }
+        prevDateEndRef.current = dateEnd;
+    }, [dateEnd]);
+
+    const closePicker = useCallback(() => setActivePicker(null), []);
+
     return (
         <div className="glass-card p-6">
             <div className="flex flex-col lg:flex-row items-end gap-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1 w-full">
-                    <div className="space-y-2">
-                        <label htmlFor="date-start" className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1">Fecha Inicio</label>
-                        <div className="relative">
-                            <Icon name="Calendar" className="absolute left-4 top-1/2 -translate-y-1/2 text-sky-500 text-lg" />
-                            <input
-                                id="date-start"
-                                type="date"
-                                value={dateStart || ''}
-                                onChange={(e) => onDateChange('dateStart', e.target.value)}
-                                className="w-full pl-12 pr-4 py-3 bg-[var(--bg-secondary)]/50 border-none rounded-2xl focus:ring-2 focus:ring-sky-500/20 transition-all font-bold text-[var(--text-primary)]"
-                            />
+                <div className="flex flex-col sm:flex-row gap-4 flex-1 w-full">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1 w-full">
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1">Fecha Inicio</label>
+                            <div className="relative group">
+                                <Icon name="Calendar" className="absolute left-4 top-1/2 -translate-y-1/2 text-[#69BEEB] dark:text-[#66D6A8] group-focus-within:text-[#69BEEB] dark:group-focus-within:text-[#66D6A8] transition-colors text-lg pointer-events-none z-10" />
+                                <div
+                                    ref={startRef}
+                                    role="button"
+                                    tabIndex={0}
+                                    onClick={() => setActivePicker(activePicker === 'start' ? null : 'start')}
+                                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setActivePicker(activePicker === 'start' ? null : 'start'); }}
+                                    className={'w-full pl-12 pr-4 py-3 bg-[var(--bg-secondary)]/50 border-2 rounded-2xl transition-all font-bold text-[var(--text-primary)] cursor-pointer flex items-center ' + (activePicker === 'start' ? 'border-[#69BEEB] dark:border-[#66D6A8] ring-2 ring-[#69BEEB]/15 dark:ring-[#66D6A8]/15' : 'border-transparent')}
+                                >
+                                    <span className={dateStart ? 'text-[var(--text-primary)]' : 'text-gray-400 dark:text-gray-600'}>
+                                        {dateStart ? formatDisplayDate(dateStart) : 'Seleccionar'}
+                                    </span>
+                                </div>
+                                {activePicker === 'start' && (
+                                    <CalendarPopover
+                                        value={dateStart || ''}
+                                        onChange={(v) => onDateChange('dateStart', v)}
+                                        onClose={closePicker}
+                                        triggerRef={startRef}
+                                        rangeStart={null}
+                                        rangeEnd={dateEnd}
+                                    />
+                                )}
+                            </div>
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1">Fecha Fin</label>
+                            <div className="relative group">
+                                <Icon name="Calendar" className="absolute left-4 top-1/2 -translate-y-1/2 text-[#69BEEB] dark:text-[#66D6A8] group-focus-within:text-[#69BEEB] dark:group-focus-within:text-[#66D6A8] transition-colors text-lg pointer-events-none z-10" />
+                                <div
+                                    ref={endRef}
+                                    role="button"
+                                    tabIndex={0}
+                                    onClick={() => setActivePicker(activePicker === 'end' ? null : 'end')}
+                                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setActivePicker(activePicker === 'end' ? null : 'end'); }}
+                                    className={'w-full pl-12 pr-4 py-3 bg-[var(--bg-secondary)]/50 border-2 rounded-2xl transition-all font-bold text-[var(--text-primary)] cursor-pointer flex items-center ' + (activePicker === 'end' ? 'border-[#69BEEB] dark:border-[#66D6A8] ring-2 ring-[#69BEEB]/15 dark:ring-[#66D6A8]/15' : 'border-transparent')}
+                                >
+                                    <span className={dateEnd ? 'text-[var(--text-primary)]' : 'text-gray-400 dark:text-gray-600'}>
+                                        {dateEnd ? formatDisplayDate(dateEnd) : 'Seleccionar'}
+                                    </span>
+                                </div>
+                                {activePicker === 'end' && (
+                                    <CalendarPopover
+                                        value={dateEnd || ''}
+                                        onChange={(v) => onDateChange('dateEnd', v)}
+                                        onClose={closePicker}
+                                        triggerRef={endRef}
+                                        rangeStart={dateStart}
+                                        rangeEnd={null}
+                                    />
+                                )}
+
+                                {/* Export info hint — floating near date-end */}
+                                {showExportHint && (
+                                    <div className="absolute top-0 -translate-y-full -mt-2 z-50 animate-fadeIn translate-x-20">
+                                        <div className="bg-white dark:bg-[#182420] rounded-2xl shadow-lg border border-[#4EC7B8]/20 dark:border-[#4EC7B8]/10 px-4 py-2.5 flex items-center gap-2.5 whitespace-nowrap">
+                                            <Info className="w-4 h-4 text-[#66D6A8] shrink-0" />
+                                            <span className="text-xs font-semibold text-gray-600 dark:text-gray-300 leading-snug">
+                                                Las exportaciones reflejan los filtros aplicados.
+                                            </span>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
-                    <div className="space-y-2">
-                        <label htmlFor="date-end" className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1">Fecha Fin</label>
-                        <div className="relative">
-                            <Icon name="Calendar" className="absolute left-4 top-1/2 -translate-y-1/2 text-sky-500 text-lg" />
-                            <input
-                                id="date-end"
-                                type="date"
-                                value={dateEnd || ''}
-                                onChange={(e) => onDateChange('dateEnd', e.target.value)}
-                                className="w-full pl-12 pr-4 py-3 bg-[var(--bg-secondary)]/50 border-none rounded-2xl focus:ring-2 focus:ring-sky-500/20 transition-all font-bold text-[var(--text-primary)]"
-                            />
+
+                    <div className="flex items-end pb-0 sm:pb-0">
+                        <div className="flex bg-[var(--bg-secondary)]/40 rounded-2xl p-1 gap-0.5 border border-[var(--border-subtle)]/50">
+                            {ORDER_TYPE_OPTIONS.map(opt => {
+                                const isActive = orderType === opt.value;
+                                return (
+                                    <button
+                                        key={opt.label}
+                                        onClick={() => onOrderTypeChange(opt.value)}
+                                        className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all duration-200 whitespace-nowrap ${
+                                            isActive
+                                                ? 'bg-[var(--bg-card)] text-[#5AAFE6] shadow-sm border border-[#69BEEB]/20'
+                                                : 'text-[var(--text-secondary)]/60 hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)]/50'
+                                        }`}
+                                    >
+                                        <Icon name={opt.icon} className="w-3.5 h-3.5" />
+                                        {opt.label}
+                                    </button>
+                                );
+                            })}
                         </div>
                     </div>
                 </div>
 
-                <div className="flex gap-3 w-full lg:w-auto">
+                <div className="flex gap-3 w-full lg:w-auto shrink-0">
                     <button
                         onClick={onClear}
-                        className="p-3 bg-[var(--bg-secondary)] text-[var(--text-secondary)] rounded-2xl hover:bg-[var(--bg-danger)] hover:text-[var(--text-danger)] transition-all flex items-center justify-center min-w-[3rem]"
+                        className="p-3 bg-[var(--bg-secondary)] text-[var(--text-secondary)] rounded-2xl hover:bg-rose-500 hover:text-white transition-all flex items-center justify-center min-w-[3rem]"
                         title="Limpiar filtros"
                     >
                         <Icon name="Trash2" className="text-xl" />
@@ -56,14 +157,14 @@ export default function SalesFilters({ dateStart, dateEnd, onDateChange, onClear
                     <div className="flex gap-2">
                         <button
                             onClick={() => onExport('excel')}
-                            className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-[var(--bg-card)] text-[var(--text-primary)] font-bold text-xs border border-[var(--border-subtle)] hover:text-sky-600 transition-all shadow-sm"
+                            className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-[var(--bg-card)] text-[var(--text-primary)] font-bold text-xs border border-[var(--border-subtle)] hover:text-[#5AAFE6] hover:border-[#69BEEB]/30 transition-all shadow-sm"
                         >
                             <Icon name="FileSpreadsheet" className="text-xl" />
                             <span className="hidden sm:inline">Excel</span>
                         </button>
                         <button
                             onClick={() => onExport('pdf')}
-                            className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-[var(--bg-card)] text-[var(--text-primary)] font-bold text-xs border border-[var(--border-subtle)] hover:text-sky-600 transition-all shadow-sm"
+                            className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-[var(--bg-card)] text-[var(--text-primary)] font-bold text-xs border border-[var(--border-subtle)] hover:text-[#5AAFE6] hover:border-[#69BEEB]/30 transition-all shadow-sm"
                         >
                             <Icon name="FileText" className="text-xl" />
                             <span className="hidden sm:inline">PDF</span>

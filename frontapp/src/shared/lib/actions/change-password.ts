@@ -1,55 +1,70 @@
 'use server';
 
-import { cookies } from 'next/headers';
-import type { ChangePasswordPayload, ChangePasswordResult } from '@/features/auth/change-password/types';
+const LARAVEL_API_URL =
+  process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://localhost:8000/api';
 
-const API_BASE = process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://localhost:8000/api';
+interface ChangePasswordPayload {
+  current_password: string;
+  password: string;
+  password_confirmation: string;
+  token: string;
+}
+
+interface ChangePasswordResult {
+  success: boolean;
+  message: string;
+  errors?: Record<string, string[]>;
+}
 
 export async function changePasswordAction(
-  payload: ChangePasswordPayload,
+  data: ChangePasswordPayload,
 ): Promise<ChangePasswordResult> {
-  // ── Leer el token de sesión (Sanctum) ──────────────────────────────────────
-  const cookieStore = await cookies();
-  const token = cookieStore.get('laravel_token')?.value;
+  const { token, ...body } = data;
 
   if (!token) {
-    return { success: false, message: 'No autenticado. Por favor inicia sesión.' };
+    return {
+      success: false,
+      message: 'No autenticado. Por favor inicia sesión nuevamente.',
+    };
   }
 
   try {
-    const laravelPayload = {
-      actual: payload.current_password,
-      nueva: payload.password,
-    };
-
-    const res = await fetch(`${API_BASE}/users/profile/password`, {
+    const res = await fetch(`${LARAVEL_API_URL}/users/profile/password`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        Accept: 'application/json',
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(laravelPayload),
-      // No cachear respuestas de mutación
-      cache: 'no-store',
+      body: JSON.stringify(body),
     });
 
-    const data = await res.json();
+    const json = await res.json();
 
-    if (!res.ok) {
-      // Laravel devuelve 422 con { message, errors }
+    if (res.ok) {
       return {
-        success: false,
-        message: data.message ?? 'Error al actualizar la contraseña.',
-        errors: data.errors,
+        success: true,
+        message: json.message ?? 'Contraseña actualizada correctamente.',
       };
     }
 
-    return { success: true, message: data.message };
+    // 422 Unprocessable Entity → errores de validación de Laravel
+    if (res.status === 422) {
+      return {
+        success: false,
+        message: json.message ?? 'Error de validación.',
+        errors: json.errors,
+      };
+    }
+
+    // 401 u otros
+    return {
+      success: false,
+      message: json.message ?? 'Error al actualizar la contraseña.',
+    };
   } catch {
     return {
       success: false,
-      message: 'Error de conexión. Por favor intenta de nuevo.',
+      message: 'Error de conexión con el servidor.',
     };
   }
 }

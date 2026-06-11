@@ -57,7 +57,7 @@ function normalizeStatus(status: string | undefined): TicketStatus {
   return map[status || ''] || 'open';
 }
 
-function adaptMessage(msg: SellerMessage, ticketId: string): UnifiedMessage {
+function adaptMessage(msg: any, ticketId: string): UnifiedMessage {
   return {
     id: String(msg.id),
     ticketId,
@@ -67,7 +67,7 @@ function adaptMessage(msg: SellerMessage, ticketId: string): UnifiedMessage {
     content: msg.texto || '',
     timestamp: new Date(msg.timestamp || Date.now()),
     hour: msg.hora || '',
-    attachments: msg.attachments?.map((a) => ({
+    attachments: msg.attachments?.map((a: any) => ({
       id: a.url,
       url: a.url,
       name: a.name,
@@ -77,7 +77,7 @@ function adaptMessage(msg: SellerMessage, ticketId: string): UnifiedMessage {
   };
 }
 
-export function adaptSellerTicket(ticket: SellerTicket): UnifiedTicket {
+export function adaptSellerTicket(ticket: any): UnifiedTicket {
   return {
     id: String(ticket.id),
     displayId: ticket.id_display || String(ticket.id),
@@ -96,7 +96,7 @@ export function adaptSellerTicket(ticket: SellerTicket): UnifiedTicket {
     },
     createdAt: new Date(ticket.tiempo || Date.now()),
     updatedAt: new Date(ticket.tiempo || Date.now()),
-    messages: ticket.mensajes?.map((m) => adaptMessage(m, String(ticket.id))) || [],
+    messages: ticket.mensajes?.map((m: any) => adaptMessage(m, String(ticket.id))) || [],
     unreadCount: 0,
     surveyRequired: ticket.survey_required,
     satisfactionRating: ticket.satisfaction_rating,
@@ -107,6 +107,6 @@ export function adaptSellerTicket(ticket: SellerTicket): UnifiedTicket {
   };
 }
 
-export function adaptSellerTickets(tickets: SellerTicket[]): UnifiedTicket[] {
+export function adaptSellerTickets(tickets: any[]): UnifiedTicket[] {
   return tickets.map(adaptSellerTicket);
 }

@@ -1,24 +1,30 @@
 'use client';
 
 import { useState, useMemo, useCallback } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { productRepository } from '@/shared/lib/api/factory';
+import { useToast } from '@/shared/lib/context/ToastContext';
+import { Product } from '@/features/seller/catalog/types';
 import { InventoryItem, InventoryFilters, InventoryStats, StockStatus } from '../types';
 
-// Mock data — replace with real API call
-const MOCK_ITEMS: InventoryItem[] = [
-  { id: '1', sku: 'CAM-001', name: 'Cámara Mirrorless Sony A7 IV', category: 'Electrónica', stock: 0,  reserved: 0, price: 2499.00, updatedAt: new Date('2024-06-10') },
-  { id: '2', sku: 'AUD-012', name: 'Audífonos Sony WH-1000XM5',   category: 'Electrónica', stock: 2,  reserved: 1,  price: 349.99,  updatedAt: new Date('2024-06-11') },
-  { id: '3', sku: 'MOC-034', name: 'Mochila Osprey Farpoint 40',  category: 'Viaje',       stock: 3,  reserved: 0,  price: 129.00,  updatedAt: new Date('2024-06-09') },
-  { id: '4', sku: 'ZAP-078', name: 'Zapatillas Salomon XT-6',     category: 'Calzado',     stock: 14, reserved: 2,  price: 180.00,  updatedAt: new Date('2024-06-12') },
-  { id: '5', sku: 'LEN-002', name: 'Lente Canon RF 50mm f/1.2',   category: 'Fotografía',  stock: 1,  reserved: 1,  price: 2199.00, updatedAt: new Date('2024-06-08') },
-  { id: '6', sku: 'TAB-019', name: 'iPad Pro 12.9" M4',           category: 'Electrónica', stock: 7,  reserved: 3,  price: 1099.00, updatedAt: new Date('2024-06-13') },
-  { id: '7', sku: 'CHA-055', name: 'Chaqueta The North Face',     category: 'Ropa',        stock: 4,  reserved: 0,  price: 249.00,  updatedAt: new Date('2024-06-07') },
-  { id: '8', sku: 'TRI-003', name: 'Trípode Joby GorillaPod 3K',  category: 'Fotografía',  stock: 22, reserved: 1,  price: 79.99,   updatedAt: new Date('2024-06-14') },
-  { id: '9', sku: 'REL-041', name: 'Reloj Garmin Fenix 8',        category: 'Wearables',   stock: 0,  reserved: 0,  price: 899.00,  updatedAt: new Date('2024-06-06') },
-  { id: '10',sku: 'MAT-007', name: 'Matero Stanley Adventure',    category: 'Hogar',       stock: 45, reserved: 5,  price: 39.99,   updatedAt: new Date('2024-06-14') },
-];
+const PER_PAGE = 10;
+
+function productToInventoryItem(product: Product): InventoryItem {
+  return {
+    id: product.id,
+    sku: product.sku ?? product.id,
+    name: product.name,
+    category: product.categories?.[0]?.name ?? product.category,
+    stock: product.stock,
+    reserved: 0,
+    price: product.price,
+    imageUrl: product.image || undefined,
+    updatedAt: product.updatedAt ? new Date(product.updatedAt) : new Date(),
+  };
+}
 
 export function getStockStatus(item: InventoryItem): StockStatus {
-  const available = item.stock - item.reserved;
+  const available = item.stock - (item.reserved ?? 0);
   if (available <= 0)  return 'out';
   if (available <= 5)  return 'critical';
   if (available <= 9)  return 'low';
@@ -26,16 +32,29 @@ export function getStockStatus(item: InventoryItem): StockStatus {
 }
 
 export function useInventory() {
-  const [items, setItems] = useState<InventoryItem[]>(MOCK_ITEMS);
+  const queryClient = useQueryClient();
+  const { showToast } = useToast();
+  const [currentPage, setCurrentPage] = useState(1);
   const [filters, setFilters] = useState<InventoryFilters>({
     search: '',
     status: 'all',
     category: 'all',
   });
 
+  const { data: products = [], isLoading, error, refetch } = useQuery<Product[]>({
+    queryKey: ['seller', 'inventory'],
+    queryFn: async () => {
+      const result = await productRepository.getProducts();
+      return result ?? [];
+    },
+    staleTime: 10 * 60 * 1000,
+  });
+
+  const items = useMemo(() => products.map(productToInventoryItem), [products]);
+
   const categories = useMemo(() => {
     const set = new Set(items.map((i) => i.category));
-    return ['all', ...Array.from(set)];
+    return ['all', ...Array.from(set).sort()];
   }, [items]);
 
   const stats: InventoryStats = useMemo(() => {
@@ -58,20 +77,78 @@ export function useInventory() {
     });
   }, [items, filters]);
 
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
+  const safePage = Math.min(currentPage, totalPages);
+
+  const pagedItems = useMemo(
+    () => filtered.slice((safePage - 1) * PER_PAGE, safePage * PER_PAGE),
+    [filtered, safePage]
+  );
+
   const alerts = useMemo(
     () => items.filter((i) => ['low', 'critical', 'out'].includes(getStockStatus(i))),
     [items]
   );
 
-  const updateStock = useCallback((id: string, newStock: number) => {
-    setItems((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, stock: newStock, updatedAt: new Date() } : item))
-    );
-  }, []);
+  const updateStockMutation = useMutation({
+    mutationFn: async ({ id, stock }: { id: string; stock: number }) => {
+      await productRepository.updateStock(id, stock);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['seller', 'inventory'] });
+      showToast('Stock actualizado correctamente', 'success');
+    },
+    onError: () => {
+      queryClient.invalidateQueries({ queryKey: ['seller', 'inventory'] });
+      showToast('Error al actualizar stock. Los datos se han restaurado.', 'error');
+    },
+  });
+
+  const updateStock = useCallback(
+    (id: string, newStock: number) => {
+      queryClient.setQueryData<Product[]>(['seller', 'inventory'], (old) =>
+        old?.map((p) => (p.id === id ? { ...p, stock: newStock } : p)) ?? []
+      );
+      updateStockMutation.mutate({ id, stock: newStock });
+    },
+    [queryClient, updateStockMutation]
+  );
 
   const setFilter = useCallback(<K extends keyof InventoryFilters>(key: K, value: InventoryFilters[K]) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
+    setCurrentPage(1);
   }, []);
 
-  return { filtered, alerts, stats, filters, categories, setFilter, updateStock };
+  const goToPage = useCallback((page: number) => {
+    setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+  }, [totalPages]);
+
+  const nextPage = useCallback(() => {
+    setCurrentPage((p) => Math.min(p + 1, totalPages));
+  }, [totalPages]);
+
+  const prevPage = useCallback(() => {
+    setCurrentPage((p) => Math.max(1, p - 1));
+  }, []);
+
+  return {
+    items,
+    filtered,
+    pagedItems,
+    currentPage: safePage,
+    totalPages,
+    totalItems: filtered.length,
+    alerts,
+    stats,
+    filters,
+    categories,
+    isLoading,
+    error: error ? (error instanceof Error ? error.message : 'Error al cargar inventario') : null,
+    setFilter,
+    updateStock,
+    goToPage,
+    nextPage,
+    prevPage,
+    refetch,
+  };
 }

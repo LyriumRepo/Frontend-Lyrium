@@ -16,7 +16,7 @@ import { LaravelOrderRepository } from './laravel/LaravelOrderRepository';
 import { LaravelUserRepository } from './laravel/LaravelUserRepository';
 import { LaravelAuthRepository } from './laravel/LaravelAuthRepository';
 
-const API_MODE = process.env.NEXT_PUBLIC_API_MODE || 'wp';
+const API_MODE = process.env.NEXT_PUBLIC_API_MODE || 'laravel';
 
 export interface ApiFactory {
     homeRepository: IHomeRepository;

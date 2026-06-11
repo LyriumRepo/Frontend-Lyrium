@@ -10,13 +10,6 @@ export const adminNavigation: PanelNavigation = [
                 href: '/admin/sellers',
                 icon: 'Users',
             },
-
-            {
-                id: 'seller-requests',
-                label: 'Solicitudes de Registro',
-                href: '/admin/sellers/solicitudes',
-                icon: 'ClipboardList',
-            },
         ],
     },
     {
@@ -56,7 +49,7 @@ export const adminNavigation: PanelNavigation = [
     {
         title: 'Operaciones',
         items: [
-   
+
             {
                 id: 'operations',
                 label: 'Gestión Operativa',
@@ -66,20 +59,24 @@ export const adminNavigation: PanelNavigation = [
         ],
     },
     {
+        title: 'Seguridad',
+        items: [
+            {
+                id: 'security',
+                label: 'Seguridad',
+                href: '/admin/security',
+                icon: 'Shield',
+            },
+        ],
+    },
+    {
         title: 'Gestión',
         items: [
-       
             {
                 id: 'categories',
                 label: 'Gestión de Categorías',
                 href: '/admin/categories',
                 icon: 'FolderTree',
-            },
-            {
-                id: 'inventory',
-                label: 'Gestión de Inventario',
-                href: '/admin/inventory',
-                icon: 'Package',
             },
             {
                 id: 'reviews',
@@ -92,12 +89,6 @@ export const adminNavigation: PanelNavigation = [
                 label: 'Planes y Suscripciones',
                 href: '/admin/planes',
                 icon: 'Sparkles',
-            },
-            {
-                id: 'seguridad',
-                label: 'Seguridad',
-                href: '/admin/security',
-                icon: 'Shield',
             },
         ],
     },

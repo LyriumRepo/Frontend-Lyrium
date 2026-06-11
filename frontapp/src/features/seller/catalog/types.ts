@@ -7,18 +7,10 @@ export type ProductSticker =
   | 'nuevo'
   | 'bestseller'
   | 'envio_gratis'
-  | 'organic'
-  | 'natural'
-  | 'eco'
-  | 'premium'
-  | 'vegan'
   | null;
 
 export type ProductType = 'physical' | 'digital' | 'service';
 
-// ── Formato único de atributo (alineado con backend) ─────────────────────────
-// Backend espera: { values: { label: string, value: string } }
-// Nutritional:    { values: { label: string, value: string, daily_value?: string } }
 export interface AttributeValue {
   label: string;
   value: string;
@@ -31,27 +23,38 @@ export interface NutritionalAttributeValue {
 }
 
 export interface ProductAttribute {
-  values: AttributeValue;
+  name?: string;
+  values: string[];
 }
 
 export interface NutritionalAttribute {
   values: NutritionalAttributeValue;
 }
 
-// ── Producto completo ─────────────────────────────────────────────────────────
+export interface ProductFormData {
+  name: string;
+  description: string;
+  price: number;
+  stock: number;
+  category: string;
+  image: string;
+  discountPercentage?: number;
+}
+
 export interface Product {
   id: string;
   name: string;
   slug?: string;
+  sku?: string | null;
   type: ProductType;
-  category: string; // slug de categoría (para enviar al backend)
-  categories?: { name: string; slug: string }[]; // respuesta del backend
+  category: string;
+  categories?: { name: string; slug: string }[];
   price: number;
   regularPrice?: number;
   stock: number;
   description: string;
   short_description?: string | null;
-  image: string; // URL activa para UI
+  image: string;
   images?: {
     src: string;
     thumb?: string;
@@ -62,34 +65,24 @@ export interface Product {
   sticker: ProductSticker;
   discountPercentage?: number | null;
   status?: string;
-
-  // Physical
   weight?: number | null;
   dimensions?: string | null;
   expirationDate?: string | null;
-
-  // Digital
   downloadUrl?: string | null;
   downloadLimit?: number | null;
   fileType?: string | null;
   fileSize?: number | null;
-
-  // Service
   serviceDuration?: number | null;
   serviceModality?: string | null;
   serviceLocation?: string | null;
-
-  // Atributos
   mainAttributes: ProductAttribute[];
   additionalAttributes: ProductAttribute[];
   nutritionalAttributes?: NutritionalAttribute[];
-  servingNote?: string | null; // nota de porción para ficha nutricional
-
+  servingNote?: string | null;
   createdAt?: string;
   updatedAt?: string;
 }
 
-// ── Payload que se envía al backend ──────────────────────────────────────────
 export interface ProductPayload {
   type: ProductType;
   name: string;
@@ -101,26 +94,74 @@ export interface ProductPayload {
   image?: string | null;
   discountPercentage?: number | null;
   sticker?: ProductSticker;
-
-  // Physical
   weight?: number | null;
   dimensions?: string | null;
   expirationDate?: string | null;
-
-  // Digital
   downloadUrl?: string | null;
   downloadLimit?: number | null;
   fileType?: string | null;
   fileSize?: number | null;
-
-  // Service
   serviceDuration?: number | null;
   serviceModality?: string | null;
   serviceLocation?: string | null;
-
-  // Atributos — formato exacto que espera Laravel
   mainAttributes?: ProductAttribute[];
   additionalAttributes?: ProductAttribute[];
   nutritionalAttributes?: NutritionalAttribute[];
   servingNote?: string | null;
+}
+
+export interface UpdateProductInput {
+  name?: string;
+  description?: string;
+  price?: number;
+  stock?: number;
+  category?: string;
+  images?: string[];
+  mainAttributes?: { values: Record<string, string> }[];
+  additionalAttributes?: { values: Record<string, string> }[];
+}
+
+export interface CreateProductInput {
+  name: string;
+  description: string;
+  price: number;
+  stock: number;
+  category: string;
+  image: string;
+  mainAttributes?: { values: Record<string, string> }[];
+  additionalAttributes?: { values: Record<string, string> }[];
+}
+
+export interface EtiquetaDescuentoData { valor: number; inicio: string; fin: string | null; }
+export interface EtiquetaOfertaData    { valor: number; inicio: string; fin: string; }
+export interface EtiquetaEdicionData   { inicio: string; fin: string; }
+export interface EtiquetaPromocionData { productosIds: string[]; }
+export interface EtiquetaConfig {
+  nuevo: boolean;
+  descuento?:      EtiquetaDescuentoData;
+  oferta?:         EtiquetaOfertaData;
+  edicionLimitada?: EtiquetaEdicionData;
+  promocion?:      EtiquetaPromocionData;
+}
+
+export function etiquetasFromProduct(product: Product): EtiquetaConfig {
+  const stored = (product as any).etiquetas;
+  if (stored) return stored;
+
+  const today = new Date().toISOString().split('T')[0];
+  const nextMonth = new Date(); nextMonth.setMonth(nextMonth.getMonth() + 1);
+  const nextMonthStr = nextMonth.toISOString().split('T')[0];
+
+  switch (product.sticker) {
+    case 'nuevo':
+      return { nuevo: true };
+    case 'descuento':
+      return { nuevo: false, descuento: { valor: product.discountPercentage ?? 20, inicio: today, fin: null } };
+    case 'oferta':
+      return { nuevo: false, oferta: { valor: product.discountPercentage ?? 30, inicio: today, fin: nextMonthStr } };
+    case 'liquidacion':
+      return { nuevo: false, edicionLimitada: { inicio: today, fin: nextMonthStr } };
+    default:
+      return { nuevo: false };
+  }
 }

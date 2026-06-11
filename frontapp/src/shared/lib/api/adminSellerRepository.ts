@@ -184,7 +184,7 @@ export interface AdminProductItem {
   created_at: string;
   store?: { id: number; name: string; slug: string };
   categories?: Array<{ id: number; name: string }>;
-  image: string | null;
+  images: Array<{ src: string; thumb: string; medium: string; large: string; alt: string }>;
 }
 
 export interface AdminProductsResponse {
@@ -264,7 +264,7 @@ export const adminSellerRepository = {
     status: 'approved' | 'rejected' | 'pending_review',
     reason?: string,
   ): Promise<unknown> {
-    return apiFetch(`/admin/products/${id}/status`, {
+    return apiFetch(`/products/${id}/status`, {
       method: 'PUT',
       body: JSON.stringify({ status, reason }),
     });

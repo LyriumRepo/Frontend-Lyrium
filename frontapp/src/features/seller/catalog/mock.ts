@@ -12,8 +12,8 @@ export const MOCK_CATALOG_DATA: Product[] = [
         description: 'Aceite esencial 100% puro para relajación y aromaterapia.',
         image: 'https://images.unsplash.com/photo-1608248593801-18cb1f0b0cdd?w=300',
         sticker: 'bestseller',
-        mainAttributes: [{ values: { label: 'Volumen', value: '15ml' } }, { values: { label: 'Ingredientes', value: 'Lavandula angustifolia' } }],
-        additionalAttributes: [{ values: { label: 'Origen', value: 'Francia' } }],
+        mainAttributes: [{ name: 'Volumen', values: ['15ml'] }, { name: 'Ingredientes', values: ['Lavandula angustifolia'] }],
+        additionalAttributes: [{ name: 'Origen', values: ['Francia'] }],
         createdAt: '2026-02-15T10:00:00.000Z'
     },
     {
@@ -27,7 +27,7 @@ export const MOCK_CATALOG_DATA: Product[] = [
         description: 'Mezcla perfecta de almendras, nueces, pasas y castañas.',
         image: 'https://images.unsplash.com/photo-1599598425947-330026e95c1a?w=300',
         sticker: 'oferta',
-        mainAttributes: [{ values: { label: 'Peso Neto', value: '250g' } }],
+        mainAttributes: [{ name: 'Peso Neto', values: ['250g'] }],
         additionalAttributes: [],
         createdAt: '2026-02-16T11:00:00.000Z'
     },
@@ -42,8 +42,8 @@ export const MOCK_CATALOG_DATA: Product[] = [
         description: 'Suplemento de alta absorción para el sistema inmunológico.',
         image: 'https://images.unsplash.com/photo-1628771065518-0d82f1938462?w=300',
         sticker: 'nuevo',
-        mainAttributes: [{ values: { label: 'Dosis', value: '2 cápsulas/día' } }],
-        additionalAttributes: [{ values: { label: 'Presentación', value: '60 Cápsulas' } }],
+        mainAttributes: [{ name: 'Dosis', values: ['2 cápsulas/día'] }],
+        additionalAttributes: [{ name: 'Presentación', values: ['60 Cápsulas'] }],
         createdAt: '2026-02-17T09:30:00.000Z'
     }
 ];

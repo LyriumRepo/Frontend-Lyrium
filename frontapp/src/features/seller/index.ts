@@ -1,5 +1,4 @@
 export { CatalogPageClient } from './catalog';
-export type { ProductFormData } from './catalog';
 
 export { HelpPageClient } from './help';
 

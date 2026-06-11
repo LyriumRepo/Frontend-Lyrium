@@ -72,6 +72,7 @@ export interface LaravelProduct {
   rating: LaravelProductRating;
   created_at: string | null;
   updated_at: string | null;
+  image?: string | null;
 
   // Atributos desde API (ProductResource)
   mainAttributes: AttributeGroup[];

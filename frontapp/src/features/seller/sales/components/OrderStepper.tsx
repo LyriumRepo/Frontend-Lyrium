@@ -38,20 +38,9 @@ const FLOW_CONFIG: Record<TipoEnvio, { label: string; icon: string; color: strin
             { id: 5, label: 'Confirmado por cliente',    icon: 'UserCheck'   },
         ],
     },
-    sucursal: {
-        label: 'Recojo en Sucursal',
-        icon: 'Store',
-        color: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20',
-        steps: [
-            { id: 1, label: 'Validado por vendedor',       icon: 'CheckSquare' },
-            { id: 2, label: 'Despachado',     icon: 'Package'     },
-            { id: 3, label: 'Listo en Sucursal', icon: 'Store'       },
-            { id: 4, label: 'Confirmado por cliente',     icon: 'UserCheck'   },
-        ],
-    },
 };
 
-export default function OrderStepper({ currentStep, tipoEnvio }: OrderStepperProps) {
+export default function ProductOrderStepper({ currentStep, tipoEnvio }: OrderStepperProps) {
     const { label, icon, color, steps } = FLOW_CONFIG[tipoEnvio];
     const progress = Math.max(0, Math.min(100, ((currentStep - 1) / (steps.length - 1)) * 100));
 
@@ -86,15 +75,19 @@ export default function OrderStepper({ currentStep, tipoEnvio }: OrderStepperPro
                             style={{ width: `${100 / steps.length}%` }}
                         >
                             <div
-                                className={`w-[42px] h-[42px] bg-[var(--bg-card)] border-[4px] rounded-[15px] flex items-center justify-center transition-all duration-300 font-black shadow-sm
+                                className={`w-14 h-14 rounded-full border-[3px] overflow-hidden transition-all duration-700 shadow-sm flex-shrink-0 bg-white dark:bg-[var(--bg-card)] flex items-center justify-center
                                     ${isCompleted
-                                        ? 'border-emerald-500 text-emerald-500'
+                                        ? 'border-emerald-500 shadow-emerald-200 dark:shadow-emerald-900/30'
                                         : isActive
-                                            ? 'border-sky-500 bg-sky-500 text-white shadow-lg shadow-sky-500/20 -translate-y-1'
-                                            : 'border-[var(--border-subtle)] text-[var(--text-secondary)]'
+                                            ? 'border-sky-500 dark:border-[var(--brand-green)] shadow-lg shadow-sky-500/20 dark:shadow-lime-500/20 scale-110'
+                                            : 'border-gray-200 dark:border-[var(--border-subtle)] opacity-60'
                                     }`}
                             >
-                                <Icon name={step.icon} className="text-lg" />
+                                <img
+                                    src={`/imagenes-seguimiento/${step.id}.jpg`}
+                                    alt={`Paso ${step.id}`}
+                                    className="w-[90%] h-[90%] rounded-full object-cover"
+                                />
                             </div>
                             <span
                                 className={`mt-3 text-[8px] font-black uppercase tracking-wider text-center leading-tight transition-colors

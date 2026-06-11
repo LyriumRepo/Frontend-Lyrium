@@ -3,24 +3,28 @@
 import React, { useState } from 'react';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import DayActivityModal from './components/DayActivityModal';
+import DayEventListModal from './components/DayEventListModal';
 import Icon from '@/components/ui/Icon';
 import BaseLoading from '@/components/ui/BaseLoading';
 import { useAgenda, generateCalendarDays } from '@/features/seller/agenda/hooks/useAgenda';
+import type { AgendaFilterType } from '@/features/seller/agenda/types';
 
-interface AgendaPageClientProps {
-    // TODO Tarea 3: Recibir datos iniciales del Server Component
-}
-
-export function AgendaPageClient(_props: AgendaPageClientProps) {
-    const { events, currentMonth, isLoading, nextMonth, prevMonth } = useAgenda();
+export function AgendaPageClient() {
+    const { events, currentMonth, isLoading, filterType, setFilterType, nextMonth, prevMonth } = useAgenda();
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
 
     const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
     const monthDisplay = `${monthNames[currentMonth.getMonth()]} ${currentMonth.getFullYear()}`;
 
     const calendarCells = generateCalendarDays(currentMonth);
     const today = new Date();
+
+    const filterOptions: { value: AgendaFilterType; label: string; icon: string }[] = [
+        { value: 'all', label: 'Todos', icon: 'Calendar' },
+        { value: 'orders', label: 'Pedidos', icon: 'Package' },
+        { value: 'services', label: 'Servicios', icon: 'Clock' },
+    ];
 
     const headerActions = (
         <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md p-1.5 rounded-2xl border border-white/20">
@@ -55,25 +59,44 @@ export function AgendaPageClient(_props: AgendaPageClientProps) {
                 actions={headerActions}
             />
 
-            {/* Icon Legend */}
-            <div className="flex items-center gap-6 px-4 mb-2">
-                <div className="flex items-center gap-2 group">
-                    <div className="w-8 h-8 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500 border border-amber-500/20">
-                        <Icon name="Package" className="text-lg w-5 h-5 fill-current" />
+            {/* Icon Legend & Filter */}
+            <div className="flex items-center justify-between px-4 mb-2">
+                <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-2 group">
+                        <div className="w-8 h-8 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500 border border-amber-500/20">
+                            <Icon name="Package" className="text-lg w-5 h-5 fill-current" />
+                        </div>
+                        <span className="text-xs font-black text-[var(--text-secondary)] uppercase tracking-widest">Pedidos</span>
                     </div>
-                    <span className="text-xs font-black text-[var(--text-secondary)] uppercase tracking-widest">Pedidos</span>
+                    <div className="flex items-center gap-2 group">
+                        <div className="w-8 h-8 rounded-xl bg-sky-500/10 flex items-center justify-center text-sky-500 border border-sky-500/20">
+                            <Icon name="Clock" className="text-lg w-5 h-5 fill-current" />
+                        </div>
+                        <span className="text-xs font-black text-[var(--text-secondary)] uppercase tracking-widest">Servicios</span>
+                    </div>
                 </div>
-                <div className="flex items-center gap-2 group">
-                    <div className="w-8 h-8 rounded-xl bg-sky-500/10 flex items-center justify-center text-sky-500 border border-sky-500/20">
-                        <Icon name="Clock" className="text-lg w-5 h-5 fill-current" />
-                    </div>
-                    <span className="text-xs font-black text-[var(--text-secondary)] uppercase tracking-widest">Servicios</span>
+                {/* Filter Tabs */}
+                <div className="flex items-center gap-1 bg-[var(--bg-secondary)]/50 p-1 rounded-xl border border-[var(--border-subtle)]">
+                    {filterOptions.map(opt => (
+                        <button
+                            key={opt.value}
+                            onClick={() => setFilterType(opt.value)}
+                            className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5
+                                ${filterType === opt.value
+                                    ? 'bg-[var(--bg-card)] text-[var(--text-primary)] shadow-sm border border-[var(--border-subtle)]'
+                                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                                }`}
+                        >
+                            <Icon name={opt.icon} className="w-3 h-3" />
+                            {opt.label}
+                        </button>
+                    ))}
                 </div>
             </div>
 
             <div className="glass-card !p-0 overflow-hidden border-t-4 border-emerald-500/50 shadow-2xl shadow-emerald-500/10 rounded-[2.5rem] bg-[var(--bg-card)]">
                 <div className="grid grid-cols-7 bg-[var(--bg-secondary)]/50 border-b border-[var(--border-subtle)]">
-                    {['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map(dia => (
+                    {['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'].map(dia => (
                         <div key={dia} className="py-5 text-center text-xs font-black text-[var(--text-secondary)] uppercase tracking-widest">
                             {dia}
                         </div>
@@ -82,25 +105,25 @@ export function AgendaPageClient(_props: AgendaPageClientProps) {
 
                 <div className="grid grid-cols-7 divide-x divide-y divide-[var(--border-subtle)] min-h-[600px]">
                     {calendarCells.map((cell) => {
-                        const dateStr = cell.date.toISOString();
-                        const dayEvents = events.filter(e => e.date === dateStr.split('T')[0]);
+                        const dateStr = cell.date.toISOString().split('T')[0];
+                        const dayEvents = events.filter(e => e.date === dateStr);
                         const isToday = cell.date.toDateString() === today.toDateString();
 
                         return (
                             <div
                                 role="button"
                                 tabIndex={0}
-                                key={dateStr}
+                                key={`${dateStr}-${cell.day}`}
                                 onClick={() => {
                                     if (!cell.isOtherMonth) {
                                         setSelectedDate(cell.date);
-                                        setIsModalOpen(true);
+                                        setSelectedEventId(null);
                                     }
                                 }}
                                 onKeyDown={(e) => {
                                     if (!cell.isOtherMonth && (e.key === 'Enter' || e.key === ' ')) {
                                         setSelectedDate(cell.date);
-                                        setIsModalOpen(true);
+                                        setSelectedEventId(null);
                                     }
                                 }}
                                 className={`min-h-[140px] p-3 transition-all relative group
@@ -114,19 +137,38 @@ export function AgendaPageClient(_props: AgendaPageClientProps) {
                                 </span>
 
                                 <div className="space-y-1.5 mt-2">
-                                    {dayEvents.map(event => (
+                                    {dayEvents.slice(0, 2).map(event => (
                                         <div
                                             key={event.id}
-                                            className={`text-xs font-extrabold p-1.5 px-2 rounded-lg border-l-[3px] shadow-sm flex items-center gap-1.5 whitespace-nowrap overflow-hidden
+                                            role="button"
+                                            tabIndex={0}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setSelectedDate(cell.date);
+                                                setSelectedEventId(event.id);
+                                            }}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter' || e.key === ' ') {
+                                                    e.stopPropagation();
+                                                    setSelectedDate(cell.date);
+                                                    setSelectedEventId(event.id);
+                                                }
+                                            }}
+                                            className={`text-xs font-extrabold p-1.5 px-2 rounded-lg border-l-[3px] shadow-sm flex items-center gap-1.5 whitespace-nowrap overflow-hidden cursor-pointer
                                                 ${event.type === 'order'
-                                                    ? 'border-l-amber-500 bg-amber-500/10 text-amber-500'
-                                                    : 'border-l-sky-500 bg-sky-500/10 text-sky-500'}
+                                                    ? 'border-l-amber-500 bg-amber-500/10 text-amber-500 hover:bg-amber-500/20'
+                                                    : 'border-l-sky-500 bg-sky-500/10 text-sky-500 hover:bg-sky-500/20'}
                                             `}
                                         >
                                             <Icon name={event.type === 'order' ? 'Package' : 'Clock'} className="w-3 h-3 flex-shrink-0 fill-current" />
                                             <span className="truncate">{event.time} - {event.subtitle}</span>
                                         </div>
                                     ))}
+                                    {dayEvents.length > 2 && (
+                                        <div className="flex items-center justify-center gap-1 pt-1">
+                                            <span className="text-sm font-black tracking-[0.3em] text-[var(--text-secondary)]/60">···</span>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         );
@@ -134,11 +176,19 @@ export function AgendaPageClient(_props: AgendaPageClientProps) {
                 </div>
             </div>
 
-            <DayActivityModal
-                isOpen={isModalOpen}
+            <DayEventListModal
+                isOpen={selectedDate !== null}
                 date={selectedDate}
-                events={selectedDate ? events.filter(e => e.date === selectedDate.toISOString().split('T')[0]) : []}
-                onClose={() => setIsModalOpen(false)}
+                allEvents={events}
+                onClose={() => { setSelectedDate(null); setSelectedEventId(null); }}
+                onSelectEvent={(id) => setSelectedEventId(id)}
+            />
+
+            <DayActivityModal
+                isOpen={selectedEventId !== null}
+                eventId={selectedEventId}
+                allEvents={events}
+                onClose={() => setSelectedEventId(null)}
             />
         </div>
     );
