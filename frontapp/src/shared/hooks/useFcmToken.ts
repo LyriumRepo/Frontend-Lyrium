@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { getToken, deleteToken, onMessage, onNewToken } from 'firebase/messaging';
+import { getToken, deleteToken, onMessage } from 'firebase/messaging';
 import { getFirebaseMessaging } from '@/shared/lib/firebase/config';
 import { deviceApi } from '@/shared/lib/api/deviceRepository';
 import { useAuth } from '@/shared/lib/context/AuthContext';
@@ -149,25 +149,27 @@ export function useFcmToken() {
     if (permission !== 'granted') return;
     if (!isAuthenticated) return;
 
-    const messaging = getFirebaseMessaging();
-    const unsubscribe = onNewToken(messaging, async (newToken) => {
-      const oldToken = getStoredToken();
-      setFcmToken(newToken);
-      setStoredToken(newToken);
-
+    const checkTokenRefresh = async () => {
+      if (document.visibilityState !== 'visible') return;
       try {
-        if (oldToken && oldToken !== newToken) {
-          await deviceApi.unregister(oldToken);
-        }
-        await deviceApi.register(newToken, 'web', navigator.userAgent);
-      } catch (err) {
-        console.error('[useFcmToken] Token refresh registration error:', err);
+        const messaging = getFirebaseMessaging();
+        const newToken = await getToken(messaging, {
+          vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
+        });
+        if (!newToken) return;
+        const oldToken = getStoredToken();
+        if (oldToken === newToken) return;
+        setFcmToken(newToken);
+        setStoredToken(newToken);
+        if (oldToken) await deviceApi.unregister(oldToken).catch(() => {});
+        await deviceApi.register(newToken, 'web', navigator.userAgent).catch(() => {});
+      } catch {
+        // token refresh check failed silently
       }
-    });
-
-    return () => {
-      unsubscribe();
     };
+
+    document.addEventListener('visibilitychange', checkTokenRefresh);
+    return () => document.removeEventListener('visibilitychange', checkTokenRefresh);
   }, [permission, isAuthenticated]);
 
   const prevAuthRef = useRef(isAuthenticated);
