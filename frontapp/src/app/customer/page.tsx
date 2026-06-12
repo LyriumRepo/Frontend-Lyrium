@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
 
 export default function CustomerPage() {
-    redirect('/customer/chat');
+  return redirect('/customer/profile');
 }

@@ -18,7 +18,7 @@ export const PaymentModal: React.FC<{
             <div className="bg-[var(--bg-card)] w-full max-w-2xl rounded-[2.5rem] shadow-2xl relative overflow-hidden animate-modalIn flex flex-col font-industrial max-h-[90vh]">
                 <div className="px-8 py-6 border-b border-[var(--border-subtle)] flex justify-between items-center bg-[var(--bg-secondary)]/50 flex-shrink-0">
                     <div className="flex items-center gap-4">
-                        <div className="p-3 bg-[var(--bg-card)] border border-emerald-500/20 rounded-2xl shadow-sm text-emerald-500">
+                        <div className="p-3 bg-[var(--bg-card)] border border-[var(--color-success)]/20 rounded-2xl shadow-sm text-[var(--color-success)]">
                             <DollarSign className="w-6 h-6" />
                         </div>
                         <div className="flex-1">
@@ -34,23 +34,23 @@ export const PaymentModal: React.FC<{
                         <div>
                             <p className="text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-widest mb-1">Cliente Responsable</p>
                             <p className="text-sm font-black text-[var(--text-primary)] uppercase leading-none">{p.customer.name}</p>
-                            <p className="text-[10px] text-indigo-500 font-black mt-1 uppercase">DNI/RUC: {p.customer.taxId || '----'}</p>
+                            <p className="text-[10px] text-[var(--color-info)] font-black mt-1 uppercase">DNI/RUC: {p.customer.taxId || '----'}</p>
                         </div>
                         <div>
                             <p className="text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-widest mb-1 mt-4">Monto Reportado</p>
-                            <p className="text-3xl font-black text-emerald-500 uppercase tracking-tighter">S/ {p.amount.amount.toLocaleString()}</p>
+                            <p className="text-3xl font-black text-[var(--color-success)] uppercase tracking-tighter">S/ {p.amount.amount.toLocaleString()}</p>
                         </div>
 
                         {p.voucherUrl ? (
-                            <div className="p-4 bg-[var(--bg-secondary)] rounded-2xl border border-[var(--border-subtle)] mt-6 cursor-pointer hover:bg-emerald-500/10 transition-colors group">
+                            <div className="p-4 bg-[var(--bg-secondary)] rounded-2xl border border-[var(--border-subtle)] mt-6 cursor-pointer hover:bg-[var(--color-success)]/10 transition-colors group">
                                 <p className="text-[8px] font-black text-[var(--text-muted)] uppercase mb-2">Comprobante de Pago Subido</p>
                                 <p className="text-[10px] font-bold text-[var(--text-primary)] flex items-center gap-2 uppercase">
-                                    <LinkIcon className="w-4 h-4 text-emerald-500 group-hover:text-emerald-400" />
+                                    <LinkIcon className="w-4 h-4 text-[var(--color-success)] group-hover:text-[var(--color-success)]/80" />
                                     <span>{p.voucherUrl.split('/').pop()}</span>
                                 </p>
                             </div>
                         ) : (
-                            <div className="p-4 bg-red-500/10 text-red-500 rounded-2xl border border-red-500/20 font-bold text-xs flex items-center gap-2">
+                            <div className="p-4 bg-[var(--color-error)]/10 text-[var(--color-error)] rounded-2xl border border-[var(--color-error)]/20 font-bold text-xs flex items-center gap-2">
                                 <AlertOctagon className="w-6 h-6" /> Voucher no adjuntado
                             </div>
                         )}
@@ -68,7 +68,7 @@ export const PaymentModal: React.FC<{
 
                         {p.status === CashInStatus.PENDING_VALIDATION && (
                             <div className="space-y-3 mt-4 flex flex-col pt-4 border-t border-[var(--border-subtle)]">
-                                <p className="text-[9px] font-black text-amber-500 uppercase tracking-widest text-center animate-pulse mb-2"> Requiere Auditoría Humana/Bancaria</p>
+                                <p className="text-[9px] font-black text-[var(--color-warning)] uppercase tracking-widest text-center animate-pulse mb-2"> Requiere Auditoría Humana/Bancaria</p>
                                 <BaseButton
                                     onClick={() => onProcessIn(p.id, 'VALIDATE')}
                                     variant="secondary"
@@ -76,7 +76,7 @@ export const PaymentModal: React.FC<{
                                     size="md"
                                     fullWidth
                                 >
-                                    Validar y Emitir Rapifac
+                                    Validar y Emitir NubeFact
                                 </BaseButton>
                                 <BaseButton
                                     onClick={() => onProcessIn(p.id, 'REJECT')}
@@ -90,7 +90,7 @@ export const PaymentModal: React.FC<{
                             </div>
                         )}
                         {p.status === CashInStatus.VALIDATED && (
-                            <div className="mt-4 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl text-emerald-500 font-bold text-[10px] uppercase text-center flex flex-col items-center">
+                            <div className="mt-4 p-4 bg-[var(--color-success)]/10 border border-[var(--color-success)]/20 rounded-2xl text-[var(--color-success)] font-bold text-[10px] uppercase text-center flex flex-col items-center">
                                 <ShieldCheck className="w-8 h-8 mb-2 opacity-80" /> Validado Sistemáticamente
                             </div>
                         )}
@@ -107,7 +107,7 @@ export const PaymentModal: React.FC<{
             <div className="bg-[var(--bg-card)] w-full max-w-2xl rounded-[2.5rem] shadow-2xl relative overflow-hidden animate-modalIn flex flex-col font-industrial max-h-[90vh]">
                 <div className="px-8 py-6 border-b border-[var(--border-subtle)] flex justify-between items-center bg-[var(--bg-secondary)]/50 flex-shrink-0">
                     <div className="flex items-center gap-4">
-                        <div className="p-3 bg-[var(--bg-card)] border border-indigo-500/20 rounded-2xl shadow-sm text-indigo-500">
+                        <div className="p-3 bg-[var(--bg-card)] border border-[var(--color-info)]/20 rounded-2xl shadow-sm text-[var(--color-info)]">
                             <Wallet className="w-6 h-6" />
                         </div>
                         <div className="flex-1">
@@ -123,7 +123,7 @@ export const PaymentModal: React.FC<{
                         <div>
                             <p className="text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-widest mb-1">Vendedor Beneficiario</p>
                             <p className="text-sm font-black text-[var(--text-primary)] uppercase leading-none">{p.seller.name}</p>
-                            <p className="text-[10px] text-indigo-500 font-black mt-1 uppercase">Banco: {p.seller.bankName}</p>
+                            <p className="text-[10px] text-[var(--color-info)] font-black mt-1 uppercase">Banco: {p.seller.bankName}</p>
                             <span className="px-2 py-0.5 bg-[var(--bg-secondary)] text-[var(--text-muted)] text-[9px] font-black rounded uppercase block mt-2 text-center border border-[var(--border-subtle)]">
                                 CTA: {p.seller.accountNumber} <br /> CCI: {p.seller.cci || 'NA'}
                             </span>
@@ -140,7 +140,7 @@ export const PaymentModal: React.FC<{
                                 </p>
                                 <p className="text-[10px] font-black text-[var(--text-muted)] uppercase flex justify-between items-end">
                                     <span>Fee Lyrium (Retención):</span>
-                                    <span className="text-sm text-emerald-500">- S/ {p.commission.amount.toLocaleString()}</span>
+                                    <span className="text-sm text-[var(--color-success)]">- S/ {p.commission.amount.toLocaleString()}</span>
                                 </p>
                                 <div className="border-t border-dashed border-[var(--border-subtle)] my-2 pt-2"></div>
                                 <p className="text-[10px] font-black justify-between items-end flex uppercase">
@@ -153,34 +153,34 @@ export const PaymentModal: React.FC<{
                 </div>
 
                 {p.status === CashOutStatus.SCHEDULED && (
-                    <div className="px-8 py-5 bg-indigo-500/10 border-t border-indigo-500/20 flex gap-4">
+                    <div className="px-8 py-5 bg-[var(--color-info)]/10 border-t border-[var(--color-info)]/20 flex gap-4">
                         <button
                             onClick={() => onProcessOut(p.id, 'PAY')}
-                            className="flex-1 py-3 bg-sky-500 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-sky-600 transition-all flex items-center justify-center gap-2"
+                            className="flex-1 py-3 bg-[var(--brand-sky)] hover:bg-[var(--brand-sky)]/90 dark:bg-[var(--brand-green)] dark:hover:bg-[var(--brand-green-hover)] text-white rounded-xl font-black text-xs uppercase tracking-widest shadow-xl shadow-[var(--brand-sky)]/10 dark:shadow-[var(--brand-green)]/10 transition-all flex items-center justify-center gap-2"
                         >
                             <Wallet className="w-4 h-4" /> Desembolsar Manualmente
                         </button>
                         <button
                             onClick={() => onProcessOut(p.id, 'FAIL')}
-                            className="px-6 py-3 bg-[var(--bg-card)] border border-red-500/20 text-red-500 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-red-500/10 transition-all flex items-center justify-center gap-2"
+                            className="px-6 py-3 bg-[var(--bg-card)] border border-[var(--color-error)]/20 text-[var(--color-error)] rounded-xl font-black text-xs uppercase tracking-widest hover:bg-[var(--color-error)]/10 transition-all flex items-center justify-center gap-2"
                         >
                             <XCircle className="w-4 h-4" /> Suspender
                         </button>
                     </div>
                 )}
                 {p.status === CashOutStatus.PAID && (
-                    <div className="px-8 py-4 bg-emerald-500/10 border-t border-emerald-500/20 text-emerald-500 font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2">
+                    <div className="px-8 py-4 bg-[var(--color-success)]/10 border-t border-[var(--color-success)]/20 text-[var(--color-success)] font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2">
                         <CheckCircle2 className="w-5 h-5" /> Pagado y Conciliado
                     </div>
                 )}
                 {p.status === CashOutStatus.DISPUTED && (
-                    <div className="px-8 py-4 bg-red-500/10 border-t border-red-500/20 flex flex-col items-center">
-                        <p className="text-red-500 font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 animate-pulse mb-3">
+                    <div className="px-8 py-4 bg-[var(--color-error)]/10 border-t border-[var(--color-error)]/20 flex flex-col items-center">
+                        <p className="text-[var(--color-error)] font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 animate-pulse mb-3">
                             <AlertTriangle className="w-5 h-5" /> Disputa Abierta por el Vendedor
                         </p>
                         <button
                             onClick={() => onProcessOut(p.id, 'PAY')}
-                            className="px-6 py-3 bg-[var(--bg-card)] border border-red-500/20 text-red-500 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-red-500/10 transition-all w-full flex justify-center gap-2"
+                            className="px-6 py-3 bg-[var(--bg-card)] border border-[var(--color-error)]/20 text-[var(--color-error)] rounded-xl font-black text-xs uppercase tracking-widest hover:bg-[var(--color-error)]/10 transition-all w-full flex justify-center gap-2"
                         >
                             <CheckCircle className="w-4 h-4" /> Resolver a favor y Forzar Pago
                         </button>

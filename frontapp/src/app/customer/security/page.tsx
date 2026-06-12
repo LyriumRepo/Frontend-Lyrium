@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { useEffect } from "react";
-import { useAuth } from "@/shared/lib/context/AuthContext";
-import { useRouter } from "next/navigation";
-import Icon from "@/components/ui/Icon";
-import { ChangePasswordForm } from "@/features/auth/change-password";
+import { useEffect } from 'react';
+import { useAuth } from '@/shared/lib/context/AuthContext';
+import { useRouter } from 'next/navigation';
+import Icon from '@/components/ui/Icon';
+import { ChangePasswordForm } from '@/features/auth/change-password';
 
 // ─── Mock data (reemplaza con fetch real si necesitas sesiones del backend) ───
 
@@ -20,18 +20,18 @@ interface Session {
 const mockSessions: Session[] = [
   {
     id: 1,
-    dispositivo: "Windows",
-    navegador: "Chrome",
-    ubicacion: "Lima, PE",
-    tiempo: "Sesión actual",
+    dispositivo: 'Windows',
+    navegador: 'Chrome',
+    ubicacion: 'Lima, PE',
+    tiempo: 'Sesión actual',
     actual: true,
   },
   {
     id: 2,
-    dispositivo: "iPhone 13",
-    navegador: "Safari",
-    ubicacion: "Lima, PE",
-    tiempo: "Hace 2 horas",
+    dispositivo: 'iPhone 13',
+    navegador: 'Safari',
+    ubicacion: 'Lima, PE',
+    tiempo: 'Hace 2 horas',
     actual: false,
   },
 ];
@@ -44,7 +44,7 @@ export default function CustomerSecurityPage() {
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
-      router.push("/login");
+      router.push('/login');
     }
   }, [loading, isAuthenticated, router]);
 
@@ -107,7 +107,7 @@ export default function CustomerSecurityPage() {
           </div>
         </div>
 
-        {/* ── Columna lateral: Tips + Sesiones ────────────────────────────── */}
+        {/* ── Columna lateral: Tips de seguridad ───────────────────────── */}
         <div className="lg:col-span-4 space-y-8">
           <div className="bg-white dark:bg-[var(--bg-secondary)] p-8 rounded-[2.5rem] shadow-2xl">
             {/* Tips header */}
@@ -129,22 +129,22 @@ export default function CustomerSecurityPage() {
             <ul className="space-y-4">
               {[
                 {
-                  icon: "Shield",
-                  color: "text-sky-500",
-                  title: "Usa una contraseña única",
-                  desc: "No reutilices contraseñas de otras cuentas.",
+                  icon: 'Shield',
+                  color: 'text-sky-500',
+                  title: 'Usa una contraseña única',
+                  desc: 'No reutilices contraseñas de otras cuentas.',
                 },
                 {
-                  icon: "RotateCcw",
-                  color: "text-sky-500",
-                  title: "Cambia regularmente",
-                  desc: "Recomendamos cada 3 a 6 meses.",
+                  icon: 'RotateCcw',
+                  color: 'text-sky-500',
+                  title: 'Cambia regularmente',
+                  desc: 'Recomendamos cada 3 a 6 meses.',
                 },
                 {
-                  icon: "AlertTriangle",
-                  color: "text-orange-500",
-                  title: "Nunca la compartas",
-                  desc: "Lyrium nunca te pedirá tu contraseña.",
+                  icon: 'AlertTriangle',
+                  color: 'text-orange-500',
+                  title: 'Nunca la compartas',
+                  desc: 'Lyrium nunca te pedirá tu contraseña.',
                 },
               ].map((tip) => (
                 <li
@@ -180,7 +180,7 @@ export default function CustomerSecurityPage() {
                   >
                     <div className="flex items-center gap-3">
                       <Icon
-                        name={session.actual ? "Monitor" : "Smartphone"}
+                        name={session.actual ? 'Monitor' : 'Smartphone'}
                         className="w-5 h-5 text-gray-400"
                       />
                       <div>
@@ -190,8 +190,8 @@ export default function CustomerSecurityPage() {
                         <p
                           className={`text-[10px] ${
                             session.actual
-                              ? "text-green-500 font-bold"
-                              : "text-gray-400 dark:text-gray-400"
+                              ? 'text-green-500 font-bold'
+                              : 'text-gray-400 dark:text-gray-400'
                           }`}
                         >
                           {session.tiempo}

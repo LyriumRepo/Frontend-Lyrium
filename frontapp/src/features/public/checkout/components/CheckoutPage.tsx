@@ -1,18 +1,8 @@
-/**
- * CheckoutPage.tsx - VERSIÓN ACTUALIZADA
- * ARCHIVO: src/features/public/checkout/components/CheckoutPage.tsx
- *
- * CAMBIOS vs versión anterior:
- *  - Llama a useCheckoutSubmit() al montar → carga el carrito real del backend
- *  - Muestra error si falla la carga
- *  - El resto del comportamiento es idéntico
- */
-
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useCheckoutStore } from '@/store/checkoutStore';
-import { useCheckoutSubmit } from '../hooks/useCheckoutSubmit';
+import { useCartLoader } from '../hooks/useCartLoader';
 import CheckoutStepBar from './CheckoutStepBar';
 import CheckoutHeader from './CheckoutHeader';
 import CartItemList from './step1/CartItemList';
@@ -22,6 +12,7 @@ import ShippingForm from './step2/ShippingForm';
 import BillingInfo from './step2/BillingInfo';
 import OrderSummary from './step2/OrderSummary';
 import OrderConfirmation from './step3/OrderConfirmation';
+import BoletaView from './step4/BoletaView';
 import ModalPostCompra from './modals/ModalPostCompra';
 import ModalRegistroUsuario from './modals/ModalRegistroUsuario';
 
@@ -30,26 +21,42 @@ export default function CheckoutPage() {
   const setStep = useCheckoutStore((s) => s.setStep);
   const orderResult = useCheckoutStore((s) => s.orderResult);
   const isProcessing = useCheckoutStore((s) => s.isProcessing);
+  const reset = useCheckoutStore((s) => s.reset);
+  const cartError = useCheckoutStore((s) => s.cartError);
+  const clearCartError = useCheckoutStore((s) => s.setCartError);
+  const cartItems = useCheckoutStore((s) => s.cartItems);
 
-  // ← NUEVO: inicializa el hook que carga el carrito del backend al montar
-  const { isLoading, error, clearError } = useCheckoutSubmit();
+  const clearError = useCallback(() => clearCartError(null), [clearCartError]);
+
+  // Carga carrito + service holds al montar (una sola vez)
+  useCartLoader();
 
   const [showPostCompra, setShowPostCompra] = useState(false);
   const [showRegistro, setShowRegistro] = useState(false);
+  const dismissedRef = useRef(false);
+
+  // Reset checkout state on mount so we always start at step 1
+  useEffect(() => { reset(); }, [reset]);
 
   useEffect(() => {
-    if (currentStep === 3) {
+    if (currentStep === 3 && !dismissedRef.current) {
       setShowPostCompra(true);
     }
   }, [currentStep]);
+
+  const handleClosePostCompra = useCallback(() => {
+    dismissedRef.current = true;
+    setShowPostCompra(false);
+  }, []);
 
   const email = orderResult?.email ?? '';
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#0A0F0D] antialiased">
       <div className="min-h-screen bg-white dark:bg-[var(--bg-primary)]">
-        {/* Sticky header */}
+        {/* Sticky top bar — logo + compact step circles */}
         <div
+          id="checkout-top-wrapper"
           className="sticky top-0 z-[10000] bg-white dark:bg-[var(--bg-secondary)]
           border-b border-gray-100 dark:border-[var(--border-subtle)]
           shadow-[0_1px_4px_rgba(0,0,0,0.06)] dark:shadow-none"
@@ -57,17 +64,18 @@ export default function CheckoutPage() {
           <CheckoutStepBar />
         </div>
 
+        {/* Dynamic header — gradient with step title */}
         <CheckoutHeader />
 
         {/* Error de carga del carrito */}
-        {error && (
+        {cartError && (
           <div className="max-w-6xl mx-auto px-4 pt-4">
             <div
               className="flex items-center justify-between gap-4 bg-red-50 dark:bg-red-950/30
               border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400
               rounded-2xl px-5 py-3 text-sm"
             >
-              <span>⚠️ {error}</span>
+              <span>⚠️ {cartError}</span>
               <button
                 onClick={clearError}
                 className="text-red-500 hover:text-red-700 font-medium"
@@ -80,6 +88,7 @@ export default function CheckoutPage() {
 
         {/* Contenido principal */}
         <div
+          id="checkout-main-content"
           className={`transition-all duration-700 ${isProcessing ? 'blur-sm pointer-events-none' : ''}`}
         >
           <div className="max-w-6xl mx-auto px-4 pt-6 pb-8">
@@ -87,11 +96,9 @@ export default function CheckoutPage() {
             {currentStep === 1 && (
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2">
-                  {/* CartItemList ya lee del checkoutStore que useCheckoutSubmit pobló */}
                   <CartItemList />
                 </div>
                 <div className="lg:col-span-1">
-                  {/* CartSummary muestra el resumen y el botón para avanzar */}
                   <CartSummary onContinue={() => setStep(2)} />
                 </div>
               </div>
@@ -100,9 +107,17 @@ export default function CheckoutPage() {
             {/* PASO 2 */}
             {currentStep === 2 && (
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2 space-y-6">
-                  <PersonalDataForm />
-                  <ShippingForm />
+                <div className="lg:col-span-2 space-y-8">
+                  <div className="relative">
+                    <PersonalDataForm />
+                    <div className="absolute -bottom-5 left-6 right-6 h-px bg-gradient-to-r from-transparent via-gray-200 dark:via-[var(--border-subtle)] to-transparent" />
+                  </div>
+                  {cartItems.some((i) => i.id > 0) && (
+                    <div className="relative">
+                      <ShippingForm />
+                      <div className="absolute -bottom-5 left-6 right-6 h-px bg-gradient-to-r from-transparent via-gray-200 dark:via-[var(--border-subtle)] to-transparent" />
+                    </div>
+                  )}
                   <BillingInfo />
                 </div>
                 <div className="lg:col-span-1">
@@ -113,6 +128,9 @@ export default function CheckoutPage() {
 
             {/* PASO 3 */}
             {currentStep === 3 && <OrderConfirmation />}
+
+            {/* PASO 4 — Boleta */}
+            {currentStep === 4 && <BoletaView />}
           </div>
         </div>
 
@@ -158,9 +176,10 @@ export default function CheckoutPage() {
       <ModalPostCompra
         isOpen={showPostCompra}
         email={email}
-        onClose={() => setShowPostCompra(false)}
+        onClose={handleClosePostCompra}
         onSync={() => {}}
         onOpenRegistro={() => {
+          dismissedRef.current = true;
           setShowPostCompra(false);
           setShowRegistro(true);
         }}

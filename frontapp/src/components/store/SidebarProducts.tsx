@@ -3,8 +3,9 @@
 import { useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ChevronLeft, ChevronRight, Star, Heart } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Star, Heart, ShoppingCart } from 'lucide-react';
 import { Producto } from '@/types/public';
+import { useCarritoStore } from '@/store/carritoStore';
 
 interface SidebarProductsProps {
   productos: Producto[];
@@ -33,6 +34,15 @@ const categoriaColors: Record<string, string> = {
 
 export default function SidebarProducts({ productos, titulo = 'Artículos de tendencia' }: SidebarProductsProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const addToCart = useCarritoStore((s) => s.addToCart);
+  const openCart = useCarritoStore((s) => s.openCart);
+
+  const handleAddToCart = (e: React.MouseEvent, producto: Producto) => {
+    e.preventDefault();
+    e.stopPropagation();
+    addToCart(producto);
+    openCart();
+  };
 
   const productosVisibles = productos.slice(0, 4);
 
@@ -107,12 +117,13 @@ export default function SidebarProducts({ productos, titulo = 'Artículos de ten
                   </span>
                 )}
                 
-                {/* Botón favorito */}
+                {/* Botón añadir */}
                 <button 
-                  className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-white/80 dark:bg-[var(--bg-card)]/80 backdrop-blur-sm rounded-full text-gray-400 hover:text-red-500 hover:bg-white dark:hover:bg-[var(--bg-card)] transition-all opacity-0 group-hover:opacity-100"
-                  onClick={(e) => e.preventDefault()}
+                  onClick={(e) => handleAddToCart(e, producto)}
+                  className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-sky-500 rounded-full text-white hover:bg-sky-600 transition-all opacity-0 group-hover:opacity-100 shadow-lg"
+                  title="Añadir al carrito"
                 >
-                  <Heart className="w-3.5 h-3.5" />
+                  <ShoppingCart className="w-3.5 h-3.5" />
                 </button>
               </div>
               

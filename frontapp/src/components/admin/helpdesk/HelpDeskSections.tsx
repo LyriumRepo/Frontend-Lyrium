@@ -22,7 +22,7 @@ export const FAQView: React.FC<FAQViewProps> = ({ articles, onCreateClick, onSea
                         type="text"
                         placeholder="¿Qué estás buscando? (Ej: Pagos, Logística...)"
                         onChange={(e) => onSearchChange(e.target.value)}
-                        className="w-full pl-12 pr-6 py-4 bg-[var(--bg-input)] border-none rounded-2xl text-sm font-medium focus:ring-2 focus:ring-sky-500/20 font-industrial"
+                        className="w-full pl-12 pr-6 py-4 bg-[var(--bg-input)] border-none rounded-2xl text-sm font-medium focus:ring-2 focus:ring-[var(--turquesa-500)]/20 font-industrial"
                     />
                 </div>
                 <BaseButton
@@ -36,10 +36,10 @@ export const FAQView: React.FC<FAQViewProps> = ({ articles, onCreateClick, onSea
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {articles.map(f => (
-                    <div key={f.id} className={`${glassCardClass} p-6 flex flex-col justify-between hover:border-sky-500/50 transition-all cursor-pointer group`}>
+                    <div key={f.id} className={`${glassCardClass} p-6 flex flex-col justify-between hover:border-[var(--turquesa-500)]/50 transition-all cursor-pointer group`}>
                         <div>
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-[8px] font-extrabold uppercase tracking-wider bg-sky-100 text-sky-600 mb-4 font-industrial">{f.categoria}</span>
-                            <h4 className="text-base font-black text-[var(--text-primary)] tracking-tight mb-2 group-hover:text-sky-600 transition-colors font-industrial uppercase">{f.titulo}</h4>
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-[8px] font-extrabold uppercase tracking-wider bg-[var(--turquesa-500)]/10 text-[var(--turquesa-500)] mb-4 font-industrial">{f.categoria}</span>
+                            <h4 className="text-base font-black text-[var(--text-primary)] tracking-tight mb-2 group-hover:text-[var(--turquesa-500)] transition-colors font-industrial uppercase">{f.titulo}</h4>
                             <p className="text-xs text-[var(--text-secondary)] font-medium line-clamp-2 font-industrial">{f.contenido}</p>
                         </div>
                         <div className="pt-6 mt-6 border-t border-[var(--border-subtle)] flex justify-between items-center">
@@ -49,7 +49,7 @@ export const FAQView: React.FC<FAQViewProps> = ({ articles, onCreateClick, onSea
                             </div>
                             <button
                                 onClick={() => onDetailClick(f.id)}
-                                className="text-[10px] font-black text-sky-500 uppercase tracking-widest font-industrial"
+                                className="text-[10px] font-black text-[var(--turquesa-500)] uppercase tracking-widest font-industrial"
                             >
                                 Leer más
                             </button>
@@ -73,9 +73,9 @@ export const AuditTable: React.FC<AuditTableProps> = ({ entries, filters, onFilt
         const map = {
             'Escalamiento': 'bg-amber-100 text-amber-600',
             'Cierre': 'bg-red-100 text-red-600',
-            'Respuesta': 'bg-sky-100 text-sky-600',
-            'Asignación': 'bg-blue-100 text-blue-600',
-            'Cambio Prioridad': 'bg-purple-100 text-purple-600'
+            'Respuesta': 'bg-[var(--turquesa-500)]/10 text-[var(--turquesa-500)]',
+            'Asignación': 'bg-[var(--icons-green)]/10 text-[var(--icons-green)]',
+            'Cambio Prioridad': 'bg-amber-100 text-amber-600'
         };
         return map[action] || 'bg-gray-100 text-gray-600';
     };
@@ -84,7 +84,7 @@ export const AuditTable: React.FC<AuditTableProps> = ({ entries, filters, onFilt
         <div className="animate-fadeIn">
             <div className={`${glassCardClass} p-8 mb-8`}>
                 <h3 className="text-xl font-black text-[var(--text-primary)] mb-6 flex items-center gap-3 font-industrial uppercase">
-                    <ShieldCheck className="w-6 h-6 text-sky-500" /> Log de Transacciones Inmutables
+                    <ShieldCheck className="w-6 h-6 text-[var(--turquesa-500)]" /> Log de Transacciones Inmutables
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
@@ -142,7 +142,7 @@ export const AuditTable: React.FC<AuditTableProps> = ({ entries, filters, onFilt
                             {entries.map(a => (
                                 <tr key={a.id} className="hover:bg-[var(--bg-card)]/50 transition-all group">
                                     <td className="p-5 text-xs font-bold text-[var(--text-secondary)]">{a.timestamp}</td>
-                                    <td className="p-5 text-xs font-black text-[var(--text-primary)] group-hover:text-sky-600 transition-colors">{a.tienda}</td>
+                                    <td className="p-5 text-xs font-black text-[var(--text-primary)] group-hover:text-[var(--turquesa-500)] transition-colors">{a.tienda}</td>
                                     <td className="p-5">
                                         <span className={`inline-flex items-center px-2 py-0.5 rounded-lg text-[8px] font-extrabold uppercase tracking-wider ${getBadgeClass(a.accion)}`}>
                                             {a.accion}

@@ -1,20 +1,31 @@
-// ─── Specialist ──────────────────────────────────────────────────────────────
-
 export type DocumentType = 'dni' | 'carnet_extranjeria' | 'pasaporte' | 'ruc';
 export type AvailabilityStatus = 'Disponible' | 'Indispuesto' | 'Ocupado';
+
+export interface CalendarStatus {
+  connected: boolean;
+  calendar_id: string | null;
+}
+
+export interface AuthUrlResponse {
+  url: string;
+}
 
 export interface Specialist {
   id: number;
   nombres: string;
   apellidos: string;
-  tipoDocumento: DocumentType;
-  numeroDocumento: string;
+  dni: string;
+  email: string;
+  tipoDocumento?: string;
+  numeroDocumento?: string;
   especialidad: string;
-  foto?: string; // base64 o URL
+  subEspecialidad?: string;
+  aniosExperiencia?: number;
+  categoria: string;
+  numeroColegiatura?: string;
+  foto?: string;
   availability: AvailabilityStatus;
 }
-
-// ─── Service ──────────────────────────────────────────────────────────────────
 
 export type WeekDay =
   | 'Lunes'
@@ -25,80 +36,64 @@ export type WeekDay =
   | 'Sábado'
   | 'Domingo';
 
-/** Bloque horario dentro de un día: ej. 08:00 → 10:00 */
 export interface TimeBlock {
-  inicio: string; // "HH:mm"
-  fin: string; // "HH:mm"
+  inicio: string;
+  fin: string;
 }
 
-/** Día con uno o más bloques horarios */
 export interface AttendanceDay {
   dia: WeekDay;
   bloques: TimeBlock[];
 }
 
-/** Sesión calculada automáticamente */
 export interface Session {
-  inicio: string; // "HH:mm"
-  fin: string; // "HH:mm"
+  inicio: string;
+  fin: string;
 }
 
-/**
- * Estado de publicación del servicio.
- * - 'borrador': registrado pero no visible para clientes.
- * - 'publicado': visible en tienda.
- */
 export type ServiceEstado = 'borrador' | 'publicado';
 
-/**
- * Anticipación mínima requerida para reservar una cita (en horas).
- * Evita que un cliente reserve un horario que ya pasó o está por pasar.
- */
 export type AnticipacionReserva = 24 | 48 | 72;
+
+/** Asignación de días y bloques (por índice) de un especialista dentro de un servicio */
+export interface SpecialistHorario {
+  id: number;
+  dias: { dia: WeekDay; bloques: number[] }[];
+}
 
 export interface Service {
   id: number;
   denominacion: string;
+  descripcion?: string;
+  beneficios?: string;
+  imagen?: string;
   categoria: string;
-  /** Duración de cada sesión en minutos */
   duracion: number;
   diasAtencion: AttendanceDay[];
-  especialistasAsignados: number[]; // IDs de Specialist
-  /** Cupos por sesión: mín 1, máx 100, default 1 */
+  especialistasAsignados: number[];
+  /** Asignación granular por especialista. Si está presente, el modal lo usa en lugar de pre-poblar todos los días. */
+  especialistaHorarios?: SpecialistHorario[];
   cupos: number;
   precio: number;
-
-  // ── Nuevos campos ──────────────────────────────────────────────────────────
-
-  /**
-   * Estado de publicación. Default: 'borrador'.
-   * Solo puede publicarse si tiene al menos 1 especialista asignado.
-   */
   estado: ServiceEstado;
-
-  /** Si el servicio puede prestarse en el domicilio del cliente. Default: false */
   domicilio: boolean;
-
-  /**
-   * Tiempo mínimo de anticipación para reservar (horas). Default: 24.
-   * Impide que un cliente reserve horarios ya pasados o inminentes.
-   */
   anticipacionReserva: AnticipacionReserva;
+  sticker?: 'nuevo' | 'descuento' | 'oferta' | 'liquidacion' | 'bestseller' | 'envio_gratis' | null;
+  discountPercentage?: number | null;
+  etiquetas?: EtiquetaConfig;
 }
 
-// ─── Appointment ──────────────────────────────────────────────────────────────
+export type AppointmentEstado = 'pendiente' | 'confirmada' | 'cancelada';
 
 export interface Appointment {
   id: number;
   serviceId: number;
   specialistId: number;
-  fecha: string; // "YYYY-MM-DD"
+  fecha: string;
   sesion: Session;
   cuposOcupados: number;
-  estado: 'pendiente' | 'confirmada' | 'cancelada';
+  estado?: AppointmentEstado;
 }
-
-// ─── Lookup maps ──────────────────────────────────────────────────────────────
 
 export const DOCUMENT_TYPE_LABELS: Record<DocumentType, string> = {
   dni: 'DNI',
@@ -107,14 +102,16 @@ export const DOCUMENT_TYPE_LABELS: Record<DocumentType, string> = {
   ruc: 'RUC',
 };
 
+export const SPECIALIST_CATEGORIES = [
+  'Salud y Bienestar',
+  'Educación y Coaching',
+  'Belleza y Estética',
+] as const;
+
+export type SpecialistCategory = (typeof SPECIALIST_CATEGORIES)[number];
+
 export const WEEK_DAYS: WeekDay[] = [
-  'Lunes',
-  'Martes',
-  'Miércoles',
-  'Jueves',
-  'Viernes',
-  'Sábado',
-  'Domingo',
+  'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo',
 ];
 
 export const WEEK_DAY_SHORT: Record<WeekDay, string> = {
@@ -133,15 +130,8 @@ export const ANTICIPACION_LABELS: Record<AnticipacionReserva, string> = {
   72: '72 horas',
 };
 
-/** Buffer en minutos entre sesiones */
 export const APPOINTMENT_BUFFER_MINUTES = 10;
 
-// ─── Pure functions ───────────────────────────────────────────────────────────
-
-/**
- * Calcula todas las sesiones automáticas de un bloque horario.
- * Cada sesión dura `duracion` minutos, con `buffer` minutos entre ellas.
- */
 export function calculateSessions(
   block: TimeBlock,
   duracion: number,
@@ -152,9 +142,7 @@ export function calculateSessions(
     return h * 60 + m;
   };
   const toTime = (min: number) => {
-    const h = Math.floor(min / 60)
-      .toString()
-      .padStart(2, '0');
+    const h = Math.floor(min / 60).toString().padStart(2, '0');
     const m = (min % 60).toString().padStart(2, '0');
     return `${h}:${m}`;
   };
@@ -171,7 +159,6 @@ export function calculateSessions(
   return sessions;
 }
 
-/** Cuenta el total de sesiones de un servicio dado su horario y duración */
 export function countTotalSessions(
   diasAtencion: AttendanceDay[],
   duracion: number,
@@ -187,10 +174,42 @@ export function countTotalSessions(
   );
 }
 
-/**
- * Valida si un servicio puede ser publicado.
- * Condición mínima: al menos 1 especialista asignado.
- */
 export function canPublish(service: Service): boolean {
   return service.especialistasAsignados.length >= 1;
+}
+
+// ─── Etiquetas / Stickers ──────────────────────────────────────────────────────
+
+export interface EtiquetaDescuentoData { valor: number; inicio: string; fin: string | null; }
+export interface EtiquetaOfertaData    { valor: number; inicio: string; fin: string; }
+export interface EtiquetaEdicionData   { inicio: string; fin: string; }
+export interface EtiquetaPromocionData { productosIds: string[]; }
+export interface EtiquetaConfig {
+  nuevo: boolean;
+  descuento?:      EtiquetaDescuentoData;
+  oferta?:         EtiquetaOfertaData;
+  edicionLimitada?: EtiquetaEdicionData;
+  promocion?:      EtiquetaPromocionData;
+}
+
+export function serviceEtiquetasFromService(service: Service): EtiquetaConfig {
+  const stored = (service as any).etiquetas;
+  if (stored) return stored;
+
+  const today = new Date().toISOString().split('T')[0];
+  const nextMonth = new Date(); nextMonth.setMonth(nextMonth.getMonth() + 1);
+  const nextMonthStr = nextMonth.toISOString().split('T')[0];
+
+  switch (service.sticker) {
+    case 'nuevo':
+      return { nuevo: true };
+    case 'descuento':
+      return { nuevo: false, descuento: { valor: service.discountPercentage ?? 20, inicio: today, fin: null } };
+    case 'oferta':
+      return { nuevo: false, oferta: { valor: service.discountPercentage ?? 30, inicio: today, fin: nextMonthStr } };
+    case 'liquidacion':
+      return { nuevo: false, edicionLimitada: { inicio: today, fin: nextMonthStr } };
+    default:
+      return { nuevo: false };
+  }
 }

@@ -1,185 +1,340 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
-import Image from 'next/image';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useSellerChat } from '@/features/seller/chat/hooks/useSellerChat';
-import Icon from '@/components/ui/Icon';
-import ChatOptionsMenu from './components/ChatOptionsMenu';
-import BaseLoading from '@/components/ui/BaseLoading';
+import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import ChatLayout from '@/components/shared/chat/ChatLayout';
 import MessageBubble from '@/components/shared/chat/MessageBubble';
 import MessageInput from '@/components/shared/chat/MessageInput';
+import ConversationList from '@/components/shared/chat/ConversationList';
+import BaseLoading from '@/components/ui/BaseLoading';
+import { ChatCategory } from '@/features/seller/chat/types';
+import type { Message as BubbleMessage } from '@/components/shared/chat/MessageBubble';
+import type { Conversation } from '@/components/shared/chat/ConversationList';
+import type { ChatCustomer } from '@/shared/lib/api/chatRepository';
 
-interface ChatPageClientProps {
-    // TODO Tarea 3: Recibir datos iniciales del Server Component
+function NewChatForm({
+    onSubmit,
+    onCancel,
+    isSubmitting,
+    stores = [],
+    customers = []
+}: {
+    onSubmit: (data: { storeId: string; customerId: string; category: ChatCategory; subject: string }) => void;
+    onCancel: () => void;
+    isSubmitting: boolean;
+    stores: { id: string; name: string }[];
+    customers: ChatCustomer[];
+}) {
+    const [storeId, setStoreId] = useState(stores[0]?.id ?? '');
+    const [customerId, setCustomerId] = useState(customers[0]?.id ?? '');
+    const [category, setCategory] = useState<ChatCategory>('informacion');
+    const [subject, setSubject] = useState('');
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!subject.trim() || !storeId) return;
+        onSubmit({ storeId, customerId, category, subject });
+    };
+
+    return (
+        <div className="flex flex-col h-full bg-[var(--bg-card)] rounded-3xl border border-[var(--border-subtle)] shadow-sm overflow-hidden">
+            <div className="p-4 border-b border-[var(--border-subtle)]">
+                <h3 className="text-sm font-black uppercase tracking-wider text-[var(--text-primary)]">Nuevo Chat</h3>
+                <p className="text-xs text-[var(--text-secondary)] mt-1">Inicia una conversación con un cliente</p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-4">
+                <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-1.5">Tu Tienda</label>
+                    <select
+                        value={storeId}
+                        onChange={(e) => setStoreId(e.target.value)}
+                        className="w-full px-4 py-2.5 bg-[var(--bg-secondary)] rounded-xl outline-none text-sm font-medium text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--turquesa-500)]/20 border border-[var(--border-subtle)]"
+                        required
+                    >
+                        {stores.length === 0 && <option value="">Sin tiendas</option>}
+                        {stores.map(s => (
+                            <option key={s.id} value={s.id}>{s.name}</option>
+                        ))}
+                    </select>
+                </div>
+
+                <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-1.5">Cliente</label>
+                    <select
+                        value={customerId}
+                        onChange={(e) => setCustomerId(e.target.value)}
+                        className="w-full px-4 py-2.5 bg-[var(--bg-secondary)] rounded-xl outline-none text-sm font-medium text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--turquesa-500)]/20 border border-[var(--border-subtle)]"
+                        required
+                    >
+                        {customers.length === 0 && <option value="">Sin clientes</option>}
+                        {customers.map(c => (
+                            <option key={c.id} value={c.id}>{c.name} — {c.email}</option>
+                        ))}
+                    </select>
+                </div>
+
+                <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-1.5">Categoría</label>
+                    <select
+                        value={category}
+                        onChange={(e) => setCategory(e.target.value as ChatCategory)}
+                        className="w-full px-4 py-2.5 bg-[var(--bg-secondary)] rounded-xl outline-none text-sm font-medium text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--turquesa-500)]/20 border border-[var(--border-subtle)]"
+                        required
+                    >
+                        <option value="informacion">Solicitud de Información</option>
+                        <option value="positivo">Comentario Positivo</option>
+                        <option value="negativo">Comentario Negativo</option>
+                        <option value="logistica">Logística </option>
+                        <option value="facturacion">Soporte de Facturación </option>
+                    </select>
+                </div>
+
+                <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-1.5">Asunto</label>
+                    <input
+                        type="text"
+                        value={subject}
+                        onChange={(e) => setSubject(e.target.value)}
+                        placeholder="Describe brevemente el motivo"
+                        className="w-full px-4 py-2.5 bg-[var(--bg-secondary)] rounded-xl outline-none text-sm font-medium text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--turquesa-500)]/20 border border-[var(--border-subtle)]"
+                        required
+                    />
+                </div>
+
+                <div className="flex gap-2 pt-4">
+                    <button
+                        type="button"
+                        onClick={onCancel}
+                        className="flex-1 px-4 py-2.5 bg-gray-200 dark:bg-[var(--bg-secondary)] text-gray-700 dark:text-[var(--text-secondary)] rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-gray-300 dark:hover:bg-[#2A3F33] transition-colors"
+                    >
+                        Cancelar
+                    </button>
+                    <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="flex-1 px-4 py-2.5 bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--verde-500)] text-white rounded-xl font-bold text-xs uppercase tracking-wider hover:opacity-90 transition-all disabled:opacity-50 shadow-lg shadow-[var(--turquesa-500)]/20"
+                    >
+                        {isSubmitting ? 'Iniciando...' : 'Iniciar Chat'}
+                    </button>
+                </div>
+            </form>
+        </div>
+    );
 }
 
-export function ChatPageClient(_props: ChatPageClientProps) {
+export function ChatPageClient() {
     const {
         conversations,
+        customers,
+        stores,
         totalConversations,
         activeConversation,
         setActiveConversation,
+        messages,
         isLoading,
         filters,
         setFilters,
-        isMobileListVisible,
-        setIsMobileListVisible,
         sendMessage,
         clearActiveChat,
-        deleteActiveTicket,
+        isCreating,
+        createConversation,
         criticalCount
     } = useSellerChat();
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const [isMobileListVisible, setIsMobileListVisible] = useState(true);
+    const [filterType, setFilterType] = useState<'cliente' | 'categoria'>('cliente');
+    const [filterValue, setFilterValue] = useState('');
+    const [showFilter, setShowFilter] = useState(false);
+    const [showNewChatForm, setShowNewChatForm] = useState(false);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [activeConversation?.mensajes]);
+    }, [messages]);
 
     const handleSendMessage = (message: string) => {
         sendMessage(message);
     };
 
-    const messages = activeConversation?.mensajes.map(msg => ({
-        sender: msg.sender,
-        content: msg.contenido,
-        timestamp: msg.hora,
-    })) || [];
+    const handleConversationSelect = useCallback((id: string) => {
+        setActiveConversation(id);
+        setIsMobileListVisible(false);
+    }, [setActiveConversation]);
+
+    const filteredConversations = conversations.filter(conv => {
+        if (!filterValue) return true;
+        if (filterType === 'cliente') {
+            return conv.customerName.toLowerCase().includes(filterValue.toLowerCase());
+        }
+        return conv.category === filterValue;
+    });
+
+    const mappedConversations: Conversation[] = filteredConversations.map(conv => ({
+        id: conv.id,
+        name: conv.customerName,
+        lastMessage: conv.lastMessage,
+        lastMessageTime: conv.lastMessageTime,
+        unreadCount: conv.unreadCount,
+        category: conv.category,
+        isActive: activeConversation?.id === conv.id,
+    }));
+
+    const mappedMessages: BubbleMessage[] = messages.map(msg => ({
+        id: msg.id,
+        sender: msg.senderId,
+        content: msg.content,
+        timestamp: msg.timestamp,
+        read_at: msg.read ? msg.timestamp : null,
+    }));
 
     const listContent = (
-        <>
-            <div className="p-6 bg-[var(--bg-secondary)]/50 border-b border-[var(--border-subtle)]">
-                <div className="flex items-center gap-4 mb-6">
-                    <div className="w-12 h-12 bg-sky-500 rounded-2xl flex items-center justify-center shadow-lg shadow-sky-500/20 shrink-0">
-                        <Icon name="MessageCircle" className="text-white text-2xl font-black w-6 h-6" />
+        <div className="flex flex-col h-full">
+            <div className="p-4 border-b border-[var(--border-subtle)] shrink-0">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h3 className="text-sm font-black uppercase tracking-wider text-[var(--text-primary)]">Conversaciones</h3>
+                        <p className="text-[10px] font-medium text-[var(--text-secondary)] mt-0.5">
+                            {filteredConversations.length} chats
+                        </p>
                     </div>
-                    <div className="min-w-0">
-                        <h3 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-tight truncate">Centro de Atención</h3>
-                        <p className="text-xs text-[var(--text-secondary)] font-black uppercase tracking-widest truncate">Soporte en Tiempo Real</p>
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3 mb-6">
-                    <div className="bg-[var(--bg-card)] p-4 rounded-3xl border border-[var(--border-subtle)] text-center shadow-sm">
-                        <div className="text-xl font-black text-[var(--text-primary)]">{totalConversations}</div>
-                        <div className="text-xs text-[var(--text-secondary)] font-black uppercase tracking-widest">Total</div>
-                    </div>
-                    <div className="bg-red-500/10 p-4 rounded-3xl border border-red-500/20 text-center shadow-sm">
-                        <div className="text-xl font-black text-red-500">{criticalCount}</div>
-                        <div className="text-xs text-red-500 font-black uppercase tracking-widest">Críticos</div>
-                    </div>
-                </div>
-
-                <div className="space-y-3">
-                    <div className="relative group">
-                        <Icon name="Search" className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] group-focus-within:text-sky-500 transition-colors w-4 h-4" />
-                        <input
-                            type="text"
-                            value={filters.search}
-                            onChange={(e) => setFilters({ search: e.target.value })}
-                            className="w-full pl-12 pr-4 py-3 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl text-xs font-bold text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 transition-all outline-none"
-                            placeholder="Buscar por cliente o DNI..."
-                        />
-                    </div>
-                    <select
-                        value={filters.category}
-                        onChange={(e) => setFilters({ category: e.target.value })}
-                        className="w-full text-xs py-3 px-4 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 font-black uppercase tracking-wider text-[var(--text-primary)] cursor-pointer outline-none shadow-sm"
+                    <button
+                        onClick={() => {
+                            setShowFilter(prev => !prev);
+                            setFilterValue('');
+                        }}
+                        className={`px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-wider border transition-colors shrink-0 ${
+                            showFilter
+                                ? 'bg-[var(--turquesa-500)] text-white border-[var(--turquesa-500)] shadow-sm'
+                                : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:bg-gray-200 dark:hover:bg-[#2A3F33]'
+                        }`}
                     >
-                        <option value="all">TODAS LAS CATEGORÍAS</option>
-                        <option value="tech">DIAGNÓSTICO TÉCNICO</option>
-                        <option value="admin">SOPORTE ADMINISTRATIVO</option>
-                        <option value="info">SOLICITUD DE INFO</option>
-                        <option value="comment">ELOGIOS Y FEEDBACK</option>
-                    </select>
+                        Filtrar
+                    </button>
                 </div>
-            </div>
 
-            <div className="flex-1 overflow-y-auto p-4 space-y-2 custom-scrollbar">
-                {conversations.length > 0 ? (
-                    conversations.map(conv => (
-                        <button
-                            key={conv.id}
-                            onClick={() => setActiveConversation(conv)}
-                            className={`w-full p-4 rounded-3xl border transition-all duration-300 group flex items-center gap-4 ${activeConversation?.id === conv.id
-                                ? 'bg-sky-500 border-sky-400 shadow-xl shadow-sky-500/20'
-                                : 'border-transparent hover:bg-[var(--bg-secondary)]'
+                {showFilter && (
+                    <div className="mt-3 space-y-2">
+                        <div className="flex rounded-xl overflow-hidden border border-[var(--border-subtle)] text-[10px] font-bold">
+                            <button
+                                onClick={() => { setFilterType('cliente'); setFilterValue(''); }}
+                                className={`flex-1 py-1.5 uppercase tracking-wider transition-colors ${
+                                    filterType === 'cliente'
+                                        ? 'bg-[var(--turquesa-500)] text-white'
+                                        : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-gray-200 dark:hover:bg-[#2A3F33]'
                                 }`}
-                        >
-                            <div className="relative">
-                                <Image src={conv.avatar} alt={conv.nombre} width={48} height={48} className="rounded-2xl object-cover border-2 border-[var(--bg-card)] shadow-sm group-hover:scale-105 transition-transform" />
-                                {conv.critical && <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-[var(--bg-card)] flex items-center justify-center text-xs text-white font-black">!</span>}
-                            </div>
-                            <div className="flex-1 text-left overflow-hidden">
-                                <div className="flex justify-between items-center mb-1">
-                                    <h4 className={`text-xs font-black uppercase tracking-tight truncate ${activeConversation?.id === conv.id ? 'text-white' : 'text-[var(--text-primary)]'}`}>{conv.nombre}</h4>
-                                    <span className={`text-xs font-black uppercase ${activeConversation?.id === conv.id ? 'text-white/70' : 'text-[var(--text-secondary)]'}`}>{conv.fecha}</span>
-                                </div>
-                                <p className={`text-xs font-bold truncate ${activeConversation?.id === conv.id ? 'text-white/80' : 'text-[var(--text-secondary)]'}`}>{conv.ultimoMensaje}</p>
-                            </div>
-                        </button>
-                    ))
-                ) : (
-                    <div className="p-12 text-center opacity-40">
-                        <Icon name="MessageSquareOff" className="text-4xl mb-4 text-[var(--text-secondary)] mx-auto w-10 h-10" />
-                        <p className="text-xs font-black uppercase tracking-widest text-[var(--text-secondary)] leading-relaxed">Sin resultados para<br />tu búsqueda</p>
+                            >
+                                Cliente
+                            </button>
+                            <button
+                                onClick={() => { setFilterType('categoria'); setFilterValue(''); }}
+                                className={`flex-1 py-1.5 uppercase tracking-wider transition-colors ${
+                                    filterType === 'categoria'
+                                        ? 'bg-[var(--turquesa-500)] text-white'
+                                        : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-gray-200 dark:hover:bg-[#2A3F33]'
+                                }`}
+                            >
+                                Categoría
+                            </button>
+                        </div>
+
+                        {filterType === 'cliente' ? (
+                            <input
+                                type="text"
+                                value={filterValue}
+                                onChange={(e) => setFilterValue(e.target.value)}
+                                placeholder="Buscar cliente..."
+                                className="w-full px-3 py-1.5 text-sm bg-[var(--bg-secondary)] rounded-xl outline-none text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--turquesa-500)]/20 border border-[var(--border-subtle)]"
+                            />
+                        ) : (
+                            <select
+                                value={filterValue}
+                                onChange={(e) => setFilterValue(e.target.value)}
+                                className="w-full px-3 py-1.5 text-sm bg-[var(--bg-secondary)] rounded-xl outline-none text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--turquesa-500)]/20 border border-[var(--border-subtle)]"
+                            >
+                                <option value="">Todas las categorías</option>
+                                <option value="informacion">Solicitud de Información</option>
+                                <option value="positivo">Comentario Positivo</option>
+                                <option value="negativo">Comentario Negativo</option>
+                                <option value="logistica">Logística </option>
+                                <option value="facturacion">Soporte de Facturación</option>
+                            </select>
+                        )}
                     </div>
                 )}
             </div>
-        </>
+
+            <ConversationList
+                conversations={mappedConversations}
+                activeId={activeConversation?.id}
+                onSelect={handleConversationSelect}
+                accentColor="turquesa"
+            />
+        </div>
     );
 
-    const detailContent = !activeConversation ? (
-        <div className="flex-1 flex flex-col items-center justify-center p-12 text-center animate-fadeIn">
-            <div className="w-32 h-32 bg-[var(--bg-card)] rounded-full flex items-center justify-center shadow-xl shadow-black/5 mb-8 border border-[var(--border-subtle)]">
-                <Icon name="MessageCircle" className="text-6xl text-sky-500 opacity-20 w-16 h-16" />
-            </div>
-            <h2 className="text-2xl font-black text-[var(--text-primary)] uppercase tracking-tighter">Buzón de Mensajes</h2>
-            <p className="text-xs text-[var(--text-secondary)] mt-2 font-black uppercase tracking-widest">Selecciona una conversación para leer</p>
-        </div>
-    ) : (
-        <>
-            <div className="p-6 bg-[var(--bg-card)] border-b border-[var(--border-subtle)] flex items-center justify-between shadow-sm">
-                <div className="flex items-center gap-4">
-                    <button
-                        onClick={() => setIsMobileListVisible(true)}
-                        className="md:hidden p-3 bg-[var(--bg-secondary)] text-[var(--text-secondary)] rounded-2xl hover:bg-sky-500/10 transition-all active:scale-90"
-                    >
-                        <Icon name="ChevronLeft" className="w-5 h-5" />
-                    </button>
-                    <Image src={activeConversation.avatar} alt={activeConversation.nombre} width={48} height={48} className="rounded-2xl object-cover border-2 border-emerald-500/20 shadow-sm" />
-                    <div>
-                        <h3 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-tight">{activeConversation.nombre}</h3>
-                        <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-xs text-[var(--text-secondary)] font-black uppercase">{activeConversation.email}</span>
-                            <span className="text-xs text-sky-500 font-black bg-sky-500/10 px-2 py-0.5 rounded-lg uppercase tracking-tight">DNI: {activeConversation.dni}</span>
-                            {activeConversation.critical && <span className="text-xs bg-red-500/10 text-red-500 font-black px-2 py-0.5 rounded-lg uppercase tracking-widest">Prioridad Alta</span>}
-                        </div>
+    const chatContent = activeConversation ? (
+        <div className="flex flex-col h-full">
+            <div className="p-4 border-b border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-secondary)] shrink-0">
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-[var(--turquesa-500)] to-[var(--verde-500)] flex items-center justify-center text-white font-black text-sm shadow-sm">
+                        {activeConversation.customerName.charAt(0)}
+                    </div>
+                    <div className="min-w-0">
+                        <h3 className="text-sm font-black uppercase tracking-wider text-[var(--text-primary)] truncate">
+                            {activeConversation.customerName}
+                        </h3>
+                        {activeConversation.subject && (
+                            <p className="text-xs text-[var(--text-secondary)]">{activeConversation.subject}</p>
+                        )}
                     </div>
                 </div>
-
-                <div className="flex gap-2">
-                    <ChatOptionsMenu onClear={clearActiveChat} onDelete={deleteActiveTicket} />
-                </div>
             </div>
 
-            <div className="flex-1 min-h-0 overflow-y-auto p-4 md:p-8 space-y-6 custom-scrollbar bg-[var(--bg-secondary)]/20">
-                <MessageBubble messages={messages} />
+            <div className="flex-1 overflow-y-auto bg-white dark:bg-[var(--bg-secondary)]">
+                <MessageBubble
+                    messages={mappedMessages}
+                    isSentOverride={(msg) => {
+                        const original = messages.find(m => m.id === msg.id);
+                        return original?.senderType === 'seller';
+                    }}
+                    meta={{
+                        currentUserName: 'Tú',
+                        currentUserRole: 'Vendedor',
+                        otherName: activeConversation.customerName,
+                        otherRole: 'Cliente',
+                        showAvatar: true,
+                    }}
+                />
                 <div ref={messagesEndRef} />
             </div>
 
-            <div className="flex-shrink-0">
-                <MessageInput onSend={handleSendMessage} />
+            <MessageInput onSend={handleSendMessage} placeholder="Escribe un mensaje..." />
+        </div>
+    ) : (
+        <div className="flex-1 flex items-center justify-center">
+            <div className="text-center px-8">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[var(--turquesa-500)]/10 to-[var(--verde-500)]/10 flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-8 h-8 text-[var(--turquesa-500)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                </div>
+                <p className="text-sm font-black uppercase tracking-wider text-[var(--text-primary)] mb-1">Selecciona una conversación</p>
+                <p className="text-xs text-[var(--text-secondary)]">Elige un chat de la lista para comenzar</p>
             </div>
-        </>
+        </div>
     );
 
     if (isLoading) {
         return (
-            <div className="w-full bg-[var(--bg-card)] rounded-[2.5rem] shadow-xl shadow-black/5 border border-[var(--border-subtle)] overflow-hidden flex flex-col md:flex-row animate-fadeIn"
-                style={{ height: 'calc(100vh - 160px)', minHeight: '600px' }}>
-                <div className="w-full md:w-80 shrink-0 flex items-center justify-center">
+            <div className="flex flex-col h-[calc(100vh-140px)] animate-fadeIn">
+                <ModuleHeader
+                    title="Chat con Clientes"
+                    subtitle="Comunicación directa con tus clientes"
+                    icon="Messages"
+                />
+                <div className="flex-1 flex items-center justify-center">
                     <BaseLoading message="Cargando conversaciones..." />
                 </div>
             </div>
@@ -187,12 +342,44 @@ export function ChatPageClient(_props: ChatPageClientProps) {
     }
 
     return (
-        <div className="min-h-[calc(100vh-8rem)] h-full overflow-hidden pb-4">
-            <ChatLayout
-                list={listContent}
-                detail={detailContent}
-                listWidth="col-span-4"
+        <div className="flex flex-col h-[calc(100vh-140px)] animate-fadeIn">
+            <ModuleHeader
+                title="Chat con Clientes"
+                subtitle="Comunicación directa con tus clientes"
+                icon="Messages"
+                actions={
+                    !showNewChatForm ? (
+                        <button
+                            onClick={() => setShowNewChatForm(true)}
+                            className="px-4 py-2 bg-white dark:bg-[var(--bg-secondary)] text-[var(--turquesa-500)] dark:text-[var(--turquesa-500)] rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-gray-50 dark:hover:bg-[#2A3F33] transition-colors border border-[var(--border-subtle)] shadow-sm"
+                        >
+                            + Nuevo Chat
+                        </button>
+                    ) : null
+                }
             />
+
+            {showNewChatForm ? (
+                <div className="flex-1 flex items-center justify-center px-8">
+                    <div className="w-full max-w-xl">
+                        <NewChatForm
+                            stores={stores}
+                            customers={customers}
+                            onSubmit={(data) => {
+                                createConversation(data);
+                                setShowNewChatForm(false);
+                            }}
+                            onCancel={() => setShowNewChatForm(false)}
+                            isSubmitting={isCreating}
+                        />
+                    </div>
+                </div>
+            ) : (
+                <ChatLayout
+                    list={listContent}
+                    detail={chatContent}
+                />
+            )}
         </div>
     );
 }

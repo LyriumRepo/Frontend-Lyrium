@@ -6,6 +6,7 @@ import SellerSidebar from '@/components/layout/seller/SellerSidebar';
 import SellerHeader from '@/components/layout/seller/SellerHeader';
 import { DashboardLayout } from '@/components/layout/shared/DashboardLayout';
 import { useUIStore } from '@/store/uiStore';
+import { InventoryAlertsProvider } from '@/features/seller/inventario/context/InventoryAlertsContext';
 
 interface SellerLayoutClientProps {
     children: React.ReactNode;
@@ -89,6 +90,7 @@ export function SellerLayoutClient({ children }: SellerLayoutClientProps) {
     }
 
     return (
+        <InventoryAlertsProvider>
         <DashboardLayout
             header={<SellerHeader onOpenMenu={toggleSidebar} />}
             sidebar={<SellerSidebar isMobileOpen={sidebarOpen} onClose={closeSidebar} />}
@@ -99,6 +101,7 @@ export function SellerLayoutClient({ children }: SellerLayoutClientProps) {
         >
             {children}
         </DashboardLayout>
+        </InventoryAlertsProvider>
     );
 }
 

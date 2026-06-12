@@ -1,24 +1,24 @@
 'use client';
 
+import { useEffect } from "react";
 import {
+  Loader2,
   ShoppingBag,
   Sparkles,
   Info,
-  ShoppingCart,
-  Loader2,
   AlertCircle,
-} from 'lucide-react';
-import { useCarritoStore } from '@/store/carritoStore';
+  ShoppingCart,
+} from "lucide-react";
+import { useCarritoStore } from "@/store/carritoStore";
 import { useCarritoCatalog } from '../hooks/useCarritoCatalog';
 import FilterBar from './FilterBar';
 import ProductGrid from './ProductGrid';
 import CartDrawer from './drawer/CartDrawer';
-import CartPopup from './CartPopup'; // ← NUEVO
+import CartPopup from './CartPopup';
 import ProductDetailModal from './modals/ProductDetailModal';
 import { useAddToCart } from '@/features/public/product/hooks/useAddToCart';
-import AuthRequiredModal from '@/shared/compoments/AuthRequiredModal';
+import AuthRequiredModal from '@/shared/components/AuthRequiredModal';
 import { useAuthStore } from '@/shared/hooks/useAuthstore';
-import { useEffect } from 'react';
 
 export default function CarritoPage() {
   const { isLoading, isError, refetch } = useCarritoCatalog();
@@ -33,15 +33,13 @@ export default function CarritoPage() {
   const openDetailModal = useCarritoStore((s) => s.openDetailModal);
   const updateItemQuantity = useCarritoStore((s) => s.updateQuantity);
   const removeFromCart = useCarritoStore((s) => s.removeFromCart);
-  const openPopup = useCarritoStore((s) => s.openPopup); // ← NUEVO
+  const openPopup = useCarritoStore((s) => s.openPopup);
 
   const { addToCart: addToCartApi } = useAddToCart();
 
-  // ── Handlers ──────────────────────────────────────────────────────────────
-
   const handleAdd = async (id: number | string) => {
-    await addToCartApi(Number(id), 1); // llama a Laravel
-    openPopup(); // ← muestra popup en lugar de abrir drawer
+    await addToCartApi(Number(id), 1);
+    openPopup();
   };
 
   const handleView = (id: number | string) => {
@@ -69,7 +67,6 @@ export default function CarritoPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-[var(--bg-primary)]">
       <div className="max-w-7xl mx-auto px-4 py-10">
-        {/* ── Hero / Filtros ── */}
         <div
           className="rounded-3xl px-6 py-6 md:px-8 md:py-7 mb-7"
           style={{
@@ -110,9 +107,8 @@ export default function CarritoPage() {
           </div>
         </div>
 
-        {/* ── Estados ── */}
         {isLoading && (
-          <div className="flex items-center justify-center py-20 gap-3 text-slate-500">
+          <div className="flex items-center justify-center py-20 gap-3 text-slate-500 dark:text-[var(--text-muted)]">
             <Loader2 className="w-6 h-6 animate-spin text-sky-500" />
             <span className="text-sm">Cargando productos...</span>
           </div>
@@ -120,10 +116,10 @@ export default function CarritoPage() {
 
         {isError && !isLoading && (
           <div className="flex flex-col items-center justify-center py-16 gap-4 text-center">
-            <div className="w-14 h-14 rounded-2xl bg-red-50 grid place-items-center">
+            <div className="w-14 h-14 rounded-2xl bg-red-50 dark:bg-red-900/20 grid place-items-center">
               <AlertCircle className="w-7 h-7 text-red-400" />
             </div>
-            <p className="text-slate-700 font-medium">
+            <p className="text-slate-700 dark:text-[var(--text-primary)] font-medium">
               No se pudieron cargar los productos
             </p>
             <button
@@ -134,14 +130,13 @@ export default function CarritoPage() {
             </button>
           </div>
         )}
-
         {!isLoading && !isError && (
           <ProductGrid onAdd={handleAdd} onView={handleView} />
         )}
       </div>
-      {/* ── Portales ── */}
+
       <CartDrawer />
-      <CartPopup /> {/* ← NUEVO */}
+      <CartPopup />
       <ProductDetailModal
         onAdd={handleAdd}
         onOpenCart={openCart}

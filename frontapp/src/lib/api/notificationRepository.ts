@@ -5,6 +5,7 @@ export interface Notification {
   type: string;
   read_at: string | null;
   created_at: string;
+  order_id: number | null;
   ticket_id: number | null;
   ticket_number: string | null;
   subject: string | null;

@@ -3,38 +3,62 @@
 // Uses Laravel API URL
 // ============================================
 
+import { getToken } from '@/shared/lib/api/token-store';
+
 const LARAVEL_API_URL = process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://localhost:8000/api';
 const API_BASE = LARAVEL_API_URL;
 
-// Lee el token Laravel de la cookie (cuando exista)
-// Con PHP no hay token, retorna null y no afecta nada
-function getAuthHeaders(): Record<string, string> {
-  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-  if (typeof document !== 'undefined') {
-    const token = document.cookie.match(/(?:^|;\s*)laravel_token=([^;]+)/)?.[1];
-    if (token) headers['Authorization'] = `Bearer ${decodeURIComponent(token)}`;
+// ─── Token helper: lee vía /api/auth-token (Route Handler de Next.js) ──────────
+let _tokenCache: { value: string | null; ts: number } | null = null;
+
+async function getAuthToken(): Promise<string | null> {
+  const now = Date.now();
+  if (_tokenCache && now - _tokenCache.ts < 30_000) {
+    return _tokenCache.value;
   }
-  return headers;
+  try {
+    const res = await fetch('/api/auth-token', { credentials: 'include', cache: 'no-store' });
+    if (!res.ok) return null;
+    const { token } = await res.json();
+    const clean = token?.replace(/^["']|["']$/g, '').trim() || null;
+    _tokenCache = { value: clean, ts: now };
+    return clean;
+  } catch {
+    return null;
+  }
 }
 
 async function apiCall<T = unknown>(endpoint: string, options?: RequestInit): Promise<T> {
-  try {
-    const res = await fetch(API_BASE + endpoint, {
-      headers: getAuthHeaders(),
-      ...options,
-    });
-    const text = await res.text();
+  const token = await getAuthToken();
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    Accept: 'application/json',
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15_000);
+  const res = await fetch(API_BASE + endpoint, {
+    headers,
+    credentials: 'include',
+    ...options,
+    signal: controller.signal,
+  });
+  clearTimeout(timeout);
+
+  const text = await res.text();
+  if (!res.ok) {
+    let msg: string;
     try {
-      return JSON.parse(text) as T;
+      const json = JSON.parse(text);
+      msg = json.message || json.error || `HTTP ${res.status}`;
     } catch {
-      console.error(`API Error [${endpoint}] — Respuesta no es JSON:\n${text}`);
-      return { success: false, message: 'Error del servidor. Ver consola para detalles.' } as T;
+      msg = text || `HTTP ${res.status}`;
     }
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Error desconocido';
-    console.error(`API Error [${endpoint}]:`, err);
-    return { success: false, message } as T;
+    throw new Error(msg);
   }
+
+  return JSON.parse(text) as T;
 }
 
 export function apiGet<T = unknown>(endpoint: string): Promise<T> {
@@ -79,29 +103,6 @@ export const getMyPlanRequest = async () => {
   return apiGet<{ success: boolean; data: any }>('/stores/me/plan-request');
 };
 
-// Admin - Plan Requests
-export const getAllPlanRequests = async () => {
-  return apiGet<{ success: boolean; data: any[] }>('/admin/plan-requests');
-};
-
-export const getPlanRequestById = async (id: number) => {
-  return apiGet<{ success: boolean; data: any }>(`/admin/plan-requests/${id}`);
-};
-
-export const approvePlanRequest = async (id: number, notes?: string) => {
-  return apiCall<{ success: boolean; data: any }>(`/admin/plan-requests/${id}/approve`, {
-    method: 'PUT',
-    body: JSON.stringify({ admin_notes: notes || '' }),
-  });
-};
-
-export const rejectPlanRequest = async (id: number, notes: string) => {
-  return apiCall<{ success: boolean; data: any }>(`/admin/plan-requests/${id}/reject`, {
-    method: 'PUT',
-    body: JSON.stringify({ admin_notes: notes }),
-  });
-};
-
 export function getSSEUrl(canal: string, usuarioId: string): string {
   return `${LARAVEL_API_URL}/events?channel=${canal}&user_id=${usuarioId}`;
 }
@@ -109,9 +110,13 @@ export function getSSEUrl(canal: string, usuarioId: string): string {
 // Post silencioso — no loggea errores (para broadcasts opcionales)
 export async function silentPost(endpoint: string, data: unknown): Promise<void> {
   try {
+    const token = await getAuthToken();
     await fetch((process.env.NEXT_PUBLIC_API_BASE ?? '/api') + endpoint, {
       method: 'POST',
-      headers: getAuthHeaders(),
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
       body: JSON.stringify(data),
     });
   } catch { /* silencioso */ }
@@ -131,43 +136,6 @@ export const updateSystemColors = async (colors: Record<string, string>): Promis
 export const getPublicConfig = async (): Promise<Record<string, unknown>> => {
   const response = await apiGet<{ success: boolean; data: Record<string, unknown> }>('/config/public');
   return response.success ? response.data : {};
-};
-
-// Admin - Vendedores
-export const getVendedores = async (): Promise<any[]> => {
-  const response = await apiGet<{ success: boolean; data: any[] }>('/admin/vendedores');
-  return response.success ? response.data : [];
-};
-
-export const getVendedorHistorial = async (vendedorId: number): Promise<any[]> => {
-  const response = await apiGet<{ success: boolean; data: any[] }>(`/admin/vendedores/${vendedorId}/historial`);
-  return response.success ? response.data : [];
-};
-
-// Admin - Planes (CRUD)
-export const updatePlanStatus = async (planId: number, activo: boolean): Promise<boolean> => {
-  const response = await apiPost<{ success: boolean }>(`/admin/plans/${planId}/status`, { activo });
-  return response.success;
-};
-
-export const deletePlan = async (planId: number): Promise<boolean> => {
-  const response = await apiDelete<{ success: boolean }>(`/admin/plans/${planId}`);
-  return response.success;
-};
-
-export const updatePlanIcon = async (planId: number, icono: string): Promise<boolean> => {
-  const response = await apiPost<{ success: boolean }>(`/admin/plans/${planId}/icon`, { icono });
-  return response.success;
-};
-
-export const savePlan = async (planData: any): Promise<boolean> => {
-  const response = await apiPost<{ success: boolean; data?: any }>(`/admin/plans`, planData);
-  return response.success;
-};
-
-export const updatePlan = async (planId: number, planData: any): Promise<boolean> => {
-  const response = await apiPost<{ success: boolean }>(`/admin/plans/${planId}`, planData);
-  return response.success;
 };
 
 export { API_BASE };

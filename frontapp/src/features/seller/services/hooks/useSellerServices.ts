@@ -1,47 +1,62 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Service, Specialist, Appointment } from '../types';
+import {
+  Service,
+  Specialist,
+  Appointment,
+} from '../types';
 import { useToast } from '@/shared/lib/context/ToastContext';
-import { serviceRepository } from '@/shared/lib/api/serviceRepository';
-import { bookingRepository } from '@/shared/lib/api/bookingRepository';
 import { USE_MOCKS } from '@/shared/lib/config/flags';
+import { serviceRepository } from '@/shared/lib/api/ServicoReposit';
 
-export function useSellerServices() {
+type Client = {
+  id: number;
+  nombres: string;
+  apellidos: string;
+  dni: string;
+  telefono: string;
+  email?: string;
+};
+
+type AppointmentWithClient = Appointment & {
+  clientId?: number;
+};
+
+interface UseSellerServicesProps {
+  initialServices?: Service[];
+  initialSpecialists?: Specialist[];
+  initialAppointments?: Appointment[];
+}
+
+const MOCK_CLIENTS: Client[] = [
+  { id: 1, nombres: 'Carlos', apellidos: 'Rojas', dni: '12345678', telefono: '987654321', email: 'carlos@email.com' },
+  { id: 2, nombres: 'Ana', apellidos: 'Vargas', dni: '87654321', telefono: '912345678', email: 'ana@email.com' },
+  { id: 3, nombres: 'Lucía', apellidos: 'Paredes', dni: '81234567', telefono: '955667788', email: 'lucia@email.com' },
+  { id: 4, nombres: 'Miguel', apellidos: 'Torres', dni: '45678912', telefono: '944556677', email: 'miguel@email.com' },
+  { id: 5, nombres: 'Sofía', apellidos: 'Chávez', dni: '78912345', telefono: '933221100', email: 'sofia@email.com' },
+];
+
+export function useSellerServices(props?: UseSellerServicesProps) {
   const queryClient = useQueryClient();
   const { showToast } = useToast();
 
-  const { data: specialists = [], isLoading: loadingSpecialists } = useQuery({
+  const { data: clients = [] } = useQuery({
+    queryKey: ['seller', 'clients'],
+    queryFn: async (): Promise<Client[]> => MOCK_CLIENTS,
+    staleTime: Infinity,
+  });
+
+  const {
+    data: specialists = [],
+    isLoading: loadingSpecialists,
+  } = useQuery({
     queryKey: ['seller', 'specialists'],
-    queryFn: async () => {
-      if (USE_MOCKS) {
-        return [
-          {
-            id: 1,
-            nombres: 'Dra. María',
-            apellidos: 'García',
-            especialidad: 'Nutrición Deportiva',
-            avatar_chars: 'MG',
-            color: '#10b981',
-          },
-          {
-            id: 2,
-            nombres: 'Lic. Juan',
-            apellidos: 'Pérez',
-            especialidad: 'Fisioterapia',
-            avatar_chars: 'JP',
-            color: '#f59e0b',
-          },
-        ] as Specialist[];
-      }
-      try {
-        return [] as Specialist[];
-      } catch (e) {
-        console.warn('FALLBACK: Specialists error', e);
-        return [] as Specialist[];
-      }
+    queryFn: async (): Promise<Specialist[]> => {
+      return serviceRepository.listSpecialists();
     },
-    staleTime: 5 * 60 * 1000,
+    initialData: props?.initialSpecialists,
+    staleTime: 30 * 1000,
   });
 
   const {
@@ -50,167 +65,106 @@ export function useSellerServices() {
     refetch: refetchServices,
   } = useQuery({
     queryKey: ['seller', 'services'],
-    queryFn: async () => {
-      if (USE_MOCKS) {
-        return [
-          {
-            id: 1,
-            nombre: 'Evaluación Nutricional Integral',
-            horario: 'Lun, Mié, Vie • 08:00 - 18:00',
-            estado: 'disponible',
-            sticker: 'bestseller',
-            especialistas_ids: [1],
-            config: {
-              hora_inicio: '08:00',
-              hora_fin: '18:00',
-              duracion: 45,
-              max_citas: 1,
-              dias: ['Lun', 'Mié', 'Vie'],
-            },
-          },
-          {
-            id: 2,
-            nombre: 'Sesión de Terapia Física',
-            horario: 'Mar, Jue • 09:00 - 17:00',
-            estado: 'disponible',
-            sticker: 'nuevo',
-            especialistas_ids: [2],
-            config: {
-              hora_inicio: '09:00',
-              hora_fin: '17:00',
-              duracion: 60,
-              max_citas: 1,
-              dias: ['Mar', 'Jue'],
-            },
-          },
-        ] as Service[];
-      }
-      try {
-        return (await serviceRepository.list()) as unknown as Service[];
-      } catch (e) {
-        console.warn('FALLBACK: Services error', e);
-        return [] as Service[];
-      }
+    queryFn: async (): Promise<Service[]> => {
+      return serviceRepository.listServices();
     },
-    staleTime: 5 * 60 * 1000,
+    initialData: props?.initialServices,
+    staleTime: 30 * 1000,
   });
 
-  const { data: appointments = [], isLoading: loadingAppointments } = useQuery({
+  const {
+    data: appointments = [],
+    isLoading: loadingAppointments,
+  } = useQuery({
     queryKey: ['seller', 'appointments'],
-    queryFn: async () => {
-      if (USE_MOCKS) {
-        await new Promise((r) => setTimeout(r, 300));
-        return [
-          {
-            id: 101,
-            fecha: '2024-03-20',
-            hora: '10:00',
-            duracionMinutos: 45,
-            especialistaId: 1,
-            cliente: 'Carlos Rodríguez',
-            servicio: 'Evaluación Nutricional Integral',
-          },
-        ] as Appointment[];
-      }
-      try {
-        return (await bookingRepository.sellerBookings()) as unknown as Appointment[];
-      } catch (e) {
-        console.warn('FALLBACK: Appointments error', e);
-        return [] as Appointment[];
-      }
+    queryFn: async (): Promise<AppointmentWithClient[]> => {
+      const apps = await serviceRepository.listAppointments();
+      return apps as AppointmentWithClient[];
     },
-    staleTime: 2 * 60 * 1000,
+    initialData: props?.initialAppointments as AppointmentWithClient[] | undefined,
+    staleTime: 30 * 1000,
   });
 
   const upsertServiceMutation = useMutation({
-    mutationFn: async (service: Partial<Service>) => {
-      await new Promise((r) => setTimeout(r, 1000));
-      return service;
+    mutationFn: async (svc: Omit<Service, 'id'> & { id?: number }) => {
+      if (svc.id) {
+        return serviceRepository.updateService(svc.id, svc);
+      }
+      return serviceRepository.createService(svc);
     },
-    onSuccess: (data, variables) => {
-      queryClient.setQueryData(
-        ['seller', 'services'],
-        (old: Service[] | undefined) => {
-          if (!old) return [data as Service];
-          if (variables.id) {
-            return old.map((s) =>
-              s.id === variables.id ? { ...s, ...data } : s,
-            );
-          }
-          return [{ ...data, id: Date.now() } as Service, ...old];
-        },
-      );
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['seller', 'services'] });
+      queryClient.invalidateQueries({ queryKey: ['seller', 'specialists'] });
       showToast('Servicio sincronizado correctamente', 'success');
+    },
+    onError: (err: Error) => {
+      showToast(err.message || 'Error al guardar el servicio', 'error');
     },
   });
 
   const deleteServiceMutation = useMutation({
     mutationFn: async (id: number) => {
-      await new Promise((r) => setTimeout(r, 800));
+      await serviceRepository.deleteService(id);
       return id;
     },
-    onSuccess: (deletedId) => {
-      queryClient.setQueryData(
-        ['seller', 'services'],
-        (old: Service[] | undefined) => {
-          return old ? old.filter((s) => s.id !== deletedId) : [];
-        },
-      );
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['seller', 'services'] });
+      queryClient.invalidateQueries({ queryKey: ['seller', 'specialists'] });
       showToast('Servicio removido del catálogo', 'info');
+    },
+    onError: (err: Error) => {
+      showToast(err.message || 'Error al eliminar el servicio', 'error');
     },
   });
 
   const upsertSpecialistMutation = useMutation({
     mutationFn: async (spec: Partial<Specialist>) => {
-      await new Promise((r) => setTimeout(r, 1000));
-      return spec;
+      if (spec.id) {
+        return serviceRepository.updateSpecialist(spec.id, spec);
+      }
+      return serviceRepository.createSpecialist(spec);
     },
-    onSuccess: (data, variables) => {
-      queryClient.setQueryData(
-        ['seller', 'specialists'],
-        (old: Specialist[] | undefined) => {
-          if (!old) return [data as Specialist];
-          if (variables.id) {
-            return old.map((s) =>
-              s.id === variables.id ? { ...s, ...data } : s,
-            );
-          }
-          return [{ ...data, id: Date.now() } as Specialist, ...old];
-        },
-      );
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['seller', 'specialists'] });
       showToast('Perfil de especialista actualizado', 'success');
+    },
+    onError: (err: Error) => {
+      showToast(err.message || 'Error al guardar especialista', 'error');
     },
   });
 
   const rescheduleMutation = useMutation({
     mutationFn: async ({
       appointmentId,
-      newTime,
+      newFecha,
+      newSession,
+      token,
     }: {
       appointmentId: number;
-      newTime: string;
+      newFecha: string;
+      newSession: { inicio: string; fin: string };
+      token?: string;
     }) => {
-      await new Promise((r) => setTimeout(r, 800));
-      return { appointmentId, newTime };
-    },
-    onSuccess: (data) => {
-      queryClient.setQueryData(
-        ['seller', 'appointments'],
-        (old: Appointment[] | undefined) => {
-          return old
-            ? old.map((app) =>
-                app.id === data.appointmentId
-                  ? { ...app, hora: data.newTime }
-                  : app,
-              )
-            : [];
-        },
+      await serviceRepository.rescheduleAppointment(
+        appointmentId,
+        newFecha,
+        newSession.inicio,
+        newSession.fin,
+        token || '',
       );
+      return { appointmentId, newFecha, newSession };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['seller', 'appointments'] });
       showToast('Cita reprogramada con éxito', 'success');
+    },
+    onError: (err: Error) => {
+      showToast(err.message || 'Error al reprogramar la cita', 'error');
     },
   });
 
   return {
+    clients,
     specialists,
     services,
     appointments,
@@ -222,13 +176,22 @@ export function useSellerServices() {
       deleteServiceMutation.isPending ||
       upsertSpecialistMutation.isPending ||
       rescheduleMutation.isPending,
-    handleSaveService: (service: Partial<Service>) =>
+    handleSaveService: (service: Omit<Service, 'id'> & { id?: number }) =>
       upsertServiceMutation.mutateAsync(service),
     handleDeleteService: (id: number) => deleteServiceMutation.mutateAsync(id),
     handleSaveSpecialist: (spec: Partial<Specialist>) =>
       upsertSpecialistMutation.mutateAsync(spec),
-    handleReschedule: (appointmentId: number, newTime: string) =>
-      rescheduleMutation.mutateAsync({ appointmentId, newTime }),
+    handleReschedule: (
+      appointmentId: number,
+      newFecha: string,
+      newSession: { inicio: string; fin: string },
+      _specialistId?: number,
+    ) =>
+      rescheduleMutation.mutateAsync({
+        appointmentId,
+        newFecha,
+        newSession,
+      }),
     refreshServices: refetchServices,
   };
 }

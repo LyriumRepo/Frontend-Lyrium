@@ -64,12 +64,6 @@ export default function SalesLegendModal({ isOpen, onClose }: SalesLegendModalPr
                                 </p>
                             </div>
 
-                            <div className="p-4 rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)] bg-gray-50 dark:bg-[var(--bg-muted)]/50">
-                                <p className="font-black text-gray-800 dark:text-[var(--text-primary)]">3. Recojo en sucursal</p>
-                                <p className="text-sm text-gray-600 dark:text-[var(--text-muted)] mt-1">
-                                    Si deseas acudir presencialmente a la tienda correspondiente.
-                                </p>
-                            </div>
                         </div>
                     </section>
 
@@ -134,7 +128,7 @@ export default function SalesLegendModal({ isOpen, onClose }: SalesLegendModalPr
                             <div className="p-4 rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)] bg-gray-50 dark:bg-[var(--bg-muted)]/50">
                                 <p className="font-black text-gray-800 dark:text-[var(--text-primary)]">Listo para recojo</p>
                                 <p className="text-sm text-gray-600 dark:text-[var(--text-muted)] mt-1">
-                                    Su pedido está listo para recojo en agencia o sucursal.
+                                    Su pedido está listo para recojo en agencia.
                                 </p>
                             </div>
 

@@ -76,10 +76,10 @@ export const TreasuryModule: React.FC<TreasuryModuleProps> = ({ state, actions }
 
             {/* KPIs */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {kpis.map((kpi: TreasuryKPI) => (
-                    <div key={kpi.label} className={`bg-[var(--bg-card)] p-6 border-l-4 border-${kpi.color}-500 transition-all hover:scale-[1.02] rounded-2xl shadow-sm`}>
+                {kpis.map((kpi: any) => (
+                    <div key={kpi.label} className={`bg-[var(--bg-card)] p-6 border-l-4 ${kpi.borderClass} transition-all hover:scale-[1.02] rounded-2xl shadow-sm`}>
                         <div className="flex items-center justify-between mb-2">
-                            <div className={`p-3 bg-${kpi.color}-500/10 text-${kpi.color}-500 rounded-2xl`}>
+                            <div className={`p-3 ${kpi.bgClass} rounded-2xl`}>
                                 {MapIcon(kpi.icon)}
                             </div>
                             <span className="text-2xl font-black text-[var(--text-primary)] tracking-tighter">{kpi.val}</span>
@@ -101,7 +101,9 @@ export const TreasuryModule: React.FC<TreasuryModuleProps> = ({ state, actions }
                         <button
                             key={tab.id}
                             onClick={() => actions.setActiveTab(tab.id)}
-                            className={`px-6 py-3 rounded-[1.2rem] font-black text-[11px] uppercase transition-all flex items-center gap-2 font-industrial ${activeTab === tab.id ? 'bg-sky-500 text-white shadow-xl' : 'text-[var(--text-muted)] hover:bg-[var(--bg-card)]'
+                            className={`px-6 py-3 rounded-[1.2rem] font-black text-[11px] uppercase transition-all flex items-center gap-2 font-industrial ${activeTab === tab.id
+                                ? 'bg-[var(--brand-sky)] dark:bg-[var(--brand-green)] text-white shadow-xl shadow-[var(--brand-sky)]/10 dark:shadow-[var(--brand-green)]/10'
+                                : 'text-[var(--text-muted)] hover:bg-[var(--bg-card)] dark:hover:bg-[var(--brand-green-hover)]'
                                 }`}
                         >
                             <IconComp className="w-4 h-4" /> {tab.label}
@@ -123,7 +125,7 @@ export const TreasuryModule: React.FC<TreasuryModuleProps> = ({ state, actions }
                                 placeholder="Buscar por ID, Cliente o Empresa..."
                                 value={filters.search}
                                 onChange={(e) => actions.setFilters({ ...filters, search: e.target.value })}
-                                className="w-full pl-10 pr-4 py-2.5 bg-[var(--bg-input)] border-none rounded-xl text-xs focus:ring-2 focus:ring-indigo-500/20 font-industrial font-bold text-[var(--text-primary)]"
+                                className="w-full pl-10 pr-4 py-2.5 bg-[var(--bg-input)] border-none rounded-xl text-xs focus:ring-2 focus:ring-[var(--brand-green)]/20 font-industrial font-bold text-[var(--text-primary)]"
                             />
                         </div>
                     </div>

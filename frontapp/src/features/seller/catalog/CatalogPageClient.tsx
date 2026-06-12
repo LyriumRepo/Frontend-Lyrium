@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useTransition, useOptimistic } from 'react';
-import type { Product } from '@/features/seller/catalog/types';
+import { Product } from '@/features/seller/catalog/types';
 import ProductCard from './components/ProductCard';
 import ProductModal from './components/ProductModal';
 import ProductDetailModal from './components/ProductDetailModal';
@@ -10,366 +10,512 @@ import BaseButton from '@/components/ui/BaseButton';
 import BaseLoading from '@/components/ui/BaseLoading';
 import Icon from '@/components/ui/Icon';
 import { useToast } from '@/shared/lib/context/ToastContext';
-import {
-  deleteProduct,
-  updateProductPrice,
-  saveProduct,
-  uploadProductImageAction,
-} from '@/shared/lib/actions/catalog';
+import { deleteProduct, updateProductPrice } from '@/shared/lib/actions/catalog';
+import { productRepository } from '@/shared/lib/api/factory';
+import { USE_MOCKS } from '@/shared/lib/config/flags';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import { useConfirmDialog } from '@/components/ui/confirm-dialog';
 
 interface CatalogClientProps {
-  initialProducts: Product[];
+    initialProducts: Product[];
 }
 
-// ─── PriceEditInput ───────────────────────────────────────────────────────────
-function PriceEditInput({
-  product,
-  onPriceUpdate,
-}: {
-  product: Product;
-  onPriceUpdate: (id: string, price: number) => void;
-}) {
-  const [isEditing, setIsEditing] = useState(false);
-  const [price, setPrice] = useState(String(product.price));
+type ProductFormData = Partial<Product>;
 
-  const handleSave = async () => {
-    const newPrice = Number(price);
-    if (isNaN(newPrice) || newPrice < 0) {
-      setPrice(String(product.price));
-      setIsEditing(false);
-      return;
-    }
-    onPriceUpdate(product.id, newPrice);
-    setIsEditing(false);
-  };
+// ─── Inline price editor ──────────────────────────────────────────────────────
 
-  if (isEditing) {
-    return (
-      <div className="flex items-center gap-2">
-        <input
-          type="number"
-          value={price}
-          onChange={(e) => setPrice(e.target.value)}
-          className="w-20 px-2 py-1 text-sm border border-emerald-500/30 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-[var(--bg-card)] text-[var(--text-primary)]"
-          step="0.01"
-        />
-        <button
-          onClick={handleSave}
-          className="p-1 text-emerald-500 hover:bg-emerald-500/10 rounded"
-        >
-          <Icon name="Check" className="w-4 h-4" />
-        </button>
-        <button
-          onClick={() => {
+interface PriceEditInputProps {
+    product: Product;
+    onPriceUpdate: (productId: string, newPrice: number) => void;
+}
+
+function PriceEditInput({ product, onPriceUpdate }: PriceEditInputProps) {
+    const [isEditing, setIsEditing]   = useState(false);
+    const [price, setPrice]           = useState(String(product.price));
+    const [isUpdating, setIsUpdating] = useState(false);
+
+    const handleSave = async () => {
+        const newPrice = Number(price);
+        if (isNaN(newPrice) || newPrice < 0) {
             setPrice(String(product.price));
             setIsEditing(false);
-          }}
-          className="p-1 text-red-500 hover:bg-red-500/10 rounded"
-        >
-          <Icon name="X" className="w-4 h-4" />
-        </button>
-      </div>
-    );
-  }
+            return;
+        }
+        setIsUpdating(true);
+        onPriceUpdate(product.id, newPrice);
+        setIsEditing(false);
+        setIsUpdating(false);
+    };
 
-  return (
-    <button
-      onClick={() => setIsEditing(true)}
-      className="flex items-center gap-1 text-emerald-500 font-bold hover:text-emerald-400 transition-colors"
-    >
-      <span>S/{product.price.toFixed(2)}</span>
-      <Icon name="Pencil" className="w-3 h-3 opacity-50" />
-    </button>
-  );
+    const handleCancel = () => {
+        setPrice(String(product.price));
+        setIsEditing(false);
+    };
+
+    if (isEditing) {
+        return (
+            <div className="flex items-center gap-1.5">
+                <input
+                    type="number"
+                    value={price}
+                    onChange={(e) => setPrice(e.target.value)}
+                    className="w-20 px-2 py-1 text-xs border border-sky-500/30 rounded-lg focus:ring-2 focus:ring-sky-500/20 bg-[var(--bg-card)] text-[var(--text-primary)] font-black"
+                    step="0.01"
+                    disabled={isUpdating}
+                    autoFocus
+                />
+                <button
+                    onClick={handleSave}
+                    disabled={isUpdating}
+                    className="w-6 h-6 flex items-center justify-center rounded-lg text-sky-500 hover:bg-sky-500/10 transition-colors"
+                >
+                    <Icon name="Check" className="w-3.5 h-3.5" />
+                </button>
+                <button
+                    onClick={handleCancel}
+                    disabled={isUpdating}
+                    className="w-6 h-6 flex items-center justify-center rounded-lg text-red-400 hover:bg-red-500/10 transition-colors"
+                >
+                    <Icon name="X" className="w-3.5 h-3.5" />
+                </button>
+            </div>
+        );
+    }
+
+    return (
+        <button
+            onClick={() => setIsEditing(true)}
+            className="flex items-center gap-1 group/price"
+            title="Editar precio"
+        >
+            <span className="text-sm font-black text-[var(--text-primary)]">
+                S/ {product.price.toFixed(2)}
+            </span>
+            <Icon name="Pencil" className="w-3 h-3 text-[var(--text-secondary)] opacity-0 group-hover/price:opacity-50 transition-opacity" />
+        </button>
+    );
 }
 
-// ─── Main Component ───────────────────────────────────────────────────────────
-export default function CatalogClient({ initialProducts }: CatalogClientProps) {
-  const [products, setProducts] = useState<Product[]>(initialProducts);
-  const [searchText, setSearchText] = useState('');
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [isPending, startTransition] = useTransition();
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [optimisticPrices, setOptimisticPrices] = useState<
-    Record<string, number>
-  >({});
+// ─── Optimistic wrapper ───────────────────────────────────────────────────────
 
-  const [optimisticProducts, setOptimisticPrice] = useOptimistic(
-    products,
-    (state, { productId, newPrice }: { productId: string; newPrice: number }) =>
-      state.map((p) => (p.id === productId ? { ...p, price: newPrice } : p)),
-  );
+interface OptimisticProductRowProps {
+    product:        Product;
+    optimisticPrice?: number;
+    onEdit:         (product: Product) => void;
+    onDelete:       (productId: string) => void;
+    onViewInfo:     (product: Product) => void;
+    onPriceUpdate:  (productId: string, newPrice: number) => void;
+}
 
-  const { showToast } = useToast();
-  const { confirm, ConfirmDialog } = useConfirmDialog();
+function OptimisticProductRow({
+    product,
+    optimisticPrice,
+    onEdit,
+    onDelete,
+    onViewInfo,
+    onPriceUpdate,
+}: OptimisticProductRowProps) {
+    const displayProduct = optimisticPrice !== undefined
+        ? { ...product, price: optimisticPrice }
+        : product;
 
-  const displayedProducts = optimisticProducts.map((p) => {
-    const op = optimisticPrices[p.id];
-    return op !== undefined ? { ...p, price: op } : p;
-  });
-
-  const filteredProducts = displayedProducts.filter(
-    (p) =>
-      p.name.toLowerCase().includes(searchText.toLowerCase()) ||
-      p.description.toLowerCase().includes(searchText.toLowerCase()),
-  );
-
-  // ─── Precio ─────────────────────────────────────────────────────────────────
-  const handlePriceUpdate = async (productId: string, newPrice: number) => {
-    startTransition(() => {
-      setOptimisticPrice({ productId, newPrice });
-      setOptimisticPrices((prev) => ({ ...prev, [productId]: newPrice }));
-    });
-
-    const result = await updateProductPrice(productId, newPrice);
-    if (!result.success) {
-      showToast(result.error ?? 'Error al actualizar precio', 'error');
-      setOptimisticPrices((prev) => {
-        const { [productId]: _, ...rest } = prev;
-        return rest;
-      });
-    } else {
-      showToast('Precio actualizado', 'success');
-      startTransition(() => {
-        setProducts((prev) =>
-          prev.map((p) => (p.id === productId ? { ...p, price: newPrice } : p)),
-        );
-      });
-    }
-  };
-
-  // ─── CRUD ────────────────────────────────────────────────────────────────────
-  const handleCreateProduct = () => {
-    setSelectedProduct(null);
-    setIsModalOpen(true);
-  };
-  const openEditModal = (product: Product) => {
-    setSelectedProduct(product);
-    setIsModalOpen(true);
-  };
-  const openDetailModal = (product: Product) => {
-    setSelectedProduct(product);
-    setIsDetailModalOpen(true);
-  };
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setSelectedProduct(null);
-  };
-  const closeDetailModal = () => {
-    setIsDetailModalOpen(false);
-    setSelectedProduct(null);
-  };
-
-  // ─── Image compression utility ────────────────────────────────────────────────
-  function compressImage(
-    dataUrl: string,
-    maxWidth = 1920,
-    quality = 0.85,
-  ): Promise<string> {
-    return new Promise((resolve, reject) => {
-      if (typeof Image === 'undefined') {
-        resolve(dataUrl);
-        return;
-      }
-      const img = new Image();
-      img.onload = () => {
-        let { width, height } = img;
-        if (width > maxWidth) {
-          height = (height * maxWidth) / width;
-          width = maxWidth;
-        }
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) {
-          resolve(dataUrl);
-          return;
-        }
-        ctx.drawImage(img, 0, 0, width, height);
-        resolve(canvas.toDataURL('image/webp', quality));
-      };
-      img.onerror = () => reject(new Error('Failed to load image for compression'));
-      img.src = dataUrl;
-    });
-  }
-
-  const onSave = async (productData: Partial<Product>) => {
-    try {
-      const hasBase64Image = productData.image?.startsWith('data:');
-
-      // Sin base64: enviar imagen existente. Con base64: preservar la anterior
-      const payload = !hasBase64Image
-        ? productData
-        : { ...productData, image: (selectedProduct?.image ?? '') };
-
-      const result = await saveProduct(payload);
-
-      if (!result.success || !result.data) {
-        showToast(result.error ?? 'Error al guardar el producto', 'error');
-        return;
-      }
-
-      let savedProduct = result.data;
-
-      // Subir imagen comprimida vía server action (evita CORS, PHP upload limits, httpOnly cookie)
-      if (hasBase64Image && productData.image && savedProduct.id) {
-        try {
-          const compressed = await compressImage(productData.image);
-          const uploadResult = await uploadProductImageAction(
-            Number(savedProduct.id),
-            compressed,
-          );
-          if (uploadResult.success && uploadResult.url) {
-            savedProduct = { ...savedProduct, image: uploadResult.url };
-          } else {
-            console.error('Upload failed:', uploadResult.error);
-          }
-        } catch (uploadErr) {
-          console.error('Upload exception:', uploadErr);
-        }
-      }
-
-      showToast(
-        selectedProduct
-          ? 'Producto actualizado correctamente'
-          : 'Producto agregado al catálogo',
-        'success',
-      );
-
-      startTransition(() => {
-        setProducts((prev) =>
-          selectedProduct
-            ? prev.map((p) => (p.id === selectedProduct.id ? savedProduct : p))
-            : [savedProduct, ...prev],
-        );
-      });
-
-      closeModal();
-    } catch (err: any) {
-      showToast(err.message ?? 'Error al procesar el producto', 'error');
-    }
-  };
-
-  const onDelete = async (productId: string) => {
-    const confirmed = await confirm(
-      'Eliminar producto',
-      '¿Estás seguro de eliminar este ítem del catálogo?',
-    );
-    if (!confirmed) return;
-
-    setIsDeleting(true);
-    const result = await deleteProduct(productId);
-    if (result.success) {
-      showToast('Producto eliminado', 'info');
-      startTransition(() => {
-        setProducts((prev) => prev.filter((p) => p.id !== productId));
-      });
-    } else {
-      showToast(result.error ?? 'No se pudo eliminar el producto', 'error');
-    }
-    setIsDeleting(false);
-  };
-
-  if (isPending || isDeleting) {
     return (
-      <div className="space-y-8 animate-fadeIn pb-20">
-        <ModuleHeader
-          title="Gestión de Catálogo"
-          subtitle="Administra tus productos, precios e inventario centralizado."
-          icon="Catalog"
-        />
-        <div className="flex items-center justify-center py-32">
-          <BaseLoading message="Procesando..." />
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-8 animate-fadeIn pb-20">
-      <ModuleHeader
-        title="Gestión de Catálogo"
-        subtitle="Administra tus productos, precios e inventario centralizado."
-        icon="Catalog"
-        actions={
-          <BaseButton
-            onClick={handleCreateProduct}
-            variant="action"
-            leftIcon="PlusCircle"
-            size="md"
-            className="!rounded-3xl"
-          >
-            Nuevo Producto
-          </BaseButton>
-        }
-      />
-
-      {/* Filtros */}
-      <div className="glass-card p-6 rounded-[2.5rem] bg-[var(--bg-card)] border border-[var(--border-subtle)] shadow-xl shadow-black/5">
-        <div className="relative">
-          <Icon
-            name="Search"
-            className="absolute left-6 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] w-5 h-5"
-          />
-          <input
-            type="text"
-            placeholder="Buscar por nombre o descripción..."
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
-            className="w-full pl-14 pr-6 py-4 bg-[var(--bg-secondary)] border-none rounded-2xl focus:ring-4 focus:ring-emerald-500/10 focus:bg-[var(--bg-card)] transition-all font-bold text-[var(--text-primary)] outline-none"
-          />
-        </div>
-      </div>
-
-      {/* Grid de productos */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {filteredProducts.length > 0 ? (
-          filteredProducts.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              onEdit={openEditModal}
-              onDelete={onDelete}
-              onViewInfo={openDetailModal}
-              renderPrice={() => (
+        <ProductCard
+            product={displayProduct}
+            onEdit={onEdit}
+            onDelete={onDelete}
+            onViewInfo={onViewInfo}
+            renderPrice={() => (
                 <PriceEditInput
-                  product={product}
-                  onPriceUpdate={handlePriceUpdate}
+                    product={product}
+                    onPriceUpdate={onPriceUpdate}
                 />
-              )}
-            />
-          ))
-        ) : (
-          <div className="col-span-full">
-            <BaseEmptyState
-              title="Tu catálogo está vacío"
-              description="Comienza a construir tu presencia digital agregando tu primer producto."
-              icon="Catalog"
-              actionLabel="Nuevo Producto"
-              onAction={handleCreateProduct}
-              suggestion="Los productos con buenas fotos y descripciones técnicas convierten un 40% más."
-            />
-          </div>
-        )}
-      </div>
+            )}
+        />
+    );
+}
 
-      <ProductModal
-        isOpen={isModalOpen}
-        onClose={closeModal}
-        onSave={onSave}
-        productToEdit={selectedProduct}
-      />
-      <ProductDetailModal
-        product={selectedProduct}
-        isOpen={isDetailModalOpen}
-        onClose={closeDetailModal}
-      />
-      <ConfirmDialog />
-    </div>
-  );
+// ─── Page ─────────────────────────────────────────────────────────────────────
+
+export default function CatalogClient({ initialProducts }: CatalogClientProps) {
+    const [products, setProducts]               = useState<Product[]>(initialProducts);
+    const [searchText, setSearchText]           = useState('');
+    const [currentPage, setCurrentPage]         = useState(1);
+    const [isModalOpen, setIsModalOpen]         = useState(false);
+    const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+    const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+    const [isDeleting, setIsDeleting]           = useState(false);
+    const [optimisticPrices, setOptimisticPrices] = useState<Record<string, number>>({});
+    const [showSuccessModal, setShowSuccessModal]   = useState(false);
+
+    const [isPending, startTransition] = useTransition();
+    const [optimisticProducts, setOptimisticPrice] = useOptimistic(
+        products,
+        (state, { productId, newPrice }: { productId: string; newPrice: number }) =>
+            state.map((p) => (p.id === productId ? { ...p, price: newPrice } : p)),
+    );
+
+    const { showToast }          = useToast();
+    const { confirm, ConfirmDialog } = useConfirmDialog();
+
+    // ── Derived ──────────────────────────────────────────────────────────────
+
+    const displayedProducts = optimisticProducts.map((p) => {
+        const op = optimisticPrices[p.id];
+        return op !== undefined ? { ...p, price: op } : p;
+    });
+
+    const filteredProducts = displayedProducts.filter(
+        (p) =>
+            p.name.toLowerCase().includes(searchText.toLowerCase()) ||
+            p.description.toLowerCase().includes(searchText.toLowerCase()),
+    );
+
+    const PAGE_SIZE   = 10;
+    const totalPages  = Math.max(1, Math.ceil(filteredProducts.length / PAGE_SIZE));
+    const safePage    = Math.min(currentPage, totalPages);
+    const pagedProducts = filteredProducts.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+
+    // ── Handlers ─────────────────────────────────────────────────────────────
+
+    const handlePriceUpdate = async (productId: string, newPrice: number) => {
+        startTransition(() => {
+            setOptimisticPrice({ productId, newPrice });
+            setOptimisticPrices((prev) => ({ ...prev, [productId]: newPrice }));
+        });
+
+        try {
+            const result = await updateProductPrice(productId, newPrice);
+            if (!result.success) {
+                showToast(result.error || 'Error al actualizar precio', 'error');
+                startTransition(() => {
+                    setOptimisticPrices((prev) => { const { [productId]: _, ...rest } = prev; return rest; });
+                });
+            } else {
+                showToast('Precio actualizado', 'success');
+                startTransition(() => {
+                    setProducts((prev) => prev.map((p) => (p.id === productId ? { ...p, price: newPrice } : p)));
+                });
+            }
+        } catch {
+            showToast('Error de conexión', 'error');
+            startTransition(() => {
+                setOptimisticPrices((prev) => { const { [productId]: _, ...rest } = prev; return rest; });
+            });
+        }
+    };
+
+    const handleCreateProduct = () => { setSelectedProduct(null); setIsModalOpen(true); };
+    const openEditModal       = (p: Product) => { setSelectedProduct(p); setIsModalOpen(true); };
+    const openDetailModal     = (p: Product) => { setSelectedProduct(p); setIsDetailModalOpen(true); };
+    const closeModal          = () => { setIsModalOpen(false); setSelectedProduct(null); };
+    const closeDetailModal    = () => { setIsDetailModalOpen(false); setSelectedProduct(null); };
+
+    const onSave = async (product: ProductFormData) => {
+        try {
+            let savedProduct;
+
+            if (!USE_MOCKS) {
+                const hasBase64Image = product.image && product.image.startsWith('data:');
+
+                if (selectedProduct) {
+                    // UPDATE: solo enviar campos escalares, NO atributos (ya existen en BD)
+                    const payload: Record<string, unknown> = {};
+                    if (product.name !== undefined) payload.name = product.name;
+                    if (product.description !== undefined) payload.description = product.description;
+                    if (product.short_description !== undefined) payload.short_description = product.short_description || null;
+                    if (product.price !== undefined) payload.price = Number(product.price);
+                    if (product.stock !== undefined) payload.stock = Number(product.stock);
+                    if (product.category !== undefined) payload.category = product.category || null;
+                    if (product.sticker !== undefined) payload.sticker = product.sticker || null;
+                    if (product.discountPercentage !== undefined) payload.discountPercentage = product.discountPercentage ?? null;
+                    if (product.weight !== undefined) payload.weight = product.weight ? Number(product.weight) : null;
+                    if (product.dimensions !== undefined) payload.dimensions = product.dimensions || null;
+                    if (product.servingNote !== undefined) payload.servingNote = product.servingNote || null;
+                    if ((product as any).expirationDate !== undefined) payload.expirationDate = (product as any).expirationDate || null;
+
+                    savedProduct = await productRepository.updateProduct(selectedProduct.id, payload);
+                    if (hasBase64Image && product.image) {
+                        try {
+                            const blob = await (await fetch(product.image)).blob();
+                            const r = await productRepository.uploadProductImage(
+                                savedProduct.id,
+                                new File([blob], `product-${Date.now()}.webp`, { type: blob.type }),
+                            );
+                            savedProduct = { ...savedProduct, image: r.url } as Product;
+                        } catch {}
+                    }
+                } else {
+                    // CREATE: payload completo
+                    const payload = {
+                        type:                   product.type || 'physical',
+                        name:                   product.name || '',
+                        category:               product.category || '',
+                        price:                  Number(product.price) || 0,
+                        stock:                  Number(product.stock) || 0,
+                        description:            product.description || '',
+                        short_description:      product.short_description || undefined,
+                        sticker:                product.sticker || null,
+                        discountPercentage:     product.discountPercentage ?? null,
+                        weight:                 product.weight ? Number(product.weight) : null,
+                        dimensions:             product.dimensions || null,
+                        mainAttributes:         product.mainAttributes || [],
+                        additionalAttributes:   product.additionalAttributes || [],
+                        nutritionalAttributes:  product.nutritionalAttributes || [],
+                        servingNote:            product.servingNote || null,
+                        image:                  (product as any).image || null,
+                        expirationDate:         (product as any).expirationDate || null,
+                    } as any;
+
+                    savedProduct = await productRepository.createProduct(payload);
+                    if (hasBase64Image && product.image && savedProduct.id) {
+                        try {
+                            const blob = await (await fetch(product.image)).blob();
+                            const r = await productRepository.uploadProductImage(
+                                savedProduct.id,
+                                new File([blob], `product-${Date.now()}.webp`, { type: blob.type }),
+                            );
+                            savedProduct = { ...savedProduct, image: r.url } as Product;
+                        } catch {}
+                    }
+                }
+            } else {
+                savedProduct = { id: product.id || Date.now().toString(), ...product } as Product;
+            }
+
+            if (!selectedProduct) {
+                setShowSuccessModal(true);
+                closeModal();
+                return;
+            }
+
+            showToast('Producto actualizado correctamente', 'success');
+
+            startTransition(() => {
+                setProducts((prev) =>
+                    prev.map((p) => (p.id === selectedProduct.id ? savedProduct as Product : p)),
+                );
+            });
+
+            closeModal();
+        } catch (err: any) {
+            showToast(err.message || 'Error al procesar el producto', 'error');
+        }
+    };
+
+    const onDelete = async (productId: string) => {
+        const confirmed = await confirm('Eliminar producto', '¿Estás seguro de eliminar este ítem del catálogo activo?');
+        if (!confirmed) return;
+
+        setIsDeleting(true);
+        try {
+            const result = await deleteProduct(productId);
+            if (result.success) {
+                showToast('Producto eliminado exitosamente', 'info');
+                startTransition(() => {
+                    setProducts((prev) => prev.filter((p) => p.id !== productId));
+                });
+            } else {
+                showToast(result.error || 'No se pudo eliminar el producto', 'error');
+            }
+        } catch {
+            showToast('No se pudo eliminar el producto', 'error');
+        } finally {
+            setIsDeleting(false);
+        }
+    };
+
+    if (isPending || isDeleting) return <BaseLoading message="Procesando..." />;
+
+    // ── Render ───────────────────────────────────────────────────────────────
+
+    return (
+        <div className="space-y-8 animate-fadeIn pb-20">
+
+            <ModuleHeader
+                title="Gestión de Catálogo"
+                subtitle="Administra tus productos, precios e inventario centralizado."
+                icon="Catalog"
+                actions={
+                    <BaseButton
+                        onClick={handleCreateProduct}
+                        variant="action"
+                        leftIcon="PlusCircle"
+                    >
+                        Nuevo Producto
+                    </BaseButton>
+                }
+            />
+
+            {/* ── Tabla ── */}
+            <div className="space-y-4 mt-8">
+
+                {/* Barra superior */}
+                <div className="flex items-center justify-between px-1">
+
+                    <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 bg-sky-500/10 dark:bg-[#8FC3A1]/10 rounded-xl flex items-center justify-center border border-sky-500/20 dark:border-[#8FC3A1]/20 text-sky-500 dark:text-[#8FC3A1]">
+                            <Icon name="Catalog" className="w-4 h-4 stroke-[2.5px]" />
+                        </div>
+                        <div>
+                            <h2 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-widest">
+                                Catálogo de Productos
+                            </h2>
+                            <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wide">
+                                {products.length} producto{products.length !== 1 ? 's' : ''} registrado{products.length !== 1 ? 's' : ''}
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Buscador */}
+                    <div className="relative">
+                        <Icon name="Search" className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--text-secondary)] pointer-events-none" />
+                        <input
+                            type="text"
+                            value={searchText}
+                            onChange={(e) => { setSearchText(e.target.value); setCurrentPage(1); }}
+                            placeholder="Buscar producto..."
+                            className="pl-8 pr-3 py-1.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] text-[11px] font-bold text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-none focus:border-sky-500/50 dark:focus:border-[#8FC3A1]/50 transition-colors w-44"
+                        />
+                    </div>
+                </div>
+
+                {/* Tabla */}
+                {filteredProducts.length > 0 ? (
+                    <>
+                        <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] overflow-visible">
+                            <table className="w-full border-separate border-spacing-0">
+                                <thead>
+                                    <tr className="border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)]">
+                                        {['Producto', 'Categoría', 'Precio', 'Stock', 'Acciones'].map(
+                                            (h, i, arr) => (
+                                                <th
+                                                    key={h}
+                                                    className={`px-4 py-2.5 text-left text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)]
+                                                        ${i === 0 ? 'rounded-tl-2xl' : ''}
+                                                        ${i === arr.length - 1 ? 'rounded-tr-2xl' : ''}`}
+                                                >
+                                                    {h}
+                                                </th>
+                                            ),
+                                        )}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {pagedProducts.map((p) => (
+                                        <OptimisticProductRow
+                                            key={p.id}
+                                            product={p}
+                                            optimisticPrice={optimisticPrices[p.id]}
+                                            onEdit={openEditModal}
+                                            onDelete={onDelete}
+                                            onViewInfo={openDetailModal}
+                                            onPriceUpdate={handlePriceUpdate}
+                                        />
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {totalPages > 1 && (
+                            <div className="flex items-center justify-between px-1 pt-1">
+                                <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest">
+                                    Página {safePage} de {totalPages} · {filteredProducts.length} producto{filteredProducts.length !== 1 ? 's' : ''}
+                                </p>
+                                <div className="flex items-center gap-1">
+                                    <button
+                                        onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                                        disabled={safePage === 1}
+                                        className="w-7 h-7 flex items-center justify-center rounded-lg border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                    >
+                                        <Icon name="ChevronLeft" className="w-3.5 h-3.5" />
+                                    </button>
+                                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                                        <button
+                                            key={page}
+                                            onClick={() => setCurrentPage(page)}
+                                            className={`w-7 h-7 flex items-center justify-center rounded-lg text-[10px] font-black transition-colors
+                                                ${safePage === page
+                                                    ? 'bg-sky-500/20 dark:bg-[#8FC3A1]/20 text-sky-500 dark:text-[#8FC3A1] border border-sky-500/30 dark:border-[#8FC3A1]/30'
+                                                    : 'border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]'
+                                                }`}
+                                        >
+                                            {page}
+                                        </button>
+                                    ))}
+                                    <button
+                                        onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                                        disabled={safePage === totalPages}
+                                        className="w-7 h-7 flex items-center justify-center rounded-lg border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                    >
+                                        <Icon name="ChevronRight" className="w-3.5 h-3.5" />
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </>
+                ) : (
+                    <BaseEmptyState
+                        title="Tu catálogo está vacío"
+                        description={
+                            searchText.trim()
+                                ? `No hay productos que coincidan con "${searchText}".`
+                                : 'Comienza agregando tu primer producto al catálogo.'
+                        }
+                        icon="Catalog"
+                        actionLabel={!searchText.trim() ? 'Nuevo Producto' : undefined}
+                        onAction={!searchText.trim() ? handleCreateProduct : undefined}
+                    />
+                )}
+            </div>
+
+            {/* ── Modals ── */}
+            <ProductModal
+                isOpen={isModalOpen}
+                onClose={closeModal}
+                onSave={onSave}
+                productToEdit={selectedProduct}
+            />
+
+            <ProductDetailModal
+                product={selectedProduct}
+                isOpen={isDetailModalOpen}
+                onClose={closeDetailModal}
+            />
+
+            <ConfirmDialog />
+
+            {/* Success Modal */}
+            {showSuccessModal && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" onClick={() => setShowSuccessModal(false)}>
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+                    <div
+                        className="relative z-10 w-full max-w-md rounded-3xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-8 shadow-2xl animate-fadeIn"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="flex flex-col items-center text-center space-y-4">
+                            <div className="w-16 h-16 rounded-full bg-emerald-500/15 flex items-center justify-center border border-emerald-500/30">
+                                <Icon name="CheckCircle" className="w-8 h-8 text-emerald-500" />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-black text-[var(--text-primary)] uppercase tracking-widest">
+                                    Producto Enviado
+                                </h3>
+                                <p className="text-sm font-medium text-[var(--text-secondary)] mt-2 leading-relaxed">
+                                    Tu producto ha sido registrado y será evaluado por un administrador.
+                                    Recibirás una notificación cuando sea aprobado.
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => setShowSuccessModal(false)}
+                                className="px-8 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-600 text-white font-black text-sm uppercase tracking-widest transition-all active:scale-95"
+                            >
+                                Entendido
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
 }

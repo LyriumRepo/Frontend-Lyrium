@@ -45,7 +45,7 @@ function BoletaGrid({ vendedor, filter }: { vendedor: VendedorPago; filter: stri
           <div className="text-xs text-gray-400 mt-0.5">{vendedor.correo ?? ''}</div>
         </div>
         <div className="text-right flex-shrink-0">
-          <div className="text-[22px] font-extrabold text-gray-800">S/ {vendedor.total_monto.toFixed(2)}</div>
+          <div className="text-[22px] font-extrabold text-gray-800">S/ {Number(vendedor.total_monto ?? 0).toFixed(2)}</div>
           <div className="text-xs text-gray-400 mt-0.5">{exitosos} exitoso(s) · {txs.length} registro(s)</div>
         </div>
         <button className="flex items-center gap-1.5 bg-gray-100 border-none rounded-xl px-4 py-2 text-xs font-semibold text-gray-700 cursor-pointer transition-all hover:bg-gray-200 flex-shrink-0 whitespace-nowrap"
@@ -85,7 +85,7 @@ function BoletaGrid({ vendedor, filter }: { vendedor: VendedorPago; filter: stri
                 </div>
                 <div className="p-4">
                   <div className="flex items-center justify-between mb-3">
-                    <div className="text-[28px] font-extrabold leading-none" style={{ color: eColor }}>S/ {tx.monto.toFixed(2)}</div>
+                    <div className="text-[28px] font-extrabold leading-none" style={{ color: eColor }}>S/ {Number(tx.monto ?? 0).toFixed(2)}</div>
                     <MetodoIcon metodo={metodo} />
                   </div>
                   <div className="border-t-2 border-dashed border-gray-200 my-3" />
@@ -133,7 +133,7 @@ export default function PaymentPanel({ vendedorPagos, totales, filter, onFilterC
         <div className="bg-white border border-gray-200 rounded-3xl p-5 flex flex-col gap-1.5 relative overflow-hidden transition-shadow hover:shadow-md hover:-translate-y-0.5">
           <div className="absolute top-0 left-0 right-0 h-1 rounded-t-3xl bg-gradient-to-r from-indigo-500 to-purple-500" />
           <div className="text-[11px] font-extrabold uppercase tracking-wide text-gray-400">Total recaudado</div>
-          <div className="text-[1.75rem] font-extrabold text-gray-800 leading-tight">S/ {totales.total_monto.toFixed(2)}</div>
+          <div className="text-[1.75rem] font-extrabold text-gray-800 leading-tight">S/ {Number(totales.total_monto ?? 0).toFixed(2)}</div>
         </div>
         <div className="bg-white border border-gray-200 rounded-3xl p-5 flex flex-col gap-1.5 relative overflow-hidden transition-shadow hover:shadow-md hover:-translate-y-0.5">
           <div className="absolute top-0 left-0 right-0 h-1 rounded-t-3xl bg-emerald-500" />

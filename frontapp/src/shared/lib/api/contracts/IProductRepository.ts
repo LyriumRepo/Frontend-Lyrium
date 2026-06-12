@@ -16,7 +16,7 @@ export interface CreateProductInput {
   price: number;
   stock: number;
   description: string;
-  short_description?: string; // ← nuevo
+  short_description?: string | null;
   image?: string | null;
   weight?: number;
   dimensions?: string;
@@ -36,7 +36,7 @@ export interface UpdateProductInput {
   price?: number;
   stock?: number;
   description?: string;
-  short_description?: string; // ← nuevo
+  short_description?: string | null;
   image?: string | null;
   sticker?: ProductSticker;
   discountPercentage?: number;

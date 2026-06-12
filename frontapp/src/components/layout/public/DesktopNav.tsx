@@ -24,20 +24,32 @@ interface DesktopNavProps {
     megaMenuData: Record<string, MegaCategoryData>;
 }
 
+const HOVER_INTENT_DELAY = 200;
+
 export default function DesktopNav({ menuItems, megaMenuData }: DesktopNavProps) {
     const [activeMenu, setActiveMenu] = useState<string | null>(null);
     const [menuPosition, setMenuPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
     const [activeCategory, setActiveCategory] = useState<string>('Bebés y recién nacidos');
     const menuRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
+    const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const { setActiveDropdown, activeDropdown } = useUIStore();
+
+    const cancelCloseTimer = () => {
+        if (closeTimerRef.current !== null) {
+            clearTimeout(closeTimerRef.current);
+            closeTimerRef.current = null;
+        }
+    };
 
     useEffect(() => {
         if (activeDropdown === 'search') {
+            cancelCloseTimer();
             setActiveMenu(null);
         }
     }, [activeDropdown]);
 
     const handleMenuEnter = (label: string, children?: MenuItem[]) => {
+        cancelCloseTimer();
         setActiveMenu(label);
         setActiveDropdown('megaMenu');
         
@@ -53,7 +65,16 @@ export default function DesktopNav({ menuItems, megaMenuData }: DesktopNavProps)
         }
     };
 
+    const startCloseTimer = () => {
+        cancelCloseTimer();
+        closeTimerRef.current = setTimeout(() => {
+            setActiveMenu(null);
+            closeTimerRef.current = null;
+        }, HOVER_INTENT_DELAY);
+    };
+
     const handleMenuLeave = () => {
+        cancelCloseTimer();
         setActiveMenu(null);
     };
 
@@ -70,6 +91,7 @@ export default function DesktopNav({ menuItems, megaMenuData }: DesktopNavProps)
                                     ref={(el) => { menuRefs.current[item.label] = el; }}
                                     type="button"
                                     onMouseEnter={() => handleMenuEnter(item.label, item.children)}
+                                    onMouseLeave={startCloseTimer}
                                     className={`flex items-center gap-1 hover:text-sky-500 dark:hover:text-[var(--color-success)] transition whitespace-nowrap ${activeMenu === item.label ? 'text-sky-500 dark:text-[var(--color-success)]' : ''
                                         }`}
                                 >
@@ -95,7 +117,7 @@ export default function DesktopNav({ menuItems, megaMenuData }: DesktopNavProps)
                                     activeCategory={activeCategory}
                                     menuPosition={menuPosition}
                                     onCategoryHover={(cat) => setActiveCategory(cat)}
-                                    onMouseEnter={() => handleMenuEnter(item.label)}
+                                    onMouseEnter={cancelCloseTimer}
                                     onMouseLeave={handleMenuLeave}
                                 />
                             )}

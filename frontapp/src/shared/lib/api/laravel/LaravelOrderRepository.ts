@@ -59,6 +59,8 @@ interface BackendOrder {
     shippingType: string | null;
     trackingNumber: string | null;
     carrier: string | null;
+    carrierCode?: string | null;
+    carrierData?: Record<string, string> | null;
     storeName: string | null;
     shipping: BackendShipping;
     subtotal: number;
@@ -239,6 +241,8 @@ export class LaravelOrderRepository implements IOrderRepository {
                 city: backend.shipping?.city ?? '',
                 postalCode: backend.shipping?.postalCode ?? '',
                 notes: backend.shipping?.notes ?? '',
+                carrierCode: backend.carrierCode ?? backend.carrier ?? null,
+                carrierData: backend.carrierData ?? null,
             } as ShippingInfo,
             items,
             serviceItems,
@@ -286,6 +290,8 @@ export class LaravelOrderRepository implements IOrderRepository {
     async updateOrder(id: string, input: UpdateOrderInput): Promise<Order> {
         const body: Record<string, unknown> = {};
         if (input.status) body.status = input.status;
+        if (input.carrier_code) body.carrier_code = input.carrier_code;
+        if (input.carrier_data) body.carrier_data = input.carrier_data;
         const raw = await this.request<Record<string, unknown>>(`/orders/${id}/status`, {
             method: 'PUT',
             body: JSON.stringify(body),

@@ -29,7 +29,6 @@
  * - mockAgendaData.ts
  * - sellersData.ts
  * - treasuryData.ts
- * - operationsData.ts
  * - contractsData.ts
  * - analyticsData.ts
  * - inventoryData.ts

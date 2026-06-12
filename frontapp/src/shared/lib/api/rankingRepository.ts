@@ -24,6 +24,19 @@ export interface StoreRanking {
   review_count: number;
 }
 
+export interface ServiceRanking {
+  id: string;
+  name: string;
+  slug: string;
+  price: number;
+  image: string | null;
+  duration_minutes: number;
+  is_home_service: boolean;
+  rating_average: number;
+  rating_count: number;
+  store: { id: string; name: string | null; slug: string; logo: string | null };
+}
+
 export interface ReviewReport {
   id: string;
   reason: string;
@@ -135,6 +148,12 @@ export const rankingApi = {
     limit = 20,
   ): Promise<{ success: boolean; data: StoreRanking[] }> {
     return requestRaw(`/rankings/stores?limit=${limit}`);
+  },
+
+  getTopServices(
+    limit = 20,
+  ): Promise<{ success: boolean; data: ServiceRanking[] }> {
+    return requestRaw(`/rankings/services?limit=${limit}`);
   },
 
   // ── Admin — reseñas ──────────────────────────────────────────────────────

@@ -22,7 +22,7 @@ import type {
 
 // ─── Tipos internos del hook ───────────────────────────────────────────────────
 
-export type TabKey = 'vendedores' | 'aprobacion' | 'auditoria' | 'validacion';
+export type TabKey = 'vendedores' | 'aprobacion' | 'auditoria' | 'validacion' | 'contratos';
 
 export interface SellerFilters {
   sellerSearch: string;
@@ -114,12 +114,13 @@ export const useControlVendedores = () => {
   });
 
   // ── Derived: Stats para las 4 cards ───────────────────────────────────────
-  const stats = useMemo((): Stats & { pendingProducts: number } => {
+  const stats = useMemo((): Stats & { pendingProducts: number; pending: number } => {
     const s = statsData;
     return {
       totalSellers: s?.total ?? 0,
       activeSellers: s?.active ?? 0,
       pendingProducts: productsData?.meta?.total ?? 0,
+      pending: s?.pending ?? 0,
       alerts: s?.alerts ?? 0,
     };
   }, [statsData, productsData]);
@@ -165,7 +166,7 @@ export const useControlVendedores = () => {
       date: p.created_at
         ? new Date(p.created_at).toLocaleDateString('es-PE')
         : '',
-      imageUrl: p.image ?? undefined,
+      imageUrl: p.images?.[0]?.src ?? undefined,
       rejection_reason: p.rejection_reason,
     }));
   }, [productsData]);

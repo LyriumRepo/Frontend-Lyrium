@@ -3,8 +3,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Chart, { ChartConfiguration } from 'chart.js/auto';
 import { useTheme } from 'next-themes';
+import { companyColors } from '../colors';
 
-interface FinanceChartProps {
+export interface FinanceChartProps {
     type: 'line' | 'bar' | 'doughnut' | 'radar';
     labels: string[];
     data: number[];
@@ -21,19 +22,23 @@ export default function FinanceChart({
     labels,
     data,
     label = '',
-    color = '#0EA5E9',
+    color = companyColors.azulCeleste,
     fill = true,
     tension = 0.4,
     cutout = '75%',
-    height = '200px'
+    height = '260px'
 }: FinanceChartProps) {
     const chartRef = useRef<HTMLCanvasElement>(null);
     const chartInstance = useRef<Chart | null>(null);
-    const { theme } = useTheme();
-    const isDark = theme === 'dark';
+    const { resolvedTheme } = useTheme();
+    const [isDark, setIsDark] = useState(false);
 
-    const gridColor = isDark ? '#334d3b' : '#f1f5f9';
-    const tickColor = isDark ? '#9BAF9F' : '#94a3b8';
+    useEffect(() => {
+        setIsDark(document.documentElement.classList.contains('dark') || resolvedTheme === 'dark');
+    }, [resolvedTheme]);
+
+    const gridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : '#f1f5f9';
+    const tickColor = isDark ? '#cbd5e1' : '#64748b';
     const pointBorder = isDark ? '#1E3028' : '#ffffff';
 
     useEffect(() => {
@@ -47,6 +52,15 @@ export default function FinanceChart({
         const ctx = chartRef.current.getContext('2d');
         if (!ctx) return;
 
+        const resolveColor = (c: string) => {
+            if (typeof window !== 'undefined' && c.startsWith('--')) {
+                return getComputedStyle(document.documentElement).getPropertyValue(c).trim() || '#0ea5e9';
+            }
+            return c;
+        };
+
+        const resolvedColor = resolveColor(color);
+
         const config: ChartConfiguration = {
             type,
             data: {
@@ -54,14 +68,15 @@ export default function FinanceChart({
                 datasets: [{
                     label,
                     data,
-                    borderColor: color,
-                    backgroundColor: type === 'doughnut' ? [color, isDark ? '#1E3028' : '#F1F5F9'] : (fill ? `${color}1A` : 'transparent'),
+                    borderColor: resolvedColor,
+                    backgroundColor: type === 'doughnut' ? [resolvedColor, isDark ? '#1E3028' : '#F1F5F9'] : (fill ? `${resolvedColor}1A` : 'transparent'),
                     borderWidth: type === 'doughnut' ? 0 : 3,
                     tension: type === 'line' ? tension : 0,
                     fill: type === 'line' ? fill : false,
-                    pointBackgroundColor: color,
+                    pointBackgroundColor: resolvedColor,
                     pointBorderColor: pointBorder,
                     pointRadius: type === 'line' ? 4 : 0,
+                    pointHoverRadius: type === 'line' ? 7 : 5,
                     borderRadius: type === 'bar' ? 8 : 0,
                 }]
             },
@@ -71,9 +86,47 @@ export default function FinanceChart({
                 cutout: type === 'doughnut' ? cutout : undefined,
                 plugins: {
                     legend: { display: false },
-                    tooltip: { enabled: true }
+                    tooltip: {
+                        enabled: true,
+                        backgroundColor: isDark ? 'rgba(30, 48, 40, 0.95)' : 'rgba(15, 23, 42, 0.9)',
+                        titleColor: '#f8fafc',
+                        bodyColor: '#e2e8f0',
+                        borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.15)',
+                        borderWidth: 1,
+                        padding: 12,
+                        bodyFont: { size: 12, weight: 'bold' } as any,
+                        titleFont: { size: 11, weight: 'bold' } as any,
+                        cornerRadius: 8,
+                        displayColors: false,
+                    }
                 },
-                scales: type !== 'doughnut' && type !== 'radar' ? {
+                scales: type === 'radar' ? {
+                    r: {
+                        grid: { 
+                            color: isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.06)' 
+                        },
+                        angleLines: { 
+                            color: isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.06)' 
+                        },
+                        pointLabels: {
+                            color: isDark ? '#f1f5f9' : '#1e293b', // Bright labels in dark mode
+                            font: { 
+                                size: 10, 
+                                weight: 'black',
+                                family: "'Inter', sans-serif" 
+                            }
+                        },
+                        ticks: {
+                            showLabelBackdrop: false,
+                            backdropColor: 'transparent',
+                            color: isDark ? '#cbd5e1' : '#475569',
+                            font: { 
+                                size: 9, 
+                                weight: 'bold' 
+                            }
+                        }
+                    }
+                } : (type !== 'doughnut' ? {
                     y: {
                         beginAtZero: true,
                         grid: { color: gridColor },
@@ -83,7 +136,7 @@ export default function FinanceChart({
                         grid: { display: false },
                         ticks: { font: { size: 10, weight: 'bold' }, color: tickColor }
                     }
-                } : undefined
+                } : undefined)
             } as any
         };
 

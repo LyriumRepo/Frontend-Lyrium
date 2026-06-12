@@ -96,7 +96,7 @@ export default function BlogPostPage() {
     if (!post) {
         return (
             <div className="max-w-4xl mx-auto px-4 py-8 text-center">
-                <HeroPill icon="WarningCircle" text="Artículo no encontrado" />
+                <HeroPill icon="AlertCircle" text="Artículo no encontrado" />
                 <p className="text-slate-600 mt-4 mb-6">El artículo que buscas no existe o ha sido eliminado.</p>
                 <Link href="/bioblog" className="text-emerald-500 hover:underline">
                     Volver al BioBlog
@@ -117,7 +117,7 @@ export default function BlogPostPage() {
             </Link>
 
             {/* Hero Pill */}
-            <HeroPill icon="Article" text={post.category_name} />
+            <HeroPill icon="FileText" text={post.category_name} />
 
             {/* Artículo */}
             <article className="mt-6">

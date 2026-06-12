@@ -76,7 +76,6 @@ export const EXPORT_EMPTY_ROW: SalesExportRow = {
 export const SHIPPING_TYPE_LABELS: Record<string, string> = {
   domicilio: 'Domicilio',
   agencia: 'Agencia',
-  sucursal: 'Sucursal',
 }
 
 export const ORDER_TYPE_LABELS: Record<string, string> = {

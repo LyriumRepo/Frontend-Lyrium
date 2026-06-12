@@ -1,279 +1,511 @@
 'use client';
 
 import React, { useState } from 'react';
-import { LifeBuoy, PlusCircle, X } from 'lucide-react';
-import ModuleHeader from '@/components/layout/shared/ModuleHeader';
-import TicketSidebar from './components/TicketSidebar';
-import TicketChatView from './components/TicketChatView';
-import NewTicketForm from './components/NewTicketForm';
-import RegisteredStoreInfo from './components/RegisteredStoreInfo';
-import BaseLoading from '@/components/ui/BaseLoading';
-import BaseButton from '@/components/ui/BaseButton';
 import { useSellerHelp } from '@/features/seller/help/hooks/useSellerHelp';
-type NewTicketPayload = Parameters<React.ComponentProps<typeof NewTicketForm>['onCreateTicket']>[0];
+import ModuleHeader from '@/components/layout/shared/ModuleHeader';
+import BaseLoading from '@/components/ui/BaseLoading';
+import {
+  SellerTicket,
+  TicketStatus,
+  TicketCategory,
+  TicketPriority,
+  CATEGORY_LABELS,
+  PRIORITY_LABELS,
+  STATUS_LABELS,
+} from '@/features/seller/help/types';
+
+const CATEGORY_OPTIONS: { value: TicketCategory; label: string }[] = [
+  { value: 'tech', label: 'Soporte Técnico' },
+  { value: 'admin', label: 'Administrativo' },
+  { value: 'info', label: 'Información' },
+  { value: 'comment', label: 'Comentario' },
+  { value: 'followup', label: 'Seguimiento' },
+  { value: 'payments', label: 'Pagos' },
+  { value: 'documentation', label: 'Documentación' },
+];
+
+const PRIORITY_OPTIONS: { value: TicketPriority; label: string }[] = [
+  { value: 'baja', label: 'Baja' },
+  { value: 'media', label: 'Media' },
+  { value: 'alta', label: 'Alta' },
+  { value: 'critica', label: 'Crítica' },
+];
+
+function getStatusColor(status: TicketStatus) {
+  switch (status) {
+    case 'open': return 'bg-red-100 text-red-700';
+    case 'in_progress': return 'bg-amber-100 text-amber-700';
+    case 'pending': return 'bg-blue-100 text-blue-700';
+    case 'resolved': return 'bg-emerald-100 text-emerald-700';
+    case 'closed': return 'bg-gray-100 text-gray-700';
+    default: return 'bg-gray-100 text-gray-700';
+  }
+}
+
+function TicketList({
+  tickets,
+  activeTicketId,
+  onSelect,
+}: {
+  tickets: SellerTicket[];
+  activeTicketId: string | null;
+  onSelect: (id: string) => void;
+}) {
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('es-PE', { day: 'numeric', month: 'short' });
+  };
+
+  const [filterType, setFilterType] = useState<'asunto' | 'categoria'>('asunto');
+  const [filterValue, setFilterValue] = useState('');
+  const [showFilter, setShowFilter] = useState(false);
+
+  const filteredTickets = tickets.filter((ticket) => {
+    if (!filterValue) return true;
+    if (filterType === 'asunto') {
+      return ticket.subject.toLowerCase().includes(filterValue.toLowerCase());
+    }
+    return ticket.category === filterValue;
+  });
+
+  return (
+    <div className="flex flex-col h-full min-h-0 bg-[var(--bg-card)] rounded-3xl border border-gray-200 shadow-sm overflow-hidden">
+      <div className="p-4 border-b border-gray-100">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="font-semibold text-gray-900 dark:text-white">Mis Tickets</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-300">
+              {filteredTickets.length} tickets
+            </p>
+          </div>
+          <button
+            onClick={() => {
+              setShowFilter((prev) => !prev);
+              setFilterValue('');
+            }}
+            className={`p-2 rounded-xl transition-colors text-xs font-medium border ${
+              showFilter
+                ? 'bg-sky-100 text-sky-600 border-sky-200 dark:bg-[var(--brand-green)] dark:text-white dark:border-transparent'
+                : 'bg-gray-100 text-gray-500 border-gray-200 hover:bg-gray-200 dark:bg-[var(--bg-secondary)] dark:border-transparent'
+            }`}
+          >
+            Filtrar
+          </button>
+        </div>
+
+        {showFilter && (
+          <div className="mt-3 space-y-2">
+            <div className="flex rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 text-xs font-medium">
+              <button
+                onClick={() => {
+                  setFilterType('asunto');
+                  setFilterValue('');
+                }}
+                className={`flex-1 py-1.5 transition-colors ${
+                  filterType === 'asunto'
+                    ? 'bg-sky-500 dark:bg-[var(--brand-green)] text-white'
+                    : 'bg-gray-100 dark:bg-[var(--bg-secondary)] text-gray-500 hover:bg-gray-200'
+                }`}
+              >
+                Asunto
+              </button>
+              <button
+                onClick={() => {
+                  setFilterType('categoria');
+                  setFilterValue('');
+                }}
+                className={`flex-1 py-1.5 transition-colors ${
+                  filterType === 'categoria'
+                    ? 'bg-sky-500 dark:bg-[var(--brand-green)] text-white'
+                    : 'bg-gray-100 dark:bg-[var(--bg-secondary)] text-gray-500 hover:bg-gray-200'
+                }`}
+              >
+                Categoría
+              </button>
+            </div>
+
+            {filterType === 'asunto' ? (
+              <input
+                type="text"
+                value={filterValue}
+                onChange={(e) => setFilterValue(e.target.value)}
+                placeholder="Buscar por asunto..."
+                className="w-full px-3 py-1.5 text-sm bg-gray-100 dark:bg-[var(--bg-secondary)] rounded-xl outline-none focus:ring-2 focus:ring-sky-500 dark:focus:ring-[var(--icons-green)]"
+              />
+            ) : (
+              <select
+                value={filterValue}
+                onChange={(e) => setFilterValue(e.target.value)}
+                className="w-full px-3 py-1.5 text-sm bg-gray-100 dark:bg-[var(--bg-secondary)] rounded-xl outline-none focus:ring-2 focus:ring-sky-500 dark:focus:ring-[var(--icons-green)]"
+              >
+                <option value="">Todas las categorías</option>
+                {CATEGORY_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            )}
+          </div>
+        )}
+      </div>
+
+      <div className="flex-1 overflow-y-auto divide-y divide-gray-100">
+        {filteredTickets.map((ticket) => (
+          <button
+            key={ticket.id}
+            onClick={() => onSelect(ticket.id)}
+            className={`w-full p-4 text-left hover:bg-gray-50 dark:hover:bg-[var(--brand-green)] transition-colors ${
+              activeTicketId === ticket.id ? 'bg-sky-50 dark:bg-[var(--brand-green-hover)]' : ''
+            }`}
+          >
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xs font-mono text-gray-400 dark:text-gray-300">#{ticket.ticketNumber}</span>
+                  <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${getStatusColor(ticket.status)}`}>
+                    {STATUS_LABELS[ticket.status]}
+                  </span>
+                </div>
+                <h4 className="font-medium text-gray-900 dark:text-white truncate">{ticket.subject}</h4>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">{ticket.description}</p>
+                <div className="flex items-center gap-3 mt-2">
+                  <span className="text-xs text-gray-400">{CATEGORY_LABELS[ticket.category]}</span>
+                  <span className="text-xs text-gray-400">•</span>
+                  <span className="text-xs text-gray-400">{PRIORITY_LABELS[ticket.priority]}</span>
+                  <span className="text-xs text-gray-400">•</span>
+                  <span className="text-xs text-gray-400">{formatDate(ticket.createdAt)}</span>
+                </div>
+              </div>
+            </div>
+          </button>
+        ))}
+        {filteredTickets.length === 0 && (
+          <div className="p-8 text-center text-gray-500">
+            <p>{filterValue ? 'Sin resultados para este filtro' : 'No hay tickets'}</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function formatTime(dateStr: string) {
+  const date = new Date(dateStr);
+  return date.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
+}
+
+function formatDate(dateStr: string) {
+  const date = new Date(dateStr);
+  return date.toLocaleDateString('es-PE', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+function TicketChat({
+  ticket,
+  onSendMessage,
+  onCloseTicket,
+  isSending,
+  isClosing,
+}: {
+  ticket: SellerTicket;
+  onSendMessage: (content: string) => void;
+  onCloseTicket: () => void;
+  isSending: boolean;
+  isClosing: boolean;
+}) {
+  const [message, setMessage] = useState('');
+
+  const handleSend = () => {
+    if (message.trim()) {
+      onSendMessage(message);
+      setMessage('');
+    }
+  };
+
+  return (
+    <div className="flex flex-col h-full bg-[var(--bg-card)] rounded-3xl border border-gray-200 shadow-sm overflow-hidden">
+      <div className="p-4 border-b border-gray-100">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="font-semibold text-gray-900 dark:text-white">{ticket.subject}</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-300">
+              #{ticket.ticketNumber} • {CATEGORY_LABELS[ticket.category]} • {PRIORITY_LABELS[ticket.priority]} • {formatDate(ticket.createdAt)}
+            </p>
+          </div>
+          <span className={`px-3 py-1 text-xs font-medium rounded-full ${getStatusColor(ticket.status)}`}>
+            {STATUS_LABELS[ticket.status]}
+          </span>
+        </div>
+      </div>
+
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-white dark:bg-[var(--bg-secondary)]">
+        {ticket.messages.length === 0 ? (
+          <div className="text-center text-gray-500 py-8">
+            <p>No hay mensajes aún</p>
+            <p className="text-sm">Envía un mensaje para comenzar la conversación</p>
+          </div>
+        ) : (
+          ticket.messages.map((msg) => {
+            const isSeller = msg.senderType === 'seller';
+            return (
+              <div key={msg.id} className={`flex ${isSeller ? 'justify-end' : 'justify-start'}`}>
+                <div className={`flex max-w-[50%] items-end gap-3 ${isSeller ? 'flex-row-reverse' : 'flex-row'}`}>
+                  <div
+                    className={`w-9 h-9 shrink-0 rounded-full flex items-center justify-center text-[10px] font-black shadow-sm ${
+                      isSeller ? 'bg-sky-500 text-white' : 'bg-emerald-500 text-white'
+                    }`}
+                  >
+                    {msg.senderName.split(' ').map((w) => w[0]).slice(0, 2).join('')}
+                  </div>
+                  <div
+                    className={`relative rounded-3xl px-4 py-3 shadow-sm border backdrop-blur-sm ${
+                      isSeller
+                        ? 'bg-gradient-to-br from-sky-500 to-sky-600 text-white border-sky-400/20 rounded-br-md'
+                        : 'bg-white dark:bg-gray-100 text-slate-800 border-gray-200 rounded-bl-md'
+                    }`}
+                  >
+                    <div className="mb-1 flex items-center gap-2">
+                      <p className={`text-[11px] font-black uppercase tracking-[0.16em] ${isSeller ? 'text-sky-100' : 'text-emerald-600'}`}>
+                        {msg.senderName}
+                      </p>
+                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${isSeller ? 'bg-white/15 text-sky-50' : 'bg-emerald-50 text-emerald-700'}`}>
+                        {isSeller ? 'Tú' : 'Soporte'}
+                      </span>
+                    </div>
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap break-all">{msg.content}</p>
+                    <div className="mt-2 flex justify-end">
+                      <p className={`text-[10px] font-medium ${isSeller ? 'text-sky-100/80' : 'text-gray-400'}`}>
+                        {formatTime(msg.createdAt)}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {ticket.status !== 'resolved' && (
+        <div className="p-3 border-t border-gray-100 dark:border-white/10">
+          <div className="flex flex-wrap items-center gap-2">
+            <input
+              type="text"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSend())}
+              placeholder="Escribe un mensaje..."
+              className="flex-1 min-w-0 px-4 py-2.5 bg-white dark:bg-[var(--bg-secondary)] rounded-full outline-none border-2 border-gray-300 dark:border-transparent focus:ring-2 focus:ring-sky-500 dark:focus:ring-[var(--icons-green)]"
+              disabled={isSending}
+            />
+            <button
+              onClick={handleSend}
+              disabled={isSending || !message.trim()}
+              className="shrink-0 px-4 py-2.5 bg-sky-500 dark:bg-[var(--brand-green)] text-white rounded-full font-medium disabled:opacity-50 hover:bg-sky-600 dark:hover:bg-[var(--brand-green-hover)] border border-sky-200 dark:border-[var(--border-subtle)] transition-colors"
+            >
+              {isSending ? 'Enviando...' : 'Enviar'}
+            </button>
+            {['open', 'in_progress', 'pending'].includes(ticket.status) && (
+              <button
+                onClick={onCloseTicket}
+                disabled={isClosing}
+                className="shrink-0 inline-flex items-center justify-center rounded-full border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-semibold text-red-700 shadow-sm transition-all duration-200 hover:border-red-300 hover:bg-red-100 hover:text-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:border-gray-200 disabled:bg-gray-100 disabled:text-gray-400"
+              >
+                {isClosing ? 'Cerrando...' : 'Cerrar ticket'}
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function NewTicketForm({
+  onSubmit,
+  onCancel,
+  isSubmitting,
+}: {
+  onSubmit: (data: { subject: string; description: string; category: TicketCategory; priority: TicketPriority }) => void;
+  onCancel: () => void;
+  isSubmitting: boolean;
+}) {
+  const [subject, setSubject] = useState('');
+  const [description, setDescription] = useState('');
+  const [category, setCategory] = useState<TicketCategory>('info');
+  const [priority, setPriority] = useState<TicketPriority>('media');
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit({ subject, description, category, priority });
+  };
+
+  return (
+    <div className="flex flex-col h-full bg-[var(--bg-card)] rounded-3xl border border-gray-200 shadow-sm overflow-hidden">
+      <div className="p-4 border-b border-gray-100">
+        <h3 className="font-semibold text-gray-900 dark:text-white">Nuevo Ticket</h3>
+        <p className="text-sm text-gray-500 dark:text-gray-300">Crea una nueva solicitud de soporte</p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-4">
+        <div>
+          <label className="block text-xs font-medium text-gray-700 dark:text-gray-400 mb-1">Categoría</label>
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value as TicketCategory)}
+            className="w-full px-4 py-2 bg-gray-100 dark:bg-[var(--bg-secondary)] rounded-xl outline-none focus:ring-2 focus:ring-sky-500 dark:focus:ring-[var(--icons-green)]"
+            required
+          >
+            {CATEGORY_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-xs font-medium text-gray-700 dark:text-gray-400 mb-1">Prioridad</label>
+          <select
+            value={priority}
+            onChange={(e) => setPriority(e.target.value as TicketPriority)}
+            className="w-full px-4 py-2 bg-gray-100 dark:bg-[var(--bg-secondary)] rounded-xl outline-none focus:ring-2 focus:ring-sky-500 dark:focus:ring-[var(--icons-green)]"
+            required
+          >
+            {PRIORITY_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-xs font-medium text-gray-700 dark:text-gray-400 mb-1">Asunto</label>
+          <input
+            type="text"
+            value={subject}
+            onChange={(e) => setSubject(e.target.value)}
+            placeholder="Describe brevemente el problema"
+            className="w-full px-4 py-2 bg-gray-100 dark:bg-[var(--bg-secondary)] rounded-xl outline-none focus:ring-2 focus:ring-sky-500 dark:focus:ring-[var(--icons-green)]"
+            required
+            minLength={5}
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Descripción</label>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Explica detalladamente tu problema..."
+            rows={5}
+            className="w-full px-4 py-2 bg-gray-100 dark:bg-[var(--bg-secondary)] rounded-xl outline-none focus:ring-2 focus:ring-sky-500 dark:focus:ring-[var(--icons-green)] resize-none"
+            required
+            minLength={10}
+          />
+        </div>
+
+        <div className="flex gap-2 pt-4">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-xl font-medium hover:bg-gray-300 transition-colors"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="flex-1 px-4 py-2 bg-sky-500 text-white rounded-xl font-medium hover:bg-sky-600 dark:bg-[var(--brand-green)] dark:hover:bg-[var(--brand-green-hover)] border dark:border-[var(--border-subtle)] transition-colors disabled:opacity-50"
+          >
+            {isSubmitting ? 'Creando...' : 'Crear Ticket'}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
 
 export function HelpPageClient() {
-    const {
-        unifiedTickets,
-        activeTicket,
-        activeTicketId,
-        setActiveTicketId,
-        isLoading,
-        isSending,
-        isClosing,
-        filters,
-        setFilters,
-        handleSendMessage,
-        handleCreateTicket,
-        handleCloseTicket,
-        handleSubmitSurvey,
-        handleLoadMoreMessages,
-        hasMoreMessages,
-        loadingMoreMessages,
-    } = useSellerHelp();
+  const {
+    tickets,
+    activeTicket,
+    activeTicketId,
+    setActiveTicketId,
+    isLoading,
+    isSending,
+    isClosing,
+    handleSendMessage,
+    handleCreateTicket,
+    handleCloseTicket,
+    openTicketsCount,
+  } = useSellerHelp();
 
-    const [activeTab, setTab] = useState<'soporte' | 'tienda'>('soporte');
-    const [showNewTicketForm, setShowNewTicketForm] = useState(false);
-    const hasActiveTicket = Boolean(activeTicketId && activeTicket);
-    const openTicketCount = unifiedTickets.filter((ticket) => {
-        const status = String(ticket.status).toLowerCase();
-        return ['open', 'abierto', 'in_progress', 'en proceso', 'proceso', 'reopened', 'reabierto'].includes(status);
-    }).length;
-    const unreadThreadCount = unifiedTickets.filter((ticket) => (ticket.unreadCount || 0) > 0).length;
-    const unreadMessageCount = unifiedTickets.reduce((total, ticket) => total + (ticket.unreadCount || 0), 0);
+  const [showNewTicketForm, setShowNewTicketForm] = useState(false);
 
-    const closeNewTicketForm = () => setShowNewTicketForm(false);
-
-    const createTicket = async (data: NewTicketPayload) => {
-        await handleCreateTicket(data);
-        closeNewTicketForm();
-    };
-
-    const headerActions = (
-        <div className="hidden md:block">
-            <BaseButton
-                variant="action"
-                leftIcon="PlusCircle"
-                onClick={() => setShowNewTicketForm(true)}
-            >
-                Nuevo Ticket
-            </BaseButton>
-        </div>
-    );
-
-    if (isLoading) {
-        return (
-            <div className="flex h-full min-h-0 flex-col animate-fadeIn md:-my-8">
-                <ModuleHeader
-                    title="Mesa de Ayuda"
-                    subtitle="Centro de soporte y gestion de incidencias"
-                    icon="Headset"
-                />
-                <div className="flex flex-1 items-center justify-center">
-                    <BaseLoading message="Cargando tickets de soporte..." />
-                </div>
-            </div>
-        );
-    }
-
+  if (isLoading) {
     return (
-        <div className="flex h-full min-h-0 flex-col overflow-hidden animate-fadeIn md:-my-8">
-            <ModuleHeader
-                title="Mesa de Ayuda"
-                subtitle="Centro de soporte y gestion de incidencias"
-                icon="Headset"
-                actions={headerActions}
-            />
-
-            <div className="mb-4 flex w-full max-w-md shrink-0 gap-1 overflow-x-auto rounded-3xl border border-[var(--border-subtle)]/50 bg-[var(--bg-secondary)]/50 p-1.5 shadow-sm no-scrollbar">
-                <button
-                    onClick={() => setTab('soporte')}
-                    className={`flex-1 whitespace-nowrap rounded-xl px-4 py-2 text-[11px] font-black uppercase tracking-widest transition-all sm:px-6 ${
-                        activeTab === 'soporte'
-                            ? 'bg-[var(--bg-card)] text-sky-600 shadow-sm'
-                            : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                    }`}
-                >
-                    Centro de Soporte
-                </button>
-                <button
-                    onClick={() => setTab('tienda')}
-                    className={`flex-1 whitespace-nowrap rounded-xl px-4 py-2 text-[11px] font-black uppercase tracking-widest transition-all sm:px-6 ${
-                        activeTab === 'tienda'
-                            ? 'bg-[var(--bg-card)] text-sky-600 shadow-sm'
-                            : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                    }`}
-                >
-                    Datos Registrados
-                </button>
-            </div>
-
-            <div className="relative flex-1 min-h-0 overflow-hidden">
-                {activeTab === 'soporte' ? (
-                    <>
-                        <div className="absolute inset-0 flex min-h-0 flex-1 flex-col md:hidden">
-                            {hasActiveTicket ? (
-                                <div className="absolute inset-0 flex min-h-0 flex-1 flex-col overflow-hidden">
-                                    <TicketChatView
-                                        ticket={activeTicket}
-                                        isSending={isSending}
-                                        isClosing={isClosing}
-                                        onSendMessage={({ text, attachments }) => handleSendMessage(text, attachments)}
-                                        onCloseTicket={handleCloseTicket}
-                                        onSubmitSurvey={({ rating, comment }) => handleSubmitSurvey(rating, comment)}
-                                        onBack={() => setActiveTicketId(null)}
-                                        onLoadMore={handleLoadMoreMessages}
-                                        isLoadingMore={loadingMoreMessages}
-                                        hasMoreMessages={hasMoreMessages}
-                                    />
-                                </div>
-                            ) : (
-                                <div className="absolute inset-0 flex min-h-0 flex-1 flex-col overflow-hidden">
-                                    <TicketSidebar
-                                        tickets={unifiedTickets}
-                                        activeTicketId={activeTicketId ? String(activeTicketId) : null}
-                                        filters={filters}
-                                        onSetFilters={setFilters}
-                                        onSetActiveTicket={(id) => {
-                                            setActiveTicketId(id ? Number(id) : null);
-                                            closeNewTicketForm();
-                                        }}
-                                        onNewTicket={() => setShowNewTicketForm(true)}
-                                    />
-                                </div>
-                            )}
-                        </div>
-
-                        <div className="hidden min-h-0 grid-cols-12 gap-5 overflow-hidden md:grid md:h-[calc(100dvh-16.5rem)] xl:h-[calc(100dvh-15.75rem)]">
-                            <div className="col-span-12 h-full min-h-0 overflow-hidden md:col-span-5 xl:col-span-4">
-                                <TicketSidebar
-                                    tickets={unifiedTickets}
-                                    activeTicketId={activeTicketId ? String(activeTicketId) : null}
-                                    filters={filters}
-                                    onSetFilters={setFilters}
-                                    onSetActiveTicket={(id) => {
-                                        setActiveTicketId(id ? Number(id) : null);
-                                        closeNewTicketForm();
-                                    }}
-                                    onNewTicket={() => setShowNewTicketForm(true)}
-                                />
-                            </div>
-
-                            <div className="col-span-12 h-full min-h-0 overflow-hidden md:col-span-7 xl:col-span-8">
-                                {showNewTicketForm ? (
-                                    <div className="h-full min-h-0 overflow-y-auto">
-                                        <NewTicketForm
-                                            onCreateTicket={createTicket}
-                                            onCancel={closeNewTicketForm}
-                                        />
-                                    </div>
-                                ) : hasActiveTicket ? (
-                                    <TicketChatView
-                                        ticket={activeTicket}
-                                        isSending={isSending}
-                                        isClosing={isClosing}
-                                        onSendMessage={({ text, attachments }) => handleSendMessage(text, attachments)}
-                                        onCloseTicket={handleCloseTicket}
-                                        onSubmitSurvey={({ rating, comment }) => handleSubmitSurvey(rating, comment)}
-                                    />
-                                ) : (
-                                    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--bg-card)] shadow-[0_20px_45px_-30px_rgba(15,23,42,0.28)] dark:shadow-[0_26px_55px_-34px_rgba(0,0,0,0.6)]">
-                                        {/* Stats strip */}
-                                        <div className="flex shrink-0 items-center gap-px border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)]/75">
-                                            <div className="flex flex-1 items-center gap-3 px-5 py-4">
-                                                <p className="text-2xl font-black text-[var(--text-primary)]">{openTicketCount}</p>
-                                                <p className="text-[10px] font-bold uppercase leading-tight tracking-wider text-[var(--text-muted)]">Casos<br/>activos</p>
-                                            </div>
-                                            <div className="h-8 w-px bg-[var(--border-subtle)]" />
-                                            <div className="flex flex-1 items-center gap-3 px-5 py-4">
-                                                <p className="text-2xl font-black text-[var(--text-primary)]">{unreadThreadCount}</p>
-                                                <p className="text-[10px] font-bold uppercase leading-tight tracking-wider text-[var(--text-muted)]">Sin<br/>revisar</p>
-                                            </div>
-                                            <div className="h-8 w-px bg-[var(--border-subtle)]" />
-                                            <div className="flex flex-1 items-center gap-3 px-5 py-4">
-                                                <p className="text-2xl font-black text-sky-500">{unreadMessageCount}</p>
-                                                <p className="text-[10px] font-bold uppercase leading-tight tracking-wider text-[var(--text-muted)]">Mensajes<br/>nuevos</p>
-                                            </div>
-                                        </div>
-
-                                        {/* Empty state */}
-                                        <div className="flex flex-1 min-h-0 flex-col items-center justify-center gap-6 p-8 text-center">
-                                            <div className="flex h-16 w-16 items-center justify-center rounded-[1.5rem] bg-sky-500/10 text-sky-500">
-                                                <LifeBuoy className="h-8 w-8" />
-                                            </div>
-                                            <div className="max-w-xs space-y-2">
-                                                <h3 className="text-xl font-black tracking-tight text-[var(--text-primary)]">
-                                                    Selecciona un ticket
-                                                </h3>
-                                                <p className="text-sm leading-6 text-[var(--text-secondary)]">
-                                                    Elige un caso de la bandeja izquierda para ver la conversacion y responder.
-                                                </p>
-                                            </div>
-                                            <BaseButton
-                                                variant="primary"
-                                                leftIcon="PlusCircle"
-                                                onClick={() => setShowNewTicketForm(true)}
-                                            >
-                                                Crear Nuevo Ticket
-                                            </BaseButton>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    </>
-                ) : (
-                    <div className="h-full overflow-y-auto px-2 custom-scrollbar overscroll-y-contain">
-                        <RegisteredStoreInfo />
-                    </div>
-                )}
-            </div>
-
-            {activeTab === 'soporte' && showNewTicketForm && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 px-3 py-6 backdrop-blur-sm md:hidden">
-                    <button
-                        type="button"
-                        aria-label="Cerrar formulario de ticket"
-                        className="absolute inset-0"
-                        onClick={closeNewTicketForm}
-                    />
-                    <div
-                        role="dialog"
-                        aria-modal="true"
-                        aria-label="Crear nuevo ticket"
-                        tabIndex={-1}
-                        className="flex max-h-[88vh] w-full max-w-[26rem] flex-col overflow-hidden rounded-[2.15rem] border border-[var(--border-subtle)] bg-[var(--bg-card)] shadow-2xl"
-                    >
-                        <div className="flex justify-center pt-3">
-                            <span className="h-1.5 w-14 rounded-full bg-[var(--border-subtle)]" />
-                        </div>
-                        <div className="flex items-center justify-between border-b border-[var(--border-subtle)] px-5 pb-4 pt-3">
-                            <div>
-                                <p className="text-[10px] font-black uppercase tracking-[0.22em] text-sky-500">
-                                    Mesa de Ayuda
-                                </p>
-                                <h2 className="text-lg font-black tracking-tight text-[var(--text-primary)]">
-                                    Crear nuevo ticket
-                                </h2>
-                            </div>
-                            <button
-                                type="button"
-                                onClick={closeNewTicketForm}
-                                className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] text-[var(--text-muted)]"
-                                aria-label="Cerrar formulario de ticket"
-                            >
-                                <X className="h-5 w-5" />
-                            </button>
-                        </div>
-                        <div className="flex-1 overflow-y-auto">
-                            <NewTicketForm
-                                onCreateTicket={createTicket}
-                                onCancel={closeNewTicketForm}
-                            />
-                        </div>
-                    </div>
-                </div>
-            )}
+      <div className="flex flex-col h-[calc(100vh-140px)] animate-fadeIn">
+        <ModuleHeader title="Mesa de Ayuda" subtitle="Centro de soporte y gestión de incidencias" icon="Headset" />
+        <div className="flex-1 flex items-center justify-center">
+          <BaseLoading message="Cargando tickets de soporte..." />
         </div>
+      </div>
     );
+  }
+
+  return (
+    <div className="flex flex-col h-[calc(100vh-140px)] animate-fadeIn">
+      <ModuleHeader
+        title="Soporte Lyrium"
+        subtitle="Centro de soporte y gestión de incidencias"
+        icon="Headset"
+        actions={
+          !showNewTicketForm && !activeTicket ? (
+            <button
+              onClick={() => setShowNewTicketForm(true)}
+              className="px-4 py-2 bg-white text-sky-600 dark:text-[var(--brand-green)] rounded-xl font-medium hover:bg-sky-50 transition-colors"
+            >
+              + Nuevo Ticket
+            </button>
+          ) : null
+        }
+      />
+
+      <div className="flex-1 flex gap-4 overflow-hidden">
+        {!showNewTicketForm && (
+          <div className="w-[290px] shrink-0">
+            <TicketList
+              tickets={tickets}
+              activeTicketId={activeTicketId}
+              onSelect={setActiveTicketId}
+            />
+          </div>
+        )}
+
+        <div className="flex-1 min-w-0">
+          {showNewTicketForm ? (
+            <NewTicketForm
+              onSubmit={(data) => {
+                handleCreateTicket(data);
+                setShowNewTicketForm(false);
+              }}
+              onCancel={() => setShowNewTicketForm(false)}
+              isSubmitting={isSending}
+            />
+          ) : activeTicket ? (
+            <TicketChat
+              ticket={activeTicket}
+              onSendMessage={handleSendMessage}
+              onCloseTicket={() => handleCloseTicket(activeTicket.id)}
+              isSending={isSending}
+              isClosing={isClosing}
+            />
+          ) : (
+            <div className="h-full flex items-center justify-center text-gray-500">
+              <div className="text-center">
+                <p className="text-lg mb-2">Selecciona un ticket</p>
+                <p className="text-sm">O crea uno nuevo si tienes alguna consulta</p>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }

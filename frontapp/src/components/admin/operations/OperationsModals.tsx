@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Supplier } from '@/features/admin/operations/types/operations';
-import { ShieldCheck, Loader2, RefreshCw } from 'lucide-react';
-
-// ─── ProviderModal ────────────────────────────────────────────────────────────
 
 type ProviderType = 'Economista' | 'Contador' | 'Ingeniero';
 
@@ -13,7 +10,7 @@ function getDynamicFields(type: ProviderType) {
   > = {
     Ingeniero: [
       {
-        label: 'Historial de Proyectos',
+        label: 'Proyectos',
         key: 'proyectos',
         placeholder: 'Proyecto A, Proyecto B',
       },
@@ -25,24 +22,24 @@ function getDynamicFields(type: ProviderType) {
     ],
     Contador: [
       {
-        label: 'Auditorías Realizadas',
+        label: 'Auditorías realizadas',
         key: 'proyectos',
-        placeholder: 'Cierre 2024, Auditoría Interna',
+        placeholder: 'Cierre 2024',
       },
       {
-        label: 'Matrícula Profesional',
+        label: 'Matrícula profesional',
         key: 'certificaciones',
         placeholder: 'CPC-12345',
       },
     ],
     Economista: [
       {
-        label: 'Análisis Sectoriales',
+        label: 'Análisis sectoriales',
         key: 'proyectos',
-        placeholder: 'Estudio Mercado, Proyección IPC',
+        placeholder: 'Estudio Mercado',
       },
       {
-        label: 'Especialidad Académica',
+        label: 'Especialidad académica',
         key: 'certificaciones',
         placeholder: 'Master en Microeconomía',
       },
@@ -51,10 +48,17 @@ function getDynamicFields(type: ProviderType) {
   return fields[type] ?? fields.Economista;
 }
 
+const inputCls =
+  'text-[13px] border border-gray-200 rounded-lg px-3 py-[7px] bg-white text-gray-700 placeholder-gray-400 focus:outline-none focus:border-gray-400 w-full';
+const selectCls =
+  'text-[13px] border border-gray-200 rounded-lg px-3 py-[7px] bg-white text-gray-700 focus:outline-none focus:border-gray-400 w-full';
+const labelCls = 'block text-[11px] font-medium text-gray-400 mb-1';
+
+// ─── ProviderModal ────────────────────────────────────────────────────────────
 export const ProviderModal: React.FC<{
   provider: Partial<Supplier> | null;
   onClose: () => void;
-  onSave: (provider: Partial<Supplier>) => void;
+  onSave: (p: Partial<Supplier>) => void;
 }> = ({ provider, onClose, onSave }) => {
   const [formData, setFormData] = useState<Partial<Supplier>>(
     provider && Object.keys(provider).length > 0
@@ -67,80 +71,73 @@ export const ProviderModal: React.FC<{
         },
   );
 
+  if (provider === null) return null;
+
+  const currentType = (formData.tipo ?? 'Economista') as ProviderType;
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave(formData);
   };
 
-  if (provider === null) return null;
-
-  const currentType = (formData.tipo ?? 'Economista') as ProviderType;
-
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="grid grid-cols-2 gap-8 font-industrial"
-    >
-      <div className="col-span-2 space-y-2">
-        <label className="block text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest ml-1">
-          Nombre Completo del Proveedor
-        </label>
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      {/* Nombre */}
+      <div>
+        <label className={labelCls}>Nombre completo</label>
         <input
           type="text"
-          value={formData.nombre ?? ''}
-          onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
           required
           placeholder="Ej: Ing. Marco Aurelio"
-          className="w-full p-4 bg-[var(--bg-input)] border-none rounded-2xl text-sm font-black text-[var(--text-primary)] focus:ring-4 focus:ring-sky-500/10"
+          value={formData.nombre ?? ''}
+          onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+          className={inputCls}
         />
       </div>
 
-      <div className="space-y-2">
-        <label className="block text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest ml-1">
-          RUC / DNI (Legal)
-        </label>
-        <input
-          type="text"
-          value={formData.ruc ?? ''}
-          onChange={(e) => setFormData({ ...formData, ruc: e.target.value })}
-          maxLength={11}
-          className="w-full p-4 bg-[var(--bg-input)] border-none rounded-2xl text-sm font-bold text-[var(--text-primary)]"
-        />
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className={labelCls}>RUC / DNI</label>
+          <input
+            type="text"
+            maxLength={11}
+            value={formData.ruc ?? ''}
+            onChange={(e) => setFormData({ ...formData, ruc: e.target.value })}
+            className={inputCls}
+          />
+        </div>
+        <div>
+          <label className={labelCls}>Perfil operativo</label>
+          <select
+            value={formData.tipo ?? 'Economista'}
+            onChange={(e) => setFormData({ ...formData, tipo: e.target.value })}
+            className={selectCls}
+          >
+            <option value="Economista">Economista</option>
+            <option value="Contador">Contador</option>
+            <option value="Ingeniero">Ingeniero</option>
+          </select>
+        </div>
       </div>
 
-      <div className="space-y-2">
-        <label className="block text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest ml-1">
-          Perfil Operativo
-        </label>
-        <select
-          value={formData.tipo ?? 'Economista'}
-          onChange={(e) => setFormData({ ...formData, tipo: e.target.value })}
-          className="w-full p-4 bg-[var(--bg-input)] border-none rounded-2xl text-xs font-black text-[var(--text-primary)]"
-        >
-          <option value="Economista">Economista</option>
-          <option value="Contador">Contador</option>
-          <option value="Ingeniero">Ingeniero</option>
-        </select>
-      </div>
-
-      <div className="col-span-2 p-6 bg-sky-500/10 rounded-[2rem] border border-sky-500/20 space-y-6">
-        <p className="text-[9px] font-black text-sky-500 uppercase tracking-widest text-center">
-          Campos Dinámicos por Especialidad
+      {/* Campos dinámicos */}
+      <div className="bg-gray-50 rounded-xl p-4 flex flex-col gap-3">
+        <p className="text-[11px] font-medium text-gray-400">
+          Campos por especialidad — {currentType}
         </p>
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-2 gap-3">
           {getDynamicFields(currentType).map((field) => {
             const val = formData[field.key];
             const displayVal = Array.isArray(val)
               ? val.join(', ')
               : ((val as string) ?? '');
             return (
-              <div key={String(field.key)} className="space-y-1">
-                <label className="text-[9px] font-black text-[var(--text-muted)] uppercase">
-                  {field.label}
-                </label>
+              <div key={String(field.key)}>
+                <label className={labelCls}>{field.label}</label>
                 <input
                   type="text"
                   value={displayVal}
+                  placeholder={field.placeholder}
                   onChange={(e) =>
                     setFormData({
                       ...formData,
@@ -149,8 +146,7 @@ export const ProviderModal: React.FC<{
                         .map((x) => x.trim()),
                     })
                   }
-                  className="w-full p-2 bg-[var(--bg-card)] rounded-xl text-[11px] font-bold border-none text-[var(--text-primary)]"
-                  placeholder={field.placeholder}
+                  className={inputCls}
                 />
               </div>
             );
@@ -158,54 +154,52 @@ export const ProviderModal: React.FC<{
         </div>
       </div>
 
-      <div className="space-y-2">
-        <label className="block text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest ml-1">
-          Estado de Vínculo
-        </label>
-        <select
-          value={formData.estado ?? 'Activo'}
-          onChange={(e) =>
-            setFormData({
-              ...formData,
-              estado: e.target.value as Supplier['estado'],
-            })
-          }
-          className="w-full p-4 bg-[var(--bg-input)] border-none rounded-2xl text-xs font-black text-[var(--text-primary)]"
-        >
-          <option value="Activo">Activo</option>
-          <option value="En Pausa">En Pausa</option>
-          <option value="Suspendido">Suspendido</option>
-          <option value="Inactivo">Inactivo</option>
-        </select>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className={labelCls}>Estado de vínculo</label>
+          <select
+            value={formData.estado ?? 'Activo'}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                estado: e.target.value as Supplier['estado'],
+              })
+            }
+            className={selectCls}
+          >
+            <option value="Activo">Activo</option>
+            <option value="En Pausa">En pausa</option>
+            <option value="Suspendido">Suspendido</option>
+            <option value="Inactivo">Inactivo</option>
+          </select>
+        </div>
+        <div>
+          <label className={labelCls}>Fecha de renovación</label>
+          <input
+            type="date"
+            value={formData.fechaRenovacion ?? ''}
+            onChange={(e) =>
+              setFormData({ ...formData, fechaRenovacion: e.target.value })
+            }
+            className={inputCls}
+          />
+        </div>
       </div>
 
-      <div className="space-y-2">
-        <label className="block text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest ml-1">
-          Fecha de Renovación
-        </label>
-        <input
-          type="date"
-          value={formData.fechaRenovacion ?? ''}
-          onChange={(e) =>
-            setFormData({ ...formData, fechaRenovacion: e.target.value })
-          }
-          className="w-full p-4 bg-[var(--bg-input)] border-none rounded-2xl text-xs font-bold text-[var(--text-primary)]"
-        />
-      </div>
-
-      <div className="col-span-2 pt-6 flex gap-4">
+      {/* Botones */}
+      <div className="flex gap-2 justify-end pt-1">
         <button
           type="button"
           onClick={onClose}
-          className="px-8 py-5 border border-[var(--border-subtle)] text-[var(--text-muted)] rounded-[1.5rem] font-black text-[10px] uppercase tracking-widest hover:bg-[var(--bg-secondary)] transition-all"
+          className="text-[13px] px-3.5 py-[6px] border border-gray-200 rounded-lg text-gray-500 hover:bg-gray-50 transition-colors"
         >
           Cancelar
         </button>
         <button
           type="submit"
-          className="flex-1 py-5 bg-sky-500 text-white rounded-[1.5rem] font-black text-[10px] uppercase tracking-widest hover:bg-sky-600 transition-all shadow-xl shadow-black/5"
+          className="text-[13px] px-3.5 py-[6px] border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition-colors"
         >
-          {formData.id ? 'Actualizar Proveedor' : 'Crear Proveedor'}
+          {formData.id ? 'Actualizar proveedor' : 'Crear proveedor'}
         </button>
       </div>
     </form>
@@ -213,7 +207,6 @@ export const ProviderModal: React.FC<{
 };
 
 // ─── TwoFactorModalContent ────────────────────────────────────────────────────
-
 export const TwoFactorModalContent: React.FC<{
   onVerify: (code: string) => Promise<boolean> | boolean;
   onClose: () => void;
@@ -226,27 +219,19 @@ export const TwoFactorModalContent: React.FC<{
   const [resending, setResending] = useState(false);
   const [cooldown, setCooldown] = useState(0);
 
-  // Manejo de la cuenta regresiva del cooldown del botón "Reenviar"
   useEffect(() => {
     if (cooldown <= 0) return;
-    const interval = setInterval(() => {
-      setCooldown((prev) => prev - 1);
-    }, 1000);
-    return () => clearInterval(interval);
+    const t = setInterval(() => setCooldown((p) => p - 1), 1000);
+    return () => clearInterval(t);
   }, [cooldown]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (loading || code.length < 6) return;
     setLoading(true);
-
     try {
-      const success = await onVerify(code);
-      if (!success) {
-        setCode(''); // Limpia el input para el siguiente intento si falla
-      }
-    } catch (err) {
-      console.error('Error en submit de 2FA:', err);
+      const ok = await onVerify(code);
+      if (!ok) setCode('');
     } finally {
       setLoading(false);
     }
@@ -255,111 +240,131 @@ export const TwoFactorModalContent: React.FC<{
   const handleResend = async () => {
     if (resending || cooldown > 0 || !onResend) return;
     setResending(true);
-
     try {
-      const success = await onResend();
-      if (success) {
-        setCooldown(60); // Inicia temporizador de 60 segundos tras el éxito
-      }
-    } catch (err) {
-      console.error('Error al reenviar código:', err);
+      const ok = await onResend();
+      if (ok) setCooldown(60);
     } finally {
       setResending(false);
     }
   };
 
+  // Shield icon
+  const IcoShield = () => (
+    <svg
+      className="w-6 h-6"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+      viewBox="0 0 24 24"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"
+      />
+    </svg>
+  );
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 font-industrial">
-      <div className="flex justify-center mb-2">
-        <div className="w-14 h-14 bg-sky-500/10 text-sky-500 rounded-2xl flex items-center justify-center">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      {/* Ícono */}
+      <div className="flex justify-center pt-1">
+        <div className="w-12 h-12 bg-[#E6F1FB] text-[#0C447C] rounded-xl flex items-center justify-center">
           {loading ? (
-            <Loader2 className="w-7 h-7 animate-spin" />
+            <svg
+              className="w-5 h-5 animate-spin"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8v8z"
+              />
+            </svg>
           ) : (
-            <ShieldCheck className="w-7 h-7" />
+            <IcoShield />
           )}
         </div>
       </div>
 
-      <div className="text-center space-y-1">
-        <p className="text-[11px] font-bold text-[var(--text-muted)] px-4">
-          Ingresa el código de 6 dígitos enviado a tu correo corporativo.
-        </p>
-      </div>
+      <p className="text-[13px] text-gray-500 text-center leading-relaxed">
+        Ingresa el código de 6 dígitos enviado a tu correo corporativo.
+      </p>
 
+      {/* Input código */}
       <input
         type="text"
-        value={code}
-        onChange={(e) => {
-          const val = e.target.value.replace(/[^0-9]/g, '');
-          setCode(val);
-        }}
-        placeholder="------"
-        maxLength={6}
-        disabled={loading}
         autoFocus
-        className={`w-full text-4xl font-black text-center tracking-[1rem] py-6 bg-[var(--bg-input)] border-none rounded-3xl focus:ring-4 focus:ring-sky-500/10 placeholder:text-[var(--text-muted)] text-[var(--text-primary)] ${
-          errorMessage ? 'ring-2 ring-red-400' : ''
+        maxLength={6}
+        value={code}
+        onChange={(e) => setCode(e.target.value.replace(/[^0-9]/g, ''))}
+        disabled={loading}
+        placeholder="------"
+        className={`w-full text-[32px] font-medium text-center tracking-[0.6em] py-4 border rounded-xl bg-gray-50 placeholder-gray-300 focus:outline-none focus:border-gray-400 text-gray-900 transition-colors ${
+          errorMessage ? 'border-[#F09595]' : 'border-gray-200'
         } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
       />
 
-      {/* Mensaje de Error de Laravel (Rojo) */}
       {errorMessage && (
-        <p className="text-center text-xs text-red-500 font-bold -mt-2 animate-pulse px-4">
+        <p className="text-center text-[12px] text-[#791F1F] -mt-1">
           {errorMessage}
         </p>
       )}
-
-      {/* Mensaje de Éxito de Reenvío de Laravel (Verde/Azul) */}
       {successMessage && !errorMessage && (
-        <p className="text-center text-xs text-emerald-500 font-black -mt-2 px-4">
+        <p className="text-center text-[12px] text-[#085041] -mt-1">
           {successMessage}
         </p>
       )}
 
+      {/* Botón validar */}
       <button
         type="submit"
         disabled={loading || code.length < 6}
-        className="w-full py-4 bg-sky-500 text-white rounded-2xl font-black text-xs uppercase hover:bg-sky-600 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-sky-500/10"
+        className="w-full py-2.5 border border-gray-300 rounded-lg text-[13px] font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
       >
-        {loading ? (
-          <>
-            <Loader2 className="w-4 h-4 animate-spin" />
-            Validando Código...
-          </>
-        ) : (
-          'Validar Acceso'
-        )}
+        {loading ? 'Validando...' : 'Validar acceso'}
       </button>
 
-      {/* Botón de Reenviar Código con cuenta regresiva inteligente */}
+      {/* Reenviar */}
       {onResend && (
-        <div className="flex justify-center pt-2 border-t border-[var(--border-subtle)]">
+        <div className="flex justify-center pt-1 border-t border-gray-100">
           <button
             type="button"
             onClick={handleResend}
             disabled={resending || cooldown > 0}
-            className={`text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 transition-all py-2 px-4 rounded-xl ${
+            className={`text-[12px] flex items-center gap-1.5 py-1.5 px-3 rounded-lg transition-colors ${
               cooldown > 0
-                ? 'text-[var(--text-muted)] cursor-not-allowed bg-[var(--bg-secondary)]'
-                : 'text-sky-500 hover:text-sky-600 hover:bg-sky-500/5 cursor-pointer'
+                ? 'text-gray-300 cursor-not-allowed'
+                : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50 cursor-pointer'
             }`}
           >
-            {resending ? (
-              <>
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                Reenviando...
-              </>
-            ) : cooldown > 0 ? (
-              <>
-                <RefreshCw className="w-3 h-3 animate-spin text-[var(--text-muted)]" />
-                Reenviar en {cooldown}s
-              </>
-            ) : (
-              <>
-                <RefreshCw className="w-3 h-3" />
-                ¿No recibiste el código? Reenviar
-              </>
-            )}
+            <svg
+              className={`w-3.5 h-3.5 ${resending ? 'animate-spin' : ''}`}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+              />
+            </svg>
+            {resending
+              ? 'Reenviando...'
+              : cooldown > 0
+                ? `Reenviar en ${cooldown}s`
+                : '¿No recibiste el código? Reenviar'}
           </button>
         </div>
       )}

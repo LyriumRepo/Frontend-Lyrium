@@ -12,12 +12,14 @@ const nextConfig: NextConfig = {
     maxInactiveAge: 25 * 1000,
     pagesBufferLength: 5,
   },
-  turbopack: {},
+
+  // === CONFIGURACIÓN DE IMÁGENES ===
   images: {
-    unoptimized: true,
+    unoptimized: true,   // Útil mientras desarrollas con Laravel
     remotePatterns: [
       { protocol: 'https', hostname: 'i.pravatar.cc' },
       { protocol: 'https', hostname: 'lyriumbiomarketplace.com' },
+
       {
         protocol: 'https',
         hostname: '**.woocommerce.com',

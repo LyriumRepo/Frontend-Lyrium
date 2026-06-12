@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, DM_Serif_Display, DM_Sans } from 'next/font/google';
 import Script from 'next/script';
 import './globals.css';
 import { NotificationProvider } from '@/shared/lib/context/NotificationContext';
+import NotificationToast from '@/components/shared/notifications/NotificationToast';
 import { AuthProvider } from '@/shared/lib/context/AuthContext';
 import { ToastProvider } from '@/shared/lib/context/ToastContext';
 import { EchoProvider } from '@/shared/lib/providers/EchoProvider';
@@ -80,6 +81,7 @@ export default function RootLayout({
                 <EchoProvider>
                   <NotificationProvider>
                     <ToastProvider>
+                      <NotificationToast />
                       {children}
                       <CartProviders />
                     </ToastProvider>

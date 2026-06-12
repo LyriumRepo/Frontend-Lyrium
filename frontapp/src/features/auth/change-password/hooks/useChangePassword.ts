@@ -11,7 +11,11 @@ import type {
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 const EMPTY_FORM: PasswordFormData = { actual: '', nueva: '', confirmar: '' };
-const EMPTY_VISIBILITY: PasswordVisibility = { actual: false, nueva: false, confirmar: false };
+const EMPTY_VISIBILITY: PasswordVisibility = {
+  actual: false,
+  nueva: false,
+  confirmar: false,
+};
 const EMPTY_REQUIREMENTS: PasswordRequirements = {
   length: false,
   uppercase: false,
@@ -31,30 +35,29 @@ function evaluateRequirements(password: string): PasswordRequirements {
 }
 
 function calcStrength(req: PasswordRequirements): number {
-  return Object.values(req).filter(Boolean).length * 20; // 0 | 20 | 40 | 60 | 80 | 100
+  return Object.values(req).filter(Boolean).length * 20;
 }
 
 // ─── Hook ─────────────────────────────────────────────────────────────────────
 
 export function useChangePassword() {
   const [formData, setFormData] = useState<PasswordFormData>(EMPTY_FORM);
-  const [visibility, setVisibility] = useState<PasswordVisibility>(EMPTY_VISIBILITY);
-  const [requirements, setRequirements] = useState<PasswordRequirements>(EMPTY_REQUIREMENTS);
+  const [visibility, setVisibility] =
+    useState<PasswordVisibility>(EMPTY_VISIBILITY);
+  const [requirements, setRequirements] =
+    useState<PasswordRequirements>(EMPTY_REQUIREMENTS);
   const [strength, setStrength] = useState(0);
 
-  // Feedback al usuario
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [success, setSuccess] = useState<string | null>(null);
 
   const [isPending, startTransition] = useTransition();
 
-  // ── Derived ────────────────────────────────────────────────────────────────
   const allRequirementsMet = Object.values(requirements).every(Boolean);
   const passwordsMatch =
     formData.confirmar.length > 0 && formData.nueva === formData.confirmar;
 
-  // ── Handlers ───────────────────────────────────────────────────────────────
   function handleFieldChange(field: keyof PasswordFormData, value: string) {
     setFormData((prev) => ({ ...prev, [field]: value }));
     setError(null);
@@ -87,9 +90,10 @@ export function useChangePassword() {
     setFieldErrors({});
     setSuccess(null);
 
-    // ── Client-side guards ──────────────────────────────────────────────────
     if (!allRequirementsMet) {
-      setError('La nueva contraseña no cumple todos los requisitos de seguridad.');
+      setError(
+        'La nueva contraseña no cumple todos los requisitos de seguridad.',
+      );
       return;
     }
     if (!passwordsMatch) {
@@ -97,25 +101,28 @@ export function useChangePassword() {
       return;
     }
 
+    // ── Leer el token aquí, en el cliente, antes de entrar al Server Action ──
+    const token = localStorage.getItem('laravel_token') ?? '';
+
     startTransition(async () => {
       const result = await changePasswordAction({
         current_password: formData.actual,
         password: formData.nueva,
         password_confirmation: formData.confirmar,
+        token, // ← se pasa al server action
       });
 
       if (result.success) {
         setSuccess(result.message);
         resetForm();
       } else {
-        // Mapear errores de campo que viene del backend (Laravel 422)
         if (result.errors) {
           const mapped: Record<string, string> = {};
-          if (result.errors.current_password?.[0]) {
-            mapped['actual'] = result.errors.current_password[0];
+          if (result.errors.actual?.[0]) {
+            mapped['actual'] = result.errors.actual[0];
           }
-          if (result.errors.password?.[0]) {
-            mapped['nueva'] = result.errors.password[0];
+          if (result.errors.nueva?.[0]) {
+            mapped['nueva'] = result.errors.nueva[0];
           }
           setFieldErrors(mapped);
         }
@@ -124,7 +131,6 @@ export function useChangePassword() {
     });
   }
 
-  // ── Strength UI helpers ────────────────────────────────────────────────────
   function getStrengthColor(): string {
     if (strength <= 20) return 'bg-red-500';
     if (strength <= 40) return 'bg-orange-500';
@@ -142,7 +148,6 @@ export function useChangePassword() {
   }
 
   return {
-    // state
     formData,
     visibility,
     requirements,
@@ -151,15 +156,12 @@ export function useChangePassword() {
     fieldErrors,
     success,
     isPending,
-    // derived
     allRequirementsMet,
     passwordsMatch,
-    // handlers
     handleFieldChange,
     toggleVisibility,
     handleSubmit,
     resetForm,
-    // helpers
     getStrengthColor,
     getStrengthLabel,
   };

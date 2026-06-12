@@ -25,6 +25,16 @@ function authHeaders(token: string): Record<string, string> {
   };
 }
 
+const VALID_STICKERS = new Set([
+  'liquidacion', 'oferta', 'descuento', 'nuevo', 'bestseller', 'envio_gratis',
+  'organic', 'natural', 'eco', 'premium', 'vegan',
+]);
+
+function sanitizeSticker(val: unknown): Product['sticker'] {
+  if (val && typeof val === 'string' && VALID_STICKERS.has(val)) return val as Product['sticker'];
+  return null;
+}
+
 // ─── Helper: mapear respuesta Laravel → Product ───────────────────────────────
 function mapLaravelProduct(p: any): Product {
   return {
@@ -38,7 +48,7 @@ function mapLaravelProduct(p: any): Product {
     regularPrice: parseFloat(p.regular_price ?? p.price ?? '0'),
     stock: p.stock ?? 0,
     status: p.status ?? 'draft',
-    sticker: p.sticker ?? null,
+    sticker: sanitizeSticker(p.sticker),
     discountPercentage: p.discount_percentage
       ? parseFloat(p.discount_percentage)
       : null,
@@ -67,12 +77,12 @@ function mapLaravelProduct(p: any): Product {
     serviceModality: p.serviceModality ?? null,
     serviceLocation: p.serviceLocation ?? null,
 
-    // Atributos — ya vienen mapeados desde ProductResource
+    // Atributos — convertir de { label, value } a string[] para el form
     mainAttributes: (p.characteristics ?? []).map((c: any) => ({
-      values: { label: c.label ?? '', value: c.value ?? '' },
+        values: [c.label ?? '', c.value ?? ''],
     })),
     additionalAttributes: (p.additional_info ?? []).map((c: any) => ({
-      values: { label: c.label ?? '', value: c.value ?? '' },
+        values: [c.label ?? '', c.value ?? ''],
     })),
     nutritionalAttributes: (p.nutritional_info?.rows ?? []).map((r: any) => ({
       values: {
@@ -144,7 +154,8 @@ export async function saveProduct(
       price: product.price ?? 0,
       stock: product.stock ?? 0,
       category: product.category || null,
-      sticker: product.sticker ?? null,
+      image: product.image || null,
+      sticker: sanitizeSticker(product.sticker),
       discountPercentage: product.discountPercentage ?? null,
 
       // Atributos — formato { values: { label, value } }

@@ -70,7 +70,7 @@ export function useSellerSales() {
         orderType: null,
     });
 
-    const { data, isLoading, error, refetch } = useQuery({
+    const { data, isFetching, isLoading, error, refetch } = useQuery({
         queryKey: ['seller', 'sales', filters],
         queryFn: async () => {
             const allOrders = await orderRepository.getOrders();
@@ -82,12 +82,27 @@ export function useSellerSales() {
             });
             return { orders, kpis: computeKPIs(orders) };
         },
+        placeholderData: (previousData) => previousData,
         staleTime: 5 * 60 * 1000,
     });
 
     const advanceStepMutation = useMutation({
         mutationFn: async (orderId: string) => {
             await orderRepository.advanceOrderStep(orderId);
+            return orderId;
+        },
+        onSuccess: async () => {
+            await queryClient.refetchQueries({ queryKey: ['seller', 'sales'] });
+        }
+    });
+
+    const shipWithCarrierMutation = useMutation({
+        mutationFn: async ({ orderId, carrierCode, carrierData }: { orderId: string; carrierCode: string; carrierData: Record<string, string> }) => {
+            await orderRepository.updateOrder(orderId, {
+                status: 'shipped',
+                carrier_code: carrierCode,
+                carrier_data: carrierData,
+            });
             return orderId;
         },
         onSuccess: async () => {
@@ -120,6 +135,7 @@ export function useSellerSales() {
         orders: data?.orders || [],
         kpis: data?.kpis || [],
         isLoading,
+        isFetching,
         selectedOrder,
         setSelectedOrder: (order: Order | null) => setSelectedOrderId(order?.id || null),
         filters,
@@ -128,6 +144,9 @@ export function useSellerSales() {
         clearFilters: () => setFilters({ dateStart: null, dateEnd: null, orderType: null }),
         advanceStep: (id: string) => advanceStepMutation.mutateAsync(id),
         isAdvancing: advanceStepMutation.isPending,
+        shipWithCarrier: (orderId: string, carrierCode: string, carrierData: Record<string, string>) =>
+            shipWithCarrierMutation.mutateAsync({ orderId, carrierCode, carrierData }),
+        isShipping: shipWithCarrierMutation.isPending,
         cancelOrder: (id: string) => cancelOrderMutation.mutateAsync(id),
         isCancelling: cancelOrderMutation.isPending,
         refresh: refetch

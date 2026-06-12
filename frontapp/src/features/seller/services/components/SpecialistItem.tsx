@@ -1,11 +1,14 @@
+'use client';
+
 import React from 'react';
 import Image from 'next/image';
 import { Specialist } from '@/features/seller/services/types';
 import Icon from '@/components/ui/Icon';
+import { useTheme } from 'next-themes';
 
 interface SpecialistItemProps {
-  specialist: Specialist;
-  onClick: (specialist: Specialist) => void;
+    specialist: Specialist;
+    onClick: (specialist: Specialist) => void;
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -19,18 +22,18 @@ function getAvatarChars(specialist: Specialist): string {
 
 /** Genera un color determinista a partir del id del especialista */
 const AVATAR_PALETTE = [
-  '#38bdf8', // sky
-  '#38bdf8', // indigo
-  '#38bdf8', // emerald
-  '#38bdf8', // pink
-  '#38bdf8', // orange
-  '#38bdf8', // violet
-  '#38bdf8', // teal
-  '#38bdf8', // yellow
+  '#38bdf8',
+  '#38bdf8',
+  '#38bdf8',
+  '#38bdf8',
+  '#38bdf8',
+  '#38bdf8',
+  '#38bdf8',
+  '#38bdf8',
 ];
 
 function getAvatarColor(id: number): string {
-  return AVATAR_PALETTE[id % AVATAR_PALETTE.length];
+    return AVATAR_PALETTE[id % AVATAR_PALETTE.length];
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -41,6 +44,11 @@ export default function SpecialistItem({
 }: SpecialistItemProps) {
   const avatarChars = getAvatarChars(specialist);
   const avatarColor = getAvatarColor(specialist.id);
+  const { theme } = useTheme();
+
+  const isDark = theme === 'dark';
+
+  const avatarBg = isDark ? '#8FC3A1' : avatarColor;
 
   return (
     <div
@@ -55,7 +63,7 @@ export default function SpecialistItem({
       {/* Avatar */}
       <div
         className="w-12 h-12 rounded-2xl flex items-center justify-center text-sm font-black text-white overflow-hidden transition-transform group-hover:scale-105 shadow-md relative flex-shrink-0"
-        style={{ backgroundColor: avatarColor }}
+        style={{ backgroundColor: avatarBg }}
       >
         {specialist.foto ? (
           <Image
@@ -76,7 +84,10 @@ export default function SpecialistItem({
           {specialist.nombres} {specialist.apellidos}
         </h4>
         <p className="text-[10px] font-bold text-[var(--text-secondary)] flex items-center gap-1 uppercase truncate tracking-widest mt-0.5">
-          <Icon name="Stethoscope" className="w-3 h-3 text-sky-400" />
+          <Icon
+            name="Stethoscope"
+            className="w-3 h-3 text-sky-400 dark:text-[#8FC3A1]"
+          />
           {specialist.especialidad}
         </p>
 
@@ -85,30 +96,30 @@ export default function SpecialistItem({
           className={`inline-flex items-center gap-1 mt-1 text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full
                     ${
                       specialist.availability === 'Disponible'
-                        ? 'bg-emerald-500/10 text-emerald-500'
+                        ? 'bg-sky-600/10 dark:bg-emerald-500/10 text-sky-600 dark:text-emerald-500'
                         : specialist.availability === 'Ocupado'
-                          ? 'bg-amber-500/10 text-amber-500'
-                          : 'bg-rose-500/10 text-rose-500'
+                          ? 'bg-sky-400/10 dark:bg-[#8FC3A1]/10 text-sky-400 dark:text-[#8FC3A1]'
+                          : 'bg-gray-500/10 dark:bg-gray-300/10 text-gray-500 dark:text-gray-300'
                     }`}
         >
           <span
             className={`w-1.5 h-1.5 rounded-full
                         ${
                           specialist.availability === 'Disponible'
-                            ? 'bg-emerald-500 animate-pulse'
+                            ? 'bg-sky-600 dark:bg-emerald-500 animate-pulse'
                             : specialist.availability === 'Ocupado'
-                              ? 'bg-amber-500'
-                              : 'bg-rose-500'
+                              ? 'bg-sky-400 dark:bg-[#8FC3A1]'
+                              : 'bg-gray-500 dark:bg-gray-300'
                         }`}
           />
           {specialist.availability}
         </span>
       </div>
 
-      {/* Chevron */}
-      <div className="w-8 h-8 rounded-full bg-[var(--bg-secondary)] flex items-center justify-center text-[var(--text-secondary)] group-hover:bg-sky-500/10 dark:group-hover:bg-[#8FC3A1]/10 group-hover:text-sky-500 dark:group-hover:text-[#8FC3A1] transition-colors flex-shrink-0">
-        <Icon name="ChevronRight" className="w-4 h-4" />
-      </div>
-    </div>
-  );
+            {/* Chevron */}
+            <div className="w-8 h-8 rounded-full bg-[var(--bg-secondary)] flex items-center justify-center text-[var(--text-secondary)] group-hover:bg-sky-500/10 dark:group-hover:bg-[#8FC3A1]/10 group-hover:text-sky-500 dark:group-hover:text-[#8FC3A1] transition-colors flex-shrink-0">
+                <Icon name="ChevronRight" className="w-4 h-4" />
+            </div>
+        </div>
+    );
 }

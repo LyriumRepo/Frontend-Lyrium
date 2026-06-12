@@ -2,7 +2,7 @@ import { PanelNavigation } from '@/shared/types/navigation';
 
 export const adminNavigation: PanelNavigation = [
     {
-        title: 'Gestión de Vendores',
+        title: 'Gestión de Vendedores',
         items: [
             {
                 id: 'sellers',
@@ -19,7 +19,7 @@ export const adminNavigation: PanelNavigation = [
                 id: 'helpdesk',
                 label: 'Mesa de Ayuda',
                 href: '/admin/helpdesk',
-                icon: 'Help',
+                icon: 'HelpCircle',
             },
         ],
     },
@@ -30,7 +30,7 @@ export const adminNavigation: PanelNavigation = [
                 id: 'finance',
                 label: 'Centro de Finanzas y Estadísticas',
                 href: '/admin/finance',
-                icon: 'Sales',
+                icon: 'TrendingUp',
             },
             {
                 id: 'payments',
@@ -39,9 +39,9 @@ export const adminNavigation: PanelNavigation = [
                 icon: 'Landmark',
             },
             {
-                id: 'rapifac',
-                label: 'Facturación Rápida',
-                href: '/admin/rapifac',
+                id: 'invoices',
+                label: 'Facturación Electrónica',
+                href: '/admin/invoices',
                 icon: 'Receipt',
             },
         ],
@@ -49,12 +49,7 @@ export const adminNavigation: PanelNavigation = [
     {
         title: 'Operaciones',
         items: [
-            {
-                id: 'analytics',
-                label: 'Analítica',
-                href: '/admin/analytics',
-                icon: 'BarChart',
-            },
+
             {
                 id: 'operations',
                 label: 'Gestión Operativa',
@@ -64,25 +59,24 @@ export const adminNavigation: PanelNavigation = [
         ],
     },
     {
-        title: 'Gestión',
+        title: 'Seguridad',
         items: [
             {
-                id: 'contracts',
-                label: 'Contratos',
-                href: '/admin/contracts',
-                icon: 'FileText',
+                id: 'security',
+                label: 'Seguridad',
+                href: '/admin/security',
+                icon: 'Shield',
             },
+        ],
+    },
+    {
+        title: 'Gestión',
+        items: [
             {
                 id: 'categories',
                 label: 'Gestión de Categorías',
                 href: '/admin/categories',
                 icon: 'FolderTree',
-            },
-            {
-                id: 'inventory',
-                label: 'Gestión de Inventario',
-                href: '/admin/inventory',
-                icon: 'Package',
             },
             {
                 id: 'reviews',

@@ -1,178 +1,184 @@
-import { useState, useCallback } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { CustomerTicket, CustomerTicketMessage, CustomerTicketFilters } from '../types';
+import { ticketApi } from '@/lib/api/ticketRepository';
+import type { Ticket, TicketMessage, TicketPriority } from '@/modules/helpdesk/types';
 
-const mockTickets: CustomerTicket[] = [
-    {
-        id: '1',
-        ticketNumber: 'TKT-001',
-        subject: 'Problema con mi pedido #12345',
-        description: 'El pedido no llegó en la fecha esperada',
-        category: 'negativo',
-        status: 'open',
-        createdAt: '2025-03-10T09:00:00',
-        updatedAt: '2025-03-11T10:30:00',
-        messages: [
-            {
-                id: 'm1',
-                ticketId: '1',
-                senderId: 'customer-1',
-                senderName: 'Yo',
-                senderType: 'customer',
-                content: 'Hola, mi pedido #12345 no llegó en la fecha esperada. ¿Pueden ayudarme?',
-                createdAt: '2025-03-10T09:00:00'
-            },
-            {
-                id: 'm2',
-                ticketId: '1',
-                senderId: 'agent-1',
-                senderName: 'Soporte Lyrium',
-                senderType: 'agent',
-                content: 'Hola! Lamentamos la demora. Estamos investigando el estado de tu pedido. Te contactamos en breve.',
-                createdAt: '2025-03-10T10:30:00'
-            }
-        ]
-    },
-    {
-        id: '2',
-        ticketNumber: 'TKT-002',
-        subject: 'Consulta sobre garantía',
-        description: 'Quiero saber los términos de garantía',
-        category: 'positivo',
-        status: 'resolved',
-        createdAt: '2025-03-05T14:00:00',
-        updatedAt: '2025-03-06T09:00:00',
-        resolvedAt: '2025-03-06T09:00:00',
-        messages: [
-            {
-                id: 'm3',
-                ticketId: '2',
-                senderId: 'customer-1',
-                senderName: 'Yo',
-                senderType: 'customer',
-                content: '¿Cuánto tiempo de garantía tiene el producto?',
-                createdAt: '2025-03-05T14:00:00'
-            },
-            {
-                id: 'm4',
-                ticketId: '2',
-                senderId: 'agent-1',
-                senderName: 'Soporte Lyrium',
-                senderType: 'agent',
-                content: 'Todos nuestros productos tienen 12 meses de garantía por defecto. ¿Hay algo más que necesites saber?',
-                createdAt: '2025-03-05T16:00:00'
-            }
-        ]
-    }
-];
+type CreateData = {
+  subject: string;
+  description: string;
+  category: CustomerTicket['category'];
+  priority: TicketPriority;
+};
+
+function toCustomerTicket(t: Ticket): CustomerTicket {
+  return {
+    id: String(t.id),
+    ticketNumber: t.numero || t.id_display,
+    subject: t.titulo,
+    description: t.descripcion,
+    category: (t.categoria || t.type || 'info') as CustomerTicket['category'],
+    priority: (t.prioridad || 'media') as CustomerTicket['priority'],
+    status: mapStatus(t.status || t.estado || 'abierto'),
+    createdAt: t.fecha_creacion || t.created_at || '',
+    updatedAt: t.fecha_actualizacion || t.updated_at || '',
+    messages: (t.mensajes || []).map(toCustomerMessage),
+  };
+}
+
+function toCustomerMessage(m: TicketMessage): CustomerTicketMessage {
+  const isAgent = m.role?.toLowerCase() === 'admin';
+  return {
+    id: String(m.id),
+    ticketId: String(m.id),
+    senderId: m.user || '0',
+    senderName: m.usuario || m.user || 'Usuario',
+    senderType: isAgent ? 'agent' : 'customer',
+    content: m.contenido || m.texto || '',
+    createdAt: m.timestamp || m.hora || '',
+  };
+}
+
+function mapStatus(s: string): CustomerTicket['status'] {
+  switch (s) {
+    case 'abierto': return 'open';
+    case 'proceso': return 'in_progress';
+    case 'resuelto': return 'resolved';
+    case 'cerrado': return 'closed';
+    case 'reabierto': return 'open';
+    default: return 'open';
+  }
+}
 
 export function useCustomerSupport() {
-    const [tickets, setTickets] = useState<CustomerTicket[]>(mockTickets);
-    const [activeTicketId, setActiveTicketId] = useState<string | null>(null);
-    const [filters, setFilters] = useState<CustomerTicketFilters>({
-        status: 'all',
-        category: 'all',
-        search: ''
-    });
-    const [isLoading, setIsLoading] = useState(false);
-    const [isSending, setIsSending] = useState(false);
-    const [isClosing, setIsClosing] = useState(false);
+  const [tickets, setTickets] = useState<CustomerTicket[]>([]);
+  const [activeTicketId, setActiveTicketId] = useState<string | null>(null);
+  const [filters, setFilters] = useState<CustomerTicketFilters>({
+    status: 'all',
+    category: 'all',
+    search: '',
+  });
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSending, setIsSending] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
 
-    const activeTicket = tickets.find(t => t.id === activeTicketId);
-    
-    const openTicketsCount = tickets.filter(t => t.status === 'open' || t.status === 'in_progress').length;
+  const fetchTicketDetail = useCallback(async (id: string) => {
+    try {
+      const data = await ticketApi.customer.get(Number(id));
+      const mapped = toCustomerTicket(data);
+      setTickets((prev) => prev.map((t) => (t.id === id ? mapped : t)));
+    } catch {
+      // silent
+    }
+  }, []);
 
-    const setActiveTicketIdHandler = useCallback((id: string | null) => {
-        setActiveTicketId(id);
-    }, []);
+  const fetchTickets = useCallback(async () => {
+    try {
+      const data = await ticketApi.customer.list();
+      setTickets(data.map(toCustomerTicket));
+    } catch {
+      setTickets([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
-    const handleSendMessage = useCallback(async (content: string) => {
-        if (!activeTicketId) return;
-        
-        setIsSending(true);
-        
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        const newMessage: CustomerTicketMessage = {
-            id: `m${Date.now()}`,
-            ticketId: activeTicketId,
-            senderId: 'customer-1',
-            senderName: 'Yo',
-            senderType: 'customer',
-            content,
-            createdAt: new Date().toISOString()
-        };
+  useEffect(() => {
+    fetchTickets();
+  }, [fetchTickets]);
 
-        setTickets(prev => prev.map(t =>
-            t.id === activeTicketId
-                ? { 
-                    ...t, 
-                    messages: [...t.messages, newMessage],
-                    updatedAt: new Date().toISOString()
-                  }
-                : t
-        ));
+  useEffect(() => {
+    if (activeTicketId) {
+      fetchTicketDetail(activeTicketId);
+    }
+  }, [activeTicketId, fetchTicketDetail]);
 
-        setIsSending(false);
-    }, [activeTicketId]);
+  const activeTicket = useMemo(
+    () => tickets.find((t) => t.id === activeTicketId) ?? null,
+    [tickets, activeTicketId],
+  );
 
-    const handleCreateTicket = useCallback(async (data: { subject: string; description: string; category: string }) => {
-        setIsSending(true);
-        
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        const newTicket: CustomerTicket = {
-            id: `t${Date.now()}`,
-            ticketNumber: `TKT-${String(tickets.length + 1).padStart(3, '0')}`,
-            subject: data.subject,
-            description: data.description,
-            category: data.category as CustomerTicket['category'],
-            status: 'open',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            messages: []
-        };
+  const openTicketsCount = useMemo(
+    () => tickets.filter((t) => t.status === 'open' || t.status === 'in_progress').length,
+    [tickets],
+  );
 
-        setTickets(prev => [newTicket, ...prev]);
-        setActiveTicketId(newTicket.id);
-        setIsSending(false);
-    }, [tickets.length]);
-
-    const handleCloseTicket = useCallback(async (id: string) => {
-        setIsClosing(true);
-        
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        setTickets(prev => prev.map(t =>
-            t.id === id
-                ? { 
-                    ...t, 
-                    status: 'closed' as const,
-                    resolvedAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString()
-                  }
-                : t
-        ));
-        
-        if (activeTicketId === id) {
-            setActiveTicketId(null);
-        }
-        
-        setIsClosing(false);
-    }, [activeTicketId]);
-
-    return {
-        tickets,
-        activeTicket: activeTicket || null,
-        activeTicketId,
-        setActiveTicketId: setActiveTicketIdHandler,
-        isLoading,
-        isSending,
-        isClosing,
-        filters,
-        setFilters,
-        handleSendMessage,
-        handleCreateTicket,
-        handleCloseTicket,
-        openTicketsCount
+  const handleSendMessage = useCallback(async (content: string) => {
+    if (!activeTicketId) return;
+    setIsSending(true);
+    const tempMsg: CustomerTicketMessage = {
+      id: `temp-${Date.now()}`,
+      ticketId: activeTicketId,
+      senderId: '',
+      senderName: 'Tú',
+      senderType: 'customer',
+      content,
+      createdAt: new Date().toISOString(),
     };
+    setTickets((prev) =>
+      prev.map((t) =>
+        t.id === activeTicketId ? { ...t, messages: [...t.messages, tempMsg] } : t,
+      ),
+    );
+    try {
+      await ticketApi.customer.sendMessage(Number(activeTicketId), { content });
+      await fetchTicketDetail(activeTicketId);
+    } catch {
+      await fetchTicketDetail(activeTicketId).catch(() => {});
+    } finally {
+      setIsSending(false);
+    }
+  }, [activeTicketId, fetchTicketDetail]);
+
+  const handleCreateTicket = useCallback(async (data: CreateData) => {
+    setIsSending(true);
+    try {
+      const created = await ticketApi.customer.create({
+        asunto: data.subject,
+        mensaje: data.description,
+        tipo_ticket: data.category,
+        criticidad: data.priority,
+      });
+      const mapped = toCustomerTicket(created);
+      setTickets((prev) => [mapped, ...prev]);
+      setActiveTicketId(mapped.id);
+    } catch {
+      // silent
+    } finally {
+      setIsSending(false);
+    }
+  }, []);
+
+  const handleCloseTicket = useCallback(async (id: string) => {
+    setIsClosing(true);
+    try {
+      await ticketApi.customer.close(Number(id));
+      setTickets((prev) =>
+        prev.map((t) =>
+          t.id === id ? { ...t, status: 'closed' as const } : t,
+        ),
+      );
+      setActiveTicketId(null);
+    } catch {
+      // silent
+    } finally {
+      setIsClosing(false);
+    }
+  }, []);
+
+  return {
+    tickets,
+    activeTicket,
+    activeTicketId,
+    setActiveTicketId,
+    isLoading,
+    isSending,
+    isClosing,
+    filters,
+    setFilters,
+    handleSendMessage,
+    handleCreateTicket,
+    handleCloseTicket,
+    openTicketsCount,
+
+  };
 }

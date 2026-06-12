@@ -5,6 +5,38 @@ import type {
     LaravelProductFilters,
 } from '@/features/public/product/types';
 
+const LARAVEL_BASE_URL = LARAVEL_API_URL.replace(/\/api\/?$/, '');
+
+function resolveImageUrl(url: string | null | undefined): string | undefined {
+  if (!url) return undefined;
+  if (url.startsWith('http')) return url;
+  if (url.startsWith('/')) return `${LARAVEL_BASE_URL}${url}`;
+  return url;
+}
+
+type TransformedProduct = LaravelProduct & { image: string | null };
+
+function transformProduct(product: LaravelProduct): TransformedProduct {
+  return {
+    ...product,
+    image: resolveImageUrl(product.images?.[0]?.src) ?? null,
+    images: product.images?.map((img) => ({
+      ...img,
+      src: resolveImageUrl(img.src) ?? img.src,
+      thumb: img.thumb ? resolveImageUrl(img.thumb) ?? img.thumb : undefined,
+      medium: img.medium ? resolveImageUrl(img.medium) ?? img.medium : undefined,
+      large: img.large ? resolveImageUrl(img.large) ?? img.large : undefined,
+    })),
+  };
+}
+
+function transformProductsResponse(res: LaravelProductsResponse): LaravelProductsResponse {
+  return {
+    ...res,
+    data: res.data.map(transformProduct),
+  };
+}
+
 // ─── Helper de fetch con manejo de error tipado ───────────────────────────────
 // Sigue el mismo patrón de request() de todos los repositories del proyecto
 async function request<T>(
@@ -55,7 +87,7 @@ function buildQuery(filters: LaravelProductFilters): string {
 export async function getPublicProducts(
     filters: LaravelProductFilters = {}
 ): Promise<LaravelProductsResponse> {
-    return request<LaravelProductsResponse>(`/products${buildQuery(filters)}`);
+    return request<LaravelProductsResponse>(`/products${buildQuery(filters)}`).then(transformProductsResponse);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -64,7 +96,7 @@ export async function getPublicProducts(
 export async function getPublicProductById(
     id: string
 ): Promise<LaravelProduct> {
-    return request<LaravelProduct>(`/products/${id}`);
+    return request<LaravelProduct>(`/products/${id}`).then(transformProduct);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

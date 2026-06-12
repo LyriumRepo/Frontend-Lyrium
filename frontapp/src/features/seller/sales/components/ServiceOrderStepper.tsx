@@ -36,6 +36,12 @@ const SERVICE_FLOW_CONFIG: Record<ServiceFlowType, { label: string; icon: string
     },
 };
 
+function getServiceImage(flowType: ServiceFlowType, stepId: number): string {
+    if (stepId === 1) return '6.png';
+    if (flowType === 'sede') return '8.png';
+    return stepId === 2 ? '7.png' : '8.png';
+}
+
 export default function ServiceOrderStepper({ currentStep, flowType }: ServiceOrderStepperProps) {
     const { label, icon, color, steps } = SERVICE_FLOW_CONFIG[flowType];
     const progress = Math.max(0, Math.min(100, ((currentStep - 1) / (steps.length - 1)) * 100));
@@ -68,15 +74,19 @@ export default function ServiceOrderStepper({ currentStep, flowType }: ServiceOr
                             style={{ width: `${100 / steps.length}%` }}
                         >
                             <div
-                                className={`w-[42px] h-[42px] bg-[var(--bg-card)] border-[4px] rounded-[15px] flex items-center justify-center transition-all duration-300 font-black shadow-sm
+                                className={`w-14 h-14 rounded-full border-[3px] overflow-hidden transition-all duration-700 shadow-sm flex-shrink-0 bg-white dark:bg-[var(--bg-card)] flex items-center justify-center
                                     ${isCompleted
-                                        ? 'border-emerald-500 text-emerald-500'
+                                        ? 'border-emerald-500 shadow-emerald-200 dark:shadow-emerald-900/30'
                                         : isActive
-                                            ? 'border-emerald-500 bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 -translate-y-1'
-                                            : 'border-[var(--border-subtle)] text-[var(--text-secondary)]'
+                                            ? 'border-emerald-500 shadow-lg shadow-emerald-500/20 scale-110'
+                                            : 'border-gray-200 dark:border-[var(--border-subtle)] opacity-60'
                                     }`}
                             >
-                                <Icon name={step.icon} className="text-lg" />
+                                <img
+                                    src={`/imagenes-seguimiento/${getServiceImage(flowType, step.id)}`}
+                                    alt={`Paso ${step.id}`}
+                                    className="w-[90%] h-[90%] rounded-full object-cover"
+                                />
                             </div>
                             <span
                                 className={`mt-3 text-[8px] font-black uppercase tracking-wider text-center leading-tight transition-colors

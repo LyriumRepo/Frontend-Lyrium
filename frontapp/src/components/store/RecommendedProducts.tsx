@@ -2,9 +2,12 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { Star, Heart, ShoppingCart } from 'lucide-react';
+import { Star, Heart, ShoppingCart, Eye } from 'lucide-react';
 import { Sparkles } from 'lucide-react';
 import { Producto } from '@/types/public';
+import { useCarritoStore } from '@/store/carritoStore';
+import { useState } from 'react';
+import QuickViewModal from '@/components/products/QuickViewModal';
 
 interface RecommendedProductsProps {
   productos: Producto[];
@@ -19,6 +22,21 @@ const stickerConfig: Record<string, { label: string; class: string }> = {
 };
 
 export default function RecommendedProducts({ productos, titulo = 'Más productos para ti' }: RecommendedProductsProps) {
+  const addToCart = useCarritoStore((s) => s.addToCart);
+  const openCart = useCarritoStore((s) => s.openCart);
+  const [quickViewProduct, setQuickViewProduct] = useState<Producto | null>(null);
+  const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
+
+  const handleAddToCart = (producto: Producto) => {
+    addToCart(producto);
+    openCart();
+  };
+
+  const handleQuickView = (producto: Producto) => {
+    setQuickViewProduct(producto);
+    setIsQuickViewOpen(true);
+  };
+
   if (!productos || productos.length === 0) {
     return null;
   }
@@ -74,6 +92,11 @@ export default function RecommendedProducts({ productos, titulo = 'Más producto
                     {sticker.label}
                   </span>
                 )}
+
+                <div className="hidden md:flex absolute inset-0 bg-black/0 group-hover:bg-black/10 items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                  <button onClick={() => handleQuickView(producto)} className="bg-white p-2 rounded-full shadow-lg"><Eye className="w-4 h-4" /></button>
+                  <button onClick={() => handleAddToCart(producto)} className="bg-sky-500 p-2 rounded-full shadow-lg"><ShoppingCart className="w-4 h-4 text-white" /></button>
+                </div>
               </div>
 
               {/* Info */}
@@ -83,7 +106,7 @@ export default function RecommendedProducts({ productos, titulo = 'Más producto
                 </h4>
                 
                 <div className="flex items-baseline gap-2">
-                  <p className="text-lg font-bold text-sky-500 dark:text-[var(--brand-sky)]">
+                  <p className="text-lg font-bold text-sky-500 dark:[var(--brand-sky)]">
                     S/{producto.precio.toFixed(2)}
                   </p>
                   {tieneDescuento && (
@@ -92,11 +115,27 @@ export default function RecommendedProducts({ productos, titulo = 'Más producto
                     </p>
                   )}
                 </div>
+                <button
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleAddToCart(producto); }}
+                  className="mt-2 w-full py-1.5 bg-sky-500 hover:bg-sky-600 text-white text-xs font-medium rounded-lg flex items-center justify-center gap-1 transition-colors md:hidden"
+                >
+                  <ShoppingCart className="w-3 h-3" /> Añadir
+                </button>
               </div>
             </Link>
           );
         })}
       </div>
+
+      <QuickViewModal
+        isOpen={isQuickViewOpen}
+        onClose={() => setIsQuickViewOpen(false)}
+        producto={quickViewProduct}
+        onAddToCart={(p) => {
+          addToCart(p);
+          openCart();
+        }}
+      />
     </section>
   );
 }
