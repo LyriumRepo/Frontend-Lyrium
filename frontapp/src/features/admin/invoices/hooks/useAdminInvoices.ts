@@ -30,6 +30,121 @@ function getToken(): string | null {
     return localStorage.getItem('laravel_token');
 }
 
+const MOCK_INVOICES: Voucher[] = [
+    {
+        id: 'mock-inv-1',
+        series: 'FFF1',
+        number: '0104',
+        type: 'FACTURA',
+        customer_name: 'BIOTIENDA DEMO SAC',
+        customer_ruc: '20056089226',
+        order_id: 'ORD-00104',
+        amount: 320.50,
+        emission_date: '2026-06-07T14:30:00Z',
+        sunat_status: 'ACCEPTED',
+        store_id: '1',
+        history: []
+    },
+    {
+        id: 'mock-inv-2',
+        series: 'BBB1',
+        number: '0542',
+        type: 'BOLETA',
+        customer_name: 'JUAN PEREZ GARCIA',
+        customer_ruc: '10458822991',
+        order_id: 'ORD-00105',
+        amount: 45.90,
+        emission_date: '2026-06-08T09:15:00Z',
+        sunat_status: 'ACCEPTED',
+        store_id: '2',
+        history: []
+    },
+    {
+        id: 'mock-inv-3',
+        series: 'FFF1',
+        number: '0105',
+        type: 'FACTURA',
+        customer_name: 'SERVICIOS MEDICOS INTEGRALES SAC',
+        customer_ruc: '20601234567',
+        order_id: 'ORD-00106',
+        amount: 1500.00,
+        emission_date: '2026-06-09T16:45:00Z',
+        sunat_status: 'SENT_WAIT_CDR',
+        store_id: '3',
+        history: []
+    },
+    {
+        id: 'mock-inv-4',
+        series: 'BBB1',
+        number: '0543',
+        type: 'BOLETA',
+        customer_name: 'MARIA ALVAREZ CHUNGA',
+        customer_ruc: '10784422993',
+        order_id: 'ORD-00107',
+        amount: 118.00,
+        emission_date: '2026-06-10T10:00:00Z',
+        sunat_status: 'ACCEPTED',
+        store_id: '1',
+        history: []
+    },
+    {
+        id: 'mock-inv-5',
+        series: 'FFF1',
+        number: '0106',
+        type: 'FACTURA',
+        customer_name: 'ALIMENTOS SALUDABLES SAC',
+        customer_ruc: '20458877112',
+        order_id: 'ORD-00108',
+        amount: 850.00,
+        emission_date: '2026-06-11T11:20:00Z',
+        sunat_status: 'REJECTED',
+        store_id: '2',
+        history: []
+    },
+    {
+        id: 'mock-inv-6',
+        series: 'BBB1',
+        number: '0544',
+        type: 'BOLETA',
+        customer_name: 'CARLOS MERINO RUIZ',
+        customer_ruc: '10229944883',
+        order_id: 'ORD-00109',
+        amount: 75.00,
+        emission_date: '2026-06-12T12:05:00Z',
+        sunat_status: 'OBSERVED',
+        store_id: '3',
+        history: []
+    },
+    {
+        id: 'mock-inv-7',
+        series: 'FFF1',
+        number: '0107',
+        type: 'FACTURA',
+        customer_name: 'INVERSIONES SANTA FE EIRL',
+        customer_ruc: '20556677889',
+        order_id: 'ORD-00110',
+        amount: 980.00,
+        emission_date: '2026-06-12T14:10:00Z',
+        sunat_status: 'ACCEPTED',
+        store_id: '1',
+        history: []
+    },
+    {
+        id: 'mock-inv-8',
+        series: 'BBB1',
+        number: '0545',
+        type: 'BOLETA',
+        customer_name: 'ANA GOMEZ FLORES',
+        customer_ruc: '10998877665',
+        order_id: 'ORD-00111',
+        amount: 210.00,
+        emission_date: '2026-06-12T15:30:00Z',
+        sunat_status: 'ACCEPTED',
+        store_id: '2',
+        history: []
+    }
+];
+
 export function useAdminInvoices() {
     const [invoices, setInvoices] = useState<Voucher[]>([]);
     const [sellers, setSellers] = useState<SellerListItem[]>([]);
@@ -66,7 +181,7 @@ export function useAdminInvoices() {
                 ? rawData
                 : (rawData && Array.isArray(rawData.data) ? rawData.data : []);
 
-            setInvoices(invoiceList);
+            setInvoices([...invoiceList, ...MOCK_INVOICES]);
 
             try {
                 const sellersRes = await adminSellerRepository.getSellers({ per_page: 100 });
@@ -78,6 +193,7 @@ export function useAdminInvoices() {
             }
         } catch (err: unknown) {
             setError(err instanceof Error ? err.message : 'Error al cargar facturas');
+            setInvoices(MOCK_INVOICES);
         } finally {
             setIsLoading(false);
         }
