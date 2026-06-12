@@ -47,7 +47,7 @@ export default function ComprobantesSection({ invoices }: ComprobantesSectionPro
                     </div>
                 </div>
                 <a
-                    href="/seller/invoices"
+                    href="/admin/invoices"
                     className="flex items-center gap-2 px-4 py-2 bg-[var(--bg-secondary)] text-[var(--text-secondary)] rounded-xl hover:bg-[var(--turquesa-500)] hover:text-white transition-all text-[10px] font-black uppercase tracking-widest"
                 >
                     <Icon name="ExternalLink" className="w-3.5 h-3.5" />

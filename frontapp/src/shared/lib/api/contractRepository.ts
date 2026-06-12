@@ -1,158 +1,187 @@
-import { LARAVEL_API_URL } from '@/shared/lib/config/flags';
-import type { ApiResponse } from '@/shared/lib/api/base-client';
+import type { Contract as FrontendContract } from '@/lib/types/admin/contracts';
 
-export type ContractStatus = 'DRAFT' | 'PENDING_SIGNATURE' | 'ACTIVE' | 'CANCELLED' | 'EXPIRED';
-export type ContractModality = 'VIRTUAL' | 'PHYSICAL';
+const API_URL = process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://localhost:8000/api';
 
-export interface Contract {
-    id: number;
-    store_id: number;
-    store_name: string;
-    store_ruc: string;
-    representative_name: string;
-    representative_dni: string;
+interface ApiContractResponse {
+    id: string;
+    dbId: number;
+    storeId: number | null;
+    company: string;
+    ruc: string | null;
+    rep: string | null;
+    dni: string | null;
+    direccion: string | null;
+    admin_name: string | null;
+    admin_phone: string | null;
+    admin_email: string | null;
     type: string;
-    modality: ContractModality;
-    status: ContractStatus;
-    start_date: string;
-    end_date: string;
-    auto_renew: boolean;
-    document_url?: string;
-    signed_at?: string;
-    created_at: string;
-    updated_at: string;
+    modality: 'VIRTUAL' | 'PHYSICAL';
+    plan: string | null;
+    status: 'ACTIVE' | 'PENDING' | 'EXPIRED';
+    start: string | null;
+    end: string | null;
+    storage_path: string;
+    signed_file_path: string | null;
+    has_signed_doc: boolean;
+    notes: string | null;
+    expiryUrgency: 'normal' | 'warning' | 'critical';
+    auditTrail?: Array<{ timestamp: string; action: string; user: string }>;
+    store?: { id: number; tradeName: string; slug: string } | null;
+    createdAt: string | null;
 }
 
-export interface ContractFilters {
-    status?: ContractStatus;
-    search?: string;
-    dateStart?: string;
-    dateEnd?: string;
+interface ApiListResponse {
+    data: ApiContractResponse[];
+    kpis: {
+        total: number;
+        active: number;
+        pending: number;
+        expired: number;
+    };
+    meta?: any;
 }
 
-export interface CreateContractInput {
-    store_id: number;
-    type: string;
-    modality: ContractModality;
-    start_date: string;
-    end_date: string;
-    auto_renew?: boolean;
+function getToken(): string | null {
+    if (typeof window === 'undefined') return null;
+    return localStorage.getItem('laravel_token');
 }
 
-export interface UpdateContractInput {
-    type?: string;
-    modality?: ContractModality;
-    start_date?: string;
-    end_date?: string;
-    auto_renew?: boolean;
-}
-
-async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
-    const response = await fetch(`${LARAVEL_API_URL}${endpoint}`, {
+async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+    const token = getToken();
+    const res = await fetch(`${API_URL}${endpoint}`, {
+        ...options,
         headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            ...options.headers,
         },
-        ...options,
     });
-
-    if (!response.ok) {
-        throw new Error(`API Error: ${response.status}`);
+    if (!res.ok) {
+        let details = '';
+        try {
+            const errData = await res.json();
+            details = errData.message || JSON.stringify(errData.errors || errData);
+        } catch {}
+        throw new Error(`API Error: ${res.status} - ${details}`);
     }
+    return res.json();
+}
 
-    return response.json();
+function mapApiToFrontend(api: ApiContractResponse): FrontendContract {
+    return {
+        id: api.id,
+        company: api.company,
+        ruc: api.ruc ?? '',
+        rep: api.rep ?? '',
+        dni: api.dni ?? '',
+        direccion: api.direccion ?? '',
+        admin_name: api.admin_name ?? '',
+        admin_phone: api.admin_phone ?? '',
+        admin_email: api.admin_email ?? '',
+        plan: api.plan ?? '',
+        type: api.type,
+        modality: api.modality,
+        status: api.status,
+        start: api.start ?? '',
+        end: api.end ?? '',
+        storage_path: api.storage_path,
+        auditTrail: api.auditTrail ?? [],
+        expiryUrgency: api.expiryUrgency ?? 'normal',
+    };
+}
+
+function frontendToApi(data: Partial<FrontendContract>): Record<string, any> {
+    const result: Record<string, any> = {};
+    if (data.company !== undefined) result.company = data.company === '' ? null : data.company;
+    if (data.ruc !== undefined) result.ruc = data.ruc === '' ? null : data.ruc;
+    if (data.rep !== undefined) result.rep = data.rep === '' ? null : data.rep;
+    if (data.dni !== undefined) result.dni = data.dni === '' ? null : data.dni;
+    if (data.direccion !== undefined) result.direccion = data.direccion === '' ? null : data.direccion;
+    if (data.admin_name !== undefined) result.admin_name = data.admin_name === '' ? null : data.admin_name;
+    if (data.admin_phone !== undefined) result.admin_phone = data.admin_phone === '' ? null : data.admin_phone;
+    if (data.admin_email !== undefined) result.admin_email = data.admin_email === '' ? null : data.admin_email;
+    if (data.plan !== undefined) result.plan = data.plan === '' ? null : data.plan;
+    if (data.type !== undefined) result.type = data.type === '' ? null : data.type;
+    if (data.modality !== undefined) result.modality = (data.modality as any) === '' ? null : data.modality;
+    if (data.start !== undefined) result.start = data.start === '' ? null : data.start;
+    if (data.end !== undefined) result.end = data.end === '' ? null : data.end;
+    if (data.status !== undefined) result.status = (data.status as any) === '' ? null : data.status;
+    return result;
 }
 
 export const contractApi = {
-    list: async (filters?: ContractFilters): Promise<Contract[]> => {
+    list: async (filters?: { query?: string; status?: string; modality?: string }): Promise<{ contracts: FrontendContract[]; kpis: { total: number; active: number; pending: number; expired: number } }> => {
         const params = new URLSearchParams();
-        if (filters?.status) params.set('status', filters.status);
-        if (filters?.search) params.set('search', filters.search);
-        if (filters?.dateStart) params.set('date_start', filters.dateStart);
-        if (filters?.dateEnd) params.set('date_end', filters.dateEnd);
-        
+        if (filters?.query) params.set('search', filters.query);
+        if (filters?.status && filters.status !== 'ALL') params.set('status', filters.status);
+        if (filters?.modality && filters.modality !== 'ALL') params.set('modality', filters.modality);
         const query = params.toString() ? `?${params.toString()}` : '';
-        const response = await request<ApiResponse<Contract[]>>(`/contracts${query}`);
-        return response.data || [];
+        const res = await apiRequest<ApiListResponse>(`/contracts${query}`);
+        return {
+            contracts: (res.data || []).map(mapApiToFrontend),
+            kpis: res.kpis || { total: 0, active: 0, pending: 0, expired: 0 },
+        };
     },
 
-    getById: async (id: number): Promise<Contract | null> => {
+    getById: async (id: string): Promise<FrontendContract | null> => {
         try {
-            const response = await request<ApiResponse<Contract>>(`/contracts/${id}`);
-            return response.data || null;
-        } catch {
-            return null;
-        }
+            const res = await apiRequest<any>(`/contracts/${id}`);
+            return mapApiToFrontend(res.data || res);
+        } catch { return null; }
     },
 
-    create: async (input: CreateContractInput): Promise<Contract> => {
-        const response = await request<ApiResponse<Contract>>('/contracts', {
+    create: async (input: Partial<FrontendContract>): Promise<FrontendContract> => {
+        const res = await apiRequest<any>('/contracts', {
             method: 'POST',
-            body: JSON.stringify(input),
+            body: JSON.stringify(frontendToApi(input)),
         });
-        return response.data as Contract;
+        return mapApiToFrontend(res.data || res);
     },
 
-    update: async (id: number, input: UpdateContractInput): Promise<Contract> => {
-        const response = await request<ApiResponse<Contract>>(`/contracts/${id}`, {
+    update: async (id: string, input: Partial<FrontendContract>): Promise<FrontendContract> => {
+        const res = await apiRequest<any>(`/contracts/${id}`, {
             method: 'PUT',
-            body: JSON.stringify(input),
+            body: JSON.stringify(frontendToApi(input)),
         });
-        return response.data as Contract;
+        return mapApiToFrontend(res.data || res);
     },
 
-    updateStatus: async (id: number, status: ContractStatus): Promise<Contract> => {
-        const response = await request<ApiResponse<Contract>>(`/contracts/${id}/status`, {
+    updateStatus: async (id: string, status: string, updatedInfo: Partial<FrontendContract>): Promise<FrontendContract> => {
+        await apiRequest(`/contracts/${id}/status`, {
             method: 'PUT',
             body: JSON.stringify({ status }),
         });
-        return response.data as Contract;
-    },
-
-    sign: async (id: number): Promise<Contract> => {
-        const response = await request<ApiResponse<Contract>>(`/contracts/${id}/sign`, {
+        const res = await apiRequest<any>(`/contracts/${id}`, {
             method: 'PUT',
+            body: JSON.stringify(frontendToApi(updatedInfo)),
         });
-        return response.data as Contract;
+        return mapApiToFrontend(res.data || res);
     },
 
-    cancel: async (id: number, reason?: string): Promise<Contract> => {
-        const response = await request<ApiResponse<Contract>>(`/contracts/${id}/cancel`, {
-            method: 'PUT',
-            body: JSON.stringify({ reason }),
-        });
-        return response.data as Contract;
-    },
-
-    uploadDocument: async (id: number, file: File): Promise<Contract> => {
+    uploadDocument: async (id: string, file: File): Promise<FrontendContract> => {
+        const token = getToken();
         const formData = new FormData();
-        formData.append('document', file);
-        
-        const response = await fetch(`${LARAVEL_API_URL}/contracts/${id}/upload`, {
+        formData.append('file', file);
+        const res = await fetch(`${API_URL}/contracts/${id}/upload`, {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
+                ...(token ? { Authorization: `Bearer ${token}` } : {}),
             },
             body: formData,
         });
-
-        if (!response.ok) {
-            throw new Error(`API Error: ${response.status}`);
-        }
-
-        const data = await response.json();
-        return data.data as Contract;
+        if (!res.ok) throw new Error(`API Error: ${res.status}`);
+        const data = await res.json();
+        return mapApiToFrontend(data.data || data);
     },
 
-    downloadDocument: async (id: number): Promise<Blob> => {
-        const response = await fetch(`${LARAVEL_API_URL}/contracts/${id}/download`, {
-            method: 'GET',
+    downloadDocument: async (id: string): Promise<Blob> => {
+        const token = getToken();
+        const res = await fetch(`${API_URL}/contracts/${id}/download`, {
+            headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
         });
-
-        if (!response.ok) {
-            throw new Error(`API Error: ${response.status}`);
-        }
-
-        return response.blob();
+        if (!res.ok) throw new Error(`API Error: ${res.status}`);
+        return res.blob();
     },
 };

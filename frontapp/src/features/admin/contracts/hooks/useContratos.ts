@@ -3,11 +3,12 @@
 import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Contract, ContractFilters, ContractKPI, ContractStatus } from '@/lib/types/admin/contracts';
-import { MOCK_CONTRACTS_DATA } from '@/lib/mocks/contractsData';
+import { contractApi } from '@/shared/lib/api/contractRepository';
 
 export const useContratos = () => {
     const queryClient = useQueryClient();
     const [selectedContractId, setSelectedContractId] = useState<string | null>(null);
+    const [tempNewContract, setTempNewContract] = useState<Contract | null>(null);
 
     const [filters, setFilters] = useState<ContractFilters>({
         query: '',
@@ -17,96 +18,73 @@ export const useContratos = () => {
         dateLimit: ''
     });
 
-    const { data: contracts = [], isLoading, error } = useQuery({
-        queryKey: ['admin', 'contracts'],
+    const TEMP_NEW_ID = '__new__';
+
+    // --- Query: Fetch Contracts ---
+    const { data, isLoading, error } = useQuery({
+        queryKey: ['admin', 'contracts', filters],
         queryFn: async () => {
-            await new Promise(resolve => setTimeout(resolve, 600));
-            if (typeof window !== 'undefined') {
-                const stored = localStorage.getItem('lyrium_contracts');
-                if (stored) {
-                    try {
-                        return JSON.parse(stored) as Contract[];
-                    } catch (e) {
-                    }
-                }
-            }
-            return MOCK_CONTRACTS_DATA as Contract[];
+            const result = await contractApi.list({
+                query: filters.query || undefined,
+                status: filters.status === 'ALL' ? undefined : filters.status,
+                modality: filters.modality === 'ALL' ? undefined : filters.modality,
+            });
+            return result;
         },
         staleTime: 5 * 60 * 1000,
     });
 
-    const updateContractMutation = useMutation({
+    const contracts = data?.contracts ?? [];
+    const kpiData = data?.kpis ?? { total: 0, active: 0, pending: 0, expired: 0 };
+
+    // --- Mutations ---
+    const saveContractMutation = useMutation({
         mutationFn: async ({ id, status, updatedInfo }: { id: string, status: ContractStatus, updatedInfo: Partial<Contract> }) => {
-            return { id, status, updatedInfo };
+            const finalInfo = { ...updatedInfo, type: updatedInfo.type || updatedInfo.plan || 'Standard' };
+            if (id === TEMP_NEW_ID) {
+                return contractApi.create({ ...finalInfo, status });
+            }
+            return contractApi.updateStatus(id, status, finalInfo);
         },
-        onSuccess: (variables) => {
-            queryClient.setQueryData(['admin', 'contracts'], (old: Contract[] | undefined) => {
-                if (!old) return old;
-                const next = old.map(c => {
-                    if (c.id === variables.id) {
-                        return {
-                            ...c,
-                            ...variables.updatedInfo,
-                            status: variables.status,
-                            auditTrail: [
-                                ...(c.auditTrail || []),
-                                {
-                                    timestamp: new Date().toISOString(),
-                                    action: `Estado actualizado a ${variables.status}`,
-                                    user: 'Admin (System)'
-                                }
-                            ]
-                        };
-                    }
-                    return c;
-                });
-                if (typeof window !== 'undefined') {
-                    localStorage.setItem('lyrium_contracts', JSON.stringify(next));
-                }
-                return next;
-            });
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['admin', 'contracts'] });
+            setTempNewContract(null);
             setSelectedContractId(null);
         }
     });
 
     const createContractMutation = useMutation({
         mutationFn: async () => {
-            const nextId = `CTR-${new Date().getFullYear()}-${Math.floor(Math.random() * 900 + 100)}`;
-            return {
-                id: nextId,
+            const newContract: Contract = {
+                id: TEMP_NEW_ID,
                 company: '',
                 ruc: '',
                 rep: '',
-                plan: 'Plan emprende',
+                dni: '',
+                direccion: '',
+                admin_name: '',
+                admin_phone: '',
+                admin_email: '',
+                plan: '',
+                type: '',
                 modality: 'VIRTUAL',
                 status: 'PENDING',
                 start: '',
                 end: '',
                 storage_path: 'pendiente_de_carga.pdf',
-                phone: '',
-                email: '',
-                address: '',
-                dni: '',
-                auditTrail: [
-                    { timestamp: new Date().toISOString(), action: 'Contrato Borrador Creado', user: 'Admin' }
-                ]
             };
+            return newContract;
         },
         onSuccess: (newContract) => {
-            queryClient.setQueryData(['admin', 'contracts'], (old: Contract[] | undefined) => {
-                const next = old ? [newContract, ...old] : [newContract];
-                if (typeof window !== 'undefined') {
-                    localStorage.setItem('lyrium_contracts', JSON.stringify(next));
-                }
-                return next;
-            });
+            setTempNewContract(newContract);
             setSelectedContractId(newContract.id);
         }
     });
 
-    const selectedContract = useMemo(() =>
-        contracts.find(c => c.id === selectedContractId) || null
-        , [contracts, selectedContractId]);
+    const selectedContract = useMemo(() => {
+        if (selectedContractId === TEMP_NEW_ID) return tempNewContract;
+        return contracts.find(c => c.id === selectedContractId) || null;
+    }, [contracts, selectedContractId, tempNewContract]);
 
     const filteredContracts = useMemo(() => {
         const now = new Date();
@@ -121,44 +99,27 @@ export const useContratos = () => {
                 else if (expiryDate <= fifteenDaysFromNow) urgency = 'warning';
             }
             return { ...c, expiryUrgency: urgency };
-        }).filter(c => {
-            const matchQuery = !filters.query ||
-                c.company.toLowerCase().includes(filters.query.toLowerCase()) ||
-                c.ruc.includes(filters.query) ||
-                c.id.toLowerCase().includes(filters.query.toLowerCase());
-
-            const matchStatus = filters.status === 'ALL' || c.status === filters.status;
-            const matchModality = filters.modality === 'ALL' || c.modality === filters.modality;
-
-            let matchDate = true;
-            if (filters.dateLimit) {
-                const targetDate = filters.dateType === 'SIGNATURE' ? c.start : c.end;
-                matchDate = targetDate <= filters.dateLimit;
-            }
-
-            return matchQuery && matchStatus && matchModality && matchDate;
         });
-    }, [contracts, filters]);
+    }, [contracts]);
 
     const kpis = useMemo((): ContractKPI[] => {
         return [
-            { label: 'Total Contratos', val: contracts.length, color: 'indigo', icon: 'Files' },
-            { label: 'Vigentes (Activos)', val: contracts.filter(c => c.status === 'ACTIVE').length, color: 'emerald', icon: 'CheckCircle' },
-            { label: 'Por Validar', val: contracts.filter(c => c.status === 'PENDING').length, color: 'amber', icon: 'Hourglass' },
-            { label: 'Vencidos / Exp.', val: contracts.filter(c => c.status === 'EXPIRED').length, color: 'red', icon: 'AlertOctagon' }
+            { label: 'Total Contratos', val: kpiData.total, color: 'indigo', icon: 'Files' },
+            { label: 'Vigentes (Activos)', val: kpiData.active, color: 'emerald', icon: 'CheckCircle' },
+            { label: 'Por Validar', val: kpiData.pending, color: 'amber', icon: 'Hourglass' },
+            { label: 'Vencidos / Exp.', val: kpiData.expired, color: 'red', icon: 'AlertOctagon' }
         ];
-    }, [contracts]);
+    }, [kpiData]);
 
     const openTemplates = () => {
-        console.log('[Contracts] Abriendo repositorio de plantillas legas');
-        window.open('https://docs.google.com/viewer?url=https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', '_blank');
+        window.open('/admin/contracts/templates', '_blank');
     };
 
     return {
         state: {
             contracts: filteredContracts,
             kpis,
-            loading: isLoading || updateContractMutation.isPending || createContractMutation.isPending,
+            loading: isLoading || saveContractMutation.isPending || createContractMutation.isPending,
             error: error ? (error as Error).message : null,
             filters,
             selectedContract
@@ -168,22 +129,22 @@ export const useContratos = () => {
             setSelectedContract: (c: Contract | null) => {
                 setSelectedContractId(c?.id || null);
                 if (c === null) {
-                    queryClient.setQueryData(['admin', 'contracts'], (old: Contract[] | undefined) => {
-                        if (!old) return old;
-                        const filtered = old.filter(item => !(item.company === '' && item.ruc === ''));
-                        if (typeof window !== 'undefined') {
-                            localStorage.setItem('lyrium_contracts', JSON.stringify(filtered));
-                        }
-                        return filtered;
+                    setTempNewContract(null);
+                    queryClient.setQueryData(['admin', 'contracts'], (old: any) => {
+                        if (!old?.contracts) return old;
+                        return {
+                            ...old,
+                            contracts: old.contracts.filter((item: Contract) => !(item.company === '' && item.ruc === ''))
+                        };
                     });
                 }
             },
             validateContract: (id: string, updatedInfo: Partial<Contract>) =>
-                updateContractMutation.mutateAsync({ id, status: 'ACTIVE', updatedInfo }),
+                saveContractMutation.mutateAsync({ id, status: 'ACTIVE', updatedInfo }),
             invalidateContract: (id: string, updatedInfo: Partial<Contract>) =>
-                updateContractMutation.mutateAsync({ id, status: 'EXPIRED', updatedInfo }),
+                saveContractMutation.mutateAsync({ id, status: 'EXPIRED', updatedInfo }),
             updateContractStatus: (id: string, status: ContractStatus, updatedInfo: Partial<Contract>) =>
-                updateContractMutation.mutateAsync({ id, status, updatedInfo }),
+                saveContractMutation.mutateAsync({ id, status, updatedInfo }),
             createNew: () => createContractMutation.mutateAsync(),
             fetchContracts: () => queryClient.invalidateQueries({ queryKey: ['admin', 'contracts'] }),
             openTemplates

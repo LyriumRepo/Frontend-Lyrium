@@ -44,6 +44,9 @@
   --color-sky-500: var(--brand-sky);
   --color-sky-600: var(--brand-sky-hover);
   --color-sky-700: var(--brand-sky-active);
+  --color-brand-green: var(--brand-green);
+  --color-brand-green-hover: var(--brand-green-hover);
+  --color-icons-green: var(--icons-green);
 }
 
 /* ========================================================================== */

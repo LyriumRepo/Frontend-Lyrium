@@ -69,7 +69,7 @@ export default function FinancialBreakdownCard({ data }: FinancialBreakdownCardP
                     <div className="rounded-xl md:col-span-2 flex items-center justify-between p-3" style={{ backgroundColor: `${companyColors.azulCeleste}1A` }}>
                         <div>
                             <p className="text-[9px] font-bold uppercase tracking-wider" style={{ color: companyColors.azulCeleste }}>Total Neto a Cobrar</p>
-                            <p className="text-lg font-black" style={{ color: companyColors.azulCeleste }}>{formatCurrency(data.totalPending + data.totalCompleted)}</p>
+                            <p className="text-xs sm:text-sm font-black" style={{ color: companyColors.azulCeleste }}>{formatCurrency(data.totalPending + data.totalCompleted)}</p>
                         </div>
                     </div>
                 </div>
@@ -115,7 +115,7 @@ export default function FinancialBreakdownCard({ data }: FinancialBreakdownCardP
                             </div>
                             <div className="p-4 rounded-xl" style={{ backgroundColor: `${companyColors.azulCeleste}1A` }}>
                                 <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: companyColors.azulCeleste }}>Total Neto a Cobrar</p>
-                                <p className="text-2xl font-black" style={{ color: companyColors.azulCeleste }}>{formatCurrency(data.totalPending + data.totalCompleted)}</p>
+                                <p className="text-base sm:text-lg font-black" style={{ color: companyColors.azulCeleste }}>{formatCurrency(data.totalPending + data.totalCompleted)}</p>
                             </div>
                         </div>
                     </div>
