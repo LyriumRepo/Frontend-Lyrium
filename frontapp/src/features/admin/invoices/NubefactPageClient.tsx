@@ -216,13 +216,21 @@ export function NubefactPageClient(_props: NubefactPageClientProps) {
                                         onChange={(e) => setStoreSearch(e.target.value)}
                                     />
                                 </div>
-                                <div>
+                                <div className="relative">
                                     <input
                                         type="date"
-                                        className="w-full px-6 py-4 bg-gray-50/50 dark:bg-[var(--bg-input)] border-gray-100 dark:border-[var(--border-subtle)] border rounded-2xl text-xs font-black focus:ring-4 focus:ring-sky-500/10 dark:focus:ring-brand-green/15 focus:border-sky-500 dark:focus:border-icons-green text-gray-900 dark:text-[var(--text-primary)] transition-all outline-none uppercase"
+                                        className="w-full pl-6 pr-10 py-4 bg-gray-50/50 dark:bg-[var(--bg-input)] border-gray-100 dark:border-[var(--border-subtle)] border rounded-2xl text-xs font-black focus:ring-4 focus:ring-sky-500/10 dark:focus:ring-brand-green/15 focus:border-sky-500 dark:focus:border-icons-green text-gray-900 dark:text-[var(--text-primary)] transition-all outline-none uppercase"
                                         value={dateFilter}
                                         onChange={(e) => setDateFilter(e.target.value)}
                                     />
+                                    {dateFilter && (
+                                        <button
+                                            onClick={() => setDateFilter('')}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors"
+                                        >
+                                            <XCircle className="w-4 h-4" />
+                                        </button>
+                                    )}
                                 </div>
                                 <div>
                                     <select

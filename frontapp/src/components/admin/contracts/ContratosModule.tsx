@@ -180,10 +180,10 @@ export const ContratosModule: React.FC<ContratosModuleProps> = ({ state, actions
                                     <tr
                                         key={c.id}
                                         onClick={() => actions.setSelectedContract(c)}
-                                        className="hover:bg-indigo-500/5 transition-all group cursor-pointer"
+                                        className="hover:bg-sky-500/5 dark:hover:bg-sky-500/10 transition-all group cursor-pointer"
                                     >
                                         <td className="px-8 py-6">
-                                            <span className="text-xs font-black text-indigo-500 italic">#{c.id}</span>
+                                            <span className="text-xs font-black text-sky-500 italic">#{c.id}</span>
                                         </td>
                                         <td className="px-8 py-6">
                                             <p className="text-xs font-black text-[var(--text-primary)] uppercase tracking-tight">{c.company}</p>
@@ -209,7 +209,7 @@ export const ContratosModule: React.FC<ContratosModuleProps> = ({ state, actions
                                             <StatusBadge status={c.status} />
                                         </td>
                                         <td className="px-8 py-6 text-right">
-                                            <div className="inline-flex p-3 bg-[var(--bg-secondary)] text-[var(--text-muted)] group-hover:bg-indigo-500 group-hover:text-white rounded-2xl transition-all shadow-sm group-hover:shadow-indigo-500/20">
+                                            <div className="inline-flex p-3 bg-[var(--bg-secondary)] text-[var(--text-muted)] group-hover:bg-sky-500 group-hover:text-white rounded-2xl transition-all shadow-sm group-hover:shadow-sky-500/20">
                                                 <ChevronRight className="w-5 h-5" />
                                             </div>
                                         </td>

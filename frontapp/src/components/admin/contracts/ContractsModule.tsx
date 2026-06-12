@@ -2,8 +2,41 @@ import React from 'react';
 import { StatusBadge, ModalityBadge, KpiCard, ExpiryTrafficLight } from './ContractsUIComponents';
 import { Contract } from '@/lib/types/admin/contracts';
 import { ContractKPI } from '@/features/admin/contracts/types';
-import { Search, Plus, ArrowRight, ChevronRight, FileText, Calendar, Shield, Hash, Landmark } from 'lucide-react';
+import { Search, Plus, ArrowRight, ChevronRight, FileText, Calendar, Shield, Hash, Landmark, CheckCircle, Clock, AlertOctagon } from 'lucide-react';
 import Skeleton from '@/components/ui/Skeleton';
+
+const getKpiConfig = (iconKey: string, colorKey: string) => {
+    const icons: Record<string, React.ReactNode> = {
+        Files: <FileText className="w-5 h-5" />,
+        CheckCircle: <CheckCircle className="w-5 h-5" />,
+        Hourglass: <Clock className="w-5 h-5" />,
+        AlertOctagon: <AlertOctagon className="w-5 h-5" />
+    };
+
+    const colors: Record<string, { iconWrapper: string; glow: string }> = {
+        indigo: {
+            iconWrapper: 'bg-indigo-500/10 text-indigo-500 dark:text-indigo-400',
+            glow: 'bg-indigo-500/5 group-hover:bg-indigo-500/10'
+        },
+        emerald: {
+            iconWrapper: 'bg-emerald-500/10 text-emerald-500 dark:text-emerald-400',
+            glow: 'bg-emerald-500/5 group-hover:bg-emerald-500/10'
+        },
+        amber: {
+            iconWrapper: 'bg-amber-500/10 text-amber-500 dark:text-amber-400',
+            glow: 'bg-amber-500/5 group-hover:bg-amber-500/10'
+        },
+        red: {
+            iconWrapper: 'bg-red-500/10 text-red-500 dark:text-red-400',
+            glow: 'bg-red-500/5 group-hover:bg-red-500/10'
+        }
+    };
+
+    return {
+        icon: icons[iconKey] || <FileText className="w-5 h-5" />,
+        classes: colors[colorKey] || colors.indigo
+    };
+};
 
 interface ContratosModuleProps {
     state: {
@@ -59,37 +92,39 @@ export const ContratosModule: React.FC<ContratosModuleProps> = ({ state, actions
     return (
         <div className="space-y-8 animate-fadeIn pb-20 text-left font-industrial">
 
-            {/* KPI Summary - Rediseño Premium */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                {kpis.map((kpi) => (
-                    <div 
-                        key={kpi.label}
-                        className="bg-[var(--bg-card)] p-6 rounded-[2.2rem] border border-[var(--border-subtle)] shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 relative overflow-hidden group flex flex-col justify-between min-h-[140px]"
-                    >
-                        <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/5 rounded-full -mr-8 -mt-8 blur-xl group-hover:bg-indigo-500/10 transition-all"></div>
-                        <div className="flex items-center justify-between">
-                            <span className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest leading-none">
-                                {kpi.label}
-                            </span>
-                            <div className="p-2.5 bg-indigo-500/10 text-indigo-500 dark:text-indigo-400 rounded-xl">
-                                <FileText className="w-5 h-5" />
+                {kpis.map((kpi) => {
+                    const config = getKpiConfig(kpi.icon, kpi.color);
+                    return (
+                        <div 
+                            key={kpi.label}
+                            className="bg-[var(--bg-card)] p-6 rounded-[2.2rem] border border-[var(--border-subtle)] shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 relative overflow-hidden group flex flex-col justify-between min-h-[140px]"
+                        >
+                            <div className={`absolute top-0 right-0 w-24 h-24 rounded-full -mr-8 -mt-8 blur-xl transition-all ${config.classes.glow}`}></div>
+                            <div className="flex items-center justify-between">
+                                <span className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest leading-none">
+                                    {kpi.label}
+                                </span>
+                                <div className={`p-2.5 rounded-xl ${config.classes.iconWrapper}`}>
+                                    {config.icon}
+                                </div>
+                            </div>
+                            <div className="mt-4">
+                                <p className="text-3xl font-black text-[var(--text-primary)] tracking-tighter leading-none">
+                                    {kpi.val}
+                                </p>
+                                <p className="text-[9px] text-[var(--text-muted)] font-bold uppercase tracking-wider mt-2">
+                                    Sistema de Registro Validado
+                                </p>
                             </div>
                         </div>
-                        <div className="mt-4">
-                            <p className="text-3xl font-black text-[var(--text-primary)] tracking-tighter leading-none">
-                                {kpi.val}
-                            </p>
-                            <p className="text-[9px] text-[var(--text-muted)] font-bold uppercase tracking-wider mt-2">
-                                Sistema de Registro Validado
-                            </p>
-                        </div>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
 
             {/* FILTROS - Diseño Premium */}
             <div className="bg-[var(--bg-card)] p-8 rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full -mr-32 -mt-32 blur-3xl group-hover:bg-indigo-500/20 transition-all duration-700"></div>
+                <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full -mr-32 -mt-32 blur-3xl group-hover:bg-indigo-500/20 transition-all duration-700 hidden dark:block"></div>
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-end relative z-10">
                     <div className="lg:col-span-6 space-y-2">
                         <label htmlFor="contract-search" className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest ml-1">
@@ -171,10 +206,10 @@ export const ContratosModule: React.FC<ContratosModuleProps> = ({ state, actions
                                 <tr
                                     key={c.id}
                                     onClick={() => actions.setSelectedContract(c)}
-                                    className="hover:bg-indigo-50/20 dark:hover:bg-indigo-950/10 transition-all duration-300 group cursor-pointer"
+                                    className="hover:bg-sky-500/5 dark:hover:bg-sky-500/10 transition-all duration-300 group cursor-pointer"
                                 >
                                     {/* ID */}
-                                    <td className="px-8 py-6 font-mono font-black text-xs text-[var(--text-muted)] group-hover:text-indigo-600 transition-colors">
+                                    <td className="px-8 py-6 font-mono font-black text-xs text-[var(--text-muted)] group-hover:text-sky-500 transition-colors">
                                         <div className="flex items-center gap-2">
                                             <Hash className="w-3.5 h-3.5 opacity-40 shrink-0" />
                                             {c.id}
@@ -184,7 +219,7 @@ export const ContratosModule: React.FC<ContratosModuleProps> = ({ state, actions
                                     {/* Razón Social */}
                                     <td className="px-8 py-6">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-9 h-9 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0 font-black text-xs">
+                                            <div className="w-9 h-9 rounded-xl bg-brand-green/10 text-brand-green dark:bg-icons-green/10 dark:text-icons-green flex items-center justify-center shrink-0 font-black text-xs">
                                                 {c.company ? c.company.substring(0, 2).toUpperCase() : 'CTR'}
                                             </div>
                                             <div>
@@ -233,7 +268,7 @@ export const ContratosModule: React.FC<ContratosModuleProps> = ({ state, actions
 
                                     {/* Flecha */}
                                     <td className="px-8 py-6 text-right whitespace-nowrap">
-                                        <div className="w-8 h-8 rounded-xl flex items-center justify-center text-[var(--text-muted)] group-hover:text-indigo-600 group-hover:bg-indigo-500/10 transition-all shrink-0 ml-auto">
+                                        <div className="w-8 h-8 rounded-xl flex items-center justify-center text-[var(--text-muted)] group-hover:text-sky-500 group-hover:bg-sky-500/10 transition-all shrink-0 ml-auto">
                                             <ChevronRight className="w-5 h-5 shrink-0" />
                                         </div>
                                     </td>

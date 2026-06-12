@@ -19,7 +19,7 @@ function CategoryCard({ producto, onAddToCart, onQuickView }: {
   onQuickView: (product: Producto) => void;
 }) {
   return (
-    <div className="cat-card flex-shrink-0 w-[210px] bg-white dark:bg-[var(--bg-secondary)]/92 rounded-[14px] p-[14px] text-center shadow-[0_10px_24px_rgba(15,23,42,0.12)] dark:shadow-[0_10px_24px_rgba(0,0,0,0.3)] border border-slate-200 dark:border-[var(--border-subtle)]/50 mr-5 transition-transform duration-300 hover:-translate-y-[5px] hover:shadow-[0_15px_35px_rgba(15,23,42,0.2)] dark:hover:shadow-[0_15px_35px_rgba(0,0,0,0.5)]">
+    <div className="cat-card flex-shrink-0 w-[210px] bg-[var(--azulCeleste-100)] dark:bg-[var(--bg-secondary)]/92 rounded-[14px] p-[14px] text-center shadow-[0_10px_24px_rgba(15,23,42,0.12)] dark:shadow-[0_10px_24px_rgba(0,0,0,0.3)] border border-slate-200 dark:border-[var(--border-subtle)]/50 mr-5 transition-transform duration-300 hover:-translate-y-[5px] hover:shadow-[0_15px_35px_rgba(15,23,42,0.2)] dark:hover:shadow-[0_15px_35px_rgba(0,0,0,0.5)]">
       {/* Image wrapper with hover actions */}
       <div className="relative overflow-hidden w-[120px] h-[120px] mx-auto mb-2 rounded-xl bg-white dark:bg-[var(--bg-muted)]">
         <Link href={`/producto/${producto.slug}`}>
@@ -66,7 +66,7 @@ function CategoryCard({ producto, onAddToCart, onQuickView }: {
       <h3 className="text-sm font-semibold text-slate-700 dark:text-[var(--text-primary)] mb-0.5 whitespace-nowrap overflow-hidden text-ellipsis">
         {producto.titulo}
       </h3>
-      <p className="text-[15px] font-bold text-blue-800 dark:text-[var(--text-primary)]">
+      <p className="text-[15px] font-bold text-black dark:text-[var(--text-primary)]">
         S/ {producto.precio.toFixed(2)}
       </p>
       <p className="text-amber-400 text-[13px] mt-1">

@@ -26,7 +26,7 @@ export default function ProductCard({ producto, minWidth }: ProductCardProps) {
   return (
     <Link
       href={producto.slug ? `/producto/${producto.slug}` : producto.enlace ?? '#'}
-      className="block bg-white dark:bg-[var(--bg-card)] rounded-2xl shadow-sm border border-gray-100 dark:border-[var(--border-subtle)] overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group"
+      className="block bg-[var(--azulCeleste-100)] dark:bg-[var(--bg-card)] rounded-2xl shadow-sm border border-gray-100 dark:border-[var(--border-subtle)] overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group"
       style={minWidth ? { minWidth } : undefined}
       aria-label={`Ver detalles de ${producto.titulo}`}
     >
@@ -64,7 +64,7 @@ export default function ProductCard({ producto, minWidth }: ProductCardProps) {
             ))}
         </div>
         <div className="flex items-center gap-2">
-          <p className="text-sky-600 dark:text-[var(--color-success)] font-bold text-lg">
+          <p className="text-black dark:text-[var(--color-success)] font-bold text-lg">
             S/{producto.precio.toFixed(2)}
           </p>
           {precioAnterior && precioAnterior > producto.precio && (

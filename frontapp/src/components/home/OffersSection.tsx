@@ -44,7 +44,7 @@ function OfferCard({
   };
 
   return (
-      <article className="w-[220px] shrink-0 bg-[var(--bg-danger)] dark:bg-[#1E3028] backdrop-blur-lg border border-transparent rounded-[20px] p-3 shadow-md group transition-all duration-300 hover:-translate-y-[5px] flex flex-col items-center relative">
+      <article className="w-[220px] shrink-0 bg-[var(--azulCeleste-100)] dark:bg-[#1E3028] backdrop-blur-lg border border-transparent rounded-[20px] p-3 shadow-md group transition-all duration-300 hover:-translate-y-[5px] flex flex-col items-center relative">
       <div className="relative w-full aspect-square rounded-[18px] overflow-hidden bg-transparent flex items-center justify-center">
                   <Image
             src={imgSrc}
@@ -70,7 +70,7 @@ function OfferCard({
 
        <div className="mt-3 w-full text-center flex flex-col items-center">
         <h3 className="text-[13px] font-bold truncate w-full text-slate-900 dark:text-white">{producto.titulo}</h3>
-        <p className="text-[15px] font-extrabold text-rose-600 dark:text-white">S/ {producto.precio.toFixed(2)}</p>
+        <p className="text-[15px] font-extrabold text-black dark:text-white">S/ {producto.precio.toFixed(2)}</p>
         <div className="flex justify-center gap-0.5 mt-1">
           {Array.from({ length: 5 }).map((_, idx) => {
             const isFilled = idx < (producto.estrellas ? producto.estrellas.length : 5);
@@ -251,9 +251,6 @@ function OfferBlock({
     <section className="space-y-4 md:space-y-6 flex flex-col items-center w-full">
       <div className="w-[1467px] max-w-full pl-10 pr-4 flex justify-between items-center">
         <h2 className="text-xl md:text-2xl font-bold pl-8">{titulo}</h2>
-        <button className="text-sm font-bold text-sky-600 pr-8">
-          {linkText} →
-        </button>
       </div>
 
       <div className="relative w-[1467px] max-w-full h-[650px] rounded-[30px] shadow-2xl overflow-hidden mx-auto">

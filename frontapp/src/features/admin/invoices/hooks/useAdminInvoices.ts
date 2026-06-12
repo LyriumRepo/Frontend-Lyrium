@@ -227,12 +227,32 @@ export function useAdminInvoices() {
                 (i.store_id && String(i.store_id).includes(sQ))
             );
 
-            const matchesDate = !dateFilter || (
-                i.emission_date && i.emission_date.startsWith(dateFilter)
-            );
+            const matchesDate = !dateFilter || (() => {
+                if (!i.emission_date) return false;
+                if (i.emission_date.startsWith(dateFilter)) return true;
+                try {
+                    const d = new Date(i.emission_date);
+                    if (isNaN(d.getTime())) return false;
+                    const year = d.getFullYear();
+                    const month = String(d.getMonth() + 1).padStart(2, '0');
+                    const day = String(d.getDate()).padStart(2, '0');
+                    const localDateStr = `${year}-${month}-${day}`;
+                    if (localDateStr === dateFilter) return true;
+                } catch {}
+                try {
+                    const d = new Date(i.emission_date);
+                    if (isNaN(d.getTime())) return false;
+                    const year = d.getUTCFullYear();
+                    const month = String(d.getUTCMonth() + 1).padStart(2, '0');
+                    const day = String(d.getUTCDate()).padStart(2, '0');
+                    const utcDateStr = `${year}-${month}-${day}`;
+                    if (utcDateStr === dateFilter) return true;
+                } catch {}
+                return false;
+            })();
 
             const matchesType = !typeFilter || typeFilter === 'ALL' || (
-                i.type === typeFilter
+                i.type && i.type.toUpperCase() === typeFilter.toUpperCase()
             );
 
             return matchesSearch && matchesStore && matchesDate && matchesType;

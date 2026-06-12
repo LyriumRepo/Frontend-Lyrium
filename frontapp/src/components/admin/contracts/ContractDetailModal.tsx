@@ -191,10 +191,6 @@ export const ContractDetailModal: React.FC<ContractDetailModalProps> = ({
                                 className="h-12 rounded-xl flex items-center justify-center gap-2 px-6 bg-sky-500 hover:bg-sky-600 active:bg-sky-700 dark:bg-brand-green dark:hover:bg-brand-green-hover text-white border-0 shadow-xl shadow-sky-500/20 dark:shadow-none font-black text-xs uppercase tracking-widest disabled:opacity-45 disabled:cursor-not-allowed duration-300 transition-all active:scale-[0.97]">
                                 <CheckCircle className="w-4 h-4 shrink-0" /> Validar y Activar
                             </button>
-                            <button onClick={() => handleUpdateStatus('PENDING')} disabled={!isFormComplete}
-                                className="h-12 rounded-xl border border-sky-500 text-sky-500 hover:bg-sky-500/10 dark:border-icons-green dark:text-icons-green dark:hover:bg-icons-green/10 flex items-center justify-center gap-2 px-6 font-black text-xs uppercase tracking-widest disabled:opacity-45 disabled:cursor-not-allowed duration-300 transition-all active:scale-[0.97]">
-                                <FileText className="w-4 h-4 shrink-0" /> En revisión
-                            </button>
                         </>
                     ) : (
                         <>

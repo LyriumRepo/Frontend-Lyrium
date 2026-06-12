@@ -73,7 +73,7 @@ function MarketplaceSection({ title, bannerImage, products }: MarketplaceSection
                   className="w-1/3 flex-shrink-0 px-2"
                 >
                   <div
-                    className="group bg-white dark:bg-[#1E3028] rounded-[14px] p-5 text-center shadow-[0_8px_25px_rgba(0,0,0,0.15)] border border-transparent transition-all duration-300 hover:-translate-y-[6px] hover:shadow-[0_15px_35px_rgba(0,0,0,0.3)] flex flex-col justify-between h-full min-h-[360px] cursor-default"
+                    className="group bg-[var(--azulCeleste-100)] dark:bg-[#1E3028] rounded-[14px] p-5 text-center shadow-[0_8px_25px_rgba(0,0,0,0.15)] border border-transparent transition-all duration-300 hover:-translate-y-[6px] hover:shadow-[0_15px_35px_rgba(0,0,0,0.3)] flex flex-col justify-between h-full min-h-[360px] cursor-default"
                   >
                    
                     <div className="relative overflow-hidden w-full h-[220px] mb-4 flex items-center justify-center group-hover:scale-[1.05] transition-transform duration-300">
@@ -92,7 +92,7 @@ function MarketplaceSection({ title, bannerImage, products }: MarketplaceSection
                       <h3 className="text-[14px] font-bold text-slate-900 dark:text-white mb-1 hover:text-sky-600 dark:hover:text-sky-100 transition-colors line-clamp-2 px-1">
                         {product.title}
                       </h3>
-                      <p className="text-[16px] font-black text-rose-600 dark:text-white">
+                      <p className="text-[16px] font-black text-black dark:text-white">
                         S/ {product.price.toFixed(2)}
                       </p>
                       
