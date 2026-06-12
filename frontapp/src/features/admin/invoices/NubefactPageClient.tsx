@@ -79,7 +79,22 @@ function getVoucherIcon(type: string) {
 interface NubefactPageClientProps {}
 
 export function NubefactPageClient(_props: NubefactPageClientProps) {
-    const { invoices, kpis, isLoading, error, search, setSearch, getStoreName, refresh } = useAdminInvoices();
+    const { 
+        invoices, 
+        kpis, 
+        isLoading, 
+        error, 
+        search, 
+        setSearch, 
+        storeSearch,
+        setStoreSearch,
+        dateFilter,
+        setDateFilter,
+        typeFilter,
+        setTypeFilter,
+        getStoreName, 
+        refresh 
+    } = useAdminInvoices();
 
     const handleExportCSV = () => {
         const headers = ['ID', 'Tienda', 'Tipo', 'Serie', 'Número', 'Cliente', 'RUC', 'Monto', 'Estado', 'Fecha'];
@@ -171,25 +186,60 @@ export function NubefactPageClient(_props: NubefactPageClientProps) {
 
                     <div className="relative overflow-hidden bg-gray-50/20 dark:bg-[var(--bg-muted)]/5 rounded-[2.5rem] border border-gray-100/80 dark:border-[var(--border-subtle)] shadow-sm transition-all duration-300 flex flex-col">
                         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-sky-500/5 dark:bg-brand-green/5 rounded-full -mr-48 -mt-48 blur-3xl pointer-events-none"></div>
-                        <div className="p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white dark:bg-[var(--bg-card)] border-b border-gray-100 dark:border-[var(--border-subtle)]/50 relative z-10">
-                            <div>
-                                <h3 className="text-xl font-black text-gray-900 dark:text-[var(--text-primary)] tracking-tight">Comprobantes Recientes</h3>
-                                <p className="text-[10px] text-gray-400 dark:text-[var(--text-muted)] font-bold uppercase tracking-widest mt-1">Sincronizado con NubeFact</p>
+                        
+                        <div className="p-8 border-b border-gray-50 dark:border-[var(--border-subtle)]/50 space-y-6 bg-white dark:bg-[var(--bg-card)] relative z-10">
+                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                                <div>
+                                    <h3 className="text-xl font-black text-gray-900 dark:text-[var(--text-primary)] tracking-tight">Comprobantes Recientes</h3>
+                                    <p className="text-[10px] text-gray-400 dark:text-[var(--text-muted)] font-bold uppercase tracking-widest mt-1">Sincronizado con NubeFact</p>
+                                </div>
                             </div>
-                            <div className="relative w-full md:w-96">
-                                <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-[var(--text-muted)] w-5 h-5" />
-                                <input
-                                    type="text"
-                                    placeholder="Buscar..."
-                                    className="w-full pl-14 pr-6 py-4 bg-gray-50/50 dark:bg-[var(--bg-input)] border-gray-100 dark:border-[var(--border-subtle)] border rounded-2xl text-xs font-black focus:ring-4 focus:ring-sky-500/10 dark:focus:ring-brand-green/15 focus:border-sky-500 dark:focus:border-icons-green text-gray-900 dark:text-[var(--text-primary)] placeholder-gray-400 dark:placeholder-[var(--text-muted)] transition-all outline-none"
-                                    value={search}
-                                    onChange={(e) => setSearch(e.target.value)}
-                                />
+                            
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                <div className="relative">
+                                    <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-[var(--text-muted)] w-5 h-5" />
+                                    <input
+                                        type="text"
+                                        placeholder="Buscar..."
+                                        className="w-full pl-14 pr-6 py-4 bg-gray-50/50 dark:bg-[var(--bg-input)] border-gray-100 dark:border-[var(--border-subtle)] border rounded-2xl text-xs font-black focus:ring-4 focus:ring-sky-500/10 dark:focus:ring-brand-green/15 focus:border-sky-500 dark:focus:border-icons-green text-gray-900 dark:text-[var(--text-primary)] placeholder-gray-400 dark:placeholder-[var(--text-muted)] transition-all outline-none"
+                                        value={search}
+                                        onChange={(e) => setSearch(e.target.value)}
+                                    />
+                                </div>
+                                <div className="relative">
+                                    <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-[var(--text-muted)] w-5 h-5" />
+                                    <input
+                                        type="text"
+                                        placeholder="Buscar por tienda..."
+                                        className="w-full pl-14 pr-6 py-4 bg-gray-50/50 dark:bg-[var(--bg-input)] border-gray-100 dark:border-[var(--border-subtle)] border rounded-2xl text-xs font-black focus:ring-4 focus:ring-sky-500/10 dark:focus:ring-brand-green/15 focus:border-sky-500 dark:focus:border-icons-green text-gray-900 dark:text-[var(--text-primary)] placeholder-gray-400 dark:placeholder-[var(--text-muted)] transition-all outline-none"
+                                        value={storeSearch}
+                                        onChange={(e) => setStoreSearch(e.target.value)}
+                                    />
+                                </div>
+                                <div>
+                                    <input
+                                        type="date"
+                                        className="w-full px-6 py-4 bg-gray-50/50 dark:bg-[var(--bg-input)] border-gray-100 dark:border-[var(--border-subtle)] border rounded-2xl text-xs font-black focus:ring-4 focus:ring-sky-500/10 dark:focus:ring-brand-green/15 focus:border-sky-500 dark:focus:border-icons-green text-gray-900 dark:text-[var(--text-primary)] transition-all outline-none uppercase"
+                                        value={dateFilter}
+                                        onChange={(e) => setDateFilter(e.target.value)}
+                                    />
+                                </div>
+                                <div>
+                                    <select
+                                        className="w-full px-6 py-4 bg-gray-50/50 dark:bg-[var(--bg-input)] border-gray-100 dark:border-[var(--border-subtle)] border rounded-2xl text-xs font-black focus:ring-4 focus:ring-sky-500/10 dark:focus:ring-brand-green/15 focus:border-sky-500 dark:focus:border-icons-green text-gray-900 dark:text-[var(--text-primary)] transition-all outline-none cursor-pointer"
+                                        value={typeFilter}
+                                        onChange={(e) => setTypeFilter(e.target.value)}
+                                    >
+                                        <option value="ALL">Todos los tipos</option>
+                                        <option value="FACTURA">Factura</option>
+                                        <option value="BOLETA">Boleta</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
 
                         <div className="overflow-x-auto relative z-10 w-full">
-                            <table className="w-full text-left border-separate border-spacing-y-3 px-8 pb-6" aria-label="Tabla de comprobantes">
+                            <table className="w-full text-left border-collapse border-separate border-spacing-y-3 px-8 pb-6" aria-label="Tabla de comprobantes">
                                 <thead>
                                     <tr className="text-[10px] font-black text-gray-400 dark:text-[var(--text-muted)] uppercase tracking-widest border-b border-transparent">
                                         <th scope="col" className="px-6 py-3">Documento</th>
