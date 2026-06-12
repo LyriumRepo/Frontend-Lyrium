@@ -1,7 +1,10 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+/**
+ * useAdminInvoices.ts
+ */
+
+import { useState, useEffect, useCallback } from 'react';
 import { LARAVEL_API_URL } from '@/shared/lib/config/flags';
 import type { Voucher } from '@/features/seller/invoices/types';
-import { adminSellerRepository, SellerListItem } from '@/shared/lib/api/adminSellerRepository';
 
 export interface AdminInvoiceKPIs {
     totalFacturado: number;
@@ -32,14 +35,10 @@ function getToken(): string | null {
 
 export function useAdminInvoices() {
     const [invoices, setInvoices] = useState<Voucher[]>([]);
-    const [sellers, setSellers] = useState<SellerListItem[]>([]);
+    const [kpis, setKpis] = useState<AdminInvoiceKPIs | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    
     const [search, setSearch] = useState('');
-    const [storeSearch, setStoreSearch] = useState('');
-    const [dateFilter, setDateFilter] = useState('');
-    const [typeFilter, setTypeFilter] = useState('ALL');
 
     const fetchInvoices = useCallback(async () => {
         setIsLoading(true);
@@ -67,15 +66,7 @@ export function useAdminInvoices() {
                 : (rawData && Array.isArray(rawData.data) ? rawData.data : []);
 
             setInvoices(invoiceList);
-
-            try {
-                const sellersRes = await adminSellerRepository.getSellers({ per_page: 100 });
-                if (sellersRes && sellersRes.data) {
-                    setSellers(sellersRes.data);
-                }
-            } catch (e) {
-                console.warn(e);
-            }
+            setKpis(calcKPIs(invoiceList));
         } catch (err: unknown) {
             setError(err instanceof Error ? err.message : 'Error al cargar facturas');
         } finally {
@@ -87,43 +78,16 @@ export function useAdminInvoices() {
         fetchInvoices();
     }, [fetchInvoices]);
 
-    const getStoreName = useCallback((storeId: string | null | undefined) => {
-        if (!storeId) return 'Soporte / Lyrium';
-        const seller = sellers.find(s => s.store && String(s.store.id) === String(storeId));
-        return seller?.store?.trade_name || seller?.store?.store_name || `Tienda #${storeId}`;
-    }, [sellers]);
-
-    const filtered = useMemo(() => {
-        return invoices.filter(i => {
-            const q = search.toLowerCase();
-            const matchesSearch = !search || (
-                i.customer_name.toLowerCase().includes(q) ||
-                i.customer_ruc.includes(q) ||
-                i.series.toLowerCase().includes(q) ||
-                i.number.includes(q) ||
-                (i.order_id && i.order_id.toLowerCase().includes(q))
-            );
-
-            const sQ = storeSearch.toLowerCase();
-            const storeName = getStoreName(i.store_id).toLowerCase();
-            const matchesStore = !storeSearch || (
-                storeName.includes(sQ) ||
-                (i.store_id && String(i.store_id).includes(sQ))
-            );
-
-            const matchesDate = !dateFilter || (
-                i.emission_date && i.emission_date.startsWith(dateFilter)
-            );
-
-            const matchesType = !typeFilter || typeFilter === 'ALL' || (
-                i.type === typeFilter
-            );
-
-            return matchesSearch && matchesStore && matchesDate && matchesType;
-        });
-    }, [invoices, search, storeSearch, dateFilter, typeFilter, getStoreName]);
-
-    const kpis = useMemo(() => calcKPIs(filtered), [filtered]);
+    const filtered = invoices.filter(i => {
+        const q = search.toLowerCase();
+        return (
+            i.customer_name.toLowerCase().includes(q) ||
+            i.customer_ruc.includes(q) ||
+            i.series.toLowerCase().includes(q) ||
+            i.number.includes(q) ||
+            i.order_id.toLowerCase().includes(q)
+        );
+    });
 
     return {
         invoices: filtered,
@@ -132,13 +96,6 @@ export function useAdminInvoices() {
         error,
         search,
         setSearch,
-        storeSearch,
-        setStoreSearch,
-        dateFilter,
-        setDateFilter,
-        typeFilter,
-        setTypeFilter,
-        getStoreName,
-        refresh: fetchInvoices
+        refresh: fetchInvoices,
     };
 }
