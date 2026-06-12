@@ -61,21 +61,18 @@ function getVoucherIcon(type: string) {
     if (t.includes('FACTURA')) {
         return {
             icon: <Building2 className="w-4 h-4 shrink-0" />,
-            bg: 'bg-indigo-500/10 text-indigo-500 dark:text-indigo-400',
-            glow: 'group-hover:scale-110'
+            bg: 'from-indigo-500/10 to-purple-500/10 text-indigo-500 dark:text-indigo-400 border border-indigo-500/15'
         };
     }
     if (t.includes('BOLETA')) {
         return {
             icon: <User className="w-4 h-4 shrink-0" />,
-            bg: 'bg-emerald-500/10 text-emerald-500 dark:text-emerald-400',
-            glow: 'group-hover:scale-110'
+            bg: 'from-emerald-500/10 to-teal-500/10 text-emerald-500 dark:text-emerald-400 border border-emerald-500/15'
         };
     }
     return {
         icon: <FileText className="w-4 h-4 shrink-0" />,
-        bg: 'bg-sky-500/10 text-sky-500 dark:text-sky-400',
-        glow: 'group-hover:scale-110'
+        bg: 'from-sky-500/10 to-blue-500/10 text-sky-500 dark:text-sky-400 border border-sky-500/15'
     };
 }
 
@@ -172,9 +169,9 @@ export function NubefactPageClient(_props: NubefactPageClientProps) {
                         })}
                     </div>
 
-                    <div className="relative overflow-hidden bg-white dark:bg-[var(--bg-card)] rounded-[2.5rem] border border-gray-100 dark:border-[var(--border-subtle)] shadow-sm transition-all duration-300 flex flex-col">
-                        <div className="absolute top-0 right-0 w-96 h-96 bg-sky-500/5 dark:bg-brand-green/5 rounded-full -mr-48 -mt-48 blur-3xl pointer-events-none"></div>
-                        <div className="p-8 border-b border-gray-50 dark:border-[var(--border-subtle)]/50 flex flex-col md:flex-row md:items-center justify-between gap-6 bg-gray-50/30 dark:bg-[var(--bg-muted)]/20 relative z-10">
+                    <div className="relative overflow-hidden bg-gray-50/20 dark:bg-[var(--bg-muted)]/5 rounded-[2.5rem] border border-gray-100/80 dark:border-[var(--border-subtle)] shadow-sm transition-all duration-300 flex flex-col">
+                        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-sky-500/5 dark:bg-brand-green/5 rounded-full -mr-48 -mt-48 blur-3xl pointer-events-none"></div>
+                        <div className="p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white dark:bg-[var(--bg-card)] border-b border-gray-100 dark:border-[var(--border-subtle)]/50 relative z-10">
                             <div>
                                 <h3 className="text-xl font-black text-gray-900 dark:text-[var(--text-primary)] tracking-tight">Comprobantes Recientes</h3>
                                 <p className="text-[10px] text-gray-400 dark:text-[var(--text-muted)] font-bold uppercase tracking-widest mt-1">Sincronizado con NubeFact</p>
@@ -184,33 +181,33 @@ export function NubefactPageClient(_props: NubefactPageClientProps) {
                                 <input
                                     type="text"
                                     placeholder="Buscar..."
-                                    className="w-full pl-14 pr-6 py-4 bg-white dark:bg-[var(--bg-input)] border-gray-100 dark:border-[var(--border-subtle)] border rounded-2xl text-xs font-black focus:ring-4 focus:ring-sky-500/10 dark:focus:ring-brand-green/15 focus:border-sky-500 dark:focus:border-icons-green text-gray-900 dark:text-[var(--text-primary)] placeholder-gray-400 dark:placeholder-[var(--text-muted)] transition-all outline-none"
+                                    className="w-full pl-14 pr-6 py-4 bg-gray-50/50 dark:bg-[var(--bg-input)] border-gray-100 dark:border-[var(--border-subtle)] border rounded-2xl text-xs font-black focus:ring-4 focus:ring-sky-500/10 dark:focus:ring-brand-green/15 focus:border-sky-500 dark:focus:border-icons-green text-gray-900 dark:text-[var(--text-primary)] placeholder-gray-400 dark:placeholder-[var(--text-muted)] transition-all outline-none"
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
                                 />
                             </div>
                         </div>
 
-                        <div className="overflow-x-auto relative z-10">
-                            <table className="w-full text-left border-collapse" aria-label="Tabla de comprobantes">
+                        <div className="overflow-x-auto relative z-10 w-full">
+                            <table className="w-full text-left border-separate border-spacing-y-3 px-8 pb-6" aria-label="Tabla de comprobantes">
                                 <thead>
-                                    <tr className="bg-gray-50/50 dark:bg-[var(--bg-muted)]/40 text-[10px] font-black text-gray-400 dark:text-[var(--text-muted)] uppercase tracking-widest border-b border-gray-100 dark:border-[var(--border-subtle)]">
-                                        <th scope="col" className="px-8 py-5">Documento</th>
-                                        <th scope="col" className="px-8 py-5">Serie-Nro</th>
-                                        <th scope="col" className="px-8 py-5">Cliente</th>
-                                        <th scope="col" className="px-8 py-5">Monto</th>
-                                        <th scope="col" className="px-8 py-5 text-center">Estado</th>
-                                        <th scope="col" className="px-8 py-5 text-right">Fecha</th>
+                                    <tr className="text-[10px] font-black text-gray-400 dark:text-[var(--text-muted)] uppercase tracking-widest border-b border-transparent">
+                                        <th scope="col" className="px-6 py-3">Documento</th>
+                                        <th scope="col" className="px-6 py-3">Serie-Nro</th>
+                                        <th scope="col" className="px-6 py-3">Cliente</th>
+                                        <th scope="col" className="px-6 py-3">Monto</th>
+                                        <th scope="col" className="px-6 py-3 text-center">Estado</th>
+                                        <th scope="col" className="px-6 py-3 text-right">Fecha</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-100 dark:divide-[var(--border-subtle)]/40">
+                                <tbody>
                                     {(invoices || []).map((invoice) => {
                                         const typeStyle = getVoucherIcon(invoice.type);
                                         return (
-                                            <tr key={invoice.id} className="hover:bg-sky-500/5 dark:hover:bg-[#1E3028]/20 transition-colors group">
-                                                <td className="px-8 py-6">
+                                            <tr key={invoice.id} className="group hover:scale-[1.002] transition-all duration-300">
+                                                <td className="px-6 py-4 bg-white dark:bg-[var(--bg-card)]/50 border-t border-b border-gray-100/70 dark:border-[var(--border-subtle)]/30 backdrop-blur-md first:border-l first:rounded-l-2xl last:border-r last:rounded-r-2xl first:pl-8 last:pr-8 group-hover:bg-sky-500/5 dark:group-hover:bg-[#1E3028]/20 group-hover:border-sky-500/30 dark:group-hover:border-[var(--brand-green)]/30 transition-all duration-300">
                                                     <div className="flex items-center gap-4">
-                                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 ${typeStyle.bg} ${typeStyle.glow}`}>
+                                                        <div className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-500 bg-gradient-to-br ${typeStyle.bg}`}>
                                                             {typeStyle.icon}
                                                         </div>
                                                         <div>
@@ -219,19 +216,30 @@ export function NubefactPageClient(_props: NubefactPageClientProps) {
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td className="px-8 py-6 font-black text-gray-600 dark:text-[var(--text-secondary)] font-mono text-sm">{invoice.series}-{invoice.number}</td>
-                                                <td className="px-8 py-6">
-                                                    <div className="text-[13px] font-black text-gray-900 dark:text-[var(--text-primary)] uppercase truncate max-w-xs">{invoice.customer_name}</div>
-                                                    <div className="text-[10px] font-black text-gray-500 dark:text-[var(--text-muted)] mt-0.5">{invoice.customer_ruc}</div>
+                                                <td className="px-6 py-4 bg-white dark:bg-[var(--bg-card)]/50 border-t border-b border-gray-100/70 dark:border-[var(--border-subtle)]/30 backdrop-blur-md first:border-l first:rounded-l-2xl last:border-r last:rounded-r-2xl first:pl-8 last:pr-8 group-hover:bg-sky-500/5 dark:group-hover:bg-[#1E3028]/20 group-hover:border-sky-500/30 dark:group-hover:border-[var(--brand-green)]/30 transition-all duration-300">
+                                                    <span className="font-mono text-xs font-black text-gray-700 dark:text-[var(--text-secondary)] px-2.5 py-1 rounded-lg bg-gray-50 dark:bg-[var(--bg-muted)]/60 border border-gray-100/50 dark:border-[var(--border-subtle)]/40 font-bold">
+                                                        {invoice.series}-{invoice.number}
+                                                    </span>
                                                 </td>
-                                                <td className="px-8 py-6 font-black text-gray-900 dark:text-[var(--text-primary)]">
+                                                <td className="px-6 py-4 bg-white dark:bg-[var(--bg-card)]/50 border-t border-b border-gray-100/70 dark:border-[var(--border-subtle)]/30 backdrop-blur-md first:border-l first:rounded-l-2xl last:border-r last:rounded-r-2xl first:pl-8 last:pr-8 group-hover:bg-sky-500/5 dark:group-hover:bg-[#1E3028]/20 group-hover:border-sky-500/30 dark:group-hover:border-[var(--brand-green)]/30 transition-all duration-300">
+                                                    <div className="text-[13px] font-black text-gray-900 dark:text-[var(--text-primary)] uppercase truncate max-w-xs">{invoice.customer_name}</div>
+                                                    <div className="text-[10px] font-black text-gray-500 dark:text-[var(--text-muted)] mt-0.5 tracking-wider font-mono">{invoice.customer_ruc}</div>
+                                                </td>
+                                                <td className="px-6 py-4 bg-white dark:bg-[var(--bg-card)]/50 border-t border-b border-gray-100/70 dark:border-[var(--border-subtle)]/30 backdrop-blur-md first:border-l first:rounded-l-2xl last:border-r last:rounded-r-2xl first:pl-8 last:pr-8 group-hover:bg-sky-500/5 dark:group-hover:bg-[#1E3028]/20 group-hover:border-sky-500/30 dark:group-hover:border-[var(--brand-green)]/30 transition-all duration-300 font-black text-sky-600 dark:text-[var(--brand-green)]">
                                                     {formatCurrency(invoice.amount)}
                                                 </td>
-                                                <td className="px-8 py-6 text-center">
+                                                <td className="px-6 py-4 bg-white dark:bg-[var(--bg-card)]/50 border-t border-b border-gray-100/70 dark:border-[var(--border-subtle)]/30 backdrop-blur-md first:border-l first:rounded-l-2xl last:border-r last:rounded-r-2xl first:pl-8 last:pr-8 group-hover:bg-sky-500/5 dark:group-hover:bg-[#1E3028]/20 group-hover:border-sky-500/30 dark:group-hover:border-[var(--brand-green)]/30 transition-all duration-300 text-center">
                                                     <StatusBadge status={invoice.sunat_status} />
                                                 </td>
-                                                <td className="px-8 py-6 text-right font-bold text-gray-600 dark:text-[var(--text-secondary)] text-[13px]">
-                                                    {new Date(invoice.emission_date).toLocaleDateString('es-PE')}
+                                                <td className="px-6 py-4 bg-white dark:bg-[var(--bg-card)]/50 border-t border-b border-gray-100/70 dark:border-[var(--border-subtle)]/30 backdrop-blur-md first:border-l first:rounded-l-2xl last:border-r last:rounded-r-2xl first:pl-8 last:pr-8 group-hover:bg-sky-500/5 dark:group-hover:bg-[#1E3028]/20 group-hover:border-sky-500/30 dark:group-hover:border-[var(--brand-green)]/30 transition-all duration-300 text-right">
+                                                    <div className="flex flex-col items-end gap-0.5">
+                                                        <span className="font-bold text-gray-700 dark:text-[var(--text-secondary)] text-[13px]">
+                                                            {new Date(invoice.emission_date).toLocaleDateString('es-PE')}
+                                                        </span>
+                                                        <span className="text-[9px] text-gray-400 dark:text-[var(--text-muted)] font-mono">
+                                                            {new Date(invoice.emission_date).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })}
+                                                        </span>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         );
