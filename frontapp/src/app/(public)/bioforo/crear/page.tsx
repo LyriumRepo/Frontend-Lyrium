@@ -5,13 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Icon from '@/components/ui/Icon';
 import HeroPill from '@/components/layout/public/HeroPill';
-import { forumApi } from '@/shared/lib/api/forum';
-
-interface ForumCategory {
-  id: number;
-  name: string;
-  slug?: string;
-}
+import { forumApi, ForumCategory } from '@/shared/lib/api/forum';
 
 export default function CrearTemaPage() {
   const router = useRouter();
@@ -58,7 +52,6 @@ export default function CrearTemaPage() {
       setError('Selecciona una categoría');
       return;
     }
-
     if (formData.titulo.length > 180) {
       setError('El título no puede exceder 180 caracteres');
       return;
@@ -92,21 +85,21 @@ export default function CrearTemaPage() {
   if (loading) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-8 flex justify-center">
-        <div className="loader-small" />
+        <div className="w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   if (success) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto px-3 md:px-4 py-4 md:py-8">
         <HeroPill icon="CheckCircle" text="Tema Creado" />
-        <div className="bg-white rounded-2xl p-8 text-center border border-slate-200 mt-6">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-emerald-100 flex items-center justify-center">
+        <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-2xl p-8 text-center border border-slate-200 dark:border-[var(--border-subtle)] mt-6">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
             <Icon name="CheckCircle" className="w-8 h-8 text-emerald-600" />
           </div>
-          <h2 className="text-xl font-bold text-slate-800 mb-2">¡Tema creado exitosamente!</h2>
-          <p className="text-slate-600 mb-4">Redirigiendo al BioForo...</p>
+          <h2 className="text-xl font-bold text-slate-800 dark:text-[var(--text-primary)] mb-2">¡Tema creado exitosamente!</h2>
+          <p className="text-slate-600 dark:text-[var(--text-muted)] mb-4">Redirigiendo al BioForo...</p>
           <Link href="/bioforo" className="text-emerald-500 hover:underline">
             Ir al BioForo ahora
           </Link>
@@ -117,52 +110,47 @@ export default function CrearTemaPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-3 md:px-4 py-4 md:py-8">
-      {/* Volver */}
       <Link
         href="/bioforo"
-        className="inline-flex items-center gap-2 text-slate-600 hover:text-emerald-500 mb-4"
+        className="inline-flex items-center gap-2 text-slate-600 dark:text-[var(--text-muted)] hover:text-emerald-500 mb-4"
       >
         <Icon name="ArrowLeft" className="w-4 h-4" />
         Volver al BioForo
       </Link>
 
-      {/* Hero Pill */}
-      <HeroPill icon="PencilSimple" text="Crear Nuevo Tema" />
+      <HeroPill icon="Pencil" text="Crear Nuevo Tema" />
 
-      {/* Formulario */}
-      <div className="bg-white rounded-2xl p-6 md:p-8 border border-slate-200 mt-6">
+      <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-2xl p-6 md:p-8 border border-slate-200 dark:border-[var(--border-subtle)] mt-6">
         <form onSubmit={handleSubmit} className="space-y-6">
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl flex items-center gap-2">
-              <Icon name="WarningCircle" className="w-5 h-5 flex-shrink-0" />
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-xl flex items-center gap-2">
+              <Icon name="AlertCircle" className="w-5 h-5 flex-shrink-0" />
               <span>{error}</span>
             </div>
           )}
 
-          {/* Categoría */}
           <div>
-            <label htmlFor="categoria" className="block text-sm font-medium text-slate-700 mb-2">
+            <label htmlFor="categoria" className="block text-sm font-medium text-slate-700 dark:text-[var(--text-primary)] mb-2">
               Categoría <span className="text-red-500">*</span>
             </label>
             <select
               id="categoria"
               value={formData.categoria}
               onChange={(e) => setFormData({ ...formData, categoria: e.target.value })}
-              className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition-all"
+              className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-gray-600 bg-white dark:bg-[var(--bg-card)] text-slate-800 dark:text-[var(--text-primary)] focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 dark:focus:ring-emerald-800 outline-none transition-all"
               required
             >
               <option value="">Selecciona una categoría</option>
               {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>
+                <option key={cat.id} value={cat.id} className="bg-white dark:bg-[var(--bg-card)]">
                   {cat.name}
                 </option>
               ))}
             </select>
           </div>
 
-          {/* Título */}
           <div>
-            <label htmlFor="titulo" className="block text-sm font-medium text-slate-700 mb-2">
+            <label htmlFor="titulo" className="block text-sm font-medium text-slate-700 dark:text-[var(--text-primary)] mb-2">
               Título <span className="text-red-500">*</span>
             </label>
             <input
@@ -172,17 +160,16 @@ export default function CrearTemaPage() {
               onChange={(e) => setFormData({ ...formData, titulo: e.target.value })}
               placeholder="Escribe un título para tu tema"
               maxLength={180}
-              className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition-all"
+              className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-gray-600 bg-white dark:bg-[var(--bg-card)] text-slate-800 dark:text-[var(--text-primary)] placeholder-slate-400 dark:placeholder-[var(--text-muted)] focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 dark:focus:ring-emerald-800 outline-none transition-all"
               required
             />
-            <p className="text-xs text-slate-500 mt-1 text-right">
+            <p className="text-xs text-slate-500 dark:text-[var(--text-muted)] mt-1 text-right">
               {formData.titulo.length}/180 caracteres
             </p>
           </div>
 
-          {/* Contenido */}
           <div>
-            <label htmlFor="contenido" className="block text-sm font-medium text-slate-700 mb-2">
+            <label htmlFor="contenido" className="block text-sm font-medium text-slate-700 dark:text-[var(--text-primary)] mb-2">
               Contenido <span className="text-red-500">*</span>
             </label>
             <textarea
@@ -192,27 +179,25 @@ export default function CrearTemaPage() {
               placeholder="Escribe el contenido de tu tema..."
               rows={8}
               maxLength={2000}
-              className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition-all resize-none"
+              className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-gray-600 bg-white dark:bg-[var(--bg-card)] text-slate-800 dark:text-[var(--text-primary)] placeholder-slate-400 dark:placeholder-[var(--text-muted)] focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 dark:focus:ring-emerald-800 outline-none transition-all resize-none"
               required
             />
-            <p className="text-xs text-slate-500 mt-1 text-right">
+            <p className="text-xs text-slate-500 dark:text-[var(--text-muted)] mt-1 text-right">
               {formData.contenido.length}/2000 caracteres
             </p>
           </div>
 
-          {/* Aviso */}
-          <div className="bg-slate-50 rounded-xl p-4 text-sm text-slate-600">
+          <div className="bg-slate-50 dark:bg-[var(--bg-muted)] rounded-xl p-4 text-sm text-slate-600 dark:text-[var(--text-muted)]">
             <div className="flex items-start gap-2">
-              <Icon name="Info" className="w-5 h-5 text-slate-500 flex-shrink-0 mt-0.5" />
+              <Icon name="Info" className="w-5 h-5 text-slate-500 dark:text-[var(--text-muted)] flex-shrink-0 mt-0.5" />
               <p>Al crear un tema, aceptas nuestras normas de comunidad. El contenido inapropiado será eliminado.</p>
             </div>
           </div>
 
-          {/* Botones */}
           <div className="flex gap-4 justify-end">
             <Link
               href="/bioforo"
-              className="px-6 py-3 rounded-full border border-slate-300 text-slate-700 font-medium hover:bg-slate-50 transition-colors"
+              className="px-6 py-3 rounded-full border border-slate-300 dark:border-gray-600 text-slate-700 dark:text-[var(--text-primary)] font-medium hover:bg-slate-50 dark:hover:bg-[#182420] transition-colors"
             >
               Cancelar
             </Link>

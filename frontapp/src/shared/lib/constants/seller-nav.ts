@@ -95,6 +95,20 @@ export const sellerNavigation: PanelNavigation = [
                 href: '/seller/help'
             },
             {
+                id: 'bioblog',
+                label: 'BioBlog',
+                description: 'Crea y gestiona contenido: artículos, podcasts, videos y shorts',
+                icon: 'BookOpen',
+                href: '/seller/blog'
+            },
+            {
+                id: 'bioforo',
+                label: 'BioForo',
+                description: 'Foro de discusión con tu comunidad',
+                icon: 'MessagesSquare',
+                href: '/seller/forum'
+            },
+            {
                 id: 'facturacion',
                 label: 'Mis Comprobantes',
                 description: 'Gestión de facturación y documentos electrónicos',

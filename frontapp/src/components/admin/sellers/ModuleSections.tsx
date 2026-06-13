@@ -56,9 +56,9 @@ export const StatsOverview: React.FC<{ stats: StatsProps }> = ({ stats }) => {
       // Usa totalSellers real del backend
       val: stats.totalSellers,
       icon: <Users className="w-6 h-6" />,
-      color: 'blue',
-      border: 'border-blue-500',
-      textColor: 'text-blue-500',
+      color: 'cyan',
+      border: 'border-cyan-500',
+      textColor: 'text-cyan-500',
     },
     {
       label: 'Activos',
@@ -148,7 +148,7 @@ export const NotificationList: React.FC<{
         </div>
         <button
           onClick={onMarkAllRead}
-          className="text-[10px] font-black uppercase tracking-widest text-sky-500 hover:bg-sky-500/10 px-6 py-3 rounded-2xl transition-all border border-sky-500/20 w-fit"
+          className="text-[10px] font-black uppercase tracking-widest text-cyan-500 hover:bg-cyan-500/10 px-6 py-3 rounded-2xl transition-all border border-cyan-500/20 w-fit"
         >
           Marcar todas como leídas
         </button>
@@ -165,7 +165,7 @@ export const NotificationList: React.FC<{
             }`}
           >
             <div
-              className={`p-4 rounded-2xl ${impactMap[n.tipo] ?? 'bg-sky-500'} text-white shadow-xl flex-shrink-0`}
+              className={`p-4 rounded-2xl ${impactMap[n.tipo] ?? 'bg-cyan-500'} text-white shadow-xl flex-shrink-0`}
             >
               {getIcon(n.tipo)}
             </div>
@@ -175,7 +175,7 @@ export const NotificationList: React.FC<{
                   {n.entidad_relacionada}
                 </p>
                 <span
-                  className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest ${impactMap[n.tipo] ?? 'bg-sky-500'} text-white`}
+                  className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest ${impactMap[n.tipo] ?? 'bg-cyan-500'} text-white`}
                 >
                   {n.tipo}
                 </span>
@@ -188,13 +188,13 @@ export const NotificationList: React.FC<{
                   <Clock className="w-3 h-3" /> {n.timestamp}
                 </span>
                 <span className="w-1 h-1 rounded-full bg-[var(--text-secondary)]" />
-                <span className="text-[10px] font-black text-sky-500 uppercase tracking-widest italic">
+                <span className="text-[10px] font-black text-cyan-500 uppercase tracking-widest italic">
                   {n.modulo_origen}
                 </span>
               </div>
             </div>
             {n.estado_revision === 'nueva' && (
-              <div className="w-3 h-3 rounded-full bg-sky-500 mt-2 animate-pulse shadow-lg shadow-sky-500/20 flex-shrink-0" />
+              <div className="w-3 h-3 rounded-full bg-cyan-500 mt-2 animate-pulse shadow-lg shadow-cyan-500/20 flex-shrink-0" />
             )}
           </div>
         ))}
@@ -448,7 +448,7 @@ export const ProductModeration: React.FC<ProductModerationProps> = ({
                   {/* Tienda */}
                   <td className="p-4">
                     <div className="flex items-center gap-2">
-                      <Store className="w-3.5 h-3.5 text-sky-500" />
+                      <Store className="w-3.5 h-3.5 text-cyan-500" />
                       <span className="text-[11px] font-bold text-[var(--text-primary)]">
                         {p.seller}
                       </span>
@@ -500,7 +500,7 @@ export const ProductModeration: React.FC<ProductModerationProps> = ({
                       </button>
                     </div>
                     {isBusy && (
-                      <Loader2 className="w-3.5 h-3.5 animate-spin text-sky-500 mt-1" />
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-cyan-500 mt-1" />
                     )}
                   </td>
                 </tr>
@@ -527,7 +527,7 @@ export const AuditLog: React.FC<{ entries: AuditEntry[] }> = ({ entries }) => {
             RF-04: Trazabilidad Absoluta (Log de Transacciones)
           </p>
         </div>
-        <div className="p-3 bg-sky-500/10 text-sky-500 rounded-xl">
+        <div className="p-3 bg-cyan-500/10 text-cyan-500 rounded-xl">
           <Terminal className="w-5 h-5" />
         </div>
       </div>
@@ -563,7 +563,7 @@ export const AuditLog: React.FC<{ entries: AuditEntry[] }> = ({ entries }) => {
                   {a.fecha}
                 </td>
                 <td className="px-8 py-6">
-                  <span className="text-xs font-black text-[var(--text-primary)] uppercase tracking-tighter group-hover:text-sky-500 transition-colors">
+                  <span className="text-xs font-black text-[var(--text-primary)] uppercase tracking-tighter group-hover:text-cyan-500 transition-colors">
                     {a.entidad}
                   </span>
                 </td>
@@ -586,7 +586,7 @@ export const AuditLog: React.FC<{ entries: AuditEntry[] }> = ({ entries }) => {
                   </div>
                 </td>
                 <td className="px-8 py-6 text-right">
-                  <span className="text-[10px] font-black text-sky-500 uppercase tracking-widest bg-sky-500/10 px-3 py-1.5 rounded-lg border border-sky-500/20 whitespace-nowrap">
+                  <span className="text-[10px] font-black text-cyan-500 uppercase tracking-widest bg-cyan-500/10 px-3 py-1.5 rounded-lg border border-cyan-500/20 whitespace-nowrap">
                     {a.usuario}
                   </span>
                 </td>

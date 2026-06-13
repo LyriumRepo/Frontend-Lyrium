@@ -72,8 +72,8 @@ const STATUS_CONFIG: Record<
   ACTIVE: { label: 'Activo', dot: 'bg-emerald-400', row: '' },
   PENDING: {
     label: 'En espera',
-    dot: 'bg-amber-400',
-    row: 'border-l-2 border-l-amber-400/40',
+    dot: 'bg-cyan-400',
+    row: 'border-l-2 border-l-cyan-400/40',
   },
   SUSPENDED: {
     label: 'Suspendido',
@@ -85,7 +85,7 @@ const STATUS_CONFIG: Record<
 
 const CONTRACT_CONFIG: Record<string, { label: string; color: string }> = {
   VIGENTE: { label: 'Vigente', color: 'text-emerald-400' },
-  PENDIENTE: { label: 'Pendiente', color: 'text-amber-400' },
+  PENDIENTE: { label: 'Pendiente', color: 'text-cyan-400' },
   VENCIDO: { label: 'Vencido', color: 'text-rose-400' },
 };
 
@@ -182,7 +182,7 @@ const SellerRow = ({
               )}
               {seller.email_verified && (
                 <BadgeCheck
-                  className="w-3.5 h-3.5 text-sky-400 flex-shrink-0"
+                  className="w-3.5 h-3.5 text-cyan-400 flex-shrink-0"
                   title="Email verificado"
                 />
               )}
@@ -237,7 +237,7 @@ const SellerRow = ({
           <span
             className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black border
                         ${seller.status === 'ACTIVE' ? 'bg-emerald-400/10 text-emerald-400 border-emerald-400/20' : ''}
-                        ${seller.status === 'PENDING' ? 'bg-amber-400/10   text-amber-400   border-amber-400/20' : ''}
+                        ${seller.status === 'PENDING' ? 'bg-cyan-400/10   text-cyan-400   border-cyan-400/20' : ''}
                         ${seller.status === 'SUSPENDED' ? 'bg-rose-400/10    text-rose-400    border-rose-400/20' : ''}
                         ${seller.status === 'REJECTED' ? 'bg-gray-500/10    text-gray-400    border-gray-500/20' : ''}
                     `}
@@ -301,7 +301,7 @@ const SellerRow = ({
           {/* Ver detalle */}
           <Link
             href={`/admin/sellers/${seller.id}`}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[var(--bg-secondary)] hover:bg-sky-500/10 text-[var(--text-secondary)] hover:text-sky-400 text-[10px] font-black transition-colors border border-[var(--border-subtle)] group-hover:border-sky-500/20"
+            className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[var(--bg-secondary)] hover:bg-cyan-500/10 text-[var(--text-secondary)] hover:text-cyan-400 text-[10px] font-black transition-colors border border-[var(--border-subtle)] group-hover:border-cyan-500/20"
           >
             Ver detalle
             <ChevronRight className="w-3 h-3" />
@@ -411,7 +411,7 @@ export default function SellerList({
             Control centralizado de cuentas
           </p>
         </div>
-        <span className="px-3 py-1.5 bg-sky-500/10 text-sky-400 border border-sky-500/20 rounded-full text-[10px] font-black">
+        <span className="px-3 py-1.5 bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 rounded-full text-[10px] font-black">
           {sellers.length} vendedor{sellers.length !== 1 ? 'es' : ''}
         </span>
       </div>

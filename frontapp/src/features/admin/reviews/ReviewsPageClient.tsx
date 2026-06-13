@@ -972,15 +972,15 @@ function AllReviewsTab() {
 type TabKey = 'productos' | 'tiendas' | 'servicios' | 'moderacion' | 'reseñas';
 
 const TABS: { key: TabKey; label: string; icon: React.ElementType }[] = [
-  { key: 'productos', label: 'Top Productos', icon: TrendingUp },
   { key: 'tiendas', label: 'Top Tiendas', icon: Store },
+  { key: 'productos', label: 'Top Productos', icon: TrendingUp },
   { key: 'servicios', label: 'Top Servicios', icon: Calendar },
   { key: 'moderacion', label: 'Moderación', icon: ShieldAlert },
   { key: 'reseñas', label: 'Todas las reseñas', icon: MessageSquare },
 ];
 
 export function ReviewsPageClient() {
-  const [activeTab, setActiveTab] = useState<TabKey>('productos');
+  const [activeTab, setActiveTab] = useState<TabKey>('tiendas');
 
   return (
     <div className="space-y-6 animate-fadeIn">
@@ -1011,8 +1011,8 @@ export function ReviewsPageClient() {
 
         {/* Tab content */}
         <div className="p-6">
-          {activeTab === 'productos' && <TopProductsTab />}
           {activeTab === 'tiendas' && <TopStoresTab />}
+          {activeTab === 'productos' && <TopProductsTab />}
           {activeTab === 'servicios' && <TopServicesTab />}
           {activeTab === 'moderacion' && <ModerationTab />}
           {activeTab === 'reseñas' && <AllReviewsTab />}

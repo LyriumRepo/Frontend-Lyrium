@@ -17,10 +17,16 @@ import { ScanResultCard } from '@/components/admin/operations/ScanResultCard';
 import { ExpenseDetailModal } from '@/components/admin/operations/ExpenseDetailModal';
 import { useScan } from './hooks/useScan';
 import { useExpenses } from './hooks/usepenses';
+import BaseModal from '@/components/ui/BaseModal';
+import { BankStatementReviewModal } from '@/components/admin/operations/BankStatementReviewModal';
 import type {
   Expense,
   Pagination,
+  Supplier,
 } from '@/features/admin/operations/types/operations';
+import type {
+  BatchStoreLine,
+} from '@/features/admin/operations/types/scan';
 
 // ─── Tabs ─────────────────────────────────────────────────────────────────────
 
@@ -555,9 +561,10 @@ export function OperationsPageClient() {
   const [detailExpense, setDetailExpense] = useState<ExpenseWithScan | null>(
     null,
   );
+  const [password, setPassword] = useState('');
 
   const {
-    state: { expenses, stats, loading, error, pagination },
+    state: { expenses, stats, suppliers, loading, error, pagination },
     actions: { markAsPaid, updateExpense, goToPage, refresh },
   } = useExpenses();
 
@@ -568,16 +575,35 @@ export function OperationsPageClient() {
       result: scanResult,
       expense: scanExpense,
       fileUrl: scanFileUrl,
+      bankStatementData,
+      batchLoading,
     },
-    actions: { scan, reset: resetScan },
+    actions: { scan, reset: resetScan, batchStore, clearBankStatement },
   } = useScan();
 
   const handleScanFile = useCallback(
     async (file: File) => {
-      await scan(file);
+      const pwd = password.trim();
+      await scan(file, pwd || undefined);
+      setPassword('');
+    },
+    [scan, password],
+  );
+
+  const handleBatchConfirm = useCallback(
+    async (payload: {
+      file_path: string;
+      supplier_id: number;
+      lines: BatchStoreLine[];
+      period?: string;
+      period_full?: string;
+      opening_balance?: number;
+      closing_balance?: number;
+    }) => {
+      await batchStore(payload);
       await refresh();
     },
-    [scan, refresh],
+    [batchStore, refresh],
   );
   const handleMarkPaid = useCallback(
     async (id: number) => {
@@ -762,6 +788,13 @@ export function OperationsPageClient() {
           <p className="text-[13px] font-medium text-[var(--text-primary)]">
             Escanear comprobante PDF
           </p>
+          <input
+            type="password"
+            placeholder="Contraseña del PDF (si aplica)"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="text-[13px] border border-[var(--border-subtle)] rounded-lg px-3 py-[7px] bg-[var(--bg-card)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--text-secondary)] w-full"
+          />
           <ScanDropzone
             onFile={handleScanFile}
             loading={scanLoading}
@@ -864,6 +897,30 @@ export function OperationsPageClient() {
         expense={detailExpense}
         onClose={() => setDetailExpense(null)}
       />
+
+      {/* ── Bank statement review modal ── */}
+      <BaseModal
+        isOpen={bankStatementData !== null}
+        onClose={clearBankStatement}
+        title="Revisar estado de cuenta"
+        subtitle="Selecciona los movimientos que deseas registrar como gastos"
+        size="2xl"
+      >
+        {bankStatementData && (
+          <BankStatementReviewModal
+            filePath={bankStatementData.filePath}
+            period={bankStatementData.period}
+            periodFull={bankStatementData.periodFull}
+            openingBalance={bankStatementData.openingBalance}
+            closingBalance={bankStatementData.closingBalance}
+            lines={bankStatementData.lines}
+            suppliers={suppliers as Supplier[]}
+            loading={batchLoading}
+            onConfirm={handleBatchConfirm}
+            onCancel={clearBankStatement}
+          />
+        )}
+      </BaseModal>
     </div>
   );
 }

@@ -98,9 +98,10 @@ const layouts = [
 interface LayoutSelectorProps {
     config: ShopConfig;
     updateConfig: (updates: Partial<ShopConfig>) => void;
+    storeId?: number | null;
 }
 
-export default function LayoutSelector({ config, updateConfig }: LayoutSelectorProps) {
+export default function LayoutSelector({ config, updateConfig, storeId }: LayoutSelectorProps) {
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
     return (
@@ -171,6 +172,8 @@ export default function LayoutSelector({ config, updateConfig }: LayoutSelectorP
                 isOpen={isPreviewOpen}
                 onClose={() => setIsPreviewOpen(false)}
                 layoutId={config.layout}
+                config={config}
+                storeId={storeId ?? null}
             />
         </div>
     );

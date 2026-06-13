@@ -90,6 +90,83 @@ export interface ScannedBoletaResponse {
   metadata: { is_scanned_image: boolean; source: string };
 }
 
+// ─── Bank Statement ────────────────────────────────────────────────────────────
+
+export interface BankStatementLine {
+  date: string;
+  description: string;
+  reference: string | null;
+  charge: number | null;
+  deposit: number | null;
+  glossary_key: string | null;
+  glossary_description: string | null;
+  hour: string | null;
+  med: string | null;
+  tipo: string | null;
+  place: string | null;
+  origen: string | null;
+  num_op: string | null;
+  suc_age: string | null;
+  balance: number | null;
+}
+
+export interface BankStatementScanResponse {
+  file_url: string;
+  file_path: string;
+  is_bank_statement: true;
+  scan: {
+    success: boolean;
+    document_type: 'ESTADO_CUENTA_BCP';
+    document_number: string | null;
+    period: string | null;
+    period_full: string | null;
+    opening_balance: number | null;
+    closing_balance: number | null;
+    lines: BankStatementLine[];
+    metadata: { is_scanned_image: boolean; source: string };
+  };
+}
+
+export interface BatchStoreLine {
+  date: string;
+  description: string;
+  amount: number;
+  reference?: string;
+  glossary_key?: string;
+  glossary_description?: string;
+  hour?: string;
+  med?: string;
+  tipo?: string;
+  place?: string;
+  balance?: number;
+}
+
+export interface ScanBatchStorePayload {
+  file_path: string;
+  supplier_id: number;
+  lines: BatchStoreLine[];
+  period?: string;
+  period_full?: string;
+  opening_balance?: number;
+  closing_balance?: number;
+}
+
+export interface ScanBatchStoreResponse {
+  success: boolean;
+  expense: import('./operations').Expense;
+  count: number;
+}
+
+export type ScanFileResponse =
+  | (Omit<ScanApiResponse, 'scan'> & { scan: ScannedDataResponse; is_bank_statement?: false })
+  | BankStatementScanResponse;
+
+export function isBankStatementResponse(
+  res: ScanFileResponse,
+): res is BankStatementScanResponse {
+  return 'is_bank_statement' in res && res.is_bank_statement === true;
+}
+
 export type ScannedDataResponse =
   | ScannedHonorariosResponse
   | ScannedFacturaResponse

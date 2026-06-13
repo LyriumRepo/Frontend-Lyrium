@@ -402,6 +402,81 @@ function GenericContent({ expense }: { expense: ExpenseWithScan }) {
   );
 }
 
+// ─── Bank Statement Content ───────────────────────────────────────────────────
+
+interface BankStatementLineDisplay {
+  date?: string;
+  description?: string;
+  amount?: number;
+  glossary_description?: string;
+  hour?: string;
+  med?: string;
+  tipo?: string;
+  place?: string;
+  balance?: number;
+}
+
+function formatVal(n: number | null | undefined) {
+  if (n == null) return '—';
+  return `S/ ${n.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`;
+}
+
+function BankStatementContent({ scan }: { scan: ScanData }) {
+  const lines = (scan as Record<string, unknown>).lines as BankStatementLineDisplay[] | undefined;
+  const periodFull = (scan as Record<string, unknown>).period_full as string | undefined;
+  const openingBalance = (scan as Record<string, unknown>).opening_balance as number | undefined;
+  const closingBalance = (scan as Record<string, unknown>).closing_balance as number | undefined;
+
+  if (!lines || lines.length === 0) return null;
+
+  return (
+    <div className="flex flex-col gap-4">
+      <Section title="Resumen del Estado de Cuenta" icon={FileText} accent="teal">
+        <Row label="Período" value={periodFull ?? '—'} />
+        <Row label="Saldo inicial" value={formatVal(openingBalance)} />
+        <Row label="Saldo final" value={formatVal(closingBalance)} />
+        <Row label="Movimientos" value={lines.length.toString()} />
+      </Section>
+      <div className="rounded-xl border border-[#9FE1CB] overflow-hidden">
+        <div className="flex items-center gap-2 px-4 py-2.5 bg-[#E1F5EE] border-b border-[#9FE1CB]">
+          <Receipt className="w-3.5 h-3.5 text-[#0F6E56]" />
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-[#085041]">
+            Operaciones
+          </span>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="bg-[#F0FBF7]">
+                <th className="text-left text-[11px] font-semibold text-[#0F6E56] px-3 py-2">Fecha</th>
+                <th className="text-left text-[11px] font-semibold text-[#0F6E56] px-3 py-2">Descripción</th>
+                <th className="text-left text-[11px] font-semibold text-[#0F6E56] px-3 py-2">Med</th>
+                <th className="text-left text-[11px] font-semibold text-[#0F6E56] px-3 py-2">Hora</th>
+                <th className="text-left text-[11px] font-semibold text-[#0F6E56] px-3 py-2">Tipo</th>
+                <th className="text-right text-[11px] font-semibold text-[#0F6E56] px-3 py-2">Monto</th>
+                <th className="text-left text-[11px] font-semibold text-[#0F6E56] px-3 py-2">Glosario</th>
+              </tr>
+            </thead>
+            <tbody>
+              {lines.map((line, i) => (
+                <tr key={i} className="border-t border-[#E1F5EE] hover:bg-[#F0FBF7] transition-colors">
+                  <td className="px-3 py-2 text-[12px] text-[#085041] font-mono">{line.date ?? '—'}</td>
+                  <td className="px-3 py-2 text-[12px] text-[#085041] max-w-[180px] truncate" title={line.description}>{line.description ?? '—'}</td>
+                  <td className="px-3 py-2 text-[12px] text-[#1D9E75]">{line.med ?? '—'}</td>
+                  <td className="px-3 py-2 text-[12px] text-[#1D9E75] font-mono">{line.hour ?? '—'}</td>
+                  <td className="px-3 py-2 text-[12px] text-[#1D9E75] font-mono">{line.tipo ?? '—'}</td>
+                  <td className="px-3 py-2 text-[12px] font-bold text-[#085041] text-right">{formatVal(line.amount)}</td>
+                  <td className="px-3 py-2 text-[12px] text-[#0F6E56] max-w-[140px] truncate" title={line.glossary_description}>{line.glossary_description ?? '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Modal ────────────────────────────────────────────────────────────────────
 
 interface ExpenseDetailModalProps {
@@ -426,19 +501,22 @@ export function ExpenseDetailModal({
 
   const scan = expense.scan_data as ScanData | null | undefined;
   const docType = scan?.document_type ?? expense.voucher_type;
+  const isBankStatement = docType === 'ESTADO_CUENTA_BCP';
   const isHonorarios =
     docType === 'RECIBO_POR_HONORARIOS' ||
     expense.voucher_type === 'Honorarios';
   const isFactura = docType === 'FACTURA' || expense.voucher_type === 'Factura';
   const isBoleta = docType === 'BOLETA' || expense.voucher_type === 'Boleta';
 
-  const typeLabel = isHonorarios
-    ? 'Recibo por Honorarios'
-    : isFactura
-      ? 'Factura Electrónica'
-      : isBoleta
-        ? 'Boleta de Venta'
-        : (expense.voucher_type ?? 'Comprobante');
+  const typeLabel = isBankStatement
+    ? 'Estado de Cuenta'
+    : isHonorarios
+      ? 'Recibo por Honorarios'
+      : isFactura
+        ? 'Factura Electrónica'
+        : isBoleta
+          ? 'Boleta de Venta'
+          : (expense.voucher_type ?? 'Comprobante');
 
   const mainAmount = isHonorarios
     ? (scan?.payment?.net_amount ??
@@ -527,13 +605,16 @@ export function ExpenseDetailModal({
         <div className="flex-1 overflow-y-auto px-5 py-4">
           {scan ? (
             <>
-              {isHonorarios && (
+              {isBankStatement && (
+                <BankStatementContent scan={scan} />
+              )}
+              {!isBankStatement && isHonorarios && (
                 <HonorariosContent expense={expense} scan={scan} />
               )}
-              {(isFactura || isBoleta) && (
+              {!isBankStatement && (isFactura || isBoleta) && (
                 <FacturaContent expense={expense} scan={scan} />
               )}
-              {!isHonorarios && !isFactura && !isBoleta && (
+              {!isBankStatement && !isHonorarios && !isFactura && !isBoleta && (
                 <GenericContent expense={expense} />
               )}
             </>

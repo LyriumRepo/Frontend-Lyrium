@@ -882,9 +882,13 @@ function RelatedProductCard({ rel }: { rel: LaravelProduct }) {
       className="flex-shrink-0 w-72"
       tabIndex={0}
     >
-      <Card className="group cursor-pointer h-full overflow-hidden border-border/60 hover:border-teal-400 hover:shadow-xl hover:-translate-y-2 transition-all duration-300">
+      <Card
+        className="group cursor-pointer h-full overflow-hidden border-border/60 
+  hover:border-teal-400 hover:shadow-xl hover:-translate-y-2 
+  transition-all duration-300 rounded-[2rem] py-0 gap-0"
+      >
         <CardContent className="p-0">
-          <div className="relative aspect-square overflow-hidden bg-gradient-to-b from-gray-50 to-white dark:from-[var(--bg-muted)] dark:to-[var(--bg-card)] border-b border-border/40">
+          <div className="relative aspect-square overflow-hidden bg-muted/40 dark:bg-muted/20">
             <Image
               src={
                 rel.images[0]?.medium ?? rel.images[0]?.src ?? '/no-image.png'
@@ -1339,29 +1343,35 @@ export function ProductDetailPageClient({
             </Button>
           </div>
 
-          {/* ── Métodos de pago con fondo turquesa ── */}
-          <div className="rounded-xl bg-gradient-to-r from-teal-500 to-cyan-500 p-4">
-            <p className="text-[10px] font-bold tracking-[.1em] uppercase text-white/80 mb-3 text-center">
+          {/* ── Métodos de pago aceptados ── */}
+          <div className="rounded-xl bg-white dark:bg-[var(--bg-secondary)] border border-teal-100 dark:border-teal-900/30 p-4">
+            <p className="text-[10px] font-bold tracking-[.1em] uppercase text-teal-600 dark:text-teal-400 mb-3 text-center">
               Medios de pago aceptados
             </p>
             <div className="flex flex-wrap items-center justify-center gap-3">
               {[
-                { src: '/img/intro/visa1.png', alt: 'Visa' },
-                { src: '/img/intro/mastercard.png', alt: 'Mastercard' },
-                { src: '/img/intro/amex1.png', alt: 'American Express' },
-                { src: '/img/intro/yape.png', alt: 'Yape' },
-                { src: '/img/intro/logo-plin.png', alt: 'Plin' },
+                { src: '/img/intro/visanuevo-Photoroom(1).png', alt: 'Visa' },
+                {
+                  src: '/img/intro/mastercadnuevo-Photoroom(1).png',
+                  alt: 'Mastercard',
+                },
+                {
+                  src: '/img/intro/amexnuevo-Photoroom(1).png',
+                  alt: 'American Express',
+                },
+                { src: '/img/intro/yapenuevo-Photoroom(1).png', alt: 'Yape' },
+                { src: '/img/intro/plinnuevo-Photoroom(1).png', alt: 'Plin' },
               ].map(({ src, alt }) => (
                 <div
                   key={alt}
-                  className="bg-gray-900 rounded-lg px-3 py-2 flex items-center justify-center shadow-sm"
+                  className="flex items-center justify-center rounded-lg px-3 py-2 dark:bg-[var(--bg-secondary)]"
                 >
                   <Image
                     src={src}
                     alt={alt}
-                    width={50}
-                    height={30}
-                    className="h-8 w-auto object-contain"
+                    width={60}
+                    height={36}
+                    className="h-9 w-auto object-contain"
                   />
                 </div>
               ))}
@@ -1377,7 +1387,7 @@ export function ProductDetailPageClient({
             ].map(({ icon: Icon, text }) => (
               <div
                 key={text}
-                className="flex flex-col items-center gap-1.5 text-center p-3 rounded-xl border border-teal-100 dark:border-teal-900/30 bg-teal-50/50 dark:bg-teal-950/10"
+                className="flex flex-col items-center gap-1.5 text-center p-3 rounded-xl border border-teal-100 dark:border-teal-900/30 bg-teal-50/50 dark:bg-[var(--bg-secondary)]"
               >
                 <Icon className="w-4 h-4 text-teal-500" />
                 <span className="text-[10px] font-semibold tracking-[.06em] uppercase text-teal-700 dark:text-teal-400">
