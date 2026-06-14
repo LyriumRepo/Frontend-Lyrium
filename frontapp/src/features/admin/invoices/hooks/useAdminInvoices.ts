@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { nubefactApi, type NubefactInvoice, type NubefactStore } from '@/shared/lib/api/nubefactRepository';
 
 export interface AdminInvoiceKPIs {
@@ -56,6 +56,10 @@ export function useAdminInvoices() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [search, setSearch] = useState('');
+    const [storeFilter, setStoreFilter] = useState('');
+    const [typeFilter, setTypeFilter] = useState('');
+    const [dateFrom, setDateFrom] = useState('');
+    const [dateTo, setDateTo] = useState('');
 
     const fetchData = useCallback(async () => {
         setIsLoading(true);
@@ -85,18 +89,48 @@ export function useAdminInvoices() {
         fetchData();
     }, [fetchData]);
 
-    const filtered = invoices
-        .map(toRow)
-        .filter(i => {
+    const allStores = useMemo(() => {
+        const names = new Set<string>();
+        for (const inv of invoices) {
+            for (const s of inv.order?.stores ?? []) {
+                names.add(s.name);
+            }
+        }
+        return Array.from(names).sort();
+    }, [invoices]);
+
+    const allTypes = useMemo(() => {
+        const types = new Set(invoices.map(i => i.type));
+        return Array.from(types).sort();
+    }, [invoices]);
+
+    const filtered = useMemo(() => {
+        const rows = invoices.map(toRow);
+
+        return rows.filter(i => {
             const q = search.toLowerCase();
-            return (
+            if (q && !(
                 i.customer_name.toLowerCase().includes(q) ||
                 i.customer_ruc.includes(q) ||
                 i.series.toLowerCase().includes(q) ||
                 i.number.includes(q) ||
                 i.type.toLowerCase().includes(q)
-            );
+            )) return false;
+
+            if (storeFilter && !i.stores.some(s => s.name === storeFilter)) return false;
+
+            if (typeFilter && i.type !== typeFilter) return false;
+
+            if (dateFrom && i.emission_date < dateFrom) return false;
+
+            if (dateTo) {
+                const endOfDay = dateTo + 'T23:59:59';
+                if (i.emission_date > endOfDay) return false;
+            }
+
+            return true;
         });
+    }, [invoices, search, storeFilter, typeFilter, dateFrom, dateTo]);
 
     return {
         invoices: filtered,
@@ -105,6 +139,16 @@ export function useAdminInvoices() {
         error,
         search,
         setSearch,
+        storeFilter,
+        setStoreFilter,
+        typeFilter,
+        setTypeFilter,
+        dateFrom,
+        setDateFrom,
+        dateTo,
+        setDateTo,
+        allStores,
+        allTypes,
         refresh: fetchData,
     };
 }

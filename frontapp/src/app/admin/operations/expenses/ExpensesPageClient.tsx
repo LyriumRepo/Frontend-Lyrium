@@ -1,8 +1,15 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useExpenses } from '@/features/admin/operations/hooks/usepenses';
 import type { StoreExpensePayload } from '@/features/admin/operations/types/operations';
+import type {
+  BankStatementLine,
+  ScanFileResponse,
+  BatchStoreLine,
+} from '@/features/admin/operations/types/scan';
+import BaseModal from '@/components/ui/BaseModal';
+import { BankStatementReviewModal } from '@/components/admin/operations/BankStatementReviewModal';
 
 // ─── Tabs ─────────────────────────────────────────────────────────────────────
 
@@ -138,6 +145,20 @@ export function ExpensesPageClient() {
   const [form, setForm] = useState(emptyForm);
   const [submitting, setSubmitting] = useState(false);
 
+  const scanInputRef = useRef<HTMLInputElement>(null);
+  const [scanning, setScanning] = useState(false);
+  const [batchLoading, setBatchLoading] = useState(false);
+  const [scanError, setScanError] = useState<string | null>(null);
+  const [scanPassword, setScanPassword] = useState('');
+  const [bankStatementData, setBankStatementData] = useState<{
+    filePath: string
+    period: string | null
+    periodFull: string | null
+    openingBalance: number | null
+    closingBalance: number | null
+    lines: BankStatementLine[]
+  } | null>(null);
+
   // Sync local filters → API (debounced)
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -182,6 +203,69 @@ export function ExpensesPageClient() {
     actions.deleteExpense(id);
   };
 
+  const handleScanFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setScanning(true);
+    setScanError(null);
+
+    try {
+      const pwd = scanPassword.trim();
+      const res: ScanFileResponse = await actions.scanDocument(file, pwd || undefined);
+      setScanPassword('');
+
+      if ('is_bank_statement' in res && res.is_bank_statement) {
+        const scan = res.scan as Extract<
+          ScanFileResponse['scan'],
+          { lines: BankStatementLine[] }
+        >;
+        const scanExt = scan as typeof scan & { period_full?: string | null; opening_balance?: number | null; closing_balance?: number | null };
+        setBankStatementData({
+          filePath: res.file_path,
+          period: 'period' in scan ? scan.period ?? null : null,
+          periodFull: scanExt.period_full ?? null,
+          openingBalance: scanExt.opening_balance ?? null,
+          closingBalance: scanExt.closing_balance ?? null,
+          lines: scan.lines ?? [],
+        });
+      } else {
+        await actions.refresh();
+      }
+    } catch (err: unknown) {
+      setScanError(
+        err instanceof Error ? err.message : 'Error al escanear el documento',
+      );
+    } finally {
+      setScanning(false);
+      if (e.target) e.target.value = '';
+    }
+  };
+
+  const handleBatchConfirm = async (payload: {
+    file_path: string
+    supplier_id: number
+    lines: BatchStoreLine[]
+    period?: string
+    period_full?: string
+    opening_balance?: number
+    closing_balance?: number
+  }) => {
+    setBatchLoading(true);
+    try {
+      await actions.scanBatchStore(payload);
+      setBankStatementData(null);
+    } catch (err: unknown) {
+      setScanError(
+        err instanceof Error
+          ? err.message
+          : 'Error al crear los gastos desde el estado de cuenta',
+      );
+    } finally {
+      setBatchLoading(false);
+    }
+  };
+
   const safePage = pagination?.page ?? 1;
   const totalPages = pagination?.totalPages ?? 1;
   const hasMore = pagination?.hasMore ?? false;
@@ -198,12 +282,35 @@ export function ExpensesPageClient() {
             Recibos, honorarios y servicios
           </p>
         </div>
-        <button
-          onClick={() => setShowForm((v) => !v)}
-          className="inline-flex items-center gap-1.5 border border-[var(--border-subtle)] rounded-lg px-3.5 py-[7px] text-[13px] font-medium text-[var(--text-primary)] hover:bg-[var(--bg-muted)] transition-colors shrink-0"
-        >
-          <IconPlus /> Nuevo comprobante
-        </button>
+        <div className="flex gap-2 items-center">
+          <input
+            type="password"
+            placeholder="Contraseña PDF"
+            value={scanPassword}
+            onChange={(e) => setScanPassword(e.target.value)}
+            className="text-[13px] border border-[var(--border-subtle)] rounded-lg px-3 py-[7px] bg-[var(--bg-card)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--text-secondary)] w-[140px]"
+          />
+          <button
+            onClick={() => scanInputRef.current?.click()}
+            disabled={scanning}
+            className="inline-flex items-center gap-1.5 border border-[var(--border-subtle)] rounded-lg px-3.5 py-[7px] text-[13px] font-medium text-[var(--text-primary)] hover:bg-[var(--bg-muted)] disabled:opacity-50 transition-colors shrink-0"
+          >
+            {scanning ? 'Escaneando...' : 'Scan estado de cuenta'}
+          </button>
+          <button
+            onClick={() => setShowForm((v) => !v)}
+            className="inline-flex items-center gap-1.5 border border-[var(--border-subtle)] rounded-lg px-3.5 py-[7px] text-[13px] font-medium text-[var(--text-primary)] hover:bg-[var(--bg-muted)] transition-colors shrink-0"
+          >
+            <IconPlus /> Nuevo comprobante
+          </button>
+          <input
+            ref={scanInputRef}
+            type="file"
+            accept="application/pdf"
+            className="hidden"
+            onChange={handleScanFile}
+          />
+        </div>
       </div>
 
       {/* ── Stats ───────────────────────────────────────────────────── */}
@@ -311,6 +418,43 @@ export function ExpensesPageClient() {
           </div>
         </div>
       )}
+
+      {/* ── Scan error ────────────────────────────────────────────────── */}
+      {scanError && (
+        <div className="bg-[#FCEBEB] border border-[#F7C1C1] rounded-xl p-4 text-[13px] text-[#791F1F] flex items-center justify-between">
+          <span>{scanError}</span>
+          <button
+            onClick={() => setScanError(null)}
+            className="underline text-gray-500 shrink-0 ml-2"
+          >
+            Cerrar
+          </button>
+        </div>
+      )}
+
+      {/* ── Bank statement review modal ──────────────────────────────── */}
+      <BaseModal
+        isOpen={bankStatementData !== null}
+        onClose={() => setBankStatementData(null)}
+        title="Revisar estado de cuenta"
+        subtitle="Selecciona los movimientos que deseas registrar como gastos"
+        size="2xl"
+      >
+        {bankStatementData && (
+          <BankStatementReviewModal
+            filePath={bankStatementData.filePath}
+            period={bankStatementData.period}
+            periodFull={bankStatementData.periodFull}
+            openingBalance={bankStatementData.openingBalance}
+            closingBalance={bankStatementData.closingBalance}
+            lines={bankStatementData.lines}
+            suppliers={suppliers}
+            loading={batchLoading}
+            onConfirm={handleBatchConfirm}
+            onCancel={() => setBankStatementData(null)}
+          />
+        )}
+      </BaseModal>
 
       {/* ── Tabla ───────────────────────────────────────────────────── */}
       <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl overflow-hidden">

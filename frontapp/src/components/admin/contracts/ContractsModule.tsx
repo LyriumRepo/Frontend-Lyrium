@@ -66,7 +66,7 @@ export const ContratosModule: React.FC<ContratosModuleProps> = ({ state, actions
                         key={kpi.label}
                         className="bg-[var(--bg-card)] p-6 rounded-[2.2rem] border border-[var(--border-subtle)] shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 relative overflow-hidden group flex flex-col justify-between min-h-[140px]"
                     >
-                        <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/5 rounded-full -mr-8 -mt-8 blur-xl group-hover:bg-indigo-500/10 transition-all"></div>
+                        <div className="absolute top-0 right-0 w-24 h-24 bg-cyan-500/5 rounded-full -mr-8 -mt-8 blur-xl group-hover:bg-cyan-500/10 transition-all"></div>
                         <div className="flex items-center justify-between">
                             <span className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest leading-none">
                                 {kpi.label}
@@ -99,6 +99,7 @@ export const ContratosModule: React.FC<ContratosModuleProps> = ({ state, actions
 
             {/* FILTROS - Diseño Premium */}
             <div className="bg-[var(--bg-card)] p-8 rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/10 rounded-full -mr-32 -mt-32 blur-3xl group-hover:bg-cyan-500/20 transition-all duration-700"></div>
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-end relative z-10">
                     <div className="lg:col-span-6 space-y-2">
                         <label htmlFor="contract-search" className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest ml-1">
@@ -112,7 +113,7 @@ export const ContratosModule: React.FC<ContratosModuleProps> = ({ state, actions
                                 placeholder="Buscar por Razón Social, RUC o Representante..."
                                 value={filters.query}
                                 onChange={(e) => actions.setFilters({ ...filters, query: e.target.value })}
-                                className="w-full pl-14 pr-6 py-4 bg-[var(--bg-secondary)] border-none rounded-2xl text-xs font-black placeholder:text-[var(--text-muted)] text-[var(--text-primary)] focus:ring-4 focus:ring-indigo-500/10 transition-all outline-none"
+                                className="w-full pl-14 pr-6 py-4 bg-[var(--bg-secondary)] border-none rounded-2xl text-xs font-black placeholder:text-[var(--text-muted)] text-[var(--text-primary)] focus:ring-4 focus:ring-cyan-500/10 transition-all outline-none"
                             />
                         </div>
                     </div>
@@ -180,7 +181,7 @@ export const ContratosModule: React.FC<ContratosModuleProps> = ({ state, actions
                                 <tr
                                     key={c.id}
                                     onClick={() => actions.setSelectedContract(c)}
-                                    className="hover:bg-indigo-50/20 dark:hover:bg-indigo-950/10 transition-all duration-300 group cursor-pointer"
+                                    className="hover:bg-cyan-50/20 dark:hover:bg-cyan-950/10 transition-all duration-300 group cursor-pointer"
                                 >
                                     {/* ID */}
                                     <td className="px-8 py-6 font-mono font-black text-xs text-[var(--text-muted)] group-hover:text-[var(--color-info)] transition-colors">

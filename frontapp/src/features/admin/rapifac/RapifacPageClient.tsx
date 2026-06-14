@@ -164,7 +164,16 @@ function DetailModal({ inv, isOpen, onClose }: { inv: AdminInvoiceRow | null; is
 }
 
 export function RapifacPageClient() {
-    const { invoices, kpis, isLoading, error, search, setSearch, refresh } = useAdminInvoices();
+    const {
+        invoices, kpis, isLoading, error,
+        search, setSearch,
+        storeFilter, setStoreFilter,
+        typeFilter, setTypeFilter,
+        dateFrom, setDateFrom,
+        dateTo, setDateTo,
+        allStores, allTypes,
+        refresh,
+    } = useAdminInvoices();
     const [detailInv, setDetailInv] = useState<AdminInvoiceRow | null>(null);
 
     const handleExportCSV = () => {
@@ -263,24 +272,90 @@ export function RapifacPageClient() {
                         </div>
 
                         <div className="bg-white dark:bg-[var(--bg-card)] rounded-[2.5rem] border border-gray-100 dark:border-[var(--border-subtle)] shadow-sm overflow-hidden flex flex-col">
-                            <div className="p-8 border-b border-gray-50 dark:border-[var(--border-subtle)] flex flex-col md:flex-row md:items-center justify-between gap-6 bg-gray-50/30 dark:bg-[var(--bg-muted)]/50">
-                                <div>
-                                    <h3 className="text-xl font-black text-gray-900 dark:text-[var(--text-primary)] tracking-tight">
-                                        Comprobantes Recientes
-                                    </h3>
-                                    <p className="text-[10px] text-gray-400 dark:text-[var(--text-muted)] font-bold uppercase tracking-widest mt-1">
-                                        Emitidos via Nubefact
-                                    </p>
+                            <div className="p-8 border-b border-gray-50 dark:border-[var(--border-subtle)] space-y-5 bg-gray-50/30 dark:bg-[var(--bg-muted)]/50">
+                                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                                    <div>
+                                        <h3 className="text-xl font-black text-gray-900 dark:text-[var(--text-primary)] tracking-tight">
+                                            Comprobantes Recientes
+                                        </h3>
+                                        <p className="text-[10px] text-gray-400 dark:text-[var(--text-muted)] font-bold uppercase tracking-widest mt-1">
+                                            Emitidos via Nubefact
+                                        </p>
+                                    </div>
+                                    <div className="relative w-full md:w-96">
+                                        <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-[var(--text-muted)] w-5 h-5" />
+                                        <input
+                                            type="text"
+                                            placeholder="Buscar..."
+                                            className="w-full pl-14 pr-6 py-4 bg-white dark:bg-[var(--bg-card)] border-gray-100 dark:border-[var(--border-subtle)] border rounded-2xl text-sm font-bold text-[var(--text-primary)] focus:ring-4 focus:ring-blue-500/10 transition-all outline-none"
+                                            value={search}
+                                            onChange={e => setSearch(e.target.value)}
+                                        />
+                                    </div>
                                 </div>
-                                <div className="relative w-full md:w-96">
-                                    <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-[var(--text-muted)] w-5 h-5" />
-                                    <input
-                                        type="text"
-                                        placeholder="Buscar..."
-                                        className="w-full pl-14 pr-6 py-4 bg-white dark:bg-[var(--bg-card)] border-gray-100 dark:border-[var(--border-subtle)] border rounded-2xl text-sm font-bold text-[var(--text-primary)] focus:ring-4 focus:ring-blue-500/10 transition-all outline-none"
-                                        value={search}
-                                        onChange={e => setSearch(e.target.value)}
-                                    />
+
+                                <div className="flex flex-wrap items-center gap-4">
+                                    <div className="flex items-center gap-2">
+                                        <Store className="w-4 h-4 text-cyan-500 shrink-0" />
+                                        <select
+                                            value={storeFilter}
+                                            onChange={e => setStoreFilter(e.target.value)}
+                                            className="px-4 py-2.5 bg-white dark:bg-[var(--bg-card)] border border-gray-100 dark:border-[var(--border-subtle)] rounded-xl text-xs font-bold text-[var(--text-primary)] focus:ring-4 focus:ring-cyan-500/10 transition-all outline-none appearance-none cursor-pointer"
+                                        >
+                                            <option value="">Todas las tiendas</option>
+                                            {allStores.map(s => (
+                                                <option key={s} value={s}>{s}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <div className="flex items-center gap-2">
+                                        <FileText className="w-4 h-4 text-emerald-500 shrink-0" />
+                                        <select
+                                            value={typeFilter}
+                                            onChange={e => setTypeFilter(e.target.value)}
+                                            className="px-4 py-2.5 bg-white dark:bg-[var(--bg-card)] border border-gray-100 dark:border-[var(--border-subtle)] rounded-xl text-xs font-bold text-[var(--text-primary)] focus:ring-4 focus:ring-emerald-500/10 transition-all outline-none appearance-none cursor-pointer"
+                                        >
+                                            <option value="">Todos los tipos</option>
+                                            {allTypes.map(t => (
+                                                <option key={t} value={t}>{t}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-[10px] font-black text-gray-400 dark:text-[var(--text-muted)] uppercase tracking-widest">Desde</span>
+                                        <input
+                                            type="date"
+                                            value={dateFrom}
+                                            onChange={e => setDateFrom(e.target.value)}
+                                            className="px-4 py-2.5 bg-white dark:bg-[var(--bg-card)] border border-gray-100 dark:border-[var(--border-subtle)] rounded-xl text-xs font-bold text-[var(--text-primary)] focus:ring-4 focus:ring-blue-500/10 transition-all outline-none"
+                                        />
+                                    </div>
+
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-[10px] font-black text-gray-400 dark:text-[var(--text-muted)] uppercase tracking-widest">Hasta</span>
+                                        <input
+                                            type="date"
+                                            value={dateTo}
+                                            onChange={e => setDateTo(e.target.value)}
+                                            className="px-4 py-2.5 bg-white dark:bg-[var(--bg-card)] border border-gray-100 dark:border-[var(--border-subtle)] rounded-xl text-xs font-bold text-[var(--text-primary)] focus:ring-4 focus:ring-blue-500/10 transition-all outline-none"
+                                        />
+                                    </div>
+
+                                    {(storeFilter || typeFilter || dateFrom || dateTo) && (
+                                        <button
+                                            onClick={() => {
+                                                setStoreFilter('');
+                                                setTypeFilter('');
+                                                setDateFrom('');
+                                                setDateTo('');
+                                            }}
+                                            className="px-4 py-2.5 rounded-xl bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 text-[10px] font-black uppercase tracking-widest hover:bg-rose-100 dark:hover:bg-rose-500/20 transition-all"
+                                        >
+                                            Limpiar filtros
+                                        </button>
+                                    )}
                                 </div>
                             </div>
 

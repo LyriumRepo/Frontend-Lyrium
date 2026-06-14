@@ -30,12 +30,12 @@ export const ContractDetailModal: React.FC<ContractDetailModalProps> = ({
 
     const isFormComplete = !!(
         formState.company?.trim() &&
-        formState.ruc?.trim() &&
+        formState.ruc?.length === 11 &&
         formState.rep?.trim() &&
-        formState.dni?.trim() &&
+        formState.dni?.length === 8 &&
         formState.direccion?.trim() &&
         formState.admin_name?.trim() &&
-        formState.admin_phone?.trim() &&
+        formState.admin_phone?.length === 9 &&
         formState.admin_email?.trim() &&
         formState.plan?.trim() &&
         formState.start &&
@@ -43,15 +43,34 @@ export const ContractDetailModal: React.FC<ContractDetailModalProps> = ({
         formState.modality
     );
 
+    const sanitizeInput = (field: string, value: string) => {
+        if (field === 'ruc') {
+            return value.replace(/\D/g, '').slice(0, 11);
+        }
+        if (field === 'dni') {
+            return value.replace(/\D/g, '').slice(0, 8);
+        }
+        if (field === 'admin_phone') {
+            return value.replace(/\D/g, '').slice(0, 9);
+        }
+        return value;
+    };
+
     const handleChange = (field: string, value: string) => {
         setFormState(prev => {
-            const next = { ...prev, [field]: value };
+            const next = { ...prev, [field]: sanitizeInput(field, value) };
             if (field === 'modality' && value === 'VIRTUAL') {
                 next.plan = 'Plan emprende';
             }
             return next;
         });
     };
+
+    const isValidRuc = formState.ruc?.length === 11;
+    const isValidDni = formState.dni?.length === 8;
+    const isValidPhone = formState.admin_phone?.length === 9;
+
+
     const handleUpdateStatus = (status: 'ACTIVE' | 'PENDING' | 'EXPIRED') => {
         if (onUpdateStatus) {
             onUpdateStatus(contract.id, status, formState);
@@ -106,11 +125,23 @@ export const ContractDetailModal: React.FC<ContractDetailModalProps> = ({
                         </div>
                         <div className="space-y-1.5">
                             <label className={labelClass}>RUC Fiscal</label>
-                            <input type="text" value={formState.ruc || ''} onChange={(e) => handleChange('ruc', e.target.value)} className={`${inputClass} font-mono`} placeholder="RUC de 11 dígitos" />
+                            <div className="relative">
+                                <input type="text" inputMode="numeric" value={formState.ruc || ''} onChange={(e) => handleChange('ruc', e.target.value)}
+                                    className={`${inputClass} font-mono pr-14`} placeholder="RUC de 11 dígitos" />
+                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-black text-[var(--text-muted)]">
+                                    {formState.ruc?.length || 0}/11
+                                </span>
+                            </div>
                         </div>
                         <div className="space-y-1.5">
                             <label className={labelClass}>DNI</label>
-                            <input type="text" value={formState.dni || ''} onChange={(e) => handleChange('dni', e.target.value)} className={inputClass} placeholder="DNI del representante" />
+                            <div className="relative">
+                                <input type="text" inputMode="numeric" value={formState.dni || ''} onChange={(e) => handleChange('dni', e.target.value)}
+                                    className={`${inputClass} font-mono pr-12`} placeholder="DNI del representante" />
+                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-black text-[var(--text-muted)]">
+                                    {formState.dni?.length || 0}/8
+                                </span>
+                            </div>
                         </div>
                         <div className="space-y-1.5">
                             <label className={labelClass}>Representante Legal</label>
@@ -138,7 +169,13 @@ export const ContractDetailModal: React.FC<ContractDetailModalProps> = ({
                         </div>
                         <div className="space-y-1.5">
                             <label className={labelClass}>Teléfono</label>
-                            <input type="text" value={formState.admin_phone || ''} onChange={(e) => handleChange('admin_phone', e.target.value)} className={inputClass} placeholder="Número de contacto" />
+                            <div className="relative">
+                                <input type="text" inputMode="numeric" value={formState.admin_phone || ''} onChange={(e) => handleChange('admin_phone', e.target.value)}
+                                    className={`${inputClass} font-mono pr-12`} placeholder="Número de contacto" />
+                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-black text-[var(--text-muted)]">
+                                    {formState.admin_phone?.length || 0}/9
+                                </span>
+                            </div>
                         </div>
                         <div className="space-y-1.5">
                             <label className={labelClass}>E-mail</label>
