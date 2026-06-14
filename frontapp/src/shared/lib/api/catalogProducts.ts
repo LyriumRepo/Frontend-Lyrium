@@ -161,7 +161,7 @@ export function mapServiceToLocal(service: any): Producto | null {
     categoria: service.category || '',
     slug: service.slug,
     descripcion: service.description,
-    enlace: `/servicios/${service.slug}`,
+    enlace: `/servicio/${service.slug}`,
     vendedor: service.store_name
       ? { slug: service.store?.slug ?? '', nombre: service.store_name }
       : undefined,

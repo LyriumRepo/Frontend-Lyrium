@@ -363,7 +363,7 @@ function OrderTrackingCards({
         </div>
 
         {steps.map((s, i) => {
-          const imgSrc = `/imagenes-seguimiento/${i + 1}.jpg`;
+          const imgSrc = `/imagenes-seguimiento/${i + 1}.png`;
           const isCompleted = i < activeIndex;
           const isActive = i === activeIndex;
           const color = STEP_COMPLETED_COLORS[Math.min(i, STEP_COMPLETED_COLORS.length - 1)];
