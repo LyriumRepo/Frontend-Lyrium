@@ -6,6 +6,7 @@ import { UnifiedMessage } from '../types';
 
 interface ChatMessageProps {
   message: UnifiedMessage;
+  showAvatar?: boolean;
 }
 
 const parseMarkdown = (text: string) => {
@@ -21,18 +22,32 @@ const parseMarkdown = (text: string) => {
   ));
 };
 
-export function ChatMessage({ message }: ChatMessageProps) {
+export function ChatMessage({ message, showAvatar = true }: ChatMessageProps) {
   const isUser = message.senderRole === 'vendor' || message.senderRole === 'user';
 
   return (
     <div
-      className={`flex w-full ${isUser ? 'justify-end' : 'justify-start'} animate-fadeIn`}
+      className={`flex w-full ${isUser ? 'justify-end' : 'justify-start'} ${isUser ? 'animate-bubble-in-right' : 'animate-bubble-in-left'}`}
     >
       <div className={`flex max-w-[82%] md:max-w-[68%] items-end gap-2 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
+
+        {/* Avatar (solo en el último mensaje del grupo) o espacio reservado para alineación */}
+        {showAvatar ? (
+          <div className={`w-8 h-8 shrink-0 rounded-full flex items-center justify-center text-[9px] font-black shadow-sm animate-avatar-appear ${
+            isUser
+              ? 'bg-gradient-to-br from-[#9cb04e] via-[#64c695] to-[#499bbf] text-white'
+              : 'bg-[var(--bg-secondary)] border border-[var(--border-subtle)] text-[var(--text-secondary)]'
+          }`}>
+            {message.senderName?.charAt(0)?.toUpperCase() ?? '?'}
+          </div>
+        ) : (
+          <div className="w-8 h-8 shrink-0" aria-hidden="true" />
+        )}
+
         <div
           className={`${
             isUser
-              ? 'bg-gradient-to-br from-[var(--turquesa-500)] to-[var(--verde-500)] text-white rounded-[1.75rem] rounded-br-md shadow-lg shadow-[var(--turquesa-500)]/30 dark:shadow-[var(--turquesa-500)]/20'
+              ? 'bg-gradient-to-br from-[#9cb04e] via-[#64c695] to-[#499bbf] text-white rounded-[1.75rem] rounded-br-md shadow-lg shadow-[#64c695]/30 dark:shadow-[#64c695]/20'
               : 'bg-white/80 dark:bg-[#1A2E25]/80 backdrop-blur-md border border-white/20 dark:border-[#2A4035]/50 text-[var(--text-primary)] rounded-[1.75rem] rounded-bl-md shadow-sm'
           } px-5 py-3.5 transition-all duration-200 hover:shadow-md flex-1 min-w-0`}
         >

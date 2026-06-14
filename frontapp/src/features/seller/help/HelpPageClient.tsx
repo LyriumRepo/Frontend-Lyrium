@@ -4,7 +4,10 @@ import React, { useState } from 'react';
 import { useSellerHelp } from '@/features/seller/help/hooks/useSellerHelp';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import BaseLoading from '@/components/ui/BaseLoading';
+import Icon from '@/components/ui/Icon';
 import { SellerTicket, TicketStatus, TicketCategory } from '@/features/seller/help/types';
+import { ChatView } from '@/modules/chat';
+import type { UnifiedTicket, UnifiedMessage } from '@/modules/chat/types';
 
 function TicketList({
     tickets,
@@ -66,7 +69,8 @@ function TicketList({
     });
 
     return (
-        <div className="flex flex-col h-full min-h-0 bg-[var(--bg-card)] rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm overflow-hidden">
+        <div className="flex flex-col h-full min-h-0 rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm overflow-hidden" style={{ background: 'linear-gradient(180deg, color-mix(in srgb,#9cb04e 4%,var(--bg-card)) 0%, var(--bg-card) 100%)' }}>
+          <div className="h-1 w-full shrink-0 bg-gradient-to-r from-[#9cb04e] via-[#64c695] to-[#499bbf]" />
             {/* ── Cabecera con filtro ── */}
             <div className="p-5 border-b border-[var(--border-subtle)]">
                 <div className="flex items-center justify-between">
@@ -83,7 +87,7 @@ function TicketList({
                         }}
                         className={`px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-wider border transition-colors shrink-0 ${showFilter
                                 ? 'bg-[var(--turquesa-500)] text-white border-[var(--turquesa-500)] shadow-sm'
-                                : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:bg-gray-200 dark:hover:bg-[#2A3F33]'
+                                : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:bg-[var(--bg-hover)]'
                             }`}
                     >
                         Filtrar
@@ -98,7 +102,7 @@ function TicketList({
                                 onClick={() => { setFilterType('asunto'); setFilterValue(''); }}
                                 className={`flex-1 py-1.5 uppercase tracking-wider transition-colors ${filterType === 'asunto'
                                         ? 'bg-[var(--turquesa-500)] text-white'
-                                        : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-gray-200 dark:hover:bg-[#2A3F33]'
+                                        : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]'
                                     }`}
                             >
                                 Asunto
@@ -107,7 +111,7 @@ function TicketList({
                                 onClick={() => { setFilterType('categoria'); setFilterValue(''); }}
                                 className={`flex-1 py-1.5 uppercase tracking-wider transition-colors ${filterType === 'categoria'
                                         ? 'bg-[var(--turquesa-500)] text-white'
-                                        : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-gray-200 dark:hover:bg-[#2A3F33]'
+                                        : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]'
                                     }`}
                             >
                                 Categoría
@@ -171,7 +175,7 @@ function TicketList({
                     </button>
                 ))}
                 {filteredTickets.length === 0 && (
-                    <div className="p-8 text-center text-gray-500">
+                    <div className="p-8 text-center text-[var(--text-secondary)]">
                         <p>{filterValue ? 'Sin resultados para este filtro' : 'No hay tickets'}</p>
                     </div>
                 )}
@@ -180,147 +184,46 @@ function TicketList({
     );
 }
 
-function TicketChat({
-    ticket,
-    onSendMessage,
-    onCloseTicket,
-    isSending,
-    isClosing
-}: {
-    ticket: SellerTicket;
-    onSendMessage: (content: string) => void;
-    onCloseTicket: () => void;
-    isSending: boolean;
-    isClosing: boolean;
-}) {
-    const [message, setMessage] = useState('');
-
-    const handleSend = () => {
-        if (message.trim()) {
-            onSendMessage(message);
-            setMessage('');
-        }
+function toUnifiedHelpTicket(ticket: SellerTicket): UnifiedTicket {
+    const statusMap: Record<string, UnifiedTicket['status']> = {
+        open: 'open',
+        in_progress: 'in_progress',
+        pending: 'in_progress',
+        resolved: 'resolved',
+        closed: 'closed',
     };
-
-    const getStatusColor = (status: TicketStatus) => {
-        switch (status) {
-            case 'open': return 'bg-red-100 text-red-700';
-            case 'in_progress': return 'bg-amber-100 text-amber-700';
-            case 'pending': return 'bg-blue-100 text-blue-700';
-            case 'resolved': return 'bg-emerald-100 text-emerald-700';
-            case 'closed': return 'bg-gray-100 text-gray-700';
-            default: return 'bg-gray-100 text-gray-700';
-        }
+    const priorityMap: Record<string, UnifiedTicket['priority']> = {
+        baja: 'Baja',
+        media: 'Media',
+        alta: 'Alta',
+        critica: 'Crítica',
     };
-
-    const formatTime = (dateStr: string) => {
-        const date = new Date(dateStr);
-        return date.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
+    const messages: UnifiedMessage[] = ticket.messages.map(msg => ({
+        id: msg.id,
+        ticketId: msg.ticketId,
+        senderId: msg.senderId,
+        senderName: msg.senderName,
+        senderRole: msg.senderType === 'seller' ? 'vendor' : 'admin',
+        content: msg.content,
+        timestamp: new Date(msg.createdAt || Date.now()),
+        hour: msg.createdAt
+            ? new Date(msg.createdAt).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })
+            : '--:--',
+    }));
+    return {
+        id: ticket.id,
+        displayId: ticket.ticketNumber,
+        title: ticket.subject,
+        description: ticket.description,
+        status: statusMap[ticket.status] ?? 'open',
+        priority: priorityMap[ticket.priority] ?? 'Media',
+        assignedTo: { role: 'admin', id: '0', name: 'Soporte Lyrium' },
+        requester: { name: 'Tú' },
+        createdAt: new Date(ticket.createdAt || Date.now()),
+        updatedAt: new Date(ticket.updatedAt || Date.now()),
+        messages,
+        source: 'seller',
     };
-
-    const formatDate = (dateStr: string) => {
-        const date = new Date(dateStr);
-        return date.toLocaleDateString('es-PE', { day: 'numeric', month: 'short', year: 'numeric' });
-    };
-
-    return (
-        <div className="flex flex-col h-full bg-[var(--bg-card)] rounded-[2.5rem] border border-[var(--border-subtle)] shadow-xl overflow-hidden">
-            {/* Cabecera */}
-            <div className="p-5 bg-[var(--bg-secondary)]/50 border-b border-[var(--border-subtle)] flex items-center justify-between gap-4">
-                <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[var(--turquesa-500)]/20 to-[var(--verde-500)]/10 text-[var(--turquesa-500)] flex items-center justify-center font-black text-sm border border-[var(--turquesa-500)]/20 shadow-md shrink-0">
-                        {ticket.subject.charAt(0).toUpperCase()}
-                    </div>
-                    <div>
-                        <h3 className="text-sm font-black text-[var(--text-primary)] leading-none uppercase tracking-tight">{ticket.subject}</h3>
-                        <p className="text-[10px] text-[var(--text-muted)] font-semibold mt-1.5 tracking-wide">#{ticket.ticketNumber} · {formatDate(ticket.createdAt)}</p>
-                    </div>
-                </div>
-                <div className="flex items-center gap-2 shrink-0">
-                    <span className={`px-2.5 py-1 text-[9px] font-black uppercase tracking-widest rounded-full ${getStatusColor(ticket.status)}`}>
-                        {ticket.status === 'open' ? 'Abierto' :
-                            ticket.status === 'in_progress' ? 'En proceso' :
-                                ticket.status === 'pending' ? 'Pendiente' :
-                                    ticket.status === 'resolved' ? 'Resuelto' : 'Cerrado'}
-                    </span>
-                    {['open', 'in_progress', 'pending'].includes(ticket.status as TicketStatus) && (
-                        <button
-                            onClick={onCloseTicket}
-                            disabled={isClosing}
-                            className="px-3 py-1.5 rounded-xl bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 font-bold text-[10px] uppercase tracking-wider border border-rose-200 dark:border-rose-800 hover:bg-rose-100 disabled:opacity-50 transition-all"
-                        >
-                            {isClosing ? '...' : 'Cerrar'}
-                        </button>
-                    )}
-                </div>
-            </div>
-
-            {/* Mensajes */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-[var(--bg-card)]/50 custom-scrollbar">
-                {ticket.messages.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-full text-center py-12">
-                        <div className="w-14 h-14 rounded-full bg-[var(--turquesa-500)]/10 flex items-center justify-center mx-auto mb-4">
-                            <svg className="w-7 h-7 text-[var(--turquesa-500)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                            </svg>
-                        </div>
-                        <p className="text-sm font-black uppercase tracking-wider text-[var(--text-primary)] mb-1">Sin mensajes aún</p>
-                        <p className="text-xs text-[var(--text-secondary)]">Envía un mensaje para comenzar la conversación</p>
-                    </div>
-                ) : (
-                    ticket.messages.map((msg) => {
-                        const isSeller = msg.senderType === 'seller';
-                        return (
-                            <div key={msg.id} className={`flex ${isSeller ? 'justify-end animate-bubble-in-right' : 'justify-start animate-bubble-in-left'} group/msg`}>
-                                <div className={`max-w-[70%] p-4 rounded-3xl relative flex flex-col gap-1.5 shadow-sm transition-all duration-300 hover:shadow-md ${
-                                    isSeller
-                                        ? 'bg-gradient-to-br from-[var(--turquesa-500)] to-[var(--verde-500)] text-white rounded-tr-none shadow-md shadow-[var(--turquesa-500)]/5'
-                                        : 'bg-[var(--bg-secondary)] text-[var(--text-primary)] rounded-tl-none border border-[var(--border-subtle)]'
-                                }`}>
-                                    <div className={`text-[9px] font-black uppercase tracking-wider ${
-                                        isSeller ? 'text-white/80' : 'text-[var(--icons-green)]'
-                                    }`}>
-                                        {msg.senderName} <span className="opacity-75 font-normal">({isSeller ? 'Tú' : 'Soporte'})</span>
-                                    </div>
-                                    <p className="text-xs font-semibold leading-relaxed break-words">{msg.content}</p>
-                                    <div className="flex items-center justify-end mt-1.5">
-                                        <span className={`text-[8px] font-bold ${isSeller ? 'text-white/70' : 'text-[var(--text-muted)]'}`}>
-                                            {formatTime(msg.createdAt)}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        );
-                    })
-                )}
-            </div>
-
-            {/* Input */}
-            {ticket.status !== 'resolved' && ticket.status !== 'closed' && (
-                <div className="p-4 bg-[var(--bg-secondary)]/50 border-t border-[var(--border-subtle)]">
-                    <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="flex gap-3 items-center relative">
-                        <input
-                            type="text"
-                            value={message}
-                            onChange={(e) => setMessage(e.target.value)}
-                            placeholder="Escribe un mensaje en el canal de soporte..."
-                            className="flex-1 pl-4 pr-14 py-4 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-2xl text-xs font-bold focus:ring-2 focus:ring-[var(--turquesa-500)]/20 outline-none text-[var(--text-primary)] placeholder:text-[var(--text-muted)]"
-                            disabled={isSending}
-                        />
-                        <button
-                            type="submit"
-                            disabled={isSending || !message.trim()}
-                            className="absolute right-2.5 w-11 h-11 rounded-xl bg-[var(--brand-green)] hover:bg-[var(--brand-green-hover)] text-white flex items-center justify-center transition active:scale-95 shadow-md shadow-[var(--brand-green)]/30 border border-[var(--brand-green)]/20 disabled:opacity-50"
-                        >
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                            </svg>
-                        </button>
-                    </form>
-                </div>
-            )}
-        </div>
-    );
 }
 
 function NewTicketForm({
@@ -393,14 +296,14 @@ function NewTicketForm({
                     <button
                         type="button"
                         onClick={onCancel}
-                        className="flex-1 px-4 py-2.5 bg-[var(--bg-secondary)] text-[var(--text-secondary)] rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-gray-200 dark:hover:bg-[#2A3F33] transition-colors border border-[var(--border-subtle)]"
+                        className="flex-1 px-4 py-2.5 bg-[var(--bg-secondary)] text-[var(--text-secondary)] rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-[var(--bg-hover)] transition-colors border border-[var(--border-subtle)]"
                     >
                         Cancelar
                     </button>
                     <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="flex-1 px-4 py-2.5 bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--verde-500)] text-white rounded-xl font-bold text-xs uppercase tracking-wider hover:opacity-90 transition-all disabled:opacity-50 shadow-lg shadow-[var(--turquesa-500)]/20"
+                        className="flex-1 px-4 py-2.5 bg-gradient-to-r from-[#9cb04e] via-[#64c695] to-[#499bbf] text-white rounded-xl font-bold text-xs uppercase tracking-wider hover:opacity-90 transition-all disabled:opacity-50 shadow-lg shadow-[#64c695]/20"
                     >
                         {isSubmitting ? 'Creando...' : 'Crear Ticket'}
                     </button>
@@ -426,6 +329,7 @@ export function HelpPageClient() {
     } = useSellerHelp();
 
     const [showNewTicketForm, setShowNewTicketForm] = useState(false);
+    const [showLegend, setShowLegend] = useState(false);
 
     if (isLoading) {
         return (
@@ -450,12 +354,21 @@ export function HelpPageClient() {
                 icon="Headset"
                 actions={
                     !showNewTicketForm && !activeTicket ? (
-                        <button
-                            onClick={() => setShowNewTicketForm(true)}
-                            className="px-4 py-2 bg-white dark:bg-[var(--bg-secondary)] text-[var(--turquesa-500)] rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-[var(--turquesa-500)]/10 transition-colors border border-[var(--border-subtle)] shadow-sm"
-                        >
-                            + Nuevo Ticket
-                        </button>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => setShowLegend(true)}
+                                title="Leyenda"
+                                className="w-9 h-9 flex items-center justify-center rounded-xl bg-white dark:bg-[var(--bg-secondary)] border border-[var(--border-subtle)] text-gray-500 dark:text-[var(--text-secondary)] hover:text-[var(--turquesa-500)] dark:hover:text-[var(--icons-green)] hover:border-[var(--turquesa-500)] dark:hover:border-[var(--icons-green)] transition-all shadow-sm"
+                            >
+                                <Icon name="Info" className="w-4 h-4" />
+                            </button>
+                            <button
+                                onClick={() => setShowNewTicketForm(true)}
+                                className="px-4 py-2 bg-white dark:bg-[var(--bg-secondary)] text-[var(--turquesa-500)] rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-[var(--turquesa-500)]/10 transition-colors border border-[var(--border-subtle)] shadow-sm"
+                            >
+                                + Nuevo Ticket
+                            </button>
+                        </div>
                     ) : null
                 }
             />
@@ -482,12 +395,13 @@ export function HelpPageClient() {
                             isSubmitting={isSending}
                         />
                     ) : activeTicket ? (
-                        <TicketChat
-                            ticket={activeTicket}
-                            onSendMessage={handleSendMessage}
+                        <ChatView
+                            ticket={toUnifiedHelpTicket(activeTicket)}
+                            onSendMessage={({ text }) => handleSendMessage(text)}
                             onCloseTicket={() => handleCloseTicket(activeTicket.id)}
                             isSending={isSending}
                             isClosing={isClosing}
+                            showAdminControls={false}
                         />
                     ) : (
                         <div className="h-full flex items-center justify-center bg-[var(--bg-card)] rounded-[2.5rem] border border-[var(--border-subtle)]">
@@ -504,6 +418,53 @@ export function HelpPageClient() {
                     )}
                 </div>
             </div>
+
+            {showLegend && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4" onClick={() => setShowLegend(false)}>
+                    <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-[3rem] max-w-lg w-full shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
+                        <div className="bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--turquesa-500)]/70 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-8 text-white relative">
+                            <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl" />
+                            <div className="relative z-10 flex items-center justify-between">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center">
+                                        <Icon name="Headset" className="w-6 h-6" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-2xl font-black tracking-tighter">Soporte Lyrium</h3>
+                                        <p className="text-[10px] font-bold text-white/70 uppercase tracking-[0.2em]">¿Para qué sirve este canal?</p>
+                                    </div>
+                                </div>
+                                <button onClick={() => setShowLegend(false)} className="w-10 h-10 rounded-full bg-black/10 flex items-center justify-center hover:bg-black/20">
+                                    <Icon name="X" className="w-5 h-5 text-white" />
+                                </button>
+                            </div>
+                        </div>
+                        <div className="p-8 space-y-4">
+                            {[
+                                { icon: 'Settings', title: 'Incidencias técnicas', desc: 'Reporta errores de la plataforma, fallas en el sistema, problemas con módulos o funcionalidades.' },
+                                { icon: 'Shield', title: 'Soporte administrativo', desc: 'Consulta sobre validaciones, configuraciones de tienda, actualizaciones de documentación o estados de aprobación.' },
+                                { icon: 'CreditCard', title: 'Facturación y planes', desc: 'Resuelve dudas sobre tu suscripción, planes de vendedor, comisiones o comprobantes de pago.' },
+                                { icon: 'AlertCircle', title: 'No gestiona ventas', desc: 'Para coordinar pedidos, devoluciones o postventa con clientes, usa el Chat con Clientes.' },
+                            ].map((item) => (
+                                <div key={item.title} className="flex items-start gap-4 p-4 bg-gray-50 dark:bg-[var(--bg-muted)]/50 rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)]">
+                                    <div className="w-10 h-10 rounded-xl bg-white dark:bg-[var(--bg-secondary)] flex items-center justify-center shadow-sm border border-gray-100 dark:border-[var(--border-subtle)] shrink-0">
+                                        <Icon name={item.icon as any} className="w-5 h-5 text-[var(--turquesa-500)] dark:text-[var(--icons-green)]" />
+                                    </div>
+                                    <div>
+                                        <p className="font-black text-sm text-gray-800 dark:text-[var(--text-primary)] mb-0.5">{item.title}</p>
+                                        <p className="text-xs text-gray-500 dark:text-[var(--text-muted)] leading-relaxed">{item.desc}</p>
+                                    </div>
+                                </div>
+                            ))}
+                            <div className="flex justify-end pt-2">
+                                <button onClick={() => setShowLegend(false)} className="px-6 py-3 rounded-2xl bg-gray-100 dark:bg-[var(--bg-muted)] text-gray-600 dark:text-[var(--text-primary)] font-black text-xs uppercase tracking-widest hover:bg-gray-200 dark:hover:bg-[#2A3F33] transition-all">
+                                    Cerrar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

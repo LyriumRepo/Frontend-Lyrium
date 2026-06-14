@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEcho } from '@laravel/echo-react';
 import { SellerTicket, SellerTicketMessage, SellerTicketFilters } from '../types';
 import { ticketApi } from '@/lib/api/ticketRepository';
 import type { Ticket, TicketMessage, TicketPriority } from '@/modules/helpdesk/types';
@@ -91,6 +92,16 @@ export function useSellerHelp() {
       fetchTicketDetail(activeTicketId);
     }
   }, [activeTicketId, fetchTicketDetail]);
+
+  // WebSocket: mensajes de soporte en tiempo real
+  useEcho(
+    `ticket.${activeTicketId ?? 0}`,
+    'TicketMessageReceived',
+    () => {
+      if (activeTicketId) fetchTicketDetail(activeTicketId);
+    },
+    [activeTicketId, fetchTicketDetail],
+  );
 
   const activeTicket = useMemo(
     () => tickets.find((t) => t.id === activeTicketId) ?? null,

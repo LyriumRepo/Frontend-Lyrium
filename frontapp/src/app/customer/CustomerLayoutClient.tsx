@@ -33,6 +33,21 @@ function BirthdayToast() {
         localStorage.setItem(key, '1');
         setVisible(true);
 
+        import('canvas-confetti').then(({ default: confetti }) => {
+            const BDAY_COLORS = ['#64c695', '#bef264', '#fbbf24', '#f472b6', '#60a5fa', '#a78bfa'];
+            const end = Date.now() + 3500;
+
+            confetti({ particleCount: 100, spread: 120, origin: { x: 0.5, y: 0.6 }, colors: BDAY_COLORS, scalar: 1.2, zIndex: 9999 });
+
+            const burst = () => {
+                confetti({ particleCount: 8, angle: 60, spread: 65, origin: { x: 0, y: 0.65 }, colors: BDAY_COLORS, zIndex: 9999 });
+                confetti({ particleCount: 8, angle: 120, spread: 65, origin: { x: 1, y: 0.65 }, colors: BDAY_COLORS, zIndex: 9999 });
+                confetti({ particleCount: 4, angle: 90, spread: 40, origin: { x: 0.5, y: 0.7 }, colors: BDAY_COLORS, shapes: ['star'], zIndex: 9999 });
+                if (Date.now() < end) requestAnimationFrame(burst);
+            };
+            burst();
+        });
+
         const timer = setTimeout(() => setVisible(false), 6000);
         return () => clearTimeout(timer);
     }, [user]);

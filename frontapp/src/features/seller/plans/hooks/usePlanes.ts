@@ -42,6 +42,13 @@ const initialState: PlanesState = {
 // Mapa global slug → ID numérico del backend
 let slugToNumericIdMap: Record<string, number> = {};
 
+// Mapa slug del backend → clave en defaultPlansData
+const slugToDefaultKey: Record<string, string> = {
+  emprende: 'basic',
+  crece:    'standard',
+  especial: 'premium',
+};
+
 export function usePlanes() {
   const [state, _setState] = useState<PlanesState>(initialState);
   const { user, isAuthenticated, loading: authLoading } = useAuth();
@@ -165,7 +172,8 @@ export function usePlanes() {
             features: plan.features?.map(f => ({ text: f, active: true })) || [],
             detailedBenefits: plan.detailed_benefits?.map(b => ({ title: b.title, description: b.description, icon: b.icon || '' })) || [],
             isActive: true,
-            bgImage: defaultPlansData[plan.slug]?.bgImage || '',
+            bgImage: defaultPlansData[slugToDefaultKey[plan.slug] ?? plan.slug]?.bgImage || '',
+            showBgInCard: defaultPlansData[slugToDefaultKey[plan.slug] ?? plan.slug]?.showBgInCard ?? false,
           };
         });
       }
@@ -425,7 +433,8 @@ export function usePlanes() {
             features: plan.features?.map(f => ({ text: f, active: true })) || [],
             detailedBenefits: plan.detailed_benefits?.map(b => ({ title: b.title, description: b.description, icon: b.icon || '' })) || [],
             isActive: true,
-            bgImage: defaultPlansData[plan.slug]?.bgImage || '',
+            bgImage: defaultPlansData[slugToDefaultKey[plan.slug] ?? plan.slug]?.bgImage || '',
+            showBgInCard: defaultPlansData[slugToDefaultKey[plan.slug] ?? plan.slug]?.showBgInCard ?? false,
           };
         });
       }

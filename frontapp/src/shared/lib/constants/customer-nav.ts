@@ -40,7 +40,7 @@ export const customerNavigation: PanelNavigation = [
             },
             {
                 id: 'invoices',
-                label: 'Mis Comprobantes',
+                label: 'Confirmaciones de Pago',
                 description: 'Facturas y boletas electrónicas',
                 icon: 'Receipt',
                 href: '/customer/invoices'

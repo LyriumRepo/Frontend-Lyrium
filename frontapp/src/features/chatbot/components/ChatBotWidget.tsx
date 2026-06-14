@@ -1,11 +1,14 @@
 'use client';
 
 import { useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import { useChatBot } from '../hooks/useChatBot';
 import ChatBotPanel from './ChatBotPanel';
 import Icon from '@/components/ui/Icon';
 
 export default function ChatBotWidget() {
+    const pathname = usePathname();
+    if (pathname === '/login') return null;
     const {
         isOpen,
         isMinimized,

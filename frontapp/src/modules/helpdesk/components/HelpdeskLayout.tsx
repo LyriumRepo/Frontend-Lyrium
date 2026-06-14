@@ -83,10 +83,11 @@ export function HelpdeskLayout({
         actions={headerActions}
       />
 
-      <div 
-        className="rounded-2xl border border-[var(--border-subtle)] overflow-hidden flex flex-col bg-[var(--bg-card)]"
-        style={{ height }}
+      <div
+        className="rounded-2xl border border-[var(--border-subtle)] overflow-hidden flex flex-col"
+        style={{ height, background: 'linear-gradient(160deg, color-mix(in srgb,#9cb04e 5%,var(--bg-card)) 0%, var(--bg-card) 50%, color-mix(in srgb,#499bbf 4%,var(--bg-card)) 100%)' }}
       >
+        <div className="h-1 w-full shrink-0 bg-gradient-to-r from-[#9cb04e] via-[#64c695] to-[#499bbf]" />
         <div className="flex h-full overflow-hidden">
           {/* Lista de Tickets */}
           <div 

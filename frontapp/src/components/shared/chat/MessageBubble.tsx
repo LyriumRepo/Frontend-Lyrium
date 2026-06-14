@@ -96,7 +96,9 @@ interface MessageItemProps {
   isSent: boolean;
   showDate: boolean;
   isRead: boolean;
-  showMeta: boolean;
+  isFirstOfGroup: boolean;
+  showAvatar: boolean;
+  needsSpacer: boolean;
   onMarkRead?: (id: string) => void;
   meta?: MessageMetaConfig;
   currentUserInitial: string;
@@ -109,7 +111,9 @@ function MessageItem({
   isSent,
   showDate,
   isRead,
-  showMeta,
+  isFirstOfGroup,
+  showAvatar,
+  needsSpacer,
   onMarkRead,
   meta,
   currentUserInitial,
@@ -132,26 +136,29 @@ function MessageItem({
       )}
 
       <div
-        className={`flex ${isSent ? 'justify-end' : 'justify-start'} ${showDate ? 'mt-2' : idx > 0 ? 'mt-0.5' : ''} animate-fadeIn`}
-        style={{ animationDelay: `${Math.min(idx * 20, 300)}ms` }}
+        className={`flex ${isSent ? 'justify-end' : 'justify-start'} ${isFirstOfGroup && !showDate && idx > 0 ? 'mt-3' : idx > 0 ? 'mt-0.5' : ''} ${isSent ? 'animate-bubble-in-right' : 'animate-bubble-in-left'}`}
+        style={{ animationDelay: `${Math.min(idx * 20, 200)}ms` }}
       >
         <div className={`flex max-w-[82%] md:max-w-[68%] items-end gap-2 ${isSent ? 'flex-row-reverse' : 'flex-row'}`}>
-          {showMeta && (
-            <div className={`w-8 h-8 shrink-0 rounded-full flex items-center justify-center text-[9px] font-black shadow-sm transition-transform duration-200 ${
+          {/* Avatar solo en el último mensaje del grupo (estilo WhatsApp) */}
+          {showAvatar ? (
+            <div className={`w-8 h-8 shrink-0 rounded-full flex items-center justify-center text-[9px] font-black shadow-sm animate-avatar-appear ${
               isSent
-                ? 'bg-gradient-to-br from-[var(--turquesa-500)] to-[var(--verde-500)] text-white'
+                ? 'bg-gradient-to-br from-[#9cb04e] via-[#64c695] to-[#499bbf] text-white'
                 : 'bg-gradient-to-br from-gray-200 to-gray-300 dark:from-[#2A4035] dark:to-[#1A2E25] text-gray-600 dark:text-gray-300'
             }`}>
               {isSent ? currentUserInitial : otherInitial}
             </div>
-          )}
+          ) : needsSpacer ? (
+            <div className="w-8 h-8 shrink-0" aria-hidden="true" />
+          ) : null}
 
           <div className={`${
             isSent
-              ? 'bg-gradient-to-br from-[var(--turquesa-500)] to-[var(--verde-500)] text-white rounded-[1.75rem] rounded-br-md shadow-lg shadow-[var(--turquesa-500)]/30 dark:shadow-[var(--turquesa-500)]/20'
+              ? 'bg-gradient-to-br from-[#9cb04e] via-[#64c695] to-[#499bbf] text-white rounded-[1.75rem] rounded-br-md shadow-lg shadow-[#64c695]/30 dark:shadow-[#64c695]/20'
               : 'bg-white/80 dark:bg-[#1A2E25]/80 backdrop-blur-md border border-white/20 dark:border-[#2A4035]/50 text-[var(--text-primary)] rounded-[1.75rem] rounded-bl-md shadow-sm'
           } px-5 py-3.5 transition-all duration-200 hover:shadow-md flex-1 min-w-0`}>
-            {showMeta && (
+            {isFirstOfGroup && (
               <div className="flex items-center gap-1.5 mb-1.5">
                 <span className={`text-[10px] font-bold uppercase tracking-wider ${
                   isSent ? 'text-white/90' : 'text-gray-600 dark:text-gray-300'
@@ -222,17 +229,27 @@ function MessageItem({
 // ─── MessageBubble: iterates messages, delegates rendering to MessageItem ─────
 
 export default function MessageBubble({ messages, currentUserId, onMarkRead, meta, isSentOverride }: MessageBubbleProps) {
+  const currentUserInitial = (meta?.currentUserName ?? 'T').charAt(0).toUpperCase();
+  const otherInitial = (meta?.otherName ?? '?').charAt(0).toUpperCase();
+
   return (
-    <div className="space-y-0.5 px-4 py-4">
+    <div className="px-4 py-4">
       {messages.map((msg, idx) => {
         const isSent = isSentByMe(msg, currentUserId, isSentOverride);
         const prevMsg = idx > 0 ? messages[idx - 1] : null;
+        const nextMsg = idx < messages.length - 1 ? messages[idx + 1] : null;
         const showDate = shouldShowDateSeparator(prevMsg?.timestamp ?? null, msg.timestamp);
         const isRead = !!msg.read_at;
-        const sameSenderAsPrev = prevMsg !== null && isSentByMe(prevMsg, currentUserId, isSentOverride) === isSent;
-        const showMeta = (meta?.showAvatar ?? false) && !sameSenderAsPrev;
-        const currentUserInitial = (meta?.currentUserName ?? 'T').charAt(0).toUpperCase();
-        const otherInitial = (meta?.otherName ?? '?').charAt(0).toUpperCase();
+
+        const prevIsSent = prevMsg !== null ? isSentByMe(prevMsg, currentUserId, isSentOverride) : null;
+        const nextIsSent = nextMsg !== null ? isSentByMe(nextMsg, currentUserId, isSentOverride) : null;
+
+        const isFirstOfGroup = showDate || prevIsSent !== isSent;
+        const isLastOfGroup = nextIsSent !== isSent;
+
+        const avatarsEnabled = meta?.showAvatar ?? false;
+        const showAvatar = avatarsEnabled && isLastOfGroup;
+        const needsSpacer = avatarsEnabled && !isLastOfGroup;
 
         return (
           <MessageItem
@@ -242,7 +259,9 @@ export default function MessageBubble({ messages, currentUserId, onMarkRead, met
             isSent={isSent}
             showDate={showDate}
             isRead={isRead}
-            showMeta={showMeta}
+            isFirstOfGroup={isFirstOfGroup}
+            showAvatar={showAvatar}
+            needsSpacer={needsSpacer}
             onMarkRead={onMarkRead}
             meta={meta}
             currentUserInitial={currentUserInitial}

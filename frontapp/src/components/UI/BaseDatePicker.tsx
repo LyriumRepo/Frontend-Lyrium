@@ -9,9 +9,10 @@ interface BaseDatePickerProps {
   name?: string;
   className?: string;
   placeholder?: string;
+  buttonClassName?: string;
 }
 
-export default function BaseDatePicker({ label, value, onChange, name, className, placeholder }: BaseDatePickerProps) {
+export default function BaseDatePicker({ label, value, onChange, name, className, placeholder, buttonClassName }: BaseDatePickerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [viewDate, setViewDate] = useState(() => value ? new Date(value + 'T12:00:00') : new Date());
   const containerRef = useRef<HTMLDivElement>(null);
@@ -79,33 +80,44 @@ export default function BaseDatePicker({ label, value, onChange, name, className
   return (
     <div className={`relative ${className || ''}`} ref={containerRef}>
       {label && (
-        <label className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1">
+        <label className="text-[10px] font-black text-gray-400 dark:text-gray-300 uppercase tracking-widest ml-1">
           {label}
         </label>
       )}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-4 py-3.5 bg-[var(--bg-secondary)] border-none rounded-2xl text-xs font-mono cursor-pointer outline-none flex items-center gap-2.5 transition-all hover:brightness-95"
-        style={value ? { color: '#059669' } : { color: 'var(--text-muted)' }}
+        className={`w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-transparent p-3 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-xl outline-none transition-all duration-300 cursor-pointer flex items-center gap-2 ${
+          buttonClassName || ''
+        }`}
       >
-        <svg className="w-4 h-4 flex-shrink-0" style={{ color: '#059669' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <svg className="w-4 h-4 flex-shrink-0 text-sky-500 dark:text-[var(--icons-green)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>
         <span>{value ? formatDisplay(value) : (placeholder || 'Seleccionar fecha')}</span>
       </button>
 
       {isOpen && (
-        <div className="absolute top-full mt-2 left-0 z-50 bg-white dark:bg-[#1a1a2e] rounded-2xl shadow-2xl border border-[var(--border-subtle)] p-4 w-[280px]">
+        <div className="absolute top-full mt-2 left-0 z-50 bg-sky-50 dark:bg-[#1A3A32] rounded-2xl shadow-2xl border border-gray-200 dark:border-[var(--border-subtle)] p-4 w-[280px]">
           <div className="flex items-center justify-between mb-4">
-            <button type="button" onClick={prevMonth} className="p-1.5 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg transition-colors">
-              <svg className="w-4 h-4" style={{ color: '#065F46' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <button
+              type="button"
+              onClick={prevMonth}
+              className="p-1.5 hover:bg-sky-200 dark:hover:bg-white/10 rounded-lg transition-colors text-sky-500 dark:text-[var(--icons-green)]"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
               </svg>
             </button>
-            <span className="text-sm font-bold" style={{ color: '#065F46' }}>{monthNames[month]} {year}</span>
-            <button type="button" onClick={nextMonth} className="p-1.5 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg transition-colors">
-              <svg className="w-4 h-4" style={{ color: '#065F46' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <span className="text-sm font-bold text-sky-500 dark:text-[var(--icons-green)]">
+              {monthNames[month]} {year}
+            </span>
+            <button
+              type="button"
+              onClick={nextMonth}
+              className="p-1.5 hover:bg-sky-200 dark:hover:bg-white/10 rounded-lg transition-colors text-sky-500 dark:text-[var(--icons-green)]"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
               </svg>
             </button>
@@ -113,7 +125,9 @@ export default function BaseDatePicker({ label, value, onChange, name, className
 
           <div className="grid grid-cols-7 gap-1 mb-2">
             {dayNames.map(d => (
-              <div key={d} className="text-center text-[10px] font-bold uppercase tracking-wider py-1" style={{ color: '#047857' }}>{d}</div>
+              <div key={d} className="text-center text-[10px] font-bold uppercase tracking-wider py-1 text-sky-500 dark:text-[var(--icons-green)]">
+                {d}
+              </div>
             ))}
           </div>
 
@@ -126,15 +140,11 @@ export default function BaseDatePicker({ label, value, onChange, name, className
                     onClick={() => selectDay(day)}
                     className={`w-9 h-9 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                       isSelected(day)
-                        ? 'text-white shadow-md'
+                        ? 'bg-sky-500 dark:bg-[var(--brand-green)] text-white shadow-md'
                         : isToday(day)
-                          ? 'hover:brightness-95'
-                          : 'hover:bg-emerald-50 dark:hover:bg-emerald-900/30'
+                          ? 'bg-sky-100 dark:bg-[var(--brand-green)]/20 text-sky-500 dark:text-[var(--icons-green)] hover:bg-sky-200 dark:hover:bg-[var(--brand-green)]/30'
+                          : 'text-gray-700 dark:text-[var(--text-primary)] hover:bg-sky-200 dark:hover:bg-white/10'
                     }`}
-                    style={{
-                      backgroundColor: isSelected(day) ? '#065F46' : isToday(day) ? '#d1fae5' : 'transparent',
-                      color: isSelected(day) ? '#fff' : isToday(day) ? '#065F46' : 'var(--text-primary)',
-                    }}
                   >
                     {day}
                   </button>
@@ -145,13 +155,12 @@ export default function BaseDatePicker({ label, value, onChange, name, className
             ))}
           </div>
 
-          <div className="flex justify-between items-center mt-3 pt-3 border-t border-[var(--border-subtle)]">
+          <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-200 dark:border-[var(--border-subtle)]">
             {value && (
               <button
                 type="button"
                 onClick={() => { onChange(''); setIsOpen(false); }}
-                className="text-[10px] font-bold transition-colors cursor-pointer"
-                style={{ color: '#f87171' }}
+                className="text-[10px] font-bold text-red-400 hover:text-red-500 transition-colors cursor-pointer"
               >
                 Limpiar
               </button>
@@ -159,8 +168,7 @@ export default function BaseDatePicker({ label, value, onChange, name, className
             <button
               type="button"
               onClick={selectToday}
-              className="text-[10px] font-bold transition-colors cursor-pointer ml-auto"
-              style={{ color: '#059669' }}
+              className="text-[10px] font-bold text-sky-500 dark:text-[var(--icons-green)] hover:underline transition-colors cursor-pointer ml-auto"
             >
               Hoy
             </button>

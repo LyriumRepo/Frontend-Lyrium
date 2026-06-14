@@ -83,6 +83,60 @@ function mapApiNotificationToProactive(notification: Notification): ProactiveNot
             message = notification.subject ?? 'El estado de tu tienda ha cambiado';
             action = { type: 'store', label: 'Ir a tienda' };
             break;
+        case 'new_chat_message':
+        case 'NewChatMessageNotification':
+            level = 'INFO';
+            title = `💬 ${notification.sender_name ?? 'Nuevo mensaje'}`;
+            message = notification.message_preview ?? notification.subject ?? 'Tienes un nuevo mensaje';
+            if (notification.conversation_id) {
+                action = { type: 'chat', id: notification.conversation_id, label: 'Ver mensaje' };
+            }
+            break;
+        case 'invoice_requested':
+        case 'InvoiceRequestedNotification':
+            level = 'WARNING';
+            title = '📄 Solicitud de comprobante';
+            message = notification.subject ?? 'Un cliente solicitó un comprobante';
+            if (notification.order_id) {
+                action = { type: 'invoices', id: notification.order_id, label: 'Ver pedido' };
+            }
+            break;
+        case 'order_tracking':
+        case 'OrderStatusTrackingNotification':
+            level = 'INFO';
+            title = '📦 Pedido actualizado';
+            message = notification.subject ?? 'Tu pedido ha sido actualizado';
+            if (notification.order_id) {
+                action = { type: 'orders', id: notification.order_id, label: 'Ver pedido' };
+            }
+            break;
+        case 'order_delivered_seller':
+        case 'OrderDeliveredSellerNotification':
+            level = 'INFO';
+            title = '✅ Pedido entregado';
+            message = notification.subject ?? 'El cliente confirmó la recepción del pedido';
+            if (notification.order_id) {
+                action = { type: 'orders', id: notification.order_id, label: 'Ver pedido' };
+            }
+            break;
+        case 'profile_request_created':
+        case 'ProfileRequestNotification':
+            level = 'WARNING';
+            title = '📋 Solicitud de perfil';
+            message = notification.subject ?? `${notification.seller_name ?? 'Un vendedor'} actualizó su perfil`;
+            if (notification.store_id) {
+                action = { type: 'store', id: notification.store_id, label: 'Ver tienda' };
+            }
+            break;
+        case 'store_profile_updated':
+        case 'StoreProfileUpdatedNotification':
+            level = 'INFO';
+            title = '✏️ Tienda actualizada';
+            message = notification.subject ?? `${notification.store_name ?? 'Una tienda'} actualizó su perfil`;
+            if (notification.store_id) {
+                action = { type: 'store', id: notification.store_id, label: 'Ver tienda' };
+            }
+            break;
         default:
             level = 'INFO';
             title = 'Notificación';
@@ -116,11 +170,12 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     const { user, isAuthenticated, loading: authLoading } = useAuth();
 
     const [notifications, setNotifications] = useState<ProactiveNotification[]>([]);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     const refreshNotifications = useCallback(async () => {
         if (authLoading || !isAuthenticated) {
             setNotifications([]);
+            setLoading(false);
             return;
         }
 
@@ -128,7 +183,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         try {
             const response = await notificationRepository.getAll();
             const mapped = response.data.map(mapApiNotificationToProactive);
-            setNotifications(mapped);
+            const unique = mapped.filter((n, i, arr) => arr.findIndex(x => x.id === n.id) === i);
+            setNotifications(unique);
         } catch (error) {
             console.error('Error fetching notifications:', error);
         } finally {
@@ -182,7 +238,10 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         (event) => {
             if (!user) return;
             const mapped = mapApiNotificationToProactive(event.notification);
-            setNotifications(prev => [mapped, ...prev]);
+            setNotifications(prev => {
+                if (prev.some(n => n.id === mapped.id)) return prev;
+                return [mapped, ...prev];
+            });
             try {
                 const audio = new Audio('/sounds/notification.mp3');
                 audio.play().catch(() => { });

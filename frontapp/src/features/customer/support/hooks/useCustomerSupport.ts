@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
+import { useEcho } from '@laravel/echo-react';
 import { CustomerTicket, CustomerTicketMessage, CustomerTicketFilters, TicketStatus, TicketCategory } from '../types';
 import { ticketApi, TicketData, TicketMessageData } from '@/shared/lib/api/ticketRepository';
 
@@ -110,6 +111,16 @@ export function useCustomerSupport() {
       loadTicketDetail(id);
     }
   }, [loadTicketDetail]);
+
+  // WebSocket: mensajes de soporte en tiempo real
+  useEcho(
+    `ticket.${activeTicketId ?? 0}`,
+    'TicketMessageReceived',
+    () => {
+      if (activeTicketId) loadTicketDetail(activeTicketId);
+    },
+    [activeTicketId, loadTicketDetail],
+  );
 
   const handleSendMessage = useCallback(async (content: string) => {
     if (!activeTicketId) return;

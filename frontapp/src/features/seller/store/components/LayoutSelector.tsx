@@ -12,27 +12,27 @@ const layouts = [
         desc: 'Bloques Alternos Verticales',
         preview: (
             <>
-                <div className="w-full h-4 bg-rose-500 rounded flex items-center justify-center text-[7px] font-bold text-white uppercase tracking-wider shadow-sm">
+                <div className="w-full h-4 bg-sky-500 dark:bg-emerald-700 rounded flex items-center justify-center text-[7px] font-bold text-white uppercase tracking-wider shadow-sm">
                     Banner Principal
                 </div>
                 <div className="flex gap-0.5 h-4">
-                    <div className="flex-1 bg-amber-100 border border-amber-200 rounded flex items-center justify-center text-[7px] font-bold text-amber-600">P</div>
-                    <div className="flex-1 bg-amber-100 border border-amber-200 rounded flex items-center justify-center text-[7px] font-bold text-amber-600">P</div>
-                    <div className="flex-1 bg-amber-100 border border-amber-200 rounded flex items-center justify-center text-[7px] font-bold text-amber-600">P</div>
+                    <div className="flex-1 bg-slate-100 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600 rounded flex items-center justify-center text-[7px] font-bold text-slate-500 dark:text-slate-300">P</div>
+                    <div className="flex-1 bg-slate-100 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600 rounded flex items-center justify-center text-[7px] font-bold text-slate-500 dark:text-slate-300">P</div>
+                    <div className="flex-1 bg-slate-100 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600 rounded flex items-center justify-center text-[7px] font-bold text-slate-500 dark:text-slate-300">P</div>
                 </div>
                 <div className="flex gap-0.5 h-8">
-                    <div className="w-1/4 bg-emerald-50 border border-emerald-100 rounded flex items-center justify-center text-[6px] font-bold text-emerald-600 text-center leading-tight">
+                    <div className="w-1/4 bg-emerald-50 dark:bg-emerald-900/25 border border-emerald-100 dark:border-emerald-800/50 rounded flex items-center justify-center text-[6px] font-bold text-emerald-600 dark:text-emerald-400 text-center leading-tight">
                         Scroll<br />Vertical
                     </div>
-                    <div className="flex-1 bg-indigo-50 border border-indigo-100 rounded flex items-center justify-center text-[7px] font-bold text-indigo-600">
+                    <div className="flex-1 bg-sky-50 dark:bg-sky-900/20 border border-sky-100 dark:border-sky-800/50 rounded flex items-center justify-center text-[7px] font-bold text-sky-500 dark:text-sky-400">
                         Scroll Horizontal →
                     </div>
                 </div>
                 <div className="flex gap-0.5 h-8">
-                    <div className="flex-1 bg-indigo-50 border border-indigo-100 rounded flex items-center justify-center text-[7px] font-bold text-indigo-600">
+                    <div className="flex-1 bg-sky-50 dark:bg-sky-900/20 border border-sky-100 dark:border-sky-800/50 rounded flex items-center justify-center text-[7px] font-bold text-sky-500 dark:text-sky-400">
                         Scroll Horizontal →
                     </div>
-                    <div className="w-1/5 bg-emerald-50 border border-emerald-100 rounded flex items-center justify-center text-[6px] font-bold text-emerald-600 text-center leading-tight">
+                    <div className="w-1/5 bg-emerald-50 dark:bg-emerald-900/25 border border-emerald-100 dark:border-emerald-800/50 rounded flex items-center justify-center text-[6px] font-bold text-emerald-600 dark:text-emerald-400 text-center leading-tight">
                         Scroll<br />Vertical
                     </div>
                 </div>
@@ -45,22 +45,22 @@ const layouts = [
         desc: 'Banners Centrales',
         preview: (
             <>
-                <div className="w-full h-4 bg-rose-500 rounded flex items-center justify-center text-[7px] font-bold text-white uppercase tracking-wider shadow-sm">
+                <div className="w-full h-4 bg-sky-500 dark:bg-emerald-700 rounded flex items-center justify-center text-[7px] font-bold text-white uppercase tracking-wider shadow-sm">
                     Banner Principal
                 </div>
                 <div className="flex gap-0.5 h-12">
                     <div className="w-1/5 flex flex-col gap-0.5">
-                        <div className="flex-1 bg-amber-100 border border-amber-200 rounded flex items-center justify-center text-[7px] font-bold text-amber-600">P</div>
-                        <div className="flex-1 bg-amber-100 border border-amber-200 rounded flex items-center justify-center text-[7px] font-bold text-amber-600">P</div>
-                        <div className="flex-1 bg-amber-100 border border-amber-200 rounded flex items-center justify-center text-[7px] font-bold text-amber-600">P</div>
+                        <div className="flex-1 bg-slate-100 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600 rounded flex items-center justify-center text-[7px] font-bold text-slate-500 dark:text-slate-300">P</div>
+                        <div className="flex-1 bg-slate-100 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600 rounded flex items-center justify-center text-[7px] font-bold text-slate-500 dark:text-slate-300">P</div>
+                        <div className="flex-1 bg-slate-100 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600 rounded flex items-center justify-center text-[7px] font-bold text-slate-500 dark:text-slate-300">P</div>
                     </div>
-                    <div className="flex-1 bg-emerald-50 border border-emerald-100 rounded flex items-center justify-center text-[7px] font-bold text-emerald-600 uppercase">
+                    <div className="flex-1 bg-emerald-50 dark:bg-emerald-900/25 border border-emerald-100 dark:border-emerald-800/50 rounded flex items-center justify-center text-[7px] font-bold text-emerald-600 dark:text-emerald-400 uppercase">
                         Scroll Productos (3 Filas) →
                     </div>
                 </div>
                 <div className="flex gap-0.5 h-4">
-                    <div className="flex-1 bg-orange-100 border border-orange-200 rounded flex items-center justify-center text-[7px] font-bold text-orange-700">Publi 1</div>
-                    <div className="flex-1 bg-orange-100 border border-orange-200 rounded flex items-center justify-center text-[7px] font-bold text-orange-700">Publi 2</div>
+                    <div className="flex-1 bg-sky-50 dark:bg-sky-900/20 border border-sky-100 dark:border-sky-800/50 rounded flex items-center justify-center text-[7px] font-bold text-sky-500 dark:text-sky-400">Publi 1</div>
+                    <div className="flex-1 bg-sky-50 dark:bg-sky-900/20 border border-sky-100 dark:border-sky-800/50 rounded flex items-center justify-center text-[7px] font-bold text-sky-500 dark:text-sky-400">Publi 2</div>
                 </div>
             </>
         )
@@ -71,23 +71,23 @@ const layouts = [
         desc: 'Laterales + Bloques Inferiores',
         preview: (
             <>
-                <div className="w-full h-4 bg-rose-500 rounded flex items-center justify-center text-[7px] font-bold text-white uppercase tracking-wider shadow-sm">
+                <div className="w-full h-4 bg-sky-500 dark:bg-emerald-700 rounded flex items-center justify-center text-[7px] font-bold text-white uppercase tracking-wider shadow-sm">
                     Banner Principal
                 </div>
                 <div className="flex gap-0.5 h-10">
                     <div className="w-1/5 flex flex-col gap-0.5">
-                        <div className="flex-1 bg-amber-100 border border-amber-200 rounded flex items-center justify-center text-[7px] font-bold text-amber-600">P</div>
-                        <div className="flex-1 bg-amber-100 border border-amber-200 rounded flex items-center justify-center text-[7px] font-bold text-amber-600">P</div>
+                        <div className="flex-1 bg-slate-100 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600 rounded flex items-center justify-center text-[7px] font-bold text-slate-500 dark:text-slate-300">P</div>
+                        <div className="flex-1 bg-slate-100 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600 rounded flex items-center justify-center text-[7px] font-bold text-slate-500 dark:text-slate-300">P</div>
                     </div>
-                    <div className="flex-1 bg-emerald-50 border border-emerald-100 rounded flex items-center justify-center text-[7px] font-bold text-emerald-600 uppercase">
+                    <div className="flex-1 bg-emerald-50 dark:bg-emerald-900/25 border border-emerald-100 dark:border-emerald-800/50 rounded flex items-center justify-center text-[7px] font-bold text-emerald-600 dark:text-emerald-400 uppercase">
                         Scroll Productos →
                     </div>
                     <div className="w-1/5 flex flex-col gap-0.5">
-                        <div className="flex-1 bg-amber-100 border border-amber-200 rounded flex items-center justify-center text-[7px] font-bold text-amber-600">P</div>
-                        <div className="flex-1 bg-amber-100 border border-amber-200 rounded flex items-center justify-center text-[7px] font-bold text-amber-600">P</div>
+                        <div className="flex-1 bg-slate-100 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600 rounded flex items-center justify-center text-[7px] font-bold text-slate-500 dark:text-slate-300">P</div>
+                        <div className="flex-1 bg-slate-100 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600 rounded flex items-center justify-center text-[7px] font-bold text-slate-500 dark:text-slate-300">P</div>
                     </div>
                 </div>
-                <div className="flex-1 bg-emerald-50 border border-emerald-100 rounded flex items-center justify-center text-[7px] font-bold text-emerald-600 uppercase">
+                <div className="flex-1 bg-emerald-50 dark:bg-emerald-900/25 border border-emerald-100 dark:border-emerald-800/50 rounded flex items-center justify-center text-[7px] font-bold text-emerald-600 dark:text-emerald-400 uppercase">
                     Scroll Productos (Categoría Grande) →
                 </div>
             </>

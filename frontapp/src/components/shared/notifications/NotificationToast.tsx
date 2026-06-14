@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useNotifications } from '@/shared/lib/context/NotificationContext';
 import { useAuth } from '@/shared/lib/context/AuthContext';
 import { Bell, AlertTriangle, X } from 'lucide-react';
+import { isAllowedForRole } from '@/shared/lib/notifications/roleNotificationTypes';
 
 interface ToastItem {
   id: string;
@@ -25,6 +26,9 @@ function resolveRoute(actionType: string, actionId: string | number | undefined,
   switch (actionType) {
     case 'orders':
       return `${prefix}/orders`;
+    case 'chat':
+      return role === 'administrator' ? '/admin/helpdesk'
+        : `${prefix}/chat`;
     case 'ticket':
       return role === 'administrator' ? `/admin/helpdesk?id=${actionId}`
         : role === 'seller' ? `/seller/help?id=${actionId}`
@@ -38,26 +42,17 @@ function resolveRoute(actionType: string, actionId: string | number | undefined,
   }
 }
 
-const roleNotificationTypes: Record<string, string[]> = {
-  customer: ['order_created', 'OrderCreatedNotification'],
-  seller: ['new_order', 'NewOrderSellerNotification', 'store_status_changed', 'StoreStatusNotification'],
-  administrator: ['ticket_created', 'TicketCreatedNotification', 'ticket_replied', 'TicketRepliedNotification', 'ticket_status_changed', 'TicketStatusChangedNotification', 'order_created', 'OrderCreatedNotification', 'new_order', 'NewOrderSellerNotification', 'store_status_changed', 'StoreStatusNotification'],
-  logistics_operator: [],
-};
-
 export default function NotificationToast() {
-  const { notifications } = useNotifications();
+  const { notifications, loading } = useNotifications();
   const { user } = useAuth();
   const router = useRouter();
 
-  const filteredNotifications = notifications.filter(n => {
-    const allowed = roleNotificationTypes[user?.role ?? ''] ?? [];
-    if (allowed.length === 0) return true;
-    const type = n.metadata?.type ?? '';
-    return allowed.some(t => type.includes(t));
-  });
+  const filteredNotifications = notifications.filter(n =>
+    isAllowedForRole(n.metadata?.type ?? '', user?.role, 'toast')
+  );
   const [items, setItems] = useState<ToastItem[]>([]);
   const lastIdRef = useRef<string | null>(null);
+  const isSeededRef = useRef(false);
 
   const remove = useCallback((id: string) => {
     setItems(prev => prev.map(i => i.id === id ? { ...i, exiting: true } : i));
@@ -66,7 +61,17 @@ export default function NotificationToast() {
     }, 400);
   }, []);
 
+  // Seed the last seen ID once the initial REST load completes, to avoid
+  // showing toasts for pre-existing notifications on page load.
   useEffect(() => {
+    if (!loading && !isSeededRef.current) {
+      isSeededRef.current = true;
+      lastIdRef.current = filteredNotifications[0]?.id ?? null;
+    }
+  }, [loading, filteredNotifications]);
+
+  useEffect(() => {
+    if (!isSeededRef.current) return;
     if (filteredNotifications.length === 0) return;
 
     const latest = filteredNotifications[0];

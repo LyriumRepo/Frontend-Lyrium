@@ -22,21 +22,45 @@ export default function ModalPostCompra({ isOpen, email, onClose, onSync, onOpen
                 const duration = 3000;
                 const end = Date.now() + duration;
 
+                const LYRIUM_COLORS = ['#0d9488', '#bef264', '#0ea5e9', '#10b981', '#2db8b0', '#64c695'];
+
+                // Burst inicial desde el centro
+                confetti({
+                    particleCount: 80,
+                    spread: 100,
+                    origin: { x: 0.5, y: 0.55 },
+                    colors: LYRIUM_COLORS,
+                    scalar: 1.3,
+                    zIndex: 40000,
+                });
+
                 const frame = () => {
                     confetti({
-                        particleCount: 3,
+                        particleCount: 12,
                         angle: 60,
-                        spread: 55,
+                        spread: 70,
+                        scalar: 1.3,
                         origin: { x: 0, y: 0.6 },
-                        colors: ['#0ea5e9', '#34d399', '#fbbf24', '#f472b6', '#a78bfa'],
+                        colors: LYRIUM_COLORS,
                         zIndex: 40000,
                     });
                     confetti({
-                        particleCount: 3,
+                        particleCount: 12,
                         angle: 120,
-                        spread: 55,
+                        spread: 70,
+                        scalar: 1.3,
                         origin: { x: 1, y: 0.6 },
-                        colors: ['#0ea5e9', '#34d399', '#fbbf24', '#f472b6', '#a78bfa'],
+                        colors: LYRIUM_COLORS,
+                        zIndex: 40000,
+                    });
+                    confetti({
+                        particleCount: 6,
+                        angle: 90,
+                        spread: 50,
+                        scalar: 1.1,
+                        origin: { x: 0.5, y: 0.7 },
+                        colors: LYRIUM_COLORS,
+                        shapes: ['star'],
                         zIndex: 40000,
                     });
 

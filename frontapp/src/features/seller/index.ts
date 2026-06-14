@@ -4,8 +4,6 @@ export { HelpPageClient } from './help';
 
 export { ChatPageClient } from './chat';
 
-export { LogisticsPageClient } from './logistics';
-
 export { AgendaPageClient } from './agenda';
 
 export { ServicesPageClient } from './services';

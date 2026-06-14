@@ -33,6 +33,7 @@ export default function LogisticsModal({
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    const isAuto = !!detectedCarrier;
     const activeCarrier: CarrierConfig | undefined = CARRIERS[selectedCarrier];
 
     const handleCarrierChange = (code: string) => {
@@ -54,15 +55,21 @@ export default function LogisticsModal({
 
     const validate = (): boolean => {
         const newErrors: Record<string, string> = {};
-        if (!activeCarrier) {
-            newErrors._form = 'Selecciona un operador logístico';
-            setErrors(newErrors);
-            return false;
-        }
-        for (const field of activeCarrier.fields) {
-            const fieldDef = field as CarrierField;
-            if (fieldDef.required && !formValues[fieldDef.key]?.trim()) {
-                newErrors[fieldDef.key] = `${fieldDef.label} es obligatorio`;
+        if (!isAuto) {
+            if (!formValues.tracking_number?.trim()) {
+                newErrors.tracking_number = 'El número de seguimiento es obligatorio';
+            }
+        } else {
+            if (!activeCarrier) {
+                newErrors._form = 'Operador logístico no detectado';
+                setErrors(newErrors);
+                return false;
+            }
+            for (const field of activeCarrier.fields) {
+                const fieldDef = field as CarrierField;
+                if (fieldDef.required && !formValues[fieldDef.key]?.trim()) {
+                    newErrors[fieldDef.key] = `${fieldDef.label} es obligatorio`;
+                }
             }
         }
         if (Object.keys(newErrors).length > 0) {
@@ -89,8 +96,6 @@ export default function LogisticsModal({
         }
     };
 
-    const isAuto = !!detectedCarrier;
-
     return (
         <BaseModal
             isOpen={isOpen}
@@ -98,7 +103,7 @@ export default function LogisticsModal({
             title="Datos del Operador Logístico"
             subtitle={isAuto
                 ? `Operador detectado: ${activeCarrier?.name ?? detectedCarrier}`
-                : 'Selecciona el operador y completa los datos para el envío'
+                : 'Completa los datos de seguimiento para este envío'
             }
             size="lg"
         >
@@ -118,45 +123,32 @@ export default function LogisticsModal({
                     </p>
                 </div>
 
-                {/* Selector de operador: oculto si ya está detectado automáticamente */}
-                {!isAuto && (
-                    <div>
-                        <label className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2 block">
-                            Operador Logístico
-                        </label>
-                        <div className="grid grid-cols-2 gap-2">
-                            {CARRIER_CODES.map((code) => {
-                                const c = CARRIERS[code];
-                                const isSelected = selectedCarrier === code;
-                                return (
-                                    <button
-                                        key={code}
-                                        type="button"
-                                        onClick={() => handleCarrierChange(code)}
-                                        disabled={isAuto}
-                                        className={`
-                                            px-4 py-3 rounded-xl text-sm font-bold text-left
-                                            border-2 transition-all duration-200
-                                            ${isSelected
-                                                ? 'border-emerald-400 bg-emerald-50 text-emerald-700 shadow-sm'
-                                                : 'border-[var(--border-subtle)] bg-[var(--bg-card)] text-[var(--text-primary)] hover:border-emerald-300 hover:bg-emerald-50/30'
-                                            }
-                                            ${isAuto ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
-                                        `}
-                                    >
-                                        <Icon
-                                            name="Truck"
-                                            className={`w-4 h-4 inline mr-2 ${isSelected ? 'text-emerald-500' : 'text-[var(--text-secondary)]'}`}
-                                        />
-                                        {c?.name ?? code}
-                                    </button>
-                                );
-                            })}
+                {!isAuto ? (
+                    <div className="space-y-4">
+                        <div className="flex items-start gap-3 p-4 rounded-2xl bg-sky-50 border border-sky-200">
+                            <Icon name="Info" className="w-5 h-5 text-sky-500 shrink-0 mt-0.5" />
+                            <p className="text-[11px] font-bold text-sky-700 leading-relaxed">
+                                El operador logístico es asignado por <strong>Lyrium</strong>. Ingresa el número de seguimiento cuando esté disponible.
+                            </p>
+                        </div>
+                        <div>
+                            <label className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2 block">
+                                Número de Seguimiento
+                            </label>
+                            <input
+                                type="text"
+                                value={formValues.tracking_number ?? ''}
+                                onChange={(e) => handleFieldChange('tracking_number', e.target.value)}
+                                placeholder="Ej: 123456789"
+                                disabled={isSubmitting}
+                                className="w-full px-4 py-2.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] text-sm font-medium text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-emerald-400 disabled:opacity-50"
+                            />
+                            {errors.tracking_number && (
+                                <p className="text-xs font-bold text-red-500 mt-1">{errors.tracking_number}</p>
+                            )}
                         </div>
                     </div>
-                )}
-
-                {activeCarrier && (
+                ) : activeCarrier && (
                     <div className="bg-[var(--bg-secondary)]/50 p-6 rounded-2xl border border-[var(--border-subtle)]">
                         <CarrierFieldGroup
                             fields={activeCarrier.fields}

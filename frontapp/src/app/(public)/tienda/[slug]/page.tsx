@@ -60,7 +60,7 @@ export default function TiendaPage({ params }: StorePageProps) {
           slug: storeData.slug,
           store_name: storeData.storeName,
           logo: storeData.logo || '',
-          cover: storeData.banner || storeData.banner,
+          cover: storeData.banner2 || storeData.banner || '',
           banner: storeData.banner || '',
           descripcion: storeData.description || '',
           actividad: storeData.activity || '',
@@ -79,9 +79,9 @@ export default function TiendaPage({ params }: StorePageProps) {
           gallery: storeData.gallery || [],
           status: storeData.status,
           policies: {
-            shipping: storeData.policies?.shipping_pdf || storeData.shippingPdf || null,
-            returns: storeData.policies?.return_pdf || storeData.returnPdf || null,
-            privacy: storeData.policies?.privacy_pdf || storeData.privacyPdf || null,
+            shipping: storeData.policyFiles?.shipping || storeData.policies?.shipping_pdf || null,
+            returns: storeData.policyFiles?.return || storeData.policies?.return_pdf || null,
+            privacy: storeData.policyFiles?.privacy || storeData.policies?.privacy_pdf || null,
           },
           branches: (storeData.branches || []).map((b: any) => ({
             name: b.name || '',

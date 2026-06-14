@@ -12,7 +12,7 @@ const MAX_MESSAGE_LENGTH = 2000;
 const WELCOME_MESSAGE: ChatBotMessage = {
     id: 'welcome',
     role: 'assistant',
-    content: 'Hola, soy el asistente virtual de Lyrium. ¿En qué puedo ayudarte?',
+    content: 'Hola, soy Lyli, tu asistente virtual. ¿En qué puedo ayudarte?',
     timestamp: new Date().toISOString(),
 };
 

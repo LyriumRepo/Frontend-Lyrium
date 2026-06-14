@@ -29,11 +29,6 @@ const statusColorClasses: Record<string, string> = {
 };
 
 export default function InvoiceDrawer({ voucher, isOpen, onClose }: InvoiceDrawerProps) {
-    if (!isOpen || !voucher) return null;
-
-    const status = statusConfig[voucher.sunat_status] || statusConfig.DRAFT;
-    const statusClasses = statusColorClasses[status.color] || statusColorClasses.gray;
-
     const [isDownloading, setIsDownloading] = useState(false);
     const [shareStatus, setShareStatus] = useState<'idle' | 'copied'>('idle');
 
@@ -88,6 +83,11 @@ export default function InvoiceDrawer({ voucher, isOpen, onClose }: InvoiceDrawe
         }
     }, []);
 
+    if (!isOpen || !voucher) return null;
+
+    const status = statusConfig[voucher.sunat_status] || statusConfig.DRAFT;
+    const statusClasses = statusColorClasses[status.color] || statusColorClasses.gray;
+
     return (
         <div className="fixed inset-0 z-[99999] flex items-center justify-end">
             <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-md" onClick={onClose} role="presentation" aria-hidden="true"></div>
@@ -118,11 +118,11 @@ export default function InvoiceDrawer({ voucher, isOpen, onClose }: InvoiceDrawe
                 <div className="flex-1 overflow-y-auto p-8 space-y-8 custom-scrollbar">
                     <div className="space-y-4">
                         <h3 className="text-xs font-black text-[var(--text-secondary)] uppercase tracking-widest flex items-center gap-2">
-                            <Icon name="User" className="w-4 h-4" /> Datos del Cliente
+                            <Icon name="Store" className="w-4 h-4" /> Datos de la Tienda
                         </h3>
                         <div className="bg-[var(--bg-secondary)] p-5 rounded-[2rem]">
-                            <p className="text-lg font-black text-[var(--text-primary)]">{voucher.customer_name}</p>
-                            <p className="text-sm font-bold text-[var(--text-secondary)]">RUC: {voucher.customer_ruc}</p>
+                            <p className="text-lg font-black text-[var(--text-primary)]">{voucher.store_name}</p>
+                            <p className="text-sm font-bold text-[var(--text-secondary)]">RUC: {voucher.store_ruc}</p>
                         </div>
                     </div>
 

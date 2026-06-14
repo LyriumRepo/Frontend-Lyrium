@@ -19,7 +19,7 @@ export default function ChatBotHeader({ onMinimize, onClose, onClear }: Props) {
                     <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-300 dark:bg-emerald-400 rounded-full border-2 border-emerald-700 dark:border-[var(--brand-green)]" />
                 </div>
                 <div>
-                    <p className="text-sm font-semibold leading-tight">Asistente Lyrium</p>
+                    <p className="text-sm font-semibold leading-tight">Asistente Lyli</p>
                     <p className="text-[10px] text-emerald-100 dark:text-green-200 leading-tight font-medium tracking-wide uppercase">Soporte en línea</p>
                 </div>
             </div>

@@ -136,27 +136,33 @@ function transformBackendPlan(plan: any): PlanData {
     name: plan.name,
     slug: plan.slug,
     price: parseFloat(plan.monthly_fee) || 0,
-    priceAnnual: (parseFloat(plan.monthly_fee) || 0) * 12,
-    period: 'mensual',
-    periodAnnual: 'anual',
-    currency: 'S/',
-    usePriceMode: false,
-    priceText: plan.monthly_fee === '0.00' ? 'Gratis' : `S/ ${plan.monthly_fee}`,
-    priceSubtext: plan.monthly_fee === '0.00' ? 'Sin costo' : '/mes',
+    priceAnnual: parseFloat(plan.price_annual) || (parseFloat(plan.monthly_fee) || 0) * 12,
+    period: plan.period || '/mes',
+    periodAnnual: '/año',
+    currency: plan.currency || 'S/',
+    usePriceMode: plan.use_price_mode !== false && plan.use_price_mode !== 0,
+    priceText: plan.price_text || (plan.monthly_fee === '0.00' ? 'Gratis' : `S/ ${plan.monthly_fee}`),
+    priceSubtext: plan.price_subtext || (plan.monthly_fee === '0.00' ? 'Sin costo' : '/mes'),
     description: plan.description || '',
     badge: plan.badge || '',
-    requiresPayment: plan.monthly_fee !== '0.00',
+    requiresPayment: plan.requires_payment ?? (plan.monthly_fee !== '0.00'),
     features: Array.isArray(plan.features)
-      ? plan.features.map((f: string) => ({ text: f, active: true }))
+      ? plan.features.map((f: any) => typeof f === 'string' ? { text: f, active: true } : { text: f.text || '', active: f.active !== false })
       : [],
     detailedBenefits: Array.isArray(plan.detailed_benefits)
-      ? plan.detailed_benefits.map((b: any) => ({ title: b.title, description: b.description, icon: b.icon || '' }))
+      ? plan.detailed_benefits.map((b: any) => ({ emoji: b.emoji || '', title: b.title || '', description: b.description || '', color: b.color || '#3b82f6' }))
       : [],
     isActive: plan.is_active !== false && plan.is_active !== 0,
     cssColor: plan.css_color || '#3b82f6',
+    accentColor: plan.accent_color || '#2563eb',
     bgImage: plan.bg_image || defaultPlansData[plan.slug]?.bgImage || '',
     color: plan.slug,
     allDetails: [],
+    enableClaimLock: plan.enable_claim_lock !== false && plan.enable_claim_lock !== 0,
+    claimMonths: plan.claim_months ?? 1,
+    subscribeButtonText: plan.subscribe_button_text || 'Suscribirse',
+    compactVisibleCount: plan.compact_visible_count ?? 5,
+    timelineIcon: plan.timeline_icon || 'star',
   };
 }
 
@@ -209,13 +215,28 @@ function buildBackendPlanPayload(plan: PlanData, planId: string) {
   return {
     name: plan.name,
     slug: planId,
-    monthly_fee: String(plan.price ?? 0),
-    features: (plan.features || []).filter(f => f.text?.trim()).map(f => f.text),
-    detailed_benefits: (plan.detailedBenefits || []).map(b => ({ title: b.title, description: b.description, icon: b.icon || '' })),
+    monthly_fee: parseFloat(String(plan.price ?? 0)),
+    features: (plan.features || [])
+      .filter(f => f.text?.trim())
+      .map(f => ({ text: f.text.trim(), active: f.active !== false })),
+    detailed_benefits: (plan.detailedBenefits || [])
+      .filter(b => b.title?.trim())
+      .map(b => ({ emoji: b.emoji || '', title: b.title, description: b.description || '', color: b.color || '#3b82f6' })),
     is_active: plan.isActive !== false ? 1 : 0,
     description: plan.description || '',
     badge: plan.badge || '',
     css_color: plan.cssColor || '#3b82f6',
+    accent_color: plan.accentColor || '#2563eb',
+    requires_payment: plan.requiresPayment ? 1 : 0,
+    enable_claim_lock: plan.enableClaimLock ? 1 : 0,
+    claim_months: plan.claimMonths ?? 1,
+    subscribe_button_text: plan.subscribeButtonText || 'Suscribirse',
+    currency: plan.currency || 'S/',
+    period: plan.period || '/mes',
+    price_text: plan.priceText || '',
+    price_subtext: plan.priceSubtext || '',
+    use_price_mode: plan.usePriceMode !== false ? 1 : 0,
+    compact_visible_count: plan.compactVisibleCount ?? 5,
     bg_image: plan.bgImage || '',
   };
 }
@@ -308,14 +329,14 @@ export function useAdmin() {
     // API REAL — fuente única de verdad: el backend Laravel
     try {
       const [planesRes, requestsRes, colorsData] = await Promise.all([
-        apiGet<{ success: boolean; data?: any[] }>('/plans'),
+        apiGet<{ data?: any[] }>('/admin/plans'),
         getAllPlanRequests(),
         getSystemColors(),
       ]);
 
       // Planes: poblar slugToAdminNumericIdMap para operaciones CRUD
       const plansData: PlansMap = {};
-      if (planesRes.success && Array.isArray(planesRes.data)) {
+      if (Array.isArray(planesRes.data)) {
         planesRes.data.forEach((plan: any) => {
           slugToAdminNumericIdMap[plan.slug] = plan.id;
           plansData[plan.slug] = transformBackendPlan(plan);
@@ -459,8 +480,8 @@ export function useAdmin() {
       return;
     }
     try {
-      const res = await apiGet<{ success: boolean; data?: any[] }>('/plans');
-      if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+      const res = await apiGet<{ data?: any[] }>('/admin/plans');
+      if (Array.isArray(res.data) && res.data.length > 0) {
         const plansData: PlansMap = {};
         res.data.forEach((plan: any) => {
           slugToAdminNumericIdMap[plan.slug] = plan.id;

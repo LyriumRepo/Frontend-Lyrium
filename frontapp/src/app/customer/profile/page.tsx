@@ -17,14 +17,14 @@ function BirthdayCelebration({ name }: { name: string }) {
   const [gone, setGone] = useState(false);
 
   const particles = useMemo(() =>
-    Array.from({ length: 38 }, (_, i) => ({
+    Array.from({ length: 80 }, (_, i) => ({
       id: i,
       left: Math.random() * 100,
-      delay: Math.random() * 2.8,
-      duration: 2.8 + Math.random() * 2,
+      delay: Math.random() * 3.2,
+      duration: 2.5 + Math.random() * 2.5,
       color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
-      size: 6 + Math.random() * 9,
-      isRect: Math.random() > 0.45,
+      size: 5 + Math.random() * 11,
+      isRect: Math.random() > 0.4,
       rotate: Math.random() * 360,
     }))
   , []);
@@ -254,6 +254,7 @@ export default function CustomerProfilePage() {
         avatarUrl = result.avatar;
         setAvatarFile(null);
         setAvatarPreview(null);
+        setFormData(prev => ({ ...prev, foto: avatarUrl }));
         setUploadingAvatar(false);
       }
 

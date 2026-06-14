@@ -88,4 +88,49 @@ export const invoiceApi = {
             return null;
         }
     },
+
+    /* --- Customer payment confirmations (Mis Confirmaciones de Pago) --- */
+
+    customerPaymentConfirmations: async (params?: { page?: number; fechaInicio?: string; fechaFin?: string }): Promise<{ data: PaymentConfirmation[]; pagination: { page: number; perPage: number; total: number; totalPages: number; hasMore: boolean } }> => {
+        const query = new URLSearchParams();
+        if (params?.page) query.set('page', String(params.page));
+        if (params?.fechaInicio) query.set('fecha_inicio', params.fechaInicio);
+        if (params?.fechaFin) query.set('fecha_fin', params.fechaFin);
+        const qs = query.toString() ? `?${query.toString()}` : '';
+        const res = await authFetch<{ success: boolean; data: PaymentConfirmation[]; pagination: any }>(`/customer/payment-confirmations${qs}`);
+        return { data: res.data || [], pagination: res.pagination || { page: 1, perPage: 20, total: 0, totalPages: 0, hasMore: false } };
+    },
+
 };
+
+export interface PaymentConfirmationItem {
+    id: string;
+    productName: string;
+    unitPrice: number;
+    quantity: number;
+    lineTotal: number;
+}
+
+export interface PaymentConfirmation {
+    id: string;
+    orderNumber: string;
+    status: string;
+    paymentMethod: string;
+    paymentStatus: string;
+    paymentStatusLabel: string;
+    shipping: {
+        name: string | null;
+        email: string | null;
+        phone: string | null;
+        address: string | null;
+        city: string | null;
+    };
+    subtotal: number;
+    shippingCost: number;
+    taxAmount: number;
+    discountAmount: number;
+    total: number;
+    items: PaymentConfirmationItem[];
+    paidAt: string | null;
+    createdAt: string;
+}

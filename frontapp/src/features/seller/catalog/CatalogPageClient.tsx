@@ -10,11 +10,12 @@ import BaseButton from '@/components/ui/BaseButton';
 import BaseLoading from '@/components/ui/BaseLoading';
 import Icon from '@/components/ui/Icon';
 import { useToast } from '@/shared/lib/context/ToastContext';
-import { deleteProduct, updateProductPrice } from '@/shared/lib/actions/catalog';
+import { deleteProduct, updateProductPrice, uploadProductImageAction } from '@/shared/lib/actions/catalog';
 import { productRepository } from '@/shared/lib/api/factory';
 import { USE_MOCKS } from '@/shared/lib/config/flags';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import { useConfirmDialog } from '@/components/ui/confirm-dialog';
+import CatalogGuideModal from './components/CatalogGuideModal';
 
 interface CatalogClientProps {
     initialProducts: Product[];
@@ -147,6 +148,7 @@ export default function CatalogClient({ initialProducts }: CatalogClientProps) {
     const [isDeleting, setIsDeleting]           = useState(false);
     const [optimisticPrices, setOptimisticPrices] = useState<Record<string, number>>({});
     const [showSuccessModal, setShowSuccessModal]   = useState(false);
+    const [showGuide, setShowGuide]                 = useState(false);
 
     const [isPending, startTransition] = useTransition();
     const [optimisticProducts, setOptimisticPrice] = useOptimistic(
@@ -236,14 +238,12 @@ export default function CatalogClient({ initialProducts }: CatalogClientProps) {
 
                     savedProduct = await productRepository.updateProduct(selectedProduct.id, payload);
                     if (hasBase64Image && product.image) {
-                        try {
-                            const blob = await (await fetch(product.image)).blob();
-                            const r = await productRepository.uploadProductImage(
-                                savedProduct.id,
-                                new File([blob], `product-${Date.now()}.webp`, { type: blob.type }),
-                            );
-                            savedProduct = { ...savedProduct, image: r.url } as Product;
-                        } catch {}
+                        const uploadResult = await uploadProductImageAction(Number(savedProduct.id), product.image);
+                        if (!uploadResult.success) {
+                            showToast(uploadResult.error || 'No se pudo subir la imagen', 'error');
+                        } else if (uploadResult.url) {
+                            savedProduct = { ...savedProduct, image: uploadResult.url } as Product;
+                        }
                     }
                 } else {
                     // CREATE: payload completo
@@ -269,14 +269,12 @@ export default function CatalogClient({ initialProducts }: CatalogClientProps) {
 
                     savedProduct = await productRepository.createProduct(payload);
                     if (hasBase64Image && product.image && savedProduct.id) {
-                        try {
-                            const blob = await (await fetch(product.image)).blob();
-                            const r = await productRepository.uploadProductImage(
-                                savedProduct.id,
-                                new File([blob], `product-${Date.now()}.webp`, { type: blob.type }),
-                            );
-                            savedProduct = { ...savedProduct, image: r.url } as Product;
-                        } catch {}
+                        const uploadResult = await uploadProductImageAction(Number(savedProduct.id), product.image);
+                        if (!uploadResult.success) {
+                            showToast(uploadResult.error || 'No se pudo subir la imagen', 'error');
+                        } else if (uploadResult.url) {
+                            savedProduct = { ...savedProduct, image: uploadResult.url } as Product;
+                        }
                     }
                 }
             } else {
@@ -285,6 +283,7 @@ export default function CatalogClient({ initialProducts }: CatalogClientProps) {
 
             if (!selectedProduct) {
                 setShowSuccessModal(true);
+                setProducts((prev) => [savedProduct as Product, ...prev]);
                 closeModal();
                 return;
             }
@@ -330,6 +329,8 @@ export default function CatalogClient({ initialProducts }: CatalogClientProps) {
     // ── Render ───────────────────────────────────────────────────────────────
 
     return (
+        <>
+        <CatalogGuideModal isOpen={showGuide} onClose={() => setShowGuide(false)} />
         <div className="space-y-8 animate-fadeIn pb-20">
 
             <ModuleHeader
@@ -337,13 +338,22 @@ export default function CatalogClient({ initialProducts }: CatalogClientProps) {
                 subtitle="Administra tus productos, precios e inventario centralizado."
                 icon="Catalog"
                 actions={
-                    <BaseButton
-                        onClick={handleCreateProduct}
-                        variant="action"
-                        leftIcon="PlusCircle"
-                    >
-                        Nuevo Producto
-                    </BaseButton>
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => setShowGuide(true)}
+                            className="w-9 h-9 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] flex items-center justify-center text-[var(--text-secondary)] hover:text-sky-500 hover:border-sky-500/30 hover:bg-sky-500/5 transition-all"
+                            title="Guía para imágenes de productos"
+                        >
+                            <Icon name="HelpCircle" className="w-4 h-4" />
+                        </button>
+                        <BaseButton
+                            onClick={handleCreateProduct}
+                            variant="action"
+                            leftIcon="PlusCircle"
+                        >
+                            Nuevo Producto
+                        </BaseButton>
+                    </div>
                 }
             />
 
@@ -517,5 +527,6 @@ export default function CatalogClient({ initialProducts }: CatalogClientProps) {
                 </div>
             )}
         </div>
+        </>
     );
 }

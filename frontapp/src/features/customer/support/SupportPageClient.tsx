@@ -152,14 +152,14 @@ function NewTicketForm({
                     <button
                         type="button"
                         onClick={onCancel}
-                        className="flex-1 px-4 py-2.5 bg-[var(--bg-secondary)] text-[var(--text-secondary)] rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-gray-200 dark:hover:bg-[#2A3F33] transition-colors border border-[var(--border-subtle)]"
+                        className="flex-1 px-4 py-2.5 bg-[var(--bg-secondary)] text-[var(--text-secondary)] rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-[var(--bg-hover)] transition-colors border border-[var(--border-subtle)]"
                     >
                         Cancelar
                     </button>
                     <button
                         type="submit"
                         disabled={isSubmitting || !subject.trim() || !description.trim()}
-                        className="flex-1 px-4 py-2.5 bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--verde-500)] text-white rounded-xl font-bold text-xs uppercase tracking-wider hover:opacity-90 transition-all disabled:opacity-50 shadow-lg shadow-[var(--turquesa-500)]/20"
+                        className="flex-1 px-4 py-2.5 bg-gradient-to-r from-[#9cb04e] via-[#64c695] to-[#499bbf] text-white rounded-xl font-bold text-xs uppercase tracking-wider hover:opacity-90 transition-all disabled:opacity-50 shadow-lg shadow-[#64c695]/20"
                     >
                         {isSubmitting ? 'Creando...' : 'Crear Ticket'}
                     </button>
@@ -186,6 +186,7 @@ export function SupportPageClient() {
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const [showNewTicketForm, setShowNewTicketForm] = useState(false);
+    const [showLegend, setShowLegend] = useState(false);
     const [filterType, setFilterType] = useState<'asunto' | 'categoria'>('asunto');
     const [filterValue, setFilterValue] = useState('');
     const [showFilter, setShowFilter] = useState(false);
@@ -230,7 +231,7 @@ export function SupportPageClient() {
                         className={`px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-wider border transition-colors shrink-0 ${
                             showFilter
                                 ? 'bg-[var(--turquesa-500)] text-white border-[var(--turquesa-500)] shadow-sm'
-                                : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:bg-gray-200 dark:hover:bg-[#2A3F33]'
+                                : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:bg-[var(--bg-hover)]'
                         }`}
                     >
                         Filtrar
@@ -245,7 +246,7 @@ export function SupportPageClient() {
                                 className={`flex-1 py-1.5 uppercase tracking-wider transition-colors ${
                                     filterType === 'asunto'
                                         ? 'bg-[var(--turquesa-500)] text-white'
-                                        : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-gray-200 dark:hover:bg-[#2A3F33]'
+                                        : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]'
                                 }`}
                             >
                                 Asunto
@@ -255,7 +256,7 @@ export function SupportPageClient() {
                                 className={`flex-1 py-1.5 uppercase tracking-wider transition-colors ${
                                     filterType === 'categoria'
                                         ? 'bg-[var(--turquesa-500)] text-white'
-                                        : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-gray-200 dark:hover:bg-[#2A3F33]'
+                                        : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]'
                                 }`}
                             >
                                 Categoría
@@ -302,7 +303,7 @@ export function SupportPageClient() {
         <div className="flex flex-col h-full">
             <div className="p-5 border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)]/50 shrink-0">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-[var(--turquesa-500)] to-[var(--verde-500)] flex items-center justify-center text-white shadow-sm">
+                    <div className="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-[#9cb04e] via-[#64c695] to-[#499bbf] flex items-center justify-center text-white shadow-sm">
                         <Icon name="Headset" className="w-5 h-5" />
                     </div>
                     <div className="min-w-0 flex-1">
@@ -414,12 +415,21 @@ export function SupportPageClient() {
                 icon="Headset"
                 actions={
                     !showNewTicketForm ? (
-                        <button
-                            onClick={() => setShowNewTicketForm(true)}
-                            className="px-4 py-2 bg-white dark:bg-[var(--bg-secondary)] text-[var(--turquesa-500)] rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-[var(--turquesa-500)]/10 dark:hover:bg-[#2A3F33] transition-colors border border-[var(--border-subtle)] shadow-sm"
-                        >
-                            + Nuevo Ticket
-                        </button>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => setShowLegend(true)}
+                                title="Leyenda"
+                                className="w-9 h-9 flex items-center justify-center rounded-xl bg-white dark:bg-[var(--bg-secondary)] border border-[var(--border-subtle)] text-gray-500 dark:text-[var(--text-secondary)] hover:text-[var(--turquesa-500)] dark:hover:text-[var(--icons-green)] hover:border-[var(--turquesa-500)] dark:hover:border-[var(--icons-green)] transition-all shadow-sm"
+                            >
+                                <Icon name="Info" className="w-4 h-4" />
+                            </button>
+                            <button
+                                onClick={() => setShowNewTicketForm(true)}
+                                className="px-4 py-2 bg-white dark:bg-[var(--bg-secondary)] text-[var(--turquesa-500)] rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-[var(--turquesa-500)]/10 dark:hover:bg-[#2A3F33] transition-colors border border-[var(--border-subtle)] shadow-sm"
+                            >
+                                + Nuevo Ticket
+                            </button>
+                        </div>
                     ) : null
                 }
             />
@@ -446,6 +456,53 @@ export function SupportPageClient() {
                 </div>
             ) : (
                 <ChatLayout list={listContent} detail={detailContent} />
+            )}
+
+            {showLegend && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4" onClick={() => setShowLegend(false)}>
+                    <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-[3rem] max-w-lg w-full shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
+                        <div className="bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--turquesa-500)]/70 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-8 text-white relative">
+                            <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl" />
+                            <div className="relative z-10 flex items-center justify-between">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center">
+                                        <Icon name="Headset" className="w-6 h-6" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-2xl font-black tracking-tighter">Soporte Lyrium</h3>
+                                        <p className="text-[10px] font-bold text-white/70 uppercase tracking-[0.2em]">¿Para qué sirve este canal?</p>
+                                    </div>
+                                </div>
+                                <button onClick={() => setShowLegend(false)} className="w-10 h-10 rounded-full bg-black/10 flex items-center justify-center hover:bg-black/20">
+                                    <Icon name="X" className="w-5 h-5 text-white" />
+                                </button>
+                            </div>
+                        </div>
+                        <div className="p-8 space-y-4">
+                            {[
+                                { icon: 'Settings', title: 'Problemas técnicos', desc: 'Errores en la plataforma, fallas en el inicio de sesión, problemas con el sitio web o la app.' },
+                                { icon: 'CreditCard', title: 'Pagos y facturación', desc: 'Cobros incorrectos, problemas con suscripciones o solicitudes de comprobantes de pago a Lyrium.' },
+                                { icon: 'Shield', title: 'Seguridad y acceso', desc: 'Cuentas bloqueadas, acceso no autorizado, cambios de contraseña o datos comprometidos.' },
+                                { icon: 'AlertCircle', title: 'No gestiona reclamos comerciales', desc: 'Para devoluciones, reembolsos o reclamos de pedidos con una tienda, usa el Chat con Vendedores.' },
+                            ].map((item) => (
+                                <div key={item.title} className="flex items-start gap-4 p-4 bg-gray-50 dark:bg-[var(--bg-muted)]/50 rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)]">
+                                    <div className="w-10 h-10 rounded-xl bg-white dark:bg-[var(--bg-secondary)] flex items-center justify-center shadow-sm border border-gray-100 dark:border-[var(--border-subtle)] shrink-0">
+                                        <Icon name={item.icon as any} className="w-5 h-5 text-[var(--turquesa-500)] dark:text-[var(--icons-green)]" />
+                                    </div>
+                                    <div>
+                                        <p className="font-black text-sm text-gray-800 dark:text-[var(--text-primary)] mb-0.5">{item.title}</p>
+                                        <p className="text-xs text-gray-500 dark:text-[var(--text-muted)] leading-relaxed">{item.desc}</p>
+                                    </div>
+                                </div>
+                            ))}
+                            <div className="flex justify-end pt-2">
+                                <button onClick={() => setShowLegend(false)} className="px-6 py-3 rounded-2xl bg-gray-100 dark:bg-[var(--bg-muted)] text-gray-600 dark:text-[var(--text-primary)] font-black text-xs uppercase tracking-widest hover:bg-gray-200 dark:hover:bg-[#2A3F33] transition-all">
+                                    Cerrar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );

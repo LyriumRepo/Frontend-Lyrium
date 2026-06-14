@@ -14,6 +14,7 @@ import {
 } from '../../lib/ubigeo';
 import CustomSelect from '../ui/CustomSelect';
 import { addressApi, type Address } from '@/shared/lib/api/addressRepository';
+import { useAuth } from '@/shared/lib/context/AuthContext';
 
 const inputCls =
   'w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-[var(--border-subtle)] ' +
@@ -26,6 +27,7 @@ const labelCls =
 export default function ShippingForm() {
   const data = useCheckoutStore((s) => s.shippingData);
   const setData = useCheckoutStore((s) => s.setShippingData);
+  const { isAuthenticated } = useAuth();
 
   const [savedAddresses, setSavedAddresses] = useState<Address[]>([]);
   const [loadingAddresses, setLoadingAddresses] = useState(true);
@@ -264,20 +266,22 @@ export default function ShippingForm() {
           />
         </div>
 
-        {/* Guardar dirección */}
-        <div className="sm:col-span-2">
-          <label className="flex items-center gap-2 cursor-pointer select-none">
-            <input
-              type="checkbox"
-              checked={data.saveAddress}
-              onChange={(e) => setData({ saveAddress: e.target.checked })}
-              className="w-4 h-4 rounded accent-[var(--brand-sky)]"
-            />
-            <span className="text-sm text-gray-600 dark:text-[var(--text-secondary)]">
-              Guardar esta dirección para futuras compras
-            </span>
-          </label>
-        </div>
+        {/* Guardar dirección — solo para usuarios autenticados */}
+        {isAuthenticated && (
+          <div className="sm:col-span-2">
+            <label className="flex items-center gap-2 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={data.saveAddress}
+                onChange={(e) => setData({ saveAddress: e.target.checked })}
+                className="w-4 h-4 rounded accent-[var(--brand-sky)]"
+              />
+              <span className="text-sm text-gray-600 dark:text-[var(--text-secondary)]">
+                Guardar esta dirección para futuras compras
+              </span>
+            </label>
+          </div>
+        )}
       </div>
     </div>
   );

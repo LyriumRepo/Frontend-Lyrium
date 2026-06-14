@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
+import { useEcho } from '@laravel/echo-react';
 import { SellerConversation, SellerMessage, SellerChatFilters, ChatCategory } from '../types';
 import { chatApi, ChatCustomer } from '@/shared/lib/api/chatRepository';
 
@@ -17,6 +18,7 @@ export function useSellerChat() {
   const [error, setError] = useState<string | null>(null);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const initialSelectionDone = useRef(false);
+  const activeConvRef = useRef<string | null>(null);
 
   const activeConversation = conversations.find(c => c.id === activeConversationId) ?? null;
   const [messages, setMessages] = useState<SellerMessage[]>([]);
@@ -80,25 +82,45 @@ export function useSellerChat() {
   }, [loadConversations, loadCustomers, loadStores]);
 
   useEffect(() => {
+    activeConvRef.current = activeConversationId;
+  }, [activeConversationId]);
+
+  const reloadMessages = useCallback((convId: string) => {
+    chatApi.getMessages(convId).then(result => {
+      setMessages(result.data.map(m => ({
+        id: m.id,
+        conversationId: m.conversationId,
+        senderId: m.senderId,
+        senderName: m.senderName,
+        senderType: m.senderType as 'seller' | 'customer',
+        content: m.content,
+        timestamp: m.timestamp,
+        read: m.read,
+      })));
+    }).catch(() => {});
+  }, []);
+
+  useEffect(() => {
     if (activeConversationId) {
-      chatApi.getMessages(activeConversationId).then(result => {
-        setMessages(result.data.map(m => ({
-          id: m.id,
-          conversationId: m.conversationId,
-          senderId: m.senderId,
-          senderName: m.senderName,
-          senderType: m.senderType as 'seller' | 'customer',
-          content: m.content,
-          timestamp: m.timestamp,
-          read: m.read,
-        })));
-      }).catch(() => {
-        setMessages([]);
-      });
+      reloadMessages(activeConversationId);
     } else {
       setMessages([]);
     }
-  }, [activeConversationId]);
+  }, [activeConversationId, reloadMessages]);
+
+  // WebSocket: mensajes en tiempo real
+  // Use a placeholder channel when stores haven't loaded yet to avoid subscribing to "store.0"
+  const primaryStoreId = stores[0]?.id ?? null;
+  useEcho<{ conversation_id: string }>(
+    primaryStoreId ? `store.${primaryStoreId}` : 'store.__placeholder',
+    'NewConversationMessage',
+    () => {
+      loadConversations();
+      const convId = activeConvRef.current;
+      if (convId) reloadMessages(convId);
+    },
+    [loadConversations, reloadMessages, primaryStoreId],
+  );
 
   const setActiveConversation = useCallback((id: string | null) => {
     setActiveConversationId(id);
