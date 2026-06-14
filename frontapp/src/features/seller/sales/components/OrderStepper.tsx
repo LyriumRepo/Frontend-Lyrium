@@ -34,7 +34,7 @@ const FLOW_CONFIG: Record<TipoEnvio, { label: string; icon: string; color: strin
             { id: 1, label: 'Validado por vendedor',      icon: 'CheckSquare' },
             { id: 2, label: 'Despachado',    icon: 'Package'     },
             { id: 3, label: 'En Transporte', icon: 'Truck'       },
-            { id: 4, label: 'Listo en Agencia', icon: 'ScanBarcode' },
+            { id: 9, label: 'Listo en Agencia', icon: 'ScanBarcode' },
             { id: 5, label: 'Confirmado por cliente',    icon: 'UserCheck'   },
         ],
     },
@@ -84,7 +84,7 @@ export default function ProductOrderStepper({ currentStep, tipoEnvio }: OrderSte
                                     }`}
                             >
                                 <img
-                                    src={`/imagenes-seguimiento/${step.id}.jpg`}
+                                    src={`/imagenes-seguimiento/${step.id}.png`}
                                     alt={`Paso ${step.id}`}
                                     className="w-[90%] h-[90%] rounded-full object-cover"
                                 />

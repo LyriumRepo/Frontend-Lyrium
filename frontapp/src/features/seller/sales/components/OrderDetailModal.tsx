@@ -16,7 +16,7 @@ interface OrderDetailModalProps {
     order: Order;
     isOpen: boolean;
     onClose: () => void;
-    onAdvanceStep: (orderId: string) => Promise<void>;
+    onAdvanceStep: (orderId: string, section?: 'products' | 'services') => Promise<void>;
     onConfirmItem?: (orderId: string, itemId: string) => Promise<void>;
     onCancelItem?: (orderId: string, itemId: string) => Promise<void>;
     onUpdateItemStatus?: (orderId: string, itemId: string, status: ItemStatus) => Promise<void>;
@@ -46,12 +46,26 @@ const PRODUCT_MAX_STEP: Record<TipoEnvio, number> = {
     agencia:   5,
 };
 
-// ── Service flow configs ──
-const SERVICE_FLOW_ACTIONS: Record<ServiceFlowType, Record<number, StepAction>> = {
+// ── Service flow configs (status→action) ──
+const SERVICE_ACTIONS_BY_STATUS: Record<ServiceFlowType, Record<string, StepAction | undefined>> = {
+    domicilio: {
+        pending:    { label: 'Validar atención',    icon: 'CheckCircle2' },
+        confirmed:  { label: 'Marcar en camino',    icon: 'Truck'        },
+        on_the_way: undefined,
+        completed:  undefined,
+    },
+    sede: {
+        pending:    { label: 'Validar atención',   icon: 'CheckCircle2' },
+        confirmed:  { label: 'Confirmar atención', icon: 'UserCheck'    },
+        completed:  undefined,
+    },
+};
+
+// ── Service flow configs (step→action, fallback) ──
+const SERVICE_STEP_ACTIONS: Record<ServiceFlowType, Record<number, StepAction>> = {
     domicilio: {
         1: { label: 'Validar atención',    icon: 'CheckCircle2' },
         2: { label: 'Marcar en camino',    icon: 'Truck'        },
-        3: { label: 'Confirmar atención',  icon: 'UserCheck'    },
     },
     sede: {
         1: { label: 'Validar atención',   icon: 'CheckCircle2' },
@@ -61,7 +75,7 @@ const SERVICE_FLOW_ACTIONS: Record<ServiceFlowType, Record<number, StepAction>> 
 
 const SERVICE_MAX_STEP: Record<ServiceFlowType, number> = {
     domicilio: 3,
-    sede:      2,
+    sede:      3,
 };
 
 const ORDER_TYPE_LABELS: Record<OrderType, string> = {
@@ -79,6 +93,7 @@ const ORDER_TYPE_BADGE: Record<OrderType, { icon: string; class: string }> = {
 const SERVICE_STATUS_STYLES: Record<string, { bg: string; text: string; icon: string }> = {
     pending_seller: { bg: 'bg-yellow-100', text: 'text-yellow-700', icon: 'Clock' },
     confirmed: { bg: 'bg-sky-100', text: 'text-sky-700', icon: 'Check' },
+    on_the_way: { bg: 'bg-orange-100', text: 'text-orange-700', icon: 'Truck' },
     processing: { bg: 'bg-indigo-100', text: 'text-indigo-700', icon: 'Package' },
     completed: { bg: 'bg-emerald-100', text: 'text-emerald-700', icon: 'CheckCircle' },
     cancelled: { bg: 'bg-red-100', text: 'text-red-700', icon: 'X' },
@@ -88,6 +103,7 @@ const HEADER_STATUS_CONFIG: Record<string, { label: string; icon: string }> = {
     pending_seller: { label: 'Pendiente', icon: 'Clock' },
     pending: { label: 'Pendiente', icon: 'Clock' },
     confirmed: { label: 'Confirmado', icon: 'CheckCircle' },
+    on_the_way: { label: 'En camino', icon: 'Truck' },
     processing: { label: 'En preparación', icon: 'Package' },
     shipped: { label: 'En transporte', icon: 'Truck' },
     delivered: { label: 'Entregado', icon: 'Home' },
@@ -206,22 +222,31 @@ export default function OrderDetailModal({
     const hasItems = order.items.length > 0;
     const hasServiceItems = order.serviceItems.length > 0;
     const isMixed = order.orderType === 'mixed';
+    const isServiceOrder = hasServiceItems && !hasItems;
 
     const tipoEnvio: TipoEnvio = hasItems ? (order.tipo_envio ?? 'domicilio') : 'domicilio';
     const serviceFlowType: ServiceFlowType = hasServiceItems
-        ? (order.serviceItems?.some(item => item.modality === 'domicilio' || item.modality === 'home') ? 'domicilio' : 'sede')
+        ? (order.serviceItems?.some(item => {
+            const m = String(item.modality ?? '').trim().toLowerCase();
+            return m === 'home' || m === 'domicilio' || m === 'home_service';
+        }) ? 'domicilio' : 'sede')
         : 'domicilio';
 
     const productMaxStep  = hasItems ? PRODUCT_MAX_STEP[tipoEnvio] : 0;
     const serviceMaxStep  = hasServiceItems ? SERVICE_MAX_STEP[serviceFlowType] : 0;
     const maxStep         = hasItems ? productMaxStep : serviceMaxStep;
     const productIsDone   = hasItems ? order.productCurrentStep >= productMaxStep : true;
-    const serviceIsDone   = hasServiceItems ? order.serviceCurrentStep >= serviceMaxStep : true;
-    const isDone          = isMixed ? (productIsDone && serviceIsDone) : (order.currentStep >= maxStep);
+    const serviceIsDone   = hasServiceItems ? order.serviceCurrentStep > serviceMaxStep : true;
 
     const productAction   = hasItems ? PRODUCT_FLOW_ACTIONS[tipoEnvio]?.[order.productCurrentStep] : null;
-    const serviceAction   = hasServiceItems ? SERVICE_FLOW_ACTIONS[serviceFlowType]?.[order.serviceCurrentStep] : null;
+    const firstServiceStatus = order.serviceItems?.[0]?.status as string ?? 'pending';
+    const serviceAction   = hasServiceItems
+        ? (SERVICE_ACTIONS_BY_STATUS[serviceFlowType]?.[firstServiceStatus]
+            ?? SERVICE_STEP_ACTIONS[serviceFlowType]?.[order.serviceCurrentStep]
+            ?? null)
+        : null;
     const action          = isMixed ? null : (productAction ?? serviceAction);
+    const isDone          = isMixed ? (productIsDone && serviceIsDone) : !action;
     const firstServiceItem = order.serviceItems?.[0] ?? null;
     const isVerified = order.estado_pago === 'verificado' || order.estado === 'pending_seller';
     const typeConfig = ORDER_TYPE_BADGE[order.orderType] || ORDER_TYPE_BADGE.product;
@@ -238,14 +263,45 @@ export default function OrderDetailModal({
     const { departamento, provincia, distrito } = parseCity(order.envio.city);
 
     const handleAdvance = async () => {
-    const isLogisticsStep = tipoEnvio === 'agencia' && productAction?.label === 'Confirmar En Transporte';
+        const isLogisticsStep = tipoEnvio === 'agencia' && productAction?.label === 'Confirmar En Transporte';
         if (isLogisticsStep && onShipWithCarrier) {
             setShowLogistics(true);
             return;
         }
+
+        console.log('[OrderDetailModal::handleAdvance]', {
+            orderId: order.id,
+            orderType: order.orderType,
+            isMixed,
+            openSection,
+            isServiceOrder,
+            hasItems,
+            hasServiceItems,
+            firstServiceItem: firstServiceItem ? {
+                id: firstServiceItem.id,
+                serviceBookingId: firstServiceItem.serviceBookingId,
+                status: firstServiceItem.status,
+                modality: firstServiceItem.modality,
+            } : null,
+            allServiceItems: order.serviceItems?.map(si => ({
+                id: si.id,
+                serviceBookingId: si.serviceBookingId,
+                status: si.status,
+            })),
+        });
+
         setIsAdvancing(true);
-        await onAdvanceStep(order.id);
-        setIsAdvancing(false);
+        try {
+            const section = (isServiceOrder || (isMixed && openSection === 'services')) ? 'services' : undefined;
+            console.log('[OrderDetailModal::handleAdvance] calling onAdvanceStep', { orderId: order.id, section });
+            await onAdvanceStep(order.id, section);
+            console.log('[OrderDetailModal::handleAdvance] onAdvanceStep completed successfully');
+        } catch (err) {
+            console.error('[OrderDetailModal::handleAdvance] onAdvanceStep failed', err);
+            throw err;
+        } finally {
+            setIsAdvancing(false);
+        }
     };
 
     const handleShipWithCarrier = async (carrierCode: string, carrierData: Record<string, string>) => {

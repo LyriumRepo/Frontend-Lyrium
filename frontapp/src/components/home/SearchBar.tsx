@@ -412,12 +412,10 @@ export default function SearchBar({ categoriasServicios = [], categoriasProducto
                                 className="w-full px-3 py-2 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-[#182420] transition-colors rounded-lg"
                               >
                                 <div className="relative w-10 h-10 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 dark:bg-[var(--bg-muted)]">
-                                  <Image
-                                    src={result.imagen || '/img/no-image.png'}
+                                  <img
+                                    src={typeof result.imagen === 'string' && result.imagen.startsWith('http') ? result.imagen : '/img/no-image.png'}
                                     alt={result.titulo}
-                                    fill
-                                    sizes="40px"
-                                    className="object-cover"
+                                    className="w-full h-full object-cover"
                                   />
                                 </div>
                                 <div className="flex-1 min-w-0 text-left">

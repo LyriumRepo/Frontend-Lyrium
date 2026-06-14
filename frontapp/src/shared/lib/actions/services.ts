@@ -47,7 +47,7 @@ async function getServerHeaders(): Promise<Record<string, string>> {
 export async function getServicesAction(): Promise<Service[]> {
   try {
     const headers = await getServerHeaders();
-    const response = await fetch(`${LARAVEL_API_URL}/seler/services`, {
+    const response = await fetch(`${LARAVEL_API_URL}/seller/services`, {
       headers,
       cache: 'no-store',
     });

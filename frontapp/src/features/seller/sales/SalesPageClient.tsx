@@ -141,8 +141,8 @@ export function SalesPageClient(_props?: SalesPageClientProps) {
                         order={selectedOrder!}
                         isOpen={!!selectedOrder}
                         onClose={() => setSelectedOrder(null)}
-                        onAdvanceStep={async (id) => {
-                            await advanceStep(id);
+                        onAdvanceStep={async (id, section) => {
+                            await advanceStep(id, section);
                         }}
                         onShipWithCarrier={async (orderId, carrierCode, carrierData) => {
                             await shipWithCarrier(orderId, carrierCode, carrierData);

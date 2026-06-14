@@ -194,6 +194,7 @@ export function adaptServiceToFrontend(beService: LaravelService): Service {
     ([dia, bloques]) => ({ dia, bloques }),
   );
 
+
   // Extraer IDs de especialistas (desde specialists[] o fallback desde schedule[].specialist_id)
   const especialistasAsignados: number[] =
     (beService.specialists || []).length > 0
@@ -310,8 +311,12 @@ export function adaptServiceToBackend(
 
   if (feService.diasAtencion) {
     if (feService.especialistaHorarios && feService.especialistaHorarios.length > 0) {
-      payload.schedules = feService.especialistaHorarios.flatMap((spec) =>
-        spec.dias.flatMap((day) => {
+      payload.schedules = feService.especialistaHorarios.flatMap((spec) => {
+        const dias = spec.dias.length > 0 ? spec.dias : feService.diasAtencion!.map((d) => ({
+          dia: d.dia,
+          bloques: d.bloques.map((_, i) => i),
+        }));
+        return dias.flatMap((day) => {
           const dayEntry = feService.diasAtencion!.find((d) => d.dia === day.dia);
           if (!dayEntry) return [];
           return day.bloques.map((blockIndex) => {
@@ -327,8 +332,8 @@ export function adaptServiceToBackend(
               orden_bloque: blockIndex + 1,
             };
           }).filter(Boolean);
-        }),
-      );
+        });
+      });
     } else {
       payload.schedules = feService.diasAtencion.flatMap((day) =>
         day.bloques.map((b) => ({

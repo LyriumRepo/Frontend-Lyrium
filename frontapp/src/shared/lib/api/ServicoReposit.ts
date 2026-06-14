@@ -59,7 +59,7 @@ export const serviceRepository = {
   // ── SERVICES ENDPOINTS ──────────────────────────────────────────────────────
 
   async listServices(): Promise<Service[]> {
-    const response = await fetch(`${LARAVEL_API_URL}/seler/services`, {
+    const response = await fetch(`${LARAVEL_API_URL}/seller/services`, {
       method: 'GET',
       headers: await getAuthHeaders(),
     });
@@ -273,7 +273,7 @@ export const serviceRepository = {
 
   async getServiceById(id: number): Promise<Service | null> {
     try {
-      const response = await fetch(`${LARAVEL_API_URL}/seler/services/${id}`, {
+      const response = await fetch(`${LARAVEL_API_URL}/seller/services/${id}`, {
         method: 'GET',
         headers: await getAuthHeaders(),
       });
