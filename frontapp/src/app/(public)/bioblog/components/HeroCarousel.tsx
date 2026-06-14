@@ -17,8 +17,8 @@ interface HeroPost {
     id: number;
     title: string;
     slug: string;
-    excerpt: string;
-    featured_image: string;
+    summary: string;
+    featured_image: string | null;
     category_name: string;
     published_at: string;
 }
@@ -27,10 +27,21 @@ export default function HeroCarousel() {
     const [posts, setPosts] = useState<HeroPost[]>([]);
 
     useEffect(() => {
-        blogApi.getFeaturedPosts(4).then(setPosts).catch(console.error);
+        blogApi.getFeaturedPosts(4).then((data) => {
+            setPosts(data.map((p: any) => ({
+                id: p.id,
+                title: p.title,
+                slug: p.slug,
+                summary: p.summary ?? '',
+                featured_image: p.featured_image ?? '/img/bioblog/blog-teclas.jpg',
+                category_name: p.category?.name ?? 'General',
+                published_at: p.published_at ?? '',
+            })));
+        }).catch(console.error);
     }, []);
 
     const formatDate = (dateString: string) => {
+        if (!dateString) return '';
         const date = new Date(dateString);
         return date.toLocaleDateString('es-ES', { month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase();
     };
@@ -136,7 +147,7 @@ export default function HeroCarousel() {
                                             <span>{formatDate(post.published_at)}</span>
                                         </div>
                                         <p className="text-slate-300 text-lg line-clamp-2 max-w-lg hidden md:block">
-                                            {post.excerpt}
+                                            {post.summary}
                                         </p>
                                     </div>
 

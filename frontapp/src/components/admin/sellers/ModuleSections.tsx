@@ -14,6 +14,7 @@ import {
   Notification,
   AuditEntry,
   ProductStatus,
+  ServiceStatus,
 } from '@/features/admin/sellers/types';
 import { CVCard } from './SharedCVUI';
 import {
@@ -492,6 +493,265 @@ export const ProductModeration: React.FC<ProductModerationProps> = ({
                       </button>
                       <button
                         onClick={() => handleAction(p, 'REJECTED')}
+                        disabled={isBusy}
+                        className="px-4 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-50 flex items-center gap-1.5"
+                      >
+                        <XCircle className="w-3.5 h-3.5" />
+                        {isBusy ? '...' : 'Rechazar'}
+                      </button>
+                    </div>
+                    {isBusy && (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-cyan-500 mt-1" />
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
+
+// ─── SERVICE MODERATION ───────────────────────────────────────────────────────
+
+interface ServiceModerationProps {
+  services: (Product & { rejection_reason?: string | null })[];
+  onAction: (service: Product, suggest: ServiceStatus) => void;
+  isLoading?: boolean;
+}
+
+export const ServiceModeration: React.FC<ServiceModerationProps> = ({
+  services,
+  onAction,
+  isLoading = false,
+}) => {
+  const [busyId, setBusyId] = useState<number | null>(null);
+  const [search, setSearch] = useState('');
+  const [storeFilter, setStoreFilter] = useState('');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
+
+  const pending = services.filter(
+    (s) => s.status === 'en_espera' || s.status === 'PENDING',
+  );
+
+  const stores = React.useMemo(() => {
+    const map = new Map<string, string>();
+    pending.forEach((s) => {
+      if (s.seller && s.sellerId) map.set(s.seller, String(s.sellerId));
+    });
+    return Array.from(map.entries()).sort((a, b) =>
+      a[0].localeCompare(b[0]),
+    );
+  }, [pending]);
+
+  const filtered = React.useMemo(() => {
+    return pending.filter((s) => {
+      if (
+        search &&
+        !s.name.toLowerCase().includes(search.toLowerCase())
+      )
+        return false;
+      if (storeFilter && s.seller !== storeFilter) return false;
+      if (dateFrom && s.date && s.date < dateFrom) return false;
+      if (dateTo && s.date && s.date > dateTo) return false;
+      return true;
+    });
+  }, [pending, search, storeFilter, dateFrom, dateTo]);
+
+  const handleAction = async (service: Product, suggest: ServiceStatus) => {
+    setBusyId(service.id);
+    try {
+      await onAction(service, suggest);
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-20 gap-3 text-[var(--text-secondary)]">
+        <Loader2 className="w-6 h-6 animate-spin" />
+        <span className="text-sm font-bold">
+          Cargando servicios pendientes...
+        </span>
+      </div>
+    );
+  }
+
+  if (pending.length === 0) {
+    return (
+      <div className="p-20 text-center text-[var(--text-secondary)] font-black uppercase tracking-widest border-2 border-dashed border-[var(--border-subtle)] rounded-[3rem]">
+        <CheckCircle className="w-12 h-12 text-emerald-400 mx-auto mb-4 opacity-60" />
+        <p className="text-[10px]">
+          No hay solicitudes de moderación de servicios activas
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-center gap-4 p-5 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-[2rem]">
+        <div className="flex items-center gap-2 flex-1 min-w-[200px]">
+          <Search className="w-4 h-4 text-[var(--text-secondary)]" />
+          <input
+            type="text"
+            placeholder="Buscar servicio..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="flex-1 bg-transparent border-none text-sm font-bold text-[var(--text-primary)] outline-none placeholder:text-[var(--text-secondary)]"
+          />
+        </div>
+        <div className="w-px h-6 bg-[var(--border-subtle)]" />
+        <select
+          value={storeFilter}
+          onChange={(e) => setStoreFilter(e.target.value)}
+          className="px-4 py-2 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-xl text-[11px] font-black text-[var(--text-primary)] outline-none cursor-pointer uppercase tracking-widest"
+        >
+          <option value="">Todas las tiendas</option>
+          {stores.map(([name]) => (
+            <option key={name} value={name}>
+              {name}
+            </option>
+          ))}
+        </select>
+        <div className="w-px h-6 bg-[var(--border-subtle)]" />
+        <div className="flex items-center gap-3">
+          <span className="text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest">
+            Desde
+          </span>
+          <input
+            type="date"
+            value={dateFrom}
+            onChange={(e) => setDateFrom(e.target.value)}
+            className="px-3 py-2 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-xl text-[11px] font-bold text-[var(--text-primary)] outline-none"
+          />
+          <span className="text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest">
+            Hasta
+          </span>
+          <input
+            type="date"
+            value={dateTo}
+            onChange={(e) => setDateTo(e.target.value)}
+            className="px-3 py-2 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-xl text-[11px] font-bold text-[var(--text-primary)] outline-none"
+          />
+        </div>
+        {(search || storeFilter || dateFrom || dateTo) && (
+          <button
+            onClick={() => {
+              setSearch('');
+              setStoreFilter('');
+              setDateFrom('');
+              setDateTo('');
+            }}
+            className="px-4 py-2 text-[10px] font-black text-rose-500 uppercase tracking-widest hover:bg-rose-500/10 rounded-xl transition-all"
+          >
+            Limpiar
+          </button>
+        )}
+        <div className="text-[10px] font-bold text-[var(--text-secondary)] ml-auto">
+          {filtered.length} de {pending.length} servicios
+        </div>
+      </div>
+
+      <div className="overflow-x-auto rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--bg-card)]">
+        <table className="w-full text-left">
+          <thead>
+            <tr className="border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)]/50">
+              <th className="p-4 text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-[0.2em]">
+                Servicio
+              </th>
+              <th className="p-4 text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-[0.2em]">
+                Tienda
+              </th>
+              <th className="p-4 text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-[0.2em]">
+                Categoría
+              </th>
+              <th className="p-4 text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-[0.2em] text-right">
+                Precio
+              </th>
+              <th className="p-4 text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-[0.2em]">
+                Fecha
+              </th>
+              <th className="p-4 text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-[0.2em]">
+                Acciones
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map((s) => {
+              const isBusy = busyId === s.id;
+              return (
+                <tr
+                  key={s.id}
+                  className={`border-b border-[var(--border-subtle)] last:border-none hover:bg-[var(--bg-secondary)]/30 transition-colors ${
+                    isBusy ? 'opacity-60 pointer-events-none' : ''
+                  }`}
+                >
+                  <td className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div>
+                        <p className="font-black text-[var(--text-primary)] text-sm leading-tight">
+                          {s.name}
+                        </p>
+                        <p className="text-[9px] font-mono text-[var(--text-secondary)] mt-0.5">
+                          ID #{s.id}
+                        </p>
+                      </div>
+                      <span className="px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest bg-emerald-500/10 text-emerald-500">
+                        Nuevo
+                      </span>
+                    </div>
+                    {s.rejection_reason && (
+                      <div className="mt-2 flex items-start gap-1.5 text-[10px] text-amber-500">
+                        <AlertTriangle className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                        <span className="line-clamp-1">
+                          {s.rejection_reason}
+                        </span>
+                      </div>
+                    )}
+                  </td>
+                  <td className="p-4">
+                    <div className="flex items-center gap-2">
+                      <Store className="w-3.5 h-3.5 text-cyan-500" />
+                      <span className="text-[11px] font-bold text-[var(--text-primary)]">
+                        {s.seller}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="p-4">
+                    <span className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest">
+                      {s.category}
+                    </span>
+                  </td>
+                  <td className="p-4 text-right">
+                    <span className="font-black text-[var(--text-primary)] text-sm">
+                      S/ {s.price.toFixed(2)}
+                    </span>
+                  </td>
+                  <td className="p-4">
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-3 h-3 text-[var(--text-secondary)]" />
+                      <span className="text-[10px] font-bold text-[var(--text-secondary)]">
+                        {s.date ?? '—'}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="p-4">
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleAction(s, 'APPROVED')}
+                        disabled={isBusy}
+                        className="px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-50 flex items-center gap-1.5"
+                      >
+                        <CheckCircle className="w-3.5 h-3.5" />
+                        {isBusy ? '...' : 'Aprobar'}
+                      </button>
+                      <button
+                        onClick={() => handleAction(s, 'REJECTED')}
                         disabled={isBusy}
                         className="px-4 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-50 flex items-center gap-1.5"
                       >

@@ -60,7 +60,7 @@ export default function BlogPostPage() {
         setSubmitting(true);
         try {
             await blogApi.createComment({
-                post_id: post.id,
+                article_id: post.id,
                 author_name: commentForm.author_name,
                 author_email: commentForm.author_email,
                 content: commentForm.content,
@@ -117,7 +117,7 @@ export default function BlogPostPage() {
             </Link>
 
             {/* Hero Pill */}
-            <HeroPill icon="Article" text={post.category_name} />
+            <HeroPill icon="Article" text={post.category?.name ?? 'Artículo'} />
 
             {/* Artículo */}
             <article className="mt-6">
@@ -130,17 +130,12 @@ export default function BlogPostPage() {
                     <div className="flex flex-wrap items-center gap-4 text-sm text-slate-500">
                         <div className="flex items-center gap-2">
                             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-100 to-sky-100 flex items-center justify-center text-emerald-600 font-bold">
-                                {post.author.charAt(0)}
+                                {(post.author_name ?? 'L').charAt(0)}
                             </div>
-                            <span>{post.author}</span>
+                            <span>{post.author_name ?? 'Lyrium'}</span>
                         </div>
                         <span>•</span>
                         <span>{formatDate(post.published_at)}</span>
-                        <span>•</span>
-                        <span className="flex items-center gap-1">
-                            <Icon name="Eye" className="w-4 h-4" />
-                            {post.views} vistas
-                        </span>
                     </div>
                 </header>
 
@@ -168,7 +163,7 @@ export default function BlogPostPage() {
                     <span className="text-sm text-slate-500">
                         Etiquetas:
                         <span className="ml-2 px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-sm">
-                            {post.category_name}
+                            {post.category?.name ?? 'General'}
                         </span>
                     </span>
                 </div>

@@ -15,6 +15,20 @@ export interface Notification {
   priority: string | null;
   category: string | null;
   vendor_name: string | null;
+  store_name: string | null;
+  store_status: string | null;
+  product_name: string | null;
+  product_status: string | null;
+  service_id: number | null;
+  service_name: string | null;
+  service_status: string | null;
+  reason: string | null;
+  contract_id: number | null;
+  contract_number: string | null;
+  contract_name: string | null;
+  contract_status: string | null;
+  contract_version: string | null;
+  contract_action: string | null;
   is_read: boolean;
 }
 

@@ -1,13 +1,39 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Play, Plus } from 'lucide-react';
-import { videoCategories, videos } from '../data/blogData';
+import { blogApi } from '@/shared/lib/api/blog';
+
+interface VideoItem {
+    id: number;
+    title: string;
+    videoId: string;
+    category: string;
+    categoryLabel: string;
+}
 
 export default function VideoGallery() {
+    const [videos, setVideos] = useState<VideoItem[]>([]);
+    const [categories, setCategories] = useState<string[]>([]);
     const [activeFilter, setActiveFilter] = useState('*');
     const [showAll, setShowAll] = useState(false);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        blogApi.getVideos().then((data: any[]) => {
+            const items = data.map((v: any) => ({
+                id: v.id,
+                title: v.title,
+                videoId: v.youtube_id ?? '',
+                category: v.category ?? 'general',
+                categoryLabel: v.category_label ?? v.category ?? 'General',
+            }));
+            setVideos(items);
+            const cats = Array.from(new Set(items.map((v) => v.category)));
+            setCategories(cats);
+        }).catch(console.error).finally(() => setLoading(false));
+    }, []);
 
     const filteredVideos = activeFilter === '*'
         ? videos
@@ -37,25 +63,41 @@ export default function VideoGallery() {
                 <div className="max-w-7xl mx-auto px-4">
                     {/* Filtros de Categoría */}
                     <div className="flex flex-wrap justify-center gap-3 mb-12">
-                        {videoCategories.map((cat) => (
+                        <button
+                            onClick={() => { setActiveFilter('*'); setShowAll(false); }}
+                            className={`px-5 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 ${
+                                activeFilter === '*'
+                                    ? 'bg-sky-500 dark:bg-[var(--brand-green)] text-white shadow-lg'
+                                    : 'bg-white dark:bg-[var(--bg-secondary)] text-slate-600 dark:text-[var(--text-secondary)] hover:bg-slate-100 dark:hover:bg-[#2A3F33] border border-slate-200 dark:border-[var(--border-subtle)]'
+                            }`}
+                        >
+                            Todos
+                        </button>
+                        {categories.map((cat) => (
                             <button
-                                key={cat.id}
-                                onClick={() => {
-                                    setActiveFilter(cat.id);
-                                    setShowAll(false);
-                                }}
-                                className={`category px-5 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 ${
-                                    activeFilter === cat.id
+                                key={cat}
+                                onClick={() => { setActiveFilter(cat); setShowAll(false); }}
+                                className={`px-5 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 ${
+                                    activeFilter === cat
                                         ? 'bg-sky-500 dark:bg-[var(--brand-green)] text-white shadow-lg'
                                         : 'bg-white dark:bg-[var(--bg-secondary)] text-slate-600 dark:text-[var(--text-secondary)] hover:bg-slate-100 dark:hover:bg-[#2A3F33] border border-slate-200 dark:border-[var(--border-subtle)]'
                                 }`}
                             >
-                                {cat.name}
+                                {categories.find(c => c === cat) ? cat.charAt(0).toUpperCase() + cat.slice(1) : cat}
                             </button>
                         ))}
                     </div>
 
-                    {/* Contenedor de la Galería */}
+                    {loading ? (
+                        <div className="flex justify-center py-12">
+                            <div className="w-8 h-8 border-2 border-sky-500 border-t-transparent rounded-full animate-spin" />
+                        </div>
+                    ) : videos.length === 0 ? (
+                        <div className="text-center py-12 text-slate-500">
+                            <p>No hay videos disponibles.</p>
+                        </div>
+                    ) : (
+                    <>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {displayedVideos.map((video) => (
                             <div
@@ -115,6 +157,8 @@ export default function VideoGallery() {
                                 <Plus className="w-4 h-4" />
                             </button>
                         </div>
+                    )}
+                    </>
                     )}
                 </div>
             </div>

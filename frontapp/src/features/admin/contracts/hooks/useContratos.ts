@@ -56,6 +56,7 @@ export const useContratos = () => {
         mutationFn: async () => {
             const newContract: Contract = {
                 id: TEMP_NEW_ID,
+                dbId: 0,
                 company: '',
                 ruc: '',
                 rep: '',

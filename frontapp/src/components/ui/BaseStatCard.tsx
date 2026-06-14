@@ -11,12 +11,13 @@ interface BaseStatCardProps {
         value: string | number;
         isPositive: boolean;
     };
-    color?: 'sky' | 'emerald' | 'amber' | 'indigo' | 'rose' | 'violet';
+    color?: 'sky' | 'emerald' | 'amber' | 'indigo' | 'rose' | 'violet' | 'lima' | 'verde' | 'turquesaClaro' | 'turquesa' | 'celeste' | 'azulCeleste';
     isLoading?: boolean;
     chart?: React.ReactNode;
+    onClick?: () => void;
 }
 
-const colorMap = {
+const colorMap: Record<string, { bg: string; iconBg: string; text: string; border: string; shadow: string }> = {
     sky: {
         bg: 'bg-sky-500/5 dark:bg-sky-500/10',
         iconBg: 'bg-sky-500',
@@ -58,6 +59,48 @@ const colorMap = {
         text: 'text-violet-600 dark:text-violet-400',
         border: 'border-violet-100/50 dark:border-violet-500/20',
         shadow: 'shadow-violet-100 dark:shadow-violet-500/20'
+    },
+    lima: {
+        bg: 'bg-[#B7E000]/10 dark:bg-[#B7E000]/20',
+        iconBg: 'bg-[#B7E000]',
+        text: 'text-[#B7E000]',
+        border: 'border-[#B7E000]/30 dark:border-[#B7E000]/30',
+        shadow: 'shadow-[#B7E000]/20'
+    },
+    verde: {
+        bg: 'bg-[#8FD400]/10 dark:bg-[#8FD400]/20',
+        iconBg: 'bg-[#8FD400]',
+        text: 'text-[#8FD400]',
+        border: 'border-[#8FD400]/30 dark:border-[#8FD400]/30',
+        shadow: 'shadow-[#8FD400]/20'
+    },
+    turquesaClaro: {
+        bg: 'bg-[#66D6A8]/10 dark:bg-[#66D6A8]/20',
+        iconBg: 'bg-[#66D6A8]',
+        text: 'text-[#66D6A8]',
+        border: 'border-[#66D6A8]/30 dark:border-[#66D6A8]/30',
+        shadow: 'shadow-[#66D6A8]/20'
+    },
+    turquesa: {
+        bg: 'bg-[#4EC7B8]/10 dark:bg-[#4EC7B8]/20',
+        iconBg: 'bg-[#4EC7B8]',
+        text: 'text-[#4EC7B8]',
+        border: 'border-[#4EC7B8]/30 dark:border-[#4EC7B8]/30',
+        shadow: 'shadow-[#4EC7B8]/20'
+    },
+    celeste: {
+        bg: 'bg-[#69BEEB]/10 dark:bg-[#69BEEB]/20',
+        iconBg: 'bg-[#69BEEB]',
+        text: 'text-[#69BEEB]',
+        border: 'border-[#69BEEB]/30 dark:border-[#69BEEB]/30',
+        shadow: 'shadow-[#69BEEB]/20'
+    },
+    azulCeleste: {
+        bg: 'bg-[#5AAFE6]/10 dark:bg-[#5AAFE6]/20',
+        iconBg: 'bg-[#5AAFE6]',
+        text: 'text-[#5AAFE6]',
+        border: 'border-[#5AAFE6]/30 dark:border-[#5AAFE6]/30',
+        shadow: 'shadow-[#5AAFE6]/20'
     }
 };
 
@@ -70,7 +113,8 @@ export default function BaseStatCard({
     trend,
     color = 'sky',
     isLoading = false,
-    chart
+    chart,
+    onClick
 }: BaseStatCardProps) {
     if (isLoading) {
         return (
@@ -89,8 +133,12 @@ export default function BaseStatCard({
 
     const theme = colorMap[color];
 
+    const Wrapper = onClick ? 'button' : 'div';
+
     return (
-        <div className={`bg-[var(--bg-card)] p-8 rounded-[2.5rem] border ${theme.border} shadow-sm dark:shadow-none transition-all duration-500 hover:shadow-2xl hover:shadow-[var(--border-subtle)]/30 hover:-translate-y-1 group relative overflow-hidden`}>
+        <Wrapper
+            onClick={onClick}
+            className={`bg-[var(--bg-card)] p-8 rounded-[2.5rem] border ${theme.border} shadow-sm dark:shadow-none transition-all duration-500 hover:shadow-2xl hover:shadow-[var(--border-subtle)]/30 hover:-translate-y-1 group relative overflow-hidden ${onClick ? 'active:scale-[0.98] text-left' : ''}`}>
             {/* Background Accent Mesh */}
             <div className={`absolute top-0 right-0 w-32 h-32 ${theme.bg} rounded-full -mr-16 -mt-16 blur-2xl transition-all duration-700 group-hover:scale-150`}></div>
 
@@ -134,6 +182,8 @@ export default function BaseStatCard({
                     </div>
                 )}
             </div>
-        </div>
+        </Wrapper>
     );
 }
+
+export type { BaseStatCardProps };

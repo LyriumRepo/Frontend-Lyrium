@@ -1,4 +1,5 @@
 export { default as BaseButton } from './BaseButton';
+export { default as BaseDatePicker } from './BaseDatePicker';
 export { default as BaseDrawer } from './BaseDrawer';
 export { default as BaseEmptyState } from './BaseEmptyState';
 export { default as BaseErrorState } from './BaseErrorState';

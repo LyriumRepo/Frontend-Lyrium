@@ -1,86 +1,108 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { FinanceData } from '../types';
-import { MOCK_FINANCE_DATA } from '../mock';
-import { USE_MOCKS } from '@/shared/lib/config/flags';
+import { LARAVEL_API_URL } from '@/shared/lib/config/flags';
+import { useToast } from '@/shared/lib/context/ToastContext';
+import type { FinanceData } from '../types';
 
 export interface FinanceFilters {
-  startDate: string;
-  endDate: string;
+    startDate: string;
+    endDate: string;
 }
 
-function getDefaultDates() {
-  const now = new Date();
-  const start = new Date(now.getFullYear(), 0, 1);
-  return {
-    startDate: start.toISOString().slice(0, 10),
-    endDate: now.toISOString().slice(0, 10),
-  };
+let _tokenCache: { value: string | null; ts: number } | null = null;
+
+async function getAuthToken(): Promise<string | null> {
+    const now = Date.now();
+    if (_tokenCache && now - _tokenCache.ts < 30_000) {
+        return _tokenCache.value;
+    }
+    try {
+        const res = await fetch('/api/auth-token', {
+            credentials: 'include',
+            cache: 'no-store',
+        });
+        if (!res.ok) return null;
+        const { token } = await res.json();
+        const clean = token?.replace(/^["']|["']$/g, '').trim() || null;
+        _tokenCache = { value: clean, ts: now };
+        return clean;
+    } catch {
+        return null;
+    }
 }
 
-async function fetchFinance(filters: FinanceFilters): Promise<FinanceData> {
-  const baseUrl =
-    process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://localhost:8000/api';
-  const token = localStorage.getItem('laravel_token');
+async function getAuthHeaders(): Promise<Record<string, string>> {
+    const token = await getAuthToken();
+    return {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    };
+}
 
-  const params = new URLSearchParams();
-  if (filters.startDate) params.set('start_date', filters.startDate);
-  if (filters.endDate) params.set('end_date', filters.endDate);
+async function fetchFinanceData(startDate: string, endDate: string): Promise<FinanceData> {
+    const headers = await getAuthHeaders();
+    const params = new URLSearchParams();
+    if (startDate) params.set('start_date', startDate);
+    if (endDate) params.set('end_date', endDate);
 
-  const res = await fetch(`${baseUrl}/admin/finance?${params}`, {
-    headers: {
-      Accept: 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-  });
+    const url = `${LARAVEL_API_URL}/admin/finance${params.toString() ? '?' + params.toString() : ''}`;
+    const res = await fetch(url, { headers, credentials: 'include' });
 
-  if (!res.ok) {
-    throw new Error(`Finance API error: ${res.status}`);
-  }
+    if (!res.ok) {
+        throw new Error('Error al cargar datos financieros');
+    }
 
-  const json = await res.json();
-  return json.data as FinanceData;
+    const json = await res.json();
+    return json.data as FinanceData;
 }
 
 export function useFinanceAnalytics() {
-  const [activeTab, setActiveTab] = useState('all');
-  const defaults = getDefaultDates();
-  const [filters, setFiltersState] = useState<FinanceFilters>({
-    startDate: defaults.startDate,
-    endDate: defaults.endDate,
-  });
+    const { showToast } = useToast();
+    const [activeTab, setActiveTab] = useState('all');
+    const [filters, setFiltersState] = useState<FinanceFilters>({
+        startDate: '',
+        endDate: ''
+    });
 
-  const { data, isLoading, refetch } = useQuery({
-    queryKey: ['admin', 'finance-data-panel', filters],
-    queryFn: async () => {
-      if (USE_MOCKS) {
-        return MOCK_FINANCE_DATA as FinanceData;
-      }
-      return fetchFinance(filters);
-    },
-    staleTime: 10 * 60 * 1000,
-  });
+    const setFilters = (startDate: string, endDate: string) => {
+        setFiltersState({ startDate, endDate });
+    };
 
-  const setFilters = (startDate: string, endDate: string) => {
-    setFiltersState({ startDate, endDate });
-  };
+    const queryKey = useMemo(
+        () => ['finance', filters.startDate, filters.endDate],
+        [filters.startDate, filters.endDate]
+    );
 
-  const isVisible = (tabId: string) =>
-    activeTab === 'all' || activeTab === tabId;
+    const { data, isLoading, isRefetching, refetch } = useQuery<FinanceData>({
+        queryKey,
+        queryFn: () => fetchFinanceData(filters.startDate, filters.endDate),
+        staleTime: 60_000,
+    });
 
-  return {
-    data: data || null,
-    isLoading,
-    activeTab,
-    setActiveTab,
-    filters,
-    setFilters,
-    applyFilters: async () => {
-      await refetch();
-      return true;
-    },
-    isVisible,
-  };
+    const isVisible = (tabId: string) => activeTab === 'all' || activeTab === tabId;
+
+    const applyFilters = async () => {
+        if (!filters.startDate || !filters.endDate) {
+            showToast('Selecciona un rango de fechas completo', 'info');
+            return false;
+        }
+        await refetch();
+        showToast('Datos sincronizados según el periodo seleccionado', 'success');
+        return true;
+    };
+
+    return {
+        data: data ?? null,
+        isLoading,
+        isRefreshing: isRefetching,
+        activeTab,
+        setActiveTab,
+        filters,
+        setFilters,
+        applyFilters,
+        isVisible,
+    };
 }

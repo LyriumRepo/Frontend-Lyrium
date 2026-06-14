@@ -16,8 +16,8 @@ interface BlogPost {
     id: number;
     title: string;
     slug: string;
-    excerpt: string;
-    featured_image: string;
+    summary: string;
+    featured_image: string | null;
     category_name: string;
     published_at: string;
     comments_count: number;
@@ -27,10 +27,22 @@ export default function FeaturedCarousel() {
     const [posts, setPosts] = useState<BlogPost[]>([]);
 
     useEffect(() => {
-        blogApi.getFeaturedPosts(4).then(setPosts).catch(console.error);
+        blogApi.getFeaturedPosts(4).then((data) => {
+            setPosts(data.map((p: any) => ({
+                id: p.id,
+                title: p.title,
+                slug: p.slug,
+                summary: p.summary ?? '',
+                featured_image: p.featured_image ?? '/img/bioblog/blog-teclas.jpg',
+                category_name: p.category?.name ?? 'General',
+                published_at: p.published_at ?? '',
+                comments_count: 0,
+            })));
+        }).catch(console.error);
     }, []);
 
     const formatDate = (dateString: string) => {
+        if (!dateString) return '';
         const date = new Date(dateString);
         return date.toLocaleDateString('es-ES', { month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase();
     };
@@ -119,7 +131,7 @@ export default function FeaturedCarousel() {
                                     </h3>
 
                                     <p className="text-white/80 text-xs md:text-sm leading-relaxed mb-8 line-clamp-2 max-w-2xl text-justify">
-                                        {post.excerpt}
+                                        {post.summary}
                                     </p>
 
                                     {/* Footer Bar */}
