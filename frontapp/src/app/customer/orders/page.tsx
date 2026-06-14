@@ -323,7 +323,7 @@ function OrderTrackingCards({
         </div>
 
         {steps.map((s, i) => {
-          const imgSrc = `/imagenes-seguimiento/${i + 1}.jpg`;
+          const imgSrc = `/imagenes-seguimiento/${i + 1}.png`;
           const isCompleted = i < activeIndex;
           const isActive = i === activeIndex;
 

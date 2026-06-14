@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Order, SalesKPI } from '../types';
 import { orderRepository } from '@/shared/lib/api/factory';
+import { useToast } from '@/shared/lib/context/ToastContext';
 
 function computeKPIs(orders: Order[]): SalesKPI[] {
     const total = orders.length;
@@ -63,6 +64,7 @@ function computeKPIs(orders: Order[]): SalesKPI[] {
 
 export function useSellerSales() {
     const queryClient = useQueryClient();
+    const { showToast } = useToast();
     const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
     const [filters, setFilters] = useState<{ dateStart: string | null; dateEnd: string | null; orderType: string | null }>({
         dateStart: null,
@@ -87,12 +89,24 @@ export function useSellerSales() {
     });
 
     const advanceStepMutation = useMutation({
-        mutationFn: async (orderId: string) => {
-            await orderRepository.advanceOrderStep(orderId);
-            return orderId;
+        mutationFn: async ({ orderId, section }: { orderId: string; section?: 'products' | 'services' }) => {
+            console.log('[useSellerSales::advanceStepMutation] START', { orderId, section });
+            const result = await orderRepository.advanceOrderStep(orderId, section);
+            console.log('[useSellerSales::advanceStepMutation] DONE', { orderId, section });
+            return result;
         },
-        onSuccess: async () => {
-            await queryClient.refetchQueries({ queryKey: ['seller', 'sales'] });
+        onSuccess: async (order) => {
+            console.log('[useSellerSales::advanceStepMutation] onSuccess, updating cache', { orderId: order.id, serviceItems: order.serviceItems?.map(s => ({ id: s.id, status: s.status, bookingStatus: s.bookingStatus })) });
+            queryClient.setQueryData(['seller', 'sales', filters], (old: { orders: Order[]; kpis: SalesKPI[] } | undefined) => {
+                if (!old) return old;
+                const updated = old.orders.map((o: Order) => o.id === order.id ? order : o);
+                return { ...old, orders: updated };
+            });
+            console.log('[useSellerSales::advanceStepMutation] cache updated, skipping refetch to avoid stale overwrite');
+        },
+        onError: (err) => {
+            console.error('[useSellerSales::advanceStepMutation] onError', err);
+            showToast(err instanceof Error ? err.message : 'Error al avanzar la orden', 'error');
         }
     });
 
@@ -142,7 +156,8 @@ export function useSellerSales() {
         updateFilters: (newFilters: { dateStart?: string | null; dateEnd?: string | null; orderType?: string | null }) =>
             setFilters({ ...filters, ...newFilters }),
         clearFilters: () => setFilters({ dateStart: null, dateEnd: null, orderType: null }),
-        advanceStep: (id: string) => advanceStepMutation.mutateAsync(id),
+        advanceStep: (id: string, section?: 'products' | 'services') =>
+            advanceStepMutation.mutateAsync({ orderId: id, section }),
         isAdvancing: advanceStepMutation.isPending,
         shipWithCarrier: (orderId: string, carrierCode: string, carrierData: Record<string, string>) =>
             shipWithCarrierMutation.mutateAsync({ orderId, carrierCode, carrierData }),

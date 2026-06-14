@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useMemo, memo } from 'react';
 import {
   useReactTable,
   getCoreRowModel,
@@ -86,9 +86,11 @@ function DeliveryBadge({ order }: { order: Order }) {
 const ORDER_STATUS_CONFIG: Record<string, { class: string }> = {
   pending_seller: { class: 'bg-amber-100 text-amber-700' },
   confirmed: { class: 'bg-sky-100 text-sky-700' },
+  on_the_way: { class: 'bg-orange-100 text-orange-700' },
   processing: { class: 'bg-blue-100 text-blue-700' },
   shipped: { class: 'bg-purple-100 text-purple-700' },
   delivered: { class: 'bg-emerald-100 text-emerald-700' },
+  completed: { class: 'bg-emerald-100 text-emerald-700' },
   cancelled: { class: 'bg-red-100 text-red-700' },
 };
 
@@ -127,6 +129,55 @@ function PaymentBadge({ status, statusLabel }: { status: string; statusLabel: st
   );
 }
 
+function ActionsCell({
+  order,
+  onViewDetail,
+  onConfirm,
+  onCancel,
+  isAdvancing,
+  isCancelling,
+}: {
+  order: Order;
+  onViewDetail: (order: Order) => void;
+  onConfirm: (orderId: string) => void;
+  onCancel: (orderId: string) => void;
+  isAdvancing: boolean;
+  isCancelling: boolean;
+}) {
+  const canConfirm = order.estado === 'pending_seller' && !isAdvancing;
+  const canCancel = order.estado === 'pending_seller' && !isCancelling;
+
+  return (
+    <div className="flex items-center gap-1">
+      <button
+        onClick={(e) => { e.stopPropagation(); onViewDetail(order); }}
+        className="w-8 h-8 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-sky-600 hover:border-sky-200 transition-all shadow-sm active:scale-90 flex items-center justify-center"
+        title="Ver detalle"
+      >
+        <Icon name="Eye" className="w-4 h-4" />
+      </button>
+      {canConfirm && (
+        <button
+          onClick={(e) => { e.stopPropagation(); onConfirm(order.id); }}
+          className="w-8 h-8 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-emerald-600 hover:border-emerald-200 transition-all shadow-sm active:scale-90 flex items-center justify-center"
+          title="Confirmar"
+        >
+          <Icon name="CheckCircle" className="w-4 h-4" />
+        </button>
+      )}
+      {canCancel && (
+        <button
+          onClick={(e) => { e.stopPropagation(); onCancel(order.id); }}
+          className="w-8 h-8 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-red-600 hover:border-red-200 transition-all shadow-sm active:scale-90 flex items-center justify-center"
+          title="Cancelar"
+        >
+          <Icon name="XCircle" className="w-4 h-4" />
+        </button>
+      )}
+    </div>
+  );
+}
+
 const SKELETON_WIDTHS = ['55%', '40%', '65%', '75%', '60%', '30%', '45%', '50%', '35%', '45%', '40%'];
 
 function SkeletonRows() {
@@ -155,7 +206,9 @@ interface SalesTableProps {
   isCancelling: boolean;
 }
 
-export default function SalesTable({
+const PAGE_SIZE = 10;
+
+const SalesTable = memo(function SalesTable({
   data,
   loading,
   onViewDetail,
@@ -164,7 +217,16 @@ export default function SalesTable({
   isAdvancing,
   isCancelling,
 }: SalesTableProps) {
-  const columns = React.useMemo(
+  const [page, setPage] = useState(0);
+  const totalPages = Math.max(1, Math.ceil(data.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages - 1);
+
+  const paginatedData = useMemo(
+    () => data.slice(safePage * PAGE_SIZE, (safePage + 1) * PAGE_SIZE),
+    [data, safePage]
+  );
+
+  const columns = useMemo(
     () => [
       columnHelper.accessor('orderNumber', {
         header: 'Número de Orden',
@@ -249,48 +311,23 @@ export default function SalesTable({
       columnHelper.display({
         id: 'actions',
         header: 'Acciones',
-        cell: (info) => {
-          const order = info.row.original;
-          const canConfirm = order.estado === 'pending_seller' && !isAdvancing;
-          const canCancel = order.estado === 'pending_seller' && !isCancelling;
-
-          return (
-            <div className="flex items-center gap-1">
-              <button
-                onClick={(e) => { e.stopPropagation(); onViewDetail(order); }}
-                className="w-8 h-8 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-sky-600 hover:border-sky-200 transition-all shadow-sm active:scale-90 flex items-center justify-center"
-                title="Ver detalle"
-              >
-                <Icon name="Eye" className="w-4 h-4" />
-              </button>
-              {canConfirm && (
-                <button
-                  onClick={(e) => { e.stopPropagation(); onConfirm(order.id); }}
-                  className="w-8 h-8 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-emerald-600 hover:border-emerald-200 transition-all shadow-sm active:scale-90 flex items-center justify-center"
-                  title="Confirmar"
-                >
-                  <Icon name="CheckCircle" className="w-4 h-4" />
-                </button>
-              )}
-              {canCancel && (
-                <button
-                  onClick={(e) => { e.stopPropagation(); onCancel(order.id); }}
-                  className="w-8 h-8 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-red-600 hover:border-red-200 transition-all shadow-sm active:scale-90 flex items-center justify-center"
-                  title="Cancelar"
-                >
-                  <Icon name="XCircle" className="w-4 h-4" />
-                </button>
-              )}
-            </div>
-          );
-        },
+        cell: (info) => (
+          <ActionsCell
+            order={info.row.original}
+            onViewDetail={onViewDetail}
+            onConfirm={onConfirm}
+            onCancel={onCancel}
+            isAdvancing={isAdvancing}
+            isCancelling={isCancelling}
+          />
+        ),
       }),
     ],
-    [onViewDetail, onConfirm, onCancel, isAdvancing, isCancelling]
+    []
   );
 
   const table = useReactTable({
-    data,
+    data: paginatedData,
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
@@ -374,6 +411,34 @@ export default function SalesTable({
           </tbody>
         </table>
       </div>
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between px-6 py-4 border-t border-[var(--border-subtle)] bg-[var(--bg-secondary)]/30">
+          <span className="text-[11px] font-bold text-[var(--text-secondary)]">
+            {data.length} órdenes
+          </span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setPage(p => Math.max(0, p - 1))}
+              disabled={safePage === 0}
+              className="px-3 py-1.5 rounded-xl text-[11px] font-bold text-[var(--text-secondary)] bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-[#69BEEB]/30 hover:text-[#5AAFE6] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              Anterior
+            </button>
+            <span className="px-3 py-1.5 text-[11px] font-bold text-[var(--text-secondary)]">
+              Pág. {safePage + 1} de {totalPages}
+            </span>
+            <button
+              onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
+              disabled={safePage >= totalPages - 1}
+              className="px-3 py-1.5 rounded-xl text-[11px] font-bold text-[var(--text-secondary)] bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-[#69BEEB]/30 hover:text-[#5AAFE6] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              Siguiente
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
-}
+});
+
+export default SalesTable;

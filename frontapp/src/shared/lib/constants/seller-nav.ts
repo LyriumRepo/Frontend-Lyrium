@@ -73,13 +73,13 @@ export const sellerNavigation: PanelNavigation = [
                 icon: 'CalendarCheck',
                 href: '/seller/agenda'
             },
-            {
-                id: 'logistica',
-                label: 'Mi Logística',
-                description: 'Configuración estratégica de envíos y operadoras',
-                icon: 'Truck',
-                href: '/seller/logistics'
-            },
+            // {
+            //     id: 'logistica',
+            //     label: 'Mi Logística',
+            //     description: 'Configuración estratégica de envíos y operadoras',
+            //     icon: 'Truck',
+            //     href: '/seller/logistics'
+            // },
             {
                 id: 'finanzas',
                 label: 'Centro de Finanzas',

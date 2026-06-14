@@ -63,6 +63,7 @@ export interface ServiceOrderItem {
     modality: string | null;
     durationMinutes: number | null;
     serviceBookingId: string | null;
+    bookingStatus: string | null;
 }
 
 export interface Order {

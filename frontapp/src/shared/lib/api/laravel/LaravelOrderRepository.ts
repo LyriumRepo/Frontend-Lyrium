@@ -40,6 +40,7 @@ interface BackendServiceItem {
     modality: string | null;
     durationMinutes: number | null;
     serviceBookingId: string | null;
+    bookingStatus: string | null;
     createdAt: string;
     updatedAt: string;
 }
@@ -89,7 +90,8 @@ const PRODUCT_STATUS_STEP_MAP: Record<string, number> = {
 
 const SERVICE_STATUS_STEP_MAP: Record<string, number> = {
     pending: 1,
-    confirmed: 2,
+    confirmed: 1,
+    on_the_way: 2,
     completed: 3,
     cancelled: 0,
     no_show: 0,
@@ -140,10 +142,18 @@ export class LaravelOrderRepository implements IOrderRepository {
         });
 
         if (!response.ok) {
-            throw new Error(`Laravel API Error: ${response.status}`);
+            let bodyText = '';
+            try { bodyText = await response.text(); } catch {}
+            const msg = `Laravel API Error: ${response.status} — ${bodyText.substring(0, 500)}`;
+            console.error('[LaravelOrderRepository::request] ERROR', { endpoint, status: response.status, body: bodyText.substring(0, 500) });
+            throw new Error(msg);
         }
 
         return response.json();
+    }
+
+    private normalizeStatus(status: string | null | undefined): string {
+        return String(status ?? '').trim();
     }
 
     private mapItem(item: BackendItem): OrderItem {
@@ -152,7 +162,7 @@ export class LaravelOrderRepository implements IOrderRepository {
             name: item.productName,
             qty: item.quantity,
             price: item.unitPrice,
-            status: item.status as OrderItem['status'],
+            status: this.normalizeStatus(item.status) as OrderItem['status'],
             can_confirm: item.actions.canConfirm,
             can_cancel: item.actions.canCancel,
         };
@@ -171,13 +181,14 @@ export class LaravelOrderRepository implements IOrderRepository {
             quantity: s.quantity,
             unitPrice: s.unitPrice,
             lineTotal: s.lineTotal,
-            status: s.status,
+            status: this.normalizeStatus(s.status),
             appointmentDate: s.appointmentDate,
             startTime: s.startTime,
             endTime: s.endTime,
             modality: s.modality,
             durationMinutes: s.durationMinutes,
             serviceBookingId: s.serviceBookingId,
+            bookingStatus: this.normalizeStatus(s.bookingStatus),
         }));
 
         const serviceQty = serviceItems.reduce((sum, s) => sum + s.quantity, 0);
@@ -188,7 +199,7 @@ export class LaravelOrderRepository implements IOrderRepository {
             : 0;
 
         const serviceCurrentStep = serviceItems.length > 0
-            ? Math.max(...serviceItems.map((s) => SERVICE_STATUS_STEP_MAP[s.status] ?? 0), 0) || 1
+            ? Math.max(...serviceItems.map((s) => SERVICE_STATUS_STEP_MAP[s.bookingStatus || s.status] ?? 0), 0) || 1
             : 0;
 
         const currentStep = productCurrentStep || serviceCurrentStep || 1;
@@ -215,8 +226,8 @@ export class LaravelOrderRepository implements IOrderRepository {
             discountAmount: backend.discountAmount ?? 0,
             total: backend.total,
             unidades,
-            estado: backend.status as OrderStatus,
-            global_status: backend.globalStatus as OrderStatus,
+            estado: this.normalizeStatus(backend.status) as OrderStatus,
+            global_status: this.normalizeStatus(backend.globalStatus) as OrderStatus,
             currentStep,
             productCurrentStep,
             serviceCurrentStep,
@@ -313,9 +324,110 @@ export class LaravelOrderRepository implements IOrderRepository {
         return this.mapOrder((raw as any).data as BackendOrder);
     }
 
-    async advanceOrderStep(id: string): Promise<Order> {
+    async advanceOrderStep(id: string, section?: 'products' | 'services'): Promise<Order> {
+        console.log('[LaravelOrderRepository::advanceOrderStep] START', { orderId: id, section });
+
         const order = await this.getOrderById(id);
-        if (!order) throw new Error('Order not found');
+        if (!order) {
+            console.error('[LaravelOrderRepository::advanceOrderStep] Order not found', { orderId: id });
+            throw new Error('Order not found');
+        }
+
+        console.log('[LaravelOrderRepository::advanceOrderStep] Order loaded', {
+            orderId: order.id,
+            orderType: order.orderType,
+            estado: order.estado,
+            serviceItemsCount: order.serviceItems?.length,
+            serviceItems: order.serviceItems?.map(si => ({
+                id: si.id,
+                serviceBookingId: si.serviceBookingId,
+                status: si.status,
+                bookingStatus: si.bookingStatus,
+                modality: si.modality,
+            })),
+        });
+
+        const shouldAdvanceServices = section === 'services' || (order.orderType === 'service' && !section);
+        console.log('[LaravelOrderRepository::advanceOrderStep] decision', {
+            shouldAdvanceServices,
+            section,
+            orderType: order.orderType,
+            estadoRaw: JSON.stringify(order.estado),
+            firstItemStatusRaw: JSON.stringify(order.serviceItems?.[0]?.status),
+            firstItemBookingStatusRaw: JSON.stringify(order.serviceItems?.[0]?.bookingStatus),
+        });
+
+        if (shouldAdvanceServices) {
+            const firstItem = order.serviceItems?.[0];
+            console.log('[LaravelOrderRepository::advanceOrderStep] firstItem', firstItem ? {
+                id: firstItem.id,
+                serviceBookingId: firstItem.serviceBookingId,
+                status: firstItem.status,
+                bookingStatus: firstItem.bookingStatus,
+                modality: firstItem.modality,
+            } : 'NO SERVICE ITEMS');
+
+            if (!firstItem?.serviceBookingId) {
+                console.error('[LaravelOrderRepository::advanceOrderStep] No serviceBookingId on firstItem');
+                throw new Error('No se encontró reserva para este servicio');
+            }
+
+            const action = this.getServiceNextAction(firstItem);
+            console.log('[LaravelOrderRepository::advanceOrderStep] action determined', { action, status: firstItem.status, bookingStatus: firstItem.bookingStatus, modality: firstItem.modality });
+
+            if (!action) {
+                console.warn('[LaravelOrderRepository::advanceOrderStep] No valid next action, returning order unchanged');
+                return order;
+            }
+
+            const baseUrl = this.getBaseUrl();
+            const url = `${baseUrl}/bookings/${firstItem.serviceBookingId}/${action}`;
+            console.log('[LaravelOrderRepository::advanceOrderStep] calling booking endpoint', { url, bookingId: firstItem.serviceBookingId, action, method: 'PUT' });
+
+            try {
+                await this.request<any>(`/bookings/${firstItem.serviceBookingId}/${action}`, { method: 'PUT' });
+                console.log('[LaravelOrderRepository::advanceOrderStep] booking endpoint succeeded');
+            } catch (err) {
+                console.error('[LaravelOrderRepository::advanceOrderStep] booking endpoint FAILED', err);
+                throw err;
+            }
+
+            const nextStatus = action === 'confirm' ? 'confirmed'
+                : action === 'on-the-way' ? 'on_the_way'
+                : action === 'complete' ? 'completed'
+                : firstItem.status;
+
+            const updatedServiceItems = order.serviceItems.map((si) =>
+                si.serviceBookingId === firstItem.serviceBookingId
+                    ? { ...si, status: nextStatus, bookingStatus: nextStatus }
+                    : si
+            );
+
+            const maxStep = Math.max(
+                ...updatedServiceItems.map((s) => SERVICE_STATUS_STEP_MAP[s.bookingStatus || s.status] ?? 0), 0
+            );
+            const newEstado = maxStep >= 3 ? 'completed'
+                : maxStep >= 2 ? 'on_the_way'
+                : maxStep >= 1 ? 'confirmed'
+                : order.estado;
+
+            const orderWithUpdatedServices = {
+                ...order,
+                estado: newEstado,
+                serviceItems: updatedServiceItems,
+                serviceCurrentStep: Math.max(
+                    ...updatedServiceItems.map((s) => SERVICE_STATUS_STEP_MAP[s.bookingStatus || s.status] ?? 0), 0
+                ) || 1,
+            };
+
+            console.log('[LaravelOrderRepository::advanceOrderStep] returning order with locally updated services', {
+                serviceCurrentStep: orderWithUpdatedServices.serviceCurrentStep,
+                serviceItems: updatedServiceItems.map(si => ({ id: si.id, status: si.status })),
+            });
+            return orderWithUpdatedServices;
+        }
+
+        console.log('[LaravelOrderRepository::advanceOrderStep] using product flow', { estado: order.estado });
 
         if (order.estado === 'pending_seller') {
             return this.confirmOrder(id);
@@ -325,6 +437,27 @@ export class LaravelOrderRepository implements IOrderRepository {
         if (newStatus === order.estado) return order;
 
         return this.updateOrder(id, { status: newStatus as OrderStatus });
+    }
+
+    private getServiceNextAction(item: ServiceOrderItem): 'confirm' | 'on-the-way' | 'complete' | null {
+        const bookingStatus = this.normalizeStatus(item.bookingStatus);
+        const modality = String(item.modality ?? '').trim().toLowerCase();
+        const isHome = modality === 'home' || modality === 'domicilio' || modality === 'home_service';
+        const isInPerson = modality === 'in_person' || modality === 'sede' || modality === 'presencial';
+
+        let action: 'confirm' | 'on-the-way' | 'complete' | null = null;
+        if (bookingStatus === 'pending') {
+            action = 'confirm';
+        } else if (bookingStatus === 'confirmed' && isHome) {
+            action = 'on-the-way';
+        } else if (bookingStatus === 'confirmed' && isInPerson) {
+            action = 'complete';
+        } else if (bookingStatus === 'on_the_way') {
+            action = 'complete';
+        }
+
+        console.log('[getServiceNextAction]', { bookingStatus, modality, normalizedModality: modality, isHome, isInPerson, action });
+        return action;
     }
 
     async confirmItem(orderId: string, itemId: string): Promise<Order> {

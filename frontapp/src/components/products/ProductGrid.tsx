@@ -117,7 +117,7 @@ function ProductCard({ producto }: { producto: Producto }) {
           {producto.titulo}
         </p>
         <div className="flex items-baseline gap-2 mt-auto">
-          <span className="text-sky-600 dark:text-sky-400 font-black text-base">
+          <span className="text-sky-600 dark:text-[var(--pd-accent2)] font-black text-base">
             S/{(producto.precioOferta ?? producto.precio).toFixed(2)}
           </span>
           {(producto.precioAnterior && producto.precioAnterior > (producto.precioOferta ?? producto.precio)) && (
@@ -137,7 +137,7 @@ function ProductCard({ producto }: { producto: Producto }) {
           className={`mt-1 w-full flex items-center justify-center gap-1.5 py-2 text-xs font-bold rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
             isAdded
               ? 'bg-emerald-500 text-white'
-              : 'bg-sky-50 dark:bg-sky-900/20 text-sky-600 dark:text-sky-400 hover:bg-sky-500 hover:text-white dark:hover:bg-[#4A7C59] dark:hover:text-white'
+              : 'bg-sky-50 dark:bg-[var(--pd-accent2)]/20 text-sky-600 dark:text-[var(--pd-accent2)] hover:bg-sky-500 hover:text-white dark:hover:bg-[var(--pd-accent2)] dark:hover:text-white'
           }`}
         >
           {isLoading ? (
@@ -217,7 +217,7 @@ function ServiceCard({ producto }: { producto: Producto }) {
         </div>
 
         <div className="flex items-baseline gap-2 mt-1">
-          <span className="text-emerald-600 dark:text-emerald-400 font-black text-base">
+          <span className="text-sky-600 dark:text-[var(--pd-accent2)] font-black text-base">
             S/{(producto.precioOferta ?? producto.precio).toFixed(2)}
           </span>
           {(producto.precioAnterior && producto.precioAnterior > (producto.precioOferta ?? producto.precio)) && (
@@ -229,7 +229,7 @@ function ServiceCard({ producto }: { producto: Producto }) {
 
         <Link
           href={producto.enlace || '#'}
-          className="block w-full text-center py-2 rounded-xl bg-sky-50 dark:bg-sky-900/20 text-sky-600 dark:text-sky-400 text-xs font-black uppercase tracking-wider hover:bg-sky-500 hover:text-white dark:hover:bg-[#4A7C59] dark:hover:text-white transition-all mt-1"
+          className="block w-full text-center py-2 rounded-xl bg-sky-50 dark:bg-[var(--pd-accent2)]/20 text-sky-600 dark:text-[var(--pd-accent2)] text-xs font-black uppercase tracking-wider hover:bg-sky-500 hover:text-white dark:hover:bg-[var(--pd-accent2)] dark:hover:text-white transition-all mt-1"
         >
           <span className="flex items-center justify-center gap-1.5">
             <Calendar className="w-3.5 h-3.5" />
