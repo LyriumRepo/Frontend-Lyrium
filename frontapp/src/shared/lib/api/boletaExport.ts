@@ -36,6 +36,14 @@ function getSubtotal(o: BoletaOrder) {
   return getItems(o).reduce((s, i) => s + i.lineTotal, 0);
 }
 
+// Precios al consumidor incluyen IGV por ley peruana — se extrae (no se suma).
+// Si el backend ya provee total, lo usamos directamente.
+function getTotal(o: BoletaOrder): number {
+  if (o.total != null) return o.total;
+  const sub = getSubtotal(o);
+  return sub + (o.shippingCost ?? 0) - (o.discountAmount ?? 0);
+}
+
 function loadImageAsDataUrl(url: string): Promise<string> {
   return fetch(url)
     .then((r) => r.blob())
@@ -68,21 +76,17 @@ export function buildBoletaHtml(order: BoletaOrder): string {
 
   const totalQty = items.reduce((a, i) => a + i.quantity, 0);
   const subtotalVal = getSubtotal(order);
-  const taxVal = order.taxAmount ?? 0;
   const shippingVal = order.shippingCost ?? 0;
   const discountVal = order.discountAmount ?? 0;
-  const finalTotal = subtotalVal + taxVal + shippingVal - discountVal;
+  const finalTotal = getTotal(order);
+  // IGV extraído de los precios (informativo, ya está incluido en subtotal)
+  const igvInfo = Math.round((subtotalVal - subtotalVal / 1.18) * 100) / 100;
 
   const breakdownRows = `
     <tr style="border-top: 2px solid #e5e7eb;">
       <td style="padding: 10px 16px; font-size: 13px; color: #374151;">Subtotal</td>
       <td style="padding: 10px 16px;"></td>
       <td style="padding: 10px 16px; text-align: right; font-weight: 700; color: #1f2937;">S/ ${subtotalVal.toFixed(2)}</td>
-    </tr>
-    <tr>
-      <td style="padding: 10px 16px; font-size: 13px; color: #374151;">IGV (18%)</td>
-      <td style="padding: 10px 16px;"></td>
-      <td style="padding: 10px 16px; text-align: right; font-weight: 700; color: #1f2937;">S/ ${taxVal.toFixed(2)}</td>
     </tr>
     ${shippingVal > 0 ? `
     <tr>
@@ -95,7 +99,12 @@ export function buildBoletaHtml(order: BoletaOrder): string {
       <td style="padding: 10px 16px; font-size: 13px; color: #374151;">Descuento</td>
       <td style="padding: 10px 16px;"></td>
       <td style="padding: 10px 16px; text-align: right; font-weight: 700; color: #dc2626;">-S/ ${discountVal.toFixed(2)}</td>
-    </tr>` : ''}`;
+    </tr>` : ''}
+    <tr>
+      <td colspan="3" style="padding: 4px 16px; font-size: 10px; color: #9ca3af; font-style: italic;">
+        Precios incluyen IGV (18%): S/ ${igvInfo.toFixed(2)}
+      </td>
+    </tr>`;
 
   return `<!DOCTYPE html>
 <html>

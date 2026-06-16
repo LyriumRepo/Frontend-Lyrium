@@ -497,6 +497,61 @@
         to   { transform: rotate(360deg); }
     }
 
+    @keyframes birthdayCardIn {
+        0%   { opacity: 0; transform: scale(0.45) rotate(-6deg); }
+        55%  { opacity: 1; transform: scale(1.06) rotate(1.5deg); }
+        75%  { transform: scale(0.97) rotate(-0.5deg); }
+        100% { opacity: 1; transform: scale(1) rotate(0deg); }
+    }
+    @keyframes birthdayCardOut {
+        0%   { opacity: 1; transform: scale(1); }
+        100% { opacity: 0; transform: scale(0.75) rotate(4deg); }
+    }
+    @keyframes birthdayGlow {
+        0%, 100% { opacity: 0.55; transform: scale(1.06); }
+        50%       { opacity: 0.95; transform: scale(1.2); }
+    }
+    @keyframes floatEmoji {
+        0%, 100% { transform: translateY(0) rotate(-8deg) scale(1); }
+        50%       { transform: translateY(-10px) rotate(8deg) scale(1.1); }
+    }
+    @keyframes gradientShift {
+        0%   { background-position: 0% 50%; }
+        50%  { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    @keyframes bdayFadeIn {
+        from { opacity: 0; }
+        to   { opacity: 1; }
+    }
+    @keyframes bdayFadeOut {
+        from { opacity: 1; }
+        to   { opacity: 0; }
+    }
+    @keyframes bdayEmojiPulse {
+        0%, 100% { transform: scale(1) rotate(-4deg); }
+        25%       { transform: scale(1.18) rotate(4deg); }
+        50%       { transform: scale(1.08) rotate(-2deg); }
+        75%       { transform: scale(1.15) rotate(3deg); }
+    }
+    @keyframes bdayRays {
+        from { transform: translateX(-50%) rotate(0deg); }
+        to   { transform: translateX(-50%) rotate(360deg); }
+    }
+    @keyframes bdayShimmer {
+        0%   { transform: translateX(-150%) skewX(-15deg); }
+        100% { transform: translateX(350%) skewX(-15deg); }
+    }
+
+    .animate-birthday-in        { animation: birthdayCardIn 0.75s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+    .animate-birthday-out       { animation: birthdayCardOut 0.45s ease-in forwards; }
+    .animate-birthday-glow      { animation: birthdayGlow 2s ease-in-out infinite; }
+    .animate-float-emoji        { animation: floatEmoji 2.2s ease-in-out infinite; }
+    .animate-gradient-shift     { background-size: 300% auto; animation: gradientShift 2.5s linear infinite; }
+    .animate-bday-fade-in       { animation: bdayFadeIn 0.3s ease forwards; }
+    .animate-bday-fade-out      { animation: bdayFadeOut 0.45s ease forwards; }
+    .animate-bday-emoji-pulse   { animation: bdayEmojiPulse 1.8s ease-in-out infinite; }
+
     /* --- Finance module stagger animations --- */
     @keyframes cardEntrance {
         from { opacity: 0; transform: translateY(24px) scale(0.97); }

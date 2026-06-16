@@ -34,10 +34,8 @@ function toMessage(m: UnifiedMessage): Message {
   };
 }
 
-// The helpdesk view always shows vendor/user messages on the right (their side)
-// and admin/logistics replies on the left — matching the original ChatMessage behavior.
 const helpdeskIsSent = (msg: Message) =>
-  msg.sender === 'vendor' || msg.sender === 'user';
+  msg.sender === 'admin' || msg.sender === 'logistics';
 
 // ─── SurveyArea ───────────────────────────────────────────────────────────────
 

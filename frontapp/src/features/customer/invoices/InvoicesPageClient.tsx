@@ -32,9 +32,9 @@ function PaymentCard({ confirmation }: { confirmation: PaymentConfirmation }) {
     orderNumber: confirmation.orderNumber,
     items: confirmation.items,
     subtotal: confirmation.subtotal,
-    taxAmount: confirmation.taxAmount,
     shippingCost: confirmation.shippingCost,
     discountAmount: confirmation.discountAmount,
+    total: confirmation.total,
   };
 
   const handleDownload = async (format: 'pdf' | 'png' | 'jpg') => {

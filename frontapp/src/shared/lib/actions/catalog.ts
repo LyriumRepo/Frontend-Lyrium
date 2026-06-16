@@ -25,6 +25,13 @@ function authHeaders(token: string): Record<string, string> {
   };
 }
 
+function toRelativeStorageUrl(url: string | null | undefined): string {
+  if (!url) return '';
+  const idx = url.indexOf('/storage/');
+  if (idx >= 0) return url.substring(idx);
+  return url.startsWith('/') ? url : url;
+}
+
 const VALID_STICKERS = new Set([
   'liquidacion', 'oferta', 'descuento', 'nuevo', 'bestseller', 'envio_gratis',
   'organic', 'natural', 'eco', 'premium', 'vegan',
@@ -53,9 +60,15 @@ function mapLaravelProduct(p: any): Product {
       ? parseFloat(p.discount_percentage)
       : null,
 
-    // Imagen principal — prioriza MediaLibrary, fallback al campo image
-    image: p.images?.[0]?.src ?? p.image ?? '',
-    images: p.images ?? [],
+    // Imagen principal — prioriza MediaLibrary, fallback al campo image; normaliza a /storage/...
+    image: toRelativeStorageUrl(p.images?.[0]?.src ?? p.image),
+    images: (p.images ?? []).map((img: any) => ({
+        ...img,
+        src:    toRelativeStorageUrl(img.src),
+        thumb:  toRelativeStorageUrl(img.thumb),
+        medium: toRelativeStorageUrl(img.medium),
+        large:  toRelativeStorageUrl(img.large),
+    })),
 
     // Categorías
     category: p.categories?.[0]?.slug ?? '',

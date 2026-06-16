@@ -1,119 +1,111 @@
 'use client';
 
 import React from 'react';
-import { MessageCircle } from 'lucide-react';
 import { TicketItemProps } from '../types';
 
-const statusConfig: Record<string, { label: string; class: string; border: string }> = {
-  open: { label: 'Abierto', class: 'bg-emerald-400 text-white', border: 'border-emerald-400' },
-  Abierto: { label: 'Abierto', class: 'bg-emerald-400 text-white', border: 'border-emerald-400' },
-  abierto: { label: 'Abierto', class: 'bg-emerald-400 text-white', border: 'border-emerald-400' },
-  in_progress: { label: 'En Proceso', class: 'bg-lime-400 text-white', border: 'border-lime-400' },
-  'En Proceso': { label: 'En Proceso', class: 'bg-lime-400 text-white', border: 'border-lime-400' },
-  proceso: { label: 'En Proceso', class: 'bg-lime-400 text-white', border: 'border-lime-400' },
-  resolved: { label: 'Resuelto', class: 'bg-[var(--turquesa-500)] text-white', border: 'border-[var(--turquesa-500)]' },
-  Resuelto: { label: 'Resuelto', class: 'bg-[var(--turquesa-500)] text-white', border: 'border-[var(--turquesa-500)]' },
-  resuelto: { label: 'Resuelto', class: 'bg-[var(--turquesa-500)] text-white', border: 'border-[var(--turquesa-500)]' },
-  closed: { label: 'Cerrado', class: 'bg-red-500 text-white', border: 'border-red-500' },
-  Cerrado: { label: 'Cerrado', class: 'bg-red-500 text-white', border: 'border-red-500' },
-  cerrado: { label: 'Cerrado', class: 'bg-red-500 text-white', border: 'border-red-500' },
-  reopened: { label: 'Reabierto', class: 'bg-amber-400 text-white', border: 'border-amber-400' },
-  Reabierto: { label: 'Reabierto', class: 'bg-amber-400 text-white', border: 'border-amber-400' },
-  reabierto: { label: 'Reabierto', class: 'bg-amber-400 text-white', border: 'border-amber-400' },
+const statusConfig: Record<string, { label: string; class: string }> = {
+  open:       { label: 'Abierto',   class: 'bg-emerald-400/15 text-emerald-600 dark:bg-emerald-400/10 dark:text-emerald-400' },
+  Abierto:    { label: 'Abierto',   class: 'bg-emerald-400/15 text-emerald-600 dark:bg-emerald-400/10 dark:text-emerald-400' },
+  abierto:    { label: 'Abierto',   class: 'bg-emerald-400/15 text-emerald-600 dark:bg-emerald-400/10 dark:text-emerald-400' },
+  in_progress:  { label: 'En Proceso', class: 'bg-lime-400/15 text-lime-700 dark:bg-lime-400/10 dark:text-lime-400' },
+  'En Proceso': { label: 'En Proceso', class: 'bg-lime-400/15 text-lime-700 dark:bg-lime-400/10 dark:text-lime-400' },
+  proceso:      { label: 'En Proceso', class: 'bg-lime-400/15 text-lime-700 dark:bg-lime-400/10 dark:text-lime-400' },
+  resolved:  { label: 'Resuelto', class: 'bg-[var(--turquesa-500)]/10 text-[var(--turquesa-500)]' },
+  Resuelto:  { label: 'Resuelto', class: 'bg-[var(--turquesa-500)]/10 text-[var(--turquesa-500)]' },
+  resuelto:  { label: 'Resuelto', class: 'bg-[var(--turquesa-500)]/10 text-[var(--turquesa-500)]' },
+  closed:  { label: 'Cerrado', class: 'bg-red-500/10 text-red-500' },
+  Cerrado: { label: 'Cerrado', class: 'bg-red-500/10 text-red-500' },
+  cerrado: { label: 'Cerrado', class: 'bg-red-500/10 text-red-500' },
+  reopened:  { label: 'Reabierto', class: 'bg-amber-400/15 text-amber-600 dark:bg-amber-400/10 dark:text-amber-400' },
+  Reabierto: { label: 'Reabierto', class: 'bg-amber-400/15 text-amber-600 dark:bg-amber-400/10 dark:text-amber-400' },
+  reabierto: { label: 'Reabierto', class: 'bg-amber-400/15 text-amber-600 dark:bg-amber-400/10 dark:text-amber-400' },
 };
 
 const priorityColors: Record<string, string> = {
-  Baja: 'bg-slate-400',
-  baja: 'bg-slate-400',
-  Media: 'bg-amber-400',
-  media: 'bg-amber-400',
-  Alta: 'bg-orange-500',
-  alta: 'bg-orange-500',
-  Critica: 'bg-red-500',
-  critica: 'bg-red-500',
+  Baja: 'bg-slate-400', baja: 'bg-slate-400',
+  Media: 'bg-amber-400', media: 'bg-amber-400',
+  Alta: 'bg-orange-500', alta: 'bg-orange-500',
+  Critica: 'bg-red-500', critica: 'bg-red-500',
+  Crítica: 'bg-red-500',
 };
 
-const categoryLabels: Record<string, { label: string; color: string }> = {
-  tech: { label: 'Tecnico', color: 'bg-blue-500/10 text-blue-600 dark:bg-blue-500/15 dark:text-blue-300' },
-  admin: { label: 'Admin', color: 'bg-slate-500/10 text-slate-600 dark:bg-slate-400/15 dark:text-slate-300' },
-  info: { label: 'Info', color: 'bg-[var(--turquesa-500)]/10 text-[var(--turquesa-500)] dark:bg-[var(--turquesa-500)]/15 dark:text-[var(--turquesa-500)]' },
-  comment: { label: 'Elogio', color: 'bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-300' },
-  followup: { label: 'Seguimiento', color: 'bg-amber-500/10 text-amber-600 dark:bg-amber-500/15 dark:text-amber-300' },
-  payments: { label: 'Pagos', color: 'bg-rose-500/10 text-rose-600 dark:bg-rose-500/15 dark:text-rose-300' },
-  documentation: { label: 'Tramites', color: 'bg-purple-500/10 text-purple-600 dark:bg-purple-500/15 dark:text-purple-300' },
-};
+const avatarGradients = [
+  'from-sky-400 to-blue-500',
+  'from-emerald-400 to-teal-500',
+  'from-violet-400 to-purple-500',
+  'from-amber-400 to-orange-500',
+  'from-rose-400 to-pink-500',
+  'from-cyan-400 to-sky-500',
+];
 
-export function TicketItem({ ticket, isActive, onClick, showPriority = true, showCategory = false }: TicketItemProps) {
+export function TicketItem({ ticket, isActive, onClick, showPriority = true }: TicketItemProps) {
   const status = statusConfig[ticket.status] || statusConfig.open;
-  const cat = ticket.category ? categoryLabels[ticket.category] : null;
-  const hasUnreadBadge = ticket.unreadCount > 0 && !isActive;
+  const hasUnread = ticket.unreadCount > 0 && !isActive;
+
+  const displayName = ticket.requester.company || ticket.requester.name;
+  const initial = displayName.charAt(0).toUpperCase();
+  const avatarGrad = avatarGradients[parseInt(ticket.id, 10) % avatarGradients.length] ?? avatarGradients[0];
 
   return (
-    <div
-      role="button"
-      tabIndex={0}
+    <button
+      type="button"
       onClick={() => onClick(ticket.id)}
-      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClick(ticket.id); }}
-      className={`group cursor-pointer rounded-[1.55rem] border border-transparent border-l-4 bg-[var(--bg-input)]/78 p-4 transition-all hover:border-[var(--turquesa-500)]/30 hover:bg-[var(--bg-card)] hover:shadow-[0_18px_36px_-28px_rgba(15,23,42,0.35)] dark:hover:border-[var(--turquesa-500)]/20 dark:hover:shadow-[0_22px_42px_-30px_rgba(0,0,0,0.7)] ${status.border} ${isActive ? '!border-[var(--turquesa-500)] !border-l-[var(--turquesa-500)] !bg-[var(--bg-card)] !shadow-[0_22px_45px_-30px_rgba(15,23,42,0.25)] dark:!shadow-[0_22px_48px_-32px_rgba(0,0,0,0.7)]' : ''}`}
+      className={`w-full px-4 py-3.5 border-b border-[var(--border-subtle)] text-left transition-all duration-200 relative group ${
+        isActive
+          ? 'bg-[var(--turquesa-500)]/10'
+          : 'hover:bg-[var(--turquesa-500)]/5 hover:pl-6'
+      }`}
     >
-      <div className="mb-3 flex items-start justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-2">
-          {showPriority && ticket.priority && (
-            <span className={`h-2 w-2 rounded-full ${priorityColors[ticket.priority] || 'bg-slate-400'}`} title={ticket.priority} />
-          )}
-          <span className="rounded-full bg-[var(--turquesa-500)]/10 px-2 py-1 text-[10px] font-black uppercase text-[var(--turquesa-500)] dark:bg-[var(--turquesa-500)]/15 dark:text-[var(--turquesa-500)]">
-            #{ticket.displayId}
-          </span>
-        </div>
-        <div className="flex shrink-0 flex-wrap justify-end gap-1">
-          <span className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-[7px] font-black uppercase tracking-wider ${status.class}`}>
-            {status.label}
-          </span>
-          {showCategory && cat && (
-            <span className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-[7px] font-black uppercase tracking-wider ${cat.color}`}>
-              {cat.label}
-            </span>
-          )}
-        </div>
-      </div>
-
-      <h4
-        className={`line-clamp-2 text-sm leading-6 transition-colors [overflow-wrap:anywhere] ${
-          hasUnreadBadge
-            ? 'font-black text-[var(--text-primary)]'
-            : isActive
-              ? 'font-black text-[var(--text-primary)]'
-              : 'font-semibold text-[var(--text-primary)] group-hover:text-[var(--turquesa-500)]'
-        }`}
-      >
-        {ticket.title}
-      </h4>
-      {ticket.description && (
-        <p className="mt-2 line-clamp-2 text-[11px] leading-5 text-[var(--text-secondary)] [overflow-wrap:anywhere]">{ticket.description}</p>
+      {isActive && (
+        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-10 bg-[var(--turquesa-500)] rounded-r-full" />
       )}
 
-      <div className="mt-4 flex items-center justify-between gap-3 border-t border-[var(--border-subtle)] pt-3">
-        <div className="min-w-0 flex-1">
-          <span className="mb-1 block truncate text-[10px] font-black uppercase tracking-[0.18em] text-[var(--text-primary)]">
-            {ticket.requester.company || ticket.requester.name}
-          </span>
-          {showPriority && ticket.priority && (
-            <span className="text-[9px] font-bold text-[var(--text-muted)]">Prioridad: {ticket.priority}</span>
-          )}
+      <div className="flex items-start gap-3">
+        {/* Avatar */}
+        <div className={`w-9 h-9 shrink-0 rounded-full bg-gradient-to-br ${avatarGrad} flex items-center justify-center text-white font-black text-sm shadow-sm transition-transform duration-200 group-hover:scale-105`}>
+          {initial}
         </div>
-        <div className="flex shrink-0 items-center gap-3 text-[var(--text-muted)]">
-          <div className="flex items-center gap-1 rounded-full border border-[var(--border-subtle)] bg-[var(--bg-card)] px-2 py-1">
-            <MessageCircle className="h-4 w-4" />
-            <span className="text-[10px] font-black">{ticket.messageCount || 0}</span>
-          </div>
-          {hasUnreadBadge && (
-            <span className="flex h-[18px] min-w-[18px] shrink-0 items-center justify-center rounded-full bg-emerald-500 px-1 text-[10px] font-black leading-none text-white">
-              {ticket.unreadCount > 99 ? '99+' : ticket.unreadCount}
+
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          {/* Row 1: name + time */}
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-xs font-black truncate text-[var(--text-primary)] uppercase tracking-tight">
+              {displayName}
+            </p>
+            <span className="text-[9px] text-[var(--text-muted)] shrink-0 font-medium">
+              {ticket.updatedAt}
             </span>
-          )}
-          <span className="text-right text-[9px] font-bold text-[var(--text-muted)]">{ticket.updatedAt}</span>
+          </div>
+
+          {/* Row 2: ticket id + status badge */}
+          <div className="flex items-center gap-1.5 mt-1">
+            <span className="text-[9px] font-black text-[var(--turquesa-500)]">#{ticket.displayId}</span>
+            <span className={`rounded px-1.5 py-0.5 text-[7px] font-black uppercase tracking-wider ${status.class}`}>
+              {status.label}
+            </span>
+            {showPriority && ticket.priority && (
+              <span className={`h-1.5 w-1.5 rounded-full ${priorityColors[ticket.priority] ?? 'bg-slate-400'}`} title={ticket.priority} />
+            )}
+          </div>
+
+          {/* Row 3: title + unread badge */}
+          <div className="flex items-center justify-between mt-1.5 gap-2">
+            <p className={`text-[10px] leading-relaxed truncate ${
+              hasUnread
+                ? 'font-bold text-[var(--text-primary)]'
+                : 'font-medium text-[var(--text-secondary)]'
+            }`}>
+              {ticket.title}
+            </p>
+            {hasUnread && (
+              <span className="ml-1 px-1.5 py-0.5 bg-[var(--turquesa-500)] text-white text-[9px] font-black rounded-full min-w-[18px] text-center leading-none shrink-0">
+                {ticket.unreadCount > 99 ? '99+' : ticket.unreadCount}
+              </span>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </button>
   );
 }

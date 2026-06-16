@@ -173,7 +173,12 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     const [loading, setLoading] = useState(true);
 
     const refreshNotifications = useCallback(async () => {
-        if (authLoading || !isAuthenticated) {
+        if (authLoading) {
+            // Auth aún no terminó — esperar sin cambiar loading
+            setNotifications([]);
+            return;
+        }
+        if (!isAuthenticated) {
             setNotifications([]);
             setLoading(false);
             return;
@@ -195,6 +200,13 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     useEffect(() => {
         refreshNotifications();
     }, [refreshNotifications]);
+
+    // Polling cada 30s como fallback cuando Reverb no está disponible
+    useEffect(() => {
+        if (!isAuthenticated) return;
+        const id = setInterval(() => refreshNotifications(), 30_000);
+        return () => clearInterval(id);
+    }, [isAuthenticated, refreshNotifications]);
 
     const unreadCount = notifications.filter(n => !n.read).length;
 
@@ -231,9 +243,9 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         } catch (e) { }
     }, []);
 
-    // Escucha notificaciones en tiempo real via WebSocket (reemplaza polling de 30s)
+    // WebSocket en tiempo real + polling como fallback
     useEcho<{ notification: Notification }>(
-        `user.${user?.id ?? 0}`,
+        user?.id ? `user.${user.id}` : 'user.__placeholder',
         'NotificationCreated',
         (event) => {
             if (!user) return;

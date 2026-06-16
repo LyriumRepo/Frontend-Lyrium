@@ -527,21 +527,21 @@ async function downloadBoletaCompra(order: Order): Promise<void> {
 
   const totalQty = items.reduce((a, i) => a + i.quantity, 0);
   const subtotalVal = items.reduce((s, i) => s + i.lineTotal, 0);
-  const taxVal = order.taxAmount ?? 0;
   const shippingVal = order.shippingCost ?? 0;
   const discountVal = order.discountAmount ?? 0;
-  const finalTotal = subtotalVal + taxVal + shippingVal - discountVal;
+  // Usar total del backend (viene como "S/ 49.80"); fallback: subtotal + envío - descuento
+  const parsedTotal = parseFloat(String(order.total ?? '').replace(/[^0-9.]/g, ''));
+  const finalTotal = !isNaN(parsedTotal) && parsedTotal > 0
+    ? parsedTotal
+    : (subtotalVal + shippingVal - discountVal);
+  // IGV extraído de los precios (informativo, ya incluido en subtotal)
+  const igvInfo = Math.round((subtotalVal - subtotalVal / 1.18) * 100) / 100;
 
   const breakdownRows = `
     <tr style="border-top: 2px solid #e5e7eb;">
       <td style="padding: 10px 16px; font-size: 13px; color: #374151;">Subtotal</td>
       <td style="padding: 10px 16px;"></td>
       <td style="padding: 10px 16px; text-align: right; font-weight: 700; color: #1f2937;">S/ ${subtotalVal.toFixed(2)}</td>
-    </tr>
-    <tr>
-      <td style="padding: 10px 16px; font-size: 13px; color: #374151;">IGV (18%)</td>
-      <td style="padding: 10px 16px;"></td>
-      <td style="padding: 10px 16px; text-align: right; font-weight: 700; color: #1f2937;">S/ ${taxVal.toFixed(2)}</td>
     </tr>
     ${shippingVal > 0 ? `
     <tr>
@@ -554,7 +554,12 @@ async function downloadBoletaCompra(order: Order): Promise<void> {
       <td style="padding: 10px 16px; font-size: 13px; color: #374151;">Descuento</td>
       <td style="padding: 10px 16px;"></td>
       <td style="padding: 10px 16px; text-align: right; font-weight: 700; color: #dc2626;">-S/ ${discountVal.toFixed(2)}</td>
-    </tr>` : ''}`;
+    </tr>` : ''}
+    <tr>
+      <td colspan="3" style="padding: 4px 16px; font-size: 10px; color: #9ca3af; font-style: italic;">
+        Precios incluyen IGV (18%): S/ ${igvInfo.toFixed(2)}
+      </td>
+    </tr>`;
 
   const fbImg = 'https://fv5-4.files.fm/thumb_show.php?i=726g592gj8&view&v=1&PHPSESSID=53ba53ad2030b8e5aae3cf48c4ba83f8e248150a';
   const igImg = 'https://cdn-icons-png.flaticon.com/128/4138/4138124.png';
