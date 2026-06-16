@@ -105,15 +105,12 @@ export default function ConversationList({
       {conversations.map((conv) => {
         const initial = (conv.storeName ?? conv.name).charAt(0).toUpperCase();
         const colors = [
-          'from-sky-400 to-blue-500',
-          'from-emerald-400 to-teal-500',
-          'from-violet-400 to-purple-500',
-          'from-amber-400 to-orange-500',
-          'from-rose-400 to-pink-500',
-          'from-cyan-400 to-sky-500',
+          'bg-[var(--verde-500)]',
+          'bg-[var(--turquesa-500)]',
+          'bg-[var(--celeste-500)]',
         ];
         const colorIdx = conv.id.charCodeAt(0) % colors.length;
-        const avatarGrad = colors[colorIdx];
+        const avatarColor = colors[colorIdx];
         return (
           <button
             key={conv.id}
@@ -131,7 +128,7 @@ export default function ConversationList({
             )}
             
             <div className="flex items-start gap-3">
-              <div className={`w-10 h-10 shrink-0 rounded-full bg-gradient-to-br ${avatarGrad} flex items-center justify-center text-white font-black text-sm shadow-sm transition-transform duration-200 group-hover:scale-105`}>
+              <div className={`w-10 h-10 shrink-0 rounded-full ${avatarColor} flex items-center justify-center text-white font-black text-sm shadow-sm transition-transform duration-200 group-hover:scale-105`}>
                 {initial}
               </div>
               <div className="flex-1 min-w-0">

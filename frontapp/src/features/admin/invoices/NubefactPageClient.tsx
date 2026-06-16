@@ -1,8 +1,11 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import { useAdminInvoices } from '@/features/admin/invoices/hooks/useAdminInvoices';
+import { InvoiceDetailModal } from '@/features/admin/invoices/InvoiceDetailModal';
+import ModalsPortal from '@/components/layout/shared/ModalsPortal';
+import type { Voucher } from '@/features/seller/invoices/types';
 import { formatCurrency } from '@/shared/lib/utils/formatters';
 import { Receipt, Search, RefreshCw, Download, CheckCircle, Clock, XCircle, AlertCircle, User, TrendingUp, FileText, Building2 } from 'lucide-react';
 import Skeleton from '@/components/ui/Skeleton';
@@ -61,24 +64,28 @@ function getVoucherIcon(type: string) {
     if (t.includes('FACTURA')) {
         return {
             icon: <Building2 className="w-4 h-4 shrink-0" />,
-            bg: 'from-indigo-500/10 to-purple-500/10 text-indigo-500 dark:text-indigo-400 border border-indigo-500/15'
+            bg: 'from-[var(--celeste-500)]/10 to-[var(--celeste-500)]/10 text-[var(--celeste-500)] border border-[var(--celeste-500)]/15',
+            text: 'text-[var(--celeste-500)]'
         };
     }
     if (t.includes('BOLETA')) {
         return {
             icon: <User className="w-4 h-4 shrink-0" />,
-            bg: 'from-emerald-500/10 to-teal-500/10 text-emerald-500 dark:text-emerald-400 border border-emerald-500/15'
+            bg: 'from-emerald-500/10 to-teal-500/10 text-emerald-500 dark:text-emerald-400 border border-emerald-500/15',
+            text: 'text-emerald-500 dark:text-icons-green'
         };
     }
     return {
         icon: <FileText className="w-4 h-4 shrink-0" />,
-        bg: 'from-sky-500/10 to-blue-500/10 text-sky-500 dark:text-sky-400 border border-sky-500/15'
+        bg: 'from-sky-500/10 to-blue-500/10 text-sky-500 dark:text-sky-400 border border-sky-500/15',
+        text: 'text-sky-500 dark:text-sky-400'
     };
 }
 
 interface NubefactPageClientProps {}
 
 export function NubefactPageClient(_props: NubefactPageClientProps) {
+    const [selectedInvoice, setSelectedInvoice] = useState<Voucher | null>(null);
     const { 
         invoices, 
         kpis, 
@@ -195,17 +202,7 @@ export function NubefactPageClient(_props: NubefactPageClientProps) {
                                 </div>
                             </div>
                             
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                                <div className="relative">
-                                    <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-[var(--text-muted)] w-5 h-5" />
-                                    <input
-                                        type="text"
-                                        placeholder="Buscar..."
-                                        className="w-full pl-14 pr-6 py-4 bg-gray-50/50 dark:bg-[var(--bg-input)] border-gray-100 dark:border-[var(--border-subtle)] border rounded-2xl text-xs font-black focus:ring-4 focus:ring-sky-500/10 dark:focus:ring-brand-green/15 focus:border-sky-500 dark:focus:border-icons-green text-gray-900 dark:text-[var(--text-primary)] placeholder-gray-400 dark:placeholder-[var(--text-muted)] transition-all outline-none"
-                                        value={search}
-                                        onChange={(e) => setSearch(e.target.value)}
-                                    />
-                                </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                 <div className="relative">
                                     <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-[var(--text-muted)] w-5 h-5" />
                                     <input
@@ -262,14 +259,18 @@ export function NubefactPageClient(_props: NubefactPageClientProps) {
                                     {(invoices || []).map((invoice) => {
                                         const typeStyle = getVoucherIcon(invoice.type);
                                         return (
-                                            <tr key={invoice.id} className="group hover:scale-[1.002] transition-all duration-300">
+                                            <tr 
+                                                key={invoice.id} 
+                                                onClick={() => setSelectedInvoice(invoice)}
+                                                className="group hover:scale-[1.002] transition-all duration-300 cursor-pointer"
+                                            >
                                                 <td className="px-6 py-4 bg-white dark:bg-[var(--bg-card)]/50 border-t border-b border-gray-100/70 dark:border-[var(--border-subtle)]/30 backdrop-blur-md first:border-l first:rounded-l-2xl last:border-r last:rounded-r-2xl first:pl-8 last:pr-8 group-hover:bg-sky-500/5 dark:group-hover:bg-[#1E3028]/20 group-hover:border-sky-500/30 dark:group-hover:border-[var(--brand-green)]/30 transition-all duration-300">
                                                     <div className="flex items-center gap-4">
                                                         <div className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-500 bg-gradient-to-br ${typeStyle.bg}`}>
                                                             {typeStyle.icon}
                                                         </div>
                                                         <div>
-                                                            <div className="text-[10px] font-black text-sky-500 dark:text-icons-green uppercase tracking-wider">{invoice.type}</div>
+                                                            <div className={`text-[10px] font-black uppercase tracking-wider ${typeStyle.text}`}>{invoice.type}</div>
                                                             <div className="text-[13px] font-black text-gray-900 dark:text-[var(--text-primary)] mt-0.5">{getStoreName(invoice.store_id)}</div>
                                                         </div>
                                                     </div>
@@ -314,6 +315,20 @@ export function NubefactPageClient(_props: NubefactPageClientProps) {
                         </div>
                     </div>
                 </>
+            )}
+            {selectedInvoice && (
+                <ModalsPortal>
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                        <div className="absolute inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-md" onClick={() => setSelectedInvoice(null)} role="presentation" aria-hidden="true"></div>
+                        <div className="relative z-10">
+                            <InvoiceDetailModal 
+                                invoice={selectedInvoice} 
+                                storeName={getStoreName(selectedInvoice.store_id)}
+                                onClose={() => setSelectedInvoice(null)}
+                            />
+                        </div>
+                    </div>
+                </ModalsPortal>
             )}
         </main>
     );

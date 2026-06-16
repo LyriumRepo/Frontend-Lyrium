@@ -12,7 +12,7 @@ interface ContractDetailModalProps {
     onUpdateStatus?: (id: string, status: any, data: Partial<Contract>) => void;
 }
 
-const inputClass = "w-full bg-[var(--bg-secondary)] border border-[var(--border-subtle)] focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 rounded-xl px-4 py-3 text-xs font-black text-[var(--text-primary)] transition-all outline-none";
+const inputClass = "w-full bg-[var(--bg-secondary)] border border-[var(--border-subtle)] focus:ring-4 focus:ring-[var(--celeste-500)]/10 focus:border-[var(--celeste-500)] rounded-xl px-4 py-3 text-xs font-black text-[var(--text-primary)] transition-all outline-none";
 const labelClass = "text-[9px] font-black text-[var(--text-muted)] uppercase ml-1";
 const sectionClass = "bg-[var(--bg-secondary)]/40 rounded-2xl p-5 border border-[var(--border-subtle)] space-y-4";
 const sectionTitleClass = "flex items-center gap-2 border-b border-[var(--border-subtle)] pb-3 mb-4";
@@ -54,22 +54,23 @@ export const ContractDetailModal: React.FC<ContractDetailModalProps> = ({
             if (status === 'ACTIVE') onValidate(contract.id, formState);
             else if (status === 'EXPIRED') onInvalidate(contract.id, formState);
         }
+        onClose();
     };
 
     return (
         <div className="bg-[var(--bg-card)] w-full max-w-4xl rounded-[3rem] shadow-2xl relative overflow-hidden flex flex-col font-industrial animate-scaleUp text-left border border-[var(--border-subtle)]">
 
             {/* Header */}
-            <div className="px-10 py-8 border-b border-[var(--border-subtle)] flex justify-between items-center bg-gradient-to-r from-indigo-950/20 to-zinc-900/10">
+            <div className="px-10 py-8 border-b border-[var(--border-subtle)] flex justify-between items-center bg-gradient-to-r from-[var(--celeste-500)]/10 to-zinc-900/10">
                 <div className="flex items-center gap-5">
-                    <div className="w-16 h-16 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl shadow-sm flex items-center justify-center text-indigo-600 shrink-0">
+                    <div className="w-16 h-16 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl shadow-sm flex items-center justify-center text-[var(--celeste-500)] shrink-0">
                         <FileText className="w-8 h-8" />
                     </div>
                     <div>
                         <h3 className="text-xl font-black text-[var(--text-primary)] tracking-tight uppercase leading-none">
                             {isNewContract ? 'Registrar Nuevo Contrato' : 'Expediente Legal Vendedor'}
                         </h3>
-                        <p className="text-[10px] font-black text-indigo-500 uppercase tracking-[0.2em] mt-2">
+                        <p className="text-[10px] font-black text-[var(--celeste-500)] uppercase tracking-[0.2em] mt-2">
                             ID Contrato: {contract.id}
                         </p>
                     </div>
@@ -83,7 +84,7 @@ export const ContractDetailModal: React.FC<ContractDetailModalProps> = ({
                 {/* ═══ SECCIÓN 1: DATOS DEL VENDEDOR ═══ */}
                 <div className={sectionClass}>
                     <div className={sectionTitleClass}>
-                        <Building2 className="w-4 h-4 text-indigo-500" />
+                        <Building2 className="w-4 h-4 text-[var(--celeste-500)]" />
                         <h4 className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest leading-none mt-0.5">
                             Datos del Vendedor
                         </h4>
@@ -115,7 +116,7 @@ export const ContractDetailModal: React.FC<ContractDetailModalProps> = ({
                 {/* ═══ SECCIÓN 2: DATOS DEL ADMINISTRADOR ═══ */}
                 <div className={sectionClass}>
                     <div className={sectionTitleClass}>
-                        <User className="w-4 h-4 text-indigo-500" />
+                        <User className="w-4 h-4 text-[var(--celeste-500)]" />
                         <h4 className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest leading-none mt-0.5">
                             Datos del Administrador del Contrato
                         </h4>
@@ -139,7 +140,7 @@ export const ContractDetailModal: React.FC<ContractDetailModalProps> = ({
                 {/* ═══ SECCIÓN 3: PLAN Y FECHAS ═══ */}
                 <div className={sectionClass}>
                     <div className={sectionTitleClass}>
-                        <CreditCard className="w-4 h-4 text-indigo-500" />
+                        <CreditCard className="w-4 h-4 text-[var(--celeste-500)]" />
                         <h4 className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest leading-none mt-0.5">
                             Plan y Vigencia
                         </h4>
@@ -172,8 +173,8 @@ export const ContractDetailModal: React.FC<ContractDetailModalProps> = ({
                         <div className="space-y-1.5">
                             <label className={labelClass}>Ruta de Almacenamiento</label>
                             <div className="flex items-center gap-3 bg-[var(--bg-secondary)] rounded-xl px-4 py-3 border border-[var(--border-subtle)]">
-                                <FolderOpen className="w-5 h-5 text-indigo-400 shrink-0" />
-                                <span className="text-[10px] font-mono font-black text-indigo-500 truncate">
+                                <FolderOpen className="w-5 h-5 text-[var(--celeste-500)] shrink-0" />
+                                <span className="text-[10px] font-mono font-black text-[var(--celeste-500)] truncate">
                                     {formState.storage_path || 'pendiente_de_carga.pdf'}
                                 </span>
                             </div>
@@ -187,14 +188,14 @@ export const ContractDetailModal: React.FC<ContractDetailModalProps> = ({
                 <div className="flex gap-3">
                     {isNewContract ? (
                         <>
-                            <button onClick={() => handleUpdateStatus('ACTIVE')} disabled={!isFormComplete}
+                             <button onClick={() => handleUpdateStatus('ACTIVE')} disabled={!isFormComplete}
                                 className="h-12 rounded-xl flex items-center justify-center gap-2 px-6 bg-sky-500 hover:bg-sky-600 active:bg-sky-700 dark:bg-brand-green dark:hover:bg-brand-green-hover text-white border-0 shadow-xl shadow-sky-500/20 dark:shadow-none font-black text-xs uppercase tracking-widest disabled:opacity-45 disabled:cursor-not-allowed duration-300 transition-all active:scale-[0.97]">
                                 <CheckCircle className="w-4 h-4 shrink-0" /> Validar y Activar
                             </button>
                         </>
                     ) : (
                         <>
-                            <button onClick={() => handleUpdateStatus('ACTIVE')}
+                             <button onClick={() => handleUpdateStatus('ACTIVE')}
                                 className="h-12 rounded-xl flex items-center justify-center gap-2 px-6 bg-sky-500 hover:bg-sky-600 active:bg-sky-700 dark:bg-brand-green dark:hover:bg-brand-green-hover text-white border-0 shadow-xl shadow-sky-500/20 dark:shadow-none font-black text-xs uppercase tracking-widest duration-300 transition-all active:scale-[0.97]">
                                 <CheckCircle className="w-4 h-4 shrink-0" /> Validar y Activar
                             </button>
@@ -204,12 +205,12 @@ export const ContractDetailModal: React.FC<ContractDetailModalProps> = ({
                             </button>
                             <button onClick={() => handleUpdateStatus('EXPIRED')}
                                 className="h-12 rounded-xl border border-rose-200/50 text-rose-500 hover:bg-rose-500/10 flex items-center justify-center gap-2 px-6 font-black text-xs uppercase tracking-widest duration-300 transition-all active:scale-[0.97]">
-                                <XCircle className="w-4 h-4 shrink-0" /> Denegar / Expirar
+                                <XCircle className="w-4 h-4 shrink-0" /> Rechazado
                             </button>
                         </>
                     )}
                 </div>
-                <button onClick={onClose} className="text-[10px] font-black text-[var(--text-muted)] hover:text-indigo-500 uppercase tracking-widest transition-all hover:translate-x-1 flex items-center gap-1.5 shrink-0">
+                <button onClick={onClose} className="text-[10px] font-black text-[var(--text-muted)] hover:text-[var(--celeste-500)] uppercase tracking-widest transition-all hover:translate-x-1 flex items-center gap-1.5 shrink-0">
                     Volver al Panel
                 </button>
             </div>
