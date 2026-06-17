@@ -2,11 +2,11 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { nubefactApi, type NubefactInvoice, type NubefactStore } from '@/shared/lib/api/nubefactRepository';
 
 export interface AdminInvoiceKPIs {
-    totalFacturado: number;
-    totalComprobantes: number;
-    pendingCount: number;
-    rejectedCount: number;
-    acceptedCount: number;
+    totalFacturadoMesActual: number;
+    totalFacturadoMesAnterior: number;
+    porcentajeCrecimiento: number;
+    montoPromedio: number;
+    topSellers: Array<{ id: string; name: string; slug: string; totalVendido: number }>;
 }
 
 export interface AdminInvoiceRow {
@@ -58,8 +58,11 @@ export function useAdminInvoices() {
     const [search, setSearch] = useState('');
     const [storeFilter, setStoreFilter] = useState('');
     const [typeFilter, setTypeFilter] = useState('');
+    const [statusFilter, setStatusFilter] = useState('');
     const [dateFrom, setDateFrom] = useState('');
     const [dateTo, setDateTo] = useState('');
+    const [selectedInvoice, setSelectedInvoice] = useState<AdminInvoiceRow | null>(null);
+    const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
     const fetchData = useCallback(async () => {
         setIsLoading(true);
@@ -72,11 +75,11 @@ export function useAdminInvoices() {
 
             setInvoices(listResult.data);
             setKpis({
-                totalFacturado: kpisResult.totalFacturado,
-                totalComprobantes: kpisResult.totalComprobantes,
-                pendingCount: kpisResult.pendientesCdr,
-                rejectedCount: kpisResult.rechazadosObservados,
-                acceptedCount: kpisResult.aceptados,
+                totalFacturadoMesActual: kpisResult.totalFacturadoMesActual,
+                totalFacturadoMesAnterior: kpisResult.totalFacturadoMesAnterior,
+                porcentajeCrecimiento: kpisResult.porcentajeCrecimiento,
+                montoPromedio: kpisResult.montoPromedio,
+                topSellers: kpisResult.topSellers,
             });
         } catch (err: unknown) {
             setError(err instanceof Error ? err.message : 'Error al cargar comprobantes');
@@ -121,6 +124,8 @@ export function useAdminInvoices() {
 
             if (typeFilter && i.type !== typeFilter) return false;
 
+            if (statusFilter && i.sunat_status !== statusFilter) return false;
+
             if (dateFrom && i.emission_date < dateFrom) return false;
 
             if (dateTo) {
@@ -130,7 +135,26 @@ export function useAdminInvoices() {
 
             return true;
         });
-    }, [invoices, search, storeFilter, typeFilter, dateFrom, dateTo]);
+    }, [invoices, search, storeFilter, typeFilter, statusFilter, dateFrom, dateTo]);
+
+    const handleViewDetail = useCallback((invoice: AdminInvoiceRow) => {
+        setSelectedInvoice(invoice);
+        setIsDrawerOpen(true);
+    }, []);
+
+    const handleCloseDrawer = useCallback(() => {
+        setIsDrawerOpen(false);
+        setSelectedInvoice(null);
+    }, []);
+
+    const clearFilters = useCallback(() => {
+        setSearch('');
+        setStoreFilter('');
+        setTypeFilter('');
+        setStatusFilter('');
+        setDateFrom('');
+        setDateTo('');
+    }, []);
 
     return {
         invoices: filtered,
@@ -143,12 +167,19 @@ export function useAdminInvoices() {
         setStoreFilter,
         typeFilter,
         setTypeFilter,
+        statusFilter,
+        setStatusFilter,
         dateFrom,
         setDateFrom,
         dateTo,
         setDateTo,
         allStores,
         allTypes,
+        selectedInvoice,
+        isDrawerOpen,
+        handleViewDetail,
+        handleCloseDrawer,
+        clearFilters,
         refresh: fetchData,
     };
 }

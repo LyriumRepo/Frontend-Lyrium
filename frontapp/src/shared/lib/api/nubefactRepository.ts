@@ -91,11 +91,16 @@ export interface NubefactInvoice {
 }
 
 export interface NubefactKPIs {
-    totalFacturado: number;
-    totalComprobantes: number;
-    pendientesCdr: number;
-    rechazadosObservados: number;
-    aceptados: number;
+    totalFacturadoMesActual: number;
+    totalFacturadoMesAnterior: number;
+    porcentajeCrecimiento: number;
+    montoPromedio: number;
+    topSellers: Array<{
+        id: string;
+        name: string;
+        slug: string;
+        totalVendido: number;
+    }>;
 }
 
 interface PaginatedResponse<T> {

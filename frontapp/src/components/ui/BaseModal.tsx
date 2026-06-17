@@ -60,17 +60,18 @@ export default function BaseModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 overflow-y-auto">
       <div
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
         onClick={onClose}
       />
+      <div className="relative flex min-h-full items-center justify-center p-4">
       <div
         className={`
           relative w-full ${sizeStyles[size] || sizeStyles.md}
           bg-[var(--bg-card)] rounded-[2.5rem] shadow-2xl
           border border-[var(--border-subtle)]
-          flex flex-col max-h-[90vh] animate-scaleIn
+          flex flex-col animate-scaleIn my-4
           ${className}
         `}
       >
@@ -96,6 +97,7 @@ export default function BaseModal({
           </div>
         </div>
         <div className="p-8 overflow-y-auto">{children}</div>
+      </div>
       </div>
     </div>
   );

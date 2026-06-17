@@ -12,7 +12,7 @@ interface ComprobantesSectionProps {
 const statusColors: Record<string, string> = {
     ACCEPTED: 'text-[var(--verde-500)] bg-[var(--verde-100)] border-[var(--verde-500)]/30',
     SENT_WAIT_CDR: 'text-[var(--celeste-500)] bg-[var(--celeste-100)] border-[var(--celeste-500)]/30',
-    DRAFT: 'text-gray-600 bg-gray-50 border-gray-200',
+    DRAFT: 'text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700',
     REJECTED: 'text-[var(--turquesa-500)] bg-[var(--turquesa-100)] border-[var(--turquesa-500)]/30',
     OBSERVED: 'text-[var(--lima-500)] bg-[var(--lima-100)] border-[var(--lima-500)]/30',
 };

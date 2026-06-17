@@ -17,7 +17,7 @@ export const adminNavigation: PanelNavigation = [
         items: [
             {
                 id: 'helpdesk',
-                label: 'Mesa de Ayuda',
+                label: 'Soporte Lyrium',
                 href: '/admin/helpdesk',
                 icon: 'HelpCircle',
             },

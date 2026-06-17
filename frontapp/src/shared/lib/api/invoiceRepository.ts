@@ -2,6 +2,40 @@ import { LARAVEL_API_URL } from '@/shared/lib/config/flags';
 import { getAuthHeaders } from '@/shared/lib/api/token-store';
 import type { Voucher, InvoiceKPIs } from '@/shared/types/invoices';
 
+// Maps camelCase InvoiceResource response → snake_case Voucher type
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function mapToVoucher(inv: any): Voucher {
+    return {
+        id: inv.id,
+        series: inv.series ?? '',
+        number: inv.number ?? '',
+        type: inv.type,
+        customer_name: inv.businessName ?? inv.customer_name ?? '',
+        customer_ruc: inv.nit ?? inv.customer_ruc ?? '',
+        store_name: inv.storeName ?? inv.store_name ?? '',
+        store_ruc: inv.storeRuc ?? inv.store_ruc ?? '',
+        order_id: inv.orderId ?? inv.order_id ?? '',
+        amount: inv.total ?? inv.amount ?? 0,
+        subtotal_sin_igv: inv.subtotalSinIgv ?? inv.subtotal_sin_igv,
+        igv_amount: inv.igvAmount ?? inv.igv_amount,
+        emission_date: inv.createdAt ?? inv.emission_date ?? '',
+        sunat_status: inv.status ?? inv.sunat_status ?? 'DRAFT',
+        pdf_url: inv.pdfUrl ?? inv.pdf_url,
+        history: inv.history ?? [],
+        store_id: inv.storeId ?? inv.store_id,
+        invoice_number: inv.invoiceNumber ?? inv.invoice_number,
+        provider: inv.provider,
+        provider_invoice_id: inv.providerInvoiceId ?? inv.provider_invoice_id,
+        authorization_code: inv.authorizationCode ?? inv.authorization_code,
+        qr_data: inv.qrData ?? inv.qr_data,
+        xml_url: inv.xmlUrl ?? inv.xml_url,
+        cdr_url: inv.cdrUrl ?? inv.cdr_url,
+        created_at: inv.createdAt ?? inv.created_at,
+        updated_at: inv.updatedAt ?? inv.updated_at,
+        items: inv.items,
+    };
+}
+
 async function authFetch<T>(endpoint: string, options?: RequestInit): Promise<T> {
     const authHeaders = await getAuthHeaders();
     const headers: Record<string, string> = {
@@ -31,14 +65,14 @@ export const invoiceApi = {
         if (params?.page) query.set('page', String(params.page));
         if (params?.per_page) query.set('per_page', String(params.per_page));
         const qs = query.toString() ? `?${query.toString()}` : '';
-        const res = await authFetch<{ success: boolean; data: { data: Voucher[]; pagination: any } }>(`/seller/invoices${qs}`);
-        return res.data?.data || [];
+        const res = await authFetch<{ success: boolean; data: { data: unknown[]; pagination: any } }>(`/seller/invoices${qs}`);
+        return (res.data?.data || []).map(mapToVoucher);
     },
 
     getById: async (id: string): Promise<Voucher | null> => {
         try {
-            const res = await authFetch<{ success: boolean; data: Voucher }>(`/invoices/${id}`);
-            return res.data || null;
+            const res = await authFetch<{ success: boolean; data: unknown }>(`/invoices/${id}`);
+            return res.data ? mapToVoucher(res.data) : null;
         } catch {
             return null;
         }
@@ -56,8 +90,8 @@ export const invoiceApi = {
         if (params?.type && params.type !== 'ALL') query.set('type', params.type);
         if (params?.page) query.set('page', String(params.page));
         const qs = query.toString() ? `?${query.toString()}` : '';
-        const res = await authFetch<{ success: boolean; data: Voucher[]; pagination: any }>(`/customer/invoices${qs}`);
-        return { data: res.data || [], pagination: res.pagination || { page: 1, perPage: 20, total: 0, totalPages: 0, hasMore: false } };
+        const res = await authFetch<{ success: boolean; data: unknown[]; pagination: any }>(`/customer/invoices${qs}`);
+        return { data: (res.data || []).map(mapToVoucher), pagination: res.pagination || { page: 1, perPage: 20, total: 0, totalPages: 0, hasMore: false } };
     },
 
     downloadPdf: async (id: string, filename?: string): Promise<void> => {

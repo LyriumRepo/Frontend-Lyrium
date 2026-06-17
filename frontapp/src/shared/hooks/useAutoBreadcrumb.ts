@@ -25,13 +25,13 @@ const routeLabels: Record<string, string> = {
     '/seller/services': 'Servicios',
     '/seller/agenda': 'Agenda',
     '/seller/chat': 'Chat',
-    '/seller/help': 'Ayuda',
+    '/seller/help': 'Soporte Lyrium',
     '/seller/store': 'Tienda',
     '/seller/profile': 'Perfil',
     // Logistics
     '/logistics': 'Panel Logística',
     '/logistics/chat-vendors': 'Chat Vendedores',
-    '/logistics/helpdesk': 'Mesa de Ayuda',
+    '/logistics/helpdesk': 'Soporte Lyrium',
 };
 
 export function useAutoBreadcrumb() {

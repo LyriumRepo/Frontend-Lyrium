@@ -69,9 +69,9 @@ export default function CardProxPago({ data, formatCurrency }: CardProxPagoProps
             <BaseModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}
                 title="Próximo Pago" subtitle="Progreso de recaudación del período" size="md">
                 <div className="space-y-8">
-                    <div className="bg-gray-900 p-6 rounded-[2rem] text-center">
-                        <p className="text-sm font-black text-white/60 uppercase tracking-widest mb-1">Recaudado</p>
-                        <p className="text-5xl font-black text-white">{formatCurrency(recaudado)}</p>
+                    <div className="bg-[var(--bg-secondary)] dark:bg-gray-900 p-6 rounded-[2rem] text-center border border-[var(--border-subtle)]">
+                        <p className="text-sm font-black text-[var(--text-secondary)] uppercase tracking-widest mb-1">Recaudado</p>
+                        <p className="text-5xl font-black text-[var(--text-primary)]">{formatCurrency(recaudado)}</p>
                     </div>
                     <div className="space-y-4">
                         <div className="flex justify-between text-sm font-bold text-[var(--text-secondary)]">
