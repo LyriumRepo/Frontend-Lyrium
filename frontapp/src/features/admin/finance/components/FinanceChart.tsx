@@ -2,6 +2,9 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import Chart, { ChartConfiguration } from 'chart.js/auto';
+import ZoomPlugin from 'chartjs-plugin-zoom';
+
+Chart.register(ZoomPlugin);
 
 interface FinanceChartProps {
   type: 'line' | 'bar' | 'doughnut' | 'radar';
@@ -35,6 +38,10 @@ export default function FinanceChart({
   const chartRef = useRef<HTMLCanvasElement>(null);
   const chartInstance = useRef<Chart | null>(null);
   const [isDark, setIsDark] = useState(false);
+  const [isZoomed, setIsZoomed] = useState(false);
+
+  const ZOOMABLE_TYPES: FinanceChartProps['type'][] = ['line', 'bar'];
+  const canZoom = ZOOMABLE_TYPES.includes(type);
 
   useEffect(() => {
     const checkDark = () => {
@@ -179,6 +186,23 @@ export default function FinanceChart({
             bodyFont: { weight: 'bold', size: 11 },
             titleFont: { weight: 'black', size: 12 },
           },
+          ...(canZoom ? {
+            zoom: {
+              zoom: {
+                wheel: { enabled: true },
+                pinch: { enabled: true },
+                mode: 'x' as const,
+                onZoom: () => setIsZoomed(true),
+              },
+              pan: {
+                enabled: true,
+                mode: 'x' as const,
+              },
+              limits: {
+                x: { minRange: 1 },
+              },
+            },
+          } : {}),
         },
         scales:
           type === 'radar'
@@ -242,10 +266,33 @@ export default function FinanceChart({
         chartInstance.current.destroy();
       }
     };
-  }, [type, labels, data, datasets, color, fill, tension, cutout, isDark]);
+  }, [type, labels, data, datasets, color, fill, tension, cutout, isDark, canZoom]);
+
+  const handleResetZoom = () => {
+    if (chartInstance.current) {
+      (chartInstance.current as any).resetZoom();
+      setIsZoomed(false);
+    }
+  };
 
   return (
-    <div style={{ height }}>
+    <div style={{ height }} className="relative">
+      {canZoom && isZoomed && (
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={handleResetZoom}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleResetZoom(); }}
+          className="absolute top-2 right-2 z-10 px-2 py-1 text-[9px] font-black uppercase tracking-widest bg-[var(--bg-secondary)] border border-[var(--border-subtle)] text-[var(--text-secondary)] rounded-lg hover:bg-[var(--bg-hover)] transition-all cursor-pointer select-none"
+        >
+          Reset zoom
+        </div>
+      )}
+      {canZoom && !isZoomed && (
+        <span className="absolute top-2 right-2 z-10 text-[8px] font-bold text-[var(--text-secondary)] opacity-50 pointer-events-none select-none">
+          Scroll para zoom
+        </span>
+      )}
       <canvas ref={chartRef}></canvas>
     </div>
   );

@@ -1,4 +1,4 @@
-import { LARAVEL_API_URL } from '@/shared/lib/config/flags';
+import { LARAVEL_API_URL, LARAVEL_STORAGE_URL } from '@/shared/lib/config/flags';
 import type { ApiResponse } from '@/shared/lib/api/base-client';
 
 export interface SellerProfile {
@@ -192,9 +192,13 @@ async function request<T>(
   const getImageUrl = (path?: string | null) => {
     if (!path) return undefined;
 
+    if (path.startsWith('http://localhost/')) {
+      return path.replace('http://localhost', LARAVEL_STORAGE_URL.replace(/\/+$/, ''));
+    }
+
     if (path.startsWith('http')) return path;
 
-    return `http://localhost:8000${path}`;
+    return `${LARAVEL_STORAGE_URL.replace(/\/+$/, '')}${path}`;
 
   };
 

@@ -102,10 +102,8 @@ export default function CustomerAddressesPage() {
 
   const setAsDefault = async (id: number) => {
     try {
-      const updated = await addressApi.setDefault(id);
-      setAddresses(prev => prev.map(a =>
-        a.id === updated.id ? { ...a, is_default: updated.is_default } : a
-      ));
+      await addressApi.setDefault(id);
+      setAddresses(prev => prev.map(a => ({ ...a, is_default: a.id === id })));
     } catch (err) {
       console.error('Error al establecer como predeterminada:', err);
     }
@@ -184,7 +182,7 @@ export default function CustomerAddressesPage() {
       <div className="p-4 bg-amber-50 dark:bg-amber-900/10 rounded-2xl border border-amber-200 dark:border-amber-800/30 flex items-start gap-3">
         <Icon name="Star" className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
         <p className="text-xs font-bold text-amber-800 dark:text-amber-300">
-          Marca con la estrella <Icon name="Star" className="w-3.5 h-3.5 inline fill-current text-amber-500" /> las direcciones que usarás por defecto. Puedes tener varias direcciones principales.
+          Usa la estrella <Icon name="Star" className="w-3.5 h-3.5 inline fill-current text-amber-500" /> para marcar tu dirección principal. Solo una dirección puede ser la predeterminada.
         </p>
       </div>
 
@@ -347,11 +345,31 @@ export default function CustomerAddressesPage() {
                     className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)]"
                   >
                     <option value="">Seleccionar...</option>
-                    <option value="Lima">Lima</option>
+                    <option value="Amazonas">Amazonas</option>
+                    <option value="Áncash">Áncash</option>
+                    <option value="Apurímac">Apurímac</option>
                     <option value="Arequipa">Arequipa</option>
+                    <option value="Ayacucho">Ayacucho</option>
+                    <option value="Cajamarca">Cajamarca</option>
+                    <option value="Callao">Callao</option>
                     <option value="Cusco">Cusco</option>
+                    <option value="Huancavelica">Huancavelica</option>
+                    <option value="Huánuco">Huánuco</option>
+                    <option value="Ica">Ica</option>
+                    <option value="Junín">Junín</option>
                     <option value="La Libertad">La Libertad</option>
+                    <option value="Lambayeque">Lambayeque</option>
+                    <option value="Lima">Lima</option>
+                    <option value="Loreto">Loreto</option>
+                    <option value="Madre de Dios">Madre de Dios</option>
+                    <option value="Moquegua">Moquegua</option>
+                    <option value="Pasco">Pasco</option>
                     <option value="Piura">Piura</option>
+                    <option value="Puno">Puno</option>
+                    <option value="San Martín">San Martín</option>
+                    <option value="Tacna">Tacna</option>
+                    <option value="Tumbes">Tumbes</option>
+                    <option value="Ucayali">Ucayali</option>
                   </select>
                 </div>
                 <div className="space-y-2">

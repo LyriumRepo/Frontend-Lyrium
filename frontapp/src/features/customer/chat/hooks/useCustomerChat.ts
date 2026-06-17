@@ -1,8 +1,11 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
+import { useEcho } from '@laravel/echo-react';
 import { CustomerConversation, CustomerMessage, CustomerChatFilters, ChatCategory } from '../types';
 import { chatApi, ChatSeller } from '@/shared/lib/api/chatRepository';
+import { useAuth } from '@/shared/lib/context/AuthContext';
 
 export function useCustomerChat(initialConversationId?: string) {
+  const { user } = useAuth();
   const [conversations, setConversations] = useState<CustomerConversation[]>([]);
   const [sellers, setSellers] = useState<ChatSeller[]>([]);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
@@ -16,6 +19,7 @@ export function useCustomerChat(initialConversationId?: string) {
   const [error, setError] = useState<string | null>(null);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const initialSelectionDone = useRef(false);
+  const activeConvRef = useRef<string | null>(null);
 
   const activeConversation = conversations.find(c => c.id === activeConversationId) ?? null;
   const [messages, setMessages] = useState<CustomerMessage[]>([]);
@@ -66,6 +70,10 @@ export function useCustomerChat(initialConversationId?: string) {
   }, [loadConversations]);
 
   useEffect(() => {
+    activeConvRef.current = activeConversationId;
+  }, [activeConversationId]);
+
+  useEffect(() => {
     if (activeConversationId) {
       chatApi.getMessages(activeConversationId).then(result => {
         setMessages(result.data);
@@ -76,6 +84,22 @@ export function useCustomerChat(initialConversationId?: string) {
       setMessages([]);
     }
   }, [activeConversationId]);
+
+  // WebSocket: mensajes en tiempo real
+  useEcho<{ conversation_id: string }>(
+    user?.id ? `user.${user.id}` : 'user.__placeholder',
+    'NewConversationMessage',
+    () => {
+      loadConversations();
+      const convId = activeConvRef.current;
+      if (convId) {
+        chatApi.getMessages(convId).then(result => {
+          setMessages(result.data);
+        }).catch(() => {});
+      }
+    },
+    [loadConversations, user?.id],
+  );
 
   const setActiveConversation = useCallback((id: string | null) => {
     setActiveConversationId(id);

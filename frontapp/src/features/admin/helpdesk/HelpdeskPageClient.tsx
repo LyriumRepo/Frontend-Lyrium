@@ -122,7 +122,7 @@ export function HelpdeskPageClient() {
           onClick={() => setChannel('vendedores')}
           className={`flex-1 py-2.5 rounded-xl text-[11px] font-black transition-all flex items-center justify-center gap-2 uppercase tracking-wider ${
             channel === 'vendedores'
-              ? 'bg-[var(--bg-card)] text-emerald-500 shadow-sm border border-[var(--border-subtle)]/30'
+              ? 'bg-[var(--bg-card)] text-[var(--turquesa-500)] shadow-sm border border-[var(--border-subtle)]/30'
               : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
           }`}
         >
@@ -133,7 +133,7 @@ export function HelpdeskPageClient() {
           onClick={() => setChannel('clientes')}
           className={`flex-1 py-2.5 rounded-xl text-[11px] font-black transition-all flex items-center justify-center gap-2 uppercase tracking-wider ${
             channel === 'clientes'
-              ? 'bg-[var(--bg-card)] text-emerald-500 shadow-sm border border-[var(--border-subtle)]/30'
+              ? 'bg-[var(--bg-card)] text-[var(--turquesa-500)] shadow-sm border border-[var(--border-subtle)]/30'
               : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
           }`}
         >
@@ -143,14 +143,15 @@ export function HelpdeskPageClient() {
       </div>
 
       <div
-        className="rounded-2xl border border-[var(--border-subtle)] overflow-hidden flex flex-col bg-[var(--bg-card)]"
-        style={{ height: 'calc(100vh - 210px)' }}
+        className="rounded-2xl border border-[var(--border-subtle)] overflow-hidden flex flex-col"
+        style={{ height: 'calc(100vh - 210px)', background: 'linear-gradient(160deg, color-mix(in srgb,#9cb04e 5%,var(--bg-card)) 0%, var(--bg-card) 50%, color-mix(in srgb,#499bbf 4%,var(--bg-card)) 100%)' }}
       >
+        <div className="h-1 w-full shrink-0 bg-gradient-to-r from-[#9cb04e] via-[#64c695] to-[#499bbf]" />
         <div className="flex h-full overflow-hidden">
           <div className="h-full flex-shrink-0 border-r border-[var(--border-subtle)] w-[240px] min-w-[240px] lg:w-72">
             {loading ? (
               <div className="flex items-center justify-center h-full">
-                <Loader2 className="w-5 h-5 animate-spin text-gray-400" />
+                <Loader2 className="w-5 h-5 animate-spin text-[var(--text-muted)]" />
               </div>
             ) : (
               <TicketList
@@ -169,7 +170,7 @@ export function HelpdeskPageClient() {
             )}
           </div>
 
-          <div className="flex-1 h-full bg-[var(--bg-card)] min-w-0">
+          <div className="flex-1 h-full min-w-0">
             {unifiedSelectedTicket ? (
               <ChatView
                 ticket={unifiedSelectedTicket}
@@ -187,12 +188,12 @@ export function HelpdeskPageClient() {
                 showAdminControls
               />
             ) : (
-              <div className="h-full flex items-center justify-center bg-[var(--bg-card)]">
+              <div className="h-full flex items-center justify-center">
                 <div className="text-center">
-                  <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
-                    <AlertCircle className="w-8 h-8 text-gray-300" />
+                  <div className="w-16 h-16 rounded-2xl bg-[var(--bg-secondary)] flex items-center justify-center mx-auto mb-4">
+                    <AlertCircle className="w-8 h-8 text-[var(--text-muted)]" />
                   </div>
-                  <p className="text-sm font-bold text-gray-500">Selecciona un ticket para ver la conversación</p>
+                  <p className="text-sm font-bold text-[var(--text-secondary)]">Selecciona un ticket para ver la conversación</p>
                 </div>
               </div>
             )}

@@ -16,6 +16,7 @@ import { useToast } from '@/shared/lib/context/ToastContext';
 import BaseLoading from '@/components/ui/BaseLoading';
 import Icon from '@/components/ui/Icon';
 import { useConfirmDialog } from '@/components/ui/confirm-dialog';
+import ServicesGuideModal from './components/ServicesGuideModal';
 
 type AppointmentWithClient = Appointment & { clientId?: number };
 
@@ -52,6 +53,7 @@ export function ServicesPageClient() {
         detail: false,
         reschedule: false,
     });
+    const [showGuide, setShowGuide] = useState(false);
 
     // ── Helpers ──────────────────────────────────────────────────────────────
 
@@ -140,6 +142,13 @@ export function ServicesPageClient() {
 
     const headerActions = (
         <div className="flex gap-3 items-center whitespace-nowrap">
+            <button
+                onClick={() => setShowGuide(true)}
+                className="w-9 h-9 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] flex items-center justify-center text-[var(--text-secondary)] hover:text-sky-500 hover:border-sky-500/30 hover:bg-sky-500/5 transition-all"
+                title="Guía para imágenes de servicios"
+            >
+                <Icon name="HelpCircle" className="w-4 h-4" />
+            </button>
             <BaseButton
                 variant="action"
                 leftIcon="Briefcase"
@@ -168,6 +177,8 @@ export function ServicesPageClient() {
     // ── Render ───────────────────────────────────────────────────────────────
 
     return (
+        <>
+        <ServicesGuideModal isOpen={showGuide} onClose={() => setShowGuide(false)} />
         <div className="space-y-8 animate-fadeIn pb-20">
 
             {/* ── Encabezado (sin cambios) ── */}
@@ -528,5 +539,6 @@ export function ServicesPageClient() {
 
             <ConfirmDialog />
         </div>
+        </>
     );
 }

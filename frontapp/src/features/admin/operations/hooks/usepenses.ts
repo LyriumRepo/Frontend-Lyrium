@@ -14,11 +14,15 @@ import {
   Supplier,
   Pagination,
 } from '@/features/admin/operations/types/operations';
+import type {
+  ScanFileResponse,
+  ScanBatchStorePayload,
+} from '@/features/admin/operations/types/scan';
 
 interface UseExpensesState {
   expenses: Expense[];
   stats: ExpenseStats | null;
-  suppliers: Supplier[]; // Para el selector del formulario
+  suppliers: Supplier[];
   loading: boolean;
   statsLoading: boolean;
   error: string | null;
@@ -34,6 +38,8 @@ interface UseExpensesActions {
   updateExpense: (id: number, payload: UpdateExpensePayload) => Promise<void>;
   deleteExpense: (id: number) => Promise<void>;
   markAsPaid: (id: number) => Promise<void>;
+  scanDocument: (file: File, password?: string) => Promise<ScanFileResponse>;
+  scanBatchStore: (payload: ScanBatchStorePayload) => Promise<void>;
 }
 
 export function useExpenses(): {
@@ -140,6 +146,21 @@ export function useExpenses(): {
     [fetchExpenses, fetchStats],
   );
 
+  const scanDocument = useCallback(
+    async (file: File, password?: string): Promise<ScanFileResponse> => {
+      return expenseRepository.scan(file, password);
+    },
+    [],
+  );
+
+  const scanBatchStore = useCallback(
+    async (payload: ScanBatchStorePayload) => {
+      await expenseRepository.scanBatchStore(payload);
+      await Promise.all([fetchExpenses(), fetchStats()]);
+    },
+    [fetchExpenses, fetchStats],
+  );
+
   return {
     state: {
       expenses,
@@ -159,6 +180,8 @@ export function useExpenses(): {
       updateExpense,
       deleteExpense,
       markAsPaid,
+      scanDocument,
+      scanBatchStore,
     },
   };
 }

@@ -208,4 +208,15 @@ export const orderApi = {
   chargeWithToken(payload: ChargeWithTokenPayload): Promise<ChargeWithTokenResult> {
     return post<ChargeWithTokenResult>('/payments/izipay/charge-with-token', payload);
   },
+
+  /**
+   * Fallback de confirmación cuando el webhook de Izipay no llega (dev/localhost).
+   * Si el webhook ya procesó el pago devuelve 400 — ignorar silenciosamente.
+   */
+  confirmIzipayPayment(orderId: string): Promise<{ message: string; order_id: string }> {
+    return post<{ message: string; order_id: string }>(
+      `/payments/izipay/confirm/${orderId}`,
+      {},
+    );
+  },
 };

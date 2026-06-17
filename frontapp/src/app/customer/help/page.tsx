@@ -279,7 +279,7 @@ export default function CustomerHelpPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <a
           href="/customer/support"
           className="bg-white dark:bg-[var(--bg-secondary)] p-6 rounded-[2rem] shadow-xl border border-slate-100 dark:border-[var(--border-subtle)] hover:border-[#bde90d] dark:hover:border-[var(--icons-green)] transition-all group hover:-translate-y-1"
@@ -289,6 +289,17 @@ export default function CustomerHelpPage() {
           </div>
           <h4 className="font-bold text-gray-800 dark:text-[var(--text-primary)] mb-2">Soporte Lyrium</h4>
           <p className="text-sm text-gray-500 dark:text-[var(--text-muted)]">Habla con un agente ahora</p>
+        </a>
+
+        <a
+          href="/customer/chatbot"
+          className="bg-white dark:bg-[var(--bg-secondary)] p-6 rounded-[2rem] shadow-xl border border-slate-100 dark:border-[var(--border-subtle)] hover:border-[var(--turquesa-500)] dark:hover:border-[var(--icons-green)] transition-all group hover:-translate-y-1"
+        >
+          <div className="w-14 h-14 bg-[var(--turquesa-500)]/10 dark:bg-[#1A3A32] rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+            <Icon name="Bot" className="w-7 h-7 text-[var(--turquesa-500)] dark:text-[var(--icons-green)]" />
+          </div>
+          <h4 className="font-bold text-gray-800 dark:text-[var(--text-primary)] mb-2">Chatbot Lyrium</h4>
+          <p className="text-sm text-gray-500 dark:text-[var(--text-muted)]">Asistente virtual inteligente</p>
         </a>
 
         <a
@@ -303,15 +314,50 @@ export default function CustomerHelpPage() {
         </a>
 
         <a
-          href="tel:+5101800000"
-          className="bg-white dark:bg-[var(--bg-secondary)] p-6 rounded-[2rem] shadow-xl border border-slate-100 dark:border-[var(--border-subtle)] hover:border-[#59a6cb] transition-all group hover:-translate-y-1"
+          href="/libro-de-reclamaciones"
+          className="bg-white dark:bg-[var(--bg-secondary)] p-6 rounded-[2rem] shadow-xl border border-slate-100 dark:border-[var(--border-subtle)] hover:border-[#bde90d] dark:hover:border-[var(--icons-green)] transition-all group hover:-translate-y-1"
         >
-          <div className="w-14 h-14 bg-[#59a6cb]/20 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-            <Icon name="Phone" className="w-7 h-7 text-[#59a6cb]" />
+          <div className="w-14 h-14 bg-[#bde90d]/15 dark:bg-[#1A3A32] rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+            <Icon name="FileText" className="w-7 h-7 text-[#7a9800] dark:text-[var(--icons-green)]" />
           </div>
-          <h4 className="font-bold text-gray-800 dark:text-[var(--text-primary)] mb-2">Teléfono</h4>
-          <p className="text-sm text-gray-500 dark:text-[var(--text-muted)]">0800-0000 (Sin costo)</p>
+          <h4 className="font-bold text-gray-800 dark:text-[var(--text-primary)] mb-2">Libro de Reclamaciones</h4>
+          <p className="text-sm text-gray-500 dark:text-[var(--text-muted)]">Presenta un reclamo formal</p>
         </a>
+      </div>
+
+      <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-[2rem] shadow-xl border border-slate-100 dark:border-[var(--border-subtle)] p-8 flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="flex items-center gap-4">
+          <div className="w-14 h-14 bg-[var(--turquesa-500)]/10 dark:bg-[#1A3A32] rounded-2xl flex items-center justify-center shrink-0">
+            <Icon name="Phone" className="w-7 h-7 text-[var(--turquesa-500)] dark:text-[var(--icons-green)]" />
+          </div>
+          <div>
+            <p className="text-sm font-black uppercase tracking-wider text-gray-800 dark:text-[var(--text-primary)]">
+              Línea Gratuita
+            </p>
+            <a href="tel:+5101800000" className="text-[var(--turquesa-500)] dark:text-[#6BAF7B] font-bold text-lg hover:underline">
+              0800-0000
+            </a>
+            <p className="text-xs text-gray-500 dark:text-[var(--text-muted)]">
+              Lun–Vie 8:00 a.m. – 6:00 p.m. · Sáb 9:00 a.m. – 1:00 p.m.
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="w-14 h-14 bg-[var(--turquesa-500)]/10 dark:bg-[#1A3A32] rounded-2xl flex items-center justify-center shrink-0">
+            <Icon name="Clock" className="w-7 h-7 text-[var(--turquesa-500)] dark:text-[var(--icons-green)]" />
+          </div>
+          <div>
+            <p className="text-sm font-black uppercase tracking-wider text-gray-800 dark:text-[var(--text-primary)]">
+              Horario de Atención
+            </p>
+            <p className="text-gray-600 dark:text-[var(--text-muted)] text-sm font-medium">
+              Lun–Vie 8:00 a.m. – 6:00 p.m.
+            </p>
+            <p className="text-gray-600 dark:text-[var(--text-muted)] text-sm font-medium">
+              Sáb 9:00 a.m. – 1:00 p.m.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );

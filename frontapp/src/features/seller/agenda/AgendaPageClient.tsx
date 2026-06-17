@@ -69,7 +69,7 @@ export function AgendaPageClient() {
                         <span className="text-xs font-black text-[var(--text-secondary)] uppercase tracking-widest">Pedidos</span>
                     </div>
                     <div className="flex items-center gap-2 group">
-                        <div className="w-8 h-8 rounded-xl bg-sky-500/10 flex items-center justify-center text-sky-500 border border-sky-500/20">
+                        <div className="w-8 h-8 rounded-xl bg-[#69BEEB]/10 flex items-center justify-center text-[#69BEEB] border border-[#69BEEB]/20">
                             <Icon name="Clock" className="text-lg w-5 h-5 fill-current" />
                         </div>
                         <span className="text-xs font-black text-[var(--text-secondary)] uppercase tracking-widest">Servicios</span>
@@ -94,7 +94,7 @@ export function AgendaPageClient() {
                 </div>
             </div>
 
-            <div className="glass-card !p-0 overflow-hidden border-t-4 border-emerald-500/50 shadow-2xl shadow-emerald-500/10 rounded-[2.5rem] bg-[var(--bg-card)]">
+            <div className="glass-card !p-0 overflow-hidden border-t-4 border-[#69BEEB]/50 shadow-2xl shadow-[#69BEEB]/10 rounded-[2.5rem] bg-[var(--bg-card)]">
                 <div className="grid grid-cols-7 bg-[var(--bg-secondary)]/50 border-b border-[var(--border-subtle)]">
                     {['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'].map(dia => (
                         <div key={dia} className="py-5 text-center text-xs font-black text-[var(--text-secondary)] uppercase tracking-widest">
@@ -127,11 +127,11 @@ export function AgendaPageClient() {
                                     }
                                 }}
                                 className={`min-h-[140px] p-3 transition-all relative group
-                                    ${cell.isOtherMonth ? 'bg-[var(--bg-secondary)]/30 opacity-20 pointer-events-none' : 'hover:bg-emerald-500/5 cursor-pointer'}
+                                    ${cell.isOtherMonth ? 'bg-[var(--bg-secondary)]/30 opacity-20 pointer-events-none' : 'hover:bg-[#69BEEB]/10 cursor-pointer'}
                                 `}
                             >
                                 <span className={`text-[15px] font-black mb-3 inline-flex items-center justify-center
-                                    ${isToday ? 'text-white bg-sky-500 w-7 h-7 rounded-[10px] shadow-lg shadow-sky-500/20' : 'text-[var(--text-primary)]'}
+                                    ${isToday ? 'text-white bg-[#69BEEB] w-7 h-7 rounded-[10px] shadow-lg shadow-[#69BEEB]/20' : 'text-[var(--text-primary)]'}
                                 `}>
                                     {cell.day}
                                 </span>
@@ -157,7 +157,7 @@ export function AgendaPageClient() {
                                             className={`text-xs font-extrabold p-1.5 px-2 rounded-lg border-l-[3px] shadow-sm flex items-center gap-1.5 whitespace-nowrap overflow-hidden cursor-pointer
                                                 ${event.type === 'order'
                                                     ? 'border-l-amber-500 bg-amber-500/10 text-amber-500 hover:bg-amber-500/20'
-                                                    : 'border-l-sky-500 bg-sky-500/10 text-sky-500 hover:bg-sky-500/20'}
+                                                    : 'border-l-[#69BEEB] bg-[#69BEEB]/10 text-[#69BEEB] hover:bg-[#69BEEB]/20'}
                                             `}
                                         >
                                             <Icon name={event.type === 'order' ? 'Package' : 'Clock'} className="w-3 h-3 flex-shrink-0 fill-current" />

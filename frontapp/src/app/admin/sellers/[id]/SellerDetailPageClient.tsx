@@ -240,7 +240,7 @@ export function SellerDetailPageClient() {
                 className="w-12 h-12 rounded-full object-cover"
               />
             ) : (
-              <div className="w-12 h-12 rounded-full bg-sky-500/10 flex items-center justify-center text-sky-500 font-black text-xl">
+              <div className="w-12 h-12 rounded-full bg-cyan-500/10 flex items-center justify-center text-cyan-500 font-black text-xl">
                 {user.display_name?.[0]?.toUpperCase()}
               </div>
             )}
@@ -480,7 +480,7 @@ export function SellerDetailPageClient() {
               disabled={banMutation.isPending}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black border transition-colors disabled:opacity-40 ${
                 user.is_banned
-                  ? 'bg-sky-500/10 text-sky-400 border-sky-500/20 hover:bg-sky-500/20'
+                  ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20 hover:bg-cyan-500/20'
                   : 'bg-rose-500/10 text-rose-400 border-rose-500/20 hover:bg-rose-500/20'
               }`}
             >

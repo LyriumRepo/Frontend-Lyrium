@@ -252,6 +252,47 @@ export default function AboutPage() {
                 </div>
             </section>
 
+            <section className="py-24 px-6 relative bg-[#f8f9fa] dark:bg-[var(--bg-primary)]">
+                <div className="max-w-7xl mx-auto">
+                    <div className="text-center mb-16">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-[var(--bg-secondary)] border border-slate-100 dark:border-[var(--border-subtle)] rounded-full mb-6 shadow-sm">
+                            <span className="w-2 h-2 bg-[var(--turquesa-500)] dark:bg-[var(--icons-green)] rounded-full animate-ping" />
+                            <span className="text-xs font-bold text-[var(--turquesa-500)] dark:text-[#6BAF7B] uppercase tracking-widest">
+                                Modelo Descentralizado
+                            </span>
+                        </div>
+                        <h2 className="text-4xl md:text-5xl font-black text-slate-800 dark:text-[var(--text-primary)] tracking-tighter">
+                            {aboutData.marketplaceSection.title}
+                        </h2>
+                        <p className="mt-4 text-lg text-slate-500 dark:text-[var(--text-muted)] font-medium max-w-2xl mx-auto">
+                            {aboutData.marketplaceSection.subtitle}
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+                        {aboutData.marketplaceSection.paragraphs.map((p, i) => (
+                            <div key={`mp-${i}`} className="bg-white dark:bg-[var(--bg-secondary)] p-8 rounded-[2.5rem] border border-slate-100 dark:border-[var(--border-subtle)] shadow-lg hover:shadow-xl transition-all group">
+                                <div className="w-10 h-10 bg-[var(--turquesa-500)]/10 dark:bg-[#1A3A32] rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+                                    <span className="text-[var(--turquesa-500)] dark:text-[#6BAF7B] font-black text-sm">0{i + 1}</span>
+                                </div>
+                                <p className="text-slate-600 dark:text-[var(--text-muted)] leading-relaxed text-sm text-justify">
+                                    {p}
+                                </p>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                        {aboutData.marketplaceSection.stats.map((stat, i) => (
+                            <div key={`stat-${i}`} className="bg-white dark:bg-[var(--bg-secondary)] p-6 rounded-2xl border border-slate-100 dark:border-[var(--border-subtle)] text-center shadow-sm hover:shadow-md transition-all">
+                                <p className="text-3xl md:text-4xl font-black text-[var(--turquesa-500)] dark:text-[#6BAF7B]">{stat.value}</p>
+                                <p className="text-xs font-bold text-slate-500 dark:text-[var(--text-muted)] uppercase tracking-wider mt-1">{stat.label}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
         </main>
     );
 }

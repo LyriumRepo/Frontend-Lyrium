@@ -13,8 +13,8 @@ interface SidebarProductsProps {
 }
 
 const stickerConfig: Record<string, { label: string; class: string }> = {
-  oferta: { label: 'Oferta', class: 'bg-red-500 text-white' },
-  promo: { label: 'Promo', class: 'bg-amber-500 text-white' },
+  oferta: { label: 'Oferta', class: 'bg-emerald-600 dark:bg-emerald-500 text-white' },
+  promo: { label: 'Promo', class: 'bg-sky-500 dark:bg-sky-400 text-white' },
   nuevo: { label: 'Nuevo', class: 'bg-sky-500 text-white' },
   limitado: { label: 'Limitado', class: 'bg-purple-500 text-white' },
 };

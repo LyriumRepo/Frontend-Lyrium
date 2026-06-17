@@ -120,7 +120,7 @@ export function StorePageClient(_props: StorePageClientProps) {
                     storeId={storeId}
                 />
                 <StoreAwards config={config!} />
-                <LayoutSelector config={config!} updateConfig={handleUpdateConfig} />
+                <LayoutSelector config={config!} updateConfig={handleUpdateConfig} storeId={storeId} />
             </div>
         </div>
     );

@@ -1,8 +1,9 @@
 'use client';
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { apiGet, apiPost, createPlanRequest, getMyPlanRequest } from '@/features/seller/plans/lib/api';
+import { apiGet, apiPost, createPlanRequest, getMyPlanRequest, getSystemColors } from '@/features/seller/plans/lib/api';
 import { buildPlanOrder, defaultPlansData, durationPresets, getDiscountForMonths } from '@/features/seller/plans/lib/plans';
 import type { PlansMap, SubscriptionInfo, Request, ButtonColors, EstadoResponse, AvisoVencimientoResponse } from '@/features/seller/plans/types';
+import { USE_MOCKS } from '@/shared/lib/config/flags';
 import { useAuth } from '@/shared/lib/context/AuthContext';
 
 export interface PlanesState {
@@ -38,13 +39,19 @@ const initialState: PlanesState = {
   isLoaded: false, notification: null, izipayConfig: null,
 };
 
-// Mapa global para convertir slug a ID numérico
+// Mapa global slug → ID numérico del backend
 let slugToNumericIdMap: Record<string, number> = {};
+
+// Mapa slug del backend → clave en defaultPlansData
+const slugToDefaultKey: Record<string, string> = {
+  emprende: 'basic',
+  crece:    'standard',
+  especial: 'premium',
+};
 
 export function usePlanes() {
   const [state, _setState] = useState<PlanesState>(initialState);
   const { user, isAuthenticated, loading: authLoading } = useAuth();
-  // stateRef: siempre apunta al estado actual para callbacks async
   const stateRef = useRef(state);
   const setState = useCallback((updater: PlanesState | ((prev: PlanesState) => PlanesState)) => {
     _setState(prev => {
@@ -89,80 +96,89 @@ export function usePlanes() {
   };
 
   const initialize = useCallback(async () => {
-    // ── API REAL (intentar siempre) ──────────
+    if (USE_MOCKS) {
+      const mockUserId = 'mock-vendedor-001';
+      const mockUserName = 'Vendedor Demo';
+      const mockCurrentPlan = 'standard';
+      const mockSubscriptionInfo: SubscriptionInfo = {
+        plan: mockCurrentPlan,
+        expiryDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        months: 1,
+      };
+      const mockRequests: Request[] = [
+        { id: 1, type: 'upgrade', fromPlan: 'basic', toPlan: 'premium', planName: 'Premium', duration: '6 meses', durationId: '6', months: 6, amount: 150, userName: 'Vendedor Demo', status: 'pending' },
+      ];
+      const mockAviso: AvisoVencimientoResponse = { porVencer: false, diasRestantes: 30, nombrePlan: 'Standard' };
+      const mockButtonColors: ButtonColors = {
+        subscribeBg: '#3b82f6', subscribeColor: '#ffffff',
+        currentBg: '#e5e7eb',  currentColor: '#6b7280',
+        lockedBg: '#9ca3af',   lockedColor: '#e5e7eb',
+        warningColor: '#ef4444',
+      };
+      update({
+        userId: mockUserId, userName: mockUserName, currentPlan: mockCurrentPlan,
+        subscriptionInfo: mockSubscriptionInfo, claimedPlans: ['basic'], trialUsedPlans: [],
+        requestsCache: mockRequests, avisoPorVencer: mockAviso, buttonColors: mockButtonColors,
+        isLoaded: true, isBlocked: false, blockInfo: null,
+      });
+      return;
+    }
+
+    // API REAL — el vendedor solo lee, no escribe planes
     try {
-      // Verificar autenticación
-      if (authLoading) return; // esperar
-      
+      if (authLoading) return;
+
       if (!isAuthenticated || !user) {
-        update({ isBlocked: true, isLoaded: true, blockInfo: {
-          msg: 'Acceso restringido', sub: 'Debes iniciar sesión como vendedor.',
-          btnHref: '/login', btnLabel: 'Iniciar sesión',
-        }});
+        update({ isBlocked: true, blockInfo: { msg: 'Acceso restringido', sub: 'Debes iniciar sesión como vendedor.', btnHref: '/login', btnLabel: 'Iniciar sesión' }, isLoaded: true });
         return;
       }
 
       const userRole = user.role?.toLowerCase() || '';
       if (userRole !== 'seller' && userRole !== 'vendedor') {
-        update({ isBlocked: true, isLoaded: true, blockInfo: {
-          msg: 'Esta sección es para vendedores', sub: 'Gestiona los planes desde el panel admin.',
-          btnHref: '/admin', btnLabel: 'Ir al panel admin',
-        }});
+        update({ isBlocked: true, blockInfo: { msg: 'Esta sección es para vendedores', sub: 'Gestiona los planes desde el panel admin.', btnHref: '/admin', btnLabel: 'Ir al panel admin' }, isLoaded: true });
         return;
       }
 
       const userId = String(user.id);
       const userName = user.display_name || user.username || 'Vendedor';
-      
-      const [plansRes, subRes, colorsRes] = await Promise.all([
-        apiGet<{ data: Array<{ id: number; name: string; slug: string; monthly_fee: string; features: unknown; detailed_benefits?: unknown; timeline_icon?: string; css_color?: string; accent_color?: string; is_active?: boolean; badge?: string; description?: string }> }>('/plans'),
-        apiGet<{ data?: { id: number; plan_id: number; status: string; starts_at?: string; started_at?: string; ends_at?: string; expires_at?: string; plan: { id: number; name: string; slug: string; monthly_fee: string } } }>('/subscriptions/current').catch(() => ({ data: null })),
-        apiGet<{ data?: Record<string, string> }>('/config/colors').catch(() => ({ data: undefined })),
+
+      // Fuente única de verdad: los planes vienen del backend (definidos por el admin)
+      const [plansRes, subRes, colorsData] = await Promise.all([
+        apiGet<{ data: Array<{ id: number; name: string; slug: string; monthly_fee: string; features: string[]; detailed_benefits?: Array<{ title: string; description: string; icon?: string }> }> }>('/plans'),
+        apiGet<{ data?: { id: number; plan_id: number; status: string; starts_at?: string; started_at?: string; ends_at?: string; expires_at?: string; plan: { id: number; name: string; slug: string; monthly_fee: string; features: string[] } } }>('/subscriptions/current').catch(() => ({ data: null })),
+        getSystemColors().catch(() => ({})),
       ]);
-      
+
       slugToNumericIdMap = {};
       const plansData: PlansMap = {};
-      if (Array.isArray(plansRes?.data)) {
-        plansRes.data.forEach((plan: any) => {
+      if (plansRes.data) {
+        plansRes.data.forEach((plan) => {
           slugToNumericIdMap[plan.slug] = plan.id;
-          const rawFeatures = plan.features ?? [];
-          const features = Array.isArray(rawFeatures)
-            ? rawFeatures.map((f: any) => typeof f === 'string' ? { text: f, active: true } : f)
-            : [];
-          const detailedBenefits = Array.isArray(plan.detailed_benefits)
-            ? plan.detailed_benefits.map((b: any) => ({
-                title: b.title ?? '',
-                description: b.description ?? '',
-                emoji: b.emoji ?? b.icon ?? '',
-              }))
-            : [];
           plansData[plan.slug] = {
             id: plan.slug,
             name: plan.name,
             slug: plan.slug,
             price: parseFloat(plan.monthly_fee) || 0,
             priceAnnual: (parseFloat(plan.monthly_fee) || 0) * 12,
-            period: '/mes',
-            periodAnnual: '/año',
+            period: 'mensual',
+            periodAnnual: 'anual',
             currency: 'S/',
-            usePriceMode: true,
+            usePriceMode: false,
             priceText: plan.monthly_fee === '0.00' ? 'Gratis' : `S/ ${plan.monthly_fee}`,
             priceSubtext: plan.monthly_fee === '0.00' ? 'Sin costo' : '/mes',
-            description: plan.description ?? '',
-            badge: plan.badge ?? '',
-            cssColor: plan.css_color ?? '#3b82f6',
-            accentColor: plan.accent_color ?? '#2563eb',
-            requiresPayment: parseFloat(plan.monthly_fee) > 0,
-            features,
-            detailedBenefits,
-            timelineIcon: plan.timeline_icon ?? 'star',
-            isActive: plan.is_active ?? true,
+            description: '',
+            badge: '',
+            requiresPayment: plan.monthly_fee !== '0.00',
+            features: plan.features?.map(f => ({ text: f, active: true })) || [],
+            detailedBenefits: plan.detailed_benefits?.map(b => ({ title: b.title, description: b.description, icon: b.icon || '' })) || [],
+            isActive: true,
+            bgImage: defaultPlansData[slugToDefaultKey[plan.slug] ?? plan.slug]?.bgImage || '',
+            showBgInCard: defaultPlansData[slugToDefaultKey[plan.slug] ?? plan.slug]?.showBgInCard ?? false,
           };
         });
       }
 
-      // Get current plan from subscription
-      const subscription = subRes?.data;
+      const subscription = subRes.data;
       const currentPlan = subscription?.plan?.slug || 'emprende';
       const endsAt = subscription?.ends_at || subscription?.expires_at || '';
       const startsAt = subscription?.starts_at || subscription?.started_at || '';
@@ -175,23 +191,26 @@ export function usePlanes() {
         startDate: startsAt,
       } : null;
 
-      const buttonColors: ButtonColors = (colorsRes?.data as Record<string, string>) ?? {};
+      const buttonColors: ButtonColors = (colorsData && Object.keys(colorsData).length > 0) ? {
+        subscribeBg: (colorsData as any).primary_color,
+        subscribeColor: '#ffffff',
+        currentBg: (colorsData as any).success_color,
+        currentColor: '#ffffff',
+        lockedBg: (colorsData as any).background_color,
+        lockedColor: (colorsData as any).text_secondary_color,
+        warningColor: (colorsData as any).error_color,
+      } : {};
 
       const planOrder = buildPlanOrder(plansData);
       const carouselIndex = Math.max(0, planOrder.indexOf(currentPlan));
       update({
         plansData, planOrder, currentPlan, userId, userName,
-        claimedPlans: [],
-        trialUsedPlans: [],
-        subscriptionInfo,
-        avisoPorVencer: null,
-        requestsCache: [],
-        buttonColors,
+        claimedPlans: [], trialUsedPlans: [], subscriptionInfo,
+        avisoPorVencer: null, requestsCache: [],
+        ...(Object.keys(buttonColors).length > 0 ? { buttonColors } : {}),
         showcasePlan: currentPlan, carouselIndex, isLoaded: true,
       });
-    } catch {
-      update({ isLoaded: true });
-    }
+    } catch { update({ isLoaded: true }); }
   }, [update]);
 
   const switchTab = (tab: 'my-plan' | 'all-plans') => update({ activeTab: tab });
@@ -209,37 +228,21 @@ export function usePlanes() {
   };
 
   const saveRequest = useCallback(async (req: Omit<Request, 'usuario_id'>) => {
-    console.log('[usePlanes] saveRequest called with:', req);
-    
     try {
-      // Buscar el plan_id basado en el toPlan
-      const plansData = state.plansData;
-      const targetPlan = Object.values(plansData).find(p => p.slug === req.toPlan || p.id === req.toPlan);
-      
-      if (!targetPlan) {
-        showNotification('Plan no encontrado', '#ef4444');
-        return;
-      }
+      // Usar el mapa slug→ID numérico poblado durante initialize()
+      const numericPlanId = slugToNumericIdMap[req.toPlan] ?? 1;
 
-      const numericPlanId = parseInt(targetPlan.id);
-      console.log('[usePlanes] Creating request for plan:', targetPlan, 'plan_id:', isNaN(numericPlanId) ? 1 : numericPlanId);
-      
       const response = await createPlanRequest({
-        plan_id: isNaN(numericPlanId) ? 1 : numericPlanId,
+        plan_id: numericPlanId,
         payment_method: req.paymentMethod === 'trial' ? 'trial' : 'izipay',
         months: req.months,
       });
 
-      console.log('[usePlanes] saveRequest response:', response);
-
       if (response.success) {
         showNotification('Solicitud enviada correctamente', '#10b981');
         setModal('requestSent', true);
-        
-        // Si es trial, se aprueba automáticamente
         if (req.paymentMethod === 'trial') {
           showNotification('¡Tu plan ha sido activado!', '#10b981');
-          // Recargar datos
           initialize();
         }
       } else {
@@ -249,25 +252,15 @@ export function usePlanes() {
       console.error('[usePlanes] Error creating plan request:', error);
       showNotification('Error al procesar solicitud', '#ef4444');
     }
-  }, [showNotification, state.plansData, setModal, initialize]);
+  }, [showNotification, setModal, initialize]);
 
   const claimFreePlan = useCallback(async (planKey: string) => {
-    console.log('[usePlanes] Claiming free plan:', planKey);
-    
     const plan = state.plansData[planKey];
-    if (!plan) {
-      showNotification('Plan no encontrado', '#ef4444');
-      return;
-    }
+    if (!plan) { showNotification('Plan no encontrado', '#ef4444'); return; }
 
     try {
-      const numericPlanId = parseInt(plan.id);
-      const response = await createPlanRequest({
-        plan_id: isNaN(numericPlanId) ? 1 : numericPlanId,
-        payment_method: 'trial',
-        months: 1,
-      });
-
+      const numericPlanId = slugToNumericIdMap[planKey] ?? 1;
+      const response = await createPlanRequest({ plan_id: numericPlanId, payment_method: 'trial', months: 1 });
       if (response.success) {
         showNotification('¡Plan gratuito activado!', '#10b981');
         initialize();
@@ -300,23 +293,12 @@ export function usePlanes() {
   const executeDowngrade = useCallback(async () => {
     const targetPlanKey = state.pendingDowngradePlan;
     if (!targetPlanKey) return;
-
     const plan = state.plansData[targetPlanKey];
-    if (!plan) {
-      showNotification('Plan no encontrado', '#ef4444');
-      return;
-    }
-
-    console.log('[usePlanes] Execute downgrade to:', targetPlanKey);
+    if (!plan) { showNotification('Plan no encontrado', '#ef4444'); return; }
 
     try {
-      const numericPlanId = parseInt(plan.id);
-      const response = await createPlanRequest({
-        plan_id: isNaN(numericPlanId) ? 1 : numericPlanId,
-        payment_method: 'trial',
-        months: 1,
-      });
-
+      const numericPlanId = slugToNumericIdMap[targetPlanKey] ?? 1;
+      const response = await createPlanRequest({ plan_id: numericPlanId, payment_method: 'trial', months: 1 });
       if (response.success) {
         showNotification('Solicitud de cambio enviada', '#10b981');
         setModal('downgradeConfirm2', false);
@@ -338,13 +320,8 @@ export function usePlanes() {
   };
 
   const openPaymentModal = useCallback(async (plan: string) => {
-    console.log('[usePlanes] Opening payment modal for plan:', plan);
     const planData = state.plansData[plan];
-    if (!planData) {
-      showNotification('Plan no encontrado', '#ef4444');
-      return;
-    }
-    // Abrir modal de pago (ya existe en el estado)
+    if (!planData) { showNotification('Plan no encontrado', '#ef4444'); return; }
     update({ selectedPaymentPlan: plan });
     setModal('payment', true);
   }, [showNotification, state.plansData, setModal, update]);
@@ -364,19 +341,17 @@ export function usePlanes() {
     const isTrial = selectedPresetId === 'trial';
     const data = plansData[selectedPaymentPlan ?? ''];
     const planId = selectedPaymentPlan ?? '';
-    
-    // Calcular meses y label
+
     let totalMonths: number;
-    if (selectedPresetId === 'trial')  totalMonths = 1;
+    if (selectedPresetId === 'trial')       totalMonths = 1;
     else if (selectedPresetId === 'custom') totalMonths = customMonths;
     else totalMonths = durationPresets.find(p => p.id === selectedPresetId)?.months ?? 1;
-    
+
     let durationLabel: string;
     if (selectedPresetId === 'trial') durationLabel = 'Prueba gratuita (1 mes)';
     else if (totalMonths >= 12 && totalMonths % 12 === 0) { const y = totalMonths / 12; durationLabel = y === 1 ? '1 año (12 meses)' : `${y} años (${totalMonths} meses)`; }
     else durationLabel = totalMonths === 1 ? '1 mes' : `${totalMonths} meses`;
 
-    // Trial - crear solicitud directamente
     if (isTrial) {
       setState(prev => ({ ...prev, sentText: `<strong>¡Tu plan ${data.name} está activándose!</strong><br><br><span style="color:#6b7280;font-size:13px;">Tu acceso se activará automáticamente en unos segundos.</span>`, selectedPaymentPlan: null, modals: { ...prev.modals, payment: false, requestSent: true } }));
       await saveRequest({ type: 'upgrade', fromPlan: currentPlan, toPlan: planId, planName: data.name, duration: durationLabel, durationId: 'trial', months: totalMonths, amount: 0, userName, paymentMethod: 'trial' });
@@ -384,23 +359,12 @@ export function usePlanes() {
       return null;
     }
 
-    // Pago con Izipay - crear solicitud de pago
     try {
-      // Obtener el ID numérico del plan usando el slug
-      const numericPlanId = selectedPaymentPlan ? slugToNumericIdMap[selectedPaymentPlan] : 1;
-      
-      const response = await createPlanRequest({
-        plan_id: numericPlanId,
-        payment_method: 'izipay',
-        months: totalMonths,
-      });
-
+      const numericPlanId = slugToNumericIdMap[selectedPaymentPlan] ?? 1;
+      const response = await createPlanRequest({ plan_id: numericPlanId, payment_method: 'izipay', months: totalMonths });
       if (response.success) {
-        // Aquí normalmente se iniciaría el pago con Izipay
-        // Por ahora, simulamos que el pago fue exitoso
         showNotification('Pago procesado correctamente. Tu plan está activo.', '#10b981');
         setState(prev => ({ ...prev, selectedPaymentPlan: null, modals: { ...prev.modals, payment: false, requestSent: true } }));
-        // Recargar datos
         initialize();
       } else {
         showNotification('Error al procesar pago', '#ef4444');
@@ -409,79 +373,110 @@ export function usePlanes() {
       console.error('[usePlanes] Payment error:', error);
       showNotification('Error al procesar pago', '#ef4444');
     }
-    
+
     return null;
-  }, [saveRequest, showNotification, createPlanRequest, initialize]);
+  }, [saveRequest, showNotification, initialize]);
 
   const onFeatureClick      = (planKey: string) => { update({ benefitDetailPlanKey: planKey }); setModal('benefitDetail', true); };
   const goToBenefitDetail   = () => { setModal('benefitDetail', false); setModal('benefitFullDetail', true); };
   const toggleDetails       = () => setState(prev => ({ ...prev, isDetailsExpanded: !prev.isDetailsExpanded }));
   const toggleCarouselCard  = (key: string) => setState(prev => ({ ...prev, expandedCards: { ...prev.expandedCards, [key]: !prev.expandedCards[key] } }));
 
-  // SSE handlers — wrapeados en useCallback y usan setState funcional para evitar stale closures
+  // ── SSE handlers ──────────────────────────────
+  // Cuando el admin aprueba/rechaza una solicitud, recargamos estado completo desde API
   const handleSolicitudActualizada = useCallback(async (data: { pendientes?: Request[] }) => {
-    for (const req of (data.pendientes ?? [])) {
-      if (req.status !== 'approved') continue;
-      if (req.id) await apiPost('/solicitudes/aplicar.php', { id: req.id });
-      const currentUserId = stateRef.current.userId;
-      const est = await apiGet<EstadoResponse>(`/usuario/estado.php?usuario_id=${currentUserId}`);
-      const av  = await apiGet<AvisoVencimientoResponse>(`/usuario/aviso_vencimiento.php?usuario_id=${currentUserId}`);
-      setState(prev => {
-        const planNom   = prev.plansData[req.toPlan]?.name ?? req.toPlan;
-        const planColor = prev.plansData[req.toPlan]?.cssColor ?? '#10b981';
-        // Programar notificación fuera del setState (efecto secundario)
-        setTimeout(() => showNotification(`Tu plan ${planNom} está activo.`, planColor), 0);
-        return {
-          ...prev, currentPlan: req.toPlan,
-          requestsCache: prev.requestsCache.filter(r => r.id !== req.id),
-          subscriptionInfo: est.success ? (est.subscription ?? null) : prev.subscriptionInfo,
-          claimedPlans: est.success ? (est.claimedPlans ?? prev.claimedPlans) : prev.claimedPlans,
-          trialUsedPlans: est.success ? (est.trialUsed ?? prev.trialUsedPlans) : prev.trialUsedPlans,
-          avisoPorVencer: av?.porVencer ? av : null,
-          pendingUIRefresh: prev.modals.requestSent,
-        };
-      });
-    }
-  }, [showNotification]);
+    const approved = (data.pendientes ?? []).filter(r => r.status === 'approved');
+    if (approved.length === 0) return;
+    await initialize();
+    const planNom = approved[0]?.toPlan
+      ? stateRef.current.plansData[approved[0].toPlan]?.name ?? approved[0].toPlan
+      : '';
+    if (planNom) showNotification(`Tu plan ${planNom} está activo.`, '#10b981');
+  }, [initialize, showNotification]);
 
   const handlePagoConfirmado = useCallback(async (data: { planId: string; meses: number; monto: number }) => {
     setModal('waitingPayment', false);
-    const currentUserId = stateRef.current.userId;
-    const est = await apiGet<EstadoResponse>(`/usuario/estado.php?usuario_id=${currentUserId}`);
-    const av  = await apiGet<AvisoVencimientoResponse>(`/usuario/aviso_vencimiento.php?usuario_id=${currentUserId}`);
-    setState(prev => {
-      const planNom   = prev.plansData[data.planId]?.name ?? data.planId;
-      const planColor = prev.plansData[data.planId]?.cssColor ?? '#10b981';
-      return {
-        ...prev, currentPlan: data.planId,
-        subscriptionInfo: est.success ? (est.subscription ?? null) : null,
-        claimedPlans:     est.success ? (est.claimedPlans ?? []) : prev.claimedPlans,
-        trialUsedPlans:   est.success ? (est.trialUsed    ?? []) : prev.trialUsedPlans,
-        avisoPorVencer:   av?.porVencer ? av : null,
-        pendingUIRefresh: true,
-        sentText: `<strong>¡Pago confirmado! 🎉</strong><br><br>Tu plan <span style="color:${planColor};font-weight:800">${planNom}</span> ha sido activado por <strong>${data.meses === 1 ? '1 mes' : `${data.meses} meses`}</strong>.<br><br><span style="color:#6b7280;font-size:13px;">S/ ${parseFloat(String(data.monto ?? 0)).toFixed(2)} · Procesado por Izipay</span>`,
-        modals: { ...prev.modals, requestSent: true },
-      };
-    });
-  }, [setModal]);
+    await initialize();
+    const { plansData } = stateRef.current;
+    const planNom   = plansData[data.planId]?.name    ?? data.planId;
+    const planColor = plansData[data.planId]?.cssColor ?? '#10b981';
+    setState(prev => ({
+      ...prev,
+      sentText: `<strong>¡Pago confirmado! 🎉</strong><br><br>Tu plan <span style="color:${planColor};font-weight:800">${planNom}</span> ha sido activado por <strong>${data.meses === 1 ? '1 mes' : `${data.meses} meses`}</strong>.<br><br><span style="color:#6b7280;font-size:13px;">S/ ${parseFloat(String(data.monto ?? 0)).toFixed(2)} · Procesado por Izipay</span>`,
+      pendingUIRefresh: true,
+      modals: { ...prev.modals, requestSent: true },
+    }));
+  }, [setModal, initialize]);
 
+  // Cuando llegan planes actualizados desde el admin, refrescamos desde el backend
   const handlePlanesActualizados = useCallback(async () => {
-    const [planesRes, coloresRes] = await Promise.all([
-      apiGet<{ success: boolean; plans?: PlansMap }>('/planes/config.php'),
-      apiGet<{ success: boolean; colors?: ButtonColors }>('/ui/colores.php'),
-    ]);
-    setState(prev => {
-      const newPlans = (planesRes.success && planesRes.plans && Object.keys(planesRes.plans).length > 0) ? planesRes.plans : prev.plansData;
-      return { ...prev, plansData: newPlans, planOrder: buildPlanOrder(newPlans), buttonColors: (coloresRes.success && coloresRes.colors) ? coloresRes.colors : prev.buttonColors };
-    });
+    if (USE_MOCKS) return;
+    try {
+      const [plansRes, colorsData] = await Promise.all([
+        apiGet<{ data?: Array<{ id: number; name: string; slug: string; monthly_fee: string; features?: string[]; detailed_benefits?: Array<{ title: string; description: string; icon?: string }> }> }>('/plans'),
+        getSystemColors().catch(() => ({})),
+      ]);
+      const newPlans: PlansMap = {};
+      if (plansRes.data) {
+        plansRes.data.forEach(plan => {
+          slugToNumericIdMap[plan.slug] = plan.id;
+          newPlans[plan.slug] = {
+            id: plan.slug, name: plan.name, slug: plan.slug,
+            price: parseFloat(plan.monthly_fee) || 0,
+            priceAnnual: (parseFloat(plan.monthly_fee) || 0) * 12,
+            period: 'mensual', periodAnnual: 'anual', currency: 'S/',
+            usePriceMode: false,
+            priceText: plan.monthly_fee === '0.00' ? 'Gratis' : `S/ ${plan.monthly_fee}`,
+            priceSubtext: plan.monthly_fee === '0.00' ? 'Sin costo' : '/mes',
+            description: '', badge: '',
+            requiresPayment: plan.monthly_fee !== '0.00',
+            features: plan.features?.map(f => ({ text: f, active: true })) || [],
+            detailedBenefits: plan.detailed_benefits?.map(b => ({ title: b.title, description: b.description, icon: b.icon || '' })) || [],
+            isActive: true,
+            bgImage: defaultPlansData[slugToDefaultKey[plan.slug] ?? plan.slug]?.bgImage || '',
+            showBgInCard: defaultPlansData[slugToDefaultKey[plan.slug] ?? plan.slug]?.showBgInCard ?? false,
+          };
+        });
+      }
+      const buttonColors: ButtonColors = (colorsData && Object.keys(colorsData).length > 0) ? {
+        subscribeBg: (colorsData as any).primary_color,
+        subscribeColor: '#ffffff',
+        currentBg: (colorsData as any).success_color,
+        currentColor: '#ffffff',
+        lockedBg: (colorsData as any).background_color,
+        lockedColor: (colorsData as any).text_secondary_color,
+        warningColor: (colorsData as any).error_color,
+      } : {};
+      setState(prev => {
+        const plans = Object.keys(newPlans).length > 0 ? newPlans : prev.plansData;
+        return {
+          ...prev, plansData: plans, planOrder: buildPlanOrder(plans),
+          ...(Object.keys(buttonColors).length > 0 ? { buttonColors } : {}),
+        };
+      });
+    } catch (err) {
+      console.error('[usePlanes] handlePlanesActualizados error:', err);
+    }
   }, []);
 
   // Declarado ANTES del useEffect para evitar ReferenceError
   const handleColoresActualizados = useCallback(async () => {
-    const res = await apiGet<{ success: boolean; colors?: ButtonColors }>('/ui/colores.php');
-    if (res.success && res.colors) update({ buttonColors: res.colors });
+    if (USE_MOCKS) return;
+    try {
+      const colorsData = await getSystemColors();
+      if (colorsData && Object.keys(colorsData).length > 0) {
+        update({ buttonColors: {
+          subscribeBg: (colorsData as any).primary_color,
+          subscribeColor: '#ffffff',
+          currentBg: (colorsData as any).success_color,
+          currentColor: '#ffffff',
+          lockedBg: (colorsData as any).background_color,
+          lockedColor: (colorsData as any).text_secondary_color,
+          warningColor: (colorsData as any).error_color,
+        } });
+      }
+    } catch {}
   }, [update]);
-  // Actualizar ref para que el BroadcastChannel listener siempre use la versión actualizada
   useEffect(() => { handleColoresActualizadosRef.current = handleColoresActualizados; }, [handleColoresActualizados]);
 
   // Refs para los handlers — evita ReferenceError independientemente del orden de declaración
@@ -499,12 +494,10 @@ export function usePlanes() {
     return () => bc.close();
   }, []);
 
-  const handlePlanVencido = useCallback(async (data: { planActual?: string }) => {
-    const currentUserId = stateRef.current.userId;
-    const av = await apiGet<AvisoVencimientoResponse>(`/usuario/aviso_vencimiento.php?usuario_id=${currentUserId}`);
-    setState(prev => ({ ...prev, currentPlan: data.planActual ?? 'basic', subscriptionInfo: null, avisoPorVencer: av?.porVencer ? av : null }));
+  const handlePlanVencido = useCallback(async () => {
+    await initialize();
     showNotification('Tu plan ha vencido y fue movido automáticamente al plan Emprende.', '#ef4444');
-  }, [showNotification]);
+  }, [initialize, showNotification]);
 
   return {
     state, update, setModal, showNotification, initialize, switchTab,

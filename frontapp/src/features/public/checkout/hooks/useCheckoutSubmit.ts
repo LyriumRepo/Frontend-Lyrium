@@ -140,6 +140,23 @@ export function useCheckoutSubmit(): UseCheckoutSubmitReturn {
             coupon_code: orderData.promoCode || undefined,
             lirios_used: orderData.liriosUsed > 0 ? orderData.liriosUsed : undefined,
           });
+
+          // Guardar dirección si el usuario lo solicitó (no bloquea el flujo si falla)
+          if (shippingData.saveAddress) {
+            addressApi.create({
+              etiqueta: 'otro',
+              destinatario: fullName,
+              pais: shippingData.pais || 'Perú',
+              departamento: shippingData.departamento,
+              provincia: shippingData.provincia,
+              distrito: shippingData.distrito,
+              avenida: shippingData.avenida,
+              numero: shippingData.numero,
+              piso_lote: shippingData.pisoLote || null,
+              referencia: shippingData.referencia || null,
+              is_default: false,
+            }).catch(() => { /* silencioso — no es crítico */ });
+          }
         } else {
           order = await orderApi.createOrder({
             shipping_name: fullName,

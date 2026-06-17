@@ -32,8 +32,8 @@ export default function CartSummary({ onContinue }: Props) {
     0,
   );
   const shipping = subtotal > 0 ? 10.0 : 0;
-  const igv = (subtotal + shipping) * 0.16;
-  const total = subtotal + shipping + igv;
+  const total = subtotal + shipping; // precios ya incluyen IGV por ley peruana
+  const igv = Math.round((total - total / 1.18) * 100) / 100; // IGV extraído (solo informativo)
 
   // ── Skeleton mientras carga ────────────────────────────────────────────────
   if (isLoading) {

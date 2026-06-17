@@ -39,7 +39,9 @@ export function useCartLoader() {
           cartApi.getCart(),
           (() => {
             const token = getCartToken();
-            return token ? serviceRepository.getServiceHolds(token) : Promise.resolve(null);
+            return token
+              ? serviceRepository.getServiceHolds(token).catch(() => null)
+              : Promise.resolve(null);
           })(),
         ]);
 

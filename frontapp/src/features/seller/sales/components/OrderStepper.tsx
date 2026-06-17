@@ -10,7 +10,7 @@ interface Step {
 
 interface OrderStepperProps {
     currentStep: number;
-    tipoEnvio: TipoEnvio;
+    tipoEnvio: TipoEnvio | null | undefined;
 }
 
 const FLOW_CONFIG: Record<TipoEnvio, { label: string; icon: string; color: string; steps: Step[] }> = {
@@ -41,7 +41,8 @@ const FLOW_CONFIG: Record<TipoEnvio, { label: string; icon: string; color: strin
 };
 
 export default function ProductOrderStepper({ currentStep, tipoEnvio }: OrderStepperProps) {
-    const { label, icon, color, steps } = FLOW_CONFIG[tipoEnvio];
+    const config = FLOW_CONFIG[tipoEnvio ?? 'domicilio'] ?? FLOW_CONFIG['domicilio'];
+    const { label, icon, color, steps } = config;
     const progress = Math.max(0, Math.min(100, ((currentStep - 1) / (steps.length - 1)) * 100));
 
     return (

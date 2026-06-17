@@ -7,7 +7,7 @@ const STEP_CONFIG = {
     1: { title: 'Carrito de compras', desc: 'Revisa tus productos', Icon: ShoppingCart },
     2: { title: 'Finalizar compra', desc: 'Completa tus datos', Icon: CreditCard },
     3: { title: 'Pedido confirmado', desc: 'Tu compra fue procesada', Icon: CheckCircle },
-    4: { title: 'Boleta de compra', desc: 'Detalle de tus productos', Icon: FileText },
+    4: { title: 'Confirmación de pago', desc: 'Detalle de tus productos', Icon: FileText },
 } as const;
 
 export default function CheckoutHeader() {

@@ -83,10 +83,11 @@ export function HelpdeskLayout({
         actions={headerActions}
       />
 
-      <div 
-        className="rounded-2xl border border-[var(--border-subtle)] overflow-hidden flex flex-col bg-[var(--bg-card)]"
-        style={{ height }}
+      <div
+        className="rounded-2xl border border-[var(--border-subtle)] overflow-hidden flex flex-col"
+        style={{ height, background: 'linear-gradient(160deg, color-mix(in srgb,#9cb04e 5%,var(--bg-card)) 0%, var(--bg-card) 50%, color-mix(in srgb,#499bbf 4%,var(--bg-card)) 100%)' }}
       >
+        <div className="h-1 w-full shrink-0 bg-gradient-to-r from-[#9cb04e] via-[#64c695] to-[#499bbf]" />
         <div className="flex h-full overflow-hidden">
           {/* Lista de Tickets */}
           <div 
@@ -144,7 +145,7 @@ export function HelpdeskLayout({
                 value={newTicketSubject}
                 onChange={(e) => setNewTicketSubject(e.target.value)}
                 placeholder="Describe brevemente el problema..."
-                className="w-full px-4 py-3.5 bg-[var(--bg-secondary)]/50 border-none rounded-2xl text-xs font-medium text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:ring-2 focus:ring-sky-500/20"
+                className="w-full px-4 py-3.5 bg-[var(--bg-secondary)]/50 border-none rounded-2xl text-xs font-medium text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:ring-2 focus:ring-[var(--turquesa-500)]/20"
               />
             </div>
             <div>
@@ -154,7 +155,7 @@ export function HelpdeskLayout({
                 onChange={(e) => setNewTicketContent(e.target.value)}
                 placeholder="Proporciona detalles adicionales..."
                 rows={4}
-                className="w-full px-4 py-3.5 bg-[var(--bg-secondary)]/50 border-none rounded-2xl text-xs font-medium text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:ring-2 focus:ring-sky-500/20 resize-none"
+                className="w-full px-4 py-3.5 bg-[var(--bg-secondary)]/50 border-none rounded-2xl text-xs font-medium text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:ring-2 focus:ring-[var(--turquesa-500)]/20 resize-none"
               />
             </div>
             <div className="flex justify-end gap-3 pt-4">

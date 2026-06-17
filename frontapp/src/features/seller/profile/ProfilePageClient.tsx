@@ -31,6 +31,7 @@ export function ProfilePageClient(_props: ProfilePageClientProps) {
 
     const [data, setData] = useState<VendorProfileData | null>(null);
     const [isEditMode, setIsEditMode] = useState(false);
+    const [photoError, setPhotoError] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const EDIT_FIELD_CLASSES = "bg-white dark:bg-[var(--bg-card)]/70 dark:bg-[var(--bg-card)] ring-sky-500/10 px-3 py-1 rounded-xl border-2 border-sky-100 dark:border-[var(--border-subtle)]";
@@ -267,8 +268,8 @@ export function ProfilePageClient(_props: ProfilePageClientProps) {
                             </div>
                             <div className="relative group z-10" role="button" tabIndex={0} onClick={handlePhotoClick} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handlePhotoClick(); }}>
                                 <div className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-white/30 shadow-xl backdrop-blur-md group-hover:scale-110 transition-all duration-500 cursor-pointer">
-                                    {data.rep_legal_foto ? (
-                                        <Image src={data.rep_legal_foto} fill sizes="64px" alt="Representante Legal" className="object-cover" />
+                                    {data.rep_legal_foto && !photoError ? (
+                                        <Image src={data.rep_legal_foto} fill sizes="64px" alt="Representante Legal" className="object-cover" onError={() => setPhotoError(true)} />
                                     ) : (
                                         <div className="w-full h-full bg-gray-100 flex items-center justify-center">
                                             <Icon name="User" className="w-8 h-8 text-gray-400 dark:text-[var(--text-secondary)]" />

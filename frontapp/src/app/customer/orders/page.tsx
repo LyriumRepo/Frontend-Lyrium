@@ -1,11 +1,13 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useEcho } from '@laravel/echo-react';
 import { useAuth } from '@/shared/lib/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import Icon from '@/components/ui/Icon';
 import { Eye, Info } from "lucide-react";
 import { orderApi, OrderResource } from '@/shared/lib/api/orderRepository';
+import { BaseDatePicker } from '@/components/ui';
 import ClientRescheduleModal, { SelectedSpecialist } from './ClientRescheduleModal';
 
 // ─── Tipos ───────────────────────────────────────────────────────────────────
@@ -56,6 +58,19 @@ interface Order {
   reprogramaciones?: number;
   /** True once the client sent a reschedule request to the health center */
   solicitudEnviada?: boolean;
+  paymentMethod?: string | null;
+  userEmail?: string | null;
+  orderItems?: Array<{
+    productName: string;
+    unitPrice: number;
+    quantity: number;
+    lineTotal: number;
+    storeName?: string;
+  }>;
+  subtotalAmount?: number;
+  taxAmount?: number;
+  shippingCost?: number;
+  discountAmount?: number;
 }
 
 // ─── Config de flujos ─────────────────────────────────────────────────────────
@@ -212,7 +227,7 @@ function mapOrderResourceToOrder(raw: OrderResource): Order {
 
   return {
     id: item.orderNumber ?? item.order_number ?? `#ORD-${item.id}`,
-    originalId: item.id,
+    originalId: Number(item.id),
     fecha,
     hora,
     tienda,
@@ -232,6 +247,19 @@ function mapOrderResourceToOrder(raw: OrderResource): Order {
           tracking_url: '',
         }
       : undefined,
+    paymentMethod: item.paymentMethod ?? null,
+    userEmail: item.user?.email ?? null,
+    orderItems: items.map((i: any) => ({
+      productName: i.productName ?? i.product_name ?? '',
+      unitPrice: Number(i.unitPrice ?? i.unit_price ?? 0),
+      quantity: Number(i.quantity ?? 1),
+      lineTotal: Number(i.lineTotal ?? i.line_total ?? 0),
+      storeName: i.store?.name ?? '',
+    })),
+    subtotalAmount: Number(item.subtotal ?? 0),
+    taxAmount: Number(item.taxAmount ?? item.tax_amount ?? 0),
+    shippingCost: Number(item.shippingCost ?? item.shipping_cost ?? 0),
+    discountAmount: Number(item.discountAmount ?? item.discount_amount ?? 0),
   };
 }
 
@@ -298,6 +326,14 @@ function combineAddressParts(parts: (string | null | undefined)[]): string {
 
 // ─── Sub-componente: Stepper de seguimiento ───────────────────────────────────
 
+// Paleta de progresión para pasos completados: de lima claro → verde profundo
+const STEP_COMPLETED_COLORS = [
+  { border: 'border-[#bde90d]', shadow: 'shadow-[#bde90d]/40', dot: '#bde90d' },
+  { border: 'border-[#6BAF7B]', shadow: 'shadow-[#6BAF7B]/40', dot: '#6BAF7B' },
+  { border: 'border-emerald-500', shadow: 'shadow-emerald-400/40', dot: '#10b981' },
+  { border: 'border-teal-500',   shadow: 'shadow-teal-400/40',   dot: '#14b8a6' },
+];
+
 function OrderTrackingCards({
   tipoEnvio,
   currentStep,
@@ -314,11 +350,15 @@ function OrderTrackingCards({
 
   return (
     <div className="space-y-4 animate-card-entrance">
-      <div className="relative flex justify-between items-start pt-2 pb-4">
+      <div className="relative flex justify-between items-start pt-2 pb-6">
+        {/* Línea base + barra de progreso con gradiente */}
         <div className="absolute top-[28px] left-[5%] right-[5%] h-[3px] bg-gray-100 dark:bg-[var(--bg-secondary)] rounded-full z-0">
           <div
-            className="h-full bg-sky-500 dark:bg-[var(--brand-green)] rounded-full transition-all duration-1000 ease-in-out"
-            style={{ width: `${progress}%` }}
+            className="h-full rounded-full transition-all duration-1000 ease-in-out"
+            style={{
+              width: `${progress}%`,
+              background: 'linear-gradient(to right, #bde90d, #6BAF7B, #2A5A4D)',
+            }}
           />
         </div>
 
@@ -326,38 +366,64 @@ function OrderTrackingCards({
           const imgSrc = `/imagenes-seguimiento/${i + 1}.png`;
           const isCompleted = i < activeIndex;
           const isActive = i === activeIndex;
+          const color = STEP_COMPLETED_COLORS[Math.min(i, STEP_COMPLETED_COLORS.length - 1)];
 
           return (
-            <div key={s.id} className="flex flex-col items-center relative z-10" style={{ width: `${100 / totalSteps}%` }}>
-              <div
-                className={`w-14 h-14 rounded-full border-[3px] overflow-hidden transition-all duration-700 shadow-sm flex-shrink-0 bg-white dark:bg-[var(--bg-card)] flex items-center justify-center
-                ${isCompleted
-                    ? 'border-emerald-500 shadow-emerald-200 dark:shadow-emerald-900/30'
-                    : isActive
-                      ? 'border-sky-500 dark:border-[var(--brand-green)] shadow-lg shadow-sky-500/20 dark:shadow-lime-500/20 scale-110'
-                      : 'border-gray-200 dark:border-[var(--border-subtle)] opacity-60'
-                  }`}
-              >
-                <img
-                  src={imgSrc}
-                  alt={`Paso ${s.id}`}
-                  className="w-[90%] h-[90%] rounded-full object-cover"
-                />
+            <div
+              key={s.id}
+              className="flex flex-col items-center relative z-10 gap-2"
+              style={{ width: `${100 / totalSteps}%` }}
+            >
+              {/* Círculo del paso */}
+              <div className="relative">
+                <div
+                  className={`w-14 h-14 rounded-full border-[3px] overflow-hidden transition-all duration-700 flex-shrink-0 flex items-center justify-center bg-white dark:bg-[var(--bg-card)]
+                    ${isCompleted
+                      ? `${color.border} shadow-lg ${color.shadow}`
+                      : isActive
+                        ? 'border-sky-500 dark:border-[var(--turquesa-500)] shadow-lg shadow-sky-400/30 dark:shadow-[var(--turquesa-500)]/30 scale-110 ring-4 ring-sky-200/50 dark:ring-[var(--turquesa-500)]/20'
+                        : 'border-gray-200 dark:border-[var(--border-subtle)] opacity-50'
+                    }`}
+                >
+                  <img
+                    src={imgSrc}
+                    alt={`Paso ${s.id}`}
+                    className={`w-[90%] h-[90%] rounded-full object-cover transition-all duration-700 ${!isCompleted && !isActive ? 'grayscale opacity-60' : ''}`}
+                  />
+                </div>
+
+                {/* Badge de completado */}
+                {isCompleted && (
+                  <div
+                    className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center border-2 border-white dark:border-[var(--bg-card)]"
+                    style={{ backgroundColor: color.dot }}
+                  >
+                    <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                )}
+
+                {/* Anillo pulsante del paso activo */}
+                {isActive && (
+                  <div className="absolute inset-0 rounded-full border-2 border-sky-400 dark:border-[var(--turquesa-500)] animate-ping opacity-25 pointer-events-none" />
+                )}
               </div>
-              <div
-                className={`mt-2 w-1.5 h-1.5 rounded-full transition-all duration-700 ${
-                  isActive
-                    ? 'bg-sky-500 dark:bg-[var(--brand-green)] animate-pulse-dot'
-                    : isCompleted
-                      ? 'bg-emerald-400'
-                      : 'bg-gray-300 dark:bg-[var(--border-subtle)]'
-                }`}
-              />
+
+              {/* Etiqueta del paso */}
+              <p className={`text-center text-[8px] font-black uppercase tracking-wider leading-tight px-0.5 transition-all duration-700
+                ${isActive
+                  ? 'text-sky-600 dark:text-[var(--icons-green)]'
+                  : isCompleted
+                    ? 'text-gray-500 dark:text-gray-400'
+                    : 'text-gray-300 dark:text-[var(--border-subtle)]'
+                }`}>
+                {s.label}
+              </p>
             </div>
           );
         })}
       </div>
-
     </div>
   );
 }
@@ -426,10 +492,168 @@ function TrackingCard({ envio, tipoEnvio }: { envio: EnvioInfo; tipoEnvio: TipoE
   );
 }
 
+// ─── Generación de Boleta de Compra (mismo diseño que el paso 4 del checkout) ──
+
+const TOP_IMG =
+  'https://fv5-5.files.fm/thumb_show.php?i=msu7t9u4py&view&v=1&PHPSESSID=53ba53ad2030b8e5aae3cf48c4ba83f8e248150a';
+const BOTTOM_IMG =
+  'https://fv5-8.files.fm/thumb_show.php?i=8dn38fae9w&view&v=1&PHPSESSID=53ba53ad2030b8e5aae3cf48c4ba83f8e248150a';
+
+function loadImageAsDataUrl(url: string): Promise<string> {
+  return fetch(url)
+    .then((r) => r.blob())
+    .then(
+      (blob) =>
+        new Promise<string>((res) => {
+          const reader = new FileReader();
+          reader.onloadend = () => res(reader.result as string);
+          reader.readAsDataURL(blob);
+        }),
+    );
+}
+
+async function downloadBoletaCompra(order: Order): Promise<void> {
+  const items = order.orderItems ?? [];
+  const itemsHtml = items
+    .map(
+      (i) => `
+    <tr style="border-bottom: 1px solid #e5e7eb;">
+      <td style="padding: 12px 16px; font-weight: 500; color: #1f2937;">${i.productName}</td>
+      <td style="padding: 12px 16px; text-align: center; color: #374151;">${i.quantity}</td>
+      <td style="padding: 12px 16px; text-align: right; font-weight: 700; color: #1f2937;">S/ ${i.lineTotal.toFixed(2)}</td>
+    </tr>`,
+    )
+    .join('');
+
+  const totalQty = items.reduce((a, i) => a + i.quantity, 0);
+  const subtotalVal = items.reduce((s, i) => s + i.lineTotal, 0);
+  const shippingVal = order.shippingCost ?? 0;
+  const discountVal = order.discountAmount ?? 0;
+  // Usar total del backend (viene como "S/ 49.80"); fallback: subtotal + envío - descuento
+  const parsedTotal = parseFloat(String(order.total ?? '').replace(/[^0-9.]/g, ''));
+  const finalTotal = !isNaN(parsedTotal) && parsedTotal > 0
+    ? parsedTotal
+    : (subtotalVal + shippingVal - discountVal);
+  // IGV extraído de los precios (informativo, ya incluido en subtotal)
+  const igvInfo = Math.round((subtotalVal - subtotalVal / 1.18) * 100) / 100;
+
+  const breakdownRows = `
+    <tr style="border-top: 2px solid #e5e7eb;">
+      <td style="padding: 10px 16px; font-size: 13px; color: #374151;">Subtotal</td>
+      <td style="padding: 10px 16px;"></td>
+      <td style="padding: 10px 16px; text-align: right; font-weight: 700; color: #1f2937;">S/ ${subtotalVal.toFixed(2)}</td>
+    </tr>
+    ${shippingVal > 0 ? `
+    <tr>
+      <td style="padding: 10px 16px; font-size: 13px; color: #374151;">Envío</td>
+      <td style="padding: 10px 16px;"></td>
+      <td style="padding: 10px 16px; text-align: right; font-weight: 700; color: #1f2937;">S/ ${shippingVal.toFixed(2)}</td>
+    </tr>` : ''}
+    ${discountVal > 0 ? `
+    <tr>
+      <td style="padding: 10px 16px; font-size: 13px; color: #374151;">Descuento</td>
+      <td style="padding: 10px 16px;"></td>
+      <td style="padding: 10px 16px; text-align: right; font-weight: 700; color: #dc2626;">-S/ ${discountVal.toFixed(2)}</td>
+    </tr>` : ''}
+    <tr>
+      <td colspan="3" style="padding: 4px 16px; font-size: 10px; color: #9ca3af; font-style: italic;">
+        Precios incluyen IGV (18%): S/ ${igvInfo.toFixed(2)}
+      </td>
+    </tr>`;
+
+  const fbImg = 'https://fv5-4.files.fm/thumb_show.php?i=726g592gj8&view&v=1&PHPSESSID=53ba53ad2030b8e5aae3cf48c4ba83f8e248150a';
+  const igImg = 'https://cdn-icons-png.flaticon.com/128/4138/4138124.png';
+  const waImg = 'https://cdn-icons-png.flaticon.com/128/15713/15713434.png';
+
+  const html = `<!DOCTYPE html>
+<html>
+<head><title>Boleta de Compra - ${order.id}</title>
+<style>
+  @media print {
+    body * { visibility: hidden; }
+    #boleta-wrapper, #boleta-wrapper * { visibility: visible; }
+    #boleta-wrapper { position: absolute; left: 0; top: 0; width: 100%; }
+    .no-print { display: none !important; }
+    #boleta-top-img, #boleta-bottom-img { display: block !important; width: 100% !important; height: auto !important; }
+    .print-turquoise { background-color: #0EA5E9 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color: white !important; }
+    #boleta-print-area { break-inside: avoid; page-break-inside: avoid; }
+    @page { size: portrait; margin: 0mm; }
+  }
+  body { font-family: Arial, Helvetica, sans-serif; margin: 0; padding: 0; background: #f3f4f6; }
+</style>
+</head>
+<body>
+<div id="boleta-wrapper" style="max-width: 672px; margin: 0 auto; padding: 16px;">
+  <div id="boleta-print-area" style="max-width: 672px; margin: 0 auto;">
+    <div class="no-print" style="text-align: right; margin-bottom: 16px;">
+      <button onclick="window.print()" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 16px; background: #0EA5E9; color: white; font-weight: 900; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; border: none; cursor: pointer;">
+        Descargar Boleta
+      </button>
+    </div>
+
+    <div style="background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); border: 1px solid #e5e7eb;">
+      <img id="boleta-top-img" src="${TOP_IMG}" alt="Encabezado boleta" style="width: 100%; height: auto; display: block;" />
+
+      <div style="padding: 8px 24px 16px; margin-top: -8px; position: relative; z-index: 10;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+          <thead>
+            <tr class="print-turquoise" style="background: #0EA5E9; color: white;">
+              <th style="text-align: left; padding: 12px 16px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; font-size: 12px;">Producto</th>
+              <th style="text-align: center; padding: 12px 16px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; font-size: 12px;">Cantidad</th>
+              <th style="text-align: right; padding: 12px 16px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; font-size: 12px;">Precio</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${itemsHtml}
+          </tbody>
+          <tfoot>
+            ${breakdownRows}
+            <tr class="print-turquoise" style="background: #0EA5E9; color: white;">
+              <td style="padding: 12px 16px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; font-size: 12px;">TOTAL</td>
+              <td style="padding: 12px 16px; text-align: center; font-weight: 900;">${totalQty}</td>
+              <td style="padding: 12px 16px; text-align: right; font-weight: 900; font-size: 16px;">S/ ${finalTotal.toFixed(2)}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <div style="padding: 0 24px 24px; display: flex; flex-direction: column; align-items: center; gap: 16px;">
+        <div style="text-align: center; font-size: 10px; color: #9ca3af; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;">
+          Orden N° ${order.id}
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: center; border-top: 1.5px solid #d1f0eb; margin-top: 8px; padding-top: 24px; padding-bottom: 8px; width: 100%;">
+          <a href="https://www.facebook.com" target="_blank" style="padding: 0 16px;">
+            <img src="${fbImg}" width="48" height="48" alt="Facebook" style="border-radius: 50%;" />
+          </a>
+          <div style="width: 1px; height: 54px; background: #c8e8e4;"></div>
+          <a href="https://www.instagram.com/lyrium_biomarketplace/" target="_blank" style="padding: 0 16px;">
+            <img src="${igImg}" width="48" height="48" alt="Instagram" style="border-radius: 10px;" />
+          </a>
+          <div style="width: 1px; height: 54px; background: #c8e8e4;"></div>
+          <a href="https://wa.me/51937093420" target="_blank" style="padding: 0 16px;">
+            <img src="${waImg}" width="48" height="48" alt="WhatsApp" />
+          </a>
+        </div>
+      </div>
+
+      <img id="boleta-bottom-img" src="${BOTTOM_IMG}" alt="Pie boleta" style="width: 100%; height: auto; display: block;" />
+    </div>
+  </div>
+</div>
+</body>
+</html>`;
+
+  const win = window.open('', '_blank');
+  if (!win) return;
+  win.document.write(html);
+  win.document.close();
+}
+
 // ─── Página principal ─────────────────────────────────────────────────────────
 
 export default function CustomerOrdersPage() {
-  const { isAuthenticated, loading } = useAuth();
+  const { user, isAuthenticated, loading } = useAuth();
   const router = useRouter();
 
   const [orders, setOrders] = useState<Order[]>([]);
@@ -463,6 +687,30 @@ export default function CustomerOrdersPage() {
       loadOrders();
     }
   }, [loading, isAuthenticated, loadOrders]);
+
+  useEcho<{ order_id: string; status: string; active: boolean }>(
+    `user.${user?.id ?? 0}`,
+    'OrderStatusChanged',
+    (event) => {
+      const { order_id, status } = event;
+      const newEstado = STATUS_MAP[status] ?? 'validado_vendedor';
+      const newLabel = STATUS_LABEL_MAP[status] ?? status;
+      const newStep = STATUS_STEP_MAP[status] ?? 1;
+
+      const applyUpdate = (o: Order): Order =>
+        o.originalId === Number(order_id)
+          ? { ...o, estado: newEstado, estadoLabel: newLabel, currentStep: newStep }
+          : o;
+
+      setOrders(prev => prev.map(applyUpdate));
+      setFiltered(prev => prev.map(applyUpdate));
+      setSelected(prev => prev && prev.originalId === Number(order_id)
+        ? applyUpdate(prev)
+        : prev
+      );
+    },
+    [user]
+  );
 
   const [filters, setFilters] = useState({
     categoria: 'productos',
@@ -592,9 +840,6 @@ export default function CustomerOrdersPage() {
 
   const selectClass =
     'w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-white dark:bg-[var(--bg-secondary)] p-3 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 dark:focus:border-[var(--brand-green)] focus:ring-2 focus:ring-sky-100 transition-all duration-300 cursor-pointer';
-  const inputClass =
-    'w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-transparent p-3 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 dark:focus:border-[var(--brand-green)] focus:ring-2 focus:ring-sky-100 transition-all duration-300';
-
   const shippingOptions =
     filters.categoria === 'productos'
       ? [
@@ -687,29 +932,19 @@ export default function CustomerOrdersPage() {
             </select>
           </div>
 
-          <div className="space-y-2">
-            <label className="text-[10px] font-black text-gray-400 dark:text-gray-300 uppercase tracking-widest ml-1">
-              Desde
-            </label>
-            <input
-              type="date"
-              value={filters.fechaInicio}
-              onChange={(e) => setFilters({ ...filters, fechaInicio: e.target.value })}
-              className={inputClass}
-            />
-          </div>
+          <BaseDatePicker
+            label="Desde"
+            value={filters.fechaInicio}
+            onChange={(v) => setFilters({ ...filters, fechaInicio: v })}
+            placeholder="Seleccionar fecha"
+          />
 
-          <div className="space-y-2">
-            <label className="text-[10px] font-black text-gray-400 dark:text-gray-300 uppercase tracking-widest ml-1">
-              Hasta
-            </label>
-            <input
-              type="date"
-              value={filters.fechaFin}
-              onChange={(e) => setFilters({ ...filters, fechaFin: e.target.value })}
-              className={inputClass}
-            />
-          </div>
+          <BaseDatePicker
+            label="Hasta"
+            value={filters.fechaFin}
+            onChange={(v) => setFilters({ ...filters, fechaFin: v })}
+            placeholder="Seleccionar fecha"
+          />
 
           <div className="space-y-2">
             <label className="text-[10px] font-black text-gray-400 dark:text-gray-300 uppercase tracking-widest ml-1">
@@ -1232,17 +1467,11 @@ export default function CustomerOrdersPage() {
 
               {selectedOrder.estado !== 'cancelado' && (
                 <button
-                  onClick={async () => {
-                    try {
-                      await orderApi.downloadPaymentConfirmation(selectedOrder.originalId);
-                    } catch (err) {
-                      console.error('Error al descargar confirmación:', err);
-                    }
-                  }}
-                  className="w-full py-5 rounded-2xl bg-gradient-to-r from-emerald-500 to-emerald-600 dark:from-[#2d5e42] dark:to-[#1a3a2a] text-white font-black text-xs uppercase tracking-[0.2em] hover:shadow-lg hover:shadow-emerald-200 dark:hover:shadow-[#2d5e42]/30 transition-all flex items-center justify-center gap-3"
+                  onClick={() => downloadBoletaCompra(selectedOrder)}
+                  className="w-full py-5 rounded-2xl bg-gradient-to-r from-amber-400 to-orange-500 dark:from-[var(--brand-green)] dark:to-[var(--brand-green-hover)] text-white font-black text-xs uppercase tracking-[0.2em] hover:shadow-lg hover:shadow-amber-200 dark:hover:shadow-[var(--brand-green)]/30 transition-all flex items-center justify-center gap-3"
                 >
                   <Icon name="Download" className="w-5 h-5" />
-                  Descargar Confirmación de Pago
+                  Descargar Boleta de Compra
                 </button>
               )}
 

@@ -49,6 +49,7 @@ import {
   getProvincias,
   getDistritos,
 } from '@/features/public/checkout/lib/ubigeo';
+import CustomSelect from '@/features/public/checkout/components/ui/CustomSelect';
 
 // ─── Token cache ──────────────────────────────────────────────────────────────
 
@@ -431,7 +432,6 @@ interface Props {
 type ModalStep =
   | 'specialist'
   | 'datetime'
-  | 'address'
   | 'payment'
   | 'confirming'
   | 'confirmed';
@@ -470,6 +470,15 @@ function BookingModal({
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const transactionIdRef = useRef<number | null>(null);
   const holdIdRef = useRef<number | null>(null);
+
+  const fullAddress = [addressDist, addressProv, addressDepto].filter(Boolean).join(', ') +
+    (serviceAddress ? ` - ${serviceAddress}` : '') +
+    (addressRef ? ` (${addressRef})` : '');
+
+  const addressValid = addressDepto && addressProv && addressDist && serviceAddress.trim();
+  const PERU_DEPTOS = getDepartamentos();
+  const provincias = addressDepto ? getProvincias(addressDepto) : [];
+  const distritos = addressProv ? getDistritos(addressDepto, addressProv) : [];
 
   const { isAuthenticated } = useAuth();
   const router = useRouter();
@@ -647,7 +656,7 @@ function BookingModal({
         start_time: selectedSlot,
         customer_notes: notes || null,
         cart_token: getCartToken(),
-        service_address: service.is_home_service ? null : null,
+        service_address: service.is_home_service ? fullAddress : null,
       });
       if (result.hold) holdIdRef.current = result.hold.id;
       setAddedToCart(true);
@@ -746,7 +755,7 @@ function BookingModal({
           </div>
           <Link
             href="/login"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#1B6EF3] hover:bg-[#1B6EF3]/90 text-white font-bold text-sm transition-all"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-cyan-500 hover:bg-cyan-600 text-white font-bold text-sm transition-all"
           >
             Iniciar sesión
           </Link>
@@ -886,6 +895,64 @@ function BookingModal({
           )}
         </div>
       )}
+      {service.is_home_service && !addedToCart && (
+        <div className="border-t border-gray-100 dark:border-gray-800 pt-3 space-y-3">
+          <p className="text-xs font-bold text-cyan-600 dark:text-cyan-400 uppercase tracking-wide flex items-center gap-1">
+            <MapPin className="w-3 h-3" /> Dirección de atención
+          </p>
+          <div className="grid grid-cols-3 gap-2">
+            <div>
+              <label className="text-xs font-bold text-gray-500 dark:text-[var(--text-muted)] uppercase tracking-wide mb-1 block">Departamento *</label>
+              <CustomSelect
+                value={addressDepto}
+                onChange={(v) => { setAddressDepto(v); setAddressProv(''); setAddressDist(''); }}
+                options={PERU_DEPTOS}
+                placeholder="Seleccionar..."
+              />
+            </div>
+            <div>
+              <label className="text-xs font-bold text-gray-500 dark:text-[var(--text-muted)] uppercase tracking-wide mb-1 block">Provincia *</label>
+              <CustomSelect
+                value={addressProv}
+                onChange={(v) => { setAddressProv(v); setAddressDist(''); }}
+                options={provincias}
+                placeholder="Seleccionar..."
+                disabled={!addressDepto}
+              />
+            </div>
+            <div>
+              <label className="text-xs font-bold text-gray-500 dark:text-[var(--text-muted)] uppercase tracking-wide mb-1 block">Distrito *</label>
+              <CustomSelect
+                value={addressDist}
+                onChange={(v) => setAddressDist(v)}
+                options={distritos}
+                placeholder="Seleccionar..."
+                disabled={!addressProv}
+              />
+            </div>
+          </div>
+          <div>
+            <label className="text-xs font-bold text-gray-500 dark:text-[var(--text-muted)] uppercase tracking-wide mb-1 block">Dirección *</label>
+            <input
+              type="text"
+              value={serviceAddress}
+              onChange={(e) => setServiceAddress(e.target.value)}
+              placeholder="Ej: Av. La Marina 1234"
+              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[var(--bg-card)] text-sm text-gray-700 dark:text-[var(--text-primary)] focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/30 outline-none transition-all"
+            />
+          </div>
+          <div>
+            <label className="text-xs font-bold text-gray-500 dark:text-[var(--text-muted)] uppercase tracking-wide mb-1 block">Referencia (opcional)</label>
+            <input
+              type="text"
+              value={addressRef}
+              onChange={(e) => setAddressRef(e.target.value)}
+              placeholder="Ej: Cerca al parque central"
+              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[var(--bg-card)] text-sm text-gray-700 dark:text-[var(--text-primary)] focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/30 outline-none transition-all"
+            />
+          </div>
+        </div>
+      )}
       {paymentError && (
         <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 flex items-start gap-2">
           <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
@@ -913,20 +980,28 @@ function BookingModal({
             >
               Cerrar
             </button>
-            <button
-              onClick={() => setStep('payment')}
-              className="flex-1 py-3 rounded-xl bg-sky-500 hover:bg-sky-600 text-white font-bold text-sm transition-colors flex items-center justify-center gap-2"
-            >
-              <ShoppingCart className="w-4 h-4" /> Ir a pagar
-            </button>
+            {service.is_home_service && (
+              <button
+                onClick={() => { close(); router.push('/checkout'); }}
+                className="flex-1 py-3 rounded-xl bg-sky-500 hover:bg-sky-600 text-white font-bold text-sm transition-colors flex items-center justify-center gap-2"
+              >
+                <ShoppingCart className="w-4 h-4" /> Ir a pagar
+              </button>
+            )}
           </div>
         </div>
       ) : (
         <div className="flex gap-2">
           <button
             onClick={handleAddToCart}
-            disabled={!selectedSlot || isAddingToCart}
-            className="flex-1 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 disabled:bg-gray-200 dark:disabled:bg-gray-800 disabled:text-gray-400 text-white font-bold text-sm transition-colors flex items-center justify-center gap-2"
+            disabled={!selectedSlot || isAddingToCart || (service.is_home_service && !addressValid)}
+            className={`flex-1 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${
+              !selectedSlot || (service.is_home_service && !addressValid)
+                ? 'bg-neutral-200 dark:bg-neutral-700 text-neutral-400 cursor-not-allowed'
+                : isAddingToCart
+                  ? 'bg-neutral-200 dark:bg-neutral-700 text-neutral-400'
+                  : 'bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 text-white shadow-sm shadow-emerald-500/20'
+            }`}
           >
             {isAddingToCart ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -939,16 +1014,18 @@ function BookingModal({
             onClick={async () => {
               const ok = await handleAddToCart();
               if (ok) {
-                if (service.is_home_service) {
-                  setStep('address');
-                } else {
-                  close();
-                  router.push('/checkout');
-                }
+                close();
+                router.push('/checkout');
               }
             }}
-            disabled={!selectedSlot || isAddingToCart}
-            className="flex-1 py-3 rounded-xl bg-sky-500 hover:bg-sky-600 disabled:bg-gray-200 dark:disabled:bg-gray-800 disabled:text-gray-400 text-white font-bold text-sm transition-colors flex items-center justify-center gap-2"
+            disabled={!selectedSlot || isAddingToCart || (service.is_home_service && !addressValid)}
+            className={`flex-1 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${
+              !selectedSlot || (service.is_home_service && !addressValid)
+                ? 'bg-neutral-200 dark:bg-neutral-700 text-neutral-400 cursor-not-allowed'
+                : isAddingToCart
+                  ? 'bg-neutral-200 dark:bg-neutral-700 text-neutral-400'
+                  : 'bg-cyan-500 hover:bg-cyan-600 active:bg-cyan-700 text-white shadow-sm shadow-cyan-500/20'
+            }`}
           >
             <ChevronRight className="w-4 h-4" /> Pagar ahora
           </button>
@@ -956,171 +1033,6 @@ function BookingModal({
       )}
     </div>
   );
-
-  const PERU_DEPTOS = getDepartamentos();
-
-  const addressStep = () => {
-    const provincias = addressDepto ? getProvincias(addressDepto) : [];
-    const distritos = addressProv
-      ? getDistritos(addressDepto, addressProv)
-      : [];
-    const fullAddress =
-      [addressDist, addressProv, addressDepto].filter(Boolean).join(', ') +
-      (serviceAddress ? ` - ${serviceAddress}` : '') +
-      (addressRef ? ` (${addressRef})` : '');
-    return (
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <p className="text-sm font-semibold text-gray-700 dark:text-[var(--text-secondary)]">
-            <User className="w-4 h-4 inline mr-1.5 text-sky-500" />
-            {selectedSpecialist?.nombre_completo} — {formatDate(selectedDate)}{' '}
-            {selectedSlot}
-          </p>
-          <button
-            onClick={() => setStep('datetime')}
-            className="text-xs text-sky-600 hover:underline"
-          >
-            Cambiar
-          </button>
-        </div>
-        <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-100 dark:border-amber-800/40 flex items-start gap-2">
-          <MapPin className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-          <p className="text-xs text-amber-700 dark:text-amber-300">
-            Este servicio se realiza a domicilio. Indícanos la dirección de
-            atención.
-          </p>
-        </div>
-        <div className="grid grid-cols-3 gap-2">
-          <div>
-            <label className="text-xs font-bold text-gray-500 dark:text-[var(--text-muted)] uppercase tracking-wide mb-1 block">
-              Departamento *
-            </label>
-            <select
-              value={addressDepto}
-              onChange={(e) => {
-                setAddressDepto(e.target.value);
-                setAddressProv('');
-                setAddressDist('');
-              }}
-              className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-secondary)] text-sm focus:ring-2 focus:ring-[var(--brand-sky)]/30 focus:border-[var(--brand-sky)] outline-none transition"
-              style={{ color: 'var(--text-primary)' }}
-            >
-              <option value="">Seleccionar</option>
-              {PERU_DEPTOS.map((d) => (
-                <option key={d} value={d}>
-                  {d}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="text-xs font-bold text-gray-500 dark:text-[var(--text-muted)] uppercase tracking-wide mb-1 block">
-              Provincia *
-            </label>
-            <select
-              value={addressProv}
-              onChange={(e) => {
-                setAddressProv(e.target.value);
-                setAddressDist('');
-              }}
-              disabled={!addressDepto}
-              className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-secondary)] text-sm focus:ring-2 outline-none transition disabled:opacity-50"
-              style={{ color: 'var(--text-primary)' }}
-            >
-              <option value="">Seleccionar</option>
-              {provincias.map((p) => (
-                <option key={p} value={p}>
-                  {p}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="text-xs font-bold text-gray-500 dark:text-[var(--text-muted)] uppercase tracking-wide mb-1 block">
-              Distrito *
-            </label>
-            <select
-              value={addressDist}
-              onChange={(e) => setAddressDist(e.target.value)}
-              disabled={!addressProv}
-              className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-secondary)] text-sm focus:ring-2 outline-none transition disabled:opacity-50"
-              style={{ color: 'var(--text-primary)' }}
-            >
-              <option value="">Seleccionar</option>
-              {distritos.map((d) => (
-                <option key={d} value={d}>
-                  {d}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-        <div>
-          <label className="text-xs font-bold text-gray-500 dark:text-[var(--text-muted)] uppercase tracking-wide mb-1 block">
-            Dirección *
-          </label>
-          <input
-            type="text"
-            value={serviceAddress}
-            onChange={(e) => setServiceAddress(e.target.value)}
-            placeholder="Ej: Av. La Marina 1234"
-            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-[var(--border-default)] bg-gray-50 dark:bg-[var(--bg-muted)] text-sm text-gray-700 dark:text-[var(--text-primary)] focus:border-sky-400 focus:ring-2 focus:ring-sky-100 outline-none transition-all"
-          />
-        </div>
-        <div>
-          <label className="text-xs font-bold text-gray-500 dark:text-[var(--text-muted)] uppercase tracking-wide mb-1 block">
-            Referencia (opcional)
-          </label>
-          <input
-            type="text"
-            value={addressRef}
-            onChange={(e) => setAddressRef(e.target.value)}
-            placeholder="Ej: Cerca al parque central"
-            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-[var(--border-default)] bg-gray-50 dark:bg-[var(--bg-muted)] text-sm text-gray-700 dark:text-[var(--text-primary)] focus:border-sky-400 focus:ring-2 focus:ring-sky-100 outline-none transition-all"
-          />
-        </div>
-        <div className="flex gap-2">
-          <button
-            onClick={async () => {
-              if (!holdIdRef.current) return;
-              try {
-                setIsAddingToCart(true);
-                await serviceRepository.updateServiceHold(holdIdRef.current, {
-                  cart_token: getCartToken(),
-                  service_address: fullAddress,
-                });
-                close();
-                router.push('/checkout');
-              } catch (e: any) {
-                setPaymentError(e.message ?? 'Error al guardar la dirección');
-              } finally {
-                setIsAddingToCart(false);
-              }
-            }}
-            disabled={
-              !addressDepto ||
-              !addressProv ||
-              !addressDist ||
-              !serviceAddress.trim() ||
-              isAddingToCart
-            }
-            className="flex-1 py-3 rounded-xl bg-sky-500 hover:bg-sky-600 disabled:bg-gray-200 dark:disabled:bg-gray-800 disabled:text-gray-400 text-white font-bold text-sm transition-colors flex items-center justify-center gap-2"
-          >
-            {isAddingToCart ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <ChevronRight className="w-4 h-4" />
-            )}
-            {isAddingToCart ? 'Guardando…' : 'Ir a pagar'}
-          </button>
-          {paymentError && (
-            <p className="text-xs text-red-500">{paymentError}</p>
-          )}
-        </div>
-      </div>
-    );
-  };
-
   const paymentStep = () => (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -1285,9 +1197,7 @@ function BookingModal({
     </div>
   );
 
-  const stepOrder = service.is_home_service
-    ? ['specialist', 'datetime', 'address', 'payment']
-    : ['specialist', 'datetime', 'payment'];
+  const stepOrder = ['specialist', 'datetime', 'payment'];
   const currentIdx = stepOrder.indexOf(
     step === 'confirming' || step === 'confirmed' ? 'payment' : step,
   );
@@ -1339,7 +1249,6 @@ function BookingModal({
         <div className="flex-1 overflow-y-auto p-5">
           {step === 'specialist' && specialistStep()}
           {step === 'datetime' && dateTimeStep()}
-          {step === 'address' && addressStep()}
           {step === 'payment' && paymentStep()}
           {step === 'confirming' && confirmingStep()}
           {step === 'confirmed' && confirmedStep()}
@@ -1429,7 +1338,7 @@ function SpecialistProfileModal({
               <h3 className="text-lg font-bold text-gray-900 dark:text-[var(--text-primary)] truncate">
                 {specialist.nombre_completo}
               </h3>
-              <p className="text-sm text-[#1B6EF3] font-medium">
+              <p className="text-sm text-cyan-600 dark:text-white font-medium">
                 {specialist.especialidad}
               </p>
               <div className="flex items-center gap-2 mt-1.5">
@@ -1592,7 +1501,7 @@ function SpecialistProfileModal({
 function RelatedServiceCard({ s }: { s: any }) {
   return (
     <Link href={`/servicio/${s.slug}`} className="flex-shrink-0 w-64 group">
-      <div className="bg-white dark:bg-[var(--bg-card)] rounded-xl border border-gray-100 dark:border-[var(--border-subtle)] overflow-hidden hover:border-[#1B6EF3]/40 hover:shadow-lg hover:-translate-y-2 transition-all duration-300 h-full">
+      <div className="bg-white dark:bg-[var(--bg-card)] rounded-xl border border-gray-100 dark:border-[var(--border-subtle)] overflow-hidden hover:border-cyan-400/40 hover:shadow-lg hover:-translate-y-2 transition-all duration-300 h-full">
         <div className="relative aspect-[3/2] bg-sky-50 dark:bg-sky-950/30 flex items-center justify-center overflow-hidden">
           {s.image ? (
             <img
@@ -1601,7 +1510,7 @@ function RelatedServiceCard({ s }: { s: any }) {
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             />
           ) : (
-            <Stethoscope className="w-8 h-8 text-[#1B6EF3]/40" />
+            <Stethoscope className="w-8 h-8 text-cyan-600 dark:text-white/40" />
           )}
           {(() => {
             const badges: Array<{ label: string; className: string }> = [];
@@ -1627,14 +1536,14 @@ function RelatedServiceCard({ s }: { s: any }) {
           })()}
         </div>
         <div className="p-4">
-          <p className="text-sm font-semibold text-gray-800 dark:text-[var(--text-primary)] line-clamp-2 leading-tight group-hover:text-[#1B6EF3] transition-colors">
+          <p className="text-sm font-semibold text-gray-800 dark:text-[var(--text-primary)] line-clamp-2 leading-tight group-hover:text-cyan-600 dark:text-white transition-colors">
             {s.name}
           </p>
           <div className="flex items-center gap-1 mt-1.5">
             <Star className="w-3.5 h-3.5 fill-[#FACC15] text-[#FACC15]" />
             <span className="text-xs text-gray-400">4.8</span>
           </div>
-          <p className="text-sm font-black text-[#1B6EF3] mt-1.5">
+          <p className="text-sm font-black text-cyan-600 dark:text-white mt-1.5">
             {s.discount_percentage && s.discount_percentage > 0 ? (
               <>
                 <span>
@@ -1918,14 +1827,14 @@ export function ServiceDetailPageClient({ service }: Props) {
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-2 text-sm">
           <Link
             href="/"
-            className="text-gray-400 hover:text-[#1B6EF3] transition-colors"
+            className="text-gray-400 hover:text-cyan-600 dark:text-white transition-colors"
           >
             Inicio
           </Link>
           <span className="text-gray-300 dark:text-[var(--text-secondary)]">
             /
           </span>
-          <Link href="/servicios" className="text-[#1B6EF3] hover:underline">
+          <Link href="/servicios" className="text-cyan-600 dark:text-white hover:underline">
             Servicios
           </Link>
           <span className="text-gray-300 dark:text-[var(--text-secondary)]">
@@ -1952,7 +1861,7 @@ export function ServiceDetailPageClient({ service }: Props) {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <Stethoscope className="w-12 h-12 text-[#1B6EF3]" />
+                    <Stethoscope className="w-12 h-12 text-cyan-600 dark:text-white" />
                   )}
                   {(() => {
                     const badges: Array<{ label: string; className: string }> =
@@ -1978,7 +1887,7 @@ export function ServiceDetailPageClient({ service }: Props) {
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-2 mb-2">
                     {service.category && (
-                      <span className="px-2.5 py-0.5 rounded-full bg-[#1B6EF3]/10 dark:bg-[#1B6EF3]/20 text-[#1B6EF3] text-xs font-semibold">
+                      <span className="px-2.5 py-0.5 rounded-full bg-cyan-500/10 dark:bg-cyan-600/20 text-cyan-600 dark:text-white text-xs font-semibold">
                         {getLeafCategory(service.category)}
                       </span>
                     )}
@@ -2047,7 +1956,7 @@ export function ServiceDetailPageClient({ service }: Props) {
                     {benefits.length > 0 ? (
                       benefits.map((b, i) => (
                         <div key={i} className="flex items-start gap-2">
-                          <CheckCircle className="w-4 h-4 text-[#1B6EF3] shrink-0 mt-0.5" />
+                          <CheckCircle className="w-4 h-4 text-cyan-600 dark:text-white shrink-0 mt-0.5" />
                           <span className="text-sm text-gray-600 dark:text-[var(--text-secondary)]">
                             {b}
                           </span>
@@ -2055,7 +1964,7 @@ export function ServiceDetailPageClient({ service }: Props) {
                       ))
                     ) : (
                       <div className="flex items-start gap-2">
-                        <CheckCircle className="w-4 h-4 text-[#1B6EF3] shrink-0 mt-0.5" />
+                        <CheckCircle className="w-4 h-4 text-cyan-600 dark:text-white shrink-0 mt-0.5" />
                         <span className="text-sm text-gray-600 dark:text-[var(--text-secondary)]">
                           Servicio profesional
                         </span>
@@ -2116,9 +2025,19 @@ export function ServiceDetailPageClient({ service }: Props) {
 
             {/* Store */}
             <Link href={`/tienda/${service.store_id}`} className="block">
-              <div className="bg-white dark:bg-[var(--bg-card)] rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)] p-4 hover:border-[#1B6EF3]/30 transition-colors flex items-center gap-3 shadow-sm">
-                <div className="w-10 h-10 rounded-lg bg-[#1B6EF3]/10 flex items-center justify-center shrink-0">
-                  <MapPin className="w-5 h-5 text-[#1B6EF3]" />
+              <div className="bg-white dark:bg-[var(--bg-card)] rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)] p-4 hover:border-cyan-400/30 transition-colors flex items-center gap-3 shadow-sm">
+                <div className="w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center shrink-0 overflow-hidden">
+                  {service.store_logo ? (
+                    <Image
+                      src={service.store_logo}
+                      alt={service.store_name}
+                      width={40}
+                      height={40}
+                      className="object-cover w-full h-full"
+                    />
+                  ) : (
+                    <MapPin className="w-5 h-5 text-cyan-600 dark:text-white" />
+                  )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs text-gray-400">Tienda</p>
@@ -2139,7 +2058,7 @@ export function ServiceDetailPageClient({ service }: Props) {
                 {service.discount_percentage &&
                 service.discount_percentage > 0 ? (
                   <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-black text-[#1B6EF3]">
+                    <span className="text-3xl font-black text-cyan-600 dark:text-white">
                       S/{' '}
                       {(
                         service.price *
@@ -2151,7 +2070,7 @@ export function ServiceDetailPageClient({ service }: Props) {
                     </span>
                   </div>
                 ) : (
-                  <span className="text-3xl font-black text-[#1B6EF3]">
+                  <span className="text-3xl font-black text-cyan-600 dark:text-white">
                     S/ {Number(service.price).toFixed(2)}
                   </span>
                 )}
@@ -2159,7 +2078,7 @@ export function ServiceDetailPageClient({ service }: Props) {
               <div className="px-6 pb-4">
                 <button
                   onClick={() => setBookingOpen(true)}
-                  className="w-full py-3.5 rounded-xl bg-[#1B6EF3] hover:bg-[#1B6EF3]/90 text-white font-bold text-sm shadow-lg shadow-[#1B6EF3]/20 transition-all hover:-translate-y-0.5 flex items-center justify-center gap-2"
+                  className="w-full py-3.5 rounded-xl bg-cyan-500 hover:bg-cyan-600 text-white font-bold text-sm shadow-lg shadow-cyan-500/20 transition-all hover:-translate-y-0.5 flex items-center justify-center gap-2"
                 >
                   <Calendar className="w-4 h-4" /> Adquirir cita
                 </button>
@@ -2170,7 +2089,7 @@ export function ServiceDetailPageClient({ service }: Props) {
                   <h3 className="font-bold text-gray-900 dark:text-[var(--text-primary)] text-sm">
                     Especialistas disponibles
                   </h3>
-                  <span className="text-xs text-[#1B6EF3]">
+                  <span className="text-xs text-cyan-600 dark:text-white">
                     {service.specialists.length} especialistas
                   </span>
                 </div>
@@ -2184,7 +2103,7 @@ export function ServiceDetailPageClient({ service }: Props) {
                       <button
                         key={sp.id}
                         onClick={() => setProfileSpecialist(sp)}
-                        className="w-full flex items-center gap-3 p-3 rounded-xl border border-gray-100 dark:border-[var(--border-default)] hover:border-[#1B6EF3]/30 hover:bg-[#1B6EF3]/5 transition-all group"
+                        className="w-full flex items-center gap-3 p-3 rounded-xl border border-gray-100 dark:border-[var(--border-default)] hover:border-cyan-400/30 hover:bg-cyan-500/5 transition-all group"
                       >
                         <div className="relative w-10 h-10 rounded-full bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900/50 dark:to-blue-900/50 flex items-center justify-center overflow-hidden shrink-0">
                           {sp.foto ? (
@@ -2208,14 +2127,14 @@ export function ServiceDetailPageClient({ service }: Props) {
                             {sp.especialidad}
                           </p>
                         </div>
-                        <ChevronRight className="w-4 h-4 text-gray-300 dark:text-[var(--text-muted)] group-hover:text-[#1B6EF3] transition-colors shrink-0" />
+                        <ChevronRight className="w-4 h-4 text-gray-300 dark:text-[var(--text-muted)] group-hover:text-cyan-600 dark:text-white transition-colors shrink-0" />
                       </button>
                     );
                   })}
                   {!showAllSpecialists && service.specialists.length > 4 && (
                     <button
                       onClick={() => setShowAllSpecialists(true)}
-                      className="w-full text-center text-xs text-[#1B6EF3] hover:underline pt-1"
+                      className="w-full text-center text-xs text-cyan-600 dark:text-white hover:underline pt-1"
                     >
                       Ver todos los {service.specialists.length} especialistas
                     </button>

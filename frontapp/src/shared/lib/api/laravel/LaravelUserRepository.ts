@@ -56,7 +56,14 @@ export class LaravelUserRepository implements IUserRepository {
                 console.log('[LaravelUserRepository] 401 Unauthorized');
                 return null as unknown as T;
             }
-            throw new Error(`Laravel API Error: ${response.status}`);
+            const body = await response.json().catch(() => ({})) as Record<string, unknown>;
+            const message = (body?.message as string) || `Error ${response.status}`;
+            const err = new Error(message) as Error & { status: number; validationErrors?: Record<string, string[]> };
+            err.status = response.status;
+            if (response.status === 422 && body?.errors) {
+                err.validationErrors = body.errors as Record<string, string[]>;
+            }
+            throw err;
         }
 
         return response.json();

@@ -7,9 +7,12 @@ import { useNotifications } from '@/shared/lib/context/NotificationContext';
 import { ProactiveNotification } from '@/shared/types/notifications';
 import { useAuth } from '@/shared/lib/context/AuthContext';
 import { apiClient } from '@/lib/api/apiClient';
+import NotificationAllModal from '@/components/shared/notifications/NotificationAllModal';
+import { isAllowedForRole } from '@/shared/lib/notifications/roleNotificationTypes';
 
 export default function NotificationBell() {
     const [isOpen, setIsOpen] = useState(false);
+    const [showAll, setShowAll] = useState(false);
     const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
     const { user } = useAuth();
     const router = useRouter();
@@ -41,6 +44,9 @@ export default function NotificationBell() {
                 return `${prefix}/orders`;
             case 'invoices':
                 return `${prefix}/invoices`;
+            case 'chat':
+                return role === 'administrator' ? '/admin/helpdesk'
+                    : `${prefix}/chat`;
             case 'ticket':
                 return role === 'administrator' ? `/admin/helpdesk?id=${actionId}`
                     : role === 'seller' ? `/seller/help?id=${actionId}`
@@ -56,19 +62,9 @@ export default function NotificationBell() {
 
     const panelInfo = getPanelInfo();
 
-    const roleNotificationTypes: Record<string, string[]> = {
-        customer: ['order_created', 'OrderCreatedNotification'],
-        seller: ['new_order', 'NewOrderSellerNotification', 'store_status_changed', 'StoreStatusNotification'],
-        administrator: ['ticket_created', 'TicketCreatedNotification', 'ticket_replied', 'TicketRepliedNotification', 'ticket_status_changed', 'TicketStatusChangedNotification', 'order_created', 'OrderCreatedNotification', 'new_order', 'NewOrderSellerNotification', 'store_status_changed', 'StoreStatusNotification'],
-        logistics_operator: [],
-    };
-
-    const filteredNotifications = notifications.filter(n => {
-        const allowed = roleNotificationTypes[user?.role ?? ''] ?? [];
-        if (allowed.length === 0) return true;
-        const type = n.metadata?.type ?? '';
-        return allowed.some(t => type.includes(t));
-    });
+    const filteredNotifications = notifications.filter(n =>
+        isAllowedForRole(n.metadata?.type ?? '', user?.role, 'bell')
+    );
 
     const getLevelUI = (level: ProactiveNotification['level']) => {
         switch (level) {
@@ -242,18 +238,22 @@ export default function NotificationBell() {
                             )}
                         </div>
                         <div className="p-4 border-t border-[var(--border-subtle)] bg-[var(--bg-secondary)]/50 text-center">
-                            <button 
+                            <button
                                 onClick={() => {
-                                    router.push(panelInfo.redirect);
                                     setIsOpen(false);
+                                    setShowAll(true);
                                 }}
                                 className="text-[10px] font-black uppercase tracking-widest text-indigo-500 hover:text-indigo-700 transition-colors"
                             >
-                                {panelInfo.cta}
+                                Ver todas las notificaciones
                             </button>
                         </div>
                     </div>
                 </>
+            )}
+
+            {showAll && (
+                <NotificationAllModal onClose={() => setShowAll(false)} />
             )}
         </div>
     );

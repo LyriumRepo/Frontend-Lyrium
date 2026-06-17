@@ -27,33 +27,34 @@ export default function ChatLayout({
   return (
     <div className={`grid grid-cols-12 ${CHAT_CONFIG.spacing.gap} h-full min-h-0`}>
       <div className={`
-        ${listWidth} 
-        bg-white/70 dark:bg-[var(--bg-secondary)]/70
-        backdrop-blur-xl
-        ${CHAT_CONFIG.card.rounded} 
-        border 
-        border-white/20 dark:border-[var(--border-subtle)]/50
-        shadow-lg shadow-black/5
-        overflow-hidden 
-        flex 
+        ${listWidth}
+        bg-[var(--bg-card)]
+        rounded-[2.5rem]
+        border
+        border-[var(--border-subtle)]
+        shadow-sm
+        overflow-hidden
+        flex
         flex-col
       `}>
+        <div className="h-1 w-full shrink-0 bg-gradient-to-r from-[#9cb04e] via-[#64c695] to-[#499bbf] rounded-t-[2.5rem]" />
         {list}
       </div>
-      
+
       <div className={`
-        ${detailWidth} 
-        bg-white/70 dark:bg-[var(--bg-secondary)]/70
-        backdrop-blur-xl
-        ${CHAT_CONFIG.card.rounded} 
-        border 
-        border-white/20 dark:border-[var(--border-subtle)]/50
-        shadow-lg shadow-black/5
-        overflow-hidden 
-        flex 
-        flex-col 
+        ${detailWidth}
+        rounded-[2.5rem]
+        border
+        border-[var(--border-subtle)]
+        shadow-xl
+        overflow-hidden
+        flex
+        flex-col
         min-h-0
-      `}>
+      `}
+        style={{ background: 'linear-gradient(160deg, color-mix(in srgb,#9cb04e 6%,var(--bg-card)) 0%, var(--bg-card) 45%, color-mix(in srgb,#499bbf 5%,var(--bg-card)) 100%)' }}
+      >
+        <div className="h-1 w-full shrink-0 bg-gradient-to-r from-[#9cb04e] via-[#64c695] to-[#499bbf] rounded-t-[2.5rem]" />
         {detail}
       </div>
     </div>

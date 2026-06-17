@@ -33,7 +33,7 @@ export function LogisticsChatVendorsPageClient() {
             placeholder="Buscar conversaciones..."
             value={filters.search || ''}
             onChange={(e) => setFilters({ search: e.target.value })}
-            className="w-full pl-4 pr-4 py-3 bg-[var(--bg-secondary)]/50 border-none rounded-2xl text-xs font-medium text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:ring-2 focus:ring-sky-500/20"
+            className="w-full pl-4 pr-4 py-3 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-2xl text-xs font-medium text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:ring-2 focus:ring-[var(--turquesa-500)]/20 outline-none"
           />
         </div>
       </div>
@@ -49,7 +49,7 @@ export function LogisticsChatVendorsPageClient() {
           const conv = conversations.find(c => c.id === id);
           if (conv) setSelectedConversation(conv);
         }}
-        accentColor="sky"
+        accentColor="turquesa"
       />
     </>
   );
@@ -57,7 +57,7 @@ export function LogisticsChatVendorsPageClient() {
   const detail = selectedConversation ? (
     <div className="flex flex-col h-full">
       <div className="flex items-center gap-4 p-4 border-b border-[var(--border-subtle)]">
-        <div className="w-12 h-12 bg-sky-500/10 rounded-2xl flex items-center justify-center text-sky-500">
+        <div className="w-12 h-12 bg-[var(--turquesa-500)]/10 rounded-2xl flex items-center justify-center text-[var(--turquesa-500)]">
           <span className="text-lg font-black">📦</span>
         </div>
         <div>

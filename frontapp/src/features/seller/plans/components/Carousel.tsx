@@ -64,7 +64,7 @@ export default function Carousel({ planOrder, plansData, showcasePlan, carouselI
 
   return (
     <div className="relative">
-      <h3 className="text-xl font-bold text-gray-800 mb-5 text-center">Todos los Planes</h3>
+      <h3 className="text-xl font-bold text-[var(--text-primary,#1f2937)] mb-5 text-center">Todos los Planes</h3>
       
       <div className="flex justify-center gap-2 mb-6">
         {planOrder.map((key, idx) => {
@@ -185,13 +185,29 @@ function CarouselCard({ planKey, plansData, showcasePlan, currentPlan, claimedPl
   const iconTextColor = data.accentColor ?? planColor;
   const showMax = data.features ? (expanded ? data.features.length : (data.compactVisibleCount ?? 5)) : 5;
   const carouselLimit = data.compactVisibleCount ?? 5;
+  const hasBgImage = !!(data.showBgInCard && data.bgImage);
 
   let priceNode: React.ReactNode;
   if (data.usePriceMode === false && data.priceText) {
-    priceNode = <><span style={{ color:planColor, fontSize:'1.75rem', fontWeight:800 }}>{data.priceText}</span>{data.priceSubtext && <span className="text-sm text-gray-400 font-medium ml-1">{data.priceSubtext}</span>}</>;
+    priceNode = (
+      <>
+        <span style={{ color: hasBgImage ? '#fff' : planColor, fontSize:'1.75rem', fontWeight:800 }}>{data.priceText}</span>
+        {data.priceSubtext && <span style={{ color: hasBgImage ? 'rgba(255,255,255,0.6)' : undefined }} className="text-sm text-gray-400 font-medium ml-1">{data.priceSubtext}</span>}
+      </>
+    );
   } else {
     const carouselPrice = (planKey === 'basic' && data.price === 0) ? 'GRATIS' : (!data.requiresPayment && data.price === 0) ? 'Prueba gratuita' : formatPrice(data.price, data.currency);
-    priceNode = <><span style={{ fontSize:'1.75rem', fontWeight:800, color: isActive ? planColor : '#1f2937' }}>{carouselPrice}</span>{(data.price > 0 || data.requiresPayment) ? <span className="text-sm text-gray-400 font-medium ml-1">{data.period ?? '/mes'}</span> : (planKey !== 'basic' && !data.requiresPayment ? <span className="text-sm text-gray-400 font-medium ml-1">/6 meses</span> : null)}</>;
+    const inactiveColor = hasBgImage ? 'rgba(255,255,255,0.88)' : '#1f2937';
+    const periodColor   = hasBgImage ? 'rgba(255,255,255,0.55)' : undefined;
+    priceNode = (
+      <>
+        <span style={{ fontSize:'1.75rem', fontWeight:800, color: isActive ? planColor : inactiveColor }}>{carouselPrice}</span>
+        {(data.price > 0 || data.requiresPayment)
+          ? <span style={{ color: periodColor }} className="text-sm text-gray-400 font-medium ml-1">{data.period ?? '/mes'}</span>
+          : (planKey !== 'basic' && !data.requiresPayment ? <span style={{ color: periodColor }} className="text-sm text-gray-400 font-medium ml-1">/6 meses</span> : null)
+        }
+      </>
+    );
   }
 
   const borderStyle: React.CSSProperties = isActive
@@ -202,82 +218,136 @@ function CarouselCard({ planKey, plansData, showcasePlan, currentPlan, claimedPl
   const transform = offset !== 0 ? `rotateY(${rotateY}deg)` : undefined;
 
   return (
-    <div 
+    <div
       role="button"
       tabIndex={0}
-      className={`bg-white dark:bg-[var(--bg-card)] rounded-2xl border-2 dark:border-[var(--border-subtle)] overflow-hidden cursor-pointer transition-all duration-300 ${isActive ? 'scale-95' : ''}`}
-      style={{ 
-        '--plan-color': planColor, 
+      className={`rounded-2xl border-2 overflow-hidden cursor-pointer transition-all duration-300 ${isActive ? 'scale-95' : ''}`}
+      style={{
+        '--plan-color': planColor,
         ...borderStyle,
         transform,
+        position: 'relative',
+        ...(hasBgImage ? {} : { background: '#fff' }),
       } as React.CSSProperties}
       onClick={() => onSelect(planKey)}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onSelect(planKey); }}
     >
-      {data.showBgInCard && data.bgImage ? (
-        <div style={{ 
-          backgroundImage: `url('${data.bgImage}')`, 
-          backgroundSize: data.bgImageFit === 'contain' ? 'contain' : 'cover', 
-          backgroundPosition: data.bgImagePosition ?? 'center', 
-          position:'relative', 
-          overflow:'hidden',
-          height: '140px',
-        }}>
-          <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom,rgba(0,0,0,0.08) 0%,rgba(0,0,0,0.55) 100%)', pointerEvents:'none' }} />
-          {data.badge && <span style={{ position:'absolute', top:8, left:8, zIndex:2, fontSize:'9px', fontWeight:800, letterSpacing:'0.5px', color:'#fff', background:'rgba(0,0,0,0.35)', padding:'2px 7px', borderRadius:'20px', backdropFilter:'blur(4px)' }}>{data.badge}</span>}
-          <span style={{ position:'absolute', bottom:8, left:10, zIndex:2, fontSize:'29px', fontWeight:800, color:'#fff', textShadow:'0 1px 6px rgba(0,0,0,0.7)', letterSpacing:'0.3px' }}>{data.name}</span>
-          <div style={{ position:'absolute', top:8, right:8, zIndex:2, color:'rgba(255,255,255,0.85)', filter:'drop-shadow(0 1px 3px rgba(0,0,0,0.5))' }} 
-                // ✅ SEGURO: getPlanIconSvg() retorna SVG hardcoded interno
-                // availableIcons es un objeto hardcoded, NO viene de user input
-                dangerouslySetInnerHTML={{ __html: getPlanIconSvg(planKey, 20, plansData) }} />
-        </div>
-      ) : (
-        <div style={{ 
-          background: `linear-gradient(135deg,${lightBg1} 0%,${lightBg2} 50%,${lightBg3} 100%)`,
-          padding: '20px',
-          height: '140px',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between',
-        }}>
-          <span style={{ color:iconTextColor, fontSize:'18px', fontWeight:800 }}>{data.name}</span>
-          <div style={{ color:iconTextColor }} 
-            // ✅ SEGURO: getPlanIconSvg() retorna SVG hardcoded interno
-            dangerouslySetInnerHTML={{ __html: getPlanIconSvg(planKey, 24, plansData) }} />
-        </div>
+      {/* Imagen de fondo de toda la tarjeta */}
+      {hasBgImage && (
+        <>
+          <div style={{
+            position: 'absolute', inset: 0, zIndex: 0,
+            backgroundImage: `url('${data.bgImage}')`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center top',
+          }} />
+          {/* Overlay degradado para legibilidad */}
+          <div style={{
+            position: 'absolute', inset: 0, zIndex: 1,
+            background: 'linear-gradient(to bottom, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.62) 55%, rgba(0,0,0,0.82) 100%)',
+          }} />
+        </>
       )}
-      <div className="p-5">
-        <div className="mb-4">
-          {priceNode}
+
+      {/* Contenido sobre la imagen */}
+      <div style={{ position: 'relative', zIndex: 2 }}>
+
+        {/* Cabecera */}
+        <div style={{
+          padding: '18px 18px 12px',
+          background: hasBgImage ? 'transparent' : `linear-gradient(135deg,${lightBg1} 0%,${lightBg2} 50%,${lightBg3} 100%)`,
+          display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
+        }}>
+          <div>
+            {data.badge && (
+              <span style={{
+                display: 'inline-block', fontSize: '9px', fontWeight: 800,
+                letterSpacing: '0.5px', padding: '2px 8px', borderRadius: '20px', marginBottom: '6px',
+                color: hasBgImage ? '#fff' : iconTextColor,
+                background: hasBgImage ? 'rgba(255,255,255,0.2)' : hexToRgba(planColor, 0.15),
+                backdropFilter: hasBgImage ? 'blur(4px)' : undefined,
+              }}>{data.badge}</span>
+            )}
+            <div style={{
+              fontSize: '22px', fontWeight: 800, letterSpacing: '0.3px',
+              color: hasBgImage ? '#fff' : iconTextColor,
+              textShadow: hasBgImage ? '0 1px 8px rgba(0,0,0,0.5)' : undefined,
+            }}>{data.name}</div>
+          </div>
+          <div style={{
+            color: hasBgImage ? 'rgba(255,255,255,0.9)' : iconTextColor,
+            filter: hasBgImage ? 'drop-shadow(0 1px 3px rgba(0,0,0,0.5))' : undefined,
+            marginTop: '4px',
+          }}
+            // ✅ SEGURO: getPlanIconSvg() retorna SVG hardcoded interno
+            dangerouslySetInnerHTML={{ __html: getPlanIconSvg(planKey, 22, plansData) }}
+          />
         </div>
-        {planKey === 'basic' && data.price === 0 && <div className="text-xs text-gray-500 mb-2"><span>Única vez</span></div>}
-        {data.enableClaimLock && <div className="text-xs text-gray-500 mb-2"><span>Solo disponible una única vez</span></div>}
-        {data.priceAnnual > 0 && !data.enableClaimLock && data.usePriceMode !== false && <div className="text-xs text-gray-500 mb-2"><span>{formatPrice(data.priceAnnual, data.currency)}{data.periodAnnual ?? '/año'}</span></div>}
-        <div className="space-y-2">
-          {(data.features ?? []).slice(0, showMax).map((f, i) => (
-            <div 
-              role="button"
-              tabIndex={0}
-              key={`${planKey}-cf-${i}-${(f.text ?? '').slice(0,8)}`} 
-              className={`flex items-center gap-2 text-xs cursor-pointer ${f.active ? 'text-gray-700' : 'text-gray-300'}`}
-              onClick={e => { e.stopPropagation(); onFeatureClick(planKey); }}
-              onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.stopPropagation(); onFeatureClick(planKey); } }}
-            >
-              <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold ${f.active ? 'bg-emerald-100 text-emerald-600' : 'bg-gray-100 text-gray-400'}`}>{f.active ? '✓' : '✕'}</span>
-              <span className={f.active ? '' : 'line-through'}>{f.text}</span>
-            </div>
-          ))}
-          {(data.features?.length ?? 0) > carouselLimit && (
-            <button 
-              className="text-xs text-blue-500 font-medium hover:text-blue-600 cursor-pointer"
-              onClick={e => { e.stopPropagation(); onToggle(planKey); }}
-            >
-              {expanded ? 'Ver menos' : `+${(data.features?.length ?? 0) - carouselLimit} beneficios más`}
-            </button>
+
+        {/* Cuerpo */}
+        <div style={{ padding: '0 18px 18px' }}>
+          <div style={{ marginBottom: '12px' }}>
+            <div style={{ color: hasBgImage ? '#fff' : undefined }}>{priceNode}</div>
+            {planKey === 'basic' && data.price === 0 && (
+              <div style={{ fontSize: '11px', color: hasBgImage ? 'rgba(255,255,255,0.7)' : '#6b7280', marginTop: '2px' }}>Única vez</div>
+            )}
+            {data.enableClaimLock && (
+              <div style={{ fontSize: '11px', color: hasBgImage ? 'rgba(255,255,255,0.7)' : '#6b7280', marginTop: '2px' }}>Solo disponible una única vez</div>
+            )}
+            {data.priceAnnual > 0 && !data.enableClaimLock && data.usePriceMode !== false && (
+              <div style={{ fontSize: '11px', color: hasBgImage ? 'rgba(255,255,255,0.7)' : '#6b7280', marginTop: '2px' }}>{formatPrice(data.priceAnnual, data.currency)}{data.periodAnnual ?? '/año'}</div>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            {(data.features ?? []).slice(0, showMax).map((f, i) => (
+              <div
+                role="button"
+                tabIndex={0}
+                key={`${planKey}-cf-${i}-${(f.text ?? '').slice(0, 8)}`}
+                className="flex items-center gap-2 text-xs cursor-pointer"
+                style={{ color: hasBgImage ? (f.active ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.45)') : (f.active ? '#374151' : '#d1d5db') }}
+                onClick={e => { e.stopPropagation(); onFeatureClick(planKey); }}
+                onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.stopPropagation(); onFeatureClick(planKey); } }}
+              >
+                <span style={{
+                  width: '16px', height: '16px', borderRadius: '50%', flexShrink: 0,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: '10px', fontWeight: 700,
+                  background: f.active
+                    ? (hasBgImage ? 'rgba(255,255,255,0.25)' : '#d1fae5')
+                    : (hasBgImage ? 'rgba(255,255,255,0.1)' : '#f3f4f6'),
+                  color: f.active
+                    ? (hasBgImage ? '#fff' : '#059669')
+                    : (hasBgImage ? 'rgba(255,255,255,0.4)' : '#9ca3af'),
+                }}>{f.active ? '✓' : '✕'}</span>
+                <span className={f.active ? '' : 'line-through'}>{f.text}</span>
+              </div>
+            ))}
+            {(data.features?.length ?? 0) > carouselLimit && (
+              <button
+                style={{ fontSize: '11px', fontWeight: 600, color: hasBgImage ? 'rgba(255,255,255,0.8)' : '#3b82f6', cursor: 'pointer' }}
+                onClick={e => { e.stopPropagation(); onToggle(planKey); }}
+              >
+                {expanded ? 'Ver menos' : `+${(data.features?.length ?? 0) - carouselLimit} beneficios más`}
+              </button>
+            )}
+          </div>
+
+          {isCurrent && (
+            <div style={{ marginTop: '12px', padding: '6px 12px', borderRadius: '8px', textAlign: 'center', fontSize: '11px', fontWeight: 700,
+              background: hasBgImage ? 'rgba(255,255,255,0.2)' : '#d1fae5',
+              color: hasBgImage ? '#fff' : '#065f46',
+              backdropFilter: hasBgImage ? 'blur(4px)' : undefined,
+            }}>Tu plan actual</div>
+          )}
+          {data.enableClaimLock && claimedPlans.includes(planKey) && !isCurrent && (
+            <div style={{ marginTop: '12px', padding: '6px 12px', borderRadius: '8px', textAlign: 'center', fontSize: '11px', fontWeight: 700,
+              background: hasBgImage ? 'rgba(239,68,68,0.3)' : '#fee2e2',
+              color: hasBgImage ? '#fff' : '#991b1b',
+            }}>Ya reclamado</div>
           )}
         </div>
-        {isCurrent && <div className="mt-3 px-3 py-1.5 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-lg text-center">Tu plan actual</div>}
-        {data.enableClaimLock && claimedPlans.includes(planKey) && !isCurrent && <div className="mt-3 px-3 py-1.5 bg-red-100 text-red-700 text-xs font-bold rounded-lg text-center">Ya reclamado</div>}
       </div>
     </div>
   );

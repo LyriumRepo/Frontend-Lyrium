@@ -1,23 +1,20 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
 const WP_API = process.env.NEXT_PUBLIC_WP_API_URL || 'https://lyriumbiomarketplace.com/wp-json';
 
 export async function GET(
-  request: NextRequest,
+  _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  
+
   try {
-    const [topicRes, postsRes] = await Promise.all([
-      fetch(`${WP_API}/wpforo/v1/topics/${id}`),
-      fetch(`${WP_API}/wpforo/v1/posts?topic_id=${id}`),
-    ]);
-
-    const topic = await topicRes.json();
-    const posts = await postsRes.json();
-
-    return NextResponse.json({ topic, posts });
+    const res = await fetch(`${WP_API}/wpforo/v1/topics/${id}`);
+    if (!res.ok) {
+      return NextResponse.json({ error: 'Topic not found' }, { status: 404 });
+    }
+    const data = await res.json();
+    return NextResponse.json(data);
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json({ error: message }, { status: 500 });

@@ -1,13 +1,43 @@
 'use client';
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ChatViewProps, TicketPriority, TicketStatus } from '../types';
-import { ChatMessage } from './ChatMessage';
-import { ChatInput } from './ChatInput';
+import { ChatViewProps, TicketStatus, TicketPriority, UnifiedMessage } from '../types';
+import MessageBubble, { Message } from '@/components/shared/chat/MessageBubble';
+import MessageInput from '@/components/shared/chat/MessageInput';
 import { AlertTriangle, ArrowLeft, CheckSquare, Headset, Loader2, ShieldCheck, Star } from 'lucide-react';
 
 const scrollbarClass = 'custom-scrollbar';
 const EMPTY_QUICK_REPLIES: string[] = [];
+
+// ─── Type bridge: UnifiedMessage → Message (MessageBubble format) ─────────────
+
+function toSafeISO(ts: unknown): string {
+  const d = ts instanceof Date ? ts : new Date(String(ts ?? ''));
+  return isNaN(d.getTime()) ? new Date(0).toISOString() : d.toISOString();
+}
+
+function toMessage(m: UnifiedMessage): Message {
+  return {
+    id: m.id,
+    sender: m.senderRole,
+    content: m.content,
+    timestamp: toSafeISO(m.timestamp),
+    read_at: m.isRead ? 'read' : null,
+    attachments: m.attachments?.map(att => ({
+      id: att.id,
+      file_name: att.name,
+      mime_type: att.type === 'image' ? 'image/jpeg' : 'application/octet-stream',
+      file_size: 0,
+      url: att.url,
+      download_url: att.url,
+    })),
+  };
+}
+
+const helpdeskIsSent = (msg: Message) =>
+  msg.sender === 'admin' || msg.sender === 'logistics';
+
+// ─── SurveyArea ───────────────────────────────────────────────────────────────
 
 function SurveyArea({ onSubmit }: { onSubmit?: (rating: number, comment: string) => void }) {
   const [rating, setRating] = useState(0);
@@ -24,9 +54,9 @@ function SurveyArea({ onSubmit }: { onSubmit?: (rating: number, comment: string)
   };
 
   return (
-    <div className="animate-fadeIn rounded-b-[2.5rem] border-t-2 border-dashed border-sky-100 bg-[var(--bg-secondary)]/70 p-8 dark:border-[var(--border-focus)]/40">
+    <div className="animate-fadeIn rounded-b-[2.5rem] border-t-2 border-dashed border-[var(--turquesa-500)]/20 bg-[var(--bg-secondary)]/70 p-8 dark:border-[var(--border-focus)]/40">
       <div className="mx-auto flex max-w-lg flex-col items-center text-center">
-        <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-[2rem] bg-[var(--bg-card)] text-sky-500 shadow-sm dark:text-emerald-300">
+        <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-[2rem] bg-[var(--turquesa-500)]/10 text-[var(--turquesa-500)] shadow-sm">
           <Headset className="h-7 w-7" />
         </div>
         <h3 className="mb-2 text-xl font-black tracking-tight text-[var(--text-primary)]">Tu opinion nos ayuda a mejorar</h3>
@@ -40,7 +70,7 @@ function SurveyArea({ onSubmit }: { onSubmit?: (rating: number, comment: string)
               aria-label={`Calificar con ${star} estrellas`}
               onClick={() => setRating(star)}
               className={`flex h-12 w-12 items-center justify-center rounded-2xl border-2 bg-[var(--bg-card)] text-2xl shadow-sm transition-all ${
-                rating >= star ? 'border-sky-200 text-sky-400 dark:border-[var(--border-focus)] dark:text-emerald-300' : 'border-transparent text-gray-300 hover:text-sky-200 dark:text-[var(--text-muted)] dark:hover:text-emerald-300'
+                rating >= star ? 'border-[var(--turquesa-500)]/30 text-[var(--turquesa-500)]' : 'border-transparent text-gray-300 hover:text-[var(--turquesa-500)]/50 dark:text-[var(--text-muted)] dark:hover:text-[var(--turquesa-500)]'
               }`}
             >
               <Star className={`h-8 w-8 ${rating >= star ? 'animate-pulse fill-current' : ''}`} />
@@ -53,14 +83,14 @@ function SurveyArea({ onSubmit }: { onSubmit?: (rating: number, comment: string)
           onChange={(e) => setComment(e.target.value)}
           aria-label="Comentario adicional para la encuesta"
           rows={2}
-          className="mb-6 w-full rounded-2xl border-none bg-[var(--bg-card)] p-4 text-xs font-medium text-[var(--text-primary)] shadow-sm outline-none placeholder:text-[var(--text-secondary)] focus:ring-2 focus:ring-sky-500/10 dark:focus:ring-[var(--ring-focus)]"
+          className="mb-6 w-full rounded-2xl border-none bg-[var(--bg-card)] p-4 text-xs font-medium text-[var(--text-primary)] shadow-sm outline-none placeholder:text-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--turquesa-500)]/10"
           placeholder="Tienes algun comentario adicional? (Opcional)"
         />
 
         <button
           onClick={handleSubmit}
           disabled={rating === 0 || isSubmitting}
-          className="min-w-[200px] rounded-[1.5rem] bg-sky-500 px-12 py-4 text-xs font-black uppercase tracking-widest text-white shadow-xl shadow-sky-500/20 transition-all hover:bg-sky-600 active:scale-95 disabled:bg-[var(--bg-secondary)] disabled:text-[var(--text-secondary)] disabled:shadow-none dark:shadow-black/30"
+          className="min-w-[200px] rounded-[1.5rem] bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--verde-500)] px-12 py-4 text-xs font-black uppercase tracking-widest text-white shadow-xl shadow-[var(--turquesa-500)]/20 transition-all hover:opacity-90 active:scale-95 disabled:bg-[var(--bg-secondary)] disabled:text-[var(--text-secondary)] disabled:shadow-none"
         >
           {isSubmitting ? <Loader2 className="mx-auto h-5 w-5 animate-spin" /> : 'Enviar encuesta y finalizar'}
         </button>
@@ -68,6 +98,8 @@ function SurveyArea({ onSubmit }: { onSubmit?: (rating: number, comment: string)
     </div>
   );
 }
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const statusLabels: Record<string, string> = {
   open: 'Abierto',
@@ -78,22 +110,16 @@ const statusLabels: Record<string, string> = {
 };
 
 function compareMessagesChronologically(
-  left: ChatViewProps['ticket']['messages'][number],
-  right: ChatViewProps['ticket']['messages'][number],
+  left: UnifiedMessage,
+  right: UnifiedMessage,
 ): number {
   const leftId = Number(left.id);
   const rightId = Number(right.id);
-
-  if (Number.isFinite(leftId) && Number.isFinite(rightId) && leftId !== rightId) {
-    return leftId - rightId;
-  }
+  if (Number.isFinite(leftId) && Number.isFinite(rightId) && leftId !== rightId) return leftId - rightId;
 
   const leftTime = left.timestamp instanceof Date ? left.timestamp.getTime() : Number.NaN;
   const rightTime = right.timestamp instanceof Date ? right.timestamp.getTime() : Number.NaN;
-
-  if (Number.isFinite(leftTime) && Number.isFinite(rightTime) && leftTime !== rightTime) {
-    return leftTime - rightTime;
-  }
+  if (Number.isFinite(leftTime) && Number.isFinite(rightTime) && leftTime !== rightTime) return leftTime - rightTime;
 
   return 0;
 }
@@ -102,17 +128,18 @@ function StatusBadge({ status }: { status: TicketStatus }) {
   const statusClasses: Record<string, string> = {
     open: 'bg-emerald-400 text-white',
     in_progress: 'bg-lime-400 text-white',
-    resolved: 'bg-sky-500 text-white',
+    resolved: 'bg-[var(--turquesa-500)] text-white',
     closed: 'bg-red-500 text-white',
     reopened: 'bg-amber-400 text-white',
   };
-
   return (
     <span className={`rounded-md px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wider ${statusClasses[status]}`}>
       {statusLabels[status]}
     </span>
   );
 }
+
+// ─── ChatView ─────────────────────────────────────────────────────────────────
 
 export function ChatView({
   ticket,
@@ -144,18 +171,20 @@ export function ChatView({
     'El problema fue escalado al area tecnica.',
     'Por favor adjunta evidencia adicional.',
     'Solicitud resuelta. Podrias confirmar si estas conforme?',
-    'Hemos verificado sus documentos y estan correctos.'
+    'Hemos verificado sus documentos y estan correctos.',
   ];
-
   const effectiveQuickReplies = quickReplies.length > 0 ? quickReplies : defaultQuickReplies;
-  const orderedMessages = useMemo(
-    () => [...ticket.messages].sort(compareMessagesChronologically),
+
+  const messages = useMemo(
+    () => [...ticket.messages].sort(compareMessagesChronologically).map(toMessage),
     [ticket.messages],
   );
 
   const isClosed = ticket.status === 'closed';
   const showInput = !isClosed && !ticket.surveyRequired;
   const showAdminPanel = showAdminControls && onPriorityChange && onAdminChange;
+
+  const requesterRole = ticket.requester.company ? 'Vendedor' : 'Cliente';
 
   // Scroll to bottom when ticket changes or new messages arrive (skip during load-more)
   useEffect(() => {
@@ -179,13 +208,10 @@ export function ChatView({
     prevScrollHeightRef.current = 0;
   }, [ticket.messages.length]);
 
-  // Detect scroll to top to trigger load more
   const handleScroll = useCallback(() => {
     const container = msgContainerRef.current;
     if (!container || !onLoadMore || !hasMoreMessages || isLoadingMoreRef.current) return;
-    if (container.scrollTop < 80) {
-      onLoadMore();
-    }
+    if (container.scrollTop < 80) onLoadMore();
   }, [onLoadMore, hasMoreMessages]);
 
   const handleQuickReply = (reply: string) => {
@@ -196,6 +222,10 @@ export function ChatView({
 
   return (
     <div className="relative flex h-full flex-1 min-h-0 flex-col overflow-hidden border-[var(--border-subtle)] bg-[var(--bg-card)] overscroll-y-none md:rounded-[2rem] md:border md:shadow-[0_18px_45px_-28px_rgba(15,23,42,0.35)] md:dark:shadow-[0_24px_52px_-34px_rgba(0,0,0,0.65)] lg:rounded-[2.5rem]">
+      {/* Barra Lyrium */}
+      <div className="h-1 w-full shrink-0 bg-gradient-to-r from-[#9cb04e] via-[#64c695] to-[#499bbf]" />
+
+      {/* Header */}
       <div className="flex shrink-0 items-center gap-3 border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)]/90 px-3 py-3 backdrop-blur-sm sm:px-4">
         {onBack && (
           <button
@@ -207,13 +237,13 @@ export function ChatView({
           </button>
         )}
 
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-cyan-400 text-white shadow-md shadow-sky-100 dark:shadow-black/20">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#9cb04e] via-[#64c695] to-[#499bbf] text-white shadow-md shadow-[#64c695]/20 dark:shadow-black/20">
           {ticket.escalated ? <ShieldCheck className="h-4 w-4" /> : <Headset className="h-4 w-4" />}
         </div>
 
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-[10px] font-black text-sky-500">{ticket.displayId}</span>
+            <span className="text-[10px] font-black text-[var(--turquesa-500)]">{ticket.displayId}</span>
             <StatusBadge status={ticket.status} />
             {ticket.surveyRequired && (
               <span className="rounded-md bg-amber-500 px-1.5 py-0.5 text-[8px] font-black uppercase text-white">
@@ -254,13 +284,15 @@ export function ChatView({
         </div>
       </div>
 
+      {/* Messages area */}
       <div
         ref={msgContainerRef}
         onScroll={handleScroll}
-        className={`flex-1 min-h-0 space-y-4 overflow-y-auto overscroll-y-contain bg-[linear-gradient(180deg,var(--bg-secondary),var(--bg-card))] px-4 py-5 ${scrollbarClass}`}
+        className={`flex-1 min-h-0 overflow-y-auto overscroll-y-contain ${scrollbarClass}`}
+        style={{ background: 'linear-gradient(160deg, color-mix(in srgb,#9cb04e 6%,var(--bg-secondary)) 0%, var(--bg-card) 45%, color-mix(in srgb,#499bbf 5%,var(--bg-card)) 100%)' }}
       >
         {isLoadingMore && (
-          <div className="flex justify-center pb-2">
+          <div className="flex justify-center pb-2 pt-3">
             <div className="flex items-center gap-2 rounded-full bg-[var(--bg-secondary)] px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
               <Loader2 className="h-3 w-3 animate-spin" />
               Cargando mensajes anteriores...
@@ -268,25 +300,36 @@ export function ChatView({
           </div>
         )}
         {hasMoreMessages && !isLoadingMore && (
-          <div className="flex justify-center pb-2">
+          <div className="flex justify-center pb-2 pt-3">
             <button
               type="button"
               onClick={onLoadMore}
-              className="rounded-full bg-[var(--bg-secondary)] px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest text-sky-500 transition hover:bg-[var(--bg-hover)]"
+              className="rounded-full bg-[var(--bg-secondary)] px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest text-[var(--turquesa-500)] transition hover:bg-[var(--bg-hover)]"
             >
               Cargar mensajes anteriores
             </button>
           </div>
         )}
-        {orderedMessages.map((m) => (
-          <ChatMessage key={m.id} message={m} />
-        ))}
+
+        <MessageBubble
+          messages={messages}
+          isSentOverride={helpdeskIsSent}
+          meta={{
+            currentUserName: ticket.requester.name,
+            currentUserRole: requesterRole,
+            otherName: ticket.assignedTo.name,
+            otherRole: 'Soporte Lyrium',
+            showAvatar: true,
+          }}
+        />
+
         {ticket.surveyRequired && onSubmitSurvey && (
           <SurveyArea onSubmit={onSubmitSurvey} />
         )}
         <div ref={bottomAnchorRef} />
       </div>
 
+      {/* Bottom bar: admin controls + quick replies + input */}
       <div className="sticky bottom-0 z-10 flex shrink-0 flex-col gap-3 border-t border-[var(--border-subtle)] bg-[var(--bg-card)]/95 p-3 backdrop-blur sm:p-4">
         {showAdminPanel && (
           <>
@@ -314,7 +357,7 @@ export function ChatView({
                     </select>
                   </div>
                 )}
-                <div className="hidden h-4 w-px bg-[var(--border-subtle)] sm:block"></div>
+                <div className="hidden h-4 w-px bg-[var(--border-subtle)] sm:block" />
                 {onAdminChange && (
                   <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
                     <span className="text-[9px] font-black uppercase text-[var(--text-muted)]">Asignado:</span>
@@ -337,7 +380,7 @@ export function ChatView({
             <button
               type="button"
               onClick={() => setShowQuickReplies(!showQuickReplies)}
-              className="w-fit text-[9px] font-black uppercase tracking-[0.2em] text-sky-500 transition hover:text-sky-600"
+              className="w-fit text-[9px] font-black uppercase tracking-[0.2em] text-[var(--turquesa-500)] transition hover:text-[var(--verde-500)]"
             >
               {showQuickReplies ? 'Ocultar respuestas' : 'Respuestas rapidas'}
             </button>
@@ -349,7 +392,7 @@ export function ChatView({
                     key={idx}
                     type="button"
                     onClick={() => handleQuickReply(qr)}
-                    className="rounded-full border border-[var(--border-subtle)] bg-[var(--bg-card)] px-3 py-1.5 text-[10px] font-bold text-[var(--text-secondary)] transition-all hover:border-sky-100 hover:bg-sky-50 hover:text-sky-600 dark:hover:border-[var(--border-focus)] dark:hover:bg-[var(--bg-hover)] dark:hover:text-emerald-300"
+                    className="rounded-full border border-[var(--border-subtle)] bg-[var(--bg-card)] px-3 py-1.5 text-[10px] font-bold text-[var(--text-secondary)] transition-all hover:border-[var(--turquesa-500)]/30 hover:bg-[var(--turquesa-500)]/5 hover:text-[var(--turquesa-500)] dark:hover:border-[var(--turquesa-500)]/20 dark:hover:bg-[var(--bg-hover)] dark:hover:text-[var(--turquesa-500)]"
                   >
                     {qr.length > 42 ? `${qr.substring(0, 42)}...` : qr}
                   </button>
@@ -357,9 +400,10 @@ export function ChatView({
               </div>
             )}
 
-            <ChatInput
-              onSendMessage={(payload) => onSendMessage(payload)}
+            <MessageInput
+              onSend={(text, files) => onSendMessage({ text, attachments: files })}
               disabled={isSending}
+              placeholder="Escribe una respuesta..."
             />
           </>
         ) : isClosed && !ticket.surveyRequired && (

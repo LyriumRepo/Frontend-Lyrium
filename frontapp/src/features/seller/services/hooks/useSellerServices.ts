@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Service,
@@ -50,6 +51,8 @@ export function useSellerServices(props?: UseSellerServicesProps) {
   const {
     data: specialists = [],
     isLoading: loadingSpecialists,
+    isError: specialistsError,
+    error: specialistsErrorObj,
   } = useQuery({
     queryKey: ['seller', 'specialists'],
     queryFn: async (): Promise<Specialist[]> => {
@@ -57,11 +60,14 @@ export function useSellerServices(props?: UseSellerServicesProps) {
     },
     initialData: props?.initialSpecialists,
     staleTime: 30 * 1000,
+    retry: 1,
   });
 
   const {
     data: services = [],
     isLoading: loadingServices,
+    isError: servicesError,
+    error: servicesErrorObj,
     refetch: refetchServices,
   } = useQuery({
     queryKey: ['seller', 'services'],
@@ -70,11 +76,14 @@ export function useSellerServices(props?: UseSellerServicesProps) {
     },
     initialData: props?.initialServices,
     staleTime: 30 * 1000,
+    retry: 1,
   });
 
   const {
     data: appointments = [],
     isLoading: loadingAppointments,
+    isError: appointmentsError,
+    error: appointmentsErrorObj,
   } = useQuery({
     queryKey: ['seller', 'appointments'],
     queryFn: async (): Promise<AppointmentWithClient[]> => {
@@ -83,7 +92,35 @@ export function useSellerServices(props?: UseSellerServicesProps) {
     },
     initialData: props?.initialAppointments as AppointmentWithClient[] | undefined,
     staleTime: 30 * 1000,
+    retry: 1,
   });
+
+  useEffect(() => {
+    if (servicesError) {
+      showToast(
+        (servicesErrorObj as Error)?.message || 'No se pudo cargar la lista de servicios',
+        'error',
+      );
+    }
+  }, [servicesError]);
+
+  useEffect(() => {
+    if (specialistsError) {
+      showToast(
+        (specialistsErrorObj as Error)?.message || 'No se pudo cargar los especialistas',
+        'error',
+      );
+    }
+  }, [specialistsError]);
+
+  useEffect(() => {
+    if (appointmentsError) {
+      showToast(
+        (appointmentsErrorObj as Error)?.message || 'No se pudo cargar la agenda',
+        'error',
+      );
+    }
+  }, [appointmentsError]);
 
   const upsertServiceMutation = useMutation({
     mutationFn: async (svc: Omit<Service, 'id'> & { id?: number }) => {
@@ -176,6 +213,7 @@ export function useSellerServices(props?: UseSellerServicesProps) {
       deleteServiceMutation.isPending ||
       upsertSpecialistMutation.isPending ||
       rescheduleMutation.isPending,
+    hasError: servicesError || specialistsError,
     handleSaveService: (service: Omit<Service, 'id'> & { id?: number }) =>
       upsertServiceMutation.mutateAsync(service),
     handleDeleteService: (id: number) => deleteServiceMutation.mutateAsync(id),

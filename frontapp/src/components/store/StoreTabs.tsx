@@ -52,8 +52,8 @@ interface ProductFilters {
 }
 
 const stickerConfig: Record<string, { label: string; class: string }> = {
-  oferta: { label: 'Oferta', class: 'bg-red-500' },
-  promo: { label: 'Promo', class: 'bg-orange-500' },
+  oferta: { label: 'Oferta', class: 'bg-emerald-600 dark:bg-emerald-500' },
+  promo: { label: 'Promo', class: 'bg-sky-500 dark:bg-sky-400' },
   nuevo: { label: 'Nuevo', class: 'bg-green-500' },
   limitado: { label: 'Limitado', class: 'bg-purple-500' },
 };
@@ -188,7 +188,7 @@ export default function StoreTabs({ tienda, productos, sucursales = [], opinione
                   <Link href={producto.slug ? `/producto/${producto.slug}` : '#'}>
                     <Image src={producto.imagen || '/img/no-image.png'} alt={producto.titulo} fill className="object-cover group-hover:scale-105 transition-transform" sizes="(max-width: 640px) 50vw, 25vw" />
                   </Link>
-                  {descuento > 0 && <span className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">-{descuento}%</span>}
+                  {descuento > 0 && <span className="absolute top-2 left-2 bg-rose-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">-{descuento}%</span>}
                   {sticker && !descuento && <span className={`absolute top-2 left-2 text-white text-xs font-bold px-2 py-0.5 rounded-full ${sticker.class}`}>{sticker.label}</span>}
                   <div className="hidden md:flex absolute inset-0 bg-black/0 group-hover:bg-black/10 items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
                     <button onClick={() => handleQuickView(producto)} className="bg-white p-2 rounded-full shadow-lg"><Eye className="w-4 h-4" /></button>

@@ -2,7 +2,7 @@ import React from 'react';
 import {
   Activity, AlertCircle, AlertOctagon, AlertTriangle, ArrowDown,
   ArrowLeft, ArrowRight, BadgeCheck, Ban, Banknote, BarChart, Bell,
-  Bold, BookOpen, Briefcase, Building, Building2, Calendar,
+  Bold, BookOpen, Bot, Briefcase, Building, Building2, Calendar,
   CalendarCheck, CalendarClock, CalendarX, Camera, Check, CheckCheck,
   CheckCircle, CheckCircle2, CheckSquare, ChevronDown, ChevronLeft, ChevronRight,
   ChevronUp, Clock, CloudUpload, Coins, CreditCard, Crown, DollarSign,
@@ -27,7 +27,7 @@ import {
 const ICON_MAP: Record<string, LucideIcon> = {
   Activity, AlertCircle, AlertOctagon, AlertTriangle, ArrowDown,
   ArrowLeft, ArrowRight, BadgeCheck, Ban, Banknote, BarChart, Bell,
-  Bold, BookOpen, Briefcase, Building, Building2, Calendar,
+  Bold, BookOpen, Bot, Briefcase, Building, Building2, Calendar,
   CalendarCheck, CalendarClock, CalendarX, Camera, Check, CheckCheck,
   CheckCircle, CheckCircle2, CheckSquare, ChevronDown, ChevronLeft, ChevronRight,
   ChevronUp, Clock, CloudUpload, Coins, CreditCard, Crown, DollarSign,

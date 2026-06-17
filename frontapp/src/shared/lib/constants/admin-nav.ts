@@ -90,6 +90,12 @@ export const adminNavigation: PanelNavigation = [
                 href: '/admin/planes',
                 icon: 'Sparkles',
             },
+            {
+                id: 'glossary',
+                label: 'Glosario',
+                href: '/admin/glossary',
+                icon: 'BookOpen',
+            },
         ],
     },
 ];

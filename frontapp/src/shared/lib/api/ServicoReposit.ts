@@ -32,11 +32,18 @@ async function getAuthHeaders(): Promise<Record<string, string>> {
     const res = await fetch('/api/auth-token');
     if (res.ok) {
       const { token } = await res.json();
-      if (token) base['Authorization'] = `Bearer ${token}`;
+      if (token) {
+        base['Authorization'] = `Bearer ${token}`;
+        return base;
+      }
     }
   } catch {
-    /* sin token */
+    // /api/auth-token no respondió — continúa al fallback
   }
+
+  // Fallback: leer token de localStorage / cookie (getToken ya importado)
+  const localToken = getToken();
+  if (localToken) base['Authorization'] = `Bearer ${localToken}`;
 
   return base;
 }

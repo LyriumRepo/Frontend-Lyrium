@@ -4,7 +4,8 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   async rewrites() {
     return [
-      { source: '/backend/:path*', destination: 'http://127.0.0.1:8000/:path*' }
+      { source: '/backend/:path*', destination: 'http://127.0.0.1:8000/:path*' },
+      { source: '/storage/:path*', destination: 'http://127.0.0.1:8000/storage/:path*' },
     ];
   },
 
@@ -79,6 +80,14 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'i.pravatar.cc',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.railway.app',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.up.railway.app',
       },
     ],
   },

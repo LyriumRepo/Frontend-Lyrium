@@ -17,6 +17,13 @@ export interface Notification {
   category: string | null;
   vendor_name: string | null;
   is_read: boolean;
+  // Store-related notifications
+  store_id: number | null;
+  store_name: string | null;
+  // Profile request notifications
+  seller_name: string | null;
+  // Chat notifications
+  conversation_id: number | null;
 }
 
 export interface NotificationsResponse {

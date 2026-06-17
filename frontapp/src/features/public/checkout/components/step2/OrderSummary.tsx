@@ -1,6 +1,7 @@
 'use client';
 
-import { Truck, ShieldCheck, Lock, Tag, Leaf } from 'lucide-react';
+import { Truck, ShieldCheck, Lock, Tag } from 'lucide-react';
+import Image from 'next/image';
 import { useCheckoutStore } from '@/store/checkoutStore';
 import { useIzipay } from '../../hooks/useIzipay';
 import { useCheckoutSubmit } from '../../hooks/useCheckoutSubmit';
@@ -45,6 +46,7 @@ export default function OrderSummary() {
 
   const [showIzipayModal, setShowIzipayModal] = useState(false);
   const [pendingFormToken, setPendingFormToken] = useState<string | null>(null);
+  const [pendingOrderId, setPendingOrderId] = useState<string | null>(null);
   const [liriosEligibility, setLiriosEligibility] = useState<LiriosEligibility | null>(null);
   const [liriosLoading, setLiriosLoading] = useState(false);
   const [liriosInput, setLiriosInput] = useState('');
@@ -59,10 +61,20 @@ export default function OrderSummary() {
     error: izipayError,
   } = useIzipay({
     onSuccess: useCallback(
-      (result) => {
+      async (result) => {
         setShowIzipayModal(false);
+        // Fallback: confirmar pago en backend por si el webhook de Izipay no llegó
+        // (habitual en localhost/dev). Si el webhook ya lo procesó, el endpoint
+        // devuelve 400 "ya está pagada" — lo ignoramos silenciosamente.
+        if (pendingOrderId) {
+          try {
+            await orderApi.confirmIzipayPayment(pendingOrderId);
+          } catch {
+            // webhook ya procesó el pago, o error no crítico
+          }
+        }
         setOrderResult({
-          orderId: result.clientAnswer.orderDetails.orderId,
+          orderId: pendingOrderId ?? result.clientAnswer.orderDetails.orderId,
           email: personalData.email,
           total: result.clientAnswer.orderDetails.orderTotalAmount / 100,
           items: cartItems,
@@ -73,6 +85,7 @@ export default function OrderSummary() {
         setStep(3);
       },
       [
+        pendingOrderId,
         cartItems,
         personalData,
         shippingData,
@@ -157,8 +170,24 @@ export default function OrderSummary() {
       return;
     }
 
+    // Mock mode: el backend ya confirmó el pago, saltar Smart Form
+    if (session.form_token.startsWith('MOCK-')) {
+      setOrderResult({
+        orderId: result.orderId,
+        email: result.email,
+        total: session.amount,
+        items: cartItems,
+        personalData,
+        shippingData,
+        orderData,
+      });
+      setStep(3);
+      return;
+    }
+
     // Abrir modal con el Smart Form. El useEffect inyectará el formToken
     // una vez que el div.kr-smart-form esté en el DOM.
+    setPendingOrderId(result.orderId);
     setPendingFormToken(session.form_token);
     setShowIzipayModal(true);
   };
@@ -253,7 +282,9 @@ export default function OrderSummary() {
             <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800/40 space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Leaf className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                  <div className="relative w-6 h-6">
+                    <Image src="/img/intro/Flor6.png" alt="" fill className="object-contain" />
+                  </div>
                   <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wide">
                     Lirios
                   </span>
@@ -325,7 +356,10 @@ export default function OrderSummary() {
           {orderData.liriosDiscount > 0 && (
             <div className="flex justify-between text-gray-500 dark:text-[var(--text-muted)]">
               <span className="flex items-center gap-1">
-                <Leaf className="w-3 h-3" /> Lirios
+                <div className="relative w-4 h-4">
+                  <Image src="/img/intro/Flor6.png" alt="" fill className="object-contain" />
+                </div>
+                Lirios
               </span>
               <span className="font-semibold text-emerald-600 dark:text-emerald-400">
                 -S/ {orderData.liriosDiscount.toFixed(2)}

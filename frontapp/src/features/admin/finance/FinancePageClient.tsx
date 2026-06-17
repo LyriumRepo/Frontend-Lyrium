@@ -1,14 +1,17 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import FinanceChart from './components/FinanceChart';
 import CardProxPago from './components/CardProxPago';
 import { useToast } from '@/shared/lib/context/ToastContext';
 import BaseLoading from '@/components/ui/BaseLoading';
 import BaseStatCard from '@/components/ui/BaseStatCard';
+import { KpiDetailModal, getKpiDetail } from './components/KpiDetailModal';
+import type { KpiConfig } from './components/KpiDetailModal';
 
 import Icon from '@/components/ui/Icon';
+import { BaseDatePicker } from '@/components/ui';
 import { useFinanceAnalytics } from './hooks/useFinanceAnalytics';
 import { formatCurrency } from '@/shared/lib/utils/formatters';
 
@@ -29,6 +32,8 @@ export function FinancePageClient(_props: FinancePageClientProps) {
 
   const { showToast } = useToast();
 
+  const [selectedKpi, setSelectedKpi] = useState<KpiConfig | null>(null);
+
   const handleApplyFilters = async () => {
     const success = await hookApplyFilters();
     if (!success) {
@@ -40,18 +45,18 @@ export function FinancePageClient(_props: FinancePageClientProps) {
 
   const headerActions = (
     <div className="flex gap-2 bg-white/10 backdrop-blur-md p-2 rounded-2xl border border-white/20">
-      <input
-        type="date"
+      <BaseDatePicker
         value={filters.startDate}
-        onChange={(e) => setFilters(e.target.value, filters.endDate)}
-        className="text-xs bg-transparent border-none focus:ring-0 text-white placeholder-white/50 cursor-pointer"
+        onChange={(v) => setFilters(v, filters.endDate)}
+        placeholder="Desde"
+        buttonClassName="!bg-transparent"
       />
       <span className="text-white/30">|</span>
-      <input
-        type="date"
+      <BaseDatePicker
         value={filters.endDate}
-        onChange={(e) => setFilters(filters.startDate, e.target.value)}
-        className="text-xs bg-transparent border-none focus:ring-0 text-white placeholder-white/50 cursor-pointer"
+        onChange={(v) => setFilters(filters.startDate, v)}
+        placeholder="Hasta"
+        buttonClassName="!bg-transparent"
       />
       <button
         type="button"
@@ -68,6 +73,40 @@ export function FinancePageClient(_props: FinancePageClientProps) {
   }
 
   if (!data) return null;
+
+  const openKpi = (
+    label: string,
+    value: string,
+    description: string,
+    icon: string,
+    color: string,
+    chartType: 'line' | 'bar' | 'doughnut' | 'radar',
+    chartLabels: string[],
+    chartData: number[],
+    chartColor: string,
+    suffix?: string,
+  ) => {
+    setSelectedKpi({
+      label,
+      value,
+      description,
+      icon,
+      color,
+      chartType,
+      chartLabels,
+      chartData,
+      chartColor,
+      suffix,
+      extraInfo: getKpiDetail(label),
+    });
+  };
+
+  const adminChartColors: Record<string, string> = {
+    sky: '#0EA5E9',
+    emerald: '#10B981',
+    amber: '#F59E0B',
+    rose: '#F43F5E',
+  };
 
   const tabs = [
     { id: 'all', label: 'Todos', icon: 'LayoutGrid' },
@@ -119,7 +158,20 @@ export function FinancePageClient(_props: FinancePageClientProps) {
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2 space-y-8">
-                <div className="bg-[var(--bg-card)] p-8 rounded-[2.5rem] border border-[var(--border-subtle)] shadow-xl relative overflow-hidden group transition-all duration-500 hover:shadow-2xl">
+                <button
+                  onClick={() => openKpi(
+                    'Centro de Control de Ingresos',
+                    formatCurrency(data.ingresosBrutos.data.reduce((a, b) => a + b, 0)),
+                    'Rendimiento consolidado de ingresos',
+                    'LineChart',
+                    '#0EA5E9',
+                    'line',
+                    data.ingresosBrutos.labels,
+                    data.ingresosBrutos.data,
+                    '#0EA5E9',
+                  )}
+                  className="w-full text-left bg-[var(--bg-card)] p-8 rounded-[2.5rem] border border-[var(--border-subtle)] shadow-xl relative overflow-hidden group transition-all duration-500 hover:shadow-2xl active:scale-[0.98]"
+                >
                   <div className="absolute top-0 left-0 w-72 h-72 bg-sky-500/5 dark:bg-sky-500/2 rounded-full -ml-36 -mt-36 blur-3xl transition-all duration-700 group-hover:scale-125" />
                   <div className="absolute bottom-0 right-0 w-72 h-72 bg-emerald-500/5 dark:bg-emerald-500/2 rounded-full -mr-36 -mb-36 blur-3xl transition-all duration-700 group-hover:scale-125" />
                   <div className="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 mb-8 border-b border-[var(--border-subtle)] pb-6">
@@ -175,7 +227,13 @@ export function FinancePageClient(_props: FinancePageClientProps) {
                       height="280px"
                     />
                   </div>
-                </div>
+                  <div className="relative z-10 mt-4 pt-3 border-t border-[var(--border-subtle)] opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span className="text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest flex items-center gap-1">
+                      <Icon name="ArrowRight" className="w-3 h-3" />
+                      Ver detalle
+                    </span>
+                  </div>
+                </button>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <BaseStatCard
                     label="Ventas Totales"
@@ -192,6 +250,18 @@ export function FinancePageClient(_props: FinancePageClientProps) {
                         color="#10B981"
                       />
                     }
+                    onClick={() => openKpi(
+                      'Ventas Totales',
+                      data.ventasTotales.data.reduce((a, b) => a + b, 0).toString(),
+                      'Número de transacciones',
+                      'ShoppingCart',
+                      '#10B981',
+                      'bar',
+                      data.ventasTotales.labels,
+                      data.ventasTotales.data,
+                      '#10B981',
+                      'Ord.',
+                    )}
                   />
                   <BaseStatCard
                     label="Ticket Promedio"
@@ -211,6 +281,20 @@ export function FinancePageClient(_props: FinancePageClientProps) {
                         fill
                       />
                     }
+                    onClick={() => openKpi(
+                      'Ticket Promedio',
+                      formatCurrency(
+                        data.ingresosBrutos.data.reduce((a, b) => a + b, 0) /
+                          Math.max(data.ventasTotales.data.reduce((a, b) => a + b, 0), 1),
+                      ),
+                      'Valor medio por pedido',
+                      'Tag',
+                      '#0EA5E9',
+                      'line',
+                      data.ticketPromedio.labels,
+                      data.ticketPromedio.data,
+                      '#0EA5E9',
+                    )}
                   />
                 </div>
               </div>
@@ -256,6 +340,17 @@ export function FinancePageClient(_props: FinancePageClientProps) {
                     color="#0EA5E9"
                   />
                 }
+                onClick={() => openKpi(
+                  'Lead Time Despacho',
+                  `${data.leadTime.data[data.leadTime.data.length - 1] || 0}h`,
+                  'Tiempo promedio de pedido a despacho',
+                  'Timer',
+                  '#0EA5E9',
+                  'bar',
+                  data.leadTime.labels,
+                  data.leadTime.data,
+                  '#0EA5E9',
+                )}
               />
               <BaseStatCard
                 label="Ingresos Reales"
@@ -272,6 +367,17 @@ export function FinancePageClient(_props: FinancePageClientProps) {
                     fill
                   />
                 }
+                onClick={() => openKpi(
+                  'Ingresos Reales',
+                  formatCurrency(data.ingresosReales.data.reduce((a, b) => a + b, 0)),
+                  'Ingresos después de comisiones y costos',
+                  'TrendingUp',
+                  '#F59E0B',
+                  'line',
+                  data.ingresosReales.labels,
+                  data.ingresosReales.data,
+                  '#F59E0B',
+                )}
               />
             </div>
           </div>
@@ -287,7 +393,20 @@ export function FinancePageClient(_props: FinancePageClientProps) {
               </h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-[var(--bg-card)] p-8 border border-[var(--border-subtle)] rounded-[2.5rem] flex flex-col items-center shadow-sm relative overflow-hidden group">
+              <button
+                onClick={() => openKpi(
+                  'Tasa de Defectuosos',
+                  `${data.defectuosos.data[data.defectuosos.data.length - 1]}%`,
+                  'Productos con reportes de fallas',
+                  'AlertOctagon',
+                  '#10B981',
+                  'doughnut',
+                  data.defectuosos.labels,
+                  data.defectuosos.data,
+                  '#10B981',
+                )}
+                className="w-full text-left bg-[var(--bg-card)] p-8 border border-[var(--border-subtle)] rounded-[2.5rem] flex flex-col items-center shadow-sm relative overflow-hidden group hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 active:scale-[0.98]"
+              >
                 <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full blur-xl transition-all" />
                 <div className="flex items-center justify-between w-full mb-6 relative z-10">
                   <span className="text-xs font-bold text-emerald-500 dark:text-emerald-400 uppercase tracking-wider">
@@ -317,7 +436,13 @@ export function FinancePageClient(_props: FinancePageClientProps) {
                 <p className="text-xs text-[var(--text-secondary)] mt-4 font-bold uppercase tracking-widest text-center relative z-10">
                   Productos con reportes de fallas
                 </p>
-              </div>
+                <div className="relative z-10 mt-4 pt-3 border-t border-[var(--border-subtle)] opacity-0 group-hover:opacity-100 transition-opacity w-full">
+                  <span className="text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest flex items-center gap-1">
+                    <Icon name="ArrowRight" className="w-3 h-3" />
+                    Ver detalle
+                  </span>
+                </div>
+              </button>
               <BaseStatCard
                 label="CSAT General"
                 value={`${data.csat.promedio.toFixed(1)} / 5`}
@@ -333,6 +458,17 @@ export function FinancePageClient(_props: FinancePageClientProps) {
                     cutout="75%"
                   />
                 }
+                onClick={() => openKpi(
+                  'CSAT General',
+                  `${data.csat.promedio.toFixed(1)} / 5`,
+                  `${data.csat.total} calificaciones`,
+                  'Star',
+                  '#10B981',
+                  'doughnut',
+                  ['Satisfacción', 'Restante'],
+                  [data.csat.promedio, Math.max(5 - data.csat.promedio, 0)],
+                  '#10B981',
+                )}
               />
             </div>
           </div>
@@ -363,6 +499,17 @@ export function FinancePageClient(_props: FinancePageClientProps) {
                     fill
                   />
                 }
+                onClick={() => openKpi(
+                  'Valor de Vida del Cliente (LTV)',
+                  `S/ ${data.ltv.data[data.ltv.data.length - 1] || 0}`,
+                  'Revenue per customer lifetime',
+                  'Coins',
+                  '#0EA5E9',
+                  'line',
+                  data.ltv.labels,
+                  data.ltv.data,
+                  '#0EA5E9',
+                )}
               />
               <BaseStatCard
                 label="Cuota de Mercado"
@@ -379,6 +526,17 @@ export function FinancePageClient(_props: FinancePageClientProps) {
                     cutout="0%"
                   />
                 }
+                onClick={() => openKpi(
+                  'Cuota de Mercado',
+                  `${data.cuotaMercado.data[0] || 0}%`,
+                  'Participación en el mercado',
+                  'PieChart',
+                  '#10B981',
+                  'doughnut',
+                  data.cuotaMercado.labels,
+                  data.cuotaMercado.data,
+                  '#10B981',
+                )}
               />
             </div>
           </div>
@@ -408,6 +566,17 @@ export function FinancePageClient(_props: FinancePageClientProps) {
                     color="#10B981"
                   />
                 }
+                onClick={() => openKpi(
+                  'Tiempo de Respuesta',
+                  `${data.tiempoRespuesta.data[data.tiempoRespuesta.data.length - 1] || 0} min`,
+                  'Promedio de respuesta a tickets',
+                  'Clock',
+                  '#10B981',
+                  'bar',
+                  data.tiempoRespuesta.labels,
+                  data.tiempoRespuesta.data,
+                  '#10B981',
+                )}
               />
               <BaseStatCard
                 label="Tasa de Resolución"
@@ -424,6 +593,17 @@ export function FinancePageClient(_props: FinancePageClientProps) {
                     fill
                   />
                 }
+                onClick={() => openKpi(
+                  'Tasa de Resolución',
+                  `${data.defectuosos.data[data.defectuosos.data.length - 1] || 0}%`,
+                  'Efectividad en resolución de problemas',
+                  'CheckCircle',
+                  '#0EA5E9',
+                  'line',
+                  data.defectuosos.labels,
+                  data.defectuosos.data,
+                  '#0EA5E9',
+                )}
               />
             </div>
           </div>
@@ -454,6 +634,17 @@ export function FinancePageClient(_props: FinancePageClientProps) {
                     fill
                   />
                 }
+                onClick={() => openKpi(
+                  'ROI',
+                  `${(data.roi.data[data.roi.data.length - 1] || 0).toFixed(1)}%`,
+                  'Retorno sobre inversión',
+                  'TrendingUp',
+                  '#F43F5E',
+                  'line',
+                  data.roi.labels,
+                  data.roi.data,
+                  '#F43F5E',
+                )}
               />
               <BaseStatCard
                 label="Cuota de Mercado"
@@ -470,6 +661,17 @@ export function FinancePageClient(_props: FinancePageClientProps) {
                     cutout="0%"
                   />
                 }
+                onClick={() => openKpi(
+                  'Cuota de Mercado',
+                  `${data.cuotaMercado.data[0] || 0}%`,
+                  'Participación en el mercado',
+                  'BarChart',
+                  '#0EA5E9',
+                  'doughnut',
+                  data.cuotaMercado.labels,
+                  data.cuotaMercado.data,
+                  '#0EA5E9',
+                )}
               />
             </div>
             {/* Top Buyers */}
@@ -526,6 +728,17 @@ export function FinancePageClient(_props: FinancePageClientProps) {
                     color="#0EA5E9"
                   />
                 }
+                onClick={() => openKpi(
+                  'Rotación de Stock',
+                  `${(data.stockRotacion.data[data.stockRotacion.data.length - 1] || 0).toFixed(1)}`,
+                  'Veces que se renueva el inventario',
+                  'RefreshCw',
+                  '#0EA5E9',
+                  'bar',
+                  data.stockRotacion.labels,
+                  data.stockRotacion.data,
+                  '#0EA5E9',
+                )}
               />
               <BaseStatCard
                 label="Ventas por Categoría"
@@ -542,6 +755,17 @@ export function FinancePageClient(_props: FinancePageClientProps) {
                     cutout="0%"
                   />
                 }
+                onClick={() => openKpi(
+                  'Ventas por Categoría',
+                  `${data.categories.labels.length} categorías`,
+                  'Distribución de ventas',
+                  'PieChart',
+                  '#10B981',
+                  'doughnut',
+                  data.categories.labels,
+                  data.categories.data,
+                  '#10B981',
+                )}
               />
             </div>
           </div>
@@ -572,6 +796,17 @@ export function FinancePageClient(_props: FinancePageClientProps) {
                     fill
                   />
                 }
+                onClick={() => openKpi(
+                  'CSAT',
+                  `${data.csat.promedio.toFixed(1)} / 5`,
+                  `${data.csat.total} calificaciones recibidas`,
+                  'Star',
+                  '#0EA5E9',
+                  'line',
+                  ['CSAT'],
+                  [data.csat.promedio],
+                  '#0EA5E9',
+                )}
               />
               <div className="bg-[var(--bg-card)] p-8 border border-[var(--border-subtle)] rounded-[2.5rem]">
                 <h3 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-wider mb-6">
@@ -603,6 +838,12 @@ export function FinancePageClient(_props: FinancePageClientProps) {
           </div>
         )}
       </div>
+
+      <KpiDetailModal
+        isOpen={!!selectedKpi}
+        onClose={() => setSelectedKpi(null)}
+        kpi={selectedKpi}
+      />
     </div>
   );
 }

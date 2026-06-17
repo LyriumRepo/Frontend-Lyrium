@@ -145,6 +145,41 @@ export function useFcmToken() {
     };
   }, [permission, isAuthenticated]);
 
+  useEffect(() => {
+    if (permission !== 'granted') return;
+    if (!isAuthenticated) return;
+
+    const checkTokenRefresh = async () => {
+      if (document.visibilityState !== 'visible') return;
+      try {
+        const messaging = getFirebaseMessaging();
+        const newToken = await getToken(messaging, {
+          vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
+        });
+        if (!newToken) return;
+        const oldToken = getStoredToken();
+        if (oldToken === newToken) return;
+        setFcmToken(newToken);
+        setStoredToken(newToken);
+        if (oldToken) await deviceApi.unregister(oldToken).catch(() => {});
+        await deviceApi.register(newToken, 'web', navigator.userAgent).catch(() => {});
+      } catch {
+        // token refresh check failed silently
+      }
+    };
+
+    document.addEventListener('visibilitychange', checkTokenRefresh);
+    return () => document.removeEventListener('visibilitychange', checkTokenRefresh);
+  }, [permission, isAuthenticated]);
+
+  const prevAuthRef = useRef(isAuthenticated);
+  useEffect(() => {
+    if (prevAuthRef.current && !isAuthenticated) {
+      unregisterToken();
+    }
+    prevAuthRef.current = isAuthenticated;
+  }, [isAuthenticated, unregisterToken]);
+
   return {
     fcmToken,
     permission,

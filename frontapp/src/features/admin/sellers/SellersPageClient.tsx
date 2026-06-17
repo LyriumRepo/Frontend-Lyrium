@@ -42,7 +42,7 @@ const TabButton = ({ active, onClick, label, icon, badge }: TabButtonProps) => (
     onClick={onClick}
     className={`px-8 py-4 rounded-2xl text-[11px] font-black transition-all flex items-center gap-3 relative border ${
       active
-        ? 'bg-[var(--bg-card)] shadow-xl shadow-black/5 text-sky-500 border-[var(--border-subtle)]'
+        ? 'bg-[var(--bg-card)] shadow-xl shadow-black/5 text-cyan-500 border-[var(--border-subtle)]'
         : 'text-[var(--text-secondary)] border-transparent hover:bg-[var(--bg-secondary)]'
     }`}
   >
@@ -102,12 +102,12 @@ const ManagementModal = ({
           </button>
 
           <div
-            className={`h-2 w-full absolute top-0 left-0 ${type === 'seller' ? 'bg-rose-500' : 'bg-sky-500'}`}
+            className={`h-2 w-full absolute top-0 left-0 ${type === 'seller' ? 'bg-rose-500' : 'bg-cyan-500'}`}
           />
 
           <div className="flex items-center gap-3 mb-4">
             <div
-              className={`p-2 rounded-lg ${type === 'seller' ? 'bg-rose-500/10 text-rose-500' : 'bg-sky-500/10 text-sky-500'}`}
+              className={`p-2 rounded-lg ${type === 'seller' ? 'bg-rose-500/10 text-rose-500' : 'bg-cyan-500/10 text-cyan-500'}`}
             >
               <ShieldAlert className="w-5 h-5" />
             </div>
@@ -146,7 +146,7 @@ const ManagementModal = ({
                   name="status"
                   defaultValue={suggested}
                   required
-                  className="w-full p-4 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-2xl font-black text-[var(--text-primary)] focus:ring-4 focus:ring-sky-500/10 appearance-none transition-all"
+                  className="w-full p-4 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-2xl font-black text-[var(--text-primary)] focus:ring-4 focus:ring-cyan-500/10 appearance-none transition-all"
                 >
                   {type === 'seller' ? (
                     <>
@@ -195,7 +195,7 @@ const ManagementModal = ({
                 required
                 minLength={10}
                 placeholder="Detalle los motivos técnicos..."
-                className="w-full p-5 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-3xl font-medium text-[var(--text-primary)] focus:ring-4 focus:ring-sky-500/10 focus:bg-[var(--bg-card)] transition-all resize-none text-[11px] placeholder:text-[var(--text-secondary)]"
+                className="w-full p-5 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-3xl font-medium text-[var(--text-primary)] focus:ring-4 focus:ring-cyan-500/10 focus:bg-[var(--bg-card)] transition-all resize-none text-[11px] placeholder:text-[var(--text-secondary)]"
               />
             </div>
 
@@ -449,7 +449,7 @@ export function SellersPageClient(_props: SellersPageClientProps) {
 
             {profileRequestsLoading ? (
               <div className="flex items-center justify-center py-12">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-500" />
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-500" />
               </div>
             ) : profileRequestsError ? (
               <div className="bg-red-50 p-6 rounded-2xl text-center">
