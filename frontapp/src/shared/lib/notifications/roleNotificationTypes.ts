@@ -21,11 +21,13 @@ export const ROLE_NOTIFICATION_TYPES: Record<string, RoleNotificationConfig> = {
         bell: [
             'order_created', 'OrderCreatedNotification',
             'order_tracking', 'OrderStatusTrackingNotification',
+            'booking_confirmed', 'BookingConfirmedNotification',
             'new_chat_message', 'NewChatMessageNotification',
         ],
         toast: [
             'order_created', 'OrderCreatedNotification',
             'order_tracking', 'OrderStatusTrackingNotification',
+            'booking_confirmed', 'BookingConfirmedNotification',
             'new_chat_message', 'NewChatMessageNotification',
         ],
     },
@@ -33,6 +35,7 @@ export const ROLE_NOTIFICATION_TYPES: Record<string, RoleNotificationConfig> = {
     seller: {
         bell: [
             'new_order', 'NewOrderSellerNotification',
+            'booking_created', 'BookingCreatedNotification',
             'store_status_changed', 'StoreStatusNotification',
             'invoice_requested', 'InvoiceRequestedNotification',
             'order_delivered_seller', 'OrderDeliveredSellerNotification',
@@ -40,6 +43,7 @@ export const ROLE_NOTIFICATION_TYPES: Record<string, RoleNotificationConfig> = {
         ],
         toast: [
             'new_order', 'NewOrderSellerNotification',
+            'booking_created', 'BookingCreatedNotification',
             'store_status_changed', 'StoreStatusNotification',
             'invoice_requested', 'InvoiceRequestedNotification',
             'order_delivered_seller', 'OrderDeliveredSellerNotification',

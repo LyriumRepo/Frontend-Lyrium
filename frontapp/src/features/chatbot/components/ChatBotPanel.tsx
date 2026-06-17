@@ -6,6 +6,7 @@ import ChatBotHeader from './ChatBotHeader';
 import ChatBotBubble from './ChatBotBubble';
 import ChatBotInput from './ChatBotInput';
 import ChatBotQuickActions from './ChatBotQuickActions';
+import ChatBotAvatar from './ChatBotAvatar';
 
 interface Props {
     isOpen: boolean;
@@ -68,11 +69,7 @@ export default function ChatBotPanel({
 
                     {isTyping && (
                         <div className="flex gap-2 justify-start animate-slide-down">
-                            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-emerald-700 to-teal-600 dark:from-[var(--brand-green)] dark:to-[var(--icons-green)] flex items-center justify-center shadow-sm">
-                                <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                                </svg>
-                            </div>
+                            <ChatBotAvatar size="sm" />
                             <div className="bg-gray-100 dark:bg-[var(--bg-muted)] rounded-2xl rounded-bl-md px-4 py-3 shadow-sm">
                                 <div className="flex gap-1.5">
                                     <span className="w-2 h-2 rounded-full bg-emerald-400 dark:bg-emerald-500 animate-pulse-dot" style={{ animationDelay: '0ms' }} />

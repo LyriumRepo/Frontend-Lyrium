@@ -414,10 +414,10 @@ export function ChatPageClient() {
                         </div>
                         <div className="p-8 space-y-4">
                             {[
-                                { icon: 'Package', title: 'Pedidos y coordinación', desc: 'Coordina entregas, confirma detalles de pedidos y resuelve dudas logísticas con tus clientes directamente.' },
-                                { icon: 'MessageSquare', title: 'Consultas comerciales', desc: 'Atiende preguntas sobre productos, precios, personalizaciones y cualquier negociación previa a la compra.' },
-                                { icon: 'RefreshCw', title: 'Seguimiento postventa', desc: 'Da seguimiento a la satisfacción del cliente, acuerda devoluciones o cambios de forma directa.' },
-                                { icon: 'Info', title: 'Gestión independiente', desc: 'Este canal es para operaciones comerciales. Para incidencias técnicas de la plataforma, usa Soporte Lyrium.' },
+                                { icon: 'Package', title: 'Pedidos y logística', desc: 'Resuelve dudas de tus clientes sobre pedidos, coordina entregas y confirma detalles del envío.' },
+                                { icon: 'RotateCcw', title: 'Devoluciones, cambios y reembolsos', desc: 'Atiende solicitudes de devolución, cambio de producto o reembolso que te hayan hecho los clientes.' },
+                                { icon: 'AlertTriangle', title: 'Reclamos y postventa', desc: 'Gestiona reportes de productos defectuosos, diferencias con lo pedido o incidencias comerciales de tus clientes.' },
+                                { icon: 'Store', title: 'Cada tienda opera de forma independiente', desc: 'Este canal es para operaciones comerciales. Para incidencias técnicas de la plataforma, usa Soporte Lyrium.' },
                             ].map((item) => (
                                 <div key={item.title} className="flex items-start gap-4 p-4 bg-gray-50 dark:bg-[var(--bg-muted)]/50 rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)]">
                                     <div className="w-10 h-10 rounded-xl bg-white dark:bg-[var(--bg-secondary)] flex items-center justify-center shadow-sm border border-gray-100 dark:border-[var(--border-subtle)] shrink-0">

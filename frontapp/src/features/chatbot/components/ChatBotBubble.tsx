@@ -1,6 +1,7 @@
 'use client';
 
 import type { ChatBotMessage } from '../types';
+import ChatBotAvatar from './ChatBotAvatar';
 
 interface Props {
     message: ChatBotMessage;
@@ -15,15 +16,13 @@ export default function ChatBotBubble({ message }: Props) {
     return (
         <div className={`flex gap-2.5 ${isUser ? 'justify-end' : 'justify-start'} ${isUser ? 'animate-bubble-in-right' : 'animate-bubble-in-left'}`}>
             {!isUser && (
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-emerald-700 to-teal-600 dark:from-[var(--brand-green)] dark:to-[var(--icons-green)] flex items-center justify-center shadow-sm mt-1 animate-avatar-appear">
-                    <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                    </svg>
+                <div className="mt-1 animate-avatar-appear">
+                    <ChatBotAvatar size="sm" />
                 </div>
             )}
 
             <div
-                className={`max-w-[280px] px-4 py-2.5 rounded-2xl text-sm leading-relaxed whitespace-pre-line shadow-sm ${
+                className={`max-w-[280px] px-4 py-2.5 rounded-2xl text-sm leading-relaxed whitespace-pre-line shadow-sm text-justify ${
                     isUser
                         ? 'bg-emerald-700 dark:bg-[var(--brand-green)] text-white rounded-br-md'
                         : 'bg-gray-100 dark:bg-[var(--bg-muted)] text-gray-800 dark:text-[var(--text-primary)] rounded-bl-md'
