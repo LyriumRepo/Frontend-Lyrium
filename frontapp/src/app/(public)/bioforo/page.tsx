@@ -139,7 +139,7 @@ export default function BioForoPage() {
       <section className="grid md:grid-cols-2 gap-4 md:gap-8 items-center bg-white dark:bg-[var(--bg-secondary)] rounded-xl md:rounded-3xl p-4 md:p-8 shadow-sm border border-slate-100 dark:border-[var(--border-subtle)]">
         <div className="rounded-lg md:rounded-2xl overflow-hidden shadow-md md:shadow-lg aspect-[4/3] relative group order-2 md:order-1">
           <Image
-            src="https://lyriumbiomarketplace.com/wp-content/uploads/2025/10/Fondos_BioBlog-4.png"
+            src="/img/bioblog/Fondos_BioBlog-4.webp"
             alt="BioForo Intro"
             fill
             sizes="(max-width: 768px) 100vw, 50vw"

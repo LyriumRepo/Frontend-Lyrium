@@ -56,7 +56,7 @@ export default function DayActivityModal({ isOpen, date, events, onClose }: DayA
                     </div>
                     <div className="bg-amber-500/10 p-6 rounded-[2.5rem] border border-amber-500/20 flex flex-col justify-between h-32">
                         <div className="flex justify-between items-start">
-                            <span className="text-xs font-black text-amber-500 uppercase tracking-widest">Pedidos</span>
+                            <span className="text-xs font-black text-amber-500 uppercase tracking-widest">Productos</span>
                             <Icon name="Package" className="text-2xl text-amber-500 w-6 h-6" />
                         </div>
                         <p className="text-2xl font-black text-[var(--text-primary)]">{orderEvents.length}</p>
@@ -127,12 +127,12 @@ export default function DayActivityModal({ isOpen, date, events, onClose }: DayA
                 <div className="p-8 bg-sky-500 rounded-[3rem] text-white shadow-2xl relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 blur-3xl -z-0"></div>
                     <div className="flex items-start gap-5 relative z-10">
-                        <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center flex-shrink-0 border border-white/10">
-                            <Icon name="Zap" className="text-sky-400 text-2xl font-bold w-6 h-6" />
+                        <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center flex-shrink-0 border border-white">
+                            <Icon name="Zap" className="text-white text-2xl font-bold w-6 h-6" />
                         </div>
                         <div>
-                            <h5 className="text-[10px] font-black uppercase tracking-[0.2em] text-sky-400 mb-1">Nota Operativa</h5>
-                            <p className="text-xs text-white/50 leading-relaxed font-bold">
+                            <h5 className="text-[10px] font-black uppercase tracking-[0.2em] text-white mb-1">Nota Operativa</h5>
+                            <p className="text-xs text-white/70 leading-relaxed font-bold">
                                 Los eventos listados aquí se sincronizan automáticamente con tus avisos de despacho y agenda de servicios en tiempo real.
                             </p>
                         </div>

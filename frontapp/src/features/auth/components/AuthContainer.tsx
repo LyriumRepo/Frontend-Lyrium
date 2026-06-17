@@ -6,8 +6,10 @@ import IntroCover from '@/components/ui/IntroCover';
 import { UserTypeToggle } from './UserTypeToggle';
 import { LoginPanel } from './LoginPanel';
 import { RegisterPanel } from './RegisterPanel';
+import { ResultadoRegistro } from './ResultadoRegistro';
+import { RegistroLoadingModal } from './RegistroLoadingModal';
 import { useAuthForm } from '../hooks/useAuthForm';
-import type { LoginFormData, RegisterFormData, UserType } from '../types/auth';
+import type { LoginFormData, RegisterFormData, UserType, RpaResultado } from '../types/auth';
 
 interface AuthContainerProps {
     onSuccess?: () => void;
@@ -16,13 +18,13 @@ interface AuthContainerProps {
 export function AuthContainer({ onSuccess }: AuthContainerProps) {
     const [showIntro, setShowIntro] = useState(true);
     const router = useRouter();
-    
-    const { 
-        mode, 
-        userType, 
-        formError, 
-        formSuccess, 
-        setUserType, 
+
+    const {
+        mode,
+        userType,
+        formError,
+        formSuccess,
+        setUserType,
         setFormError,
         setFormSuccess,
         toggleMode,
@@ -31,6 +33,11 @@ export function AuthContainer({ onSuccess }: AuthContainerProps) {
     } = useAuthForm();
 
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Resultado del RPA tras registrar un vendedor — si existe, se muestra
+    // la pantalla de resultado en vez del formulario.
+    const [rpaResultado, setRpaResultado] = useState<RpaResultado | null>(null);
+    const [rpaCorreo, setRpaCorreo] = useState<string>('');
 
     const handleEnterPortal = useCallback(() => {
         setShowIntro(false);
@@ -51,10 +58,18 @@ export function AuthContainer({ onSuccess }: AuthContainerProps) {
         try {
             const result = await register(data);
 
+            // ── Flujo vendedor: mostrar pantalla de resultado del RPA ────────
+            if (result.rpaResultado) {
+                setRpaResultado(result.rpaResultado);
+                setRpaCorreo(data.email);
+                setIsSubmitting(false);
+                return result;
+            }
+
+            // ── Flujo cliente: redirigir a verificación OTP ──────────────────
             if (result.success && result.requiresVerification && result.email) {
                 const otpUrl = `/auth/verify-otp?email=${encodeURIComponent(result.email)}`;
                 router.push(otpUrl);
-                // Fallback: si router.push no navega en 2s, forzar con window.location
                 setTimeout(() => {
                     if (window.location.pathname !== '/auth/verify-otp') {
                         window.location.href = otpUrl;
@@ -70,6 +85,13 @@ export function AuthContainer({ onSuccess }: AuthContainerProps) {
             return { success: false, message: 'Error inesperado' };
         }
     }, [register, router]);
+
+    const handleVolverDesdeResultado = useCallback(() => {
+        setRpaResultado(null);
+        setRpaCorreo('');
+        setFormError(null);
+        setFormSuccess(null);
+    }, [setFormError, setFormSuccess]);
 
     if (showIntro) {
         return (
@@ -90,7 +112,7 @@ export function AuthContainer({ onSuccess }: AuthContainerProps) {
     return (
         <div className="min-h-screen bg-[#F8F9FA] dark:bg-[var(--bg-primary)] flex items-center justify-center p-4">
             <div className="relative w-full max-w-[1200px] min-h-[650px] bg-white dark:bg-[var(--bg-secondary)] rounded-[30px] shadow-[0_40px_100px_rgba(0,0,0,0.1)] overflow-hidden flex">
-                
+
                 {/* Left Side Panel - visible siempre */}
                 <div
                     className={`absolute top-0 left-0 h-full w-[40%] 
@@ -112,13 +134,22 @@ export function AuthContainer({ onSuccess }: AuthContainerProps) {
                     </div>
 
                     <div className="relative z-10">
-                        {isRegister ? (
+                        {rpaResultado ? (
+                            <>
+                                <h2 className="text-[2rem] font-black mb-4 leading-tight">
+                                    Solicitud recibida
+                                </h2>
+                                <p className="text-white/95 text-center max-w-[300px] mx-auto">
+                                    Estamos procesando los datos de tu negocio para validarlo en nuestra plataforma.
+                                </p>
+                            </>
+                        ) : isRegister ? (
                             <>
                                 <h2 className="text-[2rem] font-black mb-4 leading-tight">
                                     {userType === 'vendedor' ? 'Haz crecer tu marca con nosotros.' : 'Únete a Lyrium'}
                                 </h2>
                                 <p className="text-white/95 text-center max-w-[300px] mx-auto">
-                                    {userType === 'vendedor' 
+                                    {userType === 'vendedor'
                                         ? 'Únete a la comunidad de vendedores más grande y gestiona tus pedidos en un solo lugar.'
                                         : 'Crea tu cuenta y descubre los mejores productos naturales y saludables.'}
                                 </p>
@@ -138,32 +169,49 @@ export function AuthContainer({ onSuccess }: AuthContainerProps) {
                     </div>
 
                     <div className="relative z-10">
-                        <p className="text-sm mb-4 text-white font-medium tracking-wide dark:[text-shadow:0_1px_2px_rgba(0,0,0,0.9),0_4px_10px_rgba(0,0,0,0.85),0_0px_25px_rgba(0,0,0,0.7)]">
-                            {isRegister ? '¿Ya tienes cuenta?' : (userType === 'vendedor' ? '¿Ya eres parte de Lyrium como vendedor?' : '¿Ya tienes una cuenta?')}
-                        </p>
-                        <button
-                            type="button"
-                            onClick={toggleMode}
-                            className="w-full py-4 px-6 bg-white text-sky-500 dark:text-[var(--brand-green)] rounded-xl font-bold text-sm uppercase tracking-wider shadow-[0_10px_25px_rgba(0,0,0,0.1)] hover:shadow-[0_8px_20px_rgba(0,0,0,0.15)] hover:-translate-y-0.5 transition-all duration-300"
-                        >
-                            {isRegister ? 'Iniciar Sesión' : (userType === 'vendedor' ? 'Registrarse como vendedor' : 'Crear cuenta')}
-                        </button>
+                        {!rpaResultado && (
+                            <>
+                                <p className="text-sm mb-4 text-white font-medium tracking-wide dark:[text-shadow:0_1px_2px_rgba(0,0,0,0.9),0_4px_10px_rgba(0,0,0,0.85),0_0px_25px_rgba(0,0,0,0.7)]">
+                                    {isRegister ? '¿Ya tienes cuenta?' : (userType === 'vendedor' ? '¿Ya eres parte de Lyrium como vendedor?' : '¿Ya tienes una cuenta?')}
+                                </p>
+                                <button
+                                    type="button"
+                                    onClick={toggleMode}
+                                    className="w-full py-4 px-6 bg-white text-sky-500 dark:text-[var(--brand-green)] rounded-xl font-bold text-sm uppercase tracking-wider shadow-[0_10px_25px_rgba(0,0,0,0.1)] hover:shadow-[0_8px_20px_rgba(0,0,0,0.15)] hover:-translate-y-0.5 transition-all duration-300"
+                                >
+                                    {isRegister ? 'Iniciar Sesión' : (userType === 'vendedor' ? 'Registrarse como vendedor' : 'Crear cuenta')}
+                                </button>
+                            </>
+                        )}
                     </div>
                 </div>
 
                 {/* Right Side - Forms */}
                 <div className="relative ml-auto w-[60%] p-10 flex flex-col">
-                    <UserTypeToggle
-                        value={userType}
-                        onChange={(type) => {
-                            setUserType(type);
-                            setFormError(null);
-                            setFormSuccess(null);
-                        }}
-                    />
+                    {!rpaResultado && (
+                        <UserTypeToggle
+                            value={userType}
+                            onChange={(type) => {
+                                setUserType(type);
+                                setFormError(null);
+                                setFormSuccess(null);
+                            }}
+                        />
+                    )}
 
-                    {/* Login Panel - only show when NOT register */}
-                    {!isRegister && (
+                    {/* Resultado RPA (vendedor) — reemplaza todo el panel derecho */}
+                    {rpaResultado && (
+                        <div className="flex-1">
+                            <ResultadoRegistro
+                                resultado={rpaResultado}
+                                correo={rpaCorreo}
+                                onVolver={handleVolverDesdeResultado}
+                            />
+                        </div>
+                    )}
+
+                    {/* Login Panel - only show when NOT register and no resultado */}
+                    {!isRegister && !rpaResultado && (
                         <div className="flex-1">
                             <LoginPanel
                                 userType={userType}
@@ -176,8 +224,8 @@ export function AuthContainer({ onSuccess }: AuthContainerProps) {
                         </div>
                     )}
 
-                    {/* Register Panel - only show when register */}
-                    {isRegister && (
+                    {/* Register Panel - only show when register and no resultado */}
+                    {isRegister && !rpaResultado && (
                         <div className="flex-1">
                             <RegisterPanel
                                 userType={userType}
@@ -191,6 +239,8 @@ export function AuthContainer({ onSuccess }: AuthContainerProps) {
                     )}
                 </div>
             </div>
+
+            <RegistroLoadingModal open={isSubmitting && isRegister && userType === 'vendedor' && !rpaResultado} />
         </div>
     );
 }

@@ -61,7 +61,7 @@ export function AgendaPageClient(_props: AgendaPageClientProps) {
                     <div className="w-8 h-8 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500 border border-amber-500/20">
                         <Icon name="Package" className="text-lg w-5 h-5 fill-current" />
                     </div>
-                    <span className="text-xs font-black text-[var(--text-secondary)] uppercase tracking-widest">Pedidos</span>
+                    <span className="text-xs font-black text-[var(--text-secondary)] uppercase tracking-widest">Productos</span>
                 </div>
                 <div className="flex items-center gap-2 group">
                     <div className="w-8 h-8 rounded-xl bg-sky-500/10 flex items-center justify-center text-sky-500 border border-sky-500/20">

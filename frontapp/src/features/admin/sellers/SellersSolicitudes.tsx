@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useSellers, type Solicitud, type FiltroEstado } from "./hooks/useSellers";
 import ModuleHeader from "@/components/layout/shared/ModuleHeader";
 import Icon from "@/components/ui/Icon";
+import { SunatDataModal } from "./components/SunatDataModal";
 
 // ─── Utilidades ──────────────────────────────────────────────────────────────
 
@@ -17,16 +18,29 @@ function formatFecha(iso: string) {
 // ─── Badges ──────────────────────────────────────────────────────────────────
 
 const ESTADO_CONFIG = {
-  ACEPTADO:  { bg: "bg-emerald-500/10", text: "text-emerald-400", ring: "ring-emerald-500/20", dot: "bg-emerald-400", label: "Aceptado"  },
-  REVISION:  { bg: "bg-amber-500/10",   text: "text-amber-400",   ring: "ring-amber-500/20",   dot: "bg-amber-400",   label: "Revisión"  },
-  RECHAZADO: { bg: "bg-rose-500/10",    text: "text-rose-400",    ring: "ring-rose-500/20",    dot: "bg-rose-400",    label: "Rechazado" },
+  ACEPTADO: { bg: "bg-emerald-500/10", text: "text-emerald-400", ring: "ring-emerald-500/20", dot: "bg-emerald-400", label: "Aceptado" },
+  REVISION: { bg: "bg-amber-500/10", text: "text-amber-400", ring: "ring-amber-500/20", dot: "bg-amber-400", label: "Revisión" },
+  RECHAZADO: { bg: "bg-rose-500/10", text: "text-rose-400", ring: "ring-rose-500/20", dot: "bg-rose-400", label: "Rechazado" },
 };
 
 const RIESGO_CONFIG = {
-  BAJO:  { text: "text-emerald-400", label: "Bajo"  },
-  MEDIO: { text: "text-amber-400",   label: "Medio" },
-  ALTO:  { text: "text-rose-400",    label: "Alto"  },
+  BAJO: { text: "text-emerald-400", label: "Bajo" },
+  MEDIO: { text: "text-amber-400", label: "Medio" },
+  ALTO: { text: "text-rose-400", label: "Alto" },
 };
+
+// Badge para solicitudes que entraron por fallback (sin evaluación RPA)
+// Se identifican porque tienen etapa === 0
+function FallbackBadge() {
+  return (
+    <span
+      title="Esta solicitud no fue evaluada por el RPA automáticamente. Requiere revisión manual."
+      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wide bg-amber-500/10 text-amber-400 ring-1 ring-amber-500/25 cursor-help"
+    >
+      ⚠ Sin RPA
+    </span>
+  );
+}
 
 function EstadoBadge({ estado }: { estado: Solicitud["estado"] }) {
   const c = ESTADO_CONFIG[estado];
@@ -35,6 +49,41 @@ function EstadoBadge({ estado }: { estado: Solicitud["estado"] }) {
       <span className={`w-1.5 h-1.5 rounded-full ${c.dot}`} />
       {c.label}
     </span>
+  );
+}
+
+const ESTADOS_DISPONIBLES: Solicitud["estado"][] = ["ACEPTADO", "REVISION", "RECHAZADO"];
+
+const CATEGORIAS = [
+  { value: "", label: "Todas las categorías" },
+  { value: "alimentos_saludables", label: "Alimentos saludables / orgánicos" },
+  { value: "atencion_medica", label: "Atención médica" },
+  { value: "fitness_bienestar", label: "Fitness y bienestar físico" },
+  { value: "mascotas", label: "Mascotas" },
+  { value: "medicina_natural", label: "Medicina natural, suplementos y vitaminas" },
+  { value: "productos_ecologicos", label: "Productos ecológicos" },
+  { value: "tecnologia_medica", label: "Tecnología médica" },
+];
+
+function EstadoSelector({
+  estado, disabled, onChange,
+}: {
+  estado: Solicitud["estado"];
+  disabled: boolean;
+  onChange: (nuevo: Solicitud["estado"]) => void;
+}) {
+  return (
+    <select
+      value={estado}
+      disabled={disabled}
+      onChange={(e) => onChange(e.target.value as Solicitud["estado"])}
+      onClick={(e) => e.stopPropagation()}
+      className="text-[10px] font-black uppercase tracking-wide rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)] text-[var(--text-primary)] px-2 py-1.5 focus:outline-none focus:border-sky-500/50 dark:focus:border-[var(--icons-green)]/50 disabled:opacity-50 cursor-pointer"
+    >
+      {ESTADOS_DISPONIBLES.map((e) => (
+        <option key={e} value={e}>{ESTADO_CONFIG[e].label}</option>
+      ))}
+    </select>
   );
 }
 
@@ -48,8 +97,8 @@ function RiesgoBadge({ riesgo }: { riesgo: Solicitud["riesgo"] }) {
 function ScoreBar({ score }: { score: number }) {
   const color =
     score >= 70 ? "bg-emerald-500"
-    : score >= 50 ? "bg-amber-500"
-    : "bg-rose-500";
+      : score >= 50 ? "bg-amber-500"
+        : "bg-rose-500";
 
   return (
     <div className="flex items-center gap-2.5">
@@ -82,26 +131,35 @@ function StatCard({
 // ─── Filtros ─────────────────────────────────────────────────────────────────
 
 const FILTROS: { value: FiltroEstado; label: string }[] = [
-  { value: "TODOS",     label: "Todos"     },
-  { value: "ACEPTADO",  label: "Aceptados" },
-  { value: "REVISION",  label: "Revisión"  },
-  { value: "RECHAZADO", label: "Rechazados"},
+  { value: "TODOS", label: "Todos" },
+  { value: "ACEPTADO", label: "Aceptados" },
+  { value: "REVISION", label: "Revisión" },
+  { value: "RECHAZADO", label: "Rechazados" },
 ];
 
 // ─── Diagnóstico expandido ────────────────────────────────────────────────────
 
 function FilaDiagnostico({
-  diagnostico, colSpan,
+  diagnostico, colSpan, onVerSunat,
 }: {
-  diagnostico: string[]; colSpan: number;
+  diagnostico: string[]; colSpan: number; onVerSunat: () => void;
 }) {
   return (
     <tr className="bg-[var(--bg-card)]">
       <td colSpan={colSpan} className="px-6 pb-4 pt-0">
         <div className="border border-[var(--border-subtle)] rounded-xl p-4 bg-[var(--bg-secondary)]">
-          <p className="text-[11px] uppercase tracking-widest text-[var(--text-secondary)] mb-2.5 font-semibold">
-            Diagnóstico del RPA
-          </p>
+          <div className="flex items-center justify-between mb-2.5">
+            <p className="text-[11px] uppercase tracking-widest text-[var(--text-secondary)] font-semibold">
+              Diagnóstico del RPA
+            </p>
+            <button
+              onClick={(e) => { e.stopPropagation(); onVerSunat(); }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sky-500/10 dark:bg-[var(--icons-green)]/15 text-sky-400 dark:text-[var(--icons-green)] border border-sky-500/20 dark:border-[var(--icons-green)]/20 text-[10px] font-black uppercase tracking-wide hover:bg-sky-500/20 dark:hover:bg-[var(--icons-green)]/25 transition-colors"
+            >
+              <Icon name="FileSearch" className="w-3.5 h-3.5" />
+              Ver datos SUNAT
+            </button>
+          </div>
           <ul className="space-y-1.5">
             {diagnostico.map((item, i) => (
               <li key={i} className="flex items-start gap-2 text-sm text-[var(--text-primary)]">
@@ -125,7 +183,10 @@ export default function SellersSolicitudes() {
     expandido, toggleExpandido,
     pagina, totalPaginas, cambiarPagina,
     resumen, totalFiltrado,
+    cambiarEstado, cambiandoEstado, errorEstado,
   } = useSellers();
+
+  const [modalSunat, setModalSunat] = useState<Solicitud | null>(null);
 
   return (
     <div className="space-y-8 animate-fadeIn pb-20">
@@ -139,10 +200,10 @@ export default function SellersSolicitudes() {
 
       {/* ── Stat Cards ── */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <StatCard label="Total"       value={resumen.total}      accent="text-[var(--text-primary)]" />
-        <StatCard label="Aceptados"   value={resumen.aceptados}  accent="text-emerald-400" />
-        <StatCard label="En revisión" value={resumen.revision}   accent="text-amber-400"   />
-        <StatCard label="Rechazados"  value={resumen.rechazados} accent="text-rose-400"    />
+        <StatCard label="Total" value={resumen.total} accent="text-[var(--text-primary)]" />
+        <StatCard label="Aceptados" value={resumen.aceptados} accent="text-emerald-400" />
+        <StatCard label="En revisión" value={resumen.revision} accent="text-amber-400" />
+        <StatCard label="Rechazados" value={resumen.rechazados} accent="text-rose-400" />
       </div>
 
       {/* ── Tabla ── */}
@@ -179,21 +240,17 @@ export default function SellersSolicitudes() {
             </div>
 
             {/* Filtros de estado */}
-            <div className="flex items-center gap-1 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-xl p-1">
+            <select
+              value={filtroEstado}
+              onChange={(e) => setFiltroEstado(e.target.value as FiltroEstado)}
+              className="text-[10px] font-black uppercase tracking-wide rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] text-[var(--text-primary)] px-3 py-1.5 focus:outline-none focus:border-sky-500/50 dark:focus:border-[var(--icons-green)]/50 cursor-pointer"
+            >
               {FILTROS.map((f) => (
-                <button
-                  key={f.value}
-                  onClick={() => setFiltroEstado(f.value)}
-                  className={`px-3.5 py-1.5 text-[10px] font-black uppercase tracking-wide rounded-lg transition-all ${
-                    filtroEstado === f.value
-                      ? "bg-sky-500/20 dark:bg-[var(--icons-green)]/20 text-sky-40 dark:text-[var(--icons-green)] border border-sky-500/30 dark:border-[var(--icons-green)]/30"
-                      : "text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]"
-                  }`}
-                >
+                <option key={f.value} value={f.value}>
                   {f.label}
-                </button>
+                </option>
               ))}
-            </div>
+            </select>
           </div>
         </div>
 
@@ -203,7 +260,7 @@ export default function SellersSolicitudes() {
             <table className="w-full text-sm border-separate border-spacing-0">
               <thead>
                 <tr className="border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)]">
-                  {["RUC", "Empresa", "DNI", "Correo", "Score", "Riesgo", "Estado", "Registro", ""].map((h, i, arr) => (
+                  {["Empresa", "DNI", "Correo", "Score", "Estado", "Registro", ""].map((h, i, arr) => (
                     <th
                       key={h || `col-${i}`}
                       className={`px-4 py-2.5 text-left text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)] whitespace-nowrap
@@ -232,15 +289,16 @@ export default function SellersSolicitudes() {
                         className={`border-b border-[var(--border-subtle)] cursor-pointer transition-colors
                           ${expandido === s.id ? "bg-[var(--bg-secondary)]" : "hover:bg-[var(--bg-secondary)]"}`}
                       >
-                        {/* RUC */}
-                        <td className="px-4 py-4 font-mono text-xs text-[var(--text-secondary)] whitespace-nowrap">
-                          {s.ruc}
-                        </td>
 
                         {/* Empresa */}
                         <td className="px-4 py-4 min-w-[200px]">
-                          <p className="font-semibold text-[var(--text-primary)] leading-tight">{s.nombreComercial}</p>
-                          <p className="text-xs text-[var(--text-secondary)] mt-0.5 leading-tight">{s.razonSocial}</p>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <p className="font-semibold text-[var(--text-primary)] leading-tight">{s.nombreComercial}</p>
+                            {s.etapa === 0 && <FallbackBadge />}
+                          </div>
+                          <p className="text-xs text-[var(--text-secondary)] mt-0.5 leading-tight">
+                            {s.etapa === 0 ? (s.ruc || '—') : s.razonSocial}
+                          </p>
                         </td>
 
                         {/* DNI */}
@@ -258,14 +316,20 @@ export default function SellersSolicitudes() {
                           <ScoreBar score={s.score} />
                         </td>
 
-                        {/* Riesgo */}
-                        <td className="px-4 py-4 whitespace-nowrap">
-                          <RiesgoBadge riesgo={s.riesgo} />
-                        </td>
-
                         {/* Estado */}
                         <td className="px-4 py-4 whitespace-nowrap">
-                          <EstadoBadge estado={s.estado} />
+                          <EstadoSelector
+                            estado={s.estado}
+                            disabled={cambiandoEstado === s.id}
+                            onChange={(nuevo) => {
+                              if (nuevo === s.estado) return;
+                              const confirmar = window.confirm(
+                                `¿Cambiar el estado de "${s.nombreComercial}" de ${ESTADO_CONFIG[s.estado].label} a ${ESTADO_CONFIG[nuevo].label}?` +
+                                (nuevo === "ACEPTADO" ? "\n\nEsto creará la tienda en el marketplace si aún no existe." : "")
+                              );
+                              if (confirmar) cambiarEstado(s.id, nuevo);
+                            }}
+                          />
                         </td>
 
                         {/* Fecha */}
@@ -277,16 +341,19 @@ export default function SellersSolicitudes() {
                         <td className="px-4 py-4">
                           <Icon
                             name="ChevronDown"
-                            className={`w-4 h-4 text-[var(--text-secondary)] transition-transform duration-200 ${
-                              expandido === s.id ? "rotate-180" : ""
-                            }`}
+                            className={`w-4 h-4 text-[var(--text-secondary)] transition-transform duration-200 ${expandido === s.id ? "rotate-180" : ""
+                              }`}
                           />
                         </td>
                       </tr>
 
                       {/* Diagnóstico expandible */}
                       {expandido === s.id && (
-                        <FilaDiagnostico diagnostico={s.diagnostico} colSpan={9} />
+                        <FilaDiagnostico
+                          diagnostico={s.diagnostico}
+                          colSpan={9}
+                          onVerSunat={() => setModalSunat(s)}
+                        />
                       )}
                     </React.Fragment>
                   ))
@@ -340,7 +407,17 @@ export default function SellersSolicitudes() {
         <p className="text-center text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest">
           Haz clic en cualquier fila para ver el diagnóstico completo del RPA
         </p>
+
+        {errorEstado && (
+          <p className="text-center text-xs font-bold text-rose-400">
+            {errorEstado}
+          </p>
+        )}
       </div>
+
+      {modalSunat && (
+        <SunatDataModal solicitud={modalSunat} onClose={() => setModalSunat(null)} />
+      )}
 
     </div>
   );

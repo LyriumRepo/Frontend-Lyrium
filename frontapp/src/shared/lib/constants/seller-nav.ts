@@ -82,7 +82,7 @@ export const sellerNavigation: PanelNavigation = [
             },
             {
                 id: 'ayuda',
-                label: 'Mesa de Ayuda',
+                label: 'Soporte Lyrium',
                 description: 'Soporte técnico y gestión de incidencias',
                 icon: 'HelpCircle',
                 href: '/seller/help'

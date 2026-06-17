@@ -1,6 +1,6 @@
 import React from 'react';
 import { ContractStatus, ContractKPI, ContractModality, AuditEvent, ExpiryUrgency } from '@/lib/types/admin/contracts';
-import { CheckCircle, AlertTriangle, AlertOctagon, Clock, XCircle, Handshake, Cloud } from 'lucide-react';
+import { CheckCircle, AlertTriangle, AlertOctagon, Clock, XCircle, Handshake, Sprout, TrendingUp, Star } from 'lucide-react';
 
 const colorMap: Record<string, string> = {
     emerald: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
@@ -75,12 +75,21 @@ export const AuditTimeline: React.FC<{ events?: AuditEvent[] }> = ({ events }) =
     );
 };
 
+// Planes reales del marketplace (Anexo N°1 del acuerdo comercial)
+const MODALITY_CONFIG: Record<ContractModality, { label: string; icon: React.ElementType; className: string }> = {
+    emprende: { label: 'Emprende', icon: Sprout,     className: 'text-emerald-600 dark:text-emerald-400' },
+    crece:    { label: 'Crece',    icon: TrendingUp, className: 'text-sky-600 dark:text-sky-400' },
+    especial: { label: 'Especial', icon: Star,       className: 'text-amber-600 dark:text-amber-400' },
+    estandar: { label: 'Estándar', icon: Handshake,  className: 'text-slate-500 dark:text-slate-400' },
+};
+
 export const ModalityBadge: React.FC<{ modality: ContractModality }> = ({ modality }) => {
-    const isVirtual = modality === 'VIRTUAL';
+    const config = MODALITY_CONFIG[modality] || MODALITY_CONFIG.estandar;
+    const Icon = config.icon;
     return (
-        <span className={`text-[10px] font-black ${isVirtual ? 'text-sky-600 dark:text-sky-400' : 'text-amber-600 dark:text-amber-400'} flex items-center gap-1 font-industrial`}>
-            {isVirtual ? <Cloud className="w-4 h-4" /> : <Handshake className="w-4 h-4" />}
-            {isVirtual ? 'VIRTUAL' : 'PRESENCIAL'}
+        <span className={`text-[10px] font-black ${config.className} flex items-center gap-1 font-industrial uppercase`}>
+            <Icon className="w-4 h-4" />
+            {config.label}
         </span>
     );
 };

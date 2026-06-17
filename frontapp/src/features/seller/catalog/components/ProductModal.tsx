@@ -724,7 +724,7 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit }:
                                     Técnicos
                                 </h3>
                                 <div className="flex gap-2">
-                                    <button type="button" onClick={() => addAttribute('main')} className="w-7 h-7 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-lg flex items-center justify-center text-sky-500 hover:bg-sky-50 transition-all shadow-xs active:scale-90">
+                                    <button type="button" onClick={() => addAttribute('main')} className="w-7 h-7 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-lg flex items-center justify-center text-sky-500 dark:text-[#8FC3A1] hover:bg-sky-50 dark:hover:bg-[#8FC3A1]/10 transition-all shadow-xs active:scale-90">
                                         <Icon name="Plus" className="font-bold text-xs w-3 h-3" />
                                     </button>
                                     <button type="button" onClick={() => addAttributeColumn('main')} className="px-2 h-7 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-lg flex items-center gap-1 text-[8px] font-black text-emerald-500 hover:bg-emerald-50 transition-all shadow-xs uppercase active:scale-90">
@@ -764,10 +764,10 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit }:
                         <div className="space-y-3">
                             <div className="flex items-center justify-between px-2">
                                 <h3 className="text-[10px] font-black text-[var(--text-primary)] uppercase tracking-widest flex items-center gap-2">
-                                    <div className="w-1.5 h-3 bg-indigo-500 rounded-full"></div>
+                                    <div className="w-1.5 h-3 bg-sky-500 dark:bg-[#8FC3A1] rounded-full"></div>
                                     Detalles
                                 </h3>
-                                <button type="button" onClick={() => addAttribute('additional')} className="w-7 h-7 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-lg flex items-center justify-center text-indigo-500 hover:bg-indigo-50 transition-all shadow-xs active:scale-90">
+                                <button type="button" onClick={() => addAttribute('additional')} className="w-7 h-7 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-lg flex items-center justify-center text-sky-500 dark:text-[#8FC3A1] hover:bg-sky-50 dark:hover:bg-[#8FC3A1]/10 transition-all shadow-xs active:scale-90">
                                     <Icon name="Plus" className="font-bold text-xs w-3 h-3" />
                                 </button>
                             </div>

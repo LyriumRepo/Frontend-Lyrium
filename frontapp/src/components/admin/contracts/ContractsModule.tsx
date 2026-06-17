@@ -101,8 +101,10 @@ export const ContratosModule: React.FC<ContratosModuleProps> = ({ state, actions
                             className="w-full p-2.5 bg-[var(--bg-input)] border-none rounded-xl text-xs font-bold text-[var(--text-primary)] font-industrial uppercase cursor-pointer"
                         >
                             <option value="ALL">Todas</option>
-                            <option value="VIRTUAL">Virtual (Digital)</option>
-                            <option value="PHYSICAL">Presencial (Físico)</option>
+                            <option value="emprende">Emprende</option>
+                            <option value="crece">Crece</option>
+                            <option value="especial">Especial</option>
+                            <option value="estandar">Estándar</option>
                         </select>
                     </div>
 

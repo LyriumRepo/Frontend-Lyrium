@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { StatusBadge, AuditTimeline } from './ContractsUIComponents';
 import { Contract } from '@/lib/types/admin/contracts';
-import { FileText, FolderOpen, CheckCircle, XCircle } from 'lucide-react';
+import { FileText, FolderOpen, CheckCircle, XCircle, Download, Loader2 } from 'lucide-react';
 import BaseButton from '@/components/ui/BaseButton';
 
 interface ContractDetailModalProps {
@@ -9,13 +9,28 @@ interface ContractDetailModalProps {
     onClose: () => void;
     onValidate: (id: string, data: Partial<Contract>) => void;
     onInvalidate: (id: string, data: Partial<Contract>) => void;
+    onDownload: (contract: Contract) => Promise<void> | void;
 }
 
-export const ContractDetailModal: React.FC<ContractDetailModalProps> = ({ contract, onClose, onValidate, onInvalidate }) => {
+export const ContractDetailModal: React.FC<ContractDetailModalProps> = ({ contract, onClose, onValidate, onInvalidate, onDownload }) => {
     const [formState, setFormState] = useState<Partial<Contract>>(() => ({ ...contract }));
+    const [downloading, setDownloading]   = useState(false);
+    const [downloadError, setDownloadError] = useState<string | null>(null);
 
     const handleChange = (field: string, value: string) => {
         setFormState(prev => ({ ...prev, [field]: value }));
+    };
+
+    const handleDownload = async () => {
+        setDownloadError(null);
+        setDownloading(true);
+        try {
+            await onDownload(contract);
+        } catch {
+            setDownloadError('No se pudo descargar el archivo.');
+        } finally {
+            setDownloading(false);
+        }
     };
 
     return (
@@ -98,13 +113,31 @@ export const ContractDetailModal: React.FC<ContractDetailModalProps> = ({ contra
                         </div>
                     </div>
 
-                    <div className="p-5 bg-indigo-500/10 rounded-2xl border border-indigo-500/20 flex gap-4 items-center">
-                        <FolderOpen className="w-8 h-8 text-indigo-500 opacity-40 shrink-0" />
-                        <div>
-                            <p className="text-[8px] font-black text-indigo-400 uppercase mb-0.5">Ruta en Nodo de Almacenamiento</p>
-                            <p className="text-[10px] font-black text-indigo-600 truncate max-w-[180px]">{formState.storage_path || 'pendiente_de_carga.pdf'}</p>
+                    <div className="p-5 bg-indigo-500/10 rounded-2xl border border-indigo-500/20 flex gap-4 items-center justify-between">
+                        <div className="flex gap-4 items-center min-w-0">
+                            <FolderOpen className="w-8 h-8 text-indigo-500 opacity-40 shrink-0" />
+                            <div className="min-w-0">
+                                <p className="text-[8px] font-black text-indigo-400 uppercase mb-0.5">Ruta en Nodo de Almacenamiento</p>
+                                <p className="text-[10px] font-black text-indigo-600 truncate max-w-[180px]">{formState.storage_path || 'pendiente_de_carga.docx'}</p>
+                            </div>
                         </div>
+                        {contract.storage_path && (
+                            <button
+                                type="button"
+                                onClick={handleDownload}
+                                disabled={downloading}
+                                title="Descargar contrato (.docx)"
+                                className="shrink-0 p-3 bg-indigo-500 text-white rounded-xl hover:bg-indigo-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {downloading
+                                    ? <Loader2 className="w-4 h-4 animate-spin" />
+                                    : <Download className="w-4 h-4" />}
+                            </button>
+                        )}
                     </div>
+                    {downloadError && (
+                        <p className="text-[9px] font-black text-rose-500 uppercase tracking-wider -mt-2">{downloadError}</p>
+                    )}
                 </div>
 
                 {/* Acciones & Auditoría */}

@@ -1,184 +1,297 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from 'react';
 
-export type EstadoSolicitud = "ACEPTADO" | "REVISION" | "RECHAZADO";
-export type RiesgoSolicitud = "BAJO" | "MEDIO" | "ALTO";
+// ─── Tipos ────────────────────────────────────────────────────────────────────
 
-export interface Solicitud {
-  id: number;
-  ruc: string;
-  razonSocial: string;
-  nombreComercial: string;
-  dni: string;
-  correo: string;
-  score: number;
-  riesgo: RiesgoSolicitud;
-  estado: EstadoSolicitud;
-  diagnostico: string[];
-  fechaRegistro: string;
+export type FiltroEstado = 'TODOS' | 'ACEPTADO' | 'REVISION' | 'RECHAZADO';
+
+export interface SunatValidacion {
+    rucExiste: boolean;
+    estadoActivo: boolean;
+    condicionHabido: boolean;
+    emiteComprobante: boolean;
 }
 
-const MOCK_DATA: Solicitud[] = [
-  {
-    id: 1,
-    ruc: "20512345671",
-    razonSocial: "LABORATORIOS VIDA NATURAL S.A.C.",
-    nombreComercial: "Vida Natural",
-    dni: "17885791",
-    correo: "ventas@vidanatural.pe",
-    score: 88,
-    riesgo: "BAJO",
-    estado: "ACEPTADO",
-    diagnostico: [
-      "RUC activo y habido",
-      "Actividad económica alineada al rubro",
-      "Evidencia URL coherente con el negocio",
-      "Nombre comercial detectado en sitio web",
-    ],
-    fechaRegistro: "2025-06-01T09:14:00Z",
-  },
-  {
-    id: 2,
-    ruc: "20487654321",
-    razonSocial: "NUTRIFARMA PERU E.I.R.L.",
-    nombreComercial: "NutriFarma",
-    dni: "45231876",
-    correo: "contacto@nutrifarma.pe",
-    score: 61,
-    riesgo: "MEDIO",
-    estado: "REVISION",
-    diagnostico: [
-      "RUC activo y habido",
-      "Actividad económica parcialmente alineada",
-      "Evidencia PDF no contiene nombre comercial",
-      "Score insuficiente para aprobación automática",
-    ],
-    fechaRegistro: "2025-06-01T10:32:00Z",
-  },
-  {
-    id: 3,
-    ruc: "20399887766",
-    razonSocial: "IMPORTACIONES GENERALES DEL NORTE S.A.C.",
-    nombreComercial: "ImportNorte",
-    dni: "32178654",
-    correo: "admin@importnorte.com",
-    score: 22,
-    riesgo: "ALTO",
-    estado: "RECHAZADO",
-    diagnostico: [
-      "RUC activo",
-      "Actividad económica no relacionada al rubro salud/bienestar",
-      "Evidencia sin coherencia con el marketplace",
-      "Riesgo de fraude detectado",
-    ],
-    fechaRegistro: "2025-06-01T11:05:00Z",
-  },
-  {
-    id: 4,
-    ruc: "20601234509",
-    razonSocial: "BIOHEALTH SOLUTIONS PERU S.A.C.",
-    nombreComercial: "BioHealth",
-    dni: "71234509",
-    correo: "info@biohealth.pe",
-    score: 94,
-    riesgo: "BAJO",
-    estado: "ACEPTADO",
-    diagnostico: [
-      "RUC activo y habido",
-      "Actividad económica completamente alineada al rubro",
-      "Sitio web con contenido médico y de bienestar verificado",
-      "Nombre comercial presente en evidencia",
-    ],
-    fechaRegistro: "2025-06-01T13:48:00Z",
-  },
-  {
-    id: 5,
-    ruc: "20534512378",
-    razonSocial: "FARMACIA Y BOTICA SAN LUIS S.R.L.",
-    nombreComercial: "Botica San Luis",
-    dni: "09876543",
-    correo: "sanluis.botica@gmail.com",
-    score: 75,
-    riesgo: "BAJO",
-    estado: "ACEPTADO",
-    diagnostico: [
-      "RUC activo y habido",
-      "Actividad económica alineada (farmacia)",
-      "Factura reciente con productos del rubro",
-    ],
-    fechaRegistro: "2025-05-31T16:20:00Z",
-  },
-  {
-    id: 6,
-    ruc: "20456123789",
-    razonSocial: "TECNO MEDICA ANDINA S.A.C.",
-    nombreComercial: "TecnoMédica",
-    dni: "56781234",
-    correo: "ventas@tecnomedica.pe",
-    score: 58,
-    riesgo: "MEDIO",
-    estado: "REVISION",
-    diagnostico: [
-      "RUC activo",
-      "Actividad económica relacionada a equipos médicos",
-      "Ficha técnica sin mencionar razón social",
-      "Requiere revisión manual",
-    ],
-    fechaRegistro: "2025-05-31T08:55:00Z",
-  },
-];
+export interface SunatData {
+    razonSocial: string | null;
+    nombreComercial: string | null;
+    fechaInicio: string | null;
+    actividad: string | null;
+    estado: string | null;
+    condicion: string | null;
+    comprobantes: string[];
+    representantes: { tipoDocumento?: string; nroDocumento?: string; nombre?: string; cargo?: string; dni?: string }[];
+    validacion: SunatValidacion;
+}
 
-export type FiltroEstado = "TODOS" | EstadoSolicitud;
+export interface Solicitud {
+    id: number;
+    ruc: string;
+    dni: string;
+    nombreComercial: string;
+    razonSocial: string;
+    correo: string;
+    score: number;
+    etapa: number;           // 0 = sin evaluación RPA (fallback), 1 = booleana, 2 = puntaje
+    riesgo: 'BAJO' | 'MEDIO' | 'ALTO';
+    estado: 'ACEPTADO' | 'REVISION' | 'RECHAZADO';
+    fechaRegistro: string;
+    diagnostico: string[];
+    sunatData: SunatData | null;
+}
+
+interface ResumenSolicitudes {
+    total: number;
+    aceptados: number;
+    revision: number;
+    rechazados: number;
+}
+
+// ─── Config ───────────────────────────────────────────────────────────────────
+
+const LARAVEL_API = process.env.NEXT_PUBLIC_LARAVEL_API_URL || 'http://127.0.0.1:8000/api';
+const PER_PAGE = 10;
+const DEBOUNCE_MS = 400;
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+async function getAuthToken(): Promise<string | null> {
+    try {
+        const response = await fetch('/api/auth/session');
+        if (!response.ok) return null;
+        const data = await response.json();
+        if (!data.authenticated || !data.token) {
+            console.warn('[useSellers] Sesión no autenticada o sin token:', data);
+            return null;
+        }
+        return data.token;
+    } catch (err) {
+        console.error('[useSellers] Error obteniendo sesión:', err);
+        return null;
+    }
+}
+
+// Mapea la respuesta del backend (snake_case) al tipo Solicitud (camelCase)
+// usado por el componente SellersSolicitudes.
+function mapApiToSolicitud(item: any): Solicitud {
+    return {
+        id: item.id,
+        ruc: item.ruc ?? '',
+        nombreComercial: item.nombre_comercial ?? '',
+        razonSocial: item.razon_social ?? '—',
+        dni: item.dni ?? '',
+        correo: item.correo ?? '',
+        score: Number(item.score ?? 0),
+        etapa: Number(item.etapa ?? 1),
+        riesgo: (item.riesgo ?? 'alto').toUpperCase() as Solicitud['riesgo'],
+        estado: item.estado as Solicitud['estado'],
+        fechaRegistro: item.created_at ?? new Date().toISOString(),
+        diagnostico: Array.isArray(item.diagnostico) ? item.diagnostico : [],
+        sunatData: item.sunat_data ?? null,
+    };
+}
+
+// ─── Hook principal ───────────────────────────────────────────────────────────
 
 export function useSellers() {
-  const [buscar, setBuscar] = useState("");
-  const [filtroEstado, setFiltroEstado] = useState<FiltroEstado>("TODOS");
-  const [expandido, setExpandido] = useState<number | null>(null);
-  const [pagina, setPagina] = useState(1);
-  const POR_PAGINA = 5;
+    const [datos, setDatos] = useState<Solicitud[]>([]);
+    const [resumen, setResumen] = useState<ResumenSolicitudes>({ total: 0, aceptados: 0, revision: 0, rechazados: 0 });
 
-  const datosFiltrados = useMemo(() => {
-    return MOCK_DATA.filter((s) => {
-      const coincideBusqueda =
-        buscar === "" ||
-        s.ruc.includes(buscar) ||
-        s.razonSocial.toLowerCase().includes(buscar.toLowerCase()) ||
-        s.nombreComercial.toLowerCase().includes(buscar.toLowerCase()) ||
-        s.correo.toLowerCase().includes(buscar.toLowerCase());
+    const [buscar, setBuscarRaw] = useState('');
+    const [buscarDebounced, setBuscarDebounced] = useState('');
+    const [filtroEstado, setFiltroEstado] = useState<FiltroEstado>('TODOS');
 
-      const coincideEstado =
-        filtroEstado === "TODOS" || s.estado === filtroEstado;
+    const [pagina, setPagina] = useState(1);
+    const [totalPaginas, setTotalPaginas] = useState(1);
+    const [totalFiltrado, setTotalFiltrado] = useState(0);
 
-      return coincideBusqueda && coincideEstado;
-    });
-  }, [buscar, filtroEstado]);
+    const [expandido, setExpandido] = useState<number | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-  const totalPaginas = Math.ceil(datosFiltrados.length / POR_PAGINA);
-  const datosPagina = datosFiltrados.slice(
-    (pagina - 1) * POR_PAGINA,
-    pagina * POR_PAGINA
-  );
+    // Debounce del buscador
+    useEffect(() => {
+        const timer = setTimeout(() => setBuscarDebounced(buscar), DEBOUNCE_MS);
+        return () => clearTimeout(timer);
+    }, [buscar]);
 
-  const resumen = useMemo(() => ({
-    total:     MOCK_DATA.length,
-    aceptados: MOCK_DATA.filter((s) => s.estado === "ACEPTADO").length,
-    revision:  MOCK_DATA.filter((s) => s.estado === "REVISION").length,
-    rechazados:MOCK_DATA.filter((s) => s.estado === "RECHAZADO").length,
-  }), []);
+    // Resetear a página 1 cuando cambian los filtros
+    useEffect(() => {
+        setPagina(1);
+    }, [buscarDebounced, filtroEstado]);
 
-  const toggleExpandido = (id: number) =>
-    setExpandido((prev) => (prev === id ? null : id));
+    // Fetch principal
+    const fetchSolicitudes = useCallback(async () => {
+        setLoading(true);
+        setError(null);
 
-  const cambiarPagina = (n: number) => {
-    if (n >= 1 && n <= totalPaginas) setPagina(n);
-  };
+        try {
+            const params = new URLSearchParams({
+                estado: filtroEstado,
+                per_page: String(PER_PAGE),
+                page: String(pagina),
+            });
+            if (buscarDebounced.trim()) {
+                params.append('buscar', buscarDebounced.trim());
+            }
 
-  return {
-    datos: datosPagina,
-    buscar, setBuscar,
-    filtroEstado, setFiltroEstado,
-    expandido, toggleExpandido,
-    pagina, totalPaginas, cambiarPagina,
-    resumen,
-    totalFiltrado: datosFiltrados.length,
-  };
+            const token = await getAuthToken();
+
+            const response = await fetch(`${LARAVEL_API}/admin/seller-applications?${params.toString()}`, {
+                headers: {
+                    Accept: 'application/json',
+                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error(`Error ${response.status} al obtener solicitudes`);
+            }
+
+            const json = await response.json();
+
+            const items: Solicitud[] = (json.data || []).map(mapApiToSolicitud);
+            setDatos(items);
+
+            if (json.pagination) {
+                setTotalPaginas(json.pagination.totalPages || 1);
+                setTotalFiltrado(json.pagination.total || items.length);
+            } else {
+                setTotalPaginas(1);
+                setTotalFiltrado(items.length);
+            }
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Error al cargar solicitudes');
+            setDatos([]);
+            setTotalFiltrado(0);
+            setTotalPaginas(1);
+        } finally {
+            setLoading(false);
+        }
+    }, [filtroEstado, buscarDebounced, pagina]);
+
+    useEffect(() => {
+        fetchSolicitudes();
+    }, [fetchSolicitudes]);
+
+    // Resumen — se obtiene aparte (sin filtros) para mostrar las stat cards globales.
+    // Si no quieres una llamada extra, puedes derivar esto de `datos` cuando filtroEstado === 'TODOS'.
+    useEffect(() => {
+        const fetchResumen = async () => {
+            try {
+                const token = await getAuthToken();
+                const params = new URLSearchParams({ estado: 'TODOS', per_page: '1' });
+
+                const response = await fetch(`${LARAVEL_API}/admin/seller-applications?${params.toString()}`, {
+                    headers: {
+                        Accept: 'application/json',
+                        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                    },
+                });
+                if (!response.ok) return;
+
+                const json = await response.json();
+                const total = json.pagination?.total ?? 0;
+
+                // Para los contadores por estado hacemos 3 llamadas livianas (per_page=1, solo nos interesa el total)
+                const [acc, rev, rej] = await Promise.all(
+                    ['ACEPTADO', 'REVISION', 'RECHAZADO'].map(async (estado) => {
+                        const p = new URLSearchParams({ estado, per_page: '1' });
+                        const r = await fetch(`${LARAVEL_API}/admin/seller-applications?${p.toString()}`, {
+                            headers: {
+                                Accept: 'application/json',
+                                ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                            },
+                        });
+                        if (!r.ok) return 0;
+                        const j = await r.json();
+                        return j.pagination?.total ?? 0;
+                    })
+                );
+
+                setResumen({ total, aceptados: acc, revision: rev, rechazados: rej });
+            } catch {
+                // Silencioso: las stat cards simplemente quedarán en 0
+            }
+        };
+
+        fetchResumen();
+    }, [datos]); // se re-sincroniza cada vez que cambian los datos (ej. tras una acción)
+
+    const toggleExpandido = useCallback((id: number) => {
+        setExpandido(prev => (prev === id ? null : id));
+    }, []);
+
+    const cambiarPagina = useCallback((n: number) => {
+        if (n < 1 || n > totalPaginas) return;
+        setExpandido(null);
+        setPagina(n);
+    }, [totalPaginas]);
+
+    const setBuscar = useCallback((v: string) => {
+        setBuscarRaw(v);
+    }, []);
+
+    // ── Cambiar estado de una solicitud (acción del admin) ──────────────────
+    const [cambiandoEstado, setCambiandoEstado] = useState<number | null>(null);
+    const [errorEstado, setErrorEstado] = useState<string | null>(null);
+
+    const cambiarEstado = useCallback(async (id: number, nuevoEstado: Solicitud['estado']) => {
+        setCambiandoEstado(id);
+        setErrorEstado(null);
+
+        try {
+            const token = await getAuthToken();
+
+            const response = await fetch(`${LARAVEL_API}/admin/seller-applications/${id}/estado`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json',
+                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                },
+                body: JSON.stringify({ estado: nuevoEstado }),
+            });
+
+            const json = await response.json();
+
+            if (!response.ok || !json.success) {
+                throw new Error(json.errors?.estado?.[0] || json.message || 'No se pudo actualizar el estado');
+            }
+
+            // Actualizar la fila localmente sin esperar un refetch completo
+            setDatos(prev => prev.map(s => s.id === id
+                ? { ...s, estado: json.data.estado, sunatData: json.data.sunat_data ?? s.sunatData }
+                : s
+            ));
+
+            return { success: true };
+        } catch (err) {
+            const msg = err instanceof Error ? err.message : 'Error al actualizar el estado';
+            setErrorEstado(msg);
+            return { success: false, message: msg };
+        } finally {
+            setCambiandoEstado(null);
+        }
+    }, []);
+
+    return {
+        datos,
+        buscar,
+        setBuscar,
+        filtroEstado,
+        setFiltroEstado,
+        expandido,
+        toggleExpandido,
+        pagina,
+        totalPaginas,
+        cambiarPagina,
+        resumen,
+        totalFiltrado,
+        loading,
+        error,
+        refetch: fetchSolicitudes,
+        cambiarEstado,
+        cambiandoEstado,
+        errorEstado,
+    };
 }
