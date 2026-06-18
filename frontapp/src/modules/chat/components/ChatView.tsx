@@ -34,8 +34,6 @@ function toMessage(m: UnifiedMessage): Message {
   };
 }
 
-const helpdeskIsSent = (msg: Message) =>
-  msg.sender === 'admin' || msg.sender === 'logistics';
 
 // ─── SurveyArea ───────────────────────────────────────────────────────────────
 
@@ -184,7 +182,41 @@ export function ChatView({
   const showInput = !isClosed && !ticket.surveyRequired;
   const showAdminPanel = showAdminControls && onPriorityChange && onAdminChange;
 
-  const requesterRole = ticket.requester.company ? 'Vendedor' : 'Cliente';
+  const isSentFn = useMemo(() => {
+    if (ticket.source === 'seller' || ticket.source === 'logistics') {
+      return (msg: Message) => msg.sender === 'vendor' || msg.sender === 'user';
+    }
+    return (msg: Message) => msg.sender === 'admin' || msg.sender === 'logistics';
+  }, [ticket.source]);
+
+  const metaConfig = useMemo(() => {
+    if (ticket.source === 'seller') {
+      return {
+        currentUserName: 'Tú',
+        currentUserRole: 'Vendedor',
+        otherName: ticket.assignedTo.name,
+        otherRole: 'Soporte Lyrium',
+        showAvatar: true,
+      };
+    }
+    if (ticket.source === 'logistics') {
+      return {
+        currentUserName: 'Tú',
+        currentUserRole: 'Operador',
+        otherName: ticket.assignedTo.name,
+        otherRole: 'Soporte Lyrium',
+        showAvatar: true,
+      };
+    }
+    const requesterRole = ticket.requester.company ? 'Vendedor' : 'Cliente';
+    return {
+      currentUserName: ticket.assignedTo.name,
+      currentUserRole: 'Soporte Lyrium',
+      otherName: ticket.requester.name,
+      otherRole: requesterRole,
+      showAvatar: true,
+    };
+  }, [ticket.source, ticket.requester.name, ticket.requester.company, ticket.assignedTo.name]);
 
   // Scroll to bottom when ticket changes or new messages arrive (skip during load-more)
   useEffect(() => {
@@ -313,14 +345,8 @@ export function ChatView({
 
         <MessageBubble
           messages={messages}
-          isSentOverride={helpdeskIsSent}
-          meta={{
-            currentUserName: ticket.requester.name,
-            currentUserRole: requesterRole,
-            otherName: ticket.assignedTo.name,
-            otherRole: 'Soporte Lyrium',
-            showAvatar: true,
-          }}
+          isSentOverride={isSentFn}
+          meta={metaConfig}
         />
 
         {ticket.surveyRequired && onSubmitSurvey && (

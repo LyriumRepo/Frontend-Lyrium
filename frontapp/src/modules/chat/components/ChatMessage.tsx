@@ -35,7 +35,7 @@ export function ChatMessage({ message, showAvatar = true }: ChatMessageProps) {
         {showAvatar ? (
           <div className={`w-8 h-8 shrink-0 rounded-full flex items-center justify-center text-[9px] font-black shadow-sm animate-avatar-appear ${
             isUser
-              ? 'bg-gradient-to-br from-[#9cb04e] via-[#64c695] to-[#499bbf] text-white'
+              ? 'bg-[#2E6A4F] text-white'
               : 'bg-[var(--bg-secondary)] border border-[var(--border-subtle)] text-[var(--text-secondary)]'
           }`}>
             {message.senderName?.charAt(0)?.toUpperCase() ?? '?'}
@@ -47,8 +47,8 @@ export function ChatMessage({ message, showAvatar = true }: ChatMessageProps) {
         <div
           className={`${
             isUser
-              ? 'bg-gradient-to-br from-[#9cb04e] via-[#64c695] to-[#499bbf] text-white rounded-[1.75rem] rounded-br-md shadow-lg shadow-[#64c695]/30 dark:shadow-[#64c695]/20'
-              : 'bg-white/80 dark:bg-[#1A2E25]/80 backdrop-blur-md border border-white/20 dark:border-[#2A4035]/50 text-[var(--text-primary)] rounded-[1.75rem] rounded-bl-md shadow-sm'
+              ? 'bg-[#2E6A4F] text-white rounded-[1.75rem] rounded-br-md shadow-sm'
+              : 'bg-white/80 dark:bg-[#1E2925] backdrop-blur-md border border-white/20 dark:border-[#2A4035]/50 text-[var(--text-primary)] rounded-[1.75rem] rounded-bl-md shadow-sm'
           } px-5 py-3.5 transition-all duration-200 hover:shadow-md flex-1 min-w-0`}
         >
           <div className="flex items-center gap-2 mb-1.5">

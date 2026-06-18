@@ -24,6 +24,9 @@ export interface Notification {
   seller_name: string | null;
   // Chat notifications
   conversation_id: number | null;
+  // Booking notifications
+  booking_id: number | null;
+  service_name: string | null;
 }
 
 export interface NotificationsResponse {

@@ -1,15 +1,15 @@
 'use client';
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import BaseButton from '@/components/ui/BaseButton';
 import BaseLoading from '@/components/ui/BaseLoading';
-import Icon from '@/components/ui/Icon';
 import { useAdminInvoices } from './hooks/useAdminInvoices';
 import AdminInvoiceKPIsDisplay from './components/AdminInvoiceKPIs';
 import AdminInvoiceFilters from './components/AdminInvoiceFilters';
 import AdminInvoiceTable from './components/AdminInvoiceTable';
 import AdminInvoiceDrawer from './components/AdminInvoiceDrawer';
+import { exportAdminInvoicesToPdf, exportAdminInvoicesToExcel } from './export';
 
 interface NubefactPageClientProps {}
 
@@ -41,29 +41,13 @@ export function NubefactPageClient(_props: NubefactPageClientProps) {
         refresh,
     } = useAdminInvoices();
 
-    const handleExportCSV = () => {
-        const headers = ['ID', 'Tienda', 'Tipo', 'Serie', 'Número', 'Cliente', 'RUC', 'Monto', 'Estado', 'Fecha'];
-        const rows = invoices.map(i => [
-            i.id,
-            i.stores.map(s => s.name).join(', ') || '—',
-            i.type,
-            i.series,
-            i.number,
-            i.customer_name,
-            i.customer_ruc,
-            i.amount.toFixed(2),
-            i.sunat_status,
-            new Date(i.emission_date).toLocaleDateString('es-PE'),
-        ]);
-        const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `comprobantes-nubefact-${new Date().toISOString().split('T')[0]}.csv`;
-        a.click();
-        URL.revokeObjectURL(url);
-    };
+    const handleExportPDF = useCallback(() => {
+        exportAdminInvoicesToPdf(invoices, kpis).catch(console.error);
+    }, [invoices, kpis]);
+
+    const handleExportExcel = useCallback(() => {
+        exportAdminInvoicesToExcel(invoices, kpis).catch(console.error);
+    }, [invoices, kpis]);
 
     if (isLoading) return <BaseLoading message="Cargando comprobantes electrónicos..." />;
 
@@ -91,14 +75,17 @@ export function NubefactPageClient(_props: NubefactPageClientProps) {
                 <BaseButton onClick={refresh} variant="ghost" leftIcon="RefreshCw" size="md">
                     Sincronizar
                 </BaseButton>
+                <BaseButton onClick={handleExportExcel} variant="ghost" leftIcon="FileSpreadsheet" size="md">
+                    Excel
+                </BaseButton>
                 <BaseButton
-                    onClick={handleExportCSV}
+                    onClick={handleExportPDF}
                     variant="primary"
-                    leftIcon="Download"
+                    leftIcon="FileDown"
                     size="md"
                     className="from-transparent to-transparent bg-[var(--brand-sky)] hover:bg-[var(--brand-sky-hover)] shadow-[var(--brand-sky)]/25 dark:bg-[var(--brand-green)] dark:hover:bg-[var(--brand-green-hover)]"
                 >
-                    Exportar CSV
+                    PDF
                 </BaseButton>
             </div>
 

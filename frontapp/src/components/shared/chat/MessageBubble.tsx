@@ -136,7 +136,7 @@ function MessageItem({
       )}
 
       <div
-        className={`flex ${isSent ? 'justify-end' : 'justify-start'} ${isFirstOfGroup && !showDate && idx > 0 ? 'mt-3' : idx > 0 ? 'mt-0.5' : ''} ${isSent ? 'animate-bubble-in-right' : 'animate-bubble-in-left'}`}
+        className={`flex ${isSent ? 'justify-end' : 'justify-start'} ${isFirstOfGroup && !showDate && idx > 0 ? 'mt-5' : idx > 0 ? 'mt-2' : ''} ${isSent ? 'animate-bubble-in-right' : 'animate-bubble-in-left'}`}
         style={{ animationDelay: `${Math.min(idx * 20, 200)}ms` }}
       >
         <div className={`flex max-w-[82%] md:max-w-[68%] items-end gap-2 ${isSent ? 'flex-row-reverse' : 'flex-row'}`}>
@@ -144,7 +144,7 @@ function MessageItem({
           {showAvatar ? (
             <div className={`w-8 h-8 shrink-0 rounded-full flex items-center justify-center text-[9px] font-black shadow-sm animate-avatar-appear ${
               isSent
-                ? 'bg-gradient-to-br from-[#9cb04e] via-[#64c695] to-[#499bbf] text-white'
+                ? 'bg-[#2E6A4F] text-white'
                 : 'bg-gradient-to-br from-gray-200 to-gray-300 dark:from-[#2A4035] dark:to-[#1A2E25] text-gray-600 dark:text-gray-300'
             }`}>
               {isSent ? currentUserInitial : otherInitial}
@@ -155,8 +155,8 @@ function MessageItem({
 
           <div className={`${
             isSent
-              ? 'bg-gradient-to-br from-[#9cb04e] via-[#64c695] to-[#499bbf] text-white rounded-[1.75rem] rounded-br-md shadow-lg shadow-[#64c695]/30 dark:shadow-[#64c695]/20'
-              : 'bg-white/80 dark:bg-[#1A2E25]/80 backdrop-blur-md border border-white/20 dark:border-[#2A4035]/50 text-[var(--text-primary)] rounded-[1.75rem] rounded-bl-md shadow-sm'
+              ? 'bg-[#2E6A4F] text-white rounded-[1.75rem] rounded-br-md shadow-sm'
+              : 'bg-white/80 dark:bg-[#1E2925] backdrop-blur-md border border-white/20 dark:border-[#2A4035]/50 text-[var(--text-primary)] rounded-[1.75rem] rounded-bl-md shadow-sm'
           } px-5 py-3.5 transition-all duration-200 hover:shadow-md flex-1 min-w-0`}>
             {isFirstOfGroup && (
               <div className="flex items-center gap-1.5 mb-1.5">

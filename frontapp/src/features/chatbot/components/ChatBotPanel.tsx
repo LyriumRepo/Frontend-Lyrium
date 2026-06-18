@@ -1,11 +1,10 @@
 'use client';
 
-import { useEffect, useRef, useMemo } from 'react';
+import { useEffect, useRef } from 'react';
 import type { ChatBotMessage } from '../types';
 import ChatBotHeader from './ChatBotHeader';
 import ChatBotBubble from './ChatBotBubble';
 import ChatBotInput from './ChatBotInput';
-import ChatBotQuickActions from './ChatBotQuickActions';
 import ChatBotAvatar from './ChatBotAvatar';
 
 interface Props {
@@ -16,7 +15,7 @@ interface Props {
     onClose: () => void;
     onMinimize: () => void;
     onSend: (content: string) => void;
-    onBotResponse: (content: string) => void;
+    onBotResponse: (content: string) => void; // kept for widget compatibility
     onClear: () => void;
 }
 
@@ -28,14 +27,9 @@ export default function ChatBotPanel({
     onClose,
     onMinimize,
     onSend,
-    onBotResponse,
     onClear,
 }: Props) {
     const messagesEndRef = useRef<HTMLDivElement>(null);
-
-    const showQuickActions = useMemo(() => {
-        return !messages.some((m) => m.role === 'user');
-    }, [messages]);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -45,7 +39,7 @@ export default function ChatBotPanel({
 
     return (
         <div
-            className={`fixed bottom-20 right-5 z-[100] w-[360px] max-w-[calc(100vw-2rem)] transition-all duration-300 ease-out ${
+            className={`fixed bottom-20 right-5 z-[100] w-[560px] max-w-[calc(100vw-2rem)] transition-all duration-300 ease-out ${
                 isMinimized
                     ? 'opacity-0 pointer-events-none translate-y-4 scale-95'
                     : 'opacity-100 translate-y-0 scale-100'
@@ -58,14 +52,10 @@ export default function ChatBotPanel({
                     onClear={onClear}
                 />
 
-                <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-white dark:bg-[var(--bg-card)] custom-scrollbar" style={{ height: '420px', maxHeight: 'calc(100vh - 280px)' }}>
+                <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-white dark:bg-[var(--bg-card)] custom-scrollbar" style={{ height: '580px', maxHeight: 'calc(100vh - 300px)' }}>
                     {messages.map((msg) => (
                         <ChatBotBubble key={msg.id} message={msg} />
                     ))}
-
-                        {showQuickActions && !isTyping && (
-                            <ChatBotQuickActions onBotResponse={onBotResponse} />
-                        )}
 
                     {isTyping && (
                         <div className="flex gap-2 justify-start animate-slide-down">

@@ -16,8 +16,10 @@ function mapToVoucher(inv: any): Voucher {
         store_ruc: inv.storeRuc ?? inv.store_ruc ?? '',
         order_id: inv.orderId ?? inv.order_id ?? '',
         amount: inv.total ?? inv.amount ?? 0,
-        subtotal_sin_igv: inv.subtotalSinIgv ?? inv.subtotal_sin_igv,
-        igv_amount: inv.igvAmount ?? inv.igv_amount,
+        order_total: inv.orderTotal ?? inv.order_total ?? inv.total ?? 0,
+        commission_rate: inv.commissionRate ?? inv.commission_rate ?? null,
+        commission_amount: inv.commissionAmount ?? inv.commission_amount ?? null,
+        seller_name: inv.sellerName ?? inv.seller_name ?? '',
         emission_date: inv.createdAt ?? inv.emission_date ?? '',
         sunat_status: inv.status ?? inv.sunat_status ?? 'DRAFT',
         pdf_url: inv.pdfUrl ?? inv.pdf_url,
@@ -30,8 +32,6 @@ function mapToVoucher(inv: any): Voucher {
         qr_data: inv.qrData ?? inv.qr_data,
         xml_url: inv.xmlUrl ?? inv.xml_url,
         cdr_url: inv.cdrUrl ?? inv.cdr_url,
-        created_at: inv.createdAt ?? inv.created_at,
-        updated_at: inv.updatedAt ?? inv.updated_at,
         items: inv.items,
     };
 }

@@ -42,11 +42,13 @@ function TicketList({
 
     const getCategoryLabel = (category: TicketCategory) => {
         switch (category) {
-            case 'critico': return 'Soporte Técnico Critico';
-            case 'tecnico': return 'Soporte Técnico';
-            case 'negativo': return 'Comentario Negativo';
-            case 'informacion': return 'Solicitud de Información';
-            case 'positivo': return 'Comentario Positivo';
+            case 'admin': return 'Soporte Crítico';
+            case 'tech': return 'Soporte Técnico';
+            case 'comment': return 'Comentario';
+            case 'info': return 'Solicitud de Información';
+            case 'followup': return 'Seguimiento';
+            case 'payments': return 'Pagos';
+            case 'documentation': return 'Documentación';
             default: return category;
         }
     };
@@ -133,11 +135,13 @@ function TicketList({
                                 className="w-full px-3 py-1.5 text-sm bg-[var(--bg-secondary)] rounded-xl outline-none text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--turquesa-500)]/20 border border-[var(--border-subtle)]"
                             >
                                 <option value="">Todas las categorías</option>
-                                <option value="positivo">Comentario Positivo</option>
-                                <option value="negativo">Comentario Negativo</option>
-                                <option value="informacion">Solicitud de Información</option>
-                                <option value="tecnico">Soporte Técnico</option>
-                                <option value="critico">Soporte Técnico Crítico</option>
+                                <option value="comment">Comentario</option>
+                                <option value="info">Solicitud de Información</option>
+                                <option value="tech">Soporte Técnico</option>
+                                <option value="admin">Soporte Crítico</option>
+                                <option value="payments">Pagos</option>
+                                <option value="followup">Seguimiento</option>
+                                <option value="documentation">Documentación</option>
                             </select>
                         )}
                     </div>
@@ -229,19 +233,21 @@ function toUnifiedHelpTicket(ticket: SellerTicket): UnifiedTicket {
 function NewTicketForm({
     onSubmit,
     onCancel,
-    isSubmitting
+    isSubmitting,
+    submitError,
 }: {
-    onSubmit: (data: { subject: string; description: string; category: string }) => void;
+    onSubmit: (data: { subject: string; description: string; category: string }) => Promise<void>;
     onCancel: () => void;
     isSubmitting: boolean;
+    submitError?: string | null;
 }) {
     const [subject, setSubject] = useState('');
     const [description, setDescription] = useState('');
-    const [category, setCategory] = useState('positivo');
+    const [category, setCategory] = useState('info');
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        onSubmit({ subject, description, category });
+        await onSubmit({ subject, description, category });
     };
 
     return (
@@ -260,11 +266,13 @@ function NewTicketForm({
                         className="w-full px-4 py-2.5 bg-[var(--bg-secondary)] rounded-xl outline-none text-sm font-medium text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--turquesa-500)]/20 border border-[var(--border-subtle)]"
                         required
                     >
-                        <option value="positivo">Comentario Positivo</option>
-                        <option value="negativo">Comentario Negativo</option>
-                        <option value="informacion">Solicitud de Información</option>
-                        <option value="tecnico">Soporte Técnico</option>
-                        <option value="critico">Soporte Técnico Crítico</option>
+                        <option value="info">Solicitud de Información</option>
+                        <option value="tech">Soporte Técnico</option>
+                        <option value="admin">Soporte Crítico / Administrativo</option>
+                        <option value="comment">Comentario</option>
+                        <option value="payments">Pagos y Facturación</option>
+                        <option value="followup">Seguimiento</option>
+                        <option value="documentation">Documentación</option>
                     </select>
                 </div>
 
@@ -292,6 +300,13 @@ function NewTicketForm({
                     />
                 </div>
 
+                {submitError && (
+                    <div className="flex items-start gap-2 p-3 rounded-xl bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800">
+                        <span className="text-rose-500 text-xs shrink-0 mt-0.5">⚠</span>
+                        <p className="text-xs font-semibold text-rose-700 dark:text-rose-400">{submitError}</p>
+                    </div>
+                )}
+
                 <div className="flex gap-2 pt-4">
                     <button
                         type="button"
@@ -303,7 +318,7 @@ function NewTicketForm({
                     <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="flex-1 px-4 py-2.5 bg-gradient-to-r from-[#9cb04e] via-[#64c695] to-[#499bbf] text-white rounded-xl font-bold text-xs uppercase tracking-wider hover:opacity-90 transition-all disabled:opacity-50 shadow-lg shadow-[#64c695]/20"
+                        className="flex-1 px-4 py-2.5 bg-[#2E6A4F] text-white rounded-xl font-bold text-xs uppercase tracking-wider hover:opacity-90 transition-all disabled:opacity-50 shadow-sm"
                     >
                         {isSubmitting ? 'Creando...' : 'Crear Ticket'}
                     </button>
@@ -322,6 +337,7 @@ export function HelpPageClient() {
         isLoading,
         isSending,
         isClosing,
+        error: hookError,
         handleSendMessage,
         handleCreateTicket,
         handleCloseTicket,
@@ -330,6 +346,7 @@ export function HelpPageClient() {
 
     const [showNewTicketForm, setShowNewTicketForm] = useState(false);
     const [showLegend, setShowLegend] = useState(false);
+    const [ticketError, setTicketError] = useState<string | null>(null);
 
     if (isLoading) {
         return (
@@ -363,7 +380,7 @@ export function HelpPageClient() {
                                 <Icon name="Info" className="w-4 h-4" />
                             </button>
                             <button
-                                onClick={() => setShowNewTicketForm(true)}
+                                onClick={() => { setShowNewTicketForm(true); setTicketError(null); }}
                                 className="px-4 py-2 bg-white dark:bg-[var(--bg-secondary)] text-[var(--turquesa-500)] rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-[var(--turquesa-500)]/10 transition-colors border border-[var(--border-subtle)] shadow-sm"
                             >
                                 + Nuevo Ticket
@@ -387,12 +404,18 @@ export function HelpPageClient() {
                 <div className="flex-1 min-w-0">
                     {showNewTicketForm ? (
                         <NewTicketForm
-                            onSubmit={(data) => {
-                                handleCreateTicket(data);
-                                setShowNewTicketForm(false);
+                            onSubmit={async (data) => {
+                                setTicketError(null);
+                                const ok = await handleCreateTicket(data);
+                                if (ok) {
+                                    setShowNewTicketForm(false);
+                                } else {
+                                    setTicketError(hookError || 'No se pudo crear el ticket. Inténtalo de nuevo.');
+                                }
                             }}
-                            onCancel={() => setShowNewTicketForm(false)}
+                            onCancel={() => { setShowNewTicketForm(false); setTicketError(null); }}
                             isSubmitting={isSending}
+                            submitError={ticketError}
                         />
                     ) : activeTicket ? (
                         <ChatView

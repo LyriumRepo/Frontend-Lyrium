@@ -150,8 +150,9 @@ export function useCustomerSupport() {
     }
   }, [activeTicketId]);
 
-  const handleCreateTicket = useCallback(async (data: { subject: string; description: string; category: string }) => {
+  const handleCreateTicket = useCallback(async (data: { subject: string; description: string; category: string }): Promise<boolean> => {
     setIsSending(true);
+    setError(null);
     try {
       const criticidadMap: Record<string, string> = {
         'critico': 'critica',
@@ -163,8 +164,8 @@ export function useCustomerSupport() {
 
       const CATEGORY_TO_BACKEND: Record<string, string> = {
         informacion: 'info',
-        positivo: 'positivo',
-        negativo: 'negativo',
+        positivo: 'comment',
+        negativo: 'comment',
         tecnico: 'tech',
         critico: 'admin',
       };
@@ -178,8 +179,10 @@ export function useCustomerSupport() {
 
       setTickets(prev => [mapTicketData(created), ...prev]);
       setActiveTicketId(String(created.id));
+      return true;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al crear ticket');
+      return false;
     } finally {
       setIsSending(false);
     }

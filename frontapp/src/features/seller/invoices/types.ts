@@ -19,6 +19,10 @@ export interface Voucher {
     store_ruc: string;
     order_id: string;
     amount: number;
+    order_total?: number;
+    commission_rate?: number | null;
+    commission_amount?: number | null;
+    seller_name?: string;
     subtotal_sin_igv?: number;
     igv_amount?: number;
     emission_date: string;

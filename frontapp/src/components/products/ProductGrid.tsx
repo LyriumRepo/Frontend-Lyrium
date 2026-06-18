@@ -293,9 +293,9 @@ export default function ProductGrid({ productos, loading = false }: ProductGridP
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
       {productos.map((producto) =>
         producto.tipo === 'service' ? (
-          <ServiceCard key={producto.id} producto={producto} />
+          <ServiceCard key={`s-${producto.id}`} producto={producto} />
         ) : (
-          <ProductCard key={producto.id} producto={producto} />
+          <ProductCard key={`p-${producto.id}`} producto={producto} />
         )
       )}
     </div>

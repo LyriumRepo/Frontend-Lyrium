@@ -260,6 +260,7 @@ export default function CustomerProfilePage() {
 
       const updatePayload: Record<string, string | undefined> = {
         name: `${formData.nombres} ${formData.apellidos}`.trim(),
+        email: formData.correo || undefined,
         secondary_email: formData.correo_secundario || undefined,
         phone: formData.telefono,
         phone_2: formData.celular_secundario || undefined,
@@ -522,13 +523,11 @@ export default function CustomerProfilePage() {
                   type="email"
                   name="correo"
                   value={formData.correo}
-                  readOnly
+                  onChange={handleChange}
+                  readOnly={!isEditMode}
                   placeholder="usuario@ejemplo.com"
-                  className="w-full text-sm font-bold text-gray-500 dark:text-[var(--text-secondary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-3 border-2 border-gray-100 dark:border-[var(--border-subtle)] rounded-xl outline-none cursor-default select-none"
+                  className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-transparent dark:bg-transparent p-3 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 dark:focus:border-[var(--brand-green)] focus:ring-2 focus:ring-sky-100 dark:focus:ring-[var(--icons-green)] transition-all duration-300"
                 />
-                <p className="text-[9px] text-gray-400 dark:text-gray-500 ml-1">
-                  Para cambiar el correo, contacta a soporte
-                </p>
               </div>
 
               <div className="space-y-1">

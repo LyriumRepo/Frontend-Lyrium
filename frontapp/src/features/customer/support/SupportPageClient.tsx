@@ -60,10 +60,12 @@ function NewTicketForm({
     onSubmit,
     onCancel,
     isSubmitting,
+    submitError,
 }: {
-    onSubmit: (data: { subject: string; description: string; category: string }) => void;
+    onSubmit: (data: { subject: string; description: string; category: string }) => Promise<void>;
     onCancel: () => void;
     isSubmitting: boolean;
+    submitError?: string | null;
 }) {
     const [subject, setSubject] = useState('');
     const [description, setDescription] = useState('');
@@ -71,10 +73,10 @@ function NewTicketForm({
 
     const priority = PRIORITY_MAP[category] ?? 'baja';
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!subject.trim() || !description.trim()) return;
-        onSubmit({ subject, description, category });
+        await onSubmit({ subject, description, category });
     };
 
     return (
@@ -148,6 +150,13 @@ function NewTicketForm({
                     </p>
                 </div>
 
+                {submitError && (
+                    <div className="flex items-start gap-2 p-3 rounded-xl bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800">
+                        <span className="text-rose-500 text-xs shrink-0 mt-0.5">⚠</span>
+                        <p className="text-xs font-semibold text-rose-700 dark:text-rose-400">{submitError}</p>
+                    </div>
+                )}
+
                 <div className="flex gap-2 pt-2">
                     <button
                         type="button"
@@ -159,7 +168,7 @@ function NewTicketForm({
                     <button
                         type="submit"
                         disabled={isSubmitting || !subject.trim() || !description.trim()}
-                        className="flex-1 px-4 py-2.5 bg-gradient-to-r from-[#9cb04e] via-[#64c695] to-[#499bbf] text-white rounded-xl font-bold text-xs uppercase tracking-wider hover:opacity-90 transition-all disabled:opacity-50 shadow-lg shadow-[#64c695]/20"
+                        className="flex-1 px-4 py-2.5 bg-[#2E6A4F] text-white rounded-xl font-bold text-xs uppercase tracking-wider hover:opacity-90 transition-all disabled:opacity-50 shadow-sm"
                     >
                         {isSubmitting ? 'Creando...' : 'Crear Ticket'}
                     </button>
@@ -186,6 +195,7 @@ export function SupportPageClient() {
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const [showNewTicketForm, setShowNewTicketForm] = useState(false);
+    const [ticketError, setTicketError] = useState<string | null>(null);
     const [showLegend, setShowLegend] = useState(false);
     const [filterType, setFilterType] = useState<'asunto' | 'categoria'>('asunto');
     const [filterValue, setFilterValue] = useState('');
@@ -303,7 +313,7 @@ export function SupportPageClient() {
         <div className="flex flex-col h-full">
             <div className="p-5 border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)]/50 shrink-0">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-[#9cb04e] via-[#64c695] to-[#499bbf] flex items-center justify-center text-white shadow-sm">
+                    <div className="w-10 h-10 shrink-0 rounded-full bg-[#2E6A4F] flex items-center justify-center text-white shadow-sm">
                         <Icon name="Headset" className="w-5 h-5" />
                     </div>
                     <div className="min-w-0 flex-1">
@@ -351,7 +361,7 @@ export function SupportPageClient() {
                             currentUserName: 'Tú',
                             currentUserRole: 'Cliente',
                             otherName: activeTicket.assignedTo ?? 'Soporte Lyrium',
-                            otherRole: 'Agente',
+                            otherRole: 'Soporte Lyrium',
                             showAvatar: true,
                         }}
                     />
@@ -424,7 +434,7 @@ export function SupportPageClient() {
                                 <Icon name="Info" className="w-4 h-4" />
                             </button>
                             <button
-                                onClick={() => setShowNewTicketForm(true)}
+                                onClick={() => { setShowNewTicketForm(true); setTicketError(null); }}
                                 className="px-4 py-2 bg-white dark:bg-[var(--bg-secondary)] text-[var(--turquesa-500)] rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-[var(--turquesa-500)]/10 dark:hover:bg-[#2A3F33] transition-colors border border-[var(--border-subtle)] shadow-sm"
                             >
                                 + Nuevo Ticket
@@ -445,12 +455,18 @@ export function SupportPageClient() {
                 <div className="flex-1 flex items-center justify-center px-8">
                     <div className="w-full max-w-xl">
                         <NewTicketForm
-                            onSubmit={(data) => {
-                                handleCreateTicket(data);
-                                setShowNewTicketForm(false);
+                            onSubmit={async (data) => {
+                                setTicketError(null);
+                                const ok = await handleCreateTicket(data);
+                                if (ok) {
+                                    setShowNewTicketForm(false);
+                                } else {
+                                    setTicketError(error || 'No se pudo crear el ticket. Inténtalo de nuevo.');
+                                }
                             }}
-                            onCancel={() => setShowNewTicketForm(false)}
+                            onCancel={() => { setShowNewTicketForm(false); setTicketError(null); }}
                             isSubmitting={isSending}
+                            submitError={ticketError}
                         />
                     </div>
                 </div>

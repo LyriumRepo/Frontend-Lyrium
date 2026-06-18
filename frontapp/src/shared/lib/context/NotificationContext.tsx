@@ -137,6 +137,15 @@ function mapApiNotificationToProactive(notification: Notification): ProactiveNot
                 : (notification.subject ?? 'Tu reserva fue confirmada');
             action = { type: 'orders', label: 'Ver pedido' };
             break;
+        case 'booking_on_the_way':
+        case 'BookingOnTheWayNotification':
+            level = 'INFO';
+            title = '🚗 Proveedor en camino';
+            message = notification.service_name
+                ? `El equipo está en camino para tu servicio de ${notification.service_name}`
+                : (notification.subject ?? 'El proveedor está en camino');
+            action = { type: 'orders', label: 'Ver pedido' };
+            break;
         case 'profile_request_created':
         case 'ProfileRequestNotification':
             level = 'WARNING';
