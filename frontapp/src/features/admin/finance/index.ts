@@ -1,0 +1,1 @@
+export { FinancePageClient } from './FinancePageClient';
