@@ -1,6 +1,6 @@
 'use client';
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { apiGet, apiPost, createPlanRequest, getMyPlanRequest, getSystemColors } from '@/features/seller/plans/lib/api';
+import { apiGet, apiPost, createPlanRequest, createIzipayPlanSession, getMyPlanRequest, getSystemColors } from '@/features/seller/plans/lib/api';
 import { buildPlanOrder, defaultPlansData, durationPresets, getDiscountForMonths } from '@/features/seller/plans/lib/plans';
 import type { PlansMap, SubscriptionInfo, Request, ButtonColors, EstadoResponse, AvisoVencimientoResponse } from '@/features/seller/plans/types';
 import { USE_MOCKS } from '@/shared/lib/config/flags';
@@ -361,17 +361,23 @@ export function usePlanes() {
 
     try {
       const numericPlanId = slugToNumericIdMap[selectedPaymentPlan] ?? 1;
-      const response = await createPlanRequest({ plan_id: numericPlanId, payment_method: 'izipay', months: totalMonths });
-      if (response.success) {
-        showNotification('Pago procesado correctamente. Tu plan está activo.', '#10b981');
-        setState(prev => ({ ...prev, selectedPaymentPlan: null, modals: { ...prev.modals, payment: false, requestSent: true } }));
-        initialize();
+      const session = await createIzipayPlanSession({ plan_id: numericPlanId, months: totalMonths });
+      if (session.success && session.form_token && session.public_key && session.izipay_order_id) {
+        setState(prev => ({
+          ...prev,
+          izipayConfig: {
+            formToken: session.form_token!,
+            publicKey: session.public_key!,
+            orderId: session.izipay_order_id!,
+          },
+          modals: { ...prev.modals, payment: false, izipayPay: true },
+        }));
       } else {
-        showNotification('Error al procesar pago', '#ef4444');
+        showNotification(session.message ?? 'Error al iniciar el pago con Izipay', '#ef4444');
       }
     } catch (error) {
-      console.error('[usePlanes] Payment error:', error);
-      showNotification('Error al procesar pago', '#ef4444');
+      console.error('[usePlanes] Izipay session error:', error);
+      showNotification('No se pudo conectar con el servicio de pago. Intenta más tarde.', '#ef4444');
     }
 
     return null;

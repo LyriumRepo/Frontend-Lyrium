@@ -73,6 +73,22 @@ export const createPlanRequest = async (payload: {
   };
 };
 
+export const createIzipayPlanSession = async (payload: {
+  plan_id: number;
+  months: number;
+}) => {
+  return apiPost<{
+    success: boolean;
+    form_token?: string;
+    public_key?: string;
+    izipay_order_id?: string;
+    plan_request_id?: number;
+    amount?: number;
+    mode?: string;
+    message?: string;
+  }>('/payments/izipay/plan-session', payload);
+};
+
 export const getMyPlanRequest = async () => {
   return apiGet<{ success: boolean; data: any }>('/stores/me/plan-request');
 };
