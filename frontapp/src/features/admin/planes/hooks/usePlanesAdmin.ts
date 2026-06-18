@@ -76,7 +76,9 @@ export interface AdminState {
     deactivateConfirm: boolean;
     imageError: boolean;
     vendedorHistorial: boolean;
+    rejectRequest: boolean;
   };
+  rejectTargetId: number | null;
   confirmTargetPlan: string | null;
   restoreConfirmText: string;
   imageErrorMsg: string;
@@ -120,7 +122,8 @@ const initialState: AdminState = {
   editorOpen: false, editorPlanId: null, editorTitle: 'Editar Plan',
   editorTab: 'basic', editingPlan: { ...initialEdit },
   editFeatures: [], editDetailedBenefits: [],
-  modals: { deleteConfirm:false, restoreConfirm:false, deactivateConfirm:false, imageError:false, vendedorHistorial:false },
+  modals: { deleteConfirm:false, restoreConfirm:false, deactivateConfirm:false, imageError:false, vendedorHistorial:false, rejectRequest:false },
+  rejectTargetId: null,
   confirmTargetPlan: null, restoreConfirmText: '',
   imageErrorMsg: '', imageErrorSuggestion: '',
   selectedVendedor: null, isLoaded: false, vendedoresLoading: false, approvingRequestId: null, rejectingRequestId: null,
@@ -173,8 +176,9 @@ function transformBackendRequest(req: any): AdminRequest {
     id: req.id,
     usuario_id: String(req.store_id),
     userName: req.seller_name || req.store_name || '—',
-    fromPlan: req.current_plan?.name || 'Sin plan',
-    toPlan: req.plan?.name || req.requested_plan?.name || '',
+    // Usar slug para que RequestsPanel pueda buscar color en plansData
+    fromPlan: req.current_plan_slug || req.current_plan?.slug || 'sin-plan',
+    toPlan: req.plan?.slug || req.requested_plan?.slug || req.plan?.name || req.requested_plan?.name || '',
     planName: req.plan?.name || req.requested_plan?.name || '',
     status: req.status === 'pending' ? 'pending' : req.status === 'approved' ? 'approved' : 'rejected',
     date: req.created_at || new Date().toISOString(),
@@ -187,14 +191,15 @@ function transformBackendRequest(req: any): AdminRequest {
 }
 
 function transformBackendVendedor(v: any): Vendedor {
+  // Backend /admin/vendedores returns: { id, trade_name, seller:{email}, subscription:{plan_slug, plan_name, plan_color, ends_at} }
   return {
-    usuario_id: String(v.id || v.usuario_id || ''),
-    username: v.name || v.username || '',
-    email: v.email || '',
-    plan_actual: v.current_plan?.slug || v.plan_actual || '',
-    nombre_plan: v.current_plan?.name || v.nombre_plan || '',
-    css_color: v.css_color || v.current_plan?.css_color || '#10b981',
-    fecha_expiracion: v.subscription_ends_at || v.fecha_expiracion || '',
+    usuario_id: String(v.id || v.store_id || v.usuario_id || ''),
+    username: v.trade_name || v.name || v.username || '',
+    email: v.seller?.email || v.email || '',
+    plan_actual: v.subscription?.plan_slug || v.current_plan?.slug || v.plan_actual || '',
+    nombre_plan: v.subscription?.plan_name || v.current_plan?.name || v.nombre_plan || 'Sin plan',
+    css_color: v.subscription?.plan_color || v.css_color || v.current_plan?.css_color || '#9ca3af',
+    fecha_expiracion: v.subscription?.ends_at || v.subscription_ends_at || v.fecha_expiracion || '',
     historial: [],
   };
 }
@@ -934,6 +939,14 @@ export function useAdmin() {
     }
   }, [initialize, update]);
 
+  const openRejectModal = useCallback((id: number) => {
+    setState(prev => ({ ...prev, rejectTargetId: id, modals: { ...prev.modals, rejectRequest: true } }));
+  }, [setState]);
+
+  const closeRejectModal = useCallback(() => {
+    setState(prev => ({ ...prev, rejectTargetId: null, modals: { ...prev.modals, rejectRequest: false } }));
+  }, [setState]);
+
   return {
     state, update, setModal, initialize, switchTab,
     openPlanEditor, closePlanEditor, updateEditingPlan, setEditorTab, savePlan,
@@ -951,5 +964,6 @@ export function useAdmin() {
     handleSolicitudesActualizadas, handlePlanesActualizados,
     handleColoresActualizados, handlePagoConfirmadoAdmin, handlePagoFallidoAdmin,
     handleApproveRequest, handleRejectRequest,
+    openRejectModal, closeRejectModal,
   };
 }

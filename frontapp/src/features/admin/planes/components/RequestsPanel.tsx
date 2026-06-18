@@ -8,7 +8,7 @@ interface Props {
   filter: string; onFilterChange: (f: string) => void;
   notifs: PaymentNotif[]; onDismissNotif: (id: string) => void;
   onApprove?: (id: number) => void;
-  onReject?: (id: number, notes: string) => void;
+  onOpenRejectModal?: (id: number) => void;
   approvingId?: number | null;
   rejectingId?: number | null;
 }
@@ -20,7 +20,7 @@ const FILTERS = [
   { key: 'rejected', label: 'Fallidos',   dot: 'var(--color-error)' },
 ] as const;
 
-export default function RequestsPanel({ requests, plansData, filter, onFilterChange, notifs, onDismissNotif, onApprove, onReject, approvingId, rejectingId }: Props) {
+export default function RequestsPanel({ requests, plansData, filter, onFilterChange, notifs, onDismissNotif, onApprove, onOpenRejectModal, approvingId, rejectingId }: Props) {
   const filtered = filter === 'all' ? requests : requests.filter(r => r.status === filter);
 
   return (
@@ -124,7 +124,7 @@ export default function RequestsPanel({ requests, plansData, filter, onFilterCha
                   )}
                 </div>
 
-                {r.status === 'pending' && onApprove && onReject && (
+                {r.status === 'pending' && onApprove && onOpenRejectModal && (
                   <div className="flex gap-2 mt-3 pt-3 border-t border-[var(--border-subtle)]">
                     <button
                       onClick={() => onApprove(r.id)}
@@ -133,10 +133,7 @@ export default function RequestsPanel({ requests, plansData, filter, onFilterCha
                       {approvingId === r.id ? 'Aprobando...' : '✓ Aprobar'}
                     </button>
                     <button
-                      onClick={() => {
-                        const notes = prompt('Ingrese motivo del rechazo:');
-                        if (notes) onReject(r.id, notes);
-                      }}
+                      onClick={() => onOpenRejectModal(r.id)}
                       disabled={approvingId === r.id || rejectingId === r.id}
                       className="flex-1 px-3 py-2 bg-[var(--color-error)] text-white text-xs font-bold rounded-lg hover:opacity-90 disabled:opacity-50 transition-all">
                       {rejectingId === r.id ? 'Rechazando...' : '✗ Rechazar'}

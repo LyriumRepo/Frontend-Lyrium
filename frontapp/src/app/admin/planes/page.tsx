@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useAdmin } from '@/features/admin/planes/hooks/usePlanesAdmin';
 import { useSSE } from '@/features/seller/plans/hooks/useSSE';
 import RequestsPanel from '@/features/admin/planes/components/RequestsPanel';
@@ -62,6 +62,7 @@ const TABS = [
 export default function AdminPage() {
   const admin = useAdmin();
   const { state, update, setModal } = admin;
+  const [rejectNotes, setRejectNotes] = useState('');
 
   useEffect(() => {
     admin.initialize();
@@ -188,7 +189,7 @@ export default function AdminPage() {
               notifs={s.paymentNotifs}
               onDismissNotif={admin.dismissNotif}
               onApprove={admin.handleApproveRequest}
-              onReject={admin.handleRejectRequest}
+              onOpenRejectModal={admin.openRejectModal}
               approvingId={s.approvingRequestId}
               rejectingId={s.rejectingRequestId}
             />
@@ -341,6 +342,60 @@ export default function AdminPage() {
         <div className="flex justify-center">
           <button className="px-6 py-3 border-none bg-[var(--brand-teal)] text-white rounded-xl text-sm font-bold cursor-pointer transition-all hover:opacity-90 hover:-translate-y-0.5"
             onClick={() => setModal('imageError', false)}>Intentar de nuevo</button>
+        </div>
+      </Modal>
+
+      {/* ── Modal de rechazo de solicitud ─────────── */}
+      <Modal
+        open={s.modals.rejectRequest}
+        onClose={() => { admin.closeRejectModal(); setRejectNotes(''); }}
+        className="max-w-md mx-auto"
+      >
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-12 h-12 bg-red-100 dark:bg-red-900/20 rounded-2xl flex items-center justify-center flex-shrink-0">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--color-error)" strokeWidth="2">
+              <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+            </svg>
+          </div>
+          <div>
+            <h2 className="text-lg font-extrabold text-[var(--text-primary)] leading-tight">Rechazar solicitud</h2>
+            <p className="text-xs text-[var(--text-secondary)] mt-0.5">El vendedor recibirá el motivo del rechazo</p>
+          </div>
+        </div>
+
+        <label className="block text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wide mb-2">
+          Motivo del rechazo <span className="text-[var(--color-error)]">*</span>
+        </label>
+        <textarea
+          value={rejectNotes}
+          onChange={e => setRejectNotes(e.target.value)}
+          placeholder="Describe el motivo del rechazo (mínimo 10 caracteres)..."
+          rows={4}
+          className="w-full px-4 py-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-sm text-[var(--text-primary)] resize-none focus:outline-none focus:border-[var(--color-error)] transition-colors placeholder:text-[var(--text-secondary)]"
+        />
+        <p className="text-[11px] text-[var(--text-secondary)] mt-1 mb-5">
+          {rejectNotes.length < 10 ? `Faltan ${10 - rejectNotes.length} caracteres mínimos` : `${rejectNotes.length} caracteres`}
+        </p>
+
+        <div className="flex gap-3">
+          <button
+            className="flex-1 px-5 py-2.5 border border-[var(--border-subtle)] bg-transparent text-[var(--text-secondary)] rounded-xl text-sm font-bold cursor-pointer hover:border-[var(--text-primary)] hover:text-[var(--text-primary)] transition-all"
+            onClick={() => { admin.closeRejectModal(); setRejectNotes(''); }}
+          >
+            Cancelar
+          </button>
+          <button
+            disabled={rejectNotes.trim().length < 10 || s.rejectingRequestId === s.rejectTargetId}
+            className="flex-1 px-5 py-2.5 border-none bg-[var(--color-error)] text-white rounded-xl text-sm font-bold cursor-pointer hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+            onClick={async () => {
+              if (!s.rejectTargetId || rejectNotes.trim().length < 10) return;
+              admin.closeRejectModal();
+              setRejectNotes('');
+              await admin.handleRejectRequest(s.rejectTargetId, rejectNotes.trim());
+            }}
+          >
+            {s.rejectingRequestId === s.rejectTargetId ? 'Rechazando...' : 'Confirmar rechazo'}
+          </button>
         </div>
       </Modal>
     </div>
