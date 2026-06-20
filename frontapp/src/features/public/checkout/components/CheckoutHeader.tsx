@@ -1,20 +1,21 @@
 'use client';
 
-import { ShoppingCart, CreditCard, CheckCircle, FileText } from 'lucide-react';
+import { ShoppingCart, CreditCard, CheckCircle, FileText, Package } from 'lucide-react';
 import { useCheckoutStore } from '@/store/checkoutStore';
 
 const STEP_CONFIG = {
     1: { title: 'Carrito de compras', desc: 'Revisa tus productos', Icon: ShoppingCart },
-    2: { title: 'Finalizar compra', desc: 'Completa tus datos', Icon: CreditCard },
-    3: { title: 'Pedido confirmado', desc: 'Tu compra fue procesada', Icon: CheckCircle },
-    4: { title: 'Confirmación de pago', desc: 'Detalle de tus productos', Icon: FileText },
+    2: { title: 'Empaque', desc: 'Revisa el empaque calculado', Icon: Package },
+    3: { title: 'Finalizar compra', desc: 'Completa tus datos', Icon: CreditCard },
+    4: { title: 'Pedido confirmado', desc: 'Tu compra fue procesada', Icon: CheckCircle },
+    5: { title: 'Confirmación de pago', desc: 'Detalle de tus productos', Icon: FileText },
 } as const;
 
 export default function CheckoutHeader() {
     const currentStep = useCheckoutStore((s) => s.currentStep);
 
     const { title, desc, Icon } = STEP_CONFIG[currentStep as keyof typeof STEP_CONFIG] || STEP_CONFIG[1];
-    const isSuccess = currentStep === 3 || currentStep === 4;
+    const isSuccess = currentStep === 4 || currentStep === 5;
 
     return (
         <div className="max-w-6xl mx-auto px-4 pt-4 pb-2 animate-fade-in">
