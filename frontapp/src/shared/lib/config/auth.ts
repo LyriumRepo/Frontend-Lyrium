@@ -11,7 +11,8 @@ export const AUTH_CONFIG = {
     ADMIN: 'administrator',
     SELLER: 'seller',
     CUSTOMER: 'customer',
-    LOGISTICS: 'logistics_operator'
+    LOGISTICS: 'logistics_operator',
+    SECURITY: 'security_admin'
   } as const,
 
   /**
@@ -22,6 +23,7 @@ export const AUTH_CONFIG = {
     seller: '/seller',
     customer: '/customer',
     logistics_operator: '/logistics',
+    security_admin: '/security',
     login: '/login',
     error: '/error/unauthorized'
   } as const,

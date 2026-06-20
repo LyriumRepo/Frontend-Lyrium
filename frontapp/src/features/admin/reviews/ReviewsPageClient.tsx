@@ -36,6 +36,10 @@ import {
   type ReviewReport,
   type AdminReview,
 } from '@/shared/lib/api/rankingRepository';
+import {
+  medalApi,
+  type TopMedal,
+} from '@/shared/lib/api/medalRepository';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -967,9 +971,202 @@ function AllReviewsTab() {
   );
 }
 
+// ─── Tab: Medallas Top 100 ──────────────────────────────────────────────────
+
+function MedalsTab() {
+  const [medals, setMedals] = useState<TopMedal[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [filterEntity, setFilterEntity] = useState<string>('');
+  const [filterStatus, setFilterStatus] = useState<string>('');
+  const [page, setPage] = useState(1);
+  const [meta, setMeta] = useState({ current_page: 1, total_pages: 1, total: 0 });
+
+  const fetchMedals = useCallback(() => {
+    setLoading(true);
+    setError(null);
+    medalApi
+      .getAdminMedals({
+        entity_type: filterEntity || undefined,
+        status: filterStatus || undefined,
+        page,
+        per_page: 15,
+      })
+      .then((res) => {
+        setMedals(res.data ?? []);
+        setMeta(res.meta);
+      })
+      .catch(() => setError('No se pudieron cargar las medallas.'))
+      .finally(() => setLoading(false));
+  }, [filterEntity, filterStatus, page]);
+
+  useEffect(() => { fetchMedals(); }, [fetchMedals]);
+
+  const handleApprove = async (id: string) => {
+    setActionLoading(id);
+    try {
+      await medalApi.approveMedal(id);
+      fetchMedals();
+    } catch { setError('Error al aprobar la medalla.'); }
+    finally { setActionLoading(null); }
+  };
+
+  const handleSuspend = async (id: string) => {
+    setActionLoading(id);
+    try {
+      await medalApi.suspendMedal(id);
+      fetchMedals();
+    } catch { setError('Error al suspender la medalla.'); }
+    finally { setActionLoading(null); }
+  };
+
+  const statusBadge = (status: string) => {
+    const map: Record<string, string> = {
+      pending: 'bg-amber-100 text-amber-700',
+      approved: 'bg-emerald-100 text-emerald-700',
+      suspended: 'bg-red-100 text-red-700',
+    };
+    const labels: Record<string, string> = {
+      pending: 'Pendiente',
+      approved: 'Activa',
+      suspended: 'Suspendida',
+    };
+    return (
+      <span className={`inline-flex px-2.5 py-1 rounded-full text-[10px] font-black uppercase ${map[status] ?? 'bg-gray-100 text-gray-500'}`}>
+        {labels[status] ?? status}
+      </span>
+    );
+  };
+
+  const selectCls =
+    'px-4 py-2.5 bg-white dark:bg-[var(--bg-card)] border border-gray-100 dark:border-[var(--border-subtle)] rounded-xl text-xs font-bold text-[var(--text-primary)] focus:ring-4 focus:ring-cyan-500/10 transition-all outline-none appearance-none cursor-pointer';
+
+  return (
+    <div className="space-y-4">
+      {/* Filtros */}
+      <div className="flex items-center gap-3 flex-wrap">
+        <select
+          value={filterEntity}
+          onChange={(e) => { setFilterEntity(e.target.value); setPage(1); }}
+          className={selectCls}
+        >
+          <option value="">Todas las entidades</option>
+          <option value="store">Tiendas</option>
+          <option value="product">Productos</option>
+          <option value="service">Servicios</option>
+        </select>
+        <select
+          value={filterStatus}
+          onChange={(e) => { setFilterStatus(e.target.value); setPage(1); }}
+          className={selectCls}
+        >
+          <option value="">Todos los estados</option>
+          <option value="pending">Pendientes</option>
+          <option value="approved">Activas</option>
+          <option value="suspended">Suspendidas</option>
+        </select>
+        <span className="text-xs font-bold text-[var(--text-muted)] ml-auto">{meta.total} medalla(s)</span>
+      </div>
+
+      {/* Tabla */}
+      {loading ? (
+        <div className="space-y-3">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <BaseSkeleton key={i} className="h-16 rounded-xl bg-[var(--bg-card)]" />
+          ))}
+        </div>
+      ) : error ? (
+        <div className="flex flex-col items-center py-12 text-center bg-[var(--bg-card)] rounded-[2.5rem] border border-[var(--border-subtle)]">
+          <AlertCircle className="w-8 h-8 text-red-400 mb-2" />
+          <p className="text-sm font-bold text-[var(--color-error)]">{error}</p>
+          <button onClick={fetchMedals} className="mt-3 text-xs font-bold text-[var(--brand-sky)] hover:text-[var(--brand-sky-hover)] flex items-center gap-1">
+            <RefreshCw className="w-3 h-3" /> Reintentar
+          </button>
+        </div>
+      ) : medals.length === 0 ? (
+        <EmptyState icon={Trophy} title="Sin medallas" subtitle="No hay medallas Top 100 registradas aún." />
+      ) : (
+        <div className="space-y-2">
+          {medals.map((medal) => (
+            <div key={medal.id} className="flex items-center gap-4 p-4 rounded-xl bg-white dark:bg-[var(--bg-card)] border border-gray-100 dark:border-[var(--border-subtle)] hover:border-gray-200 dark:hover:border-[var(--border-default)] hover:shadow-sm transition-all">
+              {/* Imagen medalla */}
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-300 to-amber-500 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                <img src="/img/INSIGNIA PREMIUM.png" alt="" className="w-full h-full object-contain p-1" />
+              </div>
+
+              {/* Info */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-sm font-black text-[var(--text-primary)]">
+                    {medal.entity?.name ?? `#${medal.entity?.id}`}
+                  </span>
+                  <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-md bg-gray-100 dark:bg-[var(--bg-muted)] text-gray-500 dark:text-[var(--text-muted)]">
+                    {medal.entity_type === 'store' ? 'Tienda' : medal.entity_type === 'product' ? 'Producto' : 'Servicio'}
+                  </span>
+                  {statusBadge(medal.status)}
+                </div>
+                <div className="flex items-center gap-3 mt-1 text-[11px] font-medium text-[var(--text-muted)]">
+                  {medal.rank_position && <span># {medal.rank_position} en ranking</span>}
+                  <span>Ingresos: {medal.times_entered}</span>
+                  <span>Salidas: {medal.times_exited}</span>
+                  <span>Detectado: {new Date(medal.detected_at).toLocaleDateString()}</span>
+                  {medal.grace_ends_at && (
+                    <span className="text-amber-500">Gracia hasta: {new Date(medal.grace_ends_at).toLocaleDateString()}</span>
+                  )}
+                </div>
+              </div>
+
+              {/* Acciones */}
+              <div className="flex items-center gap-2 flex-shrink-0">
+                {medal.status !== 'approved' && (
+                  <BaseButton
+                    size="xs"
+                    variant="primary"
+                    onClick={() => handleApprove(medal.id)}
+                    disabled={actionLoading === medal.id}
+                  >
+                    {actionLoading === medal.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle className="w-3 h-3" />}
+                    {medal.status === 'suspended' ? 'Reactivar' : 'Aprobar'}
+                  </BaseButton>
+                )}
+                {medal.status !== 'suspended' && (
+                  <BaseButton
+                    size="xs"
+                    variant="secondary"
+                    onClick={() => handleSuspend(medal.id)}
+                    disabled={actionLoading === medal.id}
+                    className="!text-red-500 dark:!text-red-400 !border-red-200 dark:!border-red-800 hover:!bg-red-50 dark:hover:!bg-red-950/20"
+                  >
+                    {actionLoading === medal.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <XCircle className="w-3 h-3" />}
+                    Suspender
+                  </BaseButton>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Paginación */}
+      {meta.total_pages > 1 && (
+        <div className="flex items-center justify-center gap-3 pt-2">
+          <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1} className="p-2 rounded-xl border border-[var(--border-subtle)] disabled:opacity-40 hover:bg-[var(--bg-muted)] transition-colors text-[var(--text-muted)]">
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          <span className="text-sm font-bold text-[var(--text-secondary)]">{page} / {meta.total_pages}</span>
+          <button onClick={() => setPage((p) => Math.min(meta.total_pages, p + 1))} disabled={page === meta.total_pages} className="p-2 rounded-xl border border-[var(--border-subtle)] disabled:opacity-40 hover:bg-[var(--bg-muted)] transition-colors text-[var(--text-muted)]">
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── COMPONENTE PRINCIPAL ─────────────────────────────────────────────────────
 
-type TabKey = 'productos' | 'tiendas' | 'servicios' | 'moderacion' | 'reseñas';
+type TabKey = 'productos' | 'tiendas' | 'servicios' | 'moderacion' | 'reseñas' | 'medallas';
 
 const TABS: { key: TabKey; label: string; icon: React.ElementType }[] = [
   { key: 'tiendas', label: 'Top Tiendas', icon: Store },
@@ -977,6 +1174,7 @@ const TABS: { key: TabKey; label: string; icon: React.ElementType }[] = [
   { key: 'servicios', label: 'Top Servicios', icon: Calendar },
   { key: 'moderacion', label: 'Moderación', icon: ShieldAlert },
   { key: 'reseñas', label: 'Todas las reseñas', icon: MessageSquare },
+  { key: 'medallas', label: 'Medallas', icon: Trophy },
 ];
 
 export function ReviewsPageClient() {
@@ -1016,6 +1214,7 @@ export function ReviewsPageClient() {
           {activeTab === 'servicios' && <TopServicesTab />}
           {activeTab === 'moderacion' && <ModerationTab />}
           {activeTab === 'reseñas' && <AllReviewsTab />}
+          {activeTab === 'medallas' && <MedalsTab />}
         </div>
       </div>
     </div>

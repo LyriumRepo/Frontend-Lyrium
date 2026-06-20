@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Icon from '@/components/ui/Icon';
+import TopMedalBadge from '@/components/ui/TopMedalBadge';
 import { LARAVEL_API_URL } from '@/shared/lib/config/flags';
 
 interface StoreData {
@@ -166,11 +167,14 @@ export default function TiendasRegistradasPage() {
                     </div>
 
                     <div className="absolute right-4 -bottom-5 z-20 w-20 h-20 rounded-full bg-white dark:bg-[var(--bg-card)] border-4 border-white/85 dark:border-[var(--border-subtle)] shadow-2xl flex items-center justify-center overflow-hidden">
-                      <img
-                        src={store.logo || '/img/stores/default-logo.webp'}
-                        alt={`${store.name} logo`}
-                        className="w-3/5 h-3/5 object-contain"
-                      />
+                      <div className="relative w-full h-full flex items-center justify-center">
+                        <img
+                          src={store.logo || '/img/stores/default-logo.webp'}
+                          alt={`${store.name} logo`}
+                          className="w-3/5 h-3/5 object-contain"
+                        />
+                        <TopMedalBadge entityType="store" entityId={store.id} size="sm" className="absolute bottom-1 right-1 z-10" />
+                      </div>
                     </div>
                   </div>
                 </Link>

@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
+import { createPortal } from 'react-dom';
 import Icon from '@/components/ui/Icon';
 
 interface BaseModalProps {
@@ -39,12 +40,18 @@ export default function BaseModal({
   children,
   className = '',
 }: BaseModalProps) {
+  const [mounted, setMounted] = useState(false);
+
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
     },
     [onClose],
   );
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
@@ -57,21 +64,23 @@ export default function BaseModal({
     };
   }, [isOpen, handleKeyDown]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
+  const modalRoot = document.getElementById('modal-root');
+  if (!modalRoot) return null;
+
+  return createPortal(
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
         onClick={onClose}
       />
-      <div className="relative flex min-h-full items-center justify-center p-4">
       <div
         className={`
           relative w-full ${sizeStyles[size] || sizeStyles.md}
           bg-[var(--bg-card)] rounded-[2.5rem] shadow-2xl
           border border-[var(--border-subtle)]
-          flex flex-col animate-scaleIn my-4
+          flex flex-col max-h-[90vh] animate-scaleIn
           ${className}
         `}
       >
@@ -98,7 +107,7 @@ export default function BaseModal({
         </div>
         <div className="p-8 overflow-y-auto">{children}</div>
       </div>
-      </div>
-    </div>
+    </div>,
+    modalRoot,
   );
 }

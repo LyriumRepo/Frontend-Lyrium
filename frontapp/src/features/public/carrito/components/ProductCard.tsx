@@ -2,6 +2,7 @@
 
 import { Star, ShieldCheck, Leaf, Barcode, FolderOpen, Package } from 'lucide-react';
 import { money, resolveImg, NO_IMAGE, ApiProduct } from '@/modules/cart/utils';
+import TopMedalBadge from '@/components/ui/TopMedalBadge';
 
 interface StarRatingProps { rating: number; total: number; }
 
@@ -93,15 +94,7 @@ export default function ProductCard({ product: p, onAdd, onView }: Props) {
                     </span>
                 )}
 
-                {/* Quick add */}
-                <button
-                    onClick={() => onAdd(p.id)}
-                    disabled={outOfStock}
-                    title="Añadir rápido"
-                    className="absolute bottom-3 right-3 w-11 h-11 rounded-2xl bg-white/95 dark:bg-[var(--bg-card)]/95 border border-sky-100 dark:border-[var(--border-subtle)] text-slate-700 dark:text-[var(--text-primary)] shadow-sm grid place-items-center hover:shadow transition disabled:opacity-40 disabled:cursor-not-allowed"
-                >
-                    <span className="text-xl text-sky-500 dark:text-[var(--brand-sky)]">+</span>
-                </button>
+                <TopMedalBadge entityType="product" entityId={p.id} size="md" className="absolute bottom-3 right-3 z-10" />
             </div>
 
             {/* Info */}

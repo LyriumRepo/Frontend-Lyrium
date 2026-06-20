@@ -40,6 +40,8 @@ export const ROLE_NOTIFICATION_TYPES: Record<string, RoleNotificationConfig> = {
             'invoice_requested', 'InvoiceRequestedNotification',
             'order_delivered_seller', 'OrderDeliveredSellerNotification',
             'new_chat_message', 'NewChatMessageNotification',
+            'top_medal_awarded', 'TopMedalAwardedNotification',
+            'top_medal_grace', 'TopMedalGraceNotification',
         ],
         toast: [
             'new_order', 'NewOrderSellerNotification',
@@ -48,6 +50,8 @@ export const ROLE_NOTIFICATION_TYPES: Record<string, RoleNotificationConfig> = {
             'invoice_requested', 'InvoiceRequestedNotification',
             'order_delivered_seller', 'OrderDeliveredSellerNotification',
             'new_chat_message', 'NewChatMessageNotification',
+            'top_medal_awarded', 'TopMedalAwardedNotification',
+            'top_medal_grace', 'TopMedalGraceNotification',
         ],
     },
 
