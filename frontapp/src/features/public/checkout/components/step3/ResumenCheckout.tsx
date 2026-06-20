@@ -10,6 +10,9 @@ const applyMarkup = (p: number | null | undefined): number | null =>
 const isSharf = (courier: string) =>
   ['sharf', 'sharf express'].includes(courier.toLowerCase());
 
+const tieneDomicilio = (op: CourierOption | undefined) =>
+  !!op && (isSharf(op.courier) || !!op.domicilio?.disponible);
+
 function getPrecioFinal(op: CourierOption | undefined, tipo: TipoEntrega): number | null {
   if (!op) return null;
   if (isSharf(op.courier)) {
@@ -20,6 +23,7 @@ function getPrecioFinal(op: CourierOption | undefined, tipo: TipoEntrega): numbe
     return op.precio != null ? applyMarkup(op.precio) : null;
   }
   if (op.domicilio?.disponible && op.domicilio.precio != null) return applyMarkup(op.domicilio.precio);
+  if (op.agencia?.disponible && op.agencia.precio != null) return applyMarkup(op.agencia.precio);
   return op.precio != null ? applyMarkup(op.precio) : null;
 }
 
@@ -44,8 +48,10 @@ export default function ResumenCheckout() {
   let grandTotalEnvio     = 0;
 
   const tiendaRows = tiendas.map(tienda => {
-    const op          = tienda.logistica?.opciones?.find(o => o.courier === selectedCourier);
-    const precioEnvio = getPrecioFinal(op, tipoEntrega) ?? 0;
+    const op   = tienda.logistica?.opciones?.find(o => o.courier === selectedCourier);
+    const sinDomicilioAqui = !isSharf(selectedCourier) && tipoEntrega === 'domicilio' && !tieneDomicilio(op);
+    const tipoEfectivo: TipoEntrega = sinDomicilioAqui ? 'agencia' : tipoEntrega;
+    const precioEnvio = getPrecioFinal(op, tipoEfectivo) ?? 0;
     const items = selectedItems.filter(i => i.storeId === tienda.tiendaId);
     const subtotalProductos = items.reduce((s, i) => s + i.price * i.quantity, 0);
 
@@ -55,7 +61,7 @@ export default function ResumenCheckout() {
     grandTotalProductos += subtotalProductos;
     grandTotalEnvio     += precioEnvio;
 
-    return { tienda, items, subtotalProductos, precioEnvio, totalTienda, pesoTotal, op };
+    return { tienda, items, subtotalProductos, precioEnvio, totalTienda, pesoTotal, op, tipoEfectivo, sinDomicilioAqui };
   });
 
   const grandTotal = grandTotalProductos + grandTotalEnvio;
@@ -64,7 +70,7 @@ export default function ResumenCheckout() {
     <div className="rounded-2xl border-2 border-gray-100 dark:border-gray-800 overflow-hidden bg-white dark:bg-gray-900/40">
       <div className="divide-y divide-gray-100 dark:divide-gray-800">
         {/* ── Por tienda ───────────────────────────────────────────────── */}
-        {tiendaRows.map(({ tienda, items, subtotalProductos, precioEnvio, totalTienda, pesoTotal, op }, idx) => (
+        {tiendaRows.map(({ tienda, items, subtotalProductos, precioEnvio, totalTienda, pesoTotal, op, tipoEfectivo }, idx) => (
           <div key={tienda.tiendaId} className="px-5 py-4 space-y-3">
 
             {/* Nombre tienda */}
@@ -113,7 +119,7 @@ export default function ResumenCheckout() {
                 <span>
                   {isSharf(selectedCourier)
                     ? 'Puerta a puerta'
-                    : tipoEntrega === 'domicilio' ? '🏠 A domicilio' : '🏢 En agencia'}
+                    : tipoEfectivo === 'domicilio' ? '🏠 A domicilio' : '🏢 En agencia'}
                 </span>
               </div>
               <span className="font-mono font-bold text-sky-600 dark:text-sky-400">
