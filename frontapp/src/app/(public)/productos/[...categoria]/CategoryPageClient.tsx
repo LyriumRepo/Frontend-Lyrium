@@ -4,6 +4,7 @@
 import { useState, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import TopMedalBadge from '@/components/ui/TopMedalBadge';
 import {
     ArrowLeft, Flame, SlidersHorizontal, X,
     ChevronDown, Tag, ShoppingCart, Loader2, Check,
@@ -59,6 +60,7 @@ function ProductCard({ product }: { product: LaravelProduct }) {
                         <span className="text-white text-xs font-bold bg-black/60 px-3 py-1 rounded-full">Sin stock</span>
                     </div>
                 )}
+                <TopMedalBadge entityType="product" entityId={product.id} size="md" className="absolute bottom-2 right-2 z-10" />
             </div>
             <div className="p-3 flex flex-col gap-1.5 flex-1">
                 <p className="text-xs text-gray-400 dark:text-gray-500 truncate">{product.store.name}</p>

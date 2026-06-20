@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { ShoppingCart, Eye, Clock, Tag, Calendar, Check, Loader2 } from 'lucide-react';
 import { Producto } from '@/types/public';
 import { useState, useCallback } from 'react';
+import TopMedalBadge from '@/components/ui/TopMedalBadge';
 
 const stickerConfig: Record<string, { label: string; class: string }> = {
   oferta: { label: 'Oferta', class: 'bg-red-500' },
@@ -104,6 +105,7 @@ function ProductCard({ producto }: { producto: Producto }) {
             </span>
           </div>
         )}
+        <TopMedalBadge entityType="product" entityId={producto.id} size="md" className="absolute bottom-3 right-3 z-10" />
       </div>
 
       {/* Info */}
@@ -187,6 +189,7 @@ function ServiceCard({ producto }: { producto: Producto }) {
             {stickerConfig[producto.tag.toLowerCase()]?.label ?? producto.tag}
           </span>
         )}
+        <TopMedalBadge entityType="service" entityId={producto.id} size="md" className="absolute bottom-3 right-3 z-10" />
       </Link>
 
       {/* Info */}

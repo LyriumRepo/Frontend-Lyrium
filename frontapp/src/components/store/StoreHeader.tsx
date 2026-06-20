@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Icon from '@/components/ui/Icon';
+import TopMedalBadge from '@/components/ui/TopMedalBadge';
 
 export interface StoreHeaderProps {
   store: {
@@ -74,18 +75,21 @@ export default function StoreHeader({ store, stats, onSearch }: StoreHeaderProps
               {/* Logo + Nombre + Badges */}
               <div className="flex items-center gap-3">
                 {/* Logo */}
-                <div className="w-12 h-12 rounded-xl overflow-hidden bg-white flex-shrink-0 shadow-lg ring-2 ring-white/50 flex items-center justify-center">
-                  <Image
-                    src={store.logo || '/img/store/tienda-94.png'}
-                    alt={store.name}
-                    width={48}
-                    height={48}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src = '/img/store/tienda-94.png';
-                    }}
-                  />
+                <div className="relative">
+                  <div className="w-12 h-12 rounded-xl overflow-hidden bg-white flex-shrink-0 shadow-lg ring-2 ring-white/50 flex items-center justify-center">
+                    <Image
+                      src={store.logo || '/img/store/tienda-94.png'}
+                      alt={store.name}
+                      width={48}
+                      height={48}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = '/img/store/tienda-94.png';
+                      }}
+                    />
+                  </div>
+                  <TopMedalBadge entityType="store" entityId={store.id} size="sm" className="absolute bottom-0 right-0 z-10" />
                 </div>
 
                 {/* Nombre + Badges */}

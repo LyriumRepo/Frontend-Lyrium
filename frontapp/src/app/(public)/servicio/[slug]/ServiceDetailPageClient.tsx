@@ -43,6 +43,7 @@ import {
 import { useIzipay } from '@/features/public/checkout/hooks/useIzipay';
 import { useAuth } from '@/shared/lib/context/AuthContext';
 import { LARAVEL_API_URL } from '@/shared/lib/config/flags';
+import TopMedalBadge from '@/components/ui/TopMedalBadge';
 import { ServiceReviews, ServiceReview, ReviewStats } from './ServiceReviews';
 import {
   getDepartamentos,
@@ -1534,6 +1535,7 @@ function RelatedServiceCard({ s }: { s: any }) {
               </div>
             );
           })()}
+          <TopMedalBadge entityType="service" entityId={s.id} size="sm" className="absolute bottom-3 right-3" />
         </div>
         <div className="p-4">
           <p className="text-sm font-semibold text-gray-800 dark:text-[var(--text-primary)] line-clamp-2 leading-tight group-hover:text-cyan-600 dark:text-white transition-colors">
@@ -2026,7 +2028,7 @@ export function ServiceDetailPageClient({ service }: Props) {
             {/* Store */}
             <Link href={`/tienda/${service.store_id}`} className="block">
               <div className="bg-white dark:bg-[var(--bg-card)] rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)] p-4 hover:border-cyan-400/30 transition-colors flex items-center gap-3 shadow-sm">
-                <div className="w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center shrink-0 overflow-hidden">
+                <div className="w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center shrink-0 overflow-hidden relative">
                   {service.store_logo ? (
                     <Image
                       src={service.store_logo}
@@ -2038,6 +2040,7 @@ export function ServiceDetailPageClient({ service }: Props) {
                   ) : (
                     <MapPin className="w-5 h-5 text-cyan-600 dark:text-white" />
                   )}
+                  <TopMedalBadge entityType="store" entityId={service.store_id} size="lg" className="absolute bottom-3 right-3" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs text-gray-400">Tienda</p>

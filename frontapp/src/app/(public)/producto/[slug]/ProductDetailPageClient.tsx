@@ -46,6 +46,7 @@ import { useCurrentUser } from '@/features/public/product/hooks/useCurrentUser';
 import { WriteProductReview } from '@/features/public/product/WriteProductReview';
 import { LARAVEL_API_URL } from '@/shared/lib/config/flags';
 
+import TopMedalBadge from '@/components/ui/TopMedalBadge';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -910,6 +911,7 @@ function RelatedProductCard({ rel }: { rel: LaravelProduct }) {
                 </Badge>
               </div>
             )}
+            <TopMedalBadge entityType="product" entityId={rel.id} size="md" className="absolute bottom-3 right-3" />
           </div>
           <div className="p-4 space-y-2">
             <div className="flex flex-wrap items-center gap-1">
@@ -1171,7 +1173,7 @@ export function ProductDetailPageClient({
       <div className="grid lg:grid-cols-[1fr_520px] gap-8 items-start">
         {/* Columna izquierda: galería */}
         <div className="sticky top-24 space-y-4">
-          <ProductGallery images={product.images} name={product.name} />
+          <ProductGallery images={product.images} name={product.name} productId={product.id} />
         </div>
 
         {/* Columna derecha: info de compra */}
@@ -1402,7 +1404,7 @@ export function ProductDetailPageClient({
             <Link href={`/tienda/${product.store.slug}`}>
               <Card className="hover:border-teal-400 transition-colors cursor-pointer">
                 <CardContent className="p-4 flex items-center gap-4">
-                  <div className="w-11 h-11 flex items-center justify-center flex-shrink-0 overflow-hidden rounded-lg bg-muted">
+                  <div className="w-11 h-11 flex items-center justify-center flex-shrink-0 overflow-hidden rounded-lg bg-muted relative">
                     {product.store.logo ? (
                       <Image
                         src={product.store.logo}
@@ -1414,6 +1416,7 @@ export function ProductDetailPageClient({
                     ) : (
                       <Store className="w-5 h-5 text-muted-foreground" />
                     )}
+                    <TopMedalBadge entityType="store" entityId={product.store.id} size="xs" className="absolute bottom-0 right-0 z-10" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-semibold text-muted-foreground mb-0.5">
@@ -1457,9 +1460,11 @@ export function ProductDetailPageClient({
 function ProductGallery({
   images,
   name,
+  productId,
 }: {
   images: LaravelProduct['images'];
   name: string;
+  productId: string;
 }) {
   const [active, setActive] = useState(0);
   const [zooming, setZooming] = useState(false);
@@ -1535,6 +1540,8 @@ function ProductGallery({
           }}
           priority
         />
+
+        <TopMedalBadge entityType="product" entityId={productId} size="xl" className="absolute bottom-4 right-4 z-10" />
 
         {/* Lupa */}
         <div
