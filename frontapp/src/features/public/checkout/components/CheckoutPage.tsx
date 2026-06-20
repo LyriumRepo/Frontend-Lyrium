@@ -7,12 +7,14 @@ import CheckoutStepBar from './CheckoutStepBar';
 import CheckoutHeader from './CheckoutHeader';
 import CartItemList from './step1/CartItemList';
 import CartSummary from './step1/CartSummary';
-import PersonalDataForm from './step2/PersonalDataForm';
-import ShippingForm from './step2/ShippingForm';
-import BillingInfo from './step2/BillingInfo';
-import OrderSummary from './step2/OrderSummary';
-import OrderConfirmation from './step3/OrderConfirmation';
-import BoletaView from './step4/BoletaView';
+import BoxCalculatorStep from './step2/BoxCalculatorStep';
+import PackagingSummary from './step2/PackagingSummary';
+import PersonalDataForm from './step3/PersonalDataForm';
+import ShippingForm from './step3/ShippingForm';
+import BillingInfo from './step3/BillingInfo';
+import OrderSummary from './step3/OrderSummary';
+import OrderConfirmation from './step4/OrderConfirmation';
+import BoletaView from './step5/BoletaView';
 import ModalPostCompra from './modals/ModalPostCompra';
 import ModalRegistroUsuario from './modals/ModalRegistroUsuario';
 
@@ -39,7 +41,7 @@ export default function CheckoutPage() {
   useEffect(() => { reset(); }, [reset]);
 
   useEffect(() => {
-    if (currentStep === 3 && !dismissedRef.current) {
+    if (currentStep === 4 && !dismissedRef.current) {
       setShowPostCompra(true);
     }
   }, [currentStep]);
@@ -54,7 +56,6 @@ export default function CheckoutPage() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#0A0F0D] antialiased">
       <div className="min-h-screen bg-white dark:bg-[var(--bg-primary)]">
-        {/* Sticky top bar — logo + compact step circles */}
         <div
           id="checkout-top-wrapper"
           className="sticky top-0 z-[10000] bg-white dark:bg-[var(--bg-secondary)]
@@ -64,10 +65,8 @@ export default function CheckoutPage() {
           <CheckoutStepBar />
         </div>
 
-        {/* Dynamic header — gradient with step title */}
         <CheckoutHeader />
 
-        {/* Error de carga del carrito */}
         {cartError && (
           <div className="max-w-6xl mx-auto px-4 pt-4">
             <div
@@ -86,13 +85,12 @@ export default function CheckoutPage() {
           </div>
         )}
 
-        {/* Contenido principal */}
         <div
           id="checkout-main-content"
           className={`transition-all duration-700 ${isProcessing ? 'blur-sm pointer-events-none' : ''}`}
         >
           <div className="max-w-6xl mx-auto px-4 pt-6 pb-8">
-            {/* PASO 1 */}
+            {/* PASO 1 — Carrito */}
             {currentStep === 1 && (
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2">
@@ -104,8 +102,20 @@ export default function CheckoutPage() {
               </div>
             )}
 
-            {/* PASO 2 */}
+            {/* PASO 2 — Empaque (cajas calculadas) */}
             {currentStep === 2 && (
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2">
+                  <BoxCalculatorStep onContinue={() => setStep(3)} />
+                </div>
+                <div className="lg:col-span-1">
+                  <PackagingSummary />
+                </div>
+              </div>
+            )}
+
+            {/* PASO 3 — Finalizar compra */}
+            {currentStep === 3 && (
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2 space-y-8">
                   <div className="relative">
@@ -126,15 +136,14 @@ export default function CheckoutPage() {
               </div>
             )}
 
-            {/* PASO 3 */}
-            {currentStep === 3 && <OrderConfirmation />}
+            {/* PASO 4 — Confirmación */}
+            {currentStep === 4 && <OrderConfirmation />}
 
-            {/* PASO 4 — Boleta */}
-            {currentStep === 4 && <BoletaView />}
+            {/* PASO 5 — Boleta */}
+            {currentStep === 5 && <BoletaView />}
           </div>
         </div>
 
-        {/* Overlay de procesando */}
         {isProcessing && (
           <div
             className="fixed inset-0 bg-black/60 backdrop-blur-md z-[1700]
