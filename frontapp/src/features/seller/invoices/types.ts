@@ -17,6 +17,8 @@ export interface Voucher {
     customer_ruc: string;
     order_id: string;
     amount: number;
+    subtotal_sin_igv?: number;
+    igv_amount?: number;
     emission_date: string;
     sunat_status: VoucherStatus;
     pdf_url?: string;

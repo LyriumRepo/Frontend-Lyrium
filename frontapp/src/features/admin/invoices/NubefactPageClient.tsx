@@ -104,7 +104,7 @@ export function NubefactPageClient(_props: NubefactPageClientProps) {
     } = useAdminInvoices();
 
     const handleExportCSV = () => {
-        const headers = ['ID', 'Tienda', 'Tipo', 'Serie', 'Número', 'Cliente', 'RUC', 'Monto', 'Estado', 'Fecha'];
+        const headers = ['ID', 'Tienda', 'Tipo', 'Serie', 'Número', 'Cliente', 'RUC', 'Base Imponible', 'IGV', 'Monto', 'Estado', 'Fecha'];
         const rows = (invoices || []).map(i => [
             i.id, 
             getStoreName(i.store_id), 
@@ -113,6 +113,8 @@ export function NubefactPageClient(_props: NubefactPageClientProps) {
             i.number, 
             i.customer_name, 
             i.customer_ruc, 
+            (i.subtotal_sin_igv ?? (i.amount / 1.18)).toFixed(2),
+            (i.igv_amount ?? (i.amount - (i.amount / 1.18))).toFixed(2),
             i.amount.toFixed(2), 
             i.sunat_status, 
             new Date(i.emission_date).toLocaleDateString('es-PE')
@@ -250,7 +252,9 @@ export function NubefactPageClient(_props: NubefactPageClientProps) {
                                         <th scope="col" className="px-6 py-3">Documento</th>
                                         <th scope="col" className="px-6 py-3">Serie-Nro</th>
                                         <th scope="col" className="px-6 py-3">Cliente</th>
-                                        <th scope="col" className="px-6 py-3">Monto</th>
+                                        <th scope="col" className="px-6 py-3 text-right">Base Imp.</th>
+                                        <th scope="col" className="px-6 py-3 text-right">IGV (18%)</th>
+                                        <th scope="col" className="px-6 py-3 text-right">Monto</th>
                                         <th scope="col" className="px-6 py-3 text-center">Estado</th>
                                         <th scope="col" className="px-6 py-3 text-right">Fecha</th>
                                     </tr>
@@ -284,7 +288,13 @@ export function NubefactPageClient(_props: NubefactPageClientProps) {
                                                     <div className="text-[13px] font-black text-gray-900 dark:text-[var(--text-primary)] uppercase truncate max-w-xs">{invoice.customer_name}</div>
                                                     <div className="text-[10px] font-black text-gray-500 dark:text-[var(--text-muted)] mt-0.5 tracking-wider font-mono">{invoice.customer_ruc}</div>
                                                 </td>
-                                                <td className="px-6 py-4 bg-white dark:bg-[var(--bg-card)]/50 border-t border-b border-gray-100/70 dark:border-[var(--border-subtle)]/30 backdrop-blur-md first:border-l first:rounded-l-2xl last:border-r last:rounded-r-2xl first:pl-8 last:pr-8 group-hover:bg-sky-500/5 dark:group-hover:bg-[#1E3028]/20 group-hover:border-sky-500/30 dark:group-hover:border-[var(--brand-green)]/30 transition-all duration-300 font-black text-gray-900 dark:text-[var(--text-primary)]">
+                                                <td className="px-6 py-4 bg-white dark:bg-[var(--bg-card)]/50 border-t border-b border-gray-100/70 dark:border-[var(--border-subtle)]/30 backdrop-blur-md first:border-l first:rounded-l-2xl last:border-r last:rounded-r-2xl first:pl-8 last:pr-8 group-hover:bg-sky-500/5 dark:group-hover:bg-[#1E3028]/20 group-hover:border-sky-500/30 dark:group-hover:border-[var(--brand-green)]/30 transition-all duration-300 text-right font-medium text-gray-600 dark:text-[var(--text-secondary)]">
+                                                    {formatCurrency(invoice.subtotal_sin_igv ?? (invoice.amount / 1.18))}
+                                                </td>
+                                                <td className="px-6 py-4 bg-white dark:bg-[var(--bg-card)]/50 border-t border-b border-gray-100/70 dark:border-[var(--border-subtle)]/30 backdrop-blur-md first:border-l first:rounded-l-2xl last:border-r last:rounded-r-2xl first:pl-8 last:pr-8 group-hover:bg-sky-500/5 dark:group-hover:bg-[#1E3028]/20 group-hover:border-sky-500/30 dark:group-hover:border-[var(--brand-green)]/30 transition-all duration-300 text-right font-medium text-gray-600 dark:text-[var(--text-secondary)]">
+                                                    {formatCurrency(invoice.igv_amount ?? (invoice.amount - (invoice.amount / 1.18)))}
+                                                </td>
+                                                <td className="px-6 py-4 bg-white dark:bg-[var(--bg-card)]/50 border-t border-b border-gray-100/70 dark:border-[var(--border-subtle)]/30 backdrop-blur-md first:border-l first:rounded-l-2xl last:border-r last:rounded-r-2xl first:pl-8 last:pr-8 group-hover:bg-sky-500/5 dark:group-hover:bg-[#1E3028]/20 group-hover:border-sky-500/30 dark:group-hover:border-[var(--brand-green)]/30 transition-all duration-300 text-right font-black text-gray-900 dark:text-[var(--text-primary)]">
                                                     {formatCurrency(invoice.amount)}
                                                 </td>
                                                 <td className="px-6 py-4 bg-white dark:bg-[var(--bg-card)]/50 border-t border-b border-gray-100/70 dark:border-[var(--border-subtle)]/30 backdrop-blur-md first:border-l first:rounded-l-2xl last:border-r last:rounded-r-2xl first:pl-8 last:pr-8 group-hover:bg-sky-500/5 dark:group-hover:bg-[#1E3028]/20 group-hover:border-sky-500/30 dark:group-hover:border-[var(--brand-green)]/30 transition-all duration-300 text-center">
@@ -305,7 +315,7 @@ export function NubefactPageClient(_props: NubefactPageClientProps) {
                                     })}
                                     {(!invoices || invoices.length === 0) && (
                                         <tr>
-                                            <td colSpan={6} className="px-8 py-12 text-center text-sm font-bold text-gray-400 dark:text-[var(--text-muted)]">
+                                            <td colSpan={8} className="px-8 py-12 text-center text-sm font-bold text-gray-400 dark:text-[var(--text-muted)]">
                                                 No se encontraron comprobantes emitidos.
                                             </td>
                                         </tr>

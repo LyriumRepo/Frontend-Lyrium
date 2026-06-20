@@ -23,11 +23,13 @@ function OfferCard({
   allProducts,
   onAddToCart,
   onQuickView,
+  isNew,
 }: {
   producto: Producto;
   allProducts: Producto[];
   onAddToCart: (product: Producto) => void;
   onQuickView: (product: Producto) => void;
+  isNew?: boolean;
 }) {
   const [imgSrc, setImgSrc] = useState(producto.imagen || '/img/no-image.png');
   const [imgError, setImgError] = useState(false);
@@ -44,14 +46,22 @@ function OfferCard({
   };
 
   return (
-      <article className="w-[220px] shrink-0 bg-[var(--azulCeleste-100)] dark:bg-[#1E3028] backdrop-blur-lg border border-transparent rounded-[20px] p-3 shadow-md group transition-all duration-300 hover:-translate-y-[5px] flex flex-col items-center relative">
-      <div className="relative w-full aspect-square rounded-[18px] overflow-hidden bg-transparent flex items-center justify-center">
+      <article className="w-[220px] shrink-0 bg-[var(--azulCeleste-100)] dark:bg-[#1E3028] backdrop-blur-lg border border-transparent rounded-[20px] overflow-hidden shadow-md group transition-all duration-300 hover:-translate-y-[5px] flex flex-col items-center relative">
+      <div className="relative w-full aspect-square overflow-hidden bg-transparent flex items-center justify-center">
+        {producto.descuento && producto.descuento > 0 ? (
+          <span className="absolute top-3 left-3 z-10 bg-red-500 text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full">
+            -{producto.descuento}%
+          </span>
+        ) : producto.tag && producto.tag.toLowerCase() !== 'nuevo' ? (
+          <span className="absolute top-3 left-3 z-10 bg-sky-500 text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase">
+            {producto.tag}
+          </span>
+        ) : null}
                   <Image
             src={imgSrc}
             alt={producto.titulo}
             fill
-           
-            className={imgSrc.includes('1.png') ? "object-contain p-[7.5%]" : "object-cover"}
+            className="object-cover transition-transform duration-500 hover:scale-105"
             onError={handleImageError}
           />
 
@@ -68,9 +78,9 @@ function OfferCard({
         </div>
       </div>
 
-       <div className="mt-3 w-full text-center flex flex-col items-center">
+       <div className="py-3 px-4 w-full text-center flex flex-col items-center">
         <h3 className="text-[13px] font-bold truncate w-full text-slate-900 dark:text-white">{producto.titulo}</h3>
-        <p className="text-[15px] font-extrabold text-black dark:text-white">S/ {producto.precio.toFixed(2)}</p>
+        <p className="text-[15px] font-extrabold text-[var(--azulCeleste-500)] dark:text-[var(--azulCeleste-500)]">S/ {producto.precio.toFixed(2)}</p>
         <div className="flex justify-center gap-0.5 mt-1">
           {Array.from({ length: 5 }).map((_, idx) => {
             const isFilled = idx < (producto.estrellas ? producto.estrellas.length : 5);
@@ -310,6 +320,7 @@ function OfferBlock({
                   allProducts={productosAMostrar}
                   onAddToCart={onAddToCart}
                   onQuickView={onQuickView}
+                  isNew={titulo.toLowerCase().includes('nuevo') || producto.tag?.toLowerCase() === 'nuevo'}
                 />
               ))}
             </div>

@@ -19,16 +19,25 @@ function CategoryCard({ producto, onAddToCart, onQuickView }: {
   onQuickView: (product: Producto) => void;
 }) {
   return (
-    <div className="cat-card flex-shrink-0 w-[210px] bg-[var(--azulCeleste-100)] dark:bg-[var(--bg-secondary)]/92 rounded-[14px] p-[14px] text-center shadow-[0_10px_24px_rgba(15,23,42,0.12)] dark:shadow-[0_10px_24px_rgba(0,0,0,0.3)] border border-slate-200 dark:border-[var(--border-subtle)]/50 mr-5 transition-transform duration-300 hover:-translate-y-[5px] hover:shadow-[0_15px_35px_rgba(15,23,42,0.2)] dark:hover:shadow-[0_15px_35px_rgba(0,0,0,0.5)]">
+    <div className="cat-card flex-shrink-0 w-[210px] bg-[var(--azulCeleste-100)] dark:bg-[var(--bg-secondary)]/92 rounded-[14px] overflow-hidden text-center shadow-[0_10px_24px_rgba(15,23,42,0.12)] dark:shadow-[0_10px_24px_rgba(0,0,0,0.3)] border border-slate-200 dark:border-[var(--border-subtle)]/50 mr-5 transition-transform duration-300 hover:-translate-y-[5px] hover:shadow-[0_15px_35px_rgba(15,23,42,0.2)] dark:hover:shadow-[0_15px_35px_rgba(0,0,0,0.5)]">
       {/* Image wrapper with hover actions */}
-      <div className="relative overflow-hidden w-[120px] h-[120px] mx-auto mb-2 rounded-xl bg-white dark:bg-[var(--bg-muted)]">
+      <div className="relative overflow-hidden w-full aspect-square bg-white dark:bg-[var(--bg-muted)]">
+        {producto.descuento && producto.descuento > 0 ? (
+          <span className="absolute top-3 left-3 z-10 bg-red-500 text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full">
+            -{producto.descuento}%
+          </span>
+        ) : producto.tag && producto.tag.toLowerCase() !== 'nuevo' ? (
+          <span className="absolute top-3 left-3 z-10 bg-sky-500 text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase">
+            {producto.tag}
+          </span>
+        ) : null}
         <Link href={`/producto/${producto.slug}`}>
           <Image
             src={producto.imagen || '/img/no-image.png'}
             alt={producto.titulo}
             fill
-            sizes="120px"
-            className="object-contain transition-transform duration-500 hover:scale-[1.08]"
+            sizes="(max-width: 640px) 100vw, 210px"
+            className="object-cover transition-transform duration-500 hover:scale-[1.08]"
             draggable={false}
           />
         </Link>
@@ -63,15 +72,17 @@ function CategoryCard({ producto, onAddToCart, onQuickView }: {
       </div>
 
       {/* Product info */}
-      <h3 className="text-sm font-semibold text-slate-700 dark:text-[var(--text-primary)] mb-0.5 whitespace-nowrap overflow-hidden text-ellipsis">
-        {producto.titulo}
-      </h3>
-      <p className="text-[15px] font-bold text-black dark:text-[var(--text-primary)]">
-        S/ {producto.precio.toFixed(2)}
-      </p>
-      <p className="text-amber-400 text-[13px] mt-1">
-        {producto.estrellas || '★★★★★'}
-      </p>
+      <div className="py-2.5 px-3">
+        <h3 className="text-sm font-semibold text-slate-700 dark:text-[var(--text-primary)] mb-0.5 whitespace-nowrap overflow-hidden text-ellipsis">
+          {producto.titulo}
+        </h3>
+        <p className="text-[15px] font-bold text-[var(--azulCeleste-500)] dark:text-[var(--azulCeleste-500)]">
+          S/ {producto.precio.toFixed(2)}
+        </p>
+        <p className="text-amber-400 text-[13px] mt-1">
+          {producto.estrellas || '★★★★★'}
+        </p>
+      </div>
     </div>
   );
 }
