@@ -236,6 +236,22 @@ const SalesTable = memo(function SalesTable({
           </span>
         ),
       }),
+      columnHelper.accessor('fecha', {
+        header: 'Fecha',
+        cell: (info) => {
+          const d = new Date(info.getValue());
+          return (
+            <div className="leading-tight">
+              <div className="text-xs font-bold text-[var(--text-secondary)] whitespace-nowrap">
+                {d.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+              </div>
+              <div className="text-[10px] text-[var(--text-placeholder)] whitespace-nowrap mt-0.5">
+                {d.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })}
+              </div>
+            </div>
+          );
+        },
+      }),
       columnHelper.accessor('orderType', {
         header: 'Tipo',
         cell: (info) => <TypeBadge orderType={info.getValue()} />,
@@ -292,22 +308,6 @@ const SalesTable = memo(function SalesTable({
           </span>
         ),
       }),
-      columnHelper.accessor('fecha', {
-        header: 'Fecha',
-        cell: (info) => {
-          const d = new Date(info.getValue());
-          return (
-            <div className="leading-tight">
-              <div className="text-xs font-bold text-[var(--text-secondary)] whitespace-nowrap">
-                {d.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' })}
-              </div>
-              <div className="text-[10px] text-[var(--text-placeholder)] whitespace-nowrap mt-0.5">
-                {d.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })}
-              </div>
-            </div>
-          );
-        },
-      }),
       columnHelper.display({
         id: 'actions',
         header: 'Acciones',
@@ -339,7 +339,7 @@ const SalesTable = memo(function SalesTable({
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-[var(--bg-secondary)]">
-                {['Número de Orden', 'Tipo', 'Cliente', 'Concepto', 'Modalidad', 'Cant.', 'Pago', 'Estado de la Orden', 'Total', 'Fecha', 'Acciones'].map((h) => (
+                {['Número de Orden', 'Fecha', 'Tipo', 'Cliente', 'Concepto', 'Modalidad', 'Cant.', 'Pago', 'Estado de la Orden', 'Total', 'Acciones'].map((h) => (
                   <th key={h} className="px-6 py-5 text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest border-b border-[var(--border-subtle)]">
                     {h}
                   </th>
