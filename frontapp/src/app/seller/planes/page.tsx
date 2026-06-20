@@ -1,9 +1,10 @@
 'use client';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { usePlanes } from '@/features/seller/plans/hooks/usePlanes';
 import { useSSE } from '@/features/seller/plans/hooks/useSSE';
 import { motivationalMessages, notificationMessages } from '@/features/seller/plans/lib/plans';
 import { sanitizeHtml } from '@/shared/lib/sanitize';
+import { apiGet } from '@/features/seller/plans/lib/api';
 
 import AccessBlocked from '@/features/seller/plans/shared/AccessBlocked';
 import Notification from '@/features/seller/plans/shared/Notification';
@@ -16,7 +17,8 @@ import PaymentModal from '@/features/seller/plans/components/PaymentModal';
 import { BenefitAskModal, BenefitFullModal } from '@/features/seller/plans/components/BenefitModals';
 import { DowngradeModal, DowngradeConfirm2Modal } from '@/features/seller/plans/components/DowngradeModals';
 import ExpiracionBanner from '@/features/seller/plans/components/ExpiracionBanner';
-import IzipayForm from '@/features/seller/plans/components/IzipayForm';
+import IzipayModal from '@/features/public/checkout/components/modals/IzipayModal';
+import { useIzipay } from '@/features/public/checkout/hooks/useIzipay';
 
 export default function PlanesPage() {
   const planes = usePlanes();
@@ -24,9 +26,7 @@ export default function PlanesPage() {
   const [motivationIndex, setMotivationIndex] = useState(0);
   const [showBanner, setShowBanner] = useState(true);
 
-  // Initialize on mount — eslint-disable-next-line react-hooks/exhaustive-deps
-  // planes.initialize es estable (useCallback sin deps variables), se ejecuta solo una vez
-  useEffect(() => { planes.initialize(); }, [planes.initialize]);
+  // Inicialización automática vía usePlanes (useEffect interno con authLoading)
 
   // Apply button colors as CSS vars
   useEffect(() => {
@@ -88,14 +88,14 @@ export default function PlanesPage() {
   }, [state.activeTab, carouselStep]);
 
   // SSE
-  useSSE(
+  const { disconnect: disconnectSSE } = useSSE(
     'planes', state.userId,
     {
       solicitud_actualizada: planes.handleSolicitudActualizada as never,
       pago_confirmado: planes.handlePagoConfirmado as never,
       pago_fallido: ({ motivo }: { motivo?: string }) => {
-        planes.setModal('waitingPayment', false);
         planes.setModal('izipayPay', false);
+        planes.setModal('waitingPayment', false);
         planes.showNotification(`El pago no pudo completarse. ${motivo ?? 'Inténtalo de nuevo.'}`, '#ef4444');
       },
       planes_actualizados: planes.handlePlanesActualizados as never,
@@ -104,6 +104,57 @@ export default function PlanesPage() {
     },
     state.isLoaded && !state.isBlocked,
   );
+
+  // ── Izipay SDK ────────────────────────────────────────────────────────────
+  const [izipayError, setIzipayError] = useState<string | null>(null);
+
+  const handleIzipaySuccess = useCallback(() => {
+    planes.setModal('izipayPay', false);
+    setIzipayError(null);
+    planes.setModal('waitingPayment', true);
+    
+    // Poll /subscriptions/current until plan changes or timeout
+    const planIdBefore = state.subscriptionInfo?.planId || '';
+    let attempts = 0;
+    const poll = setInterval(async () => {
+      attempts++;
+      try {
+        const subRes = await apiGet<{ data?: { plan_id: number; status: string; plan: { slug: string } } }>('/subscriptions/current');
+        const newPlanId = subRes?.data?.plan_id ? String(subRes.data.plan_id) : null;
+        if (subRes?.data?.status === 'active' && newPlanId && newPlanId !== planIdBefore) {
+          clearInterval(poll);
+          planes.setModal('waitingPayment', false);
+          planes.showNotification('¡Pago confirmado! Tu plan ha sido activado.', '#10b981');
+          planes.initialize();
+        }
+      } catch {}
+      if (attempts >= 30) {
+        clearInterval(poll);
+        planes.setModal('waitingPayment', false);
+        planes.showNotification('El pago fue procesado pero hubo un retraso en la activación. Recarga la página.', '#f59e0b');
+      }
+    }, 2000);
+  }, []);
+
+  const {
+    loadSmartForm,
+    error: izipaySdkError,
+    isSdkReady: izipaySdkReady,
+  } = useIzipay({ onSuccess: handleIzipaySuccess });
+
+  // Inyectar formToken cuando el modal se abre y está montado en el DOM
+  useEffect(() => {
+    console.log('[page] izipayPay effect:', { modals: state.modals.izipayPay, hasToken: !!state.izipayConfig?.formToken, sdkReady: izipaySdkReady });
+    if (state.modals.izipayPay && state.izipayConfig?.formToken) {
+      setIzipayError(null);
+      loadSmartForm(state.izipayConfig.formToken);
+    }
+  }, [state.modals.izipayPay, state.izipayConfig, loadSmartForm, izipaySdkReady]);
+
+  // Sincronizar error del SDK al estado local
+  useEffect(() => {
+    if (izipaySdkError) setIzipayError(izipaySdkError);
+  }, [izipaySdkError]);
 
   if (!state.isLoaded) {
     return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#f9fafb' }}>
@@ -253,7 +304,7 @@ export default function PlanesPage() {
         onClose={planes.closePaymentModal}
         onSelectPreset={planes.selectPreset}
         onChangeCustomQty={planes.changeCustomQty}
-        onProcess={() => planes.processPayment()}
+        onProcess={() => { disconnectSSE(); planes.processPayment(); }}
       />
 
       <Modal open={state.modals.requestSent} onClose={planes.closeRequestSentModal} className="request-sent-modal" showClose={false}>
@@ -300,34 +351,7 @@ export default function PlanesPage() {
         onClose={() => planes.setModal('benefitFullDetail', false)}
       />
 
-      <Modal open={state.modals.izipayPay} onClose={() => planes.setModal('izipayPay', false)} className="izipay-pay-modal">
-        <div className="izipay-modal-header">
-          <div className="izipay-modal-header-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5">
-              <rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
-            </svg>
-          </div>
-          <div className="izipay-modal-header-text">
-            <h3>Pago seguro con Izipay</h3>
-            <p>Conexión cifrada SSL <span className="izipay-security-badge"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12" /></svg> Verificado</span></p>
-          </div>
-        </div>
-        <div id="izipayFormContainer">
-          <IzipayForm
-            config={state.izipayConfig}
-            open={state.modals.izipayPay}
-            onPaid={() => {
-              planes.setModal('izipayPay', false);
-              planes.setModal('waitingPayment', true);
-            }}
-            onFailed={() => {
-              planes.setModal('izipayPay', false);
-              planes.showNotification('El pago no fue completado. Puedes intentarlo de nuevo.', '#ef4444');
-            }}
-          />
-        </div>
-        <div className="izipay-modal-footer">Procesado por <strong>Izipay</strong> · Tus datos de pago están protegidos</div>
-      </Modal>
+      <IzipayModal isOpen={state.modals.izipayPay} onClose={() => { planes.setModal('izipayPay', false); setIzipayError(null); }} error={izipayError} />
 
       <Modal open={state.modals.waitingPayment} onClose={() => planes.setModal('waitingPayment', false)} className="waiting-admin-modal" showClose={false}>
         <div className="waiting-icon">

@@ -10,13 +10,24 @@ import ProductCarousel from '../ProductCarousel';
 import AdBannersGrid from '../AdBannersGrid';
 import SidebarInfo from '../SidebarInfo';
 
+interface Servicio {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  image: string | null;
+  category: string | null;
+  duration: string | null;
+}
+
 interface Layout1Props {
   store: Tienda;
   products: Producto[];
+  services?: Servicio[];
   plan: 'basico' | 'premium';
 }
 
-export default function Layout1({ store, products, plan }: Layout1Props) {
+export default function Layout1({ store, products, services = [], plan }: Layout1Props) {
   return (
     <div className="space-y-6">
       {/* ========================================= */}
@@ -30,7 +41,7 @@ export default function Layout1({ store, products, plan }: Layout1Props) {
 
         {/* Columna principal: Tabs con Productos destacados */}
         <div className="flex-1">
-          <StoreTabs tienda={store} productos={products} plan={plan} />
+          <StoreTabs tienda={store} productos={products} servicios={services} plan={plan} />
         </div>
       </div>
 

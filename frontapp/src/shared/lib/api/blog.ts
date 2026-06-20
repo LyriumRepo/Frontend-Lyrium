@@ -26,81 +26,122 @@ export interface CommentApi {
     created_at: string;
 }
 
-function mapPostFromApi(post: any): BlogPostApi {
+function cleanUrl(url: string | null): string | null {
+    if (!url) return null;
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    if (url.startsWith('/storage/')) return `${LARAVEL_API_URL.replace('/api', '')}${url}`;
+    if (url.startsWith('storage/')) return `${LARAVEL_API_URL.replace('/api', '')}/${url}`;
+    return url;
+}
+
+function fixContentImageUrls(html: string): string {
+    const baseUrl = LARAVEL_API_URL.replace('/api', '');
+    return html.replace(/(<img[^>]+src\s*=\s*["'])\/(?!\/)/gi, `$1${baseUrl}/`);
+}
+
+function mapArticleFromApi(article: any): BlogPostApi {
     return {
-        id: post.id,
-        title: post.title,
-        slug: post.slug,
-        summary: post.summary ?? '',
-        content: post.content ?? '',
-        featured_image: post.featured_image ?? null,
-        author_name: post.author_name ?? 'Lyrium BioMarketplace',
-        is_published: post.is_published ?? true,
-        is_featured: post.is_featured ?? false,
-        published_at: post.published_at ?? null,
-        category: post.category ?? null,
-        store: post.store ?? null,
-        created_at: post.created_at ?? null,
+        id: article.id,
+        title: article.title,
+        slug: article.slug,
+        summary: article.summary ?? '',
+        content: article.content ? fixContentImageUrls(article.content) : '',
+        featured_image: cleanUrl(article.featured_image ?? null),
+        author_name: article.author_name ?? article.store?.name ?? 'Lyrium BioMarketplace',
+        is_published: article.is_published ?? false,
+        is_featured: article.is_featured ?? false,
+        published_at: article.published_at ?? null,
+        category: article.category ?? null,
+        store: article.store ?? null,
+        created_at: article.created_at ?? null,
     };
 }
 
+async function fetchList<T>(url: string): Promise<T[]> {
+    try {
+        const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+        if (!res.ok) {
+            console.warn(`[blogApi] HTTP ${res.status} on GET ${url}`);
+            return [];
+        }
+        const json = await res.json();
+        if (!json.success) {
+            console.warn(`[blogApi] !success on GET ${url}`);
+            return [];
+        }
+        const data = json.data;
+        if (Array.isArray(data)) return data;
+        if (data?.data && Array.isArray(data.data)) return data.data;
+        console.warn(`[blogApi] unexpected shape on GET ${url}`, json);
+        return [];
+    } catch (err) {
+        console.warn(`[blogApi] fetch error on GET ${url}`, err);
+        return [];
+    }
+}
+
+async function fetchSingle<T>(url: string): Promise<T | null> {
+    try {
+        const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+        if (!res.ok) {
+            console.warn(`[blogApi] HTTP ${res.status} on GET ${url}`);
+            return null;
+        }
+        const json = await res.json();
+        if (!json.success) {
+            console.warn(`[blogApi] !success on GET ${url}`);
+            return null;
+        }
+        return json.data ?? null;
+    } catch (err) {
+        console.warn(`[blogApi] fetch error on GET ${url}`, err);
+        return null;
+    }
+}
+
+const API = LARAVEL_API_URL;
+
 export const blogApi = {
     getCategories: async () => {
-        const res = await fetch(`${LARAVEL_API_URL}/blog/categories`);
-        const json = await res.json();
-        return json.data ?? [];
+        return fetchList<any>(`${API}/blog/categories`);
     },
 
     getPosts: async (categorySlug?: string): Promise<BlogPostApi[]> => {
-        const query = categorySlug && categorySlug !== 'todos' 
-            ? `?category=${categorySlug}` 
-            : '';
-        const res = await fetch(`${LARAVEL_API_URL}/blog/posts${query}`);
-        const json = await res.json();
-        return (json.data?.data ?? json.data ?? []).map(mapPostFromApi);
+        const params = new URLSearchParams({ per_page: '50' });
+        if (categorySlug && categorySlug !== 'todos') params.set('category', categorySlug);
+        const data = await fetchList<any>(`${API}/blog/posts?${params}`);
+        return data.map(mapArticleFromApi);
     },
 
     getRecentPosts: async (limit: number = 6): Promise<BlogPostApi[]> => {
-        const res = await fetch(`${LARAVEL_API_URL}/blog/posts/recent?limit=${limit}`);
-        const json = await res.json();
-        return (json.data ?? []).map(mapPostFromApi);
+        const data = await fetchList<any>(`${API}/blog/posts/recent?limit=${limit}`);
+        return data.map(mapArticleFromApi);
     },
 
     getFeaturedPosts: async (limit: number = 4): Promise<BlogPostApi[]> => {
-        const res = await fetch(`${LARAVEL_API_URL}/blog/posts/featured?limit=${limit}`);
-        const json = await res.json();
-        return (json.data ?? []).map(mapPostFromApi);
+        const data = await fetchList<any>(`${API}/blog/posts/featured?limit=${limit}`);
+        return data.map(mapArticleFromApi);
     },
 
     getPostBySlug: async (slug: string): Promise<BlogPostApi | null> => {
-        const res = await fetch(`${LARAVEL_API_URL}/blog/posts/${slug}`);
-        if (!res.ok) return null;
-        const json = await res.json();
-        return json.data ? mapPostFromApi(json.data) : null;
+        const article = await fetchSingle<any>(`${API}/blog/posts/${slug}`);
+        return article ? mapArticleFromApi(article) : null;
     },
 
     getComments: async (articleId: number): Promise<CommentApi[]> => {
-        const res = await fetch(`${LARAVEL_API_URL}/blog/comments?article_id=${articleId}`);
-        const json = await res.json();
-        return json.data ?? [];
+        return fetchList<CommentApi>(`${API}/blog/comments?article_id=${articleId}`);
     },
 
     getVideos: async () => {
-        const res = await fetch(`${LARAVEL_API_URL}/blog/videos`);
-        const json = await res.json();
-        return json.data ?? [];
+        return fetchList<any>(`${API}/blog/videos`);
     },
 
     getPodcasts: async () => {
-        const res = await fetch(`${LARAVEL_API_URL}/blog/podcasts`);
-        const json = await res.json();
-        return json.data ?? [];
+        return fetchList<any>(`${API}/blog/podcasts`);
     },
 
     getShorts: async () => {
-        const res = await fetch(`${LARAVEL_API_URL}/blog/shorts`);
-        const json = await res.json();
-        return json.data ?? [];
+        return fetchList<any>(`${API}/blog/shorts`);
     },
 
     createComment: async (data: {
@@ -109,12 +150,27 @@ export const blogApi = {
         author_email: string;
         content: string;
     }) => {
-        const res = await fetch(`${LARAVEL_API_URL}/blog/comments`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data),
-        });
-        const json = await res.json();
-        return json;
+        try {
+            const res = await fetch(`${API}/blog/comments`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
+            });
+            return await res.json();
+        } catch {
+            return null;
+        }
+    },
+
+    registerArticleView: async (id: number): Promise<void> => {
+        navigator.sendBeacon(`${API}/blog/articles/${id}/view`, '');
+    },
+
+    registerVideoView: async (id: number): Promise<void> => {
+        navigator.sendBeacon(`${API}/blog/videos/${id}/view`, '');
+    },
+
+    registerShortView: async (id: number): Promise<void> => {
+        navigator.sendBeacon(`${API}/blog/shorts/${id}/view`, '');
     },
 };

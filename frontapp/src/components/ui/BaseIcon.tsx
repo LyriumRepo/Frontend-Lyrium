@@ -131,7 +131,8 @@ import {
     LayoutGrid,
     LineChart,
     Coins,
-    Award
+    Award,
+    FileCheck
 } from 'lucide-react';
 import { LucideIcon } from 'lucide-react';
 
@@ -269,6 +270,7 @@ export const Icons: Record<string, LucideIcon> = {
     Coins,
     Award,
     ShoppingBag,
+    FileCheck,
     UserCircle: User,
     ShoppingCartSimple: ShoppingCart,
     Storefront: Store,

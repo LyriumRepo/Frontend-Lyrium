@@ -8,13 +8,24 @@ import RecommendedProducts from '../RecommendedProducts';
 import ProductCarousel from '../ProductCarousel';
 import SidebarInfo from '../SidebarInfo';
 
+interface Servicio {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  image: string | null;
+  category: string | null;
+  duration: string | null;
+}
+
 interface Layout3Props {
   store: Tienda;
   products: Producto[];
+  services?: Servicio[];
   plan: 'basico' | 'premium';
 }
 
-export default function Layout3({ store, products, plan }: Layout3Props) {
+export default function Layout3({ store, products, services = [], plan }: Layout3Props) {
   return (
     <div className="space-y-6">
       {/* ========================================= */}
@@ -29,7 +40,7 @@ export default function Layout3({ store, products, plan }: Layout3Props) {
 
         {/* Columna principal */}
         <div className="flex-1">
-          <StoreTabs tienda={store} productos={products} plan={plan} />
+          <StoreTabs tienda={store} productos={products} servicios={services} plan={plan} />
         </div>
 
         {/* Sidebar derecha (Más productos) */}

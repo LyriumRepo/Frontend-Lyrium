@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useCallback, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
+import ProductCard, { fromLaravelProduct } from '@/features/public/productos/components/ProductCard';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
@@ -875,75 +877,15 @@ function ProductTabs({ product }: { product: LaravelProduct }) {
 // ─── RelatedProductsCarousel (auto-scroll infinito) ──────────────────────────
 
 function RelatedProductCard({ rel }: { rel: LaravelProduct }) {
-  const relDiscount = discountPercent(rel.price, rel.regular_price);
+  const { addToCart, loading, addedToCart } = useAddToCart();
+  const router = useRouter();
+  const data = fromLaravelProduct(rel);
+  const handleAdd = useCallback(() => addToCart(Number(rel.id), 1), [addToCart, rel.id]);
+  const handleView = useCallback(() => router.push(`/producto/${rel.slug}`), [router, rel.slug]);
   return (
-    <Link
-      href={`/producto/${rel.slug}`}
-      className="flex-shrink-0 w-72"
-      tabIndex={0}
-    >
-      <Card
-        className="group cursor-pointer h-full overflow-hidden border-border/60 
-  hover:border-teal-400 hover:shadow-xl hover:-translate-y-2 
-  transition-all duration-300 rounded-[2rem] py-0 gap-0"
-      >
-        <CardContent className="p-0">
-          <div className="relative aspect-square overflow-hidden bg-muted/40 dark:bg-muted/20">
-            <Image
-              src={
-                rel.images[0]?.medium ?? rel.images[0]?.src ?? '/no-image.png'
-              }
-              alt={rel.images[0]?.alt ?? rel.name}
-              fill
-              sizes="288px"
-              className="object-contain p-6 group-hover:scale-110 transition-transform duration-500 ease-out"
-            />
-            {rel.sticker && (
-              <div className="absolute top-2 left-2">
-                <StickerBadge sticker={rel.sticker} />
-              </div>
-            )}
-            {relDiscount > 0 && (
-              <div className="absolute top-2 right-2">
-                <Badge variant="destructive" className="text-[10px] font-bold">
-                  −{relDiscount}%
-                </Badge>
-              </div>
-            )}
-          </div>
-          <div className="p-4 space-y-2">
-            <div className="flex flex-wrap items-center gap-1">
-              {rel.categories.slice(0, 1).map((cat) => (
-                <Badge key={cat.slug} variant="secondary" className="text-xs">
-                  {cat.name}
-                </Badge>
-              ))}
-            </div>
-            <h3 className="font-bold text-sm line-clamp-2 text-foreground group-hover:text-teal-600 transition-colors leading-snug">
-              {rel.name}
-            </h3>
-            <div className="flex items-center gap-1.5">
-              <Stars value={rel.rating.average} size="sm" />
-              <span className="text-xs text-muted-foreground">
-                ({rel.rating.count})
-              </span>
-            </div>
-            <div className="flex items-center justify-between pt-1">
-              <span className="text-xl font-bold text-foreground">
-                {formatPrice(rel.price)}
-              </span>
-              <Button
-                size="sm"
-                aria-label="Agregar al carrito"
-                className="opacity-0 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0 transition-all duration-200 bg-teal-500 hover:bg-teal-600 h-8 w-8 p-0"
-              >
-                <ShoppingCart className="w-3.5 h-3.5" />
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </Link>
+    <div className="flex-shrink-0 w-72">
+      <ProductCard product={data} onAdd={handleAdd} onView={handleView} adding={loading} added={addedToCart} />
+    </div>
   );
 }
 
@@ -1140,6 +1082,16 @@ export function ProductDetailPageClient({
 }) {
   const [quantity, setQuantity] = useState(1);
   const [wishlisted, setWishlisted] = useState(false);
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    setIsDark(document.documentElement.classList.contains('dark'));
+    const observer = new MutationObserver(() => {
+      setIsDark(document.documentElement.classList.contains('dark'));
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    return () => observer.disconnect();
+  }, []);
 
   const {
     addToCart,
@@ -1349,29 +1301,23 @@ export function ProductDetailPageClient({
               Medios de pago aceptados
             </p>
             <div className="flex flex-wrap items-center justify-center gap-3">
-              {[
-                { src: '/img/intro/visanuevo-Photoroom(1).png', alt: 'Visa' },
-                {
-                  src: '/img/intro/mastercadnuevo-Photoroom(1).png',
-                  alt: 'Mastercard',
-                },
-                {
-                  src: '/img/intro/amexnuevo-Photoroom(1).png',
-                  alt: 'American Express',
-                },
-                { src: '/img/intro/yapenuevo-Photoroom(1).png', alt: 'Yape' },
-                { src: '/img/intro/plinnuevo-Photoroom(1).png', alt: 'Plin' },
-              ].map(({ src, alt }) => (
+              {([
+                { dark: '/img/intro/visa1.png', light: '/img/intro/visanuevo-Photoroom(1).png', alt: 'Visa' },
+                { dark: '/img/intro/mastercard.png', light: '/img/intro/mastercadnuevo-Photoroom(1).png', alt: 'Mastercard' },
+                { dark: '/img/intro/amex1.png', light: '/img/intro/amexnuevo-Photoroom(1).png', alt: 'American Express' },
+                { dark: '/img/intro/yape.png', light: '/img/intro/yapenuevo-Photoroom(1).png', alt: 'Yape' },
+                { dark: '/img/intro/logo-plin.png', light: '/img/intro/plinnuevo-Photoroom(1).png', alt: 'Plin' },
+              ] as const).map((icon) => (
                 <div
-                  key={alt}
+                  key={icon.alt}
                   className="flex items-center justify-center rounded-lg px-3 py-2 dark:bg-[var(--bg-secondary)]"
                 >
                   <Image
-                    src={src}
-                    alt={alt}
+                    src={isDark ? icon.dark : icon.light}
+                    alt={icon.alt}
                     width={60}
                     height={36}
-                    className="h-9 w-auto object-contain"
+                    className="h-9 dark:h-14 w-auto object-contain"
                   />
                 </div>
               ))}
@@ -1390,7 +1336,7 @@ export function ProductDetailPageClient({
                 className="flex flex-col items-center gap-1.5 text-center p-3 rounded-xl border border-teal-100 dark:border-teal-900/30 bg-teal-50/50 dark:bg-[var(--bg-secondary)]"
               >
                 <Icon className="w-4 h-4 text-teal-500" />
-                <span className="text-[10px] font-semibold tracking-[.06em] uppercase text-teal-700 dark:text-teal-400">
+                <span className="text-[10px] font-semibold tracking-[.06em] uppercase text-teal-700 dark:text-white">
                   {text}
                 </span>
               </div>

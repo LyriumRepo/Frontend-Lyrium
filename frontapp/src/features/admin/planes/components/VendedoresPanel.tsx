@@ -43,37 +43,37 @@ export default function VendedoresPanel({ vendedores, loading, filter, search, s
             <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
           </svg>
           <input type="text" placeholder="Buscar por nombre o correo…" value={search} onChange={e => onSearchChange(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-500" />
+            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-[var(--border-subtle)] rounded-xl text-sm focus:outline-none focus:border-blue-500" />
         </div>
         <div className="flex items-center gap-3 flex-wrap">
-          <div className="flex gap-1 bg-gray-100 p-1 rounded-xl">
+          <div className="flex gap-1 bg-gray-100 dark:bg-[var(--bg-muted)] p-1 rounded-xl">
             {[['all','Todos'],['activo','Activos'],['por_vencer','Por vencer'],['vencido','Vencidos'],['indefinido','Sin plan']].map(([f, l]) => (
               <button key={f}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all
-                  ${filter === f ? 'bg-white shadow-sm text-gray-800' : 'text-gray-500 hover:text-gray-700'}
-                  ${f === 'por_vencer' ? (filter === f ? 'text-amber-600' : '') : f === 'vencido' ? (filter === f ? 'text-red-600' : '') : f === 'indefinido' ? (filter === f ? 'text-gray-400' : '') : ''}`}
+                  ${filter === f ? 'bg-white dark:bg-[var(--bg-card)] shadow-sm text-gray-800 dark:text-[var(--text-primary)]' : 'text-gray-500 dark:text-[var(--text-secondary)] hover:text-gray-700 dark:hover:text-[var(--text-primary)]'}
+                  ${f === 'por_vencer' ? (filter === f ? 'text-amber-600' : '') : f === 'vencido' ? (filter === f ? 'text-red-600' : '') : f === 'indefinido' ? (filter === f ? 'text-gray-400 dark:text-[var(--text-placeholder)]' : '') : ''}`}
                 onClick={() => onFilterChange(f)}>
                 {l}
               </button>
             ))}
           </div>
-          <span className="text-xs font-semibold text-gray-400 whitespace-nowrap">{filtered.length} vendedor{filtered.length !== 1 ? 'es' : ''}</span>
+          <span className="text-xs font-semibold text-gray-400 dark:text-[var(--text-placeholder)] whitespace-nowrap">{filtered.length} vendedor{filtered.length !== 1 ? 'es' : ''}</span>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="vendedoresList">
         {loading && (
-          <div className="col-span-full flex items-center justify-center gap-3 py-12 text-gray-400">
+          <div className="col-span-full flex items-center justify-center gap-3 py-12 text-gray-400 dark:text-[var(--text-placeholder)]">
             <div className="w-6 h-6 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin" />
             <span>Cargando vendedores…</span>
           </div>
         )}
         {!loading && filtered.length === 0 && (
-          <div className="col-span-full text-center py-16 text-gray-300 flex flex-col items-center">
+          <div className="col-span-full text-center py-16 text-gray-300 dark:text-[var(--text-placeholder)] flex flex-col items-center">
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
             </svg>
-            <p className="mt-4 text-sm text-gray-400">No se encontraron vendedores</p>
+            <p className="mt-4 text-sm text-gray-400 dark:text-[var(--text-placeholder)]">No se encontraron vendedores</p>
           </div>
         )}
         {!loading && filtered.map(v => {
@@ -91,7 +91,7 @@ export default function VendedoresPanel({ vendedores, loading, filter, search, s
           } else if (est === 'vencido') {
             venceBadge = <span className="inline-block px-2 py-1 rounded-md text-[10px] font-bold bg-red-100 text-red-700">Expirado</span>;
           } else if (v.fecha_expiracion) {
-            venceBadge = <span className="inline-block px-2 py-1 rounded-md text-[10px] font-semibold text-gray-500">Vence: {formatAdminDate(v.fecha_expiracion)}</span>;
+            venceBadge = <span className="inline-block px-2 py-1 rounded-md text-[10px] font-semibold text-gray-500 dark:text-[var(--text-secondary)]">Vence: {formatAdminDate(v.fecha_expiracion)}</span>;
           }
 
           return (
@@ -99,7 +99,7 @@ export default function VendedoresPanel({ vendedores, loading, filter, search, s
               key={v.usuario_id} 
               role="button"
               tabIndex={0}
-              className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-md transition-all cursor-pointer group"
+              className="bg-white dark:bg-[var(--bg-card)] rounded-2xl overflow-hidden border border-gray-100 dark:border-[var(--border-subtle)] shadow-sm hover:shadow-md transition-all cursor-pointer group"
               onClick={() => onOpenModal(String(v.usuario_id))}
               onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onOpenModal(String(v.usuario_id)); }}
             >
@@ -108,8 +108,8 @@ export default function VendedoresPanel({ vendedores, loading, filter, search, s
                 <div className="flex items-start gap-3 mb-3">
                   <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-extrabold text-sm flex-shrink-0" style={{ background: planColor }}>{initials}</div>
                   <div className="flex-1 min-w-0">
-                    <div className="font-bold text-gray-800 truncate">{v.username ?? 'Vendedor'}</div>
-                    <div className="text-xs text-gray-400 truncate">{correo}</div>
+                    <div className="font-bold text-gray-800 dark:text-[var(--text-primary)] truncate">{v.username ?? 'Vendedor'}</div>
+                    <div className="text-xs text-gray-400 dark:text-[var(--text-placeholder)] truncate">{correo}</div>
                   </div>
                 </div>
                 <span className="inline-block px-3 py-1.5 rounded-lg text-[11px] font-bold mb-3" style={{ color: planColor, background: `${planColor}18`, border:`1px solid ${planColor}40` }}>
@@ -117,14 +117,14 @@ export default function VendedoresPanel({ vendedores, loading, filter, search, s
                 </span>
                 <div className="flex items-center gap-2 mb-3">
                   <span className="w-2 h-2 rounded-full" style={{ background: estadoColor }} />
-                  <span className="text-xs font-semibold text-gray-600">{ESTADO_LABEL[est]}</span>
+                  <span className="text-xs font-semibold text-gray-600 dark:text-[var(--text-secondary)]">{ESTADO_LABEL[est]}</span>
                   {histCount > 0 && (
-                    <span className="ml-auto text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">{histCount} cambio{histCount !== 1 ? 's' : ''}</span>
+                    <span className="ml-auto text-xs bg-gray-100 dark:bg-[var(--bg-muted)] text-gray-500 dark:text-[var(--text-secondary)] px-2 py-0.5 rounded-full">{histCount} cambio{histCount !== 1 ? 's' : ''}</span>
                   )}
                 </div>
                 {venceBadge}
               </div>
-              <div className="px-5 py-3 bg-gray-50 border-t border-gray-100 flex items-center gap-2 text-xs font-semibold text-gray-400 group-hover:text-blue-500 transition-colors">
+              <div className="px-5 py-3 bg-gray-50 dark:bg-[var(--bg-muted)] border-t border-gray-100 dark:border-[var(--border-subtle)] flex items-center gap-2 text-xs font-semibold text-gray-400 dark:text-[var(--text-placeholder)] group-hover:text-blue-500 transition-colors">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 14 14"/>
                 </svg>
@@ -150,21 +150,21 @@ export default function VendedoresPanel({ vendedores, loading, filter, search, s
                   {(sv.username ?? 'V').substring(0, 2).toUpperCase()}
                 </div>
                 <div>
-                  <h3 className="text-lg font-extrabold text-gray-800">{sv.username ?? 'Vendedor'}</h3>
-                  <span className="text-xs text-gray-400">{correo}</span>
+                  <h3 className="text-lg font-extrabold text-gray-800 dark:text-[var(--text-primary)]">{sv.username ?? 'Vendedor'}</h3>
+                  <span className="text-xs text-gray-400 dark:text-[var(--text-placeholder)]">{correo}</span>
                 </div>
               </div>
 
               <div className="py-4">
-                <div className="bg-white rounded-xl p-4 border-l-4 mb-5" style={{ borderLeftColor: planColor }}>
+                <div className="bg-white dark:bg-[var(--bg-card)] rounded-xl p-4 border-l-4 mb-5" style={{ borderLeftColor: planColor }}>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-[11px] font-bold uppercase text-gray-400">Plan actual</span>
+                    <span className="text-[11px] font-bold uppercase text-gray-400 dark:text-[var(--text-placeholder)]">Plan actual</span>
                     <span className="px-2.5 py-1 rounded-full text-[11px] font-bold" style={{ background:`${ESTADO_DOT[est]}22`, color: ESTADO_DOT[est] }}>
                       {ESTADO_LABEL[est]}
                     </span>
                   </div>
                   <div className="text-lg font-extrabold mb-2" style={{ color: planColor }}>{sv.nombre_plan ?? 'Emprende'}</div>
-                  <div className="text-xs text-gray-500 space-y-1">
+                  <div className="text-xs text-gray-500 dark:text-[var(--text-secondary)] space-y-1">
                     {Boolean(firstHist?.fecha_inicio ?? firstHist?.cambiado_en) && (
                       <div className="flex items-center gap-1.5">
                         <span>📅</span>
@@ -189,10 +189,10 @@ export default function VendedoresPanel({ vendedores, loading, filter, search, s
                 </div>
 
                 <div>
-                  <h4 className="text-sm font-bold text-gray-700 mb-3">Historial de cambios</h4>
+                  <h4 className="text-sm font-bold text-gray-700 dark:text-[var(--text-primary)] mb-3">Historial de cambios</h4>
                   <div className="space-y-3">
                     {historial.length === 0
-                      ? <p className="text-center text-gray-400 text-xs py-5">Sin historial de cambios</p>
+                      ? <p className="text-center text-gray-400 dark:text-[var(--text-placeholder)] text-xs py-5">Sin historial de cambios</p>
                       : historial.map((h, i) => {
                           const motivoMap: Record<string,string> = { manual:'Cambio manual', vencido:'Venció — bajó a Emprende', eliminado:'Plan eliminado' };
                           const motivo = String(h.motivo ?? '');
@@ -201,11 +201,11 @@ export default function VendedoresPanel({ vendedores, loading, filter, search, s
                             <div key={`history-${h.cambiado_en}-${i}`} className="flex gap-3">
                               <div className="w-2 h-2 rounded-full mt-1.5 flex-shrink-0" style={{ background: mColor }} />
                               <div className="flex-1">
-                                <div className="text-xs font-semibold text-gray-700">
+                                <div className="text-xs font-semibold text-gray-700 dark:text-[var(--text-primary)]">
                                   {String(h.nombre_desde ?? h.plan_desde ?? '?')} → {String(h.nombre_hasta ?? h.plan_hasta ?? '?')}
                                 </div>
                                 <div className="text-[11px]" style={{ color: mColor }}>{motivoMap[motivo] ?? motivo}</div>
-                                <div className="text-[10px] text-gray-400">{formatAdminDate(String(h.cambiado_en ?? ''))}</div>
+                                <div className="text-[10px] text-gray-400 dark:text-[var(--text-placeholder)]">{formatAdminDate(String(h.cambiado_en ?? ''))}</div>
                               </div>
                             </div>
                           );

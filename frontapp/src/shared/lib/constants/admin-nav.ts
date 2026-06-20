@@ -2,13 +2,19 @@ import { PanelNavigation } from '@/shared/types/navigation';
 
 export const adminNavigation: PanelNavigation = [
     {
-        title: 'Gestión de Vendores',
+        title: 'Gestión de Vendedores',
         items: [
             {
                 id: 'sellers',
                 label: 'Control de Vendedores',
                 href: '/admin/sellers',
                 icon: 'Users',
+            },
+            {
+                id: 'solicitudes',
+                label: 'Solicitudes',
+                href: '/admin/sellers/solicitudes',
+                icon: 'FileCheck',
             },
         ],
     },
@@ -17,7 +23,7 @@ export const adminNavigation: PanelNavigation = [
         items: [
             {
                 id: 'helpdesk',
-                label: 'Mesa de Ayuda',
+                label: 'Soporte Lyrium',
                 href: '/admin/helpdesk',
                 icon: 'Help',
             },
@@ -88,12 +94,6 @@ export const adminNavigation: PanelNavigation = [
                 label: 'Planes y Suscripciones',
                 href: '/admin/planes',
                 icon: 'Sparkles',
-            },
-            {
-                id: 'glossary',
-                label: 'Glosario',
-                href: '/admin/glossary',
-                icon: 'BookOpen',
             },
         ],
     },

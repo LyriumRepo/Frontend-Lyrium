@@ -10,6 +10,16 @@ import { Layout1, Layout2, Layout3, BasicLayout } from '@/components/store/layou
 import { Tienda, Producto } from '@/types/public';
 import { LARAVEL_API_URL } from '@/shared/lib/config/flags';
 
+interface Servicio {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  image: string | null;
+  category: string | null;
+  duration: string | null;
+}
+
 interface Horario {
   apertura?: string;
   cierre?: string;
@@ -133,6 +143,7 @@ export default function TiendaPage() {
 
   const [storeData, setStoreData] = useState<StoreResponse['data'] | null>(null);
   const [products, setProducts] = useState<Producto[]>([]);
+  const [services, setServices] = useState<Servicio[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -168,6 +179,20 @@ export default function TiendaPage() {
               stock: p.stock,
             })));
           }
+        } catch {}
+        try {
+          const svcRes = await fetch(`${LARAVEL_API_URL}/services?store_id=${storeJson.data.id}`);
+          const svcJson = await svcRes.json();
+          const svcData = svcJson.data ?? svcJson ?? [];
+          setServices(Array.isArray(svcData) ? svcData.map((s: any) => ({
+            id: s.id,
+            name: s.name ?? s.title ?? '',
+            description: s.description ?? '',
+            price: Number(s.price ?? 0),
+            image: s.image ?? s.images?.[0] ?? null,
+            category: s.category?.name ?? s.category_name ?? null,
+            duration: s.duration ?? null,
+          })) : []);
         } catch {}
         setLoading(false);
       })
@@ -240,7 +265,7 @@ export default function TiendaPage() {
         stats={{
           products: products.length,
           rating: storeData.rating,
-          reviews: 0,
+          reviews: storeData.stats.reviews,
         }}
         onSearch={(query) => console.log('Buscar:', query)}
       />
@@ -267,6 +292,7 @@ export default function TiendaPage() {
           <LayoutComponent
             store={store}
             products={products}
+            services={services}
             plan={storeData.plan || 'basico'}
           />
         </div>

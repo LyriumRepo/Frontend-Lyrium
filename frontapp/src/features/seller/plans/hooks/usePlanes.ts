@@ -1,6 +1,6 @@
 'use client';
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { apiGet, apiPost, createPlanRequest, getMyPlanRequest } from '@/features/seller/plans/lib/api';
+import { apiGet, apiPost, createPlanRequest, createIzipayPlanSession, getMyPlanRequest } from '@/features/seller/plans/lib/api';
 import { buildPlanOrder, defaultPlansData, durationPresets, getDiscountForMonths } from '@/features/seller/plans/lib/plans';
 import type { PlansMap, SubscriptionInfo, Request, ButtonColors, EstadoResponse, AvisoVencimientoResponse } from '@/features/seller/plans/types';
 import { useAuth } from '@/shared/lib/context/AuthContext';
@@ -88,11 +88,12 @@ export function usePlanes() {
     return m === 1 ? '1 mes' : `${m} meses`;
   };
 
+  const initializeRef = useRef<() => Promise<void>>(async () => {});
+
   const initialize = useCallback(async () => {
     // ── API REAL (intentar siempre) ──────────
     try {
-      // Verificar autenticación
-      if (authLoading) return; // esperar
+      if (authLoading) return;
       
       if (!isAuthenticated || !user) {
         update({ isBlocked: true, isLoaded: true, blockInfo: {
@@ -115,7 +116,7 @@ export function usePlanes() {
       const userName = user.display_name || user.username || 'Vendedor';
       
       const [plansRes, subRes, colorsRes] = await Promise.all([
-        apiGet<{ data: Array<{ id: number; name: string; slug: string; monthly_fee: string; features: unknown; detailed_benefits?: unknown; timeline_icon?: string; css_color?: string; accent_color?: string; is_active?: boolean; badge?: string; description?: string }> }>('/plans'),
+        apiGet<{ data?: Array<{ id: number; name: string; slug: string; monthly_fee: string; features: unknown; detailed_benefits?: unknown; timeline_icon?: string; css_color?: string; accent_color?: string; is_active?: boolean; badge?: string; description?: string }> }>('/plans').catch(() => ({ data: [] })),
         apiGet<{ data?: { id: number; plan_id: number; status: string; starts_at?: string; started_at?: string; ends_at?: string; expires_at?: string; plan: { id: number; name: string; slug: string; monthly_fee: string } } }>('/subscriptions/current').catch(() => ({ data: null })),
         apiGet<{ data?: Record<string, string> }>('/config/colors').catch(() => ({ data: undefined })),
       ]);
@@ -192,7 +193,14 @@ export function usePlanes() {
     } catch {
       update({ isLoaded: true });
     }
-  }, [update]);
+  }, [update, authLoading, isAuthenticated, user]);
+
+  useEffect(() => { initializeRef.current = initialize; }, [initialize]);
+
+  // Auto-init cuando auth esté listo
+  useEffect(() => {
+    if (!authLoading) initializeRef.current();
+  }, [authLoading]);
 
   const switchTab = (tab: 'my-plan' | 'all-plans') => update({ activeTab: tab });
 
@@ -384,34 +392,41 @@ export function usePlanes() {
       return null;
     }
 
-    // Pago con Izipay - crear solicitud de pago
+    // Pago con Izipay
     try {
-      // Obtener el ID numérico del plan usando el slug
       const numericPlanId = selectedPaymentPlan ? slugToNumericIdMap[selectedPaymentPlan] : 1;
-      
-      const response = await createPlanRequest({
+
+      console.log('[processPayment] calling createIzipayPlanSession', { plan_id: numericPlanId, months: totalMonths });
+      const response = await createIzipayPlanSession({
         plan_id: numericPlanId,
-        payment_method: 'izipay',
         months: totalMonths,
       });
+      console.log('[processPayment] response:', response);
 
       if (response.success) {
-        // Aquí normalmente se iniciaría el pago con Izipay
-        // Por ahora, simulamos que el pago fue exitoso
-        showNotification('Pago procesado correctamente. Tu plan está activo.', '#10b981');
-        setState(prev => ({ ...prev, selectedPaymentPlan: null, modals: { ...prev.modals, payment: false, requestSent: true } }));
-        // Recargar datos
-        initialize();
+        console.log('[processPayment] setting izipayConfig and opening modal');
+        update({
+          izipayConfig: {
+            formToken: response.form_token,
+            publicKey: process.env.NEXT_PUBLIC_IZIPAY_PUBLIC_KEY || '',
+            orderId: response.request.izipay_order_id,
+          },
+          selectedPaymentPlan: null,
+        });
+        setModal('payment', false);
+        setModal('izipayPay', true);
       } else {
+        console.error('[processPayment] success=false, message:', (response as any).message);
         showNotification('Error al procesar pago', '#ef4444');
       }
     } catch (error) {
-      console.error('[usePlanes] Payment error:', error);
-      showNotification('Error al procesar pago', '#ef4444');
+      console.error('[processPayment] catch:', error);
+      const msg = error instanceof Error ? error.message : 'Error al procesar pago';
+      showNotification(msg, '#ef4444');
     }
     
     return null;
-  }, [saveRequest, showNotification, createPlanRequest, initialize]);
+  }, [saveRequest, showNotification, createPlanRequest, createIzipayPlanSession, initialize]);
 
   const onFeatureClick      = (planKey: string) => { update({ benefitDetailPlanKey: planKey }); setModal('benefitDetail', true); };
   const goToBenefitDetail   = () => { setModal('benefitDetail', false); setModal('benefitFullDetail', true); };

@@ -105,4 +105,8 @@ export const notificationRepository = {
       return handleApiError(error, null);
     }
   },
+
+  deleteAll: async (ids: string[]): Promise<void> => {
+    await Promise.allSettled(ids.map(id => notificationRepository.delete(id)));
+  },
 };

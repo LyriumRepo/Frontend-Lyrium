@@ -11,7 +11,7 @@ import BaseModal from '@/components/ui/BaseModal';
 import DataTable, { type Column } from '@/components/ui/DataTable';
 import { useTransactions, useTransactionDetail } from '@/features/admin/payments/hooks/useTransactions';
 import type { Transaction, TransactionFilters } from '@/features/admin/payments/types/transactions';
-import { CreditCard, Wallet, Smartphone } from 'lucide-react';
+import { CreditCard, Wallet, Smartphone, Package, Briefcase, Layers } from 'lucide-react';
 
 import type { StatusMapping } from '@/components/ui/BaseStatusBadge';
 
@@ -83,7 +83,7 @@ export function PagosPageClient() {
     {
       key: 'orderDate',
       header: 'Orden / Fecha',
-      className: 'bg-sky-50/40 dark:bg-sky-500/5',
+      className: 'bg-sky-50/40 dark:bg-[var(--bg-muted)]',
       render: (tx) => (
         <div>
           <p className="font-mono text-sm font-bold">{tx.orderNumber}</p>
@@ -94,7 +94,7 @@ export function PagosPageClient() {
     {
       key: 'customerStores',
       header: 'Cliente / Tienda',
-      className: 'bg-emerald-50/40 dark:bg-emerald-500/5',
+      className: 'bg-emerald-50/40 dark:bg-[var(--bg-muted)]',
       render: (tx) => (
         <div>
           <p className="text-sm font-semibold">{tx.customer?.name ?? '—'}</p>
@@ -105,10 +105,28 @@ export function PagosPageClient() {
       ),
     },
     {
+      key: 'tipo',
+      header: 'Tipo',
+      className: 'bg-cyan-50/40 dark:bg-[var(--bg-muted)]',
+      render: (tx) => {
+        const config: Record<string, { label: string; icon: React.ReactNode; color: string }> = {
+          producto: { label: 'Producto', icon: <Package className="w-3 h-3" />, color: 'text-sky-600 dark:text-sky-400 bg-sky-100 dark:bg-sky-500/10' },
+          servicio: { label: 'Servicio', icon: <Briefcase className="w-3 h-3" />, color: 'text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-500/10' },
+          ambos: { label: 'Ambos', icon: <Layers className="w-3 h-3" />, color: 'text-violet-600 dark:text-violet-400 bg-violet-100 dark:bg-violet-500/10' },
+        };
+        const c = config[tx.tipo] ?? config.producto;
+        return (
+          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${c.color}`}>
+            {c.icon}{c.label}
+          </span>
+        );
+      },
+    },
+    {
       key: 'totalMethod',
       header: 'Total / Método',
       align: 'right',
-      className: 'bg-violet-50/40 dark:bg-violet-500/5',
+      className: 'bg-violet-50/40 dark:bg-[var(--bg-muted)]',
       render: (tx) => {
         const method = tx.paymentMethod ?? '—';
         return (
@@ -125,9 +143,23 @@ export function PagosPageClient() {
       },
     },
     {
+      key: 'comision',
+      header: 'Comisión',
+      align: 'right',
+      className: 'bg-rose-50/40 dark:bg-[var(--bg-muted)]',
+      render: (tx) => (
+        <div className="text-right">
+          <p className="text-sm font-bold text-rose-600 dark:text-rose-400">{formatCurrency(tx.commissionTotal)}</p>
+          <p className="text-[10px] text-[var(--text-secondary)]">
+            Base: {formatCurrency(tx.commissionAmount)} + IGV
+          </p>
+        </div>
+      ),
+    },
+    {
       key: 'paymentStatus',
       header: 'Pago',
-      className: 'bg-amber-50/40 dark:bg-amber-500/5',
+      className: 'bg-amber-50/40 dark:bg-[var(--bg-muted)]',
       render: (tx) => (
         <BaseStatusBadge
           status={tx.paymentStatus}
@@ -140,7 +172,7 @@ export function PagosPageClient() {
     {
       key: 'transactionStatus',
       header: 'Transacción',
-      className: 'bg-rose-50/40 dark:bg-rose-500/5',
+      className: 'bg-rose-50/40 dark:bg-[var(--bg-muted)]',
       render: (tx) => {
         if (!tx.transactionStatus) return <span className="text-xs text-[var(--text-secondary)]">—</span>;
         return (
@@ -333,6 +365,10 @@ function TransactionDetail({ transaction }: { transaction: Transaction }) {
           <p className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Total</p>
           <p className="text-lg font-black text-[var(--brand-sky)]">{formatCurrency(transaction.total)}</p>
         </div>
+        <div className="space-y-1">
+          <p className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Tipo</p>
+          <p className="text-sm font-bold capitalize">{transaction.tipo === 'ambos' ? 'Producto y Servicio' : transaction.tipo}</p>
+        </div>
       </div>
 
       <div className="border-t border-[var(--border-subtle)] pt-4">
@@ -411,6 +447,24 @@ function TransactionDetail({ transaction }: { transaction: Transaction }) {
           <div className="flex justify-between font-bold pt-1 border-t border-[var(--border-subtle)]">
             <span>Total</span>
             <span>{formatCurrency(transaction.total)}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="border-t border-[var(--border-subtle)] pt-4">
+        <p className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest mb-3">Comisión Lyrium</p>
+        <div className="space-y-1.5 text-xs">
+          <div className="flex justify-between">
+            <span className="text-[var(--text-secondary)]">Base</span>
+            <span>{formatCurrency(transaction.commissionAmount)}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-[var(--text-secondary)]">IGV (18%)</span>
+            <span>{formatCurrency(transaction.commissionIgv)}</span>
+          </div>
+          <div className="flex justify-between font-bold pt-1 border-t border-[var(--border-subtle)] text-rose-600 dark:text-rose-400">
+            <span>Total Comisión</span>
+            <span>{formatCurrency(transaction.commissionTotal)}</span>
           </div>
         </div>
       </div>

@@ -6,6 +6,8 @@ import IntroCover from '@/components/ui/IntroCover';
 import { UserTypeToggle } from './UserTypeToggle';
 import { LoginPanel } from './LoginPanel';
 import { RegisterPanel } from './RegisterPanel';
+import { RegistroLoadingModal } from './RegistroLoadingModal';
+import { ResultadoRegistro } from './ResultadoRegistro';
 import { useAuthForm } from '../hooks/useAuthForm';
 import type { LoginFormData, RegisterFormData, UserType } from '../types/auth';
 
@@ -16,16 +18,20 @@ interface AuthContainerProps {
 export function AuthContainer({ onSuccess }: AuthContainerProps) {
     const [showIntro, setShowIntro] = useState(true);
     const router = useRouter();
-    
-    const { 
-        mode, 
-        userType, 
-        formError, 
-        formSuccess, 
-        setUserType, 
+
+    const {
+        mode,
+        userType,
+        formError,
+        formSuccess,
+        registroStep,
+        rpaResult,
+        rpaStep,
+        setUserType,
         setFormError,
         setFormSuccess,
         toggleMode,
+        resetRegistro,
         login,
         register,
     } = useAuthForm();
@@ -54,12 +60,12 @@ export function AuthContainer({ onSuccess }: AuthContainerProps) {
             if (result.success && result.requiresVerification && result.email) {
                 const otpUrl = `/auth/verify-otp?email=${encodeURIComponent(result.email)}`;
                 router.push(otpUrl);
-                // Fallback: si router.push no navega en 2s, forzar con window.location
                 setTimeout(() => {
                     if (window.location.pathname !== '/auth/verify-otp') {
                         window.location.href = otpUrl;
                     }
                 }, 2000);
+                setIsSubmitting(false);
                 return result;
             }
 
@@ -70,6 +76,18 @@ export function AuthContainer({ onSuccess }: AuthContainerProps) {
             return { success: false, message: 'Error inesperado' };
         }
     }, [register, router]);
+
+    const handleContinue = useCallback(() => {
+        if (rpaResult?.estado === 'ACEPTADO') {
+            router.push('/seller');
+        } else {
+            resetRegistro();
+        }
+    }, [rpaResult, router, resetRegistro]);
+
+    const handleRetry = useCallback(() => {
+        resetRegistro();
+    }, [resetRegistro]);
 
     if (showIntro) {
         return (
@@ -90,24 +108,24 @@ export function AuthContainer({ onSuccess }: AuthContainerProps) {
     return (
         <div className="min-h-screen bg-[#F8F9FA] dark:bg-[var(--bg-primary)] flex items-center justify-center p-4">
             <div className="relative w-full max-w-[1200px] min-h-[650px] bg-white dark:bg-[var(--bg-secondary)] rounded-[30px] shadow-[0_40px_100px_rgba(0,0,0,0.1)] overflow-hidden flex">
-                
-                {/* Left Side Panel - visible siempre */}
+
+                {/* Left Side Panel */}
                 <div
-                    className={`absolute top-0 left-0 h-full w-[40%] 
-                    bg-[linear-gradient(to_bottom_right,rgba(14,165,233,0.9),rgba(132,204,22,0.9))] 
-                    dark:bg-[linear-gradient(to_bottom_right,var(--brand-green),var(--icons-green),var(--brand-green-hover))] 
+                    className={`absolute top-0 left-0 h-full w-[40%]
+                    bg-[linear-gradient(to_bottom_right,rgba(14,165,233,0.9),rgba(132,204,22,0.9))]
+                    dark:bg-[linear-gradient(to_bottom_right,var(--brand-green),var(--icons-green),var(--brand-green-hover))]
                     p-10 flex flex-col justify-between text-white z-20 rounded-r-[20px]`}
                 >
-                    <img src="/img/intro/Flor6.png" alt="decoración" className="absolute -bottom-20 -left-80 w-[700px] max-w-none opacity-60 mix-blend-overlay pointer-events-none"/>
+                    <img src="/img/intro/Flor6.png" alt="" className="absolute -bottom-20 -left-80 w-[700px] max-w-none opacity-60 mix-blend-overlay pointer-events-none" />
 
                     <div className="absolute inset-0 opacity-30">
                         <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
                             <defs>
                                 <pattern id="gridAuth" width="20" height="20" patternUnits="userSpaceOnUse">
-                                    <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="1"/>
+                                    <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
                                 </pattern>
                             </defs>
-                            <rect width="100%" height="100%" fill="url(#gridAuth)"/>
+                            <rect width="100%" height="100%" fill="url(#gridAuth)" />
                         </svg>
                     </div>
 
@@ -118,7 +136,7 @@ export function AuthContainer({ onSuccess }: AuthContainerProps) {
                                     {userType === 'vendedor' ? 'Haz crecer tu marca con nosotros.' : 'Únete a Lyrium'}
                                 </h2>
                                 <p className="text-white/95 text-center max-w-[300px] mx-auto">
-                                    {userType === 'vendedor' 
+                                    {userType === 'vendedor'
                                         ? 'Únete a la comunidad de vendedores más grande y gestiona tus pedidos en un solo lugar.'
                                         : 'Crea tu cuenta y descubre los mejores productos naturales y saludables.'}
                                 </p>
@@ -151,7 +169,7 @@ export function AuthContainer({ onSuccess }: AuthContainerProps) {
                     </div>
                 </div>
 
-                {/* Right Side - Forms */}
+                {/* Right Side */}
                 <div className="relative ml-auto w-[60%] p-10 flex flex-col">
                     <UserTypeToggle
                         value={userType}
@@ -159,10 +177,10 @@ export function AuthContainer({ onSuccess }: AuthContainerProps) {
                             setUserType(type);
                             setFormError(null);
                             setFormSuccess(null);
+                            resetRegistro();
                         }}
                     />
 
-                    {/* Login Panel - only show when NOT register */}
                     {!isRegister && (
                         <div className="flex-1">
                             <LoginPanel
@@ -176,8 +194,7 @@ export function AuthContainer({ onSuccess }: AuthContainerProps) {
                         </div>
                     )}
 
-                    {/* Register Panel - only show when register */}
-                    {isRegister && (
+                    {isRegister && registroStep === 'form' && (
                         <div className="flex-1">
                             <RegisterPanel
                                 userType={userType}
@@ -189,8 +206,24 @@ export function AuthContainer({ onSuccess }: AuthContainerProps) {
                             />
                         </div>
                     )}
+
+                    {isRegister && registroStep === 'result' && rpaResult && (
+                        <div className="flex-1">
+                            <ResultadoRegistro
+                                result={rpaResult}
+                                onContinue={handleContinue}
+                                onRetry={handleRetry}
+                                isSubmitting={isSubmitting}
+                            />
+                        </div>
+                    )}
                 </div>
             </div>
+
+            <RegistroLoadingModal
+                isOpen={registroStep === 'loading'}
+                currentStep={rpaStep}
+            />
         </div>
     );
 }

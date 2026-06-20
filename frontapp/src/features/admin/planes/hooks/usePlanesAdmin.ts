@@ -36,7 +36,7 @@ export interface PaymentTotals {
   total_monto: number;
   pagos_exitosos: number;
   pagos_fallidos: number;
-  pagos_pending: number;
+  pagos_pendientes: number;
 }
 
 export interface Transaccion {
@@ -172,7 +172,7 @@ const initialState: AdminState = {
     total_monto: 0,
     pagos_exitosos: 0,
     pagos_fallidos: 0,
-    pagos_pending: 0,
+    pagos_pendientes: 0,
   },
   paymentFilter: 'all',
   paymentNotifs: [],
@@ -433,7 +433,7 @@ export function useAdmin() {
           total_monto: 0,
           pagos_exitosos: 0,
           pagos_fallidos: 0,
-          pagos_pending: 0,
+          pagos_pendientes: 0,
         };
 
         update({ vendedorPagos, paymentTotals: totals });
@@ -444,7 +444,7 @@ export function useAdmin() {
             total_monto: 0,
             pagos_exitosos: 0,
             pagos_fallidos: 0,
-            pagos_pending: 0,
+            pagos_pendientes: 0,
           },
         });
       }

@@ -49,10 +49,10 @@ function getDynamicFields(type: ProviderType) {
 }
 
 const inputCls =
-  'text-[13px] border border-gray-200 rounded-lg px-3 py-[7px] bg-white text-gray-700 placeholder-gray-400 focus:outline-none focus:border-gray-400 w-full';
+  'text-[13px] border border-gray-200 dark:border-[var(--border-subtle)] rounded-lg px-3 py-[7px] bg-white dark:bg-[var(--bg-card)] text-gray-700 dark:text-[var(--text-primary)] placeholder-gray-400 dark:placeholder-[var(--text-placeholder)] focus:outline-none focus:border-gray-400 w-full';
 const selectCls =
-  'text-[13px] border border-gray-200 rounded-lg px-3 py-[7px] bg-white text-gray-700 focus:outline-none focus:border-gray-400 w-full';
-const labelCls = 'block text-[11px] font-medium text-gray-400 mb-1';
+  'text-[13px] border border-gray-200 dark:border-[var(--border-subtle)] rounded-lg px-3 py-[7px] bg-white dark:bg-[var(--bg-card)] text-gray-700 dark:text-[var(--text-primary)] focus:outline-none focus:border-gray-400 w-full';
+const labelCls = 'block text-[11px] font-medium text-gray-400 dark:text-[var(--text-secondary)] mb-1';
 
 // ─── ProviderModal ────────────────────────────────────────────────────────────
 export const ProviderModal: React.FC<{
@@ -121,8 +121,8 @@ export const ProviderModal: React.FC<{
       </div>
 
       {/* Campos dinámicos */}
-      <div className="bg-gray-50 rounded-xl p-4 flex flex-col gap-3">
-        <p className="text-[11px] font-medium text-gray-400">
+      <div className="bg-gray-50 dark:bg-[var(--bg-muted)] rounded-xl p-4 flex flex-col gap-3">
+        <p className="text-[11px] font-medium text-gray-400 dark:text-[var(--text-secondary)]">
           Campos por especialidad — {currentType}
         </p>
         <div className="grid grid-cols-2 gap-3">
@@ -191,13 +191,13 @@ export const ProviderModal: React.FC<{
         <button
           type="button"
           onClick={onClose}
-          className="text-[13px] px-3.5 py-[6px] border border-gray-200 rounded-lg text-gray-500 hover:bg-gray-50 transition-colors"
+          className="text-[13px] px-3.5 py-[6px] border border-gray-200 dark:border-[var(--border-subtle)] rounded-lg text-gray-500 dark:text-[var(--text-secondary)] hover:bg-gray-50 dark:hover:bg-[var(--bg-card)] transition-colors"
         >
           Cancelar
         </button>
         <button
           type="submit"
-          className="text-[13px] px-3.5 py-[6px] border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+          className="text-[13px] px-3.5 py-[6px] border border-gray-300 dark:border-[var(--border-default)] rounded-lg font-medium text-gray-700 dark:text-[var(--text-primary)] hover:bg-gray-50 dark:hover:bg-[var(--bg-card)] transition-colors"
         >
           {formData.id ? 'Actualizar proveedor' : 'Crear proveedor'}
         </button>
@@ -269,7 +269,7 @@ export const TwoFactorModalContent: React.FC<{
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       {/* Ícono */}
       <div className="flex justify-center pt-1">
-        <div className="w-12 h-12 bg-[#E6F1FB] text-[#0C447C] rounded-xl flex items-center justify-center">
+        <div className="w-12 h-12 bg-[#E6F1FB] dark:bg-[var(--bg-card)] text-[#0C447C] dark:text-[var(--text-primary)] rounded-xl flex items-center justify-center">
           {loading ? (
             <svg
               className="w-5 h-5 animate-spin"
@@ -296,7 +296,7 @@ export const TwoFactorModalContent: React.FC<{
         </div>
       </div>
 
-      <p className="text-[13px] text-gray-500 text-center leading-relaxed">
+      <p className="text-[13px] text-gray-500 dark:text-[var(--text-secondary)] text-center leading-relaxed">
         Ingresa el código de 6 dígitos enviado a tu correo corporativo.
       </p>
 
@@ -309,18 +309,18 @@ export const TwoFactorModalContent: React.FC<{
         onChange={(e) => setCode(e.target.value.replace(/[^0-9]/g, ''))}
         disabled={loading}
         placeholder="------"
-        className={`w-full text-[32px] font-medium text-center tracking-[0.6em] py-4 border rounded-xl bg-gray-50 placeholder-gray-300 focus:outline-none focus:border-gray-400 text-gray-900 transition-colors ${
-          errorMessage ? 'border-[#F09595]' : 'border-gray-200'
+        className={`w-full text-[32px] font-medium text-center tracking-[0.6em] py-4 border rounded-xl bg-gray-50 dark:bg-[var(--bg-muted)] placeholder-gray-300 dark:placeholder-[var(--text-placeholder)] focus:outline-none focus:border-gray-400 text-gray-900 dark:text-[var(--text-primary)] transition-colors ${
+          errorMessage ? 'border-[#F09595]' : 'border-gray-200 dark:border-[var(--border-subtle)]'
         } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
       />
 
       {errorMessage && (
-        <p className="text-center text-[12px] text-[#791F1F] -mt-1">
+        <p className="text-center text-[12px] text-[#791F1F] dark:text-red-400 -mt-1">
           {errorMessage}
         </p>
       )}
       {successMessage && !errorMessage && (
-        <p className="text-center text-[12px] text-[#085041] -mt-1">
+        <p className="text-center text-[12px] text-[#085041] dark:text-green-400 -mt-1">
           {successMessage}
         </p>
       )}
@@ -329,22 +329,22 @@ export const TwoFactorModalContent: React.FC<{
       <button
         type="submit"
         disabled={loading || code.length < 6}
-        className="w-full py-2.5 border border-gray-300 rounded-lg text-[13px] font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+        className="w-full py-2.5 border border-gray-300 dark:border-[var(--border-default)] rounded-lg text-[13px] font-medium text-gray-700 dark:text-[var(--text-primary)] hover:bg-gray-50 dark:hover:bg-[var(--bg-card)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
       >
         {loading ? 'Validando...' : 'Validar acceso'}
       </button>
 
       {/* Reenviar */}
       {onResend && (
-        <div className="flex justify-center pt-1 border-t border-gray-100">
+        <div className="flex justify-center pt-1 border-t border-gray-100 dark:border-[var(--border-subtle)]">
           <button
             type="button"
             onClick={handleResend}
             disabled={resending || cooldown > 0}
             className={`text-[12px] flex items-center gap-1.5 py-1.5 px-3 rounded-lg transition-colors ${
               cooldown > 0
-                ? 'text-gray-300 cursor-not-allowed'
-                : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50 cursor-pointer'
+                ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed'
+                : 'text-gray-400 dark:text-[var(--text-secondary)] hover:text-gray-600 dark:hover:text-[var(--text-primary)] hover:bg-gray-50 dark:hover:bg-[var(--bg-card)] cursor-pointer'
             }`}
           >
             <svg

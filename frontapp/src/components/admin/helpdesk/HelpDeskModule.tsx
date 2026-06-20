@@ -242,7 +242,7 @@ export const HelpDeskModule: React.FC<any> = () => {
                         <h1 className="text-2xl font-black tracking-tight leading-none">
                             {activeMode === 'vendedores' ? 'Chat con Vendedores' : 'Chat con Clientes'}
                         </h1>
-                        <p className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest mt-1.5">Mesa de Ayuda Centralizada</p>
+                        <p className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest mt-1.5">Soporte Lyrium Centralizada</p>
                     </div>
                 </div>
                 <button 

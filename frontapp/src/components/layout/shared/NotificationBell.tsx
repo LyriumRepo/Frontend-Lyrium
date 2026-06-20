@@ -9,7 +9,7 @@ import { useAuth } from '@/shared/lib/context/AuthContext';
 
 export default function NotificationBell() {
     const [isOpen, setIsOpen] = useState(false);
-    const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
+    const { notifications, unreadCount, markAsRead, deleteAll } = useNotifications();
     const { user } = useAuth();
     const router = useRouter();
 
@@ -86,9 +86,9 @@ export default function NotificationBell() {
                                 <p className="text-[10px] font-bold text-[var(--text-secondary)] dark:text-[var(--text-secondary)] uppercase tracking-widest mt-1">{panelInfo.subtitle}</p>
                             </div>
                             <div className="flex items-center gap-2">
-                                {unreadCount > 0 && (
+                                {notifications.length > 0 && (
                                     <button
-                                        onClick={markAllAsRead}
+                                        onClick={deleteAll}
                                         className="text-[10px] font-black uppercase text-indigo-500 dark:text-indigo-400 hover:bg-indigo-500/10 dark:hover:bg-indigo-900/30 px-2 py-1 rounded-lg transition-all"
                                     >
                                         Limpiar Todo

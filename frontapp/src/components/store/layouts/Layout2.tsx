@@ -7,13 +7,24 @@ import MainProductGrid from '../MainProductGrid';
 import AdBannersGrid from '../AdBannersGrid';
 import SidebarInfo from '../SidebarInfo';
 
+interface Servicio {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  image: string | null;
+  category: string | null;
+  duration: string | null;
+}
+
 interface Layout2Props {
   store: Tienda;
   products: Producto[];
+  services?: Servicio[];
   plan: 'basico' | 'premium';
 }
 
-export default function Layout2({ store, products, plan }: Layout2Props) {
+export default function Layout2({ store, products, services = [], plan }: Layout2Props) {
   // Tomar 12 productos para el grid de selecciones
   const productosSelecciones = products.slice(0, 12);
 
@@ -31,7 +42,7 @@ export default function Layout2({ store, products, plan }: Layout2Props) {
 
         {/* Columna principal: Tabs con Productos destacados */}
         <div className="flex-1">
-          <StoreTabs tienda={store} productos={products} plan={plan} />
+          <StoreTabs tienda={store} productos={products} servicios={services} plan={plan} />
         </div>
       </div>
 

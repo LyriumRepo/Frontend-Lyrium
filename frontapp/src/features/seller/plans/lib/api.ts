@@ -34,15 +34,11 @@ async function apiCall<T = unknown>(endpoint: string, options?: RequestInit): Pr
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
 
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 15_000);
   const res = await fetch(API_BASE + endpoint, {
     headers,
     credentials: 'include',
     ...options,
-    signal: controller.signal,
   });
-  clearTimeout(timeout);
 
   const text = await res.text();
   if (!res.ok) {
@@ -70,11 +66,8 @@ export function apiPost<T = unknown>(endpoint: string, data: unknown): Promise<T
   });
 }
 
-export function apiDelete<T = unknown>(endpoint: string, data?: unknown): Promise<T> {
-  return apiCall<T>(endpoint, {
-    method: 'DELETE',
-    body: JSON.stringify(data),
-  });
+export function apiDelete<T = unknown>(endpoint: string): Promise<T> {
+  return apiCall<T>(endpoint, { method: 'DELETE' });
 }
 
 // Plan Requests (Seller)
@@ -99,6 +92,26 @@ export const createPlanRequest = async (payload: {
 
 export const getMyPlanRequest = async () => {
   return apiGet<{ success: boolean; data: any }>('/stores/me/plan-request');
+};
+
+export const createIzipayPlanSession = async (payload: {
+  plan_id: number;
+  months: number;
+}): Promise<{
+  success: boolean;
+  form_token: string;
+  request: {
+    id: number;
+    plan_id: number;
+    plan_name: string;
+    months: number;
+    total_amount: number;
+    izipay_order_id: string;
+    status: string;
+    payment_status: string;
+  };
+}> => {
+  return apiPost('/plans/izipay/init', payload);
 };
 
 export function getSSEUrl(canal: string, usuarioId: string): string {

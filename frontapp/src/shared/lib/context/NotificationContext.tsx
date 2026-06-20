@@ -13,6 +13,7 @@ interface NotificationContextType {
     loading: boolean;
     markAsRead: (id: string) => void;
     markAllAsRead: () => void;
+    deleteAll: () => Promise<void>;
     addNotification: (notification: Omit<ProactiveNotification, 'id' | 'read' | 'time'>) => void;
     refreshNotifications: () => Promise<void>;
 }
@@ -213,6 +214,16 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         }
     }, []);
 
+    const deleteAll = useCallback(async () => {
+        try {
+            const ids = notifications.map(n => n.id);
+            await notificationRepository.deleteAll(ids);
+        } catch (error) {
+            console.error('Error deleting all notifications:', error);
+        }
+        setNotifications([]);
+    }, [notifications]);
+
     const addNotification = useCallback((n: Omit<ProactiveNotification, 'id' | 'read' | 'time'>) => {
         const newNotification: ProactiveNotification = {
             ...n,
@@ -251,6 +262,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
             loading,
             markAsRead,
             markAllAsRead,
+            deleteAll,
             addNotification,
             refreshNotifications,
         }}>

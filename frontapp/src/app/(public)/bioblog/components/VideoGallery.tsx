@@ -13,26 +13,35 @@ interface VideoItem {
     categoryLabel: string;
 }
 
+const YT_THUMB = (id: string) => `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
+
 export default function VideoGallery() {
     const [videos, setVideos] = useState<VideoItem[]>([]);
     const [categories, setCategories] = useState<string[]>([]);
     const [activeFilter, setActiveFilter] = useState('*');
     const [showAll, setShowAll] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [imgErrors, setImgErrors] = useState<Set<number>>(new Set());
+
+    const handleImgError = (id: number) => {
+        setImgErrors(prev => new Set(prev).add(id));
+    };
 
     useEffect(() => {
         blogApi.getVideos().then((data: any[]) => {
-            const items = data.map((v: any) => ({
-                id: v.id,
-                title: v.title,
-                videoId: v.youtube_id ?? '',
-                category: v.category ?? 'general',
-                categoryLabel: v.category_label ?? v.category ?? 'General',
-            }));
+            const items: VideoItem[] = (data && data.length > 0)
+                ? data.map((v: any) => ({
+                    id: v.id,
+                    title: v.title,
+                    videoId: v.youtube_id ?? '',
+                    category: v.category ?? 'general',
+                    categoryLabel: v.category_label ?? v.category ?? 'General',
+                }))
+                : [];
             setVideos(items);
             const cats = Array.from(new Set(items.map((v) => v.category)));
             setCategories(cats);
-        }).catch(console.error).finally(() => setLoading(false));
+        }).catch(() => {}).finally(() => setLoading(false));
     }, []);
 
     const filteredVideos = activeFilter === '*'
@@ -108,11 +117,12 @@ export default function VideoGallery() {
                                     {/* Miniatura */}
                                     <div className="aspect-video relative overflow-hidden">
                                         <Image
-                                            src={`https://i.ytimg.com/vi/${video.videoId}/maxresdefault.jpg`}
+                                            src={imgErrors.has(video.id) || !video.videoId ? '/img/bioblog/blog-teclas.jpg' : YT_THUMB(video.videoId)}
                                             alt={video.title}
                                             fill
                                             sizes="(max-width: 768px) 100vw, 33vw"
                                             className="object-cover transform transition-transform duration-700 group-hover:scale-110"
+                                            onError={() => handleImgError(video.id)}
                                         />
                                         <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors" />
 
@@ -121,6 +131,11 @@ export default function VideoGallery() {
                                             href={`https://www.youtube.com/embed/${video.videoId}?feature=oembed&autoplay=1`}
                                             target="_blank"
                                             rel="noopener noreferrer"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                blogApi.registerVideoView(video.id);
+                                                window.open(`https://www.youtube.com/embed/${video.videoId}?feature=oembed&autoplay=1`, '_blank');
+                                            }}
                                             className="absolute inset-0 flex items-center justify-center"
                                         >
                                             <div className="w-16 h-16 bg-sky-500 dark:bg-[var(--icons-green)] text-white rounded-full flex items-center justify-center transform transition-all duration-500 scale-90 group-hover:scale-100 shadow-xl group-hover:shadow-sky-500/50 dark:group-hover:shadow-lime-100/50">

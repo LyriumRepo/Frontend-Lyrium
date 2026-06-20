@@ -27,7 +27,7 @@ export default function PlansGrid({ plansData, statusFilter, onEdit, onToggleAct
   return (
     <>
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-extrabold text-gray-800">Gestión de Planes</h2>
+        <h2 className="text-2xl font-extrabold text-gray-800 dark:text-[var(--text-primary)]">Gestión de Planes</h2>
         <button className="px-5 py-3 bg-blue-500 text-white rounded-xl text-[14px] font-bold cursor-pointer transition-all duration-300 flex items-center gap-2 hover:bg-blue-600 hover:-translate-y-0.5 hover:shadow-lg"
           onClick={onNew}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -37,7 +37,7 @@ export default function PlansGrid({ plansData, statusFilter, onEdit, onToggleAct
       <div className="flex gap-2 mb-5">
         {['all','active','inactive'].map(f => (
           <button key={f} className={`px-4 py-2 border-2 rounded-lg text-[13px] font-semibold cursor-pointer transition-all duration-200
-            ${statusFilter === f ? 'bg-gray-800 text-white border-gray-800' : 'bg-white text-gray-500 border-gray-200 hover:border-gray-400 hover:text-gray-700'}`}
+            ${statusFilter === f ? 'bg-gray-800 text-white border-gray-800' : 'bg-white dark:bg-[var(--bg-card)] text-gray-500 dark:text-[var(--text-secondary)] border-gray-200 dark:border-[var(--border-subtle)] hover:border-gray-400 hover:text-gray-700 dark:text-[var(--text-primary)]'}`}
             onClick={() => onFilterChange(f)}>
             {f === 'all' ? 'Todos' : f === 'active' ? 'Activos' : 'Inactivos'}
           </button>
@@ -51,23 +51,23 @@ export default function PlansGrid({ plansData, statusFilter, onEdit, onToggleAct
             const isActive = plan.isActive !== false;
             const isFixed  = FIXED.includes(key);
             return (
-              <div key={key} className={`bg-white rounded-2xl p-6 border-2 border-gray-200 transition-all duration-300 relative overflow-hidden${!isActive ? ' opacity-55 grayscale-[40%]' : ''}`} style={{ '--plan-color': plan.cssColor } as React.CSSProperties}>
+              <div key={key} className={`bg-white dark:bg-[var(--bg-card)] rounded-2xl p-6 border-2 border-gray-200 dark:border-[var(--border-subtle)] transition-all duration-300 relative overflow-hidden${!isActive ? ' opacity-55 grayscale-[40%]' : ''}`} style={{ '--plan-color': plan.cssColor } as React.CSSProperties}>
                 <div className="absolute top-0 left-0 right-0 h-1" style={{ background: plan.cssColor }} />
                 <div className="mb-4">
                   <div className="inline-block px-3 py-1 rounded-md text-[11px] font-bold mb-3" style={{ color:plan.cssColor, background:`${plan.cssColor}22` }}>{plan.badge}</div>
-                  <div className="text-[1.3rem] font-extrabold text-gray-800 mb-2">{plan.name}</div>
+                  <div className="text-[1.3rem] font-extrabold text-gray-800 dark:text-[var(--text-primary)] mb-2">{plan.name}</div>
                   {plan.usePriceMode === false && plan.priceText
-                    ? <div className="text-[1.8rem] font-extrabold" style={{ color:plan.cssColor }}>{plan.priceText}{plan.priceSubtext && <small className="text-[0.9rem] font-semibold text-gray-400"> {plan.priceSubtext}</small>}</div>
-                    : <div className="text-[1.8rem] font-extrabold" style={{ color:plan.cssColor }}>{plan.currency ?? 'S/'} {Number(plan.price ?? 0).toFixed(2)}<small className="text-[0.9rem] font-semibold text-gray-400">{plan.period ?? '/mes'}</small></div>
+                    ? <div className="text-[1.8rem] font-extrabold" style={{ color:plan.cssColor }}>{plan.priceText}{plan.priceSubtext && <small className="text-[0.9rem] font-semibold text-gray-400 dark:text-[var(--text-placeholder)]"> {plan.priceSubtext}</small>}</div>
+                    : <div className="text-[1.8rem] font-extrabold" style={{ color:plan.cssColor }}>{plan.currency ?? 'S/'} {Number(plan.price ?? 0).toFixed(2)}<small className="text-[0.9rem] font-semibold text-gray-400 dark:text-[var(--text-placeholder)]">{plan.period ?? '/mes'}</small></div>
                   }
                   {!isActive && <div className="inline-block px-2.5 py-1 rounded-md bg-red-100 text-red-500 text-[10px] font-extrabold tracking-wider mt-2">INACTIVO</div>}
                 </div>
-                <div className="text-[13px] text-gray-400 mb-4">{plan.description}</div>
-                <div className="mb-4 pt-4 border-t border-gray-200">
-                  <div className="text-[12px] font-bold text-gray-400 mb-2 uppercase tracking-wide">Beneficios ({plan.features?.length ?? 0})</div>
+                <div className="text-[13px] text-gray-400 dark:text-[var(--text-placeholder)] mb-4">{plan.description}</div>
+                <div className="mb-4 pt-4 border-t border-gray-200 dark:border-[var(--border-subtle)]">
+                  <div className="text-[12px] font-bold text-gray-400 dark:text-[var(--text-placeholder)] mb-2 uppercase tracking-wide">Beneficios ({plan.features?.length ?? 0})</div>
                   <ul className="list-none flex flex-col gap-1.5">
-                    {(plan.features ?? []).slice(0, 3).filter(f => f.active).map((f) => <li key={f.text} className="text-[12px] text-gray-700 pl-5 relative before:content-['✓'] before:absolute before:left-0 before:text-emerald-500 before:font-bold">{f.text}</li>)}
-                    {(plan.features?.length ?? 0) > 3 && <li className="text-gray-400 text-[12px]">+ {(plan.features?.length ?? 0) - 3} más...</li>}
+                    {(plan.features ?? []).slice(0, 3).filter(f => f.active).map((f) => <li key={f.text} className="text-[12px] text-gray-700 dark:text-[var(--text-primary)] pl-5 relative before:content-['✓'] before:absolute before:left-0 before:text-emerald-500 before:font-bold">{f.text}</li>)}
+                    {(plan.features?.length ?? 0) > 3 && <li className="text-gray-400 dark:text-[var(--text-placeholder)] text-[12px]">+ {(plan.features?.length ?? 0) - 3} más...</li>}
                   </ul>
                 </div>
                 <div className="flex gap-2 justify-end">

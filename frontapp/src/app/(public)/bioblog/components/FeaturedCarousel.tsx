@@ -17,7 +17,7 @@ interface BlogPost {
     title: string;
     slug: string;
     summary: string;
-    featured_image: string | null;
+    featured_image: string;
     category_name: string;
     published_at: string;
     comments_count: number;
@@ -27,18 +27,20 @@ export default function FeaturedCarousel() {
     const [posts, setPosts] = useState<BlogPost[]>([]);
 
     useEffect(() => {
-        blogApi.getFeaturedPosts(4).then((data) => {
-            setPosts(data.map((p: any) => ({
-                id: p.id,
-                title: p.title,
-                slug: p.slug,
-                summary: p.summary ?? '',
-                featured_image: p.featured_image ?? '/img/bioblog/blog-teclas.jpg',
-                category_name: p.category?.name ?? 'General',
-                published_at: p.published_at ?? '',
-                comments_count: 0,
-            })));
-        }).catch(console.error);
+        blogApi.getRecentPosts(4).then((data) => {
+            if (data && data.length > 0) {
+                setPosts(data.map((p: any) => ({
+                    id: p.id,
+                    title: p.title,
+                    slug: p.slug,
+                    summary: p.summary ?? '',
+                    featured_image: p.featured_image ?? '/img/bioblog/blog-teclas.jpg',
+                    category_name: p.category?.name ?? 'General',
+                    published_at: p.published_at ?? '',
+                    comments_count: 0,
+                })));
+            }
+        }).catch(() => {});
     }, []);
 
     const formatDate = (dateString: string) => {

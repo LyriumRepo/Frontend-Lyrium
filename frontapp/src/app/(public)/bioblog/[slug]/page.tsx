@@ -41,10 +41,15 @@ export default function BlogPostPage() {
         try {
             const postData = await blogApi.getPostBySlug(slug);
 
-            setPost(postData);
             if (postData) {
                 const comms = await blogApi.getComments(postData.id);
                 setComments(comms);
+            }
+
+            setPost(postData);
+
+            if (postData) {
+                blogApi.registerArticleView(postData.id);
             }
         } catch (error) {
             console.error('Error loading post:', error);
@@ -135,7 +140,7 @@ export default function BlogPostPage() {
                             <span>{post.author_name ?? 'Lyrium'}</span>
                         </div>
                         <span>•</span>
-                        <span>{formatDate(post.published_at)}</span>
+                        <span>{formatDate(post.published_at ?? '')}</span>
                     </div>
                 </header>
 
@@ -153,8 +158,20 @@ export default function BlogPostPage() {
                 )}
 
                 {/* Contenido */}
+                <style>{`
+                    .blog-content img {
+                        max-width: 100%;
+                        height: auto;
+                        border-radius: 8px;
+                        display: inline-block;
+                    }
+                    .blog-content iframe {
+                        max-width: 100%;
+                        border-radius: 8px;
+                    }
+                `}</style>
                 <div
-                    className="prose prose-lg max-w-none text-slate-700"
+                    className="prose prose-lg max-w-none text-slate-700 blog-content"
                     dangerouslySetInnerHTML={{ __html: sanitizeHtml(post.content) }}
                 />
 

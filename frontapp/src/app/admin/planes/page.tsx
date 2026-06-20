@@ -1,5 +1,5 @@
 'use client';
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useAdmin } from '@/features/admin/planes/hooks/usePlanesAdmin';
 import { useSSE } from '@/features/seller/plans/hooks/useSSE';
 import RequestsPanel from '@/features/admin/planes/components/RequestsPanel';
@@ -26,6 +26,8 @@ const TABS = [
     icon:<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> },
 ];
 
+const SLOW_TABS = new Set(['vendedores', 'payment']);
+
 export default function AdminPage() {
   const admin = useAdmin();
   const { state, update, setModal } = admin;
@@ -35,13 +37,24 @@ export default function AdminPage() {
   }, []);
 
   // SSE — solo conectar cuando el panel ya está cargado
-  useSSE('admin', '', {
+  const sse = useSSE('admin', '', {
     solicitudes_actualizadas: admin.handleSolicitudesActualizadas,
     planes_actualizados:      admin.handlePlanesActualizados,
     colores_actualizados:     admin.handleColoresActualizados,
     pago_confirmado:          admin.handlePagoConfirmadoAdmin as never,
     pago_fallido:             admin.handlePagoFallidoAdmin,
   }, state.isLoaded);
+
+  const handleSwitchTab = useCallback(async (tab: string) => {
+    if (SLOW_TABS.has(tab)) {
+      sse.disconnect();
+      await new Promise(r => setTimeout(r, 400));
+    }
+    if (tab === 'requests') {
+      sse.connect();
+    }
+    await admin.switchTab(tab as never);
+  }, [admin, sse]);
 
   const s = state;
 
@@ -50,9 +63,9 @@ export default function AdminPage() {
       {/* Pestañas */}
       <div className="flex gap-2.5 mb-6 overflow-y-auto scrollbar-hide">
         {TABS.map(t => (
-          <button key={t.key} className={`px-5 py-3 border-2 border-gray-200 bg-white rounded-xl text-sm font-semibold text-gray-500 cursor-pointer transition-all duration-300 flex items-center gap-2
-            ${s.activeTab === t.key ? 'bg-white text-black border-black' : 'hover:border-gray-400 hover:text-gray-700'}`}
-            onClick={() => admin.switchTab(t.key as never)}>
+          <button key={t.key} className={`px-5 py-3 border-2 border-gray-200 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] rounded-xl text-sm font-semibold text-gray-500 dark:text-[var(--text-secondary)] cursor-pointer transition-all duration-300 flex items-center gap-2
+            ${s.activeTab === t.key ? 'bg-white dark:bg-[var(--bg-card)] text-black dark:text-[var(--text-primary)] border-black dark:border-[var(--text-primary)]' : 'hover:border-gray-400 dark:hover:border-[var(--text-primary)] hover:text-gray-700 dark:hover:text-[var(--text-primary)]'}`}
+            onClick={() => handleSwitchTab(t.key)}>
             {t.icon}{t.label}
           </button>
         ))}
