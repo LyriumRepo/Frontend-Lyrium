@@ -922,13 +922,9 @@ export default function CustomerOrdersPage() {
               className={selectClass}
             >
               <option value="">Todos</option>
-              <option value="Vida Natural Perú">Vida Natural Perú</option>
-              <option value="Tech Store Lima">Tech Store Lima</option>
-              <option value="Moda & Estilo">Moda & Estilo</option>
-              <option value="Clínica Dental Pro">Clínica Dental Pro</option>
-              <option value="Centro Estético Lyra">Centro Estético Lyra</option>
-              <option value="Centro Médico Sur">Centro Médico Sur</option>
-              <option value="Fisioterapia Plus">Fisioterapia Plus</option>
+              {Array.from(new Set(orders.map(o => o.tienda).filter(Boolean))).sort().map(tienda => (
+                <option key={tienda} value={tienda}>{tienda}</option>
+              ))}
             </select>
           </div>
 
@@ -1482,6 +1478,7 @@ export default function CustomerOrdersPage() {
                     router.push(`/customer/chat?conversation=${result.conversationId}`);
                   } catch (err) {
                     console.error('Error al solicitar comprobante:', err);
+                    alert('No se pudo abrir el chat con el vendedor. Intenta nuevamente.');
                   }
                 }}
                 className="w-full py-5 rounded-2xl bg-gradient-to-r from-amber-400 to-orange-500 dark:from-[var(--brand-green)] dark:to-[var(--brand-green-hover)] text-white font-black text-xs uppercase tracking-[0.2em] hover:shadow-lg hover:shadow-amber-200 transition-all flex items-center justify-center gap-3"

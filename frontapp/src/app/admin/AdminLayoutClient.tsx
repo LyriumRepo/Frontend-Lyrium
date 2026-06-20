@@ -20,7 +20,7 @@ export function AdminLayoutClient({ children }: AdminLayoutClientProps) {
             sidebarOpen={sidebarOpen}
             onSidebarClose={closeSidebar}
             className="bg-[var(--bg-secondary)]"
-            mainClassName="p-6 md:p-8"
+            mainClassName="p-3 sm:p-5 md:p-6 lg:p-8"
         >
             {children}
         </DashboardLayout>

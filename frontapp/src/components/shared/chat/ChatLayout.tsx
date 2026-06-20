@@ -25,9 +25,9 @@ export default function ChatLayout({
   const detailWidth = detailWidthMap[listWidth];
 
   return (
-    <div className={`grid grid-cols-12 ${CHAT_CONFIG.spacing.gap} h-full min-h-0`}>
+    <div className={`flex flex-col sm:grid sm:grid-cols-12 ${CHAT_CONFIG.spacing.gap} h-full min-h-0 overflow-hidden`}>
       <div className={`
-        ${listWidth}
+        h-[38%] sm:h-full sm:${listWidth}
         bg-[var(--bg-card)]
         rounded-[2.5rem]
         border
@@ -36,13 +36,14 @@ export default function ChatLayout({
         overflow-hidden
         flex
         flex-col
+        min-h-0
       `}>
         <div className="h-1 w-full shrink-0 bg-gradient-to-r from-[#9cb04e] via-[#64c695] to-[#499bbf] rounded-t-[2.5rem]" />
         {list}
       </div>
 
       <div className={`
-        ${detailWidth}
+        flex-1 min-h-0 sm:flex-none sm:${detailWidth}
         rounded-[2.5rem]
         border
         border-[var(--border-subtle)]
@@ -50,7 +51,6 @@ export default function ChatLayout({
         overflow-hidden
         flex
         flex-col
-        min-h-0
       `}
         style={{ background: 'linear-gradient(160deg, color-mix(in srgb,#9cb04e 6%,var(--bg-card)) 0%, var(--bg-card) 45%, color-mix(in srgb,#499bbf 5%,var(--bg-card)) 100%)' }}
       >

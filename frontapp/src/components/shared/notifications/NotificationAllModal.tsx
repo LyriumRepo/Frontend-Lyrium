@@ -1,9 +1,12 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Bell, X } from 'lucide-react';
 import { useNotifications } from '@/shared/lib/context/NotificationContext';
+import { useAuth } from '@/shared/lib/context/AuthContext';
 import { ProactiveNotification } from '@/shared/types/notifications';
+import { resolveNotificationRoute } from '@/shared/lib/notifications/resolveNotificationRoute';
 
 interface Props {
     onClose: () => void;
@@ -21,6 +24,17 @@ function levelDotClass(level: ProactiveNotification['level']): string {
 
 export default function NotificationAllModal({ onClose }: Props) {
     const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
+    const { user } = useAuth();
+    const router = useRouter();
+
+    const handleRowClick = (n: ProactiveNotification) => {
+        if (!n.read) markAsRead(n.id);
+        if (n.action) {
+            const route = resolveNotificationRoute(n.action.type, n.action.id, user?.role);
+            router.push(route);
+            onClose();
+        }
+    };
 
     useEffect(() => {
         const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
@@ -97,9 +111,9 @@ export default function NotificationAllModal({ onClose }: Props) {
                                         key={n.id}
                                         role="button"
                                         tabIndex={0}
-                                        onKeyDown={(e) => e.key === 'Enter' && !n.read && markAsRead(n.id)}
-                                        className={`flex gap-4 px-6 py-4 cursor-pointer transition-colors hover:bg-[var(--bg-secondary)] ${!n.read ? 'bg-[var(--bg-secondary)]/50' : ''}`}
-                                        onClick={() => { if (!n.read) markAsRead(n.id); }}
+                                        onKeyDown={(e) => e.key === 'Enter' && handleRowClick(n)}
+                                        className={`flex gap-4 px-6 py-4 transition-colors hover:bg-[var(--bg-secondary)] ${!n.read ? 'bg-[var(--bg-secondary)]/50' : ''} ${n.action ? 'cursor-pointer' : 'cursor-default'}`}
+                                        onClick={() => handleRowClick(n)}
                                     >
                                         {/* Unread dot */}
                                         <div className="flex-shrink-0 pt-1.5">
@@ -118,9 +132,16 @@ export default function NotificationAllModal({ onClose }: Props) {
                                                     {n.message}
                                                 </p>
                                             )}
-                                            <p className="text-[10px] text-[var(--text-secondary)] mt-1.5 opacity-60 font-medium">
-                                                {n.time}
-                                            </p>
+                                            <div className="flex items-center gap-3 mt-1.5">
+                                                <p className="text-[10px] text-[var(--text-secondary)] opacity-60 font-medium">
+                                                    {n.time}
+                                                </p>
+                                                {n.action && (
+                                                    <span className="text-[10px] font-black text-indigo-500 uppercase tracking-wider">
+                                                        {n.action.label} →
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
                                     </li>
                                 ))}

@@ -164,6 +164,156 @@ function mapApiNotificationToProactive(notification: Notification): ProactiveNot
                 action = { type: 'store', id: notification.store_id, label: 'Ver tienda' };
             }
             break;
+        case 'booking_cancelled':
+        case 'BookingCancelledNotification':
+            level = 'WARNING';
+            title = '❌ Reserva cancelada';
+            message = notification.service_name
+                ? `La reserva para ${notification.service_name} fue cancelada`
+                : (notification.subject ?? 'Una reserva fue cancelada');
+            action = { type: 'orders', label: 'Ver pedidos' };
+            break;
+        case 'order_cancelled':
+        case 'OrderCancelledSellerNotification':
+        case 'order_cancelled_customer':
+        case 'OrderCancelledCustomerNotification':
+            level = 'WARNING';
+            title = '❌ Pedido cancelado';
+            message = notification.subject ?? 'Un pedido fue cancelado';
+            if (notification.order_id) {
+                action = { type: 'orders', id: notification.order_id, label: 'Ver pedido' };
+            }
+            break;
+        case 'payment_confirmed':
+        case 'OrderPaymentConfirmedNotification':
+            level = 'INFO';
+            title = '💳 Pago confirmado';
+            message = notification.subject ?? 'El pago de tu pedido fue confirmado';
+            if (notification.order_id) {
+                action = { type: 'orders', id: notification.order_id, label: 'Ver pedido' };
+            }
+            break;
+        case 'product_status_changed':
+        case 'ProductStatusNotification':
+            level = 'INFO';
+            title = '📦 Estado de producto actualizado';
+            message = notification.subject ?? 'El estado de tu producto ha cambiado';
+            action = { type: 'products', label: 'Ver productos' };
+            break;
+        case 'product_pending_review':
+        case 'ProductPendingReviewNotification':
+            level = 'WARNING';
+            title = '🔍 Producto pendiente de revisión';
+            message = notification.subject ?? 'Un producto está esperando aprobación';
+            action = { type: 'products', label: 'Revisar producto' };
+            break;
+        case 'service_status_changed':
+        case 'ServiceStatusNotification':
+            level = 'INFO';
+            title = '🛠️ Estado de servicio actualizado';
+            message = notification.subject ?? 'El estado de tu servicio ha cambiado';
+            action = { type: 'services', label: 'Ver servicios' };
+            break;
+        case 'service_pending_review':
+        case 'ServicePendingReviewNotification':
+            level = 'WARNING';
+            title = '🔍 Servicio pendiente de revisión';
+            message = notification.subject ?? 'Un servicio está esperando aprobación';
+            action = { type: 'services', label: 'Revisar servicio' };
+            break;
+        case 'stock_alert':
+        case 'StockAlertNotification':
+            level = 'CRITICAL';
+            title = '⚠️ Alerta de stock bajo';
+            message = notification.subject ?? 'Un producto tiene stock bajo';
+            action = { type: 'products', label: 'Ver productos' };
+            break;
+        case 'plan_activated':
+        case 'PlanActivatedNotification':
+            level = 'INFO';
+            title = '🎉 Plan activado';
+            message = notification.subject ?? 'Tu plan ha sido activado exitosamente';
+            action = { type: 'plans', label: 'Ver mi plan' };
+            break;
+        case 'plan_expiring':
+        case 'PlanExpiringNotification':
+            level = 'WARNING';
+            title = '⏰ Plan por vencer';
+            message = notification.subject ?? 'Tu plan está próximo a vencer';
+            action = { type: 'plans', label: 'Renovar plan' };
+            break;
+        case 'plan_rejected':
+        case 'PlanRejectedNotification':
+            level = 'CRITICAL';
+            title = '❌ Plan rechazado';
+            message = notification.subject ?? 'Tu solicitud de plan fue rechazada';
+            action = { type: 'plans', label: 'Ver detalles' };
+            break;
+        case 'new_plan_request':
+        case 'NewPlanRequestNotification':
+            level = 'WARNING';
+            title = '📋 Nueva solicitud de plan';
+            message = notification.subject ?? 'Una tienda solicitó un cambio de plan';
+            action = { type: 'plans', label: 'Revisar solicitud' };
+            break;
+        case 'pending_stores_overdue':
+        case 'PendingStoreOverdueNotification':
+            level = 'CRITICAL';
+            title = '🏪 Tiendas pendientes vencidas';
+            message = notification.subject ?? 'Hay tiendas con solicitud de aprobación vencida';
+            action = { type: 'store', label: 'Ver tiendas' };
+            break;
+        case 'birthday':
+        case 'BirthdayNotification':
+            level = 'INFO';
+            title = '🎂 ¡Feliz cumpleaños!';
+            message = notification.subject ?? '¡Feliz cumpleaños! Lyrium te desea un gran día';
+            break;
+        case 'birthday_advance':
+        case 'BirthdayAdvanceNotification':
+            level = 'INFO';
+            title = '🎁 Tu cumpleaños se acerca';
+            message = notification.subject ?? 'Tu cumpleaños está próximo. ¡Prepárate para una sorpresa!';
+            break;
+        case 'new_review':
+        case 'NewReviewNotification':
+            level = 'INFO';
+            title = '⭐ Nueva reseña recibida';
+            message = notification.subject ?? 'Recibiste una nueva reseña en tu producto';
+            action = { type: 'products', label: 'Ver reseñas' };
+            break;
+        case 'new_seller_registration':
+        case 'NewSellerRegistrationNotification':
+            level = 'WARNING';
+            title = '🏪 Nuevo vendedor registrado';
+            message = notification.subject ?? 'Un nuevo vendedor solicita aprobación';
+            if (notification.store_id) {
+                action = { type: 'store', id: notification.store_id, label: 'Revisar tienda' };
+            }
+            break;
+        case 'shipment_status':
+        case 'ShipmentStatusNotification':
+            level = 'INFO';
+            title = '📦 Estado de envío actualizado';
+            message = notification.subject ?? 'El estado de tu envío ha cambiado';
+            if (notification.order_id) {
+                action = { type: 'orders', id: notification.order_id, label: 'Ver pedido' };
+            }
+            break;
+        case 'commission_generated':
+        case 'CommissionGeneratedNotification':
+            level = 'INFO';
+            title = '💰 Venta procesada';
+            message = notification.subject ?? 'Una venta fue procesada y la comisión calculada';
+            action = { type: 'invoices', label: 'Ver finanzas' };
+            break;
+        case 'coupon_expiring':
+        case 'CouponExpiringNotification':
+            level = 'WARNING';
+            title = '🎟️ Cupón por vencer';
+            message = notification.subject ?? 'Un cupón activo está próximo a vencer';
+            action = { type: 'plans', label: 'Gestionar cupones' };
+            break;
         default:
             level = 'INFO';
             title = 'Notificación';

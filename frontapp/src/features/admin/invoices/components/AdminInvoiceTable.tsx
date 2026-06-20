@@ -25,9 +25,62 @@ function formatCommission(rate: number | null, amount: number | null): string {
 }
 
 export default function AdminInvoiceTable({ invoices, onViewDetail }: Props) {
+    const emptyState = (
+        <div className="flex flex-col items-center gap-4 text-[var(--text-secondary)] py-20">
+            <Icon name="FileX" className="w-12 h-12 opacity-30" />
+            <div className="font-black uppercase text-xs tracking-widest">
+                No se encontraron comprobantes
+            </div>
+        </div>
+    );
+
     return (
         <div className="glass-card overflow-hidden animate-fadeIn">
-            <div className="overflow-x-auto no-scrollbar">
+            {/* ── Vista mobile: cards (oculta en sm+) ── */}
+            <div className="sm:hidden divide-y divide-[var(--border-subtle)]">
+                {invoices.length === 0 ? emptyState : invoices.map((inv) => {
+                    const type = typeConfig[inv.type] ?? typeConfig.FACTURA;
+                    const storeName = inv.stores[0]?.name ?? '—';
+                    return (
+                        <div key={inv.id} className="p-4 flex items-start gap-3">
+                            <div className={`w-10 h-10 ${type.bg} rounded-xl flex items-center justify-center ${type.text} shrink-0 mt-0.5`}>
+                                <Icon name={type.icon} className="w-4 h-4" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <div className="flex items-center justify-between gap-2">
+                                    <p className="text-sm font-bold text-[var(--text-primary)] truncate">{inv.seller_name || '—'}</p>
+                                    <BaseStatusBadge
+                                        status={inv.sunat_status}
+                                        mappings={VOUCHER_STATUS_MAPPINGS}
+                                        variant="default"
+                                        customClass="shrink-0"
+                                    />
+                                </div>
+                                <p className="text-[10px] text-[var(--text-secondary)] truncate">{storeName}</p>
+                                <div className="flex items-center gap-3 mt-1.5 flex-wrap">
+                                    <span className={`text-[10px] font-black uppercase px-1.5 py-0.5 rounded-md ${type.bg} ${type.text}`}>{inv.type}</span>
+                                    <span className="text-xs font-mono text-[var(--text-secondary)]">{inv.series}-{inv.number}</span>
+                                    <span className="text-xs font-black text-[var(--text-primary)]">{formatCurrency(inv.order_total)}</span>
+                                    <span className="text-[10px] text-amber-600 dark:text-amber-400 font-bold">{formatCommission(inv.commission_rate, inv.commission_amount)}</span>
+                                </div>
+                                <div className="flex items-center justify-between mt-2">
+                                    <span className="text-[10px] text-[var(--text-secondary)]">{new Date(inv.emission_date).toLocaleDateString('es-PE')}</span>
+                                    <button
+                                        onClick={() => onViewDetail(inv)}
+                                        className="flex items-center gap-1 text-[10px] font-black text-[var(--text-secondary)] hover:text-emerald-600 transition-colors"
+                                    >
+                                        <Icon name="Eye" className="w-3.5 h-3.5" />
+                                        Ver
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+
+            {/* ── Vista desktop: tabla (oculta en mobile) ── */}
+            <div className="hidden sm:block overflow-x-auto no-scrollbar">
                 <table className="w-full text-left">
                     <thead>
                         <tr className="bg-[var(--bg-secondary)]/50 border-b border-[var(--border-subtle)] text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">
@@ -44,13 +97,8 @@ export default function AdminInvoiceTable({ invoices, onViewDetail }: Props) {
                     <tbody className="divide-y divide-[var(--border-subtle)] text-[var(--text-primary)]">
                         {invoices.length === 0 ? (
                             <tr>
-                                <td colSpan={8} className="px-6 py-20 text-center">
-                                    <div className="flex flex-col items-center gap-4 text-[var(--text-secondary)]">
-                                        <Icon name="FileX" className="w-12 h-12 opacity-30" />
-                                        <div className="font-black uppercase text-xs tracking-widest">
-                                            No se encontraron comprobantes
-                                        </div>
-                                    </div>
+                                <td colSpan={8} className="px-6">
+                                    {emptyState}
                                 </td>
                             </tr>
                         ) : (

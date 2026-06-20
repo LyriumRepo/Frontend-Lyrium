@@ -21,7 +21,7 @@ export function BlogArticlesClient() {
     const [previewHtml, setPreviewHtml] = useState<string | null>(null);
     const editorRef = useRef<HTMLDivElement>(null);
 
-    const fetch = useCallback(async () => {
+    const loadArticles = useCallback(async () => {
         setLoading(true); setError(null);
         try {
             const params: any = { per_page: 50 };
@@ -32,7 +32,7 @@ export function BlogArticlesClient() {
         } catch (e: any) { setError(e.message); } finally { setLoading(false); }
     }, [search, statusFilter]);
 
-    useEffect(() => { fetch(); }, [fetch]);
+    useEffect(() => { loadArticles(); }, [loadArticles]);
 
     const openCreate = () => {
         setEditingId(null); setError(null); setPreviewHtml(null);
@@ -53,13 +53,13 @@ export function BlogArticlesClient() {
             const payload = { ...form, status, blog_category_id: form.blog_category_id || null, slug: form.slug || undefined };
             if (editingId) await blogApi.articles.update(editingId, payload);
             else await blogApi.articles.create(payload);
-            setShowEditor(false); fetch();
+            setShowEditor(false); loadArticles();
         } catch (e: any) { setError(e.message); } finally { setSaving(false); }
     };
 
     const handleDelete = async (id: number) => {
         if (!confirm('¿Eliminar este artículo?')) return;
-        try { await blogApi.articles.delete(id); fetch(); } catch (e: any) { setError(e.message); }
+        try { await blogApi.articles.delete(id); loadArticles(); } catch (e: any) { setError(e.message); }
     };
 
     const handleUploadImage = async (file: File): Promise<string> => {

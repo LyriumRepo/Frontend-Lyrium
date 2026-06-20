@@ -121,14 +121,14 @@ export default function SmartSidebar({
     };
 
     // Renderizado optimizado para evitar saltos de hidratación
-    if (!isMounted) return <aside className="w-20 lg:w-72 h-screen border-r border-[var(--border-subtle)] bg-[var(--bg-sidebar)]" />;
+    if (!isMounted) return <aside className="w-20 lg:w-72 h-[100dvh] border-r border-[var(--border-subtle)] bg-[var(--bg-sidebar)]" />;
 
     return (
         <>
             <aside
                 className={`
                     fixed inset-y-0 left-0 z-[60] bg-[var(--bg-sidebar)] border-r ${colors.border} flex flex-col transition-all duration-500 ease-in-out
-                    lg:sticky lg:top-0 lg:z-40 h-screen font-industrial
+                    lg:sticky lg:top-0 lg:z-40 h-[100dvh] font-industrial
                     ${isExpanded ? 'lg:w-72' : 'lg:w-20'}
                     ${isMobileOpen ? 'translate-x-0 w-72' : '-translate-x-full lg:translate-x-0 w-72 lg:w-auto'}
                 `}

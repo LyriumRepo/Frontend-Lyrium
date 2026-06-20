@@ -210,7 +210,7 @@ export function RapifacPageClient() {
         <>
             <DetailModal inv={detailInv} isOpen={detailInv !== null} onClose={() => setDetailInv(null)} />
 
-            <main className="p-8 space-y-8 animate-fadeIn">
+            <main className="p-4 sm:p-8 space-y-8 animate-fadeIn">
                 <ModuleHeader
                     title="Facturación Electrónica"
                     subtitle="Comprobantes electrónicos emitidos via Nubefact — SUNAT"
@@ -237,7 +237,7 @@ export function RapifacPageClient() {
                     </div>
                 ) : (
                     <>
-                        <div className="flex justify-end items-center gap-3">
+                        <div className="flex flex-wrap justify-end items-center gap-3">
                             <BaseButton onClick={() => refresh()} variant="ghost" leftIcon="RefreshCw" size="md">
                                 Sincronizar
                             </BaseButton>
@@ -272,7 +272,7 @@ export function RapifacPageClient() {
                         </div>
 
                         <div className="bg-white dark:bg-[var(--bg-card)] rounded-[2.5rem] border border-gray-100 dark:border-[var(--border-subtle)] shadow-sm overflow-hidden flex flex-col">
-                            <div className="p-8 border-b border-gray-50 dark:border-[var(--border-subtle)] space-y-5 bg-gray-50/30 dark:bg-[var(--bg-muted)]/50">
+                            <div className="p-4 sm:p-8 border-b border-gray-50 dark:border-[var(--border-subtle)] space-y-5 bg-gray-50/30 dark:bg-[var(--bg-muted)]/50">
                                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                                     <div>
                                         <h3 className="text-xl font-black text-gray-900 dark:text-[var(--text-primary)] tracking-tight">

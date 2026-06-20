@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, ReactNode } from 'react';
+import React, { useEffect, ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
 import Footer from '@/components/layout/shared/Footer';
 
@@ -24,7 +24,7 @@ export default function BaseLayout({
     mainClassName = 'p-6 md:p-8'
 }: BaseLayoutProps) {
     const pathname = usePathname();
-    const isImmersiveHelpdeskRoute = pathname === '/seller/help' || pathname === '/admin/helpdesk';
+    const isImmersiveHelpdeskRoute = pathname === '/seller/help' || pathname === '/admin/helpdesk' || pathname === '/seller/chat';
 
     useEffect(() => {
         onSidebarClose();
@@ -38,13 +38,26 @@ export default function BaseLayout({
         return () => window.removeEventListener('keydown', handleEsc);
     }, [onSidebarClose]);
 
+    // Immersive routes need body to have a definite height so the flex-1 chain
+    // inside can resolve h-full / flex-1 correctly and enable internal scroll.
+    useEffect(() => {
+        if (!isImmersiveHelpdeskRoute) return;
+        const prev = { overflow: document.body.style.overflow, height: document.body.style.height };
+        document.body.style.overflow = 'hidden';
+        document.body.style.height = '100dvh';
+        return () => {
+            document.body.style.overflow = prev.overflow;
+            document.body.style.height = prev.height;
+        };
+    }, [isImmersiveHelpdeskRoute]);
+
     return (
-        <div className={`min-h-screen ${className} flex flex-col`}>
+        <div className={`${isImmersiveHelpdeskRoute ? 'h-full' : 'min-h-screen'} ${className} flex flex-col`}>
             {header}
             <div className="relative mx-auto flex w-full max-w-[1920px] flex-1 min-h-0">
                 {sidebar}
-                <main className={`flex-1 min-h-0 overflow-x-hidden ${isImmersiveHelpdeskRoute ? 'overflow-y-hidden' : ''} ${mainClassName}`}>
-                    <div className="h-full min-h-0 animate-fadeIn">
+                <main className={`flex flex-col flex-1 min-h-0 overflow-x-hidden ${isImmersiveHelpdeskRoute ? 'overflow-y-hidden !p-0' : ''} ${mainClassName}`}>
+                    <div className={`animate-fadeIn ${isImmersiveHelpdeskRoute ? 'flex flex-col flex-1 min-h-0' : 'h-full min-h-0'}`}>
                         {children}
                     </div>
                 </main>

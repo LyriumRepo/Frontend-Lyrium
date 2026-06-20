@@ -69,6 +69,7 @@ export default function SellerReservasPage() {
   const [bookings, setBookings] = useState<BookingResponse[]>([]);
   const [specialists, setSpecialists] = useState<SpecialistRating[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [completingId, setCompletingId] = useState<number | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -82,7 +83,7 @@ export default function SellerReservasPage() {
         setBookings(bookingsRes.data ?? []);
         setSpecialists(specialistsRes.data ?? []);
       })
-      .catch(() => {})
+      .catch((e: Error) => setLoadError(e.message || 'Error al cargar las reservas'))
       .finally(() => setLoading(false));
   }, []);
 
@@ -165,6 +166,14 @@ export default function SellerReservasPage() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <Loader2 className="w-10 h-10 animate-spin text-sky-500" />
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="p-6 text-center text-red-500 bg-red-50 dark:bg-red-900/20 rounded-2xl">
+        {loadError}
       </div>
     );
   }

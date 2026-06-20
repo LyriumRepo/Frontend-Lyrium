@@ -138,8 +138,8 @@ export default function BaseStatCard({
 
           {trend && (
             <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ${trend.isPositive ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 border-emerald-100 dark:border-emerald-800' : 'bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 border-rose-100 dark:border-rose-800'}`}>
-              <Icon name={trend.isPositive ? 'TrendingUp' : 'AlertCircle'} className="w-3 h-3" />
-              {trend.value}
+              <Icon name={trend.isPositive ? 'TrendingUp' : 'TrendingDown'} className="w-3 h-3" />
+              {trend.isPositive ? '+' : '-'}{typeof trend.value === 'number' ? trend.value.toFixed(1) : trend.value}%
             </div>
           )}
         </div>

@@ -98,7 +98,7 @@ export function CategoriesPageClient() {
             />
 
             {/* Stats */}
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 {[
                     { label: 'Total', value: totalCount, color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300' },
                     { label: 'Nivel 1', value: level1Count, color: 'bg-sky-50 dark:bg-sky-900/20 text-sky-700 dark:text-sky-400' },
@@ -124,7 +124,7 @@ export function CategoriesPageClient() {
             {showNewForm && (
                 <div className="bg-white dark:bg-[var(--bg-secondary)] p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
                     <h3 className="text-sm font-bold text-gray-800 dark:text-gray-200 mb-4">Nueva Categoria</h3>
-                    <div className="grid grid-cols-4 gap-4 items-end">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
                         <div>
                             <label className="block text-xs font-semibold text-gray-500 mb-1">Nombre</label>
                             <input
@@ -187,9 +187,9 @@ export function CategoriesPageClient() {
             {loading && categoryTree.length === 0 ? (
                 <div className="p-20 text-center text-gray-400">Cargando categorias...</div>
             ) : (
-                <div className="grid grid-cols-12 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                     {/* Tree */}
-                    <div className="col-span-5 bg-white dark:bg-[var(--bg-secondary)] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
+                    <div className="lg:col-span-5 bg-white dark:bg-[var(--bg-secondary)] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
                         <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
                             <div className="flex items-center gap-2">
                                 <Layers className="w-4 h-4 text-sky-500" />
@@ -197,7 +197,7 @@ export function CategoriesPageClient() {
                             </div>
                             <span className="text-xs text-gray-400">{totalCount} categorias</span>
                         </div>
-                        <div className="p-3 max-h-[calc(100vh-380px)] overflow-y-auto">
+                        <div className="p-3 max-h-[40vh] sm:max-h-[50vh] lg:max-h-[calc(100vh-380px)] overflow-y-auto">
                             <CategoryTree
                                 tree={categoryTree}
                                 selectedId={selectedCategoryId}
@@ -207,7 +207,7 @@ export function CategoriesPageClient() {
                     </div>
 
                     {/* Form */}
-                    <div className="col-span-7 bg-white dark:bg-[var(--bg-secondary)] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-6">
+                    <div className="lg:col-span-7 bg-white dark:bg-[var(--bg-secondary)] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-6">
                         <CategoryForm
                             category={selectedCategory}
                             parentOptions={parentOptions}

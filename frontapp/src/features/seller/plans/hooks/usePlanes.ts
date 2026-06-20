@@ -322,7 +322,9 @@ export function usePlanes() {
   const openPaymentModal = useCallback(async (plan: string) => {
     const planData = state.plansData[plan];
     if (!planData) { showNotification('Plan no encontrado', '#ef4444'); return; }
-    update({ selectedPaymentPlan: plan });
+    // Si el plan requiere pago, iniciar en '1m' para que el botón muestre Izipay, no trial
+    const defaultPreset = planData.requiresPayment ? '1m' : 'trial';
+    update({ selectedPaymentPlan: plan, selectedPresetId: defaultPreset });
     setModal('payment', true);
   }, [showNotification, state.plansData, setModal, update]);
 
@@ -362,7 +364,27 @@ export function usePlanes() {
     try {
       const numericPlanId = slugToNumericIdMap[selectedPaymentPlan] ?? 1;
       const session = await createIzipayPlanSession({ plan_id: numericPlanId, months: totalMonths });
-      if (session.success && session.form_token && session.public_key && session.izipay_order_id) {
+
+      if (!session.success) {
+        showNotification(session.message ?? 'Error al iniciar el pago con Izipay', '#ef4444');
+        return null;
+      }
+
+      // Modo simulación (backend sin credenciales Izipay reales):
+      // el backend ya aprobó el PlanRequest automáticamente — solo refrescar UI.
+      if (session.mode === 'mock') {
+        const planNom = data.name;
+        setState(prev => ({
+          ...prev,
+          sentText: `<strong>🧪 Pago simulado confirmado</strong><br><br>Tu plan <strong>${planNom}</strong> fue activado en <strong>modo prueba</strong>.<br><br><span style="color:#6b7280;font-size:13px;">Configura las credenciales Izipay en producción para pagos reales.</span>`,
+          pendingUIRefresh: true,
+          modals: { ...prev.modals, payment: false, requestSent: true },
+        }));
+        await initialize();
+        return null;
+      }
+
+      if (session.form_token && session.public_key && session.izipay_order_id) {
         setState(prev => ({
           ...prev,
           izipayConfig: {
@@ -373,7 +395,7 @@ export function usePlanes() {
           modals: { ...prev.modals, payment: false, izipayPay: true },
         }));
       } else {
-        showNotification(session.message ?? 'Error al iniciar el pago con Izipay', '#ef4444');
+        showNotification('Respuesta de pago incompleta. Intenta más tarde.', '#ef4444');
       }
     } catch (error) {
       console.error('[usePlanes] Izipay session error:', error);

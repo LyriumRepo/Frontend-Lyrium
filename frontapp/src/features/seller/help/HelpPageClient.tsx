@@ -347,15 +347,18 @@ export function HelpPageClient() {
     const [showNewTicketForm, setShowNewTicketForm] = useState(false);
     const [showLegend, setShowLegend] = useState(false);
     const [ticketError, setTicketError] = useState<string | null>(null);
+    const [mobileShowChat, setMobileShowChat] = useState(false);
 
     if (isLoading) {
         return (
-            <div className="flex flex-col h-[calc(100vh-140px)] animate-fadeIn">
-                <ModuleHeader
-                    title="Soporte Lyrium"
-                    subtitle="Centro de soporte y gestión de incidencias"
-                    icon="Headset"
-                />
+            <div className="flex flex-col flex-1 min-h-0 animate-fadeIn">
+                <div className="shrink-0 [&>div]:!mb-3">
+                    <ModuleHeader
+                        title="Soporte Lyrium"
+                        subtitle="Centro de soporte y gestión de incidencias"
+                        icon="Headset"
+                    />
+                </div>
                 <div className="flex-1 flex items-center justify-center">
                     <BaseLoading message="Cargando tickets de soporte..." />
                 </div>
@@ -364,44 +367,48 @@ export function HelpPageClient() {
     }
 
     return (
-        <div className="flex flex-col h-[calc(100vh-140px)] animate-fadeIn">
-            <ModuleHeader
-                title="Soporte Lyrium"
-                subtitle="Centro de soporte y gestión de incidencias"
-                icon="Headset"
-                actions={
-                    !showNewTicketForm && !activeTicket ? (
-                        <div className="flex items-center gap-2">
-                            <button
-                                onClick={() => setShowLegend(true)}
-                                title="Leyenda"
-                                className="w-9 h-9 flex items-center justify-center rounded-xl bg-white dark:bg-[var(--bg-secondary)] border border-[var(--border-subtle)] text-gray-500 dark:text-[var(--text-secondary)] hover:text-[var(--turquesa-500)] dark:hover:text-[var(--icons-green)] hover:border-[var(--turquesa-500)] dark:hover:border-[var(--icons-green)] transition-all shadow-sm"
-                            >
-                                <Icon name="Info" className="w-4 h-4" />
-                            </button>
-                            <button
-                                onClick={() => { setShowNewTicketForm(true); setTicketError(null); }}
-                                className="px-4 py-2 bg-white dark:bg-[var(--bg-secondary)] text-[var(--turquesa-500)] rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-[var(--turquesa-500)]/10 transition-colors border border-[var(--border-subtle)] shadow-sm"
-                            >
-                                + Nuevo Ticket
-                            </button>
-                        </div>
-                    ) : null
-                }
-            />
+        <div className="flex flex-col flex-1 min-h-0 animate-fadeIn">
+            <div className="shrink-0 [&>div]:!mb-3">
+                <ModuleHeader
+                    title="Soporte Lyrium"
+                    subtitle="Centro de soporte y gestión de incidencias"
+                    icon="Headset"
+                    actions={
+                        !showNewTicketForm ? (
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => setShowLegend(true)}
+                                    title="Leyenda"
+                                    className="w-9 h-9 flex items-center justify-center rounded-xl bg-white dark:bg-[var(--bg-secondary)] border border-[var(--border-subtle)] text-gray-500 dark:text-[var(--text-secondary)] hover:text-[var(--turquesa-500)] dark:hover:text-[var(--icons-green)] hover:border-[var(--turquesa-500)] dark:hover:border-[var(--icons-green)] transition-all shadow-sm"
+                                >
+                                    <Icon name="Info" className="w-4 h-4" />
+                                </button>
+                                {!activeTicket && (
+                                <button
+                                    onClick={() => { setShowNewTicketForm(true); setTicketError(null); }}
+                                    className="px-4 py-2 bg-white dark:bg-[var(--bg-secondary)] text-[var(--turquesa-500)] rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-[var(--turquesa-500)]/10 transition-colors border border-[var(--border-subtle)] shadow-sm"
+                                >
+                                    + Nuevo Ticket
+                                </button>
+                                )}
+                            </div>
+                        ) : null
+                    }
+                />
+            </div>
 
-            <div className="flex-1 flex gap-6 overflow-hidden">
+            <div className="flex-1 flex gap-4 md:gap-6 overflow-hidden">
                 {!showNewTicketForm && (
-                    <div className="w-96 shrink-0">
+                    <div className={`shrink-0 md:w-80 lg:w-96 ${mobileShowChat ? 'hidden md:flex md:flex-col' : 'flex flex-col w-full'}`}>
                         <TicketList
                             tickets={tickets}
                             activeTicketId={activeTicketId}
-                            onSelect={setActiveTicketId}
+                            onSelect={(id) => { setActiveTicketId(id); setMobileShowChat(true); }}
                         />
                     </div>
                 )}
 
-                <div className="flex-1 min-w-0">
+                <div className={`min-w-0 ${!mobileShowChat && !showNewTicketForm ? 'hidden md:flex md:flex-col flex-1' : 'flex flex-col flex-1'}`}>
                     {showNewTicketForm ? (
                         <NewTicketForm
                             onSubmit={async (data) => {
@@ -422,6 +429,7 @@ export function HelpPageClient() {
                             ticket={toUnifiedHelpTicket(activeTicket)}
                             onSendMessage={({ text }) => handleSendMessage(text)}
                             onCloseTicket={() => handleCloseTicket(activeTicket.id)}
+                            onBack={() => setMobileShowChat(false)}
                             isSending={isSending}
                             isClosing={isClosing}
                             showAdminControls={false}

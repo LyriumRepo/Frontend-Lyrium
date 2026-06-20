@@ -67,6 +67,15 @@ function buildKpiConfig(
   };
 }
 
+function trendOf(arr: number[]): { value: number; isPositive: boolean } | undefined {
+  if (arr.length < 2) return undefined;
+  const last = arr[arr.length - 1] ?? 0;
+  const prev = arr[arr.length - 2] ?? 0;
+  if (prev === 0) return undefined;
+  const pct = Math.abs(((last - prev) / prev) * 100);
+  return { value: parseFloat(pct.toFixed(1)), isPositive: last >= prev };
+}
+
 export function FinancePageClient() {
   const {
     data,
@@ -271,6 +280,7 @@ export function FinancePageClient() {
                 description="Retorno sobre inversión en comisiones"
                 icon="TrendingUp"
                 color="turquesaClaro"
+                trend={trendOf(data.roi.data)}
                 chart={<FinanceChart type="bar" labels={data.roi.labels} data={data.roi.data} color={chartColorMap.roi} />}
                 onClick={() => openStatCard('ROI de Ventas', 'roi', data, 'bar', 'turquesaClaro')}
               />
@@ -284,6 +294,7 @@ export function FinancePageClient() {
                 description="Valor medio por pedido (sin IGV)"
                 icon="Tag"
                 color="turquesa"
+                trend={trendOf(data.ticketPromedio.data)}
                 chart={<FinanceChart type="bar" labels={data.ticketPromedio.labels} data={data.ticketPromedio.data} color={chartColorMap.ticketPromedio} />}
                 onClick={() => openStatCard('Ticket Promedio', 'ticketPromedio', data, 'bar', 'turquesa')}
               />
@@ -294,6 +305,7 @@ export function FinancePageClient() {
                 icon="ShoppingCart"
                 color="azulCeleste"
                 suffix="Ord."
+                trend={trendOf(data.ventasTotales.data)}
                 chart={<FinanceChart type="bar" labels={data.ventasTotales.labels} data={data.ventasTotales.data} color={chartColorMap.ventasTotales} />}
                 onClick={() => openStatCard('Ventas Totales', 'ventasTotales', data, 'bar', 'azulCeleste')}
               />

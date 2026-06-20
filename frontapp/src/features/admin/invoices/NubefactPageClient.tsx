@@ -71,7 +71,7 @@ export function NubefactPageClient(_props: NubefactPageClientProps) {
 
             <AdminInvoiceKPIsDisplay kpis={kpis} />
 
-            <div className="flex justify-end gap-3">
+            <div className="flex flex-wrap justify-end gap-3">
                 <BaseButton onClick={refresh} variant="ghost" leftIcon="RefreshCw" size="md">
                     Sincronizar
                 </BaseButton>

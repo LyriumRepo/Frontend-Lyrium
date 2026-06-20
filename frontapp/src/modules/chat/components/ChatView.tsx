@@ -253,10 +253,7 @@ export function ChatView({
   };
 
   return (
-    <div className="relative flex h-full flex-1 min-h-0 flex-col overflow-hidden border-[var(--border-subtle)] bg-[var(--bg-card)] overscroll-y-none md:rounded-[2rem] md:border md:shadow-[0_18px_45px_-28px_rgba(15,23,42,0.35)] md:dark:shadow-[0_24px_52px_-34px_rgba(0,0,0,0.65)] lg:rounded-[2.5rem]">
-      {/* Barra Lyrium */}
-      <div className="h-1 w-full shrink-0 bg-gradient-to-r from-[#9cb04e] via-[#64c695] to-[#499bbf]" />
-
+    <div className="relative flex flex-col flex-1 min-h-0 w-full overflow-hidden bg-[var(--bg-card)] overscroll-y-none">
       {/* Header */}
       <div className="flex shrink-0 items-center gap-3 border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)]/90 px-3 py-3 backdrop-blur-sm sm:px-4">
         {onBack && (

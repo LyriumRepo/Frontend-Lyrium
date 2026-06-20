@@ -330,7 +330,7 @@ export function ChatPageClient() {
 
     if (isLoading) {
         return (
-            <div className="flex flex-col h-[calc(100vh-140px)] animate-fadeIn">
+            <div className="flex flex-col flex-1 min-h-0 animate-fadeIn">
                 <ModuleHeader
                     title="Chat con Clientes"
                     subtitle="Comunicación directa con tus clientes"
@@ -344,7 +344,7 @@ export function ChatPageClient() {
     }
 
     return (
-        <div className="flex flex-col h-[calc(100vh-140px)] animate-fadeIn">
+        <div className="flex flex-col flex-1 min-h-0 animate-fadeIn">
             <ModuleHeader
                 title="Chat con Clientes"
                 subtitle="Comunicación directa con tus clientes"

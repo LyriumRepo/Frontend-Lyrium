@@ -258,7 +258,7 @@ function VerifyOtpContent() {
                     {!verified ? (
                         <>
                             {/* OTP Input */}
-                            <div className="flex justify-center gap-3 mb-8">
+                            <div className="flex justify-center gap-2 sm:gap-3 mb-8">
                                 {code.map((digit, index) => (
                                     <input
                                         key={index}
@@ -270,7 +270,7 @@ function VerifyOtpContent() {
                                         onChange={(e) => handleChange(index, e.target.value)}
                                         onKeyDown={(e) => handleKeyDown(index, e)}
                                         onPaste={index === 0 ? handlePaste : undefined}
-                                        className="w-14 h-16 text-center text-2xl font-bold border-2 border-slate-200 dark:border-[var(--border-subtle)] rounded-xl bg-slate-50 dark:bg-[var(--bg-primary)] text-slate-900 dark:text-[var(--text-primary)] focus:outline-none focus:border-sky-500 focus:bg-white dark:focus:bg-[var(--bg-secondary)] focus:shadow-[0_0_0_4px_rgba(14,165,233,0.15)] transition-all duration-200"
+                                        className="w-10 h-12 sm:w-14 sm:h-16 text-center text-xl sm:text-2xl font-bold border-2 border-slate-200 dark:border-[var(--border-subtle)] rounded-xl bg-slate-50 dark:bg-[var(--bg-primary)] text-slate-900 dark:text-[var(--text-primary)] focus:outline-none focus:border-sky-500 focus:bg-white dark:focus:bg-[var(--bg-secondary)] focus:shadow-[0_0_0_4px_rgba(14,165,233,0.15)] transition-all duration-200"
                                         aria-label={`Dígito ${index + 1}`}
                                     />
                                 ))}

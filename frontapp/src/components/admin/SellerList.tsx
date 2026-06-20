@@ -199,7 +199,7 @@ const SellerRow = ({
       </td>
 
       {/* Tienda registrada */}
-      <td className="px-4 py-4">
+      <td className="hidden md:table-cell px-4 py-4">
         {seller.store ? (
           <div className="flex items-center gap-2">
             {seller.store.logo ? (
@@ -251,7 +251,7 @@ const SellerRow = ({
       </td>
 
       {/* Seguridad */}
-      <td className="px-4 py-4">
+      <td className="hidden md:table-cell px-4 py-4">
         <div className="space-y-1">
           {/* Contrato */}
           <div className="flex items-center gap-1">
@@ -428,20 +428,11 @@ export default function SellerList({
           <table className="w-full">
             <thead>
               <tr className="border-b border-[var(--border-subtle)]">
-                {[
-                  'Vendedor / Contacto',
-                  'Tienda Registrada',
-                  'Estado',
-                  'Seguridad',
-                  'Acciones',
-                ].map((h) => (
-                  <th
-                    key={h}
-                    className="px-4 py-3 text-left text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest"
-                  >
-                    {h}
-                  </th>
-                ))}
+                <th className="px-4 py-3 text-left text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Vendedor / Contacto</th>
+                <th className="hidden md:table-cell px-4 py-3 text-left text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Tienda Registrada</th>
+                <th className="px-4 py-3 text-left text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Estado</th>
+                <th className="hidden md:table-cell px-4 py-3 text-left text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Seguridad</th>
+                <th className="px-4 py-3 text-left text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--border-subtle)]">

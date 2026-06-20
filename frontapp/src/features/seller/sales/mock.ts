@@ -95,7 +95,8 @@ export const MOCK_ORDERS: Order[] = [
                 endTime: '11:00:00',
                 modality: 'presencial',
                 durationMinutes: 60,
-                serviceBookingId: 'bk-001'
+                serviceBookingId: 'bk-001',
+                bookingStatus: 'pending_seller'
             }
         ]
     },
@@ -154,7 +155,8 @@ export const MOCK_ORDERS: Order[] = [
                 endTime: null,
                 modality: 'domicilio',
                 durationMinutes: 45,
-                serviceBookingId: 'bk-002'
+                serviceBookingId: 'bk-002',
+                bookingStatus: 'pending_seller'
             }
         ]
     }

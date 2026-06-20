@@ -40,7 +40,7 @@ interface TabButtonProps {
 const TabButton = ({ active, onClick, label, icon, badge }: TabButtonProps) => (
   <button
     onClick={onClick}
-    className={`px-8 py-4 rounded-2xl text-[11px] font-black transition-all flex items-center gap-3 relative border ${
+    className={`px-3 sm:px-8 py-2.5 sm:py-4 rounded-2xl text-[10px] sm:text-[11px] font-black transition-all flex items-center gap-2 sm:gap-3 relative border ${
       active
         ? 'bg-[var(--bg-card)] shadow-xl shadow-black/5 text-cyan-500 border-[var(--border-subtle)]'
         : 'text-[var(--text-secondary)] border-transparent hover:bg-[var(--bg-secondary)]'
@@ -311,7 +311,7 @@ export function SellersPageClient(_props: SellersPageClientProps) {
 
   if (loading) {
     return (
-      <div className="px-8 pb-20 space-y-8 animate-fadeIn font-industrial">
+      <div className="px-4 sm:px-8 pb-20 space-y-8 animate-fadeIn font-industrial">
         <ModuleHeader
           title="Control de Vendedores"
           subtitle="Cargando Inteligencia Operativa..."
@@ -326,7 +326,7 @@ export function SellersPageClient(_props: SellersPageClientProps) {
   }
 
   return (
-    <div className="px-8 pb-20 space-y-8 animate-fadeIn font-industrial">
+    <div className="px-4 sm:px-8 pb-20 space-y-8 animate-fadeIn font-industrial">
       <ModuleHeader
         title="Control de Vendedores"
         subtitle="Gestión y supervisión estratégica de vendedores"
@@ -385,7 +385,7 @@ export function SellersPageClient(_props: SellersPageClientProps) {
         {currentTab === 'vendedores' && (
           <div className="space-y-6 animate-fadeIn">
             <StatsOverview stats={{ ...stats, pending: stats.pending }} />
-            <div className="bg-[var(--bg-card)] p-6 rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm flex items-center gap-4">
+            <div className="bg-[var(--bg-card)] p-4 sm:p-6 rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
               <div className="flex-1 relative">
                 <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] w-5 h-5" />
                 <input
@@ -621,7 +621,7 @@ export function SellersPageClient(_props: SellersPageClientProps) {
 
         {currentTab === 'contratos' && (
           <div className="space-y-6 animate-fadeIn">
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6">
               <div>
                 <h2 className="text-xl font-black text-[var(--text-primary)] tracking-tight">
                   Control de Contratación y Organización

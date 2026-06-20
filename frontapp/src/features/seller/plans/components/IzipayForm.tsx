@@ -1,8 +1,4 @@
 'use client';
-// ============================================
-// COMPONENT — IzipayForm
-// Monta e inicializa el SDK KR de Izipay.
-// ============================================
 
 import { useEffect, useRef } from 'react';
 
@@ -48,7 +44,6 @@ function ensureCSS() {
 function loadScript(publicKey: string): Promise<void> {
   return new Promise((resolve) => {
     if (_scriptEl) {
-      // Script ya existe — sólo resolemos; setFormConfig actualizará el token
       resolve();
       return;
     }
@@ -63,7 +58,13 @@ function loadScript(publicKey: string): Promise<void> {
 }
 
 export default function IzipayForm({ config, open, onPaid, onFailed }: Props) {
-  const initDone = useRef(false);
+  const initDone   = useRef(false);
+  const onPaidRef  = useRef(onPaid);
+  const onFailedRef = useRef(onFailed);
+
+  // Mantener refs actualizados sin volver a ejecutar el effect de init
+  useEffect(() => { onPaidRef.current  = onPaid;   });
+  useEffect(() => { onFailedRef.current = onFailed; });
 
   useEffect(() => {
     if (!open || !config) return;
@@ -96,18 +97,19 @@ export default function IzipayForm({ config, open, onPaid, onFailed }: Props) {
 
       if (cancelled) return;
 
-      // Pequeño delay para que el DOM del modal esté completamente pintado
+      // Delay para que el DOM del modal esté completamente pintado
       await new Promise(r => setTimeout(r, 200));
       if (cancelled) return;
 
-      kr.renderElements('#izipayFormContainer');
+      // El SDK inyecta el formulario en el elemento con clase kr-embedded
+      kr.renderElements('.kr-embedded');
 
       kr.onSubmit((paymentData) => {
         const status = paymentData.clientAnswer.orderStatus;
         if (status === 'PAID') {
-          onPaid();
+          onPaidRef.current();
         } else {
-          onFailed();
+          onFailedRef.current();
         }
         return false;
       });
@@ -118,7 +120,10 @@ export default function IzipayForm({ config, open, onPaid, onFailed }: Props) {
     return () => {
       cancelled = true;
     };
-  }, [open, config, onPaid, onFailed]);
+  // onPaid / onFailed se acceden via ref para no re-ejecutar el init al cambiar los callbacks
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, config]);
 
-  return <div className="izipay-form-inner" />;
+  // El SDK de Izipay KR V4 requiere un elemento con class="kr-embedded" donde inyecta el form
+  return <div className="kr-embedded" />;
 }

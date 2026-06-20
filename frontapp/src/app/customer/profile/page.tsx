@@ -406,6 +406,13 @@ export default function CustomerProfilePage() {
     return today.getMonth() + 1 === parts.month && today.getDate() === parts.day;
   }, [formData.fecha_cumpleanos]);
 
+  // Dispara el modal premium de cumpleaños cuando el perfil detecta que es hoy
+  useEffect(() => {
+    if (isBirthday) {
+      window.dispatchEvent(new CustomEvent('lyrium:birthday'));
+    }
+  }, [isBirthday]);
+
   if (loading || !user) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">

@@ -157,7 +157,7 @@ export function PagosPageClient() {
   };
 
   return (
-    <div className="px-8 pb-20 space-y-8 animate-fadeIn font-industrial">
+    <div className="px-4 sm:px-8 pb-20 space-y-8 animate-fadeIn font-industrial">
       <ModuleHeader
         title="Gestión de Pagos"
         subtitle="Monitoreo de transacciones Izipay — CARD, YAPE y PLIN"

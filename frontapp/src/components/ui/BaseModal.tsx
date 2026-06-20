@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import Icon from '@/components/ui/Icon';
 
 interface BaseModalProps {
@@ -57,9 +58,9 @@ export default function BaseModal({
     };
   }, [isOpen, handleKeyDown]);
 
-  if (!isOpen) return null;
+  if (!isOpen || typeof document === 'undefined') return null;
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
@@ -72,33 +73,39 @@ export default function BaseModal({
           bg-[var(--bg-card)] rounded-[2.5rem] shadow-2xl
           border border-[var(--border-subtle)]
           flex flex-col animate-scaleIn my-4
+          max-h-[90vh]
           ${className}
         `}
       >
+        {/* Header fijo */}
         <div
-          className={`relative shrink-0 px-8 pt-8 pb-6 -mx-0 -mt-0 rounded-t-[2.5rem] ${!headerBgColor ? `bg-gradient-to-r ${accentColor}` : ''}`}
+          className={`relative shrink-0 px-8 pt-8 pb-6 rounded-t-[2.5rem] overflow-hidden ${!headerBgColor ? `bg-gradient-to-r ${accentColor}` : ''}`}
           style={headerBgColor ? { background: `linear-gradient(to right, ${headerBgColor}, ${headerBgColor}dd)` } : undefined}
         >
+          {/* gradiente animado del logo Lyrium */}
+          <div className="lyrium-gradient-animated absolute inset-0 rounded-t-[2.5rem]" />
           <button
             onClick={onClose}
-            className="absolute top-6 right-6 w-10 h-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center text-white hover:bg-white/30 transition-all active:scale-90"
+            className="absolute top-5 right-6 z-20 w-10 h-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center text-white hover:bg-white/30 transition-all active:scale-90"
           >
             <Icon name="X" className="w-5 h-5" />
           </button>
-          <div className="pr-12">
-            <h2 className="text-2xl font-black text-white tracking-tight">
+          <div className="relative z-10 pr-12">
+            <h2 className="text-2xl font-black text-white tracking-tight drop-shadow-sm">
               {title}
             </h2>
             {subtitle && (
-              <p className="text-sm text-white/70 font-bold mt-1.5 max-w-md">
+              <p className="text-sm text-white/80 font-bold mt-1.5 max-w-md">
                 {subtitle}
               </p>
             )}
           </div>
         </div>
-        <div className="p-8 overflow-y-auto">{children}</div>
+        {/* Contenido scrolleable dentro del viewport */}
+        <div className="flex-1 min-h-0 overflow-y-auto p-8">{children}</div>
       </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

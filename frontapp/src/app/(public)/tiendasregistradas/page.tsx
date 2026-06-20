@@ -55,9 +55,9 @@ export default function TiendasRegistradasPage() {
           Tiendas Registradas
         </h1>
 
-        <div className="bg-white dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl shadow-xl p-4 md:p-5 flex items-center justify-between gap-3">
+        <div className="bg-white dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl shadow-xl p-4 md:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-4 flex-1">
-            <div className="text-[var(--text-secondary)] dark:text-white/90 font-semibold text-sm md:text-base whitespace-nowrap">
+            <div className="text-[var(--text-secondary)] dark:text-white/90 font-semibold text-sm md:text-base whitespace-nowrap shrink-0">
               Total: <span className="text-[var(--text-primary)] font-extrabold">{stores.length}</span>
             </div>
             <input
@@ -65,11 +65,11 @@ export default function TiendasRegistradasPage() {
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Buscar tienda..."
-              className="flex-1 max-w-xs px-4 py-2 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200 focus:outline-none focus:border-sky-500 transition"
+              className="flex-1 w-full px-4 py-2 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200 focus:outline-none focus:border-sky-500 transition"
             />
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 shrink-0">
             <button
               type="button"
               onClick={() => setViewMode('grid')}

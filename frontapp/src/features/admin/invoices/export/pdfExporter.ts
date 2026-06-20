@@ -3,13 +3,16 @@ import autoTable from 'jspdf-autotable';
 import { saveAs } from 'file-saver';
 import type { AdminInvoiceRow, AdminInvoiceKPIs } from '../hooks/useAdminInvoices';
 
-// ─── Paleta ────────────────────────────────────────────────────────────────
-const BRAND  = [11,  26,  16]  as [number, number, number]; // dark bg
-const GREEN  = [16, 185, 129]  as [number, number, number]; // emerald-500
-const TEAL   = [6,  182, 212]  as [number, number, number]; // cyan-500
-const AMBER  = [245,158,  11]  as [number, number, number]; // amber-500
-const INDIGO = [99, 102, 241]  as [number, number, number]; // indigo-500
-const ROSE   = [244, 63,  94]  as [number, number, number]; // rose-500
+// ─── Paleta Lyrium ─────────────────────────────────────────────────────────
+const BRAND      = [11,  26,  16]  as [number, number, number]; // #0B1A10
+const BRAND_MID  = [6,   78,  59]  as [number, number, number]; // #064E3B
+const GREEN      = [16, 185, 129]  as [number, number, number]; // #10B981
+const GREEN_LIGHT= [236,253,245]   as [number, number, number]; // #ECFDF5
+const GREEN_PALE = [167,243,208]   as [number, number, number]; // #A7F3D0
+const TEAL       = [6,  182, 212]  as [number, number, number]; // #06B6D4
+const AMBER      = [245,158,  11]  as [number, number, number]; // #F59E0B
+const INDIGO     = [99, 102, 241]  as [number, number, number]; // #6366F1
+const ROSE       = [244, 63,  94]  as [number, number, number]; // #F43F5E
 const G = {
     50:  [249,250,251] as [number,number,number],
     100: [243,244,246] as [number,number,number],
@@ -26,7 +29,6 @@ const G = {
 const PW = 297, PH = 210; // A4 landscape
 const ML = 14, MR = 14, CW = PW - ML - MR;
 
-// ─── Helpers ───────────────────────────────────────────────────────────────
 const STATUS_LABEL: Record<string, string> = {
     ACCEPTED:      'Aceptado',
     SENT_WAIT_CDR: 'Pend. CDR',
@@ -41,6 +43,14 @@ const STATUS_COLOR: Record<string, [number,number,number]> = {
     REJECTED:      ROSE,
     OBSERVED:      AMBER,
     DRAFT:         G[400],
+};
+
+const STATUS_BG: Record<string, [number,number,number]> = {
+    ACCEPTED:      [209,250,229],
+    SENT_WAIT_CDR: [254,243,199],
+    REJECTED:      [255,228,230],
+    OBSERVED:      [254,243,199],
+    DRAFT:         [243,244,246],
 };
 
 function fmtDate(d: string): string {
@@ -73,6 +83,14 @@ async function loadImageB64(url: string): Promise<string | null> {
     } catch { return null; }
 }
 
+// ─── Franja lateral verde en cada página ───────────────────────────────────
+function drawPageAccent(doc: jsPDF): void {
+    doc.setFillColor(GREEN[0], GREEN[1], GREEN[2]);
+    doc.rect(0, 0, 3, PH, 'F');
+    doc.setFillColor(BRAND_MID[0], BRAND_MID[1], BRAND_MID[2]);
+    doc.rect(3, 0, 1.5, PH, 'F');
+}
+
 // ─── KPI card ──────────────────────────────────────────────────────────────
 function drawKpi(
     doc: jsPDF,
@@ -80,43 +98,60 @@ function drawKpi(
     x: number, y: number, w: number, h: number,
     accent: [number,number,number]
 ): void {
-    // Card bg
-    doc.setFillColor(G[50][0], G[50][1], G[50][2]);
-    doc.roundedRect(x, y, w, h, 2, 2, 'F');
-    // Accent top bar
+    // Card con fondo verde muy suave
+    doc.setFillColor(GREEN_LIGHT[0], GREEN_LIGHT[1], GREEN_LIGHT[2]);
+    doc.roundedRect(x, y, w, h, 2.5, 2.5, 'F');
+    // Borde lateral coloreado (accent)
     doc.setFillColor(accent[0], accent[1], accent[2]);
-    doc.rect(x, y, w, 1.5, 'F');
+    doc.roundedRect(x, y, 2, h, 1, 1, 'F');
+    // Barra superior completa
+    doc.setFillColor(accent[0], accent[1], accent[2]);
+    doc.rect(x, y, w, 1.2, 'F');
     // Label
     doc.setTextColor(G[500][0], G[500][1], G[500][2]);
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(5.5);
-    doc.text(label.toUpperCase(), x + 4, y + 7);
+    doc.setFontSize(5);
+    doc.text(label.toUpperCase(), x + 5, y + 7);
     // Value
-    doc.setTextColor(G[800][0], G[800][1], G[800][2]);
+    doc.setTextColor(BRAND[0], BRAND[1], BRAND[2]);
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(10);
-    doc.text(value, x + 4, y + 14);
+    doc.setFontSize(9.5);
+    doc.text(value, x + 5, y + 14);
     // Subtext
     if (sub) {
         doc.setTextColor(G[400][0], G[400][1], G[400][2]);
         doc.setFont('helvetica', 'normal');
-        doc.setFontSize(5);
-        doc.text(sub, x + 4, y + 19);
+        doc.setFontSize(4.8);
+        doc.text(sub, x + 5, y + 19);
     }
+    // Dot decorativo accent
+    doc.setFillColor(accent[0], accent[1], accent[2]);
+    doc.circle(x + w - 5, y + h - 5, 2.5, 'F');
 }
 
 // ─── Footer ────────────────────────────────────────────────────────────────
 function drawFooter(doc: jsPDF, page: number, total: number): void {
     const y = PH - 8;
+    // Línea separadora con gradiente visual (dos segmentos)
+    doc.setDrawColor(GREEN[0], GREEN[1], GREEN[2]);
+    doc.setLineWidth(0.6);
+    doc.line(ML, y - 2, ML + CW * 0.3, y - 2);
     doc.setDrawColor(G[200][0], G[200][1], G[200][2]);
     doc.setLineWidth(0.3);
-    doc.line(ML, y - 2, ML + CW, y - 2);
-    doc.setFont('helvetica', 'normal');
+    doc.line(ML + CW * 0.3, y - 2, ML + CW, y - 2);
+
+    doc.setFont('helvetica', 'bold');
     doc.setFontSize(5.5);
+    doc.setTextColor(GREEN[0], GREEN[1], GREEN[2]);
+    doc.text('Lyrium BioMarketplace', ML, y + 1);
+
+    doc.setFont('helvetica', 'normal');
     doc.setTextColor(G[400][0], G[400][1], G[400][2]);
-    doc.text('Lyrium BioMarketplace — Reporte de Facturación Electrónica · Confidencial', ML, y + 1);
+    doc.text(' — Reporte de Facturación Electrónica · Confidencial', ML + 22, y + 1);
+
+    doc.setTextColor(G[500][0], G[500][1], G[500][2]);
     doc.text(
-        `Generado: ${new Date().toLocaleString('es-PE')}  |  Pág. ${page} de ${total}`,
+        `Generado: ${new Date().toLocaleString('es-PE')}  |  Página ${page} de ${total}`,
         ML + CW, y + 1, { align: 'right' }
     );
 }
@@ -130,28 +165,43 @@ export async function exportAdminInvoicesToPdf(
     const logo = await loadImageB64('/img/logo.png');
     const doc  = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
 
-    // ── Header ──────────────────────────────────────────────────────────────
+    // ── Header principal ────────────────────────────────────────────────────
+    // Fondo oscuro
     doc.setFillColor(BRAND[0], BRAND[1], BRAND[2]);
-    doc.rect(0, 0, PW, 26, 'F');
+    doc.rect(0, 0, PW, 30, 'F');
+    // Franja verde inferior del header
     doc.setFillColor(GREEN[0], GREEN[1], GREEN[2]);
-    doc.rect(0, 24, PW, 2, 'F');
+    doc.rect(0, 28, PW, 2.5, 'F');
+    // Detalle decorativo — triángulo/codo derecho
+    doc.setFillColor(BRAND_MID[0], BRAND_MID[1], BRAND_MID[2]);
+    doc.rect(PW - 60, 0, 60, 28, 'F');
+    doc.setFillColor(GREEN[0], GREEN[1], GREEN[2]);
+    doc.rect(PW - 62, 0, 2.5, 28, 'F');
 
-    if (logo) doc.addImage(logo, 'PNG', ML, 3, 32, 14);
+    // Logo
+    if (logo) doc.addImage(logo, 'PNG', ML + 4, 4, 30, 13);
 
+    // Nombre empresa
+    doc.setTextColor(GREEN_PALE[0], GREEN_PALE[1], GREEN_PALE[2]);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(7);
+    doc.text('LYRIUM BIOMARKETPLACE', ML + 4, 20.5);
+
+    // Título del reporte (derecha)
     doc.setTextColor(GREEN[0], GREEN[1], GREEN[2]);
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(15);
-    doc.text('REPORTE DE FACTURACIÓN ELECTRÓNICA', PW - MR, 11, { align: 'right' });
+    doc.setFontSize(13);
+    doc.text('FACTURACIÓN ELECTRÓNICA', PW - MR - 4, 11, { align: 'right' });
 
-    doc.setTextColor(G[400][0], G[400][1], G[400][2]);
+    doc.setTextColor(GREEN_PALE[0], GREEN_PALE[1], GREEN_PALE[2]);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(7);
     const rangeTxt = dateRange?.from && dateRange?.to
         ? `Período: ${fmtDate(dateRange.from)} — ${fmtDate(dateRange.to)}`
-        : `Generado: ${new Date().toLocaleDateString('es-PE', { weekday:'long', day:'2-digit', month:'long', year:'numeric' })}`;
-    doc.text(`Panel Administrador  ·  ${rows.length} comprobante${rows.length !== 1 ? 's' : ''}  ·  ${rangeTxt}`, PW - MR, 19, { align: 'right' });
+        : `Generado: ${new Date().toLocaleDateString('es-PE', { day:'2-digit', month:'long', year:'numeric' })}`;
+    doc.text(`Reporte Administrativo  ·  ${rows.length} comprobante${rows.length !== 1 ? 's' : ''}  ·  ${rangeTxt}`, PW - MR - 4, 20.5, { align: 'right' });
 
-    let y = 32;
+    let y = 36;
 
     // ── KPI Cards ───────────────────────────────────────────────────────────
     if (kpis) {
@@ -161,28 +211,31 @@ export async function exportAdminInvoicesToPdf(
         const rechazados      = rows.filter(r => r.sunat_status === 'REJECTED' || r.sunat_status === 'OBSERVED').length;
 
         const cards = [
-            { label: 'Facturado Mes Actual',   value: fmtCurrency(kpis.totalFacturadoMesActual),  sub: `vs ${fmtCurrency(kpis.totalFacturadoMesAnterior)} mes anterior`, color: GREEN  },
-            { label: 'Total Monto (filtrado)',  value: fmtCurrency(totalMonto),                    sub: `${rows.length} comprobantes`,                                    color: TEAL   },
-            { label: 'Comisiones Generadas',   value: fmtCurrency(totalComisiones),               sub: 'sobre comprobantes filtrados',                                   color: AMBER  },
-            { label: 'Crecimiento Mensual',    value: `${kpis.porcentajeCrecimiento >= 0 ? '+' : ''}${kpis.porcentajeCrecimiento.toFixed(1)}%`, sub: 'respecto al mes anterior', color: kpis.porcentajeCrecimiento >= 0 ? GREEN : ROSE },
-            { label: 'Aceptados SUNAT',        value: String(aceptados),                          sub: `${rechazados} observados/rechazados`,                            color: INDIGO },
-            { label: 'Ticket Promedio',        value: fmtCurrency(kpis.montoPromedio),            sub: 'por comprobante emitido',                                        color: TEAL   },
+            { label: 'Facturado Mes Actual',  value: fmtCurrency(kpis.totalFacturadoMesActual),  sub: `vs ${fmtCurrency(kpis.totalFacturadoMesAnterior)} mes ant.`, color: GREEN  },
+            { label: 'Total Filtrado',         value: fmtCurrency(totalMonto),                    sub: `${rows.length} comprobantes`,                               color: TEAL   },
+            { label: 'Comisiones Generadas',   value: fmtCurrency(totalComisiones),               sub: 'sobre comprobantes filtrados',                              color: AMBER  },
+            { label: 'Crecimiento Mensual',    value: `${kpis.porcentajeCrecimiento >= 0 ? '+' : ''}${kpis.porcentajeCrecimiento.toFixed(1)}%`, sub: 'respecto mes anterior', color: kpis.porcentajeCrecimiento >= 0 ? GREEN : ROSE },
+            { label: 'Aceptados SUNAT',        value: String(aceptados),                          sub: `${rechazados} observados/rechazados`,                       color: INDIGO },
+            { label: 'Ticket Promedio',        value: fmtCurrency(kpis.montoPromedio),            sub: 'por comprobante emitido',                                   color: TEAL   },
         ];
 
-        const cardW = (CW - 5 * 3) / 6;
-        const cardH = 23;
+        const cardW = (CW - 5 * 4) / 6;
+        const cardH = 24;
         cards.forEach((c, i) => {
-            drawKpi(doc, c.label, c.value, c.sub, ML + i * (cardW + 3), y, cardW, cardH, c.color as [number,number,number]);
+            drawKpi(doc, c.label, c.value, c.sub, ML + i * (cardW + 4), y, cardW, cardH, c.color as [number,number,number]);
         });
-        y += cardH + 6;
+        y += cardH + 7;
 
         // Top sellers mini-table
         if (kpis.topSellers.length > 0) {
+            // Título sección
+            doc.setFillColor(BRAND[0], BRAND[1], BRAND[2]);
+            doc.roundedRect(ML, y, 92, 6, 1, 1, 'F');
             doc.setFont('helvetica', 'bold');
-            doc.setFontSize(6.5);
-            doc.setTextColor(G[600][0], G[600][1], G[600][2]);
-            doc.text('TOP VENDEDORES (mes actual)', ML, y + 4);
-            y += 6;
+            doc.setFontSize(6);
+            doc.setTextColor(GREEN[0], GREEN[1], GREEN[2]);
+            doc.text('TOP VENDEDORES — MES ACTUAL', ML + 3, y + 4);
+            y += 8;
 
             autoTable(doc, {
                 startY: y,
@@ -193,32 +246,38 @@ export async function exportAdminInvoicesToPdf(
                     return [String(i + 1), s.name, fmtCurrency(s.totalVendido), `${pct}%`];
                 }),
                 theme: 'plain',
-                headStyles: { fillColor: [GREEN[0],GREEN[1],GREEN[2]], textColor:[255,255,255], fontSize:6, fontStyle:'bold' },
+                headStyles: {
+                    fillColor: [BRAND_MID[0],BRAND_MID[1],BRAND_MID[2]],
+                    textColor: [GREEN_PALE[0],GREEN_PALE[1],GREEN_PALE[2]],
+                    fontSize: 6, fontStyle: 'bold',
+                },
                 bodyStyles: { fontSize: 6 },
-                columnStyles: { 0:{cellWidth:8}, 1:{cellWidth:50}, 2:{cellWidth:25,halign:'right'}, 3:{cellWidth:18,halign:'right'} },
-                margin: { left: ML, right: ML + CW - 105 },
-                tableLineColor: [G[200][0],G[200][1],G[200][2]],
-                tableLineWidth: 0.1,
+                alternateRowStyles: { fillColor: [GREEN_LIGHT[0],GREEN_LIGHT[1],GREEN_LIGHT[2]] },
+                columnStyles: { 0:{cellWidth:8}, 1:{cellWidth:52}, 2:{cellWidth:26,halign:'right'}, 3:{cellWidth:18,halign:'right'} },
+                margin: { left: ML, right: ML + CW - 108 },
+                tableLineColor: [GREEN_PALE[0],GREEN_PALE[1],GREEN_PALE[2]],
+                tableLineWidth: 0.15,
             });
 
-            y = (doc as any).lastAutoTable.finalY + 6;
+            y = (doc as any).lastAutoTable.finalY + 7;
         }
     }
 
-    // ── Divider ─────────────────────────────────────────────────────────────
-    doc.setDrawColor(GREEN[0], GREEN[1], GREEN[2]);
-    doc.setLineWidth(0.5);
-    doc.line(ML, y, ML + CW, y);
-    y += 5;
-
-    // Section title
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(7);
-    doc.setTextColor(G[700][0], G[700][1], G[700][2]);
-    doc.text('DETALLE DE COMPROBANTES', ML, y);
+    // ── Separador de sección ────────────────────────────────────────────────
+    doc.setFillColor(GREEN[0], GREEN[1], GREEN[2]);
+    doc.rect(ML, y, CW, 0.7, 'F');
     y += 4;
 
-    // ── Main table ──────────────────────────────────────────────────────────
+    // Título sección comprobantes
+    doc.setFillColor(BRAND[0], BRAND[1], BRAND[2]);
+    doc.roundedRect(ML, y - 0.5, 58, 6.5, 1, 1, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(6.5);
+    doc.setTextColor(GREEN[0], GREEN[1], GREEN[2]);
+    doc.text('DETALLE DE COMPROBANTES', ML + 3, y + 4);
+    y += 9;
+
+    // ── Tabla principal ─────────────────────────────────────────────────────
     if (rows.length === 0) {
         doc.setFont('helvetica', 'italic');
         doc.setFontSize(9);
@@ -246,11 +305,12 @@ export async function exportAdminInvoicesToPdf(
             theme: 'striped',
             headStyles: {
                 fillColor: [BRAND[0], BRAND[1], BRAND[2]],
-                textColor: [GREEN[0], GREEN[1], GREEN[2]],
+                textColor: [GREEN_PALE[0], GREEN_PALE[1], GREEN_PALE[2]],
                 fontSize: 6.5, fontStyle: 'bold', halign: 'center',
+                cellPadding: { top:3, bottom:3, left:2, right:2 },
             },
             bodyStyles: { fontSize: 6, cellPadding: 2 },
-            alternateRowStyles: { fillColor: [G[50][0], G[50][1], G[50][2]] },
+            alternateRowStyles: { fillColor: [GREEN_LIGHT[0], GREEN_LIGHT[1], GREEN_LIGHT[2]] },
             columnStyles: {
                 0: { cellWidth: 36, halign: 'left' },
                 1: { cellWidth: 16, halign: 'center' },
@@ -259,21 +319,29 @@ export async function exportAdminInvoicesToPdf(
                 4: { cellWidth: 22, halign: 'center' },
                 5: { cellWidth: 24, halign: 'right' },
                 6: { cellWidth: 30, halign: 'center' },
-                7: { cellWidth: 20, halign: 'center' },
-                8: { cellWidth: 22, halign: 'center' },
+                7: { cellWidth: 22, halign: 'center' },
+                8: { cellWidth: 20, halign: 'center' },
             },
             margin: { left: ML, right: MR },
-            tableLineColor: [G[200][0], G[200][1], G[200][2]],
-            tableLineWidth: 0.1,
+            tableLineColor: [GREEN_PALE[0], GREEN_PALE[1], GREEN_PALE[2]],
+            tableLineWidth: 0.15,
             showHead: 'everyPage',
             didDrawCell: (data) => {
-                // Color badge en columna Estado
                 if (data.column.index === 7 && data.section === 'body') {
                     const rawStatus = rows[data.row.index]?.sunat_status;
-                    const color = STATUS_COLOR[rawStatus] ?? G[400];
+                    const color  = STATUS_COLOR[rawStatus] ?? G[400];
+                    const bgColor = STATUS_BG[rawStatus] ?? G[100];
+                    const cx = data.cell.x + 1.5;
+                    const cy = data.cell.y + 1.5;
+                    const cw = data.cell.width - 3;
+                    const ch = data.cell.height - 3;
+                    // Pill background
+                    doc.setFillColor(bgColor[0], bgColor[1], bgColor[2]);
+                    doc.roundedRect(cx, cy, cw, ch, ch / 2, ch / 2, 'F');
+                    // Text
                     doc.setTextColor(color[0], color[1], color[2]);
                     doc.setFont('helvetica', 'bold');
-                    doc.setFontSize(6);
+                    doc.setFontSize(5.5);
                     doc.text(
                         STATUS_LABEL[rawStatus] ?? rawStatus,
                         data.cell.x + data.cell.width / 2,
@@ -284,23 +352,43 @@ export async function exportAdminInvoicesToPdf(
             },
         });
 
-        // Totals row
-        const finalY = (doc as any).lastAutoTable.finalY + 4;
+        // Fila de totales
+        const finalY = (doc as any).lastAutoTable.finalY + 3;
         const totalMonto      = rows.reduce((s, r) => s + (r.order_total ?? r.amount), 0);
         const totalComisiones = rows.reduce((s, r) => s + (r.commission_amount ?? 0), 0);
 
         doc.setFillColor(BRAND[0], BRAND[1], BRAND[2]);
-        doc.rect(ML, finalY, CW, 8, 'F');
+        doc.roundedRect(ML, finalY, CW, 9, 1.5, 1.5, 'F');
+        doc.setFillColor(GREEN[0], GREEN[1], GREEN[2]);
+        doc.roundedRect(ML, finalY, 3, 9, 1.5, 1.5, 'F');
+
         doc.setFont('helvetica', 'bold');
-        doc.setFontSize(7);
+        doc.setFontSize(6.5);
+        doc.setTextColor(G[400][0], G[400][1], G[400][2]);
+        doc.text('TOTAL GENERAL', ML + 6, finalY + 6);
+
         doc.setTextColor(GREEN[0], GREEN[1], GREEN[2]);
-        doc.text(`TOTAL GENERAL:  ${fmtCurrency(totalMonto)}   ·   Comisiones: ${fmtCurrency(totalComisiones)}   ·   ${rows.length} comprobantes`, ML + 4, finalY + 5);
+        doc.setFontSize(7.5);
+        doc.text(fmtCurrency(totalMonto), ML + 48, finalY + 6);
+
+        doc.setTextColor(G[400][0], G[400][1], G[400][2]);
+        doc.setFontSize(6);
+        doc.text('·  Comisiones:', ML + 78, finalY + 6);
+
+        doc.setTextColor(AMBER[0], AMBER[1], AMBER[2]);
+        doc.setFontSize(7.5);
+        doc.text(fmtCurrency(totalComisiones), ML + 102, finalY + 6);
+
+        doc.setTextColor(G[500][0], G[500][1], G[500][2]);
+        doc.setFontSize(6);
+        doc.text(`·  ${rows.length} comprobantes`, ML + 130, finalY + 6);
     }
 
-    // ── Footers ─────────────────────────────────────────────────────────────
+    // ── Franja lateral y footers (todas las páginas) ────────────────────────
     const totalPages = doc.getNumberOfPages();
     for (let i = 1; i <= totalPages; i++) {
         doc.setPage(i);
+        drawPageAccent(doc);
         drawFooter(doc, i, totalPages);
     }
 

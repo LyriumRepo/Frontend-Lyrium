@@ -84,7 +84,7 @@ export const createIzipayPlanSession = async (payload: {
     izipay_order_id?: string;
     plan_request_id?: number;
     amount?: number;
-    mode?: string;
+    mode?: 'mock' | 'izipay';
     message?: string;
   }>('/payments/izipay/plan-session', payload);
 };

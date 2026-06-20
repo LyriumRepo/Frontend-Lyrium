@@ -69,11 +69,11 @@ export default function CustomerBookingsPage() {
   const todayStr = now.toISOString().slice(0, 10);
 
   const upcoming = bookings.filter(b =>
-    (b.status === 'pending' || b.status === 'confirmed') && b.date >= todayStr
+    (b.status === 'pending' || b.status === 'confirmed' || b.status === 'on_the_way') && b.date >= todayStr
   );
   const past = bookings.filter(b =>
     b.status === 'completed' || b.status === 'cancelled' || b.status === 'no_show'
-    || (b.status === 'pending' || b.status === 'confirmed') && b.date < todayStr
+    || (b.status === 'pending' || b.status === 'confirmed' || b.status === 'on_the_way') && b.date < todayStr
   );
 
   const handleConfirmCompletion = async (bookingId: number) => {

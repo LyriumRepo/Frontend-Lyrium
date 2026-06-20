@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import dynamic from 'next/dynamic';
-import type { FinanceChartProps } from './components/FinanceChart';
+import type { FinanceChartProps, FinanceChartDataset } from './components/FinanceChart';
 const FinanceChart = dynamic<FinanceChartProps>(
   () => import('./components/FinanceChart'),
   { ssr: false }
@@ -34,6 +34,7 @@ interface KpiConfig {
   chartColor: string;
   suffix?: string;
   extraInfo: string;
+  chartDatasets?: FinanceChartDataset[];
 }
 
 function buildKpiConfig(
@@ -47,6 +48,7 @@ function buildKpiConfig(
   chartData: number[],
   chartColor: string,
   suffix?: string,
+  chartDatasets?: FinanceChartDataset[],
 ): KpiConfig {
   return {
     label,
@@ -60,7 +62,17 @@ function buildKpiConfig(
     chartColor,
     suffix,
     extraInfo: getKpiDetail(label),
+    chartDatasets,
   };
+}
+
+function trendOf(arr: number[]): { value: number; isPositive: boolean } | undefined {
+  if (arr.length < 2) return undefined;
+  const last = arr[arr.length - 1] ?? 0;
+  const prev = arr[arr.length - 2] ?? 0;
+  if (prev === 0) return undefined;
+  const pct = Math.abs(((last - prev) / prev) * 100);
+  return { value: parseFloat(pct.toFixed(1)), isPositive: last >= prev };
 }
 
 export function FinancePageClient() {
@@ -89,7 +101,7 @@ export function FinancePageClient() {
   };
 
   const headerActions = (
-    <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md p-2 rounded-2xl border border-white/20">
+    <div className="flex flex-wrap items-center gap-2 bg-white/10 backdrop-blur-md p-2 rounded-2xl border border-white/20">
       <BaseDatePicker value={filters.startDate}
         onChange={(v) => setFilters(v, filters.endDate)} placeholder="Desde" />
       <span className="text-white/30 text-lg font-thin">|</span>
@@ -197,7 +209,7 @@ export function FinancePageClient() {
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`px-6 py-2.5 rounded-xl text-sm font-black whitespace-nowrap transition-all duration-300 flex items-center gap-2 active:scale-[0.98] ${activeTab === tab.id
-              ? 'bg-sky-500 hover:bg-sky-600 active:bg-sky-700 dark:bg-brand-green dark:hover:bg-brand-green-hover text-white shadow-lg shadow-sky-500/25 dark:shadow-none'
+              ? 'bg-[#5AAFE6] text-white shadow-lg shadow-[#5AAFE6]/30'
               : 'text-[var(--text-secondary)] bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:bg-[var(--bg-secondary)]'
               }`}
           >
@@ -218,24 +230,47 @@ export function FinancePageClient() {
             <FinancialBreakdownCard data={data.desgloseFinanciero} />
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 stagger-grid">
-              <BaseStatCard
-                label="Ingresos Brutos"
-                value={formatCurrency(data.ingresosBrutos.data.reduce((a, b) => a + b, 0))}
-                description="Subtotal sin IGV (base imponible)"
-                icon="Banknote"
-                color="lima"
-                chart={<FinanceChart type="bar" labels={data.ingresosBrutos.labels} data={data.ingresosBrutos.data} color={chartColorMap.ingresosBrutos} />}
-                onClick={() => openStatCard('Ingresos Brutos', 'ingresosBrutos', data, 'bar', 'lima')}
-              />
-              <BaseStatCard
-                label="Ingresos Netos"
-                value={formatCurrency(data.ingresosNetos.data.reduce((a, b) => a + b, 0))}
-                description="Neto después de comisión Lyrium"
-                icon="LineChart"
-                color="verde"
-                chart={<FinanceChart type="bar" labels={data.ingresosNetos.labels} data={data.ingresosNetos.data} color={chartColorMap.ingresosNetos} />}
-                onClick={() => openStatCard('Ingresos Netos', 'ingresosNetos', data, 'bar', 'verde')}
-              />
+              {/* Tarjeta multi-serie: Brutos + Netos + Reales */}
+              <div className="col-span-1 md:col-span-2 lg:col-span-3">
+                <BaseStatCard
+                  label="Evolución de Ingresos"
+                  value={formatCurrency(data.ingresosBrutos.data.reduce((a, b) => a + b, 0))}
+                  description="Comparativa mensual: Bruto, Neto y Real"
+                  icon="TrendingUp"
+                  color="lima"
+                  chart={
+                    <FinanceChart
+                      type="line"
+                      labels={data.ingresosBrutos.labels}
+                      data={data.ingresosBrutos.data}
+                      datasets={[
+                        { label: 'Brutos', data: data.ingresosBrutos.data, color: chartColorMap.ingresosBrutos },
+                        { label: 'Netos', data: data.ingresosNetos.data, color: chartColorMap.ingresosNetos },
+                        { label: 'Reales', data: data.ingresosReales.data, color: chartColorMap.ingresosReales },
+                      ]}
+                      height="360px"
+                    />
+                  }
+                  onClick={() => setSelectedKpi(buildKpiConfig(
+                    'Evolución de Ingresos',
+                    formatCurrency(data.ingresosBrutos.data.reduce((a, b) => a + b, 0)),
+                    'Comparativa mensual de ingresos: Bruto (sin deducciones), Neto (tras comisión Lyrium) y Real (efectivamente cobrado).',
+                    'TrendingUp',
+                    companyColors.lima,
+                    'line',
+                    data.ingresosBrutos.labels,
+                    data.ingresosBrutos.data,
+                    chartColorMap.ingresosBrutos,
+                    undefined,
+                    [
+                      { label: 'Brutos', data: data.ingresosBrutos.data, color: chartColorMap.ingresosBrutos },
+                      { label: 'Netos', data: data.ingresosNetos.data, color: chartColorMap.ingresosNetos },
+                      { label: 'Reales', data: data.ingresosReales.data, color: chartColorMap.ingresosReales },
+                    ],
+                  ))}
+                />
+              </div>
+
               <CardProxPago data={data.chartProxPago} formatCurrency={formatCurrency} />
 
               <BaseStatCard
@@ -244,6 +279,7 @@ export function FinancePageClient() {
                 description="Retorno sobre inversión en comisiones"
                 icon="TrendingUp"
                 color="turquesaClaro"
+                trend={trendOf(data.roi.data)}
                 chart={<FinanceChart type="bar" labels={data.roi.labels} data={data.roi.data} color={chartColorMap.roi} />}
                 onClick={() => openStatCard('ROI de Ventas', 'roi', data, 'bar', 'turquesaClaro')}
               />
@@ -257,19 +293,10 @@ export function FinancePageClient() {
                 description="Valor medio por pedido (sin IGV)"
                 icon="Tag"
                 color="turquesa"
+                trend={trendOf(data.ticketPromedio.data)}
                 chart={<FinanceChart type="bar" labels={data.ticketPromedio.labels} data={data.ticketPromedio.data} color={chartColorMap.ticketPromedio} />}
                 onClick={() => openStatCard('Ticket Promedio', 'ticketPromedio', data, 'bar', 'turquesa')}
               />
-              <BaseStatCard
-                label="Ingresos Netos Reales"
-                value={formatCurrency(data.ingresosReales.data.reduce((a, b) => a + b, 0))}
-                description="Neto efectivamente cobrado"
-                icon="TrendingDown"
-                color="celeste"
-                chart={<FinanceChart type="bar" labels={data.ingresosReales.labels} data={data.ingresosReales.data} color={chartColorMap.ingresosReales} />}
-                onClick={() => openStatCard('Ingresos Netos Reales', 'ingresosReales', data, 'bar', 'celeste')}
-              />
-
               <BaseStatCard
                 label="Ventas Totales"
                 value={data.ventasTotales.data.reduce((a, b) => a + b, 0).toString()}
@@ -277,6 +304,7 @@ export function FinancePageClient() {
                 icon="ShoppingCart"
                 color="azulCeleste"
                 suffix="Ord."
+                trend={trendOf(data.ventasTotales.data)}
                 chart={<FinanceChart type="bar" labels={data.ventasTotales.labels} data={data.ventasTotales.data} color={chartColorMap.ventasTotales} />}
                 onClick={() => openStatCard('Ventas Totales', 'ventasTotales', data, 'bar', 'azulCeleste')}
               />

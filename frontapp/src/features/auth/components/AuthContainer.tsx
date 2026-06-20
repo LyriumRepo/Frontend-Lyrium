@@ -89,14 +89,14 @@ export function AuthContainer({ onSuccess }: AuthContainerProps) {
 
     return (
         <div className="h-full bg-[#F8F9FA] dark:bg-[var(--bg-primary)] flex items-center justify-center p-4">
-            <div className="relative w-full max-w-[1200px] min-h-[650px] bg-white dark:bg-[var(--bg-secondary)] rounded-[30px] shadow-[0_40px_100px_rgba(0,0,0,0.1)] overflow-hidden flex">
-                
-                {/* Left Side Panel - visible siempre */}
+            <div className="relative w-full max-w-[1200px] sm:min-h-[650px] bg-white dark:bg-[var(--bg-secondary)] rounded-[30px] shadow-[0_40px_100px_rgba(0,0,0,0.1)] overflow-hidden flex">
+
+                {/* Left Side Panel - oculto en mobile, visible en sm+ */}
                 <div
-                    className={`absolute top-0 left-0 h-full w-[40%] 
-                    bg-[linear-gradient(to_bottom_right,rgba(14,165,233,0.9),rgba(132,204,22,0.9))] 
-                    dark:bg-[linear-gradient(to_bottom_right,var(--brand-green),var(--icons-green),var(--brand-green-hover))] 
-                    p-10 flex flex-col justify-center gap-16 text-white z-20 rounded-r-[20px]`}
+                    className={`hidden sm:flex absolute top-0 left-0 h-full w-[40%]
+                    bg-[linear-gradient(to_bottom_right,rgba(14,165,233,0.9),rgba(132,204,22,0.9))]
+                    dark:bg-[linear-gradient(to_bottom_right,var(--brand-green),var(--icons-green),var(--brand-green-hover))]
+                    p-10 flex-col justify-center gap-16 text-white z-20 rounded-r-[20px]`}
                 >
                     <img src="/img/intro/Flor6.png" alt="decoración" className="absolute -bottom-20 -left-80 w-[700px] max-w-none opacity-60 mix-blend-overlay pointer-events-none"/>
 
@@ -152,7 +152,7 @@ export function AuthContainer({ onSuccess }: AuthContainerProps) {
                 </div>
 
                 {/* Right Side - Forms */}
-                <div className="relative ml-auto w-[60%] p-10 flex flex-col">
+                <div className="relative w-full sm:ml-auto sm:w-[60%] p-5 sm:p-10 flex flex-col">
                     <UserTypeToggle
                         value={userType}
                         onChange={(type) => {

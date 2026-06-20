@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useRef, useMemo, useState } from 'react';
 import { useAdmin } from '@/features/admin/planes/hooks/usePlanesAdmin';
 import { useSSE } from '@/features/seller/plans/hooks/useSSE';
 import RequestsPanel from '@/features/admin/planes/components/RequestsPanel';
@@ -75,6 +75,27 @@ export default function AdminPage() {
     pago_confirmado:          admin.handlePagoConfirmadoAdmin as never,
     pago_fallido:             admin.handlePagoFallidoAdmin,
   }, state.isLoaded);
+
+  // Stream dedicado de solicitudes de plan — emite `new_plan_request` cuando un
+  // vendedor inicia una sesión de pago, actualizando la pestaña Solicitudes en tiempo real.
+  const planStreamRef = useRef<EventSource | null>(null);
+  useEffect(() => {
+    if (!state.isLoaded) return;
+    const API = process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://localhost:8000/api';
+    const es = new EventSource(`${API}/admin/plan-requests/stream`, { withCredentials: true });
+    planStreamRef.current = es;
+    es.addEventListener('new_plan_request', () => {
+      admin.handleSolicitudesActualizadas();
+    });
+    es.onerror = () => {
+      es.close();
+      planStreamRef.current = null;
+    };
+    return () => {
+      es.close();
+      planStreamRef.current = null;
+    };
+  }, [state.isLoaded]);
 
   const s = state;
 

@@ -6,6 +6,7 @@ import { useNotifications } from '@/shared/lib/context/NotificationContext';
 import { useAuth } from '@/shared/lib/context/AuthContext';
 import { Bell, AlertTriangle, X } from 'lucide-react';
 import { isAllowedForRole } from '@/shared/lib/notifications/roleNotificationTypes';
+import { resolveNotificationRoute } from '@/shared/lib/notifications/resolveNotificationRoute';
 
 interface ToastItem {
   id: string;
@@ -14,32 +15,6 @@ interface ToastItem {
   level: string;
   action?: { type: string; id?: string | number; label: string };
   exiting: boolean;
-}
-
-function resolveRoute(actionType: string, actionId: string | number | undefined, role: string | undefined): string {
-  const prefix = role === 'administrator' ? '/admin'
-    : role === 'seller' ? '/seller'
-    : role === 'customer' ? '/customer'
-    : role === 'logistics_operator' ? '/logistics'
-    : '';
-
-  switch (actionType) {
-    case 'orders':
-      return `${prefix}/orders`;
-    case 'chat':
-      return role === 'administrator' ? '/admin/helpdesk'
-        : `${prefix}/chat`;
-    case 'ticket':
-      return role === 'administrator' ? `/admin/helpdesk?id=${actionId}`
-        : role === 'seller' ? `/seller/help?id=${actionId}`
-        : `/customer/support?id=${actionId}`;
-    case 'store':
-      return role === 'administrator' ? '/admin/stores'
-        : role === 'seller' ? '/seller/settings'
-        : '/';
-    default:
-      return prefix || '/';
-  }
 }
 
 export default function NotificationToast() {
@@ -126,7 +101,7 @@ export default function NotificationToast() {
           key={item.id}
           onClick={() => {
             if (item.action) {
-              const route = resolveRoute(item.action.type, item.action.id, user?.role);
+              const route = resolveNotificationRoute(item.action.type, item.action.id, user?.role);
               router.push(route);
             }
             remove(item.id);

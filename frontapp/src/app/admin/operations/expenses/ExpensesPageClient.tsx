@@ -457,7 +457,7 @@ export function ExpensesPageClient() {
       </BaseModal>
 
       {/* ── Tabla ───────────────────────────────────────────────────── */}
-      <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl overflow-hidden">
+      <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl overflow-x-auto">
         {loading ? (
           <div className="py-10 text-center text-[13px] text-[var(--text-muted)]">
             Cargando...

@@ -9,6 +9,7 @@ import { useAuth } from '@/shared/lib/context/AuthContext';
 import { apiClient } from '@/lib/api/apiClient';
 import NotificationAllModal from '@/components/shared/notifications/NotificationAllModal';
 import { isAllowedForRole } from '@/shared/lib/notifications/roleNotificationTypes';
+import { resolveNotificationRoute } from '@/shared/lib/notifications/resolveNotificationRoute';
 
 export default function NotificationBell() {
     const [isOpen, setIsOpen] = useState(false);
@@ -29,34 +30,6 @@ export default function NotificationBell() {
                 return { title: 'Panel de Envíos', subtitle: 'Seguimiento de entregas', cta: 'Ir a Mis Envíos', redirect: '/logistics/shipments' };
             default:
                 return { title: 'Notificaciones', subtitle: 'Centro de notificaciones', cta: 'Ver notificaciones', redirect: '/' };
-        }
-    };
-
-    const resolveRoute = (actionType: string, actionId: string | number | undefined, role: string | undefined): string => {
-        const prefix = role === 'administrator' ? '/admin'
-            : role === 'seller' ? '/seller'
-            : role === 'customer' ? '/customer'
-            : role === 'logistics_operator' ? '/logistics'
-            : '';
-
-        switch (actionType) {
-            case 'orders':
-                return `${prefix}/orders`;
-            case 'invoices':
-                return `${prefix}/invoices`;
-            case 'chat':
-                return role === 'administrator' ? '/admin/helpdesk'
-                    : `${prefix}/chat`;
-            case 'ticket':
-                return role === 'administrator' ? `/admin/helpdesk?id=${actionId}`
-                    : role === 'seller' ? `/seller/help?id=${actionId}`
-                    : `/customer/support?id=${actionId}`;
-            case 'store':
-                return role === 'administrator' ? '/admin/stores'
-                    : role === 'seller' ? '/seller/settings'
-                    : '/';
-            default:
-                return prefix || '/';
         }
     };
 
@@ -88,7 +61,7 @@ export default function NotificationBell() {
         }
         
         if (notification.action) {
-            const route = resolveRoute(notification.action.type, notification.action.id, user?.role);
+            const route = resolveNotificationRoute(notification.action.type, notification.action.id, user?.role);
             router.push(route);
         } else {
             router.push(panelInfo.redirect);
