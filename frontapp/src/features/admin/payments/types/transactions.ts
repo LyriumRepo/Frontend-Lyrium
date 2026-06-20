@@ -22,6 +22,9 @@ export interface TransactionItem {
   unitPrice: number;
   quantity: number;
   lineTotal: number;
+  commissionRate: number;
+  commissionAmount: number;
+  productType: string | null;
   store: TransactionStore;
   product: TransactionItemProduct | null;
 }
@@ -38,6 +41,10 @@ export interface Transaction {
   shippingCost: number;
   discountAmount: number;
   total: number;
+  tipo: string;
+  commissionAmount: number;
+  commissionIgv: number;
+  commissionTotal: number;
   paymentMethod: string | null;
   paymentStatus: string;
   cardBrand: string | null;

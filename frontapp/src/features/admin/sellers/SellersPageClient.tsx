@@ -7,6 +7,7 @@ import { useControlVendedores } from '@/features/admin/sellers/hooks/useControlV
 import {
   StatsOverview,
   ProductModeration,
+  ServiceModeration,
   AuditLog,
 } from '@/components/admin/sellers/ModuleSections';
 import SellerList from '@/components/admin/SellerList';
@@ -19,11 +20,13 @@ import {
   Sliders,
   X,
   FileCheck,
+  Store,
 } from 'lucide-react';
-import { SellerStatus, ProductStatus } from '@/features/admin/sellers/types';
+import { SellerStatus, ProductStatus, ServiceStatus } from '@/features/admin/sellers/types';
 import Skeleton, { SkeletonRow } from '@/components/ui/Skeleton';
 import ModalsPortal from '@/components/layout/shared/ModalsPortal';
 import ProductModerationModal from '@/components/admin/sellers/ProductModerationModal';
+import ServiceModerationModal from '@/components/admin/sellers/ServiceModerationModal';
 import { useContratos } from '@/features/admin/contracts/hooks/useContratos';
 import { ContratosModule } from '@/components/admin/contracts/ContractsModule';
 import { ContractDetailModal } from '@/components/admin/contracts/ContractDetailModal';
@@ -232,6 +235,8 @@ export function SellersPageClient(_props: SellersPageClientProps) {
     setFilters,
     productsLoading,
     products,
+    services,
+    servicesLoading,
     profileRequests,
     profileRequestsLoading,
     profileRequestsError,
@@ -253,6 +258,11 @@ export function SellersPageClient(_props: SellersPageClientProps) {
     productId: number | null;
     rejectionReason?: string | null;
   }>({ isOpen: false, productId: null });
+
+  const [serviceModal, setServiceModal] = useState<{
+    isOpen: boolean;
+    service: (typeof services)[number] | null;
+  }>({ isOpen: false, service: null });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const combinedSellers = filteredSellers;
@@ -356,6 +366,13 @@ export function SellersPageClient(_props: SellersPageClientProps) {
           badge={stats.pendingProducts}
         />
         <TabButton
+          active={currentTab === 'servicios'}
+          onClick={() => setCurrentTab('servicios')}
+          label="Aprobación de Servicios"
+          icon={<Store className="w-5 h-5" />}
+          badge={services.filter(s => s.status === 'PENDING' || s.status === 'en_espera').length}
+        />
+        <TabButton
           active={currentTab === 'auditoria'}
           onClick={() => setCurrentTab('auditoria')}
           label="Historial de Auditoría"
@@ -424,6 +441,29 @@ export function SellersPageClient(_props: SellersPageClientProps) {
                   isOpen: true,
                   productId: product.id,
                   rejectionReason: product.rejectionReason || product.rejection_reason || null,
+                })
+              }
+            />
+          </div>
+        )}
+
+        {currentTab === 'servicios' && (
+          <div className="animate-fadeIn">
+            <div className="mb-8">
+              <h2 className="text-xl font-black text-[var(--text-primary)] tracking-tight">
+                Aprobación de Servicios
+              </h2>
+              <p className="text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-widest mt-1">
+                Validación de servicios nuevos y editados
+              </p>
+            </div>
+            <ServiceModeration
+              services={services}
+              isLoading={servicesLoading}
+              onAction={(service: any) =>
+                setServiceModal({
+                  isOpen: true,
+                  service,
                 })
               }
             />
@@ -656,6 +696,24 @@ export function SellersPageClient(_props: SellersPageClientProps) {
           combinedSellers.find((s: any) => s.id === statusModal.id)?.contractStatus
         }
         onSubmit={handleStatusSubmit}
+      />
+
+      <ServiceModerationModal
+        isOpen={serviceModal.isOpen}
+        service={serviceModal.service}
+        isSubmitting={isSubmitting}
+        onClose={() => setServiceModal({ isOpen: false, service: null })}
+        onAction={async (serviceId, action, reason) => {
+          setIsSubmitting(true);
+          try {
+            await actions.updateServiceStatus(serviceId, action, reason);
+            setServiceModal({ isOpen: false, service: null });
+          } catch (err) {
+            console.error('Error al moderar servicio:', err);
+          } finally {
+            setIsSubmitting(false);
+          }
+        }}
       />
 
       <ProductModerationModal

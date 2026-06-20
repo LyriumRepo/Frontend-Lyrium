@@ -1,21 +1,74 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Search, SlidersHorizontal, Funnel, ArrowUpDown, Star, ShoppingCart, Eye, Heart, Tag, MapPin, Phone, Mail, Clock, MessageCircle, Shield, CheckCircle, Truck, CreditCard, Instagram, Facebook, Globe, Youtube, MapPinned } from 'lucide-react';
+import { Search, SlidersHorizontal, Funnel, ArrowUpDown, Star, ShoppingCart, Eye, Heart, Tag, MapPin, Phone, Mail, Clock, MessageCircle, Shield, CheckCircle, Truck, CreditCard, Instagram, Facebook, Globe, Youtube, MapPinned, X, Plus, Pencil, Trash2 } from 'lucide-react';
 import { Producto, Tienda } from '@/types/public';
-import { useCarritoStore } from '@/store/carritoStore';
 import QuickViewModal from '@/components/products/QuickViewModal';
+import BaseModal from '@/components/ui/BaseModal';
+import { WriteStoreReview } from '@/features/public/product/WriteStoreReview';
+import { LARAVEL_API_URL } from '@/shared/lib/config/flags';
+
+let _tokenCache: { value: string | null; ts: number } | null = null;
+
+async function getClientToken(): Promise<string | null> {
+  const now = Date.now();
+  if (_tokenCache && now - _tokenCache.ts < 30_000) {
+    return _tokenCache.value;
+  }
+  try {
+    const res = await fetch('/api/auth-token', { credentials: 'include', cache: 'no-store' });
+    if (!res.ok) return null;
+    const { token } = await res.json();
+    const clean = token?.replace(/^["']|["']$/g, '').trim() || null;
+    _tokenCache = { value: clean, ts: now };
+    return clean;
+  } catch {
+    return null;
+  }
+}
 
 type Ordenamiento = 'recientes' | 'precio-asc' | 'precio-desc' | 'nombre' | 'popular';
 type FiltroRapido = 'todos' | 'oferta' | 'destacado' | 'bio';
 
+interface StoreReviewData {
+  id: string;
+  rating: number;
+  rating_communication: number | null;
+  rating_shipping: number | null;
+  rating_packaging: number | null;
+  title: string | null;
+  comment: string | null;
+  is_verified_purchase: boolean;
+  user: { id: string; name: string; avatar: string | null } | null;
+  created_at: string;
+}
+
+interface StoreReviewStats {
+  average: number;
+  count: number;
+  avg_communication: number;
+  avg_shipping: number;
+  avg_packaging: number;
+  distribution: Record<number, number>;
+}
+
+interface Servicio {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  image: string | null;
+  category: string | null;
+  duration: string | null;
+}
+
 interface StoreTabsProps {
   tienda: Tienda;
   productos: Producto[];
+  servicios?: Servicio[];
   sucursales?: Sucursal[];
-  opiniones?: Opinion[];
   fotos?: string[];
   politicas?: Politicas;
   plan?: 'basico' | 'premium';
@@ -27,14 +80,6 @@ interface Sucursal {
   ciudad: string;
   telefono: string;
   horario: string;
-}
-
-interface Opinion {
-  usuario: string;
-  rating: number;
-  comentario: string;
-  fecha: string;
-  utiles: number;
 }
 
 interface Politicas {
@@ -52,8 +97,8 @@ interface ProductFilters {
 }
 
 const stickerConfig: Record<string, { label: string; class: string }> = {
-  oferta: { label: 'Oferta', class: 'bg-emerald-600 dark:bg-emerald-500' },
-  promo: { label: 'Promo', class: 'bg-sky-500 dark:bg-sky-400' },
+  oferta: { label: 'Oferta', class: 'bg-red-500' },
+  promo: { label: 'Promo', class: 'bg-orange-500' },
   nuevo: { label: 'Nuevo', class: 'bg-green-500' },
   limitado: { label: 'Limitado', class: 'bg-purple-500' },
 };
@@ -66,7 +111,7 @@ const ordenOptions = [
   { value: 'popular', label: 'Más vendidos' },
 ];
 
-export default function StoreTabs({ tienda, productos, sucursales = [], opiniones = [], fotos = [], politicas, plan = 'basico' }: StoreTabsProps) {
+export default function StoreTabs({ tienda, productos, servicios = [], sucursales = [], fotos = [], politicas, plan = 'basico' }: StoreTabsProps) {
   const [activeTab, setActiveTab] = useState('productos');
   const [busqueda, setBusqueda] = useState('');
   const [ordenamiento, setOrdenamiento] = useState<Ordenamiento>('recientes');
@@ -74,21 +119,15 @@ export default function StoreTabs({ tienda, productos, sucursales = [], opinione
   const [precioMin, setPrecioMin] = useState(0);
   const [precioMax, setPrecioMax] = useState(1000);
   const [showFiltrosAvanzados, setShowFiltrosAvanzados] = useState(false);
-  const [quickViewProduct, setQuickViewProduct] = useState<Producto | null>(null);
-  const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
-
-  const addToCart = useCarritoStore((s) => s.addToCart);
-  const openCart = useCarritoStore((s) => s.openCart);
-
-  const handleAddToCart = (producto: Producto) => {
-    addToCart(producto);
-    openCart();
-  };
-
-  const handleQuickView = (producto: Producto) => {
-    setQuickViewProduct(producto);
-    setIsQuickViewOpen(true);
-  };
+  const [selectedProduct, setSelectedProduct] = useState<Producto | null>(null);
+  const [selectedService, setSelectedService] = useState<Servicio | null>(null);
+  const [storeReviews, setStoreReviews] = useState<StoreReviewData[]>([]);
+  const [reviewStats, setReviewStats] = useState<StoreReviewStats | null>(null);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [showWriteReview, setShowWriteReview] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [editingReview, setEditingReview] = useState<StoreReviewData | null>(null);
+  const [deletingReviewId, setDeletingReviewId] = useState<string | null>(null);
 
   const productosFiltrados = useMemo(() => {
     let result = [...productos];
@@ -109,11 +148,72 @@ export default function StoreTabs({ tienda, productos, sucursales = [], opinione
     return result;
   }, [productos, busqueda, ordenamiento, filtroRapido, precioMin, precioMax]);
 
+  const loadReviews = useCallback(() => {
+    if (!tienda.slug) return;
+    setReviewsLoading(true);
+    fetch(`${LARAVEL_API_URL}/stores/${tienda.slug}/reviews`)
+      .then(r => r.json())
+      .then(json => {
+        if (json.success) {
+          const body = json.data ?? {};
+          setStoreReviews(body.data ?? []);
+          setReviewStats(body.stats ?? null);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setReviewsLoading(false));
+  }, [tienda.slug]);
+
+  useEffect(() => {
+    loadReviews();
+
+    (async () => {
+      const token = await getClientToken();
+      if (!token) return;
+      try {
+        const meRes = await fetch(`${LARAVEL_API_URL}/users/me`, {
+          headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+        });
+        if (meRes.ok) {
+          const me = await meRes.json();
+          setCurrentUserId(String(me.data?.id ?? me.id));
+        }
+      } catch {}
+    })();
+  }, [loadReviews]);
+
+  const handleReviewSuccess = () => {
+    setShowWriteReview(false);
+    setEditingReview(null);
+    loadReviews();
+  };
+
+  const handleDeleteReview = async () => {
+    if (!deletingReviewId) return;
+    const token = await getClientToken();
+    if (!token) return;
+    try {
+      const res = await fetch(`${LARAVEL_API_URL}/stores/reviews/${deletingReviewId}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+      });
+      if (res.ok) {
+        setDeletingReviewId(null);
+        loadReviews();
+      }
+    } catch {}
+  };
+
+  const userReview = currentUserId
+    ? storeReviews.find(r => r.user?.id === currentUserId)
+    : null;
+
   const tabs = [
     { id: 'productos', label: `Productos (${productos.length})` },
+    { id: 'servicios', label: `Servicios (${servicios.length})` },
     { id: 'sucursales', label: `Sucursales (${sucursales.length})` },
     { id: 'contacto', label: 'Contacto' },
-    { id: 'resenas', label: `Reseñas (${opiniones.length}★)` },
+    { id: 'resenas', label: `Reseñas (${reviewStats?.count ?? 0}★)` },
     { id: 'acercade', label: 'Acerca de' },
   ];
 
@@ -188,11 +288,11 @@ export default function StoreTabs({ tienda, productos, sucursales = [], opinione
                   <Link href={producto.slug ? `/producto/${producto.slug}` : '#'}>
                     <Image src={producto.imagen || '/img/no-image.png'} alt={producto.titulo} fill className="object-cover group-hover:scale-105 transition-transform" sizes="(max-width: 640px) 50vw, 25vw" />
                   </Link>
-                  {descuento > 0 && <span className="absolute top-2 left-2 bg-rose-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">-{descuento}%</span>}
+                  {descuento > 0 && <span className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">-{descuento}%</span>}
                   {sticker && !descuento && <span className={`absolute top-2 left-2 text-white text-xs font-bold px-2 py-0.5 rounded-full ${sticker.class}`}>{sticker.label}</span>}
                   <div className="hidden md:flex absolute inset-0 bg-black/0 group-hover:bg-black/10 items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
-                    <button onClick={() => handleQuickView(producto)} className="bg-white p-2 rounded-full shadow-lg"><Eye className="w-4 h-4" /></button>
-                    <button onClick={() => handleAddToCart(producto)} className="bg-sky-500 dark:bg-[var(--brand-green)] p-2 rounded-full shadow-lg"><ShoppingCart className="w-4 h-4 text-white" /></button>
+                    <button onClick={(e) => { e.preventDefault(); setSelectedProduct(producto); }} className="bg-white p-2 rounded-full shadow-lg"><Eye className="w-4 h-4" /></button>
+                    <button className="bg-sky-500 dark:bg-[var(--brand-green)] p-2 rounded-full shadow-lg"><ShoppingCart className="w-4 h-4 text-white" /></button>
                   </div>
                 </div>
                 <div className="p-3">
@@ -202,13 +302,65 @@ export default function StoreTabs({ tienda, productos, sucursales = [], opinione
                     <div><p className="text-sky-600 dark:text-[var(--icons-green)] font-bold">S/{producto.precio.toFixed(2)}</p>{tieneDescuento && <p className="text-gray-400 text-xs line-through">S/{precioAnterior?.toFixed(2)}</p>}</div>
                   </div>
                   <div className="flex md:hidden mt-2 gap-2">
-                    <button onClick={() => handleQuickView(producto)} className="flex-1 py-1.5 bg-gray-100 dark:bg-[var(--bg-muted)] rounded-lg text-xs">Ver</button>
-                    <button onClick={() => handleAddToCart(producto)} className="flex-1 py-1.5 bg-sky-500 text-white rounded-lg text-xs">Añadir</button>
+                    <button onClick={() => setSelectedProduct(producto)} className="flex-1 py-1.5 bg-gray-100 dark:bg-[var(--bg-muted)] rounded-lg text-xs">Ver</button>
+                    <button className="flex-1 py-1.5 bg-sky-500 text-white rounded-lg text-xs">Añadir</button>
                   </div>
                 </div>
               </div>
             );
           })}
+        </div>
+      )}
+
+      {activeTab === 'servicios' && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {servicios.length === 0 ? (
+            <div className="col-span-full text-center py-12 text-gray-400">
+              <p>Esta tienda aún no tiene servicios registrados.</p>
+            </div>
+          ) : (
+            servicios.map((servicio) => (
+              <div key={servicio.id} className="bg-white dark:bg-[var(--bg-card)] rounded-xl border border-gray-100 dark:border-[var(--border-subtle)] overflow-hidden hover:shadow-lg transition-all group">
+                <div className="relative aspect-video bg-gray-100 dark:bg-[var(--bg-muted)]">
+                  <Image
+                    src={servicio.image || '/img/product-placeholder.webp'}
+                    alt={servicio.name}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform"
+                    sizes="(max-width: 640px) 100vw, 33vw"
+                  />
+                  {servicio.category && (
+                    <span className="absolute top-3 left-3 px-2.5 py-1 bg-white/90 dark:bg-[var(--bg-secondary)]/90 text-xs font-semibold rounded-full">
+                      {servicio.category}
+                    </span>
+                  )}
+                  <div className="hidden md:flex absolute inset-0 bg-black/0 group-hover:bg-black/10 items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
+                    <button onClick={(e) => { e.preventDefault(); setSelectedService(servicio); }} className="bg-white p-2 rounded-full shadow-lg"><Eye className="w-4 h-4" /></button>
+                    <button className="bg-sky-500 dark:bg-[var(--brand-green)] p-2 rounded-full shadow-lg"><ShoppingCart className="w-4 h-4 text-white" /></button>
+                  </div>
+                </div>
+                <div className="p-4">
+                  <h4 className="font-semibold text-sm text-gray-900 dark:text-[var(--text-primary)] mb-1 line-clamp-2">
+                    {servicio.name}
+                  </h4>
+                  <p className="text-xs text-gray-500 dark:text-[var(--text-secondary)] line-clamp-2 mb-3">
+                    {servicio.description}
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sky-600 dark:text-[var(--icons-green)] font-bold text-sm">
+                      S/{servicio.price.toFixed(2)}
+                    </span>
+                    {servicio.duration && (
+                      <span className="text-xs text-gray-400 flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        {servicio.duration}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       )}
 
@@ -251,48 +403,198 @@ export default function StoreTabs({ tienda, productos, sucursales = [], opinione
 
       {activeTab === 'resenas' && (
         <div className="space-y-6">
+          {/* Resumen stats */}
           <div className="bg-white dark:bg-[var(--bg-card)] rounded-xl border border-gray-100 dark:border-[var(--border-subtle)] p-6">
             <div className="flex flex-col md:flex-row gap-8">
               <div className="text-center md:text-left">
-                <p className="text-5xl font-black text-gray-900 dark:text-[var(--text-primary)]">{(tienda.valoracion ?? 0).toFixed(1)}</p>
+                <p className="text-5xl font-black text-gray-900 dark:text-[var(--text-primary)]">
+                  {(reviewStats?.average ?? 0).toFixed(1)}
+                </p>
                 <div className="flex gap-0.5 my-2 justify-center md:justify-start">
-                  {Array.from({ length: 5 }).map((_, i) => <Star key={i} className={`w-5 h-5 ${i < Math.round(tienda.valoracion ?? 0) ? 'fill-amber-400 text-amber-400' : 'fill-gray-200'}`} />)}
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Star key={i} className={`w-5 h-5 ${i < Math.round(reviewStats?.average ?? 0) ? 'fill-amber-400 text-amber-400' : 'fill-gray-200'}`} />
+                  ))}
                 </div>
-                <p className="text-sm text-gray-500">{tienda.reviews} reseñas</p>
+                <p className="text-sm text-gray-500">{reviewStats?.count ?? 0} reseñas</p>
+                <div className="flex gap-4 mt-3 justify-center md:justify-start text-xs text-gray-500">
+                  {reviewStats && (
+                    <>
+                      <span>Comunicación {reviewStats.avg_communication.toFixed(1)}</span>
+                      <span>Envío {reviewStats.avg_shipping.toFixed(1)}</span>
+                      <span>Empaque {reviewStats.avg_packaging.toFixed(1)}</span>
+                    </>
+                  )}
+                </div>
               </div>
               <div className="flex-1 space-y-2">
                 {[5,4,3,2,1].map(stars => {
-                  const count = stars === 5 ? 1 : stars === 4 ? 1 : 0;
-                  const percent = stars === 5 ? 50 : stars === 4 ? 50 : 0;
+                  const dist = reviewStats?.distribution ?? {};
+                  const count = dist[stars] ?? 0;
+                  const total = reviewStats?.count ?? 1;
+                  const percent = total > 0 ? (count / total) * 100 : 0;
                   return (
                     <div key={stars} className="flex items-center gap-2">
                       <span className="text-sm text-gray-600 w-8">{stars} ★</span>
-                      <div className="flex-1 h-2 bg-gray-200 dark:bg-[var(--bg-muted)] rounded-full"><div className="h-full bg-amber-400 rounded-full" style={{ width: `${percent}%` }} /></div>
+                      <div className="flex-1 h-2 bg-gray-200 dark:bg-[var(--bg-muted)] rounded-full">
+                        <div className="h-full bg-amber-400 rounded-full" style={{ width: `${percent}%` }} />
+                      </div>
                       <span className="text-sm text-gray-500 w-8">{count}</span>
                     </div>
                   );
                 })}
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="flex items-center gap-2 p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg"><Shield className="w-5 h-5 text-blue-500" /><span className="text-xs font-medium text-blue-700 dark:text-blue-400">Reseñas Reales</span></div>
-                <div className="flex items-center gap-2 p-2 bg-green-50 dark:bg-green-900/20 rounded-lg"><MessageCircle className="w-5 h-5 text-green-500" /><span className="text-xs font-medium text-green-700 dark:text-green-400">Respuestas Rápidas</span></div>
-                <div className="flex items-center gap-2 p-2 bg-purple-50 dark:bg-purple-900/20 rounded-lg"><CheckCircle className="w-5 h-5 text-purple-500" /><span className="text-xs font-medium text-purple-700 dark:text-purple-400">Vendedor Confiable</span></div>
-                <div className="flex items-center gap-2 p-2 bg-amber-50 dark:bg-amber-900/20 rounded-lg"><CreditCard className="w-5 h-5 text-amber-500" /><span className="text-xs font-medium text-amber-700 dark:text-amber-400">Transacciones Seguras</span></div>
+              <div className="flex flex-col gap-2 justify-center">
+                {userReview ? (
+                  <button
+                    onClick={() => setEditingReview(userReview)}
+                    className="flex items-center gap-2 px-4 py-2 bg-sky-500 dark:bg-[var(--brand-green)] text-white rounded-lg text-sm font-medium hover:opacity-90"
+                  >
+                    <Pencil className="w-4 h-4" />
+                    Editar mi reseña
+                  </button>
+                ) : currentUserId ? (
+                  <button
+                    onClick={() => setShowWriteReview(true)}
+                    className="flex items-center gap-2 px-4 py-2 bg-sky-500 dark:bg-[var(--brand-green)] text-white rounded-lg text-sm font-medium hover:opacity-90"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Escribir reseña
+                  </button>
+                ) : (
+                  <p className="text-xs text-gray-400 text-center">Inicia sesión para dejar una reseña</p>
+                )}
               </div>
             </div>
           </div>
+
+          {/* Lista de reseñas */}
           <div className="space-y-4">
-            {opiniones.map((opinion, idx) => (
-              <div key={idx} className="bg-white dark:bg-[var(--bg-card)] rounded-xl border border-gray-100 dark:border-[var(--border-subtle)] p-5">
-                <div className="flex items-start justify-between mb-2">
-                  <div><p className="font-medium text-gray-900 dark:text-[var(--text-primary)]">{opinion.usuario}</p><p className="text-sm text-gray-500">{opinion.fecha}</p></div>
-                  <div className="flex gap-0.5">{Array.from({ length: 5 }).map((_, i) => <Star key={i} className={`w-4 h-4 ${i < opinion.rating ? 'fill-amber-400 text-amber-400' : 'fill-gray-200'}`} />)}</div>
-                </div>
-                <p className="text-gray-600 dark:text-[var(--text-secondary)]">{opinion.comentario}</p>
-                <p className="text-sm text-gray-400 mt-2">Útil ({opinion.utiles})</p>
+            {reviewsLoading ? (
+              <div className="text-center py-8 text-gray-400">Cargando reseñas...</div>
+            ) : storeReviews.length === 0 ? (
+              <div className="text-center py-8 text-gray-400">
+                <p>Esta tienda aún no tiene reseñas.</p>
+                <p className="text-sm mt-1">¡Sé el primero en escribir una!</p>
               </div>
-            ))}
+            ) : (
+              storeReviews.map((review) => (
+                <div key={review.id} className="bg-white dark:bg-[var(--bg-card)] rounded-xl border border-gray-100 dark:border-[var(--border-subtle)] p-5">
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex items-center gap-3">
+                      {review.user?.avatar ? (
+                        <Image src={review.user.avatar} alt="" width={36} height={36} className="rounded-full object-cover w-9 h-9" />
+                      ) : (
+                        <div className="w-9 h-9 bg-gray-200 dark:bg-[var(--bg-muted)] rounded-full flex items-center justify-center text-sm font-medium text-gray-500">
+                          {review.user?.name?.charAt(0) ?? '?'}
+                        </div>
+                      )}
+                      <div>
+                        <p className="font-medium text-gray-900 dark:text-[var(--text-primary)] text-sm">
+                          {review.user?.name ?? 'Anónimo'}
+                          {review.is_verified_purchase && (
+                            <span className="ml-2 inline-flex items-center gap-0.5 text-xs text-green-600">
+                              <CheckCircle className="w-3 h-3" />
+                              Compra verificada
+                            </span>
+                          )}
+                        </p>
+                        <p className="text-xs text-gray-500">{new Date(review.created_at).toLocaleDateString('es-PE', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="flex gap-0.5">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <Star key={i} className={`w-4 h-4 ${i < review.rating ? 'fill-amber-400 text-amber-400' : 'fill-gray-200'}`} />
+                        ))}
+                      </div>
+                      {review.user?.id === currentUserId && (
+                        <div className="flex gap-1 ml-2">
+                          <button
+                            onClick={() => setEditingReview(review)}
+                            className="p-1.5 text-gray-400 hover:text-sky-500 hover:bg-sky-50 dark:hover:bg-sky-900/20 rounded-lg transition-colors"
+                            title="Editar"
+                          >
+                            <Pencil className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => setDeletingReviewId(review.id)}
+                            className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                            title="Eliminar"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  {review.title && (
+                    <p className="font-medium text-gray-800 dark:text-[var(--text-primary)] text-sm mb-1">{review.title}</p>
+                  )}
+                  {review.comment && (
+                    <p className="text-gray-600 dark:text-[var(--text-secondary)] text-sm leading-relaxed">{review.comment}</p>
+                  )}
+                  {(review.rating_communication || review.rating_shipping || review.rating_packaging) && (
+                    <div className="flex gap-4 mt-2 text-xs text-gray-400">
+                      {review.rating_communication && <span>Comunicación: {review.rating_communication}★</span>}
+                      {review.rating_shipping && <span>Envío: {review.rating_shipping}★</span>}
+                      {review.rating_packaging && <span>Empaque: {review.rating_packaging}★</span>}
+                    </div>
+                  )}
+                </div>
+              ))
+            )}
           </div>
+
+          {/* Modal escribir/editar reseña */}
+          <BaseModal
+            isOpen={showWriteReview || !!editingReview}
+            onClose={() => { setShowWriteReview(false); setEditingReview(null); }}
+            title={editingReview ? 'Editar reseña' : 'Escribir reseña'}
+            size="md"
+            showCloseButton
+          >
+            <WriteStoreReview
+              storeSlug={tienda.slug ?? ''}
+              reviewId={editingReview?.id}
+              initialValues={editingReview ? {
+                rating: editingReview.rating,
+                rating_communication: editingReview.rating_communication ?? undefined,
+                rating_shipping: editingReview.rating_shipping ?? undefined,
+                rating_packaging: editingReview.rating_packaging ?? undefined,
+                title: editingReview.title ?? undefined,
+                comment: editingReview.comment ?? undefined,
+              } : undefined}
+              onSuccess={handleReviewSuccess}
+              onCancel={() => { setShowWriteReview(false); setEditingReview(null); }}
+            />
+          </BaseModal>
+
+          {/* Confirmar eliminación */}
+          <BaseModal
+            isOpen={!!deletingReviewId}
+            onClose={() => setDeletingReviewId(null)}
+            title="Eliminar reseña"
+            size="sm"
+            showCloseButton
+          >
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600">¿Estás seguro de eliminar tu reseña? Esta acción no se puede deshacer.</p>
+              <div className="flex gap-3 justify-end">
+                <button
+                  onClick={() => setDeletingReviewId(null)}
+                  className="px-4 py-2 bg-gray-100 dark:bg-[var(--bg-muted)] rounded-lg text-sm font-medium"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleDeleteReview}
+                  className="px-4 py-2 bg-red-500 text-white rounded-lg text-sm font-medium hover:bg-red-600"
+                >
+                  Eliminar
+                </button>
+              </div>
+            </div>
+          </BaseModal>
         </div>
       )}
 
@@ -321,22 +623,62 @@ export default function StoreTabs({ tienda, productos, sucursales = [], opinione
         </div>
       )}
 
+      {/* Modal detalle producto */}
       <QuickViewModal
-        isOpen={isQuickViewOpen}
-        onClose={() => setIsQuickViewOpen(false)}
-        producto={quickViewProduct}
-        onAddToCart={(p, cant) => {
-          addToCart(p);
-          openCart();
-        }}
+        isOpen={!!selectedProduct}
+        onClose={() => setSelectedProduct(null)}
+        producto={selectedProduct}
         tienda={{
-          nombre: tienda.nombre || tienda.slug,
-          slug: tienda.slug,
+          nombre: tienda.nombre,
           logo: tienda.logo,
-          valoracion: tienda.valoracion || 0,
-          reviews: tienda.reviews || 0,
+          slug: tienda.slug,
+          valoracion: tienda.valoracion ?? 0,
+          reviews: tienda.reviews ?? 0,
         }}
       />
+
+      {/* Modal detalle servicio */}
+      <BaseModal
+        isOpen={!!selectedService}
+        onClose={() => setSelectedService(null)}
+        title={selectedService?.name}
+        size="md"
+        showCloseButton
+      >
+        {selectedService && (
+          <div className="space-y-4">
+            {selectedService.image && (
+              <div className="relative aspect-video rounded-xl overflow-hidden bg-gray-100 dark:bg-[var(--bg-muted)]">
+                <Image
+                  src={selectedService.image}
+                  alt={selectedService.name}
+                  fill
+                  className="object-cover"
+                />
+              </div>
+            )}
+            {selectedService.category && (
+              <span className="inline-block px-3 py-1 bg-sky-50 dark:bg-sky-900/20 text-sky-600 dark:text-sky-400 text-xs font-semibold rounded-full">
+                {selectedService.category}
+              </span>
+            )}
+            <p className="text-sm text-gray-600 dark:text-[var(--text-secondary)] leading-relaxed">
+              {selectedService.description}
+            </p>
+            <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-[var(--border-subtle)]">
+              <span className="text-2xl font-bold text-sky-600 dark:text-[var(--icons-green)]">
+                S/{selectedService.price.toFixed(2)}
+              </span>
+              {selectedService.duration && (
+                <span className="text-sm text-gray-500 flex items-center gap-1">
+                  <Clock className="w-4 h-4" />
+                  {selectedService.duration}
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+      </BaseModal>
     </div>
   );
 }

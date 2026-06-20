@@ -12,7 +12,7 @@ export { default as BaseDrawer } from './BaseDrawer';
 export { default as BaseStatsGrid } from './BaseStatsGrid';
 export { default as BaseStatusBadge, ORDER_STATUS_MAPPINGS, VOUCHER_STATUS_MAPPINGS } from './BaseStatusBadge';
 export { default as BaseStatCard } from './BaseStatCard';
-export { default as BaseIcon } from './BaseIcon';
+export { default as BaseIcon, Icons } from './BaseIcon';
 export { default as Icon } from './Icon';
 export { default as OptimizedImage } from './OptimizedImage';
 export { default as IntroCover } from './IntroCover';

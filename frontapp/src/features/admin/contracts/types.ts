@@ -10,6 +10,7 @@ export interface AuditEvent {
 
 export interface Contract {
     id: string;
+    dbId: number;
     company: string;
     ruc: string;
     rep: string;

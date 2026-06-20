@@ -24,6 +24,7 @@ import type {
   Pagination,
   Supplier,
 } from '@/features/admin/operations/types/operations';
+import { GlossaryPageClient } from '@/features/admin/glossary/GlossaryPageClient';
 import type {
   BatchStoreLine,
 } from '@/features/admin/operations/types/scan';
@@ -36,6 +37,7 @@ const TABS = [
   'Facturas',
   'Boletas',
   'Servicios',
+  'Glosario',
 ] as const;
 type Tab = (typeof TABS)[number];
 
@@ -45,6 +47,7 @@ const TAB_TYPE: Record<Tab, string | null> = {
   Facturas: 'Factura',
   Boletas: 'Boleta',
   Servicios: 'Servicio',
+  Glosario: '__glossary__',
 };
 
 // ─── Badges ───────────────────────────────────────────────────────────────────
@@ -864,33 +867,37 @@ export function OperationsPageClient() {
         </div>
       )}
 
-      {/* ── Tabla ── */}
-      <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl overflow-hidden">
-        {loading ? (
-          <div className="py-16 text-center text-[13px] text-[var(--text-muted)]">
-            Cargando comprobantes...
-          </div>
-        ) : (
-          <>
-            <div className="overflow-x-auto">
-              {activeTab === 'Honorarios' && (
-                <TableHonorarios {...tableProps} />
-              )}
-              {(activeTab === 'Facturas' || activeTab === 'Boletas') && (
-                <TableFacturas {...tableProps} />
-              )}
-              {(activeTab === 'Todos' || activeTab === 'Servicios') && (
-                <TableGeneric {...tableProps} />
-              )}
+      {/* ── Glosario ── */}
+      {activeTab === 'Glosario' ? (
+        <GlossaryPageClient />
+      ) : (
+        <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl overflow-hidden">
+          {loading ? (
+            <div className="py-16 text-center text-[13px] text-[var(--text-muted)]">
+              Cargando comprobantes...
             </div>
-            <PaginationBar
-              pagination={localPagination}
-              onPrev={() => goToPage(safePage - 1)}
-              onNext={() => goToPage(safePage + 1)}
-            />
-          </>
-        )}
-      </div>
+          ) : (
+            <>
+              <div className="overflow-x-auto">
+                {activeTab === 'Honorarios' && (
+                  <TableHonorarios {...tableProps} />
+                )}
+                {(activeTab === 'Facturas' || activeTab === 'Boletas') && (
+                  <TableFacturas {...tableProps} />
+                )}
+                {(activeTab === 'Todos' || activeTab === 'Servicios') && (
+                  <TableGeneric {...tableProps} />
+                )}
+              </div>
+              <PaginationBar
+                pagination={localPagination}
+                onPrev={() => goToPage(safePage - 1)}
+                onNext={() => goToPage(safePage + 1)}
+              />
+            </>
+          )}
+        </div>
+      )}
 
       {/* ── Modal detalle ── */}
       <ExpenseDetailModal

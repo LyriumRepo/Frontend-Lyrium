@@ -187,6 +187,30 @@ export interface AdminProductItem {
   images: Array<{ src: string; thumb: string; medium: string; large: string; alt: string }>;
 }
 
+export interface AdminServiceItem {
+  id: number;
+  name: string;
+  slug: string;
+  price: string;
+  status: string;
+  rejection_reason: string | null;
+  reviewed_at: string | null;
+  created_at: string;
+  store?: { id: number; name: string; slug: string };
+  category?: { id: number; name: string };
+}
+
+export interface AdminServicesResponse {
+  success: boolean;
+  data: AdminServiceItem[];
+  meta: {
+    current_page: number;
+    per_page: number;
+    total: number;
+    total_pages: number;
+  };
+}
+
 export interface AdminProductsResponse {
   success: boolean;
   data: AdminProductItem[];
@@ -209,6 +233,12 @@ export interface SellerListParams {
 
 export interface AdminProductsParams {
   status?: 'pending_review' | 'approved' | 'rejected' | 'draft';
+  search?: string;
+  per_page?: number;
+}
+
+export interface AdminServicesParams {
+  status?: 'pending_review' | 'approved' | 'rejected';
   search?: string;
   per_page?: number;
 }
@@ -256,6 +286,26 @@ export const adminSellerRepository = {
   ): Promise<AdminProductsResponse> {
     const q = toQuery(params as Record<string, string | number | undefined>);
     return apiFetch(`/admin/products${q}`);
+  },
+
+  /** GET /admin/services?status=&search=&per_page= */
+  getServices(
+    params: AdminServicesParams = {},
+  ): Promise<AdminServicesResponse> {
+    const q = toQuery(params as Record<string, string | number | undefined>);
+    return apiFetch(`/admin/services${q}`);
+  },
+
+  /** PUT /services/{id}/status */
+  updateServiceStatus(
+    id: number,
+    status: 'approved' | 'rejected' | 'pending_review',
+    reason?: string,
+  ): Promise<unknown> {
+    return apiFetch(`/services/${id}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ status, reason }),
+    });
   },
 
   /** PUT /products/{id}/status */

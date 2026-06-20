@@ -47,26 +47,26 @@ export default function BillingInfo() {
           Métodos disponibles
         </p>
         <div className="grid grid-cols-2 gap-2">
-          <div className="flex items-center gap-2 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800/40">
-            <CreditCard className="w-4 h-4 text-blue-500 flex-shrink-0" />
+          <div className="flex items-center gap-2 p-3 rounded-xl bg-sky-50 dark:bg-sky-900/20 border border-sky-100 dark:border-sky-800/40">
+            <CreditCard className="w-4 h-4 text-sky-500 flex-shrink-0" />
             <span className="text-xs font-medium text-gray-700 dark:text-[var(--text-primary)]">
               Tarjeta crédito / débito
             </span>
           </div>
-          <div className="flex items-center gap-2 p-3 rounded-xl bg-violet-50 dark:bg-violet-900/20 border border-violet-100 dark:border-violet-800/40">
-            <Smartphone className="w-4 h-4 text-violet-500 flex-shrink-0" />
+          <div className="flex items-center gap-2 p-3 rounded-xl bg-teal-50 dark:bg-teal-900/20 border border-teal-100 dark:border-teal-800/40">
+            <Smartphone className="w-4 h-4 text-teal-500 flex-shrink-0" />
             <span className="text-xs font-medium text-gray-700 dark:text-[var(--text-primary)]">
               Yape / Plin
             </span>
           </div>
-          <div className="flex items-center gap-2 p-3 rounded-xl bg-sky-50 dark:bg-sky-900/20 border border-sky-100 dark:border-sky-800/40">
-            <Smartphone className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+          <div className="flex items-center gap-2 p-3 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800/40">
+            <Smartphone className="w-4 h-4 text-green-500 flex-shrink-0" />
             <span className="text-xs font-medium text-gray-700 dark:text-[var(--text-primary)]">
               Billetera digital
             </span>
           </div>
-          <div className="flex items-center gap-2 p-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800/40">
-            <Building2 className="w-4 h-4 text-amber-500 flex-shrink-0" />
+          <div className="flex items-center gap-2 p-3 rounded-xl bg-sky-50 dark:bg-sky-900/20 border border-sky-100 dark:border-sky-800/40">
+            <Building2 className="w-4 h-4 text-sky-500 flex-shrink-0" />
             <span className="text-xs font-medium text-gray-700 dark:text-[var(--text-primary)]">
               Banca móvil / Agente
             </span>

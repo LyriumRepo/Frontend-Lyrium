@@ -2,12 +2,21 @@
 
 import { useState } from 'react';
 import { Star, Loader2, AlertCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/UI/button';
 import { cn } from '@/lib/utils';
 import { LARAVEL_API_URL } from '@/shared/lib/config/flags';
 
 interface Props {
   storeSlug: string;
+  reviewId?: string;
+  initialValues?: {
+    rating: number;
+    rating_communication?: number;
+    rating_shipping?: number;
+    rating_packaging?: number;
+    title?: string;
+    comment?: string;
+  };
   onSuccess?: () => void;
   onCancel?: () => void;
 }
@@ -64,22 +73,23 @@ function StarPicker({
   );
 }
 
-export function WriteStoreReview({ storeSlug, onSuccess, onCancel }: Props) {
-  const [rating, setRating] = useState(0);
-  const [ratingComm, setRatingComm] = useState(0);
-  const [ratingShip, setRatingShip] = useState(0);
-  const [ratingPack, setRatingPack] = useState(0);
-  const [title, setTitle] = useState('');
-  const [comment, setComment] = useState('');
+export function WriteStoreReview({ storeSlug, reviewId, initialValues, onSuccess, onCancel }: Props) {
+  const [rating, setRating] = useState(initialValues?.rating ?? 0);
+  const [ratingComm, setRatingComm] = useState(initialValues?.rating_communication ?? 0);
+  const [ratingShip, setRatingShip] = useState(initialValues?.rating_shipping ?? 0);
+  const [ratingPack, setRatingPack] = useState(initialValues?.rating_packaging ?? 0);
+  const [title, setTitle] = useState(initialValues?.title ?? '');
+  const [comment, setComment] = useState(initialValues?.comment ?? '');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const isEditing = !!reviewId;
 
   // ⚠️ NOTA: Asegúrate de definir de dónde viene 'status' si usas NextAuth.
   // Por ahora lo dejamos simulado o puedes usar un estado/hook real aquí:
   // const { status } = useSession();
-  const authenticated = true;
+  const status = 'authenticated';
 
-  if (!authenticated) {
+  if (false) {
     return (
       <div className="flex items-center gap-3 p-4 rounded-lg bg-yellow-50 border border-yellow-200 text-sm text-yellow-800">
         <AlertCircle className="w-4 h-4 flex-shrink-0" />
@@ -104,26 +114,27 @@ export function WriteStoreReview({ storeSlug, onSuccess, onCancel }: Props) {
       const token = await getAuthToken();
 
       // 2. Realizar la petición inyectando el header de Authorization
-      const res = await fetch(
-        `${LARAVEL_API_URL}/stores/${storeSlug}/reviews`,
-        {
-          method: 'POST',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-            ...(token ? { Authorization: `Bearer ${token}` } : {}), // <--- Solución al 401
-          },
-          body: JSON.stringify({
-            rating,
-            rating_communication: ratingComm || undefined,
-            rating_shipping: ratingShip || undefined,
-            rating_packaging: ratingPack || undefined,
-            title: title || undefined,
-            comment: comment || undefined,
-          }),
+      const url = isEditing
+        ? `${LARAVEL_API_URL}/stores/reviews/${reviewId}`
+        : `${LARAVEL_API_URL}/stores/${storeSlug}/reviews`;
+
+      const res = await fetch(url, {
+        method: isEditing ? 'PUT' : 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-      );
+        body: JSON.stringify({
+          rating,
+          rating_communication: ratingComm || undefined,
+          rating_shipping: ratingShip || undefined,
+          rating_packaging: ratingPack || undefined,
+          title: title || undefined,
+          comment: comment || undefined,
+        }),
+      });
 
       const data = await res.json();
       if (!res.ok)
@@ -209,7 +220,7 @@ export function WriteStoreReview({ storeSlug, onSuccess, onCancel }: Props) {
         )}
         <Button onClick={handleSubmit} disabled={!rating || loading}>
           {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-          {loading ? 'Enviando…' : 'Enviar reseña'}
+          {loading ? 'Enviando…' : (isEditing ? 'Guardar cambios' : 'Enviar reseña')}
         </Button>
       </div>
     </div>

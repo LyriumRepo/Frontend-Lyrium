@@ -13,6 +13,7 @@ interface NotificationContextType {
     loading: boolean;
     markAsRead: (id: string) => void;
     markAllAsRead: () => void;
+    deleteAll: () => Promise<void>;
     addNotification: (notification: Omit<ProactiveNotification, 'id' | 'read' | 'time'>) => void;
     refreshNotifications: () => Promise<void>;
 }
@@ -319,6 +320,88 @@ function mapApiNotificationToProactive(notification: Notification): ProactiveNot
             title = 'Notificación';
             message = notification.subject ?? notification.message_preview ?? 'Nueva notificación';
             break;
+
+        // Store / seller status notifications
+        case 'store_status_changed':
+        case 'App\\Notifications\\StoreStatusNotification':
+            level = 'WARNING';
+            title = 'Estado de tienda actualizado';
+            message = `${notification.store_name ?? 'Tu tienda'} cambió a: ${notification.store_status ?? '—'}`;
+            if (notification.reason) message += `. Motivo: ${notification.reason}`;
+            break;
+
+        // Product status notifications
+        case 'product_status_changed':
+        case 'App\\Notifications\\ProductStatusNotification':
+            if (notification.product_status === 'pending_review') {
+                level = 'INFO';
+                title = 'Producto pendiente de revisión';
+                message = `${notification.product_name ?? 'Un producto'} está esperando aprobación.`;
+            } else if (notification.product_status === 'approved') {
+                level = 'INFO';
+                title = 'Producto aprobado';
+                message = `${notification.product_name ?? 'Tu producto'} ha sido aprobado.`;
+            } else if (notification.product_status === 'rejected') {
+                level = 'WARNING';
+                title = 'Producto rechazado';
+                message = `${notification.product_name ?? 'Tu producto'} fue rechazado.`;
+                if (notification.reason) message += ` Motivo: ${notification.reason}`;
+            }
+            break;
+
+        // User banned notifications
+        case 'user_banned':
+        case 'App\\Notifications\\UserBannedNotification':
+            level = 'CRITICAL';
+            title = 'Cuenta suspendida';
+            message = 'Tu cuenta ha sido suspendida.';
+            if (notification.reason) message += ` Motivo: ${notification.reason}`;
+            break;
+
+        // Service status notifications
+        case 'service_status_changed':
+        case 'App\\Notifications\\ServiceStatusNotification':
+            if (notification.service_status === 'pending_review') {
+                level = 'INFO';
+                title = 'Servicio pendiente de revisión';
+                message = `${notification.service_name ?? 'Un servicio'} está esperando aprobación.`;
+            } else if (notification.service_status === 'approved') {
+                level = 'INFO';
+                title = 'Servicio aprobado';
+                message = `${notification.service_name ?? 'Tu servicio'} ha sido aprobado.`;
+            } else if (notification.service_status === 'rejected') {
+                level = 'WARNING';
+                title = 'Servicio rechazado';
+                message = `${notification.service_name ?? 'Tu servicio'} fue rechazado.`;
+                if (notification.reason) message += ` Motivo: ${notification.reason}`;
+            }
+            break;
+
+        // Contract status notifications
+        case 'contract_status_changed':
+        case 'App\\Notifications\\ContractStatusNotification':
+            if (notification.contract_action === 'created') {
+                level = 'INFO';
+                title = 'Nuevo contrato';
+                message = `Contrato creado para ${notification.contract_name ?? '—'} (${notification.contract_number ?? '—'})`;
+            } else if (notification.contract_action === 'activated') {
+                level = 'INFO';
+                title = 'Contrato activado';
+                message = `El contrato ${notification.contract_number ?? ''} de ${notification.contract_name ?? '—'} ha sido activado.`;
+            } else if (notification.contract_action === 'expired') {
+                level = 'WARNING';
+                title = 'Contrato expirado';
+                message = `El contrato ${notification.contract_number ?? ''} de ${notification.contract_name ?? '—'} ha expirado.`;
+            } else if (notification.contract_action === 'renewed') {
+                level = 'INFO';
+                title = 'Contrato renovado';
+                message = `El contrato ${notification.contract_number ?? ''} fue renovado a V${notification.contract_version ?? '?'}.`;
+            } else if (notification.contract_action === 'deleted') {
+                level = 'WARNING';
+                title = 'Contrato eliminado';
+                message = `El contrato de ${notification.contract_name ?? '—'} fue eliminado.`;
+            }
+            break;
     }
 
     const timeAgo = notification.created_at
@@ -405,6 +488,16 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         }
     }, []);
 
+    const deleteAll = useCallback(async () => {
+        try {
+            const ids = notifications.map(n => n.id);
+            await notificationRepository.deleteAll(ids);
+        } catch (error) {
+            console.error('Error deleting all notifications:', error);
+        }
+        setNotifications([]);
+    }, [notifications]);
+
     const addNotification = useCallback((n: Omit<ProactiveNotification, 'id' | 'read' | 'time'>) => {
         const newNotification: ProactiveNotification = {
             ...n,
@@ -446,6 +539,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
             loading,
             markAsRead,
             markAllAsRead,
+            deleteAll,
             addNotification,
             refreshNotifications,
         }}>

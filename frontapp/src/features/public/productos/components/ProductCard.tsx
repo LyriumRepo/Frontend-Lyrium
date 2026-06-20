@@ -1,117 +1,220 @@
 'use client';
 
-/**
- * ProductCard.tsx — componente reutilizable para CategoryPageClient
- * Conecta el botón "Agregar" a cartApi (R17 fix para la vista de categoría).
- *
- * Reemplaza el bloque `function ProductCard` dentro de CategoryPageClient.tsx
- * Ubicación sugerida: src/features/public/productos/components/ProductCard.tsx
- */
+import { Star, ShieldCheck, Leaf, FolderOpen, Package } from 'lucide-react';
 
-import Image from 'next/image';
-import Link from 'next/link';
-import { ShoppingCart, Tag, Check, Loader2 } from 'lucide-react';
-import type { LaravelProduct } from '@/features/public/product/types';
-import { useAddToCart } from '@/features/public/product/hooks/useAddToCart';
+const NO_IMAGE = '/img/no-image.png';
 
-function formatPrice(price: number) {
-  return `S/ ${price.toFixed(2)}`;
+function resolveImg(url?: string | null): string {
+  if (!url) return NO_IMAGE;
+  if (/^https?:\/\//i.test(url)) return url;
+  if (url.startsWith('/')) return url;
+  return NO_IMAGE;
 }
 
-function discountPct(price: number, regular: number) {
-  if (!regular || regular <= price) return 0;
-  return Math.round(((regular - price) / regular) * 100);
+function formatPrice(n?: number | string | null): string {
+  return 'S/ ' + Number(n ?? 0).toFixed(2);
+}
+
+export interface ProductCardData {
+  id: number | string;
+  name: string;
+  slug: string;
+  imageUrl: string;
+  price: number;
+  originalPrice?: number;
+  discountPercent?: number;
+  categoryName?: string;
+  rating?: number;
+  ratingCount?: number;
+  stock: number;
+  description?: string;
+}
+
+export function fromApiProduct(p: any): ProductCardData {
+  const finalPrice = Number(p.precio_final ?? p.precio_oferta ?? p.precio ?? 0);
+  const basePrice = Number(p.precio ?? 0);
+  const hasOffer = finalPrice > 0 && basePrice > 0 && finalPrice < basePrice;
+  const pct = hasOffer
+    ? (Number(p.descuento_pct ?? 0) || Math.round(((basePrice - finalPrice) / basePrice) * 100))
+    : 0;
+  return {
+    id: p.id,
+    name: p.nombre,
+    slug: String(p.id),
+    imageUrl: p.imagen_url,
+    price: finalPrice,
+    originalPrice: hasOffer ? basePrice : undefined,
+    discountPercent: pct,
+    categoryName: p.categoria_nombre,
+    rating: Number(p.rating_promedio ?? 0),
+    ratingCount: Number(p.rating_total ?? 0),
+    stock: Number(p.stock ?? 0),
+    description: p.descripcion_corta,
+  };
+}
+
+export function fromLaravelProduct(p: any): ProductCardData {
+  const imgSrc = p.images?.[0]?.medium ?? p.images?.[0]?.src ?? NO_IMAGE;
+  const basePrice = Number(p.regular_price ?? 0);
+  const salePrice = Number(p.price ?? 0);
+  const hasOffer = basePrice > 0 && salePrice > 0 && salePrice < basePrice;
+  const pct = hasOffer ? Math.round(((basePrice - salePrice) / basePrice) * 100) : 0;
+  return {
+    id: p.id,
+    name: p.name,
+    slug: p.slug,
+    imageUrl: imgSrc,
+    price: salePrice,
+    originalPrice: hasOffer ? basePrice : undefined,
+    discountPercent: pct,
+    categoryName: p.categories?.[0]?.name,
+    rating: Number(p.rating?.average ?? 0),
+    ratingCount: Number(p.rating?.count ?? 0),
+    stock: Number(p.stock ?? 0),
+    description: p.short_description,
+  };
 }
 
 interface ProductCardProps {
-  product: LaravelProduct;
+  product: ProductCardData;
+  onAdd?: (id: number | string) => void;
+  onView?: (id: number | string) => void;
+  adding?: boolean;
+  added?: boolean;
 }
 
-export default function ProductCard({ product }: ProductCardProps) {
-  const discount = discountPct(product.price, product.regular_price);
-  const imgSrc =
-    product.images[0]?.medium ?? product.images[0]?.src ?? '/no-image.png';
-
-  // ── R17: conectado al hook de carrito ────────────────────────────────────
-  const { addToCart, loading, addedToCart } = useAddToCart();
+export default function ProductCard({ product: p, onAdd, onView, adding, added }: ProductCardProps) {
+  const outOfStock = p.stock <= 0;
+  const hasOffer = !!p.originalPrice && p.originalPrice > p.price;
 
   return (
-    <Link
-      href={`/producto/${product.slug}`}
-      className="group bg-white dark:bg-[var(--bg-secondary)] border border-gray-100 dark:border-[var(--border-subtle)] rounded-2xl overflow-hidden hover:shadow-xl hover:border-sky-200 dark:hover:border-[#4A7C59]/40 transition-all duration-200 flex flex-col"
-    >
-      {/* Imagen */}
-      <div className="relative aspect-square overflow-hidden bg-gray-50 dark:bg-[var(--bg-primary)]">
-        <Image
-          src={imgSrc}
-          alt={product.images[0]?.alt ?? product.name}
-          fill
-          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-          className="object-cover group-hover:scale-105 transition-transform duration-300"
-        />
-        {discount > 0 && (
-          <span className="absolute top-2 left-2 px-2 py-0.5 bg-red-500 text-white text-xs font-bold rounded-full">
-            -{discount}%
-          </span>
-        )}
-        {product.sticker && (
-          <span className="absolute top-2 right-2 px-2 py-0.5 bg-sky-500 text-white text-xs font-bold rounded-full flex items-center gap-1">
-            <Tag className="w-2.5 h-2.5" />
-            {product.sticker}
-          </span>
-        )}
-        {product.stock === 0 && (
-          <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-            <span className="text-white text-xs font-bold bg-black/60 px-3 py-1 rounded-full">
-              Sin stock
-            </span>
+    <article className="group flex flex-col rounded-3xl overflow-hidden border border-slate-100 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] transition-all duration-200 hover:border-sky-200 dark:hover:border-[var(--brand-sky)] hover:shadow-[0_18px_52px_rgba(2,132,199,.10)] dark:hover:shadow-[0_18px_52px_rgba(2,132,199,0.15)] hover:-translate-y-0.5">
+
+      <div className="relative">
+        {onView ? (
+          <button onClick={() => onView(p.id)} className="block w-full">
+            <div className="aspect-square bg-gray-100 dark:bg-[var(--bg-muted)] overflow-hidden">
+              <img
+                src={resolveImg(p.imageUrl)}
+                alt={p.name}
+                onError={(e) => { (e.target as HTMLImageElement).src = NO_IMAGE; }}
+                className="w-full h-full object-cover group-hover:scale-[1.05] transition duration-300"
+              />
+            </div>
+          </button>
+        ) : (
+          <div className="aspect-square bg-gray-100 dark:bg-[var(--bg-muted)] overflow-hidden">
+            <img
+              src={resolveImg(p.imageUrl)}
+              alt={p.name}
+              onError={(e) => { (e.target as HTMLImageElement).src = NO_IMAGE; }}
+              className="w-full h-full object-cover group-hover:scale-[1.05] transition duration-300"
+            />
           </div>
         )}
+
+        <span className="absolute top-3 left-3 inline-flex items-center gap-1 text-[11px] px-3 py-1 rounded-full bg-white/85 dark:bg-[var(--bg-card)]/85 border border-sky-100 dark:border-[var(--border-subtle)] backdrop-blur-sm text-slate-700 dark:text-[var(--text-primary)] shadow-sm">
+          <Leaf className="w-3 h-3 text-sky-500 dark:text-[var(--brand-sky)]" /> Lyrium
+        </span>
+
+        {hasOffer && (
+          <span className="absolute top-3 right-3 inline-flex items-center gap-1 text-[11px] px-3 py-1 rounded-full bg-emerald-600 text-white shadow">
+            -{p.discountPercent}%
+          </span>
+        )}
+
+        {outOfStock && (
+          <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+            <span className="text-white text-xs font-bold bg-black/60 px-3 py-1 rounded-full">Sin stock</span>
+          </div>
+        )}
+
+        {!outOfStock && (
+          <button
+            onClick={() => onAdd?.(p.id)}
+            disabled={outOfStock || adding}
+            title="Añadir rápido"
+            className="absolute bottom-3 right-3 w-11 h-11 rounded-2xl bg-white/95 dark:bg-[var(--bg-card)]/95 border border-sky-100 dark:border-[var(--border-subtle)] text-slate-700 dark:text-[var(--text-primary)] shadow-sm grid place-items-center hover:shadow transition disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            {adding ? <span className="text-sm text-sky-500 dark:text-[var(--brand-sky)] animate-spin">⟳</span> : <span className="text-xl text-sky-500 dark:text-[var(--brand-sky)]">+</span>}
+          </button>
+        )}
       </div>
 
-      {/* Info */}
-      <div className="p-3 flex flex-col gap-1.5 flex-1">
-        <p className="text-xs text-gray-400 dark:text-gray-500 truncate">
-          {product.store.name}
-        </p>
-        <p className="text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] line-clamp-2 leading-tight flex-1">
-          {product.name}
-        </p>
-        <div className="flex items-baseline gap-2 mt-auto">
-          <span className="text-sky-600 dark:text-sky-400 font-black text-base">
-            {formatPrice(product.price)}
+      <div className="p-4 flex flex-col gap-2 flex-1">
+        {onView ? (
+          <button onClick={() => onView(p.id)} className="text-left">
+            <p className="text-slate-800 dark:text-[var(--text-primary)] leading-snug line-clamp-2 text-sm font-medium">{p.name}</p>
+          </button>
+        ) : (
+          <p className="text-slate-800 dark:text-[var(--text-primary)] leading-snug line-clamp-2 text-sm font-medium">{p.name}</p>
+        )}
+
+        {p.description && (
+          <p className="text-[11px] text-slate-400 dark:text-[var(--text-muted)] line-clamp-2">{p.description}</p>
+        )}
+
+        <div className="flex items-center justify-between gap-2 mt-auto pt-2">
+          <span className="text-[11px] px-2 py-1 rounded-full bg-slate-50 dark:bg-[var(--bg-muted)] border border-slate-100 dark:border-[var(--border-subtle)] text-slate-600 dark:text-[var(--text-secondary)] inline-flex items-center gap-1">
+            <FolderOpen className="w-3 h-3 text-sky-500 dark:text-[var(--brand-sky)]" /> {p.categoryName ?? 'General'}
           </span>
-          {discount > 0 && (
-            <span className="text-xs text-gray-400 line-through">
-              {formatPrice(product.regular_price)}
-            </span>
-          )}
+          {p.ratingCount && p.ratingCount > 0
+            ? (
+              <span className="inline-flex items-center gap-1 text-[11px] px-2 py-1 rounded-full bg-gradient-to-r from-sky-500/10 to-lime-500/8 dark:from-sky-500/20 dark:to-lime-500/15 border border-sky-200/50 dark:border-sky-800/30">
+                <span className="inline-flex items-center gap-0.5">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Star
+                      key={i}
+                      className={`w-3 h-3 ${(p.rating ?? 0) >= i + 0.75 ? 'text-amber-400 fill-amber-400' : 'text-gray-300 dark:text-gray-600'}`}
+                    />
+                  ))}
+                </span>
+                <span className="text-slate-500 dark:text-[var(--text-muted)]">{(p.rating ?? 0).toFixed(1)} · {p.ratingCount}</span>
+              </span>
+            )
+            : (
+              <span className="text-[10px] px-2 py-1 rounded-full bg-slate-50 dark:bg-[var(--bg-muted)] border border-slate-100 dark:border-[var(--border-subtle)] text-slate-500 dark:text-[var(--text-muted)] inline-flex items-center gap-1">
+                <ShieldCheck className="w-3 h-3 text-sky-500 dark:text-[var(--brand-sky)]" /> Verificado
+              </span>
+            )}
         </div>
 
-        {/* ── Botón conectado ── */}
-        <button
-          onClick={(e) => {
-            e.preventDefault(); // no navega al detalle
-            if (product.stock === 0 || loading) return;
-            addToCart(Number(product.id), 1);
-          }}
-          disabled={product.stock === 0 || loading}
-          className={`mt-1 w-full flex items-center justify-center gap-1.5 py-2 text-xs font-bold rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
-            addedToCart
-              ? 'bg-emerald-500 text-white'
-              : 'bg-sky-50 dark:bg-sky-900/20 text-sky-600 dark:text-sky-400 hover:bg-sky-500 hover:text-white dark:hover:bg-[#4A7C59] dark:hover:text-white'
-          }`}
-        >
-          {loading ? (
-            <Loader2 className="w-3.5 h-3.5 animate-spin" />
-          ) : addedToCart ? (
-            <Check className="w-3.5 h-3.5" />
-          ) : (
-            <ShoppingCart className="w-3.5 h-3.5" />
+        <div className="flex items-end justify-between mt-1">
+          <div>
+            <p className="text-emerald-700 dark:text-emerald-400 text-xl font-bold">{formatPrice(p.price)}</p>
+            {hasOffer
+              ? <p className="text-xs text-gray-400 dark:text-[var(--text-muted)] line-through">{formatPrice(p.originalPrice)}</p>
+              : <p className="text-xs text-transparent">-</p>
+            }
+          </div>
+          <span className={`text-xs inline-flex items-center gap-1 ${outOfStock ? 'text-rose-500' : 'text-slate-400 dark:text-[var(--text-muted)]'}`}>
+            <Package className="w-3 h-3 text-sky-500 dark:text-[var(--brand-sky)]" />
+            {outOfStock ? 'Agotado' : p.stock ? `Stock: ${p.stock}` : 'Disponible'}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2 mt-2">
+          <button
+            onClick={() => onAdd?.(p.id)}
+            disabled={outOfStock || adding}
+            className={`py-2.5 rounded-2xl text-xs font-semibold inline-flex items-center justify-center gap-1.5 transition shadow-md shadow-sky-100 dark:shadow-sky-900/20 disabled:opacity-40 disabled:cursor-not-allowed hover:-translate-y-px ${
+              added
+                ? 'bg-emerald-500 text-white'
+                : 'bg-sky-500 text-white hover:bg-sky-600 dark:hover:bg-sky-400'
+            }`}
+          >
+            {adding ? '⟳' : added ? '✓' : '🛒'} {outOfStock ? 'No disponible' : adding ? 'Agregando...' : added ? '¡Listo!' : 'Añadir'}
+          </button>
+          {onView && (
+            <button
+              onClick={() => onView?.(p.id)}
+              className="py-2.5 rounded-2xl border border-sky-200 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] text-xs font-semibold text-slate-700 dark:text-[var(--text-primary)] inline-flex items-center justify-center gap-1.5 hover:bg-sky-50 dark:hover:bg-sky-900/10 transition hover:-translate-y-px"
+            >
+              🔍 Ver
+            </button>
           )}
-          {loading ? 'Agregando…' : addedToCart ? '¡Listo!' : 'Agregar'}
-        </button>
+        </div>
       </div>
-    </Link>
+    </article>
   );
 }

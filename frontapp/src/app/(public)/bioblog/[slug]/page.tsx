@@ -41,10 +41,15 @@ export default function BlogPostPage() {
         try {
             const postData = await blogApi.getPostBySlug(slug);
 
-            setPost(postData);
             if (postData) {
                 const comms = await blogApi.getComments(postData.id);
                 setComments(comms);
+            }
+
+            setPost(postData);
+
+            if (postData) {
+                blogApi.registerArticleView(postData.id);
             }
         } catch (error) {
             console.error('Error loading post:', error);
@@ -60,7 +65,7 @@ export default function BlogPostPage() {
         setSubmitting(true);
         try {
             await blogApi.createComment({
-                post_id: post.id,
+                article_id: post.id,
                 author_name: commentForm.author_name,
                 author_email: commentForm.author_email,
                 content: commentForm.content,
@@ -96,7 +101,7 @@ export default function BlogPostPage() {
     if (!post) {
         return (
             <div className="max-w-4xl mx-auto px-4 py-8 text-center">
-                <HeroPill icon="AlertCircle" text="Artículo no encontrado" />
+                <HeroPill icon="WarningCircle" text="Artículo no encontrado" />
                 <p className="text-slate-600 mt-4 mb-6">El artículo que buscas no existe o ha sido eliminado.</p>
                 <Link href="/bioblog" className="text-emerald-500 hover:underline">
                     Volver al BioBlog
@@ -117,7 +122,7 @@ export default function BlogPostPage() {
             </Link>
 
             {/* Hero Pill */}
-            <HeroPill icon="FileText" text={post.category_name} />
+            <HeroPill icon="Article" text={post.category?.name ?? 'Artículo'} />
 
             {/* Artículo */}
             <article className="mt-6">
@@ -130,17 +135,12 @@ export default function BlogPostPage() {
                     <div className="flex flex-wrap items-center gap-4 text-sm text-slate-500">
                         <div className="flex items-center gap-2">
                             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-100 to-sky-100 flex items-center justify-center text-emerald-600 font-bold">
-                                {post.author.charAt(0)}
+                                {(post.author_name ?? 'L').charAt(0)}
                             </div>
-                            <span>{post.author}</span>
+                            <span>{post.author_name ?? 'Lyrium'}</span>
                         </div>
                         <span>•</span>
-                        <span>{formatDate(post.published_at)}</span>
-                        <span>•</span>
-                        <span className="flex items-center gap-1">
-                            <Icon name="Eye" className="w-4 h-4" />
-                            {post.views} vistas
-                        </span>
+                        <span>{formatDate(post.published_at ?? '')}</span>
                     </div>
                 </header>
 
@@ -158,8 +158,20 @@ export default function BlogPostPage() {
                 )}
 
                 {/* Contenido */}
+                <style>{`
+                    .blog-content img {
+                        max-width: 100%;
+                        height: auto;
+                        border-radius: 8px;
+                        display: inline-block;
+                    }
+                    .blog-content iframe {
+                        max-width: 100%;
+                        border-radius: 8px;
+                    }
+                `}</style>
                 <div
-                    className="prose prose-lg max-w-none text-slate-700"
+                    className="prose prose-lg max-w-none text-slate-700 blog-content"
                     dangerouslySetInnerHTML={{ __html: sanitizeHtml(post.content) }}
                 />
 
@@ -168,7 +180,7 @@ export default function BlogPostPage() {
                     <span className="text-sm text-slate-500">
                         Etiquetas:
                         <span className="ml-2 px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-sm">
-                            {post.category_name}
+                            {post.category?.name ?? 'General'}
                         </span>
                     </span>
                 </div>

@@ -1,15 +1,15 @@
 'use client';
 
-
-import { useState, useMemo } from 'react';
-import Image from 'next/image';
+import { useState, useMemo, useCallback } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
     ArrowLeft, Flame, SlidersHorizontal, X,
-    ChevronDown, Tag, ShoppingCart, Loader2, Check,
+    ChevronDown,
 } from 'lucide-react';
 import type { LaravelCategory } from '@/shared/lib/api/laravelCategoryRepository';
 import type { LaravelProduct } from '@/features/public/product/types';
+import ProductCard, { fromLaravelProduct } from '@/features/public/productos/components/ProductCard';
 import { useAddToCart } from '@/features/public/product/hooks/useAddToCart';
 
 interface LocalFilters {
@@ -18,72 +18,13 @@ interface LocalFilters {
     onSale?: boolean;
     inStock?: boolean;
     sortBy: 'default' | 'price_asc' | 'price_desc' | 'name';
-}
-
-function formatPrice(price: number) { return `S/ ${price.toFixed(2)}`; }
-function discountPct(price: number, regular: number) {
-    if (!regular || regular <= price) return 0;
-    return Math.round(((regular - price) / regular) * 100);
-}
-
-// ProductCard — usa useAddToCart igual que ProductDetailPageClient
-function ProductCard({ product }: { product: LaravelProduct }) {
-    const { addToCart, loading, addedToCart } = useAddToCart();
-    const discount = discountPct(product.price, product.regular_price);
-    const imgSrc   = product.images[0]?.medium ?? product.images[0]?.src ?? '/no-image.png';
-    const inStock  = product.stock > 0;
-
-    const handleAdd = (e: React.MouseEvent) => {
-        e.preventDefault();
-        if (!inStock || loading) return;
-        addToCart(Number(product.id), 1);
-    };
-
-    return (
-        <Link href={`/producto/${product.slug}`}
-            className="group bg-white dark:bg-[var(--bg-secondary)] border border-gray-100 dark:border-[var(--border-subtle)] rounded-2xl overflow-hidden hover:shadow-xl hover:border-sky-200 dark:hover:border-[#4A7C59]/40 transition-all duration-200 flex flex-col">
-            <div className="relative aspect-square overflow-hidden bg-gray-50 dark:bg-[var(--bg-primary)]">
-                <Image src={imgSrc} alt={product.images[0]?.alt ?? product.name} fill
-                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                    className="object-cover group-hover:scale-105 transition-transform duration-300" />
-                {discount > 0 && (
-                    <span className="absolute top-2 left-2 px-2 py-0.5 bg-red-500 text-white text-xs font-bold rounded-full">-{discount}%</span>
-                )}
-                {product.sticker && (
-                    <span className="absolute top-2 right-2 px-2 py-0.5 bg-sky-500 text-white text-xs font-bold rounded-full flex items-center gap-1">
-                        <Tag className="w-2.5 h-2.5" />{product.sticker}
-                    </span>
-                )}
-                {!inStock && (
-                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                        <span className="text-white text-xs font-bold bg-black/60 px-3 py-1 rounded-full">Sin stock</span>
-                    </div>
-                )}
-            </div>
-            <div className="p-3 flex flex-col gap-1.5 flex-1">
-                <p className="text-xs text-gray-400 dark:text-gray-500 truncate">{product.store.name}</p>
-                <p className="text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] line-clamp-2 leading-tight flex-1">{product.name}</p>
-                <div className="flex items-baseline gap-2 mt-auto">
-                    <span className="text-sky-600 dark:text-sky-400 font-black text-base">{formatPrice(product.price)}</span>
-                    {discount > 0 && <span className="text-xs text-gray-400 line-through">{formatPrice(product.regular_price)}</span>}
-                </div>
-                {/* Botón igual al de ProductDetailPageClient */}
-                <button onClick={handleAdd} disabled={!inStock || loading}
-                    className={`mt-1 w-full flex items-center justify-center gap-1.5 py-2 text-xs font-bold rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
-                        addedToCart
-                            ? 'bg-emerald-500 text-white'
-                            : inStock
-                            ? 'bg-sky-50 dark:bg-sky-900/20 text-sky-600 dark:text-sky-400 hover:bg-sky-500 hover:text-white dark:hover:bg-[#4A7C59] dark:hover:text-white'
-                            : 'bg-gray-100 dark:bg-gray-800 text-gray-400'
-                    }`}>
-                    {loading    ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    : addedToCart ? <Check className="w-3.5 h-3.5" />
-                    :              <ShoppingCart className="w-3.5 h-3.5" />}
-                    {loading ? 'Agregando…' : addedToCart ? '¡Agregado!' : 'Agregar'}
-                </button>
-            </div>
-        </Link>
-    );
+}function ProductCardWrapper({ product: p }: { product: LaravelProduct }) {
+  const { addToCart, loading, addedToCart } = useAddToCart();
+  const router = useRouter();
+  const data = fromLaravelProduct(p);
+  const handleAdd = useCallback(() => addToCart(Number(p.id), 1), [addToCart, p.id]);
+  const handleView = useCallback(() => router.push(`/producto/${p.slug}`), [router, p.slug]);
+  return <ProductCard product={data} onAdd={handleAdd} onView={handleView} adding={loading} added={addedToCart} />;
 }
 
 function FiltersPanel({ filters, onChange, onClose, totalVisible, totalAll }: {
@@ -235,7 +176,7 @@ export default function CategoryPageClient({ category, products: initialProducts
                             <h2 className="text-lg font-black text-gray-900 dark:text-white">Ofertas en {category.name}</h2>
                         </div>
                         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                            {offerProducts.slice(0, 4).map((p) => <ProductCard key={p.id} product={p} />)}
+                            {offerProducts.slice(0, 4).map((p) => <ProductCardWrapper key={p.id} product={p} />)}
                         </div>
                     </section>
                 )}
@@ -253,7 +194,7 @@ export default function CategoryPageClient({ category, products: initialProducts
                         </div>
                     ) : (
                         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                            {filteredProducts.map((p) => <ProductCard key={p.id} product={p} />)}
+                            {filteredProducts.map((p) => <ProductCardWrapper key={p.id} product={p} />)}
                         </div>
                     )}
                 </section>

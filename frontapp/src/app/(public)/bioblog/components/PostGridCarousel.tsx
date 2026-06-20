@@ -16,7 +16,7 @@ interface BlogPost {
     id: number;
     title: string;
     slug: string;
-    excerpt: string;
+    summary: string;
     featured_image: string;
     category_name: string;
     published_at: string;
@@ -26,10 +26,23 @@ export default function PostGridCarousel() {
     const [posts, setPosts] = useState<BlogPost[]>([]);
 
     useEffect(() => {
-        blogApi.getRecentPosts(6).then(setPosts).catch(console.error);
+        blogApi.getRecentPosts(6).then((data) => {
+            if (data && data.length > 0) {
+                setPosts(data.map((p: any) => ({
+                    id: p.id,
+                    title: p.title,
+                    slug: p.slug,
+                    summary: p.summary ?? '',
+                    featured_image: p.featured_image ?? '/img/bioblog/blog-teclas.jpg',
+                    category_name: p.category?.name ?? 'General',
+                    published_at: p.published_at ?? '',
+                })));
+            }
+        }).catch(() => {});
     }, []);
 
     const formatDate = (dateString: string) => {
+        if (!dateString) return '';
         const date = new Date(dateString);
         return date.toLocaleDateString('es-ES', { month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase();
     };
@@ -40,13 +53,13 @@ export default function PostGridCarousel() {
                 {/* Custom Navigation Arrows */}
                 <button
                     id="alter-prev-btn"
-                    className="hidden md:block absolute md:left-0 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[var(--text-secondary)] hover:text-sky-500 dark:hover:text-[var(--icons-green)] transition-colors cursor-pointer z-50 p-2"
+                    className="absolute left-0 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[var(--text-secondary)] hover:text-sky-500 dark:hover:text-[var(--icons-green)] transition-colors cursor-pointer z-50 p-2"
                 >
-                    <ChevronLeft className="w-8 h-8 md:w-10 md:h-10 transform rotate-180" />
+                    <ChevronLeft className="w-8 h-8 md:w-10 md:h-10" />
                 </button>
                 <button
                     id="alter-next-btn"
-                    className="hidden md:block absolute md:right-0 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[var(--text-secondary)] hover:text-sky-500 dark:hover:text-[var(--icons-green)] transition-colors cursor-pointer z-50 p-2"
+                    className="absolute right-0 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[var(--text-secondary)] hover:text-sky-500 dark:hover:text-[var(--icons-green)] transition-colors cursor-pointer z-50 p-2"
                 >
                     <ChevronRight className="w-8 h-8 md:w-10 md:h-10" />
                 </button>
@@ -111,7 +124,7 @@ export default function PostGridCarousel() {
 
                                     {/* Extracto */}
                                     <p className="text-slate-500 dark:text-[var(--text-secondary)] text-sm leading-relaxed mb-4 line-clamp-3 font-medium text-justify">
-                                        {post.excerpt}
+                                        {post.summary}
                                     </p>
 
                                     {/* Footer */}

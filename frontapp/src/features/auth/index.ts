@@ -4,4 +4,7 @@ export { LoginPanel } from './components/LoginPanel';
 export { RegisterPanel } from './components/RegisterPanel';
 export { useAuthForm } from './hooks/useAuthForm';
 
-export type { UserType, AuthMode, LoginFormData, RegisterFormData, IntroConfig } from './types/auth';
+export { RegistroLoadingModal } from './components/RegistroLoadingModal';
+export { ResultadoRegistro } from './components/ResultadoRegistro';
+
+export type { UserType, AuthMode, LoginFormData, RegisterFormData, RpaResult, RpaEstado, RpaRiesgo, RegistroStep, IntroConfig } from './types/auth';

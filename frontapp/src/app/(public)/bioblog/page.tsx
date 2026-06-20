@@ -5,6 +5,7 @@ import HeroCarousel from './components/HeroCarousel';
 import PostGridCarousel from './components/PostGridCarousel';
 import FeaturedCarousel from './components/FeaturedCarousel';
 import PodcastSection from './components/PodcastSection';
+import ShortsSection from './components/ShortsSection';
 import VideoGallery from './components/VideoGallery';
 import CommentsSection from './components/CommentsSection';
 
@@ -48,7 +49,10 @@ export default function BioBlogPage() {
             {/* Podcast Section (Sección 5) */}
             <PodcastSection />
 
-            {/* Video Gallery (Sección 6) */}
+            {/* Shorts Section (Sección 6) */}
+            <ShortsSection />
+
+            {/* Video Gallery (Sección 7) */}
             <VideoGallery />
 
             {/* Comments Section (Sección 7) */}

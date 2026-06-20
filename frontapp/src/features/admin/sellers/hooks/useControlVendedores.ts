@@ -17,12 +17,13 @@ import { sellerApi } from '@/shared/lib/api/sellerRepository'; // para profile r
 import type {
   SellerStatus,
   ProductStatus,
+  ServiceStatus,
   Stats,
 } from '@/features/admin/sellers/types';
 
 // ─── Tipos internos del hook ───────────────────────────────────────────────────
 
-export type TabKey = 'vendedores' | 'aprobacion' | 'auditoria' | 'validacion' | 'contratos';
+export type TabKey = 'vendedores' | 'aprobacion' | 'servicios' | 'auditoria' | 'validacion' | 'contratos';
 
 export interface SellerFilters {
   sellerSearch: string;
@@ -100,6 +101,21 @@ export const useControlVendedores = () => {
     staleTime: 30 * 1000,
   });
 
+  // ── Servicios pendientes ───────────────────────────────────────────────────
+  const {
+    data: servicesData,
+    isLoading: servicesLoading,
+  } = useQuery({
+    queryKey: ['admin', 'services', currentTab],
+    queryFn: () =>
+      adminSellerRepository.getServices({
+        status: currentTab === 'servicios' ? 'pending_review' : undefined,
+        per_page: 50,
+      }),
+    enabled: currentTab === 'servicios',
+    staleTime: 30 * 1000,
+  });
+
   // ── Profile Requests (pestaña validación) ─────────────────────────────────
   const {
     data: profileRequests = [],
@@ -146,6 +162,31 @@ export const useControlVendedores = () => {
       store: item.store,
     }));
   }, [sellersData]);
+
+  // ── Derived: Servicios mapeados ────────────────────────────────────────────
+  const mappedServices = useMemo(() => {
+    const statusMap: Record<string, string> = {
+      pending_review: 'PENDING',
+      approved: 'APPROVED',
+      rejected: 'REJECTED',
+      active: 'APPROVED',
+      inactive: 'REJECTED',
+    };
+    return (servicesData?.data ?? []).map((s) => ({
+      id: s.id,
+      name: s.name,
+      seller: s.store?.name ?? 'Sin tienda',
+      sellerId: s.store?.id ?? 0,
+      category: s.category?.name ?? 'Sin categoría',
+      price: parseFloat(s.price ?? '0'),
+      status: statusMap[s.status] ?? s.status,
+      date: s.created_at
+        ? new Date(s.created_at).toLocaleDateString('es-PE')
+        : '',
+      imageUrl: undefined,
+      rejection_reason: s.rejection_reason,
+    }));
+  }, [servicesData]);
 
   // ── Derived: Productos mapeados ────────────────────────────────────────────
   const mappedProducts = useMemo(() => {
@@ -217,6 +258,22 @@ export const useControlVendedores = () => {
       queryClient.invalidateQueries({
         queryKey: ['admin', 'sellers', 'stats'],
       });
+    },
+  });
+
+  /** Actualizar status de servicio */
+  const serviceStatusMutation = useMutation({
+    mutationFn: ({
+      id,
+      status,
+      reason,
+    }: {
+      id: number;
+      status: 'approved' | 'rejected' | 'pending_review';
+      reason?: string;
+    }) => adminSellerRepository.updateServiceStatus(id, status, reason),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'services'] });
     },
   });
 
@@ -297,6 +354,8 @@ export const useControlVendedores = () => {
     filteredSellers: mappedSellers, // ya filtrado desde el servidor
     products: mappedProducts,
     productsLoading,
+    services: mappedServices,
+    servicesLoading,
 
     // Stats para las cards
     stats,
@@ -328,6 +387,23 @@ export const useControlVendedores = () => {
               ? 'rejected'
               : 'pending_review';
         return productStatusMutation.mutateAsync({
+          id,
+          status: backendStatus,
+          reason,
+        });
+      },
+      updateServiceStatus: (
+        id: number,
+        status: ServiceStatus,
+        reason: string,
+      ) => {
+        const backendStatus =
+          status === 'APPROVED'
+            ? 'approved'
+            : status === 'REJECTED'
+              ? 'rejected'
+              : 'pending_review';
+        return serviceStatusMutation.mutateAsync({
           id,
           status: backendStatus,
           reason,

@@ -10,6 +10,12 @@ export const adminNavigation: PanelNavigation = [
                 href: '/admin/sellers',
                 icon: 'Users',
             },
+            {
+                id: 'solicitudes',
+                label: 'Solicitudes',
+                href: '/admin/sellers/solicitudes',
+                icon: 'FileCheck',
+            },
         ],
     },
     {
@@ -89,12 +95,6 @@ export const adminNavigation: PanelNavigation = [
                 label: 'Planes y Suscripciones',
                 href: '/admin/planes',
                 icon: 'Sparkles',
-            },
-            {
-                id: 'glossary',
-                label: 'Glosario',
-                href: '/admin/glossary',
-                icon: 'BookOpen',
             },
         ],
     },

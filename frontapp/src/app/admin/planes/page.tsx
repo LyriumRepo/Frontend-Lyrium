@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useRef, useMemo, useState } from 'react';
+import { useEffect, useRef, useMemo, useState, useCallback } from 'react';
 import { useAdmin } from '@/features/admin/planes/hooks/usePlanesAdmin';
 import { useSSE } from '@/features/seller/plans/hooks/useSSE';
 import RequestsPanel from '@/features/admin/planes/components/RequestsPanel';
@@ -59,6 +59,8 @@ const TABS = [
   { key: 'vendedores', label: 'Vendedores' },
 ] as const;
 
+const SLOW_TABS = new Set(['vendedores', 'payment']);
+
 export default function AdminPage() {
   const admin = useAdmin();
   const { state, update, setModal } = admin;
@@ -68,7 +70,8 @@ export default function AdminPage() {
     admin.initialize();
   }, []);
 
-  useSSE('admin', '', {
+  // SSE — solo conectar cuando el panel ya está cargado
+  const sse = useSSE('admin', '', {
     solicitudes_actualizadas: admin.handleSolicitudesActualizadas,
     planes_actualizados:      admin.handlePlanesActualizados,
     colores_actualizados:     admin.handleColoresActualizados,
@@ -96,6 +99,17 @@ export default function AdminPage() {
       planStreamRef.current = null;
     };
   }, [state.isLoaded]);
+
+  const handleSwitchTab = useCallback(async (tab: string) => {
+    if (SLOW_TABS.has(tab)) {
+      sse.disconnect();
+      await new Promise(r => setTimeout(r, 400));
+    }
+    if (tab === 'requests') {
+      sse.connect();
+    }
+    await admin.switchTab(tab as never);
+  }, [admin, sse]);
 
   const s = state;
 
@@ -141,7 +155,7 @@ export default function AdminPage() {
               <div className="flex items-center gap-2 flex-shrink-0">
                 {pendingCount > 0 && (
                   <button
-                    onClick={() => admin.switchTab('requests')}
+                    onClick={() => handleSwitchTab('requests')}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 cursor-pointer hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors"
                   >
                     <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
@@ -170,7 +184,7 @@ export default function AdminPage() {
               return (
                 <button
                   key={t.key}
-                  onClick={() => admin.switchTab(t.key as never)}
+                  onClick={() => handleSwitchTab(t.key)}
                   className={`
                     relative flex items-center gap-2 px-4 py-3 text-sm font-semibold
                     whitespace-nowrap cursor-pointer transition-all duration-150

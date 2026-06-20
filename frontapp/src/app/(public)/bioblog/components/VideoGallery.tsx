@@ -1,13 +1,48 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Play, Plus } from 'lucide-react';
-import { videoCategories, videos } from '../data/blogData';
+import { blogApi } from '@/shared/lib/api/blog';
+
+interface VideoItem {
+    id: number;
+    title: string;
+    videoId: string;
+    category: string;
+    categoryLabel: string;
+}
+
+const YT_THUMB = (id: string) => `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
 
 export default function VideoGallery() {
+    const [videos, setVideos] = useState<VideoItem[]>([]);
+    const [categories, setCategories] = useState<string[]>([]);
     const [activeFilter, setActiveFilter] = useState('*');
     const [showAll, setShowAll] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [imgErrors, setImgErrors] = useState<Set<number>>(new Set());
+
+    const handleImgError = (id: number) => {
+        setImgErrors(prev => new Set(prev).add(id));
+    };
+
+    useEffect(() => {
+        blogApi.getVideos().then((data: any[]) => {
+            const items: VideoItem[] = (data && data.length > 0)
+                ? data.map((v: any) => ({
+                    id: v.id,
+                    title: v.title,
+                    videoId: v.youtube_id ?? '',
+                    category: v.category ?? 'general',
+                    categoryLabel: v.category_label ?? v.category ?? 'General',
+                }))
+                : [];
+            setVideos(items);
+            const cats = Array.from(new Set(items.map((v) => v.category)));
+            setCategories(cats);
+        }).catch(() => {}).finally(() => setLoading(false));
+    }, []);
 
     const filteredVideos = activeFilter === '*'
         ? videos
@@ -37,25 +72,41 @@ export default function VideoGallery() {
                 <div className="max-w-7xl mx-auto px-4">
                     {/* Filtros de Categoría */}
                     <div className="flex flex-wrap justify-center gap-3 mb-12">
-                        {videoCategories.map((cat) => (
+                        <button
+                            onClick={() => { setActiveFilter('*'); setShowAll(false); }}
+                            className={`px-5 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 ${
+                                activeFilter === '*'
+                                    ? 'bg-sky-500 dark:bg-[var(--brand-green)] text-white shadow-lg'
+                                    : 'bg-white dark:bg-[var(--bg-secondary)] text-slate-600 dark:text-[var(--text-secondary)] hover:bg-slate-100 dark:hover:bg-[#2A3F33] border border-slate-200 dark:border-[var(--border-subtle)]'
+                            }`}
+                        >
+                            Todos
+                        </button>
+                        {categories.map((cat) => (
                             <button
-                                key={cat.id}
-                                onClick={() => {
-                                    setActiveFilter(cat.id);
-                                    setShowAll(false);
-                                }}
-                                className={`category px-5 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 ${
-                                    activeFilter === cat.id
+                                key={cat}
+                                onClick={() => { setActiveFilter(cat); setShowAll(false); }}
+                                className={`px-5 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 ${
+                                    activeFilter === cat
                                         ? 'bg-sky-500 dark:bg-[var(--brand-green)] text-white shadow-lg'
                                         : 'bg-white dark:bg-[var(--bg-secondary)] text-slate-600 dark:text-[var(--text-secondary)] hover:bg-slate-100 dark:hover:bg-[#2A3F33] border border-slate-200 dark:border-[var(--border-subtle)]'
                                 }`}
                             >
-                                {cat.name}
+                                {categories.find(c => c === cat) ? cat.charAt(0).toUpperCase() + cat.slice(1) : cat}
                             </button>
                         ))}
                     </div>
 
-                    {/* Contenedor de la Galería */}
+                    {loading ? (
+                        <div className="flex justify-center py-12">
+                            <div className="w-8 h-8 border-2 border-sky-500 border-t-transparent rounded-full animate-spin" />
+                        </div>
+                    ) : videos.length === 0 ? (
+                        <div className="text-center py-12 text-slate-500">
+                            <p>No hay videos disponibles.</p>
+                        </div>
+                    ) : (
+                    <>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {displayedVideos.map((video) => (
                             <div
@@ -66,11 +117,12 @@ export default function VideoGallery() {
                                     {/* Miniatura */}
                                     <div className="aspect-video relative overflow-hidden">
                                         <Image
-                                            src={`https://i.ytimg.com/vi/${video.videoId}/maxresdefault.jpg`}
+                                            src={imgErrors.has(video.id) || !video.videoId ? '/img/bioblog/blog-teclas.jpg' : YT_THUMB(video.videoId)}
                                             alt={video.title}
                                             fill
                                             sizes="(max-width: 768px) 100vw, 33vw"
                                             className="object-cover transform transition-transform duration-700 group-hover:scale-110"
+                                            onError={() => handleImgError(video.id)}
                                         />
                                         <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors" />
 
@@ -79,6 +131,11 @@ export default function VideoGallery() {
                                             href={`https://www.youtube.com/embed/${video.videoId}?feature=oembed&autoplay=1`}
                                             target="_blank"
                                             rel="noopener noreferrer"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                blogApi.registerVideoView(video.id);
+                                                window.open(`https://www.youtube.com/embed/${video.videoId}?feature=oembed&autoplay=1`, '_blank');
+                                            }}
                                             className="absolute inset-0 flex items-center justify-center"
                                         >
                                             <div className="w-16 h-16 bg-sky-500 dark:bg-[var(--icons-green)] text-white rounded-full flex items-center justify-center transform transition-all duration-500 scale-90 group-hover:scale-100 shadow-xl group-hover:shadow-sky-500/50 dark:group-hover:shadow-lime-100/50">
@@ -115,6 +172,8 @@ export default function VideoGallery() {
                                 <Plus className="w-4 h-4" />
                             </button>
                         </div>
+                    )}
+                    </>
                     )}
                 </div>
             </div>
