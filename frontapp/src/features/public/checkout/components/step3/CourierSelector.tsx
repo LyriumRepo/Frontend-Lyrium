@@ -5,13 +5,20 @@ import { Truck, Package, Weight, ChevronDown, Home, Store } from 'lucide-react';
 import { useCheckoutStore }     from '@/store/checkoutStore';
 import type { LaravelCalcResponse, CourierOption, TipoEntrega, TiendaLogistica } from '@/store/checkoutStore';
 
-const MARKUP     = 1.05; 
+// ── Constantes ────────────────────────────────────────────────────────────────
+const MARKUP     = 1.05; // +5%
 const SHARF_KEYS = ['sharf', 'sharf express'];
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
 const applyMarkup = (price: number | null | undefined): number | null =>
   price == null ? null : Math.ceil(price * MARKUP * 100) / 100;
 
 const isSharf = (courier: string | undefined | null) =>
   !!courier && SHARF_KEYS.includes(courier.toLowerCase());
+
+const tieneDomicilio = (op: CourierOption) =>
+  isSharf(op.courier) || !!op.domicilio?.disponible;
 
 function getPrecioFinal(op: CourierOption, tipo: TipoEntrega): number | null {
   if (isSharf(op.courier)) {
@@ -24,14 +31,17 @@ function getPrecioFinal(op: CourierOption, tipo: TipoEntrega): number | null {
     return null;
   }
   if (op.domicilio?.disponible && op.domicilio.precio != null) return applyMarkup(op.domicilio.precio);
+  if (op.agencia?.disponible && op.agencia.precio != null) return applyMarkup(op.agencia.precio);
   if (op.precio != null) return applyMarkup(op.precio);
   return null;
 }
 
+/** Peso facturable total de una tienda */
 function getPesoTotal(tienda: TiendaLogistica): number {
   return (tienda.cajas?.detalle ?? []).reduce((s, c) => s + (c.pesoFacturable ?? 0), 0);
 }
 
+// ── Metadatos por courier ─────────────────────────────────────────────────────
 const COURIER_META: Record<string, { label: string; emoji: string; color: string; bg: string }> = {
   Shalom: { 
     label: 'Shalom Express', 
@@ -63,8 +73,12 @@ const getMeta = (courier: string) => {
   return key ? COURIER_META[key] : { label: courier, emoji: '📬', color: 'text-gray-600 dark:text-gray-400', bg: 'bg-gray-50 dark:bg-gray-900/40 border-gray-200 dark:border-gray-700', tiempo: '2-5 días' };
 };
 
+// ── Props ─────────────────────────────────────────────────────────────────────
 interface Props { quotes: LaravelCalcResponse }
 
+// ════════════════════════════════════════════════════════════════════════════════
+// COMPONENT
+// ════════════════════════════════════════════════════════════════════════════════
 export default function CourierSelector({ quotes }: Props) {
   const setSelectedCourier     = useCheckoutStore(s => s.setSelectedCourier);
   const setOrderData           = useCheckoutStore(s => s.setOrderData);
@@ -74,17 +88,21 @@ export default function CourierSelector({ quotes }: Props) {
 
   const tiendas = quotes.tiendas?.filter(t => !t.error) ?? [];
   const precioPorCourier: Record<string, number> = {};
+  const sinDomicilioPorCourier: Record<string, boolean> = {};
 
   for (const tienda of tiendas) {
     for (const op of tienda.logistica?.opciones ?? []) {
       const p = getPrecioFinal(op, isSharf(op.courier) ? 'domicilio' : tipoEntrega);
       if (p == null) continue;
       precioPorCourier[op.courier] = (precioPorCourier[op.courier] ?? 0) + p;
+
+      if (tipoEntrega === 'domicilio' && !tieneDomicilio(op)) {
+        sinDomicilioPorCourier[op.courier] = true;
+      }
     }
   }
 
   const couriersDisponibles = Object.keys(precioPorCourier);
-
   useEffect(() => {
     if (!selectedCourier && couriersDisponibles.length > 0) {
       const barato = couriersDisponibles.reduce((a, b) =>
@@ -178,7 +196,12 @@ export default function CourierSelector({ quotes }: Props) {
             {couriersDisponibles.map(courier => {
               const meta  = getMeta(courier);
               const total = precioPorCourier[courier] ?? 0;
-              const suffix = isSharf(courier) ? ' · Solo domicilio' : '';
+              const sinDomicilio = tipoEntrega === 'domicilio' && sinDomicilioPorCourier[courier];
+              const suffix = isSharf(courier)
+                ? ' · Solo domicilio'
+                : sinDomicilio
+                  ? ' · Sin domicilio aquí (agencia)'
+                  : '';
               return (
                 <option key={courier} value={courier}>
                   {meta.emoji} {meta.label}{suffix}  —  S/ {total.toFixed(2)}
@@ -191,7 +214,18 @@ export default function CourierSelector({ quotes }: Props) {
         <p className="text-[11px] text-gray-400 mt-1.5">
           Precios incluyen IGV de servicio (5%)
         </p>
+
+        {selectedCourier && tipoEntrega === 'domicilio' && sinDomicilioPorCourier[selectedCourier] && (
+          <div className="flex items-start gap-2 px-3 py-2.5 mt-2 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400">
+            <Store className="w-4 h-4 shrink-0 mt-0.5" />
+            <p className="text-xs leading-snug">
+              <span className="font-bold">{getMeta(selectedCourier).label} no tiene entrega a domicilio</span> en una o más de tus tiendas. Te mostramos el precio de recojo en agencia para esos casos.
+            </p>
+          </div>
+        )}
       </div>
+
+      {/* ── 4. CARDS POR TIENDA ─────────────────────────────────────── */}
       {selectedCourier && tiendas.map(tienda => {
         const op       = tienda.logistica?.opciones?.find(o => o.courier === selectedCourier);
         const meta     = getMeta(selectedCourier);
@@ -235,6 +269,11 @@ export default function CourierSelector({ quotes }: Props) {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className={`font-bold text-sm ${meta.color}`}>{meta.emoji} {meta.label}</p>
+                      {!sharfMode && tipoEntrega === 'domicilio' && !tieneDomicilio(op) && (
+                        <p className="text-[10px] font-semibold text-amber-600 dark:text-amber-400 flex items-center gap-1 mt-0.5">
+                          <Store className="w-3 h-3" /> Sin domicilio aquí — se cobra agencia
+                        </p>
+                      )}
                     </div>
                     <div className="text-right">
                       {precioFinal != null
@@ -268,6 +307,7 @@ export default function CourierSelector({ quotes }: Props) {
   </div>
 )}
 
+                  {/* Agencia vs Domicilio */}
                   {sharfMode ? (
                     <div className="rounded-lg px-3 py-2.5 bg-white/70 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 flex items-center justify-between">
                       <div className="flex items-center gap-2">
@@ -284,7 +324,11 @@ export default function CourierSelector({ quotes }: Props) {
                   ) : (
                     <div className="grid grid-cols-2 gap-2">
                       {/* Agencia */}
-                      <div className={`rounded-lg px-3 py-2 text-center border ${op.agencia?.disponible ? 'bg-white/70 dark:bg-gray-900/50 border-gray-200 dark:border-gray-700' : 'opacity-40 bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700'}`}>
+                      <div className={[
+                        'rounded-lg px-3 py-2 text-center border',
+                        op.agencia?.disponible ? 'bg-white/70 dark:bg-gray-900/50 border-gray-200 dark:border-gray-700' : 'opacity-40 bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700',
+                        (tipoEntrega === 'domicilio' && !tieneDomicilio(op)) ? 'ring-2 ring-amber-400 dark:ring-amber-500' : '',
+                      ].join(' ')}>
                         <Store className="w-4 h-4 mx-auto mb-1 text-gray-500" />
                         <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Agencia</p>
                         {op.agencia?.disponible && precioAg != null
@@ -298,7 +342,7 @@ export default function CourierSelector({ quotes }: Props) {
                         <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Domicilio</p>
                         {op.domicilio?.disponible && precioDom != null
                           ? <p className={`text-base font-black font-mono ${meta.color}`}>S/ {precioDom.toFixed(2)}</p>
-                          : <p className="text-sm text-gray-400">No disponible</p>
+                          : <p className="text-[11px] text-gray-400 leading-tight">No disponible<br/>aquí</p>
                         }
                       </div>
                     </div>
@@ -323,7 +367,9 @@ export default function CourierSelector({ quotes }: Props) {
               Total envío con {getMeta(selectedCourier).label}
             </p>
             <p className="text-[11px] text-teal-600/70 dark:text-teal-500">
-              {tipoEntrega === 'domicilio' ? '🏠 A domicilio' : '🏢 En agencia'} · {totalPeso.toFixed(2)} kg
+              {sinDomicilioPorCourier[selectedCourier]
+                ? '🏢 En agencia (sin domicilio en tu zona)'
+                : tipoEntrega === 'domicilio' ? '🏠 A domicilio' : '🏢 En agencia'} · {totalPeso.toFixed(2)} kg
             </p>
           </div>
           <p className="font-black font-mono text-xl text-teal-700 dark:text-teal-400">
