@@ -169,6 +169,7 @@ export interface OrderResult {
   orderId:      string;
   email:        string;
   total:        number;
+  shipping?:    number;
   items:        CartItem[];
   personalData: PersonalData;
   shippingData: ShippingData;
@@ -176,7 +177,7 @@ export interface OrderResult {
 }
 
 interface CheckoutState {
-  currentStep:  1 | 2 | 3 | 4;
+  currentStep: 1 | 2 | 3 | 4 | 5;
   isProcessing: boolean;
   cartLoading:  boolean;
   cartError:    string | null;
@@ -204,7 +205,7 @@ interface CheckoutState {
   isLoadingQuotes:     boolean;
   quotesError:         string | null;
 
-  setStep:             (step: 1 | 2 | 3 | 4) => void;
+  setStep:             (step: 1 | 2 | 3 | 4 | 5) => void;
   setProcessing:       (v: boolean) => void;
   setCartLoading:      (v: boolean) => void;
   setCartError:        (v: string | null) => void;
