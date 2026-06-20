@@ -3,9 +3,7 @@ import { useMemo } from 'react';
 import { useCheckoutStore } from '@/store/checkoutStore';
 import type { CourierOption, TipoEntrega } from '@/store/checkoutStore';
 
-// ─── helpers (misma lógica que ResumenCheckout) ─────────────────────────────
 const MARKUP = 1.05;
-
 const applyMarkup = (p: number | null | undefined): number | null =>
   p == null ? null : Math.ceil(p * MARKUP * 100) / 100;
 
@@ -32,12 +30,11 @@ function getPrecioFinal(
   return op.precio != null ? applyMarkup(op.precio) : null;
 }
 
-// ─── hook ────────────────────────────────────────────────────────────────────
 export interface CheckoutGrandTotals {
   grandTotalProductos: number;
-  grandTotalEnvio: number;   // subtotal de envío (con markup 5%)
-  grandTotal: number;        // productos + envío
-  isReady: boolean;          // false si aún no hay cotizaciones seleccionadas
+  grandTotalEnvio: number;  
+  grandTotal: number;    
+  isReady: boolean;      
 }
 
 export function useCheckoutGrandTotals(): CheckoutGrandTotals {
