@@ -62,13 +62,6 @@ export default function ResumenCheckout() {
 
   return (
     <div className="rounded-2xl border-2 border-gray-100 dark:border-gray-800 overflow-hidden bg-white dark:bg-gray-900/40">
-
-      {/* ── Header ─────────────────────────────────────────────────────── */}
-      <div className="px-5 py-4 bg-gradient-to-r from-sky-500 to-teal-500 flex items-center gap-3">
-        <ShoppingBag className="w-5 h-5 text-white" />
-        <h3 className="font-bold text-white text-sm">Resumen del pedido</h3>
-      </div>
-
       <div className="divide-y divide-gray-100 dark:divide-gray-800">
         {/* ── Por tienda ───────────────────────────────────────────────── */}
         {tiendaRows.map(({ tienda, items, subtotalProductos, precioEnvio, totalTienda, pesoTotal, op }, idx) => (
