@@ -1,4 +1,5 @@
 import { LARAVEL_API_URL } from '@/shared/lib/config/flags';
+import type { ScanApiResponse } from '@/features/admin/operations/types/scan';
 import {
   Supplier,
   SupplierFilters,
@@ -17,6 +18,11 @@ import {
   OperationsStats,
   PaginatedResponse,
 } from '@/features/admin/operations/types/operations';
+import type {
+  ScanFileResponse,
+  ScanBatchStorePayload,
+  ScanBatchStoreResponse,
+} from '@/features/admin/operations/types/scan';
 
 // ─── Helpers de autenticación ─────────────────────────────────────────────────
 
@@ -130,7 +136,45 @@ export const supplierRepository = {
   },
 
   delete(id: number): Promise<{ success: boolean }> {
-    return request(`/suppliers/${id}`, { method: 'DELETE' });
+    return request(`/expenses/${id}`, { method: 'DELETE' });
+  },
+
+  async scan(file: File, password?: string): Promise<ScanFileResponse> {
+    const token = await getAuthToken();
+    const formData = new FormData();
+    formData.append('file', file);
+    if (password) {
+      formData.append('password', password);
+    }
+
+    const headers: Record<string, string> = {
+      Accept: 'application/json',
+    };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const res = await fetch(`${LARAVEL_API_URL}/expenses/scan`, {
+      method: 'POST',
+      headers,
+      body: formData,
+    });
+
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.message ?? `Error HTTP ${res.status} al escanear`);
+    }
+
+    return res.json();
+  },
+
+  async scanBatchStore(
+    payload: ScanBatchStorePayload,
+  ): Promise<ScanBatchStoreResponse> {
+    return request('/expenses/scan/batch-store', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
   },
 };
 
@@ -167,6 +211,39 @@ export const expenseRepository = {
 
   delete(id: number): Promise<{ success: boolean }> {
     return request(`/expenses/${id}`, { method: 'DELETE' });
+  },
+
+  scan: async (file: File, password?: string): Promise<ScanFileResponse> => {
+    const token = await getAuthToken();
+    const baseUrl = LARAVEL_API_URL.endsWith('/')
+      ? LARAVEL_API_URL.slice(0, -1)
+      : LARAVEL_API_URL;
+    const formData = new FormData();
+    formData.append('file', file);
+    if (password) {
+      formData.append('password', password);
+    }
+    const res = await fetch(`${baseUrl}/expenses/scan`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        Accept: 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: formData,
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error ?? err.message ?? `Error ${res.status}`);
+    }
+    return res.json();
+  },
+
+  scanBatchStore(payload: ScanBatchStorePayload): Promise<ScanBatchStoreResponse> {
+    return request('/expenses/scan/batch-store', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
   },
 };
 

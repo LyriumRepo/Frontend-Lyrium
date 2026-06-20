@@ -53,6 +53,13 @@ export const sellerNavigation: PanelNavigation = [
                 href: '/seller/services'
             },
             {
+                id: 'reservas',
+                label: 'Reservas',
+                description: 'Reservas recibidas y estado de atención',
+                icon: 'CalendarCheck',
+                href: '/seller/reservas'
+            },
+            {
                 id: 'ventas',
                 label: 'Mis Ventas',
                 description: 'Monitoreo estratégico de transacciones y despachos',
@@ -66,13 +73,13 @@ export const sellerNavigation: PanelNavigation = [
                 icon: 'CalendarCheck',
                 href: '/seller/agenda'
             },
-            {
-                id: 'logistica',
-                label: 'Mi Logística',
-                description: 'Configuración estratégica de envíos y operadoras',
-                icon: 'Truck',
-                href: '/seller/logistics'
-            },
+            // {
+            //     id: 'logistica',
+            //     label: 'Mi Logística',
+            //     description: 'Configuración estratégica de envíos y operadoras',
+            //     icon: 'Truck',
+            //     href: '/seller/logistics'
+            // },
             {
                 id: 'finanzas',
                 label: 'Centro de Finanzas',
@@ -89,10 +96,24 @@ export const sellerNavigation: PanelNavigation = [
             },
             {
                 id: 'ayuda',
-                label: 'Mesa de Ayuda',
+                label: 'Soporte Lyrium',
                 description: 'Soporte técnico y gestión de incidencias',
                 icon: 'HelpCircle',
                 href: '/seller/help'
+            },
+            {
+                id: 'bioblog',
+                label: 'BioBlog',
+                description: 'Crea y gestiona contenido: artículos, podcasts, videos y shorts',
+                icon: 'BookOpen',
+                href: '/seller/blog'
+            },
+            {
+                id: 'bioforo',
+                label: 'BioForo',
+                description: 'Foro de discusión con tu comunidad',
+                icon: 'MessagesSquare',
+                href: '/seller/forum'
             },
             {
                 id: 'facturacion',

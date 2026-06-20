@@ -436,22 +436,22 @@ export default function ClientRescheduleModal({
                   </div>
 
                   {/* Calendario */}
-                  <div className="space-y-2">
+                  <div className="space-y-2 bg-sky-50 dark:bg-[#1A3A32] p-3 rounded-2xl">
                     <div className="flex items-center justify-between">
                       <button
                         onClick={() => { if (canGoPrev) { setCurrentMonth(new Date(year, month - 1, 1)); setSelectedDate(null); } }}
                         disabled={!canGoPrev}
-                        className="w-7 h-7 rounded-lg bg-gray-100 dark:bg-[var(--bg-muted)] flex items-center justify-center hover:bg-sky-500/10 dark:hover:bg-[var(--icons-green)]/10 hover:text-sky-500 dark:hover:text-[var(--icons-green)] disabled:opacity-25 disabled:cursor-not-allowed transition-all"
+                        className="w-7 h-7 rounded-lg text-sky-500 dark:text-[var(--icons-green)] hover:bg-sky-200 dark:hover:bg-white/10 flex items-center justify-center disabled:opacity-25 disabled:cursor-not-allowed transition-all"
                       >
                         <Icon name="ChevronLeft" className="w-3.5 h-3.5" />
                       </button>
-                      <span className="text-[10px] font-black text-gray-800 dark:text-[var(--text-primary)] uppercase tracking-widest">
+                      <span className="text-[10px] font-black text-sky-600 dark:text-[var(--icons-green)] uppercase tracking-widest">
                         {MONTH_NAMES[month]} {year}
                       </span>
                       <button
                         onClick={() => { if (canGoNext) { setCurrentMonth(new Date(year, month + 1, 1)); setSelectedDate(null); } }}
                         disabled={!canGoNext}
-                        className="w-7 h-7 rounded-lg bg-gray-100 dark:bg-[var(--bg-muted)] flex items-center justify-center hover:bg-sky-500/10 dark:hover:bg-[var(--icons-green)]/10 hover:text-sky-500 dark:hover:text-[var(--icons-green)] disabled:opacity-25 disabled:cursor-not-allowed transition-all"
+                        className="w-7 h-7 rounded-lg text-sky-500 dark:text-[var(--icons-green)] hover:bg-sky-200 dark:hover:bg-white/10 flex items-center justify-center disabled:opacity-25 disabled:cursor-not-allowed transition-all"
                       >
                         <Icon name="ChevronRight" className="w-3.5 h-3.5" />
                       </button>
@@ -459,7 +459,7 @@ export default function ClientRescheduleModal({
 
                     <div className="grid grid-cols-7 gap-0.5">
                       {DAY_HEADERS.map((h) => (
-                        <div key={h} className="text-center text-[8px] font-black text-gray-400 dark:text-[var(--text-secondary)] uppercase py-1">
+                        <div key={h} className="text-center text-[8px] font-black text-sky-500 dark:text-[var(--icons-green)] uppercase py-1">
                           {h}
                         </div>
                       ))}
@@ -476,9 +476,9 @@ export default function ClientRescheduleModal({
                             disabled={!selectable}
                             onClick={() => setSelectedDate(date)}
                             className={`relative h-8 w-full rounded-lg text-[11px] font-black transition-all
-                              ${isPast ? 'text-gray-300 dark:text-[var(--text-secondary)] opacity-20 cursor-not-allowed' : ''}
-                              ${isToday && !isSelected ? 'text-gray-400 dark:text-[var(--text-secondary)] opacity-50 cursor-not-allowed line-through ring-2 ring-sky-300/50 dark:ring-[var(--icons-green)]/30 ring-offset-1 ring-offset-white dark:ring-offset-[var(--bg-secondary)]' : ''}
-                              ${selectable && !isSelected ? 'text-gray-700 dark:text-[var(--text-primary)] hover:bg-sky-500/10 dark:hover:bg-[var(--icons-green)]/10 hover:text-sky-500 dark:hover:text-[var(--icons-green)] cursor-pointer' : ''}
+                              ${isPast ? 'text-gray-300 dark:text-gray-500 opacity-20 cursor-not-allowed' : ''}
+                              ${isToday && !isSelected ? 'bg-sky-100 dark:bg-[var(--brand-green)]/20 text-sky-500 dark:text-[var(--icons-green)] opacity-50 cursor-not-allowed line-through ring-2 ring-sky-300/50 dark:ring-[var(--icons-green)]/30 ring-offset-1 ring-offset-sky-50 dark:ring-offset-[#1A3A32]' : ''}
+                              ${selectable && !isSelected ? 'text-gray-700 dark:text-[var(--text-primary)] hover:bg-sky-200 dark:hover:bg-white/10 hover:text-sky-500 dark:hover:text-[var(--icons-green)] cursor-pointer' : ''}
                               ${isSelected ? 'bg-sky-500 dark:bg-[var(--brand-green)] text-white shadow-md shadow-sky-500/20 dark:shadow-[var(--icons-green)]/20' : ''}
                             `}
                           >

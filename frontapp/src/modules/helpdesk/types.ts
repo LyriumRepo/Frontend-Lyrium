@@ -65,6 +65,8 @@ export interface Ticket {
     vendedor?: TicketUser;
     admin_asignado?: TicketUser;
     categoria?: string;
+    created_at?: string;
+    updated_at?: string;
     fecha_creacion?: string;
     fecha_actualizacion?: string;
     mensajes: TicketMessage[];

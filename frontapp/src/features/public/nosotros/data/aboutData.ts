@@ -63,6 +63,21 @@ export const aboutData = {
             }
         ]
     },
+    marketplaceSection: {
+        title: 'Un Marketplace Descentralizado',
+        subtitle: 'Cada tienda opera de forma independiente bajo los valores Lyrium',
+        paragraphs: [
+            'Lyrium BioMarketplace no es una tienda única, sino una plataforma que conecta a múltiples tiendas independientes especializadas en productos orgánicos, naturales y de bienestar. Cada tienda vendedora gestiona sus propios productos, precios, inventario, logística y proceso de atención al cliente.',
+            'Al realizar una compra, el vendedor es el responsable directo de la entrega, la calidad del producto y la postventa. Lyrium actúa como el facilitador tecnológico y el garante de la calidad, velando porque todas las tiendas cumplan con nuestros estándares de servicio, transparencia y compromiso con tu salud.',
+            'Este modelo descentralizado permite que cada tienda se especialice y ofrezca un trato cercano y personalizado, mientras que Lyrium te brinda la confianza de una plataforma segura y supervisada.'
+        ],
+        stats: [
+            { value: '50+', label: 'Tiendas verificadas' },
+            { value: '100%', label: 'Orgánico certificado' },
+            { value: '24/7', label: 'Soporte Lyrium' },
+            { value: '7 días', label: 'Plazo de devolución' },
+        ]
+    },
     premiumIcons: [
         {
             title: 'Orgánico',

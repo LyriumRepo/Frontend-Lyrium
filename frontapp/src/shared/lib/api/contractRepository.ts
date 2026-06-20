@@ -57,14 +57,7 @@ async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promi
             ...options.headers,
         },
     });
-    if (!res.ok) {
-        let details = '';
-        try {
-            const errData = await res.json();
-            details = errData.message || JSON.stringify(errData.errors || errData);
-        } catch {}
-        throw new Error(`API Error: ${res.status} - ${details}`);
-    }
+    if (!res.ok) throw new Error(`API Error: ${res.status}`);
     return res.json();
 }
 
@@ -93,20 +86,20 @@ function mapApiToFrontend(api: ApiContractResponse): FrontendContract {
 
 function frontendToApi(data: Partial<FrontendContract>): Record<string, any> {
     const result: Record<string, any> = {};
-    if (data.company !== undefined) result.company = data.company === '' ? null : data.company;
-    if (data.ruc !== undefined) result.ruc = data.ruc === '' ? null : data.ruc;
-    if (data.rep !== undefined) result.rep = data.rep === '' ? null : data.rep;
-    if (data.dni !== undefined) result.dni = data.dni === '' ? null : data.dni;
-    if (data.direccion !== undefined) result.direccion = data.direccion === '' ? null : data.direccion;
-    if (data.admin_name !== undefined) result.admin_name = data.admin_name === '' ? null : data.admin_name;
-    if (data.admin_phone !== undefined) result.admin_phone = data.admin_phone === '' ? null : data.admin_phone;
-    if (data.admin_email !== undefined) result.admin_email = data.admin_email === '' ? null : data.admin_email;
-    if (data.plan !== undefined) result.plan = data.plan === '' ? null : data.plan;
-    if (data.type !== undefined) result.type = data.type === '' ? null : data.type;
-    if (data.modality !== undefined) result.modality = (data.modality as any) === '' ? null : data.modality;
-    if (data.start !== undefined) result.start = data.start === '' ? null : data.start;
-    if (data.end !== undefined) result.end = data.end === '' ? null : data.end;
-    if (data.status !== undefined) result.status = (data.status as any) === '' ? null : data.status;
+    if (data.company !== undefined) result.company = data.company;
+    if (data.ruc !== undefined) result.ruc = data.ruc;
+    if (data.rep !== undefined) result.rep = data.rep;
+    if (data.dni !== undefined) result.dni = data.dni;
+    if (data.direccion !== undefined) result.direccion = data.direccion;
+    if (data.admin_name !== undefined) result.admin_name = data.admin_name;
+    if (data.admin_phone !== undefined) result.admin_phone = data.admin_phone;
+    if (data.admin_email !== undefined) result.admin_email = data.admin_email;
+    if (data.plan !== undefined) result.plan = data.plan;
+    if (data.type !== undefined) result.type = data.type;
+    if (data.modality !== undefined) result.modality = data.modality;
+    if (data.start !== undefined) result.start = data.start;
+    if (data.end !== undefined) result.end = data.end;
+    if (data.status !== undefined) result.status = data.status;
     return result;
 }
 
@@ -126,25 +119,25 @@ export const contractApi = {
 
     getById: async (id: string): Promise<FrontendContract | null> => {
         try {
-            const res = await apiRequest<any>(`/contracts/${id}`);
-            return mapApiToFrontend(res.data || res);
+            const res = await apiRequest<{ data: ApiContractResponse }>(`/contracts/${id}`);
+            return mapApiToFrontend(res.data);
         } catch { return null; }
     },
 
     create: async (input: Partial<FrontendContract>): Promise<FrontendContract> => {
-        const res = await apiRequest<any>('/contracts', {
+        const res = await apiRequest<{ data: ApiContractResponse }>('/contracts', {
             method: 'POST',
             body: JSON.stringify(frontendToApi(input)),
         });
-        return mapApiToFrontend(res.data || res);
+        return mapApiToFrontend(res.data);
     },
 
     update: async (id: string, input: Partial<FrontendContract>): Promise<FrontendContract> => {
-        const res = await apiRequest<any>(`/contracts/${id}`, {
+        const res = await apiRequest<{ data: ApiContractResponse }>(`/contracts/${id}`, {
             method: 'PUT',
             body: JSON.stringify(frontendToApi(input)),
         });
-        return mapApiToFrontend(res.data || res);
+        return mapApiToFrontend(res.data);
     },
 
     updateStatus: async (id: string, status: string, updatedInfo: Partial<FrontendContract>): Promise<FrontendContract> => {
@@ -152,11 +145,11 @@ export const contractApi = {
             method: 'PUT',
             body: JSON.stringify({ status }),
         });
-        const res = await apiRequest<any>(`/contracts/${id}`, {
+        const res = await apiRequest<{ data: ApiContractResponse }>(`/contracts/${id}`, {
             method: 'PUT',
             body: JSON.stringify(frontendToApi(updatedInfo)),
         });
-        return mapApiToFrontend(res.data || res);
+        return mapApiToFrontend(res.data);
     },
 
     uploadDocument: async (id: string, file: File): Promise<FrontendContract> => {
@@ -173,7 +166,7 @@ export const contractApi = {
         });
         if (!res.ok) throw new Error(`API Error: ${res.status}`);
         const data = await res.json();
-        return mapApiToFrontend(data.data || data);
+        return mapApiToFrontend(data.data);
     },
 
     downloadDocument: async (id: string): Promise<Blob> => {

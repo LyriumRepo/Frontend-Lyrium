@@ -1,6 +1,6 @@
 'use client';
 
-import { CheckCircle, MapPin, CreditCard, Home } from 'lucide-react';
+import { CheckCircle, MapPin, CreditCard, Home, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useCheckoutStore } from '@/store/checkoutStore';
@@ -21,6 +21,7 @@ const DELIVERY_LABELS: Record<string, string> = {
 
 export default function OrderConfirmation() {
   const result = useCheckoutStore((s) => s.orderResult);
+  const setStep = useCheckoutStore((s) => s.setStep);
 
   if (!result) return null;
 
@@ -127,6 +128,13 @@ export default function OrderConfirmation() {
               >
                 Ver Mis Pedidos
               </Link>
+              <button
+                type="button"
+                onClick={() => setStep(4)}
+                className="px-8 py-4 rounded-2xl bg-sky-500 text-white font-black text-xs uppercase tracking-widest hover:bg-sky-600 transition-all text-center flex items-center justify-center gap-2 shadow-lg shadow-sky-100"
+              >
+                Siguiente <ArrowRight className="w-4 h-4" />
+              </button>
             </div>
           </div>
         </div>

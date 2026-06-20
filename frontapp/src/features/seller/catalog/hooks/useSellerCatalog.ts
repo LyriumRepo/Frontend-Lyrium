@@ -6,7 +6,7 @@ import { Product } from '../types';
 import { MOCK_CATALOG_DATA } from '../mock';
 import { productRepository } from '@/shared/lib/api/factory';
 import { USE_MOCKS } from '@/shared/lib/config/flags';
-import { CreateProductInput, UpdateProductInput } from '@/shared/lib/api/contracts';
+import { CreateProductInput } from '@/shared/lib/api/contracts';
 import { getErrorMessage } from '@/shared/lib/utils/error-utils';
 
 export function useSellerCatalog() {
@@ -37,7 +37,7 @@ export function useSellerCatalog() {
         mutationFn: async (product: Partial<Product>) => {
             if (!USE_MOCKS) {
                 if (product.id) {
-                    return await productRepository.updateProduct(product.id, product as UpdateProductInput);
+                    return await productRepository.updateProduct(product.id, product as any);
                 }
                 return await productRepository.createProduct(product as CreateProductInput);
             }

@@ -1,27 +1,47 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { LARAVEL_API_URL } from '@/shared/lib/config/flags';
-import type { Voucher } from '@/features/seller/invoices/types';
-import { adminSellerRepository, SellerListItem } from '@/shared/lib/api/adminSellerRepository';
+import { nubefactApi, type NubefactInvoice, type NubefactStore } from '@/shared/lib/api/nubefactRepository';
 
 export interface AdminInvoiceKPIs {
-    totalFacturado: number;
-    totalComprobantes: number;
-    pendingCount: number;
-    rejectedCount: number;
-    acceptedCount: number;
+    totalFacturadoMesActual: number;
+    totalFacturadoMesAnterior: number;
+    porcentajeCrecimiento: number;
+    montoPromedio: number;
+    topSellers: Array<{ id: string; name: string; slug: string; totalVendido: number }>;
 }
 
-function calcKPIs(invoices: Voucher[]): AdminInvoiceKPIs {
-    const accepted = invoices.filter(i => i.sunat_status === 'ACCEPTED');
-    const pending = invoices.filter(i => i.sunat_status === 'SENT_WAIT_CDR');
-    const rejected = invoices.filter(i => i.sunat_status === 'REJECTED' || i.sunat_status === 'OBSERVED');
+export interface AdminInvoiceRow {
+    id: string;
+    type: string;
+    series: string;
+    number: string;
+    customer_name: string;
+    customer_ruc: string;
+    amount: number;
+    sunat_status: string;
+    emission_date: string;
+    order_id: string;
+    pdf_url: string | null;
+    items: NubefactInvoice['items'];
+    order: NubefactInvoice['order'];
+    stores: NubefactStore[];
+}
 
+function toRow(inv: NubefactInvoice): AdminInvoiceRow {
     return {
-        totalFacturado: accepted.reduce((s, i) => s + i.amount, 0),
-        totalComprobantes: invoices.length,
-        pendingCount: pending.length,
-        rejectedCount: rejected.length,
-        acceptedCount: accepted.length,
+        id: inv.id,
+        type: inv.type,
+        series: inv.series ?? '—',
+        number: inv.number ?? '—',
+        customer_name: inv.businessName ?? '—',
+        customer_ruc: inv.nit ?? '—',
+        amount: inv.total,
+        sunat_status: inv.status,
+        emission_date: inv.createdAt,
+        order_id: inv.orderId ?? '',
+        pdf_url: inv.pdfUrl,
+        items: inv.items,
+        order: inv.order,
+        stores: inv.order?.stores ?? [],
     };
 }
 
@@ -146,120 +166,111 @@ const MOCK_INVOICES: Voucher[] = [
 ];
 
 export function useAdminInvoices() {
-    const [invoices, setInvoices] = useState<Voucher[]>([]);
-    const [sellers, setSellers] = useState<SellerListItem[]>([]);
+    const [invoices, setInvoices] = useState<NubefactInvoice[]>([]);
+    const [kpis, setKpis] = useState<AdminInvoiceKPIs | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     
     const [search, setSearch] = useState('');
-    const [storeSearch, setStoreSearch] = useState('');
-    const [dateFilter, setDateFilter] = useState('');
-    const [typeFilter, setTypeFilter] = useState('ALL');
+    const [storeFilter, setStoreFilter] = useState('');
+    const [typeFilter, setTypeFilter] = useState('');
+    const [statusFilter, setStatusFilter] = useState('');
+    const [dateFrom, setDateFrom] = useState('');
+    const [dateTo, setDateTo] = useState('');
+    const [selectedInvoice, setSelectedInvoice] = useState<AdminInvoiceRow | null>(null);
+    const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
-    const fetchInvoices = useCallback(async () => {
+    const fetchData = useCallback(async () => {
         setIsLoading(true);
         setError(null);
         try {
-            const token = getToken();
-            const headers: Record<string, string> = {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-            };
-            if (token) {
-                headers['Authorization'] = `Bearer ${token}`;
-            }
+            const [listResult, kpisResult] = await Promise.all([
+                nubefactApi.comprobantes(1, 200),
+                nubefactApi.kpis(),
+            ]);
 
-            const res = await fetch(`${LARAVEL_API_URL}/invoices`, { headers });
-            if (!res.ok) {
-                throw new Error(`API error: ${res.status}`);
-            }
-            const json = await res.json() as { success: boolean; data: any; error?: string };
-            if (!json.success) throw new Error(json.error ?? 'Error desconocido');
-            
-            const rawData = json.data;
-            const invoiceList: Voucher[] = Array.isArray(rawData)
-                ? rawData
-                : (rawData && Array.isArray(rawData.data) ? rawData.data : []);
-
-            setInvoices([...invoiceList, ...MOCK_INVOICES]);
-
-            try {
-                const sellersRes = await adminSellerRepository.getSellers({ per_page: 100 });
-                if (sellersRes && sellersRes.data) {
-                    setSellers(sellersRes.data);
-                }
-            } catch (e) {
-                console.warn(e);
-            }
+            setInvoices(listResult.data);
+            setKpis({
+                totalFacturadoMesActual: kpisResult.totalFacturadoMesActual,
+                totalFacturadoMesAnterior: kpisResult.totalFacturadoMesAnterior,
+                porcentajeCrecimiento: kpisResult.porcentajeCrecimiento,
+                montoPromedio: kpisResult.montoPromedio,
+                topSellers: kpisResult.topSellers,
+            });
         } catch (err: unknown) {
-            setError(err instanceof Error ? err.message : 'Error al cargar facturas');
-            setInvoices(MOCK_INVOICES);
+            setError(err instanceof Error ? err.message : 'Error al cargar comprobantes');
         } finally {
             setIsLoading(false);
         }
     }, []);
 
     useEffect(() => {
-        fetchInvoices();
-    }, [fetchInvoices]);
+        fetchData();
+    }, [fetchData]);
 
-    const getStoreName = useCallback((storeId: string | null | undefined) => {
-        if (!storeId) return 'Soporte / Lyrium';
-        const seller = sellers.find(s => s.store && String(s.store.id) === String(storeId));
-        return seller?.store?.trade_name || seller?.store?.store_name || `Tienda #${storeId}`;
-    }, [sellers]);
+    const allStores = useMemo(() => {
+        const names = new Set<string>();
+        for (const inv of invoices) {
+            for (const s of inv.order?.stores ?? []) {
+                names.add(s.name);
+            }
+        }
+        return Array.from(names).sort();
+    }, [invoices]);
+
+    const allTypes = useMemo(() => {
+        const types = new Set(invoices.map(i => i.type));
+        return Array.from(types).sort();
+    }, [invoices]);
 
     const filtered = useMemo(() => {
-        return invoices.filter(i => {
+        const rows = invoices.map(toRow);
+
+        return rows.filter(i => {
             const q = search.toLowerCase();
-            const matchesSearch = !search || (
+            if (q && !(
                 i.customer_name.toLowerCase().includes(q) ||
                 i.customer_ruc.includes(q) ||
                 i.series.toLowerCase().includes(q) ||
                 i.number.includes(q) ||
-                (i.order_id && i.order_id.toLowerCase().includes(q))
-            );
+                i.type.toLowerCase().includes(q)
+            )) return false;
 
-            const sQ = storeSearch.toLowerCase();
-            const storeName = getStoreName(i.store_id).toLowerCase();
-            const matchesStore = !storeSearch || (
-                storeName.includes(sQ) ||
-                (i.store_id && String(i.store_id).includes(sQ))
-            );
+            if (storeFilter && !i.stores.some(s => s.name === storeFilter)) return false;
 
-            const matchesDate = !dateFilter || (() => {
-                if (!i.emission_date) return false;
-                if (i.emission_date.startsWith(dateFilter)) return true;
-                try {
-                    const d = new Date(i.emission_date);
-                    if (isNaN(d.getTime())) return false;
-                    const year = d.getFullYear();
-                    const month = String(d.getMonth() + 1).padStart(2, '0');
-                    const day = String(d.getDate()).padStart(2, '0');
-                    const localDateStr = `${year}-${month}-${day}`;
-                    if (localDateStr === dateFilter) return true;
-                } catch {}
-                try {
-                    const d = new Date(i.emission_date);
-                    if (isNaN(d.getTime())) return false;
-                    const year = d.getUTCFullYear();
-                    const month = String(d.getUTCMonth() + 1).padStart(2, '0');
-                    const day = String(d.getUTCDate()).padStart(2, '0');
-                    const utcDateStr = `${year}-${month}-${day}`;
-                    if (utcDateStr === dateFilter) return true;
-                } catch {}
-                return false;
-            })();
+            if (typeFilter && i.type !== typeFilter) return false;
 
-            const matchesType = !typeFilter || typeFilter === 'ALL' || (
-                i.type && i.type.toUpperCase() === typeFilter.toUpperCase()
-            );
+            if (statusFilter && i.sunat_status !== statusFilter) return false;
 
-            return matchesSearch && matchesStore && matchesDate && matchesType;
+            if (dateFrom && i.emission_date < dateFrom) return false;
+
+            if (dateTo) {
+                const endOfDay = dateTo + 'T23:59:59';
+                if (i.emission_date > endOfDay) return false;
+            }
+
+            return true;
         });
-    }, [invoices, search, storeSearch, dateFilter, typeFilter, getStoreName]);
+    }, [invoices, search, storeFilter, typeFilter, statusFilter, dateFrom, dateTo]);
 
-    const kpis = useMemo(() => calcKPIs(filtered), [filtered]);
+    const handleViewDetail = useCallback((invoice: AdminInvoiceRow) => {
+        setSelectedInvoice(invoice);
+        setIsDrawerOpen(true);
+    }, []);
+
+    const handleCloseDrawer = useCallback(() => {
+        setIsDrawerOpen(false);
+        setSelectedInvoice(null);
+    }, []);
+
+    const clearFilters = useCallback(() => {
+        setSearch('');
+        setStoreFilter('');
+        setTypeFilter('');
+        setStatusFilter('');
+        setDateFrom('');
+        setDateTo('');
+    }, []);
 
     return {
         invoices: filtered,
@@ -268,13 +279,23 @@ export function useAdminInvoices() {
         error,
         search,
         setSearch,
-        storeSearch,
-        setStoreSearch,
-        dateFilter,
-        setDateFilter,
+        storeFilter,
+        setStoreFilter,
         typeFilter,
         setTypeFilter,
-        getStoreName,
-        refresh: fetchInvoices
+        statusFilter,
+        setStatusFilter,
+        dateFrom,
+        setDateFrom,
+        dateTo,
+        setDateTo,
+        allStores,
+        allTypes,
+        selectedInvoice,
+        isDrawerOpen,
+        handleViewDetail,
+        handleCloseDrawer,
+        clearFilters,
+        refresh: fetchData,
     };
 }

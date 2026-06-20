@@ -25,6 +25,13 @@ function authHeaders(token: string): Record<string, string> {
   };
 }
 
+function toRelativeStorageUrl(url: string | null | undefined): string {
+  if (!url) return '';
+  const idx = url.indexOf('/storage/');
+  if (idx >= 0) return url.substring(idx);
+  return url.startsWith('/') ? url : url;
+}
+
 const VALID_STICKERS = new Set([
   'liquidacion', 'oferta', 'descuento', 'nuevo', 'bestseller', 'envio_gratis',
   'organic', 'natural', 'eco', 'premium', 'vegan',
@@ -53,9 +60,15 @@ function mapLaravelProduct(p: any): Product {
       ? parseFloat(p.discount_percentage)
       : null,
 
-    // Imagen principal
-    image: p.images?.[0]?.src ?? p.image ?? '',
-    images: p.images ?? [],
+    // Imagen principal — prioriza MediaLibrary, fallback al campo image; normaliza a /storage/...
+    image: toRelativeStorageUrl(p.images?.[0]?.src ?? p.image),
+    images: (p.images ?? []).map((img: any) => ({
+        ...img,
+        src:    toRelativeStorageUrl(img.src),
+        thumb:  toRelativeStorageUrl(img.thumb),
+        medium: toRelativeStorageUrl(img.medium),
+        large:  toRelativeStorageUrl(img.large),
+    })),
 
     // Categorías
     category: p.categories?.[0]?.slug ?? '',
@@ -77,12 +90,12 @@ function mapLaravelProduct(p: any): Product {
     serviceModality: p.serviceModality ?? null,
     serviceLocation: p.serviceLocation ?? null,
 
-    // Atributos — ya vienen mapeados desde ProductResource
+    // Atributos — convertir de { label, value } a string[] para el form
     mainAttributes: (p.characteristics ?? []).map((c: any) => ({
-      values: { label: c.label ?? '', value: c.value ?? '' },
+        values: [c.label ?? '', c.value ?? ''],
     })),
     additionalAttributes: (p.additional_info ?? []).map((c: any) => ({
-      values: { label: c.label ?? '', value: c.value ?? '' },
+        values: [c.label ?? '', c.value ?? ''],
     })),
     nutritionalAttributes: (p.nutritional_info?.rows ?? []).map((r: any) => ({
       values: {
@@ -121,6 +134,11 @@ export async function getProducts(): Promise<Product[]> {
     console.error('getProducts exception:', err);
     return [];
   }
+}
+
+// ─── Server action para obtener el token de auth desde cookies ─────────────
+export async function getServerToken(): Promise<string> {
+  return getAuthToken();
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -204,7 +222,6 @@ export async function saveProduct(
     const data = await res.json();
     revalidateTag('seller-catalog', 'max');
 
-    // La respuesta puede ser el producto directamente o { data: producto }
     const raw = data.data ?? data;
     return { success: true, data: mapLaravelProduct(raw) };
   } catch (err: any) {
@@ -241,6 +258,66 @@ export async function deleteProduct(
     return { success: true };
   } catch {
     return { success: false, error: 'Error de conexión al eliminar' };
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// POST /api/products/{id}/media  — subir imagen comprimida (server-to-server)
+// ─────────────────────────────────────────────────────────────────────────────
+export async function uploadProductImageAction(
+  productId: number,
+  imageBase64: string,
+): Promise<{ success: boolean; url?: string; error?: string }> {
+  try {
+    const token = await getAuthToken();
+    if (!token) {
+      return { success: false, error: 'Sesión expirada. Recarga la página.' };
+    }
+
+    const matches = imageBase64.match(/^data:(image\/(\w+));base64,(.+)$/);
+    if (!matches) {
+      return { success: false, error: 'Formato de imagen inválido.' };
+    }
+
+    const mimeType = matches[1];
+    const ext = matches[2];
+    const base64Data = matches[3];
+    const buffer = Buffer.from(base64Data, 'base64');
+    const blob = new Blob([buffer], { type: mimeType });
+
+    const formData = new FormData();
+    formData.append('file', blob, `product-${Date.now()}.${ext}`);
+
+    const res = await fetch(`${LARAVEL_API_URL}/products/${productId}/media`, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => null);
+      const msg =
+        err?.message ??
+        (err?.errors ? Object.values(err.errors).flat().join(', ') : null) ??
+        `Error ${res.status}`;
+      console.error('Media upload failed:', res.status, msg);
+      return { success: false, error: msg };
+    }
+
+    const data = await res.json();
+    const url = data.data?.url ?? '';
+
+    if (!url) {
+      return { success: false, error: 'La imagen se subió pero no se obtuvo la URL.' };
+    }
+
+    return { success: true, url };
+  } catch (err: any) {
+    console.error('uploadProductImageAction exception:', err);
+    return { success: false, error: err.message ?? 'Error de conexión al subir imagen.' };
   }
 }
 

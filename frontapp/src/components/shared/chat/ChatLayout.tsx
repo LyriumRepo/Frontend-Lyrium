@@ -47,7 +47,7 @@ export default function ChatLayout({
         flex
         flex-col
       `}>
-        <div className={`h-1 w-full shrink-0 bg-gradient-to-r from-[#9cb04e] via-[#64c695] to-[#499bbf] rounded-t-[2.5rem] ${listHeaderLineClassName}`} />
+        <div className="h-1 w-full shrink-0 bg-gradient-to-r from-[#9cb04e] via-[#64c695] to-[#499bbf] rounded-t-[2.5rem]" />
         {list}
       </div>
 
@@ -61,11 +61,10 @@ export default function ChatLayout({
         flex
         flex-col
         min-h-0
-        ${detailClassName}
       `}
-        style={style || { background: 'linear-gradient(160deg, color-mix(in srgb,#9cb04e 6%,var(--bg-card)) 0%, var(--bg-card) 45%, color-mix(in srgb,#499bbf 5%,var(--bg-card)) 100%)' }}
+        style={{ background: 'linear-gradient(160deg, color-mix(in srgb,#9cb04e 6%,var(--bg-card)) 0%, var(--bg-card) 45%, color-mix(in srgb,#499bbf 5%,var(--bg-card)) 100%)' }}
       >
-        <div className={`h-1 w-full shrink-0 bg-gradient-to-r from-[#9cb04e] via-[#64c695] to-[#499bbf] rounded-t-[2.5rem] ${detailHeaderLineClassName}`} />
+        <div className="h-1 w-full shrink-0 bg-gradient-to-r from-[#9cb04e] via-[#64c695] to-[#499bbf] rounded-t-[2.5rem]" />
         {detail}
       </div>
     </div>

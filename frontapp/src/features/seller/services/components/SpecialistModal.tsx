@@ -15,19 +15,35 @@ const SPECIALIST_CATEGORY_TREE: SpecCatL1[] = [
   {
     label: 'Servicios médicos',
     children: [
-      'Cardiología', 'Radiología', 'Dermatología', 'Medicina general',
-      'Endocrinología', 'Enfermería', 'Gastroenterología', 'Geriatría',
-      'Ginecología', 'Laboratorio clínico', 'Medicina física y rehabilitación',
-      'Neumología', 'Neurología', 'Nutriología', 'Odontología', 'Oftalmología',
-      'Oncología', 'Pediatría', 'Psicología', 'Psiquiatría', 'Reumatología',
+      'Cardiología',
+      'Radiología',
+      'Dermatología',
+      'Medicina general',
+      'Endocrinología',
+      'Enfermería',
+      'Gastroenterología',
+      'Geriatría',
+      'Ginecología',
+      'Laboratorio clínico',
+      'Medicina física y rehabilitación',
+      'Neumología',
+      'Neurología',
+      'Nutriología',
+      'Odontología',
+      'Oftalmología',
+      'Oncología',
+      'Pediatría',
+      'Psicología',
+      'Psiquiatría',
+      'Reumatología',
     ],
   },
-  { label: 'Belleza',                      children: ['Peluquerías', 'Spas', 'Otros'] },
-  { label: 'Deportes',                     children: ['Gimnasios'] },
-  { label: 'Servicios sociales',           children: ['Otro'] },
-  { label: 'Servicios para animales',      children: ['Otro'] },
+  { label: 'Belleza', children: ['Peluquerías', 'Spas', 'Otros'] },
+  { label: 'Deportes', children: ['Gimnasios'] },
+  { label: 'Servicios sociales', children: ['Otro'] },
+  { label: 'Servicios para animales', children: ['Otro'] },
   { label: 'Servicio de medicina natural', children: ['Otro'] },
-  { label: 'Alojamiento ecológico',        children: ['Otro'] },
+  { label: 'Alojamiento ecológico', children: ['Otro'] },
 ];
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -56,13 +72,17 @@ const AVAILABILITY_OPTIONS: {
   {
     value: 'Indispuesto',
     label: 'Indispuesto',
-    activeClass: 'bg-gray-500/15 border-gray-500/50 text-gray-500 dark:bg-gray-300/15 dark:border-gray-300/50 dark:text-gray-300',
+    activeClass:
+      'bg-gray-500/15 border-gray-500/50 text-gray-500 dark:bg-gray-300/15 dark:border-gray-300/50 dark:text-gray-300',
     dotClass: 'bg-gray-500 dark:bg-gray-300',
   },
 ];
 
 const EXPERIENCIA_OPTIONS = [
-  ...Array.from({ length: 29 }, (_, i) => ({ value: i + 1, label: `${i + 1} año${i + 1 !== 1 ? 's' : ''}` })),
+  ...Array.from({ length: 29 }, (_, i) => ({
+    value: i + 1,
+    label: `${i + 1} año${i + 1 !== 1 ? 's' : ''}`,
+  })),
   { value: 30, label: '30+ años' },
 ];
 
@@ -113,10 +133,11 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const inputCls = (hasError: boolean) =>
   `w-full bg-[var(--bg-secondary)] border rounded-xl px-3 py-2.5 text-sm
-   text-[var(--text-primary)] focus:outline-none transition-colors
-   ${hasError
-     ? 'border-rose-500/50 focus:border-rose-500'
-     : 'border-[var(--border-subtle)] focus:border-sky-500/50 dark:focus:border-[#8FC3A1]/50'
+    text-[var(--text-primary)] focus:outline-none transition-colors
+   ${
+     hasError
+       ? 'border-rose-500/50 focus:border-rose-500'
+       : 'border-[var(--border-subtle)] focus:border-sky-500/50 dark:focus:border-[#8FC3A1]/50'
    }`;
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -142,17 +163,20 @@ export default function SpecialistModal({
       setCatL1(parts[0] ?? '');
       setCatL2(parts[1] ?? '');
       setForm({
-        nombres:          specialist.nombres,
-        apellidos:        specialist.apellidos,
-        dni:              specialist.dni,
-        email:            specialist.email,
-        especialidad:     specialist.especialidad,
-        subEspecialidad:  specialist.subEspecialidad ?? '',
+        nombres: specialist.nombres,
+        apellidos: specialist.apellidos,
+        dni: specialist.dni,
+        email: specialist.email,
+        especialidad: specialist.especialidad,
+        subEspecialidad: specialist.subEspecialidad ?? '',
         aniosExperiencia: specialist.aniosExperiencia,
-        categoria:        specialist.categoria,
+        categoria: specialist.categoria,
         numeroColegiatura: specialist.numeroColegiatura ?? '',
-        foto:             specialist.foto,
-        availability:     specialist.availability === 'Ocupado' ? 'Disponible' : specialist.availability,
+        foto: specialist.foto,
+        availability:
+          specialist.availability === 'Ocupado'
+            ? 'Disponible'
+            : specialist.availability,
       });
       setFotoPreview(specialist.foto ?? null);
     } else {
@@ -194,7 +218,7 @@ export default function SpecialistModal({
     if (!form.nombres.trim())      e.nombres = 'Requerido';
     if (!form.apellidos.trim())    e.apellidos = 'Requerido';
     if (!form.especialidad.trim()) e.especialidad = 'Requerido';
-    if (!catL1)                    e.categoria = 'Selecciona una categoría';
+    if (!catL1) e.categoria = 'Selecciona una categoría';
     if (!form.dni.trim()) {
       e.dni = 'Requerido';
     } else if (form.dni.length !== 8) {
@@ -257,10 +281,15 @@ export default function SpecialistModal({
                 onClick={() => fileInputRef.current?.click()}
                 className="w-20 h-20 rounded-full bg-[var(--bg-secondary)] border-2 border-dashed border-[var(--border-subtle)] hover:border-sky-500/50 dark:hover:border-[#8FC3A1]/50 transition-all cursor-pointer overflow-hidden flex items-center justify-center shadow-sm text-[var(--text-secondary)]"
               >
-                {fotoPreview
-                  ? <img src={fotoPreview} alt="Foto" className="w-full h-full object-cover" />
-                  : <SvgUserSilhouette />
-                }
+                {fotoPreview ? (
+                  <img
+                    src={fotoPreview}
+                    alt="Foto"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <SvgUserSilhouette />
+                )}
               </div>
               {fotoPreview && (
                 <button type="button" onClick={removePhoto}
@@ -278,12 +307,18 @@ export default function SpecialistModal({
           {/* Nombres / Apellidos */}
           <div className="grid grid-cols-2 gap-3">
             <Field label="Nombres" error={errors.nombres}>
-              <input type="text" value={form.nombres} placeholder="....."
+              <input
+                type="text"
+                value={form.nombres}
+                placeholder="....."
                 onChange={(e) => set('nombres', e.target.value)}
                 className={inputCls(!!errors.nombres)} />
             </Field>
             <Field label="Apellidos" error={errors.apellidos}>
-              <input type="text" value={form.apellidos} placeholder="....."
+              <input
+                type="text"
+                value={form.apellidos}
+                placeholder="....."
                 onChange={(e) => set('apellidos', e.target.value)}
                 className={inputCls(!!errors.apellidos)} />
             </Field>
@@ -397,76 +432,104 @@ export default function SpecialistModal({
                 }}
                 className={inputCls(!!errors.categoria)}
               >
-                <option value="" disabled>1. Categoría principal...</option>
+                <option value="" disabled>
+                  1. Categoría principal...
+                </option>
                 {SPECIALIST_CATEGORY_TREE.map((c) => (
-                  <option key={c.label} value={c.label}>{c.label}</option>
+                  <option key={c.label} value={c.label}>
+                    {c.label}
+                  </option>
                 ))}
               </select>
               {errors.categoria && (
-                <p className="text-[10px] text-rose-500 font-semibold">{errors.categoria}</p>
+                <p className="text-[10px] text-rose-500 font-semibold">
+                  {errors.categoria}
+                </p>
               )}
             </div>
 
             {/* L2 */}
-            {catL1 && (() => {
-              const l1Node = SPECIALIST_CATEGORY_TREE.find((c) => c.label === catL1);
-              return l1Node ? (
-                <div className="pl-3 border-l-2 border-sky-500/20 dark:border-[#8FC3A1]/20">
-                  <select
-                    value={catL2}
-                    onChange={(e) => {
-                      const l2 = e.target.value;
-                      setCatL2(l2);
-                      set('categoria', l2 ? `${catL1} > ${l2}` : catL1);
-                      setErrors((p) => ({ ...p, categoria: undefined }));
-                    }}
-                    className={inputCls(false)}
-                  >
-                    <option value="" disabled>2. Subcategoría...</option>
-                    {l1Node.children.map((c) => (
-                      <option key={c} value={c}>{c}</option>
-                    ))}
-                  </select>
-                </div>
-              ) : null;
-            })()}
+            {catL1 &&
+              (() => {
+                const l1Node = SPECIALIST_CATEGORY_TREE.find(
+                  (c) => c.label === catL1,
+                );
+                return l1Node ? (
+                  <div className="pl-3 border-l-2 border-sky-500/20 dark:border-[#8FC3A1]/20">
+                    <select
+                      value={catL2}
+                      onChange={(e) => {
+                        const l2 = e.target.value;
+                        setCatL2(l2);
+                        set('categoria', l2 ? `${catL1} > ${l2}` : catL1);
+                        setErrors((p) => ({ ...p, categoria: undefined }));
+                      }}
+                      className={inputCls(false)}
+                    >
+                      <option value="" disabled>
+                        2. Subcategoría...
+                      </option>
+                      {l1Node.children.map((c) => (
+                        <option key={c} value={c}>
+                          {c}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                ) : null;
+              })()}
 
             {/* Ruta visual */}
             {catL1 && (
               <div className="flex items-center gap-1 flex-wrap px-1">
-                <span className="text-[10px] font-black text-sky-500 dark:text-[#8FC3A1]">{catL1}</span>
-                {catL2 && (<>
-                  <span className="text-[10px] text-[var(--text-secondary)]">›</span>
-                  <span className="text-[10px] font-black text-sky-500 dark:text-[#8FC3A1]">{catL2}</span>
-                </>)}
+                <span className="text-[10px] font-black text-sky-500 dark:text-[#8FC3A1]">
+                  {catL1}
+                </span>
+                {catL2 && (
+                  <>
+                    <span className="text-[10px] text-[var(--text-secondary)]">
+                      ›
+                    </span>
+                    <span className="text-[10px] font-black text-sky-500 dark:text-[#8FC3A1]">
+                      {catL2}
+                    </span>
+                  </>
+                )}
               </div>
             )}
           </div>
 
           {/* N° Colegiatura / Años de experiencia */}
           <div className="grid grid-cols-2 gap-3">
-          <Field label="N° Colegiatura (opcional)">
-            <input
-              type="text"
-              value={form.numeroColegiatura ?? ''}
-              placeholder="....."
-              onChange={(e) => set('numeroColegiatura', e.target.value)}
-              className={inputCls(false)}
-            />
-          </Field>
+            <Field label="N° Colegiatura (opcional)">
+              <input
+                type="text"
+                value={form.numeroColegiatura ?? ''}
+                placeholder="....."
+                onChange={(e) => set('numeroColegiatura', e.target.value)}
+                className={inputCls(false)}
+              />
+            </Field>
             <Field label="Años de experiencia (opci..)">
               <select
                 value={form.aniosExperiencia ?? ''}
-                onChange={(e) => set('aniosExperiencia', e.target.value ? Number(e.target.value) : undefined)}
+                onChange={(e) =>
+                  set(
+                    'aniosExperiencia',
+                    e.target.value ? Number(e.target.value) : undefined,
+                  )
+                }
                 className={inputCls(false)}
               >
                 <option value="">—</option>
                 {EXPERIENCIA_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
                 ))}
               </select>
             </Field>
-            </div>
+          </div>
 
           {/* Disponibilidad */}
           <div className="space-y-2">
@@ -478,8 +541,9 @@ export default function SpecialistModal({
               <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-sky-500/10 dark:bg-[#8FC3A1]/10 border border-sky-500/20 dark:border-[#8FC3A1]/20">
                 <span className="w-2 h-2 rounded-full bg-sky-500 dark:bg-[#8FC3A1] flex-shrink-0" />
                 <p className="text-[10px] font-bold text-sky-500 dark:text-[#8FC3A1]">
-                  Este especialista está <strong>Ocupado</strong> porque fue asignado a un servicio.
-                  Su estado volverá a Disponible si lo desasignas de todos los servicios.
+                  Este especialista está <strong>Ocupado</strong> porque fue
+                  asignado a un servicio. Su estado volverá a Disponible si lo
+                  desasignas de todos los servicios.
                 </p>
               </div>
             )}
@@ -493,13 +557,17 @@ export default function SpecialistModal({
                     disabled={isOccupied}
                     className={`flex-1 flex flex-col items-center py-3 px-2 rounded-xl
                       text-[10px] font-black uppercase tracking-widest border transition-all
-                      ${isOccupied
-                        ? 'opacity-40 cursor-not-allowed bg-[var(--bg-secondary)] border-[var(--border-subtle)] text-[var(--text-secondary)]'
-                        : active
-                          ? opt.activeClass
-                          : 'bg-[var(--bg-secondary)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-sky-500/20 dark:hover:border-[#8FC3A1]/20'
-                      }`}>
-                    <span className={`w-2 h-2 rounded-full mb-1.5 ${active && !isOccupied ? opt.dotClass : 'bg-[var(--text-secondary)]/30'}`} />
+                      ${
+                        isOccupied
+                          ? 'opacity-40 cursor-not-allowed bg-[var(--bg-secondary)] border-[var(--border-subtle)] text-[var(--text-secondary)]'
+                          : active
+                            ? opt.activeClass
+                            : 'bg-[var(--bg-secondary)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-sky-500/20 dark:hover:border-[#8FC3A1]/20'
+                      }`}
+                  >
+                    <span
+                      className={`w-2 h-2 rounded-full mb-1.5 ${active && !isOccupied ? opt.dotClass : 'bg-[var(--text-secondary)]/30'}`}
+                    />
                     {opt.label}
                   </button>
                 );

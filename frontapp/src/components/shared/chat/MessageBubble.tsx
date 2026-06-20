@@ -35,10 +35,6 @@ interface MessageBubbleProps {
   onMarkRead?: (messageId: string) => void;
   meta?: MessageMetaConfig;
   isSentOverride?: (message: Message) => boolean;
-  sentClassName?: string;
-  receivedClassName?: string;
-  sentAvatarClassName?: string;
-  receivedAvatarClassName?: string;
 }
 
 const isSentByMe = (message: Message, currentUserId?: string, override?: (m: Message) => boolean): boolean => {
@@ -107,10 +103,6 @@ interface MessageItemProps {
   meta?: MessageMetaConfig;
   currentUserInitial: string;
   otherInitial: string;
-  sentClassName?: string;
-  receivedClassName?: string;
-  sentAvatarClassName?: string;
-  receivedAvatarClassName?: string;
 }
 
 function MessageItem({
@@ -126,10 +118,6 @@ function MessageItem({
   meta,
   currentUserInitial,
   otherInitial,
-  sentClassName,
-  receivedClassName,
-  sentAvatarClassName,
-  receivedAvatarClassName,
 }: MessageItemProps) {
   useEffect(() => {
     if (!isSent && msg.id && !isRead && onMarkRead) {
@@ -156,8 +144,8 @@ function MessageItem({
           {showAvatar ? (
             <div className={`w-8 h-8 shrink-0 rounded-full flex items-center justify-center text-[9px] font-black shadow-sm animate-avatar-appear ${
               isSent
-                ? (sentAvatarClassName || 'bg-gradient-to-br from-[#9cb04e] via-[#64c695] to-[#499bbf] text-white')
-                : (receivedAvatarClassName || 'bg-gradient-to-br from-gray-200 to-gray-300 dark:from-[#2A4035] dark:to-[#1A2E25] text-gray-600 dark:text-gray-300')
+                ? 'bg-gradient-to-br from-[#9cb04e] via-[#64c695] to-[#499bbf] text-white'
+                : 'bg-gradient-to-br from-gray-200 to-gray-300 dark:from-[#2A4035] dark:to-[#1A2E25] text-gray-600 dark:text-gray-300'
             }`}>
               {isSent ? currentUserInitial : otherInitial}
             </div>
@@ -167,8 +155,8 @@ function MessageItem({
 
           <div className={`${
             isSent
-              ? (sentClassName || 'bg-gradient-to-br from-[#9cb04e] via-[#64c695] to-[#499bbf] text-white rounded-[1.75rem] rounded-br-md shadow-lg shadow-[#64c695]/30 dark:shadow-[#64c695]/20')
-              : (receivedClassName || 'bg-white/80 dark:bg-[#1A2E25]/80 backdrop-blur-md border border-white/20 dark:border-[#2A4035]/50 text-[var(--text-primary)] rounded-[1.75rem] rounded-bl-md shadow-sm')
+              ? 'bg-gradient-to-br from-[#9cb04e] via-[#64c695] to-[#499bbf] text-white rounded-[1.75rem] rounded-br-md shadow-lg shadow-[#64c695]/30 dark:shadow-[#64c695]/20'
+              : 'bg-white/80 dark:bg-[#1A2E25]/80 backdrop-blur-md border border-white/20 dark:border-[#2A4035]/50 text-[var(--text-primary)] rounded-[1.75rem] rounded-bl-md shadow-sm'
           } px-5 py-3.5 transition-all duration-200 hover:shadow-md flex-1 min-w-0`}>
             {isFirstOfGroup && (
               <div className="flex items-center gap-1.5 mb-1.5">
@@ -240,17 +228,7 @@ function MessageItem({
 
 // ─── MessageBubble: iterates messages, delegates rendering to MessageItem ─────
 
-export default function MessageBubble({
-  messages,
-  currentUserId,
-  onMarkRead,
-  meta,
-  isSentOverride,
-  sentClassName,
-  receivedClassName,
-  sentAvatarClassName,
-  receivedAvatarClassName,
-}: MessageBubbleProps) {
+export default function MessageBubble({ messages, currentUserId, onMarkRead, meta, isSentOverride }: MessageBubbleProps) {
   const currentUserInitial = (meta?.currentUserName ?? 'T').charAt(0).toUpperCase();
   const otherInitial = (meta?.otherName ?? '?').charAt(0).toUpperCase();
 
@@ -270,8 +248,8 @@ export default function MessageBubble({
         const isLastOfGroup = nextIsSent !== isSent;
 
         const avatarsEnabled = meta?.showAvatar ?? false;
-        const showAvatar = avatarsEnabled && isLastOfGroup && !isSent;
-        const needsSpacer = avatarsEnabled && !isLastOfGroup && !isSent;
+        const showAvatar = avatarsEnabled && isLastOfGroup;
+        const needsSpacer = avatarsEnabled && !isLastOfGroup;
 
         return (
           <MessageItem
@@ -288,10 +266,6 @@ export default function MessageBubble({
             meta={meta}
             currentUserInitial={currentUserInitial}
             otherInitial={otherInitial}
-            sentClassName={sentClassName}
-            receivedClassName={receivedClassName}
-            sentAvatarClassName={sentAvatarClassName}
-            receivedAvatarClassName={receivedAvatarClassName}
           />
         );
       })}

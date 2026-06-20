@@ -18,6 +18,13 @@ export const customerNavigation: PanelNavigation = [
                 href: '/customer/orders'
             },
             {
+                id: 'bookings',
+                label: 'Mis Reservas',
+                description: 'Servicios agendados y pasados',
+                icon: 'Calendar',
+                href: '/customer/bookings'
+            },
+            {
                 id: 'security',
                 label: 'Seguridad',
                 description: 'Protege tu cuenta',
@@ -33,7 +40,7 @@ export const customerNavigation: PanelNavigation = [
             },
             {
                 id: 'invoices',
-                label: 'Mis Comprobantes',
+                label: 'Confirmaciones de Pago',
                 description: 'Facturas y boletas electrónicas',
                 icon: 'Receipt',
                 href: '/customer/invoices'
@@ -53,6 +60,13 @@ export const customerNavigation: PanelNavigation = [
                 href: '/customer/addresses'
             },
 
+            {
+                id: 'lirios',
+                label: 'Mis Lirios',
+                description: 'Tus puntos de fidelidad',
+                icon: 'Leaf',
+                href: '/customer/lirios'
+            },
             {
                 id: 'chat',
                 label: 'Chat con Vendedores',

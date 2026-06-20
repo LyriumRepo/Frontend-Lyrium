@@ -9,9 +9,10 @@
 'use client';
 
 import Image from 'next/image';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Calendar } from 'lucide-react';
 import { useCheckoutStore } from '@/store/checkoutStore';
 import { cartApi } from '@/shared/lib/api/cartRepository';
+import { serviceRepository } from '@/shared/lib/api/serviRepository';
 
 interface Props {
   onDeleteSelected?: () => void;
@@ -27,32 +28,41 @@ export default function CartItemList({ onDeleteSelected }: Props) {
     cartItems.length > 0 && cartItems.every((i) => i.selected);
   const selectedCount = cartItems.filter((i) => i.selected).length;
 
-  // Eliminar un item del carrito (llama al backend y actualiza el store)
-  async function handleRemove(productId: number) {
+  function isService(id: number) { return id < 0; }
+  function holdId(id: number) { return Math.abs(id); }
+
+  // Eliminar un item del carrito (producto o servicio)
+  async function handleRemove(itemId: number) {
     try {
-      await cartApi.removeItem(productId);
-      setCartItems(cartItems.filter((i) => i.id !== productId));
+      if (isService(itemId)) {
+        const token = sessionStorage.getItem('cart_session_id') ?? '';
+        await serviceRepository.removeServiceHold(holdId(itemId), token);
+      } else {
+        await cartApi.removeItem(itemId);
+      }
+      setCartItems(cartItems.filter((i) => i.id !== itemId));
     } catch (err) {
       console.error('Error eliminando item:', err);
     }
   }
 
-  // Actualizar cantidad
-  async function handleQuantityChange(productId: number, delta: number) {
-    const item = cartItems.find((i) => i.id === productId);
+  // Actualizar cantidad (solo productos, no servicios)
+  async function handleQuantityChange(itemId: number, delta: number) {
+    if (isService(itemId)) return;
+    const item = cartItems.find((i) => i.id === itemId);
     if (!item) return;
 
     const newQty = item.quantity + delta;
     if (newQty < 1) {
-      await handleRemove(productId);
+      await handleRemove(itemId);
       return;
     }
 
     try {
-      await cartApi.updateItem(productId, newQty);
+      await cartApi.updateItem(itemId, newQty);
       setCartItems(
         cartItems.map((i) =>
-          i.id === productId ? { ...i, quantity: newQty } : i,
+          i.id === itemId ? { ...i, quantity: newQty } : i,
         ),
       );
     } catch (err) {
@@ -64,7 +74,12 @@ export default function CartItemList({ onDeleteSelected }: Props) {
   async function handleDeleteSelected() {
     const selected = cartItems.filter((i) => i.selected);
     for (const item of selected) {
-      await cartApi.removeItem(item.id);
+      if (isService(item.id)) {
+        const token = sessionStorage.getItem('cart_session_id') ?? '';
+        await serviceRepository.removeServiceHold(holdId(item.id), token);
+      } else {
+        await cartApi.removeItem(item.id);
+      }
     }
     setCartItems(cartItems.filter((i) => !i.selected));
     onDeleteSelected?.();
@@ -73,9 +88,9 @@ export default function CartItemList({ onDeleteSelected }: Props) {
   // ── Carrito vacío ──────────────────────────────────────────────────────────
   if (cartItems.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-gray-200 dark:border-gray-700 p-12 text-center space-y-4">
+      <div className="rounded-2xl border border-dashed border-gray-200 dark:border-[var(--border-subtle)] p-12 text-center space-y-4 bg-white dark:bg-[var(--bg-card)]">
         <div className="text-5xl">🛒</div>
-        <p className="text-gray-500 dark:text-gray-400 font-medium">
+        <p className="text-gray-500 dark:text-[var(--text-muted)] font-medium">
           Tu carrito está vacío
         </p>
         <a
@@ -92,7 +107,7 @@ export default function CartItemList({ onDeleteSelected }: Props) {
     <div className="space-y-4">
       {/* Barra de acciones */}
       <div className="flex items-center justify-between">
-        <label className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 cursor-pointer select-none">
+        <label className="flex items-center gap-2 text-sm text-gray-600 dark:text-[var(--text-secondary)] cursor-pointer select-none">
           <input
             type="checkbox"
             checked={allSelected}
@@ -121,8 +136,8 @@ export default function CartItemList({ onDeleteSelected }: Props) {
             className={`flex gap-4 p-4 rounded-2xl border transition
               ${
                 item.selected
-                  ? 'border-sky-200 dark:border-sky-900 bg-sky-50/30 dark:bg-sky-950/20'
-                  : 'border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900/40'
+              ? 'border-emerald-200 dark:border-emerald-800 bg-emerald-50/30 dark:bg-emerald-950/20'
+              : 'border-gray-100 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)]'
               }`}
           >
             {/* Checkbox */}
@@ -136,7 +151,7 @@ export default function CartItemList({ onDeleteSelected }: Props) {
             </div>
 
             {/* Imagen */}
-            <div className="w-20 h-20 rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 flex-shrink-0">
+            <div className="w-20 h-20 rounded-xl overflow-hidden bg-gray-100 dark:bg-[var(--bg-muted)] flex-shrink-0">
               {item.image ? (
                 <Image
                   src={item.image}
@@ -144,20 +159,27 @@ export default function CartItemList({ onDeleteSelected }: Props) {
                   width={80}
                   height={80}
                   className="w-full h-full object-cover"
+                  unoptimized={item.image.startsWith('data:')}
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-2xl">
-                  📦
+                  {isService(item.id) ? '📅' : '📦'}
                 </div>
               )}
             </div>
 
             {/* Info */}
             <div className="flex-1 min-w-0">
-              <p className="font-medium text-gray-900 dark:text-white text-sm leading-tight line-clamp-2">
+              <p className="font-medium text-gray-900 dark:text-[var(--text-primary)] text-sm leading-tight line-clamp-2">
                 {item.name}
               </p>
-              <p className="text-sky-600 dark:text-sky-400 font-bold text-base mt-1">
+              {isService(item.id) && (
+                <span className="inline-block mt-1 px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 text-[10px] font-semibold">
+                  <Calendar className="w-3 h-3 inline mr-0.5" />
+                  Servicio
+                </span>
+              )}
+              <p className="text-emerald-600 dark:text-emerald-400 font-bold text-base mt-1">
                 S/ {item.price.toFixed(2)}
               </p>
             </div>
@@ -172,27 +194,34 @@ export default function CartItemList({ onDeleteSelected }: Props) {
                 <Trash2 className="w-4 h-4" />
               </button>
 
-              <div className="flex items-center gap-2 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
-                <button
-                  onClick={() => handleQuantityChange(item.id, -1)}
-                  className="px-3 py-1.5 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition text-sm font-medium"
-                >
-                  −
-                </button>
-                <span className="w-8 text-center text-sm font-semibold text-gray-900 dark:text-white">
-                  {item.quantity}
+              {isService(item.id) ? (
+                  <span className="text-xs text-gray-400 dark:text-[var(--text-muted)] px-2">
+                  1 unidad
                 </span>
-                <button
-                  onClick={() => handleQuantityChange(item.id, +1)}
-                  className="px-3 py-1.5 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition text-sm font-medium"
-                >
-                  +
-                </button>
-              </div>
-
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                S/ {(item.price * item.quantity).toFixed(2)}
-              </p>
+              ) : (
+                <>
+                  <div className="flex items-center gap-2 border border-gray-200 dark:border-[var(--border-subtle)] rounded-xl overflow-hidden">
+                    <button
+                      onClick={() => handleQuantityChange(item.id, -1)}
+                      className="px-3 py-1.5 text-gray-600 dark:text-[var(--text-secondary)] hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] transition text-sm font-medium"
+                    >
+                      −
+                    </button>
+                    <span className="w-8 text-center text-sm font-semibold text-gray-900 dark:text-[var(--text-primary)]">
+                      {item.quantity}
+                    </span>
+                    <button
+                      onClick={() => handleQuantityChange(item.id, +1)}
+                      className="px-3 py-1.5 text-gray-600 dark:text-[var(--text-secondary)] hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] transition text-sm font-medium"
+                    >
+                      +
+                    </button>
+                  </div>
+                  <p className="text-xs text-gray-500 dark:text-[var(--text-secondary)]">
+                    S/ {(item.price * item.quantity).toFixed(2)}
+                  </p>
+                </>
+              )}
             </div>
           </div>
         ))}

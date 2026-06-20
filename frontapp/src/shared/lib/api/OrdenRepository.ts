@@ -47,16 +47,18 @@ export interface OrderResult {
 }
 
 export interface CreateOrderPayload {
-  shipping_name: string;
-  shipping_email: string;
-  shipping_phone: string;
-  shipping_address: string;
-  shipping_city: string;
+  shipping_name?: string;
+  shipping_email?: string;
+  shipping_phone?: string;
+  shipping_address?: string;
+  shipping_city?: string;
   shipping_postal_code?: string;
   shipping_notes?: string;
   shipping_cost?: number;
+  shipping_type?: string;
   coupon_code?: string;
   notes?: string;
+  lirios_used?: number;
 }
 
 // ── Tipos Izipay ──────────────────────────────────────────────────────────────
@@ -64,6 +66,7 @@ export interface CreateOrderPayload {
 export interface CreateIzipaySessionPayload {
   order_id: string;
   email: string;
+  cart_token?: string;
 }
 
 export interface IzipaySessionResult {
@@ -125,9 +128,20 @@ async function buildHeaders(): Promise<HeadersInit> {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     Accept: 'application/json',
+    'X-Session-ID': getSessionId(),
   };
   if (token) headers['Authorization'] = `Bearer ${token}`;
   return headers;
+}
+
+function getSessionId(): string {
+  if (typeof window === 'undefined') return '';
+  let sid = sessionStorage.getItem('cart_session_id');
+  if (!sid) {
+    sid = `guest_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+    sessionStorage.setItem('cart_session_id', sid);
+  }
+  return sid;
 }
 
 async function post<T>(endpoint: string, body: object): Promise<T> {
@@ -193,5 +207,16 @@ export const orderApi = {
 
   chargeWithToken(payload: ChargeWithTokenPayload): Promise<ChargeWithTokenResult> {
     return post<ChargeWithTokenResult>('/payments/izipay/charge-with-token', payload);
+  },
+
+  /**
+   * Fallback de confirmación cuando el webhook de Izipay no llega (dev/localhost).
+   * Si el webhook ya procesó el pago devuelve 400 — ignorar silenciosamente.
+   */
+  confirmIzipayPayment(orderId: string): Promise<{ message: string; order_id: string }> {
+    return post<{ message: string; order_id: string }>(
+      `/payments/izipay/confirm/${orderId}`,
+      {},
+    );
   },
 };

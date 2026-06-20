@@ -75,6 +75,7 @@ export interface ExpenseStats {
 export interface ExpenseFilters {
   search?: string;
   status?: 'Pagado' | 'Pendiente' | 'Anulado';
+  voucher_type?: string;
   supplier_id?: number;
   from?: string;
   to?: string;

@@ -45,8 +45,8 @@ export function useFcmToken() {
       let perm = Notification.permission;
       if (perm === 'default') {
         perm = await Notification.requestPermission();
-        setPermission(perm);
       }
+      setPermission(perm);
 
       if (perm !== 'granted') {
         setLoading(false);
@@ -114,10 +114,14 @@ export function useFcmToken() {
   }, [isAuthenticated, user, requestPermissionAndGetToken]);
 
   useEffect(() => {
-    if (permission !== 'granted') return;
     if (!isAuthenticated) return;
 
     registerDevice();
+  }, [isAuthenticated, registerDevice]);
+
+  useEffect(() => {
+    if (permission !== 'granted') return;
+    if (!isAuthenticated) return;
 
     const messaging = getFirebaseMessaging();
     const unsubscribe = onMessage(messaging, (payload) => {
@@ -128,6 +132,8 @@ export function useFcmToken() {
             title: notification.title,
             body: notification.body || '',
             url: data?.url || '/customer/orders',
+            type: data?.type,
+            id: data?.order_id || data?.ticket_id || data?.store_id,
           },
         });
         window.dispatchEvent(event);
@@ -137,7 +143,42 @@ export function useFcmToken() {
     return () => {
       unsubscribe();
     };
-  }, [permission, isAuthenticated, registerDevice]);
+  }, [permission, isAuthenticated]);
+
+  useEffect(() => {
+    if (permission !== 'granted') return;
+    if (!isAuthenticated) return;
+
+    const checkTokenRefresh = async () => {
+      if (document.visibilityState !== 'visible') return;
+      try {
+        const messaging = getFirebaseMessaging();
+        const newToken = await getToken(messaging, {
+          vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
+        });
+        if (!newToken) return;
+        const oldToken = getStoredToken();
+        if (oldToken === newToken) return;
+        setFcmToken(newToken);
+        setStoredToken(newToken);
+        if (oldToken) await deviceApi.unregister(oldToken).catch(() => {});
+        await deviceApi.register(newToken, 'web', navigator.userAgent).catch(() => {});
+      } catch {
+        // token refresh check failed silently
+      }
+    };
+
+    document.addEventListener('visibilitychange', checkTokenRefresh);
+    return () => document.removeEventListener('visibilitychange', checkTokenRefresh);
+  }, [permission, isAuthenticated]);
+
+  const prevAuthRef = useRef(isAuthenticated);
+  useEffect(() => {
+    if (prevAuthRef.current && !isAuthenticated) {
+      unregisterToken();
+    }
+    prevAuthRef.current = isAuthenticated;
+  }, [isAuthenticated, unregisterToken]);
 
   return {
     fcmToken,

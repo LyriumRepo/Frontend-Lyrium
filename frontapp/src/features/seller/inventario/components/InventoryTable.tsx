@@ -54,7 +54,7 @@ export function InventoryTable({ items, onUpdateStock }: Props) {
                 </thead>
                 <tbody>
                     {items.map((item) => {
-                        const available = Math.max(0, item.stock - item.reserved);
+                        const available = Math.max(0, item.stock - (item.reserved ?? 0));
                         const status    = getStockStatus(item);
                         const isEditing = editing?.id === item.id;
 

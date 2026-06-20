@@ -15,6 +15,8 @@ export interface Voucher {
     type: VoucherType;
     customer_name: string;
     customer_ruc: string;
+    store_name: string;
+    store_ruc: string;
     order_id: string;
     amount: number;
     subtotal_sin_igv?: number;

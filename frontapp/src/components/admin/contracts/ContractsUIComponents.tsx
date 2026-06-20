@@ -4,14 +4,14 @@ import { CheckCircle, AlertTriangle, AlertOctagon, Clock, XCircle, Handshake, Cl
 
 const colorMap: Record<string, string> = {
     emerald: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
-    indigo: 'bg-[var(--celeste-500)]/10 text-[var(--celeste-500)] border border-[var(--celeste-500)]/20',
+    indigo: 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/20',
     amber: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
     red: 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20',
 };
 
 const borderMap: Record<string, string> = {
     emerald: 'border-emerald-500',
-    indigo: 'border-[var(--celeste-500)]',
+    indigo: 'border-cyan-500',
     amber: 'border-amber-500',
     red: 'border-red-500',
 };
@@ -60,13 +60,13 @@ export const AuditTimeline: React.FC<{ events?: AuditEvent[] }> = ({ events }) =
         <div className="space-y-6 relative before:absolute before:left-4 before:top-2 before:bottom-2 before:w-0.5 before:bg-[var(--border-subtle)] font-industrial">
             {[...events].map((event) => (
                 <div key={event.timestamp + event.action} className="relative pl-10">
-                    <div className="absolute left-2.5 top-1 w-3 h-3 bg-[var(--celeste-500)] rounded-full border-4 border-[var(--bg-card)] shadow-sm -ml-0.5"></div>
+                    <div className="absolute left-2.5 top-1 w-3 h-3 bg-cyan-500 rounded-full border-4 border-[var(--bg-card)] shadow-sm -ml-0.5"></div>
                     <div>
                         <p className="text-[10px] font-black text-[var(--text-primary)] leading-none mb-1 uppercase tracking-tight">{event.action}</p>
                         <div className="flex items-center gap-2">
                             <span className="text-[9px] font-bold text-[var(--text-muted)] uppercase">{new Date(event.timestamp).toLocaleString()}</span>
                             <span className="w-1 h-1 bg-[var(--border-subtle)] rounded-full"></span>
-                            <span className="text-[9px] font-bold text-[var(--celeste-500)] uppercase">{event.user}</span>
+                            <span className="text-[9px] font-bold text-cyan-500 uppercase">{event.user}</span>
                         </div>
                     </div>
                 </div>
@@ -78,7 +78,7 @@ export const AuditTimeline: React.FC<{ events?: AuditEvent[] }> = ({ events }) =
 export const ModalityBadge: React.FC<{ modality: ContractModality }> = ({ modality }) => {
     const isVirtual = modality === 'VIRTUAL';
     return (
-        <span className={`text-[10px] font-black ${isVirtual ? 'text-sky-600 dark:text-sky-400' : 'text-amber-600 dark:text-amber-400'} flex items-center gap-1 font-industrial`}>
+        <span className={`text-[10px] font-black ${isVirtual ? 'text-cyan-600 dark:text-cyan-400' : 'text-teal-600 dark:text-teal-400'} flex items-center gap-1 font-industrial`}>
             {isVirtual ? <Cloud className="w-4 h-4" /> : <Handshake className="w-4 h-4" />}
             {isVirtual ? 'VIRTUAL' : 'PRESENCIAL'}
         </span>

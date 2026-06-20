@@ -6,7 +6,7 @@ export interface InventoryItem {
   name: string;
   category: string;
   stock: number;
-  reserved: number;
+  reserved?: number;
   price: number;
   imageUrl?: string;
   updatedAt: Date;

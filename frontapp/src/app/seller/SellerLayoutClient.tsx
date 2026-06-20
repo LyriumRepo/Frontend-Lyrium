@@ -29,14 +29,7 @@ export function SellerLayoutClient({ children }: SellerLayoutClientProps) {
             try {
                 const LARAVEL_API = process.env.NEXT_PUBLIC_LARAVEL_API_URL || 'http://127.0.0.1:8000/api';
                 
-                // Parse cookie more robustly
-                const cookies = document.cookie.split(';').reduce((acc, cookie) => {
-                    const [key, ...vals] = cookie.trim().split('=');
-                    if (key) acc[key] = decodeURIComponent(vals.join('='));
-                    return acc;
-                }, {} as Record<string, string>);
-                
-                const token = cookies['laravel_token'];
+                const token = localStorage.getItem('laravel_token');
                 console.log('[SellerLayout] Token found:', !!token);
 
                 if (!token) {

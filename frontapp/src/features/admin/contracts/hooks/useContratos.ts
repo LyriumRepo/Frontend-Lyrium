@@ -40,11 +40,10 @@ export const useContratos = () => {
     // --- Mutations ---
     const saveContractMutation = useMutation({
         mutationFn: async ({ id, status, updatedInfo }: { id: string, status: ContractStatus, updatedInfo: Partial<Contract> }) => {
-            const finalInfo = { ...updatedInfo, type: updatedInfo.type || updatedInfo.plan || 'Standard' };
             if (id === TEMP_NEW_ID) {
-                return contractApi.create({ ...finalInfo, status });
+                return contractApi.create({ ...updatedInfo, status });
             }
-            return contractApi.updateStatus(id, status, finalInfo);
+            return contractApi.updateStatus(id, status, updatedInfo);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['admin', 'contracts'] });
@@ -54,8 +53,8 @@ export const useContratos = () => {
     });
 
     const createContractMutation = useMutation({
-        mutationFn: async () => {
-            const newContract: Contract = {
+        mutationFn: async (): Promise<Contract> => {
+            return {
                 id: TEMP_NEW_ID,
                 company: '',
                 ruc: '',

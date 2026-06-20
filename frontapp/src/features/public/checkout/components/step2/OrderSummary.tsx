@@ -1,12 +1,15 @@
 'use client';
 
-import { Truck, ShieldCheck, Lock, Tag, Wallet } from 'lucide-react';
+import { Truck, ShieldCheck, Lock, Tag } from 'lucide-react';
+import Image from 'next/image';
 import { useCheckoutStore } from '@/store/checkoutStore';
-import { useCheckoutSubmit } from '../../hooks/useCheckoutSubmit';
 import { useIzipay } from '../../hooks/useIzipay';
-import { izipayPaymentApi } from '@/shared/lib/api/paymentRepository';
+import { useCheckoutSubmit } from '../../hooks/useCheckoutSubmit';
 import { orderApi } from '@/shared/lib/api/OrdenRepository';
-import { useCallback } from 'react';
+import { liriosApi, type LiriosEligibility } from '@/shared/lib/api/liriosRepository';
+import { useCallback, useState, useEffect, useMemo } from 'react';
+import { useAuth } from '@/shared/lib/context/AuthContext';
+import IzipayModal from '../modals/IzipayModal';
 import type { DeliveryMethod } from '@/store/checkoutStore';
 
 const DELIVERY_OPTIONS: {
@@ -41,6 +44,15 @@ export default function OrderSummary() {
   const personalData = useCheckoutStore((s) => s.personalData);
   const shippingData = useCheckoutStore((s) => s.shippingData);
 
+  const [showIzipayModal, setShowIzipayModal] = useState(false);
+  const [pendingFormToken, setPendingFormToken] = useState<string | null>(null);
+  const [pendingOrderId, setPendingOrderId] = useState<string | null>(null);
+  const [liriosEligibility, setLiriosEligibility] = useState<LiriosEligibility | null>(null);
+  const [liriosLoading, setLiriosLoading] = useState(false);
+  const [liriosInput, setLiriosInput] = useState('');
+
+  const { isAuthenticated } = useAuth();
+
   const { submitOrder, isSubmitting, error: submitError } = useCheckoutSubmit();
 
   const {
@@ -49,9 +61,20 @@ export default function OrderSummary() {
     error: izipayError,
   } = useIzipay({
     onSuccess: useCallback(
-      (result) => {
+      async (result) => {
+        setShowIzipayModal(false);
+        // Fallback: confirmar pago en backend por si el webhook de Izipay no llegó
+        // (habitual en localhost/dev). Si el webhook ya lo procesó, el endpoint
+        // devuelve 400 "ya está pagada" — lo ignoramos silenciosamente.
+        if (pendingOrderId) {
+          try {
+            await orderApi.confirmIzipayPayment(pendingOrderId);
+          } catch {
+            // webhook ya procesó el pago, o error no crítico
+          }
+        }
         setOrderResult({
-          orderId: result.clientAnswer.orderDetails.orderId,
+          orderId: pendingOrderId ?? result.clientAnswer.orderDetails.orderId,
           email: personalData.email,
           total: result.clientAnswer.orderDetails.orderTotalAmount / 100,
           items: cartItems,
@@ -62,6 +85,7 @@ export default function OrderSummary() {
         setStep(3);
       },
       [
+        pendingOrderId,
         cartItems,
         personalData,
         shippingData,
@@ -72,12 +96,55 @@ export default function OrderSummary() {
     ),
   });
 
+  // Una vez que el modal está montado (el div.kr-smart-form existe en el DOM),
+  // inyectamos el formToken para que Krypton renderice el formulario dentro del modal.
+  useEffect(() => {
+    if (showIzipayModal && pendingFormToken) {
+      loadSmartForm(pendingFormToken);
+      setPendingFormToken(null);
+    }
+  }, [showIzipayModal, pendingFormToken, loadSmartForm]);
+
   const selectedItems = cartItems.filter((i) => i.selected);
+  const hasProducts = selectedItems.some((i) => i.id > 0);
   const subtotal = selectedItems.reduce(
     (acc, i) => acc + i.price * i.quantity,
     0,
   );
-  const total = subtotal + orderData.deliveryCost - orderData.discount;
+
+  // Fetch Lirios eligibility when cart changes
+  const cartTotalForLirios = useMemo(() => {
+    const sub = selectedItems.reduce((acc, i) => acc + i.price * i.quantity, 0);
+    return sub + (hasProducts ? orderData.deliveryCost : 0);
+  }, [selectedItems, hasProducts, orderData.deliveryCost]);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setLiriosEligibility(null);
+      return;
+    }
+    let cancelled = false;
+    setLiriosLoading(true);
+    liriosApi.getCheckoutEligibility(cartTotalForLirios)
+      .then((res) => { if (!cancelled) setLiriosEligibility(res); })
+      .catch(() => { if (!cancelled) setLiriosEligibility(null); })
+      .finally(() => { if (!cancelled) setLiriosLoading(false); });
+    return () => { cancelled = true; };
+  }, [isAuthenticated, cartTotalForLirios]);
+
+  const handleLiriosChange = (value: string) => {
+    setLiriosInput(value);
+    const num = parseInt(value, 10);
+    if (!isNaN(num) && num > 0 && liriosEligibility) {
+      const max = liriosEligibility.max_lirios_usables;
+      const clamped = Math.min(num, max);
+      setOrderData({ liriosUsed: clamped, liriosDiscount: clamped });
+    } else {
+      setOrderData({ liriosUsed: 0, liriosDiscount: 0 });
+    }
+  };
+
+  const total = subtotal + (hasProducts ? orderData.deliveryCost : 0) - orderData.discount - orderData.liriosDiscount;
 
   const handleDeliveryChange = (value: DeliveryMethod) => {
     const option = DELIVERY_OPTIONS.find((o) => o.value === value);
@@ -88,67 +155,53 @@ export default function OrderSummary() {
     const result = await submitOrder();
     if (!result) return;
 
-    if (orderData.selectedPaymentMethodId) {
-      try {
-        const chargeResult = await orderApi.chargeWithToken({
-          order_id: result.orderId,
-          payment_method_id: orderData.selectedPaymentMethodId,
-        });
-        setOrderResult({
-          orderId: chargeResult.order_id,
-          email: personalData.email,
-          total: total,
-          items: cartItems,
-          personalData,
-          shippingData,
-          orderData,
-        });
-        setStep(3);
-      } catch (err) {
-        console.error('[chargeWithToken] error', err);
-      }
-      return;
-    }
-
-    const isMockMode = !process.env.NEXT_PUBLIC_IZIPAY_PUBLIC_KEY;
-
-    if (isMockMode) {
-      try {
-        const confirmResult = await izipayPaymentApi.confirm(result.orderId);
-        setOrderResult({
-          orderId: result.orderId,
-          email: personalData.email,
-          total: total,
-          items: cartItems,
-          personalData,
-          shippingData,
-          orderData,
-        });
-        setStep(3);
-      } catch (err: any) {
-        console.error('[Izipay MOCK] Error al confirmar pago simulado:', err);
-      }
-      return;
-    }
-
     let session;
     try {
+      const cartToken = typeof window !== 'undefined'
+        ? sessionStorage.getItem('cart_session_id') ?? undefined
+        : undefined;
       session = await orderApi.createIzipaySession({
         order_id: result.orderId,
         email: result.email,
+        cart_token: cartToken,
       });
     } catch (err) {
       console.error('[Izipay] error creando sesión', err);
       return;
     }
 
-    await loadSmartForm(session.form_token);
+    // Mock mode: el backend ya confirmó el pago, saltar Smart Form
+    if (session.form_token.startsWith('MOCK-')) {
+      setOrderResult({
+        orderId: result.orderId,
+        email: result.email,
+        total: session.amount,
+        items: cartItems,
+        personalData,
+        shippingData,
+        orderData,
+      });
+      setStep(3);
+      return;
+    }
+
+    // Abrir modal con el Smart Form. El useEffect inyectará el formToken
+    // una vez que el div.kr-smart-form esté en el DOM.
+    setPendingOrderId(result.orderId);
+    setPendingFormToken(session.form_token);
+    setShowIzipayModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowIzipayModal(false);
+    setPendingFormToken(null);
   };
 
   const displayError = submitError || izipayError;
   const isBusy = isProcessing || isSubmitting || izipayLoading;
 
   return (
+    <>
     <div className="bg-white dark:bg-[var(--bg-card)] border border-gray-200 dark:border-[var(--border-subtle)] rounded-2xl shadow-sm sticky top-[100px]">
       <div className="px-5 py-4 bg-gradient-to-r from-sky-500 to-sky-400 flex items-center gap-2 rounded-t-2xl">
         <span className="text-white text-2xl">🧾</span>
@@ -162,35 +215,46 @@ export default function OrderSummary() {
           </div>
         )}
 
-        {orderData.selectedPaymentMethodId && (
-          <div className="p-3 rounded-xl bg-sky-50 dark:bg-sky-900/20 border border-sky-200 dark:border-sky-800 flex items-center gap-2">
-            <Wallet className="w-4 h-4 text-sky-600 dark:text-[var(--icons-green)] shrink-0" />
-            <p className="text-xs font-bold text-sky-700 dark:text-sky-300">
-              Pagando con tarjeta guardada
+{/* Dirección de servicio a domicilio (read‑only) */}
+        {selectedItems.some((i) => i.service_address) && (
+          <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-100 dark:border-amber-800/40 space-y-2">
+            <p className="text-xs font-bold text-amber-700 dark:text-amber-300 uppercase tracking-wide flex items-center gap-1">
+              <Truck className="w-4 h-4" /> Dirección de atención
             </p>
+            {selectedItems.filter((i) => i.service_address).map((i) => (
+              <div key={i.id} className="text-xs text-amber-800 dark:text-amber-200">
+                <p className="font-semibold">{i.name}</p>
+                <p className="text-amber-600 dark:text-amber-400">{i.service_address}</p>
+              </div>
+            ))}
           </div>
         )}
 
-        <div className="flex flex-col gap-1">
-          <label className="text-xs font-bold text-gray-600 dark:text-[var(--text-secondary)] uppercase tracking-wide flex items-center gap-1">
-            <Truck className="w-4 h-4" /> Método de Envío
-          </label>
-          <select
-            value={orderData.deliveryMethod}
-            onChange={(e) =>
-              handleDeliveryChange(e.target.value as DeliveryMethod)
-            }
-            className={inputCls}
-          >
-            {DELIVERY_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
-        </div>
+        {/* Método de envío — solo si hay productos */}
+        {hasProducts && (
+          <>
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-bold text-gray-600 dark:text-[var(--text-secondary)] uppercase tracking-wide flex items-center gap-1">
+                <Truck className="w-4 h-4" /> Método de Envío
+              </label>
+              <select
+                value={orderData.deliveryMethod}
+                onChange={(e) =>
+                  handleDeliveryChange(e.target.value as DeliveryMethod)
+                }
+                className={inputCls}
+              >
+                {DELIVERY_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-        <div className="h-px bg-gray-100 dark:bg-[var(--border-subtle)]" />
+            <div className="h-px bg-gray-100 dark:bg-[var(--border-subtle)]" />
+          </>
+        )}
 
         <div className="flex gap-2">
           <div className="relative flex-1">
@@ -211,28 +275,94 @@ export default function OrderSummary() {
           </button>
         </div>
 
+        {/* Lirios puntos */}
+        {isAuthenticated && liriosEligibility && liriosEligibility.eligible && (
+          <>
+            <div className="h-px bg-gray-100 dark:bg-[var(--border-subtle)]" />
+            <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800/40 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="relative w-6 h-6">
+                    <Image src="/img/intro/Flor6.png" alt="" fill className="object-contain" />
+                  </div>
+                  <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wide">
+                    Lirios
+                  </span>
+                </div>
+                {liriosLoading ? (
+                  <div className="w-4 h-4 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400">
+                    {liriosEligibility.balance} disponibles
+                  </span>
+                )}
+              </div>
+              <p className="text-[10px] text-emerald-600 dark:text-emerald-500 leading-relaxed">
+                Máximo descuento: <strong>S/ {liriosEligibility.max_discount.toFixed(2)}</strong> ({liriosEligibility.max_lirios_usables} Lirios)
+              </p>
+              <div className="flex gap-2">
+                <input
+                  type="number"
+                  min={0}
+                  max={liriosEligibility.max_lirios_usables}
+                  placeholder="0 Lirios"
+                  value={liriosInput}
+                  onChange={(e) => handleLiriosChange(e.target.value)}
+                  className="w-full px-3 py-2 border-2 border-emerald-200 dark:border-emerald-700/50 rounded-xl text-xs bg-white dark:bg-[var(--bg-muted)] focus:bg-white dark:focus:bg-[var(--bg-card)] focus:border-emerald-400 dark:focus:border-emerald-500 focus:outline-none transition-all text-gray-800 dark:text-[var(--text-primary)]"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const max = liriosEligibility.max_lirios_usables;
+                    setLiriosInput(String(max));
+                    setOrderData({ liriosUsed: max, liriosDiscount: max });
+                  }}
+                  className="px-3 py-2 bg-emerald-100 dark:bg-emerald-800/40 hover:bg-emerald-200 dark:hover:bg-emerald-700/50 text-emerald-700 dark:text-emerald-300 rounded-xl font-bold text-[10px] transition-all whitespace-nowrap"
+                >
+                  Usar máx
+                </button>
+              </div>
+            </div>
+          </>
+        )}
+
         <div className="h-px bg-gray-100 dark:bg-[var(--border-subtle)]" />
 
         <div className="space-y-2 text-sm">
           <div className="flex justify-between text-gray-500 dark:text-[var(--text-muted)]">
-            <span>Subtotal ({selectedItems.length} productos)</span>
+            <span>Subtotal ({selectedItems.length} {hasProducts ? 'productos' : 'servicios'})</span>
             <span className="font-semibold text-gray-800 dark:text-[var(--text-primary)]">
               S/ {subtotal.toFixed(2)}
             </span>
           </div>
-          <div className="flex justify-between text-gray-500 dark:text-[var(--text-muted)]">
-            <span>Envío</span>
-            <span className="font-semibold text-gray-800 dark:text-[var(--text-primary)]">
-              {orderData.deliveryCost === 0
-                ? 'Gratis'
-                : `S/ ${orderData.deliveryCost.toFixed(2)}`}
-            </span>
-          </div>
+          {hasProducts && (
+            <div className="flex justify-between text-gray-500 dark:text-[var(--text-muted)]">
+              <span>Envío</span>
+              <span className="font-semibold text-gray-800 dark:text-[var(--text-primary)]">
+                {orderData.deliveryCost === 0
+                  ? 'Gratis'
+                  : `S/ ${orderData.deliveryCost.toFixed(2)}`}
+              </span>
+            </div>
+          )}
           {orderData.discount > 0 && (
             <div className="flex justify-between text-gray-500 dark:text-[var(--text-muted)]">
-              <span>Descuento</span>
+              <span>Descuento cupón</span>
               <span className="font-semibold text-emerald-600 dark:text-emerald-400">
                 -S/ {orderData.discount.toFixed(2)}
+              </span>
+            </div>
+          )}
+          {orderData.liriosDiscount > 0 && (
+            <div className="flex justify-between text-gray-500 dark:text-[var(--text-muted)]">
+              <span className="flex items-center gap-1">
+                <div className="relative w-4 h-4">
+                  <Image src="/img/intro/Flor6.png" alt="" fill className="object-contain" />
+                </div>
+                Lirios
+              </span>
+              <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                -S/ {orderData.liriosDiscount.toFixed(2)}
               </span>
             </div>
           )}
@@ -271,5 +401,8 @@ export default function OrderSummary() {
         </p>
       </div>
     </div>
+
+    <IzipayModal isOpen={showIzipayModal} onClose={handleCloseModal} error={izipayError} />
+    </>
   );
 }

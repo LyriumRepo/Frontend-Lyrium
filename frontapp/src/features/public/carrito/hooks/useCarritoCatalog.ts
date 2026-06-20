@@ -46,6 +46,7 @@ function mapToApiProduct(p: LaravelProduct): ApiProduct {
     imagen_url: p.images[0]?.medium ?? p.images[0]?.src ?? "",
     categoria_nombre: p.categories[0]?.name ?? "General",
     slug: p.slug,
+    tag: p.sticker,
     stock: p.stock,
     estado_stock: p.stock > 0 ? "in_stock" : "out_of_stock",
     sku: p.slug, // no hay SKU en el tipo LaravelProduct, usamos slug

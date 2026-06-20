@@ -46,8 +46,8 @@ export function useSellerInvoices() {
             const s = filters.search.toLowerCase();
             const match = v.series.toLowerCase().includes(s) ||
                 v.number.toLowerCase().includes(s) ||
-                v.customer_name.toLowerCase().includes(s) ||
-                v.customer_ruc.toLowerCase().includes(s);
+                v.store_name.toLowerCase().includes(s) ||
+                v.store_ruc.toLowerCase().includes(s);
             if (!match) return false;
         }
         if (filters.status !== 'ALL' && v.sunat_status !== filters.status) return false;

@@ -127,7 +127,7 @@ export function ChatInput({
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 aria-label="Agregar más imágenes"
-                className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-dashed border-[var(--border-subtle)] bg-[var(--bg-secondary)] text-[var(--text-muted)] transition hover:border-sky-300 hover:text-sky-500 dark:hover:border-[var(--icons-green)]/40 dark:hover:text-[var(--icons-green)]"
+                className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-dashed border-[var(--border-subtle)] bg-[var(--bg-secondary)] text-[var(--text-muted)] transition hover:border-[var(--turquesa-500)]/30 hover:text-[var(--turquesa-500)]"
               >
                 <Paperclip className="h-4 w-4" />
               </button>
@@ -142,7 +142,7 @@ export function ChatInput({
               onClick={() => fileInputRef.current?.click()}
               aria-label="Adjuntar imagen"
               disabled={disabled}
-              className="mb-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-[var(--text-muted)] transition hover:bg-[var(--bg-hover)] hover:text-sky-500 dark:hover:text-[var(--icons-green)] disabled:opacity-40"
+              className="mb-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-[var(--text-muted)] transition hover:bg-[var(--bg-hover)] hover:text-[var(--turquesa-500)] disabled:opacity-40"
             >
               <Paperclip className="h-4 w-4" />
             </button>
@@ -166,7 +166,7 @@ export function ChatInput({
         type="submit"
         aria-label="Enviar respuesta"
         disabled={!canSend}
-        className="inline-flex h-12 shrink-0 items-center gap-2 rounded-[1.25rem] bg-sky-500 hover:bg-sky-600 active:bg-sky-700 dark:bg-[var(--brand-green)] dark:hover:bg-[var(--brand-green-hover)] px-4 text-[10px] font-black uppercase tracking-[0.2em] text-white transition-all duration-300 disabled:cursor-not-allowed disabled:bg-slate-300 dark:disabled:bg-[var(--bg-muted)] dark:disabled:text-[var(--text-secondary)]"
+        className="inline-flex h-12 shrink-0 items-center gap-2 rounded-[1.25rem] bg-gradient-to-r from-[#9cb04e] via-[#64c695] to-[#499bbf] px-4 text-[10px] font-black uppercase tracking-[0.2em] text-white transition hover:opacity-90 active:scale-95 disabled:cursor-not-allowed disabled:bg-slate-300 dark:disabled:bg-[var(--bg-muted)] dark:disabled:text-[var(--text-secondary)] shadow-md shadow-[#64c695]/20"
       >
         {disabled ? (
           <Loader2 className="h-4 w-4 animate-spin" />

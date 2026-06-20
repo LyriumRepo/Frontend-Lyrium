@@ -74,6 +74,10 @@ function formatFecha(date: Date): string {
     return `${dayNames[date.getDay()]} ${date.getDate()} de ${MONTH_NAMES[date.getMonth()]}`;
 }
 
+function toDateStr(date: Date): string {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}
+
 function getAttendanceDay(date: Date, service: Service): AttendanceDay | null {
     const wd = JS_TO_WD[date.getDay()];
     return service.diasAtencion.find((d) => d.dia === wd) ?? null;
@@ -205,7 +209,7 @@ export default function RescheduleModal({
             })()
             : [];
 
-    const selectedFecha = selectedDate ? formatFecha(selectedDate) : null;
+    const selectedFecha = selectedDate ? toDateStr(selectedDate) : null;
 
     const occupiedStarts = new Set(
         appointments
@@ -229,13 +233,13 @@ export default function RescheduleModal({
             title="Reprogramar Cita"
             subtitle="Selecciona un nuevo horario disponible"
             size="lg"
-            accentColor="from-sky-400 dark:from-[var(--icons-green)] to-indigo-500 dark:to-[var(--brand-green)]"
+            accentColor="from-[#69BEEB] dark:from-[#66D6A8] to-[#5AAFE6] dark:to-[#4EC7B8]"
         >
             <div className="p-6 space-y-5">
 
                 {/* Cita actual */}
                 <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-[var(--bg-secondary)]/60 border border-[var(--border-subtle)]">
-                    <div className="w-9 h-9 rounded-xl bg-sky-500/10 dark:bg-[var(--icons-green)]/10 border border-sky-500/20 dark:border-[var(--icons-green)]/20 flex items-center justify-center text-sky-500 dark:text-[var(--icons-green)] flex-shrink-0">
+                    <div className="w-9 h-9 rounded-xl bg-[#69BEEB]/10 dark:bg-[#66D6A8]/10 border border-[#69BEEB]/20 dark:border-[#66D6A8]/20 flex items-center justify-center text-[#69BEEB] dark:text-[#66D6A8] flex-shrink-0">
                         <Icon name="CalendarClock" className="w-4 h-4" />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -268,11 +272,11 @@ export default function RescheduleModal({
                         onClick={() => setIsSpecialistMenuOpen((prev) => !prev)}
                         className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl border text-left transition-all ${
                             specialistChanged
-                                ? 'border-sky-500/40 dark:border-[var(--icons-green)]/40 bg-sky-500/8 dark:bg-[var(--icons-green)]/8'
-                                : 'border-[var(--border-subtle)] bg-[var(--bg-secondary)]/50 hover:border-sky-500/30 dark:hover:border-[var(--icons-green)]/70'
+                                ? 'border-[#69BEEB]/40 dark:border-[#66D6A8]/40 bg-[#69BEEB]/8 dark:bg-[#66D6A8]/8'
+                                : 'border-[var(--border-subtle)] bg-[var(--bg-secondary)]/50 hover:border-[#69BEEB]/30 dark:hover:border-[#66D6A8]/70'
                         }`}
                     >
-                        <div className="relative w-8 h-8 rounded-xl bg-[var(--bg-card)] flex items-center justify-center text-[10px] font-black text-sky-500 dark:text-[var(--icons-green)] border border-[var(--border-subtle)] overflow-hidden flex-shrink-0">
+                        <div className="relative w-8 h-8 rounded-xl bg-[var(--bg-card)] flex items-center justify-center text-[10px] font-black text-[#69BEEB] dark:text-[#66D6A8] border border-[var(--border-subtle)] overflow-hidden flex-shrink-0">
                             {activeSpecialist?.foto ? (
                                 <Image src={activeSpecialist.foto} fill sizes="32px" className="object-cover" alt="" />
                             ) : (
@@ -290,7 +294,7 @@ export default function RescheduleModal({
                             )}
                         </div>
                         {specialistChanged && (
-                            <span className="text-[8px] font-black text-sky-500 dark:text-[var(--icons-green)] bg-sky-500/10 dark:bg-[var(--icons-green)]/10 border border-sky-500/20 dark:border-[var(--icons-green)]/20 px-2 py-0.5 rounded-md uppercase tracking-widest flex-shrink-0">
+                            <span className="text-[8px] font-black text-[#69BEEB] dark:text-[#66D6A8] bg-[#69BEEB]/10 dark:bg-[#66D6A8]/10 border border-[#69BEEB]/20 dark:border-[#66D6A8]/20 px-2 py-0.5 rounded-md uppercase tracking-widest flex-shrink-0">
                                 Cambiado
                             </span>
                         )}
@@ -319,10 +323,10 @@ export default function RescheduleModal({
                                                 setSelectedSession(null);
                                             }}
                                             className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all ${
-                                                isSelected ? 'bg-sky-500/10 dark:bg-[var(--icons-green)]/10' : 'hover:bg-[var(--bg-secondary)]'
+                                                isSelected ? 'bg-[#69BEEB]/10 dark:bg-[#66D6A8]/10' : 'hover:bg-[var(--bg-secondary)]'
                                             }`}
                                         >
-                                            <div className="relative flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] text-[10px] font-black text-sky-500 dark:text-[var(--icons-green)]">
+                                            <div className="relative flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] text-[10px] font-black text-[#69BEEB] dark:text-[#66D6A8]">
                                                 {sp.foto ? (
                                                     <Image src={sp.foto} fill sizes="36px" className="object-cover" alt="" />
                                                 ) : (
@@ -331,7 +335,7 @@ export default function RescheduleModal({
                                             </div>
                                             <div className="min-w-0 flex-1">
                                                 <div className="flex items-center gap-2 flex-wrap">
-                                                    <p className={`truncate text-sm font-bold ${isSelected ? 'text-sky-600 dark:text-[var(--icons-green)]' : 'text-[var(--text-primary)]'}`}>
+                                                    <p className={`truncate text-sm font-bold ${isSelected ? 'text-[#69BEEB] dark:text-[#66D6A8]' : 'text-[var(--text-primary)]'}`}>
                                                         {sp.nombres} {sp.apellidos}
                                                     </p>
                                                     {isOriginal && (
@@ -344,7 +348,7 @@ export default function RescheduleModal({
                                                     {sp.especialidad || 'Especialista disponible'}
                                                 </p>
                                             </div>
-                                            {isSelected && <Icon name="Check" className="h-4 w-4 text-sky-500 dark:text-[var(--icons-green)] flex-shrink-0" />}
+                                            {isSelected && <Icon name="Check" className="h-4 w-4 text-[#69BEEB] dark:text-[#66D6A8] flex-shrink-0" />}
                                         </button>
                                     );
                                 })}
@@ -363,7 +367,7 @@ export default function RescheduleModal({
                             <button
                                 onClick={() => { if (canGoPrev) { setCurrentMonth(new Date(year, month - 1, 1)); setSelectedDate(null); setSelectedSession(null); } }}
                                 disabled={!canGoPrev}
-                                className="w-7 h-7 rounded-lg bg-[var(--bg-secondary)] flex items-center justify-center hover:bg-sky-500/10 dark:hover:bg-[var(--icons-green)]/10 hover:text-sky-500 dark:hover:text-[var(--icons-green)] disabled:opacity-25 disabled:cursor-not-allowed transition-all"
+                                className="w-7 h-7 rounded-lg bg-[var(--bg-secondary)] flex items-center justify-center hover:bg-[#69BEEB]/10 dark:hover:bg-[#66D6A8]/10 hover:text-[#69BEEB] dark:hover:text-[#66D6A8] disabled:opacity-25 disabled:cursor-not-allowed transition-all"
                             >
                                 <Icon name="ChevronLeft" className="w-3.5 h-3.5" />
                             </button>
@@ -373,7 +377,7 @@ export default function RescheduleModal({
                             <button
                                 onClick={() => { if (canGoNext) { setCurrentMonth(new Date(year, month + 1, 1)); setSelectedDate(null); setSelectedSession(null); } }}
                                 disabled={!canGoNext}
-                                className="w-7 h-7 rounded-lg bg-[var(--bg-secondary)] flex items-center justify-center hover:bg-sky-500/10 dark:hover:bg-[var(--icons-green)]/10 hover:text-sky-500 dark:hover:text-[var(--icons-green)] disabled:opacity-25 disabled:cursor-not-allowed transition-all"
+                                className="w-7 h-7 rounded-lg bg-[var(--bg-secondary)] flex items-center justify-center hover:bg-[#69BEEB]/10 dark:hover:bg-[#66D6A8]/10 hover:text-[#69BEEB] dark:hover:text-[#66D6A8] disabled:opacity-25 disabled:cursor-not-allowed transition-all"
                             >
                                 <Icon name="ChevronRight" className="w-3.5 h-3.5" />
                             </button>
@@ -402,9 +406,9 @@ export default function RescheduleModal({
                                             ${isPast ? 'cursor-not-allowed' : ''}
                                             ${isPast && isAvailable ? 'text-[var(--text-secondary)] opacity-35' : ''}
                                             ${isPast && !isAvailable ? 'text-[var(--text-secondary)] opacity-15' : ''}
-                                            ${isSelectable && !isSelected ? 'hover:bg-sky-500/10 dark:hover:bg-[var(--icons-green)]/10 hover:text-sky-500 dark:hover:text-[var(--icons-green)] cursor-pointer' : ''}
-                                            ${isSelected ? 'bg-sky-500 dark:bg-[var(--brand-green)] text-white shadow-md shadow-sky-500/20 dark:shadow-[var(--icons-green)]/20' : ''}
-                                            ${isToday && !isSelected ? 'ring-2 ring-sky-500 dark:ring-[var(--icons-green)] ring-offset-1 ring-offset-[var(--bg-card)]' : ''}
+                                            ${isSelectable && !isSelected ? 'hover:bg-[#69BEEB]/10 dark:hover:bg-[#66D6A8]/10 hover:text-[#69BEEB] dark:hover:text-[#66D6A8] cursor-pointer' : ''}
+                                            ${isSelected ? 'bg-[#69BEEB] dark:bg-[#4EC7B8] text-white shadow-md shadow-[#69BEEB]/20 dark:shadow-[#66D6A8]/20' : ''}
+                                            ${isToday && !isSelected ? 'ring-2 ring-[#69BEEB] dark:ring-[#66D6A8] ring-offset-1 ring-offset-[var(--bg-card)]' : ''}
                                         `}
                                     >
                                         <span className={isPast ? 'line-through' : ''}>{date.getDate()}</span>
@@ -447,20 +451,20 @@ export default function RescheduleModal({
                                                 ${occupied
                                                     ? 'opacity-40 cursor-not-allowed bg-[var(--bg-secondary)]/50 border-[var(--border-subtle)]'
                                                     : isSelected
-                                                        ? 'bg-sky-500/10 dark:bg-[var(--icons-green)]/10 border-sky-500/30 dark:border-[var(--icons-green)]/30 ring-2 ring-sky-500/20 dark:ring-[var(--icons-green)]/20 cursor-pointer'
-                                                        : 'bg-[var(--bg-secondary)]/50 border-[var(--border-subtle)] hover:border-sky-500/30 dark:hover:border-[var(--icons-green)]/30 hover:bg-sky-500/5 dark:hover:bg-[var(--icons-green)]/5 cursor-pointer'
+                                                        ? 'bg-[#69BEEB]/10 dark:bg-[#66D6A8]/10 border-[#69BEEB]/30 dark:border-[#66D6A8]/30 ring-2 ring-[#69BEEB]/20 dark:ring-[#66D6A8]/20 cursor-pointer'
+                                                        : 'bg-[var(--bg-secondary)]/50 border-[var(--border-subtle)] hover:border-[#69BEEB]/30 dark:hover:border-[#66D6A8]/30 hover:bg-[#69BEEB]/5 dark:hover:bg-[#66D6A8]/5 cursor-pointer'
                                                 }
                                             `}
                                         >
-                                            <span className={`text-[11px] font-black font-mono ${isSelected ? 'text-sky-600 dark:text-[var(--icons-green)]' : 'text-[var(--text-primary)]'}`}>
+                                            <span className={`text-[11px] font-black font-mono ${isSelected ? 'text-[#69BEEB] dark:text-[#66D6A8]' : 'text-[var(--text-primary)]'}`}>
                                                 {ses.inicio} – {ses.fin}
                                             </span>
                                             {occupied ? (
                                                 <span className="text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Ocupada</span>
                                             ) : isSelected ? (
-                                                <Icon name="CheckCircle2" className="w-4 h-4 text-sky-500 dark:text-[var(--icons-green)]" />
+                                                <Icon name="CheckCircle2" className="w-4 h-4 text-[#69BEEB] dark:text-[#66D6A8]" />
                                             ) : (
-                                                <span className="text-[9px] font-black text-sky-500 dark:text-[var(--icons-green)] uppercase tracking-widest">Libre</span>
+                                                <span className="text-[9px] font-black text-[#69BEEB] dark:text-[#66D6A8] uppercase tracking-widest">Libre</span>
                                             )}
                                         </button>
                                     );
@@ -472,10 +476,10 @@ export default function RescheduleModal({
 
                 {/* Resumen nuevo horario */}
                 {canConfirm && (
-                    <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-sky-500/8 dark:bg-[var(--icons-green)]/8 border border-sky-500/20 dark:border-[var(--icons-green)]/20">
-                        <Icon name="CheckCircle2" className="w-4 h-4 text-sky-500 dark:text-[var(--icons-green)] flex-shrink-0" />
+                    <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-[#69BEEB]/8 dark:bg-[#66D6A8]/8 border border-[#69BEEB]/20 dark:border-[#66D6A8]/20">
+                        <Icon name="CheckCircle2" className="w-4 h-4 text-[#69BEEB] dark:text-[#66D6A8] flex-shrink-0" />
                         <div className="flex-1 min-w-0">
-                            <p className="text-[9px] font-black text-sky-500 dark:text-[var(--icons-green)] uppercase tracking-widest">Nuevo horario seleccionado</p>
+                            <p className="text-[9px] font-black text-[#69BEEB] dark:text-[#66D6A8] uppercase tracking-widest">Nuevo horario seleccionado</p>
                             <p className="text-sm font-black text-[var(--text-primary)]">
                                 {selectedSession!.inicio} – {selectedSession!.fin}
                             </p>
@@ -484,7 +488,7 @@ export default function RescheduleModal({
                                 <p className="text-[10px] font-bold text-[var(--text-secondary)] mt-0.5">
                                     {activeSpecialist.nombres} {activeSpecialist.apellidos}
                                     {specialistChanged && (
-                                        <span className="ml-1.5 text-sky-500 dark:text-[var(--icons-green)]">(cambiado)</span>
+                                        <span className="ml-1.5 text-[#69BEEB] dark:text-[#66D6A8]">(cambiado)</span>
                                     )}
                                 </p>
                             )}
@@ -496,7 +500,7 @@ export default function RescheduleModal({
                     <BaseButton
                         onClick={() => {
                             if (selectedDate && selectedSession) {
-                                onConfirm(appointment.id, formatFecha(selectedDate), selectedSession, selectedSpecialistId);
+                                onConfirm(appointment.id, toDateStr(selectedDate), selectedSession, selectedSpecialistId);
                                 onClose();
                             }
                         }}

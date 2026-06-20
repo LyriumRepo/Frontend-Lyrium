@@ -210,6 +210,7 @@ export const menuItems: MenuItem[] = [
         icon: 'shopping-bag',
         children: [
             { 
+
                 label: 'Suplementos vitamínicos', 
                 href: '/productos/suplementos',
                 children: [

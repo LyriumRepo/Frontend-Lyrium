@@ -13,34 +13,43 @@ firebase.initializeApp({
 const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage((payload) => {
-  const { notification, data } = payload;
+  try {
+    const { notification, data } = payload;
 
-  const title = notification?.title || 'Lyrium';
-  const options = {
-    body: notification?.body || '',
-    icon: notification?.icon || '/img/lyrium-icon.png',
-    badge: '/img/lyrium-icon.png',
-    data: data || {},
-  };
+    const title = notification?.title || 'Lyrium';
+    const options = {
+      body: notification?.body || '',
+      icon: notification?.icon || '/img/iconologo.png',
+      badge: '/img/iconologo.png',
+      data: data || {},
+    };
 
-  self.registration.showNotification(title, options);
+    self.registration.showNotification(title, options);
+  } catch (err) {
+    console.error('[SW] onBackgroundMessage error:', err);
+  }
 });
 
 self.addEventListener('notificationclick', (event) => {
-  event.notification.close();
+  try {
+    event.notification.close();
 
-  const url = event.notification.data?.url || '/customer/orders';
+    const url = event.notification.data?.url || '/customer/orders';
 
-  event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-      for (const client of clientList) {
-        if (client.url === url && 'focus' in client) {
-          return client.focus();
+    event.waitUntil(
+      clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+        const origin = self.location.origin;
+        for (const client of clientList) {
+          if (client.url.startsWith(origin + url) && 'focus' in client) {
+            return client.focus();
+          }
         }
-      }
-      if (clients.openWindow) {
-        return clients.openWindow(url);
-      }
-    })
-  );
+        if (clients.openWindow) {
+          return clients.openWindow(origin + url);
+        }
+      })
+    );
+  } catch (err) {
+    console.error('[SW] notificationclick error:', err);
+  }
 });

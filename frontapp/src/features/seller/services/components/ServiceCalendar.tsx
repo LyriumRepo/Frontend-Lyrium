@@ -80,8 +80,12 @@ function getAttendanceDay(date: Date, service: Service): AttendanceDay | null {
   return service.diasAtencion.find((d) => d.dia === weekDay) ?? null;
 }
 
+function toDateStr(date: Date): string {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}
+
 function getApptsForDate(date: Date, service: Service, appointments: AppointmentWithClient[]): AppointmentWithClient[] {
-  const fecha = formatFecha(date);
+  const fecha = toDateStr(date);
   return appointments.filter((a) => a.serviceId === service.id && a.fecha === fecha);
 }
 
@@ -287,7 +291,15 @@ export default function ServiceCalendar({
 
   const selectedAtt = selectedDate ? getAttendanceDay(selectedDate, service) : null;
   const selectedAppts = selectedDate ? getApptsForDate(selectedDate, service, filteredAppointments) : [];
-  const selectedBlocks = selectedAtt?.bloques ?? [];
+  const selectedBlocks = selectedAtt && selectedSpecialistId
+    ? (() => {
+        const horarios = (service as Service & { especialistaHorarios?: { id: number; dias: { dia: WeekDay; bloques: number[] }[] }[] }).especialistaHorarios;
+        const entry = horarios?.find((h) => h.id === selectedSpecialistId);
+        const dayEntry = entry?.dias.find((d) => d.dia === selectedAtt.dia);
+        if (!dayEntry) return [];
+        return dayEntry.bloques.map((bi) => selectedAtt.bloques[bi]).filter(Boolean);
+      })()
+    : (selectedAtt?.bloques ?? []);
   const currentBlock = selectedBlocks[selectedBlockIndex] ?? null;
   const blockSessions = currentBlock ? calculateSessions(currentBlock, service.duracion) : [];
 
@@ -386,14 +398,14 @@ export default function ServiceCalendar({
                   onClick={() => setIsSpecialistMenuOpen((prev) => !prev)}
                   className={`inline-flex items-center gap-2 rounded-2xl border px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.26em] transition-all ${
                     selectedSpecialistId === null
-                      ? 'border-sky-500/25 dark:border-[var(--icons-green)]/20 bg-sky-500/10 dark:bg-[var(--icons-green)]/10 text-sky-500 dark:text-[var(--icons-green)] shadow-sm shadow-sky-500/10 dark:shadow-[var(--icons-green)]/10'
-                      : 'border-[var(--border-subtle)] bg-[var(--bg-secondary)] text-[var(--text-primary)] hover:border-sky-500/30 dark:hover:border-[var(--icons-green)]/30 hover:text-sky-500 dark:hover:text-[var(--icons-green)]'
+                      ? 'border-[#69BEEB]/25 dark:border-[#66D6A8]/20 bg-[#69BEEB]/10 dark:bg-[#66D6A8]/10 text-[#69BEEB] dark:text-[#66D6A8] shadow-sm shadow-[#69BEEB]/10 dark:shadow-[#66D6A8]/10'
+                      : 'border-[var(--border-subtle)] bg-[var(--bg-secondary)] text-[var(--text-primary)] hover:border-[#69BEEB]/30 dark:hover:border-[#66D6A8]/30 hover:text-[#69BEEB] dark:hover:text-[#66D6A8]'
                   }`}
                   aria-haspopup="listbox"
                   aria-expanded={isSpecialistMenuOpen}
                 >
                   <span className={`flex h-5 min-w-5 items-center justify-center rounded-lg text-[8px] font-black ${
-                    selectedSpecialistId === null ? 'bg-sky-500/15 dark:bg-[var(--icons-green)]/10 text-sky-500 dark:text-[var(--icons-green)]' : 'bg-[var(--bg-card)] text-[var(--text-secondary)]'
+                    selectedSpecialistId === null ? 'bg-[#69BEEB]/15 dark:bg-[#66D6A8]/10 text-[#69BEEB] dark:text-[#66D6A8]' : 'bg-[var(--bg-card)] text-[var(--text-secondary)]'
                   }`}>
                     {activeSpecialist ? getAvatarChars(activeSpecialist) : 'AA'}
                   </span>
@@ -417,13 +429,13 @@ export default function ServiceCalendar({
                         onClick={() => handleSpecialistSelection(null)}
                         className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all ${
                           selectedSpecialistId === null
-                            ? 'bg-sky-500/10 dark:bg-[var(--icons-green)]/10 text-sky-500 dark:text-[var(--icons-green)]'
+                            ? 'bg-[#69BEEB]/10 dark:bg-[#66D6A8]/10 text-[#69BEEB] dark:text-[#66D6A8]'
                             : 'hover:bg-[var(--bg-secondary)]'
                         }`}
                       >
                         <span className={`flex h-9 w-9 items-center justify-center rounded-xl border text-[10px] font-black ${
                           selectedSpecialistId === null
-                            ? 'border-sky-500/20 dark:border-[var(--icons-green)]/20 bg-sky-500/15 dark:bg-[var(--icons-green)]/10 text-sky-500 dark:text-[var(--icons-green)]'
+                            ? 'border-[#69BEEB]/20 dark:border-[#66D6A8]/20 bg-[#69BEEB]/15 dark:bg-[#66D6A8]/10 text-[#69BEEB] dark:text-[#66D6A8]'
                             : 'border-[var(--border-subtle)] bg-[var(--bg-secondary)] text-[var(--text-secondary)]'
                         }`}>
                           AA
@@ -437,7 +449,7 @@ export default function ServiceCalendar({
                           </p>
                         </div>
                         {selectedSpecialistId === null && (
-                          <Icon name="Check" className="h-4 w-4 text-sky-500 dark:text-[var(--icons-green)]" />
+                          <Icon name="Check" className="h-4 w-4 text-[#69BEEB] dark:text-[#66D6A8]" />
                         )}
                       </button>
 
@@ -452,11 +464,11 @@ export default function ServiceCalendar({
                             onClick={() => handleSpecialistSelection(sp.id)}
                             className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all ${
                               isSelected
-                                ? 'bg-sky-500/10 dark:bg-[var(--icons-green)]/10 text-sky-500 dark:text-[var(--icons-green)]'
+                                ? 'bg-[#69BEEB]/10 dark:bg-[#66D6A8]/10 text-[#69BEEB] dark:text-[#66D6A8]'
                                 : 'hover:bg-[var(--bg-secondary)]'
                             }`}
                           >
-                            <div className="relative flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] text-[10px] font-black text-sky-500 dark:text-[var(--icons-green)]">
+                            <div className="relative flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] text-[10px] font-black text-[#69BEEB] dark:text-[#66D6A8]">
                               {sp.foto ? (
                                 <Image src={sp.foto} fill sizes="36px" className="object-cover" alt="" />
                               ) : (
@@ -471,7 +483,7 @@ export default function ServiceCalendar({
                                 {sp.especialidad || 'Especialista disponible'}
                               </p>
                             </div>
-                            {isSelected && <Icon name="Check" className="h-4 w-4 text-sky-500 dark:text-[var(--icons-green)]" />}
+                            {isSelected && <Icon name="Check" className="h-4 w-4 text-[#69BEEB] dark:text-[#66D6A8]" />}
                           </button>
                         );
                       })}
@@ -499,7 +511,7 @@ export default function ServiceCalendar({
             <div className="flex items-center justify-between">
               <button
                 onClick={goToPrev}
-                className="w-8 h-8 md:w-9 md:h-9 rounded-xl bg-[var(--bg-secondary)] flex items-center justify-center hover:bg-sky-500/10 dark:hover:bg-[var(--icons-green)]/10 hover:text-sky-500 dark:hover:text-[var(--icons-green)] transition-all"
+                className="w-8 h-8 md:w-9 md:h-9 rounded-xl bg-[var(--bg-secondary)] flex items-center justify-center hover:bg-[#69BEEB]/10 dark:hover:bg-[#66D6A8]/10 hover:text-[#69BEEB] dark:hover:text-[#66D6A8] transition-all"
               >
                 <Icon name="ChevronLeft" className="w-4 h-4" />
               </button>
@@ -508,7 +520,7 @@ export default function ServiceCalendar({
               </h3>
               <button
                 onClick={goToNext}
-                className="w-8 h-8 md:w-9 md:h-9 rounded-xl bg-[var(--bg-secondary)] flex items-center justify-center hover:bg-sky-500/10 dark:hover:bg-[var(--icons-green)]/10 hover:text-sky-500 dark:hover:text-[var(--icons-green)] transition-all"
+                className="w-8 h-8 md:w-9 md:h-9 rounded-xl bg-[var(--bg-secondary)] flex items-center justify-center hover:bg-[#69BEEB]/10 dark:hover:bg-[#66D6A8]/10 hover:text-[#69BEEB] dark:hover:text-[#66D6A8] transition-all"
               >
                 <Icon name="ChevronRight" className="w-4 h-4" />
               </button>
@@ -522,7 +534,7 @@ export default function ServiceCalendar({
                   <div
                     key={label}
                     className={`text-center text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] py-1 ${
-                      isServiceDay ? 'text-sky-500 dark:text-[var(--icons-green)]' : 'text-[var(--text-secondary)] opacity-40'
+                      isServiceDay ? 'text-[#69BEEB] dark:text-[#66D6A8]' : 'text-[var(--text-secondary)] opacity-40'
                     }`}
                   >
                     {label}
@@ -556,16 +568,16 @@ export default function ServiceCalendar({
                       rounded-lg md:rounded-xl flex flex-col items-center justify-center gap-0.5
                       text-[11px] md:text-xs font-black transition-all
                       ${!isAvailable ? 'text-[var(--text-secondary)] opacity-25 cursor-not-allowed' : ''}
-                      ${isAvailable && !isSelected ? 'hover:bg-sky-500/10 dark:hover:bg-[var(--icons-green)]/10 hover:text-sky-500 dark:hover:text-[var(--icons-green)] cursor-pointer' : ''}
+                      ${isAvailable && !isSelected ? 'hover:bg-[#69BEEB]/10 dark:hover:bg-[#66D6A8]/10 hover:text-[#69BEEB] dark:hover:text-[#66D6A8] cursor-pointer' : ''}
                       ${isAvailable && isPast && !isSelected ? 'opacity-70' : ''}
-                      ${isSelected ? 'bg-sky-500 dark:bg-[var(--brand-green)] !text-white shadow-lg shadow-sky-500/20 dark:shadow-[var(--icons-green)]/20' : ''}
-                      ${isToday && !isSelected ? 'ring-2 ring-sky-500 dark:ring-[var(--icons-green)] ring-offset-1 ring-offset-[var(--bg-card)]' : ''}
+                      ${isSelected ? 'bg-[#69BEEB] dark:bg-[#4EC7B8] !text-white shadow-lg shadow-[#69BEEB]/20 dark:shadow-[#66D6A8]/20' : ''}
+                      ${isToday && !isSelected ? 'ring-2 ring-[#69BEEB] dark:ring-[#66D6A8] ring-offset-1 ring-offset-[var(--bg-card)]' : ''}
                     `}
                   >
                     <span className="leading-none">{date.getDate()}</span>
                     {hasAppts && (
                       <div className={`w-1 h-1 rounded-full ${
-                        isSelected ? 'bg-white' : isPast ? 'bg-emerald-400' : 'bg-sky-500 dark:bg-[var(--icons-green)]'
+                        isSelected ? 'bg-white' : isPast ? 'bg-emerald-400' : 'bg-[#69BEEB] dark:bg-[#66D6A8]'
                       }`} />
                     )}
                   </button>
@@ -576,11 +588,11 @@ export default function ServiceCalendar({
             {/* Legend */}
             <div className="flex items-center gap-4 md:gap-6 pt-2 md:pt-3 border-t border-[var(--border-subtle)] flex-wrap">
               <span className="flex items-center gap-2 text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest">
-                <span className="w-3 h-3 rounded-lg bg-sky-500/20 dark:bg-[var(--icons-green)]/20 border border-sky-500/30 dark:border-[var(--icons-green)]/30" />
+                <span className="w-3 h-3 rounded-lg bg-[#69BEEB]/20 dark:bg-[#66D6A8]/20 border border-[#69BEEB]/30 dark:border-[#66D6A8]/30" />
                 Disponible
               </span>
               <span className="flex items-center gap-2 text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest">
-                <span className="w-1.5 h-1.5 rounded-full bg-sky-500 dark:bg-[var(--icons-green)]" />
+                <span className="w-1.5 h-1.5 rounded-full bg-[#69BEEB] dark:bg-[#66D6A8]" />
                 Con citas
               </span>
               <span className="flex items-center gap-2 text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest">
@@ -629,7 +641,7 @@ export default function ServiceCalendar({
                   </div>
                   {selectedAppts.length > 0 ? (
                     <p className={`text-[9px] font-bold uppercase tracking-widest mt-0.5 ${
-                      selectedDateIsPast ? 'text-emerald-500' : 'text-sky-500 dark:text-[var(--icons-green)]'
+                      selectedDateIsPast ? 'text-emerald-500' : 'text-[#69BEEB] dark:text-[#66D6A8]'
                     }`}>
                       {selectedAppts.length} cita{selectedAppts.length !== 1 ? 's' : ''}{' '}
                       {selectedDateIsPast ? 'completada' : 'agendada'}{selectedAppts.length !== 1 ? 's' : ''}
@@ -647,7 +659,7 @@ export default function ServiceCalendar({
                       <button
                         onClick={handlePrevBlock}
                         disabled={selectedBlocks.length <= 1 || selectedBlockIndex === 0}
-                        className="w-8 h-8 rounded-xl bg-[var(--bg-secondary)] flex items-center justify-center hover:bg-sky-500/10 dark:hover:bg-[var(--icons-green)]/10 hover:text-sky-500 dark:hover:text-[var(--icons-green)] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                        className="w-8 h-8 rounded-xl bg-[var(--bg-secondary)] flex items-center justify-center hover:bg-[#69BEEB]/10 dark:hover:bg-[#66D6A8]/10 hover:text-[#69BEEB] dark:hover:text-[#66D6A8] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
                         aria-label="Bloque anterior"
                       >
                         <Icon name="ChevronLeft" className="w-4 h-4" />
@@ -662,7 +674,7 @@ export default function ServiceCalendar({
                       <button
                         onClick={handleNextBlock}
                         disabled={selectedBlocks.length <= 1 || selectedBlockIndex >= selectedBlocks.length - 1}
-                        className="w-8 h-8 rounded-xl bg-[var(--bg-secondary)] flex items-center justify-center hover:bg-sky-500/10 dark:hover:bg-[var(--icons-green)]/10 hover:text-sky-500 dark:hover:text-[var(--icons-green)] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                        className="w-8 h-8 rounded-xl bg-[var(--bg-secondary)] flex items-center justify-center hover:bg-[#69BEEB]/10 dark:hover:bg-[#66D6A8]/10 hover:text-[#69BEEB] dark:hover:text-[#66D6A8] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
                         aria-label="Bloque siguiente"
                       >
                         <Icon name="ChevronRight" className="w-4 h-4" />
@@ -673,7 +685,7 @@ export default function ServiceCalendar({
                       <div className={`flex items-center justify-between rounded-xl border px-4 py-3 ${
                         selectedDateIsPast
                           ? 'border-emerald-500/20 bg-emerald-500/5'
-                          : 'border-sky-500/20 dark:border-[var(--icons-green)]/20 bg-sky-500/5 dark:bg-[var(--icons-green)]/10'
+                          : 'border-[#69BEEB]/20 dark:border-[#66D6A8]/20 bg-[#69BEEB]/5 dark:bg-[#66D6A8]/10'
                       }`}>
                         <div>
                           <p className="text-[10px] font-black text-[var(--text-primary)] uppercase tracking-widest">
@@ -681,7 +693,7 @@ export default function ServiceCalendar({
                           </p>
                           {currentBlockAppointments.length > 0 ? (
                             <p className={`text-[9px] font-bold uppercase tracking-widest mt-1 ${
-                              selectedDateIsPast ? 'text-emerald-500' : 'text-sky-500 dark:text-[var(--icons-green)]'
+                              selectedDateIsPast ? 'text-emerald-500' : 'text-[#69BEEB] dark:text-[#66D6A8]'
                             }`}>
                               {currentBlockAppointments.length}{' '}
                               {selectedDateIsPast ? 'completada' : 'agendada'}{currentBlockAppointments.length !== 1 ? 's' : ''}
@@ -752,7 +764,7 @@ export default function ServiceCalendar({
                                 disabled={!appt}
                                 className={`w-full rounded-xl border p-3.5 text-left transition-all ${
                                   appt
-                                    ? 'bg-sky-500/10 dark:bg-[var(--icons-green)]/10 border-sky-500/20 dark:border-[var(--icons-green)]/20 text-sky-600 dark:text-[var(--icons-green)] hover:brightness-110 hover:shadow-md cursor-pointer'
+                                    ? 'bg-[#69BEEB]/10 dark:bg-[#66D6A8]/10 border-[#69BEEB]/20 dark:border-[#66D6A8]/20 text-[#69BEEB] dark:text-[#66D6A8] hover:brightness-110 hover:shadow-md cursor-pointer'
                                     : 'bg-[var(--bg-secondary)]/50 border-[var(--border-subtle)] cursor-default'
                                 }`}
                               >
@@ -761,7 +773,7 @@ export default function ServiceCalendar({
                                     {ses.inicio} – {ses.fin}
                                   </span>
                                   {appt ? (
-                                    <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-lg border bg-sky-500/10 dark:bg-[var(--icons-green)]/10 border-sky-500/20 dark:border-[var(--icons-green)]/20 text-sky-600 dark:text-[var(--icons-green)]">
+                                    <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-lg border bg-[#69BEEB]/10 dark:bg-[#66D6A8]/10 border-[#69BEEB]/20 dark:border-[#66D6A8]/20 text-[#69BEEB] dark:text-[#66D6A8]">
                                       Agendada
                                     </span>
                                   ) : (
@@ -785,8 +797,8 @@ export default function ServiceCalendar({
                                 onClick={() => setSelectedSessionPage(page)}
                                 className={`min-w-8 h-8 px-2 rounded-lg text-[10px] font-black transition-all border ${
                                   page === selectedSessionPage
-                                    ? 'bg-sky-500 dark:bg-[var(--brand-green)] text-white border-sky-500 dark:border-[var(--brand-green)] shadow-sm shadow-sky-500/20 dark:shadow-[var(--icons-green)]/20'
-                                    : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-sky-500/30 dark:hover:border-[var(--icons-green)]/30 hover:text-sky-500 dark:hover:text-[var(--icons-green)]'
+                                    ? 'bg-[#69BEEB] dark:bg-[#4EC7B8] text-white border-[#69BEEB] dark:border-[#4EC7B8] shadow-sm shadow-[#69BEEB]/20 dark:shadow-[#66D6A8]/20'
+                                    : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-[#69BEEB]/30 dark:hover:border-[#66D6A8]/30 hover:text-[#69BEEB] dark:hover:text-[#66D6A8]'
                                 }`}
                               >
                                 {page}
@@ -829,7 +841,7 @@ export default function ServiceCalendar({
                     Detalle de sesión
                   </h3>
                   {detailApptIsPast && (
-                    <span className="text-[8px] font-black text-sky-500 dark:text-[var(--icons-green)] bg-sky-500/10 dark:bg-[var(--icons-green)]/10 border border-sky-500/20 dark:border-[var(--icons-green)]/20 px-2 py-0.5 rounded-md uppercase tracking-widest">
+                    <span className="text-[8px] font-black text-[#69BEEB] dark:text-[#66D6A8] bg-[#69BEEB]/10 dark:bg-[#66D6A8]/10 border border-[#69BEEB]/20 dark:border-[#66D6A8]/20 px-2 py-0.5 rounded-md uppercase tracking-widest">
                       Completada
                     </span>
                   )}
@@ -860,7 +872,7 @@ export default function ServiceCalendar({
                       Especialista
                     </p>
                     <div className="flex items-center gap-3">
-                      <div className="relative w-9 h-9 rounded-xl bg-[var(--bg-card)] flex items-center justify-center text-[10px] font-black text-sky-500 dark:text-[var(--icons-green)] border border-[var(--border-subtle)] overflow-hidden flex-shrink-0">
+                      <div className="relative w-9 h-9 rounded-xl bg-[var(--bg-card)] flex items-center justify-center text-[10px] font-black text-[#69BEEB] dark:text-[#66D6A8] border border-[var(--border-subtle)] overflow-hidden flex-shrink-0">
                         {selectedAppointmentSpecialist?.foto ? (
                           <Image src={selectedAppointmentSpecialist.foto} fill sizes="36px" className="object-cover" alt="" />
                         ) : (
@@ -887,7 +899,7 @@ export default function ServiceCalendar({
                       Cliente
                     </p>
                     <div className="flex items-center gap-3">
-                      <div className="relative w-9 h-9 rounded-xl bg-[var(--bg-card)] flex items-center justify-center text-[10px] font-black text-sky-500 dark:text-[var(--icons-green)] border border-[var(--border-subtle)] overflow-hidden flex-shrink-0">
+                      <div className="relative w-9 h-9 rounded-xl bg-[var(--bg-card)] flex items-center justify-center text-[10px] font-black text-[#69BEEB] dark:text-[#66D6A8] border border-[var(--border-subtle)] overflow-hidden flex-shrink-0">
                         <span>{selectedAppointmentClient ? getClientChars(selectedAppointmentClient) : '??'}</span>
                       </div>
                       <div className="min-w-0">
@@ -922,13 +934,13 @@ export default function ServiceCalendar({
 
               {/* Reschedule warning (completed session) */}
               {showRescheduleWarning ? (
-                <div className="rounded-2xl border border-sky-500/25 dark:border-[var(--icons-green)]/25 bg-sky-500/8 dark:bg-[var(--icons-green)]/8 p-4 space-y-3">
+                <div className="rounded-2xl border border-[#69BEEB]/25 dark:border-[#66D6A8]/25 bg-[#69BEEB]/8 dark:bg-[#66D6A8]/8 p-4 space-y-3">
                   <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-xl bg-emerald-500/15 dark:bg-[var(--icons-green)]/10 border border-emerald-500/25 dark:border-[var(--icons-green)]/25 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <Icon name="AlertTriangle" className="w-4 h-4 text-sky-500 dark:text-[var(--icons-green)]" />
+                    <div className="w-8 h-8 rounded-xl bg-emerald-500/15 dark:bg-[#66D6A8]/10 border border-emerald-500/25 dark:border-[#66D6A8]/25 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <Icon name="AlertTriangle" className="w-4 h-4 text-[#69BEEB] dark:text-[#66D6A8]" />
                     </div>
                     <div>
-                      <p className="text-[10px] font-black text-sky-600 dark:text-[var(--icons-green)] uppercase tracking-widest">Sesión ya completada</p>
+                      <p className="text-[10px] font-black text-[#69BEEB] dark:text-[#66D6A8] uppercase tracking-widest">Sesión ya completada</p>
                       <p className="text-[11px] font-semibold text-[var(--text-secondary)] mt-1 leading-snug">
                         Esta sesión ya expiró. ¿Deseas reprogramarla de todas formas?
                       </p>
@@ -943,7 +955,7 @@ export default function ServiceCalendar({
                     </button>
                     <button
                       onClick={handleRescheduleConfirm}
-                      className="flex-1 py-2.5 rounded-xl bg-emerald-500 dark:bg-[var(--brand-green)] text-white text-[10px] font-black uppercase tracking-widest hover:opacity-90 transition-all"
+                      className="flex-1 py-2.5 rounded-xl bg-emerald-500 dark:bg-[#4EC7B8] text-white text-[10px] font-black uppercase tracking-widest hover:opacity-90 transition-all"
                     >
                       Sí, reprogramar
                     </button>
@@ -953,7 +965,7 @@ export default function ServiceCalendar({
                 <button
                   onClick={handleRescheduleClick}
                   className={`w-full py-3 rounded-2xl text-white font-black uppercase tracking-widest text-[10px] hover:opacity-90 transition-all ${
-                    detailApptIsPast ? 'bg-sky-500 dark:bg-[var(--brand-green)]' : 'bg-sky-500 dark:bg-[var(--brand-green)]'
+                    detailApptIsPast ? 'bg-[#69BEEB] dark:bg-[#4EC7B8]' : 'bg-[#69BEEB] dark:bg-[#4EC7B8]'
                   }`}
                 >
                   Reprogramar

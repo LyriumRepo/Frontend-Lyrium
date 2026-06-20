@@ -16,8 +16,8 @@ interface ProductCarouselProps {
 }
 
 const stickerConfig: Record<string, { label: string; class: string }> = {
-  oferta: { label: 'Oferta', class: 'bg-red-500' },
-  promo: { label: 'Promo', class: 'bg-orange-500' },
+  oferta: { label: 'Oferta', class: 'bg-emerald-600 dark:bg-emerald-500' },
+  promo: { label: 'Promo', class: 'bg-sky-500 dark:bg-sky-400' },
   nuevo: { label: 'Nuevo', class: 'bg-green-500' },
   limitado: { label: 'Limitado', class: 'bg-purple-500' },
 };
@@ -111,7 +111,7 @@ export default function ProductCarousel({
                       className="object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                     {descuento && !sticker && (
-                      <span className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-md">
+                      <span className="absolute top-2 left-2 bg-rose-600 text-white text-xs font-bold px-2 py-0.5 rounded-md">
                         -{Math.round(descuento * 100)}%
                       </span>
                     )}

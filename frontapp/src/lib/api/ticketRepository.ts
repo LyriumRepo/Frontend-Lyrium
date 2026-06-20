@@ -79,6 +79,7 @@ async function handleResponse<T>(response: Response): Promise<T> {
 
 const API_BASE = process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://localhost:8000/api';
 
+
 async function getAuthHeaders(contentType?: string): Promise<Record<string, string>> {
     const token = await getTokenAsync();
 
@@ -195,6 +196,38 @@ export const ticketApi = {
                 headers,
             });
             return handleResponse<Ticket>(response);
+        },
+
+        async submitSurvey(ticketId: number, payload: SubmitSurveyPayload): Promise<Ticket> {
+            const headers = await getAuthHeaders();
+            const response = await fetch(`${API_BASE}/tickets/${ticketId}/survey`, {
+                method: 'POST',
+                headers,
+                body: JSON.stringify(payload),
+            });
+            return handleResponse<Ticket>(response);
+        },
+    },
+
+    customer: {
+        async list(): Promise<Ticket[]> {
+            return ticketApi.seller.list();
+        },
+
+        async get(id: number): Promise<Ticket> {
+            return ticketApi.seller.get(id);
+        },
+
+        async create(payload: CreateTicketPayload): Promise<Ticket> {
+            return ticketApi.seller.create(payload);
+        },
+
+        async sendMessage(ticketId: number, payload: SendMessagePayload): Promise<Ticket> {
+            return ticketApi.seller.sendMessage(ticketId, payload);
+        },
+
+        async close(ticketId: number): Promise<Ticket> {
+            return ticketApi.seller.close(ticketId);
         },
 
         async submitSurvey(ticketId: number, payload: SubmitSurveyPayload): Promise<Ticket> {

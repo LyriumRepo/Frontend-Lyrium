@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, Mic, Filter, X, Loader2 } from 'lucide-react';
 import { Categoria, SearchResult } from '@/types/public';
@@ -24,7 +24,18 @@ interface SearchBarProps {
 
 export default function SearchBar({ categoriasServicios = [], categoriasProductos = [], initialQuery = '', initialCategory = '', initialMinPrice = '', initialMaxPrice = '', initialOffer = '', autoSearch = false, }: SearchBarProps) {
   const router = useRouter();
-  const [searchTerm, setSearchTerm] = useState(initialQuery);
+  const categoryName = useMemo(() => {
+    if (!initialCategory) return '';
+    const allCats = [...categoriasServicios, ...categoriasProductos];
+    const found = allCats.find(
+      c => c.slug === initialCategory || c.slug === initialCategory.split('/').pop()
+    );
+    if (found) return found.nombre;
+    // Fallback: extraer último segmento del slug
+    const last = initialCategory.split('-').pop() || initialCategory;
+    return last.charAt(0).toUpperCase() + last.slice(1).replace(/-/g, ' ');
+  }, [initialCategory, categoriasServicios, categoriasProductos]);
+  const [searchTerm, setSearchTerm] = useState(initialQuery || categoryName);
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const [activeDropdownLocal, setActiveDropdownLocal] = useState<'autocomplete' | 'filter' | null>(null);
   const [selectedIndex, setSelectedIndex] = useState(-1);
@@ -32,6 +43,7 @@ export default function SearchBar({ categoriasServicios = [], categoriasProducto
   const [categoryProducts, setCategoryProducts] = useState<SearchResult[]>([]);
   const [loadingCategoryProducts, setLoadingCategoryProducts] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const isInitialCategoryBrowse = useRef(!!initialCategory && !initialQuery);
   const inputRef = useRef<HTMLInputElement>(null);
   const searchContainerRef = useRef<HTMLFormElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -67,6 +79,16 @@ export default function SearchBar({ categoriasServicios = [], categoriasProducto
   }, []);
 
   useEffect(() => {
+    const newTerm = initialQuery || categoryName;
+    setSearchTerm(newTerm);
+    setSelectedCategory(initialCategory);
+  }, [initialQuery, initialCategory, categoryName]);
+
+  useEffect(() => {
+    if (isInitialCategoryBrowse.current) {
+      isInitialCategoryBrowse.current = false;
+      return;
+    }
     if (searchTerm.length >= 2) {
       search(searchTerm);
       setActiveDropdown('autocomplete');
@@ -179,6 +201,8 @@ export default function SearchBar({ categoriasServicios = [], categoriasProducto
   const handleSelectResult = (result: SearchResult) => {
     if (result.type === 'product' && result.slug) {
       window.location.href = `/producto/${result.slug}`;
+    } else if (result.type === 'service' && result.slug) {
+      window.location.href = `/servicios/${result.slug}`;
     } else if (result.type === 'category' && result.slug) {
       window.location.href = `/productos/${result.slug}`;
     }
@@ -388,17 +412,19 @@ export default function SearchBar({ categoriasServicios = [], categoriasProducto
                                 className="w-full px-3 py-2 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-[#182420] transition-colors rounded-lg"
                               >
                                 <div className="relative w-10 h-10 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 dark:bg-[var(--bg-muted)]">
-                                  <Image
-                                    src={result.imagen || '/img/no-image.png'}
+                                  <img
+                                    src={typeof result.imagen === 'string' && result.imagen.startsWith('http') ? result.imagen : '/img/no-image.png'}
                                     alt={result.titulo}
-                                    fill
-                                    sizes="40px"
-                                    className="object-cover"
+                                    className="w-full h-full object-cover"
                                   />
                                 </div>
                                 <div className="flex-1 min-w-0 text-left">
                                   <div className="flex items-center gap-2">
-                                    <Package className="w-4 h-4 text-sky-500 flex-shrink-0" />
+                                    {result.type === 'service' ? (
+                                      <Package className="w-4 h-4 text-purple-500 flex-shrink-0" />
+                                    ) : (
+                                      <Package className="w-4 h-4 text-sky-500 flex-shrink-0" />
+                                    )}
                                     <span className="text-sm font-medium text-gray-900 dark:text-[var(--text-primary)] truncate">
                                       {result.titulo}
                                     </span>

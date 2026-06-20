@@ -27,6 +27,9 @@ export interface Contract {
     storage_path: string;
     auditTrail?: AuditEvent[];
     expiryUrgency?: ExpiryUrgency;
+    phone?: string;
+    email?: string;
+    address?: string;
 }
 
 export interface ContractFilters {

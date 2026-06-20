@@ -204,8 +204,8 @@ export default function ProductModerationModal({
             }}
           >
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-sky-500/10 rounded-xl">
-                <Package className="w-5 h-5 text-sky-500" />
+              <div className="p-2 bg-cyan-500/10 rounded-xl">
+                <Package className="w-5 h-5 text-cyan-500" />
               </div>
               <div>
                 <h2 className="text-base font-black text-[var(--text-primary)] uppercase tracking-tight">
@@ -230,7 +230,7 @@ export default function ProductModerationModal({
             {/* Loading */}
             {loading && (
               <div className="flex flex-col items-center justify-center py-24 gap-3 text-[var(--text-secondary)]">
-                <Loader2 className="w-8 h-8 animate-spin text-sky-500" />
+                <Loader2 className="w-8 h-8 animate-spin text-cyan-500" />
                 <p className="text-sm font-bold uppercase tracking-widest">
                   Cargando producto…
                 </p>
@@ -267,7 +267,7 @@ export default function ProductModerationModal({
                       className="object-contain p-4"
                     />
                     {/* Badge tipo */}
-                    <span className="absolute top-3 left-3 px-2.5 py-1 text-[9px] font-black uppercase tracking-widest bg-sky-500 text-white rounded-full">
+                    <span className="absolute top-3 left-3 px-2.5 py-1 text-[9px] font-black uppercase tracking-widest bg-cyan-500 text-white rounded-full">
                       {detail.type}
                     </span>
                   </div>
@@ -363,7 +363,7 @@ export default function ProductModerationModal({
                       <p className="text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)] mb-1">
                         Precio
                       </p>
-                      <p className="text-lg font-black text-sky-500">
+                      <p className="text-lg font-black text-cyan-500">
                         {fmt(detail.price)}
                       </p>
                     </div>
@@ -578,7 +578,7 @@ export default function ProductModerationModal({
                               <td className="py-1.5 font-medium text-[var(--text-primary)]">
                                 {row.label}
                               </td>
-                              <td className="py-1.5 text-center text-sky-500 font-bold flex items-center justify-center gap-1">
+                              <td className="py-1.5 text-center text-cyan-500 font-bold flex items-center justify-center gap-1">
                                 <Flame className="w-2.5 h-2.5" />
                                 {row.value}
                               </td>
@@ -686,7 +686,7 @@ export default function ProductModerationModal({
                         : 'Notas de auditoría (opcional)…'
                     }
                     required={pendingAction === 'REJECTED'}
-                    className="w-full p-3 text-[12px] font-medium text-[var(--text-primary)] bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-sky-500/20 placeholder:text-[var(--text-secondary)]"
+                    className="w-full p-3 text-[12px] font-medium text-[var(--text-primary)] bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-cyan-500/20 placeholder:text-[var(--text-secondary)]"
                   />
 
                   <div className="flex gap-3">

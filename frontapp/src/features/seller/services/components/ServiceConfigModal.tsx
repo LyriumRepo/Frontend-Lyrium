@@ -15,6 +15,7 @@ import {
   WEEK_DAY_SHORT,
   ANTICIPACION_LABELS,
   calculateSessions,
+  serviceEtiquetasFromService,
 } from '@/features/seller/services/types';
 
 interface ServiceConfigModalProps {
@@ -382,8 +383,9 @@ export default function ServiceConfigModal({
   const currentlyAssignedIds = service?.especialistasAsignados ?? [];
   const serviceCatPrefix = [form.categoriaL1, form.categoriaL2].filter(Boolean).join(' > ');
   const assignableSpecialists = specialists.filter((s) => {
+    const alreadyAssigned = currentlyAssignedIds.includes(s.id);
     const categoryMatch = !serviceCatPrefix || s.categoria.startsWith(serviceCatPrefix);
-    return categoryMatch && (isAssignable(s) || currentlyAssignedIds.includes(s.id));
+    return alreadyAssigned || (categoryMatch && isAssignable(s));
   });
 
   // ── Sincronizar form ──────────────────────────────────────────────────────
@@ -398,7 +400,7 @@ export default function ServiceConfigModal({
         categoriaL3: catParts[2] ?? '',
         imagen: (service as any).imagen,
         descripcion: (service as any).descripcion ?? '',
-        caracteristicas: (service as any).caracteristicas ?? [],
+        caracteristicas: (service as any).caracteristicas ?? ((service as any).beneficios ? (service as any).beneficios.split('\n').filter((s: string) => s.trim()) : []),
         duracion: service.duracion,
         diasAtencion: service.diasAtencion,
         especialistasAsignados: service.especialistasAsignados.map((id) => {
@@ -417,7 +419,7 @@ export default function ServiceConfigModal({
         estado: service.estado,
         domicilio: service.domicilio,
         anticipacionReserva: service.anticipacionReserva,
-        etiquetas: (service as any).etiquetas ?? { nuevo: false },
+        etiquetas: serviceEtiquetasFromService(service),
       });
       setImagenPreview((service as any).imagen ?? null);
     } else {
@@ -646,18 +648,41 @@ export default function ServiceConfigModal({
     set('caracteristicas', form.caracteristicas.filter((_, i) => i !== idx));
   };
 
-  const nextStep = () => { if (validateStep(step)) setStep((s) => Math.min(s + 1, 3) as 1 | 2 | 3); };
+  const nextStep = () => {
+    const valid = validateStep(step);
+    if (valid) setStep((s) => Math.min(s + 1, 3) as 1 | 2 | 3);
+  };
   const prevStep = () => setStep((s) => Math.max(s - 1, 1) as 1 | 2 | 3);
 
   const handleSubmit = () => {
     if (!validateStep(3)) return;
     const categoria = [form.categoriaL1, form.categoriaL2, form.categoriaL3]
       .filter(Boolean).join(' > ');
+
+    let sticker: Service['sticker'] = null;
+    let discountPercentage: number | null = null;
+    if (form.etiquetas.descuento) {
+      sticker = 'descuento';
+      discountPercentage = form.etiquetas.descuento.valor;
+    } else if (form.etiquetas.oferta) {
+      sticker = 'oferta';
+      discountPercentage = form.etiquetas.oferta.valor;
+    } else if (form.etiquetas.nuevo) {
+      sticker = 'nuevo';
+    } else if (form.etiquetas.edicionLimitada) {
+      sticker = 'liquidacion';
+    }
+
     // Serializar SpecialistAssignment[] → number[] + persistir granularidad en especialistaHorarios
+    const { ...restForm } = form;
     const saveData = {
-      ...form,
+      ...restForm,
       categoria,
       imagen: form.imagen,
+      sticker,
+      discountPercentage,
+      etiquetas: form.etiquetas,    // ← persistir el objeto completo con dates + múltiples labels
+      beneficios: form.caracteristicas.join('\n'),
       especialistasAsignados: form.especialistasAsignados.map((a) => a.id),
       especialistaHorarios: form.especialistasAsignados.map<SpecialistHorario>((a) => ({
         id: a.id,
@@ -1426,15 +1451,15 @@ export default function ServiceConfigModal({
                         return (
                           <div key={bi} className="space-y-2">
                             <div className="flex items-center gap-2">
-                              <div className={`flex items-center gap-2 flex-1 bg-[var(--bg-primary)] rounded-xl border px-3 py-2 transition-colors
+                              <div className={`flex items-center gap-1 flex-1 bg-[var(--bg-primary)] rounded-xl border px-2 py-1.5 transition-colors
                               ${invalid ? 'border-rose-500/40' : 'border-[var(--border-subtle)]'}`}>
                                 <input type="time" value={block.inicio}
                                   onChange={(e) => updateBlock(dayEntry.dia, bi, 'inicio', e.target.value)}
-                                  className="bg-transparent text-sm font-semibold text-[var(--text-primary)] focus:outline-none" />
-                                <span className="text-[var(--text-secondary)]">→</span>
+                                  className="w-[6.5rem] bg-transparent text-sm font-semibold text-[var(--text-primary)] focus:outline-none [color-scheme:light] dark:[color-scheme:dark] cursor-text" />
+                                <span className="text-[var(--text-secondary)] flex-shrink-0 text-xs">→</span>
                                 <input type="time" value={block.fin}
                                   onChange={(e) => updateBlock(dayEntry.dia, bi, 'fin', e.target.value)}
-                                  className="bg-transparent text-sm font-semibold text-[var(--text-primary)] focus:outline-none" />
+                                  className="w-[6.5rem] bg-transparent text-sm font-semibold text-[var(--text-primary)] focus:outline-none [color-scheme:light] dark:[color-scheme:dark] cursor-text" />
                               </div>
                               {dayEntry.bloques.length > 1 && (
                                 <button type="button" onClick={() => removeBlock(dayEntry.dia, bi)}

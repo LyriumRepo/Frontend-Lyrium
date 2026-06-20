@@ -11,7 +11,6 @@
 
 import { ShoppingBag, Tag, Truck, ArrowRight, Loader2 } from 'lucide-react';
 import { useCheckoutStore } from '@/store/checkoutStore';
-import { useCheckoutSubmit } from '../../hooks/useCheckoutSubmit';
 
 interface Props {
   onContinue: () => void;
@@ -19,7 +18,7 @@ interface Props {
 
 export default function CartSummary({ onContinue }: Props) {
   const cartItems = useCheckoutStore((s) => s.cartItems);
-  const { isLoading } = useCheckoutSubmit();
+  const isLoading = useCheckoutStore((s) => s.cartLoading);
 
   const selectedItems = cartItems.filter((i) => i.selected);
 
@@ -33,36 +32,36 @@ export default function CartSummary({ onContinue }: Props) {
     0,
   );
   const shipping = subtotal > 0 ? 10.0 : 0;
-  const igv = subtotal * 0.16;
-  const total = subtotal + shipping;
+  const total = subtotal + shipping; // precios ya incluyen IGV por ley peruana
+  const igv = Math.round((total - total / 1.18) * 100) / 100; // IGV extraído (solo informativo)
 
   // ── Skeleton mientras carga ────────────────────────────────────────────────
   if (isLoading) {
     return (
-      <div className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900/40 p-6 space-y-4 animate-pulse">
-        <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-24" />
+      <div className="rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] p-6 space-y-4 animate-pulse">
+        <div className="h-5 bg-gray-200 dark:bg-[var(--bg-muted)] rounded w-24" />
         {[1, 2, 3].map((n) => (
           <div key={n} className="flex justify-between">
-            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-32" />
-            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-16" />
+            <div className="h-4 bg-gray-200 dark:bg-[var(--bg-muted)] rounded w-32" />
+            <div className="h-4 bg-gray-200 dark:bg-[var(--bg-muted)] rounded w-16" />
           </div>
         ))}
-        <div className="h-12 bg-gray-200 dark:bg-gray-700 rounded-xl mt-4" />
+        <div className="h-12 bg-gray-200 dark:bg-[var(--bg-muted)] rounded-xl mt-4" />
       </div>
     );
   }
 
   return (
-    <div className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900/40 p-6 space-y-5 sticky top-24">
+    <div className="rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] p-6 space-y-5 sticky top-24">
       {/* Título */}
-      <h2 className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
+      <h2 className="font-bold text-gray-900 dark:text-[var(--text-primary)] flex items-center gap-2">
         <ShoppingBag className="w-5 h-5 text-sky-500" />
         Resumen
       </h2>
 
       {/* Desglose */}
       <div className="space-y-3 text-sm">
-        <div className="flex justify-between text-gray-600 dark:text-gray-400">
+        <div className="flex justify-between text-gray-600 dark:text-[var(--text-secondary)]">
           <span>Total de artículos ({selectedItems.length})</span>
           <span className={discount > 0 ? 'line-through text-gray-400' : ''}>
             S/ {(subtotal + discount).toFixed(2)}
@@ -79,12 +78,12 @@ export default function CartSummary({ onContinue }: Props) {
           </div>
         )}
 
-        <div className="flex justify-between text-gray-600 dark:text-gray-400">
+        <div className="flex justify-between text-gray-600 dark:text-[var(--text-secondary)]">
           <span>Subtotal</span>
           <span>S/ {subtotal.toFixed(2)}</span>
         </div>
 
-        <div className="flex justify-between text-gray-600 dark:text-gray-400">
+        <div className="flex justify-between text-gray-600 dark:text-[var(--text-secondary)]">
           <span className="flex items-center gap-1">
             <Truck className="w-3.5 h-3.5" />
             Envío
@@ -98,18 +97,18 @@ export default function CartSummary({ onContinue }: Props) {
       </div>
 
       {/* Divisor */}
-      <div className="border-t border-gray-100 dark:border-gray-800" />
+      <div className="border-t border-gray-100 dark:border-[var(--border-subtle)]" />
 
       {/* Total */}
       <div className="flex justify-between font-bold text-base">
-        <span className="text-gray-900 dark:text-white">Total estimado</span>
+        <span className="text-gray-900 dark:text-[var(--text-primary)]">Total estimado</span>
         <span className="text-sky-600 dark:text-sky-400 text-lg">
           S/ {total.toFixed(2)}
         </span>
       </div>
 
       {/* Nota IGV */}
-      <p className="text-[11px] text-gray-400 dark:text-gray-500 -mt-2">
+      <p className="text-[11px] text-gray-400 dark:text-[var(--text-muted)] -mt-2">
         Incluye IGV: S/ {igv.toFixed(2)}
       </p>
 
@@ -118,7 +117,7 @@ export default function CartSummary({ onContinue }: Props) {
         onClick={onContinue}
         disabled={selectedItems.length === 0 || isLoading}
         className="w-full flex items-center justify-center gap-2 py-3.5 px-6 rounded-2xl
-          bg-sky-500 hover:bg-sky-600 disabled:bg-gray-200 disabled:dark:bg-gray-800
+          bg-sky-500 hover:bg-sky-600 disabled:bg-gray-200 disabled:dark:bg-[var(--bg-muted)]
           disabled:text-gray-400 disabled:cursor-not-allowed
           text-white font-semibold transition shadow-lg shadow-sky-200/50
           dark:shadow-none"
@@ -139,14 +138,14 @@ export default function CartSummary({ onContinue }: Props) {
       {/* Seguir comprando */}
       <a
         href="/tiendas"
-        className="block text-center text-sm text-gray-500 dark:text-gray-400
+        className="block text-center text-sm text-gray-500 dark:text-[var(--text-muted)]
           hover:text-sky-500 dark:hover:text-sky-400 transition"
       >
         ← Seguir comprando
       </a>
 
       {/* Badges de confianza */}
-      <div className="pt-2 space-y-1.5 border-t border-gray-100 dark:border-gray-800">
+      <div className="pt-2 space-y-1.5 border-t border-gray-100 dark:border-[var(--border-subtle)]">
         {[
           {
             icon: '🚀',
@@ -162,10 +161,10 @@ export default function CartSummary({ onContinue }: Props) {
           <div key={text} className="flex items-start gap-2">
             <span className="text-base leading-none mt-0.5">{icon}</span>
             <div>
-              <p className="text-xs font-medium text-gray-700 dark:text-gray-300">
+              <p className="text-xs font-medium text-gray-700 dark:text-[var(--text-primary)]">
                 {text}
               </p>
-              <p className="text-[10px] text-gray-400">{sub}</p>
+              <p className="text-[10px] text-gray-400 dark:text-[var(--text-muted)]">{sub}</p>
             </div>
           </div>
         ))}

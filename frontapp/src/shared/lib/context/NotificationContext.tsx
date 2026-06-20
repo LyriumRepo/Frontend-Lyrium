@@ -83,6 +83,78 @@ function mapApiNotificationToProactive(notification: Notification): ProactiveNot
             message = notification.subject ?? 'El estado de tu tienda ha cambiado';
             action = { type: 'store', label: 'Ir a tienda' };
             break;
+        case 'new_chat_message':
+        case 'NewChatMessageNotification':
+            level = 'INFO';
+            title = `💬 ${notification.sender_name ?? 'Nuevo mensaje'}`;
+            message = notification.message_preview ?? notification.subject ?? 'Tienes un nuevo mensaje';
+            if (notification.conversation_id) {
+                action = { type: 'chat', id: notification.conversation_id, label: 'Ver mensaje' };
+            }
+            break;
+        case 'invoice_requested':
+        case 'InvoiceRequestedNotification':
+            level = 'WARNING';
+            title = '📄 Solicitud de comprobante';
+            message = notification.subject ?? 'Un cliente solicitó un comprobante';
+            if (notification.order_id) {
+                action = { type: 'invoices', id: notification.order_id, label: 'Ver pedido' };
+            }
+            break;
+        case 'order_tracking':
+        case 'OrderStatusTrackingNotification':
+            level = 'INFO';
+            title = '📦 Pedido actualizado';
+            message = notification.subject ?? 'Tu pedido ha sido actualizado';
+            if (notification.order_id) {
+                action = { type: 'orders', id: notification.order_id, label: 'Ver pedido' };
+            }
+            break;
+        case 'order_delivered_seller':
+        case 'OrderDeliveredSellerNotification':
+            level = 'INFO';
+            title = '✅ Pedido entregado';
+            message = notification.subject ?? 'El cliente confirmó la recepción del pedido';
+            if (notification.order_id) {
+                action = { type: 'orders', id: notification.order_id, label: 'Ver pedido' };
+            }
+            break;
+        case 'booking_created':
+        case 'BookingCreatedNotification':
+            level = 'INFO';
+            title = '📅 Nueva reserva recibida';
+            message = notification.service_name
+                ? `Recibiste una reserva para ${notification.service_name}`
+                : (notification.subject ?? 'Tienes una nueva reserva');
+            action = { type: 'services', label: 'Ver reservas' };
+            break;
+        case 'booking_confirmed':
+        case 'BookingConfirmedNotification':
+            level = 'INFO';
+            title = '✅ Reserva confirmada';
+            message = notification.service_name
+                ? `Tu reserva para ${notification.service_name} fue confirmada`
+                : (notification.subject ?? 'Tu reserva fue confirmada');
+            action = { type: 'orders', label: 'Ver pedido' };
+            break;
+        case 'profile_request_created':
+        case 'ProfileRequestNotification':
+            level = 'WARNING';
+            title = '📋 Solicitud de perfil';
+            message = notification.subject ?? `${notification.seller_name ?? 'Un vendedor'} actualizó su perfil`;
+            if (notification.store_id) {
+                action = { type: 'store', id: notification.store_id, label: 'Ver tienda' };
+            }
+            break;
+        case 'store_profile_updated':
+        case 'StoreProfileUpdatedNotification':
+            level = 'INFO';
+            title = '✏️ Tienda actualizada';
+            message = notification.subject ?? `${notification.store_name ?? 'Una tienda'} actualizó su perfil`;
+            if (notification.store_id) {
+                action = { type: 'store', id: notification.store_id, label: 'Ver tienda' };
+            }
+            break;
         default:
             level = 'INFO';
             title = 'Notificación';
@@ -116,11 +188,17 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     const { user, isAuthenticated, loading: authLoading } = useAuth();
 
     const [notifications, setNotifications] = useState<ProactiveNotification[]>([]);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     const refreshNotifications = useCallback(async () => {
-        if (authLoading || !isAuthenticated) {
+        if (authLoading) {
+            // Auth aún no terminó — esperar sin cambiar loading
             setNotifications([]);
+            return;
+        }
+        if (!isAuthenticated) {
+            setNotifications([]);
+            setLoading(false);
             return;
         }
 
@@ -128,7 +206,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         try {
             const response = await notificationRepository.getAll();
             const mapped = response.data.map(mapApiNotificationToProactive);
-            setNotifications(mapped);
+            const unique = mapped.filter((n, i, arr) => arr.findIndex(x => x.id === n.id) === i);
+            setNotifications(unique);
         } catch (error) {
             console.error('Error fetching notifications:', error);
         } finally {
@@ -139,6 +218,13 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     useEffect(() => {
         refreshNotifications();
     }, [refreshNotifications]);
+
+    // Polling cada 30s como fallback cuando Reverb no está disponible
+    useEffect(() => {
+        if (!isAuthenticated) return;
+        const id = setInterval(() => refreshNotifications(), 30_000);
+        return () => clearInterval(id);
+    }, [isAuthenticated, refreshNotifications]);
 
     const unreadCount = notifications.filter(n => !n.read).length;
 
@@ -175,14 +261,17 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         } catch (e) { }
     }, []);
 
-    // Escucha notificaciones en tiempo real via WebSocket (reemplaza polling de 30s)
+    // WebSocket en tiempo real + polling como fallback
     useEcho<{ notification: Notification }>(
-        `user.${user?.id ?? 0}`,
+        user?.id ? `user.${user.id}` : 'user.__placeholder',
         'NotificationCreated',
         (event) => {
             if (!user) return;
             const mapped = mapApiNotificationToProactive(event.notification);
-            setNotifications(prev => [mapped, ...prev]);
+            setNotifications(prev => {
+                if (prev.some(n => n.id === mapped.id)) return prev;
+                return [mapped, ...prev];
+            });
             try {
                 const audio = new Audio('/sounds/notification.mp3');
                 audio.play().catch(() => { });

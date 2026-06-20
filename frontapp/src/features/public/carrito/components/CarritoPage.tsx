@@ -6,6 +6,8 @@ import {
   ShoppingBag,
   Sparkles,
   Info,
+  AlertCircle,
+  ShoppingCart,
 } from "lucide-react";
 import { useCarritoStore } from "@/store/carritoStore";
 import { useCarritoCatalog } from '../hooks/useCarritoCatalog';
@@ -19,7 +21,7 @@ import AuthRequiredModal from '@/shared/components/AuthRequiredModal';
 import { useAuthStore } from '@/shared/hooks/useAuthstore';
 
 export default function CarritoPage() {
-  const { isLoading, isError } = useCarritoCatalog();
+  const { isLoading, isError, refetch } = useCarritoCatalog();
   const { validate, showCheckoutModal, setShowCheckoutModal } = useAuthStore();
   useEffect(() => {
     validate();
@@ -60,6 +62,8 @@ export default function CarritoPage() {
 
   const handleDelete = (id: number | string) => removeFromCart(Number(id));
 
+  const cartCount = cartItems.reduce((a, i) => a + Number(i.cantidad ?? 0), 0);
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-[var(--bg-primary)]">
       <div className="max-w-7xl mx-auto px-4 py-10">
@@ -87,16 +91,45 @@ export default function CarritoPage() {
                 Busca, compara y añade al carrito en un clic.
               </p>
             </div>
+
+            <button
+              onClick={openCart}
+              className="relative self-start lg:self-center inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-sky-500 text-white font-medium hover:bg-sky-600 transition shadow-lg shadow-sky-200/50"
+            >
+              <ShoppingCart className="w-4 h-4" />
+              Ver carrito
+              {cartCount > 0 && (
+                <span className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-emerald-500 text-white text-[10px] font-black grid place-items-center border-2 border-white">
+                  {cartCount}
+                </span>
+              )}
+            </button>
           </div>
         </div>
 
         {isLoading && (
-          <div className="flex items-center justify-center py-20 gap-3 text-slate-500">
+          <div className="flex items-center justify-center py-20 gap-3 text-slate-500 dark:text-[var(--text-muted)]">
             <Loader2 className="w-6 h-6 animate-spin text-sky-500" />
             <span className="text-sm">Cargando productos...</span>
           </div>
         )}
 
+        {isError && !isLoading && (
+          <div className="flex flex-col items-center justify-center py-16 gap-4 text-center">
+            <div className="w-14 h-14 rounded-2xl bg-red-50 dark:bg-red-900/20 grid place-items-center">
+              <AlertCircle className="w-7 h-7 text-red-400" />
+            </div>
+            <p className="text-slate-700 dark:text-[var(--text-primary)] font-medium">
+              No se pudieron cargar los productos
+            </p>
+            <button
+              onClick={() => refetch()}
+              className="px-4 py-2 bg-sky-500 text-white text-sm font-bold rounded-xl hover:bg-sky-600 transition"
+            >
+              Reintentar
+            </button>
+          </div>
+        )}
         {!isLoading && !isError && (
           <ProductGrid onAdd={handleAdd} onView={handleView} />
         )}

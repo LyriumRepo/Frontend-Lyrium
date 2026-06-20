@@ -15,8 +15,7 @@ import {
   AuditEntry,
   ProductStatus,
 } from '@/features/admin/sellers/types';
-import { CVStatusBadge, CVCard } from './SharedCVUI';
-import BaseButton from '@/components/ui/BaseButton';
+import { CVCard } from './SharedCVUI';
 import {
   User,
   Mail,
@@ -26,7 +25,6 @@ import {
   Clock,
   Bell,
   Info,
-  Sliders,
   Package,
   Store,
   CheckCircle,
@@ -35,6 +33,7 @@ import {
   AlertTriangle,
   Users,
   Loader2,
+  Search,
 } from 'lucide-react';
 
 // ─── Tipos extendidos ─────────────────────────────────────────────────────────
@@ -57,9 +56,9 @@ export const StatsOverview: React.FC<{ stats: StatsProps }> = ({ stats }) => {
       // Usa totalSellers real del backend
       val: stats.totalSellers,
       icon: <Users className="w-6 h-6" />,
-      color: 'blue',
-      border: 'border-blue-500',
-      textColor: 'text-blue-500',
+      color: 'cyan',
+      border: 'border-cyan-500',
+      textColor: 'text-cyan-500',
     },
     {
       label: 'Activos',
@@ -149,7 +148,7 @@ export const NotificationList: React.FC<{
         </div>
         <button
           onClick={onMarkAllRead}
-          className="text-[10px] font-black uppercase tracking-widest text-sky-500 hover:bg-sky-500/10 px-6 py-3 rounded-2xl transition-all border border-sky-500/20 w-fit"
+          className="text-[10px] font-black uppercase tracking-widest text-cyan-500 hover:bg-cyan-500/10 px-6 py-3 rounded-2xl transition-all border border-cyan-500/20 w-fit"
         >
           Marcar todas como leídas
         </button>
@@ -166,7 +165,7 @@ export const NotificationList: React.FC<{
             }`}
           >
             <div
-              className={`p-4 rounded-2xl ${impactMap[n.tipo] ?? 'bg-sky-500'} text-white shadow-xl flex-shrink-0`}
+              className={`p-4 rounded-2xl ${impactMap[n.tipo] ?? 'bg-cyan-500'} text-white shadow-xl flex-shrink-0`}
             >
               {getIcon(n.tipo)}
             </div>
@@ -176,7 +175,7 @@ export const NotificationList: React.FC<{
                   {n.entidad_relacionada}
                 </p>
                 <span
-                  className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest ${impactMap[n.tipo] ?? 'bg-sky-500'} text-white`}
+                  className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest ${impactMap[n.tipo] ?? 'bg-cyan-500'} text-white`}
                 >
                   {n.tipo}
                 </span>
@@ -189,13 +188,13 @@ export const NotificationList: React.FC<{
                   <Clock className="w-3 h-3" /> {n.timestamp}
                 </span>
                 <span className="w-1 h-1 rounded-full bg-[var(--text-secondary)]" />
-                <span className="text-[10px] font-black text-sky-500 uppercase tracking-widest italic">
+                <span className="text-[10px] font-black text-cyan-500 uppercase tracking-widest italic">
                   {n.modulo_origen}
                 </span>
               </div>
             </div>
             {n.estado_revision === 'nueva' && (
-              <div className="w-3 h-3 rounded-full bg-sky-500 mt-2 animate-pulse shadow-lg shadow-sky-500/20 flex-shrink-0" />
+              <div className="w-3 h-3 rounded-full bg-cyan-500 mt-2 animate-pulse shadow-lg shadow-cyan-500/20 flex-shrink-0" />
             )}
           </div>
         ))}
@@ -226,10 +225,40 @@ export const ProductModeration: React.FC<ProductModerationProps> = ({
   isLoading = false,
 }) => {
   const [busyId, setBusyId] = useState<number | null>(null);
+  const [search, setSearch] = useState('');
+  const [storeFilter, setStoreFilter] = useState('');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
 
   const pending = products.filter(
     (p) => p.status === 'en_espera' || p.status === 'PENDING',
   );
+
+  // Extraer tiendas únicas para el filtro
+  const stores = React.useMemo(() => {
+    const map = new Map<string, string>();
+    pending.forEach((p) => {
+      if (p.seller && p.sellerId) map.set(p.seller, String(p.sellerId));
+    });
+    return Array.from(map.entries()).sort((a, b) =>
+      a[0].localeCompare(b[0]),
+    );
+  }, [pending]);
+
+  // Aplicar filtros
+  const filtered = React.useMemo(() => {
+    return pending.filter((p) => {
+      if (
+        search &&
+        !p.name.toLowerCase().includes(search.toLowerCase())
+      )
+        return false;
+      if (storeFilter && p.seller !== storeFilter) return false;
+      if (dateFrom && p.date && p.date < dateFrom) return false;
+      if (dateTo && p.date && p.date > dateTo) return false;
+      return true;
+    });
+  }, [pending, search, storeFilter, dateFrom, dateTo]);
 
   const handleAction = async (product: Product, suggest: ProductStatus) => {
     setBusyId(product.id);
@@ -263,146 +292,223 @@ export const ProductModeration: React.FC<ProductModerationProps> = ({
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-      {pending.map((p) => {
-        const isBusy = busyId === p.id;
-        // Heurística: si tiene rejection_reason previo → edición re-enviada
-        const isEdition = !!p.rejection_reason;
-
-        return (
-          <CVCard
-            key={p.id}
-            className={`group border-[var(--border-subtle)] hover:border-sky-500 transition-all shadow-sm hover:shadow-2xl overflow-hidden ${isBusy ? 'opacity-60 pointer-events-none' : ''}`}
+    <div className="space-y-6">
+      {/* Filtros */}
+      <div className="flex flex-wrap items-center gap-4 p-5 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-[2rem]">
+        <div className="flex items-center gap-2 flex-1 min-w-[200px]">
+          <Search className="w-4 h-4 text-[var(--text-secondary)]" />
+          <input
+            type="text"
+            placeholder="Buscar producto..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="flex-1 bg-transparent border-none text-sm font-bold text-[var(--text-primary)] outline-none placeholder:text-[var(--text-secondary)]"
+          />
+        </div>
+        <div className="w-px h-6 bg-[var(--border-subtle)]" />
+        <select
+          value={storeFilter}
+          onChange={(e) => setStoreFilter(e.target.value)}
+          className="px-4 py-2 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-xl text-[11px] font-black text-[var(--text-primary)] outline-none cursor-pointer uppercase tracking-widest"
+        >
+          <option value="">Todas las tiendas</option>
+          {stores.map(([name]) => (
+            <option key={name} value={name}>
+              {name}
+            </option>
+          ))}
+        </select>
+        <div className="w-px h-6 bg-[var(--border-subtle)]" />
+        <div className="flex items-center gap-3">
+          <span className="text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest">
+            Desde
+          </span>
+          <input
+            type="date"
+            value={dateFrom}
+            onChange={(e) => setDateFrom(e.target.value)}
+            className="px-3 py-2 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-xl text-[11px] font-bold text-[var(--text-primary)] outline-none"
+          />
+          <span className="text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest">
+            Hasta
+          </span>
+          <input
+            type="date"
+            value={dateTo}
+            onChange={(e) => setDateTo(e.target.value)}
+            className="px-3 py-2 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-xl text-[11px] font-bold text-[var(--text-primary)] outline-none"
+          />
+        </div>
+        {(search || storeFilter || dateFrom || dateTo) && (
+          <button
+            onClick={() => {
+              setSearch('');
+              setStoreFilter('');
+              setDateFrom('');
+              setDateTo('');
+            }}
+            className="px-4 py-2 text-[10px] font-black text-rose-500 uppercase tracking-widest hover:bg-rose-500/10 rounded-xl transition-all"
           >
-            {/* Imagen */}
-            <div className="h-64 bg-[var(--bg-secondary)] flex items-center justify-center relative overflow-hidden">
-              {p.imageUrl ? (
-                <Image
-                  src={p.imageUrl}
-                  alt={p.name}
-                  fill
-                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  className="object-cover group-hover:scale-110 transition-transform duration-700"
-                />
-              ) : (
-                <Package className="w-16 h-16 text-[var(--text-secondary)] group-hover:scale-110 transition-transform duration-500" />
-              )}
+            Limpiar
+          </button>
+        )}
+        <div className="text-[10px] font-bold text-[var(--text-secondary)] ml-auto">
+          {filtered.length} de {pending.length} productos
+        </div>
+      </div>
 
-              {/* Badges RF-03 */}
-              <div className="absolute top-4 left-4 flex flex-col gap-2">
-                <div
-                  className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-xl flex items-center gap-2 ${
-                    isEdition
-                      ? 'bg-orange-500 text-white shadow-orange-500/20'
-                      : 'bg-emerald-500 text-white shadow-emerald-500/20'
+      {/* Tabla */}
+      <div className="overflow-x-auto rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--bg-card)]">
+        <table className="w-full text-left">
+          <thead>
+            <tr className="border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)]/50">
+              <th className="p-4 text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-[0.2em] w-16">
+                Imagen
+              </th>
+              <th className="p-4 text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-[0.2em]">
+                Producto
+              </th>
+              <th className="p-4 text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-[0.2em]">
+                Tienda
+              </th>
+              <th className="p-4 text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-[0.2em]">
+                Categoría
+              </th>
+              <th className="p-4 text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-[0.2em] text-right">
+                Precio
+              </th>
+              <th className="p-4 text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-[0.2em]">
+                Fecha
+              </th>
+              <th className="p-4 text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-[0.2em]">
+                Acciones
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map((p) => {
+              const isBusy = busyId === p.id;
+              const isEdition = !!p.rejection_reason;
+              return (
+                <tr
+                  key={p.id}
+                  className={`border-b border-[var(--border-subtle)] last:border-none hover:bg-[var(--bg-secondary)]/30 transition-colors ${
+                    isBusy ? 'opacity-60 pointer-events-none' : ''
                   }`}
                 >
-                  {isEdition ? (
-                    <>
-                      <Sliders className="w-3 h-3" /> Re-enviado
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle className="w-3 h-3" /> Nuevo Registro
-                    </>
-                  )}
-                </div>
-                <div className="px-4 py-2 bg-[var(--bg-card)]/90 backdrop-blur-md text-[var(--text-primary)] text-[10px] font-black rounded-xl shadow-lg uppercase tracking-widest border border-[var(--border-subtle)] flex items-center gap-2">
-                  <Clock className="w-3 h-3" /> Pendiente
-                </div>
-              </div>
+                  {/* Imagen */}
+                  <td className="p-4">
+                    <div className="w-14 h-14 rounded-xl bg-[var(--bg-secondary)] overflow-hidden flex items-center justify-center">
+                      {p.imageUrl ? (
+                        <Image
+                          src={p.imageUrl}
+                          alt={p.name}
+                          width={56}
+                          height={56}
+                          className="object-cover w-full h-full"
+                        />
+                      ) : (
+                        <Package className="w-6 h-6 text-[var(--text-secondary)]" />
+                      )}
+                    </div>
+                  </td>
 
-              {/* Precio en hover */}
-              <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/60 to-transparent text-white opacity-0 group-hover:opacity-100 transition-opacity">
-                <p className="text-[10px] font-black uppercase tracking-widest leading-none mb-1 opacity-70">
-                  Precio Propuesto
-                </p>
-                <p className="text-2xl font-black italic tracking-tighter">
-                  S/{' '}
-                  {p.price.toLocaleString('es-PE', {
-                    minimumFractionDigits: 2,
-                  })}
-                </p>
-              </div>
+                  {/* Nombre */}
+                  <td className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div>
+                        <p className="font-black text-[var(--text-primary)] text-sm leading-tight">
+                          {p.name}
+                        </p>
+                        <p className="text-[9px] font-mono text-[var(--text-secondary)] mt-0.5">
+                          ID #{p.id}
+                        </p>
+                      </div>
+                      <span
+                        className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest ${
+                          isEdition
+                            ? 'bg-orange-500/10 text-orange-500'
+                            : 'bg-emerald-500/10 text-emerald-500'
+                        }`}
+                      >
+                        {isEdition ? 'Re-enviado' : 'Nuevo'}
+                      </span>
+                    </div>
+                    {/* Rechazo anterior inline */}
+                    {p.rejection_reason && (
+                      <div className="mt-2 flex items-start gap-1.5 text-[10px] text-amber-500">
+                        <AlertTriangle className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                        <span className="line-clamp-1">
+                          {p.rejection_reason}
+                        </span>
+                      </div>
+                    )}
+                  </td>
 
-              {/* Overlay de carga */}
-              {isBusy && (
-                <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                  <Loader2 className="w-8 h-8 text-white animate-spin" />
-                </div>
-              )}
-            </div>
+                  {/* Tienda */}
+                  <td className="p-4">
+                    <div className="flex items-center gap-2">
+                      <Store className="w-3.5 h-3.5 text-cyan-500" />
+                      <span className="text-[11px] font-bold text-[var(--text-primary)]">
+                        {p.seller}
+                      </span>
+                    </div>
+                  </td>
 
-            {/* Contenido */}
-            <div className="p-8">
-              <h3 className="font-black text-[var(--text-primary)] text-lg mb-1 tracking-tight truncate uppercase leading-tight">
-                {p.name}
-              </h3>
+                  {/* Categoría */}
+                  <td className="p-4">
+                    <span className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest">
+                      {p.category}
+                    </span>
+                  </td>
 
-              {/* ID para referencia de auditoría */}
-              <p className="text-[9px] font-mono text-[var(--text-secondary)] mb-4">
-                ID #{p.id} · {p.date ?? '—'}
-              </p>
+                  {/* Precio */}
+                  <td className="p-4 text-right">
+                    <span className="font-black text-[var(--text-primary)] text-sm">
+                      S/ {p.price.toFixed(2)}
+                    </span>
+                  </td>
 
-              <div className="flex flex-col gap-1.5 mb-6">
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-lg bg-sky-500/10 flex items-center justify-center flex-shrink-0">
-                    <Store className="w-3.5 h-3.5 text-sky-500" />
-                  </div>
-                  <p className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest truncate">
-                    {p.seller}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-lg bg-[var(--bg-secondary)] flex items-center justify-center flex-shrink-0">
-                    <Package className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
-                  </div>
-                  <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest">
-                    {p.category}
-                  </p>
-                </div>
-              </div>
+                  {/* Fecha */}
+                  <td className="p-4">
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-3 h-3 text-[var(--text-secondary)]" />
+                      <span className="text-[10px] font-bold text-[var(--text-secondary)]">
+                        {p.date ?? '—'}
+                      </span>
+                    </div>
+                  </td>
 
-              {/* Motivo de rechazo anterior (si es re-envío) */}
-              {p.rejection_reason && (
-                <div className="mb-6 p-3 bg-amber-400/10 border border-amber-400/20 rounded-2xl">
-                  <p className="text-[9px] font-black text-amber-400 uppercase tracking-widest mb-1 flex items-center gap-1">
-                    <AlertTriangle className="w-3 h-3" />
-                    Rechazo anterior
-                  </p>
-                  <p className="text-[10px] text-[var(--text-secondary)] leading-relaxed line-clamp-2">
-                    {p.rejection_reason}
-                  </p>
-                </div>
-              )}
-
-              {/* Acciones */}
-              <div className="flex gap-4">
-                <BaseButton
-                  onClick={() => handleAction(p, 'APPROVED')}
-                  variant="secondary"
-                  leftIcon="CheckCircle"
-                  size="md"
-                  fullWidth
-                  disabled={isBusy}
-                >
-                  {isBusy ? 'Procesando...' : 'Aprobar'}
-                </BaseButton>
-                <BaseButton
-                  onClick={() => handleAction(p, 'REJECTED')}
-                  variant="danger"
-                  leftIcon="XCircle"
-                  size="md"
-                  fullWidth
-                  disabled={isBusy}
-                >
-                  {isBusy ? 'Procesando...' : 'Rechazar'}
-                </BaseButton>
-              </div>
-            </div>
-          </CVCard>
-        );
-      })}
+                  {/* Acciones */}
+                  <td className="p-4">
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleAction(p, 'APPROVED')}
+                        disabled={isBusy}
+                        className="px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-50 flex items-center gap-1.5"
+                      >
+                        <CheckCircle className="w-3.5 h-3.5" />
+                        {isBusy ? '...' : 'Aprobar'}
+                      </button>
+                      <button
+                        onClick={() => handleAction(p, 'REJECTED')}
+                        disabled={isBusy}
+                        className="px-4 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-50 flex items-center gap-1.5"
+                      >
+                        <XCircle className="w-3.5 h-3.5" />
+                        {isBusy ? '...' : 'Rechazar'}
+                      </button>
+                    </div>
+                    {isBusy && (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-cyan-500 mt-1" />
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
@@ -421,7 +527,7 @@ export const AuditLog: React.FC<{ entries: AuditEntry[] }> = ({ entries }) => {
             RF-04: Trazabilidad Absoluta (Log de Transacciones)
           </p>
         </div>
-        <div className="p-3 bg-sky-500/10 text-sky-500 rounded-xl">
+        <div className="p-3 bg-cyan-500/10 text-cyan-500 rounded-xl">
           <Terminal className="w-5 h-5" />
         </div>
       </div>
@@ -457,7 +563,7 @@ export const AuditLog: React.FC<{ entries: AuditEntry[] }> = ({ entries }) => {
                   {a.fecha}
                 </td>
                 <td className="px-8 py-6">
-                  <span className="text-xs font-black text-[var(--text-primary)] uppercase tracking-tighter group-hover:text-sky-500 transition-colors">
+                  <span className="text-xs font-black text-[var(--text-primary)] uppercase tracking-tighter group-hover:text-cyan-500 transition-colors">
                     {a.entidad}
                   </span>
                 </td>
@@ -480,7 +586,7 @@ export const AuditLog: React.FC<{ entries: AuditEntry[] }> = ({ entries }) => {
                   </div>
                 </td>
                 <td className="px-8 py-6 text-right">
-                  <span className="text-[10px] font-black text-sky-500 uppercase tracking-widest bg-sky-500/10 px-3 py-1.5 rounded-lg border border-sky-500/20 whitespace-nowrap">
+                  <span className="text-[10px] font-black text-cyan-500 uppercase tracking-widest bg-cyan-500/10 px-3 py-1.5 rounded-lg border border-cyan-500/20 whitespace-nowrap">
                     {a.usuario}
                   </span>
                 </td>

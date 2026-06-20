@@ -17,7 +17,7 @@ export const adminNavigation: PanelNavigation = [
         items: [
             {
                 id: 'helpdesk',
-                label: 'Mesa de Ayuda',
+                label: 'Soporte Lyrium',
                 href: '/admin/helpdesk',
                 icon: 'HelpCircle',
             },
@@ -49,7 +49,7 @@ export const adminNavigation: PanelNavigation = [
     {
         title: 'Operaciones',
         items: [
-   
+
             {
                 id: 'operations',
                 label: 'Gestión Operativa',
@@ -59,20 +59,24 @@ export const adminNavigation: PanelNavigation = [
         ],
     },
     {
+        title: 'Seguridad',
+        items: [
+            {
+                id: 'security',
+                label: 'Seguridad',
+                href: '/admin/security',
+                icon: 'Shield',
+            },
+        ],
+    },
+    {
         title: 'Gestión',
         items: [
-       
             {
                 id: 'categories',
                 label: 'Gestión de Categorías',
                 href: '/admin/categories',
                 icon: 'FolderTree',
-            },
-            {
-                id: 'inventory',
-                label: 'Gestión de Inventario',
-                href: '/admin/inventory',
-                icon: 'Package',
             },
             {
                 id: 'reviews',
@@ -87,10 +91,10 @@ export const adminNavigation: PanelNavigation = [
                 icon: 'Sparkles',
             },
             {
-                id: 'seguridad',
-                label: 'Seguridad',
-                href: '/admin/security',
-                icon: 'Shield',
+                id: 'glossary',
+                label: 'Glosario',
+                href: '/admin/glossary',
+                icon: 'BookOpen',
             },
         ],
     },

@@ -117,8 +117,9 @@ export async function silentPost(endpoint: string, data: unknown): Promise<void>
 
 // System Config - Colores del sistema
 export const getSystemColors = async (): Promise<Record<string, string>> => {
-  const response = await apiGet<{ success: boolean; data: Record<string, string> }>('/config/colors');
-  return response.success ? response.data : {};
+  const response = await apiGet<any>('/config/colors');
+  const data = response?.data;
+  return (data && typeof data === 'object' && !Array.isArray(data)) ? data : {};
 };
 
 export const updateSystemColors = async (colors: Record<string, string>): Promise<boolean> => {
@@ -158,14 +159,25 @@ export const updatePlanIcon = async (planId: number, icono: string): Promise<boo
   return response.success;
 };
 
-export const savePlan = async (planData: any): Promise<boolean> => {
-  const response = await apiPost<{ success: boolean; data?: any }>(`/admin/plans`, planData);
-  return response.success;
+export const savePlan = async (planData: any): Promise<{ success: boolean; data?: any }> => {
+  return apiPost<{ success: boolean; data?: any }>(`/admin/plans`, planData);
 };
 
 export const updatePlan = async (planId: number, planData: any): Promise<boolean> => {
-  const response = await apiPost<{ success: boolean }>(`/admin/plans/${planId}`, planData);
+  const response = await apiCall<{ success: boolean }>(`/admin/plans/${planId}`, {
+    method: 'PUT',
+    body: JSON.stringify(planData),
+  });
   return response.success;
+};
+
+export const getPaymentHistory = async (filter: string): Promise<{ vendedores: any[]; totales: any }> => {
+  const params = filter !== 'all' ? `?status=${filter}` : '';
+  const response = await apiGet<{ success: boolean; data?: any[]; totales?: any }>(`/admin/plan-payments${params}`);
+  return {
+    vendedores: Array.isArray((response as any).data) ? (response as any).data : [],
+    totales: (response as any).totales ?? { total_monto: 0, pagos_exitosos: 0, pagos_fallidos: 0, pagos_pending: 0 },
+  };
 };
 
 export { API_BASE };

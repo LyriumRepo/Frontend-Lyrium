@@ -19,20 +19,33 @@ const LARAVEL_API_URL =
   process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://localhost:8000/api';
 
 /**
- * Genera de forma automatizada las cabeceras comunes inyectando el Laravel Token de sesión
+ * Obtiene las cabeceras de autenticación desde /api/auth-token
+ * (lee la cookie HttpOnly laravel_token en el servidor y devuelve el Bearer)
  */
-function getHeaders(): Record<string, string> {
-  const token = getToken();
-  const headers: Record<string, string> = {
+async function getAuthHeaders(): Promise<Record<string, string>> {
+  const base: Record<string, string> = {
     'Content-Type': 'application/json',
     Accept: 'application/json',
   };
 
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
+  try {
+    const res = await fetch('/api/auth-token');
+    if (res.ok) {
+      const { token } = await res.json();
+      if (token) {
+        base['Authorization'] = `Bearer ${token}`;
+        return base;
+      }
+    }
+  } catch {
+    // /api/auth-token no respondió — continúa al fallback
   }
 
-  return headers;
+  // Fallback: leer token de localStorage / cookie (getToken ya importado)
+  const localToken = getToken();
+  if (localToken) base['Authorization'] = `Bearer ${localToken}`;
+
+  return base;
 }
 
 interface ServiceListResponse {
@@ -53,9 +66,9 @@ export const serviceRepository = {
   // ── SERVICES ENDPOINTS ──────────────────────────────────────────────────────
 
   async listServices(): Promise<Service[]> {
-    const response = await fetch(`${LARAVEL_API_URL}/services/me`, {
+    const response = await fetch(`${LARAVEL_API_URL}/seller/services`, {
       method: 'GET',
-      headers: getHeaders(),
+      headers: await getAuthHeaders(),
     });
 
     if (!response.ok)
@@ -72,7 +85,7 @@ export const serviceRepository = {
     const backendPayload = adaptServiceToBackend(serviceData);
     const response = await fetch(`${LARAVEL_API_URL}/services`, {
       method: 'POST',
-      headers: getHeaders(),
+      headers: await getAuthHeaders(),
       body: JSON.stringify(backendPayload),
     });
 
@@ -97,7 +110,7 @@ export const serviceRepository = {
     const backendPayload = adaptServiceToBackend(serviceData);
     const response = await fetch(`${LARAVEL_API_URL}/services/${id}`, {
       method: 'PUT',
-      headers: getHeaders(),
+      headers: await getAuthHeaders(),
       body: JSON.stringify(backendPayload),
     });
 
@@ -118,7 +131,7 @@ export const serviceRepository = {
   async deleteService(id: number): Promise<void> {
     const response = await fetch(`${LARAVEL_API_URL}/services/${id}`, {
       method: 'DELETE',
-      headers: getHeaders(),
+      headers: await getAuthHeaders(),
     });
 
     if (!response.ok) throw new Error('No se pudo eliminar el servicio');
@@ -129,7 +142,7 @@ export const serviceRepository = {
   async listSpecialists(): Promise<Specialist[]> {
     const response = await fetch(`${LARAVEL_API_URL}/stores/me/specialists`, {
       method: 'GET',
-      headers: getHeaders(),
+      headers: await getAuthHeaders(),
     });
 
     if (!response.ok)
@@ -154,7 +167,7 @@ export const serviceRepository = {
     const backendPayload = adaptSpecialistToBackend(specData);
     const response = await fetch(`${LARAVEL_API_URL}/stores/me/specialists`, {
       method: 'POST',
-      headers: getHeaders(),
+      headers: await getAuthHeaders(),
       body: JSON.stringify(backendPayload),
     });
 
@@ -177,11 +190,14 @@ export const serviceRepository = {
     specData: Partial<Specialist>,
   ): Promise<Specialist> {
     const backendPayload = adaptSpecialistToBackend(specData);
+    delete backendPayload.email;
+    delete backendPayload.document_number;
+    delete backendPayload.document_type;
     const response = await fetch(
       `${LARAVEL_API_URL}/stores/me/specialists/${id}`,
       {
         method: 'PUT',
-        headers: getHeaders(),
+        headers: await getAuthHeaders(),
         body: JSON.stringify(backendPayload),
       },
     );
@@ -205,7 +221,7 @@ export const serviceRepository = {
       `${LARAVEL_API_URL}/stores/me/specialists/${id}`,
       {
         method: 'DELETE',
-        headers: getHeaders(),
+        headers: await getAuthHeaders(),
       },
     );
 
@@ -217,7 +233,7 @@ export const serviceRepository = {
   async listAppointments(): Promise<Appointment[]> {
     const response = await fetch(`${LARAVEL_API_URL}/bookings/seller`, {
       method: 'GET',
-      headers: getHeaders(),
+      headers: await getAuthHeaders(),
     });
 
     if (!response.ok) throw new Error('No se pudo cargar la agenda operativa');
@@ -239,20 +255,109 @@ export const serviceRepository = {
 
   async rescheduleAppointment(
     appointmentId: number,
-    newSession: { inicio: string; fin: string },
+    newDate: string,
+    newStartTime: string,
+    newEndTime: string,
+    token: string,
   ): Promise<void> {
     const response = await fetch(
-      `${LARAVEL_API_URL}/bookings/${appointmentId}/notes`,
+      `${LARAVEL_API_URL}/bookings/${appointmentId}/reschedule`,
       {
-        method: 'PUT',
-        headers: getHeaders(),
+        method: 'POST',
+        headers: await getAuthHeaders(),
         body: JSON.stringify({
-          notes: `Reprogramado operativamente a las: ${newSession.inicio} - ${newSession.fin}`,
+          date: newDate,
+          start_time: newStartTime,
+          end_time: newEndTime,
+          token,
         }),
       },
     );
 
     if (!response.ok)
-      throw new Error('No se pudo actualizar el itinerario de la cita');
+      throw new Error('No se pudo reprogramar la cita');
+  },
+
+  async getServiceById(id: number): Promise<Service | null> {
+    try {
+      const response = await fetch(`${LARAVEL_API_URL}/seller/services/${id}`, {
+        method: 'GET',
+        headers: await getAuthHeaders(),
+      });
+      if (!response.ok) return null;
+      const data = await response.json();
+      const rawService: LaravelService = data.data || data;
+      return adaptServiceToFrontend(rawService);
+    } catch {
+      return null;
+    }
+  },
+
+  async publishService(id: number, publish: boolean): Promise<Service> {
+    const response = await fetch(`${LARAVEL_API_URL}/services/${id}`, {
+      method: 'PUT',
+      headers: await getAuthHeaders(),
+      body: JSON.stringify({ status: publish ? 'active' : 'inactive' }),
+    });
+    if (!response.ok) {
+      const err = (await response.json().catch(() => ({}))) as { message?: string };
+      throw new Error(err.message || 'Error al cambiar estado del servicio');
+    }
+    const data = (await response.json()) as LaravelService | { service: LaravelService };
+    const rawService = 'service' in data ? data.service : data;
+    return adaptServiceToFrontend(rawService);
+  },
+
+  async uploadServiceImage(id: number, file: File): Promise<string> {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await fetch(
+      `${LARAVEL_API_URL}/services/${id}/media`,
+      {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          Authorization: (await getAuthHeaders())['Authorization'] ?? '',
+        },
+        body: formData,
+      },
+    );
+    if (!response.ok) throw new Error('Error al subir la imagen');
+    const data = await response.json();
+    return data.url ?? data.data?.url ?? '';
+  },
+
+  async cancelAppointment(id: number): Promise<void> {
+    const response = await fetch(`${LARAVEL_API_URL}/bookings/${id}/cancel`, {
+      method: 'PUT',
+      headers: await getAuthHeaders(),
+    });
+    if (!response.ok) throw new Error('No se pudo cancelar la cita');
+  },
+
+  async confirmAppointment(id: number): Promise<void> {
+    const response = await fetch(`${LARAVEL_API_URL}/bookings/${id}/confirm`, {
+      method: 'PUT',
+      headers: await getAuthHeaders(),
+    });
+    if (!response.ok) throw new Error('No se pudo confirmar la cita');
+  },
+
+  async markNoShowAppointment(id: number, reason?: string): Promise<void> {
+    const response = await fetch(`${LARAVEL_API_URL}/bookings/${id}/no-show`, {
+      method: 'PUT',
+      headers: await getAuthHeaders(),
+      body: JSON.stringify({ reason }),
+    });
+    if (!response.ok) throw new Error('No se pudo marcar como no-show');
+  },
+
+  async updateServiceNotes(id: number, notes: string): Promise<void> {
+    const response = await fetch(`${LARAVEL_API_URL}/bookings/${id}/notes`, {
+      method: 'PUT',
+      headers: await getAuthHeaders(),
+      body: JSON.stringify({ notes }),
+    });
+    if (!response.ok) throw new Error('No se pudieron actualizar las notas');
   },
 };

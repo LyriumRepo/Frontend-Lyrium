@@ -1,178 +1,194 @@
-import { useState, useCallback } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEcho } from '@laravel/echo-react';
 import { SellerTicket, SellerTicketMessage, SellerTicketFilters } from '../types';
+import { ticketApi } from '@/lib/api/ticketRepository';
+import type { Ticket, TicketMessage, TicketPriority } from '@/modules/helpdesk/types';
 
-const mockTickets: SellerTicket[] = [
-    {
-        id: '1',
-        ticketNumber: 'TKT-001',
-        subject: 'Problema con la publicación de producto',
-        description: 'No puedo subir imágenes a mi listing',
-        category: 'tecnico',
-        status: 'open',
-        createdAt: '2025-03-10T09:00:00',
-        updatedAt: '2025-03-11T10:30:00',
-        messages: [
-            {
-                id: 'm1',
-                ticketId: '1',
-                senderId: 'seller-1',
-                senderName: 'Yo',
-                senderType: 'seller',
-                content: 'Hola, tengo problemas para subir imágenes a mis productos. ¿Pueden ayudarme?',
-                createdAt: '2025-03-10T09:00:00'
-            },
-            {
-                id: 'm2',
-                ticketId: '1',
-                senderId: 'agent-1',
-                senderName: 'Soporte Lyrium',
-                senderType: 'agent',
-                content: 'Hola! Lamentamos el inconveniente. Estamos revisando el problema con las imágenes. Te contactamos en breve.',
-                createdAt: '2025-03-10T10:30:00'
-            }
-        ]
-    },
-    {
-        id: '2',
-        ticketNumber: 'TKT-002',
-        subject: 'Consulta sobre comisiones',
-        description: 'Quiero entender el detalle de las comisiones aplicadas',
-        category: 'informacion',
-        status: 'resolved',
-        createdAt: '2025-03-05T14:00:00',
-        updatedAt: '2025-03-06T09:00:00',
-        resolvedAt: '2025-03-06T09:00:00',
-        messages: [
-            {
-                id: 'm3',
-                ticketId: '2',
-                senderId: 'seller-1',
-                senderName: 'Yo',
-                senderType: 'seller',
-                content: '¿Pueden explicarme cómo se calculan las comisiones por venta?',
-                createdAt: '2025-03-05T14:00:00'
-            },
-            {
-                id: 'm4',
-                ticketId: '2',
-                senderId: 'agent-1',
-                senderName: 'Soporte Lyrium',
-                senderType: 'agent',
-                content: 'La comisión estándar es del 8% sobre el precio de venta. Puedes ver el detalle completo en la sección de facturación de tu panel.',
-                createdAt: '2025-03-05T16:00:00'
-            }
-        ]
-    }
-];
+type CreateData = {
+  subject: string;
+  description: string;
+  category: SellerTicket['category'];
+  priority: TicketPriority;
+};
+
+function toSellerTicket(t: Ticket): SellerTicket {
+  return {
+    id: String(t.id),
+    ticketNumber: t.numero || t.id_display,
+    subject: t.titulo,
+    description: t.descripcion,
+    category: (t.categoria || t.type || 'info') as SellerTicket['category'],
+    priority: (t.prioridad || 'media') as SellerTicket['priority'],
+    status: mapStatus(t.status || t.estado || 'abierto'),
+    createdAt: t.fecha_creacion || t.created_at || '',
+    updatedAt: t.fecha_actualizacion || t.updated_at || '',
+    messages: (t.mensajes || []).map(toSellerMessage),
+  };
+}
+
+function toSellerMessage(m: TicketMessage): SellerTicketMessage {
+  const isAgent = m.role?.toLowerCase() === 'admin';
+  return {
+    id: String(m.id),
+    ticketId: String(m.id),
+    senderId: m.user || '0',
+    senderName: m.usuario || m.user || 'Usuario',
+    senderType: isAgent ? 'agent' : 'seller',
+    content: m.contenido || m.texto || '',
+    createdAt: m.timestamp || m.hora || '',
+  };
+}
+
+function mapStatus(s: string): SellerTicket['status'] {
+  switch (s) {
+    case 'abierto': return 'open';
+    case 'proceso': return 'in_progress';
+    case 'resuelto': return 'resolved';
+    case 'cerrado': return 'closed';
+    case 'reabierto': return 'open';
+    default: return 'open';
+  }
+}
 
 export function useSellerHelp() {
-    const [tickets, setTickets] = useState<SellerTicket[]>(mockTickets);
-    const [activeTicketId, setActiveTicketId] = useState<string | null>(null);
-    const [filters, setFilters] = useState<SellerTicketFilters>({
-        status: 'all',
-        category: 'all',
-        search: ''
-    });
-    const [isLoading, setIsLoading] = useState(false);
-    const [isSending, setIsSending] = useState(false);
-    const [isClosing, setIsClosing] = useState(false);
+  const [tickets, setTickets] = useState<SellerTicket[]>([]);
+  const [activeTicketId, setActiveTicketId] = useState<string | null>(null);
+  const [filters, setFilters] = useState<SellerTicketFilters>({
+    status: 'all',
+    category: 'all',
+    search: '',
+  });
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSending, setIsSending] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
 
-    const activeTicket = tickets.find(t => t.id === activeTicketId);
+  const fetchTicketDetail = useCallback(async (id: string) => {
+    try {
+      const data = await ticketApi.seller.get(Number(id));
+      const mapped = toSellerTicket(data);
+      setTickets((prev) => prev.map((t) => (t.id === id ? mapped : t)));
+    } catch {
+      // silent
+    }
+  }, []);
 
-    const openTicketsCount = tickets.filter(t => t.status === 'open' || t.status === 'in_progress').length;
+  const fetchTickets = useCallback(async () => {
+    try {
+      const data = await ticketApi.seller.list();
+      setTickets(data.map(toSellerTicket));
+    } catch {
+      setTickets([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
-    const setActiveTicketIdHandler = useCallback((id: string | null) => {
-        setActiveTicketId(id);
-    }, []);
+  useEffect(() => {
+    fetchTickets();
+  }, [fetchTickets]);
 
-    const handleSendMessage = useCallback(async (content: string) => {
-        if (!activeTicketId) return;
+  useEffect(() => {
+    if (activeTicketId) {
+      fetchTicketDetail(activeTicketId);
+    }
+  }, [activeTicketId, fetchTicketDetail]);
 
-        setIsSending(true);
+  // WebSocket: mensajes de soporte en tiempo real
+  useEcho(
+    `ticket.${activeTicketId ?? 0}`,
+    'TicketMessageReceived',
+    () => {
+      if (activeTicketId) fetchTicketDetail(activeTicketId);
+    },
+    [activeTicketId, fetchTicketDetail],
+  );
 
-        await new Promise(resolve => setTimeout(resolve, 500));
+  const activeTicket = useMemo(
+    () => tickets.find((t) => t.id === activeTicketId) ?? null,
+    [tickets, activeTicketId],
+  );
 
-        const newMessage: SellerTicketMessage = {
-            id: `m${Date.now()}`,
-            ticketId: activeTicketId,
-            senderId: 'seller-1',
-            senderName: 'Yo',
-            senderType: 'seller',
-            content,
-            createdAt: new Date().toISOString()
-        };
+  const openTicketsCount = useMemo(
+    () => tickets.filter((t) => t.status === 'open' || t.status === 'in_progress').length,
+    [tickets],
+  );
 
-        setTickets(prev => prev.map(t =>
-            t.id === activeTicketId
-                ? {
-                    ...t,
-                    messages: [...t.messages, newMessage],
-                    updatedAt: new Date().toISOString()
-                }
-                : t
-        ));
-
-        setIsSending(false);
-    }, [activeTicketId]);
-
-    const handleCreateTicket = useCallback(async (data: { subject: string; description: string; category: string }) => {
-        setIsSending(true);
-
-        await new Promise(resolve => setTimeout(resolve, 500));
-
-        const newTicket: SellerTicket = {
-            id: `t${Date.now()}`,
-            ticketNumber: `TKT-${String(tickets.length + 1).padStart(3, '0')}`,
-            subject: data.subject,
-            description: data.description,
-            category: data.category as SellerTicket['category'],
-            status: 'open',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            messages: []
-        };
-
-        setTickets(prev => [newTicket, ...prev]);
-        setActiveTicketId(newTicket.id);
-        setIsSending(false);
-    }, [tickets.length]);
-
-    const handleCloseTicket = useCallback(async (id: string) => {
-        setIsClosing(true);
-
-        await new Promise(resolve => setTimeout(resolve, 500));
-
-        setTickets(prev => prev.map(t =>
-            t.id === id
-                ? {
-                    ...t,
-                    status: 'closed' as const,
-                    resolvedAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString()
-                }
-                : t
-        ));
-
-        if (activeTicketId === id) {
-            setActiveTicketId(null);
-        }
-
-        setIsClosing(false);
-    }, [activeTicketId]);
-
-    return {
-        tickets,
-        activeTicket: activeTicket || null,
-        activeTicketId,
-        setActiveTicketId: setActiveTicketIdHandler,
-        isLoading,
-        isSending,
-        isClosing,
-        filters,
-        setFilters,
-        handleSendMessage,
-        handleCreateTicket,
-        handleCloseTicket,
-        openTicketsCount
+  const handleSendMessage = useCallback(async (content: string) => {
+    if (!activeTicketId) return;
+    setIsSending(true);
+    const tempMsg: SellerTicketMessage = {
+      id: `temp-${Date.now()}`,
+      ticketId: activeTicketId,
+      senderId: '',
+      senderName: 'Tú',
+      senderType: 'seller',
+      content,
+      createdAt: new Date().toISOString(),
     };
+    setTickets((prev) =>
+      prev.map((t) =>
+        t.id === activeTicketId ? { ...t, messages: [...t.messages, tempMsg] } : t,
+      ),
+    );
+    try {
+      await ticketApi.seller.sendMessage(Number(activeTicketId), { content });
+      await fetchTicketDetail(activeTicketId);
+    } catch {
+      await fetchTicketDetail(activeTicketId).catch(() => {});
+    } finally {
+      setIsSending(false);
+    }
+  }, [activeTicketId, fetchTicketDetail]);
+
+  const handleCreateTicket = useCallback(async (data: CreateData) => {
+    setIsSending(true);
+    try {
+      const created = await ticketApi.seller.create({
+        asunto: data.subject,
+        mensaje: data.description,
+        tipo_ticket: data.category,
+        criticidad: data.priority,
+      });
+      const mapped = toSellerTicket(created);
+      setTickets((prev) => [mapped, ...prev]);
+      setActiveTicketId(mapped.id);
+    } catch {
+      // silent
+    } finally {
+      setIsSending(false);
+    }
+  }, []);
+
+  const handleCloseTicket = useCallback(async (id: string) => {
+    setIsClosing(true);
+    try {
+      await ticketApi.seller.close(Number(id));
+      setTickets((prev) =>
+        prev.map((t) =>
+          t.id === id ? { ...t, status: 'closed' as const } : t,
+        ),
+      );
+      setActiveTicketId(null);
+    } catch {
+      // silent
+    } finally {
+      setIsClosing(false);
+    }
+  }, []);
+
+  return {
+    tickets,
+    activeTicket,
+    activeTicketId,
+    setActiveTicketId,
+    isLoading,
+    isSending,
+    isClosing,
+    filters,
+    setFilters,
+    handleSendMessage,
+    handleCreateTicket,
+    handleCloseTicket,
+    openTicketsCount,
+  };
 }

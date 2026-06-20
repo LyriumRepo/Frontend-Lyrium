@@ -2,21 +2,12 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-
-  experimental: {
-    serverActions: {
-      bodySizeLimit: '10mb',
-    },
+  async rewrites() {
+    return [
+      { source: '/backend/:path*', destination: 'http://127.0.0.1:8000/:path*' },
+      { source: '/storage/:path*', destination: 'http://127.0.0.1:8000/storage/:path*' },
+    ];
   },
-
-async rewrites() {
-  const storageUrl = process.env.NEXT_PUBLIC_LARAVEL_STORAGE_URL ?? 'http://127.0.0.1:8000';
-  return [
-    { source: '/backend/:path*', destination: `${storageUrl}/:path*` },
-    { source: '/storage/:path*', destination: `${storageUrl}/storage/:path*` }
-  ];
-},
-
 
   onDemandEntries: {
     maxInactiveAge: 25 * 1000,
@@ -89,6 +80,14 @@ async rewrites() {
       {
         protocol: 'https',
         hostname: 'i.pravatar.cc',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.railway.app',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.up.railway.app',
       },
     ],
   },

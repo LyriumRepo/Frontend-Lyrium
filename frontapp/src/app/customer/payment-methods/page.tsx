@@ -156,14 +156,14 @@ export default function CustomerPaymentMethodsPage() {
           icon: 'CreditCard' as const,
           grad: 'from-sky-500 to-blue-500 dark:from-[var(--icons-green)] dark:to-lime-200',
           color: 'text-sky-500 dark:text-[var(--icons-green)]',
-          label: 'Tarjeta',
+          label: 'Tarjeta de Débito',
           subtitle: method?.card_last4 ? `•••• ${method.card_last4}` : null,
         };
       }
       case 'yape':
         return { icon: 'Phone' as const, grad: 'from-purple-500 to-pink-500', color: 'text-purple-600', label: 'Yape', subtitle: null };
       case 'plin':
-        return { icon: 'Circle' as const, grad: 'from-blue-500 to-sky-500', color: 'text-blue-600', label: 'Plin', subtitle: null };
+        return { icon: 'Wallet' as const, grad: 'from-blue-500 to-sky-500', color: 'text-blue-600', label: 'Plin', subtitle: null };
       default:
         return { icon: 'CreditCard' as const, grad: 'from-gray-500 to-gray-600', color: 'text-gray-500 dark:text-gray-400', label: 'Método', subtitle: null };
     }
@@ -225,8 +225,10 @@ export default function CustomerPaymentMethodsPage() {
                   ) : method.tipo_metodo !== 'tarjeta' ? (
                     <p className="text-xs font-bold text-gray-400 dark:text-gray-400 uppercase">{method.documento}</p>
                   ) : method.card_brand ? (
-                    <p className="text-xs font-bold text-gray-400 dark:text-gray-400">{method.card_brand}</p>
-                  ) : null}
+                    <p className="text-xs font-bold text-gray-400 dark:text-gray-400">{method.card_brand} • Débito</p>
+                  ) : (
+                    <p className="text-xs font-bold text-gray-400 dark:text-gray-400">Débito</p>
+                  )}
                 </div>
                 <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-[var(--bg-muted)] rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)] mb-8">
                   <div>
@@ -241,7 +243,7 @@ export default function CustomerPaymentMethodsPage() {
                       {method.tipo_metodo === 'tarjeta'
                         ? (method.card_exp_month && method.card_exp_year
                           ? `${method.card_exp_month}/${method.card_exp_year.slice(-2)}`
-                          : (method.detalle_extra || '--'))
+                          : 'Débito')
                         : (method.detalle_extra || '--')}
                     </p>
                   </div>
@@ -299,7 +301,7 @@ export default function CustomerPaymentMethodsPage() {
         >
           <div className="relative mb-6">
             <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform duration-500">
-              <Icon name="Smartphone" className="w-10 h-10 text-white" />
+              <Icon name="Phone" className="w-10 h-10 text-white" />
             </div>
           </div>
           <div className="text-center space-y-2">
@@ -316,7 +318,7 @@ export default function CustomerPaymentMethodsPage() {
         >
           <div className="relative mb-6">
             <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-sky-500 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform duration-500">
-              <Icon name="Circle" className="w-10 h-10 text-white" />
+              <Icon name="Wallet" className="w-10 h-10 text-white" />
             </div>
           </div>
           <div className="text-center space-y-2">
