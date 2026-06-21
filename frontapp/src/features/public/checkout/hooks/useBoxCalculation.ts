@@ -12,7 +12,7 @@ export function useBoxCalculation() {
   const boxCalculation    = useCheckoutStore((s) => s.boxCalculation);
   const isLoadingBox      = useCheckoutStore((s) => s.isLoadingBox);
   const boxError          = useCheckoutStore((s) => s.boxError);
-
+ console.log('STORE KEYS:', Object.keys(useCheckoutStore.getState()));
   const abortRef = useRef<AbortController | null>(null);
 
   const calcularCajas = useCallback(async () => {
@@ -24,7 +24,7 @@ export function useBoxCalculation() {
       store_name: string;
       store_slug?: string;
       origen:     { departamento: string; provincia: string; distrito: string };
-      productos:  Array<{ nombre: string; cantidad: number; peso: number; largo: number; ancho: number; alto: number; precio: number }>;
+      productos:  Array<{ nombre: string; cantidad: number; peso: number; largo: number; ancho: number; alto: number; precio: number; product_id?: number | null }>;
     }>();
 
     for (const item of selectedItems) {
@@ -39,13 +39,14 @@ export function useBoxCalculation() {
         });
       }
       grupos.get(sid)!.productos.push({
-        nombre:   item.name,
-        cantidad: item.quantity,
-        peso:     item.peso   ?? 0.5,
-        largo:    item.largo  ?? 30,
-        ancho:    item.ancho  ?? 20,
-        alto:     item.alto   ?? 15,
-        precio:   item.price  ?? 0,
+        nombre:     item.name,
+        cantidad:   item.quantity,
+        peso:       item.peso   ?? 0.5,
+        largo:      item.largo  ?? 30,
+        ancho:      item.ancho  ?? 20,
+        alto:       item.alto   ?? 15,
+        precio:     item.price  ?? 0,
+        product_id: (item.id && Number(item.id) > 0) ? Number(item.id) : null,
       });
     }
 
