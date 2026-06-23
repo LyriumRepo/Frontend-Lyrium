@@ -686,8 +686,8 @@ export function FinancePageClient(_props: FinancePageClientProps) {
                     className="flex items-center justify-between p-3 rounded-xl bg-[var(--bg-secondary)]/50"
                   >
                     <div className="flex items-center gap-4">
-                      <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-black text-white ${
-                        i === 0 ? 'bg-amber-500' : i === 1 ? 'bg-slate-400' : i === 2 ? 'bg-amber-700' : 'bg-sky-500/30'
+                      <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-black ${
+                        i === 0 ? 'bg-amber-500 text-white' : i === 1 ? 'bg-slate-400 text-white' : i === 2 ? 'bg-amber-700 text-white' : 'bg-sky-100 dark:bg-sky-500/30 text-sky-700 dark:text-white'
                       }`}>
                         {i + 1}
                       </span>

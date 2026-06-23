@@ -481,9 +481,9 @@ export function SupportPageClient() {
                         <div className="p-8 space-y-4">
                             {[
                                 { icon: 'Settings', title: 'Problemas técnicos', desc: 'Errores en la plataforma, fallas en el inicio de sesión, problemas con el sitio web o la app.' },
-                                { icon: 'CreditCard', title: 'Pagos y facturación', desc: 'Cobros incorrectos, problemas con suscripciones o solicitudes de comprobantes de pago a Lyrium.' },
                                 { icon: 'Shield', title: 'Seguridad y acceso', desc: 'Cuentas bloqueadas, acceso no autorizado, cambios de contraseña o datos comprometidos.' },
-                                { icon: 'AlertCircle', title: 'No gestiona reclamos comerciales', desc: 'Para devoluciones, reembolsos o reclamos de pedidos con una tienda, usa el Chat con Vendedores.' },
+                                { icon: 'CreditCard', title: 'Confirmaciones de pago', desc: 'Consulta si un pago fue procesado correctamente en la plataforma.' },
+                                { icon: 'AlertCircle', title: 'No gestiona reclamos comerciales', desc: 'Para devoluciones, reembolsos, cambios, facturación o consultas sobre productos, usa el Chat con Vendedores.' },
                             ].map((item) => (
                                 <div key={item.title} className="flex items-start gap-4 p-4 bg-gray-50 dark:bg-[var(--bg-muted)]/50 rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)]">
                                     <div className="w-10 h-10 rounded-xl bg-white dark:bg-[var(--bg-secondary)] flex items-center justify-center shadow-sm border border-gray-100 dark:border-[var(--border-subtle)] shrink-0">

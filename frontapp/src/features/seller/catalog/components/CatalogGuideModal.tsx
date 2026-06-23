@@ -53,20 +53,20 @@ export default function CatalogGuideModal({ isOpen, onClose }: CatalogGuideModal
                         <div className="grid gap-3">
                             {[
                                 {
-                                    title: '1. Imagen nítida y bien iluminada',
-                                    desc: 'Usa fotografías con buena resolución y sin desenfoque. La iluminación natural o de estudio mejora la percepción del producto.',
+                                    title: '1. Fondo blanco exclusivamente',
+                                    desc: 'Usa fondo blanco puro (#FFFFFF). Sin grises claros, neutros ni degradados. El fondo blanco resalta el producto y da un aspecto profesional en el catálogo.',
                                 },
                                 {
-                                    title: '2. Fondo blanco o limpio',
-                                    desc: 'Prefiere fondos blancos, grises claros o neutros. Esto resalta el producto y le da un aspecto profesional en el catálogo.',
+                                    title: '2. Formato cuadrado 1:1',
+                                    desc: 'La imagen se muestra en formato cuadrado en todo el catálogo. Asegúrate de que el producto ocupe al menos el 80% del encuadre sin recortes importantes.',
                                 },
                                 {
-                                    title: '3. Producto visible y centrado',
-                                    desc: 'El artículo debe ocupar al menos el 80% del encuadre. Evita ángulos que lo oculten o recorten partes importantes.',
+                                    title: '3. Alta resolución (mín. 800×800 px)',
+                                    desc: 'Usa imágenes de al menos 800×800 píxeles. Formatos compatibles: JPG, PNG o WebP. Peso máximo recomendado: 2 MB.',
                                 },
                                 {
-                                    title: '4. Formatos compatibles: JPG, PNG o WebP',
-                                    desc: 'Usa estos formatos para garantizar compatibilidad y carga rápida. El peso recomendado es menor a 2 MB por imagen.',
+                                    title: '4. Recomendación: usa un diseñador gráfico',
+                                    desc: 'Para resultados óptimos, trabaja con un diseñador profesional que pueda preparar tus imágenes con la iluminación, el fondo blanco y la composición adecuada.',
                                 },
                             ].map((item) => (
                                 <div

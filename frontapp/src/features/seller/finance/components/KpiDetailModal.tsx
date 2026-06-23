@@ -5,6 +5,7 @@ import BaseModal from '@/components/ui/BaseModal';
 import FinanceChart from './FinanceChart';
 import Icon from '@/components/ui/Icon';
 import type { FinanceData } from '../types';
+import type { FinanceChartDataset } from './FinanceChart';
 
 interface KpiConfig {
   label: string;
@@ -18,6 +19,7 @@ interface KpiConfig {
   chartColor: string;
   suffix?: string;
   extraInfo: string;
+  chartDatasets?: FinanceChartDataset[];
 }
 
 interface KpiDetailModalProps {
@@ -131,6 +133,7 @@ function KpiDetailModal({ isOpen, onClose, kpi }: KpiDetailModalProps) {
               data={kpi.chartData}
               color={kpi.chartColor}
               height="360px"
+              datasets={kpi.chartDatasets}
             />
           </div>
         </div>

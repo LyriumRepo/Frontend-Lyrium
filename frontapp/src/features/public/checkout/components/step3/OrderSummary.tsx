@@ -1,48 +1,27 @@
 'use client';
 
-import { Truck, ShieldCheck, Lock, Tag } from 'lucide-react';
+import { Truck, ShieldCheck, Lock, Tag, ArrowLeft } from 'lucide-react';
 import Image from 'next/image';
 import { useCheckoutStore } from '@/store/checkoutStore';
 import { useIzipay } from '../../hooks/useIzipay';
 import { useCheckoutSubmit } from '../../hooks/useCheckoutSubmit';
+import { useCheckoutGrandTotals } from '../../hooks/useCheckoutGrandTotals';
 import { orderApi } from '@/shared/lib/api/OrdenRepository';
 import { liriosApi, type LiriosEligibility } from '@/shared/lib/api/liriosRepository';
-import { useCallback, useState, useEffect, useMemo } from 'react';
+import { useCallback, useState, useEffect, useMemo, useRef } from 'react';
 import { useAuth } from '@/shared/lib/context/AuthContext';
 import IzipayModal from '../modals/IzipayModal';
-import type { DeliveryMethod } from '@/store/checkoutStore';
-
-const DELIVERY_OPTIONS: {
-  value: DeliveryMethod;
-  label: string;
-  cost: number;
-}[] = [
-  { value: 'pickup', label: '🏪 Recoger en tienda (Gratis)', cost: 0 },
-  { value: 'delivery', label: '🚚 Delivery a domicilio (S/ 10.00)', cost: 10 },
-  { value: 'service_store', label: '🏢 Servicio en tienda (Gratis)', cost: 0 },
-  {
-    value: 'service_home',
-    label: '🏠 Servicio a domicilio (S/ 20.00)',
-    cost: 20,
-  },
-];
-
-const inputCls =
-  'w-full px-4 py-3 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-xl text-sm ' +
-  'bg-gray-50 dark:bg-[var(--bg-muted)] focus:bg-white dark:focus:bg-[var(--bg-card)] ' +
-  'focus:border-sky-400 dark:focus:border-[var(--brand-sky)] focus:outline-none ' +
-  'focus:ring-4 focus:ring-sky-100 dark:focus:ring-sky-900/20 transition-all ' +
-  'text-gray-800 dark:text-[var(--text-primary)]';
+import ResumenCheckout from './ResumenCheckout';
 
 export default function OrderSummary() {
-  const orderData = useCheckoutStore((s) => s.orderData);
-  const setOrderData = useCheckoutStore((s) => s.setOrderData);
-  const isProcessing = useCheckoutStore((s) => s.isProcessing);
-  const cartItems = useCheckoutStore((s) => s.cartItems);
-  const setOrderResult = useCheckoutStore((s) => s.setOrderResult);
-  const setStep = useCheckoutStore((s) => s.setStep);
-  const personalData = useCheckoutStore((s) => s.personalData);
-  const shippingData = useCheckoutStore((s) => s.shippingData);
+  const orderData          = useCheckoutStore((s) => s.orderData);
+  const setOrderData       = useCheckoutStore((s) => s.setOrderData);
+  const isProcessing       = useCheckoutStore((s) => s.isProcessing);
+  const cartItems          = useCheckoutStore((s) => s.cartItems);
+  const setOrderResult     = useCheckoutStore((s) => s.setOrderResult);
+  const setStep            = useCheckoutStore((s) => s.setStep);
+  const personalData       = useCheckoutStore((s) => s.personalData);
+  const shippingData       = useCheckoutStore((s) => s.shippingData);
 
   const [showIzipayModal, setShowIzipayModal] = useState(false);
   const [pendingFormToken, setPendingFormToken] = useState<string | null>(null);
@@ -52,9 +31,23 @@ export default function OrderSummary() {
   const [liriosInput, setLiriosInput] = useState('');
 
   const { isAuthenticated } = useAuth();
-
   const { submitOrder, isSubmitting, error: submitError } = useCheckoutSubmit();
 
+  // ── Grand totals (productos + envío con markup) ────────────────────────────
+  const { grandTotal, grandTotalEnvio, isReady } = useCheckoutGrandTotals();
+
+  // Ref para capturar el valor vigente dentro de callbacks (evita closure stale)
+  const grandTotalsRef = useRef({ grandTotal, grandTotalEnvio });
+  useEffect(() => {
+    grandTotalsRef.current = { grandTotal, grandTotalEnvio };
+  }, [grandTotal, grandTotalEnvio]);
+
+  // ── Descuentos ─────────────────────────────────────────────────────────────
+  const totalDiscount = orderData.discount + orderData.liriosDiscount;
+  const hasDiscounts  = totalDiscount > 0;
+  const finalTotal    = grandTotal - totalDiscount;
+
+  // ── Izipay ─────────────────────────────────────────────────────────────────
   const {
     loadSmartForm,
     isLoading: izipayLoading,
@@ -63,9 +56,6 @@ export default function OrderSummary() {
     onSuccess: useCallback(
       async (result) => {
         setShowIzipayModal(false);
-        // Fallback: confirmar pago en backend por si el webhook de Izipay no llegó
-        // (habitual en localhost/dev). Si el webhook ya lo procesó, el endpoint
-        // devuelve 400 "ya está pagada" — lo ignoramos silenciosamente.
         if (pendingOrderId) {
           try {
             await orderApi.confirmIzipayPayment(pendingOrderId);
@@ -77,12 +67,13 @@ export default function OrderSummary() {
           orderId: pendingOrderId ?? result.clientAnswer.orderDetails.orderId,
           email: personalData.email,
           total: result.clientAnswer.orderDetails.orderTotalAmount / 100,
+          shipping: grandTotalsRef.current.grandTotalEnvio,
           items: cartItems,
           personalData,
           shippingData,
           orderData,
         });
-        setStep(3);
+        setStep(4);
       },
       [
         pendingOrderId,
@@ -96,8 +87,6 @@ export default function OrderSummary() {
     ),
   });
 
-  // Una vez que el modal está montado (el div.kr-smart-form existe en el DOM),
-  // inyectamos el formToken para que Krypton renderice el formulario dentro del modal.
   useEffect(() => {
     if (showIzipayModal && pendingFormToken) {
       loadSmartForm(pendingFormToken);
@@ -105,18 +94,12 @@ export default function OrderSummary() {
     }
   }, [showIzipayModal, pendingFormToken, loadSmartForm]);
 
+  // ── Lirios eligibility ────────────────────────────────────────────────────
   const selectedItems = cartItems.filter((i) => i.selected);
-  const hasProducts = selectedItems.some((i) => i.id > 0);
-  const subtotal = selectedItems.reduce(
-    (acc, i) => acc + i.price * i.quantity,
-    0,
-  );
+  const hasProducts   = selectedItems.some((i) => i.id > 0);
 
-  // Fetch Lirios eligibility when cart changes
-  const cartTotalForLirios = useMemo(() => {
-    const sub = selectedItems.reduce((acc, i) => acc + i.price * i.quantity, 0);
-    return sub + (hasProducts ? orderData.deliveryCost : 0);
-  }, [selectedItems, hasProducts, orderData.deliveryCost]);
+  // Usa grandTotal del hook (con markup correcto) para calcular eligibilidad
+  const cartTotalForLirios = useMemo(() => grandTotal, [grandTotal]);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -136,21 +119,14 @@ export default function OrderSummary() {
     setLiriosInput(value);
     const num = parseInt(value, 10);
     if (!isNaN(num) && num > 0 && liriosEligibility) {
-      const max = liriosEligibility.max_lirios_usables;
-      const clamped = Math.min(num, max);
+      const clamped = Math.min(num, liriosEligibility.max_lirios_usables);
       setOrderData({ liriosUsed: clamped, liriosDiscount: clamped });
     } else {
       setOrderData({ liriosUsed: 0, liriosDiscount: 0 });
     }
   };
 
-  const total = subtotal + (hasProducts ? orderData.deliveryCost : 0) - orderData.discount - orderData.liriosDiscount;
-
-  const handleDeliveryChange = (value: DeliveryMethod) => {
-    const option = DELIVERY_OPTIONS.find((o) => o.value === value);
-    setOrderData({ deliveryMethod: value, deliveryCost: option?.cost ?? 0 });
-  };
-
+  // ── Pagar ─────────────────────────────────────────────────────────────────
   const handlePagar = async () => {
     const result = await submitOrder();
     if (!result) return;
@@ -176,17 +152,16 @@ export default function OrderSummary() {
         orderId: result.orderId,
         email: result.email,
         total: session.amount,
+        shipping: grandTotalsRef.current.grandTotalEnvio,
         items: cartItems,
         personalData,
         shippingData,
         orderData,
       });
-      setStep(3);
+      setStep(4);
       return;
     }
 
-    // Abrir modal con el Smart Form. El useEffect inyectará el formToken
-    // una vez que el div.kr-smart-form esté en el DOM.
     setPendingOrderId(result.orderId);
     setPendingFormToken(session.form_token);
     setShowIzipayModal(true);
@@ -198,7 +173,7 @@ export default function OrderSummary() {
   };
 
   const displayError = submitError || izipayError;
-  const isBusy = isProcessing || isSubmitting || izipayLoading;
+  const isBusy       = isProcessing || isSubmitting || izipayLoading;
 
   return (
     <>
@@ -215,7 +190,7 @@ export default function OrderSummary() {
           </div>
         )}
 
-{/* Dirección de servicio a domicilio (read‑only) */}
+        {/* Dirección de servicio a domicilio (read-only) */}
         {selectedItems.some((i) => i.service_address) && (
           <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-100 dark:border-amber-800/40 space-y-2">
             <p className="text-xs font-bold text-amber-700 dark:text-amber-300 uppercase tracking-wide flex items-center gap-1">
@@ -230,32 +205,15 @@ export default function OrderSummary() {
           </div>
         )}
 
-        {/* Método de envío — solo si hay productos */}
+        {/* Resumen por tienda (cajas + courier + TOTAL GENERAL) */}
         {hasProducts && (
           <>
-            <div className="flex flex-col gap-1">
-              <label className="text-xs font-bold text-gray-600 dark:text-[var(--text-secondary)] uppercase tracking-wide flex items-center gap-1">
-                <Truck className="w-4 h-4" /> Método de Envío
-              </label>
-              <select
-                value={orderData.deliveryMethod}
-                onChange={(e) =>
-                  handleDeliveryChange(e.target.value as DeliveryMethod)
-                }
-                className={inputCls}
-              >
-                {DELIVERY_OPTIONS.map((o) => (
-                  <option key={o.value} value={o.value}>
-                    {o.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
+            <ResumenCheckout />
             <div className="h-px bg-gray-100 dark:bg-[var(--border-subtle)]" />
           </>
         )}
 
+        {/* Código promo */}
         <div className="flex gap-2">
           <div className="relative flex-1">
             <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -326,56 +284,45 @@ export default function OrderSummary() {
           </>
         )}
 
-        <div className="h-px bg-gray-100 dark:bg-[var(--border-subtle)]" />
-
-        <div className="space-y-2 text-sm">
-          <div className="flex justify-between text-gray-500 dark:text-[var(--text-muted)]">
-            <span>Subtotal ({selectedItems.length} {hasProducts ? 'productos' : 'servicios'})</span>
-            <span className="font-semibold text-gray-800 dark:text-[var(--text-primary)]">
-              S/ {subtotal.toFixed(2)}
-            </span>
-          </div>
-          {hasProducts && (
-            <div className="flex justify-between text-gray-500 dark:text-[var(--text-muted)]">
-              <span>Envío</span>
-              <span className="font-semibold text-gray-800 dark:text-[var(--text-primary)]">
-                {orderData.deliveryCost === 0
-                  ? 'Gratis'
-                  : `S/ ${orderData.deliveryCost.toFixed(2)}`}
-              </span>
-            </div>
-          )}
-          {orderData.discount > 0 && (
-            <div className="flex justify-between text-gray-500 dark:text-[var(--text-muted)]">
-              <span>Descuento cupón</span>
-              <span className="font-semibold text-emerald-600 dark:text-emerald-400">
-                -S/ {orderData.discount.toFixed(2)}
-              </span>
-            </div>
-          )}
-          {orderData.liriosDiscount > 0 && (
-            <div className="flex justify-between text-gray-500 dark:text-[var(--text-muted)]">
-              <span className="flex items-center gap-1">
-                <div className="relative w-4 h-4">
-                  <Image src="/img/intro/Flor6.png" alt="" fill className="object-contain" />
+        {/* Descuentos (solo si hay alguno) */}
+        {hasDiscounts && (
+          <>
+            <div className="h-px bg-gray-100 dark:bg-[var(--border-subtle)]" />
+            <div className="space-y-2 text-sm">
+              {orderData.discount > 0 && (
+                <div className="flex justify-between text-gray-500 dark:text-[var(--text-muted)]">
+                  <span>Descuento cupón</span>
+                  <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                    -S/ {orderData.discount.toFixed(2)}
+                  </span>
                 </div>
-                Lirios
-              </span>
-              <span className="font-semibold text-emerald-600 dark:text-emerald-400">
-                -S/ {orderData.liriosDiscount.toFixed(2)}
-              </span>
-            </div>
-          )}
-        </div>
+              )}
+              {orderData.liriosDiscount > 0 && (
+                <div className="flex justify-between text-gray-500 dark:text-[var(--text-muted)]">
+                  <span className="flex items-center gap-1">
+                    <div className="relative w-4 h-4">
+                      <Image src="/img/intro/Flor6.png" alt="" fill className="object-contain" />
+                    </div>
+                    Lirios
+                  </span>
+                  <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                    -S/ {orderData.liriosDiscount.toFixed(2)}
+                  </span>
+                </div>
+              )}
 
-        <div className="pt-3 border-t-2 border-gray-100 dark:border-[var(--border-subtle)] flex justify-between items-center">
-          <span className="font-bold text-gray-800 dark:text-[var(--text-primary)]">
-            Total
-          </span>
-          <span className="text-2xl font-black text-sky-600 dark:text-[var(--brand-sky)]">
-            S/ {total.toFixed(2)}
-          </span>
-        </div>
+              {/* Total final solo cuando hay descuento (sin descuento, ResumenCheckout ya muestra el total) */}
+              <div className="pt-2 border-t border-gray-100 dark:border-[var(--border-subtle)] flex justify-between items-center">
+                <span className="font-bold text-gray-800 dark:text-[var(--text-primary)]">
+                  Total a pagar
+                </span>
+                <span className="text-2xl font-black text-sky-600 dark:text-[var(--brand-sky)]">
+                  S/ {finalTotal.toFixed(2)}
+                </span>
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
       <div className="px-5 pb-5">
@@ -396,6 +343,17 @@ export default function OrderSummary() {
               ? 'Pagar con tarjeta guardada'
               : 'Realizar pedido'}
         </button>
+
+        <button
+          type="button"
+          onClick={() => setStep(2)}
+          disabled={isBusy}
+          className="w-full mt-2.5 py-3 rounded-2xl bg-gray-100 dark:bg-[var(--bg-muted)] hover:bg-gray-200 dark:hover:bg-[var(--bg-secondary)] text-gray-700 dark:text-[var(--text-secondary)] font-medium transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Volver al paso anterior
+        </button>
+
         <p className="text-xs text-center text-gray-400 dark:text-[var(--text-muted)] mt-3 flex items-center justify-center gap-1">
           <Lock className="w-3 h-3" /> Pago 100% seguro con Izipay
         </p>

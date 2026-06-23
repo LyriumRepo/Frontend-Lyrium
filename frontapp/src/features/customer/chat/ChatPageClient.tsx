@@ -401,9 +401,9 @@ export function ChatPageClient({ conversationId }: { conversationId?: string }) 
                         <div className="p-8 space-y-4">
                             {[
                                 { icon: 'Package', title: 'Pedidos y logística', desc: 'Consulta el estado de tu pedido, tiempos de entrega y datos del envío directamente con la tienda.' },
-                                { icon: 'RotateCcw', title: 'Devoluciones y cambios', desc: 'Gestiona devoluciones, cambios de producto o solicitudes de reembolso con el vendedor.' },
+                                { icon: 'RotateCcw', title: 'Devoluciones, cambios y reembolsos', desc: 'Gestiona devoluciones, cambios de producto o solicitudes de reembolso con el vendedor.' },
                                 { icon: 'AlertTriangle', title: 'Reclamos y postventa', desc: 'Reporta productos defectuosos, diferencias con lo pedido o cualquier incidencia comercial.' },
-                                { icon: 'Store', title: 'Cada tienda opera de forma independiente', desc: 'El vendedor administra sus propias operaciones. Para problemas técnicos de la plataforma, usa Soporte Lyrium.' },
+                                { icon: 'Store', title: 'Cada tienda opera de forma independiente', desc: 'El vendedor administra sus propias operaciones. Para problemas de la plataforma, usa Soporte Lyrium.' },
                             ].map((item) => (
                                 <div key={item.title} className="flex items-start gap-4 p-4 bg-gray-50 dark:bg-[var(--bg-muted)]/50 rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)]">
                                     <div className="w-10 h-10 rounded-xl bg-white dark:bg-[var(--bg-secondary)] flex items-center justify-center shadow-sm border border-gray-100 dark:border-[var(--border-subtle)] shrink-0">

@@ -119,6 +119,24 @@ function mapApiNotificationToProactive(notification: Notification): ProactiveNot
                 action = { type: 'orders', id: notification.order_id, label: 'Ver pedido' };
             }
             break;
+        case 'booking_created':
+        case 'BookingCreatedNotification':
+            level = 'INFO';
+            title = '📅 Nueva reserva recibida';
+            message = notification.service_name
+                ? `Recibiste una reserva para ${notification.service_name}`
+                : (notification.subject ?? 'Tienes una nueva reserva');
+            action = { type: 'services', label: 'Ver reservas' };
+            break;
+        case 'booking_confirmed':
+        case 'BookingConfirmedNotification':
+            level = 'INFO';
+            title = '✅ Reserva confirmada';
+            message = notification.service_name
+                ? `Tu reserva para ${notification.service_name} fue confirmada`
+                : (notification.subject ?? 'Tu reserva fue confirmada');
+            action = { type: 'orders', label: 'Ver pedido' };
+            break;
         case 'profile_request_created':
         case 'ProfileRequestNotification':
             level = 'WARNING';

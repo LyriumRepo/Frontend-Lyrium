@@ -114,7 +114,7 @@ export function HelpdeskPageClient() {
 
   return (
     <div className="space-y-4 animate-fadeIn pb-20">
-      <ModuleHeader title="Mesa de Ayuda" subtitle="Gestión de tickets y soporte" icon="Headset" />
+      <ModuleHeader title="Soporte Lyrium" subtitle="Gestión de tickets y soporte" icon="Headset" />
 
       {/* Toggle: Vendedores / Clientes */}
       <div className="flex bg-[var(--bg-secondary)]/80 p-1 rounded-2xl w-full max-w-xs border border-[var(--border-subtle)]/50">
