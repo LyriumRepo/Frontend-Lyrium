@@ -144,7 +144,7 @@ export const ContratosModule: React.FC<ContratosModuleProps> = ({ state, actions
 
                     <button
                         onClick={actions.createNew}
-                        className="h-14 bg-indigo-600 text-white rounded-2xl hover:bg-indigo-700 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-indigo-100 flex items-center justify-center gap-3 px-8 font-industrial group"
+                        className="h-14 bg-[var(--color-info)] dark:bg-[var(--brand-green)] text-white rounded-2xl hover:brightness-95 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-[var(--color-info)]/20 dark:shadow-[var(--brand-green)]/20 flex items-center justify-center gap-3 px-8 font-industrial group"
                     >
                         <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform" />
                         <span className="text-xs font-black uppercase tracking-widest">Aperturar</span>
@@ -202,17 +202,17 @@ export const ContratosModule: React.FC<ContratosModuleProps> = ({ state, actions
                                         <td className="px-8 py-6">
                                             <div className="space-y-1">
                                                 <ModalityBadge modality={c.modality} />
-                                                <p className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-tighter">{c.type}</p>
+                                                <p className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-tighter">{c.plan}</p>
                                             </div>
                                         </td>
                                         <td className="px-8 py-6">
                                             <StatusBadge status={c.status} />
                                         </td>
-                                        <td className="px-8 py-6 text-right">
-                                            <div className="inline-flex p-3 bg-[var(--bg-secondary)] text-[var(--text-muted)] group-hover:bg-indigo-500 group-hover:text-white rounded-2xl transition-all shadow-sm group-hover:shadow-indigo-500/20">
-                                                <ChevronRight className="w-5 h-5" />
-                                            </div>
-                                        </td>
+                                         <td className="px-8 py-6 text-right">
+                                             <div className="inline-flex p-3 bg-[var(--bg-secondary)] text-[var(--text-muted)] group-hover:bg-[var(--color-info)] group-hover:text-white rounded-2xl transition-all shadow-sm group-hover:shadow-[var(--color-info)]/20">
+                                                 <ChevronRight className="w-5 h-5" />
+                                             </div>
+                                         </td>
                                     </tr>
                                 ))
                             )}

@@ -1,9 +1,11 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { ShopConfig } from '@/features/seller/store/types';
+import { ShopConfig, TopMedal } from '@/features/seller/store/types';
 import Icon from '@/components/ui/Icon';
+import { medalApi } from '@/shared/lib/api/medalRepository';
+import { Loader2 } from 'lucide-react';
 
 interface StoreAwardsProps {
     config: ShopConfig;
@@ -11,11 +13,33 @@ interface StoreAwardsProps {
 
 export default function StoreAwards({ config }: StoreAwardsProps) {
     const { subscription, rating, totalSales, totalOrders, verifiedAt, status } = config;
-    
+
+    const [topMedals, setTopMedals] = useState<TopMedal[]>([]);
+    const [medalsLoading, setMedalsLoading] = useState(true);
+    const [togglingId, setTogglingId] = useState<string | null>(null);
+
+    useEffect(() => {
+        medalApi.getSellerMedals()
+            .then((res) => setTopMedals(res.data ?? []))
+            .catch(() => {})
+            .finally(() => setMedalsLoading(false));
+    }, []);
+
+    const handleToggle = async (id: string) => {
+        setTogglingId(id);
+        try {
+            const res = await medalApi.toggleMedalVisibility(id);
+            setTopMedals((prev) =>
+                prev.map((m) => (m.id === id ? { ...m, visible: res.data.visible } : m)),
+            );
+        } catch {}
+        finally { setTogglingId(null); }
+    };
+
     const isVerified = !!verifiedAt;
     const isTopSeller = (rating ?? 0) >= 4.5 && (totalSales ?? 0) > 50;
-    const isExpressShipping = false; // No hay datos de esto en backend aún
-    
+    const isExpressShipping = false;
+
     const getStatusBadge = () => {
         switch (status) {
             case 'approved':
@@ -30,11 +54,14 @@ export default function StoreAwards({ config }: StoreAwardsProps) {
                 return { text: 'Desconocido', color: 'bg-gray-500' };
         }
     };
-    
+
     const statusBadge = getStatusBadge();
+
+    const approvedMedals = topMedals.filter((m) => m.status === 'approved');
+
     return (
         <div className="glass-card p-0 overflow-hidden border-none rounded-[2.5rem] shadow-2xl bg-[var(--bg-card)] mb-8">
-            <div className="bg-gradient-to-r from-sky-500 via-sky-500 to-sky-400 p-8 flex items-center justify-between relative overflow-hidden">
+            <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[var(--brand-green)] dark:to-[#1A3A32] p-8 flex items-center justify-between relative overflow-hidden">
                 <div className="flex items-center gap-5 text-white relative z-10">
                     <div className="w-12 h-12 bg-white/20 dark:bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 dark:border-white/20 shadow-inner">
                         <Icon name="Medal" className="w-6 h-6" />
@@ -53,11 +80,11 @@ export default function StoreAwards({ config }: StoreAwardsProps) {
                     <div className="flex items-center justify-center gap-2 mb-1">
                         <h3 className="text-2xl font-black text-[var(--text-primary)] tracking-tight">Estatus de Socio Lyrium</h3>
                         <div className="relative group/info">
-                            <button type="button" className="text-[var(--text-secondary)] hover:text-sky-500 transition-colors">
+                            <button type="button" className="text-[var(--text-secondary)] hover:text-sky-500 dark:hover:text-[var(--icons-green)] transition-colors">
                                 <Icon name="Info" className="w-5 h-5" />
                             </button>
                             <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 bg-[var(--bg-card)] p-4 rounded-2xl shadow-2xl border border-[var(--border-subtle)] w-64 opacity-0 invisible group-hover/info:opacity-100 group-hover/info:visible transition-all z-[100] cursor-default text-left">
-                                <p className="text-[10px] font-black text-sky-500 uppercase tracking-widest mb-2">Acerca del Estatus</p>
+                                <p className="text-[10px] font-black text-sky-500 dark:text-[var(--icons-green)] uppercase tracking-widest mb-2">Acerca del Estatus</p>
                                 <p className="text-[9px] text-[var(--text-secondary)] font-medium leading-relaxed">
                                     Las medallas son reconocimientos automáticos y manuales que validan la trayectoria y confianza de tu tienda en el ecosistema Lyrium.
                                 </p>
@@ -70,7 +97,7 @@ export default function StoreAwards({ config }: StoreAwardsProps) {
 
                 <div className="flex flex-col md:flex-row items-center justify-center gap-16">
                     <div className="relative group flex-shrink-0">
-                        <div className="absolute -inset-4 bg-sky-500/10 rounded-full blur-2xl group-hover:bg-sky-500/20 transition-all"></div>
+                        <div className="absolute -inset-4 bg-sky-500/10 dark:bg-emerald-500/20 rounded-full blur-2xl group-hover:bg-sky-500/20 dark:group-hover:bg-emerald-500/30 transition-all"></div>
                         <Image 
                             src="/img/INSIGNIA PREMIUM.png" 
                             alt="Insignia" 
@@ -79,7 +106,7 @@ export default function StoreAwards({ config }: StoreAwardsProps) {
                             className="relative w-52 h-52 object-contain transition-transform duration-700 group-hover:scale-110 drop-shadow-2xl"
                         />
                         <div className="mt-8 text-center space-y-2">
-                            <span className="px-6 py-2 bg-[var(--bg-card)] rounded-full shadow-xl border border-sky-500/20 text-sky-500 font-black text-sm uppercase tracking-tighter block">
+                            <span className="px-6 py-2 bg-[var(--bg-card)] rounded-full shadow-xl border border-sky-500/20 dark:border-[var(--icons-green)] text-sky-500 dark:text-[var(--icons-green)] font-black text-sm uppercase tracking-tighter block">
                                 {subscription?.plan?.name || 'Sin Plan'}
                             </span>
                             <span className={`inline-flex px-3 py-1 rounded-full text-[10px] font-black uppercase ${statusBadge.color} text-white`}>
@@ -105,7 +132,7 @@ export default function StoreAwards({ config }: StoreAwardsProps) {
                                 <span className="text-[9px] font-black uppercase tracking-widest">{isVerified ? 'Identidad Verificada' : 'Sin Verificar'}</span>
                             </div>
                             <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 bg-[var(--bg-card)] p-3 rounded-xl shadow-2xl border border-[var(--border-subtle)] w-56 opacity-0 invisible group-hover/medal:opacity-100 group-hover/medal:visible transition-all z-[100] cursor-default text-left">
-                                <p className="text-[9px] font-black text-sky-500 uppercase mb-1">Requisito de Obtención</p>
+                                <p className="text-[9px] font-black text-sky-500 dark:text-[var(--icons-green)] uppercase mb-1">Requisito de Obtención</p>
                                 <p className="text-[8px] text-[var(--text-secondary)] font-medium leading-tight">Otorgada al validar satisfactoriamente los documentos oficiales (RUC y DNI) del titular.</p>
                                 <div className="absolute top-full left-1/2 -translate-x-1/2 mt-[-6px] w-3 h-3 bg-[var(--bg-card)] border-r border-b border-[var(--border-subtle)] rotate-45"></div>
                             </div>
@@ -121,7 +148,7 @@ export default function StoreAwards({ config }: StoreAwardsProps) {
                                 <span className="text-[9px] font-black uppercase tracking-widest">{isTopSeller ? 'Vendedor Top' : 'Vendedor Regular'}</span>
                             </div>
                             <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 bg-[var(--bg-card)] p-3 rounded-xl shadow-2xl border border-[var(--border-subtle)] w-56 opacity-0 invisible group-hover/medal:opacity-100 group-hover/medal:visible transition-all z-[100] cursor-default text-left">
-                                <p className="text-[9px] font-black text-amber-500 uppercase mb-1">Requisito de Obtención</p>
+                                <p className="text-[9px] font-black text-sky-500 dark:text-[var(--icons-green)] uppercase mb-1">Requisito de Obtención</p>
                                 <p className="text-[8px] text-[var(--text-secondary)] font-medium leading-tight">Requiere un promedio superior a 4.5 estrellas y más de 50 ventas exitosas.</p>
                                 <div className="absolute top-full left-1/2 -translate-x-1/2 mt-[-6px] w-3 h-3 bg-[var(--bg-card)] border-r border-b border-[var(--border-subtle)] rotate-45"></div>
                             </div>
@@ -137,13 +164,91 @@ export default function StoreAwards({ config }: StoreAwardsProps) {
                                 <span className="text-[9px] font-black uppercase tracking-widest">{isExpressShipping ? 'Envío Express' : 'Sin Envío Express'}</span>
                             </div>
                             <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 bg-[var(--bg-card)] p-3 rounded-xl shadow-2xl border border-[var(--border-subtle)] w-56 opacity-0 invisible group-hover/medal:opacity-100 group-hover/medal:visible transition-all z-[100] cursor-default text-left">
-                                <p className="text-[9px] font-black text-emerald-500 uppercase mb-1">Requisito de Obtención</p>
+                                <p className="text-[9px] font-black text-sky-500 dark:text-[var(--icons-green)] uppercase mb-1">Requisito de Obtención</p>
                                 <p className="text-[8px] text-[var(--text-secondary)] font-medium leading-tight">Otorgada al vendedor que cumpla con despachos en menos de 12 horas por 20 pedidos consecutivos.</p>
                                 <div className="absolute top-full left-1/2 -translate-x-1/2 mt-[-6px] w-3 h-3 bg-[var(--bg-card)] border-r border-b border-[var(--border-subtle)] rotate-45"></div>
                             </div>
                         </div>
                     </div>
                 </div>
+
+                {/* Reconocimientos Top Lyrium */}
+                <div className="mt-12 pt-12 border-t border-[var(--border-subtle)]">
+                    <div className="text-center mb-8">
+                        <h3 className="text-xl font-black text-[var(--text-primary)] tracking-tight flex items-center justify-center gap-2">
+                            <Icon name="Trophy" className="w-5 h-5 text-amber-500" />
+                            Reconocimientos Top Lyrium
+                        </h3>
+                        <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-[0.2em] mt-1">
+                            Medallas por posicionamiento en rankings de la plataforma
+                        </p>
+                    </div>
+
+                    {medalsLoading ? (
+                        <div className="text-center py-8">
+                            <Loader2 className="w-6 h-6 animate-spin text-gray-400 mx-auto" />
+                        </div>
+                    ) : approvedMedals.length === 0 ? (
+                        <div className="text-center py-8">
+                            <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-3">
+                                <Icon name="Trophy" className="w-7 h-7 text-gray-300" />
+                            </div>
+                            <p className="text-sm font-bold text-[var(--text-secondary)]">Aún no tienes medallas Top 100</p>
+                            <p className="text-[11px] text-[var(--text-secondary)] mt-1 opacity-70">
+                            Sigue mejorando tu rating para aparecer en el ranking de la plataforma.
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
+                            {approvedMedals.map((medal) => (
+                                <div key={medal.id} className="flex items-center gap-4 p-4 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] shadow-sm hover:shadow-md transition-all">
+                                    <div className="w-14 h-14 rounded-full bg-gradient-to-br from-amber-300 to-amber-500 flex items-center justify-center flex-shrink-0 shadow-lg overflow-hidden">
+                                        <Image src="/img/INSIGNIA PREMIUM.png" alt="Medalla Top 100" width={56} height={56} className="w-full h-full object-contain p-1" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-black text-[var(--text-primary)] truncate">
+                                            {medal.entity?.name ?? `#${medal.entity?.id}`}
+                                        </p>
+                                        <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider mt-0.5">
+                                            {medal.entity_type === 'store' ? 'Tienda' : medal.entity_type === 'product' ? 'Producto' : 'Servicio'}
+                                            <span> &middot; EN RANKING</span>
+                                        </p>
+                                        <p className="text-[9px] text-[var(--text-secondary)] mt-1">
+                                            Ingresos al Top: {medal.times_entered}
+                                            {medal.times_exited > 0 && ` · Salidas: ${medal.times_exited}`}
+                                        </p>
+                                    </div>
+                                    <div className="flex items-center gap-2 flex-shrink-0">
+                                        <button
+                                            onClick={() => handleToggle(medal.id)}
+                                            disabled={togglingId === medal.id || medal.status === 'suspended'}
+                                            className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${
+                                                medal.visible ? 'bg-emerald-500' : 'bg-gray-300'
+                                            } ${medal.status === 'suspended' ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
+                                            title={medal.visible ? 'Visible al público' : 'Oculta al público'}
+                                        >
+                                            {togglingId === medal.id ? (
+                                                <Loader2 className="w-3 h-3 animate-spin text-white mx-auto" />
+                                            ) : (
+                                                <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${medal.visible ? 'translate-x-[18px]' : 'translate-x-[2px]'}`} />
+                                            )}
+                                        </button>
+                                        <span className="text-[8px] font-black uppercase tracking-wider text-gray-400 min-w-[28px]">
+                                            {medal.visible ? 'Público' : 'Oculto'}
+                                        </span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                {/* Loading state for medals */}
+                {medalsLoading && (
+                    <div className="mt-8 text-center">
+                        <Loader2 className="w-5 h-5 animate-spin text-gray-400 mx-auto" />
+                    </div>
+                )}
             </div>
         </div>
     );

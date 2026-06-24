@@ -17,11 +17,11 @@ export function useSSE(
   handlers: Partial<{ [K in keyof SSEEventMap]: SSEHandler<K> }>,
   enabled: boolean = true,
 ) {
-  const sourceRef       = useRef<EventSource | null>(null);
-  const reconnectDelay  = useRef(1000);
-  const MAX_DELAY       = 30000;
-  const handlersRef     = useRef(handlers);
-  handlersRef.current   = handlers;
+  const sourceRef = useRef<EventSource | null>(null);
+  const reconnectDelay = useRef(1000);
+  const MAX_DELAY = 30000;
+  const handlersRef = useRef(handlers);
+  handlersRef.current = handlers;
 
   const connect = useCallback(() => {
     // Canal 'admin' no requiere usuarioId — los demás sí
@@ -33,8 +33,8 @@ export function useSSE(
       sourceRef.current = null;
     }
 
-    const url    = getSSEUrl(canal, usuarioId);
-    const source = new EventSource(url);
+    const url = getSSEUrl(canal, usuarioId);
+    const source = new EventSource(url, { withCredentials: true });
     sourceRef.current = source;
 
     source.addEventListener('conectado', () => {
@@ -52,10 +52,12 @@ export function useSSE(
       'plan_vencido',
     ];
 
-    eventos.forEach(ev => {
+    eventos.forEach((ev) => {
       source.addEventListener(ev, (e: MessageEvent) => {
         let data: unknown = {};
-        try { data = JSON.parse(e.data); } catch {}
+        try {
+          data = JSON.parse(e.data);
+        } catch {}
         const handler = handlersRef.current[ev] as AnyHandler | undefined;
         if (handler) handler(data);
       });
@@ -68,14 +70,30 @@ export function useSSE(
     source.onerror = () => {
       source.close();
       sourceRef.current = null;
-      setTimeout(connect, reconnectDelay.current);
+
+      // ← NUEVO: no reconectar si es admin y falla CORS
+      // solo reconectar silenciosamente sin bloquear
+      setTimeout(() => {
+        if (document.visibilityState !== 'hidden') {
+          connect();
+        }
+      }, reconnectDelay.current);
+
       reconnectDelay.current = Math.min(reconnectDelay.current * 2, MAX_DELAY);
     };
   }, [canal, usuarioId, enabled]);
 
   useEffect(() => {
+    const handleBeforeUnload = () => {
+      sourceRef.current?.close();
+      sourceRef.current = null;
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
     connect();
+
     return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
       sourceRef.current?.close();
       sourceRef.current = null;
     };

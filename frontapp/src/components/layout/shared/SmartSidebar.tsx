@@ -14,6 +14,7 @@ interface SmartSidebarProps {
         role: string;
         avatar?: string;
     };
+    badges?: Record<string, number>;
     brandColor?: 'sky' | 'violet' | 'indigo' | 'emerald' | 'amber';
     storageKey: string;
     sectionTitle?: string;
@@ -26,11 +27,11 @@ const colorVariants = {
     sky: {
         border: 'border-sky-100 border-[var(--border-subtle)]',
         bgActive: 'bg-brand-gradient shadow-sky-100/50',
-        textActive: 'text-sky-600 dark:text-sky-400',
+        textActive: 'text-sky-600 dark:text-lime-500',
         bgIcon: 'bg-sky-50 bg-[var(--bg-card)]',
         hover: 'hover:bg-sky-50/50 dark:hover:bg-[var(--bg-card)]',
-        accent: 'text-sky-500 dark:text-sky-400',
-        badge: 'bg-sky-400',
+        accent: 'text-sky-500 dark:text-[var(--icons-green)]',
+        badge: 'bg-sky-400 dark:bg-lime-400',
     },
     violet: {
         border: 'border-violet-100 border-[var(--border-subtle)]',
@@ -78,6 +79,7 @@ export default function SmartSidebar({
     sectionTitle = 'Gestión Administrativa',
     footerLabel = 'LYRIUM © 2025',
     isMobileOpen = false,
+    badges = {},
     onClose
 }: SmartSidebarProps) {
     const pathname = usePathname();
@@ -98,11 +100,24 @@ export default function SmartSidebar({
         localStorage.setItem(storageKey, JSON.stringify(newState));
     };
 
+    // Aplana todos los hrefs del navigation para comparar entre sí
+    const allNavHrefs = useMemo(() => {
+        const sections = (Array.isArray(navigation) && typeof navigation[0] === 'object' && 'items' in navigation[0])
+            ? (navigation as any[])
+            : [{ items: navigation }];
+        return sections.flatMap((s: any) => s.items.map((item: NavItem) => item.href));
+    }, [navigation]);
+
     const isActive = (href: string) => {
-        if (href === '/admin' || href === '/logistics' || href === '/seller') {
-            return pathname === href;
-        }
-        return pathname.startsWith(href);
+        // Coincidencia exacta siempre gana
+        if (pathname === href) return true;
+        // Prefix-match: exigir que continúe con '/' para no activar segmentos parciales
+        if (!pathname.startsWith(href + '/')) return false;
+        // No activar si hay un sibling con match más específico para este pathname
+        const hasSiblingMatch = allNavHrefs.some(
+            (otherHref) => otherHref !== href && pathname.startsWith(otherHref)
+        );
+        return !hasSiblingMatch;
     };
 
     // Renderizado optimizado para evitar saltos de hidratación
@@ -131,7 +146,7 @@ export default function SmartSidebar({
                                     className={`rounded-xl border-2 ${colors.border} shadow-sm transition-all duration-500 ${(isExpanded || isMobileOpen) ? 'w-11 h-11' : 'w-10 h-10'}`}
                                 />
                             ) : (
-                                <div className={`rounded-xl border-2 ${colors.border} shadow-sm transition-all duration-500 bg-brand-gradient flex items-center justify-center text-white font-black ${(isExpanded || isMobileOpen) ? 'w-11 h-11 text-base' : 'w-10 h-10 text-sm'}`}>
+                                <div className={`rounded-xl border-2 ${colors.border} shadow-sm transition-all duration-500 bg-brand-gradient dark:bg-brand-gradient-dark flex items-center justify-center text-white font-black ${(isExpanded || isMobileOpen) ? 'w-11 h-11 text-base' : 'w-10 h-10 text-sm'}`}>
                                     {user?.name?.substring(0, 2).toUpperCase() || 'LR'}
                                 </div>
                             )}
@@ -177,14 +192,15 @@ export default function SmartSidebar({
                                 {(isExpanded || isMobileOpen) && (
                                     <div className="flex items-center gap-2 mb-4 px-2">
                                         <span className={`w-1.5 h-1.5 ${colors.badge} rounded-full`}></span>
-                                        <h3 className={`text-[9px] font-black ${colors.accent}/80 uppercase tracking-[0.2em] truncate`}>
+                                        <h3 className={`text-[9px] font-black text-sky-500 dark:text-lime-400 uppercase tracking-[0.2em] truncate`}>
                                             {section.title || 'Navegación'}
                                         </h3>
                                     </div>
                                 )}
 
                                 {section.items.map((module: NavItem) => {
-                                    const active = isActive(module.href);
+                                    const active     = isActive(module.href);
+                                    const badgeCount = (module.id ? badges[module.id] : 0) ?? 0;
                                     return (
                                         <Link
                                             key={module.href}
@@ -198,22 +214,28 @@ export default function SmartSidebar({
                                                 <div className={`flex items-center h-full transition-all duration-500 ${active ? 'bg-[var(--bg-sidebar)] rounded-r-[80px] shadow-[10px_0_15px_-5px_rgba(0,0,0,0.05)]' : 'bg-transparent'}`}>
                                                     <div className={`flex items-center justify-center transition-all duration-500 ${(isExpanded || isMobileOpen) ? 'w-14' : 'w-20'}`}>
                                                         <div className={`
-                                                            w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-500
-                                                            ${active ? `${colors.bgIcon} ${colors.textActive} shadow-inner` : `bg-[var(--bg-muted)] text-[var(--text-secondary)] group-hover:${colors.accent} group-hover:bg-[var(--bg-sidebar)]`}
+                                                            relative w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-500
+                                                            ${active ? `${colors.bgIcon} ${colors.textActive} shadow-inner` : `bg-[var(--bg-muted)] text-[var(--text-secondary)] group-hover:text-sky-500 dark:group-hover:text-lime-500 group-hover:bg-[var(--bg-sidebar)]`}
                                                         `}>
                                                             <Icon name={module.icon || 'Package'} className="w-5 h-5" />
+                                                            {badgeCount > 0 && (
+                                                                <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-sky-500 dark:bg-lime-500 text-white text-[8px] font-black leading-none">
+                                                                    {badgeCount > 99 ? '99+' : badgeCount}
+                                                                </span>
+                                                            )}
                                                         </div>
                                                     </div>
 
                                                     {(isExpanded || isMobileOpen) && (
-                                                        <span className={`text-[13px] font-black whitespace-nowrap flex-1 transition-all duration-500 pr-4 ${active ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]'}`}>
-                                                            {module.label}
-                                                        </span>
+                                                        <span title={active ? module.label : ""} className={`text-[13px] font-black whitespace-nowrap transition-all duration-300 ${active
+                                                        ? 'max-w-[140px] overflow-hidden text-ellipsis text-[var(--text-primary)]'
+                                                        : 'flex-shrink-0 text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]' }`} > {module.label}
+                                                    </span>
                                                     )}
                                                 </div>
                                                 {active && (isExpanded || isMobileOpen) && (
                                                     <div className="flex justify-center items-center">
-                                                        <div className="w-1.5 h-1.5 bg-[var(--bg-sidebar)] rounded-full animate-pulse" />
+                                                        <div className="w-1.5 h-1.5 bg-[var(--bg-sidebar)] dark:bg-[var(--text-primary)] rounded-full animate-ping" />
                                                     </div>
                                                 )}
                                             </div>

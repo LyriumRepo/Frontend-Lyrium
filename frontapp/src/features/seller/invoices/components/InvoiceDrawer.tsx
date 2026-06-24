@@ -1,22 +1,16 @@
 'use client';
 
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import Icon from '@/components/ui/Icon';
 import { Voucher, VoucherStatus } from '@/features/seller/invoices/types';
 import { formatCurrency } from '@/shared/lib/utils/formatters';
+import { getAuthHeaders } from '@/shared/lib/api/token-store';
 
 interface InvoiceDrawerProps {
     voucher: Voucher | null;
     isOpen: boolean;
     onClose: () => void;
-    onRetry: (id: string) => void | Promise<void>;
 }
-
-const fileColorClasses: Record<string, { bg: string; bgIcon: string; textIcon: string; shadow: string }> = {
-    PDF: { bg: 'hover:bg-rose-500/5', bgIcon: 'bg-rose-50', textIcon: 'text-rose-500', shadow: 'shadow-rose-100/50' },
-    XML: { bg: 'hover:bg-emerald-500/5', bgIcon: 'bg-emerald-50', textIcon: 'text-emerald-500', shadow: 'shadow-emerald-100/50' },
-    CDR: { bg: 'hover:bg-sky-500/5', bgIcon: 'bg-sky-50', textIcon: 'text-sky-500', shadow: 'shadow-sky-100/50' },
-};
 
 const statusConfig: Record<VoucherStatus, { label: string; color: string; iconName: string }> = {
     ACCEPTED: { label: 'Aceptado', color: 'emerald', iconName: 'CheckCircle' },
@@ -34,7 +28,61 @@ const statusColorClasses: Record<string, string> = {
     gray: 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-[var(--border-subtle)]',
 };
 
-export default function InvoiceDrawer({ voucher, isOpen, onClose, onRetry }: InvoiceDrawerProps) {
+export default function InvoiceDrawer({ voucher, isOpen, onClose }: InvoiceDrawerProps) {
+    const [isDownloading, setIsDownloading] = useState(false);
+    const [shareStatus, setShareStatus] = useState<'idle' | 'copied'>('idle');
+
+    const handleDownloadPdf = useCallback(async (v: Voucher) => {
+        if (isDownloading) return;
+        setIsDownloading(true);
+        try {
+            const apiUrl = process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://localhost:8000/api';
+            const response = await fetch(`${apiUrl}/invoices/${v.id}/pdf`, {
+                headers: {
+                    Accept: 'application/pdf',
+                    ...(await getAuthHeaders()),
+                },
+            });
+            if (!response.ok) throw new Error('Error al descargar la factura');
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const anchor = document.createElement('a');
+            anchor.href = url;
+            anchor.download = `Factura-Lyrium-${v.series}-${v.number}.pdf`;
+            document.body.appendChild(anchor);
+            anchor.click();
+            document.body.removeChild(anchor);
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Error al descargar la factura:', error);
+        } finally {
+            setIsDownloading(false);
+        }
+    }, [isDownloading]);
+
+    const handleSharePdf = useCallback(async (v: Voucher) => {
+        const text = `Comprobante Lyrium\n${v.series}-${v.number}\nTotal: ${formatCurrency(v.amount)}\nFecha: ${new Date(v.emission_date).toLocaleDateString('es-PE', { day: '2-digit', month: 'long', year: 'numeric' })}`;
+        const title = `Factura ${v.series}-${v.number}`;
+
+        if (typeof navigator !== 'undefined' && navigator.share) {
+            try {
+                await navigator.share({ title, text });
+                return;
+            } catch {
+                // User cancelled — fall through to clipboard
+            }
+        }
+
+        try {
+            await navigator.clipboard.writeText(text);
+            setShareStatus('copied');
+            setTimeout(() => setShareStatus('idle'), 2000);
+        } catch {
+            // Both methods failed silently
+        }
+    }, []);
+
     if (!isOpen || !voucher) return null;
 
     const status = statusConfig[voucher.sunat_status] || statusConfig.DRAFT;
@@ -70,20 +118,23 @@ export default function InvoiceDrawer({ voucher, isOpen, onClose, onRetry }: Inv
                 <div className="flex-1 overflow-y-auto p-8 space-y-8 custom-scrollbar">
                     <div className="space-y-4">
                         <h3 className="text-xs font-black text-[var(--text-secondary)] uppercase tracking-widest flex items-center gap-2">
-                            <Icon name="User" className="w-4 h-4" /> Datos del Cliente
+                            <Icon name="Store" className="w-4 h-4" /> Datos de la Tienda
                         </h3>
                         <div className="bg-[var(--bg-secondary)] p-5 rounded-[2rem]">
-                            <p className="text-lg font-black text-[var(--text-primary)]">{voucher.customer_name}</p>
-                            <p className="text-sm font-bold text-[var(--text-secondary)]">RUC: {voucher.customer_ruc}</p>
+                            <p className="text-lg font-black text-[var(--text-primary)]">{voucher.store_name}</p>
+                            <p className="text-sm font-bold text-[var(--text-secondary)]">RUC: {voucher.store_ruc}</p>
                         </div>
                     </div>
 
-                    <div className="space-y-4">
+                    <div className="space-y-3">
                         <h3 className="text-xs font-black text-[var(--text-secondary)] uppercase tracking-widest flex items-center gap-2">
-                            <Icon name="DollarSign" className="w-4 h-4" /> Monto Total
+                            <Icon name="DollarSign" className="w-4 h-4" /> Comisión
                         </h3>
-                        <div className="bg-gray-900 p-6 rounded-[2rem]">
-                            <p className="text-3xl font-black text-white">{formatCurrency(voucher.amount)}</p>
+                        <div className="bg-[var(--bg-secondary)] rounded-2xl p-5 border border-[var(--border-subtle)]">
+                            <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest mb-2">Desglose</p>
+                            <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+                                El desglose exacto (Base Imponible, IGV y Total) se encuentra en la <span className="font-black text-[var(--text-primary)]">Factura PDF</span>. Descárgala abajo.
+                            </p>
                         </div>
                     </div>
 
@@ -94,26 +145,24 @@ export default function InvoiceDrawer({ voucher, isOpen, onClose, onRetry }: Inv
 
                     <div className="space-y-4">
                         <h3 className="text-xs font-black text-[var(--text-secondary)] uppercase tracking-widest flex items-center gap-2">
-                            <Icon name="Archive" className="w-4 h-4" /> Archivos Adjuntos
+                            <Icon name="FileText" className="w-4 h-4" /> Comprobante Digital
                         </h3>
-                        <div className="grid grid-cols-3 gap-4">
-                            {[
-                                { label: 'PDF', icon: 'FileText', color: 'PDF', path: voucher.pdf_path },
-                                { label: 'XML', icon: 'FileCode', color: 'XML', path: voucher.xml_path },
-                                { label: 'CDR', icon: 'Archive', color: 'CDR', path: voucher.cdr_path }
-                            ].map((file) => (
-                                <button
-                                    key={file.label}
-                                    disabled={!file.path}
-                                    className={`p-6 bg-[var(--bg-card)] rounded-[2.5rem] transition-all flex flex-col items-center gap-3 border border-[var(--border-subtle)] shadow-xl shadow-[var(--border-subtle)]/50 group/file ${file.path ? `${fileColorClasses[file.label].bg} active:scale-95` : 'opacity-30 grayscale cursor-not-allowed'}`}
-                                >
-                                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg transition-all ${file.path ? `${fileColorClasses[file.label].bgIcon} ${fileColorClasses[file.label].textIcon} group-hover/file:scale-110 ${fileColorClasses[file.label].shadow}` : 'bg-[var(--bg-secondary)] text-gray-300'}`}>
-                                        <Icon name={file.icon} className="w-8 h-8" />
-                                    </div>
-                                    <span className={`text-[10px] font-black uppercase tracking-widest ${file.path ? 'text-[var(--text-secondary)] group-hover/file:text-[var(--text-primary)]' : 'text-gray-300'}`}>{file.label}</span>
-                                </button>
-                            ))}
-                        </div>
+                        <button
+                            onClick={() => handleDownloadPdf(voucher)}
+                            disabled={isDownloading}
+                            className="flex items-center justify-center gap-3 p-6 bg-[var(--bg-card)] rounded-[2.5rem] border border-[var(--border-subtle)] shadow-xl shadow-[var(--border-subtle)]/50 hover:bg-emerald-500/5 transition-all group w-full text-left disabled:opacity-60 disabled:cursor-not-allowed"
+                        >
+                            <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-rose-50 text-rose-500 group-hover:scale-110 transition-all shadow-lg shadow-rose-100/50">
+                                <Icon name="FileText" className="w-8 h-8" />
+                            </div>
+                            <div className="text-left">
+                                <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]">
+                                    {isDownloading ? 'Descargando...' : 'Descargar Factura Electrónica'}
+                                </p>
+                                <p className="text-xs text-[var(--text-muted)] mt-1">Comprobante Lyrium</p>
+                            </div>
+                            <Icon name="Download" className="w-5 h-5 text-[var(--text-muted)] ml-auto" />
+                        </button>
                     </div>
 
                     <div className="space-y-4">
@@ -123,7 +172,7 @@ export default function InvoiceDrawer({ voucher, isOpen, onClose, onRetry }: Inv
                         {voucher.history && voucher.history.length > 0 ? (
                             <div className="space-y-6 relative before:absolute before:left-4 before:top-2 before:bottom-2 before:w-0.5 before:bg-[var(--border-subtle)]">
                                 {[...voucher.history].reverse().map((event, idx) => (
-                                    <div key={`history-${event.timestamp}`} className="relative pl-10">
+                                    <div key={`history-${event.timestamp}-${idx}`} className="relative pl-10">
                                         <div className="absolute left-2.5 top-1 w-3 h-3 bg-indigo-500 rounded-full border-4 border-[var(--bg-card)] shadow-sm -ml-0.5"></div>
                                         <div>
                                             <p className="text-[10px] font-black text-[var(--text-primary)] leading-none mb-1 uppercase tracking-tight">{event.note}</p>
@@ -146,14 +195,13 @@ export default function InvoiceDrawer({ voucher, isOpen, onClose, onRetry }: Inv
                 </div>
 
                 <div className="p-8 border-t border-[var(--border-subtle)] bg-[var(--bg-card)]/80 backdrop-blur-xl flex gap-4">
-                    {voucher.sunat_status === 'REJECTED' || voucher.sunat_status === 'OBSERVED' ? (
-                        <button
-                            onClick={() => onRetry(voucher.id)}
-                            className="flex-1 py-4 bg-gray-900 text-white rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-indigo-600 transition-all shadow-xl flex items-center justify-center gap-2"
-                        >
-                            <Icon name="RefreshCw" className="w-4 h-4" /> Reintentar Envío
-                        </button>
-                    ) : null}
+                    <button
+                        onClick={() => handleSharePdf(voucher)}
+                        className="flex items-center justify-center gap-2 flex-1 py-4 bg-[var(--bg-secondary)] text-[var(--text-secondary)] rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-[var(--bg-hover)] transition-all"
+                    >
+                        <Icon name={shareStatus === 'copied' ? 'ClipboardCheck' : 'Share2'} className="w-4 h-4" />
+                        {shareStatus === 'copied' ? 'Copiado' : 'Compartir'}
+                    </button>
                     <button
                         onClick={onClose}
                         className="flex-1 py-4 bg-[var(--bg-secondary)] text-[var(--text-secondary)] rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-[var(--bg-hover)] transition-all"

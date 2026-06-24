@@ -3,9 +3,12 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Search, Filter, X, SlidersHorizontal } from 'lucide-react';
-import { searchProducts, searchCategories, mapWooProductToLocal } from '@/shared/lib/api/wooCommerce';
+import { searchProducts, searchCategories, searchServices, mapCatalogProductToLocal, mapServiceToLocal } from '@/shared/lib/api/catalogProducts';
 import ProductGrid from '@/components/products/ProductGrid';
 import { Producto, Categoria } from '@/types/public';
+import SearchBar from '@/components/home/SearchBar';
+import Link from 'next/link';
+import { ArrowLeft } from 'lucide-react';
 
 interface SearchResultsProps {
   initialQuery?: string;
@@ -25,27 +28,53 @@ function SearchResultsContent({ initialQuery = '', initialCategory = '' }: Searc
   const [priceMin, setPriceMin] = useState('');
   const [priceMax, setPriceMax] = useState('');
   const [totalResults, setTotalResults] = useState(0);
+  const [onSale, setOnSale] = useState(false);
+  const [sticker, setSticker] = useState('');
 
   useEffect(() => {
     const q = searchParams.get('q') || initialQuery;
     const cat = searchParams.get('category') || initialCategory;
+    const min = searchParams.get('min_price') || '';
+    const max = searchParams.get('max_price') || '';
+    const sale = searchParams.get('on_sale') === 'true';
+    const stickerP = searchParams.get('sticker') || '';
     setQuery(q);
     setSelectedCategory(cat);
-  }, [searchParams, initialQuery, initialCategory]);
+    setPriceMin(min);
+    setPriceMax(max);
+    setOnSale(sale);
+    setSticker(stickerP);
 
-  useEffect(() => {
-    if (!query) return;
+    if (!q && !cat) return;
 
     const fetchResults = async () => {
       setIsLoading(true);
       try {
-        const [productsResult, categoriesResult] = await Promise.all([
-          searchProducts(query, 50),
-          searchCategories(query, 10),
+        const isCategoryBrowse = !!cat && !q;
+        const results = await Promise.allSettled([
+          searchProducts({
+            query: isCategoryBrowse ? '' : q,
+            perPage: 50,
+            minPrice: min || undefined,
+            maxPrice: max || undefined,
+            onSale: sale || undefined,
+            sticker: stickerP || undefined,
+            category: cat || undefined,
+          }),
+          searchCategories(isCategoryBrowse ? cat : q, 10),
+          searchServices({ query: isCategoryBrowse ? '' : q, perPage: 50, category: cat || undefined }),
         ]);
 
+        const productsResult = results[0].status === 'fulfilled' ? results[0].value : [];
+        const categoriesResult = results[1].status === 'fulfilled' ? results[1].value : [];
+        const servicesResult = results[2].status === 'fulfilled' ? results[2].value : [];
+
         const mappedProducts: Producto[] = (Array.isArray(productsResult) ? productsResult : [])
-          .map(mapWooProductToLocal)
+          .map(mapCatalogProductToLocal)
+          .filter((p): p is Producto => p !== null);
+
+        const mappedServices: Producto[] = (Array.isArray(servicesResult) ? servicesResult : [])
+          .map(mapServiceToLocal)
           .filter((p): p is Producto => p !== null);
 
         const mappedCategories = (Array.isArray(categoriesResult) ? categoriesResult : [])
@@ -57,20 +86,19 @@ function SearchResultsContent({ initialQuery = '', initialCategory = '' }: Searc
             slug: c.slug,
           }));
 
-        setProducts(mappedProducts);
+        const allProducts = [...mappedProducts, ...mappedServices];
+        setProducts(allProducts);
         setCategories(mappedCategories);
-        setTotalResults(mappedProducts.length);
+        setTotalResults(allProducts.length);
       } catch (error) {
-        console.error('Search error:', error);
-        setProducts([]);
-        setCategories([]);
+        console.error('Search render error:', error);
       } finally {
         setIsLoading(false);
       }
     };
-
     fetchResults();
-  }, [query]);
+  }, [searchParams, initialQuery, initialCategory]);
+
 
   const filteredProducts = products.filter((product) => {
     if (priceMin && product.precio < parseFloat(priceMin)) return false;
@@ -81,12 +109,15 @@ function SearchResultsContent({ initialQuery = '', initialCategory = '' }: Searc
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (query.trim()) {
-      router.push(`/buscar?q=${encodeURIComponent(query)}`);
+      const params = new URLSearchParams({ q: query });
+      if (priceMin) params.set('min_price', priceMin);
+      if (priceMax) params.set('max_price', priceMax);
+      router.push(`/buscar?${params.toString()}`);
     }
   };
 
   const handleCategoryClick = (categorySlug: string) => {
-    router.push(`/productos/${categorySlug}`);
+    router.push(`/buscar?category=${categorySlug}`);
   };
 
   const clearFilters = () => {
@@ -94,7 +125,7 @@ function SearchResultsContent({ initialQuery = '', initialCategory = '' }: Searc
     setPriceMax('');
   };
 
-  if (!query) {
+  if (!query && !selectedCategory) {
     return (
       <div className="text-center py-16">
         <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gray-100 dark:bg-gray-800 mb-4">
@@ -111,76 +142,8 @@ function SearchResultsContent({ initialQuery = '', initialCategory = '' }: Searc
   }
 
   return (
-    <div className="space-y-6">
-      <form onSubmit={handleSearch} className="flex gap-2">
-        <div className="relative flex-1">
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Buscar productos..."
-            className="w-full h-12 pl-4 pr-12 rounded-full border border-gray-200 dark:border-[var(--border-subtle)] text-base focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400 transition-all bg-white dark:bg-[var(--bg-secondary)] text-gray-800 dark:text-[var(--text-primary)]"
-          />
-          <button
-            type="submit"
-            className="absolute right-1 top-1 bottom-1 px-4 rounded-full bg-sky-500 hover:bg-sky-600 text-white font-medium transition-colors"
-          >
-            <Search className="w-5 h-5" />
-          </button>
-        </div>
-        <button
-          type="button"
-          onClick={() => setShowFilters(!showFilters)}
-          className="h-12 px-4 rounded-full border border-gray-200 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-secondary)] text-gray-600 dark:text-[var(--text-primary)] hover:bg-gray-50 dark:hover:bg-[var(--bg-muted)] transition-colors flex items-center gap-2"
-        >
-          <SlidersHorizontal className="w-5 h-5" />
-          <span className="hidden sm:inline">Filtros</span>
-        </button>
-      </form>
-
-      {showFilters && (
-        <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)] p-4">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-medium text-gray-900 dark:text-[var(--text-primary)]">Filtros</h3>
-            <button
-              onClick={clearFilters}
-              className="text-sm text-sky-500 hover:text-sky-600"
-            >
-              Limpiar
-            </button>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="price-min" className="block text-sm text-gray-500 dark:text-[var(--text-placeholder)] mb-1">
-                Precio mínimo (S/)
-              </label>
-              <input
-                id="price-min"
-                type="number"
-                value={priceMin}
-                onChange={(e) => setPriceMin(e.target.value)}
-                placeholder="0"
-                className="w-full h-10 px-3 rounded-lg border border-gray-200 dark:border-[var(--border-subtle)] bg-gray-50 dark:bg-[var(--bg-muted)] text-gray-900 dark:text-[var(--text-primary)] text-sm"
-              />
-            </div>
-            <div>
-              <label htmlFor="price-max" className="block text-sm text-gray-500 dark:text-[var(--text-placeholder)] mb-1">
-                Precio máximo (S/)
-              </label>
-              <input
-                id="price-max"
-                type="number"
-                value={priceMax}
-                onChange={(e) => setPriceMax(e.target.value)}
-                placeholder="1000"
-                className="w-full h-10 px-3 rounded-lg border border-gray-200 dark:border-[var(--border-subtle)] bg-gray-50 dark:bg-[var(--bg-muted)] text-gray-900 dark:text-[var(--text-primary)] text-sm"
-              />
-            </div>
-          </div>
-        </div>
-      )}
-
-      {categories.length > 0 && (
+    <div className="space-y-8">
+    {categories.length > 0 && (
         <div>
           <h3 className="text-sm font-medium text-gray-500 dark:text-[var(--text-placeholder)] mb-3">
             Categorías relacionadas
@@ -203,7 +166,7 @@ function SearchResultsContent({ initialQuery = '', initialCategory = '' }: Searc
         <p className="text-sm text-gray-500 dark:text-[var(--text-placeholder)] mb-4">
           {isLoading
             ? 'Buscando...'
-            : `${filteredProducts.length} resultado${filteredProducts.length !== 1 ? 's' : ''} para &quot;${query}&quot;`}
+            : `${filteredProducts.length} resultado${filteredProducts.length !== 1 ? 's' : ''}${query ? ` para "${query}"` : selectedCategory ? ' en categoría seleccionada' : ''}`}
         </p>
 
         {isLoading ? (
@@ -219,7 +182,7 @@ function SearchResultsContent({ initialQuery = '', initialCategory = '' }: Searc
               No se encontraron productos
             </h3>
             <p className="text-gray-500 dark:text-[var(--text-secondary)] max-w-md mx-auto">
-              Prueba con otros términos de búsqueda o explora nuestras categorías
+              {selectedCategory ? 'No se encontraron productos o servicios en esta categoría' : 'Prueba con otros términos de búsqueda o explora nuestras categorías'}
             </p>
           </div>
         )}

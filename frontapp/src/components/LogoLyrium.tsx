@@ -20,6 +20,8 @@ type Mood = 'welcome' | 'morning' | 'afternoon' | 'evening' | 'night';
 interface LogoLyriumProps {
   frontImg?: string;
   sideImg?: string;
+  size?: 'sm' | 'md';
+  showText?: boolean;
 }
 
 // ─────────────────────────────────────────────
@@ -390,8 +392,10 @@ const STYLES = `
 // Component
 // ─────────────────────────────────────────────
 export default function LogoLyrium({
-  frontImg = 'ICON.jpg',
-  sideImg  = 'Letras.png',
+  frontImg  = 'ICON.jpg',
+  sideImg   = 'Letras.png',
+  size      = 'md',
+  showText  = true,
 }: LogoLyriumProps) {
   const circleWrapRef      = useRef<HTMLDivElement>(null);
   const cardRef            = useRef<HTMLDivElement>(null);
@@ -414,8 +418,8 @@ export default function LogoLyrium({
     const sideGlowRing  = sideGlowRingRef.current;
     const scene         = sceneRef.current;
 
-    if (!circleWrap || !card || !faceFront || !faceBack ||
-        !sideContainer || !sideImage || !sideGlowRing || !scene) return;
+    if (!circleWrap || !card || !faceFront || !faceBack || !scene) return;
+    const hasSide = showText && !!sideContainer && !!sideImage && !!sideGlowRing;
 
     const COLORS: string[]      = ['#a3e635','#3b82f6','#0ea5e9','#ffffff','#86efac','#facc15'];
     const CLICK_COLORS: string[] = ['#a3e635','#facc15','#0ea5e9','#f472b6','#86efac','#fff'];
@@ -458,7 +462,7 @@ export default function LogoLyrium({
         const dist  = Math.random() * 60 + 25;
         const dur   = Math.random() * 400 + 350;
         p.style.cssText = `width:${size}px;height:${size}px;background:${color};box-shadow:0 0 ${size * 2}px ${color};border-radius:50%;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);pointer-events:none;`;
-        sideContainer.appendChild(p);
+        sideContainer!.appendChild(p);
         const rad = (angle * Math.PI) / 180;
         anime({
           targets: p,
@@ -491,7 +495,7 @@ export default function LogoLyrium({
     // ── Hover ola fluida en imagen lateral ──
     let waveRunning = false;
     const handleSideEnter = (): void => {
-      if (waveRunning) return;
+      if (!hasSide || waveRunning) return;
       waveRunning = true;
       anime({
         targets: sideImage,
@@ -514,15 +518,16 @@ export default function LogoLyrium({
         easing: 'easeInOutSine',
       });
     };
-    sideContainer.addEventListener('mouseenter', handleSideEnter);
+    if (hasSide) sideContainer!.addEventListener('mouseenter', handleSideEnter);
 
     // ── Click en imagen lateral ──
     const handleSideClick = (): void => {
+      if (!hasSide) return;
       anime({ targets: sideImage, scaleX: [1, 0.82, 1.15, 0.94, 1.05, 1], scaleY: [1, 1.18, 0.88, 1.10, 0.97, 1], duration: 600, easing: 'easeOutElastic(1, 0.4)' });
       anime({ targets: sideGlowRing, scale: [0.85, 1.35], opacity: [0, 0.9, 0], borderColor: ['rgba(163,230,53,0.9)', 'rgba(14,165,233,0)'], duration: 520, easing: 'easeOutExpo' });
       spawnClickParticles(18);
     };
-    sideContainer.addEventListener('click', handleSideClick);
+    if (hasSide) sideContainer!.addEventListener('click', handleSideClick);
 
     // ── Cambiar carita después de 5s ──
     const moodTimer = setTimeout(() => {
@@ -551,8 +556,8 @@ const moodInterval = setInterval(() => {
           setTimeout(() => spawnSparks(20), 120);
         },
       }, 1050)
-      .add({ targets: sideContainer, opacity: [0, 1], translateY: [-32, 0], duration: 380, easing: 'easeOutBack(2.2)' }, 3620)
-      .add({ targets: sideImage,     scaleY: [0.75, 1.06, 1], scaleX: [1.18, 0.97, 1], opacity: [0, 1], duration: 360, easing: 'easeOutBack(1.6)' }, 3620)
+      .add({ targets: hasSide ? sideContainer : [], opacity: [0, 1], translateY: [-32, 0], duration: 380, easing: 'easeOutBack(2.2)' }, 3620)
+      .add({ targets: hasSide ? sideImage : [],     scaleY: [0.75, 1.06, 1], scaleX: [1.18, 0.97, 1], opacity: [0, 1], duration: 360, easing: 'easeOutBack(1.6)' }, 3620)
       .add({
         targets: card, rotateY: [180, 360], duration: 650, easing: 'easeInOutBack',
         begin: () => spawnSparks(24),
@@ -596,8 +601,10 @@ const moodInterval = setInterval(() => {
     // ── Cleanup ──
     return () => {
       scene.removeEventListener('mouseenter', handleSceneEnter);
-      sideContainer.removeEventListener('mouseenter', handleSideEnter);
-      sideContainer.removeEventListener('click', handleSideClick);
+      if (hasSide) {
+        sideContainer!.removeEventListener('mouseenter', handleSideEnter);
+        sideContainer!.removeEventListener('click', handleSideClick);
+      }
       clearTimeout(moodTimer);
       clearTimeout(winkTimer);
       clearTimeout(winkTimer2);
@@ -608,12 +615,16 @@ const moodInterval = setInterval(() => {
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: STYLES }} />
-      <div className="lyr-root inline-flex items-center gap-1 px-3 py-2 bg-transparent cursor-default font-[Outfit,sans-serif]">
+      <div className={`lyr-root inline-flex items-center gap-1 bg-transparent cursor-default font-[Outfit,sans-serif] ${showText ? 'px-3 py-2' : ''}`}>
 
         {/* Círculo con flip 3D */}
         <div
           ref={circleWrapRef}
-          className="flex-shrink-0 w-14 h-14 md:w-[4.8rem] md:h-[4.8rem] opacity-0 relative"
+          className={`flex-shrink-0 opacity-0 relative ${
+            size === 'sm'
+              ? 'w-9 h-9'
+              : 'w-14 h-14 md:w-[4.8rem] md:h-[4.8rem]'
+          }`}
         >
           <div ref={sceneRef} className="lyr-scene">
             <div ref={cardRef} className="lyr-card">
@@ -629,19 +640,21 @@ const moodInterval = setInterval(() => {
           </div>
         </div>
 
-        {/* Imagen lateral */}
-        <div
-          ref={sideContainerRef}
-          className="lyr-side-container flex items-center justify-center opacity-0 relative cursor-pointer overflow-hidden rounded-[4px]"
-        >
-          <div ref={sideGlowRingRef} className="lyr-glow-ring" />
-          <img
-            ref={sideImageRef}
-            className="lyr-side-img"
-            src={sideImg}
-            alt="Logo"
-          />
-        </div>
+        {/* Imagen lateral — solo si showText=true */}
+        {showText && (
+          <div
+            ref={sideContainerRef}
+            className="lyr-side-container flex items-center justify-center opacity-0 relative cursor-pointer overflow-hidden rounded-[4px]"
+          >
+            <div ref={sideGlowRingRef} className="lyr-glow-ring" />
+            <img
+              ref={sideImageRef}
+              className="lyr-side-img"
+              src={sideImg}
+              alt="Logo"
+            />
+          </div>
+        )}
       </div>
     </>
   );

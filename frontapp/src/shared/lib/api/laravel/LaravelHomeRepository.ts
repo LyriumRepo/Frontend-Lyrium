@@ -19,6 +19,13 @@ export class LaravelHomeRepository implements IHomeRepository {
         return process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://localhost:8000/api';
     }
 
+    private transformUrl(url: string | undefined | null): string {
+        if (!url) return '';
+        if (url.startsWith('http')) return url;
+        const baseUrl = this.getBaseUrl().replace('/api', '');
+        return `${baseUrl}${url}`;
+    }
+
     private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
         const baseUrl = this.getBaseUrl();
 
@@ -86,7 +93,7 @@ export class LaravelHomeRepository implements IHomeRepository {
 
     async getCategories(): Promise<Categoria[]> {
         try {
-            const response = await this.request<any>('/categories');
+            const response = await this.request<any>('/categories?type=product&children_only=true&per_page=100');
             const categories = response.data || response;
             
             const baseUrl = this.getBaseUrl().replace('/api', '');
@@ -131,7 +138,7 @@ export class LaravelHomeRepository implements IHomeRepository {
             id: prod.id,
             titulo: prod.name,
             precio: parseFloat(prod.price || prod.regular_price || '0'),
-            imagen: prod.images?.[0]?.src || '/img/no-image.png',
+            imagen: this.transformUrl(prod.images?.[0]?.src || prod.image) || '/img/no-image.png',
             categoria: prod.categories?.[0]?.name || '',
             slug: prod.slug,
             descripcion: prod.short_description || prod.description,
@@ -145,7 +152,7 @@ export class LaravelHomeRepository implements IHomeRepository {
             id: prod.id,
             titulo: prod.name,
             precio: parseFloat(prod.price || prod.regular_price || '0'),
-            imagen: prod.images?.[0]?.src || '/img/no-image.png',
+            imagen: this.transformUrl(prod.images?.[0]?.src || prod.image) || '/img/no-image.png',
             categoria: prod.categories?.[0]?.name || '',
             slug: prod.slug,
             descripcion: prod.short_description || prod.description,
@@ -163,7 +170,7 @@ export class LaravelHomeRepository implements IHomeRepository {
                 id: prod.id,
                 titulo: prod.name,
                 precio: parseFloat(prod.price || prod.regular_price || '0'),
-                imagen: prod.images?.[0]?.src || '/img/no-image.png',
+                imagen: this.transformUrl(prod.images?.[0]?.src || prod.image) || '/img/no-image.png',
                 categoria: prod.categories?.[0]?.name || '',
                 slug: prod.slug,
                 descripcion: prod.short_description || prod.description,
@@ -214,7 +221,7 @@ export class LaravelHomeRepository implements IHomeRepository {
                 id: prod.id,
                 titulo: prod.name,
                 precio: parseFloat(prod.price || '0'),
-                imagen: transformUrl(prod.images?.[0]?.src),
+                imagen: transformUrl(prod.images?.[0]?.src || prod.image),
                 slug: prod.slug,
                 tag: prod.sticker,
                 vendedor: prod.storeName ? { slug: '', nombre: prod.storeName } : undefined,
@@ -268,7 +275,7 @@ export class LaravelHomeRepository implements IHomeRepository {
 
     async getServiceCategories(): Promise<Categoria[]> {
         try {
-            const response = await this.request<any>('/categories?type=service');
+            const response = await this.request<any>('/categories?type=service&children_only=true&per_page=100');
             const baseUrl = this.getBaseUrl().replace('/api', '');
             const transformUrl = (url: string | undefined): string => {
                 if (!url) return '/img/no-image.png';
@@ -334,7 +341,7 @@ export class LaravelHomeRepository implements IHomeRepository {
                 id: prod.id,
                 titulo: prod.name,
                 precio: parseFloat(prod.sale_price || prod.price || '0'),
-                imagen: transformUrl(prod.images?.[0]?.src),
+                imagen: transformUrl(prod.images?.[0]?.src || prod.image),
                 slug: prod.slug,
                 tag: prod.sticker,
                 estrellas: prod.ratingPromedio ? '★'.repeat(Math.floor(prod.ratingPromedio)) : undefined,
@@ -365,7 +372,7 @@ export class LaravelHomeRepository implements IHomeRepository {
                 id: prod.id,
                 titulo: prod.name,
                 precio: parseFloat(prod.price || '0'),
-                imagen: transformUrl(prod.images?.[0]?.src),
+                imagen: transformUrl(prod.images?.[0]?.src || prod.image),
                 slug: prod.slug,
                 tag: prod.sticker,
                 estrellas: prod.ratingPromedio ? '★'.repeat(Math.floor(prod.ratingPromedio)) : undefined,

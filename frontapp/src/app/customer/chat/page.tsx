@@ -1,5 +1,10 @@
 import { ChatPageClient } from '@/features/customer/chat/ChatPageClient';
 
-export default function ChatPage() {
-    return <ChatPageClient />;
+interface PageProps {
+  searchParams: Promise<{ conversation?: string }>;
+}
+
+export default async function ChatPage({ searchParams }: PageProps) {
+  const params = await searchParams;
+  return <ChatPageClient conversationId={params.conversation} />;
 }

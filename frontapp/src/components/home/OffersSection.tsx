@@ -2,20 +2,29 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState } from 'react';
-import { ShoppingCart, Eye, ExternalLink } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ShoppingCart, Eye, ExternalLink, Star } from 'lucide-react';
 import { Producto } from '@/types/public';
 import { useCarritoStore } from '@/store/carritoStore';
+import { homeData } from '@/data/homeData';
 
 interface OfferBlockProps {
   titulo: string;
   productos: Producto[];
   backgroundImage: string;
   linkText?: string;
+  fallbackImages: string[];
+  enableCardCarousel?: boolean;
+  backgroundPosition?: string;
 }
 
-function OfferCard({ producto, allProducts, onAddToCart, onQuickView }: { 
-  producto: Producto; 
+function OfferCard({
+  producto,
+  allProducts,
+  onAddToCart,
+  onQuickView,
+}: {
+  producto: Producto;
   allProducts: Producto[];
   onAddToCart: (product: Producto) => void;
   onQuickView: (product: Producto) => void;
@@ -24,13 +33,6 @@ function OfferCard({ producto, allProducts, onAddToCart, onQuickView }: {
   const [imgError, setImgError] = useState(false);
 
   const getFallbackImage = () => {
-    const validImages = allProducts
-      .filter(p => p.imagen && p.imagen !== producto.imagen && p.imagen !== '')
-      .map(p => p.imagen);
-    
-    if (validImages.length > 0) {
-      return validImages[Math.floor(Math.random() * validImages.length)];
-    }
     return '/img/no-image.png';
   };
 
@@ -42,125 +44,273 @@ function OfferCard({ producto, allProducts, onAddToCart, onQuickView }: {
   };
 
   return (
-    <article className="oferta-card flex-shrink-0 snap-center w-[190px] md:w-[220px] bg-white/[0.92] dark:bg-[var(--bg-secondary)]/92 backdrop-blur-lg border border-white/40 dark:border-[var(--border-subtle)]/50 rounded-[20px] p-3 shadow-[0_10px_25px_rgba(15,23,42,0.08)] dark:shadow-[0_10px_25px_rgba(0,0,0,0.3)] group transition-all duration-300 hover:-translate-y-[5px] hover:shadow-[0_15px_35px_rgba(15,23,42,0.2)] dark:hover:shadow-[0_15px_35px_rgba(0,0,0,0.5)] flex flex-col items-center relative mr-[14px] md:mr-5">
-      {/* Image wrapper — aspect-square, contain, con action bar al fondo */}
-      <div className="oferta-image-wrapper relative w-full aspect-square rounded-[18px] overflow-hidden bg-white dark:bg-[var(--bg-muted)] flex items-center justify-center">
-        <Link href={`/producto/${producto.slug}`}>
-          <Image
+      <article className="w-[220px] shrink-0 bg-white/[0.92] dark:bg-[var(--bg-secondary)]/92 backdrop-blur-lg border border-white/40 dark:border-[var(--border-subtle)]/50 rounded-[20px] p-3 shadow-md group transition-all duration-300 hover:-translate-y-[5px] flex flex-col items-center relative">
+      <div className="relative w-full aspect-square rounded-[18px] overflow-hidden bg-white dark:bg-[var(--bg-muted)] flex items-center justify-center">
+                  <Image
             src={imgSrc}
             alt={producto.titulo}
             fill
-            sizes="(max-width: 768px) 190px, 220px"
-            className="object-contain p-[7.5%] transition-transform duration-500 group-hover:scale-[1.08]"
-            draggable={false}
+           
+            className={imgSrc.includes('1.png') ? "object-contain p-[7.5%]" : "object-cover"}
             onError={handleImageError}
           />
-        </Link>
 
-        {/* Tag */}
-        {producto.tag && (
-          <span className="absolute top-2 left-2 bg-sky-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide shadow-md z-20">
-            {producto.tag}
-          </span>
-        )}
-
-        {/* Bottom action bar — slides up on hover, always visible on mobile */}
-        <div className="oferta-actions absolute bottom-0 left-0 w-full h-[44px] flex bg-sky-500 dark:bg-[var(--brand-green)] transform translate-y-full group-hover:translate-y-0 md:translate-y-full md:group-hover:translate-y-0 max-md:!translate-y-0 transition-transform duration-300 z-10">
-          <button
-            onClick={() => onAddToCart(producto)}
-            className="oferta-action-btn flex-1 flex items-center justify-center text-white border-r border-white/20 dark:border-white/15 hover:bg-white/15 dark:hover:bg-white/10 transition-colors"
-            title="Agregar al carrito"
-            aria-label="Agregar al carrito"
-          >
+        <div className="absolute bottom-0 left-0 w-full h-[44px] flex bg-sky-500 transform translate-y-full group-hover:translate-y-0 transition-transform">
+          <button onClick={() => onAddToCart(producto)} className="flex-1 flex items-center justify-center text-white">
             <ShoppingCart className="w-[18px] h-[18px]" />
           </button>
-          <button
-            onClick={() => onQuickView(producto)}
-            className="oferta-action-btn flex-1 flex items-center justify-center text-white border-r border-white/20 dark:border-white/15 hover:bg-white/15 dark:hover:bg-white/10 transition-colors"
-            title="Vista rápida"
-            aria-label="Vista rápida"
-          >
+          <button onClick={() => onQuickView(producto)} className="flex-1 flex items-center justify-center text-white">
             <Eye className="w-[18px] h-[18px]" />
           </button>
-          <Link
-            href={`/producto/${producto.slug}`}
-            className="oferta-action-btn flex-1 flex items-center justify-center text-white hover:bg-white/15 dark:hover:bg-white/10 transition-colors"
-            title="Ver producto"
-            aria-label="Ver producto"
-          >
+          <Link href={`/producto/${producto.slug}`} className="flex-1 flex items-center justify-center text-white">
             <ExternalLink className="w-[18px] h-[18px]" />
           </Link>
         </div>
       </div>
 
-      {/* Product info */}
-      <div className="mt-3 w-full text-center">
-        <h3 className="oferta-title text-[13px] font-bold text-sky-700 dark:text-[var(--brand-green)] uppercase whitespace-nowrap overflow-hidden text-ellipsis mb-0.5">
-          {producto.titulo}
-        </h3>
-        <p className="oferta-price text-[15px] font-extrabold text-gray-800 dark:text-[var(--text-primary)]">
-          S/ {producto.precio.toFixed(2)}
-        </p>
-        <div className="text-amber-400 text-xs mt-1">
-          {producto.estrellas || '★★★★★'}
+       <div className="mt-3 w-full text-center flex flex-col items-center">
+        <h3 className="text-[13px] font-bold truncate w-full">{producto.titulo}</h3>
+        <p className="text-[15px] font-extrabold">S/ {producto.precio.toFixed(2)}</p>
+        <div className="flex justify-center gap-0.5 mt-1">
+          {Array.from({ length: 5 }).map((_, idx) => {
+            const isFilled = idx < (producto.estrellas ? producto.estrellas.length : 5);
+            return (
+              <Star
+                key={idx}
+                className={`w-3.5 h-3.5 ${
+                  isFilled ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300 dark:text-gray-600'
+                }`}
+              />
+            );
+          })}
         </div>
       </div>
     </article>
   );
 }
 
-function OfferBlock({ titulo, productos, backgroundImage, linkText = 'Ver todo', onAddToCart, onQuickView }: OfferBlockProps & { 
+function OfferBlock({
+  titulo,
+  productos,
+  backgroundImage,
+  linkText = 'Ver todo',
+  fallbackImages,
+  enableCardCarousel = false,
+  backgroundPosition,
+  onAddToCart,
+  onQuickView,
+}: OfferBlockProps & {
   onAddToCart: (product: Producto) => void;
   onQuickView: (product: Producto) => void;
 }) {
-  if (productos.length === 0) {
+
+  const [bgIndex, setBgIndex] = useState(0);
+
+  useEffect(() => {
+    if (fallbackImages.length > 0) {
+      const interval = setInterval(() => {
+        setBgIndex((prev) => (prev + 1) % fallbackImages.length);
+      }, 4000);
+
+      return () => clearInterval(interval);
+    }
+  }, [fallbackImages]);
+
+  let productosAMostrar = productos;
+  if (titulo === "Las mejores ofertas de productos" || titulo === "Las mejores ofertas de Productos") {
+    productosAMostrar = [
+      {
+        id: 27,
+        titulo: "Programas de Rehabilitación Integral",
+        precio: 60.00,
+        imagen: "/img/Inicio/5/1.png",
+        estrellas: "★★★★★",
+        slug: "programas-rehabilitacion-integral",
+        vendedor: { slug: "norclab", nombre: "Norclab" },
+        categorias: ["Servicios Médicos"]
+      },
+      {
+        id: 36,
+        titulo: "Masajes Corporales",
+        precio: 30.00,
+        imagen: "/img/Inicio/5/2.png",
+        estrellas: "★★★★★",
+        slug: "masajes-corporales",
+        vendedor: { slug: "pimo", nombre: "Pimó" },
+        categorias: ["Bienestar"]
+      },
+      {
+        id: 34,
+        titulo: "Blanqueamiento Dental",
+        precio: 120.00,
+        imagen: "/img/Inicio/5/3.png",
+        estrellas: "★★★★★",
+        slug: "blanqueamiento-dental",
+        vendedor: { slug: "rydent", nombre: "RyDent" },
+        categorias: ["Servicios Médicos"]
+      },
+      {
+        id: 35,
+        titulo: "Diagnóstico Unipolar",
+        precio: 120.00,
+        imagen: "/img/Inicio/5/4.png",
+        estrellas: "★★★★★",
+        slug: "diagnostico-unipolar",
+        vendedor: { slug: "centro-medico", nombre: "Centro Médico" },
+        categorias: ["Servicios Médicos"]
+      }
+    ];
+  } else if (titulo === "Las mejores ofertas de Servicios" || titulo === "Las mejores ofertas de servicios") {
+    productosAMostrar = [
+      {
+        id: 21,
+        titulo: "Ecografía Obstétrica",
+        precio: 80.00,
+        imagen: "/img/Inicio/4/3.png",
+        estrellas: "★★★★★",
+        slug: "ecografia-obstetrica",
+        vendedor: { slug: "centromedicodigital", nombre: "Centro Médico Digital" },
+        categorias: ["Servicios Médicos"]
+      },
+      {
+        id: 23,
+        titulo: "EXTRACTO DE ALGARROBO",
+        precio: 38.00,
+        imagen: "/img/Inicio/4/1.png",
+        estrellas: "★★★★★",
+        slug: "extracto-de-algarrobo",
+        vendedor: { slug: "riquesascampesinas", nombre: "Riquesas Campesinas" },
+        categorias: ["Digestión Saludable"]
+      },
+      {
+        id: 22,
+        titulo: "Profilaxis /Destartarización",
+        precio: 50.00,
+        imagen: "/img/Inicio/4/2.png",
+        estrellas: "★★★★★",
+        slug: "profilaxis-destartraje-fluor",
+        vendedor: { slug: "rydent", nombre: "RyDent" },
+        categorias: ["Servicios Médicos"]
+      }
+    ];
+  } else if (productos.length === 0) {
+    if (titulo === "Productos Nuevos" || titulo === "Productos nuevos") {
+      productosAMostrar = homeData.productosNuevos;
+    }
+  }
+
+  const animationName = titulo === "Las mejores ofertas de Servicios" || titulo === "Las mejores ofertas de servicios"
+    ? 'infiniteScrollServices'
+    : titulo === "Las mejores ofertas de productos" || titulo === "Las mejores ofertas de Productos"
+    ? 'infiniteScrollProducts'
+    : 'infiniteScrollNewProducts';
+
+  if (productosAMostrar.length === 0) {
     return (
-      <section className="space-y-4 md:space-y-6 max-w-7xl mx-auto px-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl md:text-2xl font-semibold text-gray-900 dark:text-[var(--text-primary)] tracking-tight">{titulo}</h2>
-        </div>
-        <div className="min-h-[200px] rounded-[30px] shadow-2xl overflow-hidden">
-          <div className="w-full h-[200px] bg-gradient-to-br from-sky-50 to-sky-100 dark:from-[var(--bg-secondary)] dark:to-[var(--bg-muted)] flex flex-col items-center justify-center text-center p-8">
-            <p className="text-sky-600 dark:text-[var(--brand-green)] text-lg font-medium">
-              No hay datos para mostrar por ahora
-            </p>
-            <p className="text-gray-500 dark:text-gray-400 text-sm mt-2">
-              Pronto tendremos productos en esta sección
-            </p>
+      <section className="space-y-4 md:space-y-6 flex flex-col items-center">
+        <div className="w-[1467px] max-w-full pl-10 pr-4 space-y-4">
+          <h2 className="text-xl md:text-2xl font-bold pl-8">{titulo}</h2>
+
+          <div className="relative w-full h-[650px] rounded-[30px] shadow-2xl overflow-hidden">
+            <div className="absolute inset-0">
+              {fallbackImages.map((img, i) => (
+                <div
+                  key={i}
+                  className={`absolute inset-0 bg-cover bg-no-repeat bg-center transition-opacity duration-1000 ${
+                    i === bgIndex ? 'opacity-100' : 'opacity-0'
+                  }`}
+                  style={{
+                    backgroundImage: `url('${img}')`,
+                    backgroundAttachment: 'fixed',
+                    backgroundPosition: backgroundPosition || 'center 15%',
+                    backgroundRepeat: 'no-repeat'
+                  }}
+                />
+              ))}
+            </div>
+
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
+
+            <div className="relative z-10 h-[200px] flex flex-col items-center justify-center text-center">
+              <p className="text-white text-lg font-semibold">
+                No hay datos para mostrar por ahora
+              </p>
+              <p className="text-white/80 text-sm mt-2">
+                Pronto tendremos productos en esta sección
+              </p>
+            </div>
           </div>
         </div>
       </section>
     );
   }
 
+  const allItems = [...productosAMostrar, ...productosAMostrar];
+
   return (
-    <section className="space-y-4 md:space-y-6 max-w-7xl mx-auto px-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl md:text-2xl font-semibold text-gray-900 dark:text-[var(--text-primary)] tracking-tight">{titulo}</h2>
-        <button type="button" className="text-sm font-bold text-sky-600 dark:text-[var(--brand-green)] hover:text-sky-700 dark:hover:text-[var(--color-success)] flex items-center gap-1">
+    <section className="space-y-4 md:space-y-6 flex flex-col items-center w-full">
+      <div className="w-[1467px] max-w-full pl-10 pr-4 flex justify-between items-center">
+        <h2 className="text-xl md:text-2xl font-bold pl-8">{titulo}</h2>
+        <button className="text-sm font-bold text-sky-600 pr-8">
           {linkText} →
         </button>
       </div>
 
-      <div
-        className="relative min-h-[480px] rounded-[30px] shadow-2xl overflow-hidden"
-      >
-        {/* Parallax background */}
-        <div
-          className="absolute inset-0 z-0 bg-fixed bg-center bg-cover"
-          style={{ backgroundImage: `url('${backgroundImage}')`, backgroundPosition: 'center 20%' }}
-        />
-        <div className="absolute inset-0 bg-white/5 dark:bg-[var(--bg-secondary)]/50 backdrop-blur-[1px] z-10 pointer-events-none" />
+      <div className="relative w-[1467px] max-w-full h-[650px] rounded-[30px] shadow-2xl overflow-hidden mx-auto">
+        <div className="absolute inset-0">
+          {fallbackImages.map((img, i) => (
+            <div
+              key={i}
+              className={`absolute inset-0 bg-cover bg-no-repeat bg-center transition-opacity duration-1000 ${
+                i === bgIndex ? 'opacity-100' : 'opacity-0'
+              }`}
+              style={{
+                backgroundImage: `url('${img}')`,
+                backgroundAttachment: 'fixed',
+                backgroundPosition: backgroundPosition || 'center 15%',
+                backgroundRepeat: 'no-repeat'
+              }}
+            />
+          ))}
+        </div>
 
-        <div className="relative z-20 p-4 md:p-8 min-h-[480px] flex items-center">
-          <div className="flex flex-col w-full">
-            {/* Scrollable product cards */}
-            <div className="flex items-center overflow-x-auto lg:overflow-x-hidden lg:flex-nowrap lg:justify-end gap-4 lg:gap-5 py-6 lg:py-0 snap-x snap-mandatory scrollbar-hide max-w-full lg:ml-auto lg:max-w-5xl lg:mr-8 touch-pan-x">
-              {productos.map((producto) => (
-                <OfferCard 
-                  key={producto.id} 
-                  producto={producto} 
-                  allProducts={productos}
+        <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
+
+        <div className="relative z-10 p-4 pb-6 md:p-8 md:pb-10 h-full flex flex-col justify-end">
+          <style dangerouslySetInnerHTML={{ __html: `
+            @keyframes ${animationName} {
+              0% {
+                transform: translateX(0);
+              }
+              100% {
+                transform: translateX(-50%);
+              }
+            }
+            .animate-${animationName} {
+              animation: ${animationName} 24s linear infinite;
+            }
+            .animate-${animationName}:hover {
+              animation-play-state: paused;
+            }
+          `}} />
+
+          <div 
+            className="w-full mx-auto overflow-hidden"
+            style={{ 
+              maxWidth: '1200px',
+              maskImage: 'linear-gradient(to right, transparent, black 4%, black 96%, transparent)',
+              WebkitMaskImage: 'linear-gradient(to right, transparent, black 4%, black 96%, transparent)',
+            }}
+          >
+            <div
+              className={`flex gap-5 animate-${animationName}`}
+              style={{ width: 'max-content' }}
+            >
+              {allItems.map((producto, index) => (
+                <OfferCard
+                  key={`${producto.id}-${index}`}
+                  producto={producto}
+                  allProducts={productosAMostrar}
                   onAddToCart={onAddToCart}
                   onQuickView={onQuickView}
                 />
@@ -184,6 +334,7 @@ export default function OffersSection({
   ofertasProductos,
   productosNuevos,
 }: OffersSectionProps) {
+
   const openCart = useCarritoStore((s) => s.openCart);
   const openDetailModal = useCarritoStore((s) => s.openDetailModal);
   const addToCart = useCarritoStore((s) => s.addToCart);
@@ -197,12 +348,33 @@ export default function OffersSection({
     openDetailModal(String(product.id));
   };
 
+  //  Carruseles por sección
+  const serviciosImages = [
+    '/img/Inicio/las_mejores_ofertas/7.png',
+    '/img/1.png',
+    '/img/4.png',
+  ];
+
+  const productosImages = [
+    '/img/Inicio/las_mejores_ofertas/6.png',
+    '/img/2.png',
+    '/img/5.png',
+  ];
+
+  const nuevosImages = [
+    '/img/Inicio/las_mejores_ofertas/8.png',
+    '/img/3.png',
+    '/img/9.png',
+  ];
+
   return (
     <div className="space-y-12 mt-12">
       <OfferBlock
         titulo="Las mejores ofertas de Servicios"
         productos={ofertasServicios}
-        backgroundImage="/img/Inicio/7.png"
+        backgroundImage="/img/Inicio/las_mejores_ofertas/7.png"
+        fallbackImages={serviciosImages}
+        backgroundPosition="right 60%"
         onAddToCart={handleAddToCart}
         onQuickView={handleQuickView}
       />
@@ -210,7 +382,10 @@ export default function OffersSection({
       <OfferBlock
         titulo="Las mejores ofertas de productos"
         productos={ofertasProductos}
-        backgroundImage="/img/Inicio/6.webp"
+        backgroundImage="/img/Inicio/las_mejores_ofertas/6.png"
+        fallbackImages={productosImages}
+        enableCardCarousel
+        backgroundPosition="center 80%"
         onAddToCart={handleAddToCart}
         onQuickView={handleQuickView}
       />
@@ -218,7 +393,9 @@ export default function OffersSection({
       <OfferBlock
         titulo="Productos Nuevos"
         productos={productosNuevos}
-        backgroundImage="/img/Inicio/8.png"
+        backgroundImage="/img/Inicio/las_mejores_ofertas/8.png"
+        fallbackImages={nuevosImages}
+        backgroundPosition="center 40%"
         onAddToCart={handleAddToCart}
         onQuickView={handleQuickView}
       />

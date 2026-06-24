@@ -1,4 +1,4 @@
-import { LARAVEL_API_URL } from '@/shared/lib/config/flags';
+import { LARAVEL_API_URL, LARAVEL_STORAGE_URL } from '@/shared/lib/config/flags';
 import type { ApiResponse } from '@/shared/lib/api/base-client';
 
 export interface SellerProfile {
@@ -90,7 +90,9 @@ export interface StoreBranch {
   id: number;
   name: string;
   address: string;
-  city: string;
+  department: string;
+  province: string;
+  district: string;
   phone: string;
   hours?: string;
   is_principal: boolean;
@@ -154,28 +156,13 @@ export interface UpdateStorePayload {
     website?: string;
   };
 }
-
+//Function modified only so that it can use Sanctum API Tokens.
 async function getAuthToken(): Promise<string | null> {
-  if (typeof window !== 'undefined') {
-    const match = document.cookie.match(/laravel_token=([^;]+)/);
-    if (match && match[1]) {
-      const rawToken = match[1];
-      const token = rawToken.includes('%') ? decodeURIComponent(rawToken) : rawToken;
-      console.log('[sellerApi] Token (client):', token.substring(0, 20) + '...');
-      return token;
-    }
-    console.log('[sellerApi] No laravel_token cookie found in client');
+  if (typeof window === 'undefined') {
     return null;
   }
-  try {
-    const { cookies } = await import('next/headers');
-    const cookieStore = await cookies();
-    const value = cookieStore.get('laravel_token')?.value ?? null;
-    console.log('[sellerApi] Token from server cookies:', value ? 'found' : 'not found');
-    return value;
-  } catch {
-    return null;
-  }
+
+  return localStorage.getItem('laravel_token');
 }
 
 async function request<T>(
@@ -187,7 +174,6 @@ async function request<T>(
 
   const response = await fetch(`${baseUrl}${endpoint}`, {
     ...options,
-    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -202,6 +188,28 @@ async function request<T>(
 
   return response.json();
 }
+
+  const getImageUrl = (path?: string | null) => {
+    if (!path) return undefined;
+
+    if (path.startsWith('http://localhost/')) {
+      return path.replace('http://localhost', LARAVEL_STORAGE_URL.replace(/\/+$/, ''));
+    }
+
+    if (path.startsWith('http')) return path;
+
+    return `${LARAVEL_STORAGE_URL.replace(/\/+$/, '')}${path}`;
+
+  };
+
+  const mapStoreToLocal = (store: any) => {
+    if (!store) return null;
+
+    return {
+      ...store,
+      rep_legal_foto: getImageUrl(store.rep_legal_foto),
+    };
+  };
 
 export const sellerApi = {
   createStore: async (payload: CreateStorePayload): Promise<StoreData> => {
@@ -514,4 +522,32 @@ export const sellerApi = {
     });
     return response.data;
   },
+
+  async uploadRepLegalPhoto( storeId: number, file: File): Promise<{ url: string }> {
+      const token = localStorage.getItem('laravel_token');
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch(
+          `${LARAVEL_API_URL}/stores/${storeId}/rep-photo`,
+          {
+              method: 'POST',
+              headers: {
+                  ...(token
+                      ? { Authorization: `Bearer ${token}` }
+                      : {}),
+              },
+              body: formData,
+          }
+      );
+
+      if (!response.ok) {
+          throw new Error(`Upload failed: ${response.status}`);
+      }
+
+      return response.json();
+  }
 };
+
+export { mapStoreToLocal };

@@ -1,7 +1,7 @@
 'use client';
 
 import { X, Check } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 interface Props {
     isOpen: boolean;
@@ -13,6 +13,69 @@ interface Props {
 
 export default function ModalPostCompra({ isOpen, email, onClose, onSync, onOpenRegistro }: Props) {
     const [phase, setPhase] = useState<1 | 2>(1);
+    const confettiRef = useRef<boolean>(false);
+
+    useEffect(() => {
+        if (isOpen && !confettiRef.current) {
+            confettiRef.current = true;
+            import('canvas-confetti').then(({ default: confetti }) => {
+                const duration = 3000;
+                const end = Date.now() + duration;
+
+                const LYRIUM_COLORS = ['#0d9488', '#bef264', '#0ea5e9', '#10b981', '#2db8b0', '#64c695'];
+
+                // Burst inicial desde el centro
+                confetti({
+                    particleCount: 80,
+                    spread: 100,
+                    origin: { x: 0.5, y: 0.55 },
+                    colors: LYRIUM_COLORS,
+                    scalar: 1.3,
+                    zIndex: 40000,
+                });
+
+                const frame = () => {
+                    confetti({
+                        particleCount: 12,
+                        angle: 60,
+                        spread: 70,
+                        scalar: 1.3,
+                        origin: { x: 0, y: 0.6 },
+                        colors: LYRIUM_COLORS,
+                        zIndex: 40000,
+                    });
+                    confetti({
+                        particleCount: 12,
+                        angle: 120,
+                        spread: 70,
+                        scalar: 1.3,
+                        origin: { x: 1, y: 0.6 },
+                        colors: LYRIUM_COLORS,
+                        zIndex: 40000,
+                    });
+                    confetti({
+                        particleCount: 6,
+                        angle: 90,
+                        spread: 50,
+                        scalar: 1.1,
+                        origin: { x: 0.5, y: 0.7 },
+                        colors: LYRIUM_COLORS,
+                        shapes: ['star'],
+                        zIndex: 40000,
+                    });
+
+                    if (Date.now() < end) {
+                        requestAnimationFrame(frame);
+                    }
+                };
+
+                frame();
+            });
+        }
+        if (!isOpen) {
+            confettiRef.current = false;
+        }
+    }, [isOpen]);
 
     if (!isOpen) return null;
 
@@ -31,13 +94,13 @@ export default function ModalPostCompra({ isOpen, email, onClose, onSync, onOpen
                 <div className="bg-white dark:bg-[var(--bg-card)] w-full max-w-sm shadow-2xl relative flex flex-col rounded-[2rem] overflow-hidden animate-modal-pop">
 
                     {/* Header */}
-                    <div className="relative h-40 shrink-0 flex flex-col items-center justify-center bg-gradient-to-br from-sky-500 to-blue-700 p-6 text-center">
-                        <div className="relative z-20 flex flex-col items-center gap-3">
-                            <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border border-white/30 shadow-2xl animate-bounce-slow">
-                                <Check className="w-8 h-8 text-white drop-shadow-lg" />
+                    <div className="relative h-28 shrink-0 flex flex-col items-center justify-center bg-gradient-to-br from-sky-500 to-blue-700 p-4 text-center">
+                        <div className="relative z-20 flex flex-col items-center gap-1.5">
+                            <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border border-white/30 shadow-2xl animate-bounce-slow">
+                                <Check className="w-6 h-6 text-white drop-shadow-lg" />
                             </div>
                             <div className="space-y-0.5">
-                                <h3 className="text-2xl font-black tracking-tight text-white uppercase leading-none">
+                                <h3 className="text-lg font-black tracking-tight text-white uppercase leading-none">
                                     {phase === 1 ? '¡Listo!' : 'Casi listo'}
                                 </h3>
                                 <p className="text-[10px] font-bold text-sky-100 uppercase tracking-[0.3em] opacity-80">
@@ -56,9 +119,9 @@ export default function ModalPostCompra({ isOpen, email, onClose, onSync, onOpen
                     </div>
 
                     {/* Body */}
-                    <div className="bg-white dark:bg-[var(--bg-card)] p-6">
+                    <div className="bg-white dark:bg-[var(--bg-card)] p-5">
                         {phase === 1 ? (
-                            <div className="space-y-6">
+                            <div className="space-y-4">
                                 <div className="text-center space-y-3">
                                     <div className="inline-flex items-center gap-2 px-3 py-1 bg-sky-50 dark:bg-sky-900/20 rounded-full">
                                         <div className="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse" />
@@ -85,10 +148,10 @@ export default function ModalPostCompra({ isOpen, email, onClose, onSync, onOpen
                                     </div>
                                 </div>
 
-                                <div className="flex flex-col gap-3 pt-2">
+                                <div className="flex flex-col gap-2">
                                     <button
                                         onClick={handleSync}
-                                        className="w-full py-4 rounded-2xl bg-gray-900 dark:bg-[var(--bg-secondary)] text-white font-black text-xs uppercase tracking-[0.2em] hover:bg-sky-600 transition-all shadow-xl shadow-gray-200 dark:shadow-gray-900/20 hover:shadow-sky-200 dark:hover:shadow-sky-900/20 hover:-translate-y-0.5"
+                                        className="w-full py-3 rounded-2xl bg-gray-900 dark:bg-[var(--bg-secondary)] text-white font-black text-xs uppercase tracking-[0.2em] hover:bg-sky-600 transition-all shadow-xl shadow-gray-200 dark:shadow-gray-900/20 hover:shadow-sky-200 dark:hover:shadow-sky-900/20 hover:-translate-y-0.5"
                                     >
                                         Sincronizar y Proteger
                                     </button>
@@ -101,9 +164,9 @@ export default function ModalPostCompra({ isOpen, email, onClose, onSync, onOpen
                                 </div>
                             </div>
                         ) : (
-                            <div className="space-y-6 animate-fade-in">
-                                <div className="flex flex-col items-center gap-6">
-                                    <div className="relative w-24 h-24">
+                            <div className="space-y-4 animate-fade-in">
+                                <div className="flex flex-col items-center gap-3">
+                                    <div className="relative w-20 h-20">
                                         <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 100 100">
                                             <circle cx="50" cy="50" r="45" fill="none" stroke="#f1f5f9" strokeWidth="8" />
                                             <circle cx="50" cy="50" r="45" fill="none" stroke="#0ea5e9" strokeWidth="8" strokeDasharray="282.7" strokeDashoffset="56.5" className="transition-all duration-1000 ease-out" />
@@ -113,19 +176,19 @@ export default function ModalPostCompra({ isOpen, email, onClose, onSync, onOpen
                                         </div>
                                         <div className="absolute -top-1 -right-1 bg-sky-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-lg">80%</div>
                                     </div>
-                                    <div className="text-center space-y-2">
-                                        <h4 className="text-2xl font-black text-gray-900 dark:text-[var(--text-primary)] tracking-tight leading-tight">¡Casi terminamos!</h4>
-                                        <p className="text-sm text-gray-500 dark:text-[var(--text-muted)] font-medium leading-relaxed">
-                                            Tu identidad está sincronizada al 80%. <br />
-                                            <span className="text-sky-600 dark:text-[var(--brand-sky)] font-bold">Activa tu panel</span> para finalizar el proceso.
+                                    <div className="text-center space-y-1">
+                                        <h4 className="text-lg font-black text-gray-900 dark:text-[var(--text-primary)] tracking-tight">¡Casi terminamos!</h4>
+                                        <p className="text-xs text-gray-500 dark:text-[var(--text-muted)] font-medium leading-relaxed">
+                                            Tu identidad está sincronizada al 80%.{' '}
+                                            <span className="text-sky-600 dark:text-[var(--brand-sky)] font-bold">Activa tu panel</span> para finalizar.
                                         </p>
                                     </div>
                                 </div>
 
-                                <div className="flex flex-col gap-3 pt-2">
+                                <div className="flex flex-col gap-2">
                                     <button
                                         onClick={() => { onClose(); onOpenRegistro(); }}
-                                        className="w-full py-4 rounded-2xl bg-sky-500 text-white font-black text-xs uppercase tracking-[0.2em] hover:bg-sky-600 transition-all shadow-xl shadow-sky-200 dark:shadow-sky-900/20 hover:-translate-y-0.5 flex items-center justify-center gap-2"
+                                        className="w-full py-3 rounded-2xl bg-sky-500 text-white font-black text-xs uppercase tracking-[0.2em] hover:bg-sky-600 transition-all shadow-xl shadow-sky-200 dark:shadow-sky-900/20 hover:-translate-y-0.5 flex items-center justify-center gap-2"
                                     >
                                         🪪 Reclamar mi panel de usuario
                                     </button>

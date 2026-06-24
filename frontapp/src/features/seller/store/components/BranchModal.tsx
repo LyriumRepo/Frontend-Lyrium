@@ -5,11 +5,14 @@ import { Branch } from '@/features/seller/store/types';
 import BaseModal from '@/components/ui/BaseModal';
 import BaseButton from '@/components/ui/BaseButton';
 import Icon from '@/components/ui/Icon';
+import {peruLocations} from '@/data/peruLocations';
 
 interface BranchFormData {
     name: string;
     address: string;
-    city: string;
+    department: string;
+    province: string;
+    district: string;
     phone: string;
     hours: string;
     isPrincipal: boolean;
@@ -28,27 +31,46 @@ export default function BranchModal({ isOpen, onClose, onSave, branch }: BranchM
     const [formData, setFormData] = useState({
         name: '',
         address: '',
-        city: '',
+        department: '',
+        province: '',
+        district: '',
         phone: '',
         hours: '',
         isPrincipal: false
     });
+
+    const selectedDepartment = peruLocations.find(
+    d => d.department === formData.department
+    );
+
+    const provinces = selectedDepartment?.provinces || [];
+
+    const selectedProvince = provinces.find(
+    p => p.province === formData.province
+    );
+
+    const districts = selectedProvince?.districts || [];
 
     useEffect(() => {
         if (branch) {
             setFormData({
                 name: branch.name,
                 address: branch.address,
-                city: branch.city,
+                department: branch.department,
+                province: branch.province,
+                district: branch.district,
                 phone: branch.phone,
                 hours: branch.hours,
                 isPrincipal: branch.isPrincipal
             });
+            console.log('BRANCH MODAL:', branch);
         } else {
             setFormData({
                 name: '',
                 address: '',
-                city: '',
+                department: '',
+                province: '',
+                district: '',
                 phone: '',
                 hours: '',
                 isPrincipal: false
@@ -69,7 +91,7 @@ export default function BranchModal({ isOpen, onClose, onSave, branch }: BranchM
             title={branch ? 'Sucursal Maestra' : 'Nueva Operación'}
             subtitle="Configuración de Puntos de Venta Físicos"
             size="2xl"
-            accentColor="from-sky-500 to-indigo-600"
+            accentColor="from-sky-500 to-indigo-600 dark:from-[var(--icons-green)] dark:to-[var(--brand-green)]"
         >
             <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -101,17 +123,98 @@ export default function BranchModal({ isOpen, onClose, onSave, branch }: BranchM
                             />
                         </div>
 
-                        <div className="space-y-1.5">
-                            <label htmlFor="branch-city" className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1">Región / Distrito</label>
-                            <input
-                                id="branch-city"
-                                type="text"
-                                required
-                                value={formData.city}
-                                onChange={e => setFormData({ ...formData, city: e.target.value })}
-                                placeholder="Ej. Piura, Perú"
-                                className="w-full px-5 py-4 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-[1.5rem] font-bold text-[var(--text-primary)] focus:ring-4 focus:ring-sky-500/5 focus:bg-[var(--bg-card)] transition-all outline-none"
-                            />
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            {/* Departamento */}
+                            <div className="space-y-1">
+                                <label className="text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1">
+                                    Departamento
+                                </label>
+
+                                <select
+                                    value={formData.department || ''}
+                                    onChange={(e) =>
+                                        setFormData({
+                                            ...formData,
+                                            department: e.target.value,
+                                            province: '',
+                                            district: '',
+                                        })
+                                    }
+                                    className="w-full px-3 py-3 text-[12px] bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-2xl font-semibold text-[var(--text-primary)] outline-none focus:ring-2 focus:ring-sky-500/10 transition-all"
+                                >
+                                    <option value="">Departamento</option>
+
+                                    {peruLocations.map((dep) => (
+                                        <option
+                                            key={dep.department}
+                                            value={dep.department}
+                                        >
+                                            {dep.department}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {/* Provincia */}
+                            <div className="space-y-1">
+                                <label className="text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1">
+                                    Provincia
+                                </label>
+
+                                <select
+                                    value={formData.province || ''}
+                                    disabled={!formData.department}
+                                    onChange={(e) =>
+                                        setFormData({
+                                            ...formData,
+                                            province: e.target.value,
+                                            district: '',
+                                        })
+                                    }
+                                    className="w-full px-3 py-3 text-[12px] bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-2xl font-semibold text-[var(--text-primary)] outline-none focus:ring-2 focus:ring-sky-500/10 transition-all"
+                                >
+                                    <option value="">Provincia</option>
+
+                                    {provinces.map((prov) => (
+                                        <option
+                                            key={prov.province}
+                                            value={prov.province}
+                                        >
+                                            {prov.province}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {/* Distrito */}
+                            <div className="space-y-1">
+                                <label className="text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1">
+                                    Distrito
+                                </label>
+
+                                <select
+                                    value={formData.district || ''}
+                                    disabled={!formData.province}
+                                    onChange={(e) =>
+                                        setFormData({
+                                            ...formData,
+                                            district: e.target.value,
+                                        })
+                                    }
+                                    className="w-full px-3 py-3 text-[12px] bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-2xl font-semibold text-[var(--text-primary)] outline-none focus:ring-2 focus:ring-sky-500/10 transition-all"
+                                >
+                                    <option value="">Distrito</option>
+
+                                    {districts.map((district) => (
+                                        <option
+                                            key={district}
+                                            value={district}
+                                        >
+                                            {district}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
                         </div>
                     </div>
 
@@ -120,7 +223,7 @@ export default function BranchModal({ isOpen, onClose, onSave, branch }: BranchM
                         <div className="space-y-1.5">
                             <label htmlFor="branch-phone" className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1">Línea de Contacto</label>
                             <div className="relative group">
-                                <Icon name="Phone" className="absolute left-4 top-1/2 -translate-y-1/2 text-sky-500 w-5 h-5 font-bold" />
+                                <Icon name="Phone" className="absolute left-4 top-1/2 -translate-y-1/2 text-sky-500 dark:text-[var(--icons-green)] w-5 h-5 font-bold" />
                                 <input
                                     id="branch-phone"
                                     type="text"
@@ -136,7 +239,7 @@ export default function BranchModal({ isOpen, onClose, onSave, branch }: BranchM
                         <div className="space-y-1.5">
                             <label htmlFor="branch-hours" className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1">Ventana de Atención</label>
                             <div className="relative group">
-                                <Icon name="Clock" className="absolute left-4 top-1/2 -translate-y-1/2 text-sky-500 w-5 h-5 font-bold" />
+                                <Icon name="Clock" className="absolute left-4 top-1/2 -translate-y-1/2 text-sky-500 dark:text-[var(--icons-green)] w-5 h-5 font-bold" />
                                 <input
                                     id="branch-hours"
                                     type="text"
@@ -155,10 +258,10 @@ export default function BranchModal({ isOpen, onClose, onSave, branch }: BranchM
                                     type="checkbox"
                                     checked={formData.isPrincipal}
                                     onChange={e => setFormData({ ...formData, isPrincipal: e.target.checked })}
-                                    className="w-5 h-5 rounded-md text-sky-600 focus:ring-sky-500/20 border-[var(--border-subtle)] cursor-pointer"
+                                    className="w-5 h-5 rounded-md accent-sky-600 dark:accent-[var(--icons-green)] border-[var(--border-subtle)] cursor-pointer"
                                 />
                             </div>
-                            <span className="text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-[0.2em] group-hover:text-sky-600 transition-colors">Operación Principal</span>
+                            <span className="text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-[0.2em] group-hover:text-sky-600 dark:group-hover:text-[var(--icons-green)] transition-colors">Operación Principal</span>
                         </label>
                     </div>
                 </div>

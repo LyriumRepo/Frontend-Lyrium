@@ -1,5 +1,7 @@
 import { PublicHeader, PublicFooter } from '@/components/layout/public';
-import PublicCartDrawer from '@/components/home/PublicCartDrawer';
+// 1. Importamos el nuevo CartDrawer
+import CartDrawer from '@/features/public/carrito/components/drawer/CartDrawer';
+import ChatBotWidget from '@/features/chatbot/components/ChatBotWidget';
 
 export default function PublicLayout({
     children,
@@ -9,11 +11,17 @@ export default function PublicLayout({
     return (
         <div className="min-h-screen flex flex-col bg-white dark:bg-[var(--bg-primary)] text-slate-900 dark:text-[var(--text-primary)]">
             <PublicHeader />
+            
             <main className="flex-1">
                 {children}
             </main>
+            
             <PublicFooter />
-            <PublicCartDrawer />
+            
+            {/* 2. Reemplazamos PublicCartDrawer por tu nuevo CartDrawer 
+                que escucha a carritoStore.ui.cartOpen */}
+            <CartDrawer />
+            <ChatBotWidget />
         </div>
     );
 }

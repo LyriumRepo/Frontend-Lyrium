@@ -1,45 +1,74 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import SalesKPIs from './components/SalesKPIs';
 import SalesFilters from './components/SalesFilters';
-import OrderCard from './components/OrderCard';
+import SalesTable from './components/SalesTable';
 import OrderDetailModal from './components/OrderDetailModal';
-import { Order, SalesKPI } from '@/features/seller/sales/types';
-import { useToast } from '@/shared/lib/context/ToastContext';
+import BaseModal from '@/components/ui/BaseModal';
 import BaseLoading from '@/components/ui/BaseLoading';
-import BaseEmptyState from '@/components/ui/BaseEmptyState';
+import { SalesKPI } from '@/features/seller/sales/types';
+import { useToast } from '@/shared/lib/context/ToastContext';
 import { useSellerSales } from '@/features/seller/sales/hooks/useSellerSales';
+import { mapOrdersToExportRows } from '@/features/seller/sales/export/mappers';
+import { exportSalesRowsToExcel } from '@/features/seller/sales/export/excelExporter';
+import { generateSalesReportPdf } from '@/features/seller/sales/export/pdfExporter';
 
 interface SalesPageClientProps {
-    // TODO Tarea 3: Estos datos vendrán del Server Component
-    // Cuando se implemente la API real y el flag USE_MOCKS=false,
-    // el hook useSellerSales recibirá estos datos como initialData
-    initialOrders?: Awaited<ReturnType<typeof import('@/shared/lib/actions/dashboard').getRecentOrders>>;
-    initialKPIs?: Awaited<ReturnType<typeof import('@/shared/lib/actions/dashboard').getSalesKPIs>>;
+    initialOrders?: unknown;
+    initialKPIs?: unknown;
 }
 
-export function SalesPageClient(props: SalesPageClientProps) {
-    // TODO Tarea 3: Pasar initialData al hook cuando se implemente
-    // const { orders, kpis, ... } = useSellerSales({ initialData: props.initialOrders });
-    // Por ahora el hook usa sus MOCK_DATA internos
+export function SalesPageClient(_props?: SalesPageClientProps) {
     const {
         orders,
         kpis,
         isLoading,
+        isFetching,
         selectedOrder,
         setSelectedOrder,
         filters,
         updateFilters,
         clearFilters,
-        advanceStep
+        advanceStep,
+        shipWithCarrier,
+        cancelOrder,
+        isAdvancing,
+        isCancelling
     } = useSellerSales();
 
     const { showToast } = useToast();
+    const [selectedKpi, setSelectedKpi] = useState<SalesKPI | null>(null);
 
-    const handleExport = (type: 'excel' | 'pdf') => {
-        showToast(`Generando reporte ${type.toUpperCase()}... El documento se descargará en breve.`, "info");
+    const handleExport = async (type: 'excel' | 'pdf') => {
+        if (type === 'excel') {
+            if (orders.length === 0) {
+                showToast('No hay órdenes para exportar.', 'warning');
+                return;
+            }
+            showToast(`Exportando ${orders.length} órdenes a Excel...`, 'info');
+            try {
+                const exportRows = mapOrdersToExportRows(orders);
+                await exportSalesRowsToExcel(exportRows);
+                showToast('Excel descargado correctamente.', 'success');
+            } catch {
+                showToast('Error al generar el Excel.', 'error');
+            }
+            return;
+        }
+        if (orders.length === 0) {
+            showToast('No hay órdenes para exportar.', 'warning');
+            return;
+        }
+        showToast(`Generando reporte PDF de ${orders.length} órdenes...`, 'info');
+        try {
+            await generateSalesReportPdf(orders);
+            showToast('PDF descargado correctamente.', 'success');
+        } catch (err) {
+            console.error('PDF export error:', err);
+            showToast('Error al generar el PDF.', 'error');
+        }
     };
 
     return (
@@ -50,49 +79,73 @@ export function SalesPageClient(props: SalesPageClientProps) {
                 icon="Sales"
             />
 
-            {isLoading ? (
+            <SalesKPIs kpis={kpis} onKpiClick={setSelectedKpi} />
+
+            <SalesFilters
+                dateStart={filters.dateStart}
+                dateEnd={filters.dateEnd}
+                orderType={filters.orderType ?? null}
+                onDateChange={(type: 'dateStart' | 'dateEnd', value: string) => updateFilters({ [type]: value })}
+                onOrderTypeChange={(value: string | null) => updateFilters({ orderType: value })}
+                onClear={clearFilters}
+                onExport={handleExport}
+            />
+
+            {isLoading && orders.length === 0 ? (
                 <BaseLoading message="Cargando Centro de Control de Ventas..." />
             ) : (
                 <>
-                    <SalesKPIs kpis={kpis} />
+            <div className="relative">
+              {isFetching && orders.length > 0 && (
+                <div className="absolute inset-0 bg-[var(--bg-card)]/60 backdrop-blur-[1px] z-10 flex items-center justify-center rounded-2xl">
+                  <div className="flex items-center gap-3 px-5 py-3 bg-[var(--bg-card)] rounded-2xl shadow-lg border border-[var(--border-subtle)]">
+                    <div className="w-4 h-4 border-2 border-[#69BEEB] border-t-transparent rounded-full animate-spin"></div>
+                    <span className="text-xs font-bold text-[var(--text-secondary)]">Actualizando datos...</span>
+                  </div>
+                </div>
+              )}
+              <SalesTable
+                  data={orders}
+                  loading={false}
+                  onViewDetail={(order) => setSelectedOrder(order)}
+                  onConfirm={(orderId) => advanceStep(orderId)}
+                  onCancel={(orderId) => cancelOrder(orderId)}
+                  isAdvancing={isAdvancing}
+                  isCancelling={isCancelling}
+              />
+            </div>
 
-                    <SalesFilters
-                        dateStart={filters.dateStart}
-                        dateEnd={filters.dateEnd}
-                        onDateChange={(type: 'dateStart' | 'dateEnd', value: string) => updateFilters({ [type]: value })}
-                        onClear={clearFilters}
-                        onExport={handleExport}
-                    />
-
-                    {/* Orders Grid */}
-                    {orders.length === 0 ? (
-                        <BaseEmptyState
-                            title="No se encontraron pedidos"
-                            description="No hay registros que coincidan con los filtros de fecha aplicados actualmente."
-                            icon="ShoppingCart"
-                            actionLabel="Limpiar Filtros"
-                            onAction={clearFilters}
-                            suggestion="Intenta ampliar el rango de fechas para ver pedidos históricos."
-                        />
-                    ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-10">
-                            {orders.map((order: Order) => (
-                                <OrderCard
-                                    key={order.id}
-                                    order={order}
-                                    onClick={setSelectedOrder}
-                                />
-                            ))}
+                    {/* KPI Modal */}
+                    <BaseModal isOpen={!!selectedKpi} onClose={() => setSelectedKpi(null)}
+                        title={selectedKpi?.label ?? ''} subtitle={selectedKpi?.status ?? ''} size="md">
+                        <div className="space-y-6">
+                            <div className="bg-gray-900 p-6 rounded-[2rem] text-center">
+                                <p className="text-5xl font-black text-white">
+                                    {selectedKpi?.label === 'Ingresos Mensuales'
+                                        ? `S/ ${(selectedKpi?.count ?? 0).toLocaleString()}`
+                                        : selectedKpi?.count}
+                                </p>
+                                <p className="text-[10px] font-black text-white/60 uppercase tracking-widest mt-2">{selectedKpi?.label}</p>
+                            </div>
+                            <div className="p-4 rounded-2xl bg-[var(--bg-secondary)]">
+                                <p className="text-xs font-bold text-[var(--text-secondary)] text-center">{selectedKpi?.status}</p>
+                            </div>
+                            <p className="text-[10px] font-bold text-[var(--text-muted)] text-center">
+                                Este indicador resume el rendimiento de tus ventas. Los datos se actualizan en tiempo real conforme se procesan nuevos pedidos.
+                            </p>
                         </div>
-                    )}
+                    </BaseModal>
 
-                    {/* Modal */}
+                    {/* Order Modal */}
                     <OrderDetailModal
                         order={selectedOrder!}
                         isOpen={!!selectedOrder}
                         onClose={() => setSelectedOrder(null)}
-                        onAdvanceStep={async (id) => {
-                            await advanceStep(id);
+                        onAdvanceStep={async (id, section) => {
+                            await advanceStep(id, section);
+                        }}
+                        onShipWithCarrier={async (orderId, carrierCode, carrierData) => {
+                            await shipWithCarrier(orderId, carrierCode, carrierData);
                         }}
                     />
                 </>

@@ -1,0 +1,313 @@
+
+> marketplace-app@0.1.0 dev
+> next dev --webpack
+
+▲ Next.js 16.1.6 (webpack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.101.85:3000
+- Environments: .env.local, .env
+
+✓ Starting...
+✓ Ready in 3.8s
+○ Compiling /customer/chat ...
+ GET /customer/chat 200 in 8.3s (compile: 7.7s, proxy.ts: 208ms, render: 415ms)
+ GET /seller/chat 200 in 8.3s (compile: 7.7s, proxy.ts: 208ms, render: 430ms)
+(node:7948) [DEP0060] DeprecationWarning: The `util._extend` API is deprecated. Please use Object.assign() instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+ POST /api/broadcasting/auth 200 in 3.7s (compile: 1295ms, render: 2.4s)
+ POST /api/broadcasting/auth 200 in 2.3s (compile: 8ms, render: 2.3s)
+ GET /customer/chat 200 in 354ms (compile: 92ms, proxy.ts: 13ms, render: 249ms)
+ GET /seller/chat 200 in 374ms (compile: 60ms, proxy.ts: 20ms, render: 294ms)
+ POST /api/broadcasting/auth 200 in 2.0s (compile: 5ms, render: 2.0s)
+ POST /api/broadcasting/auth 200 in 2.4s (compile: 5ms, render: 2.4s)
+ GET /seller/planes 200 in 3.0s (compile: 2.9s, proxy.ts: 10ms, render: 115ms)
+ GET /seller/profile 200 in 2.3s (compile: 2.1s, proxy.ts: 11ms, render: 204ms)
+ GET /seller/security 200 in 2.5s (compile: 2.4s, proxy.ts: 13ms, render: 111ms)
+[Icon] "Catalog" no encontrado en ICON_MAP
+ GET /seller/catalog 200 in 3.9s (compile: 2.5s, proxy.ts: 9ms, render: 1342ms)
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[Icon] "Catalog" no encontrado en ICON_MAP
+ GET /customer/chat 200 in 716ms (compile: 193ms, proxy.ts: 34ms, render: 488ms)
+ GET /seller/catalog 200 in 718ms (compile: 477ms, proxy.ts: 29ms, render: 213ms)
+[Icon] "Catalog" no encontrado en ICON_MAP
+ GET /seller/catalog 200 in 1279ms (compile: 7ms, proxy.ts: 17ms, render: 1255ms)
+ POST /api/broadcasting/auth 200 in 4.2s (compile: 1439ms, render: 2.8s)
+ POST /api/broadcasting/auth 200 in 5.9s (compile: 2.7s, render: 3.1s)
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[Icon] "Catalog" no encontrado en ICON_MAP
+ GET /customer/chat 200 in 538ms (compile: 131ms, proxy.ts: 18ms, render: 389ms)
+ GET /seller/catalog 200 in 542ms (compile: 358ms, proxy.ts: 11ms, render: 173ms)
+[Icon] "Catalog" no encontrado en ICON_MAP
+ GET /seller/catalog 200 in 1219ms (compile: 9ms, proxy.ts: 13ms, render: 1197ms)
+ POST /api/broadcasting/auth 200 in 2.4s (compile: 17ms, render: 2.4s)
+ POST /api/broadcasting/auth 200 in 2.5s (compile: 4ms, render: 2.5s)
+ GET /customer/help 200 in 2.4s (compile: 2.3s, proxy.ts: 12ms, render: 84ms)
+ GET /customer/settings 200 in 1764ms (compile: 1677ms, proxy.ts: 10ms, render: 77ms)
+ GET /seller/chat 200 in 2.3s (compile: 2.2s, proxy.ts: 12ms, render: 155ms)
+ GET /seller/chat 200 in 365ms (compile: 13ms, proxy.ts: 10ms, render: 342ms)
+ GET /customer/settings 200 in 154ms (compile: 55ms, proxy.ts: 15ms, render: 84ms)
+ POST /api/broadcasting/auth 200 in 3.4s (compile: 460ms, render: 2.9s)
+ POST /api/broadcasting/auth 200 in 5.9s (compile: 2.6s, render: 3.3s)
+ GET /customer/chat 200 in 192ms (compile: 115ms, proxy.ts: 8ms, render: 69ms)
+ GET /customer/support 200 in 3.0s (compile: 2.9s, proxy.ts: 13ms, render: 123ms)
+ GET /customer/support 200 in 730ms (compile: 594ms, proxy.ts: 102ms, render: 34ms)
+ GET /seller/chat 200 in 733ms (compile: 425ms, proxy.ts: 102ms, render: 207ms)
+ GET /customer/support 200 in 401ms (compile: 159ms, proxy.ts: 25ms, render: 217ms)
+ GET /seller/chat 200 in 410ms (compile: 278ms, proxy.ts: 25ms, render: 107ms)
+ GET /customer/chat 200 in 89ms (compile: 43ms, proxy.ts: 13ms, render: 33ms)
+ GET /customer/chat 200 in 639ms (compile: 384ms, proxy.ts: 46ms, render: 210ms)
+ GET /seller/chat 200 in 674ms (compile: 409ms, proxy.ts: 46ms, render: 220ms)
+ GET /customer/chat 200 in 104ms (compile: 40ms, proxy.ts: 28ms, render: 36ms)
+ GET /seller/chat 200 in 107ms (compile: 7ms, proxy.ts: 28ms, render: 72ms)
+ GET /customer/chat 200 in 304ms (compile: 90ms, proxy.ts: 20ms, render: 194ms)
+ GET /seller/chat 200 in 310ms (compile: 181ms, proxy.ts: 20ms, render: 109ms)
+ GET /customer/chat 200 in 276ms (compile: 83ms, proxy.ts: 22ms, render: 171ms)
+ GET /seller/chat 200 in 281ms (compile: 171ms, proxy.ts: 22ms, render: 88ms)
+ GET /customer/chat 200 in 288ms (compile: 221ms, proxy.ts: 18ms, render: 49ms)
+ GET /seller/chat 200 in 299ms (compile: 116ms, proxy.ts: 18ms, render: 165ms)
+ GET /customer/support 200 in 76ms (compile: 40ms, proxy.ts: 7ms, render: 28ms)
+ GET /customer/support 200 in 485ms (compile: 407ms, proxy.ts: 45ms, render: 33ms)
+ GET /seller/chat 200 in 489ms (compile: 245ms, proxy.ts: 45ms, render: 199ms)
+ GET /customer/support 200 in 347ms (compile: 129ms, proxy.ts: 31ms, render: 187ms)
+ GET /seller/chat 200 in 351ms (compile: 224ms, proxy.ts: 31ms, render: 96ms)
+ GET /customer/support 200 in 306ms (compile: 243ms, proxy.ts: 24ms, render: 39ms)
+ GET /seller/chat 200 in 309ms (compile: 114ms, proxy.ts: 24ms, render: 171ms)
+ GET /customer/support 200 in 305ms (compile: 101ms, proxy.ts: 22ms, render: 182ms)
+ GET /seller/chat 200 in 310ms (compile: 195ms, proxy.ts: 22ms, render: 93ms)
+ GET /customer/support 200 in 427ms (compile: 352ms, proxy.ts: 35ms, render: 40ms)
+ GET /seller/chat 200 in 430ms (compile: 228ms, proxy.ts: 35ms, render: 167ms)
+ GET /customer/support 200 in 315ms (compile: 248ms, proxy.ts: 26ms, render: 41ms)
+ GET /seller/chat 200 in 321ms (compile: 122ms, proxy.ts: 26ms, render: 173ms)
+ GET /customer/support 200 in 338ms (compile: 266ms, proxy.ts: 31ms, render: 41ms)
+ GET /seller/chat 200 in 344ms (compile: 143ms, proxy.ts: 31ms, render: 170ms)
+ GET /customer/chat 200 in 75ms (compile: 37ms, proxy.ts: 8ms, render: 30ms)
+ GET /customer/chat 200 in 258ms (compile: 210ms, proxy.ts: 15ms, render: 32ms)
+ GET /seller/chat 200 in 262ms (compile: 118ms, proxy.ts: 15ms, render: 128ms)
+ GET /customer/support 200 in 83ms (compile: 38ms, proxy.ts: 13ms, render: 32ms)
+ GET /customer/chat 200 in 43ms (compile: 8ms, proxy.ts: 8ms, render: 27ms)
+ GET /customer/help 200 in 95ms (compile: 47ms, proxy.ts: 11ms, render: 36ms)
+ GET /customer/chatbot 404 in 2.7s (compile: 2.4s, proxy.ts: 12ms, render: 291ms)
+ GET /seller/chat 200 in 274ms (compile: 95ms, proxy.ts: 18ms, render: 162ms)
+ GET /seller/chat 200 in 166ms (compile: 8ms, proxy.ts: 11ms, render: 147ms)
+○ Compiling /api/broadcasting/auth ...
+ POST /api/broadcasting/auth 200 in 4.1s (compile: 3.5s, render: 613ms)
+ GET /customer/chatbot 404 in 522ms (compile: 460ms, proxy.ts: 20ms, render: 42ms)
+ GET /customer/help 200 in 877ms (compile: 107ms, proxy.ts: 348ms, render: 423ms)
+ GET /seller/chat 200 in 555ms (compile: 358ms, proxy.ts: 20ms, render: 177ms)
+ POST /api/broadcasting/auth 200 in 1927ms (compile: 1212ms, render: 714ms)
+ GET /seller/chat 200 in 151ms (compile: 9ms, proxy.ts: 10ms, render: 131ms)
+ POST /api/broadcasting/auth 200 in 1616ms (compile: 4ms, render: 1612ms)
+ POST /api/broadcasting/auth 200 in 1706ms (compile: 3ms, render: 1703ms)
+ GET /customer/profile 200 in 2.9s (compile: 2.8s, proxy.ts: 7ms, render: 75ms)
+ GET /customer/settings 200 in 1043ms (compile: 967ms, proxy.ts: 8ms, render: 69ms)
+ GET /customer/support 200 in 108ms (compile: 70ms, proxy.ts: 9ms, render: 29ms)
+ GET /customer/chat 200 in 1277ms (compile: 1209ms, proxy.ts: 9ms, render: 59ms)
+⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ GET /customer/chat 200 in 456ms (compile: 249ms, proxy.ts: 98ms, render: 110ms)
+ GET /seller/chat 200 in 3.2s (compile: 2.4s, proxy.ts: 98ms, render: 746ms)
+ GET /seller/chat 200 in 614ms (compile: 47ms, proxy.ts: 299ms, render: 267ms)
+ GET /customer/chat 200 in 3.2s (compile: 181ms, proxy.ts: 2.3s, render: 657ms)
+ GET /seller/chat 200 in 1069ms (compile: 329ms, proxy.ts: 315ms, render: 424ms)
+○ Compiling /api/broadcasting/auth ...
+ GET /customer/chat 200 in 343ms (compile: 283ms, proxy.ts: 26ms, render: 34ms)
+ GET /seller/chat 200 in 350ms (compile: 122ms, proxy.ts: 26ms, render: 202ms)
+ POST /api/broadcasting/auth 200 in 4.8s (compile: 1060ms, render: 3.7s)
+ POST /api/broadcasting/auth 200 in 8.6s (compile: 4.6s, render: 4.0s)
+ GET /customer/profile 200 in 106ms (compile: 48ms, proxy.ts: 16ms, render: 42ms)
+⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+[API Factory] Using Laravel backend
+ GET /seller/chat 200 in 1032ms (compile: 420ms, proxy.ts: 17ms, render: 595ms)
+ GET /customer/profile 200 in 1078ms (compile: 819ms, proxy.ts: 17ms, render: 242ms)
+ GET /customer/profile 200 in 1188ms (compile: 826ms, proxy.ts: 23ms, render: 339ms)
+ GET /seller/chat 200 in 1640ms (compile: 428ms, proxy.ts: 23ms, render: 1189ms)
+[API Factory] Using Laravel backend
+ GET /customer/profile 200 in 476ms (compile: 179ms, proxy.ts: 18ms, render: 279ms)
+ POST /api/broadcasting/auth 200 in 3.0s (compile: 2.4s, render: 561ms)
+ GET /seller/chat 200 in 331ms (compile: 87ms, proxy.ts: 11ms, render: 233ms)
+ POST /api/broadcasting/auth 200 in 893ms (compile: 3ms, render: 890ms)
+○ Compiling /customer/orders ...
+ GET /customer/orders 200 in 3.5s (compile: 3.4s, proxy.ts: 11ms, render: 62ms)
+○ Compiling /seller/sales ...
+[Icon] "Sales" no encontrado en ICON_MAP
+ GET /customer/orders 200 in 108ms (compile: 41ms, proxy.ts: 21ms, render: 46ms)
+[Icon] "Sales" no encontrado en ICON_MAP
+ GET /seller/sales 200 in 8.9s (compile: 7.9s, proxy.ts: 8ms, render: 996ms)
+ GET /seller/sales 200 in 797ms (compile: 7ms, proxy.ts: 16ms, render: 774ms)
+ GET /customer/orders 200 in 259ms (compile: 9ms, proxy.ts: 8ms, render: 242ms)
+[Icon] "Sales" no encontrado en ICON_MAP
+ GET /seller/sales 200 in 670ms (compile: 8ms, proxy.ts: 11ms, render: 651ms)
+ POST /api/broadcasting/auth 200 in 3.9s (compile: 1115ms, render: 2.8s)
+ POST /api/broadcasting/auth 200 in 6.1s (compile: 2.9s, render: 3.3s)
+[Icon] "Sales" no encontrado en ICON_MAP
+ GET /customer/orders 200 in 958ms (compile: 546ms, proxy.ts: 39ms, render: 373ms)
+ GET /seller/sales 200 in 1755ms (compile: 759ms, proxy.ts: 39ms, render: 956ms)
+[Icon] "Sales" no encontrado en ICON_MAP
+ GET /customer/orders 200 in 275ms (compile: 221ms, proxy.ts: 14ms, render: 40ms)
+ GET /seller/sales 200 in 772ms (compile: 101ms, proxy.ts: 14ms, render: 657ms)
+[Icon] "Sales" no encontrado en ICON_MAP
+ GET /customer/orders 200 in 270ms (compile: 79ms, proxy.ts: 38ms, render: 153ms)
+⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ GET /customer/orders 200 in 254ms (compile: 13ms, proxy.ts: 16ms, render: 225ms)
+ GET /seller/sales 200 in 847ms (compile: 166ms, proxy.ts: 38ms, render: 643ms)
+[Icon] "Sales" no encontrado en ICON_MAP
+ GET /seller/sales 200 in 857ms (compile: 8ms, proxy.ts: 10ms, render: 839ms)
+ POST /api/broadcasting/auth 200 in 3.7s (compile: 1984ms, render: 1711ms)
+ POST /api/broadcasting/auth 200 in 2.3s (compile: 3ms, render: 2.3s)
+[Icon] "Sales" no encontrado en ICON_MAP
+ GET /customer/orders 200 in 940ms (compile: 511ms, proxy.ts: 31ms, render: 398ms)
+ GET /seller/sales 200 in 1511ms (compile: 808ms, proxy.ts: 31ms, render: 672ms)
+○ Compiling /customer/bookings ...
+ GET /customer/bookings 200 in 5.6s (compile: 5.4s, proxy.ts: 21ms, render: 111ms)
+[Icon] "Sales" no encontrado en ICON_MAP
+ GET /customer/bookings 200 in 361ms (compile: 276ms, proxy.ts: 54ms, render: 30ms)
+ GET /seller/sales 200 in 917ms (compile: 142ms, proxy.ts: 54ms, render: 721ms)
+○ Compiling /seller/finance ...
+ GET /seller/finance 200 in 7.6s (compile: 7.4s, proxy.ts: 10ms, render: 245ms)
+ GET /customer/bookings 200 in 167ms (compile: 54ms, proxy.ts: 30ms, render: 83ms)
+ GET /seller/finance 200 in 116ms (compile: 13ms, proxy.ts: 22ms, render: 81ms)
+○ Compiling /seller/agenda ...
+[Icon] "Sales" no encontrado en ICON_MAP
+ GET /customer/bookings 200 in 372ms (compile: 238ms, proxy.ts: 20ms, render: 114ms)
+ GET /seller/agenda 200 in 11.3s (compile: 10.7s, proxy.ts: 17ms, render: 559ms)
+ GET /seller/agenda 200 in 386ms (compile: 274ms, proxy.ts: 20ms, render: 92ms)
+ GET /seller/sales 200 in 1144ms (compile: 149ms, proxy.ts: 355ms, render: 641ms)
+○ Compiling /customer/payment-methods ...
+ GET /customer/payment-methods 200 in 7.0s (compile: 6.8s, proxy.ts: 19ms, render: 129ms)
+[Icon] "Sales" no encontrado en ICON_MAP
+ GET /customer/payment-methods 200 in 313ms (compile: 15ms, proxy.ts: 252ms, render: 46ms)
+ GET /seller/sales 200 in 885ms (compile: 153ms, proxy.ts: 40ms, render: 692ms)
+[Icon] "Sales" no encontrado en ICON_MAP
+ GET /customer/payment-methods 200 in 1514ms (compile: 1043ms, proxy.ts: 162ms, render: 310ms)
+[Icon] "Sales" no encontrado en ICON_MAP
+ GET /customer/payment-methods 200 in 150ms (compile: 80ms, proxy.ts: 30ms, render: 41ms)
+ GET /seller/sales 200 in 1895ms (compile: 1101ms, proxy.ts: 162ms, render: 632ms)
+ GET /seller/sales 200 in 682ms (compile: 28ms, proxy.ts: 30ms, render: 624ms)
+⨯ ./src/components/ui/BaseDatePicker.tsx
+Module parse failed: Identifier 'isOpen' has already been declared (68:11)
+|         'Do'
+|     ];
+>     const [isOpen, setIsOpen] = useState(false);
+|     const [viewDate, setViewDate] = useState({
+|         "BaseDatePicker.useState": ()=>value ? new Date(value + 'T12:00:00') : new Date()
+
+Import trace for requested module:
+./src/components/ui/BaseDatePicker.tsx
+./src/components/ui/index.ts
+./src/features/seller/finance/FinancePageClient.tsx
+○ Compiling /_error ...
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename 'C:\Users\roaca\PROYECTO_LYRIUM\Frontend-Lyrium\frontapp\.next\dev\cache\webpack\client-development-fallback\2.pack.gz_' -> 'C:\Users\roaca\PROYECTO_LYRIUM\Frontend-Lyrium\frontapp\.next\dev\cache\webpack\client-development-fallback\2.pack.gz'
+ GET /seller/sales 500 in 14.6s (compile: 14.1s, proxy.ts: 10ms, render: 441ms)
+ GET /customer/payment-methods 500 in 14.6s (compile: 14.2s, proxy.ts: 10ms, render: 337ms)
+[Icon] "Sales" no encontrado en ICON_MAP
+ GET /customer/payment-methods 200 in 856ms (compile: 730ms, proxy.ts: 14ms, render: 112ms)
+[Icon] "Sales" no encontrado en ICON_MAP
+[Icon] "Sales" no encontrado en ICON_MAP
+ GET /seller/sales 200 in 1322ms (compile: 497ms, proxy.ts: 14ms, render: 811ms)
+ GET /seller/sales 200 in 524ms (compile: 24ms, proxy.ts: 36ms, render: 464ms)
+ GET /customer/payment-methods 200 in 552ms (compile: 350ms, proxy.ts: 36ms, render: 166ms)
+ GET /customer/payment-methods 200 in 593ms (compile: 350ms, proxy.ts: 36ms, render: 207ms)
+ GET /seller/sales 200 in 867ms (compile: 24ms, proxy.ts: 36ms, render: 807ms)
+[Icon] "Sales" no encontrado en ICON_MAP
+ GET /customer/payment-methods 200 in 293ms (compile: 239ms, proxy.ts: 16ms, render: 38ms)
+ GET /seller/sales 200 in 1340ms (compile: 119ms, proxy.ts: 16ms, render: 1205ms)
+○ Compiling /api/broadcasting/auth ...
+ POST /api/broadcasting/auth 200 in 11.8s (compile: 11.0s, render: 749ms)
+[Icon] "Sales" no encontrado en ICON_MAP
+ POST /api/broadcasting/auth 200 in 12.9s (compile: 11.8s, render: 1096ms)
+ GET /customer/payment-methods 200 in 1175ms (compile: 655ms, proxy.ts: 77ms, render: 444ms)
+[Icon] "Sales" no encontrado en ICON_MAP
+ GET /customer/payment-methods 200 in 107ms (compile: 47ms, proxy.ts: 24ms, render: 36ms)
+ GET /seller/sales 200 in 1546ms (compile: 801ms, proxy.ts: 76ms, render: 669ms)
+ GET /seller/sales 200 in 649ms (compile: 11ms, proxy.ts: 24ms, render: 615ms)
+[Icon] "Sales" no encontrado en ICON_MAP
+ GET /customer/payment-methods 200 in 95ms (compile: 9ms, proxy.ts: 20ms, render: 66ms)
+ GET /seller/sales 200 in 678ms (compile: 39ms, proxy.ts: 20ms, render: 619ms)
+[Icon] "Sales" no encontrado en ICON_MAP
+ GET /customer/payment-methods 200 in 97ms (compile: 50ms, proxy.ts: 17ms, render: 30ms)
+ GET /seller/sales 200 in 659ms (compile: 13ms, proxy.ts: 17ms, render: 629ms)
+○ Compiling /seller/invoices ...
+ GET /seller/invoices 200 in 10.0s (compile: 9.7s, proxy.ts: 10ms, render: 253ms)
+ GET /customer/payment-methods 200 in 170ms (compile: 96ms, proxy.ts: 22ms, render: 52ms)
+ GET /seller/invoices 200 in 87ms (compile: 9ms, proxy.ts: 15ms, render: 62ms)
+○ Compiling /seller/logistics ...
+ GET /seller/logistics 200 in 4.9s (compile: 4.6s, proxy.ts: 23ms, render: 283ms)
+ GET /seller/finance 200 in 432ms (compile: 71ms, proxy.ts: 308ms, render: 53ms)
+ GET /customer/payment-methods 200 in 342ms (compile: 146ms, proxy.ts: 13ms, render: 183ms)
+ GET /seller/finance 200 in 351ms (compile: 252ms, proxy.ts: 13ms, render: 86ms)
+ GET /customer/payment-methods 200 in 401ms (compile: 333ms, proxy.ts: 30ms, render: 38ms)
+ GET /seller/finance 200 in 408ms (compile: 160ms, proxy.ts: 30ms, render: 218ms)
+○ Compiling /seller/chat ...
+ GET /seller/chat 200 in 4.5s (compile: 4.4s, proxy.ts: 10ms, render: 108ms)
+ GET /seller/chat 200 in 46ms (compile: 7ms, proxy.ts: 9ms, render: 30ms)
+ GET /seller/finance 200 in 88ms (compile: 29ms, proxy.ts: 10ms, render: 50ms)
+○ Compiling /customer/orders ...
+ GET /customer/orders 200 in 5.5s (compile: 5.4s, proxy.ts: 11ms, render: 88ms)
+ GET /customer/orders 200 in 39ms (compile: 8ms, proxy.ts: 8ms, render: 23ms)
+ GET /customer/orders 200 in 35ms (compile: 5ms, proxy.ts: 8ms, render: 22ms)
+ GET /customer/chat 200 in 2.4s (compile: 2.4s, proxy.ts: 8ms, render: 69ms)
+ GET /seller/chat 200 in 180ms (compile: 56ms, proxy.ts: 9ms, render: 115ms)
+○ Compiling /api/broadcasting/auth ...
+ GET /customer/chat 200 in 31.7s (compile: 231ms, proxy.ts: 30.3s, render: 1176ms)
+ GET /seller/chat 200 in 31.7s (compile: 866ms, proxy.ts: 30.3s, render: 549ms)
+ POST /api/broadcasting/auth 200 in 33.9s (compile: 32.3s, render: 1637ms)
+ POST /api/broadcasting/auth 200 in 33.7s (compile: 32.0s, render: 1642ms)
+ POST /api/broadcasting/auth 200 in 6.0s (compile: 9ms, render: 6.0s)
+ POST /api/broadcasting/auth 200 in 7.2s (compile: 6ms, render: 7.2s)
+○ Compiling /seller/services ...
+ GET /seller/services 200 in 15.9s (compile: 15.5s, proxy.ts: 20ms, render: 414ms)
+ GET /customer/chat 200 in 273ms (compile: 115ms, proxy.ts: 52ms, render: 106ms)
+ GET /seller/services 200 in 220ms (compile: 20ms, proxy.ts: 29ms, render: 171ms)
+○ Compiling /api/auth-token ...
+ GET /api/auth-token 200 in 6.3s (compile: 6.2s, render: 72ms)
+ GET /api/auth-token 200 in 28ms (compile: 16ms, render: 12ms)
+ GET /api/auth-token 200 in 36ms (compile: 23ms, render: 13ms)
+ GET /customer/chat 200 in 634ms (compile: 475ms, proxy.ts: 76ms, render: 83ms)
+ GET /seller/services 200 in 643ms (compile: 148ms, proxy.ts: 75ms, render: 420ms)
+ GET /api/auth-token 200 in 21ms (compile: 6ms, render: 15ms)
+ GET /api/auth-token 200 in 17ms (compile: 5ms, render: 12ms)
+○ Compiling /seller/logistics ...
+ GET /seller/logistics 200 in 15.5s (compile: 13.7s, proxy.ts: 17ms, render: 1758ms)
+ GET /customer/chat 200 in 992ms (compile: 312ms, proxy.ts: 517ms, render: 162ms)
+ GET /seller/logistics 200 in 413ms (compile: 151ms, proxy.ts: 43ms, render: 219ms)
+ GET /customer/chat 200 in 1880ms (compile: 1181ms, proxy.ts: 51ms, render: 648ms)
+ GET /seller/logistics 200 in 2.3s (compile: 76ms, proxy.ts: 50ms, render: 2.2s)
+○ Compiling /api/broadcasting/auth ...
+⨯ SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>)
+    at POST (src\app\api\broadcasting\auth\route.ts:11:32)
+   9 |     }
+  10 |
+> 11 |     const body = await request.json();
+     |                                ^
+  12 |     const baseUrl = process.env.NEXT_PUBLIC_LARAVEL_API_URL?.replace('/api', '') ?? 'http://127.0.0.1:8000';
+  13 |
+  14 |     const res = await fetch(`${baseUrl}/broadcasting/auth`, {
+⨯ SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>)
+    at POST (src\app\api\broadcasting\auth\route.ts:11:32)
+   9 |     }
+  10 |
+> 11 |     const body = await request.json();
+     |                                ^
+  12 |     const baseUrl = process.env.NEXT_PUBLIC_LARAVEL_API_URL?.replace('/api', '') ?? 'http://127.0.0.1:8000';
+  13 |
+  14 |     const res = await fetch(`${baseUrl}/broadcasting/auth`, {
+ GET /customer/chat 200 in 1115ms (compile: 466ms, proxy.ts: 29ms, render: 620ms)
+ POST /api/broadcasting/auth 200 in 2.8s (compile: 10ms, render: 2.8s)
+ GET /seller/logistics 200 in 729ms (compile: 182ms, proxy.ts: 19ms, render: 528ms)
+ POST /api/broadcasting/auth 200 in 1425ms (compile: 11ms, render: 1414ms)
+○ Compiling /customer/profile ...
+ GET /customer/profile 200 in 14.4s (compile: 14.2s, proxy.ts: 22ms, render: 157ms)
+ GET /customer/profile 200 in 383ms (compile: 292ms, proxy.ts: 31ms, render: 60ms)
+ GET /seller/logistics 200 in 398ms (compile: 100ms, proxy.ts: 31ms, render: 267ms)
+ GET /customer/chat 200 in 436ms (compile: 80ms, proxy.ts: 14ms, render: 341ms)
+ GET /seller/logistics 200 in 354ms (compile: 11ms, proxy.ts: 17ms, render: 325ms)
+ POST /api/broadcasting/auth 200 in 4.9s (compile: 58ms, render: 4.9s)
+ GET /customer/profile 200 in 100ms (compile: 12ms, proxy.ts: 33ms, render: 55ms)
+ POST /api/broadcasting/auth 200 in 5.1s (compile: 5ms, render: 5.1s)
+ GET /customer/profile 200 in 76ms (compile: 11ms, proxy.ts: 27ms, render: 39ms)
+[?25h

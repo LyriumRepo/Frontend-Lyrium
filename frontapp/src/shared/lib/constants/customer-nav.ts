@@ -18,11 +18,32 @@ export const customerNavigation: PanelNavigation = [
                 href: '/customer/orders'
             },
             {
+                id: 'bookings',
+                label: 'Mis Reservas',
+                description: 'Servicios agendados y pasados',
+                icon: 'Calendar',
+                href: '/customer/bookings'
+            },
+            {
+                id: 'security',
+                label: 'Seguridad',
+                description: 'Protege tu cuenta',
+                icon: 'Shield',
+                href: '/customer/security'
+            },
+            {
                 id: 'wishlist',
                 label: 'Lista de Deseos',
                 description: 'Productos guardados',
                 icon: 'Heart',
                 href: '/customer/wishlist'
+            },
+            {
+                id: 'invoices',
+                label: 'Confirmaciones de Pago',
+                description: 'Facturas y boletas electrónicas',
+                icon: 'Receipt',
+                href: '/customer/invoices'
             },
             {
                 id: 'payment-methods',
@@ -38,23 +59,24 @@ export const customerNavigation: PanelNavigation = [
                 icon: 'MapPin',
                 href: '/customer/addresses'
             },
+
             {
-                id: 'security',
-                label: 'Seguridad',
-                description: 'Protege tu cuenta',
-                icon: 'Shield',
-                href: '/customer/security'
+                id: 'lirios',
+                label: 'Mis Lirios',
+                description: 'Tus puntos de fidelidad',
+                icon: 'Leaf',
+                href: '/customer/lirios'
             },
             {
                 id: 'chat',
                 label: 'Chat con Vendedores',
                 description: 'Comunicación directa con vendedores',
-                icon: 'Messages',
+                icon: 'MessageCircle',
                 href: '/customer/chat'
             },
             {
                 id: 'support',
-                label: 'Mesa de Ayuda',
+                label: 'Soporte Lyrium',
                 description: 'Tickets de soporte técnico',
                 icon: 'Headset',
                 href: '/customer/support'

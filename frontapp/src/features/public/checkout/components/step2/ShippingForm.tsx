@@ -1,121 +1,288 @@
+/**
+ * ShippingForm.tsx
+ * ARCHIVO: src/features/public/checkout/components/step2/ShippingForm.tsx
+ */
+
 'use client';
 
-import { MapPin } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
 import { useCheckoutStore } from '@/store/checkoutStore';
+import {
+  getDepartamentos,
+  getProvincias,
+  getDistritos,
+} from '../../lib/ubigeo';
+import CustomSelect from '../ui/CustomSelect';
+import { addressApi, type Address } from '@/shared/lib/api/addressRepository';
+import { useAuth } from '@/shared/lib/context/AuthContext';
 
-const DEPARTAMENTOS = ['Lima', 'Arequipa', 'La Libertad', 'Piura', 'Cusco', 'Junín', 'Puno', 'Callao', 'Lambayeque', 'Áncash'];
-const inputCls = "w-full px-4 py-3 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-muted)] focus:bg-white dark:focus:bg-[var(--bg-card)] focus:border-sky-400 dark:focus:border-[var(--brand-sky)] focus:outline-none focus:ring-4 focus:ring-sky-100 dark:focus:ring-sky-900/20 transition-all text-gray-800 dark:text-[var(--text-primary)]";
+const inputCls =
+  'w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-[var(--border-subtle)] ' +
+  'bg-white dark:bg-[var(--bg-secondary)] text-gray-900 dark:text-[var(--text-primary)] text-sm ' +
+  'focus:ring-2 focus:ring-[var(--brand-sky)]/30 focus:border-[var(--brand-sky)] outline-none transition';
 
-function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
-    return (
-        <div className="flex flex-col gap-1">
-            <div className="flex items-center justify-between">
-                <label className="text-xs font-bold text-gray-600 dark:text-[var(--text-secondary)] uppercase tracking-wide">{label}</label>
-                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-tighter ${required ? 'text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/20' : 'text-gray-400 dark:text-[var(--text-muted)] bg-gray-100 dark:bg-[var(--bg-muted)]'}`}>
-                    {required ? 'Requerido *' : 'Opcional'}
-                </span>
-            </div>
-            {children}
-        </div>
-    );
-}
+const labelCls =
+  'block text-xs font-medium text-gray-500 dark:text-[var(--text-secondary)] mb-1.5';
 
 export default function ShippingForm() {
-    const data = useCheckoutStore((s) => s.shippingData);
-    const setShippingData = useCheckoutStore((s) => s.setShippingData);
-    const docType = useCheckoutStore((s) => s.personalData.docType);
+  const data = useCheckoutStore((s) => s.shippingData);
+  const setData = useCheckoutStore((s) => s.setShippingData);
+  const { isAuthenticated } = useAuth();
 
-    const isPAS = docType === 'PAS';
+  const [savedAddresses, setSavedAddresses] = useState<Address[]>([]);
+  const [loadingAddresses, setLoadingAddresses] = useState(true);
+  const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
 
-    return (
-        <div className="bg-white dark:bg-[var(--bg-card)] border border-gray-200 dark:border-[var(--border-subtle)] rounded-2xl shadow-sm">
-            <div className="px-5 py-4 bg-gradient-to-r from-sky-500 to-sky-400 flex items-center gap-2 rounded-t-2xl">
-                <MapPin className="w-6 h-6 text-white" />
-                <h3 className="font-bold text-white">Datos de Envío</h3>
-            </div>
+  const departamentos = getDepartamentos();
+  const provincias = getProvincias(data.departamento);
+  const distritos = getDistritos(data.departamento, data.provincia);
 
-            <div className="p-5">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {/* País */}
-                    <Field label="País">
-                        <input type="text" value="Perú" readOnly className="w-full px-4 py-3 border-2 border-gray-100 dark:border-[var(--border-subtle)] rounded-xl text-sm bg-gray-100 dark:bg-[var(--bg-muted)] text-gray-500 dark:text-[var(--text-muted)] cursor-not-allowed" />
-                    </Field>
+  // carga direcciones guardadas del dashboard
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      try {
+        setLoadingAddresses(true);
+        const list = await addressApi.list();
+        if (!cancelled) {
+          setSavedAddresses(list);
+          // auto-seleccionar la dirección predeterminada si existe
+          const defaultAddr = list.find((a) => a.is_default);
+          if (defaultAddr) {
+            setData({
+              pais: defaultAddr.pais,
+              departamento: defaultAddr.departamento,
+              provincia: defaultAddr.provincia,
+              distrito: defaultAddr.distrito,
+              urbanizacion: '',
+              avenida: defaultAddr.avenida,
+              numero: defaultAddr.numero,
+              pisoLote: defaultAddr.piso_lote ?? '',
+              referencia: defaultAddr.referencia ?? '',
+              ciudadPas: '',
+              zipCode: '',
+              hotelName: '',
+              direccionPas: '',
+              saveAddress: false,
+            });
+            setSelectedAddressId(defaultAddr.id);
+          }
+        }
+      } catch {
+        // not authenticated — ignore
+      } finally {
+        if (!cancelled) setLoadingAddresses(false);
+      }
+    }
+    load();
+    return () => { cancelled = true; };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-                    {/* PAS: ciudad libre */}
-                    {isPAS ? (
-                        <>
-                            <Field label="Ciudad / Distrito" required>
-                                <input type="text" placeholder="Ej: Miraflores, Lima / Miami" value={data.ciudadPas} onChange={(e) => setShippingData({ ciudadPas: e.target.value })} className={inputCls} />
-                            </Field>
-                            <Field label="Código Postal / Zip Code">
-                                <input type="text" placeholder="Ej: 15001" value={data.zipCode} onChange={(e) => setShippingData({ zipCode: e.target.value })} className={inputCls} />
-                            </Field>
-                            <Field label="Nombre del Hotel / Alojamiento">
-                                <input type="text" placeholder="Ej: Hotel Westin, Hilton..." value={data.hotelName} onChange={(e) => setShippingData({ hotelName: e.target.value })} className={inputCls} />
-                            </Field>
-                            <div className="md:col-span-2">
-                                <Field label="Dirección Completa / Street Address" required>
-                                    <div className="relative group">
-                                        <input type="text" placeholder="Ej: Calle Las Flores 123, Habitación 402" value={data.direccionPas} onChange={(e) => setShippingData({ direccionPas: e.target.value })} className={`${inputCls} pr-12`} />
-                                        <button type="button" className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-sky-500 text-white rounded-lg hover:bg-sky-600 transition-colors shadow-sm" title="Ubicar en mapa">
-                                            <MapPin className="w-4 h-4" />
-                                        </button>
-                                    </div>
-                                    <p className="mt-1 text-[10px] text-gray-400 dark:text-[var(--text-muted)] italic pl-1">¿No conoces la dirección? Usa el mapa para ubicarnos.</p>
-                                </Field>
-                            </div>
-                        </>
-                    ) : (
-                        <>
-                            <Field label="Departamento" required>
-                                <select value={data.departamento} onChange={(e) => setShippingData({ departamento: e.target.value, provincia: '', distrito: '' })} className={inputCls}>
-                                    <option value="">Seleccionar departamento</option>
-                                    {DEPARTAMENTOS.map((d) => <option key={d}>{d}</option>)}
-                                </select>
-                            </Field>
-                            <Field label="Provincia" required>
-                                <select value={data.provincia} onChange={(e) => setShippingData({ provincia: e.target.value, distrito: '' })} disabled={!data.departamento} className={`${inputCls} disabled:opacity-50`}>
-                                    <option value="">Seleccionar provincia</option>
-                                    {/* Provinces would be loaded dynamically from API */}
-                                </select>
-                            </Field>
-                            <Field label="Distrito" required>
-                                <select value={data.distrito} onChange={(e) => setShippingData({ distrito: e.target.value })} disabled={!data.provincia} className={`${inputCls} disabled:opacity-50`}>
-                                    <option value="">Seleccionar distrito</option>
-                                </select>
-                            </Field>
-                            <Field label="Urbanización / Barrio">
-                                <input type="text" placeholder="Ej: Urb. Los Olivos" value={data.urbanizacion} onChange={(e) => setShippingData({ urbanizacion: e.target.value })} className={inputCls} />
-                            </Field>
-                            <Field label="Av. / Calle / Jirón">
-                                <input type="text" placeholder="Ej: Av. El Sol" value={data.avenida} onChange={(e) => setShippingData({ avenida: e.target.value })} className={inputCls} />
-                            </Field>
-                            <Field label="Número / Mz. y Lote">
-                                <input type="text" placeholder="Ej: 450 o Mz A Lt 5" value={data.numero} onChange={(e) => setShippingData({ numero: e.target.value })} className={inputCls} />
-                            </Field>
-                            <Field label="Piso / Dpto / Interior">
-                                <input type="text" placeholder="Ej: Piso 2 - Dpto 201" value={data.pisoLote} onChange={(e) => setShippingData({ pisoLote: e.target.value })} className={inputCls} />
-                            </Field>
-                            <Field label="Referencia" required>
-                                <textarea rows={1} placeholder="Ej: Frente al parque central, casa azul..." value={data.referencia} onChange={(e) => setShippingData({ referencia: e.target.value })} className={`${inputCls} resize-none`} />
-                            </Field>
-                        </>
-                    )}
-                </div>
+  function handleSelectSaved(address: Address) {
+    setData({
+      pais: address.pais,
+      departamento: address.departamento,
+      provincia: address.provincia,
+      distrito: address.distrito,
+      urbanizacion: '',
+      avenida: address.avenida,
+      numero: address.numero,
+      pisoLote: address.piso_lote ?? '',
+      referencia: address.referencia ?? '',
+      ciudadPas: '',
+      zipCode: '',
+      hotelName: '',
+      direccionPas: '',
+      saveAddress: false,
+    });
+  }
 
-                {/* Save address toggle */}
-                <div className="mt-5 p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl border border-emerald-100 dark:border-emerald-800/30">
-                    <label className="flex items-center gap-3 cursor-pointer group select-none">
-                        <div className="relative inline-flex items-center">
-                            <input type="checkbox" checked={data.saveAddress} onChange={(e) => setShippingData({ saveAddress: e.target.checked })} className="sr-only peer" />
-                            <div className="w-10 h-6 bg-gray-200 dark:bg-[var(--bg-muted)] rounded-full peer peer-checked:bg-emerald-500 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full transition-all" />
-                        </div>
-                        <span className="text-xs font-bold text-emerald-800/70 dark:text-emerald-400/80 group-hover:text-emerald-600 dark:group-hover:text-emerald-300 transition-colors">
-                            💾 Guardar esta dirección en mi perfil
-                        </span>
-                    </label>
-                </div>
-            </div>
+  function handleDepartamento(value: string) {
+    setData({ departamento: value, provincia: '', distrito: '' });
+  }
+
+  function handleProvincia(value: string) {
+    setData({ provincia: value, distrito: '' });
+  }
+
+  return (
+    <div
+      className="rounded-2xl border border-gray-200 dark:border-[var(--border-default)]
+      bg-white dark:bg-[var(--bg-card)] p-6 space-y-5 shadow-sm"
+    >
+      <h2 className="font-bold text-gray-900 dark:text-[var(--text-primary)] flex items-center gap-2">
+        <span
+          className="w-7 h-7 rounded-full bg-[var(--brand-sky)] text-white text-xs
+          font-black flex items-center justify-center"
+        >
+          2
+        </span>
+        Dirección de envío
+      </h2>
+
+      {/* Saved addresses selector */}
+      {!loadingAddresses && savedAddresses.length > 0 && (
+        <div className="space-y-2">
+          <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">
+            Usar una dirección guardada
+          </label>
+          <select
+            value={selectedAddressId ?? ''}
+            onChange={(e) => {
+              const val = e.target.value;
+              if (!val) {
+                setSelectedAddressId(null);
+                return;
+              }
+              const addr = savedAddresses.find((a) => a.id === Number(val));
+              if (addr) {
+                handleSelectSaved(addr);
+                setSelectedAddressId(addr.id);
+              }
+            }}
+            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700
+              bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm
+              focus:ring-2 focus:ring-sky-500 focus:border-transparent outline-none transition"
+          >
+            <option value="">Seleccionar dirección...</option>
+            {savedAddresses.map((a) => (
+              <option key={a.id} value={a.id}>
+                {a.etiqueta === 'casa' ? '🏠' : a.etiqueta === 'trabajo' ? '💼' : '📍'} {a.avenida} {a.numero} — {a.distrito}
+              </option>
+            ))}
+          </select>
         </div>
-    );
+      )}
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* Departamento */}
+        <div>
+          <label className={labelCls}>
+            Departamento <span className="text-red-500">*</span>
+          </label>
+          <CustomSelect
+            value={data.departamento}
+            onChange={handleDepartamento}
+            options={departamentos}
+            placeholder="Seleccionar..."
+          />
+        </div>
+
+        {/* Provincia */}
+        <div>
+          <label className={labelCls}>
+            Provincia <span className="text-red-500">*</span>
+          </label>
+          <CustomSelect
+            value={data.provincia}
+            onChange={handleProvincia}
+            options={provincias}
+            placeholder="Seleccionar..."
+            disabled={!data.departamento}
+          />
+        </div>
+
+        {/* Distrito */}
+        <div>
+          <label className={labelCls}>
+            Distrito <span className="text-red-500">*</span>
+          </label>
+          <CustomSelect
+            value={data.distrito}
+            onChange={(v) => setData({ distrito: v })}
+            options={distritos}
+            placeholder="Seleccionar..."
+            disabled={!data.provincia}
+          />
+        </div>
+
+        {/* Urbanización */}
+        <div>
+          <label className={labelCls}>
+            Urbanización / Zona
+          </label>
+          <input
+            type="text"
+            value={data.urbanizacion}
+            onChange={(e) => setData({ urbanizacion: e.target.value })}
+            placeholder="Urb. Los Pinos"
+            className={inputCls}
+          />
+        </div>
+
+        {/* Avenida / Calle */}
+        <div className="sm:col-span-2">
+          <label className={labelCls}>
+            Avenida / Calle / Jirón <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            value={data.avenida}
+            onChange={(e) => setData({ avenida: e.target.value })}
+            placeholder="Av. Larco"
+            className={inputCls}
+          />
+        </div>
+
+        {/* Número */}
+        <div>
+          <label className={labelCls}>
+            Número
+          </label>
+          <input
+            type="text"
+            value={data.numero}
+            onChange={(e) => setData({ numero: e.target.value })}
+            placeholder="456"
+            className={inputCls}
+          />
+        </div>
+
+        {/* Piso / Dpto / Lote */}
+        <div>
+          <label className={labelCls}>
+            Piso / Dpto / Lote
+          </label>
+          <input
+            type="text"
+            value={data.pisoLote}
+            onChange={(e) => setData({ pisoLote: e.target.value })}
+            placeholder="Piso 3, Dpto 301"
+            className={inputCls}
+          />
+        </div>
+
+        {/* Referencia */}
+        <div className="sm:col-span-2">
+          <label className={labelCls}>
+            Referencia
+          </label>
+          <input
+            type="text"
+            value={data.referencia}
+            onChange={(e) => setData({ referencia: e.target.value })}
+            placeholder="Frente al parque, casa color azul..."
+            className={inputCls}
+          />
+        </div>
+
+        {/* Guardar dirección — solo para usuarios autenticados */}
+        {isAuthenticated && (
+          <div className="sm:col-span-2">
+            <label className="flex items-center gap-2 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={data.saveAddress}
+                onChange={(e) => setData({ saveAddress: e.target.checked })}
+                className="w-4 h-4 rounded accent-[var(--brand-sky)]"
+              />
+              <span className="text-sm text-gray-600 dark:text-[var(--text-secondary)]">
+                Guardar esta dirección para futuras compras
+              </span>
+            </label>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }

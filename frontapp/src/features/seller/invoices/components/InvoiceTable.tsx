@@ -25,11 +25,11 @@ export default function InvoiceTable({ vouchers, onViewDetail }: InvoiceTablePro
                     <thead>
                         <tr className="bg-[var(--bg-secondary)]/50 border-b border-[var(--border-subtle)] text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">
                             <th className="px-6 py-5">Comprobante</th>
-                            <th className="px-6 py-5">Cliente / RUC</th>
+                            <th className="px-6 py-5">Tienda / RUC</th>
                             <th className="px-6 py-5">Pedido</th>
                             <th className="px-6 py-5">Monto</th>
                             <th className="px-6 py-5">Fecha Emisión</th>
-                            <th className="px-6 py-5 text-center">Estado SUNAT</th>
+                            <th className="px-6 py-5 text-center">Estado</th>
                             <th className="px-6 py-5 text-right">Acciones</th>
                         </tr>
                     </thead>
@@ -63,8 +63,8 @@ export default function InvoiceTable({ vouchers, onViewDetail }: InvoiceTablePro
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <p className="text-sm font-bold text-[var(--text-primary)] truncate max-w-[200px]">{v.customer_name}</p>
-                                            <p className="text-[10px] text-[var(--text-secondary)] font-black font-mono">{v.customer_ruc}</p>
+                                            <p className="text-sm font-bold text-[var(--text-primary)] truncate max-w-[200px]">{v.store_name}</p>
+                                            <p className="text-[10px] text-[var(--text-secondary)] font-black font-mono">{v.store_ruc}</p>
                                         </td>
                                         <td className="px-6 py-4">
                                             <span className="text-xs font-black text-sky-600 bg-sky-50 px-2 py-1 rounded-lg border border-sky-100">{v.order_id}</span>

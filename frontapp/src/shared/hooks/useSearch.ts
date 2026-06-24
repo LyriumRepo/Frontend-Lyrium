@@ -78,6 +78,26 @@ export function useSearch(options: UseSearchOptions = {}): UseSearchReturn {
     }
   }, []);
 
+  const searchServicesApi = useCallback(async (query: string): Promise<SearchResult[]> => {
+    try {
+      const API = process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://localhost:8000/api';
+      const res = await fetch(`${API}/services?search=${encodeURIComponent(query)}&per_page=${maxResults}`);
+      const json = await res.json();
+      const services = Array.isArray(json.data) ? json.data : [];
+      return services.map((s: any) => ({
+        id: s.id,
+        type: 'service' as const,
+        titulo: s.name,
+        precio: parseFloat(s.price || '0'),
+        imagen: transformUrl(s.image),
+        slug: s.slug,
+        categoria: s.category,
+      }));
+    } catch {
+      return [];
+    }
+  }, [maxResults]);
+
   const performSearch = useCallback(async (query: string, category?: string) => {
     if (query.length < minChars) {
       setResults([]);
@@ -93,9 +113,10 @@ export function useSearch(options: UseSearchOptions = {}): UseSearchReturn {
     setError(null);
 
     try {
-      const [products, categories] = await Promise.all([
+      const [products, categories, services] = await Promise.all([
         home.searchProducts(query, maxResults),
         home.searchCategories(query, maxResults),
+        searchServicesApi(query),
       ]);
 
       const productResults: SearchResult[] = (Array.isArray(products) ? products : []).map((p) => ({
@@ -116,9 +137,10 @@ export function useSearch(options: UseSearchOptions = {}): UseSearchReturn {
         slug: c.slug,
       }));
 
-      setProductResults(productResults);
+      const allProductResults = [...productResults, ...services];
+      setProductResults(allProductResults);
       setCategoryResults(categoryResults);
-      const combinedResults = [...productResults, ...categoryResults];
+      const combinedResults = [...allProductResults, ...categoryResults];
       setResults(combinedResults.slice(0, maxResults));
     } catch (err) {
       if (err instanceof Error && err.name !== 'AbortError') {

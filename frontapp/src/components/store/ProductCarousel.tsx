@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight, Star, ShoppingCart } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Producto } from '@/types/public';
+import { useCarritoStore } from '@/store/carritoStore';
 
 interface ProductCarouselProps {
   productos: Producto[];
@@ -15,8 +16,8 @@ interface ProductCarouselProps {
 }
 
 const stickerConfig: Record<string, { label: string; class: string }> = {
-  oferta: { label: 'Oferta', class: 'bg-red-500' },
-  promo: { label: 'Promo', class: 'bg-orange-500' },
+  oferta: { label: 'Oferta', class: 'bg-emerald-600 dark:bg-emerald-500' },
+  promo: { label: 'Promo', class: 'bg-sky-500 dark:bg-sky-400' },
   nuevo: { label: 'Nuevo', class: 'bg-green-500' },
   limitado: { label: 'Limitado', class: 'bg-purple-500' },
 };
@@ -29,6 +30,13 @@ export default function ProductCarousel({
   minWidth = '200px'
 }: ProductCarouselProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const addToCart = useCarritoStore((s) => s.addToCart);
+  const openCart = useCarritoStore((s) => s.openCart);
+
+  const handleAddToCart = (producto: Producto) => {
+    addToCart(producto);
+    openCart();
+  };
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
@@ -103,7 +111,7 @@ export default function ProductCarousel({
                       className="object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                     {descuento && !sticker && (
-                      <span className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-md">
+                      <span className="absolute top-2 left-2 bg-rose-600 text-white text-xs font-bold px-2 py-0.5 rounded-md">
                         -{Math.round(descuento * 100)}%
                       </span>
                     )}
@@ -136,7 +144,7 @@ export default function ProductCarousel({
                       </div>
                       <button 
                         className="w-8 h-8 bg-sky-500 hover:bg-sky-600 dark:hover:bg-sky-400 rounded-full flex items-center justify-center transition-colors"
-                        onClick={(e) => e.preventDefault()}
+                        onClick={(e) => { e.preventDefault(); handleAddToCart(producto); }}
                         aria-label="Añadir al carrito"
                       >
                         <ShoppingCart className="w-4 h-4 text-white" />

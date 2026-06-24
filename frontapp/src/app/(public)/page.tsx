@@ -9,6 +9,7 @@ import {
     ProductSlider,
     BenefitsSection,
     NewsletterSection,
+    DigestionSaludableSection,
 } from '@/components/home';
 
 import { home } from '@/shared/lib/api';
@@ -18,11 +19,7 @@ import type { Banner, Categoria, Producto, Marca, Beneficio, BannersPub } from '
 
 const LARAVEL_BASE_URL = (process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://localhost:8000/api').replace('/api', '');
 
-const HOME_SECTIONS = [
-    { slug: 'productos-digestion-saludable', titulo: 'Digestión saludable' },
-    { slug: 'productos-belleza', titulo: 'Belleza' },
-    { slug: 'servicios-medicos', titulo: 'Servicios Médicos' },
-];
+const HOME_SECTIONS: { slug: string; titulo: string }[] = [];
 
 const transformUrl = (url: string | undefined | null): string => {
     if (!url) return '/img/no-image.png';
@@ -87,7 +84,7 @@ export default async function HomePage() {
 
     return (
         <div className="space-y-8 md:space-y-16 pb-8 md:pb-12">
-            <SearchBar categorias={categoriasServicios} />
+            <SearchBar categoriasServicios={categoriasServicios} categoriasProductos={categoriasProductos}  />
             <HeroSection banners={banners} />
             <ServicesGrid categorias={categoriasServicios} />
             <ProductsGrid categorias={categoriasProductos} titulo="Categorías de productos saludables" />
@@ -111,7 +108,7 @@ export default async function HomePage() {
                     />
                 );
             })}
-
+ <DigestionSaludableSection />
             <BenefitsSection beneficios={beneficios} />
             <NewsletterSection />
         </div>

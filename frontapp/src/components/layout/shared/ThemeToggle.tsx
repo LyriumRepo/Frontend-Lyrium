@@ -1,13 +1,12 @@
 'use client';
 
 import { useTheme } from 'next-themes';
-import Icon from '@/components/ui/Icon';
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 
 export default function ThemeToggle() {
     const { theme, setTheme, resolvedTheme } = useTheme();
     const [mounted, setMounted] = useState(false);
-    const [showSystem, setShowSystem] = useState(false);
 
     useEffect(() => {
         setMounted(true);
@@ -15,52 +14,70 @@ export default function ThemeToggle() {
 
     if (!mounted) {
         return (
-            <div className="p-2.5 rounded-xl">
-                <Icon name="Sun" className="w-5 h-5 text-amber-500" />
+            <div className="p-3 rounded-xl">
+                <Image
+                    src="/img/iconologo.png"
+                    alt="Modo Bio"
+                    width={28}
+                    height={28}
+                    className="w-7 h-7 object-contain"
+                />
             </div>
         );
     }
 
     const cycleTheme = () => {
-        if (theme === 'light') {
-            setTheme('dark');
-        } else if (theme === 'dark') {
-            setTheme('system');
+        if (resolvedTheme === 'dark') {
+            setTheme('light'); // Bio
         } else {
-            setTheme('light');
+            setTheme('dark'); // Serenidad
         }
     };
 
-    const getIcon = () => {
-        if (theme === 'system') {
-            return { name: 'Monitor', color: 'text-sky-400' as const };
-        }
+    const getImage = () => {
         if (resolvedTheme === 'dark') {
-            return { name: 'Moon', color: 'text-sky-400' as const };
+            return {
+                src: '/img/Flor_Dark.png',
+                alt: 'Modo Serenidad'
+            };
         }
-        return { name: 'Sun', color: 'text-amber-500' as const };
+
+        return {
+            src: '/img/iconologo.png',
+            alt: 'Modo Bio'
+        };
     };
 
     const getLabel = () => {
-        if (theme === 'system') return 'Modo automático';
-        if (theme === 'dark') return 'Modo oscuro';
-        return 'Modo claro';
+        if (resolvedTheme === 'dark') return 'Modo Serenidad';
+        return 'Modo Bio';
     };
 
-    const icon = getIcon();
+    const image = getImage();
 
     return (
-        <div className="relative">
+        <div className="relative group inline-block">
             <button
                 onClick={cycleTheme}
-                onMouseEnter={() => setShowSystem(true)}
-                onMouseLeave={() => setShowSystem(false)}
-                className="p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] transition-colors"
+                className="p-3 rounded-xl hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] transition-colors"
                 aria-label={getLabel()}
-                title={getLabel()}
             >
-                <Icon name={icon.name} className={`w-5 h-5 ${icon.color}`} />
+                <Image
+                    src={image.src}
+                    alt={image.alt}
+                    width={30}
+                    height={30}
+                    className="w-9 h-9 object-contain"
+                />
             </button>
+
+            <span
+                className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2
+                opacity-0 group-hover:opacity-100 transition-opacity duration-300
+                bg-[#333333] text-white text-xs px-2 py-1 rounded-md whitespace-nowrap pointer-events-none"
+            >
+                {getLabel()}
+            </span>
         </div>
     );
 }

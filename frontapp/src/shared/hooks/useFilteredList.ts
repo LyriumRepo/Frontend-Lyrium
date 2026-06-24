@@ -76,15 +76,17 @@ export function useFilteredList<T, F extends Record<string, any> = Record<string
   }, []);
 
   const hasActiveFilters = useMemo(() => {
-    return Object.values(filters).some(v => v !== undefined && v !== '' && v !== 'all');
+    return Object.values(filters).some(v => v !== undefined && v !== '' && String(v).toLowerCase() !== 'all');
   }, [filters]);
+
+  const dataArray = Array.isArray(data) ? data : [];
 
   const filteredData = useMemo(() => {
     if (!hasActiveFilters) {
-      return data;
+      return dataArray;
     }
 
-    return data.filter(item => {
+    return dataArray.filter(item => {
       const itemRecord = item as Record<string, unknown>;
 
       // Search filter
@@ -131,7 +133,7 @@ export function useFilteredList<T, F extends Record<string, any> = Record<string
         const fieldConfig = config.fields[key];
         const filterValue = filters[key];
         
-        if (filterValue === undefined || filterValue === '' || filterValue === 'all') {
+        if (filterValue === undefined || filterValue === '' || String(filterValue).toLowerCase() === 'all') {
           continue;
         }
 

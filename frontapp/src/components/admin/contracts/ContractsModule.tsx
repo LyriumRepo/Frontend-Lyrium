@@ -2,7 +2,7 @@ import React from 'react';
 import { StatusBadge, ModalityBadge, KpiCard, ExpiryTrafficLight } from './ContractsUIComponents';
 import { Contract } from '@/lib/types/admin/contracts';
 import { ContractKPI } from '@/features/admin/contracts/types';
-import { Search, Plus, ArrowRight, ChevronRight } from 'lucide-react';
+import { Search, Plus, ArrowRight, ChevronRight, FileText, Calendar, Shield, Hash, Landmark, Files, CheckCircle, Hourglass, AlertOctagon } from 'lucide-react';
 import Skeleton from '@/components/ui/Skeleton';
 
 interface ContratosModuleProps {
@@ -21,36 +21,26 @@ export const ContratosModule: React.FC<ContratosModuleProps> = ({ state, actions
 
     if (loading && contracts.length === 0) {
         return (
-            <div className="space-y-6 animate-fadeIn pb-20 text-left font-industrial">
+            <div className="space-y-8 animate-fadeIn pb-20 text-left font-industrial">
                 {/* KPI SKELETONS */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div key="contracts-kpi-skel-1" className="bg-[var(--bg-card)] p-6 rounded-2xl shadow-sm space-y-4">
-                        <Skeleton className="h-4 w-24 rounded" />
-                        <Skeleton className="h-8 w-16 rounded-md" />
-                    </div>
-                    <div key="contracts-kpi-skel-2" className="bg-[var(--bg-card)] p-6 rounded-2xl shadow-sm space-y-4">
-                        <Skeleton className="h-4 w-24 rounded" />
-                        <Skeleton className="h-8 w-16 rounded-md" />
-                    </div>
-                    <div key="contracts-kpi-skel-3" className="bg-[var(--bg-card)] p-6 rounded-2xl shadow-sm space-y-4">
-                        <Skeleton className="h-4 w-24 rounded" />
-                        <Skeleton className="h-8 w-16 rounded-md" />
-                    </div>
-                    <div key="contracts-kpi-skel-4" className="bg-[var(--bg-card)] p-6 rounded-2xl shadow-sm space-y-4">
-                        <Skeleton className="h-4 w-24 rounded" />
-                        <Skeleton className="h-8 w-16 rounded-md" />
-                    </div>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    {[1, 2, 3, 4].map((i) => (
+                        <div key={`kpi-skel-${i}`} className="bg-[var(--bg-card)] p-6 rounded-[2rem] shadow-sm space-y-4 border border-[var(--border-subtle)]">
+                            <Skeleton className="h-4 w-24 rounded" />
+                            <Skeleton className="h-8 w-16 rounded-md" />
+                        </div>
+                    ))}
                 </div>
 
                 {/* FILTROS SKELETON */}
-                <Skeleton className="w-full h-24 rounded-3xl" />
+                <Skeleton className="w-full h-24 rounded-[2.5rem]" />
 
                 {/* TABLA SKELETON */}
-                <div className="bg-[var(--bg-card)] rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm overflow-hidden p-6">
+                <div className="bg-[var(--bg-card)] rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm overflow-hidden p-8">
                     <div className="space-y-4">
-                        {[1, 2, 3, 4, 5, 6].map((i) => (
-                            <div key={`row-skel-${i}`} className="flex gap-4 py-4 border-b border-[var(--border-subtle)] last:border-0 items-center">
-                                <Skeleton className="h-8 w-16 rounded" />
+                        {[1, 2, 3, 4, 5].map((i) => (
+                            <div key={`row-skel-${i}`} className="flex gap-4 py-5 border-b border-[var(--border-subtle)] last:border-0 items-center">
+                                <Skeleton className="h-8 w-20 rounded" />
                                 <div className="flex-1 space-y-2">
                                     <Skeleton className="h-4 w-1/3 rounded" />
                                     <Skeleton className="h-2 w-1/4 rounded" />
@@ -67,38 +57,76 @@ export const ContratosModule: React.FC<ContratosModuleProps> = ({ state, actions
     }
 
     return (
-        <div className="space-y-6 animate-fadeIn pb-20 text-left font-industrial">
+        <div className="space-y-8 animate-fadeIn pb-20 text-left font-industrial">
 
-            {/* KPI Summary */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                {kpis.map((kpi) => <KpiCard key={kpi.label} kpi={kpi} />)}
+            {/* KPI Summary - Rediseño Premium */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                {kpis.map((kpi) => (
+                    <div 
+                        key={kpi.label}
+                        className="bg-[var(--bg-card)] p-6 rounded-[2.2rem] border border-[var(--border-subtle)] shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 relative overflow-hidden group flex flex-col justify-between min-h-[140px]"
+                    >
+                        <div className="absolute top-0 right-0 w-24 h-24 bg-cyan-500/5 rounded-full -mr-8 -mt-8 blur-xl group-hover:bg-cyan-500/10 transition-all"></div>
+                        <div className="flex items-center justify-between">
+                            <span className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest leading-none">
+                                {kpi.label}
+                            </span>
+                            <div className={`p-2.5 rounded-xl ${
+                                kpi.color === 'emerald' ? 'bg-emerald-500/10 text-emerald-500 dark:text-emerald-400' :
+                                kpi.color === 'amber' ? 'bg-amber-500/10 text-amber-500 dark:text-amber-400' :
+                                kpi.color === 'red' ? 'bg-red-500/10 text-red-500 dark:text-red-400' :
+                                kpi.color === 'indigo' ? 'bg-indigo-500/10 text-indigo-500 dark:text-indigo-400' :
+                                'bg-[var(--icons-green)]/10 text-[var(--brand-green)] dark:text-[var(--icons-green)]'
+                            }`}>
+                                {kpi.icon === 'Files' && <Files className="w-5 h-5" />}
+                                {kpi.icon === 'CheckCircle' && <CheckCircle className="w-5 h-5" />}
+                                {kpi.icon === 'Hourglass' && <Hourglass className="w-5 h-5" />}
+                                {kpi.icon === 'AlertOctagon' && <AlertOctagon className="w-5 h-5" />}
+                                {!['Files', 'CheckCircle', 'Hourglass', 'AlertOctagon'].includes(kpi.icon) && <FileText className="w-5 h-5" />}
+                            </div>
+                        </div>
+                        <div className="mt-4">
+                            <p className="text-3xl font-black text-[var(--text-primary)] tracking-tighter leading-none">
+                                {kpi.val}
+                            </p>
+                            <p className="text-[9px] text-[var(--text-muted)] font-bold uppercase tracking-wider mt-2">
+                                Sistema de Registro Validado
+                            </p>
+                        </div>
+                    </div>
+                ))}
             </div>
 
-            {/* FILTROS */}
-            <div className="bg-[var(--bg-card)] p-6 rounded-3xl border border-[var(--border-subtle)] shadow-sm mb-6">
-                <div className="flex flex-col md:flex-row gap-4 items-end">
-                    <div className="flex-1 space-y-2">
-                        <label htmlFor="contract-search" className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest ml-1">Búsqueda</label>
+            {/* FILTROS - Diseño Premium */}
+            <div className="bg-[var(--bg-card)] p-8 rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/10 rounded-full -mr-32 -mt-32 blur-3xl group-hover:bg-cyan-500/20 transition-all duration-700"></div>
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-end relative z-10">
+                    <div className="lg:col-span-6 space-y-2">
+                        <label htmlFor="contract-search" className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest ml-1">
+                            Buscar Expediente Legal
+                        </label>
                         <div className="relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] w-4 h-4" />
+                            <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] w-5 h-5" />
                             <input
                                 id="contract-search"
                                 type="text"
-                                placeholder="Empresa, RUC o Representante..."
+                                placeholder="Buscar por Razón Social, RUC o Representante..."
                                 value={filters.query}
                                 onChange={(e) => actions.setFilters({ ...filters, query: e.target.value })}
-                                className="w-full pl-10 pr-4 py-2.5 bg-[var(--bg-input)] border-none rounded-xl text-xs focus:ring-2 focus:ring-indigo-500/20 font-industrial text-[var(--text-primary)]"
+                                className="w-full pl-14 pr-6 py-4 bg-[var(--bg-secondary)] border-none rounded-2xl text-xs font-black placeholder:text-[var(--text-muted)] text-[var(--text-primary)] focus:ring-4 focus:ring-cyan-500/10 transition-all outline-none"
                             />
                         </div>
                     </div>
 
-                    <div className="w-full md:w-40 space-y-2">
-                        <label htmlFor="contract-modality" className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest ml-1">Modalidad</label>
+                    <div className="lg:col-span-2 space-y-2">
+                        <label htmlFor="contract-modality" className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest ml-1">
+                            Aislar Modalidad
+                        </label>
                         <select
                             id="contract-modality"
                             value={filters.modality}
                             onChange={(e) => actions.setFilters({ ...filters, modality: e.target.value })}
-                            className="w-full p-2.5 bg-[var(--bg-input)] border-none rounded-xl text-xs font-bold text-[var(--text-primary)] font-industrial uppercase cursor-pointer"
+                            className="w-full p-4 bg-[var(--bg-secondary)] border-none rounded-2xl text-xs font-black text-[var(--text-primary)] uppercase cursor-pointer"
                         >
                             <option value="ALL">Todas</option>
                             <option value="VIRTUAL">Virtual (Digital)</option>
@@ -106,43 +134,46 @@ export const ContratosModule: React.FC<ContratosModuleProps> = ({ state, actions
                         </select>
                     </div>
 
-                    <div className="w-full md:w-40 space-y-2">
-                        <label htmlFor="contract-status" className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest ml-1">Estado Legal</label>
+                    <div className="lg:col-span-2 space-y-2">
+                        <label htmlFor="contract-status" className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest ml-1">
+                            Estado Legal
+                        </label>
                         <select
                             id="contract-status"
                             value={filters.status}
                             onChange={(e) => actions.setFilters({ ...filters, status: e.target.value })}
-                            className="w-full p-2.5 bg-[var(--bg-input)] border-none rounded-xl text-xs font-bold text-[var(--text-primary)] font-industrial uppercase cursor-pointer"
+                            className="w-full p-4 bg-[var(--bg-secondary)] border-none rounded-2xl text-xs font-black text-[var(--text-primary)] uppercase cursor-pointer"
                         >
-                            <option value="ALL">Todos</option>
-                            <option value="ACTIVE">Vigentes</option>
-                            <option value="PENDING">Pendientes</option>
-                            <option value="EXPIRED">Vencidos</option>
+                            <option value="ALL">Todos los Estados</option>
+                            <option value="ACTIVE">Vigentes (Activos)</option>
+                            <option value="PENDING">En Revisión / Pendiente</option>
+                            <option value="EXPIRED">Vencidos (Expirados)</option>
                         </select>
                     </div>
 
                     <button
                         onClick={actions.createNew}
-                        className="p-2.5 bg-indigo-500 text-white rounded-xl hover:bg-indigo-600 transition-all shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-2 whitespace-nowrap px-4 font-industrial"
+                        className="lg:col-span-2 w-full p-4 bg-sky-500 hover:bg-sky-600 active:bg-sky-700 dark:bg-[var(--brand-green)] dark:hover:bg-[var(--brand-green-hover)] text-white rounded-2xl transition-all shadow-xl shadow-sky-500/20 dark:shadow-[var(--brand-green)]/20 flex items-center justify-center gap-2 whitespace-nowrap duration-300"
                     >
-                        <Plus className="w-4 h-4 font-bold" /> <span className="text-xs font-black uppercase tracking-widest">Nuevo Contrato</span>
+                        <Plus className="w-4 h-4 font-bold" /> 
+                        <span className="text-xs font-black uppercase tracking-widest">Nuevo Contrato</span>
                     </button>
                 </div>
             </div>
 
-            {/* TABLA */}
-            <div className="bg-[var(--bg-card)] rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm overflow-hidden">
+            {/* TABLA DE EXPEDIENTES - Rediseño Híbrido Premium */}
+            <div className="bg-[var(--bg-card)] rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm overflow-hidden p-2">
                 <div className="overflow-x-auto custom-scrollbar">
-                    <table className="w-full text-left" aria-label="Tabla de contratos">
+                    <table className="w-full text-left border-collapse" aria-label="Tabla de contratos">
                         <thead>
                             <tr className="bg-[var(--bg-secondary)]/50 border-b border-[var(--border-subtle)] text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest">
-                                <th scope="col" className="px-6 py-5 whitespace-nowrap">ID Contrato</th>
-                                <th scope="col" className="px-6 py-5 whitespace-nowrap">Empresa / Vendedor</th>
-                                <th scope="col" className="px-6 py-5 whitespace-nowrap">Vigencia</th>
-                                <th scope="col" className="px-6 py-5 whitespace-nowrap">Modalidad</th>
-                                <th scope="col" className="px-6 py-5 whitespace-nowrap">Tipo</th>
-                                <th scope="col" className="px-6 py-5 whitespace-nowrap">Estado Legal</th>
-                                <th scope="col" className="px-6 py-5 text-right whitespace-nowrap">Gestión</th>
+                                <th scope="col" className="px-8 py-5 whitespace-nowrap">ID Expediente</th>
+                                <th scope="col" className="px-8 py-5 whitespace-nowrap">Razón Social / RUC</th>
+                                <th scope="col" className="px-8 py-5 whitespace-nowrap">Vigencia Temporal</th>
+                                <th scope="col" className="px-8 py-5 whitespace-nowrap">Modalidad</th>
+                                <th scope="col" className="px-8 py-5 whitespace-nowrap">Plan</th>
+                                <th scope="col" className="px-8 py-5 whitespace-nowrap text-center">Estado Legal</th>
+                                <th scope="col" className="px-8 py-5 text-right whitespace-nowrap"></th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-[var(--border-subtle)]">
@@ -150,32 +181,70 @@ export const ContratosModule: React.FC<ContratosModuleProps> = ({ state, actions
                                 <tr
                                     key={c.id}
                                     onClick={() => actions.setSelectedContract(c)}
-                                    className="hover:bg-[var(--bg-secondary)]/50 transition-colors group cursor-pointer"
+                                    className="hover:bg-cyan-50/20 dark:hover:bg-cyan-950/10 transition-all duration-300 group cursor-pointer"
                                 >
-                                    <td className="px-6 py-4 font-black text-xs text-[var(--text-primary)] group-hover:text-indigo-500 transition-colors">{c.id}</td>
-                                    <td className="px-6 py-4">
-                                        <p className="text-xs font-bold text-[var(--text-primary)] uppercase">{c.company}</p>
-                                        <p className="text-[9px] text-[var(--text-muted)] font-bold uppercase tracking-wider">RUC: {c.ruc}</p>
+                                    {/* ID */}
+                                    <td className="px-8 py-6 font-mono font-black text-xs text-[var(--text-muted)] group-hover:text-[var(--color-info)] transition-colors">
+                                        <div className="flex items-center gap-2">
+                                            <Hash className="w-3.5 h-3.5 opacity-40 shrink-0" />
+                                            {c.id}
+                                        </div>
                                     </td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex flex-col gap-1">
-                                            <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase flex items-center gap-1">
-                                                {c.start} <ArrowRight className="w-3 h-3 text-[var(--text-muted)]" /> {c.end}
+
+                                    {/* Razón Social */}
+                                    <td className="px-8 py-6">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-9 h-9 rounded-xl bg-[var(--icons-green)]/10 text-[var(--brand-green)] dark:text-[var(--icons-green)] flex items-center justify-center shrink-0 font-black text-xs">
+                                                {c.company ? c.company.substring(0, 2).toUpperCase() : 'CTR'}
+                                            </div>
+                                            <div>
+                                                <p className="text-xs font-black text-[var(--text-primary)] uppercase">
+                                                    {c.company || 'Sin Empresa Decl.'}
+                                                </p>
+                                                <p className="text-[10px] text-[var(--text-muted)] font-black uppercase tracking-wider mt-0.5 font-mono">
+                                                    RUC: {c.ruc || '—'}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    {/* Vigencia */}
+                                    <td className="px-8 py-6">
+                                        <div className="flex flex-col gap-1.5">
+                                            <p className="text-[11px] font-black text-[var(--text-secondary)] uppercase flex items-center gap-2">
+                                                <Calendar className="w-3.5 h-3.5 text-[var(--text-muted)] shrink-0" />
+                                                {c.start || '—'} 
+                                                <ArrowRight className="w-3.5 h-3.5 text-[var(--text-muted)] shrink-0" /> 
+                                                {c.end || '—'}
                                             </p>
                                             <ExpiryTrafficLight urgency={c.expiryUrgency} />
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4">
+
+                                    {/* Modalidad */}
+                                    <td className="px-8 py-6 whitespace-nowrap">
                                         <ModalityBadge modality={c.modality} />
                                     </td>
-                                    <td className="px-6 py-4 text-xs font-medium text-[var(--text-secondary)] uppercase">{c.type}</td>
-                                    <td className="px-6 py-4">
+
+                                    <td className="px-8 py-6">
+                                        <div className="flex items-center gap-2">
+                                            <Landmark className="w-3.5 h-3.5 text-[var(--text-muted)] shrink-0" />
+                                            <span className="text-xs font-black text-[var(--text-secondary)] uppercase">
+                                                {c.plan || '—'}
+                                            </span>
+                                        </div>
+                                    </td>
+
+                                    {/* Estado */}
+                                    <td className="px-8 py-6 text-center whitespace-nowrap">
                                         <StatusBadge status={c.status} />
                                     </td>
-                                    <td className="px-6 py-4 text-right">
-                                        <button className="p-2 text-[var(--text-muted)] group-hover:text-indigo-500 group-hover:bg-indigo-500/10 rounded-xl transition-all">
-                                            <ChevronRight className="w-5 h-5" />
-                                        </button>
+
+                                    {/* Flecha */}
+                                    <td className="px-8 py-6 text-right whitespace-nowrap">
+                                        <div className="w-8 h-8 rounded-xl flex items-center justify-center text-[var(--text-muted)] group-hover:text-[var(--color-info)] group-hover:bg-[var(--color-info)]/10 transition-all shrink-0 ml-auto">
+                                            <ChevronRight className="w-5 h-5 shrink-0" />
+                                        </div>
                                     </td>
                                 </tr>
                             ))}

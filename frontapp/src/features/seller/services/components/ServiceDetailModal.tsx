@@ -1,46 +1,109 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
+import ServiceCalendar from './ServiceCalendar';
 import Image from 'next/image';
-import { Service, Specialist, Appointment } from '@/features/seller/services/types';
+import {
+    Service,
+    Specialist,
+    Appointment,
+    WEEK_DAY_SHORT,
+    countTotalSessions,
+    calculateSessions,
+    serviceEtiquetasFromService,
+} from '@/features/seller/services/types';
 import BaseDrawer from '@/components/ui/BaseDrawer';
 import Icon from '@/components/ui/Icon';
 import BaseButton from '@/components/ui/BaseButton';
 
+type Client = {
+    id: number;
+    nombres: string;
+    apellidos: string;
+    dni: string;
+    telefono?: string;
+    email?: string;
+    direccion?: string;
+};
+
+type AppointmentWithClient = Appointment & {
+    clientId?: number;
+};
+
 interface ServiceDetailModalProps {
     service: Service | null;
     specialists: Specialist[];
-    appointments: Appointment[];
+    clients: Client[];
+    appointments: AppointmentWithClient[];
     isOpen: boolean;
     onClose: () => void;
     onEdit: (service: Service) => void;
-    onReschedule: (appointment: Appointment) => void;
+    onReschedule: (appointment: AppointmentWithClient) => void;
 }
 
-export default function ServiceDetailModal({ service, specialists, appointments, isOpen, onClose, onEdit, onReschedule }: ServiceDetailModalProps) {
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+function getAvatarChars(sp: Specialist): string {
+    return (
+        (sp.nombres?.charAt(0)?.toUpperCase() ?? '') +
+        (sp.apellidos?.charAt(0)?.toUpperCase() ?? '')
+    );
+}
+
+function buildScheduleSubtitle(service: Service): string {
+    if (!service.diasAtencion || service.diasAtencion.length === 0) return 'Sin horario configurado';
+    const days = service.diasAtencion.map((d) => WEEK_DAY_SHORT[d.dia]).join(', ');
+    const total = countTotalSessions(service.diasAtencion, service.duracion);
+    const dur = service.duracion < 60
+        ? `${service.duracion} min`
+        : `${service.duracion / 60}h`;
+    return `${days}  ·  ${total} sesión${total !== 1 ? 'es' : ''}  ·  ${dur} c/u`;
+}
+
+/** Servicio considerado activo si tiene días + al menos un especialista asignado */
+function isServiceActive(service: Service): boolean {
+    return service.diasAtencion.length > 0 && service.especialistasAsignados.length > 0;
+}
+
+// ─── Component ───────────────────────────────────────────────────────────────
+
+export default function ServiceDetailModal({
+    service,
+    specialists,
+    clients,
+    appointments,
+    isOpen,
+    onClose,
+    onEdit,
+    onReschedule,
+}: ServiceDetailModalProps) {
+    const [isCalendarOpen, setIsCalendarOpen] = useState(false);
     if (!service) return null;
 
-    const assignedSpecialists = specialists.filter(s => service.especialistas_ids.includes(s.id));
-    const serviceAppointments = appointments.filter(a => a.servicio === service.nombre);
+    // Especialistas asignados resueltos
+    const assignedSpecialists = service.especialistasAsignados
+        .map((id) => specialists.find((s) => s.id === id))
+        .filter((s): s is Specialist => !!s);
+
+    // Citas de este servicio
+    const serviceAppointments = appointments.filter((a) => a.serviceId === service.id);
+
+    const active = isServiceActive(service);
+    const scheduleSubtitle = buildScheduleSubtitle(service);
+    const totalSessions = countTotalSessions(service.diasAtencion, service.duracion);
 
     const footer = (
-        <div className="flex flex-col sm:flex-row gap-4 w-full">
-            <BaseButton
-                variant="ghost"
-                onClick={onClose}
-                className="flex-1 !rounded-3xl"
-            >
-                Cerrar Panel
+        <div className="flex flex-col sm:flex-row gap-3 w-full">
+            <BaseButton variant="ghost" onClick={onClose} className="flex-1 !rounded-2xl">
+                Cerrar
             </BaseButton>
             <BaseButton
-                onClick={() => {
-                    onEdit(service);
-                    onClose();
-                }}
+                onClick={() => { onEdit(service); onClose(); }}
                 variant="primary"
                 leftIcon="Pencil"
-                className="flex-[2] !rounded-3xl"
+                className="flex-[2] !rounded-2xl"
                 size="md"
             >
-                Editar Configuración
+                Editar Servicio
             </BaseButton>
         </div>
     );
@@ -49,159 +112,239 @@ export default function ServiceDetailModal({ service, specialists, appointments,
         <BaseDrawer
             isOpen={isOpen}
             onClose={onClose}
-            title={service.nombre}
-            subtitle={service.horario}
-            badge="Auditoría de Servicio"
+            title={service.denominacion}
+            subtitle={scheduleSubtitle}
+            badge="Detalle de Servicio"
             width="md:w-[650px]"
             accentColor="from-sky-500/10 via-indigo-500/5"
             footer={footer}
         >
-            <div className="space-y-12">
-                {/* Status & Specialists Quick Cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div className="space-y-4">
-                        <p className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest px-1">Estado Operativo</p>
-                        <div className={`flex items-center gap-5 p-6 rounded-[2.5rem] border shadow-sm transition-all
-                            ${service.estado === 'disponible'
-                                ? 'bg-emerald-500/10 border-emerald-500/20 shadow-emerald-500/10'
-                                : 'bg-rose-500/10 border-rose-500/20 shadow-rose-500/10'}`}>
-                            <div className="relative">
-                                <div className={`w-4 h-4 rounded-full ${service.estado === 'disponible' ? 'bg-emerald-500' : 'bg-rose-500'}`}></div>
-                                {service.estado === 'disponible' && <div className="absolute inset-0 w-4 h-4 rounded-full bg-emerald-500 animate-ping opacity-75"></div>}
+            <div className="space-y-8">
+
+                {/* ── Estado + Staff ── */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+                    {/* Estado operativo */}
+                    <div className="space-y-2">
+                        <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest px-1">
+                            Estado
+                        </p>
+                        {/* ↓ rounded-[2.5rem] igual que la versión original */}
+                        <div className={`flex items-center gap-4 p-5 rounded-[2.5rem] border transition-all
+                            ${active
+                                ? 'bg-emerald-500/8 border-emerald-500/25'
+                                : 'bg-gray-500/15 dark:bg-gray-300/15  border-gray-500/50 dark:border-gray-300/50'
+                            }`}
+                        >
+                            {/* Dot + ping: contenedor ajustado al tamaño del dot */}
+                            <div className="relative flex-shrink-0 w-4 h-4">
+                                <div className={`w-4 h-4 rounded-full ${active ? 'bg-emerald-500' : 'bg-gray-400 dark:bg-gray-300/70'}`} />
+                                {active && (
+                                    <div className="absolute inset-0 rounded-full bg-emerald-500 animate-ping opacity-75" />
+                                )}
                             </div>
                             <div>
-                                <p className={`text-sm font-black tracking-tight ${service.estado === 'disponible' ? 'text-emerald-500' : 'text-rose-500'}`}>
-                                    {service.estado === 'disponible' ? 'Activo en Tienda' : 'Fuera de Línea'}
+                                <p className={`text-sm font-bold ${active ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-600 dark:text-gray-300'}`}>
+                                    {active ? 'Activo en tienda' : 'Configuración incompleta'}
                                 </p>
-                                <p className="text-[9px] font-bold text-[var(--text-secondary)] uppercase tracking-tighter mt-0.5">Visibilidad Pública OK</p>
+                                <p className="text-[11px] text-[var(--text-secondary)] mt-0.5">
+                                    {active ? 'Visible al público' : 'Asigna días o especialistas'}
+                                </p>
                             </div>
                         </div>
                     </div>
 
-                    <div className="space-y-4">
-                        <p className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest px-1">Staff Certificado</p>
-                        <div className="flex -space-x-3 p-4 bg-[var(--bg-secondary)]/30 rounded-[2.5rem] border border-[var(--border-subtle)] min-h-[5.5rem] items-center px-8 shadow-inner">
-                            {assignedSpecialists.map(esp => (
-                                <div
-                                    key={esp.id}
-                                    className="w-12 h-12 rounded-2xl bg-[var(--bg-card)] border-[3px] border-[var(--bg-card)] flex items-center justify-center text-sm font-black overflow-hidden shadow-lg hover:-translate-y-2 hover:z-10 transition-all cursor-pointer ring-1 ring-[var(--border-subtle)]"
-                                    title={`${esp.nombres}`}
-                                >
-                                    {esp.foto ? <Image src={esp.foto} fill sizes="48px" className="object-cover" alt="" /> : <span className="text-sky-500">{esp.avatar_chars}</span>}
-                                </div>
-                            ))}
-                            {assignedSpecialists.length === 0 && (
-                                <p className="text-[10px] font-bold text-[var(--text-secondary)] italic">Sin asignar</p>
+                    {/* Staff */}
+                    <div className="space-y-2">
+                        <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest px-1">
+                            Especialistas ({assignedSpecialists.length})
+                        </p>
+                        {/* ↓ rounded-[2.5rem] igual que estado */}
+                        <div className="flex -space-x-3 p-5 bg-[var(--bg-secondary)]/40 rounded-[2.5rem] border border-[var(--border-subtle)] min-h-[5rem] items-center px-6">
+                            {assignedSpecialists.length === 0 ? (
+                                <p className="text-xs text-[var(--text-secondary)] italic">Sin especialistas asignados</p>
+                            ) : (
+                                assignedSpecialists.map((esp) => (
+                                    <div
+                                        key={esp.id}
+                                        className="relative w-11 h-11 rounded-2xl bg-[var(--bg-card)] border-2 border-[var(--bg-card)] flex items-center justify-center text-sm font-black overflow-hidden shadow-md hover:-translate-y-2 hover:z-10 transition-all cursor-pointer ring-1 ring-[var(--border-subtle)]"
+                                        title={`${esp.nombres} ${esp.apellidos} · ${esp.especialidad}`}
+                                    >
+                                        {esp.foto
+                                            ? <Image src={esp.foto} fill sizes="44px" className="object-cover" alt={`${esp.nombres} ${esp.apellidos}`} />
+                                            : <span className="text-sky-500 dark:text-[var(--icons-green)]">{getAvatarChars(esp)}</span>
+                                        }
+                                    </div>
+                                ))
                             )}
                         </div>
                     </div>
                 </div>
 
-                {/* Timeline Appointments */}
-                <div className="space-y-6">
+                {/* ── Etiquetas ── */}
+                {(() => {
+                    const etiquetas = serviceEtiquetasFromService(service);
+                    const has = etiquetas.nuevo || etiquetas.descuento || etiquetas.oferta || etiquetas.edicionLimitada;
+                    if (!has) return null;
+                    return (
+                        <div className="flex gap-2 flex-wrap">
+                            {etiquetas.nuevo && (
+                                <span className="px-2 py-1 rounded-md text-xs font-black uppercase tracking-wider" style={{ background: '#ADEBB3', color: '#0d3318' }}>Nuevo</span>
+                            )}
+                            {etiquetas.descuento && (
+                                <span className="px-2 py-1 rounded-md text-xs font-black uppercase tracking-wider" style={{ background: 'linear-gradient(135deg,#dc2626,#f87171)', color: 'white' }}>-{etiquetas.descuento.valor}%</span>
+                            )}
+                            {etiquetas.oferta && (
+                                <span className="px-2 py-1 rounded-md text-xs font-black uppercase tracking-wider" style={{ background: 'linear-gradient(135deg,#991b1b,#dc2626)', color: 'white' }}>−{etiquetas.oferta.valor}% Oferta</span>
+                            )}
+                            {etiquetas.edicionLimitada && (
+                                <span className="px-2 py-1 rounded-md text-xs font-bold uppercase tracking-wider" style={{ background: '#59a6cb', color: '#1a2e3a' }}>Ed. Limitada</span>
+                            )}
+                        </div>
+                    );
+                })()}
+
+                {/* ── Disponibilidad ── */}
+                <div className="space-y-3">
                     <div className="flex items-center justify-between px-1">
-                        <h3 className="text-xs font-black text-[var(--text-primary)] uppercase tracking-widest flex items-center gap-2">
-                            <div className="w-1.5 h-4 bg-sky-500 rounded-full"></div>
-                            Hoja de Ruta (Hoy)
+                        <h3 className="text-xs font-bold text-[var(--text-primary)] uppercase tracking-widest flex items-center gap-2">
+                            <div className="w-1 h-4 bg-sky-500 dark:bg-[var(--icons-green)] rounded-full" />
+                            Horario semanal
                         </h3>
-                        <span className="text-[9px] font-black text-[var(--text-secondary)] bg-[var(--bg-secondary)] px-3 py-1 rounded-full">{serviceAppointments.length} Citas</span>
+                        <button
+                            onClick={() => setIsCalendarOpen(true)}
+                            className="flex items-center gap-1.5 text-[11px] font-semibold text-sky-500 dark:text-[var(--icons-green)] hover:opacity-70 transition-opacity"
+                        >
+                            <Icon name="CalendarDays" className="w-3.5 h-3.5" />
+                            Ver calendario del servicio
+                        </button>
                     </div>
 
-                    <div className="space-y-4">
-                        {serviceAppointments.length > 0 ? (
-                            serviceAppointments.map((appointment, idx) => {
-                                const esp = specialists.find(e => e.id === appointment.especialistaId);
+                    {service.diasAtencion.length === 0 ? (
+                        <div className="py-10 text-center text-xs text-[var(--text-secondary)] bg-[var(--bg-secondary)]/30 rounded-[2.5rem] border border-dashed border-[var(--border-subtle)]">
+                            Sin días configurados — edita el servicio para agregar horarios
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 gap-2">
+                            {service.diasAtencion.map((dayObj) => {
+                                const totalSes = dayObj.bloques.reduce(
+                                    (t, b) => t + calculateSessions(b, service.duracion).length, 0
+                                );
                                 return (
-                                    <div key={appointment.id} className="relative pl-8 group">
-                                        {/* Timeline Line */}
-                                        {idx !== serviceAppointments.length - 1 && (
-                                            <div className="absolute left-[11px] top-8 bottom-[-24px] w-0.5 bg-gradient-to-b from-[var(--border-subtle)] to-transparent"></div>
-                                        )}
-                                        {/* Timeline Dot */}
-                                        <div className="absolute left-0 top-6 w-6 h-6 bg-[var(--bg-card)] border-2 border-sky-400 rounded-full flex items-center justify-center z-10 shadow-sm group-hover:scale-125 transition-transform">
-                                            <div className="w-1.5 h-1.5 bg-sky-500 rounded-full animate-pulse"></div>
+                                    <div
+                                        key={dayObj.dia}
+                                        className="flex items-center justify-between px-5 py-3.5 bg-[var(--bg-secondary)]/40 hover:bg-[var(--bg-secondary)]/70 rounded-[2.5rem] border border-[var(--border-subtle)] transition-colors"
+                                    >
+                                        {/* Día */}
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-2 h-2 rounded-full bg-sky-500 dark:bg-[var(--icons-green)] flex-shrink-0" />
+                                            <span className="text-sm font-semibold text-[var(--text-primary)] capitalize">
+                                                {dayObj.dia}
+                                            </span>
                                         </div>
-
-                                        <div className="p-6 bg-[var(--bg-card)] rounded-[2.5rem] border border-[var(--border-subtle)] flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 transition-all hover:shadow-2xl hover:shadow-black/5 hover:border-sky-500/20">
-                                            <div className="flex items-center gap-5">
-                                                <div className="w-12 h-12 rounded-2xl bg-sky-500/10 flex items-center justify-center text-xs font-black text-sky-500 border border-sky-500/20">
-                                                    {esp?.avatar_chars || '??'}
-                                                </div>
-                                                <div>
-                                                    <p className="text-base font-black text-[var(--text-primary)] tracking-tight leading-tight">{appointment.cliente}</p>
-                                                    <div className="flex items-center gap-3 mt-1.5">
-                                                        <span className="text-[11px] font-black text-sky-500 font-mono bg-sky-500/10 px-2 py-0.5 rounded-lg border border-sky-500/20 uppercase">{appointment.hora}</span>
-                                                        <span className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest">• {esp?.nombres || 'Personal'}</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center gap-3 border-t sm:border-t-0 pt-4 sm:pt-0">
-                                                <button
-                                                    onClick={() => onReschedule(appointment)}
-                                                    className="px-6 py-3 bg-[var(--bg-secondary)] text-[var(--text-secondary)] rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-sky-500/10 hover:text-sky-500 transition-all active:scale-95 border border-transparent hover:border-sky-500/20"
-                                                >
-                                                    Reprogramar
-                                                </button>
-                                                <div className="px-5 py-3 bg-emerald-500/10 text-emerald-500 rounded-xl text-[10px] font-black uppercase tracking-widest border border-emerald-500/20 shadow-sm">
-                                                    Confirmada
-                                                </div>
-                                            </div>
+                                        {/* Métricas */}
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-xs text-[var(--text-secondary)]">
+                                                {dayObj.bloques.length} {dayObj.bloques.length !== 1 ? 'bloques' : 'bloque'}
+                                            </span>
+                                            <span className="text-xs font-semibold text-sky-600 dark:text-[var(--icons-green)] bg-sky-500/10 dark:bg-[var(--icons-green)]/10 border border-sky-500/20 dark:border-[var(--icons-green)]/20 px-2.5 py-0.5 rounded-lg">
+                                                {totalSes} sesión{totalSes !== 1 ? 'es' : ''}
+                                            </span>
                                         </div>
                                     </div>
                                 );
-                            })
-                        ) : (
-                            <div className="py-20 flex flex-col items-center justify-center text-center gap-4 bg-[var(--bg-secondary)]/30 rounded-[3rem] border-2 border-dashed border-[var(--border-subtle)]">
-                                <div className="w-16 h-16 bg-[var(--bg-card)] rounded-[2rem] flex items-center justify-center shadow-xl shadow-black/5 border border-[var(--border-subtle)]">
-                                    <Icon name="CalendarX" className="w-8 h-8 text-[var(--text-secondary)]" />
-                                </div>
-                                <div>
-                                    <p className="text-[11px] font-black text-[var(--text-secondary)] uppercase tracking-[0.2em] mb-1">Sin Actividad Programada</p>
-                                    <p className="text-[9px] font-bold text-[var(--text-secondary)] uppercase italic">Tu agenda está despejada por ahora</p>
-                                </div>
+                            })}
+                        </div>
+                    )}
+
+                    <ServiceCalendar
+                        isOpen={isCalendarOpen}
+                        service={service}
+                        specialists={specialists}
+                        clients={clients}
+                        appointments={appointments}
+                        onClose={() => setIsCalendarOpen(false)}
+                        onReschedule={onReschedule}
+                    />
+                </div>
+
+                {/* ── Configuración del servicio ── */}
+                <div className="rounded-2xl overflow-hidden border border-[var(--border-subtle)]">
+
+                    {/* Header */}
+                    <div className="flex items-center justify-between px-5 py-4 bg-sky-500 dark:bg-[var(--brand-green)]">
+                        <div className="flex items-center gap-2.5">
+                            <Icon name="ShieldCheck" className="text-white/80 w-4 h-4" />
+                            <span className="text-xs font-bold text-white uppercase tracking-widest">
+                                Configuración del servicio
+                            </span>
+                        </div>
+                        <span className="text-[11px] font-semibold text-white bg-white/10 px-3 py-1 rounded-full border border-white/20">
+                            Auto gestionado
+                        </span>
+                    </div>
+
+                    {/* Grid 2×2 con divisores */}
+                    <div className="grid grid-cols-2 divide-x divide-y divide-[var(--border-subtle)] bg-[var(--bg-secondary)]/20">
+
+                        {/* Días activos */}
+                        <div className="p-5 space-y-1.5">
+                            <div className="flex items-center gap-1.5 text-[var(--text-secondary)]">
+                                <Icon name="CalendarDays" className="w-3.5 h-3.5 text-sky-500 dark:text-[var(--icons-green)]" />
+                                <span className="text-[10px] font-bold uppercase tracking-wider">Días activos</span>
                             </div>
-                        )}
+                            <p className="text-base font-bold text-[var(--text-primary)] leading-tight">
+                                {service.diasAtencion.length > 0
+                                    ? service.diasAtencion.map((d) => WEEK_DAY_SHORT[d.dia]).join(' · ')
+                                    : <span className="text-[var(--text-secondary)] font-normal text-sm">Sin configurar</span>
+                                }
+                            </p>
+                        </div>
+
+                        {/* Cupos */}
+                        <div className="p-5 space-y-1.5">
+                            <div className="flex items-center gap-1.5 text-[var(--text-secondary)]">
+                                <Icon name="Users" className="w-3.5 h-3.5 text-sky-500 dark:text-[var(--icons-green)]" />
+                                <span className="text-[10px] font-bold uppercase tracking-wider">Cupos por sesión</span>
+                            </div>
+                            <p className="text-base font-bold text-[var(--text-primary)]">
+                                {service.cupos}
+                                <span className="text-xs font-normal text-[var(--text-secondary)] ml-1.5">
+                                    · {totalSessions} sesión{totalSessions !== 1 ? 'es' : ''} en total
+                                </span>
+                            </p>
+                        </div>
+
+                        {/* Duración */}
+                        <div className="p-5 space-y-1.5">
+                            <div className="flex items-center gap-1.5 text-[var(--text-secondary)]">
+                                <Icon name="Clock" className="w-3.5 h-3.5 text-sky-500 dark:text-[var(--icons-green)]" />
+                                <span className="text-[10px] font-bold uppercase tracking-wider">Duración</span>
+                            </div>
+                            <p className="text-base font-bold text-[var(--text-primary)]">
+                                {service.duracion < 60
+                                    ? `${service.duracion} min`
+                                    : `${service.duracion / 60} h`
+                                }
+                                <span className="text-xs font-normal text-[var(--text-secondary)] ml-1.5">por sesión</span>
+                            </p>
+                        </div>
+
+                        {/* Precio */}
+                        <div className="p-5 space-y-1.5">
+                            <div className="flex items-center gap-1.5 text-[var(--text-secondary)]">
+                                <Icon name="Banknote" className="w-3.5 h-3.5 text-sky-500 dark:text-[var(--icons-green)]" />
+                                <span className="text-[10px] font-bold uppercase tracking-wider">Precio</span>
+                            </div>
+                            <p className="text-base font-bold text-[var(--text-primary)]">
+                                S/. {service.precio.toFixed(2)}
+                                <span className="text-xs font-normal text-[var(--text-secondary)] ml-1.5">por sesión</span>
+                            </p>
+                        </div>
+
                     </div>
                 </div>
 
-                {/* Technical Meta (Horarios, etc) */}
-                <div className="p-8 bg-sky-500 rounded-[3rem] text-white shadow-2xl space-y-6 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 blur-[100px] -z-0"></div>
-                    <div className="relative z-10 flex items-center justify-between border-b border-white/10 pb-6">
-                        <div className="flex items-center gap-3">
-                            <Icon name="ShieldCheck" className="text-sky-400 w-6 h-6" />
-                            <h4 className="text-[10px] font-black uppercase tracking-[0.3em] opacity-60">Configuración Maestra</h4>
-                        </div>
-                        <div className="text-[10px] font-black text-sky-400 bg-sky-500/10 px-3 py-1 rounded-full border border-sky-500/20">AUTO-MANAGED</div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-8 relative z-10">
-                        <div className="space-y-4">
-                            <p className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em]">Rango de Atención</p>
-                            <div className="flex items-center gap-4">
-                                <div className="p-3 bg-white/5 rounded-2xl border border-white/10">
-                                    <Icon name="Clock" className="text-sky-400 w-5 h-5" />
-                                </div>
-                                <div>
-                                    <p className="text-xl font-black tracking-tight">{service.horario.split('•')[1] || 'Sin Horario'}</p>
-                                    <p className="text-[9px] font-bold text-white/40 uppercase mt-0.5">Ventana Operativa</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="space-y-4">
-                            <p className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em]">Carga de Citas</p>
-                            <div className="flex items-center gap-4">
-                                <div className="p-3 bg-white/5 rounded-2xl border border-white/10">
-                                    <Icon name="TrendingUp" className="text-emerald-400 w-5 h-5" />
-                                </div>
-                                <div>
-                                    <p className="text-xl font-black tracking-tight">{service.config?.max_citas || 1} <span className="text-[10px] font-bold opacity-30">PX/SLOT</span></p>
-                                    <p className="text-[9px] font-bold text-white/40 uppercase mt-0.5">Promedio Concurrencia</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
         </BaseDrawer>
     );

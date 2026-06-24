@@ -6,6 +6,7 @@ import SellerSidebar from '@/components/layout/seller/SellerSidebar';
 import SellerHeader from '@/components/layout/seller/SellerHeader';
 import { DashboardLayout } from '@/components/layout/shared/DashboardLayout';
 import { useUIStore } from '@/store/uiStore';
+import { InventoryAlertsProvider } from '@/features/seller/inventario/context/InventoryAlertsContext';
 
 interface SellerLayoutClientProps {
     children: React.ReactNode;
@@ -28,14 +29,7 @@ export function SellerLayoutClient({ children }: SellerLayoutClientProps) {
             try {
                 const LARAVEL_API = process.env.NEXT_PUBLIC_LARAVEL_API_URL || 'http://127.0.0.1:8000/api';
                 
-                // Parse cookie more robustly
-                const cookies = document.cookie.split(';').reduce((acc, cookie) => {
-                    const [key, ...vals] = cookie.trim().split('=');
-                    if (key) acc[key] = decodeURIComponent(vals.join('='));
-                    return acc;
-                }, {} as Record<string, string>);
-                
-                const token = cookies['laravel_token'];
+                const token = localStorage.getItem('laravel_token');
                 console.log('[SellerLayout] Token found:', !!token);
 
                 if (!token) {
@@ -88,14 +82,11 @@ export function SellerLayoutClient({ children }: SellerLayoutClientProps) {
 
     // Show nothing while checking (avoids flash of seller content)
     if (!storeChecked && pathname !== '/seller/pending') {
-        return (
-            <div className="flex items-center justify-center min-h-screen bg-[var(--bg-secondary)]">
-                <div className="w-8 h-8 border-4 border-sky-500 border-t-transparent rounded-full animate-spin" />
-            </div>
-        );
+        return <div className="min-h-screen bg-[var(--bg-secondary)]" />;
     }
 
     return (
+        <InventoryAlertsProvider>
         <DashboardLayout
             header={<SellerHeader onOpenMenu={toggleSidebar} />}
             sidebar={<SellerSidebar isMobileOpen={sidebarOpen} onClose={closeSidebar} />}
@@ -106,6 +97,7 @@ export function SellerLayoutClient({ children }: SellerLayoutClientProps) {
         >
             {children}
         </DashboardLayout>
+        </InventoryAlertsProvider>
     );
 }
 

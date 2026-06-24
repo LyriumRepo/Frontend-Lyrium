@@ -1,68 +1,107 @@
 'use client';
 
-import { useState, useCallback } from 'react';
-import BaseModal from './BaseModal';
-import BaseButton from './BaseButton';
+import React, { useState, useCallback } from 'react';
+import BaseModal from '@/components/ui/BaseModal';
+import BaseButton from '@/components/ui/BaseButton';
 
-interface ConfirmDialogState {
-    open: boolean;
-    title: string;
-    description: string;
-    onConfirm: (() => void) | null;
+interface ConfirmDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  title: string;
+  message: string;
+  confirmText?: string;
+  cancelText?: string;
+  variant?: 'danger' | 'primary';
 }
 
-const initialState: ConfirmDialogState = {
-    open: false,
-    title: '',
-    description: '',
-    onConfirm: null,
-};
+function ConfirmDialog({
+  isOpen,
+  onClose,
+  onConfirm,
+  title,
+  message,
+  confirmText = 'Confirmar',
+  cancelText = 'Cancelar',
+  variant = 'danger',
+}: ConfirmDialogProps) {
+  return (
+    <BaseModal isOpen={isOpen} onClose={onClose} title={title} size="sm">
+      <p className="text-sm font-medium text-[var(--text-secondary)] mb-8">
+        {message}
+      </p>
+      <div className="flex gap-3">
+        <BaseButton
+          variant="ghost"
+          onClick={onClose}
+          className="flex-1"
+          size="md"
+        >
+          {cancelText}
+        </BaseButton>
+        <BaseButton
+          variant={variant === 'danger' ? 'danger' : 'primary'}
+          onClick={() => {
+            onConfirm();
+            onClose();
+          }}
+          className="flex-1"
+          size="md"
+        >
+          {confirmText}
+        </BaseButton>
+      </div>
+    </BaseModal>
+  );
+}
+
+interface ConfirmState {
+  isOpen: boolean;
+  title: string;
+  message: string;
+  resolve: (value: boolean) => void;
+}
 
 export function useConfirmDialog() {
-    const [state, setState] = useState<ConfirmDialogState>(initialState);
+  const [state, setState] = useState<ConfirmState | null>(null);
 
-    const confirm = useCallback((title: string, description: string): Promise<boolean> => {
-        return new Promise((resolve) => {
-            setState({
-                open: true,
-                title,
-                description,
-                onConfirm: () => resolve(true),
-            });
-        });
-    }, []);
+  const confirm = useCallback(
+    (title: string, message: string): Promise<boolean> => {
+      return new Promise((resolve) => {
+        setState({ isOpen: true, title, message, resolve });
+      });
+    },
+    [],
+  );
 
-    const handleConfirm = useCallback(() => {
-        state.onConfirm?.();
-        setState(initialState);
-    }, [state.onConfirm]);
+  const handleClose = useCallback(() => {
+    if (state) {
+      state.resolve(false);
+      setState(null);
+    }
+  }, [state]);
 
-    const handleCancel = useCallback(() => {
-        setState(initialState);
-    }, []);
+  const handleConfirm = useCallback(() => {
+    if (state) {
+      state.resolve(true);
+      setState(null);
+    }
+  }, [state]);
 
-    return {
-        confirm,
-        ConfirmDialog: () => (
-            <BaseModal
-                isOpen={state.open}
-                onClose={handleCancel}
-                title={state.title}
-                size="sm"
-                showCloseButton={false}
-            >
-                <div className="space-y-6">
-                    <p id="confirm-description" className="text-gray-600">{state.description}</p>
-                    <div className="flex gap-3 justify-end">
-                        <BaseButton variant="secondary" onClick={handleCancel}>
-                            Cancelar
-                        </BaseButton>
-                        <BaseButton variant="danger" onClick={handleConfirm}>
-                            Confirmar
-                        </BaseButton>
-                    </div>
-                </div>
-            </BaseModal>
-        ),
-    };
+  function ConfirmDialogComponent() {
+    if (!state) return null;
+    return (
+      <ConfirmDialog
+        isOpen={state.isOpen}
+        onClose={handleClose}
+        onConfirm={handleConfirm}
+        title={state.title}
+        message={state.message}
+      />
+    );
+  }
+
+  return { confirm, ConfirmDialog: ConfirmDialogComponent };
 }
+
+export default ConfirmDialog;

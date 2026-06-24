@@ -39,13 +39,16 @@ function apiToMegaMenuFormat(categories: ApiCategory[]): {
                 icons: cat.children.map(sub => ({
                     title: sub.name,
                     img: sub.image || '/img/placeholder-category.webp',
-                    href: sub.href,
+                    href: `/buscar?category=${sub.slug}`,
                 })),
                 cols: cat.children
                     .filter(sub => sub.children.length > 0)
                     .map(sub => ({
                         h: sub.name.toUpperCase(),
-                        items: sub.children.map(subsub => subsub.name),
+                        items: sub.children.map(subsub => ({
+                            name: subsub.name,
+                            href: `/buscar?category=${subsub.slug}`,
+                        })),
                     })),
             };
         });
@@ -54,26 +57,26 @@ function apiToMegaMenuFormat(categories: ApiCategory[]): {
 
     const productMenuChildren = productCats.map(cat => ({
         label: cat.name,
-        href: `/productos/${cat.slug}`,
+        href: `/buscar?category=${cat.slug}`,
         children: cat.children.map(sub => ({
             label: sub.name,
-            href: sub.href,
+            href: `/buscar?category=${sub.slug}`,
             children: sub.children.map(subsub => ({
                 label: subsub.name,
-                href: subsub.href,
+                href: `/buscar?category=${subsub.slug}`,
             })),
         })),
     }));
 
     const serviceMenuChildren = serviceCats.map(cat => ({
         label: cat.name,
-        href: `/servicios/${cat.slug}`,
+        href: `/buscar?category=${cat.slug}`,
         children: cat.children.map(sub => ({
             label: sub.name,
-            href: sub.href,
+            href: `/buscar?category=${sub.slug}`,
             children: sub.children.map(subsub => ({
                 label: subsub.name,
-                href: subsub.href,
+                href: `/buscar?category=${subsub.slug}`,
             })),
         })),
     }));

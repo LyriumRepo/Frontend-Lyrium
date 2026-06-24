@@ -15,19 +15,54 @@ export interface Voucher {
     type: VoucherType;
     customer_name: string;
     customer_ruc: string;
+    store_name: string;
+    store_ruc: string;
     order_id: string;
     amount: number;
+    subtotal_sin_igv?: number;
+    igv_amount?: number;
     emission_date: string;
     sunat_status: VoucherStatus;
-    pdf_path?: string;
-    xml_path?: string;
-    cdr_path?: string;
+    pdf_url?: string;
     history: VoucherHistory[];
+    store_id?: string | null;
+    invoice_number?: string;
+    provider?: string;
+    provider_invoice_id?: string | null;
+    authorization_code?: string | null;
+    qr_data?: string | null;
+    xml_url?: string | null;
+    cdr_url?: string | null;
+    created_at?: string;
+    updated_at?: string;
+    items?: { product_name?: string; service_name?: string; quantity: number; line_total: number }[];
 }
 
 export interface InvoiceKPIs {
     totalFacturado: number;
     successRate: number;
     pendingCount: number;
-    rejectedCount: number;
+    totalComprobantes: number;
+}
+
+export interface InvoiceApiResponse {
+    success: boolean;
+    data: Voucher[];
+    pagination?: {
+        page: number;
+        perPage: number;
+        total: number;
+        totalPages: number;
+        hasMore: boolean;
+    };
+}
+
+export interface SingleInvoiceResponse {
+    success: boolean;
+    data: Voucher;
+}
+
+export interface KpisResponse {
+    success: boolean;
+    data: InvoiceKPIs;
 }

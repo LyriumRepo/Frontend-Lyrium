@@ -138,7 +138,7 @@ export class LaravelAuthRepository implements IAuthRepository {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    name: credentials.storeName,
+                    storeName: credentials.storeName,
                     email: credentials.email,
                     phone: credentials.phone,
                     password: credentials.password,

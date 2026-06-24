@@ -2,7 +2,9 @@ export interface Branch {
     id: string;
     name: string;
     address: string;
-    city: string;
+    department: string;
+    province: string;
+    district: string;
     phone: string;
     hours: string;
     isPrincipal: boolean;
@@ -39,6 +41,31 @@ export interface Medal {
     description: string;
     icon: string;
     date: string;
+}
+
+export interface TopMedalEntity {
+    id: string;
+    name: string | null;
+    slug: string;
+    logo?: string | null;
+    image?: string | null;
+}
+
+export interface TopMedal {
+    id: string;
+    entity_type: 'store' | 'product' | 'service';
+    entity: TopMedalEntity | null;
+    rank_position: number | null;
+    status: 'pending' | 'approved' | 'suspended';
+    visible: boolean;
+    medal_image_url: string | null;
+    times_entered: number;
+    times_exited: number;
+    detected_at: string;
+    approved_at: string | null;
+    suspended_at: string | null;
+    grace_ends_at: string | null;
+    created_at: string;
 }
 
 export interface SubscriptionInfo {

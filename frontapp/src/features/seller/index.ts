@@ -1,11 +1,8 @@
 export { CatalogPageClient } from './catalog';
-export type { ProductFormData } from './catalog';
 
 export { HelpPageClient } from './help';
 
 export { ChatPageClient } from './chat';
-
-export { LogisticsPageClient } from './logistics';
 
 export { AgendaPageClient } from './agenda';
 

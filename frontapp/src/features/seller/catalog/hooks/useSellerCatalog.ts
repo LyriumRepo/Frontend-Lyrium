@@ -37,7 +37,7 @@ export function useSellerCatalog() {
         mutationFn: async (product: Partial<Product>) => {
             if (!USE_MOCKS) {
                 if (product.id) {
-                    return await productRepository.updateProduct(product.id, product);
+                    return await productRepository.updateProduct(product.id, product as any);
                 }
                 return await productRepository.createProduct(product as CreateProductInput);
             }

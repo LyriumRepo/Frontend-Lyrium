@@ -1,219 +1,343 @@
 'use client';
 
+/**
+ * useControlVendedores.ts
+ * Hook principal del panel de control de vendedores.
+ * Conectado al backend Laravel via adminSellerRepository.
+ */
+
 import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-    ControlVendedoresData, SellerStatus, ProductStatus, Stats, AuditEntry, Seller, Product as AdminProduct
+  adminSellerRepository,
+  SellerListItem,
+  SellerStatsResponse,
+} from '@/shared/lib/api/adminSellerRepository';
+import { sellerApi } from '@/shared/lib/api/sellerRepository'; // para profile requests (ya funciona)
+import type {
+  SellerStatus,
+  ProductStatus,
+  Stats,
 } from '@/features/admin/sellers/types';
-import { MOCK_CONTROL_DATA } from '@/features/admin/sellers/mock';
-import { getStores, getProducts, updateStoreStatus } from '@/shared/lib/api';
-import { sellerApi } from '@/shared/lib/api/sellerRepository';
-import { Product as WCProduct } from '@/lib/types/wp/wp-types';
-import { Store as DokanStore } from '@/lib/types/stores/store';
-import { USE_MOCKS } from '@/shared/lib/config/flags';
+
+// ─── Tipos internos del hook ───────────────────────────────────────────────────
+
+export type TabKey = 'vendedores' | 'aprobacion' | 'auditoria' | 'validacion' | 'contratos';
+
+export interface SellerFilters {
+  sellerSearch: string;
+  status: '' | 'active' | 'pending' | 'banned' | 'alert' | 'approved';
+}
+
+// ─── Helpers de mapeo ──────────────────────────────────────────────────────────
+
+/** Mapea el status del backend al SellerStatus del frontend */
+function mapStoreStatus(item: SellerListItem): SellerStatus {
+  if (item.is_banned) return 'SUSPENDED';
+  const s = item.store?.status;
+  if (s === 'active' || s === 'approved') return 'ACTIVE';
+  if (s === 'pending') return 'PENDING';
+  if (s === 'suspended') return 'SUSPENDED';
+  if (s === 'banned') return 'SUSPENDED';
+  return 'REJECTED';
+}
+
+/** Mapea alertas del backend al contractStatus del frontend */
+function mapContractStatus(
+  item: SellerListItem,
+): 'VIGENTE' | 'PENDIENTE' | 'VENCIDO' {
+  if (!item.store) return 'PENDIENTE';
+  if (item.store.has_active_contract) return 'VIGENTE';
+  return 'PENDIENTE';
+}
+
+// ─── Hook ─────────────────────────────────────────────────────────────────────
 
 export const useControlVendedores = () => {
-    const queryClient = useQueryClient();
-    const [currentTab, setCurrentTab] = useState<'vendedores' | 'aprobacion' | 'auditoria' | 'validacion'>('vendedores');
-    const [filters, setFilters] = useState({
-        sellerSearch: '',
-        auditStore: '',
-        auditType: 'ALL'
-    });
+  const queryClient = useQueryClient();
+  const [currentTab, setCurrentTab] = useState<TabKey>('vendedores');
+  const [filters, setFilters] = useState<SellerFilters>({
+    sellerSearch: '',
+    status: '',
+  });
 
-    // --- Query: Fetch and Map Data ---
-    const { data: rawData, isLoading, error } = useQuery({
-        queryKey: ['admin', 'control-vendedores'],
-        queryFn: async () => {
-            if (USE_MOCKS) {
-                return MOCK_CONTROL_DATA as ControlVendedoresData;
-            }
+  // ── Stats (4 cards del dashboard) ─────────────────────────────────────────
+  const { data: statsData, isLoading: statsLoading } = useQuery({
+    queryKey: ['admin', 'sellers', 'stats'],
+    queryFn: () => adminSellerRepository.getStats(),
+    staleTime: 60 * 1000, // 1 min
+  });
 
-            // Usar API de Laravel en lugar de WooCommerce/Dokan
-            const laravelStores = await sellerApi.getAllStores();
+  // ── Lista de vendedores ────────────────────────────────────────────────────
+  const {
+    data: sellersData,
+    isLoading: sellersLoading,
+    error: sellersError,
+  } = useQuery({
+    queryKey: ['admin', 'sellers', 'list', filters],
+    queryFn: () =>
+      adminSellerRepository.getSellers({
+        search: filters.sellerSearch || undefined,
+        status: filters.status || undefined,
+        per_page: 50,
+      }),
+    staleTime: 30 * 1000,
+  });
 
-            // 1. Mapeo de Tiendas (Laravel -> Admin Seller)
-            const mappedSellers: Seller[] = laravelStores.map((s) => {
-                let mappedStatus = 'REJECTED';
-                if (s.status === 'approved' || s.status === 'active' || s.status === 'ACTIVE') mappedStatus = 'ACTIVE';
-                else if (s.status === 'pending') mappedStatus = 'PENDING';
-                else if (s.status === 'banned') mappedStatus = 'SUSPENDED';
+  // ── Productos pendientes ───────────────────────────────────────────────────
+  const {
+    data: productsData,
+    isLoading: productsLoading,
+    error: productsError,
+  } = useQuery({
+    queryKey: ['admin', 'products', currentTab],
+    queryFn: () =>
+      adminSellerRepository.getProducts({
+        status: currentTab === 'aprobacion' ? 'pending_review' : undefined,
+        per_page: 50,
+      }),
+    enabled: currentTab === 'aprobacion',
+    staleTime: 30 * 1000,
+  });
 
-                return {
-                    id: s.id,
-                    name: s.store_name || 'Sin Nombre',
-                    company: s.nombre_comercial || s.store_name || 'Sin Nombre de Tienda',
-                    email: s.email || 'n/a',
-                    status: mappedStatus as SellerStatus,
-                    productsTotal: 0, // TODO: Obtener de endpoint de productos
-                    productsPending: 0,
-                    regDate: s.verified_at ? new Date(s.verified_at).toLocaleDateString() : new Date().toLocaleDateString(),
-                    contractStatus: 'VIGENTE'
-                };
-            });
+  // ── Profile Requests (pestaña validación) ─────────────────────────────────
+  const {
+    data: profileRequests = [],
+    isLoading: profileRequestsLoading,
+    refetch: refetchProfileRequests,
+    error: profileRequestsError,
+  } = useQuery({
+    queryKey: ['admin', 'profile-requests'],
+    queryFn: () => sellerApi.getAllProfileRequests(),
+    enabled: currentTab === 'validacion',
+    staleTime: 30_000,
+  });
 
-            // 2. Productos - Fetch from new admin endpoint
-            const LARAVEL_API_URL = process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://localhost:8000/api';
-            const token = typeof document !== 'undefined' ? document.cookie.match(/(?:^|;\s*)laravel_token=([^;]+)/)?.[1] : null;
-            
-            const productsResponse = await fetch(`${LARAVEL_API_URL}/admin/products`, {
-                headers: {
-                    ...(token ? { 'Authorization': `Bearer ${decodeURIComponent(token)}` } : {}),
-                },
-            });
-            
-            const productsData = await productsResponse.json();
-            const allProducts = productsData.data?.data || productsData.data || [];
-            
-            const statusMap: Record<string, string> = {
-                'pending_review': 'PENDING',
-                'approved': 'APPROVED',
-                'rejected': 'REJECTED',
-            };
-            
-            const mappedProducts: AdminProduct[] = allProducts.map((p: any) => ({
-                id: p.id,
-                name: p.name,
-                seller: p.store?.name || 'Sin tienda',
-                sellerId: p.store?.id || 0,
-                category: p.categories?.[0]?.name || 'Sin categoría',
-                price: parseFloat(p.price || '0'),
-                status: statusMap[p.status] || p.status || 'PENDING',
-                date: p.created_at ? new Date(p.created_at).toLocaleDateString() : new Date().toLocaleDateString(),
-                imageUrl: p.images?.[0]?.src || undefined,
-            }));
-
-            return {
-                sellers: mappedSellers,
-                products: mappedProducts,
-                notifications: MOCK_CONTROL_DATA.notifications,
-                auditoria: MOCK_CONTROL_DATA.auditoria
-            } as ControlVendedoresData;
-        },
-        staleTime: 5 * 60 * 1000, // 5 minutos de validez
-    });
-
-    // --- Mutation: Update Seller Status ---
-    const sellerStatusMutation = useMutation({
-        mutationFn: async ({ id, status, reason }: { id: number, status: SellerStatus, reason: string }) => {
-            const statusMap: Record<string, string> = {
-                'ACTIVE': 'approved',
-                'activa': 'approved',
-                'SUSPENDED': 'banned',
-                'REJECTED': 'rejected',
-                'PENDING': 'pending'
-            };
-            return sellerApi.updateStoreStatus(id, statusMap[status] || 'pending', reason);
-        },
-        onSuccess: (_, variables) => {
-            queryClient.invalidateQueries({ queryKey: ['admin', 'control-vendedores'] });
-        }
-    });
-
-    // --- Mutation: Update Product Status ---
-    const productStatusMutation = useMutation({
-        mutationFn: async ({ id, status, reason }: { id: number, status: ProductStatus, reason: string }) => {
-            const LARAVEL_API_URL = process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://localhost:8000/api';
-            const token = typeof document !== 'undefined' ? document.cookie.match(/(?:^|;\s*)laravel_token=([^;]+)/)?.[1] : null;
-            
-            const response = await fetch(`${LARAVEL_API_URL}/products/${id}/status`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...(token ? { 'Authorization': `Bearer ${decodeURIComponent(token)}` } : {}),
-                },
-                body: JSON.stringify({ status, reason }),
-            });
-            
-            if (!response.ok) {
-                const error = await response.json().catch(() => ({ message: 'Error al actualizar estado del producto' }));
-                throw new Error(error.message || 'Error al actualizar estado del producto');
-            }
-            
-            return response.json();
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['admin', 'control-vendedores'] });
-        }
-    });
-
-    // --- Derived State: Stats ---
-    const stats = useMemo((): Stats => {
-        if (!rawData) return { totalSellers: 0, activeSellers: 0, pendingProducts: 0, alerts: 0 };
-        return {
-            totalSellers: rawData.sellers.length,
-            activeSellers: rawData.sellers.filter(s => s.status === 'activa' || s.status === 'ACTIVE').length,
-            pendingProducts: rawData.products.filter(p => p.status === 'en_espera' || p.status === 'PENDING').length,
-            alerts: rawData.notifications.filter(n => n.estado_revision === 'nueva').length
-        };
-    }, [rawData]);
-
-    // --- Derived State: Filtered Sellers ---
-    const filteredSellers = useMemo(() => {
-        if (!rawData) return [];
-        return rawData.sellers.filter(s =>
-            s.name.toLowerCase().includes(filters.sellerSearch.toLowerCase()) ||
-            s.company.toLowerCase().includes(filters.sellerSearch.toLowerCase())
-        );
-    }, [rawData, filters.sellerSearch]);
-
-    // --- Query: Profile Requests ---
-    const { data: profileRequests = [], isLoading: profileRequestsLoading, refetch: refetchProfileRequests, error: profileRequestsError } = useQuery({
-        queryKey: ['admin', 'profile-requests'],
-        queryFn: async () => {
-            const result = await sellerApi.getAllProfileRequests();
-            return result;
-        },
-        enabled: currentTab === 'validacion',
-        staleTime: 30000,
-    });
-
-    const pendingProfileRequestsCount = profileRequests.filter(r => r.status === 'pending').length;
-
-    // --- Mutations: Approve/Reject Profile Requests ---
-    const approveProfileMutation = useMutation({
-        mutationFn: ({ id, notes }: { id: number; notes?: string }) =>
-            sellerApi.approveProfileRequest(id, notes),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['admin', 'profile-requests'] });
-        }
-    });
-
-    const rejectProfileMutation = useMutation({
-        mutationFn: ({ id, notes }: { id: number; notes: string }) =>
-            sellerApi.rejectProfileRequest(id, notes),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['admin', 'profile-requests'] });
-        }
-    });
-
+  // ── Derived: Stats para las 4 cards ───────────────────────────────────────
+  const stats = useMemo((): Stats & { pendingProducts: number; pending: number } => {
+    const s = statsData;
     return {
-        data: rawData,
-        loading: isLoading,
-        error: error ? (error as Error).message : null,
-        currentTab,
-        setCurrentTab,
-        stats,
-        filteredSellers,
-        filters,
-        setFilters,
-        profileRequests,
-        profileRequestsLoading,
-        profileRequestsError: profileRequestsError ? (profileRequestsError as Error).message : null,
-        pendingProfileRequestsCount,
-        actions: {
-            updateSellerStatus: (id: number, status: SellerStatus, reason: string) =>
-                sellerStatusMutation.mutateAsync({ id, status, reason }),
-            updateProductStatus: (id: number, status: ProductStatus, reason: string) =>
-                productStatusMutation.mutateAsync({ id, status, reason }),
-            approveProfileRequest: (id: number, notes?: string) =>
-                approveProfileMutation.mutateAsync({ id, notes }),
-            rejectProfileRequest: (id: number, notes: string) =>
-                rejectProfileMutation.mutateAsync({ id, notes }),
-            refetchProfileRequests,
-            markAllAsRead: () => {
-                console.log("Marking all as read (Mock)");
-            }
-        }
+      totalSellers: s?.total ?? 0,
+      activeSellers: s?.active ?? 0,
+      pendingProducts: productsData?.meta?.total ?? 0,
+      pending: s?.pending ?? 0,
+      alerts: s?.alerts ?? 0,
     };
+  }, [statsData, productsData]);
+
+  // ── Derived: Vendedores mapeados al formato que espera SellerList ──────────
+  const mappedSellers = useMemo(() => {
+    return (sellersData?.data ?? []).map((item) => ({
+      id: item.id,
+      name: item.display_name,
+      company: item.store?.trade_name ?? item.store?.store_name ?? 'Sin tienda',
+      email: item.email,
+      status: mapStoreStatus(item),
+      productsTotal: item.store?.total_sales ?? 0,
+      productsPending: 0,
+      regDate: new Date(item.created_at).toLocaleDateString('es-PE'),
+      contractStatus: mapContractStatus(item),
+      avatar: item.avatar,
+      phone: item.phone,
+      is_banned: item.is_banned,
+      email_verified: item.email_verified,
+      has_alerts: item.has_alerts,
+      alerts: item.alerts,
+      store: item.store,
+    }));
+  }, [sellersData]);
+
+  // ── Derived: Productos mapeados ────────────────────────────────────────────
+  const mappedProducts = useMemo(() => {
+    const statusMap: Record<string, string> = {
+      pending_review: 'PENDING',
+      approved: 'APPROVED',
+      rejected: 'REJECTED',
+      draft: 'DRAFT',
+    };
+    return (productsData?.data ?? []).map((p) => ({
+      id: p.id,
+      name: p.name,
+      seller: p.store?.name ?? 'Sin tienda',
+      sellerId: p.store?.id ?? 0,
+      category: p.categories?.[0]?.name ?? 'Sin categoría',
+      price: parseFloat(p.price ?? '0'),
+      status: statusMap[p.status] ?? p.status,
+      date: p.created_at
+        ? new Date(p.created_at).toLocaleDateString('es-PE')
+        : '',
+      imageUrl: p.images?.[0]?.src ?? undefined,
+      rejection_reason: p.rejection_reason,
+    }));
+  }, [productsData]);
+
+  // ── Pending profile requests count (badge de pestaña) ─────────────────────
+  const pendingProfileRequestsCount = useMemo(
+    () => profileRequests.filter((r) => r.status === 'pending').length,
+    [profileRequests],
+  );
+
+  // ─── Mutations ────────────────────────────────────────────────────────────
+
+  /** Ban/unban de usuario */
+  const banMutation = useMutation({
+    mutationFn: (id: number) => adminSellerRepository.toggleBan(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'sellers'] });
+    },
+  });
+
+  /** Cambio de estado de tienda (active / pending / suspended) */
+  const storeStatusMutation = useMutation({
+    mutationFn: ({
+      storeId,
+      status,
+    }: {
+      storeId: number;
+      status: 'active' | 'pending' | 'suspended';
+    }) => adminSellerRepository.updateStoreStatus(storeId, status),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'sellers'] });
+    },
+  });
+
+  /** Actualizar status de producto */
+  const productStatusMutation = useMutation({
+    mutationFn: ({
+      id,
+      status,
+      reason,
+    }: {
+      id: number;
+      status: 'approved' | 'rejected' | 'pending_review';
+      reason?: string;
+    }) => adminSellerRepository.updateProductStatus(id, status, reason),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'products'] });
+      queryClient.invalidateQueries({
+        queryKey: ['admin', 'sellers', 'stats'],
+      });
+    },
+  });
+
+  /** Aprobar profile request */
+  const approveProfileMutation = useMutation({
+    mutationFn: ({ id, notes }: { id: number; notes?: string }) =>
+      sellerApi.approveProfileRequest(id, notes),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['admin', 'profile-requests'],
+      });
+    },
+  });
+
+  /** Rechazar profile request */
+  const rejectProfileMutation = useMutation({
+    mutationFn: ({ id, notes }: { id: number; notes: string }) =>
+      sellerApi.rejectProfileRequest(id, notes),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['admin', 'profile-requests'],
+      });
+    },
+  });
+
+  // ─── Acción combinada: updateSellerStatus ─────────────────────────────────
+  // El frontend usa un modal unificado que emite SellerStatus ('ACTIVE', 'SUSPENDED', etc.)
+  // lo convertimos al formato del backend.
+  const updateSellerStatus = async (
+    id: number,
+    status: SellerStatus,
+    _reason: string,
+  ) => {
+    const seller = mappedSellers.find((s) => s.id === id);
+    if (!seller) return;
+
+    if (
+      status === 'SUSPENDED' ||
+      status === 'suspendida' ||
+      status === 'baja_logica'
+    ) {
+      // banear el usuario
+      await banMutation.mutateAsync(id);
+    } else if (status === 'ACTIVE' || status === 'activa') {
+      // desbanear + activar tienda
+      if (seller.is_banned) await banMutation.mutateAsync(id);
+      if (seller.store?.id) {
+        await storeStatusMutation.mutateAsync({
+          storeId: seller.store.id,
+          status: 'active',
+        });
+      }
+    } else if (status === 'PENDING') {
+      if (seller.store?.id) {
+        await storeStatusMutation.mutateAsync({
+          storeId: seller.store.id,
+          status: 'pending',
+        });
+      }
+    }
+  };
+
+  // ─── Return ───────────────────────────────────────────────────────────────
+  const isLoading = statsLoading || sellersLoading;
+  const error = sellersError ? (sellersError as Error).message : null;
+
+  return {
+    // Estado global
+    loading: isLoading,
+    error,
+    currentTab,
+    setCurrentTab,
+    filters,
+    setFilters,
+
+    // Datos
+    sellers: mappedSellers,
+    filteredSellers: mappedSellers, // ya filtrado desde el servidor
+    products: mappedProducts,
+    productsLoading,
+
+    // Stats para las cards
+    stats,
+    statsData,
+
+    // Profile Requests
+    profileRequests,
+    profileRequestsLoading,
+    profileRequestsError: profileRequestsError
+      ? (profileRequestsError as Error).message
+      : null,
+    pendingProfileRequestsCount,
+
+    // Paginación
+    pagination: sellersData?.pagination,
+
+    // Acciones
+    actions: {
+      updateSellerStatus,
+      updateProductStatus: (
+        id: number,
+        status: ProductStatus,
+        reason: string,
+      ) => {
+        const backendStatus =
+          status === 'APPROVED'
+            ? 'approved'
+            : status === 'REJECTED'
+              ? 'rejected'
+              : 'pending_review';
+        return productStatusMutation.mutateAsync({
+          id,
+          status: backendStatus,
+          reason,
+        });
+      },
+      approveProfileRequest: (id: number, notes?: string) =>
+        approveProfileMutation.mutateAsync({ id, notes }),
+      rejectProfileRequest: (id: number, notes: string) =>
+        rejectProfileMutation.mutateAsync({ id, notes }),
+      refetchProfileRequests,
+    },
+  };
 };

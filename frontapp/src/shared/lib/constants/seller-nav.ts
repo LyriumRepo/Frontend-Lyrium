@@ -18,6 +18,13 @@ export const sellerNavigation: PanelNavigation = [
                 href: '/seller/profile'
             },
             {
+                id: 'seguridad',
+                label: 'Seguridad',
+                description: 'Protege tu cuenta y gestiona tu contraseña',
+                icon: 'Shield',
+                href: '/seller/security'
+            },
+            {
                 id: 'mi-tienda',
                 label: 'Mi Tienda',
                 description: 'Personaliza tu escaparate público y presencia de marca',
@@ -26,10 +33,17 @@ export const sellerNavigation: PanelNavigation = [
             },
             {
                 id: 'catalogo',
-                label: 'Mi Catálogo',
+                label: 'Mis Productos',
                 description: 'Gestión integral de productos, categorías y existencias',
                 icon: 'Package',
                 href: '/seller/catalog'
+            },
+            {
+                id: 'inventario',
+                label: 'Gestión de stock ',
+                description: 'Control de existencias y alertas de stock',
+                icon: 'Boxes',
+                href: '/seller/inventario'
             },
             {
                 id: 'servicios',
@@ -37,6 +51,13 @@ export const sellerNavigation: PanelNavigation = [
                 description: 'Gestión de prestaciones y reservas activas',
                 icon: 'Calendar',
                 href: '/seller/services'
+            },
+            {
+                id: 'reservas',
+                label: 'Reservas',
+                description: 'Reservas recibidas y estado de atención',
+                icon: 'CalendarCheck',
+                href: '/seller/reservas'
             },
             {
                 id: 'ventas',
@@ -52,13 +73,13 @@ export const sellerNavigation: PanelNavigation = [
                 icon: 'CalendarCheck',
                 href: '/seller/agenda'
             },
-            {
-                id: 'logistica',
-                label: 'Mi Logística',
-                description: 'Configuración estratégica de envíos y operadoras',
-                icon: 'Truck',
-                href: '/seller/logistics'
-            },
+            // {
+            //     id: 'logistica',
+            //     label: 'Mi Logística',
+            //     description: 'Configuración estratégica de envíos y operadoras',
+            //     icon: 'Truck',
+            //     href: '/seller/logistics'
+            // },
             {
                 id: 'finanzas',
                 label: 'Centro de Finanzas',
@@ -75,10 +96,24 @@ export const sellerNavigation: PanelNavigation = [
             },
             {
                 id: 'ayuda',
-                label: 'Mesa de Ayuda',
+                label: 'Soporte Lyrium',
                 description: 'Soporte técnico y gestión de incidencias',
                 icon: 'HelpCircle',
                 href: '/seller/help'
+            },
+            {
+                id: 'bioblog',
+                label: 'BioBlog',
+                description: 'Crea y gestiona contenido: artículos, podcasts, videos y shorts',
+                icon: 'BookOpen',
+                href: '/seller/blog'
+            },
+            {
+                id: 'bioforo',
+                label: 'BioForo',
+                description: 'Foro de discusión con tu comunidad',
+                icon: 'MessagesSquare',
+                href: '/seller/forum'
             },
             {
                 id: 'facturacion',

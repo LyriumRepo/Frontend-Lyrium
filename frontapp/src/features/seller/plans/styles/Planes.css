@@ -584,16 +584,26 @@ body {
    PESTAÑA 1: MI PLAN
    ============================================ */
 .my-plan-title {
+    --title-gradient: linear-gradient(135deg, #1f2937 0%, #2563eb 55%, #06b6d4 100%);
     font-size: clamp(3rem, 3.5vw, 2.5rem);
     font-weight: 800;
     text-align: center;
     margin-bottom: 8px;
     letter-spacing: -0.6px;
     line-height: 1.15;
-    background: linear-gradient(135deg, #111111 0%, #92f63b 55%, #5cf6c5 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    display: block;
+    width: 100%;
+    background: var(--title-gradient) !important;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    color: transparent !important;
+}
+
+.dark .my-plan-title {
+    --title-gradient: linear-gradient(135deg, #111111 0%, #92f63b 55%, #5cf6c5 100%);
 }
 
 .my-plan-subtitle {
@@ -2930,4 +2940,156 @@ body {
     max-width: calc(100vw - 32px) !important;
     text-align: center;
     padding: 28px 32px !important;
+}
+
+/* ============================================
+   DARK MODE
+   ============================================ */
+
+/* Override CSS custom properties for dark mode */
+.dark {
+    --text-dark: #e2e8f0;
+    --text-light: #94a3b8;
+    --inactive-color: #64748b;
+    --bg-white: #1e293b;
+    --bg-light: #0f172a;
+    --border-light: #334155;
+    --border-extra-light: #263147;
+}
+
+/* Page background */
+.dark body {
+    background: linear-gradient(135deg, #0f172a 0%, #1a2744 100%);
+    color: #e2e8f0;
+}
+
+/* Showcase overlay — replace white gradient with dark one */
+.dark .showcase-bg::after {
+    background: linear-gradient(to right, rgba(15,23,42,0.92) 0%, rgba(15,23,42,0.62) 45%, rgba(15,23,42,0.12) 100%);
+}
+
+/* Mobile showcase overlay — dark */
+@media (max-width: 768px) {
+    .dark .showcase-bg::after {
+        background: linear-gradient(to bottom, rgba(15,23,42,0.96) 0%, rgba(15,23,42,0.84) 50%, rgba(15,23,42,0.62) 100%) !important;
+    }
+}
+
+/* Hardcoded black toggle buttons */
+.dark .showcase-toggle-btn {
+    color: rgba(226,232,240,0.85);
+}
+.dark .showcase-toggle-btn:hover {
+    color: #e2e8f0;
+}
+
+.dark .c-toggle-btn {
+    color: rgba(226,232,240,0.85);
+}
+.dark .c-toggle-btn:hover {
+    color: #93c5fd;
+}
+
+/* Tab nav — bg-white var cascades but active tab background uses --text-dark */
+.dark .tab-btn.active {
+    background: #334155;
+    color: #f1f5f9;
+}
+.dark .tab-btn:hover:not(.active) {
+    background: #263147;
+    color: #e2e8f0;
+}
+
+/* Carousel nav buttons */
+.dark .carousel-nav-btn {
+    background: rgba(30,41,59,0.92);
+    border-color: #334155;
+    color: #e2e8f0;
+}
+.dark .carousel-nav-btn:hover {
+    background: #334155;
+    color: #f1f5f9;
+    border-color: #475569;
+}
+
+/* Pay button uses --text-dark as background */
+.dark .btn-pay {
+    background: #334155;
+}
+.dark .btn-pay:hover {
+    background: #475569;
+}
+
+/* Preset active button uses --text-dark as background */
+.dark .preset-btn.active {
+    background: #334155;
+    border-color: #64748b;
+    color: #f1f5f9;
+}
+
+/* Qty buttons */
+.dark .qty-btn:hover {
+    background: #334155;
+    border-color: #64748b;
+    color: #f1f5f9;
+}
+
+/* Benefit detail item hover */
+.dark .benefit-detail-item:hover {
+    background: #1e3a5f;
+    border-color: rgba(59,130,246,0.25);
+}
+
+/* Downgrade modal cancel button */
+.dark .dg-btn-cancel {
+    background: #263147;
+    color: #e2e8f0;
+}
+.dark .dg-btn-cancel:hover {
+    background: #334155;
+}
+
+/* Expiry banners — lighten background for dark mode readability */
+.dark .expiracion-banner.banner-aviso {
+    background: rgba(245,158,11,0.1);
+    color: #fcd34d;
+}
+.dark .expiracion-banner.banner-urgente {
+    background: rgba(239,68,68,0.1);
+    color: #fca5a5;
+    box-shadow: 0 0 0 3px rgba(239,68,68,0.08);
+}
+
+/* Payment result notifications */
+.dark .payment-result-notification.success {
+    background: rgba(16,185,129,0.1);
+    border-left-color: #10b981;
+}
+.dark .payment-result-notification.error {
+    background: rgba(239,68,68,0.1);
+    border-left-color: #ef4444;
+}
+.dark .payment-result-title {
+    color: #e2e8f0;
+}
+
+/* Izipay modal */
+.dark .izipay-modal-header {
+    border-bottom-color: #334155;
+}
+.dark .izipay-modal-footer {
+    border-top-color: #334155;
+    color: #94a3b8;
+}
+.dark .izipay-modal-header-text h3 {
+    color: #e2e8f0;
+}
+
+/* Pending request banner */
+.dark .pending-request-banner {
+    background: rgba(73,155,191,0.1);
+    border-color: rgba(73,155,191,0.25);
+}
+.dark .pending-request-banner p {
+    color: #cbd5e1;
 }

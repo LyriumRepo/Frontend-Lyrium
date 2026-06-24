@@ -2,6 +2,7 @@
 
 import { Star, ShieldCheck, Leaf, Barcode, FolderOpen, Package } from 'lucide-react';
 import { money, resolveImg, NO_IMAGE, ApiProduct } from '@/modules/cart/utils';
+import TopMedalBadge from '@/components/ui/TopMedalBadge';
 
 interface StarRatingProps { rating: number; total: number; }
 
@@ -20,6 +21,22 @@ function StarRating({ rating, total }: StarRatingProps) {
         </span>
     );
 }
+
+const stickerConfig: Record<string, { label: string; class: string }> = {
+    oferta: { label: 'Oferta', class: 'bg-red-500' },
+    promo: { label: 'Promo', class: 'bg-orange-500' },
+    nuevo: { label: 'Nuevo', class: 'bg-green-500' },
+    limitado: { label: 'Limitado', class: 'bg-purple-500' },
+    liquidacion: { label: 'Liquidación', class: 'bg-red-600' },
+    descuento: { label: 'Descuento', class: 'bg-red-500' },
+    bestseller: { label: 'Best Seller', class: 'bg-amber-500' },
+    envio_gratis: { label: 'Envío Gratis', class: 'bg-teal-500' },
+    organic: { label: 'Orgánico', class: 'bg-emerald-600' },
+    natural: { label: 'Natural', class: 'bg-green-600' },
+    eco: { label: 'Eco', class: 'bg-lime-600' },
+    premium: { label: 'Premium', class: 'bg-purple-500' },
+    vegan: { label: 'Vegano', class: 'bg-green-700' },
+};
 
 interface Props {
     product: ApiProduct;
@@ -63,6 +80,13 @@ export default function ProductCard({ product: p, onAdd, onView }: Props) {
                     <Leaf className="w-3 h-3 text-sky-500 dark:text-[var(--brand-sky)]" /> Lyrium
                 </span>
 
+                {/* Tag badge */}
+                {p.tag && (
+                    <span className={`absolute top-7 right-3 text-white text-xs font-bold px-2 py-1 rounded-full ${stickerConfig[p.tag.toLowerCase()]?.class ?? 'bg-gray-500'}`}>
+                        {stickerConfig[p.tag.toLowerCase()]?.label ?? p.tag}
+                    </span>
+                )}
+
                 {/* Offer badge */}
                 {hasOffer && (
                     <span className="absolute top-3 right-3 inline-flex items-center gap-1 text-[11px] px-3 py-1 rounded-full bg-emerald-600 text-white shadow">
@@ -70,15 +94,7 @@ export default function ProductCard({ product: p, onAdd, onView }: Props) {
                     </span>
                 )}
 
-                {/* Quick add */}
-                <button
-                    onClick={() => onAdd(p.id)}
-                    disabled={outOfStock}
-                    title="Añadir rápido"
-                    className="absolute bottom-3 right-3 w-11 h-11 rounded-2xl bg-white/95 dark:bg-[var(--bg-card)]/95 border border-sky-100 dark:border-[var(--border-subtle)] text-slate-700 dark:text-[var(--text-primary)] shadow-sm grid place-items-center hover:shadow transition disabled:opacity-40 disabled:cursor-not-allowed"
-                >
-                    <span className="text-xl text-sky-500 dark:text-[var(--brand-sky)]">+</span>
-                </button>
+                <TopMedalBadge entityType="product" entityId={p.id} size="md" className="absolute bottom-3 right-3 z-10" />
             </div>
 
             {/* Info */}

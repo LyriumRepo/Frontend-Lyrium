@@ -38,8 +38,8 @@ export class WPOrderRepository implements IOrderRepository {
         throw new Error('TODO Tarea 3: Conectar endpoint real');
     }
 
-    async advanceOrderStep(id: string): Promise<Order> {
-        throw new Error('TODO Tarea 3: Conectar endpoint real');
+    async advanceOrderStep(id: string, section?: 'products' | 'services'): Promise<Order> {
+        throw new Error('TODO Tarea 3: Conectar endpoint real de WooCommerce/Dokan');
     }
 
     async confirmItem(orderId: string, itemId: string): Promise<Order> {
