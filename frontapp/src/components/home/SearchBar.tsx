@@ -404,8 +404,8 @@ export default function SearchBar({ categoriasServicios = [], categoriasProducto
                           Productos
                         </p>
                         <ul>
-                          {productResults.map((result, index) => (
-                            <li key={`product-${result.id}`}>
+                          {productResults.map((result) => (
+                            <li key={`${result.type}-${result.id}`}>
                               <button
                                 type="button"
                                 onMouseDown={() => handleSelectResult(result)}
