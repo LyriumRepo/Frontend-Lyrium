@@ -62,7 +62,10 @@ export function useCheckoutGrandTotals(): CheckoutGrandTotals {
     let grandTotalEnvio     = 0;
 
     tiendas.forEach(tienda => {
-      const op          = tienda.logistica?.opciones?.find(o => o.courier === selectedCourier);
+      const opciones = tienda.logistica?.opciones ?? [];
+      const op =
+        opciones.find(o => o.courier === selectedCourier) ??
+        opciones[0]; // fallback: courier más barato disponible para esta tienda
       const precioEnvio = getPrecioFinal(op, tipoEntrega) ?? 0;
       const items       = selectedItems.filter(i => i.storeId === tienda.tiendaId);
       grandTotalProductos += items.reduce((s, i) => s + i.price * i.quantity, 0);
