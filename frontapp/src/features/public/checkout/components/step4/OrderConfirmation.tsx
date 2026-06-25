@@ -36,7 +36,7 @@ export default function OrderConfirmation() {
     orderData,
   } = result;
 
-  const subtotalProductos = items.reduce((a, i) => a + i.price * i.quantity, 0);
+  const subtotalProductos = result.backendSubtotal ?? items.reduce((a, i) => a + i.price * i.quantity, 0);
 
   const addressLines =
     orderData.deliveryMethod !== 'pickup'
@@ -133,7 +133,7 @@ export default function OrderConfirmation() {
               </Link>
               <button
                 type="button"
-                onClick={() => setStep(4)}
+                onClick={() => setStep(5)}
                 className="px-8 py-4 rounded-2xl bg-sky-500 text-white font-black text-xs uppercase tracking-widest hover:bg-sky-600 transition-all text-center flex items-center justify-center gap-2 shadow-lg shadow-sky-100"
               >
                 Siguiente <ArrowRight className="w-4 h-4" />

@@ -166,14 +166,16 @@ export interface OrderData {
 }
 
 export interface OrderResult {
-  orderId:      string;
-  email:        string;
-  total:        number;
-  shipping?:    number;
-  items:        CartItem[];
-  personalData: PersonalData;
-  shippingData: ShippingData;
-  orderData:    OrderData;
+  orderId:          string;
+  email:            string;
+  total:            number;
+  shipping?:        number;
+  backendSubtotal?: number;
+  backendShipping?: number;
+  items:            CartItem[];
+  personalData:     PersonalData;
+  shippingData:     ShippingData;
+  orderData:        OrderData;
 }
 
 interface CheckoutState {

@@ -5,13 +5,38 @@ import { useCheckoutStore }          from '@/store/checkoutStore';
 import { orderApi }                  from '@/shared/lib/api/OrdenRepository';
 import { addressApi }                from '@/shared/lib/api/addressRepository';
 import { cartApi }                   from '@/shared/lib/api/cartRepository';
-import type { CartItem }             from '@/store/checkoutStore';
+import type { CartItem, CourierOption, TipoEntrega } from '@/store/checkoutStore';
 
+// ─── Helpers de envío por tienda ────────────────────────────────────────────────
+const MARKUP = 1.05;
+const applyMarkup = (price: number | null | undefined): number | null =>
+  price == null ? null : Math.ceil(price * MARKUP * 100) / 100;
+const SHARF_KEYS = ['sharf', 'sharf express'];
+const isSharf = (courier: string | undefined | null) =>
+  !!courier && SHARF_KEYS.includes(courier.toLowerCase());
+
+function getPrecioFinal(op: CourierOption, tipo: TipoEntrega): number | null {
+  if (isSharf(op.courier)) {
+    const raw = op.agencia?.precio ?? op.domicilio?.precio ?? op.precio ?? null;
+    return applyMarkup(raw);
+  }
+  if (tipo === 'agencia') {
+    if (op.agencia?.disponible && op.agencia.precio != null) return applyMarkup(op.agencia.precio);
+    if (op.precio != null) return applyMarkup(op.precio);
+    return null;
+  }
+  if (op.domicilio?.disponible && op.domicilio.precio != null) return applyMarkup(op.domicilio.precio);
+  if (op.agencia?.disponible && op.agencia.precio != null) return applyMarkup(op.agencia.precio);
+  if (op.precio != null) return applyMarkup(op.precio);
+  return null;
+}
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
 interface SubmitOrderResult {
-  orderId: string;
-  email:   string;
+  orderId:      string;
+  email:        string;
+  subtotal:     number;
+  shippingCost: number;
 }
 
 interface UseCheckoutSubmitReturn {
@@ -29,6 +54,9 @@ export function useCheckoutSubmit(): UseCheckoutSubmitReturn {
   const personalData   = useCheckoutStore((s) => s.personalData);
   const shippingData   = useCheckoutStore((s) => s.shippingData);
   const orderData      = useCheckoutStore((s) => s.orderData);
+  const selectedCourier      = useCheckoutStore((s) => s.selectedCourier);
+  const selectedTipoEntrega = useCheckoutStore((s) => s.selectedTipoEntrega);
+  const shippingQuotes      = useCheckoutStore((s) => s.shippingQuotes);
   const isSubmitting   = useCheckoutStore((s) => s.isSubmitting);
   const submitError    = useCheckoutStore((s) => s.submitError);
   const cartLoaded     = useCheckoutStore((s) => s.cartLoaded);
@@ -135,12 +163,24 @@ export function useCheckoutSubmit(): UseCheckoutSubmitReturn {
         .filter(Boolean)
         .join(' ');
 
+      const storeShipping = shippingQuotes?.tiendas
+        ?.filter(t => !t.error)
+        .map(t => {
+          const op = t.logistica?.opciones?.find(o => o.courier === selectedCourier);
+          const costo = getPrecioFinal(op ?? {} as CourierOption, selectedTipoEntrega ?? 'agencia');
+          return { store_id: t.tiendaId, shipping_cost: costo ?? 0 };
+        })
+        .filter(s => s.shipping_cost > 0);
+
       const commonFields = {
         shipping_name:  fullName,
         shipping_email: personalData.email,
         shipping_phone: personalData.celular,
         coupon_code:    orderData.promoCode   || undefined,
         lirios_used:    orderData.liriosUsed > 0 ? orderData.liriosUsed : undefined,
+        shipping_type:  selectedTipoEntrega,
+        carrier:  selectedCourier?.toLowerCase(),
+        store_shipping: storeShipping?.length ? storeShipping : undefined,
       };
 
       let order;
@@ -185,7 +225,7 @@ export function useCheckoutSubmit(): UseCheckoutSubmitReturn {
         order = await orderApi.createOrder(commonFields);
       }
 
-      return { orderId: order.id, email: personalData.email };
+      return { orderId: order.id, email: personalData.email, subtotal: order.subtotal, shippingCost: order.shippingCost };
 
     } catch (err: unknown) {
       const message =

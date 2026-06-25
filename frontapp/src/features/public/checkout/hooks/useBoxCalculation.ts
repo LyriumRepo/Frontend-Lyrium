@@ -12,7 +12,6 @@ export function useBoxCalculation() {
   const boxCalculation    = useCheckoutStore((s) => s.boxCalculation);
   const isLoadingBox      = useCheckoutStore((s) => s.isLoadingBox);
   const boxError          = useCheckoutStore((s) => s.boxError);
- console.log('STORE KEYS:', Object.keys(useCheckoutStore.getState()));
   const abortRef = useRef<AbortController | null>(null);
 
   const calcularCajas = useCallback(async () => {

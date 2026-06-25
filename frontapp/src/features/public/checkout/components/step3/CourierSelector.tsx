@@ -104,14 +104,11 @@ export default function CourierSelector({ quotes }: Props) {
 
   const couriersDisponibles = Object.keys(precioPorCourier);
   useEffect(() => {
-    if (!selectedCourier && couriersDisponibles.length > 0) {
-      const barato = couriersDisponibles.reduce((a, b) =>
-        (precioPorCourier[a] ?? Infinity) < (precioPorCourier[b] ?? Infinity) ? a : b
-      );
-      setSelectedCourier(barato);
-      setOrderData({ deliveryCost: precioPorCourier[barato] ?? 0 });
-    }
-  }, [couriersDisponibles.join(',')]);
+    if (couriersDisponibles.length === 0) return;
+    const target = selectedCourier ?? couriersDisponibles[0];
+    if (!selectedCourier) setSelectedCourier(target);
+    setOrderData({ deliveryCost: precioPorCourier[target] ?? 0 });
+  }, [couriersDisponibles.join(','), selectedCourier]);
 
   function handleCourier(courier: string) {
     setSelectedCourier(courier || null);

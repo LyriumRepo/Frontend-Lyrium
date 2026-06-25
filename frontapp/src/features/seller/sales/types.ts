@@ -24,9 +24,13 @@ export const ITEM_STATUS_LABELS: Record<ItemStatus, string> = {
 
 export interface OrderItem {
     id: string;
+    storeId: number;
+    isOwn: boolean;
     name: string;
     qty: number;
     price: number;
+    lineTotal: number;
+    shippingCost: number;
     status: ItemStatus;
     can_confirm: boolean;
     can_cancel: boolean;
@@ -42,6 +46,7 @@ export interface ShippingInfo {
     notes: string;
     carrierCode?: string | null;
     carrierData?: Record<string, string> | null;
+    checkoutCarrier?: string | null;
 }
 
 export type OrderType = 'product' | 'service' | 'mixed';
@@ -69,6 +74,10 @@ export interface ServiceOrderItem {
 export interface Order {
     id: string;
     orderNumber: string;
+    sellerSubtotal?: number;
+    sellerShipping?: number;
+    sellerTotal?: number;
+    isMultiStore?: boolean;
     statusLabel: string;
     fecha: string;
     updatedAt: string;

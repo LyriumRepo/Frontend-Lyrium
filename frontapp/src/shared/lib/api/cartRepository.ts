@@ -47,6 +47,18 @@ export interface CartItem {
   unitPrice: number;
   lineTotal: number;
   product: CartItemProduct;
+  store_id?:   number;
+  store_name?: string;
+  store_slug?: string;
+  peso?:  number;
+  largo?: number;
+  ancho?: number;
+  alto?:  number;
+  origen?: {
+    departamento: string;
+    provincia:    string;
+    distrito:     string;
+  };
 }
 
 export interface CartResource {

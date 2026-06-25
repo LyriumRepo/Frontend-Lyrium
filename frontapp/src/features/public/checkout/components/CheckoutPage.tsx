@@ -106,7 +106,7 @@ export default function CheckoutPage() {
             {currentStep === 2 && (
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2">
-                  <BoxCalculatorStep onContinue={() => setStep(3)} />
+                  <BoxCalculatorStep/>
                 </div>
                 <div className="lg:col-span-1">
                   <PackagingSummary />

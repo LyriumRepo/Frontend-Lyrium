@@ -42,6 +42,8 @@ export default function OrderSummary() {
     grandTotalsRef.current = { grandTotal, grandTotalEnvio };
   }, [grandTotal, grandTotalEnvio]);
 
+  const backendTotalsRef = useRef({ subtotal: 0, shippingCost: 0 });
+
   // ── Descuentos ─────────────────────────────────────────────────────────────
   const totalDiscount = orderData.discount + orderData.liriosDiscount;
   const hasDiscounts  = totalDiscount > 0;
@@ -68,6 +70,8 @@ export default function OrderSummary() {
           email: personalData.email,
           total: result.clientAnswer.orderDetails.orderTotalAmount / 100,
           shipping: grandTotalsRef.current.grandTotalEnvio,
+          backendSubtotal: backendTotalsRef.current.subtotal,
+          backendShipping: backendTotalsRef.current.shippingCost,
           items: cartItems,
           personalData,
           shippingData,
@@ -131,6 +135,8 @@ export default function OrderSummary() {
     const result = await submitOrder();
     if (!result) return;
 
+    backendTotalsRef.current = { subtotal: result.subtotal, shippingCost: result.shippingCost };
+
     let session;
     try {
       const cartToken = typeof window !== 'undefined'
@@ -153,6 +159,8 @@ export default function OrderSummary() {
         email: result.email,
         total: session.amount,
         shipping: grandTotalsRef.current.grandTotalEnvio,
+        backendSubtotal: result.subtotal,
+        backendShipping: result.shippingCost,
         items: cartItems,
         personalData,
         shippingData,

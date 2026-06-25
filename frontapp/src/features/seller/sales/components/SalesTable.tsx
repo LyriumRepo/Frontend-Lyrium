@@ -300,7 +300,8 @@ const SalesTable = memo(function SalesTable({
           return <StatusBadge label={order.statusLabel} className={config.class} />;
         },
       }),
-      columnHelper.accessor('total', {
+      columnHelper.accessor((row) => row.sellerSubtotal ?? row.total, {
+        id: 'total',
         header: 'Total',
         cell: (info) => (
           <span className="text-sm font-black text-[var(--text-primary)] tracking-tight">
