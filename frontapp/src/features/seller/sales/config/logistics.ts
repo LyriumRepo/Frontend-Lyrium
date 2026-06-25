@@ -28,37 +28,36 @@ export interface CarrierConfig {
 export const CARRIERS: Record<string, CarrierConfig> = {
     shalom: {
         name: 'Shalom',
-        trackingUrl: 'https://shalomcourier.com/track?code={tracking}',
+        trackingUrl: 'https://rastrea.shalom.pe/',
         fields: [
             { key: 'tracking_code', label: 'Código de seguimiento', type: 'text', required: true },
-            { key: 'pickup_code', label: 'Código de retiro', type: 'text', required: false },
+            { key: 'password', label: 'Clave de seguridad', type: 'password', required: true },
             { key: 'agency', label: 'Agencia destino', type: 'text', required: false },
         ],
     },
     olva: {
         name: 'Olva',
-        trackingUrl: 'https://www.olvacourier.com/track?codigo={tracking}',
+        trackingUrl: 'https://tracking.olvaexpress.pe/',
         fields: [
             { key: 'tracking_code', label: 'Código de seguimiento', type: 'text', required: true },
+            { key: 'password', label: 'Clave de seguridad', type: 'password', required: true },
             { key: 'agency', label: 'Agencia destino', type: 'text', required: false },
         ],
     },
     urbano: {
         name: 'Urbano',
-        trackingUrl: 'https://urbanocourier.com/tracking?n={tracking}',
+        trackingUrl: 'https://www.urbano.com.pe/tracking/',
         fields: [
             { key: 'tracking_code', label: 'Código de seguimiento', type: 'text', required: true },
-            { key: 'password', label: 'Contraseña', type: 'password', required: false },
+            { key: 'agency', label: 'Punto Urbano', type: 'text', required: false },
         ],
     },
     sharf: {
         name: 'Sharf',
-        trackingUrl: 'https://sharfexpress.com/tracking?cod={tracking}',
+        trackingUrl: 'https://envia.holasharf.com/tracking',
         fields: [
             { key: 'tracking_code', label: 'Código de seguimiento', type: 'text', required: true },
-            { key: 'pickup_code', label: 'Código de retiro', type: 'text', required: false },
-            { key: 'password', label: 'Contraseña', type: 'password', required: false },
-            { key: 'agency', label: 'Agencia destino', type: 'text', required: false },
+            { key: 'agency', label: 'Punto Sharf', type: 'text', required: false },
         ],
     },
 };

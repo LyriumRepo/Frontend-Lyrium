@@ -20,7 +20,7 @@ const DELIVERY_LABELS: Record<string, string> = {
 };
 
 export default function OrderConfirmation() {
-  const result = useCheckoutStore((s) => s.orderResult);
+  const result  = useCheckoutStore((s) => s.orderResult);
   const setStep = useCheckoutStore((s) => s.setStep);
 
   if (!result) return null;
@@ -30,10 +30,13 @@ export default function OrderConfirmation() {
     email,
     total,
     items,
+    shipping = 0,
     personalData,
     shippingData,
     orderData,
   } = result;
+
+  const subtotalProductos = result.backendSubtotal ?? items.reduce((a, i) => a + i.price * i.quantity, 0);
 
   const addressLines =
     orderData.deliveryMethod !== 'pickup'
@@ -130,7 +133,7 @@ export default function OrderConfirmation() {
               </Link>
               <button
                 type="button"
-                onClick={() => setStep(4)}
+                onClick={() => setStep(5)}
                 className="px-8 py-4 rounded-2xl bg-sky-500 text-white font-black text-xs uppercase tracking-widest hover:bg-sky-600 transition-all text-center flex items-center justify-center gap-2 shadow-lg shadow-sky-100"
               >
                 Siguiente <ArrowRight className="w-4 h-4" />
@@ -179,17 +182,19 @@ export default function OrderConfirmation() {
               ))}
             </div>
 
+            {/* Totales del recibo */}
             <div className="mt-8 pt-6 border-t border-gray-200/60 dark:border-[var(--border-subtle)] space-y-3">
               <div className="flex justify-between items-center text-[10px] font-bold text-gray-400 dark:text-[var(--text-muted)] uppercase tracking-widest">
-                <span>Subtotal Estimado</span>
-                <span>
-                  S/{' '}
-                  {items
-                    .reduce((a, i) => a + i.price * i.quantity, 0)
-                    .toFixed(2)}
-                </span>
+                <span>Subtotal productos</span>
+                <span>S/ {subtotalProductos.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between items-center">
+              {shipping > 0 && (
+                <div className="flex justify-between items-center text-[10px] font-bold text-gray-400 dark:text-[var(--text-muted)] uppercase tracking-widest">
+                  <span>Envío (incl. 5% servicio)</span>
+                  <span>S/ {shipping.toFixed(2)}</span>
+                </div>
+              )}
+              <div className="flex justify-between items-center pt-2 border-t border-gray-100 dark:border-[var(--border-subtle)]">
                 <span className="text-sm font-black text-gray-900 dark:text-[var(--text-primary)]">
                   TOTAL PAGADO
                 </span>

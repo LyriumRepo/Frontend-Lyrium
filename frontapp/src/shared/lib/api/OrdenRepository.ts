@@ -56,9 +56,11 @@ export interface CreateOrderPayload {
   shipping_notes?: string;
   shipping_cost?: number;
   shipping_type?: string;
+  carrier?: string;
   coupon_code?: string;
   notes?: string;
   lirios_used?: number;
+  store_shipping?: Array<{ store_id: number; shipping_cost: number }>;
 }
 
 // ── Tipos Izipay ──────────────────────────────────────────────────────────────

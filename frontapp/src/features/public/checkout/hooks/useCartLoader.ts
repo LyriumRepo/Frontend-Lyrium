@@ -53,14 +53,20 @@ export function useCartLoader() {
           for (const item of cart.items) {
             checkoutItems.push({
               id: item.productId,
-              storeId: 0,
-              storeName: '',
+              storeId:   item.store_id   ?? 0,
+              storeName: item.store_name ?? '',
+              storeSlug: item.store_slug ?? undefined,
               name: item.product.name,
               image: item.product.image ?? '',
               price: item.product.price,
               originalPrice: item.product.regular_price ?? item.product.price,
               quantity: item.quantity,
               selected: true,
+              peso:  item.peso,
+              largo: item.largo,
+              ancho: item.ancho,
+              alto:  item.alto,
+              origen: item.origen,
             });
           }
         }
