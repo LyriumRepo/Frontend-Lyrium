@@ -1,8 +1,6 @@
 ﻿'use client';
 
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
-import ProductCard, { fromLaravelProduct } from '@/features/public/productos/components/ProductCard';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
@@ -48,6 +46,7 @@ import { useCurrentUser } from '@/features/public/product/hooks/useCurrentUser';
 import { WriteProductReview } from '@/features/public/product/WriteProductReview';
 import { LARAVEL_API_URL } from '@/shared/lib/config/flags';
 
+import TopMedalBadge from '@/components/ui/TopMedalBadge';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -877,15 +876,76 @@ function ProductTabs({ product }: { product: LaravelProduct }) {
 // ─── RelatedProductsCarousel (auto-scroll infinito) ──────────────────────────
 
 function RelatedProductCard({ rel }: { rel: LaravelProduct }) {
-  const { addToCart, loading, addedToCart } = useAddToCart();
-  const router = useRouter();
-  const data = fromLaravelProduct(rel);
-  const handleAdd = useCallback(() => addToCart(Number(rel.id), 1), [addToCart, rel.id]);
-  const handleView = useCallback(() => router.push(`/producto/${rel.slug}`), [router, rel.slug]);
+  const relDiscount = discountPercent(rel.price, rel.regular_price);
   return (
-    <div className="flex-shrink-0 w-72">
-      <ProductCard product={data} onAdd={handleAdd} onView={handleView} adding={loading} added={addedToCart} />
-    </div>
+    <Link
+      href={`/producto/${rel.slug}`}
+      className="flex-shrink-0 w-72"
+      tabIndex={0}
+    >
+      <Card
+        className="group cursor-pointer h-full overflow-hidden border-border/60 
+  hover:border-teal-400 hover:shadow-xl hover:-translate-y-2 
+  transition-all duration-300 rounded-[2rem] py-0 gap-0"
+      >
+        <CardContent className="p-0">
+          <div className="relative aspect-square overflow-hidden bg-muted/40 dark:bg-muted/20">
+            <Image
+              src={
+                rel.images[0]?.medium ?? rel.images[0]?.src ?? '/no-image.png'
+              }
+              alt={rel.images[0]?.alt ?? rel.name}
+              fill
+              sizes="288px"
+              className="object-contain p-6 group-hover:scale-110 transition-transform duration-500 ease-out"
+            />
+            {rel.sticker && (
+              <div className="absolute top-2 left-2">
+                <StickerBadge sticker={rel.sticker} />
+              </div>
+            )}
+            {relDiscount > 0 && (
+              <div className="absolute top-2 right-2">
+                <Badge variant="destructive" className="text-[10px] font-bold">
+                  −{relDiscount}%
+                </Badge>
+              </div>
+            )}
+            <TopMedalBadge entityType="product" entityId={rel.id} size="md" className="absolute bottom-3 right-3" />
+          </div>
+          <div className="p-4 space-y-2">
+            <div className="flex flex-wrap items-center gap-1">
+              {rel.categories.slice(0, 1).map((cat) => (
+                <Badge key={cat.slug} variant="secondary" className="text-xs">
+                  {cat.name}
+                </Badge>
+              ))}
+            </div>
+            <h3 className="font-bold text-sm line-clamp-2 text-foreground group-hover:text-teal-600 transition-colors leading-snug">
+              {rel.name}
+            </h3>
+            <div className="flex items-center gap-1.5">
+              <Stars value={rel.rating.average} size="sm" />
+              <span className="text-xs text-muted-foreground">
+                ({rel.rating.count})
+              </span>
+            </div>
+            <div className="flex items-center justify-between pt-1">
+              <span className="text-xl font-bold text-foreground">
+                {formatPrice(rel.price)}
+              </span>
+              <Button
+                size="sm"
+                aria-label="Agregar al carrito"
+                className="opacity-0 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0 transition-all duration-200 bg-teal-500 hover:bg-teal-600 h-8 w-8 p-0"
+              >
+                <ShoppingCart className="w-3.5 h-3.5" />
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </Link>
   );
 }
 
@@ -1082,16 +1142,6 @@ export function ProductDetailPageClient({
 }) {
   const [quantity, setQuantity] = useState(1);
   const [wishlisted, setWishlisted] = useState(false);
-  const [isDark, setIsDark] = useState(false);
-
-  useEffect(() => {
-    setIsDark(document.documentElement.classList.contains('dark'));
-    const observer = new MutationObserver(() => {
-      setIsDark(document.documentElement.classList.contains('dark'));
-    });
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-    return () => observer.disconnect();
-  }, []);
 
   const {
     addToCart,
@@ -1123,7 +1173,7 @@ export function ProductDetailPageClient({
       <div className="grid lg:grid-cols-[1fr_520px] gap-8 items-start">
         {/* Columna izquierda: galería */}
         <div className="sticky top-24 space-y-4">
-          <ProductGallery images={product.images} name={product.name} />
+          <ProductGallery images={product.images} name={product.name} productId={product.id} />
         </div>
 
         {/* Columna derecha: info de compra */}
@@ -1301,23 +1351,29 @@ export function ProductDetailPageClient({
               Medios de pago aceptados
             </p>
             <div className="flex flex-wrap items-center justify-center gap-3">
-              {([
-                { dark: '/img/intro/visa1.png', light: '/img/intro/visanuevo-Photoroom(1).png', alt: 'Visa' },
-                { dark: '/img/intro/mastercard.png', light: '/img/intro/mastercadnuevo-Photoroom(1).png', alt: 'Mastercard' },
-                { dark: '/img/intro/amex1.png', light: '/img/intro/amexnuevo-Photoroom(1).png', alt: 'American Express' },
-                { dark: '/img/intro/yape.png', light: '/img/intro/yapenuevo-Photoroom(1).png', alt: 'Yape' },
-                { dark: '/img/intro/logo-plin.png', light: '/img/intro/plinnuevo-Photoroom(1).png', alt: 'Plin' },
-              ] as const).map((icon) => (
+              {[
+                { src: '/img/intro/visanuevo-Photoroom(1).png', alt: 'Visa' },
+                {
+                  src: '/img/intro/mastercadnuevo-Photoroom(1).png',
+                  alt: 'Mastercard',
+                },
+                {
+                  src: '/img/intro/amexnuevo-Photoroom(1).png',
+                  alt: 'American Express',
+                },
+                { src: '/img/intro/yapenuevo-Photoroom(1).png', alt: 'Yape' },
+                { src: '/img/intro/plinnuevo-Photoroom(1).png', alt: 'Plin' },
+              ].map(({ src, alt }) => (
                 <div
-                  key={icon.alt}
+                  key={alt}
                   className="flex items-center justify-center rounded-lg px-3 py-2 dark:bg-[var(--bg-secondary)]"
                 >
                   <Image
-                    src={isDark ? icon.dark : icon.light}
-                    alt={icon.alt}
+                    src={src}
+                    alt={alt}
                     width={60}
                     height={36}
-                    className="h-9 dark:h-14 w-auto object-contain"
+                    className="h-9 w-auto object-contain"
                   />
                 </div>
               ))}
@@ -1336,7 +1392,7 @@ export function ProductDetailPageClient({
                 className="flex flex-col items-center gap-1.5 text-center p-3 rounded-xl border border-teal-100 dark:border-teal-900/30 bg-teal-50/50 dark:bg-[var(--bg-secondary)]"
               >
                 <Icon className="w-4 h-4 text-teal-500" />
-                <span className="text-[10px] font-semibold tracking-[.06em] uppercase text-teal-700 dark:text-white">
+                <span className="text-[10px] font-semibold tracking-[.06em] uppercase text-teal-700 dark:text-teal-400">
                   {text}
                 </span>
               </div>
@@ -1348,7 +1404,7 @@ export function ProductDetailPageClient({
             <Link href={`/tienda/${product.store.slug}`}>
               <Card className="hover:border-teal-400 transition-colors cursor-pointer">
                 <CardContent className="p-4 flex items-center gap-4">
-                  <div className="w-11 h-11 flex items-center justify-center flex-shrink-0 overflow-hidden rounded-lg bg-muted">
+                  <div className="w-11 h-11 flex items-center justify-center flex-shrink-0 overflow-hidden rounded-lg bg-muted relative">
                     {product.store.logo ? (
                       <Image
                         src={product.store.logo}
@@ -1360,6 +1416,7 @@ export function ProductDetailPageClient({
                     ) : (
                       <Store className="w-5 h-5 text-muted-foreground" />
                     )}
+                    <TopMedalBadge entityType="store" entityId={product.store.id} size="xs" className="absolute bottom-0 right-0 z-10" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-semibold text-muted-foreground mb-0.5">
@@ -1403,9 +1460,11 @@ export function ProductDetailPageClient({
 function ProductGallery({
   images,
   name,
+  productId,
 }: {
   images: LaravelProduct['images'];
   name: string;
+  productId: string;
 }) {
   const [active, setActive] = useState(0);
   const [zooming, setZooming] = useState(false);
@@ -1481,6 +1540,8 @@ function ProductGallery({
           }}
           priority
         />
+
+        <TopMedalBadge entityType="product" entityId={productId} size="xl" className="absolute bottom-4 right-4 z-10" />
 
         {/* Lupa */}
         <div

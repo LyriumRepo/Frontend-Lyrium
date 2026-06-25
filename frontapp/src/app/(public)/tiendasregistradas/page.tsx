@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Icon from '@/components/ui/Icon';
+import TopMedalBadge from '@/components/ui/TopMedalBadge';
 import { LARAVEL_API_URL } from '@/shared/lib/config/flags';
 
 interface StoreData {
@@ -55,9 +56,9 @@ export default function TiendasRegistradasPage() {
           Tiendas Registradas
         </h1>
 
-        <div className="bg-white dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl shadow-xl p-4 md:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="bg-white dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl shadow-xl p-4 md:p-5 flex items-center justify-between gap-3">
           <div className="flex items-center gap-4 flex-1">
-            <div className="text-[var(--text-secondary)] dark:text-white/90 font-semibold text-sm md:text-base whitespace-nowrap shrink-0">
+            <div className="text-[var(--text-secondary)] dark:text-white/90 font-semibold text-sm md:text-base whitespace-nowrap">
               Total: <span className="text-[var(--text-primary)] font-extrabold">{stores.length}</span>
             </div>
             <input
@@ -65,11 +66,11 @@ export default function TiendasRegistradasPage() {
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Buscar tienda..."
-              className="flex-1 w-full px-4 py-2 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200 focus:outline-none focus:border-sky-500 transition"
+              className="flex-1 max-w-xs px-4 py-2 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200 focus:outline-none focus:border-sky-500 transition"
             />
           </div>
 
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={() => setViewMode('grid')}
@@ -166,11 +167,14 @@ export default function TiendasRegistradasPage() {
                     </div>
 
                     <div className="absolute right-4 -bottom-5 z-20 w-20 h-20 rounded-full bg-white dark:bg-[var(--bg-card)] border-4 border-white/85 dark:border-[var(--border-subtle)] shadow-2xl flex items-center justify-center overflow-hidden">
-                      <img
-                        src={store.logo || '/img/stores/default-logo.webp'}
-                        alt={`${store.name} logo`}
-                        className="w-3/5 h-3/5 object-contain"
-                      />
+                      <div className="relative w-full h-full flex items-center justify-center">
+                        <img
+                          src={store.logo || '/img/stores/default-logo.webp'}
+                          alt={`${store.name} logo`}
+                          className="w-3/5 h-3/5 object-contain"
+                        />
+                        <TopMedalBadge entityType="store" entityId={store.id} size="sm" className="absolute bottom-1 right-1 z-10" />
+                      </div>
                     </div>
                   </div>
                 </Link>
