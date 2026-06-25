@@ -102,7 +102,12 @@ export default function CourierSelector({ quotes }: Props) {
     }
   }
 
+  // Todos los couriers elegibles según el backend (incluyendo los que no cotizaron)
+  const allEligibles = Array.from(
+    new Set(tiendas.flatMap(t => t.logistica?.couriersDisponibles ?? []))
+  );
   const couriersDisponibles = Object.keys(precioPorCourier);
+  const couriersNoDisponibles = allEligibles.filter(c => !couriersDisponibles.includes(c));
   useEffect(() => {
     if (couriersDisponibles.length === 0) return;
     const target = selectedCourier ?? couriersDisponibles[0];
@@ -202,6 +207,14 @@ export default function CourierSelector({ quotes }: Props) {
               return (
                 <option key={courier} value={courier}>
                   {meta.emoji} {meta.label}{suffix}  —  S/ {total.toFixed(2)}
+                </option>
+              );
+            })}
+            {couriersNoDisponibles.map(courier => {
+              const meta = getMeta(courier);
+              return (
+                <option key={courier} value={courier} disabled>
+                  {meta.emoji} {meta.label}  —  No disponible en tu zona
                 </option>
               );
             })}
