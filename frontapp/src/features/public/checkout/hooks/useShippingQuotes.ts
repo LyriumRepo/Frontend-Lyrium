@@ -55,9 +55,11 @@ export function useShippingQuotes() {
 
     if (!departamento || !provincia || !distrito) return;
 
-    const selectedItems = cartItems.filter((i) => i.selected);
+    // Los service holds (id < 0) no necesitan cotización de envío
+    const selectedItems = cartItems.filter((i) => i.selected && i.id > 0);
     if (!selectedItems.length) {
-      setQuotesError('No hay productos seleccionados.');
+      // Carrito solo con servicios — no hay envío que cotizar
+      setLoadingQuotes(false);
       return;
     }
 
