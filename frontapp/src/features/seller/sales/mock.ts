@@ -37,8 +37,8 @@ export const MOCK_ORDERS: Order[] = [
         paidAt: '2024-03-15T14:00:00Z',
         envio: { direccion: 'Av. Siempre Viva 123, Lima', carrier: 'Olva Courier', tracking: 'TRK-123456789', costo: 15.00, city: 'Lima', postalCode: '15001', notes: '' },
         items: [
-            { id: '1', name: 'Producto A', qty: 2, price: 100.00, status: 'confirmed', can_confirm: false, can_cancel: false },
-            { id: '2', name: 'Producto B', qty: 1, price: 50.50, status: 'processing', can_confirm: false, can_cancel: false }
+            { id: '1', storeId: 1, isOwn: true, name: 'Producto A', qty: 2, price: 100.00, lineTotal: 200.00, shippingCost: 0, status: 'confirmed', can_confirm: false, can_cancel: false },
+            { id: '2', storeId: 1, isOwn: true, name: 'Producto B', qty: 1, price: 50.50, lineTotal: 50.50, shippingCost: 0, status: 'processing', can_confirm: false, can_cancel: false }
         ],
         serviceItems: []
     },
@@ -95,8 +95,7 @@ export const MOCK_ORDERS: Order[] = [
                 endTime: '11:00:00',
                 modality: 'presencial',
                 durationMinutes: 60,
-                serviceBookingId: 'bk-001',
-                bookingStatus: 'pending_seller'
+                serviceBookingId: 'bk-001'
             }
         ]
     },
@@ -136,7 +135,7 @@ export const MOCK_ORDERS: Order[] = [
         paidAt: null,
         envio: { direccion: 'Urb. Los Rosales Mz A Lt 5, Trujillo', carrier: 'Shalom', tracking: 'SHL-9876543456', costo: 20.00, city: 'Trujillo', postalCode: '13001', notes: '' },
         items: [
-            { id: '4', name: 'Producto D', qty: 5, price: 90.00, status: 'pending_seller', can_confirm: true, can_cancel: true }
+            { id: '4', storeId: 1, isOwn: true, name: 'Producto D', qty: 5, price: 90.00, lineTotal: 450.00, shippingCost: 0, status: 'pending_seller', can_confirm: true, can_cancel: true }
         ],
         serviceItems: [
             {
@@ -155,8 +154,7 @@ export const MOCK_ORDERS: Order[] = [
                 endTime: null,
                 modality: 'domicilio',
                 durationMinutes: 45,
-                serviceBookingId: 'bk-002',
-                bookingStatus: 'pending_seller'
+                serviceBookingId: 'bk-002'
             }
         ]
     }

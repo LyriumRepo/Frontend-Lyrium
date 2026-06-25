@@ -25,9 +25,19 @@ export default function BranchManagement({ branches, setBranches }: BranchManage
     const handleSave = (branchData: unknown) => {
         const data = branchData as Branch;
         if (editingBranch) {
-            setBranches(branches.map(b => b.id === editingBranch.id ? { ...data, id: b.id } : b));
+            setBranches(branches.map(b =>
+                b.id === editingBranch.id
+                    ? { ...data, id: b.id }
+                    : data.isPrincipal
+                        ? { ...b, isPrincipal: false }
+                        : b
+            ));
         } else {
-            setBranches([...branches, { ...data, id: Math.random().toString(36).substr(2, 9) }]);
+            const newBranch = { ...data, id: Math.random().toString(36).substr(2, 9) };
+            setBranches([
+                ...branches.map(b => data.isPrincipal ? { ...b, isPrincipal: false } : b),
+                newBranch,
+            ]);
         }
         setIsModalOpen(false);
     };

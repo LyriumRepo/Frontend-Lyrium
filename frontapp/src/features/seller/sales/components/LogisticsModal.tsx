@@ -5,6 +5,7 @@ import BaseModal from '@/components/ui/BaseModal';
 import BaseButton from '@/components/ui/BaseButton';
 import CarrierFieldGroup from './CarrierFieldGroup';
 import { CARRIERS, CARRIER_CODES, CarrierConfig, CarrierField } from '@/features/seller/sales/config/logistics';
+import type { TipoEnvio } from '@/features/seller/sales/types';
 import Icon from '@/components/ui/Icon';
 
 interface LogisticsModalProps {
@@ -15,6 +16,7 @@ interface LogisticsModalProps {
     detectedCarrier?: string | null;
     /** Datos existentes para edición (re-apertura del modal) */
     existingData?: Record<string, string> | null;
+    tipoEnvio: TipoEnvio;
 }
 
 export default function LogisticsModal({
@@ -23,6 +25,7 @@ export default function LogisticsModal({
     onConfirm,
     detectedCarrier,
     existingData,
+    tipoEnvio,
 }: LogisticsModalProps) {
     const [selectedCarrier, setSelectedCarrier] = useState<string>(
         () => detectedCarrier ?? existingData?.carrier_code ?? CARRIER_CODES[0]
@@ -34,7 +37,14 @@ export default function LogisticsModal({
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const isAuto = !!detectedCarrier;
-    const activeCarrier: CarrierConfig | undefined = CARRIERS[selectedCarrier];
+    const activeCarrier: CarrierConfig | undefined = CARRIERS[selectedCarrier?.toLowerCase()];
+    const filteredFields = useMemo(() => {
+        if (!activeCarrier) return [];
+        if (tipoEnvio === 'domicilio') {
+            return activeCarrier.fields.filter(f => f.key === 'tracking_code');
+        }
+        return activeCarrier.fields;
+    }, [activeCarrier, tipoEnvio]);
 
     const handleCarrierChange = (code: string) => {
         setSelectedCarrier(code);
@@ -56,8 +66,8 @@ export default function LogisticsModal({
     const validate = (): boolean => {
         const newErrors: Record<string, string> = {};
         if (!isAuto) {
-            if (!formValues.tracking_number?.trim()) {
-                newErrors.tracking_number = 'El número de seguimiento es obligatorio';
+            if (!formValues.tracking_code?.trim()) {
+                newErrors.tracking_code = 'El código de seguimiento es obligatorio';
             }
         } else {
             if (!activeCarrier) {
@@ -65,7 +75,7 @@ export default function LogisticsModal({
                 setErrors(newErrors);
                 return false;
             }
-            for (const field of activeCarrier.fields) {
+            for (const field of filteredFields) {
                 const fieldDef = field as CarrierField;
                 if (fieldDef.required && !formValues[fieldDef.key]?.trim()) {
                     newErrors[fieldDef.key] = `${fieldDef.label} es obligatorio`;
@@ -83,7 +93,7 @@ export default function LogisticsModal({
         if (!validate()) return;
         setIsSubmitting(true);
         try {
-            await onConfirm(selectedCarrier, { ...formValues });
+            await onConfirm(selectedCarrier.toLowerCase(), { ...formValues });
         } finally {
             setIsSubmitting(false);
         }
@@ -133,25 +143,25 @@ export default function LogisticsModal({
                         </div>
                         <div>
                             <label className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2 block">
-                                Número de Seguimiento
+                                Código de Seguimiento
                             </label>
                             <input
                                 type="text"
-                                value={formValues.tracking_number ?? ''}
-                                onChange={(e) => handleFieldChange('tracking_number', e.target.value)}
+                                value={formValues.tracking_code ?? ''}
+                                onChange={(e) => handleFieldChange('tracking_code', e.target.value)}
                                 placeholder="Ej: 123456789"
                                 disabled={isSubmitting}
                                 className="w-full px-4 py-2.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] text-sm font-medium text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-emerald-400 disabled:opacity-50"
                             />
-                            {errors.tracking_number && (
-                                <p className="text-xs font-bold text-red-500 mt-1">{errors.tracking_number}</p>
+                            {errors.tracking_code && (
+                                <p className="text-xs font-bold text-red-500 mt-1">{errors.tracking_code}</p>
                             )}
                         </div>
                     </div>
                 ) : activeCarrier && (
                     <div className="bg-[var(--bg-secondary)]/50 p-6 rounded-2xl border border-[var(--border-subtle)]">
                         <CarrierFieldGroup
-                            fields={activeCarrier.fields}
+                            fields={filteredFields}
                             values={formValues}
                             errors={errors}
                             onChange={handleFieldChange}

@@ -3,9 +3,13 @@ import { IOrderRepository, OrderFilters, CreateOrderInput, UpdateOrderInput } fr
 
 interface BackendItem {
     id: string;
+    sellerId: number;
+    isOwn: boolean;
     productName: string;
     quantity: number;
     unitPrice: number;
+    lineTotal: number;
+    shippingCost: number;
     status: string;
     actions: {
         canConfirm: boolean;
@@ -62,8 +66,10 @@ interface BackendOrder {
     carrier: string | null;
     carrierCode?: string | null;
     carrierData?: Record<string, string> | null;
+    checkoutCarrier?: string | null;
     storeName: string | null;
     shipping: BackendShipping;
+    storeShipping: Array<{ store_id: number; shipping_cost: number }> | null;
     subtotal: number;
     shippingCost: number;
     taxAmount: number;
@@ -159,9 +165,13 @@ export class LaravelOrderRepository implements IOrderRepository {
     private mapItem(item: BackendItem): OrderItem {
         return {
             id: item.id,
+            storeId: item.sellerId,
+            isOwn: item.isOwn,
             name: item.productName,
             qty: item.quantity,
             price: item.unitPrice,
+            lineTotal: item.lineTotal,
+            shippingCost: item.shippingCost ?? 0,
             status: this.normalizeStatus(item.status) as OrderItem['status'],
             can_confirm: item.actions.canConfirm,
             can_cancel: item.actions.canCancel,
@@ -254,6 +264,7 @@ export class LaravelOrderRepository implements IOrderRepository {
                 notes: backend.shipping?.notes ?? '',
                 carrierCode: backend.carrierCode ?? backend.carrier ?? null,
                 carrierData: backend.carrierData ?? null,
+                checkoutCarrier: backend.checkoutCarrier ?? null,
             } as ShippingInfo,
             items,
             serviceItems,
@@ -324,8 +335,13 @@ export class LaravelOrderRepository implements IOrderRepository {
         return this.mapOrder((raw as any).data as BackendOrder);
     }
 
-    async advanceOrderStep(id: string, section?: 'products' | 'services'): Promise<Order> {
+    async advanceOrderStep(id: string, section?: 'products' | 'services' | 'confirm'): Promise<Order> {
         console.log('[LaravelOrderRepository::advanceOrderStep] START', { orderId: id, section });
+
+        if (section === 'confirm') {
+            console.log('[LaravelOrderRepository::advanceOrderStep] confirm action requested, calling confirmOrder');
+            return this.confirmOrder(id);
+        }
 
         const order = await this.getOrderById(id);
         if (!order) {

@@ -1,0 +1,174 @@
+'use client';
+import { Package, Weight, Truck, ShoppingBag, Store } from 'lucide-react';
+import { useCheckoutStore } from '@/store/checkoutStore';
+import type { TiendaLogistica, CourierOption, TipoEntrega } from '@/store/checkoutStore';
+
+const MARKUP = 1.05;
+const applyMarkup = (p: number | null | undefined): number | null =>
+  p == null ? null : Math.ceil(p * MARKUP * 100) / 100;
+
+const isSharf = (courier: string) =>
+  ['sharf', 'sharf express'].includes(courier.toLowerCase());
+
+const tieneDomicilio = (op: CourierOption | undefined) =>
+  !!op && (isSharf(op.courier) || !!op.domicilio?.disponible);
+
+function getPrecioFinal(op: CourierOption | undefined, tipo: TipoEntrega): number | null {
+  if (!op) return null;
+  if (isSharf(op.courier)) {
+    return applyMarkup(op.agencia?.precio ?? op.domicilio?.precio ?? op.precio ?? null);
+  }
+  if (tipo === 'agencia') {
+    if (op.agencia?.disponible && op.agencia.precio != null) return applyMarkup(op.agencia.precio);
+    return op.precio != null ? applyMarkup(op.precio) : null;
+  }
+  if (op.domicilio?.disponible && op.domicilio.precio != null) return applyMarkup(op.domicilio.precio);
+  if (op.agencia?.disponible && op.agencia.precio != null) return applyMarkup(op.agencia.precio);
+  return op.precio != null ? applyMarkup(op.precio) : null;
+}
+
+const getPesoTienda = (t: TiendaLogistica) =>
+  (t.cajas?.detalle ?? []).reduce((s, c) => s + (c.pesoFacturable ?? 0), 0);
+
+const Divider = () => <div className="h-px bg-gray-100 dark:bg-gray-800" />;
+
+export default function ResumenCheckout() {
+  const cartItems       = useCheckoutStore(s => s.cartItems);
+  const shippingQuotes  = useCheckoutStore(s => s.shippingQuotes);
+  const selectedCourier = useCheckoutStore(s => s.selectedCourier);
+  const tipoEntrega     = useCheckoutStore(s => s.selectedTipoEntrega);
+
+  if (!shippingQuotes || !selectedCourier) return null;
+
+  const tiendas        = shippingQuotes.tiendas?.filter(t => !t.error) ?? [];
+  const selectedItems  = cartItems.filter(i => i.selected);
+
+  if (tiendas.length === 0 || selectedItems.length === 0) return null;
+  let grandTotalProductos = 0;
+  let grandTotalEnvio     = 0;
+
+  const tiendaRows = tiendas.map(tienda => {
+    const op   = tienda.logistica?.opciones?.find(o => o.courier === selectedCourier);
+    const sinDomicilioAqui = !isSharf(selectedCourier) && tipoEntrega === 'domicilio' && !tieneDomicilio(op);
+    const tipoEfectivo: TipoEntrega = sinDomicilioAqui ? 'agencia' : tipoEntrega;
+    const precioEnvio = getPrecioFinal(op, tipoEfectivo) ?? 0;
+    const items = selectedItems.filter(i => i.storeId === tienda.tiendaId);
+    const subtotalProductos = items.reduce((s, i) => s + i.price * i.quantity, 0);
+
+    const pesoTotal  = getPesoTienda(tienda);
+    const totalTienda = subtotalProductos + precioEnvio;
+
+    grandTotalProductos += subtotalProductos;
+    grandTotalEnvio     += precioEnvio;
+
+    return { tienda, items, subtotalProductos, precioEnvio, totalTienda, pesoTotal, op, tipoEfectivo, sinDomicilioAqui };
+  });
+
+  const grandTotal = grandTotalProductos + grandTotalEnvio;
+
+  return (
+    <div className="rounded-2xl border-2 border-gray-100 dark:border-gray-800 overflow-hidden bg-white dark:bg-gray-900/40">
+      <div className="divide-y divide-gray-100 dark:divide-gray-800">
+        {/* ── Por tienda ───────────────────────────────────────────────── */}
+        {tiendaRows.map(({ tienda, items, subtotalProductos, precioEnvio, totalTienda, pesoTotal, op, tipoEfectivo }, idx) => (
+          <div key={tienda.tiendaId} className="px-5 py-4 space-y-3">
+
+            {/* Nombre tienda */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Store className="w-4 h-4 text-teal-500 shrink-0" />
+                <span className="text-sm font-bold text-gray-900 dark:text-white">
+                  {tienda.tienda}
+                </span>
+              </div>
+              <span className="text-[11px] text-gray-400">
+                📍 {tienda.origen?.display}
+              </span>
+            </div>
+
+            {/* Productos */}
+            <div className="space-y-1">
+              {items.map(item => (
+                <div key={item.id} className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                  <span className="truncate max-w-[160px]">
+                    {item.name}
+                    <span className="ml-1 text-gray-400">×{item.quantity}</span>
+                  </span>
+                  <span className="font-mono shrink-0">
+                    S/ {(item.price * item.quantity).toFixed(2)}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            {/* Cajas + peso */}
+            <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-800/60 text-xs text-gray-500 dark:text-gray-400">
+              <Package className="w-3.5 h-3.5 text-teal-500 shrink-0" />
+              <span>{tienda.cajas?.resumen}</span>
+              <span className="text-gray-300 dark:text-gray-600">·</span>
+              <Weight className="w-3.5 h-3.5 shrink-0" />
+              <span className="font-mono">{pesoTotal.toFixed(2)} kg</span>
+            </div>
+
+            {/* Courier elegido */}
+            <div className="flex items-center justify-between text-xs">
+              <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
+                <Truck className="w-3.5 h-3.5 shrink-0" />
+                <span className="font-medium">{selectedCourier}</span>
+                <span className="text-gray-300 dark:text-gray-600">·</span>
+                <span>
+                  {isSharf(selectedCourier)
+                    ? 'Puerta a puerta'
+                    : tipoEfectivo === 'domicilio' ? '🏠 A domicilio' : '🏢 En agencia'}
+                </span>
+              </div>
+              <span className="font-mono font-bold text-sky-600 dark:text-sky-400">
+                + S/ {precioEnvio.toFixed(2)}
+              </span>
+            </div>
+
+            {/* Subtotales tienda */}
+            <div className="pt-2 space-y-1 border-t border-gray-100 dark:border-gray-800">
+              <div className="flex justify-between text-xs text-gray-400">
+                <span>Subtotal productos</span>
+                <span className="font-mono">S/ {subtotalProductos.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-xs text-gray-400">
+                <span>Envío</span>
+                <span className="font-mono">S/ {precioEnvio.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-sm font-bold text-gray-800 dark:text-white">
+                <span>Total {tienda.tienda}</span>
+                <span className="font-mono">S/ {totalTienda.toFixed(2)}</span>
+              </div>
+            </div>
+
+          </div>
+        ))}
+
+        {/* ── TOTALES GENERALES ─────────────────────────────────────── */}
+        <div className="px-5 py-4 space-y-2 bg-gray-50 dark:bg-gray-800/40">
+          <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400">
+            <span>Subtotal productos</span>
+            <span className="font-mono">S/ {grandTotalProductos.toFixed(2)}</span>
+          </div>
+          <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400">
+            <span>Total envío ({selectedCourier})</span>
+            <span className="font-mono">S/ {grandTotalEnvio.toFixed(2)}</span>
+          </div>
+          <Divider />
+          <div className="flex justify-between items-center pt-1">
+            <span className="font-black text-base text-gray-900 dark:text-white">TOTAL GENERAL</span>
+            <span className="font-black font-mono text-2xl text-sky-600 dark:text-sky-400">
+              S/ {grandTotal.toFixed(2)}
+            </span>
+          </div>
+          <p className="text-[10px] text-gray-400 text-right">
+            Incluye 5% de servicio de envío
+          </p>
+        </div>
+      </div>
+
+    </div>
+  );
+}

@@ -1,15 +1,6 @@
-/**
- * CartSummary.tsx
- * ARCHIVO: src/features/public/checkout/components/step1/CartSummary.tsx
- *
- * Panel de resumen del paso 1.
- * Lee del checkoutStore (ya poblado con los items reales del backend).
- * El botón "Ir a pagar" avanza al paso 2.
- */
-
 'use client';
 
-import { ShoppingBag, Tag, Truck, ArrowRight, Loader2 } from 'lucide-react';
+import { ShoppingBag, Tag, ArrowRight, Loader2 } from 'lucide-react';
 import { useCheckoutStore } from '@/store/checkoutStore';
 
 interface Props {
@@ -31,8 +22,7 @@ export default function CartSummary({ onContinue }: Props) {
     (acc, i) => acc + (i.originalPrice - i.price) * i.quantity,
     0,
   );
-  const shipping = subtotal > 0 ? 10.0 : 0;
-  const total = subtotal + shipping; // precios ya incluyen IGV por ley peruana
+  const total = subtotal; // precios ya incluyen IGV por ley peruana
   const igv = Math.round((total - total / 1.18) * 100) / 100; // IGV extraído (solo informativo)
 
   // ── Skeleton mientras carga ────────────────────────────────────────────────
@@ -81,18 +71,6 @@ export default function CartSummary({ onContinue }: Props) {
         <div className="flex justify-between text-gray-600 dark:text-[var(--text-secondary)]">
           <span>Subtotal</span>
           <span>S/ {subtotal.toFixed(2)}</span>
-        </div>
-
-        <div className="flex justify-between text-gray-600 dark:text-[var(--text-secondary)]">
-          <span className="flex items-center gap-1">
-            <Truck className="w-3.5 h-3.5" />
-            Envío
-          </span>
-          <span
-            className={shipping === 0 ? 'text-emerald-500 font-medium' : ''}
-          >
-            {shipping === 0 ? 'Gratis' : `S/ ${(shipping ?? 0).toFixed(2)}`}
-          </span>
         </div>
       </div>
 
