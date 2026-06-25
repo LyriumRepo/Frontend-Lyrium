@@ -454,20 +454,23 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit }:
                                                     />
                                                 </div>
                                                 <div className="flex flex-col gap-1 pl-4">
-                                                    <span className="text-[8px] font-black text-[var(--text-secondary)] uppercase">Peso (kg)</span>
+                                                    <span className="text-[8px] font-black text-[var(--text-secondary)] uppercase">Peso kg 📦</span>
                                                     <input
-                                                        type="number" name="weight" step="0.1"
+                                                        type="number" name="weight" step="0.1" min="0.1"
                                                         value={formData.weight || ''} onChange={handleChange}
+                                                        placeholder="ej: 1.5"
+                                                        title="Peso real del producto en kilogramos. Se usa para calcular el costo de envío."
                                                         className="w-full bg-transparent border-none focus:ring-0 font-black text-[var(--text-primary)] p-0 outline-none"
                                                     />
                                                 </div>
                                                 <div className="flex flex-col gap-1 pl-4">
-                                                    <span className="text-[8px] font-black text-[var(--text-secondary)] uppercase">Dimen (LxWxH)</span>
+                                                    <span className="text-[8px] font-black text-[var(--text-secondary)] uppercase">Medidas cm 📐</span>
                                                     <input
                                                         type="text" name="dimensions"
                                                         value={formData.dimensions || ''} onChange={handleChange}
                                                         className="w-full bg-transparent border-none focus:ring-0 font-black text-[var(--text-primary)] p-0 outline-none font-mono text-[10px]"
-                                                        placeholder="0x0x0 cm"
+                                                        placeholder="largo×ancho×alto"
+                                                        title="Dimensiones del paquete en centímetros: Largo × Ancho × Alto. Ejemplo: 30x20x15"
                                                     />
                                                 </div>
                                             </div>
