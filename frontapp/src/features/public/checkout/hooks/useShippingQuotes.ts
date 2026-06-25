@@ -77,8 +77,8 @@ export function useShippingQuotes() {
       largo:      item.largo  ?? 30,
       ancho:      item.ancho  ?? 20,
       alto:       item.alto   ?? 15,
-      store_id:   item.storeId,
-      store_name: item.storeName,
+      store_id:   item.storeId ?? 0,
+      store_name: item.storeName || `Tienda ${item.storeId ?? 0}`,
       store_slug: item.storeSlug ?? null,
       origen: item.origen ?? {
         departamento: 'LA LIBERTAD',
