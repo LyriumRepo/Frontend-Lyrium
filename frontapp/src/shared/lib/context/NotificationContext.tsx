@@ -214,12 +214,13 @@ function mapApiNotificationToProactive(notification: Notification): ProactiveNot
             }
             break;
         case 'product_status_changed':
-        case 'ProductStatusNotification':
-            if (notification.product_status === 'approved') {
+        case 'ProductStatusNotification': {
+            const pStatus = notification.status ?? notification.product_status;
+            if (pStatus === 'approved') {
                 level = 'INFO';
                 title = '📦 Producto aprobado';
                 message = `${notification.product_name ?? 'Tu producto'} ha sido aprobado.`;
-            } else if (notification.product_status === 'rejected') {
+            } else if (pStatus === 'rejected') {
                 level = 'WARNING';
                 title = '📦 Producto rechazado';
                 message = `${notification.product_name ?? 'Tu producto'} fue rechazado.`;
@@ -231,6 +232,7 @@ function mapApiNotificationToProactive(notification: Notification): ProactiveNot
             }
             action = { type: 'products', label: 'Ver productos' };
             break;
+        }
         case 'product_pending_review':
         case 'ProductPendingReviewNotification':
             level = 'WARNING';
@@ -239,12 +241,13 @@ function mapApiNotificationToProactive(notification: Notification): ProactiveNot
             action = { type: 'products', label: 'Revisar producto' };
             break;
         case 'service_status_changed':
-        case 'ServiceStatusNotification':
-            if (notification.service_status === 'approved') {
+        case 'ServiceStatusNotification': {
+            const sStatus = notification.status ?? notification.service_status;
+            if (sStatus === 'approved') {
                 level = 'INFO';
                 title = '🛠️ Servicio aprobado';
                 message = `${notification.service_name ?? 'Tu servicio'} ha sido aprobado.`;
-            } else if (notification.service_status === 'rejected') {
+            } else if (sStatus === 'rejected') {
                 level = 'WARNING';
                 title = '🛠️ Servicio rechazado';
                 message = `${notification.service_name ?? 'Tu servicio'} fue rechazado.`;
@@ -256,6 +259,7 @@ function mapApiNotificationToProactive(notification: Notification): ProactiveNot
             }
             action = { type: 'services', label: 'Ver servicios' };
             break;
+        }
         case 'service_pending_review':
         case 'ServicePendingReviewNotification':
             level = 'WARNING';
