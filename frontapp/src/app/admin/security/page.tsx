@@ -5,6 +5,7 @@ import { useAuth } from '@/shared/lib/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import Icon from '@/components/ui/Icon';
 import { ChangePasswordForm } from '@/features/auth/change-password';
+import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 
 // ─── Mock data (reemplaza con fetch real si necesitas sesiones del backend) ───
 
@@ -58,15 +59,11 @@ export default function CustomerSecurityPage() {
 
   return (
     <div className="space-y-8 animate-fadeIn">
-      {/* ── Encabezado ──────────────────────────────────────────────────────── */}
-      <div>
-        <h1 className="text-2xl md:text-3xl font-black text-slate-800 dark:text-[var(--text-primary)]">
-          Seguridad
-        </h1>
-        <p className="text-slate-500 dark:text-[var(--text-muted)] mt-1">
-          Protege tu cuenta y gestiona tu contraseña
-        </p>
-      </div>
+      <ModuleHeader
+        title="Seguridad"
+        subtitle="Protege tu cuenta y gestiona tu contraseña"
+        icon="ShieldCheck"
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* ── Columna principal: Formulario ────────────────────────────────── */}
@@ -101,7 +98,7 @@ export default function CustomerSecurityPage() {
             </div>
 
             {/* Formulario ← componente extraído */}
-            <div className="p-8">
+            <div className="p-5 sm:p-8">
               <ChangePasswordForm />
             </div>
           </div>
@@ -109,7 +106,7 @@ export default function CustomerSecurityPage() {
 
         {/* ── Columna lateral: Tips + Sesiones ────────────────────────────── */}
         <div className="lg:col-span-4 space-y-8">
-          <div className="bg-white dark:bg-[var(--bg-secondary)] p-8 rounded-[2.5rem] shadow-2xl">
+          <div className="bg-white dark:bg-[var(--bg-secondary)] p-5 sm:p-8 rounded-[2.5rem] shadow-2xl">
             {/* Tips header */}
             <div className="flex items-center gap-4 mb-6">
               <div className="w-12 h-12 bg-gradient-to-br from-sky-400 to-sky-600 dark:from-[var(--brand-green)] dark:to-[#1A3A32] rounded-2xl flex items-center justify-center">

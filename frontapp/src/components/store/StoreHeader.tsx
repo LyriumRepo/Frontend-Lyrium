@@ -38,7 +38,7 @@ export default function StoreHeader({ store, stats, onSearch }: StoreHeaderProps
     <div className="mt-2">
       <div className="max-w-[1600px] mx-auto px-4">
         <div
-          className="relative overflow-hidden rounded-2xl shadow-2xl bg-white dark:bg-gray-900 border border-sky-200/20 dark:border-gray-700"
+          className="relative overflow-hidden rounded-2xl shadow-2xl bg-white dark:bg-[var(--bg-primary)] border border-sky-200/20 dark:border-[var(--border-subtle)]"
         >
           {/* Fila 1: Logo + Nombre + Badges + Buscador */}
           <div className="px-4 lg:px-6 py-4">

@@ -1,13 +1,13 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import {
   Leaf,
   ArrowUpRight,
   ArrowDownLeft,
   History,
   Sparkles,
-  TrendingUp,
   Coins,
   Eye,
   EyeOff,
@@ -57,37 +57,11 @@ export default function LiriosWalletPageClient() {
 
   return (
     <div className="space-y-8">
-        {/* ── Floating header ── */}
-        <div className="relative">
-          <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/20 via-teal-400/20 to-emerald-400/20 blur-3xl" />
-          <div className="relative flex items-center justify-between bg-white/80 dark:bg-[var(--bg-card)] backdrop-blur-xl rounded-3xl p-6 shadow-lg border border-white/50 dark:border-[var(--border-subtle)]">
-            <div className="flex items-center gap-4">
-              <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-400 via-teal-400 to-emerald-400 flex items-center justify-center shadow-lg shadow-teal-500/30 overflow-hidden">
-                <Image
-                  src="/img/intro/Flor.png"
-                  alt="Lirios"
-                  fill
-                  className="object-contain p-2"
-                />
-              </div>
-              <div>
-                <h1 className="text-3xl font-black bg-gradient-to-r from-cyan-600 via-teal-600 to-emerald-600 bg-clip-text text-transparent">
-                  Mis Lirios
-                </h1>
-                <p className="text-sm text-gray-600 dark:text-[var(--text-muted)] flex items-center gap-1.5 mt-1">
-                  <Sparkles className="w-3.5 h-3.5" />
-                  Tus puntos de fidelidad — 1 Lirio = S/ 1 de descuento
-                </p>
-              </div>
-            </div>
-            <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-100 to-teal-100 dark:from-cyan-900/30 dark:to-teal-900/30 rounded-full">
-              <TrendingUp className="w-4 h-4 text-teal-600 dark:text-teal-400" />
-              <span className="text-xs font-bold text-teal-700 dark:text-teal-300">
-                Activo
-              </span>
-            </div>
-          </div>
-        </div>
+        <ModuleHeader
+          title="Mis Lirios"
+          subtitle="Tus puntos de fidelidad — 1 Lirio = S/ 1 de descuento"
+          icon="Leaf"
+        />
 
         {/* ── Main grid ── */}
         <div className="grid lg:grid-cols-3 gap-6">
@@ -103,7 +77,7 @@ export default function LiriosWalletPageClient() {
               {/* Decorative flower corners */}
               <div className="absolute -top-6 -right-6 w-36 h-36 opacity-10 pointer-events-none">
                 <Image
-                  src="/img/intro/Flor.png"
+                  src="https://i.imgur.com/HHURL27.png"
                   alt=""
                   fill
                   className="object-contain"
@@ -111,7 +85,7 @@ export default function LiriosWalletPageClient() {
               </div>
               <div className="absolute -bottom-4 -left-4 w-28 h-28 opacity-10 pointer-events-none">
                 <Image
-                  src="/img/intro/Flor.png"
+                  src="https://i.imgur.com/HHURL27.png"
                   alt=""
                   fill
                   className="object-contain"

@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useAuth } from '@/shared/lib/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import Icon from '@/components/ui/Icon';
+import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import { wishlistApi, WishlistItem as WishlistItemType } from '@/shared/lib/api/wishlistRepository';
 
 interface WishlistItem {
@@ -139,14 +140,11 @@ export default function CustomerWishlistPage() {
 
   return (
     <div className="space-y-8 animate-fadeIn">
-      <div>
-        <h1 className="text-2xl md:text-3xl font-black text-slate-800 dark:text-[var(--text-primary)]">
-          Lista de Deseos
-        </h1>
-        <p className="text-slate-500 dark:text-[var(--text-muted)] mt-1">
-          Productos que te interesan y ofertas guardadas
-        </p>
-      </div>
+      <ModuleHeader
+        title="Lista de Deseos"
+        subtitle="Productos que te interesan y ofertas guardadas"
+        icon="Heart"
+      />
 
       <div className="flex flex-wrap items-center gap-3">
         {predefinedCategories.map(category => {

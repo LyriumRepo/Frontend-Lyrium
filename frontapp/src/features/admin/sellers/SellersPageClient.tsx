@@ -30,7 +30,8 @@ import ServiceModerationModal from '@/components/admin/sellers/ServiceModeration
 import { useContratos } from '@/features/admin/contracts/hooks/useContratos';
 import { ContratosModule } from '@/components/admin/contracts/ContractsModule';
 import { ContractDetailModal } from '@/components/admin/contracts/ContractDetailModal';
-import { exportToCSV } from '@/shared/lib/utils/export';
+import Icon from '@/components/ui/Icon';
+import { exportSellersToExcel, exportSellersToPdf } from './export';
 
 interface TabButtonProps {
   active: boolean;
@@ -43,7 +44,7 @@ interface TabButtonProps {
 const TabButton = ({ active, onClick, label, icon, badge }: TabButtonProps) => (
   <button
     onClick={onClick}
-    className={`px-3 sm:px-8 py-2.5 sm:py-4 rounded-2xl text-[10px] sm:text-[11px] font-black transition-all flex items-center gap-2 sm:gap-3 relative border ${
+    className={`px-3 sm:px-8 py-3 sm:py-4 min-h-[44px] rounded-2xl text-[10px] sm:text-[11px] font-black transition-all flex items-center gap-2 sm:gap-3 relative border ${
       active
         ? 'bg-[var(--bg-card)] shadow-xl shadow-black/5 text-cyan-500 border-[var(--border-subtle)]'
         : 'text-[var(--text-secondary)] border-transparent hover:bg-[var(--bg-secondary)]'
@@ -95,7 +96,7 @@ const ManagementModal = ({
           }}
         />
 
-        <div className="bg-[var(--bg-card)] w-full max-w-md rounded-[2.5rem] shadow-2xl relative overflow-hidden p-10 animate-scaleUp border border-[var(--border-subtle)] font-industrial">
+        <div className="bg-[var(--bg-card)] w-full max-w-md max-h-[90vh] overflow-y-auto rounded-[2.5rem] shadow-2xl relative overflow-x-hidden p-6 sm:p-10 animate-scaleUp border border-[var(--border-subtle)] font-industrial">
           <button
             type="button"
             onClick={onClose}
@@ -241,6 +242,8 @@ export function SellersPageClient(_props: SellersPageClientProps) {
     profileRequestsLoading,
     profileRequestsError,
     pendingProfileRequestsCount,
+    auditEntries,
+    auditLogsLoading,
   } = useControlVendedores();
 
   const { state: contractsState, actions: contractsActions } = useContratos();
@@ -267,19 +270,14 @@ export function SellersPageClient(_props: SellersPageClientProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const combinedSellers = filteredSellers;
 
-  const handleExport = () => {
+  const handleExportExcel = () => {
     if (!filteredSellers.length) return;
-    const headers = ['ID', 'Nombre', 'Empresa', 'Email', 'Estado', 'Contratos'];
-    const csvData = filteredSellers.map((s) => [
-      s.id,
-      s.name,
-      s.company,
-      s.email,
-      s.status,
-      s.contractStatus,
-    ]);
-    const dateStr = new Date().toISOString().split('T')[0];
-    exportToCSV(headers, csvData, `padron-vendedores-${dateStr}.csv`);
+    exportSellersToExcel(filteredSellers).catch(console.error);
+  };
+
+  const handleExportPdf = () => {
+    if (!filteredSellers.length) return;
+    exportSellersToPdf(filteredSellers).catch(console.error);
   };
 
   const handleStatusSubmit = async ({
@@ -350,75 +348,97 @@ export function SellersPageClient(_props: SellersPageClientProps) {
         </div>
       )}
 
-      <div className="flex flex-wrap gap-2 border-b border-[var(--border-subtle)] py-5 pb-6 overflow-x-auto no-scrollbar scroll-smooth">
-        <TabButton
-          active={currentTab === 'vendedores'}
-          onClick={() => setCurrentTab('vendedores')}
-          label="Gestión de Vendedores"
-          icon={<Users className="w-5 h-5" />}
-          badge={stats.pending}
-        />
-        <TabButton
-          active={currentTab === 'aprobacion'}
-          onClick={() => setCurrentTab('aprobacion')}
-          label="Aprobación de Productos"
-          icon={<CheckCircle className="w-5 h-5" />}
-          badge={stats.pendingProducts}
-        />
-        <TabButton
-          active={currentTab === 'servicios'}
-          onClick={() => setCurrentTab('servicios')}
-          label="Aprobación de Servicios"
-          icon={<Store className="w-5 h-5" />}
-          badge={services.filter(s => s.status === 'PENDING' || s.status === 'en_espera').length}
-        />
-        <TabButton
-          active={currentTab === 'auditoria'}
-          onClick={() => setCurrentTab('auditoria')}
-          label="Historial de Auditoría"
-          icon={<ShieldCheck className="w-5 h-5" />}
-        />
-        <TabButton
-          active={currentTab === 'validacion'}
-          onClick={() => setCurrentTab('validacion')}
-          label="Validación de Datos"
-          icon={<FileCheck className="w-5 h-5" />}
-          badge={
-            pendingProfileRequestsCount > 0
-              ? pendingProfileRequestsCount
-              : undefined
-          }
-        />
-        <TabButton
-          active={currentTab === 'contratos'}
-          onClick={() => setCurrentTab('contratos' as any)}
-          label="Contratos"
-          icon={<FileCheck className="w-5 h-5" />}
-        />
+      {/* ── Barra de navegación (tabs con scroll horizontal) ── */}
+      <div className="relative border-b border-[var(--border-subtle)] pb-1">
+        <div className="flex flex-nowrap overflow-x-auto gap-2 py-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <TabButton
+            active={currentTab === 'vendedores'}
+            onClick={() => setCurrentTab('vendedores')}
+            label="Gestión de Vendedores"
+            icon={<Users className="w-5 h-5" />}
+            badge={stats.pending}
+          />
+          <TabButton
+            active={currentTab === 'aprobacion'}
+            onClick={() => setCurrentTab('aprobacion')}
+            label="Aprobación de Productos"
+            icon={<CheckCircle className="w-5 h-5" />}
+            badge={stats.pendingProducts}
+          />
+          <TabButton
+            active={currentTab === 'servicios'}
+            onClick={() => setCurrentTab('servicios')}
+            label="Aprobación de Servicios"
+            icon={<Store className="w-5 h-5" />}
+            badge={services.filter(s => s.status === 'PENDING' || s.status === 'en_espera').length}
+          />
+          <TabButton
+            active={currentTab === 'auditoria'}
+            onClick={() => setCurrentTab('auditoria')}
+            label="Historial de Auditoría"
+            icon={<ShieldCheck className="w-5 h-5" />}
+          />
+          <TabButton
+            active={currentTab === 'validacion'}
+            onClick={() => setCurrentTab('validacion')}
+            label="Validación de Datos"
+            icon={<FileCheck className="w-5 h-5" />}
+            badge={
+              pendingProfileRequestsCount > 0
+                ? pendingProfileRequestsCount
+                : undefined
+            }
+          />
+          <TabButton
+            active={currentTab === 'contratos'}
+            onClick={() => setCurrentTab('contratos' as any)}
+            label="Contratos"
+            icon={<FileCheck className="w-5 h-5" />}
+          />
+        </div>
+        {/* Fade derecho — indica scroll disponible */}
+        <div className="absolute right-0 top-0 bottom-1 w-12 bg-gradient-to-l from-[var(--bg-canvas)] to-transparent pointer-events-none" />
       </div>
+
+      {/* ── Toolbar contextual — solo visible en tab Gestión de Vendedores ── */}
+      {currentTab === 'vendedores' && (
+        <div className="bg-[var(--bg-card)] p-4 sm:p-5 rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <div className="flex-1 relative">
+            <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] w-5 h-5" />
+            <input
+              type="text"
+              placeholder="Buscar por Nombre, Empresa o ID..."
+              value={filters.sellerSearch}
+              onChange={(e) =>
+                setFilters((prev) => ({ ...prev, sellerSearch: e.target.value }))
+              }
+              className="w-full h-12 pl-12 pr-5 rounded-full border border-[var(--border-subtle)] bg-[var(--bg-canvas)] text-sm font-semibold placeholder:text-[var(--text-tertiary)] focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-500 transition-all"
+            />
+          </div>
+          <div className="flex gap-2 shrink-0">
+            <button
+              onClick={handleExportExcel}
+              className="flex items-center gap-2 px-5 py-3 min-h-[44px] rounded-2xl bg-[var(--bg-card)] text-[var(--text-primary)] font-bold text-xs border border-[var(--border-subtle)] hover:text-[#5AAFE6] hover:border-[#69BEEB]/30 transition-all shadow-sm"
+            >
+              <Icon name="FileSpreadsheet" className="text-xl" />
+              <span className="hidden sm:inline">Excel</span>
+            </button>
+            <button
+              onClick={handleExportPdf}
+              className="flex items-center gap-2 px-5 py-3 min-h-[44px] rounded-2xl bg-[var(--bg-card)] text-[var(--text-primary)] font-bold text-xs border border-[var(--border-subtle)] hover:text-[#5AAFE6] hover:border-[#69BEEB]/30 transition-all shadow-sm"
+            >
+              <Icon name="FileText" className="text-xl" />
+              <span className="hidden sm:inline">PDF</span>
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="min-h-[500px]">
 
         {currentTab === 'vendedores' && (
           <div className="space-y-6 animate-fadeIn">
             <StatsOverview stats={{ ...stats, pending: stats.pending }} />
-            <div className="bg-[var(--bg-card)] p-4 sm:p-6 rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-              <div className="flex-1 relative">
-                <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] w-5 h-5" />
-                <input
-                  type="text"
-                  placeholder="Buscar por Nombre, Empresa o ID..."
-                  value={filters.sellerSearch}
-                  onChange={(e) =>
-                    setFilters((prev) => ({ ...prev, sellerSearch: e.target.value }))
-                  }
-                  className="w-full h-12 pl-14 pr-5 rounded-full border border-[var(--border-subtle)] bg-[var(--bg-canvas)] text-sm font-semibold placeholder:text-[var(--text-tertiary)] focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-500 transition-all"
-                />
-              </div>
-              <BaseButton onClick={handleExport} variant="secondary" leftIcon="Download" size="md" className="bg-emerald-500 text-white hover:bg-emerald-600 border-0 shadow-sm">
-                Exportar Padrón
-              </BaseButton>
-            </div>
             <SellerList sellers={filteredSellers} loading={loading} />
           </div>
         )}
@@ -472,7 +492,13 @@ export function SellersPageClient(_props: SellersPageClientProps) {
 
         {currentTab === 'auditoria' && (
           <div className="animate-fadeIn">
-            <AuditLog entries={[]} />
+            {auditLogsLoading ? (
+              <div className="bg-[var(--bg-card)] p-8 rounded-[2.5rem] border border-[var(--border-subtle)]">
+                <SkeletonRow count={8} />
+              </div>
+            ) : (
+              <AuditLog entries={auditEntries} />
+            )}
           </div>
         )}
 
@@ -675,7 +701,7 @@ export function SellersPageClient(_props: SellersPageClientProps) {
                 variant="secondary" 
                 leftIcon="FolderOpen" 
                 size="md"
-                className="bg-sky-500 hover:bg-sky-600 active:bg-sky-700 dark:bg-[var(--brand-green)] dark:hover:bg-[var(--brand-green-hover)] text-white border-0 shadow-lg shadow-sky-500/25 dark:shadow-none transition-all duration-300"
+                className="bg-gradient-to-r from-sky-500 to-sky-400 dark:from-emerald-700 dark:to-teal-600 text-white border-0 shadow-lg shadow-sky-500/25 dark:shadow-emerald-900/25 hover:shadow-xl hover:shadow-sky-500/30 dark:hover:shadow-emerald-900/30 hover:-translate-y-0.5 transition-all duration-200"
               >
                 Plantillas Legales
               </BaseButton>

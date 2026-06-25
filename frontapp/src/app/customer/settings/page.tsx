@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/shared/lib/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import Icon from '@/components/ui/Icon';
+import BaseButton from '@/components/ui/BaseButton';
+import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import { settingsApi, NotificationSettings } from '@/shared/lib/api/settingsRepository';
 
 const defaultSettings: NotificationSettings = {
@@ -29,6 +31,16 @@ export default function CustomerSettingsPage() {
   const [fetching, setFetching] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showLegend, setShowLegend] = useState(false);
+  const [isLegendClosing, setIsLegendClosing] = useState(false);
+
+  const handleCloseLegend = useCallback(() => {
+    if (isLegendClosing) return;
+    setIsLegendClosing(true);
+    setTimeout(() => {
+      setShowLegend(false);
+      setIsLegendClosing(false);
+    }, 250);
+  }, [isLegendClosing]);
 
   const loadSettings = useCallback(async () => {
     try {
@@ -82,39 +94,31 @@ export default function CustomerSettingsPage() {
 
   return (
     <div className="space-y-8 animate-fadeIn">
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-black text-slate-800 dark:text-[var(--text-primary)]">
-            Configuración
-          </h1>
-          <p className="text-slate-500 dark:text-[var(--text-muted)] mt-1">
-            Gestiona tus preferencias y notificaciones
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => setShowLegend(true)}
-            className="flex items-center gap-2 px-4 py-3 rounded-xl font-bold text-xs uppercase tracking-widest bg-gray-100 dark:bg-[var(--bg-muted)] text-gray-600 dark:text-[var(--text-secondary)] hover:bg-gray-200 dark:hover:bg-[#2A3F33] transition-all border border-gray-200 dark:border-[var(--border-subtle)]"
-          >
-            <Icon name="Info" className="w-4 h-4" />
-            Leyenda
-          </button>
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="flex items-center gap-3 px-6 py-3 rounded-xl font-bold text-sm bg-sky-500 dark:bg-[var(--brand-green)] text-white hover:bg-sky-600 dark:hover:bg-[var(--brand-green-hover)] transition-all disabled:opacity-60"
-          >
-            {saving ? (
-              <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
-            ) : (
-              <>
-                <Icon name="Check" className="w-5 h-5" />
-                <span>Guardar Cambios</span>
-              </>
-            )}
-          </button>
-        </div>
-      </div>
+      <ModuleHeader
+        title="Configuración"
+        subtitle="Gestiona tus preferencias y notificaciones"
+        icon="Settings"
+        actions={
+          <>
+            <BaseButton
+              onClick={() => setShowLegend(true)}
+              variant="secondary"
+              size="sm"
+              leftIcon="Info"
+            >
+              Leyenda
+            </BaseButton>
+            <BaseButton
+              onClick={handleSave}
+              isLoading={saving}
+              variant="action"
+              leftIcon="Check"
+            >
+              Guardar Cambios
+            </BaseButton>
+          </>
+        }
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-3xl shadow-xl border border-slate-100 dark:border-[var(--border-subtle)] overflow-hidden">
@@ -240,13 +244,13 @@ export default function CustomerSettingsPage() {
         </div>
       </div>
 
-      {showLegend && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4" onClick={() => setShowLegend(false)}>
+      {(showLegend || isLegendClosing) && (
+        <div className={`fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4 ${isLegendClosing ? 'animate-fade-out-overlay' : 'animate-fadeIn'}`} onClick={handleCloseLegend}>
           <div
-            className="bg-white dark:bg-[var(--bg-secondary)] rounded-[3rem] max-w-lg w-full max-h-[90vh] overflow-hidden shadow-2xl"
+            className={`bg-white dark:bg-[var(--bg-secondary)] rounded-[3rem] max-w-lg w-full max-h-[80vh] overflow-hidden shadow-2xl ${isLegendClosing ? 'animate-scale-out' : 'animate-scaleIn'} flex flex-col`}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-8 text-white relative">
+            <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-8 text-white relative flex-shrink-0">
               <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl" />
               <div className="relative z-10 flex items-center justify-between">
                 <div className="flex items-center gap-4">
@@ -258,13 +262,13 @@ export default function CustomerSettingsPage() {
                     <p className="text-[10px] font-bold text-sky-100 uppercase tracking-[0.2em]">Conoce cada tipo de notificación</p>
                   </div>
                 </div>
-                <button onClick={() => setShowLegend(false)} className="w-10 h-10 rounded-full bg-black/10 flex items-center justify-center hover:bg-black/20">
+                <button onClick={handleCloseLegend} className="w-10 h-10 rounded-full bg-black/10 flex items-center justify-center hover:bg-black/20">
                   <Icon name="X" className="w-5 h-5 text-white" />
                 </button>
               </div>
             </div>
 
-            <div className="p-8 space-y-6 overflow-y-auto max-h-[calc(90vh-180px)]">
+            <div className="p-8 space-y-6 overflow-y-auto">
               {NOTIFICATION_LEGEND.map((item) => (
                 <div key={item.key} className="p-5 bg-gray-50 dark:bg-[var(--bg-muted)]/50 rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)]">
                   <div className="flex items-start gap-4">
@@ -295,7 +299,7 @@ export default function CustomerSettingsPage() {
 
               <div className="flex justify-end pt-2">
                 <button
-                  onClick={() => setShowLegend(false)}
+                  onClick={handleCloseLegend}
                   className="px-6 py-3 rounded-2xl bg-gray-100 dark:bg-[var(--bg-muted)] text-gray-600 dark:text-[var(--text-primary)] font-black text-xs uppercase tracking-widest hover:bg-gray-200 dark:hover:bg-[#2A3F33] transition-all"
                 >
                   Cerrar

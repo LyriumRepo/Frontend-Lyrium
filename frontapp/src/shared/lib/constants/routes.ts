@@ -25,4 +25,7 @@ export const ROUTES = {
     // Admin (existente)
     ADMIN: '/admin',
     SELLER: '/seller',
+
+    // Security
+    SECURITY: '/security',
 } as const;

@@ -169,7 +169,9 @@ export function usePlanes() {
             description: '',
             badge: '',
             requiresPayment: plan.monthly_fee !== '0.00',
-            features: plan.features?.map(f => ({ text: f, active: true })) || [],
+            features: plan.features?.map(f =>
+              typeof f === 'string' ? { text: f, active: true } : { text: String((f as any).text ?? ''), active: (f as any).active ?? true }
+            ) || [],
             detailedBenefits: plan.detailed_benefits?.map(b => ({ title: b.title, description: b.description, icon: b.icon || '' })) || [],
             isActive: true,
             bgImage: defaultPlansData[slugToDefaultKey[plan.slug] ?? plan.slug]?.bgImage || '',
@@ -458,7 +460,9 @@ export function usePlanes() {
             priceSubtext: plan.monthly_fee === '0.00' ? 'Sin costo' : '/mes',
             description: '', badge: '',
             requiresPayment: plan.monthly_fee !== '0.00',
-            features: plan.features?.map(f => ({ text: f, active: true })) || [],
+            features: plan.features?.map(f =>
+              typeof f === 'string' ? { text: f, active: true } : { text: String((f as any).text ?? ''), active: (f as any).active ?? true }
+            ) || [],
             detailedBenefits: plan.detailed_benefits?.map(b => ({ title: b.title, description: b.description, icon: b.icon || '' })) || [],
             isActive: true,
             bgImage: defaultPlansData[slugToDefaultKey[plan.slug] ?? plan.slug]?.bgImage || '',
@@ -506,6 +510,14 @@ export function usePlanes() {
     } catch {}
   }, [update]);
   useEffect(() => { handleColoresActualizadosRef.current = handleColoresActualizados; }, [handleColoresActualizados]);
+
+  // Auto-inicializar cuando auth resuelve (authLoading pasa de true a false)
+  useEffect(() => {
+    if (!authLoading) {
+      initialize();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authLoading]);
 
   // Refs para los handlers — evita ReferenceError independientemente del orden de declaración
   const handlePlanesActualizadosRef = useRef(handlePlanesActualizados);

@@ -71,10 +71,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const { isLoading: loading, data: sessionData } = useQuery({
     queryKey: ['auth', 'session'],
     queryFn: fetchSession,
-    staleTime: 30_000,
+    staleTime: 5 * 60_000,
     retry: 2,
     refetchOnMount: true,
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: false,
   });
 
   // Sincroniza el user con la query
@@ -101,7 +101,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         pathname.startsWith('/admin') ||
         pathname.startsWith('/seller') ||
         pathname.startsWith('/customer') ||
-        pathname.startsWith('/logistics');
+        pathname.startsWith('/logistics') ||
+        pathname.startsWith('/security');
 
       if (!effectiveUser && isProtectedPath) {
         router.push('/login');

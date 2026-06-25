@@ -36,7 +36,7 @@ function ChartExpandedModal({ kpi, onClose }: { kpi: KpiConfig; onClose: () => v
       title={kpi.label}
       subtitle="Zoom con rueda del mouse · Arrastra para desplazar"
       size="5xl"
-      accentColor={`from-[${kpi.color}] to-[${kpi.color}]/80`}
+      rainbowHeader
     >
       <FinanceChart
         type={kpi.chartType}
@@ -72,9 +72,9 @@ function KpiDetailModal({ isOpen, onClose, kpi }: KpiDetailModalProps) {
         title={kpi.label}
         subtitle={kpi.description}
         size="4xl"
-        accentColor={`from-[${kpi.color}] to-[${kpi.color}]/80`}
+        rainbowHeader
       >
-        <div className="space-y-6 modal-stagger">
+        <div className="space-y-6 modal-stagger max-h-[75vh] overflow-y-auto pr-1">
 
           {/* Fila superior: valor + descripción */}
           <div className="flex flex-wrap items-start justify-between gap-4">
@@ -126,7 +126,7 @@ function KpiDetailModal({ isOpen, onClose, kpi }: KpiDetailModalProps) {
               data={kpi.chartData}
               color={kpi.chartColor}
               datasets={kpi.chartDatasets}
-              height="380px"
+              height="280px"
             />
           </div>
 

@@ -135,7 +135,7 @@ export default function SellersSolicitudes() {
         </div>
       ) : (
       <div className="space-y-4">
-        <div className="flex items-center justify-between px-1">
+        <div className="flex flex-wrap items-start justify-between gap-3 px-1">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 bg-sky-500/10 dark:bg-[var(--icons-green)]/15 rounded-xl flex items-center justify-center border border-sky-500/20 dark:border-[var(--icons-green)]/20 text-sky-400 dark:text-[var(--icons-green)]">
               <Icon name="Users" className="w-4 h-4 stroke-[2.5px]" />
@@ -150,24 +150,24 @@ export default function SellersSolicitudes() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <div className="relative">
+          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+            <div className="relative flex-1 sm:flex-none">
               <Icon name="Search" className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--text-secondary)] pointer-events-none" />
               <input
                 type="text"
                 placeholder="Buscar por RUC, empresa, correo\u2026"
                 value={buscar}
                 onChange={(e) => setBuscar(e.target.value)}
-                className="pl-8 pr-3 py-1.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] text-[11px] font-bold text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-none focus:border-indigo-500/50 dark:focus:border-[var(--icons-green)]/50 transition-colors w-52"
+                className="w-full sm:w-52 pl-8 pr-3 py-1.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] text-[11px] font-bold text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-none focus:border-indigo-500/50 dark:focus:border-[var(--icons-green)]/50 transition-colors"
               />
             </div>
 
-            <div className="flex items-center gap-1 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-xl p-1">
+            <div className="flex flex-wrap items-center gap-1 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-xl p-1">
               {FILTROS.map((f) => (
                 <button
                   key={f.value}
                   onClick={() => setFiltroEstado(f.value)}
-                  className={`px-3.5 py-1.5 text-[10px] font-black uppercase tracking-wide rounded-lg transition-all ${
+                  className={`px-3.5 py-2 min-h-[36px] text-[10px] font-black uppercase tracking-wide rounded-lg transition-all ${
                     filtroEstado === f.value
                       ? "bg-sky-500/20 dark:bg-[var(--icons-green)]/20 text-sky-400 dark:text-[var(--icons-green)] border border-sky-500/30 dark:border-[var(--icons-green)]/30"
                       : "text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]"
@@ -266,7 +266,7 @@ export default function SellersSolicitudes() {
                 <button
                   onClick={() => cambiarPagina(pagina - 1)}
                   disabled={pagina === 1}
-                  className="w-7 h-7 flex items-center justify-center rounded-lg border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  className="min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                 >
                   <Icon name="ChevronLeft" className="w-3.5 h-3.5" />
                 </button>
@@ -274,7 +274,7 @@ export default function SellersSolicitudes() {
                   <button
                     key={n}
                     onClick={() => cambiarPagina(n)}
-                    className={`w-7 h-7 flex items-center justify-center rounded-lg text-[10px] font-black transition-colors
+                    className={`min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg text-[10px] font-black transition-colors
                       ${n === pagina
                         ? "bg-sky-500/20 dark:bg-[var(--icons-green)]/20 text-sky-400 dark:text-[var(--icons-green)] border border-sky-500/30 dark:border-[var(--icons-green)]/30"
                         : "border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]"
@@ -286,7 +286,7 @@ export default function SellersSolicitudes() {
                 <button
                   onClick={() => cambiarPagina(pagina + 1)}
                   disabled={pagina === totalPaginas}
-                  className="w-7 h-7 flex items-center justify-center rounded-lg border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  className="min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                 >
                   <Icon name="ChevronRight" className="w-3.5 h-3.5" />
                 </button>

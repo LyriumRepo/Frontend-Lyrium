@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import { Voucher, VoucherStatus, VoucherType } from '@/features/seller/invoices/types';
 import { formatDate } from '@/shared/lib/utils/formatters';
 import Icon from '@/components/ui/Icon';
@@ -17,15 +17,29 @@ const typeConfig: Record<VoucherType, { icon: string; bg: string; text: string }
     'NOTA_CREDITO': { icon: 'Undo', bg: 'bg-red-100', text: 'text-red-600' }
 };
 
-function formatCommission(rate: number | null | undefined, amount: number | null | undefined): string {
-    if (rate == null || amount == null) return '—';
-    // rate puede ser decimal (0.15) o entero (15) según la fuente
-    const pct = rate > 1 ? Math.round(rate) : Math.round(rate * 100);
-    return `${pct}% · S/ ${amount.toFixed(2)}`;
+function formatCommission(_rate: number | null | undefined, amount: number | null | undefined): string {
+    if (amount == null) return '—';
+    return `S/ ${amount.toFixed(2)}`;
 }
 
 export default function InvoiceTable({ vouchers, onViewDetail }: InvoiceTableProps) {
+    const [tooltipVisible, setTooltipVisible] = useState(false);
+    const iconRef = useRef<HTMLSpanElement>(null);
+
+    const handleMouseEnter = () => setTooltipVisible(true);
+    const handleMouseLeave = () => setTooltipVisible(false);
+
+    const iconRect = iconRef.current?.getBoundingClientRect();
+    const tooltipStyle: React.CSSProperties = tooltipVisible && iconRect ? {
+        position: 'fixed',
+        top: iconRect.bottom + 8,
+        left: iconRect.left + iconRect.width / 2,
+        transform: 'translateX(-50%)',
+        zIndex: 9999,
+    } : { display: 'none' };
+
     return (
+        <>
         <div className="glass-card overflow-hidden animate-fadeIn">
             <div className="overflow-x-auto no-scrollbar">
                 <table className="w-full text-left">
@@ -33,7 +47,19 @@ export default function InvoiceTable({ vouchers, onViewDetail }: InvoiceTablePro
                         <tr className="bg-[var(--bg-secondary)]/50 border-b border-[var(--border-subtle)] text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">
                             <th className="px-6 py-5">Comprobante</th>
                             <th className="px-6 py-5">Serie-Código</th>
-                            <th className="px-6 py-5">Monto</th>
+                            <th className="px-6 py-5">
+                                <span className="flex items-center gap-1.5">
+                                    Monto
+                                    <span
+                                        ref={iconRef}
+                                        onMouseEnter={handleMouseEnter}
+                                        onMouseLeave={handleMouseLeave}
+                                        className="cursor-help"
+                                    >
+                                        <Icon name="Info" className="w-3 h-3 text-[var(--text-secondary)] opacity-60" />
+                                    </span>
+                                </span>
+                            </th>
                             <th className="px-6 py-5">Comisión</th>
                             <th className="px-6 py-5">Fecha</th>
                             <th className="px-6 py-5 text-center">Estado</th>
@@ -74,10 +100,10 @@ export default function InvoiceTable({ vouchers, onViewDetail }: InvoiceTablePro
                                         <td className="px-6 py-4">
                                             <span className="text-sm font-black text-[var(--text-primary)] font-mono tracking-tight">{v.series}-{v.number}</span>
                                         </td>
-                                        {/* Monto (total con envío) */}
+                                        {/* Monto (productos del vendedor, sin envío) */}
                                         <td className="px-6 py-4">
                                             <p className="text-sm font-black text-[var(--text-primary)]">
-                                                S/ {(v.order_total ?? v.amount).toLocaleString('es-PE', { minimumFractionDigits: 2 })}
+                                                S/ {(v.store_amount ?? v.amount).toLocaleString('es-PE', { minimumFractionDigits: 2 })}
                                             </p>
                                         </td>
                                         {/* Comisión */}
@@ -116,5 +142,17 @@ export default function InvoiceTable({ vouchers, onViewDetail }: InvoiceTablePro
                 </table>
             </div>
         </div>
+
+            {/* Tooltip Monto — position:fixed para no ser recortado por overflow de la tabla */}
+            <div style={tooltipStyle} className="w-64 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl p-3 shadow-2xl pointer-events-none">
+                <p className="text-[11px] font-black text-[var(--text-primary)] mb-1">¿Qué es el Monto?</p>
+                <p className="text-[10px] text-[var(--text-secondary)] leading-relaxed">
+                    Subtotal de tus <span className="text-emerald-500 font-bold">productos con IGV</span>, sin incluir el costo de envío.
+                </p>
+                <p className="text-[10px] text-[var(--text-secondary)] leading-relaxed mt-1.5 pt-1.5 border-t border-[var(--border-subtle)]">
+                    El comprobante electrónico emitido a SUNAT incluye también el envío en el total.
+                </p>
+            </div>
+        </>
     );
 }

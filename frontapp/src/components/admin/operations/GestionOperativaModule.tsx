@@ -19,9 +19,9 @@ type TabId = 'proveedores' | 'gastos' | 'roles' | 'auditoria';
 // ─── Stat card ────────────────────────────────────────────────────────────────
 function StatCard({ kpi }: { kpi: OperationalKPI }) {
   return (
-    <div className="bg-gray-50 rounded-[10px] p-4">
-      <p className="text-[12px] text-gray-400 mb-1">{kpi.label}</p>
-      <p className="text-[22px] font-medium text-gray-900 leading-tight">
+    <div className="bg-[var(--bg-muted)] rounded-[10px] p-4">
+      <p className="text-[12px] text-[var(--text-muted)] mb-1">{kpi.label}</p>
+      <p className="text-[22px] font-medium text-[var(--text-primary)] leading-tight">
         {kpi.val}
       </p>
     </div>
@@ -34,17 +34,17 @@ function LoadingSkeleton() {
     <div className="flex flex-col gap-5 pb-20 animate-pulse">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="bg-gray-100 rounded-[10px] h-20" />
+          <div key={i} className="bg-[var(--bg-muted)] rounded-[10px] h-20" />
         ))}
       </div>
-      <div className="flex gap-1 border-b border-gray-100 pb-2">
+      <div className="flex gap-1 border-b border-[var(--border-subtle)] pb-2">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="bg-gray-100 rounded-lg h-8 w-28" />
+          <div key={i} className="bg-[var(--bg-muted)] rounded-lg h-8 w-28" />
         ))}
       </div>
-      <div className="bg-white border border-gray-200 rounded-xl p-6 space-y-3">
+      <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl p-6 space-y-3">
         {[1, 2, 3, 4, 5].map((i) => (
-          <div key={i} className="bg-gray-100 rounded-lg h-10" />
+          <div key={i} className="bg-[var(--bg-muted)] rounded-lg h-10" />
         ))}
       </div>
     </div>
@@ -106,15 +106,15 @@ export const GestionOperativaModule: React.FC<GestionOperativaModuleProps> = ({
       </div>
 
       {/* ── Tabs ──────────────────────────────────────────────────── */}
-      <div className="flex gap-0.5 border-b border-gray-100 pb-2">
+      <div className="flex gap-0.5 border-b border-[var(--border-subtle)] pb-2">
         {TABS.map((tab) => (
           <button
             key={tab.id}
             onClick={() => actions.setActiveTab(tab.id)}
             className={`text-[13px] px-3.5 py-[5px] rounded-lg border-none transition-colors ${
               activeTab === tab.id
-                ? 'bg-gray-100 text-gray-900 font-medium'
-                : 'text-gray-400 hover:text-gray-600 bg-transparent'
+                ? 'bg-[var(--bg-muted)] text-[var(--text-primary)] font-medium'
+                : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)] bg-transparent'
             }`}
           >
             {tab.label}

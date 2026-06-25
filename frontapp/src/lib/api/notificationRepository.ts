@@ -33,14 +33,12 @@ export interface Notification {
   is_read: boolean;
   // Store-related notifications
   store_id: number | null;
-  store_name: string | null;
   // Profile request notifications
   seller_name: string | null;
   // Chat notifications
   conversation_id: number | null;
   // Booking notifications
   booking_id: number | null;
-  service_name: string | null;
 }
 
 export interface NotificationsResponse {

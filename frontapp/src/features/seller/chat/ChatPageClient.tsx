@@ -192,7 +192,7 @@ export function ChatPageClient() {
     }));
 
     const listContent = (
-        <div className="flex flex-col h-full">
+        <div className={`flex-col h-full ${(!activeConversation || isMobileListVisible) ? 'flex' : 'hidden'} sm:flex`}>
             <div className="p-4 border-b border-[var(--border-subtle)] shrink-0">
                 <div className="flex items-center justify-between">
                     <div>
@@ -277,7 +277,7 @@ export function ChatPageClient() {
     );
 
     const chatContent = activeConversation ? (
-        <div className="flex flex-col h-full">
+        <div className={`flex-col h-full ${(activeConversation && !isMobileListVisible) ? 'flex' : 'hidden'} sm:flex`}>
             <div className="p-5 border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)]/50 shrink-0">
                 <div className="flex items-center gap-3">
                     <div className="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-[var(--turquesa-500)] to-[var(--verde-500)] flex items-center justify-center text-white font-black text-sm shadow-sm">

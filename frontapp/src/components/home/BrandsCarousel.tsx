@@ -78,7 +78,7 @@ export default function BrandsCarousel({ marcas }: BrandsCarouselProps) {
 
       <div 
         ref={containerRef}
-        className="relative overflow-hidden cursor-grab active:cursor-grabbing -mx-4 px-4 bg-white dark:bg-gray-900"
+        className="relative overflow-hidden cursor-grab active:cursor-grabbing -mx-4 px-4 bg-white dark:bg-[var(--bg-primary)]"
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
@@ -100,7 +100,7 @@ export default function BrandsCarousel({ marcas }: BrandsCarouselProps) {
                 key={marca.id}
                 className="flex-shrink-0 w-1/2 sm:w-1/3 lg:w-1/4 xl:w-1/5"
               >
-                <div className="h-38 md:h-46 flex items-center justify-center p-1 bg-white dark:bg-gray-900 w-full">
+                <div className="h-38 md:h-46 flex items-center justify-center p-1 bg-white dark:bg-[var(--bg-primary)] w-full">
                                    <article className="group cursor-pointer transition-all duration-300 w-full h-full relative rounded-2xl overflow-hidden">
                     <Image
                       src={localLogo}  

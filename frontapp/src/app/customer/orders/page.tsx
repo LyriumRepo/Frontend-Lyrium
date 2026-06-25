@@ -5,6 +5,7 @@ import { useEcho } from '@laravel/echo-react';
 import { useAuth } from '@/shared/lib/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import Icon from '@/components/ui/Icon';
+import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import { Eye, Info } from "lucide-react";
 import { orderApi, OrderResource } from '@/shared/lib/api/orderRepository';
 import { BaseDatePicker } from '@/components/ui';
@@ -661,9 +662,19 @@ export default function CustomerOrdersPage() {
   const [selectedOrder, setSelected] = useState<Order | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [showLegendModal, setShowLegendModal] = useState(false);
+  const [isLegendClosing, setIsLegendClosing] = useState(false);
   const [showRescheduleModal, setShowRescheduleModal] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [fetchError, setFetchError] = useState('');
+
+  const handleCloseLegend = useCallback(() => {
+    if (isLegendClosing) return;
+    setIsLegendClosing(true);
+    setTimeout(() => {
+      setShowLegendModal(false);
+      setIsLegendClosing(false);
+    }, 250);
+  }, [isLegendClosing]);
 
   const loadOrders = useCallback(async () => {
     try {
@@ -881,14 +892,11 @@ export default function CustomerOrdersPage() {
 
   return (
     <div className="space-y-8 animate-fadeIn">
-      <div>
-        <h1 className="text-2xl md:text-3xl font-black text-slate-800 dark:text-[var(--text-primary)]">
-          Historial de Pedidos
-        </h1>
-        <p className="text-slate-500 dark:text-[var(--text-muted)] mt-1">
-          Revisa todos tus pedidos realizados en Lyrium
-        </p>
-      </div>
+      <ModuleHeader
+        title="Mis Pedidos"
+        subtitle="Revisa el estado e historial completo de tus compras en Lyrium"
+        icon="Package"
+      />
 
       <div className="bg-white dark:bg-[var(--bg-secondary)] p-8 rounded-[2.5rem] shadow-xl border border-slate-100 dark:border-[var(--border-subtle)]">
         <div className="flex items-center justify-between gap-4 mb-6">
@@ -1163,13 +1171,13 @@ export default function CustomerOrdersPage() {
         </div>
       </div>
 
-      {showLegendModal && (
+      {(showLegendModal || isLegendClosing) && (
         <div
-          className="fixed inset-0 bg-black/40 backdrop-blur-xl z-50 flex justify-center items-center p-4 lg:p-6 animate-fadeIn"
-          onClick={() => setShowLegendModal(false)}
+          className={`fixed inset-0 bg-black/40 backdrop-blur-xl z-50 flex justify-center items-center p-4 lg:p-6 ${isLegendClosing ? 'animate-fade-out-overlay' : 'animate-fadeIn'}`}
+          onClick={handleCloseLegend}
         >
           <div
-            className="bg-white dark:bg-[var(--bg-secondary)] w-full max-w-4xl max-h-[90vh] rounded-[2.5rem] overflow-hidden shadow-[-40px_0_100px_rgba(0,0,0,0.1)] border border-white/20 relative flex flex-col"
+            className={`bg-white dark:bg-[var(--bg-secondary)] w-full max-w-2xl max-h-[80vh] rounded-[2.5rem] overflow-hidden shadow-[-40px_0_100px_rgba(0,0,0,0.1)] border border-white/20 relative flex flex-col ${isLegendClosing ? 'animate-scale-out' : 'animate-scaleIn'}`}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="bg-gradient-to-r from-sky-500 via-sky-500 to-sky-300 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-6 text-white relative flex-shrink-0">
@@ -1188,7 +1196,7 @@ export default function CustomerOrdersPage() {
                 </div>
 
                 <button
-                  onClick={() => setShowLegendModal(false)}
+                  onClick={handleCloseLegend}
                   className="w-9 h-9 rounded-full bg-black/10 flex items-center justify-center hover:bg-black/20 transition-all"
                 >
                   <Icon name="X" className="w-5 h-5 text-white" />
@@ -1294,7 +1302,7 @@ export default function CustomerOrdersPage() {
 
               <div className="flex justify-end pt-2">
                 <button
-                  onClick={() => setShowLegendModal(false)}
+                  onClick={handleCloseLegend}
                   className="px-6 py-3 rounded-xl bg-slate-100 dark:bg-[var(--bg-muted)] text-slate-700 dark:text-[var(--text-primary)] font-black text-xs uppercase tracking-widest hover:bg-slate-200 dark:hover:bg-[#2A3F33] transition-all"
                 >
                   Cerrar
@@ -1311,7 +1319,7 @@ export default function CustomerOrdersPage() {
           onClick={closeModal}
         >
           <div
-            className="bg-white dark:bg-[var(--bg-secondary)] w-full lg:w-[700px] h-full rounded-[2.5rem] overflow-hidden shadow-[-40px_0_100px_rgba(0,0,0,0.1)] border border-white/20 relative flex flex-col transition-all duration-700"
+            className="bg-white dark:bg-[var(--bg-secondary)] w-full lg:w-[700px] max-h-[90vh] my-auto rounded-[2.5rem] overflow-hidden shadow-[-40px_0_100px_rgba(0,0,0,0.1)] border border-white/20 relative flex flex-col transition-all duration-700"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="bg-gradient-to-r from-sky-500 via-sky-500 to-sky-300 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-6 text-white relative flex-shrink-0">

@@ -14,18 +14,18 @@ export default function SellerHeader({ onOpenMenu }: { onOpenMenu: () => void })
     const { status, checkConnection, isHealthy, showLaravel } = useApiConnection();
 
     return (
-        <header className="h-16 bg-[var(--bg-sidebar)] border-b border-[var(--border-subtle)] sticky top-0 z-50">
+        <header className="h-16 bg-white dark:bg-[var(--bg-secondary)] border-b border-gray-200 dark:border-[var(--border-subtle)] sticky top-0 z-50">
             <div className="flex h-full items-center justify-between px-3 sm:px-4 lg:px-6">
                 {/* Left: Panel Indicator + Breadcrumb */}
                 <div className="flex min-w-0 items-center gap-2 sm:gap-4">
                     <button
                         onClick={onOpenMenu}
-                        className="lg:hidden p-2 -ml-2 rounded-lg hover:bg-[var(--bg-hover)] transition-colors"
+                        className="md:hidden p-2 -ml-2 rounded-lg hover:bg-[var(--bg-hover)] transition-colors"
                         aria-label="Open menu"
                     >
                         <Menu className="w-6 h-6 text-[var(--text-secondary)]" />
                     </button>
-                    <span className="hidden md:inline-block px-3 py-1 bg-sky-500 text-white text-xs font-bold uppercase rounded-full whitespace-nowrap">
+                    <span className="hidden md:inline-block px-3 py-1 bg-sky-500 dark:bg-[var(--bg-secondary)] text-white dark:text-[var(--brand-green)] dark:border dark:border-[var(--border-default)] text-xs font-bold uppercase rounded-full whitespace-nowrap">
                         Mi Panel
                     </span>
                     <div className="hidden sm:block">

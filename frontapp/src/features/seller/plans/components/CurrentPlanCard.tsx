@@ -76,7 +76,7 @@ export default function CurrentPlanCard({ currentPlan, plansData, subscriptionIn
           <div className="plan-expiry-info">{expiryBadge}</div>
           {(data.features ?? []).slice(0, visibleLimit).map((f) => (
             <div 
-              key={`feat-${f.text.slice(0,8)}`} 
+              key={`feat-${String(f.text ?? '').slice(0,8)}`}
               role="button"
               tabIndex={0}
               className={`feature-row ${f.active ? 'active-feature' : 'inactive-feature'} feature-clickable`} 

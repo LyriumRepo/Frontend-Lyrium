@@ -203,19 +203,23 @@ export function FinancePageClient() {
         actions={headerActions}
       />
 
-      <div className="flex flex-wrap gap-2 border-b border-gray-100 pb-4 overflow-x-auto no-scrollbar">
-        {tabs.map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`px-6 py-2.5 rounded-xl text-sm font-black whitespace-nowrap transition-all duration-300 flex items-center gap-2 active:scale-[0.98] ${activeTab === tab.id
-              ? 'bg-[#5AAFE6] text-white shadow-lg shadow-[#5AAFE6]/30'
-              : 'text-[var(--text-secondary)] bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:bg-[var(--bg-secondary)]'
-              }`}
-          >
-            <Icon name={tab.icon as unknown as 'LayoutGrid'} className="w-4 h-4" /> {tab.label}
-          </button>
-        ))}
+      <div className="relative border-b border-[var(--border-subtle)] pb-1">
+        <div className="flex flex-nowrap overflow-x-auto gap-2 pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {tabs.map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex-shrink-0 px-6 py-2.5 rounded-xl text-sm font-black whitespace-nowrap transition-all duration-300 flex items-center gap-2 active:scale-[0.98] ${activeTab === tab.id
+                ? 'bg-[#5AAFE6] text-white shadow-lg shadow-[#5AAFE6]/30'
+                : 'text-[var(--text-secondary)] bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:bg-[var(--bg-secondary)]'
+                }`}
+            >
+              <Icon name={tab.icon as unknown as 'LayoutGrid'} className="w-4 h-4" /> {tab.label}
+            </button>
+          ))}
+        </div>
+        {/* Fade derecho — indica scroll disponible */}
+        <div className="absolute right-0 top-0 bottom-1 w-12 bg-gradient-to-l from-[var(--bg-canvas)] to-transparent pointer-events-none" />
       </div>
 
       <div className="space-y-12">
@@ -229,7 +233,7 @@ export function FinancePageClient() {
 
             <FinancialBreakdownCard data={data.desgloseFinanciero} />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 stagger-grid">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 stagger-grid">
               {/* Tarjeta multi-serie: Brutos + Netos + Reales */}
               <div className="col-span-1 md:col-span-2 lg:col-span-3">
                 <BaseStatCard
@@ -321,7 +325,7 @@ export function FinancePageClient() {
               <div className="w-1.5 h-6 rounded-full" style={{ backgroundColor: companyColors.turquesaClaro }} />
               <h2 className="text-lg font-black text-[var(--text-primary)] uppercase tracking-tight">Rendimiento Logístico</h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 stagger-grid">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 stagger-grid">
               <BaseStatCard
                 label="Lead Time de Despacho"
                 value={(() => {
@@ -346,7 +350,7 @@ export function FinancePageClient() {
               <div className="w-1.5 h-6 rounded-full" style={{ backgroundColor: companyColors.turquesa }} />
               <h2 className="text-lg font-black text-[var(--text-primary)] uppercase tracking-tight">Control de Calidad</h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 stagger-grid">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 stagger-grid">
               <button
                 onClick={() => openKpi(
                   'Tasa de Productos Defectuosos',
@@ -359,9 +363,9 @@ export function FinancePageClient() {
                   data.defectuosos.data,
                   chartColorMap.defectuosos,
                 )}
-                className="group text-left bg-[var(--bg-card)] p-8 rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm hover:shadow-xl hover:shadow-black/10 hover:-translate-y-1 transition-all duration-300 active:scale-[0.98]"
+                className="group text-left bg-[var(--bg-card)] p-4 sm:p-8 rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm hover:shadow-xl hover:shadow-black/10 hover:-translate-y-1 transition-all duration-300 active:scale-[0.98]"
               >
-                <div className="flex items-center justify-between w-full mb-6">
+                <div className="flex items-center justify-between w-full mb-4 sm:mb-6">
                   <span className="text-xs font-bold uppercase tracking-wider" style={{ color: companyColors.turquesa }}>Tasa de Productos Defectuosos</span>
                   <div className="p-2 rounded-lg" style={{ backgroundColor: `${companyColors.turquesa}1A`, color: companyColors.turquesa }}>
                     <Icon name="AlertOctagon" className="w-5 h-5" />
@@ -390,7 +394,7 @@ export function FinancePageClient() {
               <div className="w-1.5 h-6 rounded-full" style={{ backgroundColor: companyColors.celeste }} />
               <h2 className="text-lg font-black text-[var(--text-primary)] uppercase tracking-tight">Fidelización de Clientes</h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 stagger-grid">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 stagger-grid">
               <BaseStatCard
                 label="LTV (Lifetime Value)"
                 value={`S/ ${data.ltv.data[data.ltv.data.length - 1] ?? 0}`}
@@ -411,7 +415,7 @@ export function FinancePageClient() {
               <div className="w-1.5 h-6 rounded-full" style={{ backgroundColor: companyColors.turquesaClaro }} />
               <h2 className="text-lg font-black text-[var(--text-primary)] uppercase tracking-tight">Servicio al Cliente</h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 stagger-grid">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 stagger-grid">
               <button
                 onClick={() => openKpi(
                   'Tiempo de Respuesta (Chat)',
@@ -424,9 +428,9 @@ export function FinancePageClient() {
                   data.tiempoRespuesta.data,
                   chartColorMap.tiempoRespuesta,
                 )}
-                className="group text-left bg-[var(--bg-card)] p-8 rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm hover:shadow-xl hover:shadow-black/10 hover:-translate-y-1 transition-all duration-300 active:scale-[0.98]"
+                className="group text-left bg-[var(--bg-card)] p-4 sm:p-8 rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm hover:shadow-xl hover:shadow-black/10 hover:-translate-y-1 transition-all duration-300 active:scale-[0.98]"
               >
-                <div className="flex items-center justify-between w-full mb-6">
+                <div className="flex items-center justify-between w-full mb-4 sm:mb-6">
                   <span className="text-xs font-bold uppercase tracking-wider" style={{ color: companyColors.turquesaClaro }}>Tiempo de Respuesta (Chat)</span>
                   <div className="p-2 rounded-lg" style={{ backgroundColor: `${companyColors.turquesaClaro}1A`, color: companyColors.turquesaClaro }}>
                     <Icon name="Clock" className="w-5 h-5" />
@@ -471,7 +475,7 @@ export function FinancePageClient() {
               <div className="w-1.5 h-6 rounded-full" style={{ backgroundColor: companyColors.azulCeleste }} />
               <h2 className="text-lg font-black text-[var(--text-primary)] uppercase tracking-tight">Estrategia de Crecimiento</h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 stagger-grid">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 stagger-grid">
               <BaseStatCard
                 label="Cuota de Mercado Interna"
                 value={`${data.cuotaMercado.data[0] ?? 0}%`}
@@ -492,7 +496,7 @@ export function FinancePageClient() {
               <div className="w-1.5 h-6 rounded-full" style={{ backgroundColor: companyColors.verde }} />
               <h2 className="text-lg font-black text-[var(--text-primary)] uppercase tracking-tight">Control de Inventario</h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 stagger-grid">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 stagger-grid">
               <BaseStatCard
                 label="Rotación de Stock"
                 value={`${data.stockRotacion.data[data.stockRotacion.data.length - 1] ?? 0}`}
@@ -522,7 +526,7 @@ export function FinancePageClient() {
               <div className="w-1.5 h-6 rounded-full" style={{ backgroundColor: companyColors.turquesa }} />
               <h2 className="text-lg font-black text-[var(--text-primary)] uppercase tracking-tight">Experiencia del Cliente</h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 stagger-grid">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 stagger-grid">
               <button
                 onClick={() => openKpi(
                   'CSAT - Satisfacción del Cliente',
@@ -535,9 +539,9 @@ export function FinancePageClient() {
                   data.csat.data,
                   chartColorMap.csat,
                 )}
-                className="group text-left bg-[var(--bg-card)] p-8 rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm hover:shadow-xl hover:shadow-black/10 hover:-translate-y-1 transition-all duration-300 active:scale-[0.98]"
+                className="group text-left bg-[var(--bg-card)] p-4 sm:p-8 rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm hover:shadow-xl hover:shadow-black/10 hover:-translate-y-1 transition-all duration-300 active:scale-[0.98]"
               >
-                <div className="flex items-center justify-between w-full mb-6">
+                <div className="flex items-center justify-between w-full mb-4 sm:mb-6">
                   <span className="text-xs font-bold uppercase tracking-wider" style={{ color: companyColors.turquesa }}>CSAT - Satisfacción del Cliente</span>
                   <Icon name="Star" className="w-5 h-5" style={{ color: companyColors.turquesa }} />
                 </div>

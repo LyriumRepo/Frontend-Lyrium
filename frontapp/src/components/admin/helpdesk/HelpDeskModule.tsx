@@ -77,16 +77,16 @@ const getCategoryLabel = (cat?: string): string => {
 
 const getCategoryBadgeClass = (tag: string): string => {
     switch (tag.toLowerCase()) {
-        case 'logística': case 'logistica': return 'bg-purple-500/10 text-purple-400 border border-purple-500/20';
+        case 'logística': case 'logistica': return 'bg-amber-500/10 text-amber-400 border border-amber-500/20';
         case 'catálogo': case 'catalogo': return 'bg-amber-500/10 text-amber-400 border border-amber-500/20';
-        case 'finanzas': return 'bg-blue-500/10 text-blue-400 border border-blue-500/20';
+        case 'finanzas': return 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20';
         case 'reembolso': return 'bg-rose-500/10 text-rose-400 border border-rose-500/20';
         case 'consulta puntos': case 'puntos': return 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20';
-        case 'técnico': case 'tecnico': return 'bg-blue-500/10 text-blue-400 border border-blue-500/20';
+        case 'técnico': case 'tecnico': return 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20';
         case 'admin': return 'bg-slate-500/10 text-slate-400 border border-slate-500/20';
         case 'info': return 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20';
         case 'pagos': return 'bg-rose-500/10 text-rose-400 border border-rose-500/20';
-        case 'trámites': case 'tramites': return 'bg-purple-500/10 text-purple-400 border border-purple-500/20';
+        case 'trámites': case 'tramites': return 'bg-amber-500/10 text-amber-400 border border-amber-500/20';
         case 'seguimiento': return 'bg-amber-500/10 text-amber-400 border border-amber-500/20';
         case 'elogio': return 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
         default: return 'bg-zinc-500/10 text-zinc-400 border border-zinc-500/20';

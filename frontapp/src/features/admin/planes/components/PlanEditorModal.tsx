@@ -55,7 +55,7 @@ export default function PlanEditorModal({ open, title, activeTab, editingPlan: e
           </button>
         ))}
       </div>
-      <div className="editor-content">
+      <div className="editor-content max-h-[60vh] overflow-y-auto pr-1">
 
         {/* BÁSICO */}
         {activeTab === 'basic' && (
@@ -101,14 +101,14 @@ export default function PlanEditorModal({ open, title, activeTab, editingPlan: e
               </div>
               {showNumeric ? (
                 <>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="mb-4">
                       <label htmlFor="plan-currency" className="block text-xs font-semibold text-gray-500 dark:text-[var(--text-secondary)] uppercase tracking-wide mb-1.5">Moneda</label>
                       <input id="plan-currency" type="text" value={p.currency ?? 'S/'} placeholder="S/" maxLength={10} className="w-full px-3.5 py-2.5 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-lg text-sm"
                         onChange={e => onUpdatePlan({ currency: e.target.value })} />
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="mb-4">
                       <label htmlFor="plan-price" className="block text-xs font-semibold text-gray-500 dark:text-[var(--text-secondary)] uppercase tracking-wide mb-1.5">Precio Mensual</label>
                       <input id="plan-price" type="number" value={p.price ?? 0} placeholder="0.00" step={0.01} min={0} className="w-full px-3.5 py-2.5 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-lg text-sm"
@@ -120,7 +120,7 @@ export default function PlanEditorModal({ open, title, activeTab, editingPlan: e
                         onChange={e => onUpdatePlan({ priceAnnual: parseFloat(e.target.value) || 0 })} />
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="mb-4">
                       <label htmlFor="plan-period" className="block text-xs font-semibold text-gray-500 dark:text-[var(--text-secondary)] uppercase tracking-wide mb-1.5">Etiqueta Mensual</label>
                       <input id="plan-period" type="text" value={p.period ?? '/mes'} placeholder="/mes" maxLength={20} className="w-full px-3.5 py-2.5 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-lg text-sm"
@@ -156,7 +156,7 @@ export default function PlanEditorModal({ open, title, activeTab, editingPlan: e
           <div className="block animate-fade-in">
             <div className="p-5 bg-gray-50 dark:bg-[var(--bg-muted)] rounded-xl mb-4">
               <h3 className="text-base font-bold text-gray-800 dark:text-[var(--text-primary)] mb-4">Colores del Plan</h3>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="mb-0">
                   <label htmlFor="plan-css-color" className="block text-xs font-semibold text-gray-500 dark:text-[var(--text-secondary)] uppercase tracking-wide mb-2">Color Principal</label>
                   <div className="flex items-center gap-2">
@@ -195,7 +195,7 @@ export default function PlanEditorModal({ open, title, activeTab, editingPlan: e
                 </button>
                 <input type="text" value={p.bgImage ?? ''} placeholder="URL o ruta de la imagen" className="w-full mt-2 px-3 py-2 border border-gray-200 dark:border-[var(--border-subtle)] rounded-lg text-sm"
                   onChange={e => onUpdatePlan({ bgImage: e.target.value })} />
-                <div className="grid grid-cols-2 gap-3 mt-2.5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2.5">
                   <div className="flex items-center gap-2">
                     <label htmlFor="plan-bg-fit" className="text-xs font-semibold text-gray-500 dark:text-[var(--text-secondary)] whitespace-nowrap">Ajuste:</label>
                     <select id="plan-bg-fit" className="flex-1 px-2.5 py-1.5 border border-gray-200 dark:border-[var(--border-subtle)] rounded-md text-xs font-semibold text-gray-700 dark:text-[var(--text-primary)] cursor-pointer" value={p.bgImageFit ?? 'cover'} onChange={e => onUpdatePlan({ bgImageFit: e.target.value as 'cover'|'contain' })}>

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useCustomerSupport } from '@/features/customer/support/hooks/useCustomerSupport';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import ChatLayout from '@/components/shared/chat/ChatLayout';
@@ -197,13 +197,29 @@ export function SupportPageClient() {
     const [showNewTicketForm, setShowNewTicketForm] = useState(false);
     const [ticketError, setTicketError] = useState<string | null>(null);
     const [showLegend, setShowLegend] = useState(false);
+    const [isLegendClosing, setIsLegendClosing] = useState(false);
     const [filterType, setFilterType] = useState<'asunto' | 'categoria'>('asunto');
     const [filterValue, setFilterValue] = useState('');
     const [showFilter, setShowFilter] = useState(false);
+    const [isMobileListVisible, setIsMobileListVisible] = useState(true);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [activeTicket?.messages]);
+
+    const handleTicketSelect = useCallback((id: string) => {
+        setActiveTicketId(id);
+        setIsMobileListVisible(false);
+    }, [setActiveTicketId]);
+
+    const handleCloseLegend = useCallback(() => {
+        if (isLegendClosing) return;
+        setIsLegendClosing(true);
+        setTimeout(() => {
+            setShowLegend(false);
+            setIsLegendClosing(false);
+        }, 250);
+    }, [isLegendClosing]);
 
     const filteredTickets = tickets.filter(ticket => {
         if (!filterValue) return true;
@@ -225,7 +241,7 @@ export function SupportPageClient() {
 
     // ── List panel ────────────────────────────────────────────────────────────
     const listContent = (
-        <div className="flex flex-col h-full">
+        <div className={`flex-col h-full ${(!activeTicketId || isMobileListVisible) ? 'flex' : 'hidden'} sm:flex`}>
             <div className="p-4 border-b border-[var(--border-subtle)] shrink-0">
                 <div className="flex items-center justify-between">
                     <div>
@@ -302,7 +318,7 @@ export function SupportPageClient() {
             <ConversationList
                 conversations={mappedConversations}
                 activeId={activeTicketId ?? undefined}
-                onSelect={setActiveTicketId}
+                onSelect={handleTicketSelect}
                 accentColor="turquesa"
             />
         </div>
@@ -310,7 +326,7 @@ export function SupportPageClient() {
 
     // ── Detail panel ──────────────────────────────────────────────────────────
     const detailContent = activeTicket ? (
-        <div className="flex flex-col h-full">
+        <div className={`flex-col h-full ${(activeTicket && !isMobileListVisible) ? 'flex' : 'hidden'} sm:flex`}>
             <div className="p-5 border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)]/50 shrink-0">
                 <div className="flex items-center gap-3">
                     <div className="w-10 h-10 shrink-0 rounded-full bg-[#2E6A4F] flex items-center justify-center text-white shadow-sm">
@@ -474,10 +490,10 @@ export function SupportPageClient() {
                 <ChatLayout list={listContent} detail={detailContent} />
             )}
 
-            {showLegend && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4" onClick={() => setShowLegend(false)}>
-                    <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-[3rem] max-w-lg w-full shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
-                        <div className="bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--turquesa-500)]/70 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-8 text-white relative">
+            {(showLegend || isLegendClosing) && (
+                <div className={`fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4 ${isLegendClosing ? 'animate-fade-out-overlay' : 'animate-fadeIn'}`} onClick={handleCloseLegend}>
+                    <div className={`bg-white dark:bg-[var(--bg-secondary)] rounded-[3rem] max-w-lg w-full max-h-[80vh] shadow-2xl overflow-hidden ${isLegendClosing ? 'animate-scale-out' : 'animate-scaleIn'} flex flex-col`} onClick={(e) => e.stopPropagation()}>
+                        <div className="bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--turquesa-500)]/70 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-8 text-white relative flex-shrink-0">
                             <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl" />
                             <div className="relative z-10 flex items-center justify-between">
                                 <div className="flex items-center gap-4">
@@ -489,12 +505,12 @@ export function SupportPageClient() {
                                         <p className="text-[10px] font-bold text-white/70 uppercase tracking-[0.2em]">¿Para qué sirve este canal?</p>
                                     </div>
                                 </div>
-                                <button onClick={() => setShowLegend(false)} className="w-10 h-10 rounded-full bg-black/10 flex items-center justify-center hover:bg-black/20">
+                                <button onClick={handleCloseLegend} className="w-10 h-10 rounded-full bg-black/10 flex items-center justify-center hover:bg-black/20">
                                     <Icon name="X" className="w-5 h-5 text-white" />
                                 </button>
                             </div>
                         </div>
-                        <div className="p-8 space-y-4">
+                        <div className="p-8 space-y-4 overflow-y-auto">
                             {[
                                 { icon: 'Settings', title: 'Problemas técnicos', desc: 'Errores en la plataforma, fallas en el inicio de sesión, problemas con el sitio web o la app.' },
                                 { icon: 'Shield', title: 'Seguridad y acceso', desc: 'Cuentas bloqueadas, acceso no autorizado, cambios de contraseña o datos comprometidos.' },
@@ -512,7 +528,7 @@ export function SupportPageClient() {
                                 </div>
                             ))}
                             <div className="flex justify-end pt-2">
-                                <button onClick={() => setShowLegend(false)} className="px-6 py-3 rounded-2xl bg-gray-100 dark:bg-[var(--bg-muted)] text-gray-600 dark:text-[var(--text-primary)] font-black text-xs uppercase tracking-widest hover:bg-gray-200 dark:hover:bg-[#2A3F33] transition-all">
+                                <button onClick={handleCloseLegend} className="px-6 py-3 rounded-2xl bg-gray-100 dark:bg-[var(--bg-muted)] text-gray-600 dark:text-[var(--text-primary)] font-black text-xs uppercase tracking-widest hover:bg-gray-200 dark:hover:bg-[#2A3F33] transition-all">
                                     Cerrar
                                 </button>
                             </div>

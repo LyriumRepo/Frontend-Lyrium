@@ -122,6 +122,7 @@ export default function TiendaPage({ params }: StorePageProps) {
           id: Number(s.id),
           titulo: s.name || 'Sin nombre',
           slug: s.slug,
+          enlace: s.slug ? `/servicio/${s.slug}` : undefined,
           precio: Number(s.price || 0),
           precioOferta: Number(s.price || 0),
           precioAnterior: undefined,
@@ -156,13 +157,6 @@ export default function TiendaPage({ params }: StorePageProps) {
           }))),
         ];
 
-        console.log('=== DIAGNÓSTICO SERVICIOS ===');
-        console.log('Productos desde API:', rawProducts.length);
-        console.log('Servicios desde API:', rawServices.length);
-        console.log('Total combinado:', allProducts.length);
-        console.log('tipo===service:', allProducts.filter((p:any) => p.tipo === 'service').length);
-        console.log('tipo!==service:', allProducts.filter((p:any) => p.tipo !== 'service').length);
-        console.log('Servicio ejemplo:', JSON.stringify(services[0] || 'N/A'));
 
         setStoreData({
           store,

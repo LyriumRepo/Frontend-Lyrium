@@ -27,7 +27,7 @@ export default function ChatLayout({
   return (
     <div className={`flex flex-col sm:grid sm:grid-cols-12 ${CHAT_CONFIG.spacing.gap} h-full min-h-0 overflow-hidden`}>
       <div className={`
-        h-[38%] sm:h-full sm:${listWidth}
+        h-[38%] sm:h-full ${listWidth === 'col-span-3' ? 'sm:col-span-3' : listWidth === 'col-span-4' ? 'sm:col-span-4' : 'sm:col-span-5'}
         bg-[var(--bg-card)]
         rounded-[2.5rem]
         border
@@ -43,7 +43,7 @@ export default function ChatLayout({
       </div>
 
       <div className={`
-        flex-1 min-h-0 sm:flex-none sm:${detailWidth}
+        flex-1 min-h-0 sm:flex-none ${detailWidth === 'col-span-9' ? 'sm:col-span-9' : detailWidth === 'col-span-8' ? 'sm:col-span-8' : 'sm:col-span-7'}
         rounded-[2.5rem]
         border
         border-[var(--border-subtle)]

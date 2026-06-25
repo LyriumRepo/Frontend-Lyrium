@@ -17,11 +17,9 @@ const typeConfig: Record<string, { icon: string; bg: string; text: string }> = {
     NOTA_CREDITO: { icon: 'Undo',     bg: 'bg-red-100 dark:bg-red-950/40',     text: 'text-red-600 dark:text-red-400' },
 };
 
-function formatCommission(rate: number | null, amount: number | null): string {
-    if (rate === null || amount === null) return '—';
-    // rate puede ser decimal (0.15) o entero (15) según la fuente
-    const pct = rate > 1 ? Math.round(rate) : Math.round(rate * 100);
-    return `${pct}% · S/ ${amount.toFixed(2)}`;
+function formatCommission(_rate: number | null, amount: number | null): string {
+    if (amount === null) return '—';
+    return `S/ ${amount.toFixed(2)}`;
 }
 
 export default function AdminInvoiceTable({ invoices, onViewDetail }: Props) {

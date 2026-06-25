@@ -12,18 +12,18 @@ export default function LogisticsHeader({ onOpenMenu }: { onOpenMenu: () => void
     const breadcrumbs = useAutoBreadcrumb();
 
     return (
-        <header className="h-16 bg-white dark:bg-[var(--bg-secondary)] border-b border-violet-100 dark:border-[var(--border-subtle)] sticky top-0 z-50">
+        <header className="h-16 bg-white dark:bg-[var(--bg-secondary)] border-b border-gray-200 dark:border-[var(--border-subtle)] sticky top-0 z-50">
             <div className="h-full px-6 flex items-center justify-between">
                 {/* Left: Panel Indicator + Breadcrumb */}
                 <div className="flex items-center gap-4">
                     <button
                         onClick={onOpenMenu}
-                        className="lg:hidden p-2 -ml-2 rounded-lg hover:bg-gray-100 dark:hover:bg-[var(--bg-card)] transition-colors"
+                        className="md:hidden p-2 -ml-2 rounded-lg hover:bg-gray-100 dark:hover:bg-[var(--bg-card)] transition-colors"
                         aria-label="Open menu"
                     >
                         <Menu className="w-6 h-6 text-gray-600 dark:text-[var(--text-secondary)]" />
                     </button>
-                    <span className="hidden md:inline-block px-3 py-1 bg-sky-500 text-white text-xs font-bold uppercase rounded-full whitespace-nowrap">
+                    <span className="hidden md:inline-block px-3 py-1 bg-sky-500 dark:bg-[var(--bg-secondary)] text-white dark:text-[var(--brand-green)] dark:border dark:border-[var(--border-default)] text-xs font-bold uppercase rounded-full whitespace-nowrap">
                         Panel del Operador Logístico
                     </span>
                     <Breadcrumb items={breadcrumbs} />

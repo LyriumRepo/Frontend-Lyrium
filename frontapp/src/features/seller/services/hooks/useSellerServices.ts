@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Service,
@@ -8,7 +8,6 @@ import {
   Appointment,
 } from '../types';
 import { useToast } from '@/shared/lib/context/ToastContext';
-import { USE_MOCKS } from '@/shared/lib/config/flags';
 import { serviceRepository } from '@/shared/lib/api/ServicoReposit';
 
 type Client = {
@@ -22,6 +21,7 @@ type Client = {
 
 type AppointmentWithClient = Appointment & {
   clientId?: number;
+  customerName?: string;
 };
 
 interface UseSellerServicesProps {
@@ -30,23 +30,9 @@ interface UseSellerServicesProps {
   initialAppointments?: Appointment[];
 }
 
-const MOCK_CLIENTS: Client[] = [
-  { id: 1, nombres: 'Carlos', apellidos: 'Rojas', dni: '12345678', telefono: '987654321', email: 'carlos@email.com' },
-  { id: 2, nombres: 'Ana', apellidos: 'Vargas', dni: '87654321', telefono: '912345678', email: 'ana@email.com' },
-  { id: 3, nombres: 'Lucía', apellidos: 'Paredes', dni: '81234567', telefono: '955667788', email: 'lucia@email.com' },
-  { id: 4, nombres: 'Miguel', apellidos: 'Torres', dni: '45678912', telefono: '944556677', email: 'miguel@email.com' },
-  { id: 5, nombres: 'Sofía', apellidos: 'Chávez', dni: '78912345', telefono: '933221100', email: 'sofia@email.com' },
-];
-
 export function useSellerServices(props?: UseSellerServicesProps) {
   const queryClient = useQueryClient();
   const { showToast } = useToast();
-
-  const { data: clients = [] } = useQuery({
-    queryKey: ['seller', 'clients'],
-    queryFn: async (): Promise<Client[]> => MOCK_CLIENTS,
-    staleTime: Infinity,
-  });
 
   const {
     data: specialists = [],
@@ -94,6 +80,20 @@ export function useSellerServices(props?: UseSellerServicesProps) {
     staleTime: 30 * 1000,
     retry: 1,
   });
+
+  // Derivar clientes únicos desde los appointments reales (no hay endpoint separado de clientes)
+  const clients = useMemo((): Client[] => {
+    const seen = new Set<number>();
+    return appointments.reduce<Client[]>((acc, app) => {
+      const id = app.clientId;
+      if (!id || seen.has(id)) return acc;
+      seen.add(id);
+      const fullName = (app as AppointmentWithClient).customerName ?? '';
+      const [nombres = '', ...rest] = fullName.trim().split(' ');
+      acc.push({ id, nombres, apellidos: rest.join(' '), dni: '', telefono: '', email: '' });
+      return acc;
+    }, []);
+  }, [appointments]);
 
   useEffect(() => {
     if (servicesError) {

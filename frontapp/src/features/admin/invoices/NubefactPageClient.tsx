@@ -3,6 +3,7 @@
 import React, { useCallback } from 'react';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import BaseButton from '@/components/ui/BaseButton';
+import Icon from '@/components/ui/Icon';
 import BaseLoading from '@/components/ui/BaseLoading';
 import { useAdminInvoices } from './hooks/useAdminInvoices';
 import AdminInvoiceKPIsDisplay from './components/AdminInvoiceKPIs';
@@ -75,18 +76,22 @@ export function NubefactPageClient(_props: NubefactPageClientProps) {
                 <BaseButton onClick={refresh} variant="ghost" leftIcon="RefreshCw" size="md">
                     Sincronizar
                 </BaseButton>
-                <BaseButton onClick={handleExportExcel} variant="ghost" leftIcon="FileSpreadsheet" size="md">
-                    Excel
-                </BaseButton>
-                <BaseButton
-                    onClick={handleExportPDF}
-                    variant="primary"
-                    leftIcon="FileDown"
-                    size="md"
-                    className="from-transparent to-transparent bg-[var(--brand-sky)] hover:bg-[var(--brand-sky-hover)] shadow-[var(--brand-sky)]/25 dark:bg-[var(--brand-green)] dark:hover:bg-[var(--brand-green-hover)]"
-                >
-                    PDF
-                </BaseButton>
+                <div className="flex gap-2">
+                    <button
+                        onClick={handleExportExcel}
+                        className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-[var(--bg-card)] text-[var(--text-primary)] font-bold text-xs border border-[var(--border-subtle)] hover:text-[#5AAFE6] hover:border-[#69BEEB]/30 transition-all shadow-sm"
+                    >
+                        <Icon name="FileSpreadsheet" className="text-xl" />
+                        <span className="hidden sm:inline">Excel</span>
+                    </button>
+                    <button
+                        onClick={handleExportPDF}
+                        className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-[var(--bg-card)] text-[var(--text-primary)] font-bold text-xs border border-[var(--border-subtle)] hover:text-[#5AAFE6] hover:border-[#69BEEB]/30 transition-all shadow-sm"
+                    >
+                        <Icon name="FileText" className="text-xl" />
+                        <span className="hidden sm:inline">PDF</span>
+                    </button>
+                </div>
             </div>
 
             <AdminInvoiceFilters

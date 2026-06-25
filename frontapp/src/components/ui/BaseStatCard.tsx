@@ -45,11 +45,11 @@ const colorMap = {
         shadow: 'shadow-[#4EC7B8]/20 dark:shadow-[#4EC7B8]/20'
     },
     rose: {
-        bg: 'bg-rose-500/10 dark:bg-rose-500/15',
-        iconBg: 'bg-rose-500',
-        text: 'text-rose-600 dark:text-rose-400',
-        border: 'border-rose-500/20 dark:border-rose-500/25',
-        shadow: 'shadow-rose-500/20 dark:shadow-rose-500/20'
+        bg: 'bg-[var(--color-error)]/10 dark:bg-[var(--color-error)]/15',
+        iconBg: 'bg-[var(--color-error)]',
+        text: 'text-[var(--color-error)] dark:text-[var(--color-error)]',
+        border: 'border-[var(--color-error)]/20 dark:border-[var(--color-error)]/25',
+        shadow: 'shadow-[var(--color-error)]/20 dark:shadow-[var(--color-error)]/20'
     },
     violet: {
         bg: 'bg-[#69BEEB]/10 dark:bg-[#69BEEB]/15',

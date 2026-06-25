@@ -6,9 +6,11 @@ import { useAdminInvoices } from '@/features/admin/invoices/hooks/useAdminInvoic
 import { formatCurrency } from '@/shared/lib/utils/formatters';
 import {
     Receipt, Search, RefreshCw, Download, CheckCircle, Clock, XCircle, AlertCircle,
-    FileText, TrendingUp, ExternalLink, Package, Store, Eye,
+    FileText, TrendingUp, ExternalLink, Package, Store, Eye, FileSpreadsheet,
 } from 'lucide-react';
+import { exportRapifacToExcel, exportRapifacToPdf } from './export';
 import BaseButton from '@/components/ui/BaseButton';
+import BaseDatePicker from '@/components/ui/BaseDatePicker';
 import Skeleton from '@/components/ui/Skeleton';
 import BaseModal from '@/components/ui/BaseModal';
 import type { AdminInvoiceRow } from '@/features/admin/invoices/hooks/useAdminInvoices';
@@ -72,7 +74,7 @@ function DetailModal({ inv, isOpen, onClose }: { inv: AdminInvoiceRow | null; is
                     </div>
                 )}
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div className="bg-gradient-to-br from-sky-50 to-cyan-50 dark:from-sky-500/5 dark:to-cyan-500/5 rounded-2xl p-4 border border-sky-100/50 dark:border-sky-500/10">
                         <span className="text-[9px] font-black text-sky-500 dark:text-sky-400 uppercase tracking-widest">Cliente</span>
                         <p className="text-sm font-black text-[var(--text-primary)] mt-1 truncate">{inv.customer_name}</p>
@@ -90,8 +92,8 @@ function DetailModal({ inv, isOpen, onClose }: { inv: AdminInvoiceRow | null; is
                 </div>
 
                 {hasItems ? (
-                    <div className="bg-gradient-to-br from-teal-50/50 to-cyan-50/50 dark:from-teal-500/3 dark:to-cyan-500/3 rounded-2xl border border-teal-100/30 dark:border-teal-500/10 overflow-hidden">
-                        <table className="w-full text-left">
+                    <div className="bg-gradient-to-br from-teal-50/50 to-cyan-50/50 dark:from-teal-500/3 dark:to-cyan-500/3 rounded-2xl border border-teal-100/30 dark:border-teal-500/10 overflow-hidden overflow-x-auto">
+                        <table className="w-full text-left min-w-[400px]">
                             <thead>
                                 <tr className="bg-teal-500/5 dark:bg-teal-500/5">
                                     <th className="px-5 py-3 text-[9px] font-black text-teal-600 dark:text-teal-400 uppercase tracking-widest">Producto</th>
@@ -241,9 +243,22 @@ export function RapifacPageClient() {
                             <BaseButton onClick={() => refresh()} variant="ghost" leftIcon="RefreshCw" size="md">
                                 Sincronizar
                             </BaseButton>
-                            <BaseButton onClick={handleExportCSV} variant="primary" leftIcon="Download" size="md">
-                                Exportar Reporte
-                            </BaseButton>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => exportRapifacToExcel(invoices, kpis).catch(console.error)}
+                                    className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-[var(--bg-card)] text-[var(--text-primary)] font-bold text-xs border border-[var(--border-subtle)] hover:text-[#5AAFE6] hover:border-[#69BEEB]/30 transition-all shadow-sm"
+                                >
+                                    <FileSpreadsheet className="w-5 h-5" />
+                                    <span className="hidden sm:inline">Excel</span>
+                                </button>
+                                <button
+                                    onClick={() => exportRapifacToPdf(invoices, kpis).catch(console.error)}
+                                    className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-[var(--bg-card)] text-[var(--text-primary)] font-bold text-xs border border-[var(--border-subtle)] hover:text-[#5AAFE6] hover:border-[#69BEEB]/30 transition-all shadow-sm"
+                                >
+                                    <FileText className="w-5 h-5" />
+                                    <span className="hidden sm:inline">PDF</span>
+                                </button>
+                            </div>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -323,23 +338,21 @@ export function RapifacPageClient() {
                                         </select>
                                     </div>
 
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-[10px] font-black text-gray-400 dark:text-[var(--text-muted)] uppercase tracking-widest">Desde</span>
-                                        <input
-                                            type="date"
+                                    <div>
+                                        <BaseDatePicker
+                                            label="Desde"
                                             value={dateFrom}
-                                            onChange={e => setDateFrom(e.target.value)}
-                                            className="px-4 py-2.5 bg-white dark:bg-[var(--bg-card)] border border-gray-100 dark:border-[var(--border-subtle)] rounded-xl text-xs font-bold text-[var(--text-primary)] focus:ring-4 focus:ring-blue-500/10 transition-all outline-none"
+                                            onChange={setDateFrom}
+                                            placeholder="dd/mm/aaaa"
                                         />
                                     </div>
 
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-[10px] font-black text-gray-400 dark:text-[var(--text-muted)] uppercase tracking-widest">Hasta</span>
-                                        <input
-                                            type="date"
+                                    <div>
+                                        <BaseDatePicker
+                                            label="Hasta"
                                             value={dateTo}
-                                            onChange={e => setDateTo(e.target.value)}
-                                            className="px-4 py-2.5 bg-white dark:bg-[var(--bg-card)] border border-gray-100 dark:border-[var(--border-subtle)] rounded-xl text-xs font-bold text-[var(--text-primary)] focus:ring-4 focus:ring-blue-500/10 transition-all outline-none"
+                                            onChange={setDateTo}
+                                            placeholder="dd/mm/aaaa"
                                         />
                                     </div>
 

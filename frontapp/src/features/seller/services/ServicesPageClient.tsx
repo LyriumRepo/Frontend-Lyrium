@@ -11,6 +11,7 @@ import RescheduleModal from './components/RescheduleModal';
 import BaseEmptyState from '@/components/ui/BaseEmptyState';
 import BaseButton from '@/components/ui/BaseButton';
 import { Service, Specialist, Appointment } from '@/features/seller/services/types';
+import { exportServicesToExcel, exportServiciosToPdf } from './export';
 import { useSellerServices } from '@/features/seller/services/hooks/useSellerServices';
 import { useToast } from '@/shared/lib/context/ToastContext';
 import BaseLoading from '@/components/ui/BaseLoading';
@@ -142,6 +143,20 @@ export function ServicesPageClient() {
 
     const headerActions = (
         <div className="flex gap-3 items-center whitespace-nowrap">
+            <button
+                onClick={() => exportServicesToExcel(services).catch(console.error)}
+                className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-[var(--bg-card)] text-[var(--text-primary)] font-bold text-xs border border-[var(--border-subtle)] hover:text-[#5AAFE6] hover:border-[#69BEEB]/30 transition-all shadow-sm"
+            >
+                <Icon name="FileSpreadsheet" className="text-xl" />
+                <span className="hidden sm:inline">Excel</span>
+            </button>
+            <button
+                onClick={() => exportServiciosToPdf(services).catch(console.error)}
+                className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-[var(--bg-card)] text-[var(--text-primary)] font-bold text-xs border border-[var(--border-subtle)] hover:text-[#5AAFE6] hover:border-[#69BEEB]/30 transition-all shadow-sm"
+            >
+                <Icon name="FileText" className="text-xl" />
+                <span className="hidden sm:inline">PDF</span>
+            </button>
             <button
                 onClick={() => setShowGuide(true)}
                 className="w-9 h-9 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] flex items-center justify-center text-[var(--text-secondary)] hover:text-sky-500 hover:border-sky-500/30 hover:bg-sky-500/5 transition-all"

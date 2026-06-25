@@ -3,6 +3,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { usePlanes } from '@/features/seller/plans/hooks/usePlanes';
 import { useSSE } from '@/features/seller/plans/hooks/useSSE';
 import { motivationalMessages, notificationMessages } from '@/features/seller/plans/lib/plans';
+import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import { sanitizeHtml } from '@/shared/lib/sanitize';
 import { apiGet } from '@/features/seller/plans/lib/api';
 
@@ -204,8 +205,11 @@ export default function PlanesPage() {
             />
           )}
 
-          <h1 className="my-plan-title animate-title">Mi Plan Actual</h1>
-          <p className="my-plan-subtitle animate-subtitle">Gestiona tu suscripción en LYRIUM Biomarketplace</p>
+          <ModuleHeader
+            title="Mi Plan Actual"
+            subtitle="Gestiona tu suscripción en LYRIUM Biomarketplace"
+            icon="CreditCard"
+          />
 
           <Timeline
             planOrder={state.planOrder} plansData={state.plansData}
@@ -254,8 +258,11 @@ export default function PlanesPage() {
 
         {/* ── PESTAÑA: PLANES ── */}
         <div className={`tab-panel ${state.activeTab === 'all-plans' ? 'active' : ''}`} id="panel-all-plans">
-          <h1 className="plans-tab-title">Explora Nuestros Planes</h1>
-          <p className="plans-tab-subtitle">Elige el plan perfecto para tu tienda en LYRIUM Biomarketplace</p>
+          <ModuleHeader
+            title="Explora Nuestros Planes"
+            subtitle="Elige el plan perfecto para tu tienda en LYRIUM Biomarketplace"
+            icon="Layers"
+          />
 
           <Timeline
             planOrder={state.planOrder} plansData={state.plansData}

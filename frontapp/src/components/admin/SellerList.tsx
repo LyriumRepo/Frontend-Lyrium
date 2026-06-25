@@ -182,7 +182,7 @@ const SellerRow = ({
               {seller.email_verified && (
                 <BadgeCheck
                   className="w-3.5 h-3.5 text-cyan-400 flex-shrink-0"
-                  title="Email verificado"
+                  aria-label="Email verificado"
                 />
               )}
             </div>
@@ -424,29 +424,83 @@ export default function SellerList({
           <p className="text-xs opacity-60">Ajusta los filtros de búsqueda</p>
         </div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-[var(--border-subtle)]">
-                <th className="px-4 py-3 text-left text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Vendedor / Contacto</th>
-                <th className="hidden md:table-cell px-4 py-3 text-left text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Tienda Registrada</th>
-                <th className="px-4 py-3 text-left text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Estado</th>
-                <th className="hidden md:table-cell px-4 py-3 text-left text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Seguridad</th>
-                <th className="px-4 py-3 text-left text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[var(--border-subtle)]">
-              {sellers.map((seller) => (
-                <SellerRow
-                  key={seller.id}
-                  seller={seller}
-                  onStatusChange={onStatusChange}
-                  onResetPassword={onResetPassword}
-                />
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <>
+          {/* Mobile: cards */}
+          <div className="sm:hidden divide-y divide-[var(--border-subtle)]">
+            {sellers.map((seller) => {
+              const cfg = STATUS_CONFIG[seller.status] ?? STATUS_CONFIG['REJECTED'];
+              const contract = CONTRACT_CONFIG[seller.contractStatus ?? 'PENDIENTE'];
+              return (
+                <div key={seller.id} className="p-4 flex items-start gap-3">
+                  <div className="relative flex-shrink-0">
+                    {seller.avatar ? (
+                      <img src={seller.avatar} alt={seller.name} className="w-10 h-10 rounded-2xl object-cover border border-[var(--border-subtle)]" />
+                    ) : (
+                      <div className="w-10 h-10 rounded-2xl bg-[var(--bg-secondary)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-secondary)] font-black text-sm">
+                        {seller.name?.[0]?.toUpperCase()}
+                      </div>
+                    )}
+                    <span className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-[var(--bg-card)] ${cfg.dot}`} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-sm font-black text-[var(--text-primary)] truncate">{seller.name}</span>
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black border flex-shrink-0
+                        ${seller.status === 'ACTIVE' ? 'bg-emerald-400/10 text-emerald-400 border-emerald-400/20' : ''}
+                        ${seller.status === 'PENDING' ? 'bg-cyan-400/10 text-cyan-400 border-cyan-400/20' : ''}
+                        ${seller.status === 'SUSPENDED' ? 'bg-rose-400/10 text-rose-400 border-rose-400/20' : ''}
+                        ${seller.status === 'REJECTED' ? 'bg-gray-500/10 text-gray-400 border-gray-500/20' : ''}
+                      `}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
+                        {cfg.label}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-[var(--text-secondary)] truncate mt-0.5">{seller.email}</p>
+                    <div className="flex items-center gap-3 mt-1.5 flex-wrap">
+                      <span className={`text-[10px] font-bold ${contract.color}`}>Contrato: {contract.label}</span>
+                      {seller.store && (
+                        <span className="text-[10px] text-[var(--text-secondary)]">{seller.store.total_sales} ventas · ⭐{seller.store.rating ?? '—'}</span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 mt-2">
+                      <Link
+                        href={`/admin/sellers/${seller.id}`}
+                        className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-cyan-400 text-[10px] font-black transition-colors border border-[var(--border-subtle)]"
+                      >
+                        Ver detalle <ChevronRight className="w-3 h-3" />
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Tablet+: table */}
+          <div className="hidden sm:block overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-[var(--border-subtle)]">
+                  <th className="px-4 py-3 text-left text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Vendedor / Contacto</th>
+                  <th className="hidden md:table-cell px-4 py-3 text-left text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Tienda Registrada</th>
+                  <th className="px-4 py-3 text-left text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Estado</th>
+                  <th className="hidden md:table-cell px-4 py-3 text-left text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Seguridad</th>
+                  <th className="px-4 py-3 text-left text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[var(--border-subtle)]">
+                {sellers.map((seller) => (
+                  <SellerRow
+                    key={seller.id}
+                    seller={seller}
+                    onStatusChange={onStatusChange}
+                    onResetPassword={onResetPassword}
+                  />
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
     </div>
   );

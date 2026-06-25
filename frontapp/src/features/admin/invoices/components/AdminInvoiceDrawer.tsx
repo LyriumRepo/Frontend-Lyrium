@@ -45,7 +45,7 @@ export default function AdminInvoiceDrawer({ invoice, isOpen, onClose }: Props) 
 
             <div className="relative h-full bg-[var(--bg-card)] shadow-[-40px_0_80px_-20px_rgba(0,0,0,0.15)] w-full md:w-[600px] flex flex-col animate-slideInRight">
                 {/* Header */}
-                <div className="p-8 flex items-center justify-between border-b border-[var(--border-subtle)] bg-[var(--bg-card)]/80 backdrop-blur-xl">
+                <div className="p-4 sm:p-8 flex items-center justify-between border-b border-[var(--border-subtle)] bg-[var(--bg-card)]/80 backdrop-blur-xl">
                     <div className="flex-1 min-w-0 pr-4">
                         <div className="flex items-center gap-3 mb-3">
                             <span className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest border border-[var(--border-default)] px-2 py-1 rounded-lg bg-[var(--bg-secondary)]">
@@ -68,7 +68,7 @@ export default function AdminInvoiceDrawer({ invoice, isOpen, onClose }: Props) 
                 </div>
 
                 {/* Body */}
-                <div className="flex-1 overflow-y-auto p-8 space-y-8 custom-scrollbar">
+                <div className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-6 sm:space-y-8 custom-scrollbar">
                     {/* Tienda */}
                     {invoice.stores.length > 0 && (
                         <div className="space-y-4">

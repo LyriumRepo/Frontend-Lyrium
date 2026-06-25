@@ -6,6 +6,7 @@ export interface ProactiveNotification {
     title: string;
     message: string;
     time: string;
+    createdAt?: string;
     read: boolean;
     metadata?: {
         entityId?: string;

@@ -207,7 +207,7 @@ export default function StoreAwards({ config }: StoreAwardsProps) {
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <p className="text-sm font-black text-[var(--text-primary)] truncate">
-                                            {medal.entity?.name ?? `#${medal.entity?.id}`}
+                                            {medal.entity?.name ?? medal.entity?.id ?? 'Sin nombre'}
                                         </p>
                                         <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider mt-0.5">
                                             {medal.entity_type === 'store' ? 'Tienda' : medal.entity_type === 'product' ? 'Producto' : 'Servicio'}
@@ -243,12 +243,7 @@ export default function StoreAwards({ config }: StoreAwardsProps) {
                     )}
                 </div>
 
-                {/* Loading state for medals */}
-                {medalsLoading && (
-                    <div className="mt-8 text-center">
-                        <Loader2 className="w-5 h-5 animate-spin text-gray-400 mx-auto" />
-                    </div>
-                )}
+
             </div>
         </div>
     );

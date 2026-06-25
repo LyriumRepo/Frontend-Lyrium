@@ -283,7 +283,7 @@ export default function OrderSummary() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="relative w-6 h-6">
-                    <Image src="/img/intro/Flor6.png" alt="" fill className="object-contain" />
+                    <Image src="https://i.imgur.com/HHURL27.png" alt="" fill className="object-contain" />
                   </div>
                   <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wide">
                     Lirios
@@ -357,7 +357,7 @@ export default function OrderSummary() {
             <div className="flex justify-between text-gray-500 dark:text-[var(--text-muted)]">
               <span className="flex items-center gap-1">
                 <div className="relative w-4 h-4">
-                  <Image src="/img/intro/Flor6.png" alt="" fill className="object-contain" />
+                  <Image src="https://i.imgur.com/HHURL27.png" alt="" fill className="object-contain" />
                 </div>
                 Lirios
               </span>

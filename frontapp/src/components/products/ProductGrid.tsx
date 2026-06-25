@@ -11,7 +11,7 @@ const stickerConfig: Record<string, { label: string; class: string }> = {
   oferta: { label: 'Oferta', class: 'bg-red-500' },
   promo: { label: 'Promo', class: 'bg-orange-500' },
   nuevo: { label: 'Nuevo', class: 'bg-green-500' },
-  limitado: { label: 'Limitado', class: 'bg-purple-500' },
+  limitado: { label: 'Limitado', class: 'bg-amber-500' },
   liquidacion: { label: 'Liquidación', class: 'bg-red-600' },
   descuento: { label: 'Descuento', class: 'bg-red-500' },
   bestseller: { label: 'Best Seller', class: 'bg-amber-500' },
@@ -19,7 +19,7 @@ const stickerConfig: Record<string, { label: string; class: string }> = {
   organic: { label: 'Orgánico', class: 'bg-emerald-600' },
   natural: { label: 'Natural', class: 'bg-green-600' },
   eco: { label: 'Eco', class: 'bg-lime-600' },
-  premium: { label: 'Premium', class: 'bg-purple-500' },
+  premium: { label: 'Premium', class: 'bg-[var(--brand-green)]' },
   vegan: { label: 'Vegano', class: 'bg-green-700' },
 };
 
@@ -178,7 +178,7 @@ function ServiceCard({ producto }: { producto: Producto }) {
   return (
     <div className="group bg-white dark:bg-[var(--bg-secondary)] border border-gray-100 dark:border-[var(--border-subtle)] rounded-2xl overflow-hidden hover:shadow-xl hover:border-sky-200 dark:hover:border-[#4A7C59]/40 transition-all duration-200 flex flex-col">
       {/* Header with image or gradient */}
-      <Link href={producto.enlace || '#'} className="block relative h-36 overflow-hidden bg-gray-100 dark:bg-gray-800">
+      <Link href={producto.enlace || '#'} className="block relative h-36 overflow-hidden bg-gray-100 dark:bg-[var(--bg-secondary)]">
         {producto.imagen ? (
           <Image
             src={producto.imagen}
@@ -260,12 +260,12 @@ function ServiceCard({ producto }: { producto: Producto }) {
 function ProductCardSkeleton() {
   return (
     <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-2xl shadow-sm border border-gray-100 dark:border-[var(--border-subtle)] overflow-hidden animate-pulse">
-      <div className="aspect-square bg-gray-200 dark:bg-gray-700" />
+      <div className="aspect-square bg-gray-200 dark:bg-[var(--bg-muted)]" />
       <div className="p-3 space-y-3">
-        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/3" />
-        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4" />
-        <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-1/3" />
-        <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded-xl w-full" />
+        <div className="h-3 bg-gray-200 dark:bg-[var(--bg-muted)] rounded w-1/3" />
+        <div className="h-4 bg-gray-200 dark:bg-[var(--bg-muted)] rounded w-3/4" />
+        <div className="h-5 bg-gray-200 dark:bg-[var(--bg-muted)] rounded w-1/3" />
+        <div className="h-8 bg-gray-200 dark:bg-[var(--bg-muted)] rounded-xl w-full" />
       </div>
     </div>
   );
@@ -285,7 +285,7 @@ export default function ProductGrid({ productos, loading = false }: ProductGridP
   if (productos.length === 0) {
     return (
       <div className="text-center py-16">
-        <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gray-100 dark:bg-gray-800 mb-4">
+        <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gray-100 dark:bg-[var(--bg-secondary)] mb-4">
           <span className="text-4xl">📦</span>
         </div>
         <h3 className="text-lg font-medium text-gray-900 dark:text-[var(--text-primary)] mb-2">
@@ -309,9 +309,9 @@ export default function ProductGrid({ productos, loading = false }: ProductGridP
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
       {productos.map((producto) =>
         producto.tipo === 'service' ? (
-          <ServiceCard key={producto.id} producto={producto} />
+          <ServiceCard key={`service-${producto.id}`} producto={producto} />
         ) : (
-          <ProductCard key={producto.id} producto={producto} />
+          <ProductCard key={`product-${producto.id}`} producto={producto} />
         )
       )}
     </div>

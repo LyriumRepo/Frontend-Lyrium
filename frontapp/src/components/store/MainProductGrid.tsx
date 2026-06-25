@@ -28,7 +28,7 @@ const stickerConfig: Record<string, { label: string; class: string }> = {
   oferta: { label: 'Oferta', class: 'bg-emerald-600 dark:bg-emerald-500' },
   promo: { label: 'Promo', class: 'bg-sky-500 dark:bg-sky-400' },
   nuevo: { label: 'Nuevo', class: 'bg-green-500' },
-  limitado: { label: 'Limitado', class: 'bg-purple-500' },
+  limitado: { label: 'Limitado', class: 'bg-amber-500' },
 };
 
 const ordenOptions = [

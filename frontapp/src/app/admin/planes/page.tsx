@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useRef, useMemo, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useMemo, useState, useCallback } from 'react';
 import { useAdmin } from '@/features/admin/planes/hooks/usePlanesAdmin';
 import { useSSE } from '@/features/seller/plans/hooks/useSSE';
 import RequestsPanel from '@/features/admin/planes/components/RequestsPanel';
@@ -10,8 +10,9 @@ import PaymentPanel from '@/features/admin/planes/components/PaymentPanel';
 import VendedoresPanel from '@/features/admin/planes/components/VendedoresPanel';
 import PlanEditorModal from '@/features/admin/planes/components/PlanEditorModal';
 import Modal from '@/features/seller/plans/shared/Modal';
+import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 
-const TAB_ICONS: Record<string, JSX.Element> = {
+const TAB_ICONS: Record<string, React.ReactElement> = {
   requests: (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
       <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
@@ -65,6 +66,8 @@ export default function AdminPage() {
   const admin = useAdmin();
   const { state, update, setModal } = admin;
   const [rejectNotes, setRejectNotes] = useState('');
+  const [rejectModalOpen, setRejectModalOpen] = useState(false);
+  const [rejectTargetId, setRejectTargetId] = useState<number | null>(null);
 
   useEffect(() => {
     admin.initialize();
@@ -131,51 +134,37 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen bg-[var(--bg-secondary)]">
 
-      {/* ── Hero header ─────────────────────────── */}
-      <div className="bg-[var(--bg-card)] border-b border-[var(--border-subtle)]">
-        <div className="max-w-7xl mx-auto px-5 pt-7 pb-0">
-
-          {/* Título */}
-          <div className="flex items-start justify-between gap-4 mb-5">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <div className="h-5 w-1 rounded-full bg-gradient-to-b from-[var(--brand-teal)] to-[var(--brand-lime)]" />
-                <span className="text-xs font-bold text-[var(--brand-teal)] uppercase tracking-widest">Panel de Administración</span>
-              </div>
-              <h1 className="text-2xl font-black text-[var(--text-primary)] tracking-tight leading-none">
-                Planes y Suscripciones
-              </h1>
-              <p className="text-sm text-[var(--text-secondary)] mt-1">
-                Gestiona planes, procesa solicitudes y monitorea pagos
-              </p>
-            </div>
-
-            {/* Stat chips */}
-            {s.isLoaded && (
-              <div className="flex items-center gap-2 flex-shrink-0">
-                {pendingCount > 0 && (
-                  <button
-                    onClick={() => handleSwitchTab('requests')}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 cursor-pointer hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors"
-                  >
-                    <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-                    <span className="text-xs font-bold text-amber-700 dark:text-amber-400">
-                      {pendingCount} pendiente{pendingCount !== 1 ? 's' : ''}
-                    </span>
-                  </button>
-                )}
-                <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--bg-secondary)] border border-[var(--border-subtle)]">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--brand-teal)" strokeWidth="2.5">
-                    <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-                  </svg>
-                  <span className="text-xs font-semibold text-[var(--text-secondary)]">
-                    {activePlansCount} plan{activePlansCount !== 1 ? 'es' : ''} activo{activePlansCount !== 1 ? 's' : ''}
-                  </span>
-                </div>
-              </div>
+      {/* ── Module header ─────────────────────── */}
+      <ModuleHeader
+        title="Planes y Suscripciones"
+        subtitle="Gestiona planes, procesa solicitudes y monitorea pagos"
+        icon="CreditCard"
+        actions={s.isLoaded && (
+          <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap sm:flex-shrink-0">
+            {pendingCount > 0 && (
+              <button
+                onClick={() => handleSwitchTab('requests')}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 cursor-pointer hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors"
+              >
+                <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                <span className="text-xs font-bold text-amber-700 dark:text-amber-400">
+                  {pendingCount} pendiente{pendingCount !== 1 ? 's' : ''}
+                </span>
+              </button>
             )}
+            <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/20 border border-white/30">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
+                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+              </svg>
+              <span className="text-xs font-semibold text-white">
+                {activePlansCount} plan{activePlansCount !== 1 ? 'es' : ''} activo{activePlansCount !== 1 ? 's' : ''}
+              </span>
+            </div>
           </div>
+        )}
+      />
 
+      <div className="max-w-7xl mx-auto px-5 pt-0 pb-0">
           {/* Tabs */}
           <div className="flex gap-0.5 overflow-x-auto scrollbar-hide">
             {TABS.map(t => {
@@ -208,7 +197,6 @@ export default function AdminPage() {
               );
             })}
           </div>
-        </div>
       </div>
 
       {/* ── Contenido ───────────────────────────── */}
@@ -224,7 +212,7 @@ export default function AdminPage() {
               notifs={s.paymentNotifs}
               onDismissNotif={admin.dismissNotif}
               onApprove={admin.handleApproveRequest}
-              onOpenRejectModal={admin.openRejectModal}
+              onReject={(id: number) => { setRejectTargetId(id); setRejectModalOpen(true); }}
               approvingId={s.approvingRequestId}
               rejectingId={s.rejectingRequestId}
             />
@@ -382,8 +370,8 @@ export default function AdminPage() {
 
       {/* ── Modal de rechazo de solicitud ─────────── */}
       <Modal
-        open={s.modals.rejectRequest}
-        onClose={() => { admin.closeRejectModal(); setRejectNotes(''); }}
+        open={rejectModalOpen}
+        onClose={() => { setRejectModalOpen(false); setRejectNotes(''); }}
         className="max-w-md mx-auto"
       >
         <div className="flex items-center gap-3 mb-5">
@@ -415,21 +403,21 @@ export default function AdminPage() {
         <div className="flex gap-3">
           <button
             className="flex-1 px-5 py-2.5 border border-[var(--border-subtle)] bg-transparent text-[var(--text-secondary)] rounded-xl text-sm font-bold cursor-pointer hover:border-[var(--text-primary)] hover:text-[var(--text-primary)] transition-all"
-            onClick={() => { admin.closeRejectModal(); setRejectNotes(''); }}
+            onClick={() => { setRejectModalOpen(false); setRejectNotes(''); }}
           >
             Cancelar
           </button>
           <button
-            disabled={rejectNotes.trim().length < 10 || s.rejectingRequestId === s.rejectTargetId}
+            disabled={rejectNotes.trim().length < 10 || s.rejectingRequestId === rejectTargetId}
             className="flex-1 px-5 py-2.5 border-none bg-[var(--color-error)] text-white rounded-xl text-sm font-bold cursor-pointer hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
             onClick={async () => {
-              if (!s.rejectTargetId || rejectNotes.trim().length < 10) return;
-              admin.closeRejectModal();
+              if (!rejectTargetId || rejectNotes.trim().length < 10) return;
+              setRejectModalOpen(false);
               setRejectNotes('');
-              await admin.handleRejectRequest(s.rejectTargetId, rejectNotes.trim());
+              await admin.handleRejectRequest(rejectTargetId, rejectNotes.trim());
             }}
           >
-            {s.rejectingRequestId === s.rejectTargetId ? 'Rechazando...' : 'Confirmar rechazo'}
+            {s.rejectingRequestId === rejectTargetId ? 'Rechazando...' : 'Confirmar rechazo'}
           </button>
         </div>
       </Modal>

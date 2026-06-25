@@ -57,18 +57,18 @@ export const StatsOverview: React.FC<{ stats: StatsProps }> = ({ stats }) => {
       // Usa totalSellers real del backend
       val: stats.totalSellers,
       icon: <Users className="w-6 h-6" />,
-      color: 'cyan',
-      border: 'border-cyan-500',
-      textColor: 'text-cyan-500',
+      color: 'celeste',
+      border: 'border-[#69BEEB]',
+      textColor: 'text-[#69BEEB]',
     },
     {
       label: 'Activos',
       // activeSellers viene de stats.active del backend
       val: stats.activeSellers,
       icon: <CheckCircle className="w-6 h-6" />,
-      color: 'emerald',
-      border: 'border-emerald-400',
-      textColor: 'text-emerald-400',
+      color: 'turquesaClaro',
+      border: 'border-[#66D6A8]',
+      textColor: 'text-[#66D6A8]',
     },
     {
       label: 'En Espera',
@@ -76,18 +76,18 @@ export const StatsOverview: React.FC<{ stats: StatsProps }> = ({ stats }) => {
       // Usa stats.pending si viene del backend, sino fallback a pendingProducts
       val: stats.pending ?? stats.pendingProducts,
       icon: <Clock className="w-6 h-6" />,
-      color: 'amber',
-      border: 'border-amber-400',
-      textColor: 'text-amber-400',
+      color: 'lima',
+      border: 'border-[#B7E000]',
+      textColor: 'text-[#B7E000]',
     },
     {
       label: 'Alertas',
       // alerts = stores con strikes > 0 || disputas abiertas || pagos fallidos
       val: stats.alerts,
       icon: <Bell className="w-6 h-6" />,
-      color: 'rose',
-      border: 'border-rose-500',
-      textColor: 'text-rose-500',
+      color: 'error',
+      border: 'border-[var(--color-error)]',
+      textColor: 'text-[var(--color-error)]',
     },
   ];
 

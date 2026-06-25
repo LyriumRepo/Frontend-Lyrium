@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/shared/lib/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import Icon from '@/components/ui/Icon';
+import BaseButton from '@/components/ui/BaseButton';
+import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import { addressApi, Address } from '@/shared/lib/api/addressRepository';
 
 export default function CustomerAddressesPage() {
@@ -161,23 +163,20 @@ export default function CustomerAddressesPage() {
 
   return (
     <div className="space-y-8 animate-fadeIn">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-black text-slate-800 dark:text-[var(--text-primary)]">
-            Direcciones de Envío
-          </h1>
-          <p className="text-slate-500 dark:text-[var(--text-muted)] mt-1">
-            Gestiona tus direcciones de entrega
-          </p>
-        </div>
-        <button
-          onClick={openAddModal}
-          className="flex items-center gap-3 px-6 py-3 rounded-xl bg-white dark:bg-[var(--bg-secondary)] backdrop-blur-md text-black dark:text-[var(--text-primary)] font-bold text-sm border border-gray-200 dark:border-[var(--border-subtle)] hover:text-sky-500 dark:hover:text-[var(--icons-green)] transition-all"
-        >
-          <Icon name="Plus" className="w-5 h-5" />
-          <span>Agregar Dirección</span>
-        </button>
-      </div>
+      <ModuleHeader
+        title="Direcciones de Envío"
+        subtitle="Gestiona las ubicaciones donde recibirás tus pedidos"
+        icon="MapPin"
+        actions={
+          <BaseButton
+            onClick={openAddModal}
+            variant="action"
+            leftIcon="Plus"
+          >
+            Agregar Dirección
+          </BaseButton>
+        }
+      />
 
       <div className="p-4 bg-amber-50 dark:bg-amber-900/10 rounded-2xl border border-amber-200 dark:border-amber-800/30 flex items-start gap-3">
         <Icon name="Star" className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />

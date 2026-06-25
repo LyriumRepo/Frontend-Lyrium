@@ -17,7 +17,7 @@ function levelDotClass(level: ProactiveNotification['level']): string {
         case 'CRITICAL': return 'bg-red-500';
         case 'SECURITY': return 'bg-orange-500';
         case 'WARNING':  return 'bg-amber-500';
-        case 'INFO':     return 'bg-blue-500';
+        case 'INFO':     return 'bg-[var(--brand-green)]';
         default:         return 'bg-[var(--text-secondary)]';
     }
 }
@@ -57,8 +57,8 @@ export default function NotificationAllModal({ onClose }: Props) {
                     {/* Header */}
                     <div className="flex items-center justify-between gap-4 px-6 py-4 border-b border-[var(--border-subtle)] flex-shrink-0">
                         <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-xl bg-indigo-500/10 flex items-center justify-center flex-shrink-0">
-                                <Bell className="w-4 h-4 text-indigo-500" />
+                            <div className="w-8 h-8 rounded-xl bg-[var(--bg-secondary)] flex items-center justify-center flex-shrink-0">
+                                <Bell className="w-4 h-4 text-[var(--brand-green)]" />
                             </div>
                             <div>
                                 <h2 className="text-sm font-black text-[var(--text-primary)] tracking-tight">
@@ -75,7 +75,7 @@ export default function NotificationAllModal({ onClose }: Props) {
                             {unreadCount > 0 && (
                                 <button
                                     onClick={markAllAsRead}
-                                    className="text-[10px] font-black uppercase tracking-wider text-indigo-500 hover:text-indigo-700 px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/20 dark:hover:bg-indigo-900/40 transition-colors"
+                                    className="text-[10px] font-black uppercase tracking-wider text-[var(--brand-green)] hover:text-[var(--brand-green-hover)] px-3 py-1.5 rounded-xl bg-[var(--bg-secondary)] hover:bg-[var(--bg-muted)] transition-colors"
                                 >
                                     Marcar todo leído
                                 </button>
@@ -137,7 +137,7 @@ export default function NotificationAllModal({ onClose }: Props) {
                                                     {n.time}
                                                 </p>
                                                 {n.action && (
-                                                    <span className="text-[10px] font-black text-indigo-500 uppercase tracking-wider">
+                                                    <span className="text-[10px] font-black text-[var(--brand-green)] uppercase tracking-wider">
                                                         {n.action.label} →
                                                     </span>
                                                 )}

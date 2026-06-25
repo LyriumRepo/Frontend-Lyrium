@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { useEcho } from '@laravel/echo-react';
 import { ProactiveNotification, NotificationLevel } from '@/shared/types/notifications';
 import { useSyncNotifications } from '@/shared/hooks/useSyncNotifications';
@@ -19,6 +19,24 @@ interface NotificationContextType {
 }
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
+
+const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
+
+function isWithin24h(createdAt?: string): boolean {
+    if (!createdAt) return true;
+    return Date.now() - new Date(createdAt).getTime() < TWENTY_FOUR_HOURS;
+}
+
+function formatRelativeTime(createdAt?: string): string {
+    if (!createdAt) return 'Ahora';
+    const diffMs = Date.now() - new Date(createdAt).getTime();
+    const mins = Math.floor(diffMs / 60_000);
+    if (mins < 1) return 'Ahora';
+    if (mins < 60) return `hace ${mins} min`;
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return `hace ${hours}h`;
+    return `hace ${Math.floor(hours / 24)}d`;
+}
 
 const SyncManager = () => {
     useSyncNotifications();
@@ -81,7 +99,8 @@ function mapApiNotificationToProactive(notification: Notification): ProactiveNot
         case 'StoreStatusNotification':
             level = 'WARNING';
             title = 'Estado de tienda actualizado';
-            message = notification.subject ?? 'El estado de tu tienda ha cambiado';
+            message = `${notification.store_name ?? 'Tu tienda'} cambió a: ${notification.store_status ?? (notification.subject ?? '—')}`;
+            if (notification.reason) message += `. Motivo: ${notification.reason}`;
             action = { type: 'store', label: 'Ir a tienda' };
             break;
         case 'new_chat_message':
@@ -196,9 +215,20 @@ function mapApiNotificationToProactive(notification: Notification): ProactiveNot
             break;
         case 'product_status_changed':
         case 'ProductStatusNotification':
-            level = 'INFO';
-            title = '📦 Estado de producto actualizado';
-            message = notification.subject ?? 'El estado de tu producto ha cambiado';
+            if (notification.product_status === 'approved') {
+                level = 'INFO';
+                title = '📦 Producto aprobado';
+                message = `${notification.product_name ?? 'Tu producto'} ha sido aprobado.`;
+            } else if (notification.product_status === 'rejected') {
+                level = 'WARNING';
+                title = '📦 Producto rechazado';
+                message = `${notification.product_name ?? 'Tu producto'} fue rechazado.`;
+                if (notification.reason) message += ` Motivo: ${notification.reason}`;
+            } else {
+                level = 'INFO';
+                title = '📦 Estado de producto actualizado';
+                message = notification.subject ?? 'El estado de tu producto ha cambiado';
+            }
             action = { type: 'products', label: 'Ver productos' };
             break;
         case 'product_pending_review':
@@ -210,9 +240,20 @@ function mapApiNotificationToProactive(notification: Notification): ProactiveNot
             break;
         case 'service_status_changed':
         case 'ServiceStatusNotification':
-            level = 'INFO';
-            title = '🛠️ Estado de servicio actualizado';
-            message = notification.subject ?? 'El estado de tu servicio ha cambiado';
+            if (notification.service_status === 'approved') {
+                level = 'INFO';
+                title = '🛠️ Servicio aprobado';
+                message = `${notification.service_name ?? 'Tu servicio'} ha sido aprobado.`;
+            } else if (notification.service_status === 'rejected') {
+                level = 'WARNING';
+                title = '🛠️ Servicio rechazado';
+                message = `${notification.service_name ?? 'Tu servicio'} fue rechazado.`;
+                if (notification.reason) message += ` Motivo: ${notification.reason}`;
+            } else {
+                level = 'INFO';
+                title = '🛠️ Estado de servicio actualizado';
+                message = notification.subject ?? 'El estado de tu servicio ha cambiado';
+            }
             action = { type: 'services', label: 'Ver servicios' };
             break;
         case 'service_pending_review':
@@ -315,71 +356,29 @@ function mapApiNotificationToProactive(notification: Notification): ProactiveNot
             message = notification.subject ?? 'Un cupón activo está próximo a vencer';
             action = { type: 'plans', label: 'Gestionar cupones' };
             break;
-        default:
+        case 'top_medal_awarded':
+        case 'TopMedalAwardedNotification':
             level = 'INFO';
-            title = 'Notificación';
-            message = notification.subject ?? notification.message_preview ?? 'Nueva notificación';
+            title = '🏅 ¡Medalla Top Lyrium!';
+            message = notification.message_preview ?? notification.subject ?? '¡Felicidades! Recibiste la medalla Top 100 Lyrium.';
+            action = { type: 'products', label: 'Ver logro' };
             break;
-
-        // Store / seller status notifications
-        case 'store_status_changed':
-        case 'App\\Notifications\\StoreStatusNotification':
+        case 'top_medal_grace':
+        case 'TopMedalGraceNotification':
             level = 'WARNING';
-            title = 'Estado de tienda actualizado';
-            message = `${notification.store_name ?? 'Tu tienda'} cambió a: ${notification.store_status ?? '—'}`;
-            if (notification.reason) message += `. Motivo: ${notification.reason}`;
+            title = '⚠️ Medalla en riesgo';
+            message = notification.message_preview ?? notification.subject ?? 'Tu medalla Top 100 Lyrium está en riesgo de perderse.';
+            action = { type: 'products', label: 'Ver producto' };
             break;
-
-        // Product status notifications
-        case 'product_status_changed':
-        case 'App\\Notifications\\ProductStatusNotification':
-            if (notification.product_status === 'pending_review') {
-                level = 'INFO';
-                title = 'Producto pendiente de revisión';
-                message = `${notification.product_name ?? 'Un producto'} está esperando aprobación.`;
-            } else if (notification.product_status === 'approved') {
-                level = 'INFO';
-                title = 'Producto aprobado';
-                message = `${notification.product_name ?? 'Tu producto'} ha sido aprobado.`;
-            } else if (notification.product_status === 'rejected') {
-                level = 'WARNING';
-                title = 'Producto rechazado';
-                message = `${notification.product_name ?? 'Tu producto'} fue rechazado.`;
-                if (notification.reason) message += ` Motivo: ${notification.reason}`;
-            }
-            break;
-
-        // User banned notifications
         case 'user_banned':
-        case 'App\\Notifications\\UserBannedNotification':
+        case 'UserBannedNotification':
             level = 'CRITICAL';
             title = 'Cuenta suspendida';
             message = 'Tu cuenta ha sido suspendida.';
             if (notification.reason) message += ` Motivo: ${notification.reason}`;
             break;
-
-        // Service status notifications
-        case 'service_status_changed':
-        case 'App\\Notifications\\ServiceStatusNotification':
-            if (notification.service_status === 'pending_review') {
-                level = 'INFO';
-                title = 'Servicio pendiente de revisión';
-                message = `${notification.service_name ?? 'Un servicio'} está esperando aprobación.`;
-            } else if (notification.service_status === 'approved') {
-                level = 'INFO';
-                title = 'Servicio aprobado';
-                message = `${notification.service_name ?? 'Tu servicio'} ha sido aprobado.`;
-            } else if (notification.service_status === 'rejected') {
-                level = 'WARNING';
-                title = 'Servicio rechazado';
-                message = `${notification.service_name ?? 'Tu servicio'} fue rechazado.`;
-                if (notification.reason) message += ` Motivo: ${notification.reason}`;
-            }
-            break;
-
-        // Contract status notifications
         case 'contract_status_changed':
-        case 'App\\Notifications\\ContractStatusNotification':
+        case 'ContractStatusNotification':
             if (notification.contract_action === 'created') {
                 level = 'INFO';
                 title = 'Nuevo contrato';
@@ -402,23 +401,20 @@ function mapApiNotificationToProactive(notification: Notification): ProactiveNot
                 message = `El contrato de ${notification.contract_name ?? '—'} fue eliminado.`;
             }
             break;
+        default:
+            level = 'INFO';
+            title = 'Notificación';
+            message = notification.subject ?? notification.message_preview ?? 'Nueva notificación';
+            break;
     }
-
-    const timeAgo = notification.created_at
-        ? new Date(notification.created_at).toLocaleString('es-PE', {
-              hour: '2-digit',
-              minute: '2-digit',
-              day: 'numeric',
-              month: 'short',
-          })
-        : 'Ahora';
 
     return {
         id: notification.id,
         level,
         title,
         message,
-        time: timeAgo,
+        time: formatRelativeTime(notification.created_at),
+        createdAt: notification.created_at,
         read: notification.is_read,
         metadata: { type: notificationType },
         action,
@@ -431,6 +427,19 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
     const [notifications, setNotifications] = useState<ProactiveNotification[]>([]);
     const [loading, setLoading] = useState(true);
+    const [tick, setTick] = useState(0);
+
+    // Re-evalúa el filtro de 24h cada minuto para auto-expirar notificaciones
+    useEffect(() => {
+        const id = setInterval(() => setTick(t => t + 1), 60_000);
+        return () => clearInterval(id);
+    }, []);
+
+    const visibleNotifications = useMemo(
+        () => notifications.filter(n => isWithin24h(n.createdAt)),
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [notifications, tick]
+    );
 
     const refreshNotifications = useCallback(async () => {
         if (authLoading) {
@@ -468,8 +477,6 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         return () => clearInterval(id);
     }, [isAuthenticated, refreshNotifications]);
 
-    const unreadCount = notifications.filter(n => !n.read).length;
-
     const markAsRead = useCallback(async (id: string) => {
         try {
             await notificationRepository.markAsRead(id);
@@ -499,11 +506,13 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }, [notifications]);
 
     const addNotification = useCallback((n: Omit<ProactiveNotification, 'id' | 'read' | 'time'>) => {
+        const now = new Date().toISOString();
         const newNotification: ProactiveNotification = {
             ...n,
             id: Date.now().toString(),
             read: false,
-            time: 'Ahora'
+            time: 'Ahora',
+            createdAt: now,
         };
         setNotifications(prev => [newNotification, ...prev]);
 
@@ -534,8 +543,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
     return (
         <NotificationContext.Provider value={{
-            notifications,
-            unreadCount,
+            notifications: visibleNotifications,
+            unreadCount: visibleNotifications.filter(n => !n.read).length,
             loading,
             markAsRead,
             markAllAsRead,

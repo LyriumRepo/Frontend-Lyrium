@@ -139,7 +139,7 @@ export default function CategoryForm({
             </div>
 
             {/* Parent + Type row */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Padre</label>
                     <select
@@ -178,7 +178,7 @@ export default function CategoryForm({
                     min={0}
                     value={sortOrder}
                     onChange={(e) => setSortOrder(Number(e.target.value))}
-                    className="w-32 px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200 focus:outline-none focus:border-sky-500 transition"
+                    className="w-full sm:w-32 px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200 focus:outline-none focus:border-sky-500 transition"
                 />
             </div>
 

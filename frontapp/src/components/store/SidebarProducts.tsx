@@ -16,7 +16,7 @@ const stickerConfig: Record<string, { label: string; class: string }> = {
   oferta: { label: 'Oferta', class: 'bg-emerald-600 dark:bg-emerald-500 text-white' },
   promo: { label: 'Promo', class: 'bg-sky-500 dark:bg-sky-400 text-white' },
   nuevo: { label: 'Nuevo', class: 'bg-sky-500 text-white' },
-  limitado: { label: 'Limitado', class: 'bg-purple-500 text-white' },
+  limitado: { label: 'Limitado', class: 'bg-amber-500 text-white' },
 };
 
 const categoriaColors: Record<string, string> = {
@@ -29,7 +29,7 @@ const categoriaColors: Record<string, string> = {
   Orgánicos: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
   Granos: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
   Especias: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-  Digestivo: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+  Digestivo: 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400',
 };
 
 export default function SidebarProducts({ productos, titulo = 'Artículos de tendencia' }: SidebarProductsProps) {

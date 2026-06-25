@@ -43,13 +43,13 @@ export default function VendedoresPanel({ vendedores, loading, filter, search, s
             <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
           </svg>
           <input type="text" placeholder="Buscar por nombre o correo…" value={search} onChange={e => onSearchChange(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-[var(--border-subtle)] rounded-xl text-sm focus:outline-none focus:border-blue-500" />
+            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-[var(--border-subtle)] rounded-xl text-sm focus:outline-none focus:border-[var(--brand-sky)] dark:focus:border-[var(--brand-green)]" />
         </div>
         <div className="flex items-center gap-3 flex-wrap">
-          <div className="flex gap-1 bg-gray-100 dark:bg-[var(--bg-muted)] p-1 rounded-xl">
+          <div className="flex flex-wrap gap-1 bg-gray-100 dark:bg-[var(--bg-muted)] p-1 rounded-xl">
             {[['all','Todos'],['activo','Activos'],['por_vencer','Por vencer'],['vencido','Vencidos'],['indefinido','Sin plan']].map(([f, l]) => (
               <button key={f}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all
+                className={`px-3 py-2 min-h-[36px] rounded-lg text-xs font-semibold transition-all
                   ${filter === f ? 'bg-white dark:bg-[var(--bg-card)] shadow-sm text-gray-800 dark:text-[var(--text-primary)]' : 'text-gray-500 dark:text-[var(--text-secondary)] hover:text-gray-700 dark:hover:text-[var(--text-primary)]'}
                   ${f === 'por_vencer' ? (filter === f ? 'text-amber-600' : '') : f === 'vencido' ? (filter === f ? 'text-red-600' : '') : f === 'indefinido' ? (filter === f ? 'text-gray-400 dark:text-[var(--text-placeholder)]' : '') : ''}`}
                 onClick={() => onFilterChange(f)}>
@@ -61,10 +61,10 @@ export default function VendedoresPanel({ vendedores, loading, filter, search, s
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="vendedoresList">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="vendedoresList">
         {loading && (
           <div className="col-span-full flex items-center justify-center gap-3 py-12 text-gray-400 dark:text-[var(--text-placeholder)]">
-            <div className="w-6 h-6 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin" />
+            <div className="w-6 h-6 border-2 border-gray-300 border-t-[var(--brand-sky)] dark:border-t-[var(--brand-green)] rounded-full animate-spin" />
             <span>Cargando vendedores…</span>
           </div>
         )}
@@ -124,7 +124,7 @@ export default function VendedoresPanel({ vendedores, loading, filter, search, s
                 </div>
                 {venceBadge}
               </div>
-              <div className="px-5 py-3 bg-gray-50 dark:bg-[var(--bg-muted)] border-t border-gray-100 dark:border-[var(--border-subtle)] flex items-center gap-2 text-xs font-semibold text-gray-400 dark:text-[var(--text-placeholder)] group-hover:text-blue-500 transition-colors">
+              <div className="px-5 py-3 bg-gray-50 dark:bg-[var(--bg-muted)] border-t border-gray-100 dark:border-[var(--border-subtle)] flex items-center gap-2 text-xs font-semibold text-gray-400 dark:text-[var(--text-placeholder)] group-hover:text-[var(--brand-sky)] dark:group-hover:text-[var(--brand-green)] transition-colors">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 14 14"/>
                 </svg>
@@ -144,7 +144,7 @@ export default function VendedoresPanel({ vendedores, loading, filter, search, s
           const firstHist = historial[0];
 
           return (
-            <div>
+            <div className="max-h-[75vh] overflow-y-auto">
               <div className="flex items-center gap-4 pb-4 border-b-2" style={{ borderColor: planColor }}>
                 <div className="w-14 h-14 rounded-xl flex items-center justify-center text-white font-extrabold text-lg" style={{ background: planColor }}>
                   {(sv.username ?? 'V').substring(0, 2).toUpperCase()}

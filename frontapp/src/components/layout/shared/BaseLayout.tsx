@@ -51,6 +51,14 @@ export default function BaseLayout({
         };
     }, [isImmersiveHelpdeskRoute]);
 
+    // Lock body scroll when mobile sidebar is open to prevent background scrolling.
+    useEffect(() => {
+        if (!sidebarOpen) return;
+        const prev = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+        return () => { document.body.style.overflow = prev; };
+    }, [sidebarOpen]);
+
     return (
         <div className={`${isImmersiveHelpdeskRoute ? 'h-full' : 'min-h-screen'} ${className} flex flex-col`}>
             {header}

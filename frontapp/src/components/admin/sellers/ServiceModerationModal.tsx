@@ -61,7 +61,7 @@ export default function ServiceModerationModal({
           style={{ borderRadius: '2rem' }}
         >
           <div
-            className="flex items-center justify-between px-8 py-5 border-b border-[var(--border-subtle)]"
+            className="flex items-center justify-between px-4 py-4 sm:px-8 sm:py-5 border-b border-[var(--border-subtle)]"
             style={{
               background:
                 'linear-gradient(90deg, rgba(14,165,233,.08), rgba(132,204,22,.06))',
@@ -89,7 +89,7 @@ export default function ServiceModerationModal({
             </button>
           </div>
 
-          <div className="p-6 space-y-4">
+          <div className="p-4 sm:p-6 space-y-4">
             <div className="space-y-3">
               <h3 className="text-xl font-black text-[var(--text-primary)] uppercase tracking-tight">
                 {service.name}

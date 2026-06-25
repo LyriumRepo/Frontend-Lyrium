@@ -122,41 +122,42 @@ export function HelpdeskPageClient() {
           title="Soporte Lyrium"
           subtitle="Gestión de tickets y soporte"
           icon="Headset"
-          actions={
-            <button
-              onClick={() => setShowLegend(true)}
-              title="¿Qué puedo hacer aquí?"
-              className="w-9 h-9 flex items-center justify-center rounded-xl bg-white dark:bg-[var(--bg-secondary)] border border-[var(--border-subtle)] text-gray-500 dark:text-[var(--text-secondary)] hover:text-[var(--turquesa-500)] dark:hover:text-[var(--icons-green)] hover:border-[var(--turquesa-500)] dark:hover:border-[var(--icons-green)] transition-all shadow-sm"
-            >
-              <Info className="w-4 h-4" />
-            </button>
-          }
         />
       </div>
 
-      {/* Toggle: Vendedores / Clientes */}
-      <div className="flex bg-[var(--bg-secondary)]/80 p-1 rounded-2xl w-full max-w-xs border border-[var(--border-subtle)]/50 shrink-0 mb-2">
+      {/* Toggle: Vendedores / Clientes + botón leyenda */}
+      <div className="flex items-center gap-3 shrink-0 mb-2">
+        <div className="flex bg-[var(--bg-secondary)]/80 p-1 rounded-2xl max-w-xs border border-[var(--border-subtle)]/50">
+          <button
+            onClick={() => setChannel('vendedores')}
+            className={`flex-1 py-2.5 px-4 rounded-xl text-[11px] font-black transition-all flex items-center justify-center gap-2 uppercase tracking-wider ${
+              channel === 'vendedores'
+                ? 'bg-[var(--bg-card)] text-[var(--turquesa-500)] shadow-sm border border-[var(--border-subtle)]/30'
+                : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
+            }`}
+          >
+            <Store className="w-4 h-4" />
+            Vendedores
+          </button>
+          <button
+            onClick={() => setChannel('clientes')}
+            className={`flex-1 py-2.5 px-4 rounded-xl text-[11px] font-black transition-all flex items-center justify-center gap-2 uppercase tracking-wider ${
+              channel === 'clientes'
+                ? 'bg-[var(--bg-card)] text-[var(--turquesa-500)] shadow-sm border border-[var(--border-subtle)]/30'
+                : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
+            }`}
+          >
+            <Users className="w-4 h-4" />
+            Clientes
+          </button>
+        </div>
+
         <button
-          onClick={() => setChannel('vendedores')}
-          className={`flex-1 py-2.5 rounded-xl text-[11px] font-black transition-all flex items-center justify-center gap-2 uppercase tracking-wider ${
-            channel === 'vendedores'
-              ? 'bg-[var(--bg-card)] text-[var(--turquesa-500)] shadow-sm border border-[var(--border-subtle)]/30'
-              : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
-          }`}
+          onClick={() => setShowLegend(true)}
+          title="¿Qué puedo hacer aquí?"
+          className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl bg-white dark:bg-[var(--bg-secondary)] border border-[var(--border-subtle)] text-gray-500 dark:text-[var(--text-secondary)] hover:text-[var(--turquesa-500)] dark:hover:text-[var(--icons-green)] hover:border-[var(--turquesa-500)] dark:hover:border-[var(--icons-green)] transition-all shadow-sm shrink-0"
         >
-          <Store className="w-4 h-4" />
-          Vendedores
-        </button>
-        <button
-          onClick={() => setChannel('clientes')}
-          className={`flex-1 py-2.5 rounded-xl text-[11px] font-black transition-all flex items-center justify-center gap-2 uppercase tracking-wider ${
-            channel === 'clientes'
-              ? 'bg-[var(--bg-card)] text-[var(--turquesa-500)] shadow-sm border border-[var(--border-subtle)]/30'
-              : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
-          }`}
-        >
-          <Users className="w-4 h-4" />
-          Clientes
+          <Info className="w-4 h-4" />
         </button>
       </div>
 
@@ -229,19 +230,14 @@ export function HelpdeskPageClient() {
 
       {showLegend && (
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-end sm:items-center justify-center sm:p-4"
+          className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-end sm:items-center justify-center p-4 sm:p-4"
           onClick={() => setShowLegend(false)}
         >
           {/* Bottom sheet en móvil, card centrado en sm+ */}
           <div
-            className="w-full sm:max-w-lg bg-white dark:bg-[var(--bg-secondary)] rounded-t-[3rem] sm:rounded-[3rem] shadow-2xl overflow-hidden max-h-[78vh] flex flex-col"
+            className="w-full max-w-sm sm:max-w-md bg-white dark:bg-[var(--bg-secondary)] rounded-[2rem] shadow-2xl overflow-hidden max-h-[80vh] flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Handle visual solo en móvil */}
-            <div className="sm:hidden flex justify-center pt-3 pb-0 shrink-0">
-              <div className="w-10 h-1 bg-gray-300 dark:bg-gray-600 rounded-full" />
-            </div>
-
             {/* Header — mismos colores que HelpPageClient */}
             <div className="bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--turquesa-500)]/70 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-8 text-white relative shrink-0">
               <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl" />
@@ -255,7 +251,7 @@ export function HelpdeskPageClient() {
                     <p className="text-[10px] font-bold text-white/70 uppercase tracking-[0.2em]">¿Qué puedes hacer aquí?</p>
                   </div>
                 </div>
-                <button onClick={() => setShowLegend(false)} className="w-10 h-10 rounded-full bg-black/10 flex items-center justify-center hover:bg-black/20">
+                <button onClick={() => setShowLegend(false)} className="min-w-[44px] min-h-[44px] rounded-full bg-black/10 flex items-center justify-center hover:bg-black/20">
                   <X className="w-5 h-5 text-white" />
                 </button>
               </div>

@@ -5,6 +5,7 @@ import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import BaseButton from '@/components/ui/BaseButton';
 import BaseInputField from '@/components/ui/BaseInputField';
 import BaseSelectField from '@/components/ui/BaseSelectField';
+import BaseDatePicker from '@/components/ui/BaseDatePicker';
 interface SelectOption { value: string; label: string; }
 import Skeleton from '@/components/ui/Skeleton';
 import BaseStatusBadge from '@/components/ui/BaseStatusBadge';
@@ -13,6 +14,8 @@ import DataTable, { type Column } from '@/components/ui/DataTable';
 import { useTransactions, useTransactionDetail } from '@/features/admin/payments/hooks/useTransactions';
 import type { Transaction, TransactionFilters } from '@/features/admin/payments/types/transactions';
 import { CreditCard, Wallet, Smartphone, BarChart3, TrendingUp, Calendar, CheckCircle } from 'lucide-react';
+import Icon from '@/components/ui/Icon';
+import { exportPaymentsToExcel, exportPaymentsToPdf } from './export';
 
 interface StatusMapping { status: string; label: string; class: string; icon?: string; }
 
@@ -50,6 +53,7 @@ export function PagosPageClient() {
   const [filters, setFilters] = useState<TransactionFilters>({ page: 1, per_page: 10 });
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [searchInput, setSearchInput] = useState('');
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
   const { data, pagination, loading, error, refetch, stats } = useTransactions(filters);
   const { data: detailData } = useTransactionDetail(selectedId);
@@ -163,15 +167,31 @@ export function PagosPageClient() {
         subtitle="Monitoreo de transacciones Izipay — CARD, YAPE y PLIN"
         icon="CreditCard"
         actions={
-          <BaseButton variant="outline" size="sm" leftIcon="RotateCw" onClick={() => refetch()}>
-            Actualizar
-          </BaseButton>
+          <div className="flex items-center gap-2">
+            <BaseButton variant="outline" size="sm" leftIcon="RotateCw" onClick={() => refetch()}>
+              Actualizar
+            </BaseButton>
+            <button
+              onClick={() => exportPaymentsToExcel(data).catch(console.error)}
+              className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-[var(--bg-card)] text-[var(--text-primary)] font-bold text-xs border border-[var(--border-subtle)] hover:text-[#5AAFE6] hover:border-[#69BEEB]/30 transition-all shadow-sm"
+            >
+              <Icon name="FileSpreadsheet" className="text-xl" />
+              <span className="hidden sm:inline">Excel</span>
+            </button>
+            <button
+              onClick={() => exportPaymentsToPdf(data).catch(console.error)}
+              className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-[var(--bg-card)] text-[var(--text-primary)] font-bold text-xs border border-[var(--border-subtle)] hover:text-[#5AAFE6] hover:border-[#69BEEB]/30 transition-all shadow-sm"
+            >
+              <Icon name="FileText" className="text-xl" />
+              <span className="hidden sm:inline">PDF</span>
+            </button>
+          </div>
         }
       />
 
       {/* KPI Cards — TreasuryModule style */}
       {stats.loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {[1, 2, 3, 4].map((i) => (
             <div key={`kpi-skel-${i}`} className="bg-[var(--bg-card)] p-6 rounded-2xl shadow-sm space-y-4">
               <div className="flex justify-between items-center">
@@ -183,23 +203,23 @@ export function PagosPageClient() {
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {kpiItems.map((kpi) => {
             const borderMap: Record<string, string> = {
-              sky: 'border-[var(--color-info)]',
-              emerald: 'border-[var(--color-success)]',
-              indigo: 'border-[var(--brand-sky)]',
-              amber: 'border-[var(--color-warning)]',
+              sky: 'border-[#69BEEB]',
+              emerald: 'border-[#66D6A8]',
+              indigo: 'border-[#4EC7B8]',
+              amber: 'border-[#B7E000]',
               rose: 'border-[var(--color-error)]',
-              violet: 'border-[var(--color-error)]',
+              violet: 'border-[#5AAFE6]',
             };
             const bgMap: Record<string, string> = {
-              sky: 'bg-[var(--color-info)]/10 text-[var(--color-info)]',
-              emerald: 'bg-[var(--color-success)]/10 text-[var(--color-success)]',
-              indigo: 'bg-[var(--brand-sky)]/10 text-[var(--brand-sky)]',
-              amber: 'bg-[var(--color-warning)]/10 text-[var(--color-warning)]',
+              sky: 'bg-[#69BEEB]/10 text-[#69BEEB]',
+              emerald: 'bg-[#66D6A8]/10 text-[#66D6A8]',
+              indigo: 'bg-[#4EC7B8]/10 text-[#4EC7B8]',
+              amber: 'bg-[#B7E000]/10 text-[#B7E000]',
               rose: 'bg-[var(--color-error)]/10 text-[var(--color-error)]',
-              violet: 'bg-[var(--color-error)]/10 text-[var(--color-error)]',
+              violet: 'bg-[#5AAFE6]/10 text-[#5AAFE6]',
             };
             const iconMap: Record<string, React.ReactNode> = {
               BarChart3: <BarChart3 className="w-8 h-8" />,
@@ -231,16 +251,16 @@ export function PagosPageClient() {
           <p className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1">
             Distribución por método de pago
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {methodItems.map((m) => {
               const borderMap: Record<string, string> = {
-                violet: 'border-[var(--color-info)]',
-                amber: 'border-[var(--color-warning)]',
+                violet: 'border-[#5AAFE6]',
+                amber: 'border-[#B7E000]',
                 rose: 'border-[var(--color-error)]',
               };
               const bgMap: Record<string, string> = {
-                violet: 'bg-[var(--color-info)]/10 text-[var(--color-info)]',
-                amber: 'bg-[var(--color-warning)]/10 text-[var(--color-warning)]',
+                violet: 'bg-[#5AAFE6]/10 text-[#5AAFE6]',
+                amber: 'bg-[#B7E000]/10 text-[#B7E000]',
                 rose: 'bg-[var(--color-error)]/10 text-[var(--color-error)]',
               };
               const iconMap: Record<string, React.ReactNode> = {
@@ -267,9 +287,10 @@ export function PagosPageClient() {
         </div>
       )}
 
-      <div className="bg-[var(--bg-card)] p-6 rounded-[2.5rem] border border-[var(--border-subtle)] space-y-3">
-        <div className="flex flex-wrap items-end gap-3">
-          <div className="flex-1 min-w-[220px]">
+      <div className="bg-[var(--bg-card)] p-4 sm:p-6 rounded-[2.5rem] border border-[var(--border-subtle)] space-y-3">
+        {/* Fila 1 — Búsqueda principal (siempre visible) */}
+        <div className="flex gap-2 items-center">
+          <div className="flex-1 min-w-0">
             <BaseInputField
               name="search"
               placeholder="Buscar orden o cliente..."
@@ -281,20 +302,44 @@ export function PagosPageClient() {
               }}
             />
           </div>
-          <BaseInputField
-            name="date_from"
-            type="date"
-            label="Desde"
-            value={filters.date_from ?? ''}
-            onChange={(v) => updateFilter('date_from', v || undefined)}
-          />
-          <BaseInputField
-            name="date_to"
-            type="date"
-            label="Hasta"
-            value={filters.date_to ?? ''}
-            onChange={(v) => updateFilter('date_to', v || undefined)}
-          />
+          <button
+            type="button"
+            onClick={() => setShowAdvancedFilters(v => !v)}
+            className={`flex items-center gap-1.5 px-4 py-2.5 min-h-[44px] rounded-2xl text-xs font-bold border transition-all shrink-0 ${
+              showAdvancedFilters || filters.date_from || filters.date_to || filters.payment_status || filters.transaction_status || filters.payment_method
+                ? 'bg-[var(--bg-secondary)] border-[var(--border-subtle)] text-[var(--text-primary)]'
+                : 'bg-transparent border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--bg-muted)]'
+            }`}
+          >
+            <Icon name="SlidersHorizontal" className="w-4 h-4" />
+            <span className="hidden sm:inline">Filtros</span>
+            {(filters.date_from || filters.date_to || filters.payment_status || filters.transaction_status || filters.payment_method) && (
+              <span className="w-4 h-4 rounded-full bg-[#5AAFE6] text-white text-[9px] font-black flex items-center justify-center leading-none">
+                {[filters.date_from, filters.date_to, filters.payment_status, filters.transaction_status, filters.payment_method].filter(Boolean).length}
+              </span>
+            )}
+            <Icon name={showAdvancedFilters ? 'ChevronUp' : 'ChevronDown'} className="w-3 h-3" />
+          </button>
+        </div>
+
+        {/* Fila 2 — Filtros secundarios (siempre visible en md+, colapsable en mobile) */}
+        <div className={`${showAdvancedFilters ? 'flex' : 'hidden'} md:flex flex-wrap items-end gap-3 pt-2 border-t border-[var(--border-subtle)]`}>
+          <div>
+            <BaseDatePicker
+              label="Desde"
+              value={filters.date_from ?? ''}
+              onChange={(v) => updateFilter('date_from', v || undefined)}
+              placeholder="dd/mm/aaaa"
+            />
+          </div>
+          <div>
+            <BaseDatePicker
+              label="Hasta"
+              value={filters.date_to ?? ''}
+              onChange={(v) => updateFilter('date_to', v || undefined)}
+              placeholder="dd/mm/aaaa"
+            />
+          </div>
           <BaseSelectField
             name="payment_status"
             label="Estado Pago"
@@ -327,19 +372,17 @@ export function PagosPageClient() {
               methodOption('PLIN'),
             ]}
           />
-          {(filters.search || filters.date_from || filters.date_to || filters.payment_status || filters.transaction_status || filters.payment_method) && (
-            <BaseButton
-              variant="ghost"
-              size="sm"
-              leftIcon="X"
-              onClick={() => {
-                setSearchInput('');
-                setFilters({ page: 1, per_page: 10 });
-              }}
-            >
-              Limpiar
-            </BaseButton>
-          )}
+          <BaseButton
+            variant="ghost"
+            size="sm"
+            leftIcon="X"
+            onClick={() => {
+              setSearchInput('');
+              setFilters({ page: 1, per_page: 10 });
+            }}
+          >
+            Limpiar filtros
+          </BaseButton>
         </div>
       </div>
 
@@ -400,7 +443,7 @@ export function PagosPageClient() {
 function TransactionDetail({ transaction }: { transaction: Transaction }) {
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1">
           <p className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Orden</p>
           <p className="text-sm font-bold font-mono">{transaction.orderNumber}</p>
@@ -440,7 +483,7 @@ function TransactionDetail({ transaction }: { transaction: Transaction }) {
 
       <div className="border-t border-[var(--border-subtle)] pt-4">
         <p className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest mb-3">Información de Pago Izipay</p>
-        <div className="grid grid-cols-2 gap-x-8 gap-y-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
           <div className="flex justify-between">
             <span className="text-[10px] font-semibold text-[var(--text-secondary)]">Método</span>
             <span className="text-xs font-semibold uppercase">{transaction.paymentMethod ?? '—'}</span>

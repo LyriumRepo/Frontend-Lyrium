@@ -11,6 +11,8 @@ import {
   XCircle,
 } from 'lucide-react';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
+import Icon from '@/components/ui/Icon';
+import { exportExpensesToExcel, exportExpensesToPdf } from './export';
 import { CVCard } from '@/components/admin/sellers/SharedCVUI';
 import { ScanDropzone } from '@/components/admin/operations/ScanDropzone';
 import { ScanResultCard } from '@/components/admin/operations/ScanResultCard';
@@ -18,6 +20,7 @@ import { ExpenseDetailModal } from '@/components/admin/operations/ExpenseDetailM
 import { useScan } from './hooks/useScan';
 import { useExpenses } from './hooks/usepenses';
 import BaseModal from '@/components/ui/BaseModal';
+import BaseDatePicker from '@/components/ui/BaseDatePicker';
 import { BankStatementReviewModal } from '@/components/admin/operations/BankStatementReviewModal';
 import type {
   Expense,
@@ -112,7 +115,7 @@ function IconBtn({
         target="_blank"
         rel="noopener noreferrer"
         title={title}
-        className={`w-7 h-7 inline-flex items-center justify-center border rounded-[6px] transition-colors ${cls}`}
+        className={`min-w-[36px] min-h-[36px] inline-flex items-center justify-center border rounded-[6px] transition-colors ${cls}`}
       >
         {children}
       </a>
@@ -122,7 +125,7 @@ function IconBtn({
     <button
       onClick={onClick}
       title={title}
-      className={`w-7 h-7 inline-flex items-center justify-center border rounded-[6px] transition-colors ${cls}`}
+      className={`min-w-[36px] min-h-[36px] inline-flex items-center justify-center border rounded-[6px] transition-colors ${cls}`}
     >
       {children}
     </button>
@@ -694,23 +697,39 @@ export function OperationsPageClient() {
         subtitle="Recibos, honorarios y servicios"
         icon="Briefcase"
         actions={
-          <button
-            onClick={() => {
-              setShowScanner((v) => !v);
-              if (showScanner) resetScan();
-            }}
-            className="inline-flex items-center gap-1.5 border border-[var(--border-subtle)] rounded-lg px-3.5 py-[7px] text-[13px] font-medium text-[var(--text-primary)] hover:bg-[var(--bg-muted)] transition-colors shrink-0"
-          >
-            {showScanner ? '✕ Cerrar scanner' : '+ Escanear PDF'}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                setShowScanner((v) => !v);
+                if (showScanner) resetScan();
+              }}
+              className="inline-flex items-center gap-1.5 border border-[var(--border-subtle)] rounded-lg px-3.5 py-[7px] text-[13px] font-medium text-[var(--text-primary)] hover:bg-[var(--bg-muted)] transition-colors shrink-0"
+            >
+              {showScanner ? '✕ Cerrar scanner' : '+ Escanear PDF'}
+            </button>
+            <button
+              onClick={() => exportExpensesToExcel(filtered).catch(console.error)}
+              className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-[var(--bg-card)] text-[var(--text-primary)] font-bold text-xs border border-[var(--border-subtle)] hover:text-[#5AAFE6] hover:border-[#69BEEB]/30 transition-all shadow-sm"
+            >
+              <Icon name="FileSpreadsheet" className="text-xl" />
+              <span className="hidden sm:inline">Excel</span>
+            </button>
+            <button
+              onClick={() => exportExpensesToPdf(filtered).catch(console.error)}
+              className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-[var(--bg-card)] text-[var(--text-primary)] font-bold text-xs border border-[var(--border-subtle)] hover:text-[#5AAFE6] hover:border-[#69BEEB]/30 transition-all shadow-sm"
+            >
+              <Icon name="FileText" className="text-xl" />
+              <span className="hidden sm:inline">PDF</span>
+            </button>
+          </div>
         }
       />
 
       {/* ── Stats ── */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <CVCard className="p-6 border-l-4 border-blue-500 shadow-sm hover:shadow-md transition-all">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <CVCard className="p-6 border-l-4 border-[#5AAFE6] shadow-sm hover:shadow-md transition-all">
           <div className="flex items-center justify-between mb-4">
-            <div className="p-2.5 bg-[var(--bg-secondary)] rounded-xl text-blue-500">
+            <div className="p-2.5 bg-[var(--bg-secondary)] rounded-xl text-[#5AAFE6]">
               <CircleDollarSign className="w-5 h-5" />
             </div>
             <span className="text-2xl font-black text-[var(--text-primary)] tracking-tight">
@@ -727,9 +746,9 @@ export function OperationsPageClient() {
             {expenses.length} comprobantes
           </p>
         </CVCard>
-        <CVCard className="p-6 border-l-4 border-emerald-400 shadow-sm hover:shadow-md transition-all">
+        <CVCard className="p-6 border-l-4 border-[#66D6A8] shadow-sm hover:shadow-md transition-all">
           <div className="flex items-center justify-between mb-4">
-            <div className="p-2.5 bg-[var(--bg-secondary)] rounded-xl text-emerald-400">
+            <div className="p-2.5 bg-[var(--bg-secondary)] rounded-xl text-[#66D6A8]">
               <Receipt className="w-5 h-5" />
             </div>
             <span className="text-2xl font-black text-[var(--text-primary)] tracking-tight">
@@ -747,9 +766,9 @@ export function OperationsPageClient() {
             honorarios
           </p>
         </CVCard>
-        <CVCard className="p-6 border-l-4 border-amber-400 shadow-sm hover:shadow-md transition-all">
+        <CVCard className="p-6 border-l-4 border-[#B7E000] shadow-sm hover:shadow-md transition-all">
           <div className="flex items-center justify-between mb-4">
-            <div className="p-2.5 bg-[var(--bg-secondary)] rounded-xl text-amber-400">
+            <div className="p-2.5 bg-[var(--bg-secondary)] rounded-xl text-[#B7E000]">
               <Landmark className="w-5 h-5" />
             </div>
             <span className="text-2xl font-black text-[var(--text-primary)] tracking-tight">
@@ -766,9 +785,9 @@ export function OperationsPageClient() {
             {recibosPendientes} recibo(s)
           </p>
         </CVCard>
-        <CVCard className="p-6 border-l-4 border-purple-400 shadow-sm hover:shadow-md transition-all">
+        <CVCard className="p-6 border-l-4 border-[#4EC7B8] shadow-sm hover:shadow-md transition-all">
           <div className="flex items-center justify-between mb-4">
-            <div className="p-2.5 bg-[var(--bg-secondary)] rounded-xl text-purple-400">
+            <div className="p-2.5 bg-[var(--bg-secondary)] rounded-xl text-[#4EC7B8]">
               <Receipt className="w-5 h-5" />
             </div>
             <span className="text-2xl font-black text-[var(--text-primary)] tracking-tight">
@@ -785,7 +804,59 @@ export function OperationsPageClient() {
         </CVCard>
       </div>
 
-      {/* ── Scanner ── */}
+      {/* ── Tabs ── */}
+      <div className="flex gap-0.5 border-b border-[var(--border-subtle)] pb-2 overflow-x-auto no-scrollbar">
+        {TABS.map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`text-[13px] px-3.5 py-[5px] rounded-lg border-none transition-colors whitespace-nowrap shrink-0 ${activeTab === tab ? 'bg-[var(--bg-muted)] text-[var(--text-primary)] font-medium' : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)] bg-transparent'}`}
+          >
+            {tab}
+          </button>
+        ))}
+      </div>
+
+      {/* ── Filtros ── */}
+      <div className="flex flex-wrap gap-2 items-center">
+        <input
+          type="text"
+          placeholder="Buscar proveedor o concepto..."
+          className={`${inputCls} flex-1 min-w-[160px]`}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+        <select
+          className={`${selectCls} w-full sm:w-auto`}
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+        >
+          <option value="">Todos los estados</option>
+          <option value="Pagado">Pagado</option>
+          <option value="Pendiente">Pendiente</option>
+          <option value="Anulado">Anulado</option>
+        </select>
+        <BaseDatePicker
+          value={dateFrom}
+          onChange={setDateFrom}
+          placeholder="Desde"
+          buttonClassName="text-xs py-[7px]"
+        />
+        <BaseDatePicker
+          value={dateTo}
+          onChange={setDateTo}
+          placeholder="Hasta"
+          buttonClassName="text-xs py-[7px]"
+        />
+      </div>
+
+      {error && (
+        <div className="rounded-lg border border-[#F7C1C1] bg-[#FCEBEB] px-4 py-3 text-[13px] text-[#791F1F]">
+          {error}
+        </div>
+      )}
+
+      {/* ── Scanner — anclado al contenido, debajo de filtros ── */}
       {showScanner && (
         <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl p-5 flex flex-col gap-4">
           <p className="text-[13px] font-medium text-[var(--text-primary)]">
@@ -812,58 +883,6 @@ export function OperationsPageClient() {
               fileUrl={scanFileUrl}
             />
           )}
-        </div>
-      )}
-
-      {/* ── Tabs ── */}
-      <div className="flex gap-0.5 border-b border-[var(--border-subtle)] pb-2">
-        {TABS.map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`text-[13px] px-3.5 py-[5px] rounded-lg border-none transition-colors ${activeTab === tab ? 'bg-[var(--bg-muted)] text-[var(--text-primary)] font-medium' : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)] bg-transparent'}`}
-          >
-            {tab}
-          </button>
-        ))}
-      </div>
-
-      {/* ── Filtros ── */}
-      <div className="flex flex-wrap gap-2 items-center">
-        <input
-          type="text"
-          placeholder="Buscar proveedor o concepto..."
-          className={`${inputCls} flex-1 min-w-[160px]`}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        <select
-          className={selectCls}
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-        >
-          <option value="">Todos los estados</option>
-          <option value="Pagado">Pagado</option>
-          <option value="Pendiente">Pendiente</option>
-          <option value="Anulado">Anulado</option>
-        </select>
-        <input
-          type="date"
-          className={`${selectCls} w-[140px]`}
-          value={dateFrom}
-          onChange={(e) => setDateFrom(e.target.value)}
-        />
-        <input
-          type="date"
-          className={`${selectCls} w-[140px]`}
-          value={dateTo}
-          onChange={(e) => setDateTo(e.target.value)}
-        />
-      </div>
-
-      {error && (
-        <div className="rounded-lg border border-[#F7C1C1] bg-[#FCEBEB] px-4 py-3 text-[13px] text-[#791F1F]">
-          {error}
         </div>
       )}
 

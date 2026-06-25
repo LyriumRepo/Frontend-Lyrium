@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/shared/lib/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import Icon from '@/components/ui/Icon';
+import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import { paymentMethodApi, PaymentMethod } from '@/shared/lib/api/paymentMethodRepository';
 import TokenizeNewCardModal from '@/features/customer/payment-methods/TokenizeNewCardModal';
 
@@ -179,16 +180,11 @@ export default function CustomerPaymentMethodsPage() {
 
   return (
     <div className="space-y-8 animate-fadeIn">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-black text-slate-800 dark:text-[var(--text-primary)]">
-            Métodos de Pago
-          </h1>
-          <p className="text-slate-500 dark:text-[var(--text-muted)] mt-1">
-            Gestiona tus datos de facturación de forma segura
-          </p>
-        </div>
-      </div>
+      <ModuleHeader
+        title="Métodos de Pago"
+        subtitle="Gestiona tus datos de facturación de forma segura"
+        icon="CreditCard"
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {methods.map((method) => {

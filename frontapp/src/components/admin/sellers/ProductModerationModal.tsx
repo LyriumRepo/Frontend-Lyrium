@@ -197,7 +197,7 @@ export default function ProductModerationModal({
         >
           {/* ── Header ── */}
           <div
-            className="flex items-center justify-between px-8 py-5 border-b border-[var(--border-subtle)] flex-shrink-0"
+            className="flex items-center justify-between px-4 py-4 sm:px-8 sm:py-5 border-b border-[var(--border-subtle)] flex-shrink-0"
             style={{
               background:
                 'linear-gradient(90deg, rgba(14,165,233,.08), rgba(132,204,22,.06))',
@@ -351,7 +351,7 @@ export default function ProductModerationModal({
                   </div>
 
                   {/* Precio + stock */}
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div
                       className="p-3 text-center"
                       style={{
@@ -621,7 +621,7 @@ export default function ProductModerationModal({
           {/* ── Footer: acciones ── */}
           {detail && !loading && (
             <div
-              className="flex-shrink-0 px-8 py-5 border-t border-[var(--border-subtle)] space-y-4"
+              className="flex-shrink-0 px-4 py-4 sm:px-8 sm:py-5 border-t border-[var(--border-subtle)] space-y-4"
               style={{ background: 'var(--bg-secondary)' }}
             >
               {/* Selector de acción */}

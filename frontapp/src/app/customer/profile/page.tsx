@@ -4,6 +4,8 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { useAuth } from '@/shared/lib/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import Icon from '@/components/ui/Icon';
+import BaseButton from '@/components/ui/BaseButton';
+import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import { userRepository } from '@/shared/lib/api/factory';
 
 const CONFETTI_COLORS = [
@@ -434,38 +436,21 @@ export default function CustomerProfilePage() {
     <>
     {isBirthday && <BirthdayCelebration name={firstName} />}
     <div className="space-y-8 animate-fadeIn">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-black text-slate-800 dark:text-[var(--text-primary)]">
-            Mi Perfil
-          </h1>
-          <p className="text-slate-500 dark:text-[var(--text-muted)] mt-1">
-            Gestiona tu información personal
-          </p>
-        </div>
-        <button
-          onClick={() => isEditMode ? handleSave() : setIsEditMode(true)}
-          disabled={saving}
-          className={`flex items-center gap-3 px-6 py-3 rounded-xl font-bold text-sm transition-all ${isEditMode
-            ? 'bg-sky-500 dark:bg-[var(--brand-green)] text-white hover:bg-sky-600 dark:hover:bg-[var(--brand-green-hover)]'
-            : 'bg-white dark:bg-[var(--bg-secondary)] text-black dark:text-[var(--text-primary)] border border-gray-200 dark:border-[var(--border-subtle)] hover:text-sky-500 dark:hover:text-[var(--icons-green)]'
-            }`}
-        >
-          {saving ? (
-            <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
-          ) : isEditMode ? (
-            <>
-              <Icon name="Check" className="w-5 h-5" />
-              <span>Guardar Cambios</span>
-            </>
-          ) : (
-            <>
-              <Icon name="Pencil" className="w-5 h-5" />
-              <span>Editar Información</span>
-            </>
-          )}
-        </button>
-      </div>
+      <ModuleHeader
+        title="Mi Perfil"
+        subtitle="Gestiona tu información personal"
+        icon="User"
+        actions={
+          <BaseButton
+            onClick={() => isEditMode ? handleSave() : setIsEditMode(true)}
+            isLoading={saving}
+            variant="action"
+            leftIcon={isEditMode ? "Check" : "Pencil"}
+          >
+            {isEditMode ? "Guardar Cambios" : "Editar Información"}
+          </BaseButton>
+        }
+      />
 
       <form className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
         <div className="md:col-span-8 bg-white dark:bg-[var(--bg-secondary)] rounded-3xl shadow-xl border border-slate-100 dark:border-[var(--border-subtle)] overflow-hidden">

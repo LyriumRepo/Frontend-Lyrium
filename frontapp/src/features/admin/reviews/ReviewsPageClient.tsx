@@ -611,12 +611,12 @@ function ModerationTab() {
   return (
     <div className="space-y-4">
       {/* Filtros de status */}
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         {(['pending', 'accepted', 'dismissed'] as const).map((s) => (
           <button
             key={s}
             onClick={() => setStatus(s)}
-            className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${status === s ? 'bg-sky-500 text-white shadow-sm' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
+            className={`px-4 py-2 min-h-[44px] rounded-xl text-xs font-black uppercase tracking-wider transition-all ${status === s ? 'bg-sky-500 text-white shadow-sm' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
           >
             {s === 'pending'
               ? 'Pendientes'
@@ -627,7 +627,7 @@ function ModerationTab() {
         ))}
         <button
           onClick={fetchReports}
-          className="ml-auto p-2 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors"
+          className="ml-auto min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors"
         >
           <RefreshCw className="w-4 h-4 text-gray-400" />
         </button>
@@ -824,7 +824,7 @@ function AllReviewsTab() {
         </div>
 
         {/* Filtro estrellas */}
-        <div className="flex gap-1">
+        <div className="flex gap-1 flex-wrap">
           {[null, 1, 2, 3, 4, 5].map((r) => (
             <button
               key={r ?? 'all'}
@@ -832,7 +832,7 @@ function AllReviewsTab() {
                 setRating(r);
                 setPage(1);
               }}
-              className={`px-3 py-2 rounded-xl text-xs font-black transition-all ${rating === r ? 'bg-amber-400 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
+              className={`px-3 py-2 min-h-[44px] rounded-xl text-xs font-black transition-all ${rating === r ? 'bg-amber-400 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
             >
               {r ? `${r}★` : 'Todas'}
             </button>
@@ -845,7 +845,7 @@ function AllReviewsTab() {
             setReported((r) => !r);
             setPage(1);
           }}
-          className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black transition-all ${reported ? 'bg-rose-500 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
+          className={`flex items-center gap-1.5 px-3 py-2 min-h-[44px] rounded-xl text-xs font-black transition-all ${reported ? 'bg-rose-500 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
         >
           <ShieldAlert className="w-3.5 h-3.5" />
           {reported ? 'Reportadas' : 'Con reportes'}
@@ -1099,14 +1099,14 @@ function MedalsTab() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-sm font-black text-[var(--text-primary)]">
-                    {medal.entity?.name ?? `#${medal.entity?.id}`}
+                    {medal.entity?.name ?? medal.entity?.id ?? 'Sin nombre'}
                   </span>
                   <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-md bg-gray-100 dark:bg-[var(--bg-muted)] text-gray-500 dark:text-[var(--text-muted)]">
                     {medal.entity_type === 'store' ? 'Tienda' : medal.entity_type === 'product' ? 'Producto' : 'Servicio'}
                   </span>
                   {statusBadge(medal.status)}
                 </div>
-                <div className="flex items-center gap-3 mt-1 text-[11px] font-medium text-[var(--text-muted)]">
+                <div className="flex flex-wrap items-center gap-2 mt-1 text-[11px] font-medium text-[var(--text-muted)]">
                   {medal.rank_position && <span># {medal.rank_position} en ranking</span>}
                   <span>Ingresos: {medal.times_entered}</span>
                   <span>Salidas: {medal.times_exited}</span>

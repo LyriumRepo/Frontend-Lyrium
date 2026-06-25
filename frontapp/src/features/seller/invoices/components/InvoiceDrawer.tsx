@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useCallback, useState } from 'react';
-import { QRCodeSVG } from 'qrcode.react';
 import Icon from '@/components/ui/Icon';
 import { Voucher, VoucherStatus } from '@/features/seller/invoices/types';
 import { formatCurrency } from '@/shared/lib/utils/formatters';
@@ -166,21 +165,6 @@ export default function InvoiceDrawer({ voucher, isOpen, onClose }: InvoiceDrawe
                         </button>
                     </div>
 
-                    {voucher.qr_data && (
-                        <div className="space-y-4">
-                            <h3 className="text-xs font-black text-[var(--text-secondary)] uppercase tracking-widest flex items-center gap-2">
-                                <Icon name="Camera" className="w-4 h-4" /> Código QR SUNAT
-                            </h3>
-                            <div className="bg-[var(--bg-secondary)] p-6 rounded-[2rem] flex flex-col items-center gap-3 border border-[var(--border-subtle)]">
-                                <div className="bg-white p-3 rounded-xl shadow-sm">
-                                    <QRCodeSVG value={voucher.qr_data} size={160} level="M" />
-                                </div>
-                                <p className="text-[9px] font-bold text-[var(--text-secondary)] uppercase tracking-widest text-center">
-                                    Código QR generado por SUNAT — Nubefact
-                                </p>
-                            </div>
-                        </div>
-                    )}
 
                     <div className="space-y-4">
                         <h3 className="text-xs font-black text-[var(--text-secondary)] uppercase tracking-widest flex items-center gap-2">

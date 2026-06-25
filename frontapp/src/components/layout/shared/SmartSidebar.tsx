@@ -121,20 +121,20 @@ export default function SmartSidebar({
     };
 
     // Renderizado optimizado para evitar saltos de hidratación
-    if (!isMounted) return <aside className="w-20 lg:w-72 h-[100dvh] border-r border-[var(--border-subtle)] bg-[var(--bg-sidebar)]" />;
+    if (!isMounted) return <aside className="hidden md:block md:w-16 lg:w-72 h-[100dvh] border-r border-[var(--border-subtle)] bg-[var(--bg-sidebar)]" />;
 
     return (
         <>
             <aside
                 className={`
                     fixed inset-y-0 left-0 z-[60] bg-[var(--bg-sidebar)] border-r ${colors.border} flex flex-col transition-all duration-500 ease-in-out
-                    lg:sticky lg:top-0 lg:z-40 h-[100dvh] font-industrial
+                    md:sticky md:top-0 md:z-40 lg:sticky lg:top-0 lg:z-40 h-[100dvh] font-industrial
                     ${isExpanded ? 'lg:w-72' : 'lg:w-20'}
-                    ${isMobileOpen ? 'translate-x-0 w-72' : '-translate-x-full lg:translate-x-0 w-72 lg:w-auto'}
+                    ${isMobileOpen ? 'translate-x-0 w-72 md:w-16' : '-translate-x-full md:translate-x-0 md:w-16 lg:translate-x-0 w-72 lg:w-auto'}
                 `}
             >
                 {/* 1. PERFIL DE USUARIO */}
-                <div className={`p-4 border-b ${colors.border} bg-[var(--bg-sidebar)]/95 backdrop-blur flex items-center transition-all duration-500 ${(isExpanded || isMobileOpen) ? '' : 'justify-center px-2'}`}>
+                <div className={`p-4 border-b ${colors.border} bg-[var(--bg-sidebar)]/95 backdrop-blur flex items-center transition-all duration-500 md:justify-center md:px-2 ${(isExpanded || isMobileOpen) ? 'lg:justify-start lg:px-4' : 'justify-center px-2'}`}>
                     <div className="flex items-center space-x-3 w-full">
                         <div className="relative flex-shrink-0">
                             {user?.avatar ? (
@@ -146,7 +146,7 @@ export default function SmartSidebar({
                                     className={`rounded-xl border-2 ${colors.border} shadow-sm transition-all duration-500 ${(isExpanded || isMobileOpen) ? 'w-11 h-11' : 'w-10 h-10'}`}
                                 />
                             ) : (
-                                <div className={`rounded-xl border-2 ${colors.border} shadow-sm transition-all duration-500 bg-brand-gradient dark:bg-brand-gradient-dark flex items-center justify-center text-white font-black ${(isExpanded || isMobileOpen) ? 'w-11 h-11 text-base' : 'w-10 h-10 text-sm'}`}>
+                                <div className={`rounded-xl border-2 ${colors.border} shadow-sm transition-all duration-500 bg-brand-gradient flex items-center justify-center text-white font-black ${(isExpanded || isMobileOpen) ? 'w-11 h-11 text-base' : 'w-10 h-10 text-sm'}`}>
                                     {user?.name?.substring(0, 2).toUpperCase() || 'LR'}
                                 </div>
                             )}
@@ -154,7 +154,7 @@ export default function SmartSidebar({
                         </div>
 
                         {(isExpanded || isMobileOpen) && (
-                            <div className="flex flex-col min-w-0 animate-fadeIn">
+                            <div className="flex flex-col min-w-0 animate-fadeIn md:hidden lg:flex">
                                 <p className="font-black text-xs text-[var(--text-primary)] leading-tight truncate uppercase tracking-tighter">
                                     {user?.name || "Marketplace User"}
                                 </p>
@@ -169,7 +169,7 @@ export default function SmartSidebar({
                 {/* 2. HEADER DE CONTROL */}
                 <div className="flex items-center justify-between p-4 px-6 border-b border-[var(--border-subtle)] bg-[var(--bg-sidebar)]/20">
                     {(isExpanded || isMobileOpen) && (
-                        <h2 className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-[0.2em] animate-fadeIn">
+                        <h2 className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-[0.2em] animate-fadeIn md:hidden lg:block">
                             {sectionTitle}
                         </h2>
                     )}
@@ -178,7 +178,7 @@ export default function SmartSidebar({
                     </button>
                     {/* Close button for mobile inside sidebar */}
                     {onClose && (
-                        <button onClick={onClose} className="lg:hidden p-2 hover:bg-[var(--bg-hover)] ${colors.accent} rounded-xl transition-all duration-300">
+                        <button onClick={onClose} className={`md:hidden p-2 hover:bg-[var(--bg-hover)] ${colors.accent} rounded-xl transition-all duration-300`}>
                             <Icon name="X" className="w-4 h-4" />
                         </button>
                     )}
@@ -190,9 +190,9 @@ export default function SmartSidebar({
                         {(Array.isArray(navigation) && typeof navigation[0] === 'object' && 'items' in navigation[0] ? (navigation as any[]) : [{ items: navigation }]).map((section, sidx) => (
                             <div key={sidx} className="space-y-1.5">
                                 {(isExpanded || isMobileOpen) && (
-                                    <div className="flex items-center gap-2 mb-4 px-2">
+                                    <div className="flex items-center gap-2 mb-4 px-2 md:hidden lg:flex">
                                         <span className={`w-1.5 h-1.5 ${colors.badge} rounded-full`}></span>
-                                        <h3 className={`text-[9px] font-black text-sky-500 dark:text-lime-400 uppercase tracking-[0.2em] truncate`}>
+                                        <h3 className={`text-[9px] font-black text-[var(--brand-green)] uppercase tracking-[0.2em] truncate`}>
                                             {section.title || 'Navegación'}
                                         </h3>
                                     </div>
@@ -210,16 +210,16 @@ export default function SmartSidebar({
                                                 ${active ? colors.bgActive : colors.hover}
                                             `}
                                         >
-                                            <div className={`grid ${(isExpanded || isMobileOpen) ? 'grid-cols-[80%_20%]' : 'grid-cols-1'} items-center h-14 relative z-10 transition-all duration-500`}>
+                                            <div className={`grid grid-cols-1 ${(isExpanded || isMobileOpen) ? 'lg:grid-cols-[80%_20%]' : ''} items-center h-14 relative z-10 transition-all duration-500`}>
                                                 <div className={`flex items-center h-full transition-all duration-500 ${active ? 'bg-[var(--bg-sidebar)] rounded-r-[80px] shadow-[10px_0_15px_-5px_rgba(0,0,0,0.05)]' : 'bg-transparent'}`}>
-                                                    <div className={`flex items-center justify-center transition-all duration-500 ${(isExpanded || isMobileOpen) ? 'w-14' : 'w-20'}`}>
+                                                    <div className={`flex items-center justify-center transition-all duration-500 w-full md:w-full ${(isExpanded || isMobileOpen) ? 'lg:w-14' : 'lg:w-20'}`}>
                                                         <div className={`
                                                             relative w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-500
-                                                            ${active ? `${colors.bgIcon} ${colors.textActive} shadow-inner` : `bg-[var(--bg-muted)] text-[var(--text-secondary)] group-hover:text-sky-500 dark:group-hover:text-lime-500 group-hover:bg-[var(--bg-sidebar)]`}
+                                                            ${active ? `${colors.bgIcon} ${colors.textActive} shadow-inner` : `bg-[var(--bg-muted)] text-[var(--text-secondary)] group-hover:text-[var(--brand-green)] group-hover:bg-[var(--bg-sidebar)]`}
                                                         `}>
                                                             <Icon name={module.icon || 'Package'} className="w-5 h-5" />
                                                             {badgeCount > 0 && (
-                                                                <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-sky-500 dark:bg-lime-500 text-white text-[8px] font-black leading-none">
+                                                                <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-[var(--brand-green)] text-white text-[8px] font-black leading-none">
                                                                     {badgeCount > 99 ? '99+' : badgeCount}
                                                                 </span>
                                                             )}
@@ -227,14 +227,14 @@ export default function SmartSidebar({
                                                     </div>
 
                                                     {(isExpanded || isMobileOpen) && (
-                                                        <span title={active ? module.label : ""} className={`text-[13px] font-black whitespace-nowrap transition-all duration-300 ${active
+                                                        <span title={active ? module.label : ""} className={`text-[13px] font-black whitespace-nowrap transition-all duration-300 md:hidden lg:inline ${active
                                                         ? 'max-w-[140px] overflow-hidden text-ellipsis text-[var(--text-primary)]'
                                                         : 'flex-shrink-0 text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]' }`} > {module.label}
                                                     </span>
                                                     )}
                                                 </div>
                                                 {active && (isExpanded || isMobileOpen) && (
-                                                    <div className="flex justify-center items-center">
+                                                    <div className="hidden lg:flex justify-center items-center">
                                                         <div className="w-1.5 h-1.5 bg-[var(--bg-sidebar)] dark:bg-[var(--text-primary)] rounded-full animate-ping" />
                                                     </div>
                                                 )}
@@ -249,7 +249,7 @@ export default function SmartSidebar({
 
                 {/* 4. FOOTER */}
                 {(isExpanded || isMobileOpen) && (
-                    <div className="mt-auto px-6 py-4 border-t border-[var(--border-subtle)] bg-[var(--bg-sidebar)]/30 animate-fadeIn">
+                    <div className="mt-auto px-6 py-4 border-t border-[var(--border-subtle)] bg-[var(--bg-sidebar)]/30 animate-fadeIn md:hidden lg:flex flex-col">
                         <div className="flex items-center justify-between opacity-60">
                             <span className={`flex items-center gap-1.5 text-[10px] font-black ${colors.accent}`}>
                                 <Icon name="Zap" className="w-3 h-3" />
@@ -269,7 +269,7 @@ export default function SmartSidebar({
                     role="button"
                     tabIndex={0}
                     aria-label="Cerrar menú"
-                    className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[55] lg:hidden animate-fadeIn cursor-default"
+                    className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[55] md:hidden animate-fadeIn cursor-default"
                     onClick={onClose}
                     onKeyDown={(e) => e.key === 'Escape' && onClose?.()}
                 />

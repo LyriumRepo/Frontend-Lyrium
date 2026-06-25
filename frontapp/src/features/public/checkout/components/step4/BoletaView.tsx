@@ -13,7 +13,8 @@ export default function BoletaView() {
 
   if (!result) return null;
 
-  const { orderId, total, items, shipping = 0 } = result;
+  const { orderId, total, items } = result;
+  const shipping = 0;
   const subtotal = items.reduce((a, i) => a + i.price * i.quantity, 0);
 
   const handlePrint = () => {

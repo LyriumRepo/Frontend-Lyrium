@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useAuth } from "@/shared/lib/context/AuthContext";
 import { useRouter } from "next/navigation";
 import Icon from "@/components/ui/Icon";
+import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import { ChangePasswordForm } from "@/features/auth/change-password";
 
 export default function SellerSecurityPage() {
@@ -26,14 +27,11 @@ export default function SellerSecurityPage() {
 
   return (
     <div className="space-y-8 animate-fadeIn">
-      <div>
-        <h1 className="text-2xl md:text-3xl font-black text-slate-800 dark:text-[var(--text-primary)]">
-          Seguridad
-        </h1>
-        <p className="text-slate-500 dark:text-[var(--text-muted)] mt-1">
-          Protege tu cuenta de vendedor y gestiona tu contraseña
-        </p>
-      </div>
+      <ModuleHeader
+        title="Seguridad"
+        subtitle="Protege tu cuenta de vendedor y gestiona tu contraseña"
+        icon="Shield"
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         <div className="lg:col-span-8 space-y-8">

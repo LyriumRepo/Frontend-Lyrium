@@ -161,7 +161,7 @@ export function SellerDetailPageClient() {
     return (
       <div className="px-4 sm:px-8 pb-20 font-industrial animate-pulse space-y-6">
         <div className="h-20 bg-[var(--bg-card)] rounded-[2rem]" />
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {[1, 2, 3].map((i) => (
             <div key={i} className="h-48 bg-[var(--bg-card)] rounded-[2rem]" />
           ))}
@@ -229,7 +229,7 @@ export function SellerDetailPageClient() {
       </div>
 
       {/* ── Grid de información ──────────────────────────────────────── */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {/* Usuario */}
         <InfoCard title="Datos del usuario">
           <div className="flex items-center gap-4 mb-2">

@@ -31,11 +31,10 @@ export async function POST(request: NextRequest) {
         }
 
         const result = await blogApi.createComment({
-            post_id,
+            article_id: post_id,
             author_name,
             author_email: author_email || '',
             content,
-            parent_id,
         });
 
         return NextResponse.json(result);

@@ -155,20 +155,20 @@ function MessageItem({
 
           <div className={`${
             isSent
-              ? 'bg-[#2E6A4F] text-white rounded-[1.75rem] rounded-br-md shadow-sm'
-              : 'bg-white/80 dark:bg-[#1E2925] backdrop-blur-md border border-white/20 dark:border-[#2A4035]/50 text-[var(--text-primary)] rounded-[1.75rem] rounded-bl-md shadow-sm'
+              ? 'bg-gradient-to-br from-[#D4EEF9] to-[#D0F2EE] dark:from-[#2E6A4F] dark:to-[#2E6A4F] text-gray-700 dark:text-white rounded-[1.75rem] rounded-br-md shadow-sm'
+              : 'bg-gradient-to-br from-[#69BEEB] to-[#5AAFE6] dark:from-[#1E2925] dark:to-[#1E2925] text-white dark:text-[var(--text-primary)] rounded-[1.75rem] rounded-bl-md shadow-sm'
           } px-5 py-3.5 transition-all duration-200 hover:shadow-md flex-1 min-w-0`}>
             {isFirstOfGroup && (
               <div className="flex items-center gap-1.5 mb-1.5">
                 <span className={`text-[10px] font-bold uppercase tracking-wider ${
-                  isSent ? 'text-white/90' : 'text-gray-600 dark:text-gray-300'
+                  isSent ? 'text-gray-600 dark:text-white/90' : 'text-white/80 dark:text-gray-300'
                 }`}>
                   {isSent ? (meta?.currentUserName ?? 'Tú') : (meta?.otherName ?? '')}
                 </span>
                 <span className={`text-[8px] font-semibold px-1.5 py-0.5 rounded-full uppercase tracking-wider ${
                   isSent
-                    ? 'bg-white/15 text-white/80'
-                    : 'bg-gray-100 dark:bg-[#24382E] text-gray-500 dark:text-gray-400'
+                    ? 'bg-gray-200/60 dark:bg-white/15 text-gray-500 dark:text-white/80'
+                    : 'bg-white/20 dark:bg-[#24382E] text-white/90 dark:text-gray-400'
                 }`}>
                   {isSent ? (meta?.currentUserRole ?? '') : (meta?.otherRole ?? '')}
                 </span>
@@ -176,7 +176,7 @@ function MessageItem({
             )}
 
             {msg.content && (
-              <p className={`text-sm leading-relaxed ${isSent ? 'text-white' : 'text-gray-800 dark:text-gray-100'} whitespace-pre-wrap break-words`}>
+              <p className={`text-sm leading-relaxed ${isSent ? 'text-gray-800 dark:text-white' : 'text-white dark:text-gray-100'} whitespace-pre-wrap break-words`}>
                 {msg.content}
               </p>
             )}
@@ -191,8 +191,8 @@ function MessageItem({
                     rel="noopener noreferrer"
                     className={`flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 ${
                       isSent
-                        ? 'bg-white/10 text-white/90 hover:bg-white/20 active:scale-[0.98]'
-                        : 'bg-gray-50 dark:bg-[#24382E] text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-[#2A4035] active:scale-[0.98]'
+                        ? 'bg-white/30 dark:bg-white/10 text-gray-600 dark:text-white/90 hover:bg-gray-200/60 dark:hover:bg-white/20 active:scale-[0.98]'
+                        : 'bg-white/15 dark:bg-[#24382E] text-white/90 dark:text-gray-200 hover:bg-white/25 dark:hover:bg-[#2A4035] active:scale-[0.98]'
                     }`}
                   >
                     <Icon name="FileText" className="w-4 h-4 shrink-0" />
@@ -205,7 +205,7 @@ function MessageItem({
             )}
 
             <div className={`flex items-center gap-1.5 mt-1.5 ${isSent ? 'justify-end' : 'justify-start'}`}>
-              <span className={`text-[10px] font-medium ${isSent ? 'text-white/50' : 'text-gray-400 dark:text-gray-500'}`}>
+              <span className={`text-[10px] font-medium ${isSent ? 'text-gray-400 dark:text-white/50' : 'text-white/60 dark:text-gray-500'}`}>
                 {formatTime(msg.timestamp)}
               </span>
               {isSent && (
@@ -215,7 +215,7 @@ function MessageItem({
                     <span className="absolute -top-2 -right-1 w-1.5 h-1.5 bg-[var(--turquesaClaro-500)] rounded-full" />
                   </div>
                 ) : (
-                  <Icon name="Check" className="w-3.5 h-3.5 text-white/40" />
+                  <Icon name="Check" className="w-3.5 h-3.5 text-gray-400 dark:text-white/40" />
                 )
               )}
             </div>

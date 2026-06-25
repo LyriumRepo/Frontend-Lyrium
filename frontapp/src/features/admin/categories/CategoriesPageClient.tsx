@@ -187,7 +187,7 @@ export function CategoriesPageClient() {
             {loading && categoryTree.length === 0 ? (
                 <div className="p-20 text-center text-gray-400">Cargando categorias...</div>
             ) : (
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6">
                     {/* Tree */}
                     <div className="lg:col-span-5 bg-white dark:bg-[var(--bg-secondary)] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
                         <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">

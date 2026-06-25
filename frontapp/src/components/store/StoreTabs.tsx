@@ -100,7 +100,7 @@ const stickerConfig: Record<string, { label: string; class: string }> = {
   oferta: { label: 'Oferta', class: 'bg-red-500' },
   promo: { label: 'Promo', class: 'bg-orange-500' },
   nuevo: { label: 'Nuevo', class: 'bg-green-500' },
-  limitado: { label: 'Limitado', class: 'bg-purple-500' },
+  limitado: { label: 'Limitado', class: 'bg-amber-500' },
 };
 
 const ordenOptions = [
@@ -641,7 +641,7 @@ export default function StoreTabs({ tienda, productos, servicios = [], sucursale
       <BaseModal
         isOpen={!!selectedService}
         onClose={() => setSelectedService(null)}
-        title={selectedService?.name}
+        title={selectedService?.name ?? ''}
         size="md"
         showCloseButton
       >

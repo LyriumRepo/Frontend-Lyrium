@@ -144,7 +144,7 @@ export const ContratosModule: React.FC<ContratosModuleProps> = ({ state, actions
 
                     <button
                         onClick={actions.createNew}
-                        className="h-14 bg-sky-500 hover:bg-sky-600 active:bg-sky-700 dark:bg-brand-green dark:hover:bg-brand-green-hover text-white rounded-2xl hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-sky-500/20 dark:shadow-none flex items-center justify-center gap-3 px-8 font-industrial group"
+                        className="h-14 bg-sky-500 hover:bg-sky-600 active:bg-sky-700 text-white rounded-2xl hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-sky-500/20 flex items-center justify-center gap-3 px-8 font-industrial group"
                     >
                         <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform" />
                         <span className="text-xs font-black uppercase tracking-widest">Aperturar</span>

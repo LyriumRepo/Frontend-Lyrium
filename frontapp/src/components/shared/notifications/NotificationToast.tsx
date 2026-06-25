@@ -76,7 +76,7 @@ export default function NotificationToast() {
       case 'WARNING':
         return <Bell className="w-4 h-4 text-amber-500" />;
       default:
-        return <Bell className="w-4 h-4 text-[#2d5e42]" />;
+        return <Bell className="w-4 h-4 text-[var(--brand-green)]" />;
     }
   };
 
@@ -88,7 +88,7 @@ export default function NotificationToast() {
       case 'WARNING':
         return 'border-l-amber-500';
       default:
-        return 'border-l-[#2d5e42]';
+        return 'border-l-[var(--brand-green)]';
     }
   };
 
@@ -106,7 +106,7 @@ export default function NotificationToast() {
             }
             remove(item.id);
           }}
-          className={`pointer-events-auto bg-white dark:bg-[#1a2e26] border border-gray-200 dark:border-[#2d5e42]/30 rounded-xl shadow-lg ${getBorder(item.level)} border-l-4 pl-3 pr-4 py-3 flex items-start gap-3 ${item.exiting ? 'animate-fade-out' : 'animate-fade-slide-in'} ${item.action ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-[#24382e] transition-colors' : ''}`}
+          className={`pointer-events-auto bg-white dark:bg-[var(--bg-card)] border border-gray-200 dark:border-[var(--border-subtle)] rounded-xl shadow-lg ${getBorder(item.level)} border-l-4 pl-3 pr-4 py-3 flex items-start gap-3 ${item.exiting ? 'animate-fade-out' : 'animate-fade-slide-in'} ${item.action ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-[var(--bg-secondary)] transition-colors' : ''}`}
         >
           <div className="mt-0.5 flex-shrink-0">
             {getIcon(item.level)}
@@ -119,7 +119,7 @@ export default function NotificationToast() {
               {item.message}
             </p>
             {item.action && (
-              <p className="text-[10px] font-bold text-[#2d5e42] dark:text-[#4A7C59] mt-1 uppercase tracking-wider">
+              <p className="text-[10px] font-bold text-[var(--brand-green)] mt-1 uppercase tracking-wider">
                 {item.action.label} →
               </p>
             )}

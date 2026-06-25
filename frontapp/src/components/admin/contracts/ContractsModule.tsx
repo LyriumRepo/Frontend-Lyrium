@@ -123,7 +123,7 @@ export const ContratosModule: React.FC<ContratosModuleProps> = ({ state, actions
             </div>
 
             {/* FILTROS - Diseño Premium */}
-            <div className="bg-[var(--bg-card)] p-8 rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm relative overflow-hidden group">
+            <div className="bg-[var(--bg-card)] p-4 sm:p-8 rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm relative overflow-hidden group">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-[var(--celeste-500)]/10 rounded-full -mr-32 -mt-32 blur-3xl group-hover:bg-[var(--celeste-500)]/20 transition-all duration-700 hidden dark:block"></div>
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-end relative z-10">
                     <div className="lg:col-span-6 space-y-2">
@@ -178,7 +178,7 @@ export const ContratosModule: React.FC<ContratosModuleProps> = ({ state, actions
 
                     <button
                         onClick={actions.createNew}
-                        className="lg:col-span-2 w-full p-4 bg-sky-500 hover:bg-sky-600 active:bg-sky-700 dark:bg-brand-green dark:hover:bg-brand-green-hover text-white rounded-2xl transition-all shadow-xl shadow-sky-500/20 dark:shadow-none flex items-center justify-center gap-2 whitespace-nowrap active:scale-95 duration-300"
+                        className="lg:col-span-2 w-full p-4 bg-sky-500 hover:bg-sky-600 active:bg-sky-700 text-white rounded-2xl transition-all shadow-xl shadow-sky-500/20 flex items-center justify-center gap-2 whitespace-nowrap active:scale-95 duration-300"
                     >
                         <Plus className="w-4 h-4 font-bold" /> 
                         <span className="text-xs font-black uppercase tracking-widest">Nuevo Contrato</span>

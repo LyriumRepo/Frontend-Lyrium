@@ -18,6 +18,15 @@ async function getToken(): Promise<string | null> {
   if (_tokenCache && now - _tokenCache.ts < 30_000) {
     return _tokenCache.value;
   }
+  // Primero intentar leer del localStorage (disponible en cliente, siempre fresco)
+  if (typeof window !== 'undefined') {
+    const local = localStorage.getItem('laravel_token');
+    if (local) {
+      _tokenCache = { value: local, ts: now };
+      return local;
+    }
+  }
+  // Fallback: cookie httpOnly via route handler (para SSR o cuando localStorage está vacío)
   try {
     const res = await fetch('/api/auth-token', {
       credentials: 'include',
@@ -306,6 +315,22 @@ export const adminSellerRepository = {
       method: 'PUT',
       body: JSON.stringify({ status, reason }),
     });
+  },
+
+  /** GET /audit-logs?per_page=50 */
+  getAuditLogs(params: { per_page?: number; module?: string; search?: string } = {}): Promise<{
+    data: Array<{
+      id: number;
+      event: string;
+      module: string;
+      description: string;
+      created_at: string;
+      actor: { id: number; email: string; role: string };
+      auditable?: { type: string; id: number };
+    }>;
+  }> {
+    const q = toQuery(params as Record<string, string | number | undefined>);
+    return apiFetch(`/audit-logs${q || '?per_page=50'}`);
   },
 
   /** PUT /products/{id}/status */

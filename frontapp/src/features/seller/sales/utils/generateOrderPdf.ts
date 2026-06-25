@@ -24,8 +24,8 @@ const G = {
 };
 
 const STATUS_META: Record<string, { bg: number[]; label: string }> = {
-    pending_seller: { bg: [245, 158, 11],  label: 'Pendiente' },
-    pending:        { bg: [245, 158, 11],  label: 'Pendiente' },
+    pending_seller: { bg: [59, 130, 246],  label: 'Pendiente' },
+    pending:        { bg: [59, 130, 246],  label: 'Pendiente' },
     confirmed:      { bg: [14, 165, 233],  label: 'Confirmado' },
     processing:     { bg: [99, 102, 241],  label: 'En preparación' },
     shipped:        { bg: [59, 130, 246],  label: 'En transporte' },
@@ -294,7 +294,7 @@ export async function generateOrderPdf(order: Order): Promise<void> {
     doc.setTextColor(G[400][0], G[400][1], G[400][2]);
     doc.text('ESTADO PAGO', ML + 55, y);
     const payStatus = isVerified ? 'VERIFICADO' : (order.estado_pago || 'PENDIENTE').toUpperCase();
-    doc.setFillColor(isVerified ? 34 : 245, isVerified ? 197 : 158, isVerified ? 94 : 11);
+    doc.setFillColor(isVerified ? 34 : 59, isVerified ? 197 : 130, isVerified ? 94 : 246);
     doc.roundedRect(ML + 55, y + 0.5, doc.getTextWidth(payStatus) + 6, 5, 1, 1, 'F');
     doc.setTextColor(255, 255, 255);
     doc.setFont('helvetica', 'bold');

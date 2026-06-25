@@ -22,7 +22,7 @@ export default function ChatBotBubble({ message }: Props) {
             )}
 
             <div
-                className={`max-w-[280px] px-4 py-2.5 rounded-2xl text-sm leading-relaxed whitespace-pre-line shadow-sm text-justify ${
+                className={`max-w-[75%] px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-line shadow-sm ${
                     isUser
                         ? 'bg-emerald-700 dark:bg-[var(--brand-green)] text-white rounded-br-md'
                         : 'bg-gray-100 dark:bg-[var(--bg-muted)] text-gray-800 dark:text-[var(--text-primary)] rounded-bl-md'

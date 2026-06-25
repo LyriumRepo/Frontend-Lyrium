@@ -370,7 +370,7 @@ export function GlossaryPageClient() {
                                 className="text-xs text-sky-500 hover:text-sky-600 font-semibold">+ Agregar patrón</button>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-xs font-semibold text-gray-500 mb-1">Monto por defecto</label>
                                 <input type="number" step="0.01" value={form.default_amount} onChange={e => setForm(f => ({ ...f, default_amount: e.target.value }))}

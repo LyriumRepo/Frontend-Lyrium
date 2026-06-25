@@ -98,7 +98,7 @@ export default function SellerManagementDetailsModal({ isOpen, onClose, contract
                 />
 
                 <div className="relative bg-white dark:bg-[#0b0f0c] border border-gray-200 dark:border-emerald-900/40 rounded-[2.5rem] w-full max-w-5xl shadow-[0_0_50px_rgba(16,185,129,0.1)] overflow-hidden font-industrial animate-scaleUp flex flex-col max-h-[90vh]">
-                    <div className="flex items-center justify-between p-8 border-b border-gray-150 dark:border-emerald-900/20 bg-gray-50 dark:bg-[#0d120e]">
+                    <div className="flex items-center justify-between p-4 sm:p-8 border-b border-gray-150 dark:border-emerald-900/20 bg-gray-50 dark:bg-[#0d120e]">
                         <div className="flex items-center gap-3">
                             <div className="p-2.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-2xl border border-emerald-500/20">
                                 <Sparkles className="w-5 h-5" />
@@ -117,7 +117,7 @@ export default function SellerManagementDetailsModal({ isOpen, onClose, contract
                         </button>
                     </div>
 
-                    <div className="p-8 overflow-y-auto flex-1 space-y-8 bg-white dark:bg-[#0b0f0c]">
+                    <div className="p-4 sm:p-8 overflow-y-auto flex-1 space-y-6 sm:space-y-8 bg-white dark:bg-[#0b0f0c]">
                         {isSubmitted ? (
                             <div className="flex flex-col items-center justify-center py-16 text-center space-y-6 animate-fadeIn">
                                 <div className="w-24 h-24 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center justify-center animate-bounce">
@@ -172,8 +172,8 @@ export default function SellerManagementDetailsModal({ isOpen, onClose, contract
                                         </div>
                                     </div>
                                 ) : (
-                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-fadeIn">
-                                        <div className="bg-gray-50 dark:bg-[#0d120f] border border-gray-150 dark:border-emerald-900/20 rounded-[2rem] p-8 space-y-6">
+                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8 animate-fadeIn">
+                                        <div className="bg-gray-50 dark:bg-[#0d120f] border border-gray-150 dark:border-emerald-900/20 rounded-[2rem] p-4 sm:p-8 space-y-6">
                                             <div className="flex items-center gap-3 pb-4 border-b border-gray-200/60 dark:border-emerald-950">
                                                 <User className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                                                 <h3 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider">Datos del Usuario</h3>
@@ -259,7 +259,7 @@ export default function SellerManagementDetailsModal({ isOpen, onClose, contract
                                             </div>
                                         </div>
 
-                                        <div className="bg-gray-50 dark:bg-[#0d120f] border border-gray-150 dark:border-emerald-900/20 rounded-[2rem] p-8 flex flex-col justify-between">
+                                        <div className="bg-gray-50 dark:bg-[#0d120f] border border-gray-150 dark:border-emerald-900/20 rounded-[2rem] p-4 sm:p-8 flex flex-col justify-between">
                                             <div className="space-y-6">
                                                 <div className="flex items-center gap-3 pb-4 border-b border-gray-200/60 dark:border-emerald-950">
                                                     <Store className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
@@ -318,7 +318,7 @@ export default function SellerManagementDetailsModal({ isOpen, onClose, contract
                     </div>
 
                     {!isSubmitted && (
-                        <div className="p-8 border-t border-gray-150 dark:border-emerald-900/20 bg-gray-50 dark:bg-[#0d120e] flex justify-end">
+                        <div className="p-4 sm:p-8 border-t border-gray-150 dark:border-emerald-900/20 bg-gray-50 dark:bg-[#0d120e] flex justify-end">
                             <BaseButton
                                 onClick={handleSubmit}
                                 disabled={!selectedContractId}

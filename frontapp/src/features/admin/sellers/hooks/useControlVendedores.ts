@@ -129,6 +129,14 @@ export const useControlVendedores = () => {
     staleTime: 30_000,
   });
 
+  // ── Audit Logs (pestaña auditoría) ────────────────────────────────────────
+  const { data: auditLogsData, isLoading: auditLogsLoading } = useQuery({
+    queryKey: ['admin', 'audit-logs'],
+    queryFn: () => adminSellerRepository.getAuditLogs(),
+    enabled: currentTab === 'auditoria',
+    staleTime: 60_000,
+  });
+
   // ── Derived: Stats para las 4 cards ───────────────────────────────────────
   const stats = useMemo((): Stats & { pendingProducts: number; pending: number } => {
     const s = statsData;
@@ -211,6 +219,22 @@ export const useControlVendedores = () => {
       rejection_reason: p.rejection_reason,
     }));
   }, [productsData]);
+
+  // ── Derived: Audit logs mapeados al formato AuditEntry ────────────────────
+  const auditEntries = useMemo((): import('@/features/admin/sellers/types').AuditEntry[] => {
+    return (auditLogsData?.data ?? []).map((log: any) => ({
+      id: log.id,
+      usuario: log.actor?.email ?? `ID ${log.actor?.id ?? '?'}`,
+      accion: log.event ?? 'unknown',
+      entidad: log.auditable
+        ? `${log.auditable.type} #${log.auditable.id}`
+        : (log.module ?? 'Sistema'),
+      fecha: log.created_at
+        ? new Date(log.created_at).toLocaleString('es-PE')
+        : '—',
+      metadata: { motivo: log.description ?? '' },
+    }));
+  }, [auditLogsData]);
 
   // ── Pending profile requests count (badge de pestaña) ─────────────────────
   const pendingProfileRequestsCount = useMemo(
@@ -368,6 +392,10 @@ export const useControlVendedores = () => {
       ? (profileRequestsError as Error).message
       : null,
     pendingProfileRequestsCount,
+
+    // Audit Logs
+    auditEntries,
+    auditLogsLoading,
 
     // Paginación
     pagination: sellersData?.pagination,

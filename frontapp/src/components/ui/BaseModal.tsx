@@ -12,6 +12,7 @@ interface BaseModalProps {
   size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | 'full';
   accentColor?: string;
   headerBgColor?: string;
+  rainbowHeader?: boolean;
   children: React.ReactNode;
   className?: string;
   showCloseButton?: boolean;
@@ -37,6 +38,7 @@ export default function BaseModal({
   size = 'md',
   accentColor = 'from-[var(--turquesa-500)] to-[var(--verde-500)]',
   headerBgColor,
+  rainbowHeader = false,
   children,
   className = '',
 }: BaseModalProps) {
@@ -85,8 +87,8 @@ export default function BaseModal({
         `}
       >
         <div
-          className={`relative shrink-0 px-8 pt-8 pb-6 -mx-0 -mt-0 rounded-t-[2.5rem] ${!headerBgColor ? `bg-gradient-to-r ${accentColor}` : ''}`}
-          style={headerBgColor ? { background: `linear-gradient(to right, ${headerBgColor}, ${headerBgColor}dd)` } : undefined}
+          className={`relative shrink-0 px-4 sm:px-8 pt-6 sm:pt-8 pb-5 sm:pb-6 -mx-0 -mt-0 rounded-t-[2.5rem] ${rainbowHeader ? 'lyrium-rainbow-header' : !headerBgColor ? `bg-gradient-to-r ${accentColor}` : ''}`}
+          style={!rainbowHeader && headerBgColor ? { background: `linear-gradient(to right, ${headerBgColor}, ${headerBgColor}dd)` } : undefined}
         >
           <button
             onClick={onClose}
@@ -105,7 +107,7 @@ export default function BaseModal({
             )}
           </div>
         </div>
-        <div className="p-8 overflow-y-auto">{children}</div>
+        <div className="p-4 sm:p-8 overflow-y-auto">{children}</div>
       </div>
     </div>,
     modalRoot,
