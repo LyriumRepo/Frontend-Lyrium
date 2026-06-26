@@ -250,7 +250,7 @@ export default function TiendaPage({ params }: StorePageProps) {
 
       <main className="max-w-[1600px] mx-auto px-4 py-3">
         <div className="space-y-8">
-          <StoreBannerCarousel banners={banners} redes={redes} plan={planHeader} />
+          <StoreBannerCarousel banners={banners} redes={redes} plan={planHeader} logo={store.logo} storeId={store.id} />
 
           <div className="flex flex-wrap gap-4 items-center justify-between bg-white p-4 rounded-2xl shadow-sm border">
             <div className="text-sm text-gray-600">

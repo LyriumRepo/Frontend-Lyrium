@@ -13,6 +13,20 @@ interface Category {
     id: number;
     name: string;
     slug: string;
+    children?: Category[];
+    level?: number;
+}
+
+function flattenCategoryTree(nodes: Category[], level = 0): Category[] {
+    const result: Category[] = [];
+    for (const node of nodes) {
+        const children = node.children ?? [];
+        result.push({ ...node, children: [], level });
+        if (children.length > 0) {
+            result.push(...flattenCategoryTree(children, level + 1));
+        }
+    }
+    return result;
 }
 
 interface ProductModalProps {
@@ -84,9 +98,10 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit }:
     const { data: categories = [] } = useQuery<Category[]>({
         queryKey: ['seller', 'categories'],
         queryFn: async () => {
-            const res = await fetch(`${LARAVEL_API_URL}/categories?type=product&per_page=100`);
+            const res = await fetch(`${LARAVEL_API_URL}/categories?type=product&tree=1&per_page=100`);
             const data = await res.json();
-            return data.data || data || [];
+            const tree = data.data || data || [];
+            return flattenCategoryTree(tree);
         },
         staleTime: 5 * 60 * 1000,
     });
@@ -419,11 +434,14 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit }:
                                                 className="w-full bg-[var(--bg-card)] border-none focus:ring-0 font-bold text-[var(--text-primary)] p-0 outline-none cursor-pointer"
                                             >
                                                 <option value="">Seleccionar Categoría...</option>
-                                                {categories.map((cat) => (
-                                                    <option key={cat.id} value={cat.slug}>
-                                                        {cat.name}
-                                                    </option>
-                                                ))}
+                                                {categories.map((cat) => {
+                                                    const isParent = (cat.level || 0) < 2;
+                                                    return (
+                                                        <option key={cat.id} value={isParent ? '' : cat.slug} disabled={isParent}>
+                                                            {'\u00A0\u00A0'.repeat(cat.level || 0)}{isParent ? '-- ' : ''}{cat.name}
+                                                        </option>
+                                                    );
+                                                })}
                                             </select>
                                         </td>
                                     </tr>

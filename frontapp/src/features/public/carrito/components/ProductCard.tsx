@@ -23,19 +23,19 @@ function StarRating({ rating, total }: StarRatingProps) {
 }
 
 const stickerConfig: Record<string, { label: string; class: string }> = {
-    oferta: { label: 'Oferta', class: 'bg-red-500' },
-    promo: { label: 'Promo', class: 'bg-orange-500' },
-    nuevo: { label: 'Nuevo', class: 'bg-green-500' },
-    limitado: { label: 'Limitado', class: 'bg-purple-500' },
-    liquidacion: { label: 'Liquidación', class: 'bg-red-600' },
-    descuento: { label: 'Descuento', class: 'bg-red-500' },
-    bestseller: { label: 'Best Seller', class: 'bg-amber-500' },
-    envio_gratis: { label: 'Envío Gratis', class: 'bg-teal-500' },
-    organic: { label: 'Orgánico', class: 'bg-emerald-600' },
-    natural: { label: 'Natural', class: 'bg-green-600' },
-    eco: { label: 'Eco', class: 'bg-lime-600' },
-    premium: { label: 'Premium', class: 'bg-purple-500' },
-    vegan: { label: 'Vegano', class: 'bg-green-700' },
+    oferta: { label: 'Oferta', class: 'bg-[#5AAFE6]' },
+    promo: { label: 'Promo', class: 'bg-[#4EC7B8]' },
+    nuevo: { label: 'Nuevo', class: 'bg-[#69BEEB]' },
+    limitado: { label: 'Limitado', class: 'bg-[#3F90C7]' },
+    liquidacion: { label: 'Liquidación', class: 'bg-[#6FA800]' },
+    descuento: { label: 'Descuento', class: 'bg-[#8FD400]' },
+    bestseller: { label: 'Best Seller', class: 'bg-[#4EC7B8]' },
+    envio_gratis: { label: 'Envío Gratis', class: 'bg-[#69BEEB]' },
+    organic: { label: 'Orgánico', class: 'bg-[#8FD400]' },
+    natural: { label: 'Natural', class: 'bg-[#8FD400]' },
+    eco: { label: 'Eco', class: 'bg-[#8FD400]' },
+    premium: { label: 'Premium', class: 'bg-[#3F90C7]' },
+    vegan: { label: 'Vegano', class: 'bg-[#8FD400]' },
 };
 
 interface Props {
@@ -76,25 +76,27 @@ export default function ProductCard({ product: p, onAdd, onView }: Props) {
                 </button>
 
                 {/* Lyrium badge */}
-                <span className="absolute top-3 left-3 inline-flex items-center gap-1 text-[11px] px-3 py-1 rounded-full bg-white/85 dark:bg-[var(--bg-card)]/85 border border-sky-100 dark:border-[var(--border-subtle)] backdrop-blur-sm text-slate-700 dark:text-[var(--text-primary)] shadow-sm">
+                <span className="absolute bottom-3 left-3 inline-flex items-center gap-1 text-[11px] px-3 py-1 rounded-full bg-white/85 dark:bg-[var(--bg-card)]/85 border border-sky-100 dark:border-[var(--border-subtle)] backdrop-blur-sm text-slate-700 dark:text-[var(--text-primary)] shadow-sm">
                     <Leaf className="w-3 h-3 text-sky-500 dark:text-[var(--brand-sky)]" /> Lyrium
                 </span>
 
                 {/* Tag badge */}
                 {p.tag && (
-                    <span className={`absolute top-7 right-3 text-white text-xs font-bold px-2 py-1 rounded-full ${stickerConfig[p.tag.toLowerCase()]?.class ?? 'bg-gray-500'}`}>
-                        {stickerConfig[p.tag.toLowerCase()]?.label ?? p.tag}
-                    </span>
+                    <div className="absolute top-4 right-0 z-10">
+                        <div
+                            className={`flex flex-col items-center justify-center text-center leading-tight text-white w-[100px] h-[50px] pl-2 pr-1 rounded-l-full shadow-lg ${stickerConfig[p.tag.toLowerCase()]?.class ?? 'bg-gray-500'}`}
+                        >
+                            <span className="text-[14px] font-extrabold uppercase tracking-wide line-clamp-2">
+                                {stickerConfig[p.tag.toLowerCase()]?.label ?? p.tag}
+                            </span>
+                            {hasOffer && pct > 0 && (
+                                <span className="text-[17px] font-black mt-0.5">-{pct}%</span>
+                            )}
+                        </div>
+                    </div>
                 )}
 
-                {/* Offer badge */}
-                {hasOffer && (
-                    <span className="absolute top-3 right-3 inline-flex items-center gap-1 text-[11px] px-3 py-1 rounded-full bg-emerald-600 text-white shadow">
-                        -{pct}%
-                    </span>
-                )}
-
-                <TopMedalBadge entityType="product" entityId={p.id} size="md" className="absolute bottom-3 right-3 z-10" />
+                <TopMedalBadge entityType="product" entityId={p.id} size="xxl" className="absolute bottom-2 right-2 z-10" />
             </div>
 
             {/* Info */}

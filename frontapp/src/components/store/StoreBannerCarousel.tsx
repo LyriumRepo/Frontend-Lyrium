@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Icon from '@/components/ui/Icon';
+import TopMedalBadge from '@/components/ui/TopMedalBadge';
 
 interface Banner {
   url: string;
@@ -23,6 +24,8 @@ interface StoreBannerCarouselProps {
   autoPlay?: boolean;
   interval?: number;
   plan?: 'basic' | 'premium';
+  logo?: string;
+  storeId?: number;
 }
 
 const defaultBanners: Banner[] = [
@@ -103,7 +106,9 @@ export default function StoreBannerCarousel({
   redes = [],
   autoPlay = true, 
   interval = 5000,
-  plan = 'premium'
+  plan = 'premium',
+  logo,
+  storeId,
 }: StoreBannerCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -211,6 +216,26 @@ export default function StoreBannerCarousel({
               />
             ))}
           </div>
+        )}
+
+        {/* Logo + Medalla en esquina inferior izquierda */}
+        {logo && (
+          <div className="absolute left-4 bottom-4 z-20">
+          <div className="relative w-50 h-50 sm:w-60 sm:h-60">
+            <div className="w-full h-full rounded-full bg-white/95 backdrop-blur-sm border-4 border-white shadow-xl flex items-center justify-center overflow-hidden">
+              <Image
+                src={logo}
+                alt="Logo tienda"
+                width={250}
+                height={250}
+                className="w-4/5 h-4/5 object-contain"
+              />
+            </div>
+            {storeId && (
+              <TopMedalBadge entityType="store" entityId={storeId} size="xxl" className="absolute bottom-6 right-6 sm:bottom-6 sm:right-6 z-10" />
+            )}
+          </div>
+        </div>
         )}
       </div>
 
