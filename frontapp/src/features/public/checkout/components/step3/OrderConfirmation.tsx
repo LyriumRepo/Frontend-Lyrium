@@ -4,6 +4,7 @@ import { CheckCircle, MapPin, CreditCard, Home, ArrowRight } from 'lucide-react'
 import Link from 'next/link';
 import Image from 'next/image';
 import { useCheckoutStore } from '@/store/checkoutStore';
+import { useEffect, useRef } from 'react';
 
 const PAYMENT_LABELS: Record<string, string> = {
   credit_card: 'Tarjeta de Crédito',
@@ -22,6 +23,31 @@ const DELIVERY_LABELS: Record<string, string> = {
 export default function OrderConfirmation() {
   const result = useCheckoutStore((s) => s.orderResult);
   const setStep = useCheckoutStore((s) => s.setStep);
+  const confettiRef = useRef(false);
+
+  useEffect(() => {
+    if (!confettiRef.current) {
+      confettiRef.current = true;
+      import('canvas-confetti').then(({ default: confetti }) => {
+        const duration = 3000;
+        const end = Date.now() + duration;
+        const colors = ['#84cc16', '#2BBFBF', '#38bdf8'];
+
+        const frame = () => {
+          confetti({
+            particleCount: 4, angle: 60, spread: 70, origin: { x: 0, y: 0.6 },
+            colors, scalar: 1.8, gravity: 0.6, ticks: 250, zIndex: 40000,
+          });
+          confetti({
+            particleCount: 4, angle: 120, spread: 70, origin: { x: 1, y: 0.6 },
+            colors, scalar: 1.8, gravity: 0.6, ticks: 250, zIndex: 40000,
+          });
+          if (Date.now() < end) requestAnimationFrame(frame);
+        };
+        frame();
+      });
+    }
+  }, []);
 
   if (!result) return null;
 

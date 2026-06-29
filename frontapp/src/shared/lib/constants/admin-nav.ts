@@ -75,6 +75,28 @@ export const adminNavigation: PanelNavigation = [
         ],
     },
     {
+        title: 'Reportes',
+        items: [
+            {
+                id: 'reportes',
+                label: 'Centro de Reportes',
+                href: '/admin/reportes',
+                icon: 'BarChart3',
+            },
+        ],
+    },
+    {
+        title: 'BioBlog',
+        items: [
+            {
+                id: 'bioblog',
+                label: 'Aprobación de Contenido',
+                href: '/admin/bioblog',
+                icon: 'FileText',
+            },
+        ],
+    },
+    {
         title: 'Gestión',
         items: [
             {

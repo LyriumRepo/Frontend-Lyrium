@@ -63,7 +63,7 @@ export default function ProductCard({ producto, minWidth }: ProductCardProps) {
               />
             ))}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between gap-2">
           <p className="text-sky-600 dark:text-[var(--color-success)] font-bold text-lg">
             S/{producto.precio.toFixed(2)}
           </p>
@@ -72,6 +72,9 @@ export default function ProductCard({ producto, minWidth }: ProductCardProps) {
               S/{precioAnterior.toFixed(2)}
             </p>
           )}
+          <span className={`text-[10px] ml-auto ${!producto.stock || producto.stock === 0 ? 'text-rose-500' : 'text-slate-400 dark:text-[var(--text-muted)]'}`}>
+            {!producto.stock || producto.stock === 0 ? 'Agotado' : `Stock: ${producto.stock}`}
+          </span>
         </div>
       </div>
     </Link>

@@ -1,4 +1,5 @@
 'use client';
+import Link from 'next/link';
 
 interface Props {
   msg: string; sub: string; btnHref: string; btnLabel: string;
@@ -6,13 +7,21 @@ interface Props {
 
 export default function AccessBlocked({ msg, sub, btnHref, btnLabel }: Props) {
   return (
-    <div style={{inset:0, background:'#f9fafb', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', zIndex:999999, padding:'32px', textAlign:'center', height: '37rem' }}>
-      <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" strokeWidth="1.5" style={{ marginBottom:'20px' }}>
-        <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-      </svg>
-      <h2 style={{ fontSize:'1.3rem', fontWeight:800, color:'#111827', margin:'0 0 10px' }}>{msg}</h2>
-      <p style={{ fontSize:'14px', color:'#6b7280', maxWidth:'300px', lineHeight:1.6, margin:'0 0 24px' }}>{sub}</p>
-      <a href={btnHref} style={{ padding:'11px 28px', background:'#1f2937', color:'#fff', borderRadius:'12px', fontSize:'13px', fontWeight:700, textDecoration:'none', display:'inline-block' }}>{btnLabel}</a>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+      <div className="text-center max-w-sm p-8">
+        <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/30 flex items-center justify-center">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+        </div>
+        <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">{msg}</h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-8">{sub}</p>
+        <Link href={btnHref}
+          className="inline-flex px-6 py-2.5 rounded-xl bg-gradient-to-r from-teal-500 via-sky-500 to-emerald-500 text-white text-sm font-semibold shadow-lg shadow-teal-500/20 hover:shadow-xl transition-all"
+        >
+          {btnLabel}
+        </Link>
+      </div>
     </div>
   );
 }

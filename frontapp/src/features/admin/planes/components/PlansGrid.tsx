@@ -28,7 +28,7 @@ export default function PlansGrid({ plansData, statusFilter, onEdit, onToggleAct
     <>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-extrabold text-gray-800 dark:text-[var(--text-primary)]">Gestión de Planes</h2>
-        <button className="px-5 py-3 bg-blue-500 text-white rounded-xl text-[14px] font-bold cursor-pointer transition-all duration-300 flex items-center gap-2 hover:bg-blue-600 hover:-translate-y-0.5 hover:shadow-lg"
+        <button className="px-5 py-3 bg-teal-500 text-white rounded-xl text-[14px] font-bold cursor-pointer transition-all duration-300 flex items-center gap-2 hover:bg-teal-600 hover:-translate-y-0.5 hover:shadow-lg"
           onClick={onNew}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           Crear Nuevo Plan
@@ -60,7 +60,7 @@ export default function PlansGrid({ plansData, statusFilter, onEdit, onToggleAct
                     ? <div className="text-[1.8rem] font-extrabold" style={{ color:plan.cssColor }}>{plan.priceText}{plan.priceSubtext && <small className="text-[0.9rem] font-semibold text-gray-400 dark:text-[var(--text-placeholder)]"> {plan.priceSubtext}</small>}</div>
                     : <div className="text-[1.8rem] font-extrabold" style={{ color:plan.cssColor }}>{plan.currency ?? 'S/'} {Number(plan.price ?? 0).toFixed(2)}<small className="text-[0.9rem] font-semibold text-gray-400 dark:text-[var(--text-placeholder)]">{plan.period ?? '/mes'}</small></div>
                   }
-                  {!isActive && <div className="inline-block px-2.5 py-1 rounded-md bg-red-100 text-red-500 text-[10px] font-extrabold tracking-wider mt-2">INACTIVO</div>}
+                  {!isActive && <div className="inline-block px-2.5 py-1 rounded-md bg-teal-100 text-teal-600 text-[10px] font-extrabold tracking-wider mt-2">INACTIVO</div>}
                 </div>
                 <div className="text-[13px] text-gray-400 dark:text-[var(--text-placeholder)] mb-4">{plan.description}</div>
                 <div className="mb-4 pt-4 border-t border-gray-200 dark:border-[var(--border-subtle)]">
@@ -72,16 +72,16 @@ export default function PlansGrid({ plansData, statusFilter, onEdit, onToggleAct
                 </div>
                 <div className="flex gap-2 justify-end">
                   <button className={`w-9 h-9 rounded-lg border-2 cursor-pointer transition-all duration-250 flex items-center justify-center flex-shrink-0
-                    ${isActive ? 'border-amber-500 text-amber-500 hover:bg-amber-500 hover:text-white hover:-translate-y-0.5' : 'border-emerald-500 text-emerald-500 hover:bg-emerald-500 hover:text-white hover:-translate-y-0.5'}`}
+                    ${isActive ? 'border-sky-500 text-sky-500 hover:bg-sky-500 hover:text-white hover:-translate-y-0.5' : 'border-emerald-500 text-emerald-500 hover:bg-emerald-500 hover:text-white hover:-translate-y-0.5'}`}
                     title={isActive ? 'Desactivar plan' : 'Activar plan'} onClick={() => onToggleActive(key)}>
                     {isActive
                       ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="2" y="7" width="20" height="10" rx="5"/><circle cx="7" cy="12" r="3" fill="currentColor"/></svg>
                       : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="2" y="7" width="20" height="10" rx="5"/><circle cx="17" cy="12" r="3" fill="currentColor"/></svg>
                     }
                   </button>
-                  <button className="w-9 h-9 rounded-lg border-2 border-blue-500 text-blue-500 bg-transparent cursor-pointer transition-all duration-250 flex items-center justify-center hover:bg-blue-500 hover:text-white hover:-translate-y-0.5" title="Editar" onClick={() => onEdit(key)}>{svgEdit}</button>
-                  {isFixed && <button className="w-9 h-9 rounded-lg border-2 border-red-500 text-red-500 bg-transparent cursor-pointer transition-all duration-250 flex items-center justify-center hover:bg-red-500 hover:text-white hover:-translate-y-0.5" title="Restaurar" onClick={() => onRestore(key)}>{svgRestore}</button>}
-                  {!isFixed && <button className="w-9 h-9 rounded-lg border-2 border-red-500 text-red-500 bg-transparent cursor-pointer transition-all duration-250 flex items-center justify-center hover:bg-red-500 hover:text-white hover:-translate-y-0.5" title="Eliminar" onClick={() => onDelete(key)}>{svgDelete}</button>}
+                  <button className="w-9 h-9 rounded-lg border-2 border-sky-500 text-sky-500 bg-transparent cursor-pointer transition-all duration-250 flex items-center justify-center hover:bg-sky-500 hover:text-white hover:-translate-y-0.5" title="Editar" onClick={() => onEdit(key)}>{svgEdit}</button>
+                  {isFixed && <button className="w-9 h-9 rounded-lg border-2 border-teal-500 text-teal-500 bg-transparent cursor-pointer transition-all duration-250 flex items-center justify-center hover:bg-teal-500 hover:text-white hover:-translate-y-0.5" title="Restaurar" onClick={() => onRestore(key)}>{svgRestore}</button>}
+                  {!isFixed && <button className="w-9 h-9 rounded-lg border-2 border-teal-500 text-teal-500 bg-transparent cursor-pointer transition-all duration-250 flex items-center justify-center hover:bg-teal-500 hover:text-white hover:-translate-y-0.5" title="Eliminar" onClick={() => onDelete(key)}>{svgDelete}</button>}
                 </div>
               </div>
             );

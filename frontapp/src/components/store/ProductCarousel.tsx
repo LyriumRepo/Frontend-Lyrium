@@ -134,13 +134,18 @@ export default function ProductCarousel({
                           </p>
                         )}
                       </div>
-                      <button 
-                        className="w-8 h-8 bg-sky-500 hover:bg-sky-600 dark:hover:bg-sky-400 rounded-full flex items-center justify-center transition-colors"
-                        onClick={(e) => e.preventDefault()}
-                        aria-label="Añadir al carrito"
-                      >
-                        <ShoppingCart className="w-4 h-4 text-white" />
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <span className={`text-[10px] ${!producto.stock || producto.stock === 0 ? 'text-rose-500' : 'text-slate-400 dark:text-[var(--text-muted)]'}`}>
+                          {!producto.stock || producto.stock === 0 ? 'Agotado' : `Stock: ${producto.stock}`}
+                        </span>
+                        <button 
+                          className="w-8 h-8 bg-sky-500 hover:bg-sky-600 dark:hover:bg-sky-400 rounded-full flex items-center justify-center transition-colors"
+                          onClick={(e) => e.preventDefault()}
+                          aria-label="Añadir al carrito"
+                        >
+                          <ShoppingCart className="w-4 h-4 text-white" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>

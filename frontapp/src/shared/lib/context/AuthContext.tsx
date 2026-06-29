@@ -101,7 +101,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         pathname.startsWith('/admin') ||
         pathname.startsWith('/seller') ||
         pathname.startsWith('/customer') ||
-        pathname.startsWith('/logistics');
+        pathname.startsWith('/logistics') ||
+        pathname.startsWith('/security');
 
       if (!effectiveUser && isProtectedPath) {
         router.push('/login');

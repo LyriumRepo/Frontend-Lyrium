@@ -144,6 +144,7 @@ const initialEdit: Partial<PlanData> = {
   bgImagePosition: 'center',
   showBgInCard: false,
   requiresPayment: false,
+  commissionRate: 0.05,
   enableClaimLock: false,
   claimMonths: 1,
   subscribeButtonText: 'Suscribirse',
@@ -234,6 +235,11 @@ function mapPlanToPlansMap(plans: api.PlanFromApi[]): PlansMap {
       enableClaimLock: p.enable_claim_lock ?? false,
       claimMonths: p.claim_months ?? 1,
       compactVisibleCount: p.compact_visible_count ?? 5,
+      commissionRate: parseFloat(p.commission_rate) || 0,
+      bgImage: p.bg_image ?? '',
+      bgImageFit: (p.bg_image_fit ?? 'cover') as 'cover' | 'contain' | 'fill',
+      bgImagePosition: p.bg_image_position ?? 'center',
+      showBgInCard: p.show_bg_in_card ?? false,
       trialSuccessTitle: p.trial_success_title ?? '',
       trialSuccessMessage: p.trial_success_message ?? '',
       trialWaitMessage: p.trial_wait_message ?? '',
@@ -604,7 +610,7 @@ export function useAdmin() {
       name: ep.name.trim(),
       slug: isNew ? newSlug : originalSlug, // en update no cambiar slug
       monthly_fee: ep.price ?? 0,
-      commission_rate: (ep as any).commission_rate ?? 0.05,
+      commission_rate: ep.commissionRate ?? 0.05,
       has_membership_fee: (ep.price ?? 0) > 0,
       features,
       detailed_benefits: detailedBenefits,
@@ -625,6 +631,10 @@ export function useAdmin() {
       price_subtext: ep.priceSubtext ?? '/mes',
       use_price_mode: ep.usePriceMode ?? true,
       compact_visible_count: ep.compactVisibleCount ?? 5,
+      bg_image: ep.bgImage || null,
+      bg_image_fit: ep.bgImageFit ?? 'cover',
+      bg_image_position: ep.bgImagePosition ?? 'center',
+      show_bg_in_card: !!ep.showBgInCard,
       trial_success_title: ep.trialSuccessTitle ?? '',
       trial_success_message: ep.trialSuccessMessage ?? '',
       trial_wait_message: ep.trialWaitMessage ?? '',
@@ -637,14 +647,20 @@ export function useAdmin() {
         ? await api.createPlan(payload)
         : await api.updatePlan(originalSlug!, payload);
 
-      // ← NUEVO: refrescar todos los planes desde la API
-      const planesActualizados = await api.fetchPlans();
-      setState((prev) => ({
-        ...prev,
-        plansData: mapPlanToPlansMap(planesActualizados),
-        editorOpen: false,
-        editorPlanId: null,
-      }));
+      // Actualizar estado local con la respuesta (evita fetchPlans extra)
+      const updatedEntry = mapPlanToPlansMap([saved]);
+      setState((prev) => {
+        const plans = { ...prev.plansData };
+        if (!isNew && originalSlug && saved.slug !== originalSlug) {
+          delete plans[originalSlug];
+        }
+        return {
+          ...prev,
+          plansData: { ...plans, ...updatedEntry },
+          editorOpen: false,
+          editorPlanId: null,
+        };
+      });
 
       broadcast('planes_actualizados');
       alert('Plan guardado correctamente');
@@ -910,9 +926,9 @@ export function useAdmin() {
         const detail = await api.fetchVendedorDetail(Number(uid));
 
         const historial = detail.plan_requests.map((r: any) => ({
-          plan_desde: '',
+          plan_desde: r.current_plan_name ?? '',
           plan_hasta: r.plan_name ?? '—',
-          nombre_desde: '—',
+          nombre_desde: r.current_plan_name ?? '—',
           nombre_hasta: r.plan_name ?? '—',
           motivo:
             r.payment_status === 'paid'

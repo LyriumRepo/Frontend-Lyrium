@@ -10,6 +10,7 @@ import PaymentPanel from '@/features/admin/planes/components/PaymentPanel';
 import VendedoresPanel from '@/features/admin/planes/components/VendedoresPanel';
 import PlanEditorModal from '@/features/admin/planes/components/PlanEditorModal';
 import Modal from '@/features/seller/plans/shared/Modal';
+import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 
 const TABS = [
   { key:'requests',   label:'Solicitudes',
@@ -26,7 +27,7 @@ const TABS = [
     icon:<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> },
 ];
 
-const SLOW_TABS = new Set(['vendedores', 'payment']);
+const SSE_TAB = 'requests';
 
 export default function AdminPage() {
   const admin = useAdmin();
@@ -36,7 +37,6 @@ export default function AdminPage() {
     admin.initialize();
   }, []);
 
-  // SSE — solo conectar cuando el panel ya está cargado
   const sse = useSSE('admin', '', {
     solicitudes_actualizadas: admin.handleSolicitudesActualizadas,
     planes_actualizados:      admin.handlePlanesActualizados,
@@ -46,11 +46,10 @@ export default function AdminPage() {
   }, state.isLoaded);
 
   const handleSwitchTab = useCallback(async (tab: string) => {
-    if (SLOW_TABS.has(tab)) {
+    if (tab !== SSE_TAB) {
       sse.disconnect();
       await new Promise(r => setTimeout(r, 400));
-    }
-    if (tab === 'requests') {
+    } else {
       sse.connect();
     }
     await admin.switchTab(tab as never);
@@ -59,65 +58,86 @@ export default function AdminPage() {
   const s = state;
 
   return (
-    <div className="max-w-7xl mx-auto p-5">
-      {/* Pestañas */}
-      <div className="flex gap-2.5 mb-6 overflow-y-auto scrollbar-hide">
-        {TABS.map(t => (
-          <button key={t.key} className={`px-5 py-3 border-2 border-gray-200 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] rounded-xl text-sm font-semibold text-gray-500 dark:text-[var(--text-secondary)] cursor-pointer transition-all duration-300 flex items-center gap-2
-            ${s.activeTab === t.key ? 'bg-white dark:bg-[var(--bg-card)] text-black dark:text-[var(--text-primary)] border-black dark:border-[var(--text-primary)]' : 'hover:border-gray-400 dark:hover:border-[var(--text-primary)] hover:text-gray-700 dark:hover:text-[var(--text-primary)]'}`}
-            onClick={() => handleSwitchTab(t.key)}>
-            {t.icon}{t.label}
-          </button>
-        ))}
-      </div>
+    <div className="px-8 pb-20 space-y-8 animate-fadeIn font-industrial">
+      <ModuleHeader
+        title="Gestión de Planes"
+        subtitle="Administra solicitudes, planes, pagos y vendedores"
+        icon="Box"
+      />
 
-      {/* Panels */}
-      {s.activeTab === 'requests' && (
-        <div className="block animate-fade-in">
-          <RequestsPanel 
-            requests={s.requests} 
-            plansData={s.plansData} 
-            filter={s.requestFilter} 
-            onFilterChange={f => update({ requestFilter: f as never })} 
-            notifs={s.paymentNotifs} 
-            onDismissNotif={admin.dismissNotif}
-            onApprove={admin.handleApproveRequest}
-            onReject={admin.handleRejectRequest}
-            approvingId={s.approvingRequestId}
-            rejectingId={s.rejectingRequestId}
-          />
+      <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-subtle)] shadow-sm overflow-hidden">
+        {/* Tabs */}
+        <div className="border-b border-[var(--border-subtle)] px-4 pt-4">
+          <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+            {TABS.map(t => (
+              <button
+                key={t.key}
+                onClick={() => handleSwitchTab(t.key)}
+                className={`relative px-5 py-3 rounded-t-xl text-xs font-bold transition-all duration-200 flex items-center gap-2 whitespace-nowrap ${
+                  s.activeTab === t.key
+                    ? 'bg-white dark:bg-[var(--bg-secondary)] text-teal-600 dark:text-teal-400 shadow-sm border border-b-0 border-[var(--border-subtle)] -mb-px'
+                    : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--bg-muted)] border border-transparent'
+                }`}
+              >
+                <span className={s.activeTab === t.key ? 'text-teal-500' : 'text-[var(--text-muted)]'}>
+                  {t.icon}
+                </span>
+                {t.label}
+              </button>
+            ))}
+          </div>
         </div>
-      )}
-      {s.activeTab === 'plans' && (
-        <div className="block animate-fade-in">
-          <PlansGrid plansData={s.plansData} statusFilter={s.planStatusFilter} onEdit={admin.openPlanEditor} onNew={() => admin.openPlanEditor('new')} onToggleActive={admin.togglePlanActive} onDelete={admin.openDeleteConfirm} onRestore={admin.openRestoreConfirm} onFilterChange={f => update({ planStatusFilter: f as never })} />
+
+        {/* Panels */}
+        <div className="p-6">
+          {s.activeTab === 'requests' && (
+            <div className="block animate-fade-in">
+              <RequestsPanel 
+                requests={s.requests} 
+                plansData={s.plansData} 
+                filter={s.requestFilter} 
+                onFilterChange={f => update({ requestFilter: f as never })} 
+                notifs={s.paymentNotifs} 
+                onDismissNotif={admin.dismissNotif}
+                onApprove={admin.handleApproveRequest}
+                onReject={admin.handleRejectRequest}
+                approvingId={s.approvingRequestId}
+                rejectingId={s.rejectingRequestId}
+              />
+            </div>
+          )}
+          {s.activeTab === 'plans' && (
+            <div className="block animate-fade-in">
+              <PlansGrid plansData={s.plansData} statusFilter={s.planStatusFilter} onEdit={admin.openPlanEditor} onNew={() => admin.openPlanEditor('new')} onToggleActive={admin.togglePlanActive} onDelete={admin.openDeleteConfirm} onRestore={admin.openRestoreConfirm} onFilterChange={f => update({ planStatusFilter: f as never })} />
+            </div>
+          )}
+          {s.activeTab === 'timeline' && (
+            <div className="block animate-fade-in">
+              <TimelineEditor plansData={s.plansData} onSelectIcon={admin.selectTimelineIcon} />
+            </div>
+          )}
+          {s.activeTab === 'uisettings' && (
+            <div className="block animate-fade-in">
+              <UISettingsPanel colors={s.buttonColors} onChange={admin.updateBtnColor} onSave={admin.saveBtnColors} onReset={admin.resetBtnColors} />
+            </div>
+          )}
+          {s.activeTab === 'payment' && (
+            <div className="block animate-fade-in">
+              <PaymentPanel vendedorPagos={s.vendedorPagos} totales={s.paymentTotals} filter={s.paymentFilter} onFilterChange={f => admin.loadPaymentHistory(f as never)} />
+            </div>
+          )}
+          {s.activeTab === 'vendedores' && (
+            <div className="block animate-fade-in" id="vendedoresPanel">
+              <VendedoresPanel vendedores={s.vendedores} loading={s.vendedoresLoading} filter={s.vendedorFilter} search={s.vendedorSearch} selectedVendedor={s.selectedVendedor} modalOpen={s.modals.vendedorHistorial} onFilterChange={f => update({ vendedorFilter: f as never })} onSearchChange={q => update({ vendedorSearch: q })} onOpenModal={admin.openVendedorModal} onCloseModal={() => setModal('vendedorHistorial', false)} />
+            </div>
+          )}
         </div>
-      )}
-      {s.activeTab === 'timeline' && (
-        <div className="block animate-fade-in">
-          <TimelineEditor plansData={s.plansData} onSelectIcon={admin.selectTimelineIcon} />
-        </div>
-      )}
-      {s.activeTab === 'uisettings' && (
-        <div className="block animate-fade-in">
-          <UISettingsPanel colors={s.buttonColors} onChange={admin.updateBtnColor} onSave={admin.saveBtnColors} onReset={admin.resetBtnColors} />
-        </div>
-      )}
-      {s.activeTab === 'payment' && (
-        <div className="block animate-fade-in">
-          <PaymentPanel vendedorPagos={s.vendedorPagos} totales={s.paymentTotals} filter={s.paymentFilter} onFilterChange={f => admin.loadPaymentHistory(f as never)} />
-        </div>
-      )}
-      {s.activeTab === 'vendedores' && (
-        <div className="block animate-fade-in" id="vendedoresPanel">
-          <VendedoresPanel vendedores={s.vendedores} loading={s.vendedoresLoading} filter={s.vendedorFilter} search={s.vendedorSearch} selectedVendedor={s.selectedVendedor} modalOpen={s.modals.vendedorHistorial} onFilterChange={f => update({ vendedorFilter: f as never })} onSearchChange={q => update({ vendedorSearch: q })} onOpenModal={admin.openVendedorModal} onCloseModal={() => setModal('vendedorHistorial', false)} />
-        </div>
-      )}
+      </div>
 
       {/* Editor de planes */}
       <PlanEditorModal open={s.editorOpen} title={s.editorTitle} activeTab={s.editorTab} editingPlan={s.editingPlan} editFeatures={s.editFeatures} editDetailedBenefits={s.editDetailedBenefits} onClose={admin.closePlanEditor} onSave={admin.savePlan} onTabChange={admin.setEditorTab} onUpdatePlan={admin.updateEditingPlan} onAddFeature={admin.addFeature} onUpdateFeature={admin.updateFeature} onRemoveFeature={admin.removeFeature} onAddDetailedBenefit={admin.addDetailedBenefit} onUpdateDetailedBenefit={admin.updateDetailedBenefit} onRemoveDetailedBenefit={admin.removeDetailedBenefit} onImageUpload={admin.handleImageUpload} />
 
-{/* Modal eliminar */}
+      {/* Modales */}
       <Modal open={s.modals.deleteConfirm} onClose={() => setModal('deleteConfirm', false)} className="max-w-md mx-auto text-center">
         <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-5">
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
@@ -132,7 +152,6 @@ export default function AdminPage() {
         </div>
       </Modal>
 
-      {/* Modal restaurar */}
       <Modal open={s.modals.restoreConfirm} onClose={() => setModal('restoreConfirm', false)} className="max-w-md mx-auto text-center">
         <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-5">
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#f5420b" strokeWidth="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
@@ -147,7 +166,6 @@ export default function AdminPage() {
         </div>
       </Modal>
 
-      {/* Modal desactivar */}
       <Modal open={s.modals.deactivateConfirm} onClose={() => setModal('deactivateConfirm', false)} className="max-w-md mx-auto text-center">
         <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-5">
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
@@ -162,7 +180,6 @@ export default function AdminPage() {
         </div>
       </Modal>
 
-      {/* Modal error imagen */}
       <Modal open={s.modals.imageError} onClose={() => setModal('imageError', false)} className="max-w-md mx-auto text-center">
         <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-5">
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>

@@ -107,7 +107,7 @@ export default function CustomerSecurityPage() {
           </div>
         </div>
 
-        {/* ── Columna lateral: Tips + Sesiones ────────────────────────────── */}
+        {/* ── Columna lateral: Tips de seguridad ───────────────────────── */}
         <div className="lg:col-span-4 space-y-8">
           <div className="bg-white dark:bg-[var(--bg-secondary)] p-8 rounded-[2.5rem] shadow-2xl">
             {/* Tips header */}

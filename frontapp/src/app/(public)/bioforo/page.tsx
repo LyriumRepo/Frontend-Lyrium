@@ -8,9 +8,17 @@ import { forumApi, ForumTopic, ForumCategory } from '@/shared/lib/api/forum';
 import Icon from '@/components/ui/Icon';
 import { formatDate, getInitial } from '@/shared/lib/helpers';
 
+function SafeImage({ src, alt, ...props }: { src: string; alt: string; [key: string]: any }) {
+  const [errored, setErrored] = useState(false);
+  if (errored) return null;
+  return <Image {...props} src={src} alt={alt} onError={() => setErrored(true)} />;
+}
+
 export default function BioForoPage() {
   const [forums, setForums] = useState<ForumCategory[]>([]);
   const [topics, setTopics] = useState<ForumTopic[]>([]);
+  const [sharedId, setSharedId] = useState<number | null>(null);
+  const [shareTopic, setShareTopic] = useState<ForumTopic | null>(null);
   const [selectedForum, setSelectedForum] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -61,9 +69,10 @@ export default function BioForoPage() {
       <section className="relative mt-2 md:mt-8 rounded-xl md:rounded-[24px] overflow-hidden shadow-lg md:shadow-2xl min-h-[160px] md:min-h-[320px] bg-[#0b1220] group">
         <div
           className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 transform group-hover:scale-105"
-          style={{ backgroundImage: "url('https://lyriumbiomarketplace.com/wp-content/uploads/2025/06/bioforo_banner-scaled.jpg')" }}
+          style={{ backgroundImage: "url('https://img.freepik.com/foto-gratis/alegre-amigos-telefono-prado_23-2147656274.jpg?semt=ais_rp_progressive&w=740&q=80')" }}
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-slate-950/40 to-transparent dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)]" />
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-slate-950/40 to-transparent dark:hidden" />
+        <div className="absolute inset-0 hidden dark:block" style={{ background: 'linear-gradient(to right, color-mix(in srgb, var(--brand-green-hover) 80%, transparent), color-mix(in srgb, var(--brand-green) 40%, transparent), transparent)' }} />
         <div className="relative z-10 p-4 md:p-14 max-w-3xl text-white h-full flex flex-col justify-center">
           <h1 className="text-2xl md:text-6xl font-extrabold tracking-tight uppercase drop-shadow-xl mb-2 md:mb-4 leading-tight">
             Conecta <span className="text-[#2ea8ff] dark:text-lime-500">BioForo</span>
@@ -76,9 +85,9 @@ export default function BioForoPage() {
       </section>
 
       <section className="grid md:grid-cols-2 gap-4 md:gap-8 items-center bg-white dark:bg-[var(--bg-secondary)] rounded-xl md:rounded-3xl p-4 md:p-8 shadow-sm border border-slate-100 dark:border-[var(--border-subtle)]">
-        <div className="rounded-lg md:rounded-2xl overflow-hidden shadow-md md:shadow-lg aspect-[4/3] relative group order-2 md:order-1">
-          <Image
-            src="https://lyriumbiomarketplace.com/wp-content/uploads/2025/10/Fondos_BioBlog-4.png"
+        <div className="rounded-lg md:rounded-2xl overflow-hidden shadow-md md:shadow-lg aspect-[4/3] relative group order-2 md:order-1 bg-gradient-to-br from-emerald-100/50 to-blue-100/50 dark:from-emerald-900/20 dark:to-blue-900/20">
+          <SafeImage
+            src="https://img.magnific.com/foto-gratis/primer-plano-mujer-trabajando-su-portatil-al-aire-libre_1150-380.jpg?semt=ais_hybrid&w=740&q=80"
             alt="BioForo Intro"
             fill
             sizes="(max-width: 768px) 100vw, 50vw"
@@ -88,9 +97,9 @@ export default function BioForoPage() {
         </div>
         <div className="flex flex-col gap-3 md:gap-6 order-1 md:order-2">
           <div className="flex items-start gap-3 md:gap-4">
-            <div className="flex-shrink-0 w-10 h-10 md:w-16 md:h-16 rounded-lg md:rounded-2xl bg-slate-50 border border-slate-200 grid place-items-center shadow-sm">
-              <Image
-                src="https://lyriumbiomarketplace.com/wp-content/uploads/2025/10/Fondos_BioBlog-4.png"
+            <div className="flex-shrink-0 w-10 h-10 md:w-16 md:h-16 rounded-lg md:rounded-2xl bg-gradient-to-br from-emerald-100 to-blue-100 dark:from-emerald-900/40 dark:to-blue-900/40 border border-slate-200 grid place-items-center shadow-sm">
+              <SafeImage
+                src="https://img.magnific.com/foto-gratis/primer-plano-mujer-trabajando-su-portatil-al-aire-libre_1150-380.jpg?semt=ais_hybrid&w=740&q=80"
                 alt="Icon"
                 width={40}
                 height={40}
@@ -307,7 +316,11 @@ export default function BioForoPage() {
 
                 <button
                   onClick={() => {
-                    navigator.clipboard.writeText(`${window.location.origin}/bioforo/${topic.id}`);
+                    if (navigator.share) {
+                      navigator.share({ title: topic.title, url: `${window.location.origin}/bioforo/${topic.id}` });
+                    } else {
+                      setShareTopic(topic);
+                    }
                   }}
                   className="flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-full bg-slate-50 dark:bg-[var(--bg-secondary)] hover:bg-slate-100 text-slate-700 dark:text-[var(--text-primary)] transition-all text-xs md:text-sm"
                 >
@@ -325,6 +338,48 @@ export default function BioForoPage() {
           {topics.length} temas mostrados
         </span>
       </div>
+
+      {/* Share Modal */}
+      {shareTopic && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setShareTopic(null)}>
+          <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-800 w-full max-w-sm mx-4 p-6" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-slate-800 dark:text-[var(--text-primary)]">Compartir</h3>
+              <button onClick={() => setShareTopic(null)} className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-gray-800 transition">
+                <Icon name="X" className="w-5 h-5 text-slate-500" />
+              </button>
+            </div>
+            <p className="text-sm text-slate-600 dark:text-[var(--text-muted)] mb-4 line-clamp-2">{shareTopic.title}</p>
+
+            <div className="grid grid-cols-4 gap-3 mb-5">
+              <a href={`https://wa.me/?text=${encodeURIComponent(shareTopic.title + ' ' + window.location.origin + '/bioforo/' + shareTopic.id)}`} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-gray-800 transition">
+                <div className="w-11 h-11 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600"><Icon name="MessageCircle" className="w-5 h-5" /></div>
+                <span className="text-[10px] font-semibold text-slate-600 dark:text-[var(--text-muted)]">WhatsApp</span>
+              </a>
+              <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.origin + '/bioforo/' + shareTopic.id)}`} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-gray-800 transition">
+                <div className="w-11 h-11 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600"><Icon name="Facebook" className="w-5 h-5" /></div>
+                <span className="text-[10px] font-semibold text-slate-600 dark:text-[var(--text-muted)]">Facebook</span>
+              </a>
+              <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareTopic.title + ' ' + window.location.origin + '/bioforo/' + shareTopic.id)}`} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-gray-800 transition">
+                <div className="w-11 h-11 rounded-full bg-sky-100 dark:bg-sky-900/30 flex items-center justify-center text-sky-600"><Icon name="Twitter" className="w-5 h-5" /></div>
+                <span className="text-[10px] font-semibold text-slate-600 dark:text-[var(--text-muted)]">Twitter / X</span>
+              </a>
+              <a href={`mailto:?subject=${encodeURIComponent(shareTopic.title)}&body=${encodeURIComponent(window.location.origin + '/bioforo/' + shareTopic.id)}`} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-gray-800 transition">
+                <div className="w-11 h-11 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600"><Icon name="Mail" className="w-5 h-5" /></div>
+                <span className="text-[10px] font-semibold text-slate-600 dark:text-[var(--text-muted)]">Correo</span>
+              </a>
+            </div>
+
+            <div className="flex items-center gap-2 p-3 bg-slate-50 dark:bg-[var(--bg-card)] rounded-xl">
+              <input type="text" readOnly value={`${window.location.origin}/bioforo/${shareTopic.id}`} className="flex-1 text-xs bg-transparent text-slate-600 dark:text-[var(--text-muted)] outline-none truncate" />
+              <button onClick={async () => { await navigator.clipboard.writeText(`${window.location.origin}/bioforo/${shareTopic.id}`); setSharedId(shareTopic.id); setTimeout(() => setSharedId(null), 2000); }} className="flex items-center gap-1 px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-xs font-semibold transition shrink-0">
+                <Icon name={sharedId === shareTopic.id ? 'Check' : 'File'} className="w-3.5 h-3.5" />
+                {sharedId === shareTopic.id ? 'Copiado' : 'Copiar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <style jsx>{`
         .filtro-dropdown {

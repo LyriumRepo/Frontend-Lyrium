@@ -39,7 +39,7 @@ function BoletaGrid({ vendedor, filter }: { vendedor: VendedorPago; filter: stri
   return (
     <div className="mb-7">
       <div className="flex items-center gap-4 bg-white dark:bg-[var(--bg-card)] rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-[var(--border-subtle)] flex-wrap cursor-default">
-        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 text-white font-extrabold text-lg flex items-center justify-center flex-shrink-0">{initials}</div>
+        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-teal-500 to-sky-500 text-white font-extrabold text-lg flex items-center justify-center flex-shrink-0">{initials}</div>
         <div className="flex-1 min-w-[120px]">
           <div className="text-base font-extrabold text-gray-800 dark:text-[var(--text-primary)]">{vendedor.username ?? 'Vendedor'}</div>
           <div className="text-xs text-gray-400 dark:text-[var(--text-placeholder)] mt-0.5">{vendedor.correo ?? ''}</div>
@@ -59,7 +59,7 @@ function BoletaGrid({ vendedor, filter }: { vendedor: VendedorPago; filter: stri
       {open && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-4 px-1">
           {txs.map(tx => {
-            const eColor = tx.estado === 'paid' ? '#10b981' : tx.estado === 'failed' ? '#ef4444' : '#f59e0b';
+            const eColor = tx.estado === 'paid' ? '#059669' : tx.estado === 'failed' ? '#0d9488' : '#0284c7';
             const eLabel = tx.estado === 'paid' ? 'EXITOSO' : tx.estado === 'failed' ? 'FALLIDO' : 'PENDIENTE';
             const isYape = tx.metodoPago === 'YAPE' || tx.metodoPago === 'yape';
             const isPlin = tx.metodoPago === 'PLIN' || tx.metodoPago === 'plin';
@@ -131,7 +131,7 @@ export default function PaymentPanel({ vendedorPagos, totales, filter, onFilterC
       </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5 mb-2">
         <div className="bg-white dark:bg-[var(--bg-card)] border border-gray-200 dark:border-[var(--border-subtle)] rounded-3xl p-5 flex flex-col gap-1.5 relative overflow-hidden transition-shadow hover:shadow-md hover:-translate-y-0.5">
-          <div className="absolute top-0 left-0 right-0 h-1 rounded-t-3xl bg-gradient-to-r from-indigo-500 to-purple-500" />
+          <div className="absolute top-0 left-0 right-0 h-1 rounded-t-3xl bg-gradient-to-r from-teal-500 to-sky-500" />
           <div className="text-[11px] font-extrabold uppercase tracking-wide text-gray-400 dark:text-[var(--text-placeholder)]">Total recaudado</div>
           <div className="text-[1.75rem] font-extrabold text-gray-800 dark:text-[var(--text-primary)] leading-tight">S/ {Number(totales.total_monto ?? 0).toFixed(2)}</div>
         </div>
@@ -141,14 +141,14 @@ export default function PaymentPanel({ vendedorPagos, totales, filter, onFilterC
           <div className="text-[1.75rem] font-extrabold text-emerald-600 leading-tight">{totales.pagos_exitosos}</div>
         </div>
         <div className="bg-white dark:bg-[var(--bg-card)] border border-gray-200 dark:border-[var(--border-subtle)] rounded-3xl p-5 flex flex-col gap-1.5 relative overflow-hidden transition-shadow hover:shadow-md hover:-translate-y-0.5">
-          <div className="absolute top-0 left-0 right-0 h-1 rounded-t-3xl bg-red-500" />
+          <div className="absolute top-0 left-0 right-0 h-1 rounded-t-3xl bg-teal-500" />
           <div className="text-[11px] font-extrabold uppercase tracking-wide text-gray-400 dark:text-[var(--text-placeholder)]">Pagos fallidos</div>
-          <div className="text-[1.75rem] font-extrabold text-red-600 leading-tight">{totales.pagos_fallidos}</div>
+          <div className="text-[1.75rem] font-extrabold text-teal-600 leading-tight">{totales.pagos_fallidos}</div>
         </div>
         <div className="bg-white dark:bg-[var(--bg-card)] border border-gray-200 dark:border-[var(--border-subtle)] rounded-3xl p-5 flex flex-col gap-1.5 relative overflow-hidden transition-shadow hover:shadow-md hover:-translate-y-0.5">
-          <div className="absolute top-0 left-0 right-0 h-1 rounded-t-3xl bg-amber-500" />
+          <div className="absolute top-0 left-0 right-0 h-1 rounded-t-3xl bg-sky-500" />
           <div className="text-[11px] font-extrabold uppercase tracking-wide text-gray-400 dark:text-[var(--text-placeholder)]">Pendientes</div>
-          <div className="text-[1.75rem] font-extrabold text-amber-600 leading-tight">{totales.pagos_pendientes}</div>
+          <div className="text-[1.75rem] font-extrabold text-sky-600 leading-tight">{totales.pagos_pendientes}</div>
         </div>
       </div>
       <div className="flex gap-2 mb-5 flex-wrap" style={{ marginTop:'20px' }}>
@@ -156,7 +156,7 @@ export default function PaymentPanel({ vendedorPagos, totales, filter, onFilterC
           <button key={f} className={`px-4 py-2.5 border-2 rounded-lg text-[13px] font-semibold cursor-pointer transition-all duration-300 flex items-center gap-2
             ${filter === f ? 'bg-gray-800 text-white border-gray-800' : 'bg-white dark:bg-[var(--bg-card)] text-gray-500 dark:text-[var(--text-secondary)] border-gray-200 dark:border-[var(--border-subtle)] hover:border-gray-400 hover:text-gray-700 dark:hover:text-[var(--text-primary)]'}`}
             onClick={() => onFilterChange(f)}>
-            {f !== 'all' && <span className={`w-2 h-2 rounded-full ${f === 'paid' ? 'bg-emerald-500' : f === 'failed' ? 'bg-red-500' : 'bg-amber-500'}`} />}
+            {f !== 'all' && <span className={`w-2 h-2 rounded-full ${f === 'paid' ? 'bg-emerald-500' : f === 'failed' ? 'bg-teal-500' : 'bg-sky-500'}`} />}
             {f === 'all' ? 'Todos' : f === 'paid' ? 'Exitosos' : f === 'failed' ? 'Fallidos' : 'Pendientes'}
           </button>
         ))}
@@ -164,7 +164,7 @@ export default function PaymentPanel({ vendedorPagos, totales, filter, onFilterC
       <div className="mt-4">
         {visible.length === 0
           ? <div className="text-center py-16 text-gray-300 flex flex-col items-center"><svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg><p className="mt-4 text-[15px] text-gray-400 dark:text-[var(--text-placeholder)]">No hay transacciones aún</p></div>
-          : visible.map(v => <BoletaGrid key={v.usuario_id} vendedor={v} filter={filter} />)
+          : visible.map((v, i) => <BoletaGrid key={`${v.usuario_id}-${i}`} vendedor={v} filter={filter} />)
         }
       </div>
     </>

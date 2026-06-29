@@ -110,6 +110,10 @@ export interface PlanFromApi {
   price_subtext: string;
   use_price_mode: boolean;
   compact_visible_count: number;
+  bg_image: string | null;
+  bg_image_fit: string | null;
+  bg_image_position: string | null;
+  show_bg_in_card: boolean;
   trial_success_title: string | null;
   trial_success_message: string | null;
   trial_wait_message: string | null;

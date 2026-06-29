@@ -29,8 +29,8 @@ export default function TimelineEditor({ plansData, onSelectIcon }: Props) {
                   role="button"
                   tabIndex={0}
                   key={ik} 
-                  className={`aspect-square flex items-center justify-center bg-gray-50 dark:bg-[var(--bg-muted)] border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-lg cursor-pointer transition-all duration-200 hover:bg-blue-50 hover:border-blue-400
-                    ${plan.timelineIcon === ik ? 'bg-blue-500 border-blue-500' : ''}`}
+                  className={`aspect-square flex items-center justify-center bg-gray-50 dark:bg-[var(--bg-muted)] border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-lg cursor-pointer transition-all duration-200 hover:bg-sky-50 hover:border-sky-400
+                    ${plan.timelineIcon === ik ? 'bg-teal-500 border-teal-500' : ''}`}
                   onClick={() => onSelectIcon(plan.id, ik)}
                   onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onSelectIcon(plan.id, ik); }}
                 >

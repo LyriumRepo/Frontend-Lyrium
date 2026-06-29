@@ -1,7 +1,8 @@
 'use client';
 
 import { useCheckoutStore } from '@/store/checkoutStore';
-import { Download } from 'lucide-react';
+import { Download, Image as LucideImage, Share2, MessageCircle, Mail, Check, X, FileText, Loader2, Facebook, Twitter } from 'lucide-react';
+import { useState } from 'react';
 
 const TOP_IMG =
   'https://fv5-5.files.fm/thumb_show.php?i=msu7t9u4py&view&v=1&PHPSESSID=53ba53ad2030b8e5aae3cf48c4ba83f8e248150a';
@@ -10,6 +11,58 @@ const BOTTOM_IMG =
 
 export default function BoletaView() {
   const result = useCheckoutStore((s) => s.orderResult);
+  const [downloadingPng, setDownloadingPng] = useState(false);
+  const [showShare, setShowShare] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [pngError, setPngError] = useState(false);
+
+  const handleDownloadPng = async () => {
+    setDownloadingPng(true);
+    setPngError(false);
+
+    const origError = console.error;
+    console.error = (...args: any[]) => {
+      const msg = args.join(' ');
+      if (
+        msg.includes('cssRules') ||
+        msg.includes('insertRule') ||
+        msg.includes('@charset') ||
+        msg.includes('@import') ||
+        msg.includes('krtoolbar')
+      ) return;
+      origError.apply(console, args);
+    };
+
+    try {
+      const { toPng } = await import('html-to-image');
+      const node = document.getElementById('boleta-content');
+      if (!node) return;
+
+      const dataUrl = await toPng(node, { quality: 1, pixelRatio: 2, cacheBust: true });
+
+      const link = document.createElement('a');
+      link.download = `boleta-${result?.orderId || 'pedido'}.png`;
+      link.href = dataUrl;
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch {
+      setPngError(true);
+    } finally {
+      console.error = origError;
+      setDownloadingPng(false);
+    }
+  };
+
+  const handleShare = () => {
+    const url = `${window.location.origin}/checkout`;
+    if (navigator.share) {
+      navigator.share({ title: 'Mi compra en Lyrium', url });
+    } else {
+      setShowShare(true);
+    }
+  };
 
   if (!result) return null;
 
@@ -83,18 +136,39 @@ export default function BoletaView() {
       >
         <div id="boleta-print-area" className="space-y-6 print:space-y-4">
           {/* Botón descargar */}
-          <div className="flex justify-end no-print">
+          <div className="flex items-center justify-end gap-3 no-print">
+            <button
+              type="button"
+              onClick={handleShare}
+              className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-white dark:bg-[var(--bg-card)] text-gray-700 dark:text-[var(--text-primary)] border-2 border-gray-200 dark:border-[var(--border-subtle)] font-black text-xs uppercase tracking-widest hover:bg-gray-50 dark:hover:bg-[var(--bg-muted)] transition-all shadow-lg"
+            >
+              <Share2 className="w-4 h-4" /> Compartir
+            </button>
+            <button
+              type="button"
+              onClick={handleDownloadPng}
+              disabled={downloadingPng}
+              className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-emerald-500 text-white font-black text-xs uppercase tracking-widest hover:bg-emerald-600 transition-all shadow-lg disabled:opacity-50"
+            >
+              {downloadingPng ? <Loader2 className="w-4 h-4 animate-spin" /> : <LucideImage className="w-4 h-4" />} {downloadingPng ? '...' : 'PNG'}
+            </button>
             <button
               type="button"
               onClick={handlePrint}
-              className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-sky-500 text-white font-black text-xs uppercase tracking-widest hover:bg-sky-600 transition-all shadow-lg"
+              className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-sky-500 text-white font-black text-xs uppercase tracking-widest hover:bg-sky-600 transition-all shadow-lg"
             >
-              <Download className="w-4 h-4" /> Descargar Boleta
+              <Download className="w-4 h-4" /> PDF
             </button>
           </div>
 
+          {pngError && (
+            <div className="text-center text-red-500 text-xs font-semibold no-print bg-red-50 dark:bg-red-900/20 py-2 px-4 rounded-xl">
+              Error al generar PNG. Intenta con PDF o compártela.
+            </div>
+          )}
+
           {/* Boleta */}
-          <div className="bg-white rounded-2xl overflow-hidden shadow-xl border border-gray-200 print:border-0 print:shadow-none print:rounded-none">
+          <div id="boleta-content" className="bg-white rounded-2xl overflow-hidden shadow-xl border border-gray-200 print:border-0 print:shadow-none print:rounded-none">
             {/* Imagen Superior */}
             <img
               id="boleta-top-img"
@@ -285,10 +359,50 @@ export default function BoletaView() {
           </div>
 
           <p className="text-center text-[10px] text-gray-400 font-medium no-print">
-            Usa el botón Descargar o Ctrl+P para guardar la boleta
+            Usa los botones para descargar o compartir tu boleta
           </p>
         </div>
       </div>
+
+      {/* Share Modal */}
+      {showShare && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setShowShare(false)}>
+          <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-800 w-full max-w-sm mx-4 p-6" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-slate-800 dark:text-[var(--text-primary)]">Compartir</h3>
+              <button onClick={() => setShowShare(false)} className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-gray-800 transition">
+                <X className="w-5 h-5 text-slate-500" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-4 gap-3 mb-5">
+              <a href={`https://wa.me/?text=${encodeURIComponent('Mi compra en Lyrium ' + window.location.origin + '/checkout')}`} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-gray-800 transition">
+                <div className="w-11 h-11 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600"><MessageCircle className="w-5 h-5" /></div>
+                <span className="text-[10px] font-semibold text-slate-600 dark:text-[var(--text-muted)]">WhatsApp</span>
+              </a>
+              <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.origin + '/checkout')}`} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-gray-800 transition">
+                <div className="w-11 h-11 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600"><Facebook className="w-5 h-5" /></div>
+                <span className="text-[10px] font-semibold text-slate-600 dark:text-[var(--text-muted)]">Facebook</span>
+              </a>
+              <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent('Mi compra en Lyrium ' + window.location.origin + '/checkout')}`} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-gray-800 transition">
+                <div className="w-11 h-11 rounded-full bg-sky-100 dark:bg-sky-900/30 flex items-center justify-center text-sky-600"><Twitter className="w-5 h-5" /></div>
+                <span className="text-[10px] font-semibold text-slate-600 dark:text-[var(--text-muted)]">Twitter / X</span>
+              </a>
+              <a href={`mailto:?subject=${encodeURIComponent('Mi compra en Lyrium')}&body=${encodeURIComponent(window.location.origin + '/checkout')}`} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-gray-800 transition">
+                <div className="w-11 h-11 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600"><Mail className="w-5 h-5" /></div>
+                <span className="text-[10px] font-semibold text-slate-600 dark:text-[var(--text-muted)]">Correo</span>
+              </a>
+            </div>
+
+            <div className="flex items-center gap-2 p-3 bg-slate-50 dark:bg-[var(--bg-card)] rounded-xl">
+              <input type="text" readOnly value={`${window.location.origin}/checkout`} className="flex-1 text-xs bg-transparent text-slate-600 dark:text-[var(--text-muted)] outline-none truncate" />
+              <button onClick={async () => { await navigator.clipboard.writeText(`${window.location.origin}/checkout`); setCopied(true); setTimeout(() => { setCopied(false); setShowShare(false); }, 2000); }} className="flex items-center gap-1 px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-xs font-semibold transition shrink-0">
+                {copied ? <><Check className="w-3.5 h-3.5" /> Copiado</> : <><FileText className="w-3.5 h-3.5" /> Copiar</>}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { motion } from 'framer-motion';
 import { blogApi } from '@/shared/lib/api/blog';
 import { Play, Clock, ExternalLink } from 'lucide-react';
 
@@ -91,32 +93,29 @@ export default function ShortsSection() {
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {shorts.map((short) => (
-              <a
+            {shorts.map((short, index) => (
+              <motion.div
                 key={short.id}
-                href={short.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={(e) => {
-                    e.preventDefault();
-                    blogApi.registerShortView(short.id);
-                    window.open(short.url, '_blank');
-                }}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: index * 0.06 }}
                 className="group relative rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 bg-slate-100 dark:bg-[#1e2a2a] aspect-[9/16]"
               >
+                <Link href={`/bioblog/short/${short.id}`} className="absolute inset-0 z-10" />
                 {short.cover_image || short.thumbnail ? (
                   <img
                     src={short.cover_image || short.thumbnail || ''}
                     alt={short.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 pointer-events-none"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center">
+                  <div className="w-full h-full flex items-center justify-center pointer-events-none">
                     <Play className="w-12 h-12 text-slate-400" />
                   </div>
                 )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-4">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent pointer-events-none" />
+                <div className="absolute bottom-0 left-0 right-0 p-4 z-20 pointer-events-none">
                   <h4 className="text-sm font-bold text-white line-clamp-2 mb-1">
                     {short.title}
                   </h4>
@@ -127,7 +126,7 @@ export default function ShortsSection() {
                     </span>
                   )}
                 </div>
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-none">
                   <div className="w-14 h-14 bg-white/90 rounded-full flex items-center justify-center shadow-xl transform scale-90 group-hover:scale-100 transition-transform">
                     <Play
                       className="w-7 h-7 ml-0.5 text-slate-800"
@@ -135,10 +134,10 @@ export default function ShortsSection() {
                     />
                   </div>
                 </div>
-                <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-none">
                   <ExternalLink className="w-4 h-4 text-white" />
                 </div>
-              </a>
+              </motion.div>
             ))}
           </div>
         )}

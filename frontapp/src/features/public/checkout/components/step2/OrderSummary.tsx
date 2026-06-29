@@ -126,7 +126,7 @@ export default function OrderSummary() {
     if (!isNaN(num) && num > 0 && liriosEligibility) {
       const max = liriosEligibility.max_lirios_usables;
       const clamped = Math.min(num, max);
-      setOrderData({ liriosUsed: clamped, liriosDiscount: clamped });
+      setOrderData({ liriosUsed: clamped, liriosDiscount: clamped / 100 });
     } else {
       setOrderData({ liriosUsed: 0, liriosDiscount: 0 });
     }
@@ -261,26 +261,26 @@ export default function OrderSummary() {
                     <Image src="/img/intro/Flor6.png" alt="" fill className="object-contain" />
                   </div>
                   <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wide">
-                    Lirios
+                    Lyriopuntos
                   </span>
                 </div>
                 {liriosLoading ? (
                   <div className="w-4 h-4 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />
                 ) : (
-                  <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400">
-                    {liriosEligibility.balance} disponibles
+                    <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400">
+                    {liriosEligibility.balance} lyriopuntos disponibles
                   </span>
                 )}
               </div>
               <p className="text-[10px] text-emerald-600 dark:text-emerald-500 leading-relaxed">
-                Máximo descuento: <strong>S/ {liriosEligibility.max_discount.toFixed(2)}</strong> ({liriosEligibility.max_lirios_usables} Lirios)
+                Máximo descuento: <strong>S/ {liriosEligibility.max_discount.toFixed(2)}</strong> ({liriosEligibility.max_lirios_usables} lyriopuntos)
               </p>
               <div className="flex gap-2">
                 <input
                   type="number"
                   min={0}
                   max={liriosEligibility.max_lirios_usables}
-                  placeholder="0 Lirios"
+                  placeholder="0 lyriopuntos"
                   value={liriosInput}
                   onChange={(e) => handleLiriosChange(e.target.value)}
                   className="w-full px-3 py-2 border-2 border-emerald-200 dark:border-emerald-700/50 rounded-xl text-xs bg-white dark:bg-[var(--bg-muted)] focus:bg-white dark:focus:bg-[var(--bg-card)] focus:border-emerald-400 dark:focus:border-emerald-500 focus:outline-none transition-all text-gray-800 dark:text-[var(--text-primary)]"
@@ -290,7 +290,7 @@ export default function OrderSummary() {
                   onClick={() => {
                     const max = liriosEligibility.max_lirios_usables;
                     setLiriosInput(String(max));
-                    setOrderData({ liriosUsed: max, liriosDiscount: max });
+                    setOrderData({ liriosUsed: max, liriosDiscount: max / 100 });
                   }}
                   className="px-3 py-2 bg-emerald-100 dark:bg-emerald-800/40 hover:bg-emerald-200 dark:hover:bg-emerald-700/50 text-emerald-700 dark:text-emerald-300 rounded-xl font-bold text-[10px] transition-all whitespace-nowrap"
                 >
@@ -335,7 +335,7 @@ export default function OrderSummary() {
                 <div className="relative w-4 h-4">
                   <Image src="/img/intro/Flor6.png" alt="" fill className="object-contain" />
                 </div>
-                Lirios
+                Lyriopuntos ({orderData.liriosUsed})
               </span>
               <span className="font-semibold text-emerald-600 dark:text-emerald-400">
                 -S/ {orderData.liriosDiscount.toFixed(2)}

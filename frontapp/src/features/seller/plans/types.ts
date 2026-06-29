@@ -35,7 +35,7 @@ export interface PlanData {
   cssColor?: string;
   accentColor?: string;
   bgImage?: string;
-  bgImageFit?: 'cover' | 'contain';
+  bgImageFit?: 'cover' | 'contain' | 'fill';
   bgImagePosition?: string;
   showBgInCard?: boolean;
   customCSS?: string;
@@ -55,6 +55,7 @@ export interface PlanData {
   compactVisibleCount?: number;
   isActive?: boolean;
   orden?: number;
+  commissionRate?: number;
   commission_rate?: number;
 }
 

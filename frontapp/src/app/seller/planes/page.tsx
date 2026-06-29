@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { usePlanes } from '@/features/seller/plans/hooks/usePlanes';
 import { useSSE } from '@/features/seller/plans/hooks/useSSE';
 import { motivationalMessages, notificationMessages } from '@/features/seller/plans/lib/plans';
@@ -9,6 +10,7 @@ import { apiGet } from '@/features/seller/plans/lib/api';
 import AccessBlocked from '@/features/seller/plans/shared/AccessBlocked';
 import Notification from '@/features/seller/plans/shared/Notification';
 import Modal from '@/features/seller/plans/shared/Modal';
+import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import Timeline from '@/features/seller/plans/components/Timeline';
 import CurrentPlanCard from '@/features/seller/plans/components/CurrentPlanCard';
 import Showcase from '@/features/seller/plans/components/Showcase';
@@ -20,15 +22,35 @@ import ExpiracionBanner from '@/features/seller/plans/components/ExpiracionBanne
 import IzipayModal from '@/features/public/checkout/components/modals/IzipayModal';
 import { useIzipay } from '@/features/public/checkout/hooks/useIzipay';
 
+function SkeletonPage() {
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="max-w-6xl mx-auto px-4 py-24">
+        <div className="space-y-6">
+          <div className="flex justify-center gap-3 mb-12">
+            {[1, 2].map(i => (
+              <div key={i} className="h-10 w-32 rounded-xl bg-gray-200 dark:bg-gray-700 animate-pulse" />
+            ))}
+          </div>
+          <div className="h-10 w-64 mx-auto rounded-xl bg-gray-200 dark:bg-gray-700 animate-pulse" />
+          <div className="h-5 w-96 mx-auto rounded-lg bg-gray-200 dark:bg-gray-700 animate-pulse" />
+          <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="h-80 rounded-2xl bg-gray-200 dark:bg-gray-700 animate-pulse" />
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function PlanesPage() {
   const planes = usePlanes();
   const { state } = planes;
   const [motivationIndex, setMotivationIndex] = useState(0);
   const [showBanner, setShowBanner] = useState(true);
 
-  // Inicialización automática vía usePlanes (useEffect interno con authLoading)
-
-  // Apply button colors as CSS vars
   useEffect(() => {
     const c = state.buttonColors;
     const r = document.documentElement.style;
@@ -41,7 +63,6 @@ export default function PlanesPage() {
     if (c.warningColor) r.setProperty('--claimed-text-color', c.warningColor);
   }, [state.buttonColors]);
 
-  // Inject custom CSS for plan
   useEffect(() => {
     let el = document.getElementById('lyrium-custom-css');
     if (!el) { el = document.createElement('style'); el.id = 'lyrium-custom-css'; document.head.appendChild(el); }
@@ -49,33 +70,27 @@ export default function PlanesPage() {
     el.textContent = (data?.customCSS) ? data.customCSS : '';
   }, [state.currentPlan, state.plansData]);
 
-  // Initial notification — solo se dispara cuando isLoaded pasa de false a true
   const showNotification = planes.showNotification;
   useEffect(() => {
     if (!state.isLoaded) return;
     const msg = notificationMessages[Math.floor(Math.random() * notificationMessages.length)];
-    showNotification(msg, '#3b82f6');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    showNotification(msg, '#14b8a6');
   }, [state.isLoaded]);
 
-  // Motivational message rotation
   useEffect(() => {
     const interval = setInterval(() => setMotivationIndex(i => (i + 1) % motivationalMessages.length), 180000);
     return () => clearInterval(interval);
   }, []);
 
-  // Days-left notification
   useEffect(() => {
     if (!state.isLoaded || !state.subscriptionInfo?.expiryDate) return;
     const daysLeft = Math.ceil((new Date(state.subscriptionInfo.expiryDate).getTime() - Date.now()) / 86400000);
     if (daysLeft > 0 && daysLeft <= 15) {
-      const timer = setTimeout(() => showNotification(`⚠ Tu plan vence en ${daysLeft} día${daysLeft === 1 ? '' : 's'}. ¡Renueva ahora!`, '#f59e0b'), 2500);
+      const timer = setTimeout(() => showNotification(`Tu plan vence en ${daysLeft} día${daysLeft === 1 ? '' : 's'}. Renueva ahora.`, '#f59e0b'), 2500);
       return () => clearTimeout(timer);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.isLoaded, state.subscriptionInfo?.expiryDate]);
 
-  // Keyboard carousel nav
   const carouselStep = planes.carouselStep;
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -87,7 +102,6 @@ export default function PlanesPage() {
     return () => document.removeEventListener('keydown', handler);
   }, [state.activeTab, carouselStep]);
 
-  // SSE
   const { disconnect: disconnectSSE } = useSSE(
     'planes', state.userId,
     {
@@ -105,15 +119,13 @@ export default function PlanesPage() {
     state.isLoaded && !state.isBlocked,
   );
 
-  // ── Izipay SDK ────────────────────────────────────────────────────────────
   const [izipayError, setIzipayError] = useState<string | null>(null);
 
   const handleIzipaySuccess = useCallback(() => {
     planes.setModal('izipayPay', false);
     setIzipayError(null);
     planes.setModal('waitingPayment', true);
-    
-    // Poll /subscriptions/current until plan changes or timeout
+
     const planIdBefore = state.subscriptionInfo?.planId || '';
     let attempts = 0;
     const poll = setInterval(async () => {
@@ -142,33 +154,25 @@ export default function PlanesPage() {
     isSdkReady: izipaySdkReady,
   } = useIzipay({ onSuccess: handleIzipaySuccess });
 
-  // Inyectar formToken cuando el modal se abre y está montado en el DOM
   useEffect(() => {
-    console.log('[page] izipayPay effect:', { modals: state.modals.izipayPay, hasToken: !!state.izipayConfig?.formToken, sdkReady: izipaySdkReady });
     if (state.modals.izipayPay && state.izipayConfig?.formToken) {
       setIzipayError(null);
       loadSmartForm(state.izipayConfig.formToken);
     }
   }, [state.modals.izipayPay, state.izipayConfig, loadSmartForm, izipaySdkReady]);
 
-  // Sincronizar error del SDK al estado local
   useEffect(() => {
     if (izipaySdkError) setIzipayError(izipaySdkError);
   }, [izipaySdkError]);
 
-  if (!state.isLoaded) {
-    return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#f9fafb' }}>
-      <div style={{ width: '40px', height: '40px', border: '3px solid #e5e7eb', borderTopColor: '#3b82f6', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }}></div>
-    </div>;
-  }
+  if (!state.isLoaded) return <SkeletonPage />;
 
   if (state.isBlocked && state.blockInfo) return <AccessBlocked {...state.blockInfo} />;
 
   const hasPending = planes.hasPendingRequest();
 
   return (
-    <>
-      {/* Notification */}
+    <div className="min-h-screen bg-[var(--bg-secondary)]">
       {state.notification && (
         <Notification
           msg={state.notification.msg}
@@ -178,56 +182,77 @@ export default function PlanesPage() {
         />
       )}
 
-      {/* Tabs */}
-      <nav className="tabs-nav">
-        <button className={`tab-btn ${state.activeTab === 'my-plan' ? 'active' : ''}`} data-tab="my-plan" onClick={() => planes.switchTab('my-plan')}>
-          <svg className="tab-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
-          Mi Plan
-        </button>
-        <button className={`tab-btn ${state.activeTab === 'all-plans' ? 'active' : ''}`} data-tab="all-plans" onClick={() => planes.switchTab('all-plans')}>
-          <svg className="tab-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /></svg>
-          Planes
-        </button>
-      </nav>
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
+        <ModuleHeader
+          title="Mi Plan"
+          subtitle="Gestiona tu suscripción en LYRIUM Biomarketplace"
+          icon="UserCheck"
+        />
 
-      <div className="container">
-
-        {/* ── PESTAÑA: MI PLAN ── */}
-        <div className={`tab-panel ${state.activeTab === 'my-plan' ? 'active' : ''}`} id="panel-my-plan">
-          {showBanner && (
-            <ExpiracionBanner
-              avisoPorVencer={state.avisoPorVencer}
-              subscriptionInfo={state.subscriptionInfo}
-              currentPlan={state.currentPlan}
-              plansData={state.plansData}
-              onClose={() => setShowBanner(false)}
-            />
-          )}
-
-          <h1 className="my-plan-title animate-title">Mi Plan Actual</h1>
-          <p className="my-plan-subtitle animate-subtitle">Gestiona tu suscripción en LYRIUM Biomarketplace</p>
-
-          <Timeline
-            planOrder={state.planOrder} plansData={state.plansData}
-            activePlan={state.currentPlan} suffix="MyPlan"
-            onPointClick={plan => { }}
-          />
-
-          <div className="motivation-section">
-            <div className="motivation-card-modern">
-              <div className="motivation-icon-modern">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="10" /><path d="M12 16v-4M12 8h.01" />
+        {/* Tabs */}
+        <div className="flex justify-center mb-10">
+          <div className="inline-flex items-center gap-1 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl p-1.5 shadow-lg shadow-black/5 border border-gray-200/50 dark:border-gray-700/50">
+            {[
+              { id: 'my-plan', label: 'Mi Plan', icon: 'M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 7a4 4 0 1 0 0-8 4 4 0 0 0 0 8z' },
+              { id: 'all-plans', label: 'Planes', icon: 'M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z' },
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => planes.switchTab(tab.id as 'my-plan' | 'all-plans')}
+                className={`relative flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 ${
+                  state.activeTab === tab.id
+                    ? 'text-white shadow-lg'
+                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
+                }`}
+              >
+                {state.activeTab === tab.id && (
+                  <motion.div
+                    layoutId="tab-bg"
+                    className="absolute inset-0 rounded-xl bg-gradient-to-r from-teal-500 via-sky-500 to-emerald-500"
+                    transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                  />
+                )}
+                <svg className="relative z-10 w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d={tab.icon} />
                 </svg>
-              </div>
-              <p className="motivation-text-modern">{motivationalMessages[motivationIndex]}</p>
-            </div>
+                <span className="relative z-10">{tab.label}</span>
+              </button>
+            ))}
           </div>
-          <br />
+        </div>
 
-          <div className="my-plan-layout">
-            <div className="current-plan-section-wrapper animate-card-entrance">
-              <div className="current-plan-wrapper">
+        <AnimatePresence mode="wait">
+          {state.activeTab === 'my-plan' ? (
+            <motion.div
+              key="my-plan"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            >
+              {showBanner && (
+                <ExpiracionBanner
+                  avisoPorVencer={state.avisoPorVencer}
+                  subscriptionInfo={state.subscriptionInfo}
+                  currentPlan={state.currentPlan}
+                  plansData={state.plansData}
+                  onClose={() => setShowBanner(false)}
+                />
+              )}
+
+
+
+              <Timeline
+                planOrder={state.planOrder} plansData={state.plansData}
+                activePlan={state.currentPlan} suffix="MyPlan"
+                onPointClick={() => {}}
+              />
+
+              <motion.div
+                initial={{ opacity: 0, y: 30, scale: 0.97 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ delay: 0.25, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+              >
                 <CurrentPlanCard
                   currentPlan={state.currentPlan}
                   plansData={state.plansData}
@@ -236,64 +261,83 @@ export default function PlanesPage() {
                   onToggleDetails={planes.toggleDetails}
                   onFeatureClick={planes.onFeatureClick}
                 />
-              </div>
-            </div>
-          </div>
+              </motion.div>
 
-          {hasPending && (
-            <div className="pending-request-banner" id="pendingBanner">
-              <div className="pending-icon">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
-                </svg>
-              </div>
-              <p>Tienes una solicitud de cambio de plan pendiente de aprobación.</p>
-            </div>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.35, duration: 0.5 }}
+                className="mt-6 p-5 rounded-2xl bg-gradient-to-r from-teal-50 via-sky-50 to-emerald-50 dark:from-teal-900/20 dark:via-sky-900/20 dark:to-emerald-900/20 border border-teal-200/30 dark:border-teal-700/30"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-teal-500/10 dark:bg-teal-500/20 flex items-center justify-center text-teal-600 dark:text-teal-400 shrink-0">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">{motivationalMessages[motivationIndex]}</p>
+                </div>
+              </motion.div>
+
+              {hasPending && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  className="mt-6 flex items-center gap-3 p-4 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/30"
+                >
+                  <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-800 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  </div>
+                  <p className="text-sm font-medium text-amber-800 dark:text-amber-300">Tienes una solicitud de cambio de plan pendiente de aprobación.</p>
+                </motion.div>
+              )}
+            </motion.div>
+          ) : (
+            <motion.div
+              key="all-plans"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            >
+
+
+              <Timeline
+                planOrder={state.planOrder} plansData={state.plansData}
+                activePlan={state.showcasePlan} suffix="Plans"
+                onPointClick={planes.selectCarouselPlan}
+              />
+
+              <Showcase
+                showcasePlan={state.showcasePlan}
+                plansData={state.plansData}
+                planOrder={state.planOrder}
+                currentPlan={state.currentPlan}
+                claimedPlans={state.claimedPlans}
+                hasPendingRequest={hasPending}
+                onOpenPayment={planes.openPaymentModal}
+                onClaimFree={planes.claimFreePlan}
+                onOpenDowngrade={planes.openDowngradeModal}
+                onFeatureClick={planes.onFeatureClick}
+              />
+
+              <Carousel
+                planOrder={state.planOrder}
+                plansData={state.plansData}
+                showcasePlan={state.showcasePlan}
+                carouselIndex={state.carouselIndex}
+                currentPlan={state.currentPlan}
+                claimedPlans={state.claimedPlans}
+                expandedCards={state.expandedCards}
+                onSelect={planes.selectCarouselPlan}
+                onStep={planes.carouselStep}
+                onToggleCard={planes.toggleCarouselCard}
+                onFeatureClick={planes.onFeatureClick}
+              />
+            </motion.div>
           )}
-        </div>
-
-        {/* ── PESTAÑA: PLANES ── */}
-        <div className={`tab-panel ${state.activeTab === 'all-plans' ? 'active' : ''}`} id="panel-all-plans">
-          <h1 className="plans-tab-title">Explora Nuestros Planes</h1>
-          <p className="plans-tab-subtitle">Elige el plan perfecto para tu tienda en LYRIUM Biomarketplace</p>
-
-          <Timeline
-            planOrder={state.planOrder} plansData={state.plansData}
-            activePlan={state.showcasePlan} suffix="Plans"
-            onPointClick={planes.selectCarouselPlan}
-          />
-
-          <Showcase
-            showcasePlan={state.showcasePlan}
-            plansData={state.plansData}
-            planOrder={state.planOrder}
-            currentPlan={state.currentPlan}
-            claimedPlans={state.claimedPlans}
-            hasPendingRequest={hasPending}
-            onOpenPayment={planes.openPaymentModal}
-            onClaimFree={planes.claimFreePlan}
-            onOpenDowngrade={planes.openDowngradeModal}
-            onFeatureClick={planes.onFeatureClick}
-          />
-
-          <Carousel
-            planOrder={state.planOrder}
-            plansData={state.plansData}
-            showcasePlan={state.showcasePlan}
-            carouselIndex={state.carouselIndex}
-            currentPlan={state.currentPlan}
-            claimedPlans={state.claimedPlans}
-            expandedCards={state.expandedCards}
-            onSelect={planes.selectCarouselPlan}
-            onStep={planes.carouselStep}
-            onToggleCard={planes.toggleCarouselCard}
-            onFeatureClick={planes.onFeatureClick}
-          />
-        </div>
-
+        </AnimatePresence>
       </div>
 
-      {/* ── MODALS ── */}
+      {/* MODALS */}
       <PaymentModal
         open={state.modals.payment}
         plan={state.selectedPaymentPlan}
@@ -307,15 +351,18 @@ export default function PlanesPage() {
         onProcess={() => { disconnectSSE(); planes.processPayment(); }}
       />
 
-      <Modal open={state.modals.requestSent} onClose={planes.closeRequestSentModal} className="request-sent-modal" showClose={false}>
-        <div style={{ textAlign: 'center', padding: '8px' }}>
-          <div className="waiting-icon">
-            <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="1.5">
-              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" />
-            </svg>
-          </div>
-          <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(state.sentText) }} style={{ marginTop: '12px', lineHeight: 1.6 }} />
-          <button className="btn-sent-ok" style={{ marginTop: '20px' }} onClick={planes.closeRequestSentModal}>Entendido</button>
+      <Modal open={state.modals.requestSent} onClose={planes.closeRequestSentModal} className="" showClose={false}>
+        <div className="text-center py-4 px-2">
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+            className="w-16 h-16 mx-auto mb-4 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center"
+          >
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          </motion.div>
+          <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(state.sentText) }} className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed" />
+          <button className="mt-5 px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold transition-all hover:shadow-lg hover:shadow-emerald-500/25 active:scale-95" onClick={planes.closeRequestSentModal}>Entendido</button>
         </div>
       </Modal>
 
@@ -353,19 +400,18 @@ export default function PlanesPage() {
 
       <IzipayModal isOpen={state.modals.izipayPay} onClose={() => { planes.setModal('izipayPay', false); setIzipayError(null); }} error={izipayError} />
 
-      <Modal open={state.modals.waitingPayment} onClose={() => planes.setModal('waitingPayment', false)} className="waiting-admin-modal" showClose={false}>
-        <div className="waiting-icon">
-          <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2">
-            <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
-          </svg>
+      <Modal open={state.modals.waitingPayment} onClose={() => planes.setModal('waitingPayment', false)} className="" showClose={false}>
+        <div className="text-center py-4">
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
+            className="w-16 h-16 mx-auto mb-4 rounded-full border-4 border-emerald-100 dark:border-emerald-900/30 border-t-emerald-500"
+          />
+          <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-2">Confirmando tu pago</h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Estamos verificando tu pago con Izipay. No cierres esta ventana.</p>
+          <button className="px-6 py-2 rounded-xl bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 text-sm font-medium transition-all" onClick={() => planes.setModal('waitingPayment', false)}>Cerrar (seguir esperando)</button>
         </div>
-        <h2 className="waiting-title">Confirmando tu pago</h2>
-        <p className="waiting-text">Estamos verificando tu pago con Izipay. No cierres esta ventana.</p>
-        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '16px' }}>
-          <div className="payment-spinner"></div>
-        </div>
-        <button className="btn-sent-ok" style={{ marginTop: '20px', background: '#6b7280' }} onClick={() => planes.setModal('waitingPayment', false)}>Cerrar (seguir esperando)</button>
       </Modal>
-    </>
+    </div>
   );
 }

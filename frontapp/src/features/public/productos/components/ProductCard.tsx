@@ -1,6 +1,7 @@
 'use client';
 
-import { Star, ShieldCheck, Leaf, FolderOpen, Package } from 'lucide-react';
+import { Star, ShieldCheck, Leaf, FolderOpen, Package, ExternalLink } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 const NO_IMAGE = '/img/no-image.png';
 
@@ -40,7 +41,7 @@ export function fromApiProduct(p: any): ProductCardData {
   return {
     id: p.id,
     name: p.nombre,
-    slug: String(p.id),
+    slug: p.slug ?? String(p.id),
     imageUrl: p.imagen_url,
     price: finalPrice,
     originalPrice: hasOffer ? basePrice : undefined,
@@ -84,6 +85,7 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product: p, onAdd, onView, adding, added }: ProductCardProps) {
+  const router = useRouter();
   const outOfStock = p.stock <= 0;
   const hasOffer = !!p.originalPrice && p.originalPrice > p.price;
 
@@ -113,7 +115,7 @@ export default function ProductCard({ product: p, onAdd, onView, adding, added }
           </div>
         )}
 
-        <span className="absolute top-3 left-3 inline-flex items-center gap-1 text-[11px] px-3 py-1 rounded-full bg-white/85 dark:bg-[var(--bg-card)]/85 border border-sky-100 dark:border-[var(--border-subtle)] backdrop-blur-sm text-slate-700 dark:text-[var(--text-primary)] shadow-sm">
+        <span className="absolute bottom-3 left-3 inline-flex items-center gap-1 text-[11px] px-3 py-1 rounded-full bg-white/85 dark:bg-[var(--bg-card)]/85 border border-sky-100 dark:border-[var(--border-subtle)] backdrop-blur-sm text-slate-700 dark:text-[var(--text-primary)] shadow-sm">
           <Leaf className="w-3 h-3 text-sky-500 dark:text-[var(--brand-sky)]" /> Lyrium
         </span>
 
@@ -179,7 +181,7 @@ export default function ProductCard({ product: p, onAdd, onView, adding, added }
             )}
         </div>
 
-        <div className="flex items-end justify-between mt-1">
+        <div className="flex items-baseline justify-between mt-1">
           <div>
             <p className="text-emerald-700 dark:text-emerald-400 text-xl font-bold">{formatPrice(p.price)}</p>
             {hasOffer
@@ -187,8 +189,8 @@ export default function ProductCard({ product: p, onAdd, onView, adding, added }
               : <p className="text-xs text-transparent">-</p>
             }
           </div>
-          <span className={`text-xs inline-flex items-center gap-1 ${outOfStock ? 'text-rose-500' : 'text-slate-400 dark:text-[var(--text-muted)]'}`}>
-            <Package className="w-3 h-3 text-sky-500 dark:text-[var(--brand-sky)]" />
+          <span className={`text-sm inline-flex items-center gap-1 ${outOfStock ? 'text-rose-500' : 'text-slate-400 dark:text-[var(--text-muted)]'}`}>
+            <Package className="w-3.5 h-3.5 text-sky-500 dark:text-[var(--brand-sky)]" />
             {outOfStock ? 'Agotado' : p.stock ? `Stock: ${p.stock}` : 'Disponible'}
           </span>
         </div>
@@ -205,14 +207,12 @@ export default function ProductCard({ product: p, onAdd, onView, adding, added }
           >
             {adding ? '⟳' : added ? '✓' : '🛒'} {outOfStock ? 'No disponible' : adding ? 'Agregando...' : added ? '¡Listo!' : 'Añadir'}
           </button>
-          {onView && (
-            <button
-              onClick={() => onView?.(p.id)}
-              className="py-2.5 rounded-2xl border border-sky-200 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] text-xs font-semibold text-slate-700 dark:text-[var(--text-primary)] inline-flex items-center justify-center gap-1.5 hover:bg-sky-50 dark:hover:bg-sky-900/10 transition hover:-translate-y-px"
-            >
-              🔍 Ver
-            </button>
-          )}
+          <button
+            onClick={() => router.push(`/producto/${p.slug}`)}
+            className="py-2.5 rounded-2xl border border-sky-200 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] text-xs font-semibold text-slate-700 dark:text-[var(--text-primary)] inline-flex items-center justify-center gap-1.5 hover:bg-sky-50 dark:hover:bg-sky-900/10 transition hover:-translate-y-px"
+          >
+            <ExternalLink className="w-3.5 h-3.5 text-sky-500" /> Detalle
+          </button>
         </div>
       </div>
     </article>

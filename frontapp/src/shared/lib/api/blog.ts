@@ -18,12 +18,19 @@ export interface BlogPostApi {
 
 export interface CommentApi {
     id: number;
+    user_id: number | null;
     article_id: number | null;
+    video_id: number | null;
+    podcast_id: number | null;
+    short_id: number | null;
     author_name: string;
     author_email: string;
     content: string;
     is_approved: boolean;
     created_at: string;
+    can_edit?: boolean;
+    can_delete?: boolean;
+    user?: { id: number; display_name: string; avatar?: string | null } | null;
 }
 
 function cleanUrl(url: string | null): string | null {
@@ -128,33 +135,100 @@ export const blogApi = {
         return article ? mapArticleFromApi(article) : null;
     },
 
-    getComments: async (articleId: number): Promise<CommentApi[]> => {
-        return fetchList<CommentApi>(`${API}/blog/comments?article_id=${articleId}`);
+    getComments: async (params: { article_id?: number; post_id?: number; video_id?: number; podcast_id?: number; short_id?: number }): Promise<CommentApi[]> => {
+        const query = new URLSearchParams();
+        if (params.article_id) query.set('article_id', String(params.article_id));
+        if (params.post_id) query.set('post_id', String(params.post_id));
+        if (params.video_id) query.set('video_id', String(params.video_id));
+        if (params.podcast_id) query.set('podcast_id', String(params.podcast_id));
+        if (params.short_id) query.set('short_id', String(params.short_id));
+        const headers: Record<string, string> = { 'Accept': 'application/json' };
+        const token = typeof window !== 'undefined' ? localStorage.getItem('laravel_token') : null;
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+        try {
+            const res = await fetch(`${API}/blog/comments?${query}`, { headers });
+            if (!res.ok) return [];
+            const json = await res.json();
+            if (!json.success) return [];
+            const data = json.data;
+            if (Array.isArray(data)) return data;
+            if (data?.data && Array.isArray(data.data)) return data.data;
+            return [];
+        } catch {
+            return [];
+        }
     },
 
     getVideos: async () => {
-        return fetchList<any>(`${API}/blog/videos`);
+        return fetchList<any>(`${API}/blog/published-videos`);
+    },
+
+    getVideo: async (id: number) => {
+        return fetchSingle<any>(`${API}/blog/published-videos/${id}`);
     },
 
     getPodcasts: async () => {
-        return fetchList<any>(`${API}/blog/podcasts`);
+        return fetchList<any>(`${API}/blog/published-podcasts`);
+    },
+
+    getPodcast: async (id: number) => {
+        return fetchSingle<any>(`${API}/blog/published-podcasts/${id}`);
     },
 
     getShorts: async () => {
-        return fetchList<any>(`${API}/blog/shorts`);
+        return fetchList<any>(`${API}/blog/published-shorts`);
+    },
+
+    getShort: async (id: number) => {
+        return fetchSingle<any>(`${API}/blog/published-shorts/${id}`);
     },
 
     createComment: async (data: {
-        article_id: number;
-        author_name: string;
-        author_email: string;
+        article_id?: number;
+        video_id?: number;
+        podcast_id?: number;
+        short_id?: number;
+        author_name?: string;
+        author_email?: string;
         content: string;
     }) => {
         try {
+            const token = localStorage.getItem('laravel_token');
+            const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+            if (token) headers['Authorization'] = `Bearer ${token}`;
             const res = await fetch(`${API}/blog/comments`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers,
                 body: JSON.stringify(data),
+            });
+            return await res.json();
+        } catch {
+            return null;
+        }
+    },
+
+    updateComment: async (id: number, data: { content: string }) => {
+        try {
+            const token = localStorage.getItem('laravel_token');
+            if (!token) throw new Error('No autenticado');
+            const res = await fetch(`${API}/blog/comments/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                body: JSON.stringify(data),
+            });
+            return await res.json();
+        } catch {
+            return null;
+        }
+    },
+
+    deleteComment: async (id: number) => {
+        try {
+            const token = localStorage.getItem('laravel_token');
+            if (!token) throw new Error('No autenticado');
+            const res = await fetch(`${API}/blog/comments/${id}`, {
+                method: 'DELETE',
+                headers: { Authorization: `Bearer ${token}` },
             });
             return await res.json();
         } catch {

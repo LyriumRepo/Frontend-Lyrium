@@ -23,7 +23,7 @@ export default function RequestsPanel({ requests, plansData, filter, onFilterCha
           <button key={f} className={`px-4 py-2.5 border-2 rounded-lg text-[13px] font-semibold cursor-pointer transition-all duration-300 flex items-center gap-2
             ${filter === f ? 'bg-gray-800 text-white border-gray-800' : 'bg-white dark:bg-[var(--bg-card)] text-gray-500 dark:text-[var(--text-secondary)] border-gray-200 dark:border-[var(--border-subtle)] hover:border-gray-400 hover:text-gray-700 dark:hover:text-[var(--text-primary)]'}`}
             data-filter={f} onClick={() => onFilterChange(f)}>
-            {f !== 'all' && <span className={`w-2 h-2 rounded-full ${f === 'approved' ? 'bg-emerald-500' : f === 'pending' ? 'bg-amber-500' : 'bg-red-500'}`} />}
+            {f !== 'all' && <span className={`w-2 h-2 rounded-full ${f === 'approved' ? 'bg-emerald-500' : f === 'pending' ? 'bg-sky-500' : 'bg-teal-500'}`} />}
             {f === 'all' ? 'Todas' : f === 'approved' ? 'Exitosos' : f === 'pending' ? 'Pendientes' : 'Fallidos'}
           </button>
         ))}
@@ -31,8 +31,8 @@ export default function RequestsPanel({ requests, plansData, filter, onFilterCha
 
       <div className="space-y-3 mb-6">
         {notifs.map(n => (
-          <div key={n.id} className="flex items-start gap-3 p-4 bg-white dark:bg-[var(--bg-card)] rounded-xl shadow-sm border-l-4" style={{ borderLeftColor: n.type === 'success' ? '#10b981' : '#ef4444' }}>
-            <span className="flex-shrink-0" style={{ color: n.type === 'success' ? '#10b981' : '#ef4444' }}>
+          <div key={n.id} className="flex items-start gap-3 p-4 bg-white dark:bg-[var(--bg-card)] rounded-xl shadow-sm border-l-4" style={{ borderLeftColor: n.type === 'success' ? '#059669' : '#0d9488' }}>
+            <span className="flex-shrink-0" style={{ color: n.type === 'success' ? '#059669' : '#0d9488' }}>
               {n.type === 'success'
                 ? <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                 : <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
@@ -59,7 +59,7 @@ export default function RequestsPanel({ requests, plansData, filter, onFilterCha
               const toName    = plansData[r.toPlan]?.name   ?? r.toPlan;
               const fromColor = plansData[r.fromPlan]?.cssColor ?? '#9ca3af';
               const toColor   = plansData[r.toPlan]?.cssColor   ?? '#9ca3af';
-              const statusClass = r.status === 'pending' ? 'bg-amber-100 text-amber-700' : r.status === 'approved' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700';
+              const statusClass = r.status === 'pending' ? 'bg-sky-100 text-sky-700' : r.status === 'approved' ? 'bg-emerald-100 text-emerald-700' : 'bg-teal-100 text-teal-700';
               const statusText  = r.status === 'pending' ? 'PENDIENTE' : r.status === 'approved' ? 'EXITOSO' : 'FALLIDO';
               return (
                 <div key={r.id ?? i} className="bg-white dark:bg-[var(--bg-card)] rounded-2xl p-5 border border-gray-200 dark:border-[var(--border-subtle)] shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 mx-4 my-4">
@@ -95,7 +95,7 @@ export default function RequestsPanel({ requests, plansData, filter, onFilterCha
                           if (notes) onReject(r.id, notes);
                         }}
                         disabled={approvingId === r.id || rejectingId === r.id}
-                        className="flex-1 px-3 py-2 bg-red-500 text-white text-xs font-bold rounded-lg hover:bg-red-600 disabled:opacity-50 transition-colors"
+                        className="flex-1 px-3 py-2 bg-teal-500 text-white text-xs font-bold rounded-lg hover:bg-teal-600 disabled:opacity-50 transition-colors"
                       >
                         {rejectingId === r.id ? 'Rechazando...' : '✗ Rechazar'}
                       </button>

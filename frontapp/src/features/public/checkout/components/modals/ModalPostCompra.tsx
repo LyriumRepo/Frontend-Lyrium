@@ -21,22 +21,29 @@ export default function ModalPostCompra({ isOpen, email, onClose, onSync, onOpen
             import('canvas-confetti').then(({ default: confetti }) => {
                 const duration = 3000;
                 const end = Date.now() + duration;
+                const colors = ['#84cc16', '#2BBFBF', '#38bdf8'];
 
                 const frame = () => {
                     confetti({
-                        particleCount: 3,
+                        particleCount: 4,
                         angle: 60,
-                        spread: 55,
+                        spread: 70,
                         origin: { x: 0, y: 0.6 },
-                        colors: ['#0ea5e9', '#34d399', '#fbbf24', '#f472b6', '#a78bfa'],
+                        colors,
+                        scalar: 1.8,
+                        gravity: 0.6,
+                        ticks: 250,
                         zIndex: 40000,
                     });
                     confetti({
-                        particleCount: 3,
+                        particleCount: 4,
                         angle: 120,
-                        spread: 55,
+                        spread: 70,
                         origin: { x: 1, y: 0.6 },
-                        colors: ['#0ea5e9', '#34d399', '#fbbf24', '#f472b6', '#a78bfa'],
+                        colors,
+                        scalar: 1.8,
+                        gravity: 0.6,
+                        ticks: 250,
                         zIndex: 40000,
                     });
 

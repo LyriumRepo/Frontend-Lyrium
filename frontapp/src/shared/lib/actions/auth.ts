@@ -30,6 +30,22 @@ export async function loginAction(credentials: LoginCredentials) {
 
 export async function logoutAction() {
     const cookieStore = await cookies();
+    const token = cookieStore.get('laravel_token')?.value;
+
+    if (token) {
+        try {
+            const baseUrl = process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://localhost:8000/api';
+            await fetch(`${baseUrl}/auth/logout`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+        } catch {
+            // si falla, igual limpiamos cookies
+        }
+    }
 
     cookieStore.delete('laravel_token');
     cookieStore.delete('wp_session');

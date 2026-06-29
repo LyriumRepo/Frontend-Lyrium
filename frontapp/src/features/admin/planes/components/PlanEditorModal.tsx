@@ -50,7 +50,7 @@ export default function PlanEditorModal({ open, title, activeTab, editingPlan: e
       <div className="flex gap-1 mb-6 border-b-2 border-gray-200 dark:border-[var(--border-subtle)] overflow-x-auto pb-px">
         {EDITOR_TABS.map(t => (
           <button key={t.key} className={`px-4 py-2.5 border-none bg-transparent text-[13px] font-semibold cursor-pointer transition-all duration-300 flex items-center gap-2 whitespace-nowrap border-b-3 border-transparent -mb-px
-            ${activeTab === t.key ? 'text-blue-500 border-blue-500' : 'text-gray-400 dark:text-[var(--text-placeholder)] hover:text-gray-700'}`} onClick={() => onTabChange(t.key)}>
+            ${activeTab === t.key ? 'text-teal-500 border-teal-500' : 'text-gray-400 dark:text-[var(--text-placeholder)] hover:text-gray-700'}`} onClick={() => onTabChange(t.key)}>
             {t.icon}{t.label}
           </button>
         ))}
@@ -64,22 +64,22 @@ export default function PlanEditorModal({ open, title, activeTab, editingPlan: e
               <input type="hidden" value={p.id ?? ''} readOnly />
               <div className="mb-4">
                 <label htmlFor="plan-id" className="block text-[13px] font-semibold text-gray-700 dark:text-[var(--text-primary)] mb-1.5">ID del Plan</label>
-                <input id="plan-id" type="text" value={p.id ?? ''} placeholder="ej: plan_pro (sin espacios)" className="w-full px-3.5 py-2.5 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-lg text-sm transition-all focus:outline-none focus:border-blue-500"
+                <input id="plan-id" type="text" value={p.id ?? ''} placeholder="ej: plan_pro (sin espacios)" className="w-full px-3.5 py-2.5 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-lg text-sm transition-all focus:outline-none focus:border-teal-500"
                   onChange={e => onUpdatePlan({ id: e.target.value })} disabled={['basic','standard','premium'].includes(p.id ?? '')} />
               </div>
               <div className="mb-4">
                 <label htmlFor="plan-name" className="block text-[13px] font-semibold text-gray-700 dark:text-[var(--text-primary)] mb-1.5">Nombre del Plan *</label>
-                <input id="plan-name" type="text" value={p.name ?? ''} placeholder="Ej: Plan Profesional" className="w-full px-3.5 py-2.5 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-lg text-sm transition-all focus:outline-none focus:border-blue-500"
+                <input id="plan-name" type="text" value={p.name ?? ''} placeholder="Ej: Plan Profesional" className="w-full px-3.5 py-2.5 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-lg text-sm transition-all focus:outline-none focus:border-teal-500"
                   onChange={e => onUpdatePlan({ name: e.target.value })} />
               </div>
               <div className="mb-4">
                 <label htmlFor="plan-badge" className="block text-[13px] font-semibold text-gray-700 dark:text-[var(--text-primary)] mb-1.5">Badge / Etiqueta</label>
-                <input id="plan-badge" type="text" value={p.badge ?? ''} placeholder="Ej: MÁS POPULAR" className="w-full px-3.5 py-2.5 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-lg text-sm transition-all focus:outline-none focus:border-blue-500"
+                <input id="plan-badge" type="text" value={p.badge ?? ''} placeholder="Ej: MÁS POPULAR" className="w-full px-3.5 py-2.5 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-lg text-sm transition-all focus:outline-none focus:border-teal-500"
                   onChange={e => onUpdatePlan({ badge: e.target.value })} />
               </div>
               <div className="mb-4">
                 <label htmlFor="plan-description" className="block text-[13px] font-semibold text-gray-700 dark:text-[var(--text-primary)] mb-1.5">Descripción</label>
-                <textarea id="plan-description" value={p.description ?? ''} rows={3} placeholder="Descripción breve del plan" className="w-full px-3.5 py-2.5 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-lg text-sm transition-all focus:outline-none focus:border-blue-500 resize-y"
+                <textarea id="plan-description" value={p.description ?? ''} rows={3} placeholder="Descripción breve del plan" className="w-full px-3.5 py-2.5 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-lg text-sm transition-all focus:outline-none focus:border-teal-500 resize-y"
                   onChange={e => onUpdatePlan({ description: e.target.value })} />
               </div>
             </div>
@@ -92,8 +92,8 @@ export default function PlanEditorModal({ open, title, activeTab, editingPlan: e
             <div className="p-5 bg-gray-50 dark:bg-[var(--bg-muted)] rounded-xl">
               <h3 className="text-base font-bold text-gray-800 dark:text-[var(--text-primary)] mb-4">Modo de Precio</h3>
               <div className="mb-5">
-                <label className="flex items-center gap-3 cursor-pointer mb-1 p-3 bg-white dark:bg-[var(--bg-card)] border border-gray-200 dark:border-[var(--border-subtle)] rounded-lg transition-all hover:border-blue-400">
-                  <input type="checkbox" checked={p.usePriceMode !== false} className="w-5 h-5 accent-blue-500 cursor-pointer"
+                <label className="flex items-center gap-3 cursor-pointer mb-1 p-3 bg-white dark:bg-[var(--bg-card)] border border-gray-200 dark:border-[var(--border-subtle)] rounded-lg transition-all hover:border-teal-400">
+                  <input type="checkbox" checked={p.usePriceMode !== false} className="w-5 h-5 accent-teal-500 cursor-pointer"
                     onChange={e => onUpdatePlan({ usePriceMode: e.target.checked })} />
                   <span className="text-sm font-semibold text-gray-700 dark:text-[var(--text-primary)] flex-1">Usar precio numérico</span>
                 </label>
@@ -132,6 +132,11 @@ export default function PlanEditorModal({ open, title, activeTab, editingPlan: e
                         onChange={e => onUpdatePlan({ periodAnnual: e.target.value })} />
                     </div>
                   </div>
+                  <div className="mb-4">
+                    <label htmlFor="plan-commission-rate" className="block text-xs font-semibold text-gray-500 dark:text-[var(--text-secondary)] uppercase tracking-wide mb-1.5">Comisión (%)</label>
+                    <input id="plan-commission-rate" type="number" value={(p.commissionRate ?? 0.05) * 100} placeholder="5" step={0.1} min={0} max={100} className="w-full px-3.5 py-2.5 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-lg text-sm dark:bg-[var(--bg-card)] dark:text-[var(--text-primary)]"
+                      onChange={e => onUpdatePlan({ commissionRate: (parseFloat(e.target.value) || 0) / 100 })} />
+                  </div>
                 </>
               ) : (
                 <>
@@ -160,25 +165,25 @@ export default function PlanEditorModal({ open, title, activeTab, editingPlan: e
                 <div className="mb-0">
                   <label htmlFor="plan-css-color" className="block text-xs font-semibold text-gray-500 dark:text-[var(--text-secondary)] uppercase tracking-wide mb-2">Color Principal</label>
                   <div className="flex items-center gap-2">
-                    <div className="w-10 h-10 rounded-lg overflow-hidden relative" style={{ background: p.cssColor ?? '#3b82f6' }}>
-                      <input id="plan-css-color" type="color" value={p.cssColor ?? '#3b82f6'} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    <div className="w-10 h-10 rounded-lg overflow-hidden relative" style={{ background: p.cssColor ?? '#14b8a6' }}>
+                      <input id="plan-css-color" type="color" value={p.cssColor ?? '#14b8a6'} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                         onChange={e => onUpdatePlan({ cssColor: e.target.value })} />
                     </div>
-                    <input type="text" aria-label="Color principal en formato hex" className="flex-1 px-3 py-2 border border-gray-200 dark:border-[var(--border-subtle)] rounded-lg text-sm font-mono" value={p.cssColor ?? '#3b82f6'} maxLength={7}
+                    <input type="text" aria-label="Color principal en formato hex" className="flex-1 px-3 py-2 border border-gray-200 dark:border-[var(--border-subtle)] rounded-lg text-sm font-mono" value={p.cssColor ?? '#14b8a6'} maxLength={7}
                       onChange={e => { if (/^#[0-9a-fA-F]{0,6}$/.test(e.target.value)) onUpdatePlan({ cssColor: e.target.value }); }} />
-                    <div className="w-8 h-8 rounded-lg" style={{ background: p.cssColor ?? '#3b82f6' }} />
+                    <div className="w-8 h-8 rounded-lg" style={{ background: p.cssColor ?? '#14b8a6' }} />
                   </div>
                 </div>
                 <div className="mb-0">
                   <label htmlFor="plan-accent-color" className="block text-xs font-semibold text-gray-500 dark:text-[var(--text-secondary)] uppercase tracking-wide mb-2">Color de Acento</label>
                   <div className="flex items-center gap-2">
-                    <div className="w-10 h-10 rounded-lg overflow-hidden relative" style={{ background: p.accentColor ?? '#2563eb' }}>
-                      <input id="plan-accent-color" type="color" value={p.accentColor ?? '#2563eb'} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    <div className="w-10 h-10 rounded-lg overflow-hidden relative" style={{ background: p.accentColor ?? '#0284c7' }}>
+                      <input id="plan-accent-color" type="color" value={p.accentColor ?? '#0284c7'} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                         onChange={e => onUpdatePlan({ accentColor: e.target.value })} />
                     </div>
-                    <input type="text" aria-label="Color de acento en formato hex" className="flex-1 px-3 py-2 border border-gray-200 dark:border-[var(--border-subtle)] rounded-lg text-sm font-mono" value={p.accentColor ?? '#2563eb'} maxLength={7}
+                    <input type="text" aria-label="Color de acento en formato hex" className="flex-1 px-3 py-2 border border-gray-200 dark:border-[var(--border-subtle)] rounded-lg text-sm font-mono" value={p.accentColor ?? '#0284c7'} maxLength={7}
                       onChange={e => { if (/^#[0-9a-fA-F]{0,6}$/.test(e.target.value)) onUpdatePlan({ accentColor: e.target.value }); }} />
-                    <div className="w-8 h-8 rounded-lg" style={{ background: p.accentColor ?? '#2563eb' }} />
+                    <div className="w-8 h-8 rounded-lg" style={{ background: p.accentColor ?? '#0284c7' }} />
                   </div>
                 </div>
               </div>
@@ -188,7 +193,7 @@ export default function PlanEditorModal({ open, title, activeTab, editingPlan: e
               <div>
                 <input type="file" id="editPlanImageUpload" accept="image/*,.heic,.heif,.avif,.tiff,.bmp,.ico" className="hidden"
                   onChange={e => { const f = e.target.files?.[0]; if (f) onImageUpload(f); }} />
-                <button className="px-5 py-2.5 border-2 border-dashed border-blue-500 bg-transparent text-blue-500 rounded-lg text-[13px] font-semibold cursor-pointer transition-all flex items-center gap-2 hover:bg-blue-50"
+                <button className="px-5 py-2.5 border-2 border-dashed border-teal-500 bg-transparent text-teal-500 rounded-lg text-[13px] font-semibold cursor-pointer transition-all flex items-center gap-2 hover:bg-teal-50"
                   onClick={() => document.getElementById('editPlanImageUpload')?.click()}>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
                   Subir Imagen
@@ -210,7 +215,7 @@ export default function PlanEditorModal({ open, title, activeTab, editingPlan: e
                   </div>
                 </div>
                 <label className="flex items-center gap-2.5 p-2.5 bg-white dark:bg-[var(--bg-card)] border border-gray-200 dark:border-[var(--border-subtle)] rounded-lg cursor-pointer mt-2.5">
-                  <input type="checkbox" checked={!!p.showBgInCard} className="w-4 h-4 accent-blue-500 cursor-pointer"
+                  <input type="checkbox" checked={!!p.showBgInCard} className="w-4 h-4 accent-teal-500 cursor-pointer"
                     onChange={e => onUpdatePlan({ showBgInCard: e.target.checked })} />
                   <span className="text-xs font-semibold text-gray-700 dark:text-[var(--text-primary)]">Mostrar imagen en tarjeta pequeña del carrusel</span>
                 </label>
@@ -250,9 +255,9 @@ export default function PlanEditorModal({ open, title, activeTab, editingPlan: e
                     onClick={() => setFeatFilter('active')}>
                     <span className="w-2 h-2 rounded-full bg-emerald-500"/>Activos
                   </button>
-                  <button className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all flex items-center gap-1 ${featFilter === 'inactive' ? 'bg-red-100 text-red-700' : 'bg-gray-100 dark:bg-[var(--bg-muted)] text-gray-500 dark:text-[var(--text-secondary)] hover:bg-gray-200'}`}
+                  <button className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all flex items-center gap-1 ${featFilter === 'inactive' ? 'bg-teal-100 text-teal-700' : 'bg-gray-100 dark:bg-[var(--bg-muted)] text-gray-500 dark:text-[var(--text-secondary)] hover:bg-gray-200'}`}
                     onClick={() => setFeatFilter('inactive')}>
-                    <span className="w-2 h-2 rounded-full bg-red-50 dark:bg-[var(--bg-muted)]0"/>No incluidos
+                    <span className="w-2 h-2 rounded-full bg-teal-50 dark:bg-[var(--bg-muted)]"/>No incluidos
                   </button>
                 </div>
               </div>
@@ -260,15 +265,15 @@ export default function PlanEditorModal({ open, title, activeTab, editingPlan: e
                 {filteredFeatures.map((f) => {
                   const realIdx = editFeatures.indexOf(f);
                   return (
-                    <div key={`k-${realIdx}`} className={`flex items-center gap-2 p-2 mb-2 rounded-lg border transition-all ${f.active ? 'bg-green-50 dark:bg-[var(--bg-muted)] border-green-200' : 'bg-red-50 dark:bg-[var(--bg-muted)] border-red-200 opacity-75'}`}>
+                    <div key={`k-${realIdx}`} className={`flex items-center gap-2 p-2 mb-2 rounded-lg border transition-all ${f.active ? 'bg-emerald-50 dark:bg-[var(--bg-muted)] border-emerald-200' : 'bg-teal-50 dark:bg-[var(--bg-muted)] border-teal-200 opacity-75'}`}>
                       <button type="button" className={`px-3 py-2 rounded-full text-[11.5px] font-bold cursor-pointer transition-all whitespace-nowrap min-w-[90px] text-center
-                        ${f.active ? 'bg-emerald-200 text-emerald-700 hover:bg-emerald-300' : 'bg-red-200 text-red-700 hover:bg-red-300'}`}
+                        ${f.active ? 'bg-emerald-200 text-emerald-700 hover:bg-emerald-300' : 'bg-teal-200 text-teal-700 hover:bg-teal-300'}`}
                         onClick={() => onUpdateFeature(realIdx, { active: !f.active })}>
                         {f.active ? '✓ Activo' : '✕ No incluido'}
                       </button>
                       <input type="text" value={f.text ?? ''} placeholder="Texto del beneficio" className="flex-1 px-3 py-2 border border-gray-200 dark:border-[var(--border-subtle)] rounded-md text-sm"
                         onChange={e => onUpdateFeature(realIdx, { text: e.target.value })} />
-                      <button className="px-3 py-2 bg-red-50 dark:bg-[var(--bg-muted)]0 text-white rounded-md text-sm font-bold hover:bg-red-600" onClick={() => onRemoveFeature(realIdx)}>×</button>
+                      <button className="px-3 py-2 bg-teal-50 dark:bg-[var(--bg-muted)] text-white rounded-md text-sm font-bold hover:bg-teal-600" onClick={() => onRemoveFeature(realIdx)}>×</button>
                     </div>
                   );
                 })}
@@ -276,11 +281,11 @@ export default function PlanEditorModal({ open, title, activeTab, editingPlan: e
               <div className="flex items-center gap-2 mt-4 text-xs">
                 <span className="text-emerald-600 font-semibold">✓ {activeCount} activos</span>
                 <span className="text-gray-300 dark:text-[var(--text-placeholder)]">·</span>
-                <span className="text-red-600 font-semibold">✕ {inactiveCount} no incluidos</span>
+                <span className="text-teal-600 font-semibold">✕ {inactiveCount} no incluidos</span>
                 <span className="text-gray-300 dark:text-[var(--text-placeholder)]">·</span>
-                <span className="text-blue-600 font-semibold">Mostrando {visibleCount} en "Ver más"</span>
+                <span className="text-sky-600 font-semibold">Mostrando {visibleCount} en "Ver más"</span>
               </div>
-              <button className="mt-4 px-4 py-2 border-2 border-dashed border-blue-500 bg-transparent text-blue-500 rounded-lg text-[13px] font-semibold cursor-pointer transition-all flex items-center gap-1.5 hover:bg-blue-50"
+              <button className="mt-4 px-4 py-2 border-2 border-dashed border-teal-500 bg-transparent text-teal-500 rounded-lg text-[13px] font-semibold cursor-pointer transition-all flex items-center gap-1.5 hover:bg-teal-50"
                 onClick={onAddFeature}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 + Agregar Beneficio
@@ -297,26 +302,26 @@ export default function PlanEditorModal({ open, title, activeTab, editingPlan: e
               <p className="text-xs text-gray-400 dark:text-[var(--text-placeholder)] mb-4">Aparecen en el modal de detalles al hacer clic en cualquier beneficio.</p>
               <div>
                 {editDetailedBenefits.map((b, i) => (
-                  <div key={`benefit-${b.title?.slice(0, 8) ?? i}`} className="mb-4 p-3.5 bg-white dark:bg-[var(--bg-card)] rounded-xl border-l-4" style={{ borderLeftColor: b.color ?? '#3b82f6' }}>
+                  <div key={`benefit-${b.title?.slice(0, 8) ?? i}`} className="mb-4 p-3.5 bg-white dark:bg-[var(--bg-card)] rounded-xl border-l-4" style={{ borderLeftColor: b.color ?? '#14b8a6' }}>
                     <div className="flex items-center gap-2.5 mb-2.5">
-                      <div className="w-12 h-12 rounded-lg flex items-center justify-center text-xl" style={{ background:`${b.color ?? '#3b82f6'}22`, border:`1.5px solid ${b.color ?? '#3b82f6'}55` }}>
+                      <div className="w-12 h-12 rounded-lg flex items-center justify-center text-xl" style={{ background:`${b.color ?? '#14b8a6'}22`, border:`1.5px solid ${b.color ?? '#14b8a6'}55` }}>
                         <input type="text" value={b.emoji ?? ''} placeholder="😀" maxLength={4} className="w-full bg-transparent text-center text-lg" title="Emoji o símbolo"
                           onChange={e => onUpdateDetailedBenefit(i, { emoji: e.target.value })} />
                       </div>
                       <input type="text" className="flex-1 px-3 py-2 border border-gray-200 dark:border-[var(--border-subtle)] rounded-lg text-sm font-semibold" value={b.title ?? ''} placeholder="Título del beneficio"
                         onChange={e => onUpdateDetailedBenefit(i, { title: e.target.value })} />
-                      <div className="w-9 h-9 rounded-lg overflow-hidden relative" style={{ background: b.color ?? '#3b82f6' }}>
-                        <input type="color" value={b.color ?? '#3b82f6'} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                      <div className="w-9 h-9 rounded-lg overflow-hidden relative" style={{ background: b.color ?? '#14b8a6' }}>
+                        <input type="color" value={b.color ?? '#14b8a6'} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                           onChange={e => onUpdateDetailedBenefit(i, { color: e.target.value })} />
                       </div>
-                      <button className="px-3 py-2 bg-red-50 dark:bg-[var(--bg-muted)]0 text-white rounded-lg text-sm font-bold hover:bg-red-600" onClick={() => onRemoveDetailedBenefit(i)}>×</button>
+                      <button className="px-3 py-2 bg-teal-50 dark:bg-[var(--bg-muted)] text-white rounded-lg text-sm font-bold hover:bg-teal-600" onClick={() => onRemoveDetailedBenefit(i)}>×</button>
                     </div>
                     <textarea className="w-full px-3 py-2 border border-gray-200 dark:border-[var(--border-subtle)] rounded-lg text-sm" placeholder="Descripción detallada del beneficio…"
                       value={b.description ?? ''} onChange={e => onUpdateDetailedBenefit(i, { description: e.target.value })} />
                   </div>
                 ))}
               </div>
-              <button className="mt-3 px-4 py-2 border-2 border-dashed border-blue-500 bg-transparent text-blue-500 rounded-lg text-[13px] font-semibold cursor-pointer transition-all flex items-center gap-1.5 hover:bg-blue-50"
+              <button className="mt-3 px-4 py-2 border-2 border-dashed border-teal-500 bg-transparent text-teal-500 rounded-lg text-[13px] font-semibold cursor-pointer transition-all flex items-center gap-1.5 hover:bg-teal-50"
                 onClick={onAddDetailedBenefit}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 Agregar Beneficio Detallado
@@ -330,8 +335,8 @@ export default function PlanEditorModal({ open, title, activeTab, editingPlan: e
           <div className="block animate-fade-in">
             <div className="p-5 bg-gray-50 dark:bg-[var(--bg-muted)] rounded-xl mb-5">
               <h3 className="text-base font-bold text-gray-800 dark:text-[var(--text-primary)] mb-4">Configuración de Pago</h3>
-              <label className="flex items-center gap-3 cursor-pointer p-3 bg-white dark:bg-[var(--bg-card)] border border-gray-200 dark:border-[var(--border-subtle)] rounded-lg transition-all hover:border-blue-400">
-                <input type="checkbox" checked={!!p.requiresPayment} className="w-5 h-5 accent-blue-500 cursor-pointer"
+              <label className="flex items-center gap-3 cursor-pointer p-3 bg-white dark:bg-[var(--bg-card)] border border-gray-200 dark:border-[var(--border-subtle)] rounded-lg transition-all hover:border-teal-400">
+                <input type="checkbox" checked={!!p.requiresPayment} className="w-5 h-5 accent-teal-500 cursor-pointer"
                   onChange={e => onUpdatePlan({ requiresPayment: e.target.checked })} />
                 <span className="text-sm font-semibold text-gray-700 dark:text-[var(--text-primary)]">Requiere pago</span>
               </label>
@@ -339,8 +344,8 @@ export default function PlanEditorModal({ open, title, activeTab, editingPlan: e
             </div>
             <div className="p-5 bg-gray-50 dark:bg-[var(--bg-muted)] rounded-xl mb-5">
               <h3 className="text-base font-bold text-gray-800 dark:text-[var(--text-primary)] mb-4">Bloqueo de Reclamación</h3>
-              <label className="flex items-center gap-3 cursor-pointer p-3 bg-white dark:bg-[var(--bg-card)] border border-gray-200 dark:border-[var(--border-subtle)] rounded-lg transition-all hover:border-blue-400 mb-4">
-                <input type="checkbox" checked={!!p.enableClaimLock} className="w-5 h-5 accent-blue-500 cursor-pointer"
+              <label className="flex items-center gap-3 cursor-pointer p-3 bg-white dark:bg-[var(--bg-card)] border border-gray-200 dark:border-[var(--border-subtle)] rounded-lg transition-all hover:border-teal-400 mb-4">
+                <input type="checkbox" checked={!!p.enableClaimLock} className="w-5 h-5 accent-teal-500 cursor-pointer"
                   onChange={e => onUpdatePlan({ enableClaimLock: e.target.checked })} />
                 <span className="text-sm font-semibold text-gray-700 dark:text-[var(--text-primary)]">Bloquear después de reclamar (solo una vez)</span>
               </label>

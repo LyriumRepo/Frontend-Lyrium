@@ -52,9 +52,14 @@ function ProductCard({ producto }: { producto: Producto }) {
           <h3 className="font-medium text-gray-900 dark:text-[var(--text-primary)] mb-2 line-clamp-2 text-sm min-h-[2.5rem]">
             {producto.titulo}
           </h3>
-          <p className="text-sky-600 dark:text-[var(--color-success)] font-bold text-lg">
-            S/{producto.precio.toFixed(2)}
-          </p>
+          <div className="flex items-center justify-between">
+            <p className="text-sky-600 dark:text-[var(--color-success)] font-bold text-lg">
+              S/{producto.precio.toFixed(2)}
+            </p>
+            <span className={`text-[10px] ${!producto.stock || producto.stock === 0 ? 'text-rose-500' : 'text-slate-400 dark:text-[var(--text-muted)]'}`}>
+              {!producto.stock || producto.stock === 0 ? 'Agotado' : `Stock: ${producto.stock}`}
+            </span>
+          </div>
         </div>
       </div>
     </Link>

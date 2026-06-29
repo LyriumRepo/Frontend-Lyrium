@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { Plus, RefreshCw, Search, Check, X, AlertCircle, BookOpen, Clock, FileText } from 'lucide-react';
-import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import BaseButton from '@/components/ui/BaseButton';
 import { glossaryApi, GlossaryEntry, PendingTerm } from '@/shared/lib/api/glossaryRepository';
 
@@ -170,29 +169,23 @@ export function GlossaryPageClient() {
     // ─── Render ────────────────────────────────────────────────────────────
 
     return (
-        <div className="space-y-6 animate-fadeIn font-industrial pb-20">
-            <ModuleHeader
-                title="Glosario"
-                subtitle="Entradas de glosario para clasificación automática de transacciones"
-                icon="BookOpen"
-                actions={
-                    <div className="flex gap-2">
-                        {tab === 'pending' && pendingTerms.length > 0 && (
-                            <BaseButton onClick={handleDismissAll} variant="outline" leftIcon="X" size="md">
-                                Descartar todo
-                            </BaseButton>
-                        )}
-                        <BaseButton onClick={() => { if (tab === 'entries') fetchEntries(); else fetchPending(); }} variant="outline" leftIcon="RefreshCw" size="md">
-                            Refrescar
-                        </BaseButton>
-                        {tab === 'entries' && (
-                            <BaseButton onClick={openCreate} variant="primary" leftIcon="Plus" size="md">
-                                Nueva Entrada
-                            </BaseButton>
-                        )}
-                    </div>
-                }
-            />
+        <div className="space-y-8 animate-fadeIn font-industrial pb-20">
+            {/* Actions Bar */}
+            <div className="flex gap-2 flex-wrap">
+                {tab === 'pending' && pendingTerms.length > 0 && (
+                    <BaseButton onClick={handleDismissAll} variant="outline" leftIcon="X" size="md">
+                        Descartar todo
+                    </BaseButton>
+                )}
+                <BaseButton onClick={() => { if (tab === 'entries') fetchEntries(); else fetchPending(); }} variant="outline" leftIcon="RefreshCw" size="md">
+                    Refrescar
+                </BaseButton>
+                {tab === 'entries' && (
+                    <BaseButton onClick={openCreate} variant="primary" leftIcon="Plus" size="md">
+                        Nueva Entrada
+                    </BaseButton>
+                )}
+            </div>
 
             {/* Tabs */}
             <div className="flex gap-4 border-b border-gray-200 dark:border-gray-700">
@@ -228,7 +221,7 @@ export function GlossaryPageClient() {
 
             {/* Error */}
             {error && (
-                <div className="flex items-center gap-3 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl text-red-600 dark:text-red-400 text-sm">
+                <div className="flex items-center gap-3 p-4 bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-800 rounded-2xl text-teal-600 dark:text-teal-400 text-sm">
                     <AlertCircle className="w-5 h-5 flex-shrink-0" />
                     {error}
                 </div>
@@ -270,7 +263,7 @@ export function GlossaryPageClient() {
                                             </td>
                                             <td className="px-5 py-4 text-gray-600 dark:text-gray-400">{entry.default_amount ?? '—'}</td>
                                             <td className="px-5 py-4">
-                                                <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${entry.is_income ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400' : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'}`}>
+                                                <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${entry.is_income ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400' : 'bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400'}`}>
                                                     {entry.is_income ? 'Ingreso' : 'Gasto'}
                                                 </span>
                                             </td>
@@ -279,7 +272,7 @@ export function GlossaryPageClient() {
                                                     <button onClick={() => openEdit(entry)} className="text-xs px-3 py-1.5 bg-sky-50 dark:bg-sky-900/20 text-sky-600 dark:text-sky-400 rounded-lg hover:bg-sky-100 transition font-semibold">
                                                         Editar
                                                     </button>
-                                                    <button onClick={() => handleDelete(entry.id)} className="text-xs px-3 py-1.5 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-100 transition font-semibold">
+                                                    <button onClick={() => handleDelete(entry.id)} className="text-xs px-3 py-1.5 bg-teal-50 dark:bg-teal-900/20 text-teal-600 dark:text-teal-400 rounded-lg hover:bg-teal-100 transition font-semibold">
                                                         Eliminar
                                                     </button>
                                                 </div>
@@ -362,7 +355,7 @@ export function GlossaryPageClient() {
                                         placeholder="TRANSF.*TERCEROS" />
                                     {form.search_patterns.length > 1 && (
                                         <button onClick={() => setForm(f => ({ ...f, search_patterns: f.search_patterns.filter((_, j) => j !== i) }))}
-                                            className="px-3 text-red-400 hover:text-red-600 text-xs font-bold">X</button>
+                                            className="px-3 text-teal-400 hover:text-teal-600 text-xs font-bold">X</button>
                                     )}
                                 </div>
                             ))}

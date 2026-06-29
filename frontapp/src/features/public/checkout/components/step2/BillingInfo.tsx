@@ -36,8 +36,10 @@ export default function BillingInfo() {
           />
         </div>
         <p className="text-sm text-sky-800 dark:text-sky-300 leading-relaxed">
-          Haz clic en <span className="font-bold">&quot;Realizar pedido&quot;</span> y el
-          formulario seguro de pago de Izipay se abrirá en una ventana emergente.
+          Haz clic en{' '}
+          <span className="font-bold">&quot;Realizar pedido&quot;</span> y el
+          formulario seguro de pago de Izipay se abrirá en una ventana
+          emergente.
         </p>
       </div>
 
@@ -47,24 +49,31 @@ export default function BillingInfo() {
           Métodos disponibles
         </p>
         <div className="grid grid-cols-2 gap-2">
+          {/* Tarjeta crédito / débito */}
           <div className="flex items-center gap-2 p-3 rounded-xl bg-sky-50 dark:bg-sky-900/20 border border-sky-100 dark:border-sky-800/40">
             <CreditCard className="w-4 h-4 text-sky-500 flex-shrink-0" />
             <span className="text-xs font-medium text-gray-700 dark:text-[var(--text-primary)]">
               Tarjeta crédito / débito
             </span>
           </div>
-          <div className="flex items-center gap-2 p-3 rounded-xl bg-teal-50 dark:bg-teal-900/20 border border-teal-100 dark:border-teal-800/40">
-            <Smartphone className="w-4 h-4 text-teal-500 flex-shrink-0" />
+
+          {/* Yape / Plin */}
+          <div className="flex items-center gap-2 p-3 rounded-xl bg-sky-50 dark:bg-sky-900/20 border border-sky-100 dark:border-sky-800/40">
+            <Smartphone className="w-4 h-4 text-sky-500 flex-shrink-0" />
             <span className="text-xs font-medium text-gray-700 dark:text-[var(--text-primary)]">
               Yape / Plin
             </span>
           </div>
-          <div className="flex items-center gap-2 p-3 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800/40">
-            <Smartphone className="w-4 h-4 text-green-500 flex-shrink-0" />
+
+          {/* Billetera digital */}
+          <div className="flex items-center gap-2 p-3 rounded-xl bg-sky-50 dark:bg-sky-900/20 border border-sky-100 dark:border-sky-800/40">
+            <Smartphone className="w-4 h-4 text-sky-500 flex-shrink-0" />
             <span className="text-xs font-medium text-gray-700 dark:text-[var(--text-primary)]">
               Billetera digital
             </span>
           </div>
+
+          {/* Banca móvil / Agente */}
           <div className="flex items-center gap-2 p-3 rounded-xl bg-sky-50 dark:bg-sky-900/20 border border-sky-100 dark:border-sky-800/40">
             <Building2 className="w-4 h-4 text-sky-500 flex-shrink-0" />
             <span className="text-xs font-medium text-gray-700 dark:text-[var(--text-primary)]">
@@ -91,7 +100,8 @@ export default function BillingInfo() {
             Pago 100% seguro con Izipay
           </p>
           <p className="text-xs text-emerald-700 dark:text-emerald-400 mt-0.5">
-            Respaldado por Banco BCP. Lyrium nunca almacena los datos de tu tarjeta.
+            Respaldado por Banco BCP. Lyrium nunca almacena los datos de tu
+            tarjeta.
           </p>
         </div>
       </div>

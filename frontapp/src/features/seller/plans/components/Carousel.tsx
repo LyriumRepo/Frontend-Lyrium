@@ -1,7 +1,8 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
+import { motion } from 'framer-motion';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, EffectCoverflow, Pagination } from 'swiper/modules';
+import { Navigation, EffectCoverflow } from 'swiper/modules';
 import { hexToRgba, lightenColor, formatPrice } from '@/features/seller/plans/lib/helpers';
 import { availableIcons } from '@/features/seller/plans/lib/icons';
 import type { PlansMap } from '@/features/seller/plans/types';
@@ -50,11 +51,8 @@ export default function Carousel({ planOrder, plansData, showcasePlan, carouselI
 
   const handleNavigation = (direction: 'prev' | 'next') => {
     if (swiperRef.current?.swiper) {
-      if (direction === 'prev') {
-        swiperRef.current.swiper.slidePrev();
-      } else {
-        swiperRef.current.swiper.slideNext();
-      }
+      if (direction === 'prev') swiperRef.current.swiper.slidePrev();
+      else swiperRef.current.swiper.slideNext();
     }
   };
 
@@ -63,9 +61,9 @@ export default function Carousel({ planOrder, plansData, showcasePlan, carouselI
   const isLast = carouselIndex >= planOrder.length - 1;
 
   return (
-    <div className="relative">
-      <h3 className="text-xl font-bold text-gray-800 mb-5 text-center">Todos los Planes</h3>
-      
+    <div className="relative mt-8">
+      <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 text-center mb-6 uppercase tracking-wider">Todos los Planes</h3>
+
       <div className="flex justify-center gap-2 mb-6">
         {planOrder.map((key, idx) => {
           const data = plansData[key]; if (!data) return null;
@@ -73,10 +71,10 @@ export default function Carousel({ planOrder, plansData, showcasePlan, carouselI
           return (
             <button
               key={key}
-              className={`h-2 rounded-full transition-all duration-300 ${isActive ? '' : 'w-2 bg-gray-300'}`}
-              style={{ 
+              className="h-2 rounded-full transition-all duration-300"
+              style={{
                 width: isActive ? '28px' : '8px',
-                background: isActive ? data.cssColor : '#d1d5db'
+                background: isActive ? (data.cssColor || '#14b8a6') : '#d1d5db'
               }}
               onClick={() => onSelect(key)}
             />
@@ -87,19 +85,19 @@ export default function Carousel({ planOrder, plansData, showcasePlan, carouselI
       <div className="relative" style={{ perspective: '1100px', transformStyle: 'preserve-3d' }}>
         {planOrder.length > 1 && (
           <>
-            <button 
-              className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-30 w-10 h-10 rounded-full border-2 border-gray-200 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] flex items-center justify-center cursor-pointer transition-all duration-200 hover:border-blue-400 hover:text-blue-500 dark:hover:border-[var(--brand-sky)] dark:hover:text-[var(--brand-sky)] disabled:opacity-30 disabled:cursor-not-allowed shadow-lg ${isFirst ? 'opacity-30 cursor-not-allowed' : ''}`}
+            <button
+              className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-3 z-30 w-10 h-10 rounded-xl border border-gray-200 dark:border-gray-700/50 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl flex items-center justify-center cursor-pointer transition-all duration-200 hover:shadow-lg disabled:opacity-30 disabled:cursor-not-allowed shadow-lg shadow-black/5 ${isFirst ? 'opacity-30 cursor-not-allowed' : ''}`}
               onClick={() => handleNavigation('prev')}
               disabled={isFirst}
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="15 18 9 12 15 6"/></svg>
             </button>
-            <button 
-              className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-30 w-10 h-10 rounded-full border-2 border-gray-200 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] flex items-center justify-center cursor-pointer transition-all duration-200 hover:border-blue-400 hover:text-blue-500 dark:hover:border-[var(--brand-sky)] dark:hover:text-[var(--brand-sky)] disabled:opacity-30 disabled:cursor-not-allowed shadow-lg ${isLast ? 'opacity-30 cursor-not-allowed' : ''}`}
+            <button
+              className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-3 z-30 w-10 h-10 rounded-xl border border-gray-200 dark:border-gray-700/50 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl flex items-center justify-center cursor-pointer transition-all duration-200 hover:shadow-lg disabled:opacity-30 disabled:cursor-not-allowed shadow-lg shadow-black/5 ${isLast ? 'opacity-30 cursor-not-allowed' : ''}`}
               onClick={() => handleNavigation('next')}
               disabled={isLast}
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 12 9 18 15 6"/></svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6"/></svg>
             </button>
           </>
         )}
@@ -128,34 +126,31 @@ export default function Carousel({ planOrder, plansData, showcasePlan, carouselI
         >
           {planOrder.length === 0 ? (
             <SwiperSlide style={{ width: '100%' }}>
-              <div style={{ textAlign:'center', padding:'40px', color:'#9ca3af', fontSize:'14px', width:'100%' }}>No hay planes configurados aún.</div>
+              <div className="text-center py-10 text-gray-400 dark:text-gray-500 text-sm">No hay planes configurados aún.</div>
             </SwiperSlide>
           ) : (
             planOrder.map((key, idx) => {
               const isActive = idx === activeIndex;
               return (
-                <SwiperSlide 
-                  key={key} 
-                  style={{ 
-                    width: isMobile ? '200px' : '320px', 
+                <SwiperSlide
+                  key={key}
+                  style={{
+                    width: isMobile ? '200px' : '300px',
                     transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
-                    opacity: Math.abs(idx - activeIndex) > 2 ? 0 : 1 - (Math.abs(idx - activeIndex) * 0.25),
-                    transform: `scale(${1 - Math.abs(idx - activeIndex) * 0.18}) translateZ(${-(Math.abs(idx - activeIndex) * 80)}px)`,
                     zIndex: 20 - Math.abs(idx - activeIndex),
                   }}
                 >
-                  <CarouselCard 
-                    planKey={key} 
-                    plansData={plansData} 
-                    showcasePlan={showcasePlan} 
-                    currentPlan={currentPlan} 
-                    claimedPlans={claimedPlans} 
+                  <CarouselCard
+                    planKey={key}
+                    plansData={plansData}
+                    showcasePlan={showcasePlan}
+                    currentPlan={currentPlan}
+                    claimedPlans={claimedPlans}
                     expanded={!!expandedCards[key]}
                     onSelect={onSelect}
                     onToggle={onToggleCard}
                     onFeatureClick={onFeatureClick}
                     isActive={isActive}
-                    offset={idx - activeIndex}
                   />
                 </SwiperSlide>
               );
@@ -172,113 +167,123 @@ interface CardProps {
   claimedPlans: string[]; expanded: boolean;
   onSelect: (k: string) => void; onToggle: (k: string) => void; onFeatureClick: (k: string) => void;
   isActive: boolean;
-  offset: number;
 }
 
-function CarouselCard({ planKey, plansData, showcasePlan, currentPlan, claimedPlans, expanded, onSelect, onToggle, onFeatureClick, isActive, offset }: CardProps) {
-  const data      = plansData[planKey]; if (!data) return null;
+function CarouselCard({ planKey, plansData, showcasePlan, currentPlan, claimedPlans, expanded, onSelect, onToggle, onFeatureClick, isActive }: CardProps) {
+  const data = plansData[planKey]; if (!data) return null;
   const isCurrent = planKey === currentPlan;
-  const planColor = data.cssColor ?? '#3b82f6';
-  const lightBg1  = lightenColor(planColor, 0.75);
-  const lightBg2  = lightenColor(planColor, 0.55);
-  const lightBg3  = lightenColor(planColor, 0.35);
+  const planColor = data.cssColor ?? '#14b8a6';
+  const lightBg1 = lightenColor(planColor, 0.75);
+  const lightBg2 = lightenColor(planColor, 0.55);
+  const lightBg3 = lightenColor(planColor, 0.35);
   const iconTextColor = data.accentColor ?? planColor;
   const showMax = data.features ? (expanded ? data.features.length : (data.compactVisibleCount ?? 5)) : 5;
   const carouselLimit = data.compactVisibleCount ?? 5;
 
   let priceNode: React.ReactNode;
   if (data.usePriceMode === false && data.priceText) {
-    priceNode = <><span style={{ color:planColor, fontSize:'1.75rem', fontWeight:800 }}>{data.priceText}</span>{data.priceSubtext && <span className="text-sm text-gray-400 font-medium ml-1">{data.priceSubtext}</span>}</>;
+    priceNode = <><span className="text-xl font-extrabold" style={{ color: planColor }}>{data.priceText}</span>{data.priceSubtext && <span className="text-xs text-gray-500 dark:text-gray-400 font-medium ml-1">{data.priceSubtext}</span>}</>;
   } else {
-    const carouselPrice = (planKey === 'basic' && data.price === 0) ? 'GRATIS' : (!data.requiresPayment && data.price === 0) ? 'Prueba gratuita' : formatPrice(data.price, data.currency);
-    priceNode = <><span style={{ fontSize:'1.75rem', fontWeight:800, color: isActive ? planColor : '#1f2937' }}>{carouselPrice}</span>{(data.price > 0 || data.requiresPayment) ? <span className="text-sm text-gray-400 font-medium ml-1">{data.period ?? '/mes'}</span> : (planKey !== 'basic' && !data.requiresPayment ? <span className="text-sm text-gray-400 font-medium ml-1">/6 meses</span> : null)}</>;
+    const carouselPrice = (planKey === 'basic' && data.price === 0) ? 'GRATIS' : (!data.requiresPayment && data.price === 0) ? 'Gratis' : formatPrice(data.price, data.currency);
+    priceNode = <><span className="text-xl font-extrabold" style={{ color: isActive ? planColor : undefined }}>{carouselPrice}</span>{(data.price > 0 || data.requiresPayment) ? <span className="text-xs text-gray-500 dark:text-gray-400 font-medium ml-1">{data.period ?? '/mes'}</span> : (planKey !== 'basic' && !data.requiresPayment ? <span className="text-xs text-gray-500 dark:text-gray-400 font-medium ml-1">/6 meses</span> : null)}</>;
   }
 
-  const borderStyle: React.CSSProperties = isActive
-    ? { borderColor:planColor, boxShadow:`0 0 0 1px ${planColor}, 0 8px 25px ${hexToRgba(planColor, 0.45)}` }
-    : { borderColor:'transparent', boxShadow:'0 4px 16px rgba(0,0,0,0.05)' };
-
-  const rotateY = offset * (offset > 0 ? -38 : 38);
-  const transform = offset !== 0 ? `rotateY(${rotateY}deg)` : undefined;
-
   return (
-    <div 
+    <motion.div
+      whileHover={{ y: -2 }}
       role="button"
       tabIndex={0}
-      className={`bg-white dark:bg-[var(--bg-card)] rounded-2xl border-2 dark:border-[var(--border-subtle)] overflow-hidden cursor-pointer transition-all duration-300 ${isActive ? 'scale-95' : ''}`}
-      style={{ 
-        '--plan-color': planColor, 
-        ...borderStyle,
-        transform,
-      } as React.CSSProperties}
+      className="bg-white dark:bg-gray-800/50 backdrop-blur-xl rounded-2xl border-2 overflow-hidden cursor-pointer transition-all duration-300 flex flex-col"
+      style={{
+        borderColor: isActive ? planColor : 'transparent',
+        boxShadow: isActive
+          ? `0 0 0 1px ${planColor}, 0 8px 25px ${hexToRgba(planColor, 0.15)}`
+          : '0 4px 16px rgba(0,0,0,0.05)',
+      }}
       onClick={() => onSelect(planKey)}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onSelect(planKey); }}
     >
       {data.showBgInCard && data.bgImage ? (
-        <div style={{ 
-          backgroundImage: `url('${data.bgImage}')`, 
-          backgroundSize: data.bgImageFit === 'contain' ? 'contain' : 'cover', 
-          backgroundPosition: data.bgImagePosition ?? 'center', 
-          position:'relative', 
-          overflow:'hidden',
-          height: '140px',
+        <div className="relative h-[120px] overflow-hidden" style={{
+          backgroundImage: `url('${data.bgImage}')`,
+          backgroundSize: data.bgImageFit === 'contain' ? 'contain' : (data.bgImageFit ?? 'cover'),
+          backgroundPosition: data.bgImagePosition ?? 'center',
         }}>
-          <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom,rgba(0,0,0,0.08) 0%,rgba(0,0,0,0.55) 100%)', pointerEvents:'none' }} />
-          {data.badge && <span style={{ position:'absolute', top:8, left:8, zIndex:2, fontSize:'9px', fontWeight:800, letterSpacing:'0.5px', color:'#fff', background:'rgba(0,0,0,0.35)', padding:'2px 7px', borderRadius:'20px', backdropFilter:'blur(4px)' }}>{data.badge}</span>}
-          <span style={{ position:'absolute', bottom:8, left:10, zIndex:2, fontSize:'29px', fontWeight:800, color:'#fff', textShadow:'0 1px 6px rgba(0,0,0,0.7)', letterSpacing:'0.3px' }}>{data.name}</span>
-          <div style={{ position:'absolute', top:8, right:8, zIndex:2, color:'rgba(255,255,255,0.85)', filter:'drop-shadow(0 1px 3px rgba(0,0,0,0.5))' }} 
-                // ✅ SEGURO: getPlanIconSvg() retorna SVG hardcoded interno
-                // availableIcons es un objeto hardcoded, NO viene de user input
-                dangerouslySetInnerHTML={{ __html: getPlanIconSvg(planKey, 20, plansData) }} />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+          {data.badge && (
+            <span className="absolute top-2 left-2 z-10 text-[9px] font-bold text-white bg-black/30 px-2 py-0.5 rounded-full backdrop-blur-sm">
+              {data.badge}
+            </span>
+          )}
+          <span className="absolute bottom-2 left-3 z-10 text-sm font-bold text-white drop-shadow-lg">{data.name}</span>
+          <div className="absolute top-2 right-2 z-10 text-white/80 drop-shadow-lg"
+            dangerouslySetInnerHTML={{ __html: getPlanIconSvg(planKey, 18, plansData) }} />
         </div>
       ) : (
-        <div style={{ 
+        <div style={{
           background: `linear-gradient(135deg,${lightBg1} 0%,${lightBg2} 50%,${lightBg3} 100%)`,
-          padding: '20px',
-          height: '140px',
+          padding: '18px',
+          height: '120px',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
         }}>
-          <span style={{ color:iconTextColor, fontSize:'18px', fontWeight:800 }}>{data.name}</span>
-          <div style={{ color:iconTextColor }} 
-            // ✅ SEGURO: getPlanIconSvg() retorna SVG hardcoded interno
-            dangerouslySetInnerHTML={{ __html: getPlanIconSvg(planKey, 24, plansData) }} />
+          <span className="text-sm font-bold" style={{ color: iconTextColor }}>{data.name}</span>
+          <div style={{ color: iconTextColor }}
+            dangerouslySetInnerHTML={{ __html: getPlanIconSvg(planKey, 20, plansData) }} />
         </div>
       )}
-      <div className="p-5">
-        <div className="mb-4">
-          {priceNode}
-        </div>
-        {planKey === 'basic' && data.price === 0 && <div className="text-xs text-gray-500 mb-2"><span>Única vez</span></div>}
-        {data.enableClaimLock && <div className="text-xs text-gray-500 mb-2"><span>Solo disponible una única vez</span></div>}
-        {data.priceAnnual > 0 && !data.enableClaimLock && data.usePriceMode !== false && <div className="text-xs text-gray-500 mb-2"><span>{formatPrice(data.priceAnnual, data.currency)}{data.periodAnnual ?? '/año'}</span></div>}
-        <div className="space-y-2">
+      <div className="p-4">
+        <div className="mb-3">{priceNode}</div>
+        {planKey === 'basic' && data.price === 0 && <div className="text-[10px] text-gray-500 dark:text-gray-400 mb-1">Única vez</div>}
+        {data.enableClaimLock && <div className="text-[10px] text-gray-500 dark:text-gray-400 mb-1">Solo disponible una única vez</div>}
+        {data.priceAnnual > 0 && !data.enableClaimLock && data.usePriceMode !== false && <div className="text-[10px] text-gray-500 dark:text-gray-400 mb-2">{formatPrice(data.priceAnnual, data.currency)}{data.periodAnnual ?? '/año'}</div>}
+
+        <div className="space-y-1.5">
           {(data.features ?? []).slice(0, showMax).map((f, i) => (
-            <div 
+            <div
+              key={`${planKey}-cf-${i}-${(f.text ?? '').slice(0, 8)}`}
               role="button"
               tabIndex={0}
-              key={`${planKey}-cf-${i}-${(f.text ?? '').slice(0,8)}`} 
-              className={`flex items-center gap-2 text-xs cursor-pointer ${f.active ? 'text-gray-700' : 'text-gray-300'}`}
+              className={`flex items-center gap-1.5 text-[11px] cursor-pointer ${f.active ? 'text-gray-600 dark:text-gray-300' : 'text-gray-400 dark:text-gray-500'}`}
               onClick={e => { e.stopPropagation(); onFeatureClick(planKey); }}
               onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.stopPropagation(); onFeatureClick(planKey); } }}
             >
-              <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold ${f.active ? 'bg-emerald-100 text-emerald-600' : 'bg-gray-100 text-gray-400'}`}>{f.active ? '✓' : '✕'}</span>
+              <span className={`w-3.5 h-3.5 rounded-full flex items-center justify-center text-[8px] font-bold shrink-0 ${
+                f.active
+                  ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400'
+                  : 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500'
+              }`}>
+                {f.active ? (
+                  <svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><polyline points="20 6 9 17 4 12"/></svg>
+                ) : (
+                  <svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                )}
+              </span>
               <span className={f.active ? '' : 'line-through'}>{f.text}</span>
             </div>
           ))}
           {(data.features?.length ?? 0) > carouselLimit && (
-            <button 
-              className="text-xs text-blue-500 font-medium hover:text-blue-600 cursor-pointer"
+            <button
+              className="text-[11px] font-semibold text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 transition-colors"
               onClick={e => { e.stopPropagation(); onToggle(planKey); }}
             >
-              {expanded ? 'Ver menos' : `+${(data.features?.length ?? 0) - carouselLimit} beneficios más`}
+              {expanded ? 'Ver menos' : `+${(data.features?.length ?? 0) - carouselLimit} más`}
             </button>
           )}
         </div>
-        {isCurrent && <div className="mt-3 px-3 py-1.5 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-lg text-center">Tu plan actual</div>}
-        {data.enableClaimLock && claimedPlans.includes(planKey) && !isCurrent && <div className="mt-3 px-3 py-1.5 bg-red-100 text-red-700 text-xs font-bold rounded-lg text-center">Ya reclamado</div>}
+
+        {isCurrent && (
+          <div className="mt-2 px-2 py-1 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold rounded-lg text-center border border-emerald-200 dark:border-emerald-700/30">
+            Tu plan actual
+          </div>
+        )}
+        {data.enableClaimLock && claimedPlans.includes(planKey) && !isCurrent && (
+          <div className="mt-2 px-2 py-1 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 text-[10px] font-bold rounded-lg text-center border border-amber-200 dark:border-amber-700/30">
+            Ya reclamado
+          </div>
+        )}
       </div>
-    </div>
+    </motion.div>
   );
 }

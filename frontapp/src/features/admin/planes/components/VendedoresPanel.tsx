@@ -22,7 +22,7 @@ interface Props {
   onCloseModal: () => void;
 }
 
-const ESTADO_DOT: Record<string, string> = { activo:'#22c55e', por_vencer:'#f59e0b', vencido:'#ef4444', indefinido:'#9ca3af' };
+const ESTADO_DOT: Record<string, string> = { activo:'#059669', por_vencer:'#0284c7', vencido:'#0d9488', indefinido:'#9ca3af' };
 const ESTADO_LABEL: Record<string, string> = { activo:'Activo', por_vencer:'Por vencer', vencido:'Vencido', indefinido:'Sin vencimiento' };
 
 export default function VendedoresPanel({ vendedores, loading, filter, search, selectedVendedor: sv, modalOpen, onFilterChange, onSearchChange, onOpenModal, onCloseModal }: Props) {
@@ -43,7 +43,7 @@ export default function VendedoresPanel({ vendedores, loading, filter, search, s
             <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
           </svg>
           <input type="text" placeholder="Buscar por nombre o correo…" value={search} onChange={e => onSearchChange(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-[var(--border-subtle)] rounded-xl text-sm focus:outline-none focus:border-blue-500" />
+            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-[var(--border-subtle)] rounded-xl text-sm focus:outline-none focus:border-teal-500" />
         </div>
         <div className="flex items-center gap-3 flex-wrap">
           <div className="flex gap-1 bg-gray-100 dark:bg-[var(--bg-muted)] p-1 rounded-xl">
@@ -51,7 +51,7 @@ export default function VendedoresPanel({ vendedores, loading, filter, search, s
               <button key={f}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all
                   ${filter === f ? 'bg-white dark:bg-[var(--bg-card)] shadow-sm text-gray-800 dark:text-[var(--text-primary)]' : 'text-gray-500 dark:text-[var(--text-secondary)] hover:text-gray-700 dark:hover:text-[var(--text-primary)]'}
-                  ${f === 'por_vencer' ? (filter === f ? 'text-amber-600' : '') : f === 'vencido' ? (filter === f ? 'text-red-600' : '') : f === 'indefinido' ? (filter === f ? 'text-gray-400 dark:text-[var(--text-placeholder)]' : '') : ''}`}
+                  ${f === 'por_vencer' ? (filter === f ? 'text-sky-600' : '') : f === 'vencido' ? (filter === f ? 'text-teal-600' : '') : f === 'indefinido' ? (filter === f ? 'text-gray-400 dark:text-[var(--text-placeholder)]' : '') : ''}`}
                 onClick={() => onFilterChange(f)}>
                 {l}
               </button>
@@ -64,7 +64,7 @@ export default function VendedoresPanel({ vendedores, loading, filter, search, s
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="vendedoresList">
         {loading && (
           <div className="col-span-full flex items-center justify-center gap-3 py-12 text-gray-400 dark:text-[var(--text-placeholder)]">
-            <div className="w-6 h-6 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin" />
+            <div className="w-6 h-6 border-2 border-gray-300 border-t-teal-500 rounded-full animate-spin" />
             <span>Cargando vendedores…</span>
           </div>
         )}
@@ -87,9 +87,9 @@ export default function VendedoresPanel({ vendedores, loading, filter, search, s
           let venceBadge: React.ReactNode = null;
           if (est === 'por_vencer' && v.fecha_expiracion) {
             const days = Math.ceil((new Date(v.fecha_expiracion).getTime() - Date.now()) / 86400000);
-            venceBadge = <span className="inline-block px-2 py-1 rounded-md text-[10px] font-bold bg-amber-100 text-amber-700">Vence en {days}d</span>;
+            venceBadge = <span className="inline-block px-2 py-1 rounded-md text-[10px] font-bold bg-sky-100 text-sky-700">Vence en {days}d</span>;
           } else if (est === 'vencido') {
-            venceBadge = <span className="inline-block px-2 py-1 rounded-md text-[10px] font-bold bg-red-100 text-red-700">Expirado</span>;
+            venceBadge = <span className="inline-block px-2 py-1 rounded-md text-[10px] font-bold bg-teal-100 text-teal-700">Expirado</span>;
           } else if (v.fecha_expiracion) {
             venceBadge = <span className="inline-block px-2 py-1 rounded-md text-[10px] font-semibold text-gray-500 dark:text-[var(--text-secondary)]">Vence: {formatAdminDate(v.fecha_expiracion)}</span>;
           }
@@ -124,7 +124,7 @@ export default function VendedoresPanel({ vendedores, loading, filter, search, s
                 </div>
                 {venceBadge}
               </div>
-              <div className="px-5 py-3 bg-gray-50 dark:bg-[var(--bg-muted)] border-t border-gray-100 dark:border-[var(--border-subtle)] flex items-center gap-2 text-xs font-semibold text-gray-400 dark:text-[var(--text-placeholder)] group-hover:text-blue-500 transition-colors">
+                <div className="px-5 py-3 bg-gray-50 dark:bg-[var(--bg-muted)] border-t border-gray-100 dark:border-[var(--border-subtle)] flex items-center gap-2 text-xs font-semibold text-gray-400 dark:text-[var(--text-placeholder)] group-hover:text-teal-500 transition-colors">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 14 14"/>
                 </svg>
@@ -179,8 +179,8 @@ export default function VendedoresPanel({ vendedores, loading, filter, search, s
                           <span>⏱</span>
                           <span>
                             Vence: <strong>{formatAdminDate(sv.fecha_expiracion)}</strong>
-                            {!isExpired && <span className="text-amber-600 font-bold ml-1.5">({daysLeft} días restantes)</span>}
-                            {isExpired  && <span className="text-red-600 font-bold ml-1.5">(vencido)</span>}
+                            {!isExpired && <span className="text-sky-600 font-bold ml-1.5">({daysLeft} días restantes)</span>}
+                            {isExpired  && <span className="text-teal-600 font-bold ml-1.5">(vencido)</span>}
                           </span>
                         </div>
                       );
@@ -196,7 +196,7 @@ export default function VendedoresPanel({ vendedores, loading, filter, search, s
                       : historial.map((h, i) => {
                           const motivoMap: Record<string,string> = { manual:'Cambio manual', vencido:'Venció — bajó a Emprende', eliminado:'Plan eliminado' };
                           const motivo = String(h.motivo ?? '');
-                          const mColor = motivo === 'vencido' ? '#f59e0b' : motivo === 'eliminado' ? '#ef4444' : '#6b7280';
+                          const mColor = motivo === 'vencido' ? '#0284c7' : motivo === 'eliminado' ? '#0d9488' : '#6b7280';
                           return (
                             <div key={`history-${h.cambiado_en}-${i}`} className="flex gap-3">
                               <div className="w-2 h-2 rounded-full mt-1.5 flex-shrink-0" style={{ background: mColor }} />

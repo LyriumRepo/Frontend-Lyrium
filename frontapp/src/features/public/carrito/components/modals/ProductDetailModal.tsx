@@ -10,8 +10,13 @@ import {
   Loader2,
   Check,
   AlertCircle,
+  Minus,
+  Plus,
+  ExternalLink,
+  Package,
 } from "lucide-react";
 import { useState, useRef, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { money, resolveImg, NO_IMAGE, ApiProduct } from "@/modules/cart/utils";
 import { useCarritoStore } from "@/store/carritoStore";
 import { useAddToCart } from "@/features/public/product/hooks/useAddToCart";
@@ -26,6 +31,7 @@ export default function ProductDetailModal({
   onOpenCart,
   productsCache,
 }: Props) {
+  const router = useRouter();
   const detailOpen = useCarritoStore((s) => s.ui.detailModalOpen);
   const productId = useCarritoStore((s) => s.ui.detailProductId);
   const closeDetailModal = useCarritoStore((s) => s.closeDetailModal);
@@ -40,6 +46,7 @@ export default function ProductDetailModal({
   const p =
     productsCache.find((x) => String(x.id) === String(productId)) ?? null;
   const [mainImg, setMainImg] = useState("");
+  const [quantity, setQuantity] = useState(1);
 
   const [scale, setScale] = useState(1);
   const [pos, setPos] = useState({ x: 0, y: 0 });
@@ -59,6 +66,7 @@ export default function ProductDetailModal({
     if (!detailOpen || !p) return;
     resetZoom();
     setMainImg(resolveImg(p.imagen_url));
+    setQuantity(1);
   }, [detailOpen, p, resetZoom]);
 
   useEffect(() => {
@@ -81,11 +89,12 @@ export default function ProductDetailModal({
   const outOfStock = p?.estado_stock === "out_of_stock" || stock <= 0;
   const rating = Number(p?.rating_promedio ?? 0);
   const totalR = Number(p?.rating_total ?? 0);
+  const stockLevel = stock > 50 ? "high" : stock > 10 ? "medium" : "low";
   const images: { url?: string; imagen_url?: string }[] = [];
 
   const handleAdd = () => {
-    if (!p || !productId || outOfStock || cartLoading) return; // agregar !p
-    addToCart(Number(p.id), 1); // usar p.id en lugar de productId
+    if (!p || !productId || outOfStock || cartLoading) return;
+    addToCart(Number(p.id), quantity);
   };
   return (
     <>
@@ -278,7 +287,7 @@ export default function ProductDetailModal({
                 {/* Precio */}
                 <div className="flex items-end justify-between">
                   <div>
-                    <p className="text-2xl text-emerald-700 dark:text-emerald-400 font-bold flex items-center gap-1.5">
+                    <p className="text-3xl text-emerald-700 dark:text-emerald-400 font-bold flex items-center gap-1.5">
                       {money(finalPrice)}
                     </p>
                     {hasOffer && (
@@ -286,19 +295,65 @@ export default function ProductDetailModal({
                         <p className="text-sm text-slate-400 dark:text-[var(--text-muted)] line-through">
                           {money(basePrice)}
                         </p>
-                        <p className="text-sm text-emerald-700 dark:text-emerald-400">
-                          🏷️ Ahorra {money(saving)}
+                        <p className="text-sm text-emerald-700 dark:text-emerald-400 font-medium">
+                          Ahorra {money(saving)}
                         </p>
                       </>
                     )}
                   </div>
 
-                  {/* Botones de acción */}
-                  <div className="flex items-center gap-2">
+                  {/* Stock indicator */}
+                  {!outOfStock && (
+                    <div className="text-right">
+                      <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-[var(--text-muted)] mb-1">
+                        <Package className="w-3.5 h-3.5 text-sky-500" />
+                        <span>{stock} en stock</span>
+                      </div>
+                      <div className="w-20 h-1.5 rounded-full bg-slate-100 dark:bg-gray-700 overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all ${
+                            stockLevel === "high"
+                              ? "bg-emerald-400 w-[85%]"
+                              : stockLevel === "medium"
+                                ? "bg-sky-400 w-[45%]"
+                                : "bg-amber-400 w-[15%]"
+                          }`}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Quantity selector + Add to cart */}
+                <div className="flex items-center gap-3">
+                  {/* Quantity */}
+                  {!outOfStock && (
+                    <div className="flex items-center border border-slate-200 dark:border-[var(--border-subtle)] rounded-2xl bg-white dark:bg-[var(--bg-card)] overflow-hidden">
+                      <button
+                        onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                        disabled={quantity <= 1 || cartLoading}
+                        className="w-10 h-11 grid place-items-center text-slate-600 dark:text-[var(--text-secondary)] hover:bg-slate-50 dark:hover:bg-[var(--bg-muted)] transition disabled:opacity-30"
+                      >
+                        <Minus className="w-3.5 h-3.5" />
+                      </button>
+                      <span className="w-10 h-11 grid place-items-center text-sm font-bold text-slate-800 dark:text-[var(--text-primary)] select-none border-x border-slate-100 dark:border-[var(--border-subtle)]">
+                        {quantity}
+                      </span>
+                      <button
+                        onClick={() => setQuantity((q) => q + 1)}
+                        disabled={quantity >= stock || cartLoading}
+                        className="w-10 h-11 grid place-items-center text-slate-600 dark:text-[var(--text-secondary)] hover:bg-slate-50 dark:hover:bg-[var(--bg-muted)] transition disabled:opacity-30"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-2 flex-1">
                     <button
                       onClick={handleAdd}
                       disabled={outOfStock || cartLoading}
-                      className={`px-4 py-3 rounded-2xl inline-flex items-center gap-2 font-bold text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
+                      className={`flex-1 px-4 py-3 rounded-2xl inline-flex items-center justify-center gap-2 font-bold text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
                         addedToCart
                           ? "bg-emerald-500 text-white"
                           : "bg-sky-500 hover:bg-sky-600 dark:hover:bg-sky-400 text-white shadow-lg shadow-sky-500/20 hover:-translate-y-0.5"
@@ -315,7 +370,9 @@ export default function ProductDetailModal({
                         ? "Agregando…"
                         : addedToCart
                           ? "¡Agregado!"
-                          : "Añadir"}
+                          : outOfStock
+                            ? "Sin stock"
+                            : "Añadir"}
                     </button>
 
                     <button
@@ -325,14 +382,28 @@ export default function ProductDetailModal({
                       }}
                       className="px-4 py-3 rounded-2xl border border-sky-200 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] text-slate-700 dark:text-[var(--text-primary)] inline-flex items-center gap-2 hover:bg-sky-50 dark:hover:bg-sky-900/10 transition"
                     >
-                      🛍️ Ver carrito
+                      🛍️
                     </button>
                   </div>
                 </div>
 
+                {/* Ver detalle completo */}
+                {p?.slug && (
+                  <button
+                    onClick={() => {
+                      closeDetailModal();
+                      router.push(`/producto/${p.slug}`);
+                    }}
+                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-2xl border border-sky-100 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] text-sm font-medium text-sky-600 dark:text-sky-400 hover:bg-sky-50 dark:hover:bg-sky-900/10 transition"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    Ver detalle completo
+                  </button>
+                )}
+
                 {/* Error del carrito */}
                 {cartError && (
-                  <div className="flex items-center gap-2 text-sm text-red-500 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl px-3 py-2">
+                  <div className="flex items-center gap-2 text-sm text-teal-600 bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-800 rounded-xl px-3 py-2">
                     <AlertCircle className="w-4 h-4 flex-shrink-0" />
                     {cartError}
                   </div>
@@ -340,8 +411,8 @@ export default function ProductDetailModal({
 
                 {p?.descripcion_larga && String(p.descripcion_larga).trim() && (
                   <div>
-                    <p className="text-sm text-slate-700 dark:text-[var(--text-primary)] flex items-center gap-2 mb-1">
-                      📄 Detalle
+                    <p className="text-sm text-slate-700 dark:text-[var(--text-primary)] font-semibold flex items-center gap-2 mb-1.5">
+                      📄 Descripción
                     </p>
                     <p className="text-sm text-slate-400 dark:text-[var(--text-muted)] leading-relaxed">
                       {p.descripcion_larga}

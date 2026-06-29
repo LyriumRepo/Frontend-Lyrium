@@ -11,7 +11,6 @@ import {
   XCircle,
 } from 'lucide-react';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
-import { CVCard } from '@/components/admin/sellers/SharedCVUI';
 import { ScanDropzone } from '@/components/admin/operations/ScanDropzone';
 import { ScanResultCard } from '@/components/admin/operations/ScanResultCard';
 import { ExpenseDetailModal } from '@/components/admin/operations/ExpenseDetailModal';
@@ -54,10 +53,10 @@ const TAB_TYPE: Record<Tab, string | null> = {
 
 function TipoBadge({ tipo }: { tipo: string }) {
   const map: Record<string, string> = {
-    Honorarios: 'bg-[#EEEDFE] text-[#3C3489]',
-    Factura: 'bg-[#FAEEDA] text-[#633806]',
-    Boleta: 'bg-[#E6F1FB] text-[#0C447C]',
-    Servicio: 'bg-[#EAF3DE] text-[#27500A]',
+    Honorarios: 'bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-300',
+    Factura: 'bg-sky-50 dark:bg-sky-900/20 text-sky-700 dark:text-sky-300',
+    Boleta: 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300',
+    Servicio: 'bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-300',
   };
   return (
     <span
@@ -70,9 +69,9 @@ function TipoBadge({ tipo }: { tipo: string }) {
 
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, string> = {
-    Pagado: 'bg-[#E1F5EE] text-[#085041]',
-    Pendiente: 'bg-[#FAEEDA] text-[#633806]',
-    Anulado: 'bg-[#FCEBEB] text-[#791F1F]',
+    Pagado: 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300',
+    Pendiente: 'bg-sky-50 dark:bg-sky-900/20 text-sky-700 dark:text-sky-300',
+    Anulado: 'bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-300',
   };
   return (
     <span
@@ -101,9 +100,9 @@ function IconBtn({
   const cls = {
     default:
       'border-[var(--border-subtle)] text-[var(--text-muted)] hover:bg-[var(--bg-muted)] hover:text-[var(--text-secondary)]',
-    teal: 'border-[#9FE1CB] text-[#0F6E56] hover:bg-[#E1F5EE]',
-    green: 'border-[#9FE1CB] text-[#085041] hover:bg-[#E1F5EE]',
-    red: 'border-[#F7C1C1] text-[#791F1F] hover:bg-[#FCEBEB]',
+    teal: 'border-teal-200 dark:border-teal-800 text-teal-700 dark:text-teal-300 hover:bg-teal-50 dark:hover:bg-teal-900/20',
+    green: 'border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20',
+    red: 'border-teal-200 dark:border-teal-800 text-teal-700 dark:text-teal-300 hover:bg-teal-50 dark:hover:bg-teal-900/20',
   }[variant];
   if (href) {
     return (
@@ -687,12 +686,14 @@ export function OperationsPageClient() {
     onAnular: handleAnular,
   };
 
+  const isGlossary = activeTab === 'Glosario';
+
   return (
     <div className="px-8 pb-20 space-y-8 animate-fadeIn font-industrial">
       <ModuleHeader
-        title="Gestión Operativa"
-        subtitle="Recibos, honorarios y servicios"
-        icon="Briefcase"
+        title={isGlossary ? 'Glosario' : 'Gestión Operativa'}
+        subtitle={isGlossary ? 'Entradas de glosario para clasificación automática de transacciones' : 'Recibos, honorarios y servicios'}
+        icon={isGlossary ? 'BookOpen' : 'Briefcase'}
         actions={
           <button
             onClick={() => {
@@ -708,81 +709,85 @@ export function OperationsPageClient() {
 
       {/* ── Stats ── */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <CVCard className="p-6 border-l-4 border-blue-500 shadow-sm hover:shadow-md transition-all">
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-2.5 bg-[var(--bg-secondary)] rounded-xl text-blue-500">
-              <CircleDollarSign className="w-5 h-5" />
+        <div className="relative overflow-hidden bg-white dark:bg-[var(--bg-secondary)] rounded-2xl border border-[var(--border-subtle)] p-5 shadow-sm hover:shadow-md transition-all">
+          <div className="absolute top-0 right-0 w-24 h-24 -mr-6 -mt-6 rounded-full bg-gradient-to-br from-teal-500 to-emerald-500 opacity-10 dark:opacity-20" />
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500 to-emerald-500 flex items-center justify-center shadow-sm">
+              <CircleDollarSign className="w-5 h-5 text-white" />
             </div>
-            <span className="text-2xl font-black text-[var(--text-primary)] tracking-tight">
-              S/{' '}
-              {Number(totalInvertido).toLocaleString('es-PE', {
-                minimumFractionDigits: 0,
-              })}
-            </span>
-          </div>
-          <h3 className="text-[11px] font-black text-[var(--text-secondary)] uppercase tracking-[0.15em]">
-            Total invertido
-          </h3>
-          <p className="text-[10px] text-[var(--text-muted)] font-medium mt-0.5">
-            {expenses.length} comprobantes
-          </p>
-        </CVCard>
-        <CVCard className="p-6 border-l-4 border-emerald-400 shadow-sm hover:shadow-md transition-all">
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-2.5 bg-[var(--bg-secondary)] rounded-xl text-emerald-400">
-              <Receipt className="w-5 h-5" />
+            <div>
+              <p className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Total invertido</p>
+              <p className="text-2xl font-bold text-[var(--text-primary)]">
+                S/{' '}
+                {Number(totalInvertido).toLocaleString('es-PE', {
+                  minimumFractionDigits: 0,
+                })}
+              </p>
+              <p className="text-[10px] text-[var(--text-muted)] font-medium mt-0.5">
+                {expenses.length} comprobantes
+              </p>
             </div>
-            <span className="text-2xl font-black text-[var(--text-primary)] tracking-tight">
-              S/{' '}
-              {Number(totalPagado).toLocaleString('es-PE', {
-                minimumFractionDigits: 0,
-              })}
-            </span>
           </div>
-          <h3 className="text-[11px] font-black text-[var(--text-secondary)] uppercase tracking-[0.15em]">
-            Pagado
-          </h3>
-          <p className="text-[10px] text-[var(--text-muted)] font-medium mt-0.5">
-            {filtered.filter((e) => e.voucher_type === 'Honorarios').length}{' '}
-            honorarios
-          </p>
-        </CVCard>
-        <CVCard className="p-6 border-l-4 border-amber-400 shadow-sm hover:shadow-md transition-all">
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-2.5 bg-[var(--bg-secondary)] rounded-xl text-amber-400">
-              <Landmark className="w-5 h-5" />
+        </div>
+        <div className="relative overflow-hidden bg-white dark:bg-[var(--bg-secondary)] rounded-2xl border border-[var(--border-subtle)] p-5 shadow-sm hover:shadow-md transition-all">
+          <div className="absolute top-0 right-0 w-24 h-24 -mr-6 -mt-6 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 opacity-10 dark:opacity-20" />
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-sm">
+              <Receipt className="w-5 h-5 text-white" />
             </div>
-            <span className="text-2xl font-black text-[var(--text-primary)] tracking-tight">
-              S/{' '}
-              {Number(totalPendiente).toLocaleString('es-PE', {
-                minimumFractionDigits: 0,
-              })}
-            </span>
-          </div>
-          <h3 className="text-[11px] font-black text-[var(--text-secondary)] uppercase tracking-[0.15em]">
-            Pendiente
-          </h3>
-          <p className="text-[10px] text-[var(--text-muted)] font-medium mt-0.5">
-            {recibosPendientes} recibo(s)
-          </p>
-        </CVCard>
-        <CVCard className="p-6 border-l-4 border-purple-400 shadow-sm hover:shadow-md transition-all">
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-2.5 bg-[var(--bg-secondary)] rounded-xl text-purple-400">
-              <Receipt className="w-5 h-5" />
+            <div>
+              <p className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Pagado</p>
+              <p className="text-2xl font-bold text-[var(--text-primary)]">
+                S/{' '}
+                {Number(totalPagado).toLocaleString('es-PE', {
+                  minimumFractionDigits: 0,
+                })}
+              </p>
+              <p className="text-[10px] text-[var(--text-muted)] font-medium mt-0.5">
+                {filtered.filter((e) => e.voucher_type === 'Honorarios').length}{' '}
+                honorarios
+              </p>
             </div>
-            <span className="text-2xl font-black text-[var(--text-primary)] tracking-tight">
-              {filtered.filter((e) => e.voucher_type === 'Factura').length}
-            </span>
           </div>
-          <h3 className="text-[11px] font-black text-[var(--text-secondary)] uppercase tracking-[0.15em]">
-            Facturas
-          </h3>
-          <p className="text-[10px] text-[var(--text-muted)] font-medium mt-0.5">
-            {filtered.filter((e) => e.voucher_type === 'Boleta').length}{' '}
-            boleta(s)
-          </p>
-        </CVCard>
+        </div>
+        <div className="relative overflow-hidden bg-white dark:bg-[var(--bg-secondary)] rounded-2xl border border-[var(--border-subtle)] p-5 shadow-sm hover:shadow-md transition-all">
+          <div className="absolute top-0 right-0 w-24 h-24 -mr-6 -mt-6 rounded-full bg-gradient-to-br from-sky-500 to-teal-500 opacity-10 dark:opacity-20" />
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-500 to-teal-500 flex items-center justify-center shadow-sm">
+              <Landmark className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <p className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Pendiente</p>
+              <p className="text-2xl font-bold text-[var(--text-primary)]">
+                S/{' '}
+                {Number(totalPendiente).toLocaleString('es-PE', {
+                  minimumFractionDigits: 0,
+                })}
+              </p>
+              <p className="text-[10px] text-[var(--text-muted)] font-medium mt-0.5">
+                {recibosPendientes} recibo(s)
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="relative overflow-hidden bg-white dark:bg-[var(--bg-secondary)] rounded-2xl border border-[var(--border-subtle)] p-5 shadow-sm hover:shadow-md transition-all">
+          <div className="absolute top-0 right-0 w-24 h-24 -mr-6 -mt-6 rounded-full bg-gradient-to-br from-teal-500 to-emerald-500 opacity-10 dark:opacity-20" />
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500 to-emerald-500 flex items-center justify-center shadow-sm">
+              <Receipt className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <p className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Facturas</p>
+              <p className="text-2xl font-bold text-[var(--text-primary)]">
+                {filtered.filter((e) => e.voucher_type === 'Factura').length}
+              </p>
+              <p className="text-[10px] text-[var(--text-muted)] font-medium mt-0.5">
+                {filtered.filter((e) => e.voucher_type === 'Boleta').length}{' '}
+                boleta(s)
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* ── Scanner ── */}
@@ -821,7 +826,11 @@ export function OperationsPageClient() {
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`text-[13px] px-3.5 py-[5px] rounded-lg border-none transition-colors ${activeTab === tab ? 'bg-[var(--bg-muted)] text-[var(--text-primary)] font-medium' : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)] bg-transparent'}`}
+            className={`text-[13px] px-4 py-2 rounded-lg border-none transition-all ${
+              activeTab === tab
+                ? 'bg-gradient-to-r from-teal-500/10 to-sky-500/10 text-teal-600 dark:text-teal-400 font-semibold shadow-sm'
+                : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--bg-muted)] bg-transparent'
+            }`}
           >
             {tab}
           </button>
@@ -862,7 +871,8 @@ export function OperationsPageClient() {
       </div>
 
       {error && (
-        <div className="rounded-lg border border-[#F7C1C1] bg-[#FCEBEB] px-4 py-3 text-[13px] text-[#791F1F]">
+        <div className="rounded-xl border border-teal-200 dark:border-teal-800 bg-teal-50 dark:bg-teal-900/20 px-5 py-4 text-[13px] text-teal-700 dark:text-teal-300 flex items-center gap-3 shadow-sm">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="flex-shrink-0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
           {error}
         </div>
       )}
@@ -873,8 +883,18 @@ export function OperationsPageClient() {
       ) : (
         <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl overflow-hidden">
           {loading ? (
-            <div className="py-16 text-center text-[13px] text-[var(--text-muted)]">
-              Cargando comprobantes...
+            <div className="divide-y divide-[var(--border-subtle)]">
+              {[1,2,3,4,5].map(i => (
+                <div key={i} className="flex items-center gap-4 px-5 py-4 animate-pulse">
+                  <div className="w-20 h-4 rounded bg-gray-200 dark:bg-gray-700" />
+                  <div className="w-28 h-4 rounded bg-gray-200 dark:bg-gray-700" />
+                  <div className="w-32 h-4 rounded bg-gray-200 dark:bg-gray-700" />
+                  <div className="w-36 h-4 rounded bg-gray-200 dark:bg-gray-700" />
+                  <div className="w-20 h-4 rounded bg-gray-200 dark:bg-gray-700" />
+                  <div className="w-16 h-4 rounded bg-gray-200 dark:bg-gray-700" />
+                  <div className="w-14 h-4 rounded bg-gray-200 dark:bg-gray-700 ml-auto" />
+                </div>
+              ))}
             </div>
           ) : (
             <>

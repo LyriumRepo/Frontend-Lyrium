@@ -291,13 +291,18 @@ export default function MainProductGrid({ productos }: MainProductGridProps) {
                     )}
                   </div>
 
-                  <div className="text-xl font-bold text-sky-500">
-                    S/{producto.precio.toFixed(2)}
-                    {tieneDescuento && (
-                      <span className="text-sm font-normal text-gray-400 line-through ml-2">
-                        S/{precioAnterior?.toFixed(2)}
-                      </span>
-                    )}
+                  <div className="flex items-center justify-between">
+                    <div className="text-xl font-bold text-sky-500">
+                      S/{producto.precio.toFixed(2)}
+                      {tieneDescuento && (
+                        <span className="text-sm font-normal text-gray-400 line-through ml-2">
+                          S/{precioAnterior?.toFixed(2)}
+                        </span>
+                      )}
+                    </div>
+                    <span className={`text-[10px] ${!producto.stock || producto.stock === 0 ? 'text-rose-500' : 'text-slate-400 dark:text-[var(--text-muted)]'}`}>
+                      {!producto.stock || producto.stock === 0 ? 'Agotado' : `Stock: ${producto.stock}`}
+                    </span>
                   </div>
                 </div>
               </div>

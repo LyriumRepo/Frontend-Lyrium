@@ -8,6 +8,9 @@ export interface TransactionStore {
   id: string;
   name: string;
   slug: string;
+  commissionAmount: number;
+  commissionIgv: number;
+  commissionTotal: number;
 }
 
 export interface TransactionItemProduct {

@@ -116,7 +116,7 @@ export function usePlanes() {
       const userName = user.display_name || user.username || 'Vendedor';
       
       const [plansRes, subRes, colorsRes] = await Promise.all([
-        apiGet<{ data?: Array<{ id: number; name: string; slug: string; monthly_fee: string; features: unknown; detailed_benefits?: unknown; timeline_icon?: string; css_color?: string; accent_color?: string; is_active?: boolean; badge?: string; description?: string }> }>('/plans').catch(() => ({ data: [] })),
+        apiGet<{ data?: Array<{ id: number; name: string; slug: string; monthly_fee: string; features: unknown; detailed_benefits?: unknown; timeline_icon?: string; css_color?: string; accent_color?: string; bg_image?: string; bg_image_fit?: string; bg_image_position?: string; show_bg_in_card?: boolean; is_active?: boolean; badge?: string; description?: string }> }>('/plans').catch(() => ({ data: [] })),
         apiGet<{ data?: { id: number; plan_id: number; status: string; starts_at?: string; started_at?: string; ends_at?: string; expires_at?: string; plan: { id: number; name: string; slug: string; monthly_fee: string } } }>('/subscriptions/current').catch(() => ({ data: null })),
         apiGet<{ data?: Record<string, string> }>('/config/colors').catch(() => ({ data: undefined })),
       ]);
@@ -158,6 +158,10 @@ export function usePlanes() {
             detailedBenefits,
             timelineIcon: plan.timeline_icon ?? 'star',
             isActive: plan.is_active ?? true,
+            bgImage: plan.bg_image ?? '',
+            bgImageFit: (plan.bg_image_fit ?? 'cover') as 'cover' | 'contain' | 'fill',
+            bgImagePosition: plan.bg_image_position ?? 'center',
+            showBgInCard: !!plan.show_bg_in_card,
           };
         });
       }

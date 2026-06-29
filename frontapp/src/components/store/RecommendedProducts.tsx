@@ -82,15 +82,20 @@ export default function RecommendedProducts({ productos, titulo = 'Más producto
                   {producto.titulo}
                 </h4>
                 
-                <div className="flex items-baseline gap-2">
-                  <p className="text-lg font-bold text-sky-500 dark:text-[var(--brand-sky)]">
-                    S/{producto.precio.toFixed(2)}
-                  </p>
-                  {tieneDescuento && (
-                    <p className="text-gray-400 dark:text-[var(--text-muted)] text-xs line-through">
-                      S/{precioAnterior?.toFixed(2)}
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-baseline gap-2">
+                    <p className="text-lg font-bold text-sky-500 dark:text-[var(--brand-sky)]">
+                      S/{producto.precio.toFixed(2)}
                     </p>
-                  )}
+                    {tieneDescuento && (
+                      <p className="text-gray-400 dark:text-[var(--text-muted)] text-xs line-through">
+                        S/{precioAnterior?.toFixed(2)}
+                      </p>
+                    )}
+                  </div>
+                  <span className={`text-[10px] ${!producto.stock || producto.stock === 0 ? 'text-rose-500' : 'text-slate-400 dark:text-[var(--text-muted)]'}`}>
+                    {!producto.stock || producto.stock === 0 ? 'Agotado' : `Stock: ${producto.stock}`}
+                  </span>
                 </div>
               </div>
             </Link>

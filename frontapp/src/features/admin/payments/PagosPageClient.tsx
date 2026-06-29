@@ -11,7 +11,8 @@ import BaseModal from '@/components/ui/BaseModal';
 import DataTable, { type Column } from '@/components/ui/DataTable';
 import { useTransactions, useTransactionDetail } from '@/features/admin/payments/hooks/useTransactions';
 import type { Transaction, TransactionFilters } from '@/features/admin/payments/types/transactions';
-import { CreditCard, Wallet, Smartphone, Package, Briefcase, Layers } from 'lucide-react';
+import { CreditCard, Wallet, Smartphone, Package, Briefcase, Layers, FileDown, FileSpreadsheet } from 'lucide-react';
+import { downloadExport } from '@/shared/lib/utils/exportFile';
 
 import type { StatusMapping } from '@/components/ui/BaseStatusBadge';
 
@@ -146,10 +147,10 @@ export function PagosPageClient() {
       key: 'comision',
       header: 'Comisión',
       align: 'right',
-      className: 'bg-rose-50/40 dark:bg-[var(--bg-muted)]',
+      className: 'bg-emerald-50/40 dark:bg-[var(--bg-muted)]',
       render: (tx) => (
         <div className="text-right">
-          <p className="text-sm font-bold text-rose-600 dark:text-rose-400">{formatCurrency(tx.commissionTotal)}</p>
+          <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400">{formatCurrency(tx.commissionTotal)}</p>
           <p className="text-[10px] text-[var(--text-secondary)]">
             Base: {formatCurrency(tx.commissionAmount)} + IGV
           </p>
@@ -172,7 +173,7 @@ export function PagosPageClient() {
     {
       key: 'transactionStatus',
       header: 'Transacción',
-      className: 'bg-rose-50/40 dark:bg-[var(--bg-muted)]',
+      className: 'bg-teal-50/40 dark:bg-[var(--bg-muted)]',
       render: (tx) => {
         if (!tx.transactionStatus) return <span className="text-xs text-[var(--text-secondary)]">—</span>;
         return (
@@ -286,6 +287,42 @@ export function PagosPageClient() {
               Limpiar
             </BaseButton>
           )}
+          <div className="flex gap-2 ml-auto">
+            <BaseButton
+              variant="outline"
+              size="sm"
+              leftIcon={<FileSpreadsheet className="w-4 h-4" />}
+              onClick={() => {
+                const params = new URLSearchParams();
+                if (filters.search) params.set('search', filters.search);
+                if (filters.date_from) params.set('date_from', filters.date_from);
+                if (filters.date_to) params.set('date_to', filters.date_to);
+                if (filters.payment_status) params.set('payment_status', filters.payment_status);
+                if (filters.transaction_status) params.set('transaction_status', filters.transaction_status);
+                if (filters.payment_method) params.set('payment_method', filters.payment_method);
+                downloadExport(`/admin/transactions/export/csv?${params.toString()}`, 'reporte-transacciones.csv');
+              }}
+            >
+              CSV
+            </BaseButton>
+            <BaseButton
+              variant="outline"
+              size="sm"
+              leftIcon={<FileDown className="w-4 h-4" />}
+              onClick={() => {
+                const params = new URLSearchParams();
+                if (filters.search) params.set('search', filters.search);
+                if (filters.date_from) params.set('date_from', filters.date_from);
+                if (filters.date_to) params.set('date_to', filters.date_to);
+                if (filters.payment_status) params.set('payment_status', filters.payment_status);
+                if (filters.transaction_status) params.set('transaction_status', filters.transaction_status);
+                if (filters.payment_method) params.set('payment_method', filters.payment_method);
+                downloadExport(`/admin/transactions/export/pdf?${params.toString()}`, 'reporte-transacciones.pdf');
+              }}
+            >
+              PDF
+            </BaseButton>
+          </div>
         </div>
       </div>
 
@@ -453,6 +490,31 @@ function TransactionDetail({ transaction }: { transaction: Transaction }) {
 
       <div className="border-t border-[var(--border-subtle)] pt-4">
         <p className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest mb-3">Comisión Lyrium</p>
+
+        {transaction.stores.length > 1 && (
+          <div className="space-y-2 mb-3 pb-3 border-b border-[var(--border-subtle)]">
+            {transaction.stores.map((store) => (
+              <div key={store.id} className="bg-emerald-50/40 dark:bg-emerald-900/10 rounded-xl p-2.5 space-y-1">
+                <p className="text-[11px] font-bold text-emerald-700 dark:text-emerald-400 truncate">{store.name}</p>
+                <div className="space-y-0.5 text-[11px] pl-1">
+                  <div className="flex justify-between">
+                    <span className="text-[var(--text-secondary)]">Base</span>
+                    <span>{formatCurrency(store.commissionAmount)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-[var(--text-secondary)]">IGV (18%)</span>
+                    <span>{formatCurrency(store.commissionIgv)}</span>
+                  </div>
+                  <div className="flex justify-between font-semibold text-emerald-600 dark:text-emerald-400">
+                    <span>Total</span>
+                    <span>{formatCurrency(store.commissionTotal)}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
         <div className="space-y-1.5 text-xs">
           <div className="flex justify-between">
             <span className="text-[var(--text-secondary)]">Base</span>
@@ -462,7 +524,7 @@ function TransactionDetail({ transaction }: { transaction: Transaction }) {
             <span className="text-[var(--text-secondary)]">IGV (18%)</span>
             <span>{formatCurrency(transaction.commissionIgv)}</span>
           </div>
-          <div className="flex justify-between font-bold pt-1 border-t border-[var(--border-subtle)] text-rose-600 dark:text-rose-400">
+          <div className="flex justify-between font-bold pt-1 border-t border-[var(--border-subtle)] text-emerald-600 dark:text-emerald-400">
             <span>Total Comisión</span>
             <span>{formatCurrency(transaction.commissionTotal)}</span>
           </div>

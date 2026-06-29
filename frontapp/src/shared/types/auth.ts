@@ -1,4 +1,4 @@
-export type UserRole = 'administrator' | 'seller' | 'customer' | 'logistics_operator';
+export type UserRole = 'administrator' | 'seller' | 'customer' | 'logistics_operator' | 'security_admin';
 
 export interface UserLocation {
     departamento?: string;

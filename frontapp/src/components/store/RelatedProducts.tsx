@@ -89,6 +89,9 @@ export default function RelatedProducts({ productos, titulo = 'Descubre más pro
                       </p>
                     )}
                   </div>
+                  <span className={`text-[10px] ${!producto.stock || producto.stock === 0 ? 'text-rose-500' : 'text-slate-400 dark:text-[var(--text-muted)]'}`}>
+                    {!producto.stock || producto.stock === 0 ? 'Agotado' : `Stock: ${producto.stock}`}
+                  </span>
                 </div>
               </div>
             </div>

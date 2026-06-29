@@ -300,6 +300,9 @@ export default function StoreTabs({ tienda, productos, servicios = [], sucursale
                   <div className="flex items-center gap-1 mb-2">{producto.estrellas && producto.estrellas.split('').map((_, i) => <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400" />)}</div>
                   <div className="flex items-center justify-between">
                     <div><p className="text-sky-600 dark:text-[var(--icons-green)] font-bold">S/{producto.precio.toFixed(2)}</p>{tieneDescuento && <p className="text-gray-400 text-xs line-through">S/{precioAnterior?.toFixed(2)}</p>}</div>
+                    <span className={`text-[10px] ${!producto.stock || producto.stock === 0 ? 'text-rose-500' : 'text-slate-400 dark:text-[var(--text-muted)]'}`}>
+                      {!producto.stock || producto.stock === 0 ? 'Agotado' : `Stock: ${producto.stock}`}
+                    </span>
                   </div>
                   <div className="flex md:hidden mt-2 gap-2">
                     <button onClick={() => setSelectedProduct(producto)} className="flex-1 py-1.5 bg-gray-100 dark:bg-[var(--bg-muted)] rounded-lg text-xs">Ver</button>
