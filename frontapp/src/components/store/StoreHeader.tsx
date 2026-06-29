@@ -1,9 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Icon from '@/components/ui/Icon';
-import TopMedalBadge from '@/components/ui/TopMedalBadge';
 
 export interface StoreHeaderProps {
   store: {
@@ -25,7 +24,18 @@ export interface StoreHeaderProps {
 }
 
 export default function StoreHeader({ store, stats, onSearch }: StoreHeaderProps) {
+  const [isSticky, setIsSticky] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      setIsSticky(scrollY > 50);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,37 +45,52 @@ export default function StoreHeader({ store, stats, onSearch }: StoreHeaderProps
   const addressShort = store.address?.split(',')[0] || 'Sin ubicación';
 
   return (
-    <div className="mt-2">
+    <div
+      id="tiendaHeaderSticky"
+      className={`relative z-50 transition-all duration-300 ${
+        isSticky ? 'fixed top-0 left-0 right-0' : 'mt-4'
+      }`}
+    >
       <div className="max-w-[1600px] mx-auto px-4">
         <div
-          className="relative overflow-hidden rounded-2xl shadow-2xl bg-white dark:bg-[var(--bg-primary)] border border-sky-200/20 dark:border-[var(--border-subtle)]"
+          className={`
+            relative overflow-hidden rounded-2xl shadow-2xl
+            bg-cover bg-center bg-no-repeat
+            border border-sky-200/20
+            transition-all duration-300
+            ${isSticky ? 'rounded-none' : ''}
+          `}
+          style={{ 
+            backgroundImage: `
+              linear-gradient(to right, rgba(15, 23, 42, 0.92), rgba(30, 41, 59, 0.88)),
+              url('${store.cover || '/img/store/tienda-94.png'}')
+            `,
+            backgroundBlendMode: 'overlay'
+          }}
         >
           {/* Fila 1: Logo + Nombre + Badges + Buscador */}
-          <div className="px-4 lg:px-6 py-4">
+          <div className="px-4 lg:px-6 py-4 bg-white/10 backdrop-blur-sm">
             <div className="flex items-center justify-between gap-4 flex-wrap">
               {/* Logo + Nombre + Badges */}
               <div className="flex items-center gap-3">
                 {/* Logo */}
-                <div className="relative">
-                  <div className="w-12 h-12 rounded-xl overflow-hidden bg-white flex-shrink-0 shadow-lg ring-2 ring-white/50 flex items-center justify-center">
-                    <Image
-                      src={store.logo || '/img/store/tienda-94.png'}
-                      alt={store.name}
-                      width={48}
-                      height={48}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.src = '/img/store/tienda-94.png';
-                      }}
-                    />
-                  </div>
-                  <TopMedalBadge entityType="store" entityId={store.id} size="sm" className="absolute bottom-0 right-0 z-10" />
+                <div className="w-12 h-12 rounded-xl overflow-hidden bg-white flex-shrink-0 shadow-lg ring-2 ring-white/50 flex items-center justify-center">
+                  <Image
+                    src={store.logo || '/img/store/tienda-94.png'}
+                    alt={store.name}
+                    width={48}
+                    height={48}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = '/img/store/tienda-94.png';
+                    }}
+                  />
                 </div>
 
                 {/* Nombre + Badges */}
                 <div className="flex items-center gap-2">
-                  <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+                  <h1 className="text-xl font-bold text-white drop-shadow-md">
                     {store.name}
                   </h1>
 
@@ -131,32 +156,85 @@ export default function StoreHeader({ store, stats, onSearch }: StoreHeaderProps
             </div>
           </div>
 
-          {/* Fila 2: Stats compactos */}
-          <div className="px-4 lg:px-6 py-2 border-t border-gray-200 dark:border-gray-700">
-            <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-xs">
-              <div className="flex items-center gap-1.5 text-slate-600 dark:text-white/80">
-                <Icon name="MapPin" className="w-3.5 h-3.5 text-sky-500 flex-shrink-0" />
-                <span className="font-medium truncate max-w-[180px]">{addressShort}</span>
-              </div>
-              {store.category && (
-                <div className="flex items-center gap-1.5 text-slate-600 dark:text-white/80">
-                  <Icon name="Tag" className="w-3.5 h-3.5 text-purple-500 flex-shrink-0" />
-                  <span className="font-medium truncate max-w-[160px]">{store.category}</span>
+          {/* Fila 2: Cards de información */}
+          <div className="px-4 lg:px-6 py-3 bg-white/40 backdrop-blur-sm border-t border-white/50 dark:bg-black/20 dark:border-white/10">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {/* Card: Ubicación */}
+              <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-xl p-4 shadow-lg border-l-4 border-l-sky-500 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 cursor-default dark:border-sky-400">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-slate-500 dark:text-white/90 text-xs font-medium mb-1">Ubicación</p>
+                    <p className="text-lg font-bold text-slate-800 dark:text-white truncate">{addressShort}</p>
+                    <p className="text-xs text-sky-600 dark:text-sky-300 font-medium mt-1 flex items-center gap-0.5">
+                      <Icon name="MapPin" className="w-3 h-3" />
+                      Ver en mapa
+                    </p>
+                  </div>
+                  <div className="w-10 h-10 rounded-full bg-sky-100 dark:bg-sky-500/30 flex items-center justify-center flex-shrink-0">
+                    <Icon name="MapPin" className="w-5 h-5 text-sky-600 dark:text-sky-300" />
+                  </div>
                 </div>
-              )}
-              <div className="flex items-center gap-1.5 text-slate-600 dark:text-white/80">
-                <Icon name="Star" className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />
-                <span className="font-medium">{stats.rating > 0 ? `${stats.rating} ★` : 'Sin reseñas'}</span>
-                <span className="text-slate-400 dark:text-white/50">· {stats.reviews} reseñas</span>
               </div>
-              <div className="flex items-center gap-1.5 text-slate-600 dark:text-white/80">
-                <Icon name="Package" className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />
-                <span className="font-medium">{stats.products} productos</span>
+
+              {/* Card: Categoría */}
+              <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-xl p-4 shadow-lg border-l-4 border-l-purple-500 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 cursor-default dark:border-purple-400">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-slate-500 dark:text-white/90 text-xs font-medium mb-1">Categoría</p>
+                    <p className="text-lg font-bold text-slate-800 dark:text-white truncate">{store.category}</p>
+                    <p className="text-xs text-purple-600 dark:text-purple-300 font-medium mt-1 flex items-center gap-0.5">
+                      <Icon name="Tag" className="w-3 h-3" />
+                      Productos naturales
+                    </p>
+                  </div>
+                  <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-500/30 flex items-center justify-center flex-shrink-0">
+                    <Icon name="Tag" className="w-5 h-5 text-purple-600 dark:text-purple-300" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Card: Valoración */}
+              <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-xl p-4 shadow-lg border-l-4 border-l-amber-500 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 cursor-default dark:border-amber-400">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-slate-500 dark:text-white/90 text-xs font-medium mb-1">Valoración</p>
+                    <p className="text-lg font-bold text-slate-800 dark:text-white">
+                      {stats.rating > 0 ? `${stats.rating} ★` : 'Sin reseñas'}
+                    </p>
+                    <p className="text-xs text-amber-600 dark:text-amber-300 font-medium mt-1 flex items-center gap-0.5">
+                      <Icon name="Users" className="w-3 h-3" />
+                      {stats.reviews} reseñas
+                    </p>
+                  </div>
+                  <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-500/30 flex items-center justify-center flex-shrink-0">
+                    <Icon name="Star" className="w-5 h-5 text-amber-500 dark:text-amber-300" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Card: Productos */}
+              <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-xl p-4 shadow-lg border-l-4 border-l-emerald-500 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 cursor-default dark:border-emerald-400">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-slate-500 dark:text-white/90 text-xs font-medium mb-1">Productos Activos</p>
+                    <p className="text-lg font-bold text-slate-800 dark:text-white">{stats.products}</p>
+                    <p className="text-xs text-emerald-600 dark:text-emerald-100 font-medium mt-1 flex items-center gap-0.5">
+                      <Icon name="CheckCircle" className="w-3 h-3" />
+                      Disponibles
+                    </p>
+                  </div>
+                  <div className="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-500/30 flex items-center justify-center flex-shrink-0">
+                    <Icon name="Package" className="w-5 h-5 text-emerald-600 dark:text-emerald-100" />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Spacer cuando está sticky para evitar superposición */}
+      {isSticky && <div className="h-4" />}
     </div>
   );
 }

@@ -32,7 +32,7 @@ export default function PackagingSummary() {
   return (
     <div className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900/40 overflow-hidden">
       
-      <div className="px-5 py-4 bg-gradient-to-r from-sky-500 to-blue-500 flex items-center gap-3">
+      <div className="px-5 py-4 bg-gradient-to-r from-teal-500 to-sky-500 flex items-center gap-3">
         <Package className="w-5 h-5 text-white" />
         <h3 className="font-bold text-white">Resumen de empaque</h3>
       </div>

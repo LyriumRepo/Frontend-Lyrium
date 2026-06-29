@@ -12,27 +12,26 @@ interface Banner {
 interface AdBannersGridProps {
   banners?: Banner[];
   maxBanners?: number;
-  vertical?: boolean;
 }
 
 const defaultBanners: Banner[] = [
-  { url: '', titulo: 'Banner en preparación', link: '#' },
-  { url: '', titulo: 'Banner en preparación', link: '#' },
-  { url: '', titulo: 'Banner en preparación', link: '#' },
+  { url: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=800&h=400&fit=crop', titulo: 'Promoción Especial', link: '#' },
+  { url: 'https://images.unsplash.com/photo-1607082349566-187342175e2f?w=800&h=400&fit=crop', titulo: 'Ofertas Destacadas', link: '#' },
+  { url: 'https://images.unsplash.com/photo-1557821552-17105176677c?w=800&h=400&fit=crop', titulo: 'Nuevos Productos', link: '#' },
 ];
 
-export default function AdBannersGrid({ banners = defaultBanners, maxBanners = 3, vertical = false }: AdBannersGridProps) {
+export default function AdBannersGrid({ banners = defaultBanners, maxBanners = 3 }: AdBannersGridProps) {
   const bannersVisibles = banners.slice(0, maxBanners);
 
   return (
-    <div className={`grid gap-4 ${vertical ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-3'}`}>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       {bannersVisibles.map((banner, idx) => (
         <Link 
           key={idx}
           href={banner.link || '#'}
           className="group block overflow-hidden rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
         >
-          <div className={`relative overflow-hidden bg-gray-100 dark:bg-[var(--bg-muted)] ${vertical ? 'aspect-[3/4]' : 'aspect-[16/9]'}`}>
+          <div className="relative aspect-[16/9] md:aspect-[4/3] overflow-hidden bg-gray-100 dark:bg-[var(--bg-muted)]">
             {banner.url ? (
               <Image
                 src={banner.url}
@@ -42,8 +41,8 @@ export default function AdBannersGrid({ banners = defaultBanners, maxBanners = 3
                 sizes="(max-width: 768px) 100vw, 33vw"
               />
             ) : (
-              <div className="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800">
-                <span className="text-gray-400 dark:text-gray-500 font-bold text-lg">{banner.titulo}</span>
+              <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-sky-400 to-indigo-500">
+                <span className="text-white font-bold text-lg">{banner.titulo}</span>
               </div>
             )}
             {/* Overlay con título al hover */}

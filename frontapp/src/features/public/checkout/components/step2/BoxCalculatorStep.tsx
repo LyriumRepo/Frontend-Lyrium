@@ -6,16 +6,16 @@ import type { CajaDetalle, TiendaBoxResult, CartItem } from '@/store/checkoutSto
 import { useBoxCalculation }   from '../../hooks/useBoxCalculation';
 
 const TIPO_COLOR: Record<string, string> = {
-  XXS:'bg-slate-100  text-slate-700  dark:bg-slate-800 dark:text-slate-300',
-  XS: 'bg-sky-100   text-sky-700    dark:bg-sky-900/40 dark:text-sky-300',
-  S:  'bg-blue-100  text-blue-700   dark:bg-blue-900/40 dark:text-blue-300',
-  M:  'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300',
-  ML: 'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300',
-  L:  'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300',
-  XL: 'bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-900/40 dark:text-fuchsia-300',
+  XXS: 'bg-teal-50  text-teal-700  dark:bg-teal-900/30 dark:text-teal-300',
+  XS:  'bg-teal-50  text-teal-700  dark:bg-teal-900/30 dark:text-teal-300',
+  S:   'bg-teal-100 text-teal-800  dark:bg-teal-900/40 dark:text-teal-200',
+  M:   'bg-sky-50   text-sky-700   dark:bg-sky-900/30  dark:text-sky-300',
+  ML:  'bg-sky-100  text-sky-800   dark:bg-sky-900/40  dark:text-sky-200',
+  L:   'bg-sky-100  text-sky-800   dark:bg-sky-900/40  dark:text-sky-200',
+  XL:  'bg-sky-200  text-sky-900   dark:bg-sky-900/50  dark:text-sky-100',
 };
 const tipoColor = (t: string) =>
-  TIPO_COLOR[t?.toUpperCase()] ?? 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300';
+  TIPO_COLOR[t?.toUpperCase()] ?? 'bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300';
 
 function getPeso(c: CajaDetalle & Record<string, any>) {
   return {
@@ -57,9 +57,9 @@ function BoxChip({
 
   const cajas    = tiendaBox.cajas;
   const eff      = Math.round((tiendaBox.eficiencia ?? 0) * 100);
-  const effColor = eff >= 80 ? 'text-emerald-600 dark:text-emerald-400'
-                 : eff >= 60 ? 'text-amber-600 dark:text-amber-400'
-                 : 'text-red-500 dark:text-red-400';
+  const effColor = eff >= 80 ? 'text-teal-600 dark:text-teal-400'
+                 : eff >= 60 ? 'text-sky-600 dark:text-sky-400'
+                 : 'text-sky-400 dark:text-sky-500';
 
   return (
     <div className="mx-4 mb-3 mt-1 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-800 p-3 space-y-2">
@@ -235,7 +235,7 @@ export default function BoxCalculatorStep() {
     <div className="space-y-5">
 
       
-      <div className="rounded-2xl bg-gradient-to-r from-[#46b2ff] to-sky-400 p-5 text-white">
+      <div className="rounded-2xl bg-gradient-to-r from-teal-500 to-sky-500 p-5 text-white">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2 className="text-lg font-black tracking-tight">📦 Cálculo de Cajas</h2>
@@ -301,7 +301,7 @@ export default function BoxCalculatorStep() {
       )}
 
       
-      <div className="flex gap-2 items-start p-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-100 dark:border-amber-900/40 text-amber-700 dark:text-amber-400 text-xs">
+      <div className="flex gap-2 items-start p-3 rounded-xl bg-sky-50 dark:bg-sky-950/30 border border-sky-100 dark:border-sky-900/40 text-sky-700 dark:text-sky-400 text-xs">
         <Info className="w-4 h-4 mt-0.5 shrink-0" />
         <p>
           El <strong>peso facturable</strong> es el mayor entre peso real y volumétrico
