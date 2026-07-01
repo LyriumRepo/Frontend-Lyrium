@@ -11,6 +11,8 @@ import { ThemeProvider } from 'next-themes';
 import QueryProvider from '@/components/providers/QueryProvider';
 import { GoogleOAuthWrapper } from '@/components/providers/GoogleOAuthWrapper';
 import CartProviders from '@/components/CartProviders';
+import { PageTransitionLoader } from '@/components/layout/shared/PageTransitionLoader';
+import { TopMedalProvider } from '@/shared/lib/context/TopMedalContext';
 
 const dmSerif = DM_Serif_Display({
   subsets: ['latin'],
@@ -82,7 +84,10 @@ export default function RootLayout({
                   <NotificationProvider>
                     <ToastProvider>
                       <NotificationToast />
-                      {children}
+                      <TopMedalProvider>
+                        {children}
+                      </TopMedalProvider>
+                      <PageTransitionLoader />
                       <CartProviders />
                     </ToastProvider>
                   </NotificationProvider>

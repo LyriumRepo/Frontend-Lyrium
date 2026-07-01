@@ -19,7 +19,7 @@ export const logisticsNavigation: PanelNavigation = [
             },
             {
                 id: 'helpdesk',
-                label: 'Mesa de Ayuda',
+                label: 'Soporte Lyrium',
                 description: 'Soporte y reportar incidencias',
                 icon: 'HelpCircle',
                 href: '/logistics/helpdesk'

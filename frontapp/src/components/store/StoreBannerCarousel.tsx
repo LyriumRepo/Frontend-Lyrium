@@ -135,7 +135,7 @@ export default function StoreBannerCarousel({
   return (
     <div className="flex flex-col sm:flex-row gap-3 items-stretch">
       {/* Slider del Banner */}
-      <div className="flex-1 relative w-full aspect-[16/9] sm:aspect-[1600/585] rounded-2xl overflow-hidden shadow-lg bg-white dark:bg-[var(--bg-card)]">
+      <div className="flex-1 relative w-full aspect-[2/1] sm:aspect-[1600/500] rounded-2xl overflow-hidden shadow-lg bg-white dark:bg-[var(--bg-card)]">
         {/* Slides */}
         <div 
           className="relative w-full h-full"

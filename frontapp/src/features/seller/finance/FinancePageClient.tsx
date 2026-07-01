@@ -21,6 +21,7 @@ import { useSellerFinance } from '@/features/seller/finance/hooks/useSellerFinan
 import { formatCurrency } from '@/shared/lib/utils/formatters';
 import { companyColors, chartColorMap } from '@/features/seller/finance/colors';
 import type { FinanceData } from '@/features/seller/finance/types';
+import type { FinanceChartDataset } from '@/features/seller/finance/components/FinanceChart';
 
 interface KpiConfig {
   label: string;
@@ -34,6 +35,7 @@ interface KpiConfig {
   chartColor: string;
   suffix?: string;
   extraInfo: string;
+  chartDatasets?: FinanceChartDataset[];
 }
 
 function buildKpiConfig(
@@ -47,6 +49,7 @@ function buildKpiConfig(
   chartData: number[],
   chartColor: string,
   suffix?: string,
+  chartDatasets?: FinanceChartDataset[],
 ): KpiConfig {
   return {
     label,
@@ -60,6 +63,7 @@ function buildKpiConfig(
     chartColor,
     suffix,
     extraInfo: getKpiDetail(label),
+    chartDatasets,
   };
 }
 
@@ -207,7 +211,7 @@ export function FinancePageClient() {
         {renderDateFilterControls('inline')}
       </div>
 
-      <div className="flex flex-wrap gap-2 border-b border-gray-100 pb-4 overflow-x-auto no-scrollbar">
+      <div className="flex flex-wrap gap-2 border-b border-gray-100 dark:border-[var(--border-subtle)] pb-4 overflow-x-auto no-scrollbar">
         {tabs.map(tab => (
           <button
             key={tab.id}
@@ -234,24 +238,47 @@ export function FinancePageClient() {
             <FinancialBreakdownCard data={data.desgloseFinanciero} />
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 stagger-grid">
-              <BaseStatCard
-                label="Ingresos Brutos"
-                value={formatCurrency(data.ingresosBrutos.data.reduce((a, b) => a + b, 0))}
-                description="Subtotal sin IGV (base imponible)"
-                icon="Banknote"
-                color="lima"
-                chart={<FinanceChart type="bar" labels={data.ingresosBrutos.labels} data={data.ingresosBrutos.data} color={chartColorMap.ingresosBrutos} />}
-                onClick={() => openStatCard('Ingresos Brutos', 'ingresosBrutos', data, 'bar', 'lima')}
-              />
-              <BaseStatCard
-                label="Ingresos Netos"
-                value={formatCurrency(data.ingresosNetos.data.reduce((a, b) => a + b, 0))}
-                description="Neto después de comisión Lyrium"
-                icon="LineChart"
-                color="verde"
-                chart={<FinanceChart type="bar" labels={data.ingresosNetos.labels} data={data.ingresosNetos.data} color={chartColorMap.ingresosNetos} />}
-                onClick={() => openStatCard('Ingresos Netos', 'ingresosNetos', data, 'bar', 'verde')}
-              />
+              {/* Tarjeta multi-serie: Brutos + Netos + Reales */}
+              <div className="col-span-1 md:col-span-2 lg:col-span-3">
+                <BaseStatCard
+                  label="Evolución de Ingresos"
+                  value={formatCurrency(data.ingresosBrutos.data.reduce((a, b) => a + b, 0))}
+                  description="Comparativa mensual: Bruto, Neto y Real"
+                  icon="TrendingUp"
+                  color="lima"
+                  chart={
+                    <FinanceChart
+                      type="line"
+                      labels={data.ingresosBrutos.labels}
+                      data={data.ingresosBrutos.data}
+                      datasets={[
+                        { label: 'Brutos', data: data.ingresosBrutos.data, color: chartColorMap.ingresosBrutos },
+                        { label: 'Netos', data: data.ingresosNetos.data, color: chartColorMap.ingresosNetos },
+                        { label: 'Reales', data: data.ingresosReales.data, color: chartColorMap.ingresosReales },
+                      ]}
+                      height="360px"
+                    />
+                  }
+                  onClick={() => setSelectedKpi(buildKpiConfig(
+                    'Evolución de Ingresos',
+                    formatCurrency(data.ingresosBrutos.data.reduce((a, b) => a + b, 0)),
+                    'Comparativa mensual de ingresos: Bruto (sin deducciones), Neto (tras comisión Lyrium) y Real (efectivamente cobrado).',
+                    'TrendingUp',
+                    companyColors.lima,
+                    'line',
+                    data.ingresosBrutos.labels,
+                    data.ingresosBrutos.data,
+                    chartColorMap.ingresosBrutos,
+                    undefined,
+                    [
+                      { label: 'Brutos', data: data.ingresosBrutos.data, color: chartColorMap.ingresosBrutos },
+                      { label: 'Netos', data: data.ingresosNetos.data, color: chartColorMap.ingresosNetos },
+                      { label: 'Reales', data: data.ingresosReales.data, color: chartColorMap.ingresosReales },
+                    ],
+                  ))}
+                />
+              </div>
+
               <CardProxPago data={data.chartProxPago} formatCurrency={formatCurrency} />
 
               <BaseStatCard
@@ -276,16 +303,6 @@ export function FinancePageClient() {
                 chart={<FinanceChart type="bar" labels={data.ticketPromedio.labels} data={data.ticketPromedio.data} color={chartColorMap.ticketPromedio} />}
                 onClick={() => openStatCard('Ticket Promedio', 'ticketPromedio', data, 'bar', 'turquesa')}
               />
-              <BaseStatCard
-                label="Ingresos Netos Reales"
-                value={formatCurrency(data.ingresosReales.data.reduce((a, b) => a + b, 0))}
-                description="Neto efectivamente cobrado"
-                icon="TrendingDown"
-                color="celeste"
-                chart={<FinanceChart type="bar" labels={data.ingresosReales.labels} data={data.ingresosReales.data} color={chartColorMap.ingresosReales} />}
-                onClick={() => openStatCard('Ingresos Netos Reales', 'ingresosReales', data, 'bar', 'celeste')}
-              />
-
               <BaseStatCard
                 label="Ventas Totales"
                 value={data.ventasTotales.data.reduce((a, b) => a + b, 0).toString()}
@@ -489,15 +506,6 @@ export function FinancePageClient() {
                 color="verde"
                 chart={<FinanceChart type="bar" labels={data.stockRotacion.labels} data={data.stockRotacion.data} color={chartColorMap.stockRotacion} />}
                 onClick={() => openStatCard('Rotación de Stock', 'stockRotacion', data, 'bar', 'verde')}
-              />
-              <BaseStatCard
-                label="Ventas Totales"
-                value={data.ventasTotales.data.reduce((a, b) => a + b, 0).toString()}
-                description="Unidades vendidas en el período"
-                icon="Package"
-                color="azulCeleste"
-                chart={<FinanceChart type="bar" labels={data.ventasTotales.labels} data={data.ventasTotales.data} color={chartColorMap.ventasTotales} />}
-                onClick={() => openStatCard('Ventas Totales', 'ventasTotales', data, 'bar', 'azulCeleste')}
               />
             </div>
           </div>

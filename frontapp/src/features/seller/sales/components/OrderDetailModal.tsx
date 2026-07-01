@@ -17,7 +17,7 @@ interface OrderDetailModalProps {
     order: Order;
     isOpen: boolean;
     onClose: () => void;
-    onAdvanceStep: (orderId: string, section?: 'products' | 'services') => Promise<void>;
+    onAdvanceStep: (orderId: string, section?: 'products' | 'services' | 'confirm') => Promise<void>;
     onConfirmItem?: (orderId: string, itemId: string) => Promise<void>;
     onCancelItem?: (orderId: string, itemId: string) => Promise<void>;
     onUpdateItemStatus?: (orderId: string, itemId: string, status: ItemStatus) => Promise<void>;
@@ -272,7 +272,7 @@ export default function OrderDetailModal({
     const { departamento, provincia, distrito } = parseCity(order.envio.city);
 
     const handleAdvance = async () => {
-        const isLogisticsStep = tipoEnvio === 'agencia' && productAction?.label === 'Confirmar En Transporte';
+        const isLogisticsStep = productAction?.label === 'Confirmar En Transporte';
         if (isLogisticsStep && onShipWithCarrier) {
             setShowLogistics(true);
             return;
@@ -302,8 +302,9 @@ export default function OrderDetailModal({
         setIsAdvancing(true);
         try {
             const section = (isServiceOrder || (isMixed && openSection === 'services')) ? 'services' : undefined;
-            console.log('[OrderDetailModal::handleAdvance] calling onAdvanceStep', { orderId: order.id, section });
-            await onAdvanceStep(order.id, section);
+            const sectionOrConfirm = !isServiceOrder && order.productCurrentStep === 1 ? 'confirm' : section;
+            console.log('[OrderDetailModal::handleAdvance] calling onAdvanceStep', { orderId: order.id, section: sectionOrConfirm });
+            await onAdvanceStep(order.id, sectionOrConfirm);
             console.log('[OrderDetailModal::handleAdvance] onAdvanceStep completed successfully');
         } catch (err) {
             console.error('[OrderDetailModal::handleAdvance] onAdvanceStep failed', err);
@@ -797,21 +798,28 @@ export default function OrderDetailModal({
                             )}
                         </div>
                         <div className="space-y-2.5 border-t md:border-t-0 md:border-l border-[var(--border-subtle)] pt-4 md:pt-0 md:pl-8">
-                            {(order.subtotal > 0 || hasServiceItems) && (
-                                <FinancialRow label="Subtotal" value={`S/ ${(order.subtotal ?? 0).toLocaleString('es-PE', { minimumFractionDigits: 2 })}`} />
+                            {(order.sellerSubtotal ?? 0) > 0 && (
+                                <FinancialRow label="Tu subtotal" value={`S/ ${(order.sellerSubtotal ?? 0).toLocaleString('es-PE', { minimumFractionDigits: 2 })}`} bold />
                             )}
-                            {hasItems && (
-                                <FinancialRow label="Costo de Envío" value={`S/ ${(order.shippingCost ?? 0).toLocaleString('es-PE', { minimumFractionDigits: 2 })}`} />
-                            )}
-                            {(order.taxAmount ?? 0) > 0 && (
-                                <FinancialRow label="Impuestos" value={`S/ ${(order.taxAmount ?? 0).toLocaleString('es-PE', { minimumFractionDigits: 2 })}`} />
+                            {(order.sellerShipping ?? 0) > 0 && (
+                                <FinancialRow label="Tu costo de envío" value={`S/ ${(order.sellerShipping ?? 0).toLocaleString('es-PE', { minimumFractionDigits: 2 })}`} bold />
                             )}
                             {(order.discountAmount ?? 0) > 0 && (
                                 <FinancialRow label="Descuento" value={`- S/ ${(order.discountAmount ?? 0).toLocaleString('es-PE', { minimumFractionDigits: 2 })}`} />
                             )}
                             <div className="border-t border-[var(--border-subtle)] pt-2.5 mt-2.5">
-                                <FinancialRow label="Total" value={`S/ ${(order.total ?? 0).toLocaleString('es-PE', { minimumFractionDigits: 2 })}`} bold />
+                                <FinancialRow label="Total de orden" value={`S/ ${(order.sellerTotal ?? order.total ?? 0).toLocaleString('es-PE', { minimumFractionDigits: 2 })}`} bold />
                             </div>
+                            {order.isMultiStore && (
+                                <div className="mt-3 p-3 rounded-xl bg-[var(--bg-secondary)]/80 border border-[var(--border-subtle)]">
+                                    <p className="text-[11px] font-bold flex items-center gap-1.5 text-[var(--text-primary)]">
+                                        🛒 Pedido compuesto
+                                    </p>
+                                    <p className="text-[10px] text-[var(--text-secondary)] mt-1">
+                                        Esta orden incluye productos de otras tiendas. Monto total de la orden: <strong>S/ {(order.total ?? 0).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</strong>
+                                    </p>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -883,8 +891,9 @@ export default function OrderDetailModal({
                 isOpen={showLogistics}
                 onClose={() => setShowLogistics(false)}
                 onConfirm={handleShipWithCarrier}
-                detectedCarrier={order.envio.carrierCode ?? null}
+                detectedCarrier={order.envio.checkoutCarrier ?? order.envio.carrierCode ?? null}
                 existingData={order.envio.carrierData ?? null}
+                tipoEnvio={tipoEnvio}
             />
         )}
         </>,

@@ -348,7 +348,7 @@ export function HelpPageClient() {
         return (
             <div className="flex flex-col h-[calc(100svh-120px)] md:h-[calc(100vh-140px)] animate-fadeIn">
                 <ModuleHeader
-                    title="Mesa de Ayuda"
+                    title="Soporte Lyrium"
                     subtitle="Centro de soporte y gestión de incidencias"
                     icon="Headset"
                 />
@@ -507,7 +507,7 @@ export function HelpPageClient() {
                             {[
                                 { icon: 'Settings', title: 'Incidencias técnicas', desc: 'Reporta errores de la plataforma, fallas en el sistema, problemas con módulos o funcionalidades.' },
                                 { icon: 'Shield', title: 'Soporte administrativo', desc: 'Consulta sobre validaciones, configuraciones de tienda, actualizaciones de documentación o estados de aprobación.' },
-                                { icon: 'CreditCard', title: 'Facturación y planes', desc: 'Resuelve dudas sobre tu suscripción, planes de vendedor, comisiones o comprobantes de pago.' },
+                                { icon: 'CreditCard', title: 'Facturación y planes', desc: 'Resuelve dudas sobre tu suscripción, planes de vendedor o comisiones.' },
                                 { icon: 'AlertCircle', title: 'No gestiona ventas', desc: 'Para coordinar pedidos, devoluciones o postventa con clientes, usa el Chat con Clientes.' },
                             ].map((item) => (
                                 <div key={item.title} className="flex items-start gap-4 p-4 bg-gray-50 dark:bg-[var(--bg-muted)]/50 rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)]">

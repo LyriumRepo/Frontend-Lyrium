@@ -1,9 +1,11 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { ShopConfig } from '@/features/seller/store/types';
+import { ShopConfig, TopMedal } from '@/features/seller/store/types';
 import Icon from '@/components/ui/Icon';
+import { medalApi } from '@/shared/lib/api/medalRepository';
+import { Loader2 } from 'lucide-react';
 
 interface StoreAwardsProps {
     config: ShopConfig;
@@ -11,6 +13,28 @@ interface StoreAwardsProps {
 
 export default function StoreAwards({ config }: StoreAwardsProps) {
     const { subscription, rating, totalSales, totalOrders, verifiedAt, status } = config;
+
+    const [topMedals, setTopMedals] = useState<TopMedal[]>([]);
+    const [medalsLoading, setMedalsLoading] = useState(true);
+    const [togglingId, setTogglingId] = useState<string | null>(null);
+
+    useEffect(() => {
+        medalApi.getSellerMedals()
+            .then((res) => setTopMedals(res.data ?? []))
+            .catch(() => {})
+            .finally(() => setMedalsLoading(false));
+    }, []);
+
+    const handleToggle = async (id: string) => {
+        setTogglingId(id);
+        try {
+            const res = await medalApi.toggleMedalVisibility(id);
+            setTopMedals((prev) =>
+                prev.map((m) => (m.id === id ? { ...m, visible: res.data.visible } : m)),
+            );
+        } catch {}
+        finally { setTogglingId(null); }
+    };
 
     const isVerified = !!verifiedAt;
     const isTopSeller = (rating ?? 0) >= 4.5 && (totalSales ?? 0) > 50;
@@ -27,6 +51,8 @@ export default function StoreAwards({ config }: StoreAwardsProps) {
     };
 
     const statusBadge = getStatusBadge();
+
+    const approvedMedals = topMedals.filter((m) => m.status === 'approved');
 
     return (
         <div className="glass-card p-0 overflow-hidden border-none rounded-[2rem] sm:rounded-[2.5rem] shadow-2xl bg-[var(--bg-card)] mb-4 sm:mb-6 md:mb-8">
@@ -167,6 +193,84 @@ export default function StoreAwards({ config }: StoreAwardsProps) {
                         </div>
                     </div>
                 </div>
+
+                {/* Reconocimientos Top Lyrium */}
+                <div className="mt-12 pt-12 border-t border-[var(--border-subtle)]">
+                    <div className="text-center mb-8">
+                        <h3 className="text-xl font-black text-[var(--text-primary)] tracking-tight flex items-center justify-center gap-2">
+                            <Icon name="Trophy" className="w-5 h-5 text-amber-500" />
+                            Reconocimientos Top Lyrium
+                        </h3>
+                        <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-[0.2em] mt-1">
+                            Medallas por posicionamiento en rankings de la plataforma
+                        </p>
+                    </div>
+
+                    {medalsLoading ? (
+                        <div className="text-center py-8">
+                            <Loader2 className="w-6 h-6 animate-spin text-gray-400 mx-auto" />
+                        </div>
+                    ) : approvedMedals.length === 0 ? (
+                        <div className="text-center py-8">
+                            <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-3">
+                                <Icon name="Trophy" className="w-7 h-7 text-gray-300" />
+                            </div>
+                            <p className="text-sm font-bold text-[var(--text-secondary)]">Aún no tienes medallas Top 100</p>
+                            <p className="text-[11px] text-[var(--text-secondary)] mt-1 opacity-70">
+                            Sigue mejorando tu rating para aparecer en el ranking de la plataforma.
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
+                            {approvedMedals.map((medal) => (
+                                <div key={medal.id} className="flex items-center gap-4 p-4 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] shadow-sm hover:shadow-md transition-all">
+                                    <div className="w-14 h-14 rounded-full bg-gradient-to-br from-amber-300 to-amber-500 flex items-center justify-center flex-shrink-0 shadow-lg overflow-hidden">
+                                        <Image src="/img/INSIGNIA PREMIUM.png" alt="Medalla Top 100" width={56} height={56} className="w-full h-full object-contain p-1" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-black text-[var(--text-primary)] truncate">
+                                            {medal.entity?.name ?? `#${medal.entity?.id}`}
+                                        </p>
+                                        <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider mt-0.5">
+                                            {medal.entity_type === 'store' ? 'Tienda' : medal.entity_type === 'product' ? 'Producto' : 'Servicio'}
+                                            <span> &middot; EN RANKING</span>
+                                        </p>
+                                        <p className="text-[9px] text-[var(--text-secondary)] mt-1">
+                                            Ingresos al Top: {medal.times_entered}
+                                            {medal.times_exited > 0 && ` · Salidas: ${medal.times_exited}`}
+                                        </p>
+                                    </div>
+                                    <div className="flex items-center gap-2 flex-shrink-0">
+                                        <button
+                                            onClick={() => handleToggle(medal.id)}
+                                            disabled={togglingId === medal.id || medal.status === 'suspended'}
+                                            className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${
+                                                medal.visible ? 'bg-emerald-500' : 'bg-gray-300'
+                                            } ${medal.status === 'suspended' ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
+                                            title={medal.visible ? 'Visible al público' : 'Oculta al público'}
+                                        >
+                                            {togglingId === medal.id ? (
+                                                <Loader2 className="w-3 h-3 animate-spin text-white mx-auto" />
+                                            ) : (
+                                                <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${medal.visible ? 'translate-x-[18px]' : 'translate-x-[2px]'}`} />
+                                            )}
+                                        </button>
+                                        <span className="text-[8px] font-black uppercase tracking-wider text-gray-400 min-w-[28px]">
+                                            {medal.visible ? 'Público' : 'Oculto'}
+                                        </span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                {/* Loading state for medals */}
+                {medalsLoading && (
+                    <div className="mt-8 text-center">
+                        <Loader2 className="w-5 h-5 animate-spin text-gray-400 mx-auto" />
+                    </div>
+                )}
             </div>
         </div>
     );

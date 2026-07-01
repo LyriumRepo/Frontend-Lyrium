@@ -2,6 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Star } from 'lucide-react';
 import { Producto } from '@/types/public';
+import TopMedalBadge from '@/components/ui/TopMedalBadge';
 
 interface ProductCardProps {
   producto: Producto;
@@ -48,6 +49,7 @@ export default function ProductCard({ producto, minWidth }: ProductCardProps) {
             {sticker.label}
           </span>
         )}
+        <TopMedalBadge entityType="product" entityId={producto.id} size="sm" className="absolute bottom-3 right-3 z-10" />
       </div>
       <div className="p-4">
         <h3 className="font-medium text-gray-900 dark:text-[var(--text-primary)] mb-2 line-clamp-2">

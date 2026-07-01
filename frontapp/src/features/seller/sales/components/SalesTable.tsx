@@ -359,6 +359,22 @@ const SalesTable = memo(function SalesTable({
           </span>
         ),
       }),
+      columnHelper.accessor('fecha', {
+        header: 'Fecha',
+        cell: (info) => {
+          const d = new Date(info.getValue());
+          return (
+            <div className="leading-tight">
+              <div className="text-xs font-bold text-[var(--text-secondary)] whitespace-nowrap">
+                {d.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+              </div>
+              <div className="text-[10px] text-[var(--text-placeholder)] whitespace-nowrap mt-0.5">
+                {d.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })}
+              </div>
+            </div>
+          );
+        },
+      }),
       columnHelper.accessor('orderType', {
         header: 'Tipo',
         cell: (info) => <TypeBadge orderType={info.getValue()} />,
@@ -407,29 +423,14 @@ const SalesTable = memo(function SalesTable({
           return <StatusBadge label={order.statusLabel} className={config.class} />;
         },
       }),
-      columnHelper.accessor('total', {
+      columnHelper.accessor((row) => row.sellerSubtotal ?? row.total, {
+        id: 'total',
         header: 'Total',
         cell: (info) => (
           <span className="text-sm font-black text-[var(--text-primary)] tracking-tight">
             {formatCurrency(info.getValue())}
           </span>
         ),
-      }),
-      columnHelper.accessor('fecha', {
-        header: 'Fecha',
-        cell: (info) => {
-          const d = new Date(info.getValue());
-          return (
-            <div className="leading-tight">
-              <div className="text-xs font-bold text-[var(--text-secondary)] whitespace-nowrap">
-                {d.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' })}
-              </div>
-              <div className="text-[10px] text-[var(--text-placeholder)] whitespace-nowrap mt-0.5">
-                {d.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })}
-              </div>
-            </div>
-          );
-        },
       }),
       columnHelper.display({
         id: 'actions',

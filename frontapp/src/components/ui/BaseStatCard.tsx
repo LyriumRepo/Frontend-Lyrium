@@ -19,28 +19,28 @@ const colorMap = {
     sky: {
         bg: 'bg-[#8FD400]/10 dark:bg-[#8FD400]/15',
         iconBg: 'bg-[#8FD400]',
-        text: 'text-[#66D6A8] dark:text-[#8FD400]',
+        text: 'text-[var(--text-primary)] dark:text-[#8FD400]',
         border: 'border-[#8FD400]/20 dark:border-[#8FD400]/25',
         shadow: 'shadow-[#8FD400]/20 dark:shadow-[#8FD400]/20'
     },
     emerald: {
         bg: 'bg-[#B7E000]/10 dark:bg-[#B7E000]/15',
         iconBg: 'bg-[#B7E000]',
-        text: 'text-[#8FD400] dark:text-[#B7E000]',
+        text: 'text-[var(--text-primary)] dark:text-[#B7E000]',
         border: 'border-[#B7E000]/20 dark:border-[#B7E000]/25',
         shadow: 'shadow-[#B7E000]/20 dark:shadow-[#B7E000]/20'
     },
     amber: {
         bg: 'bg-[#66D6A8]/10 dark:bg-[#66D6A8]/15',
         iconBg: 'bg-[#66D6A8]',
-        text: 'text-[#4EC7B8] dark:text-[#66D6A8]',
+        text: 'text-[var(--text-primary)] dark:text-[#66D6A8]',
         border: 'border-[#66D6A8]/20 dark:border-[#66D6A8]/25',
         shadow: 'shadow-[#66D6A8]/20 dark:shadow-[#66D6A8]/20'
     },
     indigo: {
         bg: 'bg-[#4EC7B8]/10 dark:bg-[#4EC7B8]/15',
         iconBg: 'bg-[#4EC7B8]',
-        text: 'text-[#5AAFE6] dark:text-[#4EC7B8]',
+        text: 'text-[var(--text-primary)] dark:text-[#4EC7B8]',
         border: 'border-[#4EC7B8]/20 dark:border-[#4EC7B8]/25',
         shadow: 'shadow-[#4EC7B8]/20 dark:shadow-[#4EC7B8]/20'
     },
@@ -54,16 +54,51 @@ const colorMap = {
     violet: {
         bg: 'bg-[#69BEEB]/10 dark:bg-[#69BEEB]/15',
         iconBg: 'bg-[#69BEEB]',
-        text: 'text-[#5AAFE6] dark:text-[#69BEEB]',
+        text: 'text-[var(--text-primary)] dark:text-[#69BEEB]',
         border: 'border-[#69BEEB]/20 dark:border-[#69BEEB]/25',
         shadow: 'shadow-[#69BEEB]/20 dark:shadow-[#69BEEB]/20'
     },
     celeste: {
         bg: 'bg-[#69BEEB]/10 dark:bg-[#69BEEB]/15',
         iconBg: 'bg-[#69BEEB]',
-        text: 'text-[#5AAFE6] dark:text-[#69BEEB]',
+        text: 'text-[var(--text-primary)] dark:text-[#69BEEB]',
         border: 'border-[#69BEEB]/20 dark:border-[#69BEEB]/25',
         shadow: 'shadow-[#69BEEB]/20 dark:shadow-[#69BEEB]/20'
+    },
+    lima: {
+        bg: 'bg-[#B7E000]/10 dark:bg-[#B7E000]/15',
+        iconBg: 'bg-[#B7E000]',
+        text: 'text-[var(--text-primary)] dark:text-[#B7E000]',
+        border: 'border-[#B7E000]/20 dark:border-[#B7E000]/25',
+        shadow: 'shadow-[#B7E000]/20 dark:shadow-[#B7E000]/20'
+    },
+    verde: {
+        bg: 'bg-[#8FD400]/10 dark:bg-[#8FD400]/15',
+        iconBg: 'bg-[#8FD400]',
+        text: 'text-[var(--text-primary)] dark:text-[#8FD400]',
+        border: 'border-[#8FD400]/20 dark:border-[#8FD400]/25',
+        shadow: 'shadow-[#8FD400]/20 dark:shadow-[#8FD400]/20'
+    },
+    turquesaClaro: {
+        bg: 'bg-[#66D6A8]/10 dark:bg-[#66D6A8]/15',
+        iconBg: 'bg-[#66D6A8]',
+        text: 'text-[var(--text-primary)] dark:text-[#66D6A8]',
+        border: 'border-[#66D6A8]/20 dark:border-[#66D6A8]/25',
+        shadow: 'shadow-[#66D6A8]/20 dark:shadow-[#66D6A8]/20'
+    },
+    turquesa: {
+        bg: 'bg-[#4EC7B8]/10 dark:bg-[#4EC7B8]/15',
+        iconBg: 'bg-[#4EC7B8]',
+        text: 'text-[var(--text-primary)] dark:text-[#4EC7B8]',
+        border: 'border-[#4EC7B8]/20 dark:border-[#4EC7B8]/25',
+        shadow: 'shadow-[#4EC7B8]/20 dark:shadow-[#4EC7B8]/20'
+    },
+    azulCeleste: {
+        bg: 'bg-[#5AAFE6]/10 dark:bg-[#5AAFE6]/15',
+        iconBg: 'bg-[#5AAFE6]',
+        text: 'text-[var(--text-primary)] dark:text-[#5AAFE6]',
+        border: 'border-[#5AAFE6]/20 dark:border-[#5AAFE6]/25',
+        shadow: 'shadow-[#5AAFE6]/20 dark:shadow-[#5AAFE6]/20'
     }
 };
 

@@ -1,20 +1,22 @@
 'use client';
 
-import { ShoppingCart, CreditCard, CheckCircle, FileText } from 'lucide-react';
+import { ShoppingCart, Package, CreditCard, CheckCircle, FileText } from 'lucide-react';
 import { useCheckoutStore } from '@/store/checkoutStore';
 
 const STEPS = [
   { id: 1, label: 'Carrito', Icon: ShoppingCart },
-  { id: 2, label: 'Datos', Icon: CreditCard },
-  { id: 3, label: 'Confirmación', Icon: CheckCircle },
-  { id: 4, label: 'Boleta', Icon: FileText },
+  { id: 2, label: 'Empaque', Icon: Package },
+  { id: 3, label: 'Datos', Icon: CreditCard },
+  { id: 4, label: 'Confirmación', Icon: CheckCircle },
+  { id: 5, label: 'Boleta', Icon: FileText },
 ] as const;
 
 const STEP_COLORS = {
   1: { accent: '#E6EE9C', glow: 'rgba(192,223,22,0.35)' },
-  2: { accent: '#78E0A1', glow: 'rgba(120,224,161,0.35)' },
-  3: { accent: '#5B9BD5', glow: 'rgba(91,155,213,0.35)' },
-  4: { accent: '#0EA5E9', glow: 'rgba(14,165,233,0.35)' },
+  2: { accent: '#38BDF8', glow: 'rgba(56,189,248,0.35)' },
+  3: { accent: '#78E0A1', glow: 'rgba(120,224,161,0.35)' },
+  4: { accent: '#5B9BD5', glow: 'rgba(91,155,213,0.35)' },
+  5: { accent: '#0EA5E9', glow: 'rgba(14,165,233,0.35)' },
 };
 
 export default function CheckoutStepBar() {
@@ -40,7 +42,7 @@ export default function CheckoutStepBar() {
         {/* Steps */}
         <div className="flex items-center justify-between w-full max-w-2xl mx-auto py-3 relative">
           {STEPS.map((step, idx) => {
-            const color = STEP_COLORS[step.id as 1 | 2 | 3 | 4];
+            const color = STEP_COLORS[step.id as 1 | 2 | 3 | 4 | 5];
             const circleClass = getCircleClass(step.id);
             const isActive = step.id === currentStep;
             const isCompleted = step.id < currentStep;

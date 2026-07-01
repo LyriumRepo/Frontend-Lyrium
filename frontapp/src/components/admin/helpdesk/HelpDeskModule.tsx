@@ -530,7 +530,7 @@ export const HelpDeskModule: React.FC<HelpDeskModuleProps> = ({
                     ) : (
                         <div className="flex-1 flex flex-col items-center justify-center text-center p-12">
                             <MessageSquare className="w-14 h-14 text-[var(--text-muted)] mb-4" />
-                            <h4 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-wider">Mesa de Soporte Central</h4>
+                            <h4 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-wider">Soporte Lyrium</h4>
                             <p className="text-[11px] text-[var(--text-muted)] font-bold mt-1 max-w-xs">
                                 {activeMode === 'vendedores' && loading
                                     ? 'Cargando tickets de soporte...'

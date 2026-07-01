@@ -14,9 +14,11 @@ interface InvoiceFiltersProps {
     dateTo: string;
     onFilterChange: (filters: Partial<{ search: string; status: VoucherStatus | 'ALL'; type: VoucherType | 'ALL'; dateFrom: string; dateTo: string }>) => void;
     onClear: () => void;
+    onExportExcel?: () => void;
+    onExportPDF?: () => void;
 }
 
-export default function InvoiceFilters({ search, status, type, dateFrom, dateTo, onFilterChange, onClear }: InvoiceFiltersProps) {
+export default function InvoiceFilters({ search, status, type, dateFrom, dateTo, onFilterChange, onClear, onExportExcel, onExportPDF }: InvoiceFiltersProps) {
     return (
         <div className="glass-card p-6 border-[var(--border-subtle)] animate-fadeIn">
             <div className="flex flex-col md:flex-row gap-4 items-end flex-wrap">
@@ -72,6 +74,20 @@ export default function InvoiceFilters({ search, status, type, dateFrom, dateTo,
                     title="Limpiar Filtros">
                     <Icon name="RotateCcw" className="w-5 h-5" />
                 </button>
+                {onExportExcel && (
+                    <button onClick={onExportExcel}
+                        className="p-3 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 rounded-2xl hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-all shadow-sm active:scale-95 border border-emerald-100 dark:border-emerald-900/50"
+                        title="Exportar Excel">
+                        <Icon name="FileSpreadsheet" className="w-5 h-5" />
+                    </button>
+                )}
+                {onExportPDF && (
+                    <button onClick={onExportPDF}
+                        className="p-3 bg-rose-50 dark:bg-rose-950/30 text-rose-500 dark:text-rose-400 rounded-2xl hover:bg-rose-100 dark:hover:bg-rose-900/40 transition-all shadow-sm active:scale-95 border border-rose-100 dark:border-rose-900/50"
+                        title="Exportar PDF">
+                        <Icon name="FileText" className="w-5 h-5" />
+                    </button>
+                )}
             </div>
         </div>
     );

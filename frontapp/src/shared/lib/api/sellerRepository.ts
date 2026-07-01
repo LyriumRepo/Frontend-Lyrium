@@ -50,6 +50,9 @@ export interface StoreData {
   activity?: string;
   corporate_email?: string;
   address?: string;
+  department?: string;
+  province?: string;
+  district?: string;
   instagram?: string;
   facebook?: string;
   tiktok?: string;

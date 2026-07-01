@@ -63,20 +63,20 @@ export default function ServicesGuideModal({ isOpen, onClose }: ServicesGuideMod
                         <div className="grid gap-3">
                             {[
                                 {
-                                    title: '1. Imagen nítida y bien iluminada',
-                                    desc: 'Usa fotografías con buena resolución y sin desenfoque. La iluminación natural o de estudio transmite profesionalismo al cliente.',
+                                    title: '1. Fondo blanco exclusivamente',
+                                    desc: 'Usa fondo blanco puro (#FFFFFF). Sin grises claros, neutros ni fondos distractores. El servicio debe ser el centro visual.',
                                 },
                                 {
-                                    title: '2. Fondo blanco o limpio',
-                                    desc: 'Prefiere fondos neutros o entornos ordenados. Esto resalta el servicio ofrecido y da una apariencia cuidada en el catálogo.',
+                                    title: '2. Muestra la acción del servicio',
+                                    desc: 'La imagen debe representar el servicio en ejecución: el especialista trabajando, el proceso o el resultado final. Evita imágenes genéricas que no comuniquen claramente lo que se ofrece.',
                                 },
                                 {
-                                    title: '3. Muestra claramente el servicio',
-                                    desc: 'Si es un servicio presencial, usa imágenes que representen la atención real: el especialista, el ambiente o el proceso de trabajo.',
+                                    title: '3. Formato cuadrado 400×400 px',
+                                    desc: 'La imagen principal del servicio se muestra en 400×400 píxeles. Usa imágenes de al menos 800×800 px para buena calidad en retina. Formatos: JPG, PNG o WebP (máx 2 MB).',
                                 },
                                 {
-                                    title: '4. Formatos compatibles: JPG, PNG o WebP',
-                                    desc: 'Usa estos formatos para garantizar compatibilidad y carga rápida. El peso recomendado es menor a 2 MB por imagen.',
+                                    title: '4. Recomendación: usa un diseñador gráfico',
+                                    desc: 'Para resultados óptimos, trabaja con un diseñador profesional que pueda crear imágenes que comuniquen visualmente el valor de tu servicio sin generar confusión.',
                                 },
                             ].map((item) => (
                                 <div
@@ -106,8 +106,8 @@ export default function ServicesGuideModal({ isOpen, onClose }: ServicesGuideMod
                                     desc: 'Las fotos pixeladas o desenfocadas generan desconfianza y reducen la intención de contratación del servicio.',
                                 },
                                 {
-                                    title: 'Imágenes genéricas o de stock sin relación',
-                                    desc: 'Evita fotos que no representen tu servicio real. Los clientes valoran la autenticidad y la coherencia con lo que ofrecen.',
+                                    title: 'Imágenes ambiguas o que no reflejan el servicio',
+                                    desc: 'Evita fotos que puedan interpretarse de múltiples formas. La imagen debe comunicar de inmediato qué servicio se ofrece: la acción, el entorno o el resultado esperado.',
                                 },
                             ].map((item) => (
                                 <div
