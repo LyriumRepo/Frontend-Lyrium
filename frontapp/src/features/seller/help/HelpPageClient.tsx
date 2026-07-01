@@ -69,7 +69,7 @@ function TicketList({
     });
 
     return (
-        <div className="flex flex-col h-full min-h-0 rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm overflow-hidden" style={{ background: 'linear-gradient(180deg, color-mix(in srgb,#9cb04e 4%,var(--bg-card)) 0%, var(--bg-card) 100%)' }}>
+        <div className="flex flex-col h-full min-h-0 rounded-[2rem] lg:rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm overflow-hidden" style={{ background: 'linear-gradient(180deg, color-mix(in srgb,#9cb04e 4%,var(--bg-card)) 0%, var(--bg-card) 100%)' }}>
           <div className="h-1 w-full shrink-0 bg-gradient-to-r from-[#9cb04e] via-[#64c695] to-[#499bbf]" />
             {/* ── Cabecera con filtro ── */}
             <div className="p-5 border-b border-[var(--border-subtle)]">
@@ -245,7 +245,7 @@ function NewTicketForm({
     };
 
     return (
-        <div className="flex flex-col h-full bg-[var(--bg-card)] rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm overflow-hidden">
+        <div className="flex flex-col h-full bg-[var(--bg-card)] rounded-[2rem] lg:rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm overflow-hidden">
             <div className="p-5 border-b border-[var(--border-subtle)]">
                 <h3 className="text-sm font-black uppercase tracking-wider text-[var(--text-primary)]">Nuevo Ticket</h3>
                 <p className="text-xs text-[var(--text-secondary)] mt-1">Crea una nueva solicitud de soporte</p>
@@ -330,10 +330,23 @@ export function HelpPageClient() {
 
     const [showNewTicketForm, setShowNewTicketForm] = useState(false);
     const [showLegend, setShowLegend] = useState(false);
+    /** En mobile/tablet: true = muestra lista, false = muestra detalle */
+    const [isMobileListVisible, setIsMobileListVisible] = useState(true);
+
+    /** Seleccionar ticket: en mobile oculta la lista y muestra el chat */
+    const handleSelectTicket = (id: string) => {
+        setActiveTicketId(id);
+        setIsMobileListVisible(false);
+    };
+
+    /** Volver a la lista desde el chat (mobile/tablet) */
+    const handleBack = () => {
+        setIsMobileListVisible(true);
+    };
 
     if (isLoading) {
         return (
-            <div className="flex flex-col h-[calc(100vh-140px)] animate-fadeIn">
+            <div className="flex flex-col h-[calc(100svh-120px)] md:h-[calc(100vh-140px)] animate-fadeIn">
                 <ModuleHeader
                     title="Mesa de Ayuda"
                     subtitle="Centro de soporte y gestión de incidencias"
@@ -347,7 +360,7 @@ export function HelpPageClient() {
     }
 
     return (
-        <div className="flex flex-col h-[calc(100vh-140px)] animate-fadeIn">
+        <div className="flex flex-col h-[calc(100svh-120px)] md:h-[calc(100vh-140px)] animate-fadeIn">
             <ModuleHeader
                 title="Soporte Lyrium"
                 subtitle="Centro de soporte y gestión de incidencias"
@@ -362,36 +375,97 @@ export function HelpPageClient() {
                             >
                                 <Icon name="Info" className="w-4 h-4" />
                             </button>
+                            {/* Mobile / Tablet: solo ícono */}
+                            <button
+                                onClick={() => { setShowNewTicketForm(true); setIsMobileListVisible(false); }}
+                                title="Nuevo Ticket"
+                                className="lg:hidden w-9 h-9 flex items-center justify-center rounded-xl bg-white dark:bg-[var(--bg-secondary)] text-[var(--turquesa-500)] border border-[var(--border-subtle)] hover:bg-[var(--turquesa-500)]/10 transition-colors shadow-sm"
+                            >
+                                <Icon name="Plus" className="w-4 h-4" />
+                            </button>
+                            {/* Desktop: texto completo */}
                             <button
                                 onClick={() => setShowNewTicketForm(true)}
-                                className="px-4 py-2 bg-white dark:bg-[var(--bg-secondary)] text-[var(--turquesa-500)] rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-[var(--turquesa-500)]/10 transition-colors border border-[var(--border-subtle)] shadow-sm"
+                                className="hidden lg:flex items-center gap-1.5 px-4 py-2 bg-white dark:bg-[var(--bg-secondary)] text-[var(--turquesa-500)] rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-[var(--turquesa-500)]/10 transition-colors border border-[var(--border-subtle)] shadow-sm"
                             >
-                                + Nuevo Ticket
+                                <Icon name="Plus" className="w-3.5 h-3.5" />
+                                Nuevo Ticket
                             </button>
                         </div>
                     ) : null
                 }
             />
 
-            <div className="flex-1 flex gap-6 overflow-hidden">
-                {!showNewTicketForm && (
-                    <div className="w-96 shrink-0">
-                        <TicketList
-                            tickets={tickets}
-                            activeTicketId={activeTicketId}
-                            onSelect={setActiveTicketId}
-                        />
-                    </div>
-                )}
+            <div className="flex-1 overflow-hidden">
 
-                <div className="flex-1 min-w-0">
+                {/* ─────────────────────────────────────────────────────────────────
+                    DESKTOP (lg+): lista fija + detalle al lado
+                    ───────────────────────────────────────────────────────────────── */}
+                <div className="hidden lg:flex gap-6 h-full">
+                    {!showNewTicketForm && (
+                        <div className="w-96 shrink-0">
+                            <TicketList
+                                tickets={tickets}
+                                activeTicketId={activeTicketId}
+                                onSelect={setActiveTicketId}
+                            />
+                        </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                        {showNewTicketForm ? (
+                            <NewTicketForm
+                                onSubmit={(data) => { handleCreateTicket(data); setShowNewTicketForm(false); }}
+                                onCancel={() => setShowNewTicketForm(false)}
+                                isSubmitting={isSending}
+                            />
+                        ) : activeTicket ? (
+                            <ChatView
+                                ticket={toUnifiedHelpTicket(activeTicket)}
+                                onSendMessage={({ text }) => handleSendMessage(text)}
+                                onCloseTicket={() => handleCloseTicket(activeTicket.id)}
+                                isSending={isSending}
+                                isClosing={isClosing}
+                                showAdminControls={false}
+                            />
+                        ) : (
+                            <div className="h-full flex items-center justify-center bg-[var(--bg-card)] rounded-[2.5rem] border border-[var(--border-subtle)]">
+                                <div className="text-center px-8">
+                                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[var(--turquesa-500)]/10 to-[var(--verde-500)]/10 flex items-center justify-center mx-auto mb-4">
+                                        <svg className="w-8 h-8 text-[var(--turquesa-500)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                        </svg>
+                                    </div>
+                                    <p className="text-sm font-black uppercase tracking-wider text-[var(--text-primary)] mb-1">Selecciona un ticket</p>
+                                    <p className="text-xs text-[var(--text-secondary)]">O crea uno nuevo si tienes alguna consulta</p>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* ─────────────────────────────────────────────────────────────────
+                    MOBILE / TABLET: lista O detalle (nunca ambos)
+                    ───────────────────────────────────────────────────────────────── */}
+
+                {/* Panel lista */}
+                <div className={`lg:hidden h-full ${(isMobileListVisible && !showNewTicketForm) ? 'block' : 'hidden'}`}>
+                    <TicketList
+                        tickets={tickets}
+                        activeTicketId={activeTicketId}
+                        onSelect={handleSelectTicket}
+                    />
+                </div>
+
+                {/* Panel detalle / formulario */}
+                <div className={`lg:hidden h-full ${(!isMobileListVisible || showNewTicketForm) ? 'block' : 'hidden'}`}>
                     {showNewTicketForm ? (
                         <NewTicketForm
                             onSubmit={(data) => {
                                 handleCreateTicket(data);
                                 setShowNewTicketForm(false);
+                                setIsMobileListVisible(true);
                             }}
-                            onCancel={() => setShowNewTicketForm(false)}
+                            onCancel={() => { setShowNewTicketForm(false); setIsMobileListVisible(true); }}
                             isSubmitting={isSending}
                         />
                     ) : activeTicket ? (
@@ -399,24 +473,14 @@ export function HelpPageClient() {
                             ticket={toUnifiedHelpTicket(activeTicket)}
                             onSendMessage={({ text }) => handleSendMessage(text)}
                             onCloseTicket={() => handleCloseTicket(activeTicket.id)}
+                            onBack={handleBack}
                             isSending={isSending}
                             isClosing={isClosing}
                             showAdminControls={false}
                         />
-                    ) : (
-                        <div className="h-full flex items-center justify-center bg-[var(--bg-card)] rounded-[2.5rem] border border-[var(--border-subtle)]">
-                            <div className="text-center px-8">
-                                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[var(--turquesa-500)]/10 to-[var(--verde-500)]/10 flex items-center justify-center mx-auto mb-4">
-                                    <svg className="w-8 h-8 text-[var(--turquesa-500)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                                    </svg>
-                                </div>
-                                <p className="text-sm font-black uppercase tracking-wider text-[var(--text-primary)] mb-1">Selecciona un ticket</p>
-                                <p className="text-xs text-[var(--text-secondary)]">O crea uno nuevo si tienes alguna consulta</p>
-                            </div>
-                        </div>
-                    )}
+                    ) : null}
                 </div>
+
             </div>
 
             {showLegend && (

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Order, ItemStatus, ServiceOrderItem, ORDER_STATUS_LABELS, OrderType, TipoEnvio, ShippingInfo } from '@/features/seller/sales/types';
 import ProductOrderStepper from './OrderStepper';
 import ServiceOrderStepper, { ServiceFlowType } from './ServiceOrderStepper';
@@ -215,9 +216,17 @@ export default function OrderDetailModal({
     );
     const [showLegend, setShowLegend] = useState(false);
     const [showLogistics, setShowLogistics] = useState(false);
-    const [pendingAdvance, setPendingAdvance] = useState(false);
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     if (!order) return null;
+    if (!mounted) return null;
+
+    const modalRoot = document.getElementById('modal-root');
+    if (!modalRoot) return null;
 
     const hasItems = order.items.length > 0;
     const hasServiceItems = order.serviceItems.length > 0;
@@ -382,7 +391,7 @@ export default function OrderDetailModal({
         </div>
     );
 
-    return (
+    return createPortal(
         <>
         <BaseDrawer
             isOpen={isOpen}
@@ -878,6 +887,7 @@ export default function OrderDetailModal({
                 existingData={order.envio.carrierData ?? null}
             />
         )}
-        </>
+        </>,
+        modalRoot,
     );
 }

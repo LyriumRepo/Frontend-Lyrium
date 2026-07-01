@@ -43,14 +43,15 @@ export default function BranchManagement({ branches, setBranches }: BranchManage
     };
 
     return (
-        <div className="glass-card p-0 overflow-hidden border-none rounded-[2.5rem] shadow-2xl bg-[var(--bg-card)] mb-8">
-            <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[var(--brand-green)] dark:to-[#1A3A32] p-8 flex items-center justify-between relative overflow-hidden">
-                <div className="flex items-center gap-5 text-white relative z-10">
-                    <div className="w-12 h-12 bg-white/20 dark:bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 dark:border-white/20 shadow-inner">
-                        <Store className="w-6 h-6" />
+        <div className="glass-card p-0 overflow-hidden border-none rounded-[2rem] sm:rounded-[2.5rem] shadow-2xl bg-[var(--bg-card)] mb-4 sm:mb-6 md:mb-8">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[var(--brand-green)] dark:to-[#1A3A32] p-4 sm:p-6 md:p-8 flex flex-wrap items-center justify-between gap-y-3 relative overflow-hidden">
+                <div className="flex items-center gap-3 sm:gap-5 text-white relative z-10">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white/20 dark:bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 dark:border-white/20 shadow-inner flex-shrink-0">
+                        <Store className="w-5 h-5 sm:w-6 sm:h-6" />
                     </div>
                     <div>
-                        <h3 className="text-2xl font-black tracking-tighter leading-none">Sucursales</h3>
+                        <h3 className="text-xl sm:text-2xl font-black tracking-tighter leading-none">Sucursales</h3>
                         <p className="text-[10px] font-bold text-sky-100 uppercase tracking-[0.2em] mt-1 opacity-90">
                             Gestión de tus locales físicos y puntos de venta
                         </p>
@@ -58,14 +59,17 @@ export default function BranchManagement({ branches, setBranches }: BranchManage
                 </div>
                 <button
                     onClick={() => handleOpenModal()}
-                    className="relative z-10 flex items-center gap-2 px-6 py-3 rounded-xl bg-[var(--bg-card)] backdrop-blur-md text-[var(--text-primary)] font-black text-xs border border-[var(--border-subtle)] hover:bg-[var(--bg-card)] hover:text-sky-500 dark:hover:text-[var(--icons-green)] transition-all shadow-lg shadow-black/5 uppercase tracking-widest"
+                    className="relative z-10 flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl bg-[var(--bg-card)] backdrop-blur-md text-[var(--text-primary)] font-black text-xs border border-[var(--border-subtle)] hover:text-sky-500 dark:hover:text-[var(--icons-green)] transition-all shadow-lg shadow-black/5 uppercase tracking-widest"
                 >
-                    <Plus className="w-4 h-4" /> Agregar Sucursal
+                    <Plus className="w-4 h-4" />
+                    <span className="hidden xs:inline sm:inline">Agregar Sucursal</span>
+                    <span className="xs:hidden sm:hidden">Agregar</span>
                 </button>
             </div>
 
-            <div className="p-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Body */}
+            <div className="p-4 sm:p-6 md:p-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
                     {branches.map(branch => (
                         <BranchCard
                             key={branch.id}
@@ -75,7 +79,7 @@ export default function BranchManagement({ branches, setBranches }: BranchManage
                         />
                     ))}
                     {branches.length === 0 && (
-                        <div className="col-span-full py-12 text-center bg-[var(--bg-secondary)] rounded-[2rem] border-2 border-dashed border-[var(--border-subtle)]">
+                        <div className="col-span-full py-10 sm:py-12 text-center bg-[var(--bg-secondary)] rounded-[1.5rem] sm:rounded-[2rem] border-2 border-dashed border-[var(--border-subtle)]">
                             <p className="text-sm font-bold text-[var(--text-secondary)] uppercase tracking-widest">No hay sucursales registradas</p>
                         </div>
                     )}

@@ -13,29 +13,32 @@ interface StoreIdentityProps {
 
 export default function StoreIdentity({ config, updateConfig, categories = [] }: StoreIdentityProps) {
     return (
-        <div className="glass-card p-0 overflow-hidden border-none rounded-[2.5rem] shadow-2xl bg-[var(--bg-card)] mb-8">
-            <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[var(--brand-green)] dark:to-[#1A3A32] p-8 flex items-center justify-between relative overflow-hidden">
-                <div className="flex items-center gap-5 text-white relative z-10">
-                    <div className="w-12 h-12 bg-white/20 dark:bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 dark:border-white/20 shadow-inner">
-                        <Icon name="Building" className="w-6 h-6" />
+        <div className="glass-card p-0 overflow-hidden border-none rounded-[2rem] sm:rounded-[2.5rem] shadow-2xl bg-[var(--bg-card)] mb-4 sm:mb-6 md:mb-8">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[var(--brand-green)] dark:to-[#1A3A32] p-4 sm:p-6 md:p-8 flex flex-wrap items-center justify-between gap-y-3 relative overflow-hidden">
+                <div className="flex items-center gap-3 sm:gap-5 text-white relative z-10">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white/20 dark:bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 dark:border-white/20 shadow-inner flex-shrink-0">
+                        <Icon name="Building" className="w-5 h-5 sm:w-6 sm:h-6" />
                     </div>
                     <div>
-                        <h3 className="text-2xl font-black tracking-tighter leading-none">Sobre Nosotros</h3>
+                        <h3 className="text-xl sm:text-2xl font-black tracking-tighter leading-none">Sobre Nosotros</h3>
                         <p className="text-[10px] font-bold text-sky-100 uppercase tracking-[0.2em] mt-1 opacity-80">
                             Identidad, historia y descripción de tu empresa
                         </p>
                     </div>
                 </div>
                 <div className="relative z-10">
-                    <span className="px-4 py-2 bg-black/10 backdrop-blur-md rounded-full text-[9px] font-black uppercase tracking-widest text-white border border-white/10">
+                    <span className="px-3 sm:px-4 py-1.5 sm:py-2 bg-black/10 backdrop-blur-md rounded-full text-[9px] font-black uppercase tracking-widest text-white border border-white/10">
                         Perfil Corporativo
                     </span>
                 </div>
             </div>
 
-            <div className="p-8">
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                    <div className="lg:col-span-4 space-y-6">
+            {/* Body */}
+            <div className="p-4 sm:p-6 md:p-8">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 md:gap-8">
+                    {/* Left: Basic fields */}
+                    <div className="lg:col-span-4 space-y-4 sm:space-y-6">
                         <div className="space-y-4">
                             <div className="space-y-1">
                                 <label htmlFor="store-name" className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1 flex items-center gap-1">
@@ -80,7 +83,8 @@ export default function StoreIdentity({ config, updateConfig, categories = [] }:
                         </div>
                     </div>
 
-                    <div className="lg:col-span-8 space-y-6">
+                    {/* Right: Description */}
+                    <div className="lg:col-span-8 space-y-4 sm:space-y-6">
                         <div className="space-y-2">
                             <label htmlFor="store-description" className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1 flex items-center gap-1">
                                 <Icon name="Building2" className="w-3 h-3 text-sky-500 dark:text-[var(--icons-green)]" />

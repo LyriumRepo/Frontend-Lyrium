@@ -2,7 +2,7 @@ import React from 'react';
 import {
   Activity, AlertCircle, AlertOctagon, AlertTriangle, ArrowDown,
   ArrowLeft, ArrowRight, BadgeCheck, Ban, Banknote, BarChart, Bell,
-  Bold, BookOpen, Bot, Briefcase, Building, Building2, Calendar,
+  Bold, BookOpen, Bot, Boxes, Briefcase, Building, Building2, Clapperboard, Calendar,
   CalendarCheck, CalendarClock, CalendarX, Camera, Check, CheckCheck,
   CheckCircle, CheckCircle2, CheckSquare, ChevronDown, ChevronLeft, ChevronRight,
   ChevronUp, Clock, CloudUpload, Coins, CreditCard, Crown, DollarSign,
@@ -11,7 +11,7 @@ import {
   Headphones, Headset, Heart, HelpCircle, Home, IdCard, Image, Info,
   Instagram, Italic, Key, Landmark, Layers, LayoutDashboard, LayoutGrid,
   LineChart, Linkedin, List, ListChecks, Loader, Loader2, Lock, LogIn,
-  LogOut, Mail, Map, MapPin, Maximize, Medal, Menu, MessageCircle,
+  LogOut, MessagesSquare, Mail, Map, MapPin, Maximize, Medal, Menu, MessageCircle,
   MessageSquare, MessageSquareOff, Minus, MonitorPlay, Moon,
   MoreVertical, MousePointerClick, Music, Newspaper, Package, Paperclip,
   Palette, Pause, Pencil, Phone, PhoneCall, PieChart, Plus, PlusCircle,
@@ -19,7 +19,7 @@ import {
   Send, Settings, Share2, Shield, ShieldCheck, ShieldX, ShoppingBag,
   ShoppingCart, Smile, Sparkles, Star, Stethoscope, Store, Tag, ThumbsUp,
   Ticket, Timer, Trash2, TrendingDown, TrendingUp, Truck, Twitter,
-  Upload, User, UserCheck, UserCircle, UserCog, UserPlus, Users, Wallet,
+  Upload, User, UserCheck, UserCircle, UserCog, UserPlus, Users, Video, Wallet,
   X, XCircle, XSquare, Youtube, Zap,
   type LucideIcon,
 } from 'lucide-react';
@@ -27,7 +27,7 @@ import {
 const ICON_MAP: Record<string, LucideIcon> = {
   Activity, AlertCircle, AlertOctagon, AlertTriangle, ArrowDown,
   ArrowLeft, ArrowRight, BadgeCheck, Ban, Banknote, BarChart, Bell,
-  Bold, BookOpen, Bot, Briefcase, Building, Building2, Calendar,
+  Bold, BookOpen, Bot, Boxes, Briefcase, Building, Building2, Clapperboard, Calendar,
   CalendarCheck, CalendarClock, CalendarX, Camera, Check, CheckCheck,
   CheckCircle, CheckCircle2, CheckSquare, ChevronDown, ChevronLeft, ChevronRight,
   ChevronUp, Clock, CloudUpload, Coins, CreditCard, Crown, DollarSign,
@@ -36,7 +36,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Headphones, Headset, Heart, HelpCircle, Home, IdCard, Image, Info,
   Instagram, Italic, Key, Landmark, Layers, LayoutDashboard, LayoutGrid,
   LineChart, Linkedin, List, ListChecks, Loader, Loader2, Lock, LogIn,
-  LogOut, Mail, Map, MapPin, Maximize, Medal, Menu, MessageCircle,
+  LogOut, MessagesSquare, Mail, Map, MapPin, Maximize, Medal, Menu, MessageCircle,
   MessageSquare, MessageSquareOff, Minus, MonitorPlay, Moon,
   MoreVertical, MousePointerClick, Music, Newspaper, Package, Paperclip,
   Palette, Pause, Pencil, Phone, PhoneCall, PieChart, Plus, PlusCircle,
@@ -44,7 +44,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Send, Settings, Share2, Shield, ShieldCheck, ShieldX, ShoppingBag,
   ShoppingCart, Smile, Sparkles, Star, Stethoscope, Store, Tag, ThumbsUp,
   Ticket, Timer, Trash2, TrendingDown, TrendingUp, Truck, Twitter,
-  Upload, User, UserCheck, UserCircle, UserCog, UserPlus, Users, Wallet,
+  Upload, User, UserCheck, UserCircle, UserCog, UserPlus, Users, Video, Wallet,
   X, XCircle, XSquare, Youtube, Zap,
 };
 

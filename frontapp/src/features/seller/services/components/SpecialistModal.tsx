@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import BaseButton from '@/components/ui/BaseButton';
 import Icon from '@/components/ui/Icon';
 import {
@@ -155,6 +156,11 @@ export default function SpecialistModal({
   const [catL1, setCatL1] = useState('');
   const [catL2, setCatL2] = useState('');
   const [showCatInfo, setShowCatInfo] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -240,11 +246,14 @@ export default function SpecialistModal({
     onClose();
   };
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
+
+  const modalRoot = document.getElementById('modal-root');
+  if (!modalRoot) return null;
 
   const isOccupied = specialist?.availability === 'Ocupado';
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
 
@@ -590,7 +599,8 @@ export default function SpecialistModal({
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    modalRoot,
   );
 }
 

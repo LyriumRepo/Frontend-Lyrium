@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import Icon from '@/components/ui/Icon';
 
 interface ServicesGuideModalProps {
@@ -7,9 +8,18 @@ interface ServicesGuideModalProps {
 }
 
 export default function ServicesGuideModal({ isOpen, onClose }: ServicesGuideModalProps) {
-    if (!isOpen) return null;
+    const [mounted, setMounted] = useState(false);
 
-    return (
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    if (!isOpen || !mounted) return null;
+
+    const modalRoot = document.getElementById('modal-root');
+    if (!modalRoot) return null;
+
+    return createPortal(
         <div
             className="fixed inset-0 bg-black/40 backdrop-blur-xl z-[100000] flex justify-center items-center p-4 lg:p-6 animate-fadeIn"
             onClick={onClose}
@@ -121,6 +131,7 @@ export default function ServicesGuideModal({ isOpen, onClose }: ServicesGuideMod
                     </div>
                 </div>
             </div>
-        </div>
+        </div>,
+        modalRoot,
     );
 }

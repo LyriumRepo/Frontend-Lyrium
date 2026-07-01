@@ -278,8 +278,16 @@ export function ChatPageClient() {
 
     const chatContent = activeConversation ? (
         <div className="flex flex-col h-full">
-            <div className="p-5 border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)]/50 shrink-0">
+            <div className="p-4 md:p-5 border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)]/50 shrink-0">
                 <div className="flex items-center gap-3">
+                    {/* Botón regreso — solo visible en mobile/tablet */}
+                    <button
+                        onClick={() => setIsMobileListVisible(true)}
+                        className="lg:hidden w-8 h-8 shrink-0 flex items-center justify-center rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--turquesa-500)] hover:border-[var(--turquesa-500)] transition-all"
+                        title="Volver a conversaciones"
+                    >
+                        <Icon name="ChevronLeft" className="w-4 h-4" />
+                    </button>
                     <div className="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-[var(--turquesa-500)] to-[var(--verde-500)] flex items-center justify-center text-white font-black text-sm shadow-sm">
                         {activeConversation.customerName.charAt(0)}
                     </div>
@@ -330,7 +338,7 @@ export function ChatPageClient() {
 
     if (isLoading) {
         return (
-            <div className="flex flex-col h-[calc(100vh-140px)] animate-fadeIn">
+            <div className="flex flex-col h-[calc(100svh-120px)] md:h-[calc(100vh-140px)] animate-fadeIn">
                 <ModuleHeader
                     title="Chat con Clientes"
                     subtitle="Comunicación directa con tus clientes"
@@ -344,7 +352,7 @@ export function ChatPageClient() {
     }
 
     return (
-        <div className="flex flex-col h-[calc(100vh-140px)] animate-fadeIn">
+        <div className="flex flex-col h-[calc(100svh-120px)] md:h-[calc(100vh-140px)] animate-fadeIn">
             <ModuleHeader
                 title="Chat con Clientes"
                 subtitle="Comunicación directa con tus clientes"
@@ -359,11 +367,21 @@ export function ChatPageClient() {
                             >
                                 <Icon name="Info" className="w-4 h-4" />
                             </button>
+                            {/* Mobile / Tablet: solo ícono */}
                             <button
                                 onClick={() => setShowNewChatForm(true)}
-                                className="px-4 py-2 bg-white dark:bg-[var(--bg-secondary)] text-[var(--turquesa-500)] dark:text-[var(--turquesa-500)] rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-gray-50 dark:hover:bg-[#2A3F33] transition-colors border border-[var(--border-subtle)] shadow-sm"
+                                title="Nuevo Chat"
+                                className="lg:hidden w-9 h-9 flex items-center justify-center rounded-xl bg-white dark:bg-[var(--bg-secondary)] text-[var(--turquesa-500)] border border-[var(--border-subtle)] hover:bg-gray-50 dark:hover:bg-[#2A3F33] transition-colors shadow-sm"
                             >
-                                + Nuevo Chat
+                                <Icon name="Plus" className="w-4 h-4" />
+                            </button>
+                            {/* Desktop: texto completo */}
+                            <button
+                                onClick={() => setShowNewChatForm(true)}
+                                className="hidden lg:flex items-center gap-1.5 px-4 py-2 bg-white dark:bg-[var(--bg-secondary)] text-[var(--turquesa-500)] dark:text-[var(--turquesa-500)] rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-gray-50 dark:hover:bg-[#2A3F33] transition-colors border border-[var(--border-subtle)] shadow-sm"
+                            >
+                                <Icon name="Plus" className="w-3.5 h-3.5" />
+                                Nuevo Chat
                             </button>
                         </div>
                     ) : null
@@ -371,7 +389,7 @@ export function ChatPageClient() {
             />
 
             {showNewChatForm ? (
-                <div className="flex-1 flex items-center justify-center px-8">
+                <div className="flex-1 flex items-center justify-center px-4 md:px-8">
                     <div className="w-full max-w-xl">
                         <NewChatForm
                             stores={stores}
@@ -389,6 +407,7 @@ export function ChatPageClient() {
                 <ChatLayout
                     list={listContent}
                     detail={chatContent}
+                    isMobileListVisible={isMobileListVisible}
                 />
             )}
 

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import BaseButton from '@/components/ui/BaseButton';
 import Icon from '@/components/ui/Icon';
 import {
@@ -378,7 +379,12 @@ export default function ServiceConfigModal({
   const [bufferMinutos, setBufferMinutos] = useState(10);
   const [imagenPreview, setImagenPreview] = useState<string | null>(null);
   const [showTagPreview, setShowTagPreview] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const imageInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const currentlyAssignedIds = service?.especialistasAsignados ?? [];
   const serviceCatPrefix = [form.categoriaL1, form.categoriaL2].filter(Boolean).join(' > ');
@@ -693,11 +699,14 @@ export default function ServiceConfigModal({
     onClose();
   };
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
+
+  const modalRoot = document.getElementById('modal-root');
+  if (!modalRoot) return null;
 
   const STEP_LABELS = ['Información', 'Horarios', 'Precio y cupos'];
 
-  return (
+  return createPortal(
     <>
       <TagPreviewModal
         isOpen={showTagPreview}
@@ -1829,7 +1838,8 @@ export default function ServiceConfigModal({
           </div>
         </div>
       </div>
-    </>
+    </>,
+    modalRoot,
   );
 }
 

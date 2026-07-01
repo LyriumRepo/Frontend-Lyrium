@@ -105,14 +105,15 @@ export default function LayoutSelector({ config, updateConfig, storeId }: Layout
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
     return (
-        <div className="glass-card p-0 overflow-hidden border-none rounded-[2.5rem] shadow-2xl bg-[var(--bg-card)] mb-8 animate-fadeIn">
-            <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[var(--brand-green)] dark:to-[#1A3A32] p-8 flex items-center justify-between relative overflow-hidden">
-                <div className="flex items-center gap-5 text-white relative z-10">
-                    <div className="w-12 h-12 bg-white/20 dark:bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 dark:border-white/20 shadow-inner">
-                        <Icon name="Palette" className="w-6 h-6" />
+        <div className="glass-card p-0 overflow-hidden border-none rounded-[2rem] sm:rounded-[2.5rem] shadow-2xl bg-[var(--bg-card)] mb-4 sm:mb-6 md:mb-8 animate-fadeIn">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[var(--brand-green)] dark:to-[#1A3A32] p-4 sm:p-6 md:p-8 flex flex-wrap items-center justify-between gap-y-3 relative overflow-hidden">
+                <div className="flex items-center gap-3 sm:gap-5 text-white relative z-10">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white/20 dark:bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 dark:border-white/20 shadow-inner flex-shrink-0">
+                        <Icon name="Palette" className="w-5 h-5 sm:w-6 sm:h-6" />
                     </div>
                     <div>
-                        <h3 className="text-2xl font-black tracking-tighter leading-none">Personalización Visual</h3>
+                        <h3 className="text-xl sm:text-2xl font-black tracking-tighter leading-none">Personalización Visual</h3>
                         <p className="text-[10px] font-bold text-sky-100 uppercase tracking-[0.2em] mt-1 opacity-80">
                             Define la estructura y estética de tu escaparate digital
                         </p>
@@ -120,24 +121,33 @@ export default function LayoutSelector({ config, updateConfig, storeId }: Layout
                 </div>
                 <button
                     onClick={() => setIsPreviewOpen(true)}
-                    className="relative z-10 flex items-center gap-3 px-6 py-3 rounded-2xl bg-[var(--bg-card)] backdrop-blur-md text-[var(--text-primary)] border border-[var(--border-subtle)] font-black text-[10px] uppercase tracking-widest hover:text-sky-500 dark:hover:text-[var(--icons-green)] transition-all shadow-lg active:scale-95"
+                    className="relative z-10 flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl bg-[var(--bg-card)] backdrop-blur-md text-[var(--text-primary)] border border-[var(--border-subtle)] font-black text-[10px] uppercase tracking-widest hover:text-sky-500 dark:hover:text-[var(--icons-green)] transition-all shadow-lg active:scale-95"
                 >
-                    <Icon name="Eye" className="w-5 h-5" />
-                    <span>Visualizar Tienda</span>
+                    <Icon name="Eye" className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <span className="hidden xs:inline">Visualizar Tienda</span>
+                    <span className="xs:hidden">Preview</span>
                 </button>
             </div>
 
-            <div className="p-8">
-                <div className="space-y-8">
-                    <div className="space-y-6">
+            {/* Body */}
+            <div className="p-4 sm:p-6 md:p-8">
+                <div className="space-y-4 sm:space-y-6 md:space-y-8">
+                    <div className="space-y-4 sm:space-y-6">
                         <div className="flex items-center gap-2 mb-2 ml-1">
                             <Icon name="MousePointerClick" className="text-sky-500 dark:text-[var(--icons-green)] w-4 h-4" />
-                            <span className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Selecciona una estructura</span>
+                            <span className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">
+                                Selecciona una estructura
+                            </span>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
                             {layouts.map(layout => (
-                                <label htmlFor={`layout-${layout.id}`} key={layout.id} className="cursor-pointer group" aria-label={`Seleccionar diseño ${layout.name}`}>
+                                <label
+                                    htmlFor={`layout-${layout.id}`}
+                                    key={layout.id}
+                                    className="cursor-pointer group"
+                                    aria-label={`Seleccionar diseño ${layout.name}`}
+                                >
                                     <input
                                         id={`layout-${layout.id}`}
                                         type="radio"
@@ -147,11 +157,11 @@ export default function LayoutSelector({ config, updateConfig, storeId }: Layout
                                         onChange={e => updateConfig({ layout: e.target.value as any })}
                                         className="sr-only peer"
                                     />
-                                    <div className="p-6 rounded-[2.5rem] border-2 border-[var(--border-subtle)] bg-[var(--bg-card)] hover:border-sky-500/30 dark:hover:border-emerald-500/30 hover:shadow-lg peer-checked:border-sky-500 dark:peer-checked:border-[var(--icons-green)] peer-checked:shadow-2xl peer-checked:shadow-sky-500/20 dark:peer-checked:shadow-emerald-500/30 peer-checked:-translate-y-1 transition-all relative overflow-hidden">
-                                        <div className="absolute top-0 right-0 w-20 h-20 bg-sky-500/10 rounded-bl-[4rem] opacity-0 peer-checked:opacity-100 transition-opacity flex items-center justify-center pl-6 pb-6">
-                                            <Icon name="Check" className="text-sky-500 w-6 h-6" />
+                                    <div className="p-4 sm:p-5 md:p-6 rounded-[2rem] sm:rounded-[2.5rem] border-2 border-[var(--border-subtle)] bg-[var(--bg-card)] hover:border-sky-500/30 dark:hover:border-emerald-500/30 hover:shadow-lg peer-checked:border-sky-500 dark:peer-checked:border-[var(--icons-green)] peer-checked:shadow-2xl peer-checked:shadow-sky-500/20 dark:peer-checked:shadow-emerald-500/30 peer-checked:-translate-y-1 transition-all relative overflow-hidden">
+                                        <div className="absolute top-0 right-0 w-16 h-16 sm:w-20 sm:h-20 bg-sky-500/10 rounded-bl-[3rem] sm:rounded-bl-[4rem] opacity-0 peer-checked:opacity-100 transition-opacity flex items-center justify-center pl-4 pb-4 sm:pl-6 sm:pb-6">
+                                            <Icon name="Check" className="text-sky-500 w-5 h-5 sm:w-6 sm:h-6" />
                                         </div>
-                                        <div className="w-full h-40 bg-[var(--bg-secondary)] rounded-xl p-1.5 mb-4 border border-[var(--border-subtle)] flex flex-col gap-0.5">
+                                        <div className="w-full h-32 sm:h-36 md:h-40 bg-[var(--bg-secondary)] rounded-xl p-1.5 mb-3 sm:mb-4 border border-[var(--border-subtle)] flex flex-col gap-0.5">
                                             {layout.preview}
                                         </div>
                                         <p className="text-[11px] font-black uppercase text-[var(--text-secondary)] peer-checked:text-[var(--text-primary)] tracking-tight text-center transition-colors">

@@ -196,6 +196,129 @@ function SkeletonRows() {
   );
 }
 
+// ─── Mobile accordion card ───────────────────────────────────────────────────
+
+interface MobileOrderCardProps {
+  order: Order;
+  onViewDetail: (order: Order) => void;
+  onConfirm: (orderId: string) => void;
+  onCancel: (orderId: string) => void;
+  isAdvancing: boolean;
+  isCancelling: boolean;
+}
+
+function MobileOrderCard({ order, onViewDetail, onConfirm, onCancel, isAdvancing, isCancelling }: MobileOrderCardProps) {
+  const [expanded, setExpanded] = useState(false);
+  const statusConfig = ORDER_STATUS_CONFIG[order.estado] ?? { class: 'bg-gray-100 text-gray-600' };
+  const canConfirm = order.estado === 'pending_seller' && !isAdvancing;
+  const canCancel  = order.estado === 'pending_seller' && !isCancelling;
+
+  return (
+    <div className={`rounded-2xl border bg-[var(--bg-card)] overflow-hidden transition-colors ${
+      expanded ? 'border-sky-400/40' : 'border-[var(--border-subtle)]'
+    }`}>
+
+      {/* ── Fila colapsada — siempre visible ── */}
+      <button
+        onClick={() => setExpanded(v => !v)}
+        className="w-full flex items-center gap-3 px-4 py-3.5 text-left active:bg-[var(--bg-secondary)]/60 transition-colors"
+      >
+        {/* Nº Orden + Tipo + Cliente */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-1.5 mb-1 flex-wrap">
+            <span className="text-[9px] font-black text-sky-600 bg-sky-50 px-2 py-0.5 rounded-md font-mono tracking-tight whitespace-nowrap">
+              {order.orderNumber}
+            </span>
+            <TypeBadge orderType={order.orderType} />
+          </div>
+          <p className="text-sm font-bold text-[var(--text-primary)] truncate leading-tight">
+            {order.cliente}
+          </p>
+        </div>
+
+        {/* Estado + Total */}
+        <div className="flex flex-col items-end gap-1 flex-shrink-0">
+          <StatusBadge label={order.statusLabel} className={statusConfig.class} />
+          <span className="text-sm font-black text-[var(--text-primary)] tracking-tight">
+            {formatCurrency(order.total)}
+          </span>
+        </div>
+
+        <Icon
+          name={expanded ? 'ChevronUp' : 'ChevronDown'}
+          className="w-4 h-4 flex-shrink-0 text-[var(--text-secondary)]"
+        />
+      </button>
+
+      {/* ── Panel expandido ── */}
+      {expanded && (
+        <div className="border-t border-[var(--border-subtle)] px-4 py-3 space-y-3">
+
+          {/* Concepto */}
+          {order.itemsSummary && (
+            <div className="flex items-start justify-between gap-3">
+              <span className="text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)] pt-0.5 flex-shrink-0">Concepto</span>
+              <span className="text-xs font-semibold text-[var(--text-primary)] text-right leading-snug">{order.itemsSummary}</span>
+            </div>
+          )}
+
+          {/* Modalidad */}
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)] flex-shrink-0">Modalidad</span>
+            <DeliveryBadge order={order} />
+          </div>
+
+          {/* Tres datos en fila */}
+          <div className="grid grid-cols-3 gap-2 pt-0.5">
+            <div>
+              <p className="text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)] mb-1">Cantidad</p>
+              <span className="text-sm font-black text-[var(--text-primary)]">{order.unidades}</span>
+            </div>
+            <div>
+              <p className="text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)] mb-1">Pago</p>
+              <PaymentBadge status={order.estado_pago} statusLabel={order.paymentStatusLabel} />
+            </div>
+            <div>
+              <p className="text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)] mb-1">Fecha</p>
+              <span className="text-[10px] font-bold text-[var(--text-secondary)] whitespace-nowrap">
+                {new Date(order.fecha).toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: '2-digit' })}
+              </span>
+            </div>
+          </div>
+
+          {/* Acciones */}
+          <div className="flex items-center gap-2 pt-1">
+            <button
+              onClick={() => onViewDetail(order)}
+              className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border border-[var(--border-subtle)] text-[11px] font-black text-[var(--text-secondary)] hover:border-sky-500/30 hover:text-sky-500 hover:bg-sky-500/5 transition-colors"
+            >
+              <Icon name="Eye" className="w-3.5 h-3.5" /> Ver
+            </button>
+            {canConfirm && (
+              <button
+                onClick={() => onConfirm(order.id)}
+                className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border border-emerald-500/20 text-[11px] font-black text-emerald-600 hover:bg-emerald-500/10 transition-colors"
+              >
+                <Icon name="CheckCircle" className="w-3.5 h-3.5" /> Confirmar
+              </button>
+            )}
+            {canCancel && (
+              <button
+                onClick={() => onCancel(order.id)}
+                className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border border-red-500/20 text-[11px] font-black text-red-500 hover:bg-red-500/10 transition-colors"
+              >
+                <Icon name="XCircle" className="w-3.5 h-3.5" /> Cancelar
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── SalesTable ───────────────────────────────────────────────────────────────
+
 interface SalesTableProps {
   data: Order[];
   loading: boolean;
@@ -334,35 +457,52 @@ const SalesTable = memo(function SalesTable({
 
   if (loading) {
     return (
-      <div className="bg-[var(--bg-card)] rounded-3xl overflow-hidden border border-[var(--border-subtle)] shadow-sm">
-        <div className="overflow-x-auto no-scrollbar">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-[var(--bg-secondary)]">
-                {['Número de Orden', 'Tipo', 'Cliente', 'Concepto', 'Modalidad', 'Cant.', 'Pago', 'Estado de la Orden', 'Total', 'Fecha', 'Acciones'].map((h) => (
-                  <th key={h} className="px-6 py-5 text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest border-b border-[var(--border-subtle)]">
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <SkeletonRows />
-          </table>
+      <>
+        {/* Mobile skeleton */}
+        <div className="sm:hidden space-y-2">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-4 animate-pulse space-y-3">
+              <div className="flex items-center gap-2">
+                <div className="h-5 w-28 bg-[var(--bg-secondary)] rounded-md" />
+                <div className="h-5 w-16 bg-[var(--bg-secondary)] rounded-md" />
+              </div>
+              <div className="h-4 w-40 bg-[var(--bg-secondary)] rounded-md" />
+              <div className="h-4 w-20 bg-[var(--bg-secondary)] rounded-md ml-auto" />
+            </div>
+          ))}
         </div>
-      </div>
+
+        {/* Desktop skeleton */}
+        <div className="hidden sm:block bg-[var(--bg-card)] rounded-3xl overflow-hidden border border-[var(--border-subtle)] shadow-sm">
+          <div className="overflow-x-auto no-scrollbar">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-[var(--bg-secondary)]">
+                  {['Número de Orden', 'Tipo', 'Cliente', 'Concepto', 'Modalidad', 'Cant.', 'Pago', 'Estado de la Orden', 'Total', 'Fecha', 'Acciones'].map((h) => (
+                    <th key={h} className="px-6 py-5 text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest border-b border-[var(--border-subtle)]">
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <SkeletonRows />
+            </table>
+          </div>
+        </div>
+      </>
     );
   }
 
   if (data.length === 0) {
     return (
-      <div className="w-full py-24 flex flex-col items-center justify-center text-center px-6 bg-[var(--bg-card)] rounded-[3rem] border border-[var(--border-subtle)] shadow-sm">
+      <div className="w-full py-16 sm:py-24 flex flex-col items-center justify-center text-center px-6 bg-[var(--bg-card)] rounded-[2rem] sm:rounded-[3rem] border border-[var(--border-subtle)] shadow-sm">
         <div className="relative inline-block">
-          <div className="w-24 h-24 bg-[var(--bg-muted)] rounded-[2.5rem] flex items-center justify-center shadow-inner border border-[var(--border-subtle)] text-[var(--text-secondary)]">
-            <Icon name="Inbox" className="w-12 h-12 stroke-[1.5px]" />
+          <div className="w-20 h-20 sm:w-24 sm:h-24 bg-[var(--bg-muted)] rounded-[2rem] sm:rounded-[2.5rem] flex items-center justify-center shadow-inner border border-[var(--border-subtle)] text-[var(--text-secondary)]">
+            <Icon name="Inbox" className="w-10 h-10 sm:w-12 sm:h-12 stroke-[1.5px]" />
           </div>
         </div>
-        <div className="space-y-3 mt-8">
-          <h3 className="text-2xl font-black text-[var(--text-primary)] tracking-tighter">
+        <div className="space-y-3 mt-6 sm:mt-8">
+          <h3 className="text-xl sm:text-2xl font-black text-[var(--text-primary)] tracking-tighter">
             No se encontraron pedidos
           </h3>
           <p className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest leading-relaxed">
@@ -374,70 +514,115 @@ const SalesTable = memo(function SalesTable({
   }
 
   return (
-    <div className="bg-[var(--bg-card)] rounded-3xl overflow-hidden border border-[var(--border-subtle)] shadow-sm transition-all hover:shadow-md">
-      <div className="overflow-x-auto no-scrollbar">
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="bg-[var(--bg-secondary)]">
-              {table.getHeaderGroups().map((headerGroup) =>
-                headerGroup.headers.map((header) => (
-                  <th
-                    key={header.id}
-                    scope="col"
-                    className="px-6 py-5 text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest border-b border-[var(--border-subtle)] whitespace-nowrap"
-                  >
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(header.column.columnDef.header, header.getContext())}
-                  </th>
-                ))
-              )}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-[var(--border-subtle)]">
-            {table.getRowModel().rows.map((row) => (
-              <tr
-                key={row.id}
-                className="group hover:bg-[var(--bg-secondary)] transition-colors cursor-pointer"
-                onClick={() => onViewDetail(row.original)}
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id} className="px-6 py-4">
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between px-6 py-4 border-t border-[var(--border-subtle)] bg-[var(--bg-secondary)]/30">
-          <span className="text-[11px] font-bold text-[var(--text-secondary)]">
-            {data.length} órdenes
-          </span>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setPage(p => Math.max(0, p - 1))}
-              disabled={safePage === 0}
-              className="px-3 py-1.5 rounded-xl text-[11px] font-bold text-[var(--text-secondary)] bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-[#69BEEB]/30 hover:text-[#5AAFE6] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              Anterior
-            </button>
-            <span className="px-3 py-1.5 text-[11px] font-bold text-[var(--text-secondary)]">
-              Pág. {safePage + 1} de {totalPages}
+    <>
+      {/* ══ MÓVIL: accordion cards (sm:hidden) ══════════════════════════════ */}
+      <div className="sm:hidden space-y-2">
+        {paginatedData.map((order) => (
+          <MobileOrderCard
+            key={order.id}
+            order={order}
+            onViewDetail={onViewDetail}
+            onConfirm={onConfirm}
+            onCancel={onCancel}
+            isAdvancing={isAdvancing}
+            isCancelling={isCancelling}
+          />
+        ))}
+
+        {/* Paginación móvil */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between px-1 pt-2">
+            <span className="text-[10px] font-bold text-[var(--text-secondary)]">
+              {data.length} órdenes · Pág. {safePage + 1}/{totalPages}
             </span>
-            <button
-              onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
-              disabled={safePage >= totalPages - 1}
-              className="px-3 py-1.5 rounded-xl text-[11px] font-bold text-[var(--text-secondary)] bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-[#69BEEB]/30 hover:text-[#5AAFE6] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              Siguiente
-            </button>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setPage(p => Math.max(0, p - 1))}
+                disabled={safePage === 0}
+                className="w-8 h-8 flex items-center justify-center rounded-xl border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                <Icon name="ChevronLeft" className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
+                disabled={safePage >= totalPages - 1}
+                className="w-8 h-8 flex items-center justify-center rounded-xl border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                <Icon name="ChevronRight" className="w-4 h-4" />
+              </button>
+            </div>
           </div>
+        )}
+      </div>
+
+      {/* ══ DESKTOP: tabla completa (hidden sm:block) ════════════════════════ */}
+      <div className="hidden sm:block bg-[var(--bg-card)] rounded-3xl overflow-hidden border border-[var(--border-subtle)] shadow-sm transition-all hover:shadow-md">
+        <div className="overflow-x-auto no-scrollbar">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-[var(--bg-secondary)]">
+                {table.getHeaderGroups().map((headerGroup) =>
+                  headerGroup.headers.map((header) => (
+                    <th
+                      key={header.id}
+                      scope="col"
+                      className="px-6 py-5 text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest border-b border-[var(--border-subtle)] whitespace-nowrap"
+                    >
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(header.column.columnDef.header, header.getContext())}
+                    </th>
+                  ))
+                )}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[var(--border-subtle)]">
+              {table.getRowModel().rows.map((row) => (
+                <tr
+                  key={row.id}
+                  className="group hover:bg-[var(--bg-secondary)] transition-colors cursor-pointer"
+                  onClick={() => onViewDetail(row.original)}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <td key={cell.id} className="px-6 py-4">
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-      )}
-    </div>
+
+        {/* Paginación desktop */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between px-6 py-4 border-t border-[var(--border-subtle)] bg-[var(--bg-secondary)]/30">
+            <span className="text-[11px] font-bold text-[var(--text-secondary)]">
+              {data.length} órdenes
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setPage(p => Math.max(0, p - 1))}
+                disabled={safePage === 0}
+                className="px-3 py-1.5 rounded-xl text-[11px] font-bold text-[var(--text-secondary)] bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-[#69BEEB]/30 hover:text-[#5AAFE6] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                Anterior
+              </button>
+              <span className="px-3 py-1.5 text-[11px] font-bold text-[var(--text-secondary)]">
+                Pág. {safePage + 1} de {totalPages}
+              </span>
+              <button
+                onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
+                disabled={safePage >= totalPages - 1}
+                className="px-3 py-1.5 rounded-xl text-[11px] font-bold text-[var(--text-secondary)] bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-[#69BEEB]/30 hover:text-[#5AAFE6] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                Siguiente
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </>
   );
 });
 

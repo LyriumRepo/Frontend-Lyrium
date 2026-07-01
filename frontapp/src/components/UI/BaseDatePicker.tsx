@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 interface BaseDatePickerProps {
   label?: string;
@@ -15,7 +16,10 @@ interface BaseDatePickerProps {
 export default function BaseDatePicker({ label, value, onChange, name, className, placeholder, buttonClassName }: BaseDatePickerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [viewDate, setViewDate] = useState(() => value ? new Date(value + 'T12:00:00') : new Date());
+  const [position, setPosition] = useState<{ top: number; left: number } | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const popoverRef = useRef<HTMLDivElement>(null);
 
   const selectedDate = value ? new Date(value + 'T12:00:00') : null;
   const year = viewDate.getFullYear();
@@ -25,12 +29,56 @@ export default function BaseDatePicker({ label, value, onChange, name, className
   useEffect(() => {
     if (!isOpen) return;
     const handleClickOutside = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      const target = e.target as Node;
+      const clickedContainer = containerRef.current?.contains(target);
+      const clickedPopover = popoverRef.current?.contains(target);
+      if (!clickedContainer && !clickedPopover) {
         setIsOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isOpen]);
+
+  // Posiciona el popup con coordenadas fijas (viewport) calculadas desde el botón,
+  // ya que se renderiza vía portal fuera de cualquier contenedor con overflow-hidden.
+  useEffect(() => {
+    if (!isOpen) return;
+    const btn = buttonRef.current;
+    if (!btn) return;
+
+    const computePosition = () => {
+      const rect = btn.getBoundingClientRect();
+      const popoverWidth = popoverRef.current?.offsetWidth ?? 280;
+      const popoverHeight = popoverRef.current?.offsetHeight ?? 380;
+      const margin = 8;
+
+      let left = rect.left;
+      if (left + popoverWidth > window.innerWidth - margin) {
+        left = Math.max(margin, window.innerWidth - popoverWidth - margin);
+      }
+
+      let top = rect.bottom + margin;
+      const fitsBelow = top + popoverHeight <= window.innerHeight - margin;
+      if (!fitsBelow) {
+        const topAbove = rect.top - popoverHeight - margin;
+        if (topAbove >= margin) top = topAbove;
+      }
+
+      setPosition({ top, left });
+    };
+
+    computePosition();
+    // Recalcula una vez montado el popup, ya con su tamaño real medido
+    const raf = requestAnimationFrame(computePosition);
+
+    window.addEventListener('scroll', computePosition, true);
+    window.addEventListener('resize', computePosition);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener('scroll', computePosition, true);
+      window.removeEventListener('resize', computePosition);
+    };
   }, [isOpen]);
 
   useEffect(() => {
@@ -86,6 +134,7 @@ export default function BaseDatePicker({ label, value, onChange, name, className
       )}
       <button
         type="button"
+        ref={buttonRef}
         onClick={() => setIsOpen(!isOpen)}
         className={`w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-transparent p-3 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-xl outline-none transition-all duration-300 cursor-pointer flex items-center gap-2 ${
           buttonClassName || ''
@@ -97,8 +146,12 @@ export default function BaseDatePicker({ label, value, onChange, name, className
         <span>{value ? formatDisplay(value) : (placeholder || 'Seleccionar fecha')}</span>
       </button>
 
-      {isOpen && (
-        <div className="absolute top-full mt-2 left-0 z-50 bg-sky-50 dark:bg-[#1A3A32] rounded-2xl shadow-2xl border border-gray-200 dark:border-[var(--border-subtle)] p-4 w-[280px]">
+      {isOpen && position && typeof document !== 'undefined' && createPortal(
+        <div
+          ref={popoverRef}
+          style={{ position: 'fixed', top: position.top, left: position.left }}
+          className="z-[1000] bg-sky-50 dark:bg-[#1A3A32] rounded-2xl shadow-2xl border border-gray-200 dark:border-[var(--border-subtle)] p-4 w-[280px]"
+        >
           <div className="flex items-center justify-between mb-4">
             <button
               type="button"
@@ -173,7 +226,8 @@ export default function BaseDatePicker({ label, value, onChange, name, className
               Hoy
             </button>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

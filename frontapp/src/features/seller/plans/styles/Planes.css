@@ -585,7 +585,7 @@ body {
    ============================================ */
 .my-plan-title {
     --title-gradient: linear-gradient(135deg, #1f2937 0%, #2563eb 55%, #06b6d4 100%);
-    font-size: clamp(3rem, 3.5vw, 2.5rem);
+    font-size: clamp(1.5rem, 3.5vw, 2.5rem);
     font-weight: 800;
     text-align: center;
     margin-bottom: 8px;
@@ -926,7 +926,7 @@ body {
    PESTAÑA 2: PLANES
    ============================================ */
 .plans-tab-title {
-    font-size: clamp(4rem, 3.5vw, 2.5rem);
+    font-size: clamp(1.5rem, 3.5vw, 2.5rem);
     font-weight: 800;
     text-align: center;
     margin-bottom: 8px;
@@ -2332,9 +2332,28 @@ body {
    RESPONSIVE
    ============================================ */
 @media (max-width: 768px) {
+    /* overflow-x: hidden sólo en contenedores página, NO en wildcard
+       porque * { overflow-x:hidden } sobreescribe overflow:visible del Swiper
+       y recorta las cards laterales del carrusel 3D.
+       scrollbar-width: none se mantiene en * para ocultar scrollbars en todos los elementos. */
     * {
-        overflow-x: hidden;
         scrollbar-width: none;
+    }
+
+    body,
+    .container,
+    .tab-panel {
+        overflow-x: hidden;
+    }
+
+    /* Swiper necesita overflow:visible para el efecto 3D coverflow */
+    .plans-carousel,
+    .plans-carousel .swiper,
+    .plans-carousel .swiper-wrapper,
+    .plans-carousel .swiper-slide,
+    .carousel-track-wrapper,
+    .carousel-track {
+        overflow: visible !important;
     }
 
     .tabs-nav {
