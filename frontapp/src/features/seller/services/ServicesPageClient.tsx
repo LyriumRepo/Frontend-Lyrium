@@ -1,8 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import ServiceCard from './components/ServiceCard';
+import ServiceCardMobile from './components/ServiceCardMobile';
 import SpecialistItem from './components/SpecialistItem';
 import SpecialistModal from './components/SpecialistModal';
 import dynamic from 'next/dynamic';
@@ -48,6 +50,7 @@ export function ServicesPageClient() {
     const [currentPage, setCurrentPage] = useState(1);
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [specialistPage, setSpecialistPage] = useState(1);
+    const [expandedServiceId, setExpandedServiceId] = useState<number | null>(null);
 
     const [modals, setModals] = useState({
         serviceConfig: false,
@@ -56,6 +59,11 @@ export function ServicesPageClient() {
         reschedule: false,
     });
     const [showGuide, setShowGuide] = useState(false);
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     // ── Helpers ──────────────────────────────────────────────────────────────
 
@@ -160,31 +168,33 @@ export function ServicesPageClient() {
             </button>
             <button
                 onClick={() => setShowGuide(true)}
-                className="w-9 h-9 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] flex items-center justify-center text-[var(--text-secondary)] hover:text-sky-500 hover:border-sky-500/30 hover:bg-sky-500/5 transition-all"
+                className="w-9 h-9 flex-shrink-0 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] flex items-center justify-center text-[var(--text-secondary)] hover:text-sky-500 hover:border-sky-500/30 hover:bg-sky-500/5 transition-all"
                 title="Guía para imágenes de servicios"
             >
                 <Icon name="HelpCircle" className="w-4 h-4" />
             </button>
-            <BaseButton
-                variant="action"
-                leftIcon="Briefcase"
-                onClick={() => {
-                    setActiveService(null);
-                    setModals({ ...modals, serviceConfig: true });
-                }}
-            >
-                Nuevo Servicio
-            </BaseButton>
-            <BaseButton
-                variant="action"
-                leftIcon="PlusCircle"
-                onClick={() => {
-                    setSelectedSpecialist(null);
-                    setModals({ ...modals, specialist: true });
-                }}
-            >
-                Especialista
-            </BaseButton>
+            <div className="hidden sm:flex gap-3 items-center">
+                <BaseButton
+                    variant="action"
+                    leftIcon="Briefcase"
+                    onClick={() => {
+                        setActiveService(null);
+                        setModals({ ...modals, serviceConfig: true });
+                    }}
+                >
+                    Nuevo Servicio
+                </BaseButton>
+                <BaseButton
+                    variant="action"
+                    leftIcon="PlusCircle"
+                    onClick={() => {
+                        setSelectedSpecialist(null);
+                        setModals({ ...modals, specialist: true });
+                    }}
+                >
+                    Especialista
+                </BaseButton>
+            </div>
         </div>
     );
 
@@ -205,11 +215,37 @@ export function ServicesPageClient() {
                 actions={headerActions}
             />
 
+            {/* Acciones — solo mobile, debajo del header */}
+            <div className="sm:hidden space-y-2">
+                <BaseButton
+                    variant="action"
+                    leftIcon="Briefcase"
+                    className="w-full"
+                    onClick={() => {
+                        setActiveService(null);
+                        setModals({ ...modals, serviceConfig: true });
+                    }}
+                >
+                    Nuevo Servicio
+                </BaseButton>
+                <BaseButton
+                    variant="action"
+                    leftIcon="PlusCircle"
+                    className="w-full"
+                    onClick={() => {
+                        setSelectedSpecialist(null);
+                        setModals({ ...modals, specialist: true });
+                    }}
+                >
+                    Especialista
+                </BaseButton>
+            </div>
+
             {/* ── Catálogo ── */}
             <div className="space-y-4 mt-8">
 
                 {/* Barra superior de la tabla */}
-                <div className="flex items-center justify-between px-1">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between px-1">
 
                     {/* Título sección */}
                     <div className="flex items-center gap-3">
@@ -227,56 +263,62 @@ export function ServicesPageClient() {
                     </div>
 
                     {/* Filtros + botón equipo */}
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
 
                         {/* Buscador por nombre */}
-                        <div className="relative">
+                        <div className="relative w-full sm:w-44">
                             <Icon name="Search" className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--text-secondary)] pointer-events-none" />
                             <input
                                 type="text"
                                 value={searchText}
                                 onChange={(e) => { setSearchText(e.target.value); setCurrentPage(1); }}
                                 placeholder="Buscar servicio..."
-                                className="pl-8 pr-3 py-1.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] text-[11px] font-bold text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-none focus:border-sky-500/50 dark:focus:border-[#8FC3A1]/50 transition-colors w-44"
+                                className="pl-8 pr-3 py-1.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] text-[11px] font-bold text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-none focus:border-sky-500/50 dark:focus:border-[#8FC3A1]/50 transition-colors w-full sm:w-44"
                             />
                         </div>
 
-                        {/* Dropdown filtro estado */}
-                        <div className="relative">
-                            <select
-                                value={statusFilter}
-                                onChange={(e) => { setStatusFilter(e.target.value as StatusFilter); setCurrentPage(1); }}
-                                className="appearance-none pl-3 pr-7 py-1.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] text-[11px] font-bold text-[var(--text-primary)] focus:outline-none focus:border-sky-500/50 dark:focus:border-[#8FC3A1]/50 transition-colors cursor-pointer"
-                            >
-                                <option value="todos">Todos ({services.length})</option>
-                                <option value="publicado">Publicados ({publishedCount})</option>
-                                <option value="borrador">Borradores ({draftCount})</option>
-                            </select>
-                            <Icon name="ChevronDown" className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-[var(--text-secondary)] pointer-events-none" />
-                        </div>
+                        <div className="flex items-center gap-2">
+                            {/* Dropdown filtro estado */}
+                            <div className="relative flex-1 sm:flex-none">
+                                <select
+                                    value={statusFilter}
+                                    onChange={(e) => { setStatusFilter(e.target.value as StatusFilter); setCurrentPage(1); }}
+                                    className="appearance-none w-full pl-3 pr-7 py-1.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] text-[11px] font-bold text-[var(--text-primary)] focus:outline-none focus:border-sky-500/50 dark:focus:border-[#8FC3A1]/50 transition-colors cursor-pointer"
+                                >
+                                    <option value="todos">Todos ({services.length})</option>
+                                    <option value="publicado">Publicados ({publishedCount})</option>
+                                    <option value="borrador">Borradores ({draftCount})</option>
+                                </select>
+                                <Icon name="ChevronDown" className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-[var(--text-secondary)] pointer-events-none" />
+                            </div>
 
-                        {/* Botón off-canvas especialistas */}
-                        <button
-                            onClick={() => setDrawerOpen(true)}
-                            className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-sky-500/20 dark:border-[#8FC3A1]/20 bg-sky-500/10 dark:bg-[#8FC3A1]/10 text-sky-500 dark:text-[#8FC3A1] hover:bg-sky-500/20 dark:hover:bg-[#8FC3A1]/20 transition-colors"
-                        >
-                            <Icon name="Users" className="w-4 h-4" />
-                            <span className="text-[11px] font-bold">
-                                Mis Especialistas
-                            </span>
-                            {specialists.length > 0 && (
-                                <span className="w-4 h-4 flex items-center justify-center rounded-full bg-sky-500 dark:bg-[#8FC3A1] text-white dark:text-[#0a1a13] text-[9px] font-bold">
-                                    {specialists.length}
+                            {/* Botón off-canvas especialistas */}
+                            <button
+                                onClick={() => setDrawerOpen(true)}
+                                className="flex items-center justify-center gap-2 px-3 py-1.5 rounded-xl border border-sky-500/20 dark:border-[#8FC3A1]/20 bg-sky-500/10 dark:bg-[#8FC3A1]/10 text-sky-500 dark:text-[#8FC3A1] hover:bg-sky-500/20 dark:hover:bg-[#8FC3A1]/20 transition-colors flex-1 sm:flex-none whitespace-nowrap"
+                            >
+                                <Icon name="Users" className="w-4 h-4" />
+                                <span className="text-[11px] font-bold hidden xs:inline sm:inline">
+                                    Mis Especialistas
                                 </span>
-                            )}
-                        </button>
+                                <span className="text-[11px] font-bold xs:hidden sm:hidden">
+                                    Equipo
+                                </span>
+                                {specialists.length > 0 && (
+                                    <span className="w-4 h-4 flex items-center justify-center rounded-full bg-sky-500 dark:bg-[#8FC3A1] text-white dark:text-[#0a1a13] text-[9px] font-bold">
+                                        {specialists.length}
+                                    </span>
+                                )}
+                            </button>
+                        </div>
                     </div>
                 </div>
 
                 {/* Tabla */}
                 {filteredServices.length > 0 ? (
                     <>
-                        <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] overflow-visible">
+                        {/* ===== Vista Desktop: Tabla ===== */}
+                        <div className="hidden sm:block rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] overflow-visible">
                             <table className="w-full border-separate border-spacing-0">
                                 <thead>
                                     <tr className="border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)]">
@@ -321,16 +363,39 @@ export function ServicesPageClient() {
                             </table>
                         </div>
 
+                        {/* ===== Vista Mobile: Acordeón ===== */}
+                        <div className="sm:hidden rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] divide-y divide-[var(--border-subtle)] overflow-hidden">
+                            {pagedServices.map((s) => (
+                                <ServiceCardMobile
+                                    key={s.id}
+                                    service={s}
+                                    specialists={specialists}
+                                    isExpanded={expandedServiceId === s.id}
+                                    onToggle={() => setExpandedServiceId((prev) => (prev === s.id ? null : s.id))}
+                                    onDetail={(serv) => {
+                                        setActiveService(serv);
+                                        setModals((prev) => ({ ...prev, detail: true }));
+                                    }}
+                                    onEdit={(serv) => {
+                                        setActiveService(serv);
+                                        setModals((prev) => ({ ...prev, serviceConfig: true }));
+                                    }}
+                                    onDelete={deleteService}
+                                    onPublish={handlePublish}
+                                />
+                            ))}
+                        </div>
+
                         {totalPages > 1 && (
-                            <div className="flex items-center justify-between px-1 pt-1">
+                            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between px-1 pt-1">
                                 <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest">
                                     Página {safePage} de {totalPages} · {filteredServices.length} servicio{filteredServices.length !== 1 ? 's' : ''}
                                 </p>
-                                <div className="flex items-center gap-1">
+                                <div className="flex items-center gap-1 overflow-x-auto pb-1 sm:pb-0">
                                     <button
                                         onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                                         disabled={safePage === 1}
-                                        className="w-7 h-7 flex items-center justify-center rounded-lg border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                        className="w-7 h-7 flex-shrink-0 flex items-center justify-center rounded-lg border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                                     >
                                         <Icon name="ChevronLeft" className="w-3.5 h-3.5" />
                                     </button>
@@ -339,7 +404,7 @@ export function ServicesPageClient() {
                                         <button
                                             key={page}
                                             onClick={() => setCurrentPage(page)}
-                                            className={`w-7 h-7 flex items-center justify-center rounded-lg text-[10px] font-black transition-colors
+                                            className={`w-7 h-7 flex-shrink-0 flex items-center justify-center rounded-lg text-[10px] font-black transition-colors
                                 ${safePage === page
                                                     ? 'bg-sky-500/20 dark:bg-[#8FC3A1]/20 text-sky-500 dark:text-[#8FC3A1] border border-sky-500/30 dark:border-[#8FC3A1]/30'
                                                     : 'border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]'
@@ -352,7 +417,7 @@ export function ServicesPageClient() {
                                     <button
                                         onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                                         disabled={safePage === totalPages}
-                                        className="w-7 h-7 flex items-center justify-center rounded-lg border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                        className="w-7 h-7 flex-shrink-0 flex items-center justify-center rounded-lg border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                                     >
                                         <Icon name="ChevronRight" className="w-3.5 h-3.5" />
                                     </button>
@@ -383,21 +448,22 @@ export function ServicesPageClient() {
             </div>
 
             {/* ── Off-canvas Especialistas ─────────────────────────────────── */}
+            {mounted && document.getElementById('modal-root') && createPortal(
+                <>
+                {/* Backdrop */}
+                <div
+                    onClick={() => setDrawerOpen(false)}
+                    className={`fixed inset-0 z-[70] bg-black/25 backdrop-blur-[2px] transition-opacity duration-300
+                        ${drawerOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+                />
 
-            {/* Backdrop */}
-            <div
-                onClick={() => setDrawerOpen(false)}
-                className={`fixed inset-0 z-[70] bg-black/25 backdrop-blur-[2px] transition-opacity duration-300
-                    ${drawerOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
-            />
-
-            {/* Panel */}
-            <aside
-                className={`fixed top-0 right-0 h-full w-80 z-[80] flex flex-col
-                    bg-[var(--bg-card)] border-l border-[var(--border-subtle)] shadow-2xl
-                    transition-transform duration-300 ease-in-out
-                    ${drawerOpen ? 'translate-x-0' : 'translate-x-full'}`}
-            >
+                {/* Panel */}
+                <aside
+                    className={`fixed top-0 right-0 h-full w-[85vw] max-w-xs sm:w-80 sm:max-w-none z-[80] flex flex-col
+                        bg-[var(--bg-card)] border-l border-[var(--border-subtle)] shadow-2xl
+                        transition-transform duration-300 ease-in-out
+                        ${drawerOpen ? 'translate-x-0' : 'translate-x-full'}`}
+                >
                 {/* Drawer header */}
                 <div className="flex items-center justify-between px-5 py-3.5 border-b border-[var(--border-subtle)] flex-shrink-0">
                     <div className="flex items-center gap-3">
@@ -475,7 +541,7 @@ export function ServicesPageClient() {
                         <p className="text-[9px] font-bold text-[var(--text-secondary)] uppercase tracking-widest">
                             {safeSpecialistPage}/{specialistTotalPages} · {specialists.length} prof.
                         </p>
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-1 overflow-x-auto">
                             <button
                                 onClick={() => setSpecialistPage((p) => Math.max(1, p - 1))}
                                 disabled={safeSpecialistPage === 1}
@@ -506,7 +572,10 @@ export function ServicesPageClient() {
                         </div>
                     </div>
                 )}
-            </aside>
+                </aside>
+                </>,
+                document.getElementById('modal-root')!
+            )}
 
             {/* ── Modals (sin cambios) ─────────────────────────────────────── */}
 

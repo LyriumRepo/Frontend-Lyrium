@@ -6,6 +6,7 @@ import {
   Calendar, Clock, User, Star, Loader2, CheckCircle,
   Search, CreditCard, MessageSquare, X, AlertCircle, Eye, Store,
 } from 'lucide-react';
+import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import { LARAVEL_API_URL } from '@/shared/lib/config/flags';
 import type { BookingResponse } from '@/shared/lib/api/bookingRepository';
 import { BookingTimeline } from '@/shared/components/booking/BookingTimeline';
@@ -66,7 +67,7 @@ function RatingStars({ value }: { value: number }) {
   return (
     <div className="flex items-center gap-0.5">
       {[1, 2, 3, 4, 5].map((n) => (
-        <Star key={n} className={`w-3 h-3 ${n <= Math.round(value) ? 'text-amber-400 fill-amber-400' : 'text-gray-300 dark:text-gray-600'}`} />
+        <Star key={n} className={`w-3 h-3 ${n <= Math.round(value) ? 'text-amber-400 fill-amber-400' : 'text-gray-300 dark:text-[var(--border-subtle)]'}`} />
       ))}
     </div>
   );
@@ -213,7 +214,7 @@ export default function SellerReservasPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="w-10 h-10 animate-spin text-sky-500" />
+        <Loader2 className="w-10 h-10 animate-spin text-sky-500 dark:text-[var(--icons-green)]" />
       </div>
     );
   }
@@ -236,29 +237,29 @@ export default function SellerReservasPage() {
 
       {/* Specialist ratings summary */}
       {specialists.length > 0 && (
-        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 p-5">
-          <h2 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-3">
+        <div className="bg-white dark:bg-[var(--bg-card)] rounded-xl border border-gray-100 dark:border-[var(--border-subtle)] p-5">
+          <h2 className="text-xs font-bold text-gray-400 dark:text-[var(--text-secondary)] uppercase tracking-wide mb-3">
             Calificaciones de especialistas
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {specialists.map(sp => (
-              <div key={sp.id} className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700/50">
-                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900/50 dark:to-blue-900/50 flex items-center justify-center overflow-hidden shrink-0">
+              <div key={sp.id} className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-[var(--bg-secondary)] border border-gray-100 dark:border-[var(--border-subtle)]">
+                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-sky-100 to-blue-100 dark:from-[var(--celeste-500)]/20 dark:to-[var(--celeste-500)]/10 flex items-center justify-center overflow-hidden shrink-0">
                   {sp.foto ? (
                     <img src={sp.foto} alt={sp.nombre_completo} className="object-cover w-full h-full" />
                   ) : (
-                    <User className="w-4 h-4 text-sky-400" />
+                    <User className="w-4 h-4 text-sky-400 dark:text-[var(--icons-green)]" />
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{sp.nombre_completo}</p>
-                  <p className="text-[11px] text-gray-400">{sp.especialidad}</p>
+                  <p className="text-sm font-semibold text-gray-900 dark:text-[var(--text-primary)] truncate">{sp.nombre_completo}</p>
+                  <p className="text-[11px] text-gray-400 dark:text-[var(--text-secondary)]">{sp.especialidad}</p>
                 </div>
                 <div className="text-right shrink-0">
                   <div className="flex items-center gap-1">
                     <RatingStars value={sp.avg_rating} />
                   </div>
-                  <p className="text-[10px] text-gray-400 mt-0.5">
+                  <p className="text-[10px] text-gray-400 dark:text-[var(--text-secondary)] mt-0.5">
                     {sp.total_ratings > 0
                       ? `${sp.avg_rating.toFixed(1)} (${sp.total_ratings})`
                       : 'Sin reseñas'}
@@ -273,19 +274,19 @@ export default function SellerReservasPage() {
       {/* Filters */}
       <div className="flex flex-wrap gap-3">
         <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-[var(--text-secondary)]" />
           <input
             type="text"
             placeholder="Buscar por servicio, cliente, especialista…"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-700 dark:text-gray-200 focus:border-sky-400 focus:ring-2 focus:ring-sky-100 outline-none transition-all"
+            className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] text-sm text-gray-700 dark:text-[var(--text-primary)] focus:border-sky-400 focus:ring-2 focus:ring-sky-100 outline-none transition-all"
           />
         </div>
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm font-semibold text-gray-700 dark:text-gray-200 outline-none focus:border-sky-400"
+          className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] text-sm font-semibold text-gray-700 dark:text-[var(--text-primary)] outline-none focus:border-sky-400"
         >
           <option value="all">Todos los estados</option>
           {Object.entries(STATUS_LABELS).map(([key, { label }]) => (
@@ -297,38 +298,38 @@ export default function SellerReservasPage() {
       {/* Bookings list */}
       {filtered.length === 0 ? (
         <div className="text-center py-16">
-          <Calendar className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-3" />
-          <p className="text-gray-500 dark:text-gray-400 font-semibold">No hay reservas</p>
+          <Calendar className="w-12 h-12 mx-auto text-gray-300 dark:text-[var(--border-subtle)] mb-3" />
+          <p className="text-gray-500 dark:text-[var(--text-secondary)] font-semibold">No hay reservas</p>
         </div>
       ) : (
         <div className="space-y-3">
           {filtered.map((booking) => (
-            <div key={booking.id} className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 p-5">
+            <div key={booking.id} className="bg-white dark:bg-[var(--bg-card)] rounded-xl border border-gray-100 dark:border-[var(--border-subtle)] p-5">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <h3 className="font-bold text-gray-900 dark:text-white text-sm truncate">{booking.service_name}</h3>
+                    <h3 className="font-bold text-gray-900 dark:text-[var(--text-primary)] text-sm truncate">{booking.service_name}</h3>
                     <span className={`shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full ${STATUS_LABELS[booking.status]?.color ?? ''}`}>
                       {STATUS_LABELS[booking.status]?.label ?? booking.status}
                     </span>
                   </div>
 
-                  <div className="flex flex-wrap gap-x-5 gap-y-1.5 text-xs text-gray-600 dark:text-gray-300 mt-2">
+                  <div className="flex flex-wrap gap-x-5 gap-y-1.5 text-xs text-gray-600 dark:text-[var(--text-secondary)] mt-2">
                     <span className="flex items-center gap-1.5">
-                      <User className="w-3.5 h-3.5 text-sky-400" />
+                      <User className="w-3.5 h-3.5 text-sky-400 dark:text-[var(--icons-green)]" />
                       {booking.customer_name}
                     </span>
                     <span className="flex items-center gap-1.5">
-                      <Calendar className="w-3.5 h-3.5 text-sky-400" />
+                      <Calendar className="w-3.5 h-3.5 text-sky-400 dark:text-[var(--icons-green)]" />
                       {booking.date && formatDate(booking.date)}
                     </span>
                     <span className="flex items-center gap-1.5">
-                      <Clock className="w-3.5 h-3.5 text-sky-400" />
+                      <Clock className="w-3.5 h-3.5 text-sky-400 dark:text-[var(--icons-green)]" />
                       {booking.start_time} - {booking.end_time}
                     </span>
                     {booking.specialist && (
                       <span className="flex items-center gap-1.5">
-                        <User className="w-3.5 h-3.5 text-sky-400" />
+                        <User className="w-3.5 h-3.5 text-sky-400 dark:text-[var(--icons-green)]" />
                         {booking.specialist.name}
                       </span>
                     )}
@@ -336,12 +337,12 @@ export default function SellerReservasPage() {
 
                   <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-xs">
                     {booking.payment_amount > 0 && (
-                      <span className="font-semibold text-gray-800 dark:text-gray-200">
+                      <span className="font-semibold text-gray-800 dark:text-[var(--text-primary)]">
                         S/ {booking.payment_amount.toFixed(2)}
                       </span>
                     )}
                     {booking.payment_method && (
-                      <span className="text-gray-400 flex items-center gap-1">
+                      <span className="text-gray-400 dark:text-[var(--text-secondary)] flex items-center gap-1">
                         <CreditCard className="w-3 h-3" />
                         {booking.payment_method}
                       </span>
@@ -359,7 +360,7 @@ export default function SellerReservasPage() {
                   </div>
 
                   {booking.notes && (
-                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-2 flex items-start gap-1.5">
+                    <p className="text-xs text-gray-400 dark:text-[var(--text-secondary)] mt-2 flex items-start gap-1.5">
                       <MessageSquare className="w-3 h-3 mt-0.5 shrink-0" />
                       {booking.notes}
                     </p>

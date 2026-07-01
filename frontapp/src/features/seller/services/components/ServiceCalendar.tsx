@@ -378,13 +378,13 @@ export default function ServiceCalendar({
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-3 md:p-4">
-      <div className="bg-[var(--bg-card)] rounded-[2rem] w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col border border-[var(--border-subtle)] shadow-2xl">
+    <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-3 md:p-4">
+      <div className="bg-[var(--bg-card)] rounded-none sm:rounded-[2rem] w-full h-full sm:h-auto sm:max-w-6xl sm:max-h-[90vh] overflow-hidden flex flex-col border-0 sm:border border-[var(--border-subtle)] shadow-2xl">
 
         {/* Header */}
-        <div className="flex items-center justify-between px-5 md:px-8 py-4 md:py-5 border-b border-[var(--border-subtle)] flex-shrink-0">
-          <div>
-            <h2 className="text-base md:text-lg font-black text-[var(--text-primary)] tracking-tight">
+        <div className="flex items-center justify-between gap-3 px-4 sm:px-5 md:px-8 py-3.5 sm:py-4 md:py-5 border-b border-[var(--border-subtle)] flex-shrink-0">
+          <div className="min-w-0">
+            <h2 className="text-sm sm:text-base md:text-lg font-black text-[var(--text-primary)] tracking-tight truncate">
               {service.denominacion}
             </h2>
             <div className="mt-0.5 flex flex-wrap items-center gap-2">
@@ -495,17 +495,17 @@ export default function ServiceCalendar({
           </div>
           <button
             onClick={onClose}
-            className="w-9 h-9 rounded-xl bg-[var(--bg-secondary)] flex items-center justify-center hover:bg-rose-500/10 hover:text-rose-500 transition-all"
+            className="w-8 h-8 sm:w-9 sm:h-9 flex-shrink-0 rounded-xl bg-[var(--bg-secondary)] flex items-center justify-center hover:bg-rose-500/10 hover:text-rose-500 transition-all"
           >
             <Icon name="X" className="w-4 h-4" />
           </button>
         </div>
 
         {/* Body */}
-        <div className="flex flex-1 overflow-hidden">
+        <div className="flex flex-col md:flex-row flex-1 overflow-y-auto md:overflow-hidden">
 
           {/* Calendario */}
-          <div className="flex-1 px-4 md:px-6 py-4 md:py-5 overflow-hidden flex flex-col gap-3 md:gap-4">
+          <div className="flex-1 px-4 md:px-6 py-4 md:py-5 flex flex-col gap-3 md:gap-4 md:overflow-hidden">
 
             {/* Month nav */}
             <div className="flex items-center justify-between">
@@ -607,9 +607,9 @@ export default function ServiceCalendar({
           </div>
 
           {/* Right panel */}
-          <div className="w-[320px] lg:w-[340px] flex-shrink-0 border-l border-[var(--border-subtle)] flex flex-col overflow-hidden bg-[var(--bg-card)]">
+          <div className="w-full md:w-[320px] lg:w-[340px] flex-shrink-0 border-t md:border-t-0 md:border-l border-[var(--border-subtle)] flex flex-col md:overflow-hidden bg-[var(--bg-card)]">
             {!selectedDate ? (
-              <div className="flex-1 flex flex-col items-center justify-center gap-4 p-8 text-center">
+              <div className="flex-1 flex flex-col items-center justify-center gap-4 p-6 md:p-8 text-center">
                 <div className="w-14 h-14 rounded-[1.5rem] bg-[var(--bg-secondary)] flex items-center justify-center border border-[var(--border-subtle)]">
                   <Icon name="CalendarSearch" className="w-6 h-6 text-[var(--text-secondary)]" />
                 </div>
@@ -623,7 +623,7 @@ export default function ServiceCalendar({
                 </div>
               </div>
             ) : (
-              <div className="flex-1 overflow-hidden flex flex-col">
+              <div className="flex-1 flex flex-col md:overflow-hidden">
 
                 {/* Selected day header */}
                 <div className={`px-5 py-4 border-b border-[var(--border-subtle)] flex-shrink-0 ${
@@ -653,7 +653,7 @@ export default function ServiceCalendar({
                   )}
                 </div>
 
-                <div className="flex-1 overflow-hidden flex flex-col">
+                <div className="flex-1 flex flex-col md:overflow-hidden">
                   <div className="p-4 pb-3 flex-shrink-0">
                     <div className="flex items-center justify-between gap-2 mb-3">
                       <button
@@ -712,7 +712,7 @@ export default function ServiceCalendar({
                   </div>
 
                   {currentBlock ? (
-                    <div className="flex-1 overflow-hidden flex flex-col border-t border-[var(--border-subtle)]">
+                    <div className="flex-1 flex flex-col border-t border-[var(--border-subtle)] md:overflow-hidden">
                       <div className="px-4 pt-4 pb-2 flex-shrink-0">
                         <p className="text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest px-1">
                           Sesiones · {currentBlock.inicio}–{currentBlock.fin}
@@ -829,8 +829,8 @@ export default function ServiceCalendar({
 
       {/* Detail modal */}
       {selectedAppointment && (
-        <div className="fixed inset-0 z-[100000] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-          <div className="w-full max-w-lg rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--bg-card)] shadow-2xl overflow-hidden">
+        <div className="fixed inset-0 z-[100000] flex items-center justify-center bg-black/70 backdrop-blur-sm p-3 sm:p-4">
+          <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-[1.5rem] sm:rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--bg-card)] shadow-2xl">
 
             <div className={`flex items-center justify-between px-5 py-4 border-b border-[var(--border-subtle)] ${
               detailApptIsPast ? 'bg-emerald-500/5' : ''
