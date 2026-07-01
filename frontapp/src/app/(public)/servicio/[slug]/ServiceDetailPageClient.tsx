@@ -42,8 +42,8 @@ import {
 } from '@/shared/lib/api/serviRepository';
 import { useIzipay } from '@/features/public/checkout/hooks/useIzipay';
 import { useAuth } from '@/shared/lib/context/AuthContext';
+import { useCarritoStore } from '@/store/carritoStore';
 import { LARAVEL_API_URL } from '@/shared/lib/config/flags';
-import TopMedalBadge from '@/components/ui/TopMedalBadge';
 import { ServiceReviews, ServiceReview, ReviewStats } from './ServiceReviews';
 import {
   getDepartamentos,
@@ -483,6 +483,7 @@ function BookingModal({
 
   const { isAuthenticated } = useAuth();
   const router = useRouter();
+  const incrementServiceHoldCount = useCarritoStore((s) => s.incrementServiceHoldCount);
 
   const stopPolling = useCallback(() => {
     if (pollRef.current) {
@@ -661,6 +662,7 @@ function BookingModal({
       });
       if (result.hold) holdIdRef.current = result.hold.id;
       setAddedToCart(true);
+      incrementServiceHoldCount();
       return true;
     } catch (e: any) {
       setPaymentError(e.message ?? 'Error al agregar al carrito');
@@ -1535,7 +1537,6 @@ function RelatedServiceCard({ s }: { s: any }) {
               </div>
             );
           })()}
-          <TopMedalBadge entityType="service" entityId={s.id} size="sm" className="absolute bottom-3 right-3" />
         </div>
         <div className="p-4">
           <p className="text-sm font-semibold text-gray-800 dark:text-[var(--text-primary)] line-clamp-2 leading-tight group-hover:text-cyan-600 dark:text-white transition-colors">
@@ -1782,6 +1783,7 @@ function RelatedServices({
 // ─── Componente principal ─────────────────────────────────────────────────────
 
 export function ServiceDetailPageClient({ service }: Props) {
+  const router = useRouter();
   const [bookingOpen, setBookingOpen] = useState(false);
   const [profileSpecialist, setProfileSpecialist] =
     useState<ServiceSpecialist | null>(null);
@@ -1836,9 +1838,13 @@ export function ServiceDetailPageClient({ service }: Props) {
           <span className="text-gray-300 dark:text-[var(--text-secondary)]">
             /
           </span>
-          <Link href="/servicios" className="text-cyan-600 dark:text-white hover:underline">
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="text-cyan-600 dark:text-white hover:underline"
+          >
             Servicios
-          </Link>
+          </button>
           <span className="text-gray-300 dark:text-[var(--text-secondary)]">
             /
           </span>
@@ -2028,7 +2034,7 @@ export function ServiceDetailPageClient({ service }: Props) {
             {/* Store */}
             <Link href={`/tienda/${service.store_id}`} className="block">
               <div className="bg-white dark:bg-[var(--bg-card)] rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)] p-4 hover:border-cyan-400/30 transition-colors flex items-center gap-3 shadow-sm">
-                <div className="w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center shrink-0 overflow-hidden relative">
+                <div className="w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center shrink-0 overflow-hidden">
                   {service.store_logo ? (
                     <Image
                       src={service.store_logo}
@@ -2040,7 +2046,6 @@ export function ServiceDetailPageClient({ service }: Props) {
                   ) : (
                     <MapPin className="w-5 h-5 text-cyan-600 dark:text-white" />
                   )}
-                  <TopMedalBadge entityType="store" entityId={service.store_id} size="lg" className="absolute bottom-3 right-3" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs text-gray-400">Tienda</p>

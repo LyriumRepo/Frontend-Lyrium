@@ -15,23 +15,28 @@ function getAuthHeaders(): Record<string, string> {
   return headers;
 }
 
-async function apiCall<T = unknown>(endpoint: string, options?: RequestInit): Promise<T> {
+async function apiCall<T = unknown>(endpoint: string, options?: RequestInit, timeoutMs = 5000): Promise<T> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const res = await fetch(API_BASE + endpoint, {
+      signal: controller.signal,
       headers: getAuthHeaders(),
       ...options,
     });
+    clearTimeout(timer);
     const text = await res.text();
     try {
       return JSON.parse(text) as T;
     } catch {
-      console.error(`API Error [${endpoint}] — Respuesta no es JSON:\n${text}`);
-      return { success: false, message: 'Error del servidor. Ver consola para detalles.' } as T;
+      return { success: false, message: 'Error del servidor.' } as T;
     }
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Error desconocido';
-    console.error(`API Error [${endpoint}]:`, err);
-    return { success: false, message } as T;
+    clearTimeout(timer);
+    if (err instanceof Error && err.name === 'AbortError') {
+      return { success: false, message: 'timeout' } as T;
+    }
+    return { success: false, message: err instanceof Error ? err.message : 'Error desconocido' } as T;
   }
 }
 
@@ -74,10 +79,11 @@ export const createPlanRequest = async (payload: {
 };
 
 export const createIzipayPlanSession = async (payload: {
-  plan_id: number;
+  plan_id?: number;
+  plan_slug?: string;
   months: number;
 }) => {
-  return apiPost<{
+  return apiCall<{
     success: boolean;
     form_token?: string;
     public_key?: string;
@@ -86,7 +92,7 @@ export const createIzipayPlanSession = async (payload: {
     amount?: number;
     mode?: 'mock' | 'izipay';
     message?: string;
-  }>('/payments/izipay/plan-session', payload);
+  }>('/payments/izipay/plan-session', { method: 'POST', body: JSON.stringify(payload) }, 30000);
 };
 
 export const getMyPlanRequest = async () => {

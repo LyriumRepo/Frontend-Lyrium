@@ -16,6 +16,7 @@ function mapToVoucher(inv: any): Voucher {
         store_ruc: inv.storeRuc ?? inv.store_ruc ?? '',
         order_id: inv.orderId ?? inv.order_id ?? '',
         amount: inv.total ?? inv.amount ?? 0,
+        store_amount: inv.storeAmount ?? inv.store_amount,
         order_total: inv.orderTotal ?? inv.order_total ?? inv.total ?? 0,
         commission_rate: inv.commissionRate ?? inv.commission_rate ?? null,
         commission_amount: inv.commissionAmount ?? inv.commission_amount ?? null,

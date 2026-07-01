@@ -155,7 +155,7 @@ export function HelpdeskPageClient() {
         <button
           onClick={() => setShowLegend(true)}
           title="¿Qué puedo hacer aquí?"
-          className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl bg-white dark:bg-[var(--bg-secondary)] border border-[var(--border-subtle)] text-gray-500 dark:text-[var(--text-secondary)] hover:text-[var(--turquesa-500)] dark:hover:text-[var(--icons-green)] hover:border-[var(--turquesa-500)] dark:hover:border-[var(--icons-green)] transition-all shadow-sm shrink-0"
+          className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--icons-green)] hover:border-[var(--icons-green)] transition-all shadow-sm shrink-0"
         >
           <Info className="w-4 h-4" />
         </button>
@@ -167,7 +167,7 @@ export function HelpdeskPageClient() {
         style={{ background: 'linear-gradient(160deg, color-mix(in srgb,#9cb04e 5%,var(--bg-card)) 0%, var(--bg-card) 50%, color-mix(in srgb,#499bbf 4%,var(--bg-card)) 100%)' }}
       >
         {/* Columna izquierda: lista de tickets — oculta en móvil cuando hay chat abierto */}
-        <div className={`flex flex-col flex-shrink-0 border-r border-[var(--border-subtle)] overflow-hidden sm:w-[200px] sm:min-w-[200px] md:w-[220px] md:min-w-[220px] lg:w-60 xl:w-72 ${mobileShowChat ? 'hidden sm:flex' : 'w-full'}`}>
+        <div className={`flex flex-col flex-shrink-0 border-r border-[var(--border-subtle)] overflow-hidden transition-all duration-300 ease-in-out sm:w-[200px] sm:min-w-[200px] md:w-[220px] md:min-w-[220px] lg:w-60 xl:w-72 sm:opacity-100 ${mobileShowChat ? 'w-0 min-w-0 opacity-0 pointer-events-none' : 'w-full opacity-100 pointer-events-auto'}`}>
           <div className="h-1 w-full shrink-0 bg-gradient-to-r from-[#9cb04e] via-[#64c695] to-[#499bbf]" />
           {loading ? (
             <div className="flex-1 flex items-center justify-center">
@@ -191,7 +191,7 @@ export function HelpdeskPageClient() {
         </div>
 
         {/* Columna derecha: chat — ocupa toda la pantalla en móvil */}
-        <div className={`flex flex-col flex-1 min-w-0 min-h-0 overflow-hidden ${!mobileShowChat ? 'hidden sm:flex' : 'flex'}`}>
+        <div className={`flex flex-col min-w-0 min-h-0 overflow-hidden transition-all duration-300 ease-in-out sm:flex-1 sm:opacity-100 ${!mobileShowChat ? 'w-0 min-w-0 opacity-0 pointer-events-none' : 'flex-1 opacity-100 pointer-events-auto'}`}>
           <div className="h-1 w-full shrink-0 bg-gradient-to-r from-[#9cb04e] via-[#64c695] to-[#499bbf]" />
           {/* ChatView o estado vacío — flex-1 min-h-0 para que el área de mensajes haga scroll sin bloquear */}
           <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
@@ -230,12 +230,12 @@ export function HelpdeskPageClient() {
 
       {showLegend && (
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-end sm:items-center justify-center p-4 sm:p-4"
+          className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-end sm:items-center justify-center p-4 pt-[calc(60px+1rem)] sm:pt-4"
           onClick={() => setShowLegend(false)}
         >
           {/* Bottom sheet en móvil, card centrado en sm+ */}
           <div
-            className="w-full max-w-sm sm:max-w-md bg-white dark:bg-[var(--bg-secondary)] rounded-[2rem] shadow-2xl overflow-hidden max-h-[80vh] flex flex-col"
+            className="w-full max-w-sm sm:max-w-md bg-[var(--bg-card)] rounded-[2rem] shadow-2xl overflow-hidden max-h-[80vh] flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header — mismos colores que HelpPageClient */}
@@ -251,7 +251,7 @@ export function HelpdeskPageClient() {
                     <p className="text-[10px] font-bold text-white/70 uppercase tracking-[0.2em]">¿Qué puedes hacer aquí?</p>
                   </div>
                 </div>
-                <button onClick={() => setShowLegend(false)} className="min-w-[44px] min-h-[44px] rounded-full bg-black/10 flex items-center justify-center hover:bg-black/20">
+                <button onClick={() => setShowLegend(false)} aria-label="Cerrar leyenda" className="min-w-[44px] min-h-[44px] rounded-full bg-black/10 flex items-center justify-center hover:bg-black/20">
                   <X className="w-5 h-5 text-white" />
                 </button>
               </div>
@@ -265,18 +265,18 @@ export function HelpdeskPageClient() {
                 { icon: AlertCircle, title: 'Asignar y escalar', desc: 'Asigna tickets a administradores específicos o escálalos a un nivel superior cuando requieren atención prioritaria.' },
                 { icon: Settings2, title: 'Prioridad y estado', desc: 'Actualiza la prioridad (Baja, Media, Alta, Crítica) y el estado del ticket (abierto, en proceso, resuelto, cerrado) en tiempo real.' },
               ].map((item) => (
-                <div key={item.title} className="flex items-start gap-4 p-4 bg-gray-50 dark:bg-[var(--bg-muted)]/50 rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)]">
-                  <div className="w-10 h-10 rounded-xl bg-white dark:bg-[var(--bg-secondary)] flex items-center justify-center shadow-sm border border-gray-100 dark:border-[var(--border-subtle)] shrink-0">
-                    <item.icon className="w-5 h-5 text-[var(--turquesa-500)] dark:text-[var(--icons-green)]" />
+                <div key={item.title} className="flex items-start gap-4 p-4 bg-[var(--bg-muted)]/50 rounded-2xl border border-[var(--border-subtle)]">
+                  <div className="w-10 h-10 rounded-xl bg-[var(--bg-card)] flex items-center justify-center shadow-sm border border-[var(--border-subtle)] shrink-0">
+                    <item.icon className="w-5 h-5 text-[var(--icons-green)]" />
                   </div>
                   <div>
-                    <p className="font-black text-sm text-gray-800 dark:text-[var(--text-primary)] mb-0.5">{item.title}</p>
-                    <p className="text-xs text-gray-500 dark:text-[var(--text-muted)] leading-relaxed">{item.desc}</p>
+                    <p className="font-black text-sm text-[var(--text-primary)] mb-0.5">{item.title}</p>
+                    <p className="text-xs text-[var(--text-muted)] leading-relaxed">{item.desc}</p>
                   </div>
                 </div>
               ))}
               <div className="flex justify-end pt-2">
-                <button onClick={() => setShowLegend(false)} className="px-6 py-3 rounded-2xl bg-gray-100 dark:bg-[var(--bg-muted)] text-gray-600 dark:text-[var(--text-primary)] font-black text-xs uppercase tracking-widest hover:bg-gray-200 dark:hover:bg-[#2A3F33] transition-all">
+                <button onClick={() => setShowLegend(false)} className="px-6 py-3 rounded-2xl bg-[var(--bg-muted)] text-[var(--text-primary)] font-black text-xs uppercase tracking-widest hover:bg-[var(--bg-hover)] transition-all">
                   Cerrar
                 </button>
               </div>

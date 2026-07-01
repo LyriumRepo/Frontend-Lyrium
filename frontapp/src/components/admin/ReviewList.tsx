@@ -9,7 +9,7 @@ import DataTable, { Column } from '@/components/ui/DataTable';
 const renderStars = (rating: number) => (
     <div className="flex gap-0.5" role="img" aria-label={`${rating} de 5 estrellas`}>
         {[...Array(5)].map((_, i) => (
-            <Icon key={`star-${i}`} name="Star" className={`w-3 h-3 ${i < rating ? 'text-amber-400 fill-amber-400' : 'text-gray-200'}`} aria-hidden="true" />
+            <Icon key={`star-${i}`} name="Star" className={`w-3 h-3 ${i < rating ? 'text-[var(--color-warning)] fill-[var(--color-warning)]' : 'text-gray-200'}`} aria-hidden="true" />
         ))}
     </div>
 );
@@ -20,8 +20,8 @@ const columns: Column<ProductReview>[] = [
         header: 'Usuario',
         render: (r) => (
             <div className="flex flex-col">
-                <span className="text-sm font-black text-gray-900">{r.reviewer}</span>
-                <span className="text-[10px] text-gray-400 font-bold uppercase">{r.reviewer_email}</span>
+                <span className="text-sm font-black text-[var(--text-primary)]">{r.reviewer}</span>
+                <span className="text-[10px] text-[var(--text-muted)] font-bold uppercase">{r.reviewer_email}</span>
             </div>
         )
     },
@@ -33,13 +33,13 @@ const columns: Column<ProductReview>[] = [
     {
         key: 'review',
         header: 'Comentario',
-        render: (r) => <span className="text-xs text-gray-500 line-clamp-2 max-w-[300px]">{r.review}</span>
+        render: (r) => <span className="text-xs text-[var(--text-secondary)] line-clamp-2 max-w-[300px]">{r.review}</span>
     },
     {
         key: 'date_created',
         header: 'Fecha',
         render: (r) => (
-            <span className="text-xs font-bold text-gray-400">
+            <span className="text-xs font-bold text-[var(--text-muted)]">
                 {new Date(r.date_created).toLocaleDateString('es-ES')}
             </span>
         )
@@ -51,13 +51,13 @@ const columns: Column<ProductReview>[] = [
         render: () => (
             <div className="flex items-center justify-end gap-2">
                 <button 
-                    className="p-2 rounded-xl bg-gray-50 text-gray-400 hover:bg-brand-sky/10 hover:text-brand-sky transition-all active:scale-90"
+                    className="p-2 rounded-xl bg-gray-50 text-[var(--text-muted)] hover:bg-brand-sky/10 hover:text-brand-sky transition-all active:scale-90"
                     aria-label="Ver detalles de la reseña"
                 >
                     <Icon name="Star" className="w-5 h-5" />
                 </button>
                 <button 
-                    className="p-2 rounded-xl bg-gray-50 text-gray-400 hover:bg-rose-50 hover:text-rose-500 transition-all active:scale-90"
+                    className="p-2 rounded-xl bg-gray-50 text-[var(--text-muted)] hover:bg-rose-50 hover:text-rose-500 transition-all active:scale-90"
                     aria-label="Eliminar reseña"
                 >
                     <Icon name="Trash2" className="w-5 h-5" />

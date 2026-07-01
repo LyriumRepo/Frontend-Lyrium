@@ -28,8 +28,10 @@ export default function NotificationToast() {
   const [items, setItems] = useState<ToastItem[]>([]);
   const lastIdRef = useRef<string | null>(null);
   const isSeededRef = useRef(false);
+  const timersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
   const remove = useCallback((id: string) => {
+    timersRef.current.delete(id);
     setItems(prev => prev.map(i => i.id === id ? { ...i, exiting: true } : i));
     setTimeout(() => {
       setItems(prev => prev.filter(i => i.id !== id));
@@ -64,8 +66,10 @@ export default function NotificationToast() {
 
     setItems(prev => [item, ...prev].slice(0, 3));
 
+    // Each notification gets its own independent timer stored in a Map,
+    // so arriving notifications never cancel each other's auto-dismiss.
     const timer = setTimeout(() => remove(item.id), 5000);
-    return () => clearTimeout(timer);
+    timersRef.current.set(item.id, timer);
   }, [filteredNotifications, remove]);
 
   const getIcon = (level: string) => {

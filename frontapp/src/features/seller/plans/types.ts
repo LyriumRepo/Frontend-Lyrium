@@ -56,6 +56,7 @@ export interface PlanData {
   isActive?: boolean;
   orden?: number;
   commission_rate?: number;
+  numericId?: number;
 }
 
 export interface PlansMap {

@@ -1319,7 +1319,7 @@ export default function CustomerOrdersPage() {
           onClick={closeModal}
         >
           <div
-            className="bg-white dark:bg-[var(--bg-secondary)] w-full lg:w-[700px] max-h-[90vh] my-auto rounded-[2.5rem] overflow-hidden shadow-[-40px_0_100px_rgba(0,0,0,0.1)] border border-white/20 relative flex flex-col transition-all duration-700"
+            className="bg-white dark:bg-[var(--bg-secondary)] w-full lg:w-[700px] max-h-[80vh] rounded-[2.5rem] overflow-hidden shadow-[-40px_0_100px_rgba(0,0,0,0.1)] border border-white/20 relative flex flex-col transition-all duration-700"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="bg-gradient-to-r from-sky-500 via-sky-500 to-sky-300 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-6 text-white relative flex-shrink-0">
@@ -1472,7 +1472,7 @@ export default function CustomerOrdersPage() {
               {selectedOrder.estado !== 'cancelado' && (
                 <button
                   onClick={() => downloadBoletaCompra(selectedOrder)}
-                  className="w-full py-5 rounded-2xl bg-gradient-to-r from-amber-400 to-orange-500 dark:from-[var(--brand-green)] dark:to-[var(--brand-green-hover)] text-white font-black text-xs uppercase tracking-[0.2em] hover:shadow-lg hover:shadow-amber-200 dark:hover:shadow-[var(--brand-green)]/30 transition-all flex items-center justify-center gap-3"
+                  className="w-full py-5 rounded-2xl bg-gradient-to-r from-sky-500 to-sky-600 dark:from-[var(--brand-green)] dark:to-[var(--brand-green-hover)] text-white font-black text-xs uppercase tracking-[0.2em] hover:shadow-lg hover:shadow-sky-200 dark:hover:shadow-[var(--brand-green)]/30 transition-all flex items-center justify-center gap-3"
                 >
                   <Icon name="Download" className="w-5 h-5" />
                   Descargar Boleta de Compra
@@ -1489,7 +1489,7 @@ export default function CustomerOrdersPage() {
                     alert('No se pudo abrir el chat con el vendedor. Intenta nuevamente.');
                   }
                 }}
-                className="w-full py-5 rounded-2xl bg-gradient-to-r from-amber-400 to-orange-500 dark:from-[var(--brand-green)] dark:to-[var(--brand-green-hover)] text-white font-black text-xs uppercase tracking-[0.2em] hover:shadow-lg hover:shadow-amber-200 transition-all flex items-center justify-center gap-3"
+                className="w-full py-5 rounded-2xl bg-gradient-to-r from-sky-500 to-sky-600 dark:from-[var(--brand-green)] dark:to-[var(--brand-green-hover)] text-white font-black text-xs uppercase tracking-[0.2em] hover:shadow-lg hover:shadow-sky-200 dark:hover:shadow-[var(--brand-green)]/30 transition-all flex items-center justify-center gap-3"
               >
                 <Icon name="MessageCircle" className="w-5 h-5" />
                 Pedir Comprobante al Vendedor

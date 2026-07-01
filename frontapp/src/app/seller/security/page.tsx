@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Icon from "@/components/ui/Icon";
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import { ChangePasswordForm } from "@/features/auth/change-password";
+import ActiveSessionsList from "@/features/security/components/ActiveSessionsList";
 
 export default function SellerSecurityPage() {
   const { isAuthenticated, loading } = useAuth();
@@ -124,6 +125,8 @@ export default function SellerSecurityPage() {
                 </li>
               ))}
             </ul>
+
+            <ActiveSessionsList />
           </div>
         </div>
       </div>

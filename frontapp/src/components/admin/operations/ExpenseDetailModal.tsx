@@ -85,12 +85,12 @@ function Row({
 }) {
   if (!value && value !== 0) return null;
   return (
-    <div className="flex justify-between items-start gap-6 py-2.5 border-b border-[#E1F5EE] dark:border-[var(--border-subtle)] last:border-0">
-      <span className="text-[12px] text-[#0F6E56] dark:text-[var(--text-secondary)] shrink-0 font-medium">
+    <div className="flex justify-between items-start gap-6 py-2.5 border-b border-[var(--border-subtle)] last:border-0">
+      <span className="text-[12px] text-[var(--text-secondary)] shrink-0 font-medium">
         {label}
       </span>
       <span
-        className={`text-[12px] text-[#085041] dark:text-[var(--text-primary)] text-right ${mono ? 'font-mono' : 'font-medium'}`}
+        className={`text-[12px] text-[var(--text-primary)] text-right ${mono ? 'font-mono' : 'font-medium'}`}
       >
         {value}
       </span>
@@ -111,23 +111,23 @@ function Section({
 }) {
   const styles = {
     teal: {
-      header: 'bg-[#E1F5EE] dark:bg-[var(--bg-card)] border-[#9FE1CB] dark:border-[var(--border-default)]',
-      icon: 'text-[#0F6E56] dark:text-[var(--text-secondary)]',
-      title: 'text-[#085041] dark:text-[var(--text-primary)]',
+      header: 'bg-[var(--bg-card)] border-[var(--border-default)]',
+      icon: 'text-[var(--text-secondary)]',
+      title: 'text-[var(--text-primary)]',
     },
     green: {
-      header: 'bg-[#EAF3DE] dark:bg-[var(--bg-card)]/70 border-[#C0DD97] dark:border-[var(--border-default)]/50',
-      icon: 'text-[#3B6D11] dark:text-[var(--text-secondary)]',
-      title: 'text-[#27500A] dark:text-[var(--text-primary)]',
+      header: 'bg-[var(--bg-card)]/70 border-[var(--border-default)]/50',
+      icon: 'text-[var(--text-secondary)]',
+      title: 'text-[var(--text-primary)]',
     },
     mint: {
-      header: 'bg-[#F0FBF7] dark:bg-[var(--bg-card)]/50 border-[#9FE1CB] dark:border-[var(--border-default)]',
-      icon: 'text-[#1D9E75] dark:text-[var(--text-secondary)]',
-      title: 'text-[#0F6E56] dark:text-[var(--text-secondary)]',
+      header: 'bg-[var(--bg-card)]/50 border-[var(--border-default)]',
+      icon: 'text-[var(--text-secondary)]',
+      title: 'text-[var(--text-secondary)]',
     },
   }[accent];
   return (
-    <div className="rounded-xl border border-[#9FE1CB] dark:border-[var(--border-default)] overflow-hidden">
+    <div className="rounded-xl border border-[var(--border-default)] overflow-hidden">
       <div
         className={`flex items-center gap-2 px-4 py-2.5 border-b ${styles.header}`}
       >
@@ -154,11 +154,11 @@ function AmountPill({
   return (
     <div className="flex flex-col items-end gap-0.5">
       {label && (
-        <span className="text-[10px] text-[#1D9E75] dark:text-[var(--text-secondary)] uppercase tracking-wide font-medium">
+        <span className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wide font-medium">
           {label}
         </span>
       )}
-      <span className="text-[15px] font-bold text-[#085041] dark:text-[var(--text-primary)] bg-[#E1F5EE] dark:bg-[var(--bg-card)] px-3 py-1 rounded-full">
+      <span className="text-[15px] font-bold text-[var(--text-primary)] bg-[var(--bg-card)] px-3 py-1 rounded-full">
         S/{' '}
         {Number(amount).toLocaleString('es-PE', { minimumFractionDigits: 2 })}
       </span>
@@ -168,10 +168,10 @@ function AmountPill({
 
 function StatusIcon({ status }: { status: string }) {
   if (status === 'Pagado')
-    return <CheckCircle2 className="w-4 h-4 text-[#1D9E75] dark:text-[var(--text-secondary)]" />;
+    return <CheckCircle2 className="w-4 h-4 text-[var(--text-secondary)]" />;
   if (status === 'Anulado')
-    return <XCircle className="w-4 h-4 text-[#E24B4A]" />;
-  return <Clock className="w-4 h-4 text-[#BA7517]" />;
+    return <XCircle className="w-4 h-4 text-[var(--color-error)]" />;
+  return <Clock className="w-4 h-4 text-[var(--color-warning)]" />;
 }
 
 function HonorariosContent({
@@ -222,7 +222,7 @@ function HonorariosContent({
           <Row
             label="Neto recibido"
             value={
-              <span className="text-[13px] font-bold text-[#085041] dark:text-[var(--text-primary)]">
+              <span className="text-[13px] font-bold text-[var(--text-primary)]">
                 {fmt(scan.payment.net_amount)}
               </span>
             }
@@ -275,27 +275,27 @@ function FacturaContent({
         )}
       </Section>
       {scan.items && scan.items.length > 0 && (
-        <div className="rounded-xl border border-[#9FE1CB] dark:border-[var(--border-default)] overflow-hidden">
-          <div className="flex items-center gap-2 px-4 py-2.5 bg-[#E1F5EE] dark:bg-[var(--bg-card)] border-b border-[#9FE1CB] dark:border-[var(--border-default)]">
-            <Receipt className="w-3.5 h-3.5 text-[#0F6E56] dark:text-[var(--text-secondary)]" />
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-[#085041] dark:text-[var(--text-primary)]">
+        <div className="rounded-xl border border-[var(--border-default)] overflow-hidden">
+          <div className="flex items-center gap-2 px-4 py-2.5 bg-[var(--bg-card)] border-b border-[var(--border-default)]">
+            <Receipt className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-primary)]">
               Ítems del comprobante
             </span>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="bg-[#F0FBF7] dark:bg-[var(--bg-card)]/50">
-                  <th className="text-left text-[11px] font-semibold text-[#0F6E56] dark:text-[var(--text-secondary)] px-4 py-2.5">
+                <tr className="bg-[var(--bg-card)]/50">
+                  <th className="text-left text-[11px] font-semibold text-[var(--text-secondary)] px-4 py-2.5">
                     Descripción
                   </th>
-                  <th className="text-right text-[11px] font-semibold text-[#0F6E56] dark:text-[var(--text-secondary)] px-4 py-2.5 w-16">
+                  <th className="text-right text-[11px] font-semibold text-[var(--text-secondary)] px-4 py-2.5 w-16">
                     Cant.
                   </th>
-                  <th className="text-right text-[11px] font-semibold text-[#0F6E56] dark:text-[var(--text-secondary)] px-4 py-2.5 w-24">
+                  <th className="text-right text-[11px] font-semibold text-[var(--text-secondary)] px-4 py-2.5 w-24">
                     P. Unit.
                   </th>
-                  <th className="text-right text-[11px] font-semibold text-[#0F6E56] dark:text-[var(--text-secondary)] px-4 py-2.5 w-24">
+                  <th className="text-right text-[11px] font-semibold text-[var(--text-secondary)] px-4 py-2.5 w-24">
                     Total
                   </th>
                 </tr>
@@ -304,18 +304,18 @@ function FacturaContent({
                 {scan.items.map((item, i) => (
                   <tr
                     key={i}
-                    className="border-t border-[#E1F5EE] dark:border-[var(--border-subtle)] hover:bg-[#F0FBF7] dark:hover:bg-[var(--bg-card)]/50 transition-colors"
+                    className="border-t border-[var(--border-subtle)] hover:bg-[var(--bg-card)]/50 transition-colors"
                   >
-                    <td className="px-4 py-2.5 text-[12px] text-[#085041] dark:text-[var(--text-primary)]">
+                    <td className="px-4 py-2.5 text-[12px] text-[var(--text-primary)]">
                       {item.description}
                     </td>
-                    <td className="px-4 py-2.5 text-[12px] text-[#1D9E75] dark:text-[var(--text-secondary)] text-right">
+                    <td className="px-4 py-2.5 text-[12px] text-[var(--text-secondary)] text-right">
                       {item.quantity ?? '—'}
                     </td>
-                    <td className="px-4 py-2.5 text-[12px] text-[#1D9E75] dark:text-[var(--text-secondary)] text-right font-mono">
+                    <td className="px-4 py-2.5 text-[12px] text-[var(--text-secondary)] text-right font-mono">
                       {item.unit_price != null ? `S/ ${item.unit_price}` : '—'}
                     </td>
-                    <td className="px-4 py-2.5 text-[12px] font-bold text-[#085041] dark:text-[var(--text-primary)] text-right font-mono">
+                    <td className="px-4 py-2.5 text-[12px] font-bold text-[var(--text-primary)] text-right font-mono">
                       {item.total != null ? `S/ ${item.total}` : '—'}
                     </td>
                   </tr>
@@ -345,7 +345,7 @@ function FacturaContent({
           <Row
             label="TOTAL A PAGAR"
             value={
-              <span className="text-[14px] font-bold text-[#085041] dark:text-[var(--text-primary)]">
+              <span className="text-[14px] font-bold text-[var(--text-primary)]">
                 {fmt(scan.totals.grand_total)}
               </span>
             }
@@ -386,7 +386,7 @@ function GenericContent({ expense }: { expense: ExpenseWithScan }) {
       </Section>
       {expense.notes && (
         <Section title="Notas" icon={FileText} accent="mint">
-          <div className="py-3 text-[12px] text-[#0F6E56] dark:text-[var(--text-secondary)]">{expense.notes}</div>
+          <div className="py-3 text-[12px] text-[var(--text-secondary)]">{expense.notes}</div>
         </Section>
       )}
     </div>
@@ -426,36 +426,36 @@ function BankStatementContent({ scan }: { scan: ScanData }) {
         <Row label="Saldo final" value={formatVal(closingBalance)} />
         <Row label="Movimientos" value={lines.length.toString()} />
       </Section>
-      <div className="rounded-xl border border-[#9FE1CB] dark:border-[var(--border-default)] overflow-hidden">
-        <div className="flex items-center gap-2 px-4 py-2.5 bg-[#E1F5EE] dark:bg-[var(--bg-card)] border-b border-[#9FE1CB] dark:border-[var(--border-default)]">
-          <Receipt className="w-3.5 h-3.5 text-[#0F6E56] dark:text-[var(--text-secondary)]" />
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-[#085041] dark:text-[var(--text-primary)]">
+      <div className="rounded-xl border border-[var(--border-default)] overflow-hidden">
+        <div className="flex items-center gap-2 px-4 py-2.5 bg-[var(--bg-card)] border-b border-[var(--border-default)]">
+          <Receipt className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-primary)]">
             Operaciones
           </span>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="bg-[#F0FBF7] dark:bg-[var(--bg-card)]/50">
-                <th className="text-left text-[11px] font-semibold text-[#0F6E56] dark:text-[var(--text-secondary)] px-3 py-2">Fecha</th>
-                <th className="text-left text-[11px] font-semibold text-[#0F6E56] dark:text-[var(--text-secondary)] px-3 py-2">Descripción</th>
-                <th className="text-left text-[11px] font-semibold text-[#0F6E56] dark:text-[var(--text-secondary)] px-3 py-2">Med</th>
-                <th className="text-left text-[11px] font-semibold text-[#0F6E56] dark:text-[var(--text-secondary)] px-3 py-2">Hora</th>
-                <th className="text-left text-[11px] font-semibold text-[#0F6E56] dark:text-[var(--text-secondary)] px-3 py-2">Tipo</th>
-                <th className="text-right text-[11px] font-semibold text-[#0F6E56] dark:text-[var(--text-secondary)] px-3 py-2">Monto</th>
-                <th className="text-left text-[11px] font-semibold text-[#0F6E56] dark:text-[var(--text-secondary)] px-3 py-2">Glosario</th>
+              <tr className="bg-[var(--bg-card)]/50">
+                <th className="text-left text-[11px] font-semibold text-[var(--text-secondary)] px-3 py-2">Fecha</th>
+                <th className="text-left text-[11px] font-semibold text-[var(--text-secondary)] px-3 py-2">Descripción</th>
+                <th className="text-left text-[11px] font-semibold text-[var(--text-secondary)] px-3 py-2">Med</th>
+                <th className="text-left text-[11px] font-semibold text-[var(--text-secondary)] px-3 py-2">Hora</th>
+                <th className="text-left text-[11px] font-semibold text-[var(--text-secondary)] px-3 py-2">Tipo</th>
+                <th className="text-right text-[11px] font-semibold text-[var(--text-secondary)] px-3 py-2">Monto</th>
+                <th className="text-left text-[11px] font-semibold text-[var(--text-secondary)] px-3 py-2">Glosario</th>
               </tr>
             </thead>
             <tbody>
               {lines.map((line, i) => (
-                <tr key={i} className="border-t border-[#E1F5EE] dark:border-[var(--border-subtle)] hover:bg-[#F0FBF7] dark:hover:bg-[var(--bg-card)]/50 transition-colors">
-                  <td className="px-3 py-2 text-[12px] text-[#085041] dark:text-[var(--text-primary)] font-mono">{line.date ?? '—'}</td>
-                  <td className="px-3 py-2 text-[12px] text-[#085041] dark:text-[var(--text-primary)] max-w-[180px] truncate" title={line.description}>{line.description ?? '—'}</td>
-                  <td className="px-3 py-2 text-[12px] text-[#1D9E75] dark:text-[var(--text-secondary)]">{line.med ?? '—'}</td>
-                  <td className="px-3 py-2 text-[12px] text-[#1D9E75] dark:text-[var(--text-secondary)] font-mono">{line.hour ?? '—'}</td>
-                  <td className="px-3 py-2 text-[12px] text-[#1D9E75] dark:text-[var(--text-secondary)] font-mono">{line.tipo ?? '—'}</td>
-                  <td className="px-3 py-2 text-[12px] font-bold text-[#085041] dark:text-[var(--text-primary)] text-right">{formatVal(line.amount)}</td>
-                  <td className="px-3 py-2 text-[12px] text-[#0F6E56] dark:text-[var(--text-secondary)] max-w-[140px] truncate" title={line.glossary_description}>{line.glossary_description ?? '—'}</td>
+                <tr key={i} className="border-t border-[var(--border-subtle)] hover:bg-[var(--bg-card)]/50 transition-colors">
+                  <td className="px-3 py-2 text-[12px] text-[var(--text-primary)] font-mono">{line.date ?? '—'}</td>
+                  <td className="px-3 py-2 text-[12px] text-[var(--text-primary)] max-w-[180px] truncate" title={line.description}>{line.description ?? '—'}</td>
+                  <td className="px-3 py-2 text-[12px] text-[var(--text-secondary)]">{line.med ?? '—'}</td>
+                  <td className="px-3 py-2 text-[12px] text-[var(--text-secondary)] font-mono">{line.hour ?? '—'}</td>
+                  <td className="px-3 py-2 text-[12px] text-[var(--text-secondary)] font-mono">{line.tipo ?? '—'}</td>
+                  <td className="px-3 py-2 text-[12px] font-bold text-[var(--text-primary)] text-right">{formatVal(line.amount)}</td>
+                  <td className="px-3 py-2 text-[12px] text-[var(--text-secondary)] max-w-[140px] truncate" title={line.glossary_description}>{line.glossary_description ?? '—'}</td>
                 </tr>
               ))}
             </tbody>
@@ -518,16 +518,16 @@ export function ExpenseDetailModal({
       }}
     >
       <div
-        className="relative w-full max-w-xl max-h-[88vh] flex flex-col rounded-2xl overflow-hidden border border-[#5DCAA5] dark:border-[var(--border-default)] shadow-[0_24px_64px_rgba(4,52,44,0.18)] dark:shadow-[0_24px_64px_rgba(0,0,0,0.4)] [background:linear-gradient(160deg,#F0FBF7_0%,#ffffff_40%)] dark:[background:linear-gradient(160deg,var(--bg-card)_0%,var(--bg-secondary)_40%)]"
+        className="relative w-full max-w-xl max-h-[88vh] flex flex-col rounded-2xl overflow-hidden border border-[var(--border-default)] shadow-[0_24px_64px_rgba(0,0,0,0.15)] bg-[var(--bg-card)]"
       >
         <div
-          className="flex items-start justify-between px-5 pt-5 pb-4 shrink-0 border-b border-[#9FE1CB] dark:border-[var(--border-default)]"
+          className="flex items-start justify-between px-5 pt-5 pb-4 shrink-0 border-b border-[var(--border-default)]"
         >
           <div className="flex flex-col gap-1.5">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-[#1D9E75] dark:text-[var(--text-secondary)] bg-[#E1F5EE] dark:bg-[var(--bg-card)] px-2.5 py-1 rounded-full self-start">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-secondary)] bg-[var(--bg-card)] px-2.5 py-1 rounded-full self-start">
               {typeLabel}
             </span>
-            <span className="text-[12px] font-mono text-[#0F6E56] dark:text-[var(--text-secondary)]">
+            <span className="text-[12px] font-mono text-[var(--text-secondary)]">
               {scan?.document_number ??
                 expense.voucher_number ??
                 expense.receipt_number ??
@@ -539,7 +539,7 @@ export function ExpenseDetailModal({
             <AmountPill amount={mainAmount} label="Total" />
             <div className="flex items-center gap-1.5">
               <StatusIcon status={expense.status} />
-              <span className="text-[11px] font-semibold text-[#0F6E56] dark:text-[var(--text-secondary)]">
+              <span className="text-[11px] font-semibold text-[var(--text-secondary)]">
                 {expense.status}
               </span>
             </div>
@@ -547,25 +547,25 @@ export function ExpenseDetailModal({
 
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 w-7 h-7 inline-flex items-center justify-center rounded-full text-[#1D9E75] dark:text-[var(--text-secondary)] hover:bg-[#E1F5EE] dark:hover:bg-[var(--bg-card)] transition-colors"
+            className="absolute top-4 right-4 w-7 h-7 inline-flex items-center justify-center rounded-full text-[var(--text-secondary)] hover:bg-[var(--bg-card)] transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        <div className="flex items-center gap-4 px-5 py-2.5 bg-[#F0FBF7] dark:bg-[var(--bg-card)]/50 border-b border-[#C0DD97] dark:border-[var(--border-default)]/50 shrink-0">
-          <div className="flex items-center gap-1.5 text-[11px] text-[#1D9E75] dark:text-[var(--text-secondary)]">
+        <div className="flex items-center gap-4 px-5 py-2.5 bg-[var(--bg-card)]/50 border-b border-[var(--border-default)]/50 shrink-0">
+          <div className="flex items-center gap-1.5 text-[11px] text-[var(--text-secondary)]">
             <Calendar className="w-3.5 h-3.5" />
             <span>{scan?.issue_date ?? expense.issued_at ?? '—'}</span>
           </div>
           {expense.paid_at && (
-            <div className="flex items-center gap-1.5 text-[11px] text-[#3B6D11] dark:text-[var(--text-secondary)]">
+            <div className="flex items-center gap-1.5 text-[11px] text-[var(--text-secondary)]">
               <CheckCircle2 className="w-3.5 h-3.5" />
               <span>Pagado {expense.paid_at}</span>
             </div>
           )}
           {expense.registered_by && (
-            <div className="flex items-center gap-1.5 text-[11px] text-[#1D9E75] dark:text-[var(--text-secondary)] ml-auto">
+            <div className="flex items-center gap-1.5 text-[11px] text-[var(--text-secondary)] ml-auto">
               <User className="w-3.5 h-3.5" />
               <span>{expense.registered_by.name}</span>
             </div>
@@ -594,9 +594,9 @@ export function ExpenseDetailModal({
         </div>
 
         <div
-          className="flex items-center justify-between px-5 py-3.5 shrink-0 border-t border-[#9FE1CB] dark:border-[var(--border-default)] bg-[#F0FBF7] dark:bg-[var(--bg-card)]/50"
+          className="flex items-center justify-between px-5 py-3.5 shrink-0 border-t border-[var(--border-default)] bg-[var(--bg-card)]/50"
         >
-          <span className="text-[11px] text-[#1D9E75] dark:text-[var(--text-secondary)]">
+          <span className="text-[11px] text-[var(--text-secondary)]">
             Registrado{' '}
             {new Date(expense.created_at).toLocaleDateString('es-PE')}
           </span>
@@ -606,7 +606,7 @@ export function ExpenseDetailModal({
                 href={expense.file_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-[12px] font-medium text-[#085041] dark:text-[var(--text-primary)] bg-[#E1F5EE] dark:bg-[var(--bg-card)] hover:bg-[#9FE1CB] dark:hover:bg-[var(--bg-muted)] px-3.5 py-1.5 rounded-lg transition-colors border border-[#9FE1CB] dark:border-[var(--border-default)]"
+                className="inline-flex items-center gap-1.5 text-[12px] font-medium text-[var(--text-primary)] bg-[var(--bg-card)] hover:bg-[var(--bg-muted)] px-3.5 py-1.5 rounded-lg transition-colors border border-[var(--border-default)]"
               >
                 <ExternalLink className="w-3.5 h-3.5" />
                 Ver PDF original
@@ -614,7 +614,7 @@ export function ExpenseDetailModal({
             )}
             <button
               onClick={onClose}
-              className="text-[12px] font-medium text-[#0F6E56] dark:text-[var(--text-secondary)] hover:bg-[#E1F5EE] dark:hover:bg-[var(--bg-card)] px-3.5 py-1.5 rounded-lg transition-colors border border-[#9FE1CB] dark:border-[var(--border-default)]"
+              className="text-[12px] font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-card)] px-3.5 py-1.5 rounded-lg transition-colors border border-[var(--border-default)]"
             >
               Cerrar
             </button>

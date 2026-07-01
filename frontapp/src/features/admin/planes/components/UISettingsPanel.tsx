@@ -64,7 +64,7 @@ export default function UISettingsPanel({ colors: c, onChange, onSave, onReset }
         </div>
 
         <div className="mt-5 flex gap-3">
-          <button className="px-6 py-3 border-none bg-blue-500 text-white rounded-xl text-sm font-bold cursor-pointer transition-all duration-300 hover:bg-blue-600 hover:-translate-y-0.5"
+          <button className="px-6 py-3 border-none bg-gradient-to-r from-sky-500 to-sky-400 dark:from-emerald-700 dark:to-teal-600 text-white rounded-xl text-sm font-bold cursor-pointer transition-all duration-300 shadow-lg shadow-sky-500/25 dark:shadow-emerald-900/25 hover:shadow-xl hover:-translate-y-0.5"
             onClick={onSave}>Guardar Colores</button>
           <button className="px-6 py-3 border-2 border-gray-200 dark:border-[var(--border-subtle)] bg-transparent text-gray-400 dark:text-[var(--text-placeholder)] rounded-xl text-sm font-semibold cursor-pointer transition-all duration-300 hover:border-gray-800 dark:hover:border-[var(--text-primary)] hover:text-gray-800 dark:hover:text-[var(--text-primary)]"
             onClick={onReset}>Restablecer</button>

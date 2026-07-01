@@ -27,10 +27,11 @@ const CATEGORY_LABELS: Record<TicketCategory, string> = {
     negativo:    'Comentario Negativo',
     informacion: 'Solicitud de Información',
     positivo:    'Comentario Positivo',
+    payments:    'Pagos y Facturación',
 };
 
 const PRIORITY_MAP: Record<string, string> = {
-    critico: 'critica', tecnico: 'media', negativo: 'media', informacion: 'baja', positivo: 'baja',
+    critico: 'critica', tecnico: 'media', negativo: 'media', informacion: 'baja', positivo: 'baja', payments: 'media',
 };
 
 const PRIORITY_DOT: Record<string, string> = {
@@ -101,6 +102,7 @@ function NewTicketForm({
                         <option value="positivo">Comentario Positivo</option>
                         <option value="negativo">Comentario Negativo</option>
                         <option value="tecnico">Soporte Técnico</option>
+                        <option value="payments">Pagos y Facturación</option>
                         <option value="critico">Soporte Crítico</option>
                     </select>
                 </div>
@@ -308,6 +310,7 @@ export function SupportPageClient() {
                                 <option value="negativo">Comentario Negativo</option>
                                 <option value="informacion">Solicitud de Información</option>
                                 <option value="tecnico">Soporte Técnico</option>
+                                <option value="payments">Pagos y Facturación</option>
                                 <option value="critico">Soporte Crítico</option>
                             </select>
                         )}
@@ -439,25 +442,6 @@ export function SupportPageClient() {
                 title="Soporte Lyrium"
                 subtitle="Centro de soporte y gestión de incidencias"
                 icon="Headset"
-                actions={
-                    !showNewTicketForm ? (
-                        <div className="flex items-center gap-2">
-                            <button
-                                onClick={() => setShowLegend(true)}
-                                title="Leyenda"
-                                className="w-9 h-9 flex items-center justify-center rounded-xl bg-white dark:bg-[var(--bg-secondary)] border border-[var(--border-subtle)] text-gray-500 dark:text-[var(--text-secondary)] hover:text-[var(--turquesa-500)] dark:hover:text-[var(--icons-green)] hover:border-[var(--turquesa-500)] dark:hover:border-[var(--icons-green)] transition-all shadow-sm"
-                            >
-                                <Icon name="Info" className="w-4 h-4" />
-                            </button>
-                            <button
-                                onClick={() => { setShowNewTicketForm(true); setTicketError(null); }}
-                                className="px-4 py-2 bg-white dark:bg-[var(--bg-secondary)] text-[var(--turquesa-500)] rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-[var(--turquesa-500)]/10 dark:hover:bg-[#2A3F33] transition-colors border border-[var(--border-subtle)] shadow-sm"
-                            >
-                                + Nuevo Ticket
-                            </button>
-                        </div>
-                    ) : null
-                }
             />
 
             {error && (
@@ -487,7 +471,26 @@ export function SupportPageClient() {
                     </div>
                 </div>
             ) : (
-                <ChatLayout list={listContent} detail={detailContent} />
+                <>
+                    {!showNewTicketForm && (
+                        <div className="flex items-center gap-2 mb-2 shrink-0">
+                            <button
+                                onClick={() => setShowLegend(true)}
+                                title="Leyenda"
+                                className="w-9 h-9 flex items-center justify-center rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--turquesa-500)] hover:border-[var(--turquesa-500)] transition-all shadow-sm"
+                            >
+                                <Icon name="Info" className="w-4 h-4" />
+                            </button>
+                            <button
+                                onClick={() => { setShowNewTicketForm(true); setTicketError(null); }}
+                                className="px-4 py-2 bg-[var(--bg-card)] text-[var(--turquesa-500)] rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-[var(--turquesa-500)]/10 transition-colors border border-[var(--border-subtle)] shadow-sm"
+                            >
+                                + Nuevo Ticket
+                            </button>
+                        </div>
+                    )}
+                    <ChatLayout list={listContent} detail={detailContent} />
+                </>
             )}
 
             {(showLegend || isLegendClosing) && (

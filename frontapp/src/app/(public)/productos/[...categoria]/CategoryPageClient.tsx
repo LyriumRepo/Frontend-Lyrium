@@ -2,6 +2,7 @@
 
 
 import { useState, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import TopMedalBadge from '@/components/ui/TopMedalBadge';
@@ -101,7 +102,7 @@ function FiltersPanel({ filters, onChange, onClose, totalVisible, totalAll }: {
         <div className="bg-white dark:bg-[var(--bg-secondary)] border border-gray-200 dark:border-[var(--border-subtle)] rounded-2xl p-5 space-y-5">
             <div className="flex items-center justify-between">
                 <h3 className="font-black text-gray-800 dark:text-[var(--text-primary)]">Filtros</h3>
-                <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
+                <button onClick={onClose} aria-label="Cerrar filtros" className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
             </div>
             <div>
                 <p className="text-xs font-black uppercase text-gray-400 mb-2">Ordenar por</p>
@@ -165,6 +166,7 @@ interface CategoryPageClientProps {
 }
 
 export default function CategoryPageClient({ category, products: initialProducts, siblingCategories }: CategoryPageClientProps) {
+    const router = useRouter();
     const [filters, setFilters] = useState<LocalFilters>({ sortBy: 'default' });
     const [showFilters, setShowFilters] = useState(false);
 
@@ -191,7 +193,7 @@ export default function CategoryPageClient({ category, products: initialProducts
                 <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-2 text-sm text-gray-500 dark:text-[var(--text-secondary)]">
                     <Link href="/" className="hover:text-sky-500 transition-colors">Inicio</Link>
                     <span>/</span>
-                    <Link href="/productos" className="hover:text-sky-500 transition-colors">Productos</Link>
+                    <button type="button" onClick={() => router.back()} className="hover:text-sky-500 transition-colors">Productos</button>
                     <span>/</span>
                     <span className="text-gray-800 dark:text-[var(--text-primary)] font-medium">{category.name}</span>
                 </div>

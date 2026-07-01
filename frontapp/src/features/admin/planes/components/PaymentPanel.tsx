@@ -136,27 +136,27 @@ export default function PaymentPanel({ vendedorPagos, totales, filter, onFilterC
           <div className="text-[1.75rem] font-extrabold text-gray-800 dark:text-[var(--text-primary)] leading-tight">S/ {Number(totales.total_monto ?? 0).toFixed(2)}</div>
         </div>
         <div className="bg-white dark:bg-[var(--bg-card)] border border-gray-200 dark:border-[var(--border-subtle)] rounded-3xl p-5 flex flex-col gap-1.5 relative overflow-hidden transition-shadow hover:shadow-md hover:-translate-y-0.5">
-          <div className="absolute top-0 left-0 right-0 h-1 rounded-t-3xl bg-emerald-500" />
+          <div className="absolute top-0 left-0 right-0 h-1 rounded-t-3xl bg-[var(--color-success)]" />
           <div className="text-[11px] font-extrabold uppercase tracking-wide text-gray-400 dark:text-[var(--text-placeholder)]">Pagos exitosos</div>
-          <div className="text-[1.75rem] font-extrabold text-emerald-600 leading-tight">{totales.pagos_exitosos}</div>
+          <div className="text-[1.75rem] font-extrabold text-[var(--color-success)] leading-tight">{totales.pagos_exitosos}</div>
         </div>
         <div className="bg-white dark:bg-[var(--bg-card)] border border-gray-200 dark:border-[var(--border-subtle)] rounded-3xl p-5 flex flex-col gap-1.5 relative overflow-hidden transition-shadow hover:shadow-md hover:-translate-y-0.5">
-          <div className="absolute top-0 left-0 right-0 h-1 rounded-t-3xl bg-red-500" />
+          <div className="absolute top-0 left-0 right-0 h-1 rounded-t-3xl bg-[var(--color-error)]" />
           <div className="text-[11px] font-extrabold uppercase tracking-wide text-gray-400 dark:text-[var(--text-placeholder)]">Pagos fallidos</div>
-          <div className="text-[1.75rem] font-extrabold text-red-600 leading-tight">{totales.pagos_fallidos}</div>
+          <div className="text-[1.75rem] font-extrabold text-[var(--color-error)] leading-tight">{totales.pagos_fallidos}</div>
         </div>
         <div className="bg-white dark:bg-[var(--bg-card)] border border-gray-200 dark:border-[var(--border-subtle)] rounded-3xl p-5 flex flex-col gap-1.5 relative overflow-hidden transition-shadow hover:shadow-md hover:-translate-y-0.5">
-          <div className="absolute top-0 left-0 right-0 h-1 rounded-t-3xl bg-amber-500" />
+          <div className="absolute top-0 left-0 right-0 h-1 rounded-t-3xl bg-[var(--color-warning)]" />
           <div className="text-[11px] font-extrabold uppercase tracking-wide text-gray-400 dark:text-[var(--text-placeholder)]">Pendientes</div>
-          <div className="text-[1.75rem] font-extrabold text-amber-600 leading-tight">{totales.pagos_pendientes}</div>
+          <div className="text-[1.75rem] font-extrabold text-[var(--color-warning)] leading-tight">{totales.pagos_pendientes}</div>
         </div>
       </div>
       <div className="flex gap-2 mb-5 flex-wrap" style={{ marginTop:'20px' }}>
         {(['all','paid','failed','pending'] as const).map(f => (
           <button key={f} className={`px-4 py-2.5 border-2 rounded-lg text-[13px] font-semibold cursor-pointer transition-all duration-300 flex items-center gap-2
-            ${filter === f ? 'bg-[var(--text-primary)] text-[var(--bg-canvas)] border-[var(--text-primary)]' : 'bg-white dark:bg-[var(--bg-card)] text-gray-500 dark:text-[var(--text-secondary)] border-gray-200 dark:border-[var(--border-subtle)] hover:border-gray-400 hover:text-gray-700 dark:hover:text-[var(--text-primary)]'}`}
+            ${filter === f ? 'bg-gradient-to-r from-sky-500 to-sky-400 dark:from-emerald-700 dark:to-teal-600 text-white border-transparent shadow-lg shadow-sky-500/25 dark:shadow-emerald-900/25' : 'bg-white dark:bg-[var(--bg-card)] text-gray-500 dark:text-[var(--text-secondary)] border-gray-200 dark:border-[var(--border-subtle)] hover:border-gray-400 hover:text-gray-700 dark:hover:text-[var(--text-primary)]'}`}
             onClick={() => onFilterChange(f)}>
-            {f !== 'all' && <span className={`w-2 h-2 rounded-full ${f === 'paid' ? 'bg-emerald-500' : f === 'failed' ? 'bg-red-500' : 'bg-amber-500'}`} />}
+            {f !== 'all' && <span className={`w-2 h-2 rounded-full ${f === 'paid' ? 'bg-[var(--color-success)]' : f === 'failed' ? 'bg-[var(--color-error)]' : 'bg-[var(--color-warning)]'}`} />}
             {f === 'all' ? 'Todos' : f === 'paid' ? 'Exitosos' : f === 'failed' ? 'Fallidos' : 'Pendientes'}
           </button>
         ))}

@@ -112,7 +112,7 @@ export default function BaseDatePicker({ label, value, onChange, name, className
   return (
     <div className={`relative ${className || ''}`} ref={containerRef}>
       {label && (
-        <label className="text-[10px] font-black text-gray-400 dark:text-gray-300 uppercase tracking-widest ml-1">
+        <label className="text-[10px] font-black text-gray-400 dark:text-[var(--icons-green)] uppercase tracking-widest ml-1">
           {label}
         </label>
       )}

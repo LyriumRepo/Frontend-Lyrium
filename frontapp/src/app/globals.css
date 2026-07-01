@@ -335,6 +335,22 @@
         background: var(--text-secondary);
     }
 
+    .no-scrollbar {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+
+    .scrollbar-hide {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }
+
     .lateral-gradient-mask {
         @apply bg-white dark:bg-[var(--bg-card)] rounded-r-[60px] md:rounded-r-[80px] transition-all duration-500;
         box-shadow: 10px 0 15px -5px rgba(0, 0, 0, 0.05);
@@ -796,4 +812,15 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     );
     background-size: 300% 300%;
     animation: lyrium-gradient-flow 5s ease infinite;
+}
+
+/* Brillo neón pulsante para cards de plan */
+@keyframes plan-neon-pulse {
+    0%   { box-shadow: 0 0 8px 2px var(--plan-glow), 0 0 20px 4px var(--plan-glow-soft), inset 0 0 6px 1px var(--plan-glow-inner); }
+    50%  { box-shadow: 0 0 18px 6px var(--plan-glow), 0 0 40px 10px var(--plan-glow-soft), inset 0 0 10px 2px var(--plan-glow-inner); }
+    100% { box-shadow: 0 0 8px 2px var(--plan-glow), 0 0 20px 4px var(--plan-glow-soft), inset 0 0 6px 1px var(--plan-glow-inner); }
+}
+
+.plan-neon-glow {
+    animation: plan-neon-pulse 2.5s ease-in-out infinite;
 }

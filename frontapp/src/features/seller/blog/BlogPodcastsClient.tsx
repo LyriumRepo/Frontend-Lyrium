@@ -128,8 +128,8 @@ export function BlogPodcastsClient() {
                                     <td className="px-5 py-4 text-gray-500">{fmtDuration(p.duration) || '—'}</td>
                                     <td className="px-5 py-4">{statusBadge(p.status)}</td>
                                     <td className="px-5 py-4"><div className="flex gap-2">
-                                        <button onClick={() => openEdit(p)} className="p-1.5 rounded-lg hover:bg-sky-50 text-sky-500 transition"><Edit className="w-4 h-4" /></button>
-                                        <button onClick={() => handleDelete(p.id)} className="p-1.5 rounded-lg hover:bg-red-50 text-red-400 transition"><Trash2 className="w-4 h-4" /></button>
+                                        <button onClick={() => openEdit(p)} aria-label="Editar" className="p-1.5 rounded-lg hover:bg-sky-50 text-sky-500 transition"><Edit className="w-4 h-4" /></button>
+                                        <button onClick={() => handleDelete(p.id)} aria-label="Eliminar" className="p-1.5 rounded-lg hover:bg-red-50 text-red-400 transition"><Trash2 className="w-4 h-4" /></button>
                                     </div></td>
                                 </tr>
                             ))}

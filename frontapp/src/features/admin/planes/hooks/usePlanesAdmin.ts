@@ -909,18 +909,15 @@ export function useAdmin() {
       try {
         const detail = await api.fetchVendedorDetail(Number(uid));
 
-        const historial = detail.plan_requests.map((r: any) => ({
+        const historial = (detail.data ?? []).map((r: any) => ({
           plan_desde: '',
           plan_hasta: r.plan_name ?? '—',
           nombre_desde: '—',
           nombre_hasta: r.plan_name ?? '—',
-          motivo:
-            r.payment_status === 'paid'
-              ? 'manual'
-              : (r.status ?? 'desconocido'),
-          cambiado_en: r.created_at,
-          monto: r.total_amount,
-          metodo: r.payment_method,
+          motivo: r.status ?? 'activo',
+          cambiado_en: r.starts_at,
+          monto: r.monthly_fee,
+          metodo: '—',
         }));
 
         setState((prev) => {

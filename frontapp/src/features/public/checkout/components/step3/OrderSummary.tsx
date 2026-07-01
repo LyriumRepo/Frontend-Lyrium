@@ -186,7 +186,7 @@ export default function OrderSummary() {
   return (
     <>
     <div className="bg-white dark:bg-[var(--bg-card)] border border-gray-200 dark:border-[var(--border-subtle)] rounded-2xl shadow-sm sticky top-[100px]">
-      <div className="px-5 py-4 bg-gradient-to-r from-sky-500 to-sky-400 flex items-center gap-2 rounded-t-2xl">
+      <div className="px-5 py-4 bg-gradient-to-r from-teal-500 to-sky-500 flex items-center gap-2 rounded-t-2xl">
         <span className="text-white text-2xl">🧾</span>
         <h3 className="font-bold text-white">Resumen del Pedido</h3>
       </div>
@@ -338,7 +338,7 @@ export default function OrderSummary() {
           type="button"
           onClick={handlePagar}
           disabled={isBusy || selectedItems.length === 0}
-          className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-sky-500 to-sky-400 hover:from-sky-600 hover:to-sky-500 text-white font-bold shadow-lg shadow-sky-200 dark:shadow-sky-900/20 transition-all hover:-translate-y-0.5 flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+          className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-teal-500 to-sky-500 hover:from-teal-600 hover:to-sky-600 text-white font-bold shadow-lg shadow-teal-200 dark:shadow-teal-900/20 transition-all hover:-translate-y-0.5 flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0"
         >
           {isBusy ? (
             <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />

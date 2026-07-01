@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -655,6 +656,7 @@ export default function ServicesCategoryPageClient({
   services,
   allCategories,
 }: Props) {
+  const router = useRouter();
   const [search, setSearch] = useState('');
   const [selectedService, setSelectedService] = useState<Service | null>(null);
 
@@ -687,12 +689,13 @@ export default function ServicesCategoryPageClient({
             Inicio
           </Link>
           <span className="text-gray-300 dark:text-[var(--text-secondary)]">/</span>
-          <Link
-            href="/servicios"
+          <button
+            type="button"
+            onClick={() => router.back()}
             className="text-gray-400 hover:text-sky-500 transition-colors"
           >
             Servicios
-          </Link>
+          </button>
           <span className="text-gray-300 dark:text-[var(--text-secondary)]">/</span>
           <span className="font-semibold text-gray-700 dark:text-[var(--text-primary)]">
             {category.name}

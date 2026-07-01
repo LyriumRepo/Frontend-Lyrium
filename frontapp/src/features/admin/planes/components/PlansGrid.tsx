@@ -37,7 +37,7 @@ export default function PlansGrid({ plansData, statusFilter, onEdit, onToggleAct
       <div className="flex gap-2 mb-5">
         {['all','active','inactive'].map(f => (
           <button key={f} className={`px-4 py-2 border-2 rounded-lg text-[13px] font-semibold cursor-pointer transition-all duration-200
-            ${statusFilter === f ? 'bg-[var(--text-primary)] text-[var(--bg-canvas)] border-[var(--text-primary)]' : 'bg-white dark:bg-[var(--bg-card)] text-gray-500 dark:text-[var(--text-secondary)] border-gray-200 dark:border-[var(--border-subtle)] hover:border-gray-400 hover:text-gray-700 dark:text-[var(--text-primary)]'}`}
+            ${statusFilter === f ? 'bg-gradient-to-r from-sky-500 to-sky-400 dark:from-emerald-700 dark:to-teal-600 text-white border-transparent shadow-lg shadow-sky-500/25 dark:shadow-emerald-900/25' : 'bg-white dark:bg-[var(--bg-card)] text-gray-500 dark:text-[var(--text-secondary)] border-gray-200 dark:border-[var(--border-subtle)] hover:border-gray-400 hover:text-gray-700 dark:text-[var(--text-primary)]'}`}
             onClick={() => onFilterChange(f)}>
             {f === 'all' ? 'Todos' : f === 'active' ? 'Activos' : 'Inactivos'}
           </button>
@@ -72,14 +72,16 @@ export default function PlansGrid({ plansData, statusFilter, onEdit, onToggleAct
                 </div>
                 <div className="flex gap-2 justify-end">
                   <button className={`w-9 h-9 rounded-lg border-2 cursor-pointer transition-all duration-250 flex items-center justify-center flex-shrink-0
-                    ${isActive ? 'border-amber-500 text-amber-500 hover:bg-amber-500 hover:text-white hover:-translate-y-0.5' : 'border-emerald-500 text-emerald-500 hover:bg-emerald-500 hover:text-white hover:-translate-y-0.5'}`}
+                    ${isActive
+                      ? 'border-[var(--text-secondary)] text-[var(--text-secondary)] hover:bg-[var(--text-secondary)] hover:text-white hover:-translate-y-0.5'
+                      : 'border-[var(--icons-green)] text-[var(--icons-green)] hover:bg-[var(--icons-green)] hover:text-white hover:-translate-y-0.5'}`}
                     title={isActive ? 'Desactivar plan' : 'Activar plan'} onClick={() => onToggleActive(key)}>
                     {isActive
                       ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="2" y="7" width="20" height="10" rx="5"/><circle cx="7" cy="12" r="3" fill="currentColor"/></svg>
                       : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="2" y="7" width="20" height="10" rx="5"/><circle cx="17" cy="12" r="3" fill="currentColor"/></svg>
                     }
                   </button>
-                  <button className="w-9 h-9 rounded-lg border-2 border-blue-500 text-blue-500 bg-transparent cursor-pointer transition-all duration-250 flex items-center justify-center hover:bg-blue-500 hover:text-white hover:-translate-y-0.5" title="Editar" onClick={() => onEdit(key)}>{svgEdit}</button>
+                  <button className="w-9 h-9 rounded-lg border-2 border-[var(--icons-green)] text-[var(--icons-green)] bg-transparent cursor-pointer transition-all duration-250 flex items-center justify-center hover:bg-[var(--icons-green)] hover:text-white hover:-translate-y-0.5" title="Editar" onClick={() => onEdit(key)}>{svgEdit}</button>
                   {isFixed && <button className="w-9 h-9 rounded-lg border-2 border-red-500 text-red-500 bg-transparent cursor-pointer transition-all duration-250 flex items-center justify-center hover:bg-red-500 hover:text-white hover:-translate-y-0.5" title="Restaurar" onClick={() => onRestore(key)}>{svgRestore}</button>}
                   {!isFixed && <button className="w-9 h-9 rounded-lg border-2 border-red-500 text-red-500 bg-transparent cursor-pointer transition-all duration-250 flex items-center justify-center hover:bg-red-500 hover:text-white hover:-translate-y-0.5" title="Eliminar" onClick={() => onDelete(key)}>{svgDelete}</button>}
                 </div>

@@ -139,7 +139,7 @@ export function ProfilePageClient(_props: ProfilePageClientProps) {
                                 <Icon name="Building2" className="w-6 h-6 text-sky-600 dark:text-white" />
                             </div>
                             <div>
-                                <h3 className="text-2xl font-black tracking-tighter leading-none text-gray-800 dark:text-[var(--text-primary)] dark:text-[var(--text-primary)]">Datos Empresariales</h3>
+                                <h3 className="text-2xl font-black tracking-tighter leading-none text-white">Datos Empresariales</h3>
                                 <div className="flex items-center gap-2 mt-1">
                                     <p className="text-xs font-black text-sky-100 uppercase tracking-[0.2em] opacity-80">Gestión de Entidad Legal</p>
                                     <span className="px-2 py-0.5 bg-emerald-500/20 backdrop-blur-md rounded-full text-xs font-black uppercase tracking-widest text-emerald-100 border border-emerald-500/30 flex items-center gap-1">

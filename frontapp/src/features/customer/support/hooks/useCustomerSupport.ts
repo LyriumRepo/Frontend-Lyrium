@@ -23,7 +23,7 @@ const BACKEND_TO_CATEGORY: Record<string, TicketCategory> = {
   admin: 'critico',          // was incorrectly 'informacion'
   critico: 'critico',
   followup: 'informacion',
-  payments: 'informacion',
+  payments: 'payments',
   documentation: 'informacion',
 };
 

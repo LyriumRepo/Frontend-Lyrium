@@ -20,20 +20,20 @@ import { exportPaymentsToExcel, exportPaymentsToPdf } from './export';
 interface StatusMapping { status: string; label: string; class: string; icon?: string; }
 
 const PAYMENT_STATUS_MAP: StatusMapping[] = [
-  { status: 'paid', label: 'Pagado', class: 'bg-emerald-100 text-emerald-700', icon: 'CheckCircle' },
-  { status: 'pending', label: 'Pendiente', class: 'bg-amber-100 text-amber-700', icon: 'Clock' },
-  { status: 'failed', label: 'Fallido', class: 'bg-red-100 text-red-700', icon: 'XCircle' },
-  { status: 'refunded', label: 'Reembolsado', class: 'bg-violet-100 text-violet-700', icon: 'Undo2' },
+  { status: 'paid', label: 'Pagado', class: 'bg-[var(--color-success)]/15 text-[var(--color-success)]', icon: 'CheckCircle' },
+  { status: 'pending', label: 'Pendiente', class: 'bg-[var(--color-warning)]/15 text-[var(--color-warning)]', icon: 'Clock' },
+  { status: 'failed', label: 'Fallido', class: 'bg-[var(--color-error)]/15 text-[var(--color-error)]', icon: 'XCircle' },
+  { status: 'refunded', label: 'Reembolsado', class: 'bg-[var(--color-info)]/15 text-[var(--color-info)]', icon: 'Undo2' },
 ];
 
 const TRANSACTION_STATUS_MAP: StatusMapping[] = [
-  { status: 'AUTHORISED', label: 'Autorizado', class: 'bg-emerald-100 text-emerald-700', icon: 'CheckCircle' },
-  { status: 'CAPTURED', label: 'Capturado', class: 'bg-emerald-100 text-emerald-700', icon: 'CheckCircle' },
-  { status: 'REFUSED', label: 'Rechazado', class: 'bg-red-100 text-red-700', icon: 'XCircle' },
-  { status: 'CANCELLED', label: 'Cancelado', class: 'bg-amber-100 text-amber-700', icon: 'Ban' },
-  { status: 'PENDING', label: 'Pendiente', class: 'bg-amber-100 text-amber-700', icon: 'Clock' },
-  { status: 'EXPIRED', label: 'Expirado', class: 'bg-red-100 text-red-700', icon: 'Timer' },
-  { status: 'ERROR', label: 'Error', class: 'bg-red-100 text-red-700', icon: 'AlertTriangle' },
+  { status: 'AUTHORISED', label: 'Autorizado', class: 'bg-[var(--color-success)]/15 text-[var(--color-success)]', icon: 'CheckCircle' },
+  { status: 'CAPTURED', label: 'Capturado', class: 'bg-[var(--color-success)]/15 text-[var(--color-success)]', icon: 'CheckCircle' },
+  { status: 'REFUSED', label: 'Rechazado', class: 'bg-[var(--color-error)]/15 text-[var(--color-error)]', icon: 'XCircle' },
+  { status: 'CANCELLED', label: 'Cancelado', class: 'bg-[var(--color-warning)]/15 text-[var(--color-warning)]', icon: 'Ban' },
+  { status: 'PENDING', label: 'Pendiente', class: 'bg-[var(--color-warning)]/15 text-[var(--color-warning)]', icon: 'Clock' },
+  { status: 'EXPIRED', label: 'Expirado', class: 'bg-[var(--color-error)]/15 text-[var(--color-error)]', icon: 'Timer' },
+  { status: 'ERROR', label: 'Error', class: 'bg-[var(--color-error)]/15 text-[var(--color-error)]', icon: 'AlertTriangle' },
 ];
 
 function formatCurrency(amount: number): string {
@@ -78,9 +78,9 @@ export function PagosPageClient() {
     if (!stats.data) return [];
     const s = stats.data;
     return [
-      { label: 'Tarjeta (CARD)', value: `${s.methodDistribution.find(m => m.method === 'CARD')?.count ?? 0}`, icon: 'CreditCard', color: 'violet' as const },
-      { label: 'Yape', value: `${s.methodDistribution.find(m => m.method === 'YAPE')?.count ?? 0}`, icon: 'Smartphone', color: 'amber' as const },
-      { label: 'Plin', value: `${s.methodDistribution.find(m => m.method === 'PLIN')?.count ?? 0}`, icon: 'Wallet', color: 'rose' as const },
+      { label: 'Tarjeta (CARD)', value: `${s.methodDistribution.find(m => m.method === 'CARD')?.count ?? 0}`, icon: 'CreditCard', color: 'sky' as const },
+      { label: 'Yape', value: `${s.methodDistribution.find(m => m.method === 'YAPE')?.count ?? 0}`, icon: 'Smartphone', color: 'emerald' as const },
+      { label: 'Plin', value: `${s.methodDistribution.find(m => m.method === 'PLIN')?.count ?? 0}`, icon: 'Wallet', color: 'indigo' as const },
     ];
   }, [stats.data]);
 
@@ -99,7 +99,7 @@ export function PagosPageClient() {
     {
       key: 'customerStores',
       header: 'Cliente / Tienda',
-      className: 'bg-emerald-50/40 dark:bg-emerald-500/5',
+      className: 'bg-[var(--color-success)]/5',
       render: (tx) => (
         <div>
           <p className="text-sm font-semibold">{tx.customer?.name ?? '—'}</p>
@@ -132,7 +132,7 @@ export function PagosPageClient() {
     {
       key: 'paymentStatus',
       header: 'Pago',
-      className: 'bg-amber-50/40 dark:bg-amber-500/5',
+      className: 'bg-[var(--color-warning)]/5',
       render: (tx) => (
         <BaseStatusBadge
           status={tx.paymentStatus}
@@ -143,7 +143,7 @@ export function PagosPageClient() {
     {
       key: 'transactionStatus',
       header: 'Transacción',
-      className: 'bg-rose-50/40 dark:bg-rose-500/5',
+      className: 'bg-[var(--color-error)]/5',
       render: (tx) => {
         if (!tx.transactionStatus) return <span className="text-xs text-[var(--text-secondary)]">—</span>;
         return (
@@ -166,27 +166,6 @@ export function PagosPageClient() {
         title="Gestión de Pagos"
         subtitle="Monitoreo de transacciones Izipay — CARD, YAPE y PLIN"
         icon="CreditCard"
-        actions={
-          <div className="flex items-center gap-2">
-            <BaseButton variant="outline" size="sm" leftIcon="RotateCw" onClick={() => refetch()}>
-              Actualizar
-            </BaseButton>
-            <button
-              onClick={() => exportPaymentsToExcel(data).catch(console.error)}
-              className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-[var(--bg-card)] text-[var(--text-primary)] font-bold text-xs border border-[var(--border-subtle)] hover:text-[#5AAFE6] hover:border-[#69BEEB]/30 transition-all shadow-sm"
-            >
-              <Icon name="FileSpreadsheet" className="text-xl" />
-              <span className="hidden sm:inline">Excel</span>
-            </button>
-            <button
-              onClick={() => exportPaymentsToPdf(data).catch(console.error)}
-              className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-[var(--bg-card)] text-[var(--text-primary)] font-bold text-xs border border-[var(--border-subtle)] hover:text-[#5AAFE6] hover:border-[#69BEEB]/30 transition-all shadow-sm"
-            >
-              <Icon name="FileText" className="text-xl" />
-              <span className="hidden sm:inline">PDF</span>
-            </button>
-          </div>
-        }
       />
 
       {/* KPI Cards — TreasuryModule style */}
@@ -206,20 +185,20 @@ export function PagosPageClient() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {kpiItems.map((kpi) => {
             const borderMap: Record<string, string> = {
-              sky: 'border-[#69BEEB]',
-              emerald: 'border-[#66D6A8]',
-              indigo: 'border-[#4EC7B8]',
-              amber: 'border-[#B7E000]',
+              sky: 'border-[var(--color-info)]',
+              emerald: 'border-[var(--color-success)]',
+              indigo: 'border-[var(--icons-green)]',
+              amber: 'border-[var(--color-success)]',
               rose: 'border-[var(--color-error)]',
-              violet: 'border-[#5AAFE6]',
+              violet: 'border-[var(--color-info)]',
             };
             const bgMap: Record<string, string> = {
-              sky: 'bg-[#69BEEB]/10 text-[#69BEEB]',
-              emerald: 'bg-[#66D6A8]/10 text-[#66D6A8]',
-              indigo: 'bg-[#4EC7B8]/10 text-[#4EC7B8]',
-              amber: 'bg-[#B7E000]/10 text-[#B7E000]',
+              sky: 'bg-[var(--color-info)]/10 text-[var(--color-info)]',
+              emerald: 'bg-[var(--color-success)]/10 text-[var(--color-success)]',
+              indigo: 'bg-[var(--icons-green)]/10 text-[var(--icons-green)]',
+              amber: 'bg-[var(--color-success)]/10 text-[var(--color-success)]',
               rose: 'bg-[var(--color-error)]/10 text-[var(--color-error)]',
-              violet: 'bg-[#5AAFE6]/10 text-[#5AAFE6]',
+              violet: 'bg-[var(--color-info)]/10 text-[var(--color-info)]',
             };
             const iconMap: Record<string, React.ReactNode> = {
               BarChart3: <BarChart3 className="w-8 h-8" />,
@@ -254,14 +233,14 @@ export function PagosPageClient() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {methodItems.map((m) => {
               const borderMap: Record<string, string> = {
-                violet: 'border-[#5AAFE6]',
-                amber: 'border-[#B7E000]',
-                rose: 'border-[var(--color-error)]',
+                sky: 'border-[var(--color-info)]',
+                emerald: 'border-[var(--color-success)]',
+                indigo: 'border-[var(--icons-green)]',
               };
               const bgMap: Record<string, string> = {
-                violet: 'bg-[#5AAFE6]/10 text-[#5AAFE6]',
-                amber: 'bg-[#B7E000]/10 text-[#B7E000]',
-                rose: 'bg-[var(--color-error)]/10 text-[var(--color-error)]',
+                sky: 'bg-[var(--color-info)]/10 text-[var(--color-info)]',
+                emerald: 'bg-[var(--color-success)]/10 text-[var(--color-success)]',
+                indigo: 'bg-[var(--icons-green)]/10 text-[var(--icons-green)]',
               };
               const iconMap: Record<string, React.ReactNode> = {
                 CreditCard: <CreditCard className="w-8 h-8" />,
@@ -287,8 +266,32 @@ export function PagosPageClient() {
         </div>
       )}
 
-      <div className="bg-[var(--bg-card)] p-4 sm:p-6 rounded-[2.5rem] border border-[var(--border-subtle)] space-y-3">
-        {/* Fila 1 — Búsqueda principal (siempre visible) */}
+      <div className="bg-[var(--bg-card)] p-6 sm:p-8 rounded-[2.5rem] shadow-xl border border-[var(--border-subtle)] space-y-5">
+
+        {/* Header */}
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-gradient-to-br from-sky-500 to-sky-400 dark:from-emerald-700 dark:to-teal-600 rounded-2xl flex items-center justify-center shadow-lg shrink-0">
+              <Icon name="Search" className="w-6 h-6 text-white" />
+            </div>
+            <h3 className="text-xl font-black text-[var(--text-primary)]">
+              Filtros de Búsqueda
+            </h3>
+          </div>
+          <BaseButton
+            variant="primary"
+            size="sm"
+            leftIcon="RotateCcw"
+            onClick={() => {
+              setSearchInput('');
+              setFilters({ page: 1, per_page: 10 });
+            }}
+          >
+            <span className="hidden sm:inline">Limpiar</span>
+          </BaseButton>
+        </div>
+
+        {/* Búsqueda + toggle filtros */}
         <div className="flex gap-2 items-center">
           <div className="flex-1 min-w-0">
             <BaseInputField
@@ -314,7 +317,7 @@ export function PagosPageClient() {
             <Icon name="SlidersHorizontal" className="w-4 h-4" />
             <span className="hidden sm:inline">Filtros</span>
             {(filters.date_from || filters.date_to || filters.payment_status || filters.transaction_status || filters.payment_method) && (
-              <span className="w-4 h-4 rounded-full bg-[#5AAFE6] text-white text-[9px] font-black flex items-center justify-center leading-none">
+              <span className="w-4 h-4 rounded-full bg-[var(--color-info)] text-white text-[9px] font-black flex items-center justify-center leading-none">
                 {[filters.date_from, filters.date_to, filters.payment_status, filters.transaction_status, filters.payment_method].filter(Boolean).length}
               </span>
             )}
@@ -322,8 +325,8 @@ export function PagosPageClient() {
           </button>
         </div>
 
-        {/* Fila 2 — Filtros secundarios (siempre visible en md+, colapsable en mobile) */}
-        <div className={`${showAdvancedFilters ? 'flex' : 'hidden'} md:flex flex-wrap items-end gap-3 pt-2 border-t border-[var(--border-subtle)]`}>
+        {/* Filtros secundarios — colapsables en móvil, siempre visibles en md+ */}
+        <div className={`${showAdvancedFilters ? 'grid' : 'hidden'} md:grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 pt-2 border-t border-[var(--border-subtle)]`}>
           <div>
             <BaseDatePicker
               label="Desde"
@@ -372,33 +375,118 @@ export function PagosPageClient() {
               methodOption('PLIN'),
             ]}
           />
-          <BaseButton
-            variant="ghost"
-            size="sm"
-            leftIcon="X"
-            onClick={() => {
-              setSearchInput('');
-              setFilters({ page: 1, per_page: 10 });
-            }}
-          >
-            Limpiar filtros
+        </div>
+
+        {/* Acciones — Actualizar, Excel, PDF dentro del card */}
+        <div className="grid grid-cols-3 gap-3 pt-4 border-t border-[var(--border-subtle)]">
+          <BaseButton variant="primary" size="sm" leftIcon="RotateCw" onClick={() => refetch()} className="justify-center">
+            Actualizar
           </BaseButton>
+          <button
+            onClick={() => exportPaymentsToExcel(data).catch(console.error)}
+            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--bg-card)] text-[var(--text-primary)] font-bold text-xs border border-[var(--border-subtle)] hover:text-[var(--icons-green)] hover:border-[var(--icons-green)]/30 transition-all shadow-sm"
+          >
+            <Icon name="FileSpreadsheet" className="w-4 h-4" />
+            Excel
+          </button>
+          <button
+            onClick={() => exportPaymentsToPdf(data).catch(console.error)}
+            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--bg-card)] text-[var(--text-primary)] font-bold text-xs border border-[var(--border-subtle)] hover:text-[var(--icons-green)] hover:border-[var(--icons-green)]/30 transition-all shadow-sm"
+          >
+            <Icon name="FileText" className="w-4 h-4" />
+            PDF
+          </button>
         </div>
       </div>
 
-      <DataTable<Transaction>
-        data={data}
-        columns={columns}
-        loading={loading}
-        error={error}
-        onRetry={refetch}
-        onRowClick={(tx) => setSelectedId(tx.id)}
-        keyField="id"
-        countLabel="transacciones"
-        emptyIcon="CreditCard"
-        emptyTitle="Sin transacciones"
-        emptyDescription="No se encontraron transacciones con los filtros aplicados."
-      />
+      {/* ── Vista mobile: cards ── */}
+      <div className="sm:hidden bg-[var(--bg-card)] rounded-2xl shadow-sm border border-[var(--border-subtle)] overflow-hidden">
+        {loading ? (
+          <div className="divide-y divide-[var(--border-subtle)]">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="p-4 flex items-start gap-3">
+                <Skeleton className="w-10 h-10 rounded-2xl shrink-0" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-3 w-40 rounded" />
+                  <Skeleton className="h-3 w-28 rounded" />
+                  <Skeleton className="h-3 w-20 rounded" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : error ? (
+          <p className="py-10 text-center text-[13px] text-[var(--color-error)]">Error al cargar transacciones.</p>
+        ) : data.length === 0 ? (
+          <p className="py-10 text-center text-[13px] text-[var(--text-muted)]">No se encontraron transacciones.</p>
+        ) : (
+          <>
+            <p className="px-4 pt-3 pb-2 text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">
+              {data.length} transacciones
+            </p>
+            <div className="divide-y divide-[var(--border-subtle)]">
+              {data.map((tx) => {
+                const method = tx.paymentMethod ?? '—';
+                const methodIcon = method === 'CARD'
+                  ? <CreditCard className="w-3.5 h-3.5" />
+                  : method === 'YAPE'
+                  ? <Smartphone className="w-3.5 h-3.5" />
+                  : method === 'PLIN'
+                  ? <Wallet className="w-3.5 h-3.5" />
+                  : null;
+                const payBadge = PAYMENT_STATUS_MAP.find(m => m.status === tx.paymentStatus);
+                return (
+                  <div
+                    key={tx.id}
+                    className="p-4 flex items-start gap-3 hover:bg-[var(--bg-secondary)] transition-colors cursor-pointer active:opacity-70"
+                    onClick={() => setSelectedId(tx.id)}
+                  >
+                    <div className="w-10 h-10 rounded-2xl bg-[var(--color-info)]/10 text-[var(--color-info)] flex items-center justify-center shrink-0">
+                      <CreditCard className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="font-mono text-xs font-bold text-[var(--text-primary)] truncate">{tx.orderNumber}</p>
+                        <span className="text-sm font-black text-[var(--text-primary)] shrink-0">{formatCurrency(tx.total)}</span>
+                      </div>
+                      <p className="text-xs text-[var(--text-secondary)] mt-0.5">{tx.customer?.name ?? '—'}</p>
+                      <p className="text-[11px] text-[var(--text-muted)] truncate">{tx.stores.map(s => s.name).join(', ')}</p>
+                      <div className="flex items-center gap-2 mt-1.5">
+                        <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
+                          {methodIcon}
+                          {method === 'CARD' && tx.cardBrand ? `${tx.cardBrand} ****${tx.cardLast4}` : method}
+                        </span>
+                        {payBadge && (
+                          <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${payBadge.class}`}>
+                            {payBadge.label}
+                          </span>
+                        )}
+                        <span className="text-[10px] text-[var(--text-muted)] ml-auto">{formatDate(tx.createdAt)}</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* ── Vista desktop: tabla ── */}
+      <div className="hidden sm:block">
+        <DataTable<Transaction>
+          data={data}
+          columns={columns}
+          loading={loading}
+          error={error}
+          onRetry={refetch}
+          onRowClick={(tx) => setSelectedId(tx.id)}
+          keyField="id"
+          countLabel="transacciones"
+          emptyIcon="CreditCard"
+          emptyTitle="Sin transacciones"
+          emptyDescription="No se encontraron transacciones con los filtros aplicados."
+        />
+      </div>
 
       {pagination && pagination.totalPages > 1 && (
         <div className="flex items-center justify-between">

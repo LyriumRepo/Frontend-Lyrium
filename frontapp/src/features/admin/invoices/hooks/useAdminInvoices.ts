@@ -17,6 +17,7 @@ export interface AdminInvoiceRow {
     customer_name: string;
     customer_ruc: string;
     amount: number;
+    store_amount?: number;
     order_total: number;
     commission_rate: number | null;
     commission_amount: number | null;
@@ -39,6 +40,7 @@ function toRow(inv: NubefactInvoice): AdminInvoiceRow {
         customer_name: inv.businessName ?? '—',
         customer_ruc: inv.nit ?? '—',
         amount: inv.total,
+        store_amount: inv.storeAmount,
         order_total: (inv as any).orderTotal ?? inv.total,
         commission_rate: (inv as any).commissionRate ?? null,
         commission_amount: (inv as any).commissionAmount ?? null,

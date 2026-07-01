@@ -280,8 +280,8 @@ export default function MainProductGrid({ productos }: MainProductGridProps) {
                   )}
 
                   <div className="hidden md:flex absolute inset-0 bg-black/0 group-hover:bg-black/10 items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-all">
-                    <button onClick={() => handleQuickView(producto)} className="bg-white p-2 rounded-full shadow-lg"><Eye className="w-4 h-4" /></button>
-                    <button onClick={() => handleAddToCart(producto)} className="bg-sky-500 p-2 rounded-full shadow-lg"><ShoppingCart className="w-4 h-4 text-white" /></button>
+                    <button onClick={() => handleQuickView(producto)} aria-label="Vista rápida" className="bg-white p-2 rounded-full shadow-lg"><Eye className="w-4 h-4" /></button>
+                    <button onClick={() => handleAddToCart(producto)} aria-label="Agregar al carrito" className="bg-sky-500 p-2 rounded-full shadow-lg"><ShoppingCart className="w-4 h-4 text-white" /></button>
                   </div>
                 </div>
 

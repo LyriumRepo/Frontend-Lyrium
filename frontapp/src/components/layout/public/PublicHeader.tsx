@@ -17,7 +17,7 @@ import LogoLyrium from '@/components/LogoLyrium';
 
 export default function PublicHeader() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const cartItemCount = useCarritoStore((s) => s.cartItems.reduce((sum, i) => sum + Number(i.cantidad ?? 0), 0));
+    const cartItemCount = useCarritoStore((s) => s.cartItems.reduce((sum, i) => sum + Number(i.cantidad ?? 0), 0) + s.serviceHoldCount);
     const { menuItems: apiMenuItems, megaMenuData: apiMegaMenuData, hasData } = useMegaMenu();
     const { user, isAuthenticated } = useAuth();
     const dashboardUrl = isAuthenticated && user?.role

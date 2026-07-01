@@ -21,6 +21,7 @@ import { useScan } from './hooks/useScan';
 import { useExpenses } from './hooks/usepenses';
 import BaseModal from '@/components/ui/BaseModal';
 import BaseDatePicker from '@/components/ui/BaseDatePicker';
+import BaseSelectField from '@/components/ui/BaseSelectField';
 import { BankStatementReviewModal } from '@/components/admin/operations/BankStatementReviewModal';
 import type {
   Expense,
@@ -57,10 +58,10 @@ const TAB_TYPE: Record<Tab, string | null> = {
 
 function TipoBadge({ tipo }: { tipo: string }) {
   const map: Record<string, string> = {
-    Honorarios: 'bg-[#EEEDFE] text-[#3C3489]',
-    Factura: 'bg-[#FAEEDA] text-[#633806]',
-    Boleta: 'bg-[#E6F1FB] text-[#0C447C]',
-    Servicio: 'bg-[#EAF3DE] text-[#27500A]',
+    Honorarios: 'bg-[var(--color-info)]/10 text-[var(--color-info)]',
+    Factura: 'bg-[var(--color-warning)]/10 text-[var(--color-warning)]',
+    Boleta: 'bg-[var(--color-info)]/10 text-[var(--color-info)]',
+    Servicio: 'bg-[var(--color-success)]/10 text-[var(--color-success)]',
   };
   return (
     <span
@@ -73,9 +74,9 @@ function TipoBadge({ tipo }: { tipo: string }) {
 
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, string> = {
-    Pagado: 'bg-[#E1F5EE] text-[#085041]',
-    Pendiente: 'bg-[#FAEEDA] text-[#633806]',
-    Anulado: 'bg-[#FCEBEB] text-[#791F1F]',
+    Pagado: 'bg-[var(--color-success)]/10 text-[var(--color-success)]',
+    Pendiente: 'bg-[var(--color-warning)]/10 text-[var(--color-warning)]',
+    Anulado: 'bg-[var(--color-error)]/10 text-[var(--color-error)]',
   };
   return (
     <span
@@ -104,9 +105,9 @@ function IconBtn({
   const cls = {
     default:
       'border-[var(--border-subtle)] text-[var(--text-muted)] hover:bg-[var(--bg-muted)] hover:text-[var(--text-secondary)]',
-    teal: 'border-[#9FE1CB] text-[#0F6E56] hover:bg-[#E1F5EE]',
-    green: 'border-[#9FE1CB] text-[#085041] hover:bg-[#E1F5EE]',
-    red: 'border-[#F7C1C1] text-[#791F1F] hover:bg-[#FCEBEB]',
+    teal: 'border-[var(--icons-green)]/30 text-[var(--icons-green)] hover:bg-[var(--icons-green)]/10',
+    green: 'border-[var(--icons-green)]/30 text-[var(--icons-green)] hover:bg-[var(--icons-green)]/10',
+    red: 'border-[var(--color-error)]/30 text-[var(--color-error)] hover:bg-[var(--color-error)]/10',
   }[variant];
   if (href) {
     return (
@@ -209,100 +210,84 @@ function TableHonorarios({
   onMarkPaid: (id: number) => void;
   onAnular: (id: number) => void;
 }) {
+  const emptyMsg = <p className="py-10 text-center text-[13px] text-[var(--text-muted)]">No hay recibos por honorarios.</p>;
+
   return (
-    <table className="w-full border-collapse" style={{ tableLayout: 'fixed' }}>
-      <colgroup>
-        <col style={{ width: '180px' }} />
-        <col style={{ width: '120px' }} />
-        <col style={{ width: '130px' }} />
-        <col style={{ width: '130px' }} />
-        <col style={{ width: '100px' }} />
-        <col style={{ width: '90px' }} />
-        <col style={{ width: '85px' }} />
-        <col style={{ width: '100px' }} />
-      </colgroup>
-      <thead>
-        <tr>
-          {[
-            'Nombre emisor',
-            'RUC emisor',
-            'Tipo documento',
-            'Nro. documento',
-            'Fecha emisión',
-            'Monto',
-            'Estado',
-            '',
-          ].map((h) => (
-            <th
-              key={h}
-              className="text-left text-[11px] font-medium text-[var(--text-muted)] px-3 py-2.5 border-b border-[var(--border-subtle)]"
-            >
-              {h}
-            </th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {expenses.length === 0 && (
-          <tr>
-            <td
-              colSpan={8}
-              className="py-10 text-center text-[13px] text-[var(--text-muted)]"
-            >
-              No hay recibos por honorarios.
-            </td>
-          </tr>
-        )}
-        {expenses.map((e) => {
-          const issuer = e.scan_data?.issuer as
-            | { name?: string; ruc?: string }
-            | null
-            | undefined;
+    <>
+      {/* ── Vista mobile: cards ── */}
+      <div className="sm:hidden divide-y divide-[var(--border-subtle)]">
+        {expenses.length === 0 ? emptyMsg : expenses.map((e) => {
+          const issuer = e.scan_data?.issuer as { name?: string; ruc?: string } | null | undefined;
+          const nombre = issuer?.name ?? e.supplier?.name ?? '—';
           return (
-            <tr
-              key={e.id}
-              className="border-b border-[var(--border-subtle)] hover:bg-[var(--bg-muted)] transition-colors"
-            >
-              <td
-                className="px-3 py-2.5 text-[13px] text-[var(--text-primary)] truncate"
-                title={issuer?.name ?? e.supplier?.name}
-              >
-                {issuer?.name ?? e.supplier?.name ?? '—'}
-              </td>
-              <td className="px-3 py-2.5 font-mono text-[12px] text-[var(--text-secondary)] truncate">
-                {issuer?.ruc ?? '—'}
-              </td>
-              <td className="px-3 py-2.5">
-                <TipoBadge tipo={e.voucher_type ?? 'Honorarios'} />
-              </td>
-              <td className="px-3 py-2.5 font-mono text-[12px] text-[var(--text-secondary)] truncate">
-                {e.voucher_number ?? e.receipt_number ?? '—'}
-              </td>
-              <td className="px-3 py-2.5 text-[13px] text-[var(--text-secondary)]">
-                {e.issued_at}
-              </td>
-              <td className="px-3 py-2.5 text-[13px] font-medium text-[var(--text-primary)]">
-                S/{' '}
-                {Number(e.amount).toLocaleString('es-PE', {
-                  minimumFractionDigits: 2,
-                })}
-              </td>
-              <td className="px-3 py-2.5">
-                <StatusBadge status={e.status} />
-              </td>
-              <td className="px-3 py-2.5">
-                <RowActions
-                  expense={e}
-                  onDetail={onDetail}
-                  onMarkPaid={onMarkPaid}
-                  onAnular={onAnular}
-                />
-              </td>
-            </tr>
+            <div key={e.id} className="p-4 flex items-start gap-3 hover:bg-[var(--bg-secondary)] transition-colors">
+              <div className="w-10 h-10 rounded-2xl bg-[var(--bg-secondary)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-secondary)] font-black text-sm shrink-0">
+                {nombre[0]?.toUpperCase() ?? 'H'}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-sm font-black text-[var(--text-primary)] truncate">{nombre}</p>
+                  <StatusBadge status={e.status} />
+                </div>
+                <p className="text-[11px] text-[var(--text-secondary)] font-mono mt-0.5">{issuer?.ruc ?? '—'}</p>
+                <div className="flex items-center gap-3 mt-1.5 flex-wrap">
+                  <TipoBadge tipo={e.voucher_type ?? 'Honorarios'} />
+                  <span className="text-[10px] font-mono text-[var(--text-secondary)]">{e.voucher_number ?? e.receipt_number ?? '—'}</span>
+                  <span className="text-xs font-black text-[var(--text-primary)]">S/ {Number(e.amount).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span>
+                </div>
+                <div className="flex items-center justify-between mt-2">
+                  <span className="text-[10px] text-[var(--text-secondary)]">{e.issued_at}</span>
+                  <RowActions expense={e} onDetail={onDetail} onMarkPaid={onMarkPaid} onAnular={onAnular} />
+                </div>
+              </div>
+            </div>
           );
         })}
-      </tbody>
-    </table>
+      </div>
+
+      {/* ── Vista desktop: tabla ── */}
+      <div className="hidden sm:block overflow-x-auto">
+        <table className="w-full border-collapse" style={{ tableLayout: 'fixed' }}>
+          <colgroup>
+            <col style={{ width: '180px' }} />
+            <col style={{ width: '120px' }} />
+            <col style={{ width: '130px' }} />
+            <col style={{ width: '130px' }} />
+            <col style={{ width: '100px' }} />
+            <col style={{ width: '90px' }} />
+            <col style={{ width: '85px' }} />
+            <col style={{ width: '100px' }} />
+          </colgroup>
+          <thead>
+            <tr>
+              {['Nombre emisor','RUC emisor','Tipo documento','Nro. documento','Fecha emisión','Monto','Estado',''].map((h) => (
+                <th key={h} className="text-left text-[11px] font-medium text-[var(--text-muted)] px-3 py-2.5 border-b border-[var(--border-subtle)]">{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {expenses.length === 0 && (
+              <tr><td colSpan={8} className="py-10 text-center text-[13px] text-[var(--text-muted)]">No hay recibos por honorarios.</td></tr>
+            )}
+            {expenses.map((e) => {
+              const issuer = e.scan_data?.issuer as { name?: string; ruc?: string } | null | undefined;
+              return (
+                <tr key={e.id} className="border-b border-[var(--border-subtle)] hover:bg-[var(--bg-muted)] transition-colors">
+                  <td className="px-3 py-2.5 text-[13px] text-[var(--text-primary)] truncate">{issuer?.name ?? e.supplier?.name ?? '—'}</td>
+                  <td className="px-3 py-2.5 font-mono text-[12px] text-[var(--text-secondary)] truncate">{issuer?.ruc ?? '—'}</td>
+                  <td className="px-3 py-2.5"><TipoBadge tipo={e.voucher_type ?? 'Honorarios'} /></td>
+                  <td className="px-3 py-2.5 font-mono text-[12px] text-[var(--text-secondary)] truncate">{e.voucher_number ?? e.receipt_number ?? '—'}</td>
+                  <td className="px-3 py-2.5 text-[13px] text-[var(--text-secondary)]">{e.issued_at}</td>
+                  <td className="px-3 py-2.5 text-[13px] font-medium text-[var(--text-primary)]">S/ {Number(e.amount).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</td>
+                  <td className="px-3 py-2.5"><StatusBadge status={e.status} /></td>
+                  <td className="px-3 py-2.5"><RowActions expense={e} onDetail={onDetail} onMarkPaid={onMarkPaid} onAnular={onAnular} /></td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </>
   );
 }
 
@@ -319,100 +304,84 @@ function TableFacturas({
   onMarkPaid: (id: number) => void;
   onAnular: (id: number) => void;
 }) {
+  const emptyMsg = <p className="py-10 text-center text-[13px] text-[var(--text-muted)]">No hay comprobantes para este filtro.</p>;
+
   return (
-    <table className="w-full border-collapse" style={{ tableLayout: 'fixed' }}>
-      <colgroup>
-        <col style={{ width: '200px' }} />
-        <col style={{ width: '120px' }} />
-        <col style={{ width: '120px' }} />
-        <col style={{ width: '140px' }} />
-        <col style={{ width: '100px' }} />
-        <col style={{ width: '90px' }} />
-        <col style={{ width: '85px' }} />
-        <col style={{ width: '100px' }} />
-      </colgroup>
-      <thead>
-        <tr>
-          {[
-            'Emisor (proveedor)',
-            'RUC emisor',
-            'Tipo documento',
-            'Nro. documento',
-            'Fecha emisión',
-            'Total',
-            'Estado',
-            '',
-          ].map((h) => (
-            <th
-              key={h}
-              className="text-left text-[11px] font-medium text-[var(--text-muted)] px-3 py-2.5 border-b border-[var(--border-subtle)]"
-            >
-              {h}
-            </th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {expenses.length === 0 && (
-          <tr>
-            <td
-              colSpan={8}
-              className="py-10 text-center text-[13px] text-[var(--text-muted)]"
-            >
-              No hay comprobantes para este filtro.
-            </td>
-          </tr>
-        )}
-        {expenses.map((e) => {
-          const issuer = e.scan_data?.issuer as
-            | { name?: string; ruc?: string }
-            | null
-            | undefined;
+    <>
+      {/* ── Vista mobile: cards ── */}
+      <div className="sm:hidden divide-y divide-[var(--border-subtle)]">
+        {expenses.length === 0 ? emptyMsg : expenses.map((e) => {
+          const issuer = e.scan_data?.issuer as { name?: string; ruc?: string } | null | undefined;
+          const nombre = issuer?.name ?? e.supplier?.name ?? '—';
           return (
-            <tr
-              key={e.id}
-              className="border-b border-[var(--border-subtle)] hover:bg-[var(--bg-muted)] transition-colors"
-            >
-              <td
-                className="px-3 py-2.5 text-[13px] text-[var(--text-primary)] truncate"
-                title={issuer?.name ?? e.supplier?.name}
-              >
-                {issuer?.name ?? e.supplier?.name ?? '—'}
-              </td>
-              <td className="px-3 py-2.5 font-mono text-[12px] text-[var(--text-secondary)] truncate">
-                {issuer?.ruc ?? '—'}
-              </td>
-              <td className="px-3 py-2.5">
-                <TipoBadge tipo={e.voucher_type ?? ''} />
-              </td>
-              <td className="px-3 py-2.5 font-mono text-[12px] text-[var(--text-secondary)] truncate">
-                {e.voucher_number ?? e.receipt_number ?? '—'}
-              </td>
-              <td className="px-3 py-2.5 text-[13px] text-[var(--text-secondary)]">
-                {e.issued_at}
-              </td>
-              <td className="px-3 py-2.5 text-[13px] font-medium text-[var(--text-primary)]">
-                S/{' '}
-                {Number(e.amount).toLocaleString('es-PE', {
-                  minimumFractionDigits: 2,
-                })}
-              </td>
-              <td className="px-3 py-2.5">
-                <StatusBadge status={e.status} />
-              </td>
-              <td className="px-3 py-2.5">
-                <RowActions
-                  expense={e}
-                  onDetail={onDetail}
-                  onMarkPaid={onMarkPaid}
-                  onAnular={onAnular}
-                />
-              </td>
-            </tr>
+            <div key={e.id} className="p-4 flex items-start gap-3 hover:bg-[var(--bg-secondary)] transition-colors">
+              <div className="w-10 h-10 rounded-2xl bg-[var(--bg-secondary)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-secondary)] font-black text-sm shrink-0">
+                {nombre[0]?.toUpperCase() ?? 'F'}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-sm font-black text-[var(--text-primary)] truncate">{nombre}</p>
+                  <StatusBadge status={e.status} />
+                </div>
+                <p className="text-[11px] text-[var(--text-secondary)] font-mono mt-0.5">{issuer?.ruc ?? '—'}</p>
+                <div className="flex items-center gap-3 mt-1.5 flex-wrap">
+                  <TipoBadge tipo={e.voucher_type ?? ''} />
+                  <span className="text-[10px] font-mono text-[var(--text-secondary)]">{e.voucher_number ?? e.receipt_number ?? '—'}</span>
+                  <span className="text-xs font-black text-[var(--text-primary)]">S/ {Number(e.amount).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span>
+                </div>
+                <div className="flex items-center justify-between mt-2">
+                  <span className="text-[10px] text-[var(--text-secondary)]">{e.issued_at}</span>
+                  <RowActions expense={e} onDetail={onDetail} onMarkPaid={onMarkPaid} onAnular={onAnular} />
+                </div>
+              </div>
+            </div>
           );
         })}
-      </tbody>
-    </table>
+      </div>
+
+      {/* ── Vista desktop: tabla ── */}
+      <div className="hidden sm:block overflow-x-auto">
+        <table className="w-full border-collapse" style={{ tableLayout: 'fixed' }}>
+          <colgroup>
+            <col style={{ width: '200px' }} />
+            <col style={{ width: '120px' }} />
+            <col style={{ width: '120px' }} />
+            <col style={{ width: '140px' }} />
+            <col style={{ width: '100px' }} />
+            <col style={{ width: '90px' }} />
+            <col style={{ width: '85px' }} />
+            <col style={{ width: '100px' }} />
+          </colgroup>
+          <thead>
+            <tr>
+              {['Emisor (proveedor)','RUC emisor','Tipo documento','Nro. documento','Fecha emisión','Total','Estado',''].map((h) => (
+                <th key={h} className="text-left text-[11px] font-medium text-[var(--text-muted)] px-3 py-2.5 border-b border-[var(--border-subtle)]">{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {expenses.length === 0 && (
+              <tr><td colSpan={8} className="py-10 text-center text-[13px] text-[var(--text-muted)]">No hay comprobantes para este filtro.</td></tr>
+            )}
+            {expenses.map((e) => {
+              const issuer = e.scan_data?.issuer as { name?: string; ruc?: string } | null | undefined;
+              return (
+                <tr key={e.id} className="border-b border-[var(--border-subtle)] hover:bg-[var(--bg-muted)] transition-colors">
+                  <td className="px-3 py-2.5 text-[13px] text-[var(--text-primary)] truncate">{issuer?.name ?? e.supplier?.name ?? '—'}</td>
+                  <td className="px-3 py-2.5 font-mono text-[12px] text-[var(--text-secondary)] truncate">{issuer?.ruc ?? '—'}</td>
+                  <td className="px-3 py-2.5"><TipoBadge tipo={e.voucher_type ?? ''} /></td>
+                  <td className="px-3 py-2.5 font-mono text-[12px] text-[var(--text-secondary)] truncate">{e.voucher_number ?? e.receipt_number ?? '—'}</td>
+                  <td className="px-3 py-2.5 text-[13px] text-[var(--text-secondary)]">{e.issued_at}</td>
+                  <td className="px-3 py-2.5 text-[13px] font-medium text-[var(--text-primary)]">S/ {Number(e.amount).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</td>
+                  <td className="px-3 py-2.5"><StatusBadge status={e.status} /></td>
+                  <td className="px-3 py-2.5"><RowActions expense={e} onDetail={onDetail} onMarkPaid={onMarkPaid} onAnular={onAnular} /></td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </>
   );
 }
 
@@ -429,91 +398,80 @@ function TableGeneric({
   onMarkPaid: (id: number) => void;
   onAnular: (id: number) => void;
 }) {
+  const emptyMsg = <p className="py-10 text-center text-[13px] text-[var(--text-muted)]">No hay comprobantes para este filtro.</p>;
+
   return (
-    <table className="w-full border-collapse" style={{ tableLayout: 'fixed' }}>
-      <colgroup>
-        <col style={{ width: '110px' }} />
-        <col style={{ width: '130px' }} />
-        <col style={{ width: '160px' }} />
-        <col style={{ width: '150px' }} />
-        <col style={{ width: '100px' }} />
-        <col style={{ width: '90px' }} />
-        <col style={{ width: '85px' }} />
-        <col style={{ width: '100px' }} />
-      </colgroup>
-      <thead>
-        <tr>
-          {[
-            'Tipo',
-            'Nro. comprobante',
-            'Proveedor / Trabajador',
-            'Concepto',
-            'Fecha',
-            'Monto',
-            'Estado',
-            '',
-          ].map((h) => (
-            <th
-              key={h}
-              className="text-left text-[11px] font-medium text-[var(--text-muted)] px-3 py-2.5 border-b border-[var(--border-subtle)]"
-            >
-              {h}
-            </th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {expenses.length === 0 && (
-          <tr>
-            <td
-              colSpan={8}
-              className="py-10 text-center text-[13px] text-[var(--text-muted)]"
-            >
-              No hay comprobantes para este filtro.
-            </td>
-          </tr>
-        )}
-        {expenses.map((e) => (
-          <tr
-            key={e.id}
-            className="border-b border-[var(--border-subtle)] hover:bg-[var(--bg-muted)] transition-colors"
-          >
-            <td className="px-3 py-2.5">
-              <TipoBadge tipo={e.voucher_type ?? ''} />
-            </td>
-            <td className="px-3 py-2.5 font-mono text-[12px] text-[var(--text-secondary)] truncate">
-              {e.receipt_number ?? '—'}
-            </td>
-            <td className="px-3 py-2.5 text-[13px] text-[var(--text-primary)] truncate">
-              {e.supplier?.name ?? '—'}
-            </td>
-            <td className="px-3 py-2.5 text-[13px] text-[var(--text-primary)] truncate">
-              {e.concept}
-            </td>
-            <td className="px-3 py-2.5 text-[13px] text-[var(--text-secondary)]">
-              {e.issued_at}
-            </td>
-            <td className="px-3 py-2.5 text-[13px] font-medium text-[var(--text-primary)]">
-              S/{' '}
-              {Number(e.amount).toLocaleString('es-PE', {
-                minimumFractionDigits: 2,
-              })}
-            </td>
-            <td className="px-3 py-2.5">
-              <StatusBadge status={e.status} />
-            </td>
-            <td className="px-3 py-2.5">
-              <RowActions
-                expense={e}
-                onDetail={onDetail}
-                onMarkPaid={onMarkPaid}
-                onAnular={onAnular}
-              />
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+    <>
+      {/* ── Vista mobile: cards ── */}
+      <div className="sm:hidden divide-y divide-[var(--border-subtle)]">
+        {expenses.length === 0 ? emptyMsg : expenses.map((e) => {
+          const nombre = e.supplier?.name ?? '—';
+          return (
+            <div key={e.id} className="p-4 flex items-start gap-3 hover:bg-[var(--bg-secondary)] transition-colors">
+              <div className="w-10 h-10 rounded-2xl bg-[var(--bg-secondary)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-secondary)] font-black text-sm shrink-0">
+                {nombre[0]?.toUpperCase() ?? 'G'}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-sm font-black text-[var(--text-primary)] truncate">{nombre}</p>
+                  <StatusBadge status={e.status} />
+                </div>
+                <p className="text-[11px] text-[var(--text-secondary)] truncate mt-0.5">{e.concept}</p>
+                <div className="flex items-center gap-3 mt-1.5 flex-wrap">
+                  <TipoBadge tipo={e.voucher_type ?? ''} />
+                  <span className="text-[10px] font-mono text-[var(--text-secondary)]">{e.receipt_number ?? '—'}</span>
+                  <span className="text-xs font-black text-[var(--text-primary)]">S/ {Number(e.amount).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span>
+                </div>
+                <div className="flex items-center justify-between mt-2">
+                  <span className="text-[10px] text-[var(--text-secondary)]">{e.issued_at}</span>
+                  <RowActions expense={e} onDetail={onDetail} onMarkPaid={onMarkPaid} onAnular={onAnular} />
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* ── Vista desktop: tabla ── */}
+      <div className="hidden sm:block overflow-x-auto">
+        <table className="w-full border-collapse" style={{ tableLayout: 'fixed' }}>
+          <colgroup>
+            <col style={{ width: '110px' }} />
+            <col style={{ width: '130px' }} />
+            <col style={{ width: '160px' }} />
+            <col style={{ width: '150px' }} />
+            <col style={{ width: '100px' }} />
+            <col style={{ width: '90px' }} />
+            <col style={{ width: '85px' }} />
+            <col style={{ width: '100px' }} />
+          </colgroup>
+          <thead>
+            <tr>
+              {['Tipo','Nro. comprobante','Proveedor / Trabajador','Concepto','Fecha','Monto','Estado',''].map((h) => (
+                <th key={h} className="text-left text-[11px] font-medium text-[var(--text-muted)] px-3 py-2.5 border-b border-[var(--border-subtle)]">{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {expenses.length === 0 && (
+              <tr><td colSpan={8} className="py-10 text-center text-[13px] text-[var(--text-muted)]">No hay comprobantes para este filtro.</td></tr>
+            )}
+            {expenses.map((e) => (
+              <tr key={e.id} className="border-b border-[var(--border-subtle)] hover:bg-[var(--bg-muted)] transition-colors">
+                <td className="px-3 py-2.5"><TipoBadge tipo={e.voucher_type ?? ''} /></td>
+                <td className="px-3 py-2.5 font-mono text-[12px] text-[var(--text-secondary)] truncate">{e.receipt_number ?? '—'}</td>
+                <td className="px-3 py-2.5 text-[13px] text-[var(--text-primary)] truncate">{e.supplier?.name ?? '—'}</td>
+                <td className="px-3 py-2.5 text-[13px] text-[var(--text-primary)] truncate">{e.concept}</td>
+                <td className="px-3 py-2.5 text-[13px] text-[var(--text-secondary)]">{e.issued_at}</td>
+                <td className="px-3 py-2.5 text-[13px] font-medium text-[var(--text-primary)]">S/ {Number(e.amount).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</td>
+                <td className="px-3 py-2.5"><StatusBadge status={e.status} /></td>
+                <td className="px-3 py-2.5"><RowActions expense={e} onDetail={onDetail} onMarkPaid={onMarkPaid} onAnular={onAnular} /></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
   );
 }
 
@@ -696,40 +654,13 @@ export function OperationsPageClient() {
         title="Gestión Operativa"
         subtitle="Recibos, honorarios y servicios"
         icon="Briefcase"
-        actions={
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => {
-                setShowScanner((v) => !v);
-                if (showScanner) resetScan();
-              }}
-              className="inline-flex items-center gap-1.5 border border-[var(--border-subtle)] rounded-lg px-3.5 py-[7px] text-[13px] font-medium text-[var(--text-primary)] hover:bg-[var(--bg-muted)] transition-colors shrink-0"
-            >
-              {showScanner ? '✕ Cerrar scanner' : '+ Escanear PDF'}
-            </button>
-            <button
-              onClick={() => exportExpensesToExcel(filtered).catch(console.error)}
-              className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-[var(--bg-card)] text-[var(--text-primary)] font-bold text-xs border border-[var(--border-subtle)] hover:text-[#5AAFE6] hover:border-[#69BEEB]/30 transition-all shadow-sm"
-            >
-              <Icon name="FileSpreadsheet" className="text-xl" />
-              <span className="hidden sm:inline">Excel</span>
-            </button>
-            <button
-              onClick={() => exportExpensesToPdf(filtered).catch(console.error)}
-              className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-[var(--bg-card)] text-[var(--text-primary)] font-bold text-xs border border-[var(--border-subtle)] hover:text-[#5AAFE6] hover:border-[#69BEEB]/30 transition-all shadow-sm"
-            >
-              <Icon name="FileText" className="text-xl" />
-              <span className="hidden sm:inline">PDF</span>
-            </button>
-          </div>
-        }
       />
 
       {/* ── Stats ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <CVCard className="p-6 border-l-4 border-[#5AAFE6] shadow-sm hover:shadow-md transition-all">
+        <CVCard className="p-6 border-l-4 border-[var(--icons-green)] shadow-sm hover:shadow-md transition-all">
           <div className="flex items-center justify-between mb-4">
-            <div className="p-2.5 bg-[var(--bg-secondary)] rounded-xl text-[#5AAFE6]">
+            <div className="p-2.5 bg-[var(--bg-secondary)] rounded-xl text-[var(--icons-green)]">
               <CircleDollarSign className="w-5 h-5" />
             </div>
             <span className="text-2xl font-black text-[var(--text-primary)] tracking-tight">
@@ -746,9 +677,9 @@ export function OperationsPageClient() {
             {expenses.length} comprobantes
           </p>
         </CVCard>
-        <CVCard className="p-6 border-l-4 border-[#66D6A8] shadow-sm hover:shadow-md transition-all">
+        <CVCard className="p-6 border-l-4 border-[var(--color-success)] shadow-sm hover:shadow-md transition-all">
           <div className="flex items-center justify-between mb-4">
-            <div className="p-2.5 bg-[var(--bg-secondary)] rounded-xl text-[#66D6A8]">
+            <div className="p-2.5 bg-[var(--bg-secondary)] rounded-xl text-[var(--color-success)]">
               <Receipt className="w-5 h-5" />
             </div>
             <span className="text-2xl font-black text-[var(--text-primary)] tracking-tight">
@@ -766,9 +697,9 @@ export function OperationsPageClient() {
             honorarios
           </p>
         </CVCard>
-        <CVCard className="p-6 border-l-4 border-[#B7E000] shadow-sm hover:shadow-md transition-all">
+        <CVCard className="p-6 border-l-4 border-[var(--color-info)] shadow-sm hover:shadow-md transition-all">
           <div className="flex items-center justify-between mb-4">
-            <div className="p-2.5 bg-[var(--bg-secondary)] rounded-xl text-[#B7E000]">
+            <div className="p-2.5 bg-[var(--bg-secondary)] rounded-xl text-[var(--color-info)]">
               <Landmark className="w-5 h-5" />
             </div>
             <span className="text-2xl font-black text-[var(--text-primary)] tracking-tight">
@@ -785,9 +716,9 @@ export function OperationsPageClient() {
             {recibosPendientes} recibo(s)
           </p>
         </CVCard>
-        <CVCard className="p-6 border-l-4 border-[#4EC7B8] shadow-sm hover:shadow-md transition-all">
+        <CVCard className="p-6 border-l-4 border-[var(--color-info)] shadow-sm hover:shadow-md transition-all">
           <div className="flex items-center justify-between mb-4">
-            <div className="p-2.5 bg-[var(--bg-secondary)] rounded-xl text-[#4EC7B8]">
+            <div className="p-2.5 bg-[var(--bg-secondary)] rounded-xl text-[var(--color-info)]">
               <Receipt className="w-5 h-5" />
             </div>
             <span className="text-2xl font-black text-[var(--text-primary)] tracking-tight">
@@ -817,41 +748,92 @@ export function OperationsPageClient() {
         ))}
       </div>
 
-      {/* ── Filtros ── */}
-      <div className="flex flex-wrap gap-2 items-center">
+      {/* ── Filtros + acciones en card unificado ── */}
+      <div className="bg-[var(--bg-card)] p-6 sm:p-8 rounded-[2.5rem] shadow-xl border border-[var(--border-subtle)] space-y-5 overflow-x-hidden">
+        {/* Header */}
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-[var(--brand-green)] rounded-2xl flex items-center justify-center shadow-lg shrink-0">
+              <Icon name="Search" className="w-6 h-6 text-white" />
+            </div>
+            <h3 className="text-xl font-black text-[var(--text-primary)]">
+              Filtros de Búsqueda
+            </h3>
+          </div>
+          <button
+            onClick={() => { setSearch(''); setStatusFilter(''); setDateFrom(''); setDateTo(''); }}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-sky-400 dark:from-emerald-700 dark:to-teal-600 text-white font-black text-[10px] uppercase tracking-widest shadow-lg shadow-sky-500/25 dark:shadow-emerald-900/25 hover:shadow-xl hover:-translate-y-0.5 transition-all"
+          >
+            <Icon name="RotateCcw" className="w-4 h-4" />
+            <span className="hidden sm:inline">Limpiar</span>
+          </button>
+        </div>
+
+        {/* Fila 1: Búsqueda (ancho completo) */}
         <input
           type="text"
           placeholder="Buscar proveedor o concepto..."
-          className={`${inputCls} flex-1 min-w-[160px]`}
+          className={`${inputCls}`}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-        <select
-          className={`${selectCls} w-full sm:w-auto`}
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-        >
-          <option value="">Todos los estados</option>
-          <option value="Pagado">Pagado</option>
-          <option value="Pendiente">Pendiente</option>
-          <option value="Anulado">Anulado</option>
-        </select>
-        <BaseDatePicker
-          value={dateFrom}
-          onChange={setDateFrom}
-          placeholder="Desde"
-          buttonClassName="text-xs py-[7px]"
-        />
-        <BaseDatePicker
-          value={dateTo}
-          onChange={setDateTo}
-          placeholder="Hasta"
-          buttonClassName="text-xs py-[7px]"
-        />
+
+        {/* Fila 2: Estado + Desde + Hasta */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <BaseSelectField
+            name="status"
+            label="Estado"
+            value={statusFilter}
+            onChange={setStatusFilter}
+            options={[
+              { value: '', label: 'Todos los estados' },
+              { value: 'Pagado', label: 'Pagado' },
+              { value: 'Pendiente', label: 'Pendiente' },
+              { value: 'Anulado', label: 'Anulado' },
+            ]}
+          />
+          <BaseDatePicker
+            value={dateFrom}
+            onChange={setDateFrom}
+            placeholder="Desde"
+            buttonClassName="text-xs py-[7px]"
+          />
+          <BaseDatePicker
+            value={dateTo}
+            onChange={setDateTo}
+            placeholder="Hasta"
+            buttonClassName="text-xs py-[7px]"
+          />
+        </div>
+
+        {/* Fila 3: acciones en grid de 3 columnas iguales */}
+        <div className="grid grid-cols-3 gap-3 pt-4 border-t border-[var(--border-subtle)]">
+          <button
+            onClick={() => { setShowScanner((v) => !v); if (showScanner) resetScan(); }}
+            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--bg-card)] text-[var(--text-primary)] font-bold text-xs border border-[var(--border-subtle)] hover:text-[var(--color-success)] hover:border-[var(--color-success)]/30 transition-all shadow-sm"
+          >
+            <Icon name={showScanner ? 'X' : 'ScanLine'} className="w-4 h-4" />
+            {showScanner ? 'Cerrar' : 'Escanear PDF'}
+          </button>
+          <button
+            onClick={() => exportExpensesToExcel(filtered).catch(console.error)}
+            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--bg-card)] text-[var(--text-primary)] font-bold text-xs border border-[var(--border-subtle)] hover:text-[var(--icons-green)] hover:border-[var(--icons-green)]/30 transition-all shadow-sm"
+          >
+            <Icon name="FileSpreadsheet" className="w-4 h-4" />
+            Excel
+          </button>
+          <button
+            onClick={() => exportExpensesToPdf(filtered).catch(console.error)}
+            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--bg-card)] text-[var(--text-primary)] font-bold text-xs border border-[var(--border-subtle)] hover:text-[var(--icons-green)] hover:border-[var(--icons-green)]/30 transition-all shadow-sm"
+          >
+            <Icon name="FileText" className="w-4 h-4" />
+            PDF
+          </button>
+        </div>
       </div>
 
       {error && (
-        <div className="rounded-lg border border-[#F7C1C1] bg-[#FCEBEB] px-4 py-3 text-[13px] text-[#791F1F]">
+        <div className="rounded-lg border border-[var(--color-error)]/30 bg-[var(--color-error)]/10 px-4 py-3 text-[13px] text-[var(--color-error)]">
           {error}
         </div>
       )}

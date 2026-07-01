@@ -14,7 +14,7 @@ export const adminNavigation: PanelNavigation = [
                 id: 'solicitudes',
                 label: 'Solicitudes',
                 href: '/admin/sellers/solicitudes',
-                icon: 'FileCheck',
+                icon: 'ListChecks',
             },
         ],
     },

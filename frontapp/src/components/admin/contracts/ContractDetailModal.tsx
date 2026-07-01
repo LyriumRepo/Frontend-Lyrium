@@ -188,21 +188,21 @@ export const ContractDetailModal: React.FC<ContractDetailModalProps> = ({
                 <div className="flex flex-wrap gap-2">
                     {isNewContract ? (
                         <button onClick={() => handleUpdateStatus('ACTIVE')} disabled={!isFormComplete}
-                            className="h-10 sm:h-12 rounded-xl flex items-center justify-center gap-2 px-4 sm:px-6 bg-sky-500 hover:bg-sky-600 active:bg-sky-700 text-white border-0 shadow-lg shadow-sky-500/20 font-black text-xs uppercase tracking-widest disabled:opacity-45 disabled:cursor-not-allowed duration-300 transition-all active:scale-[0.97]">
+                            className="h-10 sm:h-12 rounded-xl flex items-center justify-center gap-2 px-4 sm:px-6 bg-[var(--icons-green)] hover:bg-[var(--icons-green)] active:bg-[var(--icons-green)] text-white border-0 shadow-lg shadow-[var(--icons-green)]/20 font-black text-xs uppercase tracking-widest disabled:opacity-45 disabled:cursor-not-allowed duration-300 transition-all active:scale-[0.97]">
                             <CheckCircle className="w-4 h-4 shrink-0" /> Validar y Activar
                         </button>
                     ) : (
                         <>
                             <button onClick={() => handleUpdateStatus('ACTIVE')}
-                                className="h-10 sm:h-12 rounded-xl flex items-center justify-center gap-2 px-4 sm:px-6 bg-sky-500 hover:bg-sky-600 active:bg-sky-700 text-white border-0 shadow-lg shadow-sky-500/20 font-black text-xs uppercase tracking-widest duration-300 transition-all active:scale-[0.97]">
+                                className="h-10 sm:h-12 rounded-xl flex items-center justify-center gap-2 px-4 sm:px-6 bg-[var(--icons-green)] hover:bg-[var(--icons-green)] active:bg-[var(--icons-green)] text-white border-0 shadow-lg shadow-[var(--icons-green)]/20 font-black text-xs uppercase tracking-widest duration-300 transition-all active:scale-[0.97]">
                                 <CheckCircle className="w-4 h-4 shrink-0" /> Validar y Activar
                             </button>
                             <button onClick={() => handleUpdateStatus('PENDING')}
-                                className="h-10 sm:h-12 rounded-xl border border-sky-500 text-sky-500 hover:bg-sky-500/10 flex items-center justify-center gap-2 px-4 sm:px-6 font-black text-xs uppercase tracking-widest duration-300 transition-all active:scale-[0.97]">
+                                className="h-10 sm:h-12 rounded-xl border border-[var(--icons-green)] text-[var(--icons-green)] hover:bg-[var(--icons-green)]/10 flex items-center justify-center gap-2 px-4 sm:px-6 font-black text-xs uppercase tracking-widest duration-300 transition-all active:scale-[0.97]">
                                 <FileText className="w-4 h-4 shrink-0" /> En revisión
                             </button>
                             <button onClick={() => handleUpdateStatus('EXPIRED')}
-                                className="h-10 sm:h-12 rounded-xl border border-rose-200/50 text-rose-500 hover:bg-rose-500/10 flex items-center justify-center gap-2 px-4 sm:px-6 font-black text-xs uppercase tracking-widest duration-300 transition-all active:scale-[0.97]">
+                                className="h-10 sm:h-12 rounded-xl border border-[var(--color-error)]/30 text-[var(--color-error)] hover:bg-[var(--color-error)]/10 flex items-center justify-center gap-2 px-4 sm:px-6 font-black text-xs uppercase tracking-widest duration-300 transition-all active:scale-[0.97]">
                                 <XCircle className="w-4 h-4 shrink-0" /> Rechazado
                             </button>
                         </>

@@ -100,10 +100,16 @@ export default function InvoiceTable({ vouchers, onViewDetail }: InvoiceTablePro
                                         <td className="px-6 py-4">
                                             <span className="text-sm font-black text-[var(--text-primary)] font-mono tracking-tight">{v.series}-{v.number}</span>
                                         </td>
-                                        {/* Monto (productos del vendedor, sin envío) */}
+                                        {/* Monto — subtotal productos/servicios sin envío */}
                                         <td className="px-6 py-4">
                                             <p className="text-sm font-black text-[var(--text-primary)]">
-                                                S/ {(v.store_amount ?? v.amount).toLocaleString('es-PE', { minimumFractionDigits: 2 })}
+                                                S/ {(
+                                                    v.store_amount ??
+                                                    (v.items && v.items.length > 0
+                                                        ? v.items.reduce((s, i) => s + i.line_total, 0)
+                                                        : null) ??
+                                                    v.amount
+                                                ).toLocaleString('es-PE', { minimumFractionDigits: 2 })}
                                             </p>
                                         </td>
                                         {/* Comisión */}

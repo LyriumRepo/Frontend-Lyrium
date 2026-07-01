@@ -19,16 +19,16 @@ const getKpiConfig = (iconKey: string, colorKey: string) => {
             glow: 'bg-[var(--celeste-500)]/5 group-hover:bg-[var(--celeste-500)]/10'
         },
         emerald: {
-            iconWrapper: 'bg-emerald-500/10 text-emerald-500 dark:text-emerald-400',
-            glow: 'bg-emerald-500/5 group-hover:bg-emerald-500/10'
+            iconWrapper: 'bg-[var(--color-success)]/10 text-[var(--color-success)]',
+            glow: 'bg-[var(--color-success)]/5 group-hover:bg-[var(--color-success)]/10'
         },
         amber: {
-            iconWrapper: 'bg-amber-500/10 text-amber-500 dark:text-amber-400',
-            glow: 'bg-amber-500/5 group-hover:bg-amber-500/10'
+            iconWrapper: 'bg-[var(--color-warning)]/10 text-[var(--color-warning)]',
+            glow: 'bg-[var(--color-warning)]/5 group-hover:bg-[var(--color-warning)]/10'
         },
         red: {
-            iconWrapper: 'bg-red-500/10 text-red-500 dark:text-red-400',
-            glow: 'bg-red-500/5 group-hover:bg-red-500/10'
+            iconWrapper: 'bg-[var(--color-error)]/10 text-[var(--color-error)]',
+            glow: 'bg-[var(--color-error)]/5 group-hover:bg-[var(--color-error)]/10'
         }
     };
 
@@ -178,7 +178,7 @@ export const ContratosModule: React.FC<ContratosModuleProps> = ({ state, actions
 
                     <button
                         onClick={actions.createNew}
-                        className="lg:col-span-2 w-full p-4 bg-sky-500 hover:bg-sky-600 active:bg-sky-700 text-white rounded-2xl transition-all shadow-xl shadow-sky-500/20 flex items-center justify-center gap-2 whitespace-nowrap active:scale-95 duration-300"
+                        className="lg:col-span-2 w-full p-4 bg-[var(--icons-green)] hover:bg-[var(--icons-green)] active:bg-[var(--icons-green)] text-white rounded-2xl transition-all shadow-xl shadow-[var(--icons-green)]/20 flex items-center justify-center gap-2 whitespace-nowrap active:scale-95 duration-300"
                     >
                         <Plus className="w-4 h-4 font-bold" /> 
                         <span className="text-xs font-black uppercase tracking-widest">Nuevo Contrato</span>

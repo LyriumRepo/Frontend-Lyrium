@@ -58,7 +58,7 @@ export default function CheckoutPage() {
       <div className="min-h-screen bg-white dark:bg-[var(--bg-primary)]">
         <div
           id="checkout-top-wrapper"
-          className="sticky top-0 z-[10000] bg-white dark:bg-[var(--bg-secondary)]
+          className="sticky top-0 z-40 bg-white dark:bg-[var(--bg-secondary)]
           border-b border-gray-100 dark:border-[var(--border-subtle)]
           shadow-[0_1px_4px_rgba(0,0,0,0.06)] dark:shadow-none"
         >

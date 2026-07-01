@@ -22,7 +22,7 @@ export default function RequestsPanel({ requests, plansData, filter, onFilterCha
       <div className="flex gap-2 mb-5 flex-wrap" id="requestsFilters">
         {(['all','approved','pending','rejected'] as const).map(f => (
           <button key={f} className={`px-4 py-2.5 border-2 rounded-lg text-[13px] font-semibold cursor-pointer transition-all duration-300 flex items-center gap-2
-            ${filter === f ? 'bg-[var(--text-primary)] text-[var(--bg-canvas)] border-[var(--text-primary)]' : 'bg-white dark:bg-[var(--bg-card)] text-gray-500 dark:text-[var(--text-secondary)] border-gray-200 dark:border-[var(--border-subtle)] hover:border-gray-400 hover:text-gray-700 dark:hover:text-[var(--text-primary)]'}`}
+            ${filter === f ? 'bg-gradient-to-r from-sky-500 to-sky-400 dark:from-emerald-700 dark:to-teal-600 text-white border-transparent shadow-lg shadow-sky-500/25 dark:shadow-emerald-900/25' : 'bg-white dark:bg-[var(--bg-card)] text-gray-500 dark:text-[var(--text-secondary)] border-gray-200 dark:border-[var(--border-subtle)] hover:border-gray-400 hover:text-gray-700 dark:hover:text-[var(--text-primary)]'}`}
             data-filter={f} onClick={() => onFilterChange(f)}>
             {f !== 'all' && <span className={`w-2 h-2 rounded-full ${f === 'approved' ? 'bg-emerald-500' : f === 'pending' ? 'bg-amber-500' : 'bg-red-500'}`} />}
             {f === 'all' ? 'Todas' : f === 'approved' ? 'Exitosos' : f === 'pending' ? 'Pendientes' : 'Fallidos'}

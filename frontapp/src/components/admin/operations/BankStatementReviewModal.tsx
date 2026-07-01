@@ -36,13 +36,13 @@ interface BankStatementReviewModalProps {
 function MedBadge({ med }: { med: string | null }) {
   if (!med) return <span className="text-[var(--text-muted)]">—</span>;
   const map: Record<string, { label: string; cls: string }> = {
-    BPI: { label: 'B. Internet', cls: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300' },
-    CAJ: { label: 'Cajero', cls: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300' },
-    INT: { label: 'Interno', cls: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300' },
-    VEN: { label: 'Vent.', cls: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' },
-    POS: { label: 'POS', cls: 'bg-pink-100 text-pink-700 dark:bg-pink-900/40 dark:text-pink-300' },
-    TLC: { label: 'TeleC.', cls: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300' },
-    BPT: { label: 'B. Tel.', cls: 'bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300' },
+    BPI: { label: 'B. Internet', cls: 'bg-[var(--color-info)]/10 text-[var(--color-info)]' },
+    CAJ: { label: 'Cajero', cls: 'bg-[var(--color-warning)]/10 text-[var(--color-warning)]' },
+    INT: { label: 'Interno', cls: 'bg-[var(--color-warning)]/10 text-[var(--color-warning)]' },
+    VEN: { label: 'Vent.', cls: 'bg-[var(--color-success)]/10 text-[var(--color-success)]' },
+    POS: { label: 'POS', cls: 'bg-[var(--color-error)]/10 text-[var(--color-error)]' },
+    TLC: { label: 'TeleC.', cls: 'bg-[var(--color-info)]/10 text-[var(--color-info)]' },
+    BPT: { label: 'B. Tel.', cls: 'bg-[var(--color-info)]/10 text-[var(--color-info)]' },
   };
   const entry = map[med];
   return (
@@ -239,7 +239,7 @@ export function BankStatementReviewModal({
                   key={i}
                   onClick={() => toggle(i)}
                   className={`border-t border-[var(--border-subtle)] cursor-pointer transition-colors hover:bg-[var(--bg-muted)] ${
-                    isSelected ? 'bg-blue-50/40 dark:bg-blue-900/10' : ''
+                    isSelected ? 'bg-[var(--color-info)]/5' : ''
                   }`}
                 >
                   <td className="px-2 py-2">

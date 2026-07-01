@@ -3,7 +3,8 @@
 import React, { useState, useTransition, useOptimistic } from 'react';
 import { Product } from '@/features/seller/catalog/types';
 import ProductCard from './components/ProductCard';
-import ProductModal from './components/ProductModal';
+import dynamic from 'next/dynamic';
+const ProductModal = dynamic(() => import('./components/ProductModal'), { ssr: false });
 import ProductDetailModal from './components/ProductDetailModal';
 import BaseEmptyState from '@/components/ui/BaseEmptyState';
 import BaseButton from '@/components/ui/BaseButton';

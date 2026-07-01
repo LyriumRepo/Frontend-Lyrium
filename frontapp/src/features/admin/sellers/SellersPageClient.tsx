@@ -44,16 +44,16 @@ interface TabButtonProps {
 const TabButton = ({ active, onClick, label, icon, badge }: TabButtonProps) => (
   <button
     onClick={onClick}
-    className={`px-3 sm:px-8 py-3 sm:py-4 min-h-[44px] rounded-2xl text-[10px] sm:text-[11px] font-black transition-all flex items-center gap-2 sm:gap-3 relative border ${
+    className={`px-3 sm:px-8 py-3 sm:py-4 min-h-[44px] rounded-2xl text-[10px] sm:text-[11px] font-black transition-all flex items-center justify-center gap-2 sm:gap-3 relative border w-full sm:w-auto ${
       active
-        ? 'bg-[var(--bg-card)] shadow-xl shadow-black/5 text-cyan-500 border-[var(--border-subtle)]'
+        ? 'bg-[var(--bg-card)] shadow-xl shadow-black/5 text-[var(--icons-green)] border-[var(--border-subtle)]'
         : 'text-[var(--text-secondary)] border-transparent hover:bg-[var(--bg-secondary)]'
     }`}
   >
     {icon}
     <span className="uppercase tracking-widest">{label}</span>
     {badge !== undefined && badge > 0 && (
-      <span className="absolute -top-1 -right-1 px-2.5 py-1 bg-rose-500 text-white rounded-full text-[9px] font-black animate-bounce shadow-lg shadow-rose-500/20">
+      <span className="absolute -top-1 -right-1 px-2.5 py-1 bg-[var(--color-error)] text-white rounded-full text-[9px] font-black animate-bounce shadow-lg shadow-[var(--color-error)]/20">
         {badge}
       </span>
     )}
@@ -106,12 +106,12 @@ const ManagementModal = ({
           </button>
 
           <div
-            className={`h-2 w-full absolute top-0 left-0 ${type === 'seller' ? 'bg-rose-500' : 'bg-cyan-500'}`}
+            className={`h-2 w-full absolute top-0 left-0 ${type === 'seller' ? 'bg-[var(--color-error)]' : 'bg-[var(--icons-green)]'}`}
           />
 
           <div className="flex items-center gap-3 mb-4">
             <div
-              className={`p-2 rounded-lg ${type === 'seller' ? 'bg-rose-500/10 text-rose-500' : 'bg-cyan-500/10 text-cyan-500'}`}
+              className={`p-2 rounded-lg ${type === 'seller' ? 'bg-[var(--color-error)]/10 text-[var(--color-error)]' : 'bg-[var(--icons-green)]/10 text-[var(--icons-green)]'}`}
             >
               <ShieldAlert className="w-5 h-5" />
             </div>
@@ -150,7 +150,7 @@ const ManagementModal = ({
                   name="status"
                   defaultValue={suggested}
                   required
-                  className="w-full p-4 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-2xl font-black text-[var(--text-primary)] focus:ring-4 focus:ring-cyan-500/10 appearance-none transition-all"
+                  className="w-full p-4 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-2xl font-black text-[var(--text-primary)] focus:ring-4 focus:ring-[var(--icons-green)]/10 appearance-none transition-all"
                 >
                   {type === 'seller' ? (
                     <>
@@ -199,7 +199,7 @@ const ManagementModal = ({
                 required
                 minLength={10}
                 placeholder="Detalle los motivos técnicos..."
-                className="w-full p-5 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-3xl font-medium text-[var(--text-primary)] focus:ring-4 focus:ring-cyan-500/10 focus:bg-[var(--bg-card)] transition-all resize-none text-[11px] placeholder:text-[var(--text-secondary)]"
+                className="w-full p-5 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-3xl font-medium text-[var(--text-primary)] focus:ring-4 focus:ring-[var(--icons-green)]/10 focus:bg-[var(--bg-card)] transition-all resize-none text-[11px] placeholder:text-[var(--text-secondary)]"
               />
             </div>
 
@@ -342,7 +342,7 @@ export function SellersPageClient(_props: SellersPageClientProps) {
       />
 
       {error && (
-        <div className="p-6 bg-red-500/10 border border-red-500/20 rounded-[2rem] flex items-center gap-4 text-red-500 font-bold text-sm">
+        <div className="p-6 bg-[var(--color-error)]/10 border border-[var(--color-error)]/20 rounded-[2rem] flex items-center gap-4 text-[var(--color-error)] font-bold text-sm">
           <ShieldAlert className="w-5 h-5" />
           {error}
         </div>
@@ -350,7 +350,7 @@ export function SellersPageClient(_props: SellersPageClientProps) {
 
       {/* ── Barra de navegación (tabs con scroll horizontal) ── */}
       <div className="relative border-b border-[var(--border-subtle)] pb-1">
-        <div className="flex flex-nowrap overflow-x-auto gap-2 py-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="grid grid-cols-2 sm:flex sm:flex-nowrap sm:overflow-x-auto gap-2 py-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <TabButton
             active={currentTab === 'vendedores'}
             onClick={() => setCurrentTab('vendedores')}
@@ -412,23 +412,23 @@ export function SellersPageClient(_props: SellersPageClientProps) {
               onChange={(e) =>
                 setFilters((prev) => ({ ...prev, sellerSearch: e.target.value }))
               }
-              className="w-full h-12 pl-12 pr-5 rounded-full border border-[var(--border-subtle)] bg-[var(--bg-canvas)] text-sm font-semibold placeholder:text-[var(--text-tertiary)] focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-500 transition-all"
+              className="w-full h-12 pl-12 pr-5 rounded-full border border-[var(--border-subtle)] bg-[var(--bg-canvas)] text-sm font-semibold placeholder:text-[var(--text-tertiary)] focus:outline-none focus:ring-2 focus:ring-[var(--icons-green)]/30 focus:border-[var(--icons-green)] transition-all"
             />
           </div>
-          <div className="flex gap-2 shrink-0">
+          <div className="flex gap-2 sm:shrink-0">
             <button
               onClick={handleExportExcel}
-              className="flex items-center gap-2 px-5 py-3 min-h-[44px] rounded-2xl bg-[var(--bg-card)] text-[var(--text-primary)] font-bold text-xs border border-[var(--border-subtle)] hover:text-[#5AAFE6] hover:border-[#69BEEB]/30 transition-all shadow-sm"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-3 min-h-[44px] rounded-2xl bg-[var(--bg-card)] text-[var(--text-primary)] font-bold text-xs border border-[var(--border-subtle)] hover:text-[var(--icons-green)] hover:border-[var(--icons-green)]/30 transition-all shadow-sm"
             >
               <Icon name="FileSpreadsheet" className="text-xl" />
-              <span className="hidden sm:inline">Excel</span>
+              <span>Excel</span>
             </button>
             <button
               onClick={handleExportPdf}
-              className="flex items-center gap-2 px-5 py-3 min-h-[44px] rounded-2xl bg-[var(--bg-card)] text-[var(--text-primary)] font-bold text-xs border border-[var(--border-subtle)] hover:text-[#5AAFE6] hover:border-[#69BEEB]/30 transition-all shadow-sm"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-3 min-h-[44px] rounded-2xl bg-[var(--bg-card)] text-[var(--text-primary)] font-bold text-xs border border-[var(--border-subtle)] hover:text-[var(--icons-green)] hover:border-[var(--icons-green)]/30 transition-all shadow-sm"
             >
               <Icon name="FileText" className="text-xl" />
-              <span className="hidden sm:inline">PDF</span>
+              <span>PDF</span>
             </button>
           </div>
         </div>
@@ -515,24 +515,24 @@ export function SellersPageClient(_props: SellersPageClientProps) {
 
             {profileRequestsLoading ? (
               <div className="flex items-center justify-center py-12">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-500" />
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--icons-green)]" />
               </div>
             ) : profileRequestsError ? (
-              <div className="bg-red-50 p-6 rounded-2xl text-center">
-                <p className="text-red-600">
+              <div className="bg-[var(--color-error)]/10 p-6 rounded-2xl text-center">
+                <p className="text-[var(--color-error)]">
                   Error al cargar solicitudes: {String(profileRequestsError)}
                 </p>
                 <button
                   type="button"
                   onClick={() => actions.refetchProfileRequests?.()}
-                  className="mt-4 px-4 py-2 bg-red-500 text-white rounded-xl"
+                  className="mt-4 px-4 py-2 bg-[var(--color-error)] text-white rounded-xl"
                 >
                   Reintentar
                 </button>
               </div>
             ) : profileRequests.length === 0 ? (
               <div className="bg-[var(--bg-card)] p-12 rounded-[2.5rem] border border-[var(--border-subtle)] text-center">
-                <FileCheck className="w-12 h-12 text-green-500 mx-auto mb-4" />
+                <FileCheck className="w-12 h-12 text-[var(--color-success)] mx-auto mb-4" />
                 <p className="text-[var(--text-secondary)]">
                   No hay solicitudes de validación pendientes
                 </p>
@@ -564,17 +564,17 @@ export function SellersPageClient(_props: SellersPageClientProps) {
                       </div>
                       <div className="flex items-center gap-2">
                         {request.status === 'pending' && (
-                          <span className="px-3 py-1 bg-amber-100 text-amber-700 text-xs font-bold rounded-full">
+                          <span className="px-3 py-1 bg-[var(--color-warning)]/15 text-[var(--color-warning)] text-xs font-bold rounded-full">
                             Pendiente
                           </span>
                         )}
                         {request.status === 'approved' && (
-                          <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full">
+                          <span className="px-3 py-1 bg-[var(--color-success)]/15 text-[var(--color-success)] text-xs font-bold rounded-full">
                             Aprobado
                           </span>
                         )}
                         {request.status === 'rejected' && (
-                          <span className="px-3 py-1 bg-red-100 text-red-700 text-xs font-bold rounded-full">
+                          <span className="px-3 py-1 bg-[var(--color-error)]/15 text-[var(--color-error)] text-xs font-bold rounded-full">
                             Rechazado
                           </span>
                         )}
@@ -644,11 +644,11 @@ export function SellersPageClient(_props: SellersPageClientProps) {
                     </div>
 
                     {request.admin_notes && (
-                      <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/20 rounded-2xl">
-                        <h4 className="text-xs font-bold text-red-600 uppercase mb-1">
+                      <div className="mt-4 p-4 bg-[var(--color-error)]/10 rounded-2xl">
+                        <h4 className="text-xs font-bold text-[var(--color-error)] uppercase mb-1">
                           Notas del admin:
                         </h4>
-                        <p className="text-sm text-red-700 dark:text-red-400">
+                        <p className="text-sm text-[var(--color-error)]">
                           {request.admin_notes}
                         </p>
                       </div>
@@ -661,7 +661,7 @@ export function SellersPageClient(_props: SellersPageClientProps) {
                           onClick={() =>
                             actions.approveProfileRequest(request.id)
                           }
-                          className="px-4 py-2 bg-green-500 text-white font-bold rounded-xl hover:bg-green-600 transition-colors"
+                          className="px-4 py-2 bg-[var(--color-success)] text-white font-bold rounded-xl hover:bg-[var(--color-success)] transition-colors"
                         >
                           Aprobar
                         </button>
@@ -672,7 +672,7 @@ export function SellersPageClient(_props: SellersPageClientProps) {
                             if (notes)
                               actions.rejectProfileRequest(request.id, notes);
                           }}
-                          className="px-4 py-2 bg-red-500 text-white font-bold rounded-xl hover:bg-red-600 transition-colors"
+                          className="px-4 py-2 bg-[var(--color-error)] text-white font-bold rounded-xl hover:bg-[var(--color-error)] transition-colors"
                         >
                           Rechazar
                         </button>

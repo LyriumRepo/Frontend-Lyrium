@@ -19,13 +19,13 @@ const tdCls = 'px-3 py-2.5 text-[13px] text-[var(--text-secondary)]';
 // ─── Badges ───────────────────────────────────────────────────────────────────
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, string> = {
-    Activo: 'bg-[#E1F5EE] text-[#085041]',
-    Suspendido: 'bg-[#FCEBEB] text-[#791F1F]',
-    'En Pausa': 'bg-[#FAEEDA] text-[#633806]',
+    Activo: 'bg-[var(--color-success)]/15 text-[var(--color-success)]',
+    Suspendido: 'bg-[var(--color-error)]/15 text-[var(--color-error)]',
+    'En Pausa': 'bg-[var(--color-warning)]/15 text-[var(--color-warning)]',
     Inactivo: 'bg-[var(--bg-muted)] text-[var(--text-muted)]',
-    Pagado: 'bg-[#E1F5EE] text-[#085041]',
-    Pendiente: 'bg-[#FAEEDA] text-[#633806]',
-    Anulado: 'bg-[#FCEBEB] text-[#791F1F]',
+    Pagado: 'bg-[var(--color-success)]/15 text-[var(--color-success)]',
+    Pendiente: 'bg-[var(--color-warning)]/15 text-[var(--color-warning)]',
+    Anulado: 'bg-[var(--color-error)]/15 text-[var(--color-error)]',
   };
   return (
     <span
@@ -38,10 +38,10 @@ function StatusBadge({ status }: { status: string }) {
 
 function TipoBadge({ tipo }: { tipo: string }) {
   const map: Record<string, string> = {
-    Honorarios: 'bg-[#E6F1FB] text-[#0C447C]',
-    Factura: 'bg-[#FAEEDA] text-[#633806]',
-    Boleta: 'bg-[#EEEDFE] text-[#3C3489]',
-    Servicio: 'bg-[#EAF3DE] text-[#27500A]',
+    Honorarios: 'bg-[var(--color-info)]/15 text-[var(--color-info)]',
+    Factura: 'bg-[var(--color-warning)]/15 text-[var(--color-warning)]',
+    Boleta: 'bg-[var(--color-info)]/15 text-[var(--color-info)]',
+    Servicio: 'bg-[var(--color-success)]/15 text-[var(--color-success)]',
   };
   return (
     <span
@@ -67,9 +67,9 @@ function IconBtn({
   const cls = {
     default:
       'border-[var(--border-subtle)] text-[var(--text-muted)] hover:bg-[var(--bg-muted)] hover:text-[var(--text-secondary)]',
-    green: 'border-[#9FE1CB] text-[#085041] hover:bg-[#E1F5EE]',
-    red: 'border-[#F7C1C1] text-[#791F1F] hover:bg-[#FCEBEB]',
-    blue: 'border-[#B5D4F4] text-[#0C447C] hover:bg-[#E6F1FB]',
+    green: 'border-[var(--color-success)]/30 text-[var(--color-success)] hover:bg-[var(--color-success)]/10',
+    red: 'border-[var(--color-error)]/30 text-[var(--color-error)] hover:bg-[var(--color-error)]/10',
+    blue: 'border-[var(--color-info)]/30 text-[var(--color-info)] hover:bg-[var(--color-info)]/10',
   }[variant];
   return (
     <button
@@ -304,7 +304,7 @@ export const ProvidersTab: React.FC<{
               >
                 <td className={tdCls}>
                   <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 bg-[#E6F1FB] text-[#0C447C] rounded-lg flex items-center justify-center text-[12px] font-medium shrink-0">
+                    <div className="w-8 h-8 bg-[var(--color-info)]/15 text-[var(--color-info)] rounded-lg flex items-center justify-center text-[12px] font-medium shrink-0">
                       {inicial}
                     </div>
                     <div className="min-w-0">
@@ -502,7 +502,7 @@ export const CredentialsTab: React.FC<{
               >
                 <td className={tdCls}>
                   <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 bg-[#EEEDFE] text-[#3C3489] rounded-lg flex items-center justify-center text-[11px] font-medium shrink-0">
+                    <div className="w-7 h-7 bg-[var(--color-info)]/15 text-[var(--color-info)] rounded-lg flex items-center justify-center text-[11px] font-medium shrink-0">
                       {(role.name ?? '??').substring(0, 2).toUpperCase()}
                     </div>
                     <span className="text-[13px] text-[var(--text-primary)] font-medium">
@@ -515,7 +515,7 @@ export const CredentialsTab: React.FC<{
                     {(role.modules ?? []).map((mod) => (
                       <span
                         key={mod}
-                        className="text-[11px] px-1.5 py-0.5 bg-[#E6F1FB] text-[#0C447C] rounded-md"
+                        className="text-[11px] px-1.5 py-0.5 bg-[var(--color-info)]/15 text-[var(--color-info)] rounded-md"
                       >
                         {mod}
                       </span>
@@ -557,7 +557,7 @@ export const CredentialsTab: React.FC<{
 
       {/* Panel info */}
       <div className="bg-[var(--bg-muted)] rounded-xl p-5 h-fit flex flex-col gap-3">
-        <div className="w-9 h-9 bg-[#EEEDFE] text-[#3C3489] rounded-lg flex items-center justify-center">
+        <div className="w-9 h-9 bg-[var(--color-info)]/15 text-[var(--color-info)] rounded-lg flex items-center justify-center">
           <IcoShield />
         </div>
         <p className="text-[13px] font-medium text-[var(--text-primary)]">
@@ -596,7 +596,7 @@ export const AuditTab: React.FC<{ logs: AuditLog[] }> = ({ logs = [] }) => (
         Registro de todas las acciones del sistema
       </p>
     </div>
-    <div className="divide-y divide-gray-50 max-h-[560px] overflow-y-auto">
+    <div className="divide-y divide-[var(--border-subtle)] max-h-[560px] overflow-y-auto">
       {logs.length === 0 && (
         <p className="py-10 text-center text-[13px] text-[var(--text-muted)]">
           No hay registros de auditoría.
@@ -607,7 +607,7 @@ export const AuditTab: React.FC<{ logs: AuditLog[] }> = ({ logs = [] }) => (
           key={log.id}
           className="flex items-start gap-3 px-4 py-3 hover:bg-[var(--bg-muted)] transition-colors"
         >
-          <div className="w-7 h-7 bg-[#E6F1FB] text-[#0C447C] rounded-lg flex items-center justify-center shrink-0 mt-0.5">
+          <div className="w-7 h-7 bg-[var(--color-info)]/15 text-[var(--color-info)] rounded-lg flex items-center justify-center shrink-0 mt-0.5">
             <IcoFinger />
           </div>
           <div className="flex-1 min-w-0">
@@ -631,7 +631,7 @@ export const AuditTab: React.FC<{ logs: AuditLog[] }> = ({ logs = [] }) => (
             )}
           </div>
           {log.event === 'created' && (
-            <span className="text-[#085041] mt-0.5 shrink-0">
+            <span className="text-[var(--color-success)] mt-0.5 shrink-0">
               <IcoCheck />
             </span>
           )}

@@ -1,5 +1,5 @@
 export type TicketStatus = 'abierto' | 'proceso' | 'pendiente' | 'resuelto' | 'cerrado';
-export type TicketCategory = 'critico' | 'tecnico' | 'negativo' | 'informacion' | 'positivo';
+export type TicketCategory = 'critico' | 'tecnico' | 'negativo' | 'informacion' | 'positivo' | 'payments';
 export type TicketPriority = 'baja' | 'media' | 'alta' | 'critica';
 
 export interface CustomerTicket {
@@ -40,6 +40,7 @@ export const CATEGORY_LABELS: Record<TicketCategory, string> = {
   negativo:    'Comentario Negativo',
   informacion: 'Solicitud de Información',
   positivo:    'Comentario Positivo',
+  payments:    'Pagos y Facturación',
 };
 
 export const PRIORITY_LABELS: Record<TicketPriority, string> = {

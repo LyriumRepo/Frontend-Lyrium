@@ -77,19 +77,19 @@ const getCategoryLabel = (cat?: string): string => {
 
 const getCategoryBadgeClass = (tag: string): string => {
     switch (tag.toLowerCase()) {
-        case 'logística': case 'logistica': return 'bg-amber-500/10 text-amber-400 border border-amber-500/20';
-        case 'catálogo': case 'catalogo': return 'bg-amber-500/10 text-amber-400 border border-amber-500/20';
-        case 'finanzas': return 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20';
-        case 'reembolso': return 'bg-rose-500/10 text-rose-400 border border-rose-500/20';
-        case 'consulta puntos': case 'puntos': return 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20';
-        case 'técnico': case 'tecnico': return 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20';
-        case 'admin': return 'bg-slate-500/10 text-slate-400 border border-slate-500/20';
-        case 'info': return 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20';
-        case 'pagos': return 'bg-rose-500/10 text-rose-400 border border-rose-500/20';
-        case 'trámites': case 'tramites': return 'bg-amber-500/10 text-amber-400 border border-amber-500/20';
-        case 'seguimiento': return 'bg-amber-500/10 text-amber-400 border border-amber-500/20';
-        case 'elogio': return 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
-        default: return 'bg-zinc-500/10 text-zinc-400 border border-zinc-500/20';
+        case 'logística': case 'logistica': return 'bg-[var(--color-warning)]/10 text-[var(--color-warning)] border border-[var(--color-warning)]/20';
+        case 'catálogo': case 'catalogo': return 'bg-[var(--color-warning)]/10 text-[var(--color-warning)] border border-[var(--color-warning)]/20';
+        case 'finanzas': return 'bg-[var(--color-info)]/10 text-[var(--color-info)] border border-[var(--color-info)]/20';
+        case 'reembolso': return 'bg-[var(--color-error)]/10 text-[var(--color-error)] border border-[var(--color-error)]/20';
+        case 'consulta puntos': case 'puntos': return 'bg-[var(--color-info)]/10 text-[var(--color-info)] border border-[var(--color-info)]/20';
+        case 'técnico': case 'tecnico': return 'bg-[var(--color-info)]/10 text-[var(--color-info)] border border-[var(--color-info)]/20';
+        case 'admin': return 'bg-[var(--bg-muted)] text-[var(--text-muted)] border border-[var(--border-subtle)]';
+        case 'info': return 'bg-[var(--color-info)]/10 text-[var(--color-info)] border border-[var(--color-info)]/20';
+        case 'pagos': return 'bg-[var(--color-error)]/10 text-[var(--color-error)] border border-[var(--color-error)]/20';
+        case 'trámites': case 'tramites': return 'bg-[var(--color-warning)]/10 text-[var(--color-warning)] border border-[var(--color-warning)]/20';
+        case 'seguimiento': return 'bg-[var(--color-warning)]/10 text-[var(--color-warning)] border border-[var(--color-warning)]/20';
+        case 'elogio': return 'bg-[var(--color-success)]/10 text-[var(--color-success)] border border-[var(--color-success)]/20';
+        default: return 'bg-[var(--bg-muted)] text-[var(--text-muted)] border border-[var(--border-subtle)]';
     }
 };
 
@@ -384,7 +384,7 @@ export const HelpDeskModule: React.FC<HelpDeskModuleProps> = ({
                                                 <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-[var(--turquesa-500)] border-2 border-[var(--bg-card)] shadow-[0_0_8px_var(--turquesa-500)] animate-pulse" />
                                             )}
                                             {chat.unreadCount > 0 && !isActive && (
-                                                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 text-white text-[8px] font-black flex items-center justify-center border border-[var(--bg-card)]">
+                                                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[var(--color-success)] text-white text-[8px] font-black flex items-center justify-center border border-[var(--bg-card)]">
                                                     {chat.unreadCount > 9 ? '9+' : chat.unreadCount}
                                                 </span>
                                             )}

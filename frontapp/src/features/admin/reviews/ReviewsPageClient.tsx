@@ -50,7 +50,7 @@ function Stars({ value, size = 'sm' }: { value: number; size?: 'sm' | 'lg' }) {
       {[1, 2, 3, 4, 5].map((n) => (
         <Star
           key={n}
-          className={`${cls} ${n <= Math.round(value) ? 'text-amber-400 fill-amber-400' : 'text-gray-200 fill-gray-200'}`}
+          className={`${cls} ${n <= Math.round(value) ? 'text-[var(--color-warning)] fill-[var(--color-warning)]' : 'text-[var(--border-subtle)] fill-[var(--border-subtle)]'}`}
         />
       ))}
     </div>
@@ -60,10 +60,10 @@ function Stars({ value, size = 'sm' }: { value: number; size?: 'sm' | 'lg' }) {
 function RatingBadge({ value }: { value: number }) {
   const color =
     value >= 4.5
-      ? 'bg-emerald-100 text-emerald-700'
+      ? 'bg-[var(--color-success)]/15 text-[var(--color-success)]'
       : value >= 3.5
-        ? 'bg-amber-100 text-amber-700'
-        : 'bg-red-100 text-red-700';
+        ? 'bg-[var(--color-warning)]/15 text-[var(--color-warning)]'
+        : 'bg-[var(--color-error)]/15 text-[var(--color-error)]';
   return (
     <span
       className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-black ${color}`}
@@ -85,11 +85,11 @@ function EmptyState({
 }) {
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center">
-      <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mb-4">
-        <Icon className="w-8 h-8 text-gray-300" />
+      <div className="w-16 h-16 rounded-2xl bg-[var(--bg-muted)] flex items-center justify-center mb-4">
+        <Icon className="w-8 h-8 text-[var(--text-muted)]" />
       </div>
-      <p className="font-bold text-gray-500">{title}</p>
-      <p className="text-sm text-gray-400 mt-1">{subtitle}</p>
+      <p className="font-bold text-[var(--text-secondary)]">{title}</p>
+      <p className="text-sm text-[var(--text-muted)] mt-1">{subtitle}</p>
     </div>
   );
 }
@@ -106,7 +106,7 @@ function LimitSelector({
   const options = [5, 10, 100];
   return (
     <div className="flex items-center gap-2">
-      <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+      <span className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">
         Top
       </span>
       <div className="flex gap-1">
@@ -116,8 +116,8 @@ function LimitSelector({
             onClick={() => onChange(opt)}
             className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all ${
               value === opt
-                ? 'bg-sky-500 text-white shadow-sm'
-                : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                ? 'bg-gradient-to-r from-sky-500 to-sky-400 dark:from-emerald-700 dark:to-teal-600 text-white shadow-lg shadow-sky-500/25 dark:shadow-emerald-900/25'
+                : 'bg-[var(--bg-muted)] text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)]'
             }`}
           >
             {opt}
@@ -175,7 +175,7 @@ function TopProductsTab() {
 
   if (error)
     return (
-      <div className="flex items-center gap-2 text-red-500 text-sm p-4 bg-red-50 rounded-2xl">
+      <div className="flex items-center gap-2 text-[var(--color-error)] text-sm p-4 bg-[var(--color-error)]/5 rounded-2xl">
         <AlertCircle className="w-4 h-4 flex-shrink-0" />
         {error}
       </div>
@@ -186,7 +186,7 @@ function TopProductsTab() {
       {/* Buscador y Limit */}
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
           <input
             value={search}
             onChange={(e) => {
@@ -194,7 +194,7 @@ function TopProductsTab() {
               setPage(1);
             }}
             placeholder="Buscar producto o tienda..."
-            className="w-full pl-9 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500/30 bg-white dark:bg-[var(--bg-card)]"
+            className="w-full pl-9 pr-4 py-2.5 text-sm border border-[var(--border-subtle)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--icons-green)]/30 bg-[var(--bg-card)]"
           />
         </div>
         <LimitSelector value={limit} onChange={(v) => { setLimit(v); setPage(1); }} />
@@ -214,17 +214,17 @@ function TopProductsTab() {
             return (
               <div
                 key={product.id}
-                className="flex items-center gap-4 p-3 bg-white dark:bg-[var(--bg-card)] border border-gray-100 dark:border-[var(--border-subtle)] rounded-2xl hover:border-sky-200 transition-all group"
+                className="flex items-center gap-4 p-3 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl hover:border-[var(--icons-green)]/20 transition-all group"
               >
                 {/* Rank */}
                 <div
-                  className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 font-black text-sm ${rank === 1 ? 'bg-amber-100 text-amber-600' : rank === 2 ? 'bg-gray-100 text-gray-600' : rank === 3 ? 'bg-orange-100 text-orange-600' : 'bg-gray-50 text-gray-400'}`}
+                  className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 font-black text-sm ${rank === 1 ? 'bg-[var(--color-warning)]/15 text-[var(--color-warning)]' : rank === 2 ? 'bg-[var(--bg-muted)] text-[var(--text-secondary)]' : rank === 3 ? 'bg-[var(--color-warning)]/10 text-[var(--color-warning)]' : 'bg-[var(--bg-muted)] text-[var(--text-muted)]'}`}
                 >
                   {rank <= 3 ? <Trophy className="w-4 h-4" /> : rank}
                 </div>
 
                 {/* Imagen */}
-                <div className="w-10 h-10 rounded-xl bg-gray-100 overflow-hidden flex-shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-[var(--bg-muted)] overflow-hidden flex-shrink-0">
                   {product.image ? (
                     <Image
                       src={product.image}
@@ -234,16 +234,16 @@ function TopProductsTab() {
                       className="object-cover w-full h-full"
                     />
                   ) : (
-                    <Package className="w-5 h-5 text-gray-300 m-auto mt-2.5" />
+                    <Package className="w-5 h-5 text-[var(--text-muted)] m-auto mt-2.5" />
                   )}
                 </div>
 
                 {/* Info */}
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] truncate">
+                  <p className="text-sm font-bold text-[var(--text-primary)] truncate">
                     {product.name}
                   </p>
-                  <p className="text-xs text-gray-400 truncate flex items-center gap-1">
+                  <p className="text-xs text-[var(--text-muted)] truncate flex items-center gap-1">
                     <Store className="w-3 h-3" />
                     {product.store?.name ?? '—'}
                   </p>
@@ -252,7 +252,7 @@ function TopProductsTab() {
                 {/* Rating */}
                 <div className="flex flex-col items-end gap-1 flex-shrink-0">
                   <RatingBadge value={product.rating_average} />
-                  <p className="text-xs text-gray-400">
+                  <p className="text-xs text-[var(--text-muted)]">
                     {product.rating_count} reseñas
                   </p>
                 </div>
@@ -261,7 +261,7 @@ function TopProductsTab() {
                 <Link
                   href={`/producto/${product.slug}`}
                   target="_blank"
-                  className="opacity-0 group-hover:opacity-100 transition-opacity text-xs text-sky-500 font-bold flex-shrink-0"
+                  className="opacity-0 group-hover:opacity-100 transition-opacity text-xs text-[var(--icons-green)] font-bold flex-shrink-0"
                 >
                   Ver →
                 </Link>
@@ -274,24 +274,24 @@ function TopProductsTab() {
       {/* Paginación */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between pt-2">
-          <p className="text-xs text-gray-400">{limited.length} productos</p>
+          <p className="text-xs text-[var(--text-muted)]">{limited.length} productos</p>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="p-1.5 rounded-lg border border-gray-200 disabled:opacity-40 hover:bg-gray-50 transition-colors"
+              className="p-1.5 rounded-lg border border-[var(--border-subtle)] disabled:opacity-40 hover:bg-[var(--bg-muted)] transition-colors"
             >
-              <ChevronLeft className="w-4 h-4 text-gray-500" />
+              <ChevronLeft className="w-4 h-4 text-[var(--text-secondary)]" />
             </button>
-            <span className="text-xs font-bold text-gray-600">
+            <span className="text-xs font-bold text-[var(--text-secondary)]">
               {page} / {totalPages}
             </span>
             <button
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
-              className="p-1.5 rounded-lg border border-gray-200 disabled:opacity-40 hover:bg-gray-50 transition-colors"
+              className="p-1.5 rounded-lg border border-[var(--border-subtle)] disabled:opacity-40 hover:bg-[var(--bg-muted)] transition-colors"
             >
-              <ChevronRight className="w-4 h-4 text-gray-500" />
+              <ChevronRight className="w-4 h-4 text-[var(--text-secondary)]" />
             </button>
           </div>
         </div>
@@ -331,7 +331,7 @@ function TopStoresTab() {
 
   if (error)
     return (
-      <div className="flex items-center gap-2 text-red-500 text-sm p-4 bg-red-50 rounded-2xl">
+      <div className="flex items-center gap-2 text-[var(--color-error)] text-sm p-4 bg-[var(--color-error)]/5 rounded-2xl">
         <AlertCircle className="w-4 h-4" />
         {error}
       </div>
@@ -356,17 +356,17 @@ function TopStoresTab() {
         displayed.map((store, i) => (
           <div
             key={store.id}
-            className="flex items-center gap-4 p-4 bg-white dark:bg-[var(--bg-card)] border border-gray-100 dark:border-[var(--border-subtle)] rounded-2xl hover:border-sky-200 transition-all"
+            className="flex items-center gap-4 p-4 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl hover:border-[var(--icons-green)]/20 transition-all"
           >
             {/* Rank */}
             <div
-              className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 font-black text-sm ${i === 0 ? 'bg-amber-100 text-amber-600' : i === 1 ? 'bg-gray-100 text-gray-500' : i === 2 ? 'bg-orange-100 text-orange-600' : 'bg-gray-50 text-gray-400'}`}
+              className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 font-black text-sm ${i === 0 ? 'bg-[var(--color-warning)]/15 text-[var(--color-warning)]' : i === 1 ? 'bg-[var(--bg-muted)] text-[var(--text-secondary)]' : i === 2 ? 'bg-[var(--color-warning)]/10 text-[var(--color-warning)]' : 'bg-[var(--bg-muted)] text-[var(--text-muted)]'}`}
             >
               {i < 3 ? <Trophy className="w-4 h-4" /> : i + 1}
             </div>
 
             {/* Logo */}
-            <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/20 flex items-center justify-center flex-shrink-0 overflow-hidden">
+            <div className="w-10 h-10 rounded-xl bg-[var(--color-success)]/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
               {store.logo ? (
                 <Image
                   src={store.logo}
@@ -376,15 +376,15 @@ function TopStoresTab() {
                   className="object-cover w-full h-full"
                 />
               ) : (
-                <Store className="w-5 h-5 text-emerald-500" />
+                <Store className="w-5 h-5 text-[var(--color-success)]" />
               )}
             </div>
 
             {/* Info */}
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] flex items-center gap-1.5 truncate">
+              <p className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-1.5 truncate">
                 {store.name}
-                <BadgeCheck className="w-3.5 h-3.5 text-sky-500 flex-shrink-0" />
+                <BadgeCheck className="w-3.5 h-3.5 text-[var(--icons-green)] flex-shrink-0" />
               </p>
               <Stars value={store.rating_average} />
             </div>
@@ -392,7 +392,7 @@ function TopStoresTab() {
             {/* Rating */}
             <div className="flex flex-col items-end gap-1 flex-shrink-0">
               <RatingBadge value={store.rating_average} />
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-[var(--text-muted)]">
                 {store.review_count} reseñas
               </p>
             </div>
@@ -437,7 +437,7 @@ function TopServicesTab() {
 
   if (error)
     return (
-      <div className="flex items-center gap-2 text-red-500 text-sm p-4 bg-red-50 rounded-2xl">
+      <div className="flex items-center gap-2 text-[var(--color-error)] text-sm p-4 bg-[var(--color-error)]/5 rounded-2xl">
         <AlertCircle className="w-4 h-4 flex-shrink-0" />
         {error}
       </div>
@@ -468,17 +468,17 @@ function TopServicesTab() {
             return (
               <div
                 key={service.id}
-                className="flex items-center gap-4 p-3 bg-white dark:bg-[var(--bg-card)] border border-gray-100 dark:border-[var(--border-subtle)] rounded-2xl hover:border-sky-200 transition-all group"
+                className="flex items-center gap-4 p-3 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl hover:border-[var(--icons-green)]/20 transition-all group"
               >
                 {/* Rank */}
                 <div
-                  className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 font-black text-sm ${rank === 1 ? 'bg-amber-100 text-amber-600' : rank === 2 ? 'bg-gray-100 text-gray-600' : rank === 3 ? 'bg-orange-100 text-orange-600' : 'bg-gray-50 text-gray-400'}`}
+                  className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 font-black text-sm ${rank === 1 ? 'bg-[var(--color-warning)]/15 text-[var(--color-warning)]' : rank === 2 ? 'bg-[var(--bg-muted)] text-[var(--text-secondary)]' : rank === 3 ? 'bg-[var(--color-warning)]/10 text-[var(--color-warning)]' : 'bg-[var(--bg-muted)] text-[var(--text-muted)]'}`}
                 >
                   {rank <= 3 ? <Trophy className="w-4 h-4" /> : rank}
                 </div>
 
                 {/* Imagen */}
-                <div className="w-10 h-10 rounded-xl bg-sky-100 overflow-hidden flex-shrink-0 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-[var(--icons-green)]/10 overflow-hidden flex-shrink-0 flex items-center justify-center">
                   {service.image ? (
                     <Image
                       src={service.image}
@@ -488,16 +488,16 @@ function TopServicesTab() {
                       className="object-cover w-full h-full"
                     />
                   ) : (
-                    <Calendar className="w-5 h-5 text-sky-500" />
+                    <Calendar className="w-5 h-5 text-[var(--icons-green)]" />
                   )}
                 </div>
 
                 {/* Info */}
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] truncate">
+                  <p className="text-sm font-bold text-[var(--text-primary)] truncate">
                     {service.name}
                   </p>
-                  <p className="text-xs text-gray-400 truncate flex items-center gap-2">
+                  <p className="text-xs text-[var(--text-muted)] truncate flex items-center gap-2">
                     <Store className="w-3 h-3" />
                     {service.store?.name ?? '—'}
                     <span className="flex items-center gap-0.5">
@@ -510,14 +510,14 @@ function TopServicesTab() {
                 {/* Rating */}
                 <div className="flex flex-col items-end gap-1 flex-shrink-0">
                   <RatingBadge value={service.rating_average} />
-                  <p className="text-xs text-gray-400">
+                  <p className="text-xs text-[var(--text-muted)]">
                     {service.rating_count} reseñas
                   </p>
                 </div>
 
                 {/* Precio */}
                 <div className="text-right flex-shrink-0 min-w-[60px]">
-                  <p className="text-sm font-black text-gray-800">
+                  <p className="text-sm font-black text-[var(--text-primary)]">
                     S/ {service.price.toFixed(2)}
                   </p>
                 </div>
@@ -530,24 +530,24 @@ function TopServicesTab() {
       {/* Paginación */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between pt-2">
-          <p className="text-xs text-gray-400">{limited.length} servicios</p>
+          <p className="text-xs text-[var(--text-muted)]">{limited.length} servicios</p>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="p-1.5 rounded-lg border border-gray-200 disabled:opacity-40 hover:bg-gray-50 transition-colors"
+              className="p-1.5 rounded-lg border border-[var(--border-subtle)] disabled:opacity-40 hover:bg-[var(--bg-muted)] transition-colors"
             >
-              <ChevronLeft className="w-4 h-4 text-gray-500" />
+              <ChevronLeft className="w-4 h-4 text-[var(--text-secondary)]" />
             </button>
-            <span className="text-xs font-bold text-gray-600">
+            <span className="text-xs font-bold text-[var(--text-secondary)]">
               {page} / {totalPages}
             </span>
             <button
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
-              className="p-1.5 rounded-lg border border-gray-200 disabled:opacity-40 hover:bg-gray-50 transition-colors"
+              className="p-1.5 rounded-lg border border-[var(--border-subtle)] disabled:opacity-40 hover:bg-[var(--bg-muted)] transition-colors"
             >
-              <ChevronRight className="w-4 h-4 text-gray-500" />
+              <ChevronRight className="w-4 h-4 text-[var(--text-secondary)]" />
             </button>
           </div>
         </div>
@@ -616,7 +616,7 @@ function ModerationTab() {
           <button
             key={s}
             onClick={() => setStatus(s)}
-            className={`px-4 py-2 min-h-[44px] rounded-xl text-xs font-black uppercase tracking-wider transition-all ${status === s ? 'bg-sky-500 text-white shadow-sm' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
+            className={`px-4 py-2 min-h-[44px] rounded-xl text-xs font-black uppercase tracking-wider transition-all ${status === s ? 'bg-sky-500 text-white shadow-sm' : 'bg-[var(--bg-muted)] text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)]'}`}
           >
             {s === 'pending'
               ? 'Pendientes'
@@ -627,14 +627,14 @@ function ModerationTab() {
         ))}
         <button
           onClick={fetchReports}
-          className="ml-auto min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors"
+          className="ml-auto min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl border border-[var(--border-subtle)] hover:bg-[var(--bg-muted)] transition-colors"
         >
-          <RefreshCw className="w-4 h-4 text-gray-400" />
+          <RefreshCw className="w-4 h-4 text-[var(--text-muted)]" />
         </button>
       </div>
 
       {error && (
-        <div className="flex items-center gap-2 text-red-500 text-sm p-3 bg-red-50 rounded-xl">
+        <div className="flex items-center gap-2 text-[var(--color-error)] text-sm p-3 bg-[var(--color-error)]/5 rounded-xl">
           <AlertCircle className="w-4 h-4 flex-shrink-0" />
           {error}
         </div>
@@ -657,13 +657,13 @@ function ModerationTab() {
           {reports.map((report) => (
             <div
               key={report.id}
-              className={`p-5 rounded-2xl border ${status === 'pending' ? 'bg-rose-50 border-rose-100' : 'bg-gray-50 border-gray-100'}`}
+              className={`p-5 rounded-2xl border ${status === 'pending' ? 'bg-[var(--color-error)]/5 border-[var(--color-error)]/10' : 'bg-[var(--bg-muted)] border-[var(--border-subtle)]'}`}
             >
               {/* Header del reporte */}
               <div className="flex items-start justify-between gap-3 mb-3">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span
-                    className={`text-xs font-black uppercase px-2.5 py-1 rounded-lg ${status === 'pending' ? 'bg-rose-100 text-rose-600' : status === 'accepted' ? 'bg-emerald-100 text-emerald-600' : 'bg-gray-200 text-gray-500'}`}
+                    className={`text-xs font-black uppercase px-2.5 py-1 rounded-lg ${status === 'pending' ? 'bg-[var(--color-error)]/15 text-[var(--color-error)]' : status === 'accepted' ? 'bg-[var(--color-success)]/15 text-[var(--color-success)]' : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)]'}`}
                   >
                     {status === 'pending'
                       ? 'Pendiente'
@@ -671,11 +671,11 @@ function ModerationTab() {
                         ? 'Aceptado'
                         : 'Desestimado'}
                   </span>
-                  <span className="text-xs bg-white border border-gray-200 text-gray-500 font-semibold px-2.5 py-1 rounded-lg">
+                  <span className="text-xs bg-[var(--bg-card)] border border-[var(--border-subtle)] text-[var(--text-secondary)] font-semibold px-2.5 py-1 rounded-lg">
                     {REASON_LABELS[report.reason] ?? report.reason}
                   </span>
                   {report.reporter && (
-                    <span className="text-xs text-gray-400">
+                    <span className="text-xs text-[var(--text-muted)]">
                       por{' '}
                       <span className="font-bold">{report.reporter.name}</span>
                     </span>
@@ -686,12 +686,12 @@ function ModerationTab() {
 
               {/* Producto */}
               {report.review.product && (
-                <p className="text-xs text-gray-400 mb-2 flex items-center gap-1">
+                <p className="text-xs text-[var(--text-muted)] mb-2 flex items-center gap-1">
                   <Package className="w-3 h-3" />
                   <Link
                     href={`/producto/${report.review.product.slug}`}
                     target="_blank"
-                    className="hover:text-sky-500 transition-colors font-semibold"
+                    className="hover:text-[var(--icons-green)] transition-colors font-semibold"
                   >
                     {report.review.product.name}
                   </Link>
@@ -700,17 +700,17 @@ function ModerationTab() {
 
               {/* Contenido de la reseña */}
               {report.review.title && (
-                <p className="text-sm font-bold text-gray-800 mb-1">
+                <p className="text-sm font-bold text-[var(--text-primary)] mb-1">
                   {report.review.title}
                 </p>
               )}
               {report.review.comment && (
-                <p className="text-sm text-gray-600 italic leading-relaxed mb-3">
+                <p className="text-sm text-[var(--text-secondary)] italic leading-relaxed mb-3">
                   "{report.review.comment}"
                 </p>
               )}
               {report.details && (
-                <p className="text-xs text-gray-500 bg-white border border-gray-100 rounded-xl px-3 py-2 mb-3">
+                <p className="text-xs text-[var(--text-secondary)] bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl px-3 py-2 mb-3">
                   <span className="font-bold">Motivo del reporte:</span>{' '}
                   {report.details}
                 </p>
@@ -718,7 +718,7 @@ function ModerationTab() {
 
               {/* Moderador */}
               {report.moderator && (
-                <p className="text-xs text-gray-400 mb-3">
+                <p className="text-xs text-[var(--text-muted)] mb-3">
                   Moderado por{' '}
                   <span className="font-bold">{report.moderator.name}</span>
                 </p>
@@ -811,7 +811,7 @@ function AllReviewsTab() {
       {/* Filtros */}
       <div className="flex flex-wrap gap-2">
         <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
           <input
             value={search}
             onChange={(e) => {
@@ -819,7 +819,7 @@ function AllReviewsTab() {
               setPage(1);
             }}
             placeholder="Buscar en reseñas..."
-            className="w-full pl-9 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500/30"
+            className="w-full pl-9 pr-4 py-2.5 text-sm border border-[var(--border-subtle)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--icons-green)]/30"
           />
         </div>
 
@@ -832,7 +832,7 @@ function AllReviewsTab() {
                 setRating(r);
                 setPage(1);
               }}
-              className={`px-3 py-2 min-h-[44px] rounded-xl text-xs font-black transition-all ${rating === r ? 'bg-amber-400 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
+              className={`px-3 py-2 min-h-[44px] rounded-xl text-xs font-black transition-all ${rating === r ? 'bg-amber-400 text-white' : 'bg-[var(--bg-muted)] text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)]'}`}
             >
               {r ? `${r}★` : 'Todas'}
             </button>
@@ -845,7 +845,7 @@ function AllReviewsTab() {
             setReported((r) => !r);
             setPage(1);
           }}
-          className={`flex items-center gap-1.5 px-3 py-2 min-h-[44px] rounded-xl text-xs font-black transition-all ${reported ? 'bg-rose-500 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
+          className={`flex items-center gap-1.5 px-3 py-2 min-h-[44px] rounded-xl text-xs font-black transition-all ${reported ? 'bg-rose-500 text-white' : 'bg-[var(--bg-muted)] text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)]'}`}
         >
           <ShieldAlert className="w-3.5 h-3.5" />
           {reported ? 'Reportadas' : 'Con reportes'}
@@ -853,7 +853,7 @@ function AllReviewsTab() {
       </div>
 
       {error && (
-        <div className="flex items-center gap-2 text-red-500 text-sm p-3 bg-red-50 rounded-xl">
+        <div className="flex items-center gap-2 text-[var(--color-error)] text-sm p-3 bg-[var(--color-error)]/5 rounded-xl">
           <AlertCircle className="w-4 h-4" />
           {error}
         </div>
@@ -876,43 +876,43 @@ function AllReviewsTab() {
           {reviews.map((review) => (
             <div
               key={review.id}
-              className="flex gap-4 p-4 bg-white dark:bg-[var(--bg-card)] border border-gray-100 dark:border-[var(--border-subtle)] rounded-2xl"
+              className="flex gap-4 p-4 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl"
             >
               <div className="flex-1 min-w-0 space-y-1">
                 <div className="flex items-center gap-2 flex-wrap">
                   <Stars value={review.rating} />
                   {review.isVerifiedPurchase && (
-                    <span className="text-xs text-emerald-600 font-semibold flex items-center gap-0.5">
+                    <span className="text-xs text-[var(--color-success)] font-semibold flex items-center gap-0.5">
                       <BadgeCheck className="w-3 h-3" />
                       Verificada
                     </span>
                   )}
                   {review.reports_count > 0 && (
-                    <span className="text-xs text-rose-600 font-semibold flex items-center gap-0.5 bg-rose-50 px-2 py-0.5 rounded-lg">
+                    <span className="text-xs text-[var(--color-error)] font-semibold flex items-center gap-0.5 bg-[var(--color-error)]/5 px-2 py-0.5 rounded-lg">
                       <ShieldAlert className="w-3 h-3" />
                       {review.reports_count} reporte
                       {review.reports_count > 1 ? 's' : ''}
                     </span>
                   )}
-                  <span className="text-xs text-gray-400 ml-auto">
+                  <span className="text-xs text-[var(--text-muted)] ml-auto">
                     {new Date(review.createdAt).toLocaleDateString('es-PE')}
                   </span>
                 </div>
                 {review.title && (
-                  <p className="text-sm font-bold text-gray-800 dark:text-[var(--text-primary)]">
+                  <p className="text-sm font-bold text-[var(--text-primary)]">
                     {review.title}
                   </p>
                 )}
                 {review.comment && (
-                  <p className="text-sm text-gray-500 line-clamp-2">
+                  <p className="text-sm text-[var(--text-secondary)] line-clamp-2">
                     {review.comment}
                   </p>
                 )}
-                <div className="flex items-center gap-3 text-xs text-gray-400">
+                <div className="flex items-center gap-3 text-xs text-[var(--text-muted)]">
                   {review.user && (
                     <span>
                       por{' '}
-                      <span className="font-bold text-gray-600">
+                      <span className="font-bold text-[var(--text-secondary)]">
                         {review.user.name}
                       </span>
                     </span>
@@ -921,7 +921,7 @@ function AllReviewsTab() {
                     <Link
                       href={`/producto/${review.product.slug}`}
                       target="_blank"
-                      className="flex items-center gap-1 hover:text-sky-500 transition-colors"
+                      className="flex items-center gap-1 hover:text-[var(--icons-green)] transition-colors"
                     >
                       <Package className="w-3 h-3" />
                       {review.product.name}
@@ -932,7 +932,7 @@ function AllReviewsTab() {
               <button
                 onClick={() => handleDelete(review.id)}
                 disabled={deleting === review.id}
-                className="p-2 rounded-xl hover:bg-red-50 hover:text-red-500 text-gray-300 transition-all flex-shrink-0 self-start disabled:opacity-40"
+                className="p-2 rounded-xl hover:bg-red-50 hover:text-red-500 text-[var(--text-muted)] transition-all flex-shrink-0 self-start disabled:opacity-40"
               >
                 {deleting === review.id ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -951,19 +951,19 @@ function AllReviewsTab() {
           <button
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
-            className="p-2 rounded-xl border border-gray-200 disabled:opacity-40 hover:bg-gray-50 transition-colors"
+            className="p-2 rounded-xl border border-[var(--border-subtle)] disabled:opacity-40 hover:bg-[var(--bg-muted)] transition-colors"
           >
-            <ChevronLeft className="w-4 h-4 text-gray-500" />
+            <ChevronLeft className="w-4 h-4 text-[var(--text-secondary)]" />
           </button>
-          <span className="text-sm font-bold text-gray-600">
+          <span className="text-sm font-bold text-[var(--text-secondary)]">
             {page} / {totalPages}
           </span>
           <button
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page === totalPages}
-            className="p-2 rounded-xl border border-gray-200 disabled:opacity-40 hover:bg-gray-50 transition-colors"
+            className="p-2 rounded-xl border border-[var(--border-subtle)] disabled:opacity-40 hover:bg-[var(--bg-muted)] transition-colors"
           >
-            <ChevronRight className="w-4 h-4 text-gray-500" />
+            <ChevronRight className="w-4 h-4 text-[var(--text-secondary)]" />
           </button>
         </div>
       )}
@@ -1023,9 +1023,9 @@ function MedalsTab() {
 
   const statusBadge = (status: string) => {
     const map: Record<string, string> = {
-      pending: 'bg-amber-100 text-amber-700',
-      approved: 'bg-emerald-100 text-emerald-700',
-      suspended: 'bg-red-100 text-red-700',
+      pending: 'bg-[var(--color-warning)]/15 text-[var(--color-warning)]',
+      approved: 'bg-[var(--color-success)]/15 text-[var(--color-success)]',
+      suspended: 'bg-[var(--color-error)]/15 text-[var(--color-error)]',
     };
     const labels: Record<string, string> = {
       pending: 'Pendiente',
@@ -1033,14 +1033,14 @@ function MedalsTab() {
       suspended: 'Suspendida',
     };
     return (
-      <span className={`inline-flex px-2.5 py-1 rounded-full text-[10px] font-black uppercase ${map[status] ?? 'bg-gray-100 text-gray-500'}`}>
+      <span className={`inline-flex px-2.5 py-1 rounded-full text-[10px] font-black uppercase ${map[status] ?? 'bg-[var(--bg-muted)] text-[var(--text-secondary)]'}`}>
         {labels[status] ?? status}
       </span>
     );
   };
 
   const selectCls =
-    'px-4 py-2.5 bg-white dark:bg-[var(--bg-card)] border border-gray-100 dark:border-[var(--border-subtle)] rounded-xl text-xs font-bold text-[var(--text-primary)] focus:ring-4 focus:ring-cyan-500/10 transition-all outline-none appearance-none cursor-pointer';
+    'px-4 py-2.5 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl text-xs font-bold text-[var(--text-primary)] focus:ring-4 focus:ring-[var(--icons-green)]/10 transition-all outline-none appearance-none cursor-pointer';
 
   return (
     <div className="space-y-4">
@@ -1089,7 +1089,7 @@ function MedalsTab() {
       ) : (
         <div className="space-y-2">
           {medals.map((medal) => (
-            <div key={medal.id} className="flex items-center gap-4 p-4 rounded-xl bg-white dark:bg-[var(--bg-card)] border border-gray-100 dark:border-[var(--border-subtle)] hover:border-gray-200 dark:hover:border-[var(--border-default)] hover:shadow-sm transition-all">
+            <div key={medal.id} className="flex items-center gap-4 p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-[var(--border-subtle)] dark:hover:border-[var(--border-default)] hover:shadow-sm transition-all">
               {/* Imagen medalla */}
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-300 to-amber-500 flex items-center justify-center flex-shrink-0 overflow-hidden">
                 <img src="/img/INSIGNIA PREMIUM.png" alt="" className="w-full h-full object-contain p-1" />
@@ -1101,7 +1101,7 @@ function MedalsTab() {
                   <span className="text-sm font-black text-[var(--text-primary)]">
                     {medal.entity?.name ?? medal.entity?.id ?? 'Sin nombre'}
                   </span>
-                  <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-md bg-gray-100 dark:bg-[var(--bg-muted)] text-gray-500 dark:text-[var(--text-muted)]">
+                  <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-md bg-[var(--bg-muted)] text-[var(--text-muted)]">
                     {medal.entity_type === 'store' ? 'Tienda' : medal.entity_type === 'product' ? 'Producto' : 'Servicio'}
                   </span>
                   {statusBadge(medal.status)}
@@ -1189,17 +1189,17 @@ export function ReviewsPageClient() {
       />
 
       {/* Tabs */}
-      <div className="bg-white dark:bg-[var(--bg-card)] border border-gray-100 dark:border-[var(--border-subtle)] rounded-2xl overflow-hidden">
+      <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl overflow-hidden">
         {/* Tab headers */}
-        <div className="flex border-b border-gray-100 dark:border-[var(--border-subtle)] overflow-x-auto">
+        <div className="flex border-b border-[var(--border-subtle)] overflow-x-auto">
           {TABS.map(({ key, label, icon: Icon }) => (
             <button
               key={key}
               onClick={() => setActiveTab(key)}
-              className={`flex items-center gap-2 px-6 py-4 text-xs font-black uppercase tracking-widest whitespace-nowrap transition-all border-b-2 -mb-px ${activeTab === key ? 'border-sky-500 text-sky-600 dark:text-sky-400 bg-sky-50/50 dark:bg-sky-900/10' : 'border-transparent text-gray-400 hover:text-gray-600 hover:bg-gray-50'}`}
+              className={`flex items-center gap-2 px-6 py-4 text-xs font-black uppercase tracking-widest whitespace-nowrap transition-all border-b-2 -mb-px ${activeTab === key ? 'border-[var(--icons-green)] text-[var(--icons-green)] bg-[var(--icons-green)]/5' : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--bg-muted)]'}`}
             >
               <Icon
-                className={`w-4 h-4 ${activeTab === key ? 'text-sky-500' : ''}`}
+                className={`w-4 h-4 ${activeTab === key ? 'text-[var(--icons-green)]' : ''}`}
               />
               {label}
               {key === 'moderacion' && <ModerationBadge />}

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useCallback, useState } from 'react';
+import React, { useEffect, useCallback, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Icon from '@/components/ui/Icon';
 
@@ -16,6 +16,7 @@ interface BaseModalProps {
   children: React.ReactNode;
   className?: string;
   showCloseButton?: boolean;
+  ariaDescribedby?: string;
 }
 
 const sizeStyles: Record<string, string> = {
@@ -41,12 +42,29 @@ export default function BaseModal({
   rainbowHeader = false,
   children,
   className = '',
+  ariaDescribedby,
 }: BaseModalProps) {
   const [mounted, setMounted] = useState(false);
+  const modalRef = useRef<HTMLDivElement>(null);
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
+      if (e.key === 'Tab' && modalRef.current) {
+        const focusable = modalRef.current.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+        );
+        if (focusable.length === 0) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
     },
     [onClose],
   );
@@ -59,6 +77,12 @@ export default function BaseModal({
     if (isOpen) {
       document.addEventListener('keydown', handleKeyDown);
       document.body.style.overflow = 'hidden';
+      setTimeout(() => {
+        const first = modalRef.current?.querySelector<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+        );
+        first?.focus();
+      }, 50);
     }
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
@@ -78,6 +102,11 @@ export default function BaseModal({
         onClick={onClose}
       />
       <div
+        ref={modalRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+        aria-describedby={ariaDescribedby}
         className={`
           relative w-full ${sizeStyles[size] || sizeStyles.md}
           bg-[var(--bg-card)] rounded-[2.5rem] shadow-2xl
@@ -92,6 +121,7 @@ export default function BaseModal({
         >
           <button
             onClick={onClose}
+            aria-label="Cerrar"
             className="absolute top-6 right-6 w-10 h-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center text-white hover:bg-white/30 transition-all active:scale-90"
           >
             <Icon name="X" className="w-5 h-5" />

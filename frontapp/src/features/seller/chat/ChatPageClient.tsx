@@ -193,6 +193,25 @@ export function ChatPageClient() {
 
     const listContent = (
         <div className={`flex-col h-full ${(!activeConversation || isMobileListVisible) ? 'flex' : 'hidden'} sm:flex`}>
+            {/* Barra de acciones: Nuevo Chat + Leyenda */}
+            {!showNewChatForm && (
+                <div className="px-4 pt-3 pb-2 flex items-center gap-2 shrink-0">
+                    <button
+                        onClick={() => setShowNewChatForm(true)}
+                        className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--verde-500)] text-white rounded-xl font-bold text-[10px] uppercase tracking-wider hover:opacity-90 transition-all shadow-sm"
+                    >
+                        <Icon name="Plus" className="w-3.5 h-3.5" />
+                        Nuevo Chat
+                    </button>
+                    <button
+                        onClick={() => setShowLegend(true)}
+                        title="Leyenda"
+                        className="w-9 h-9 flex items-center justify-center rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--turquesa-500)] hover:border-[var(--turquesa-500)] transition-all shadow-sm shrink-0"
+                    >
+                        <Icon name="Info" className="w-4 h-4" />
+                    </button>
+                </div>
+            )}
             <div className="p-4 border-b border-[var(--border-subtle)] shrink-0">
                 <div className="flex items-center justify-between">
                     <div>
@@ -330,7 +349,7 @@ export function ChatPageClient() {
 
     if (isLoading) {
         return (
-            <div className="flex flex-col flex-1 min-h-0 animate-fadeIn">
+            <div className="flex flex-col h-[calc(100vh-140px)] animate-fadeIn">
                 <ModuleHeader
                     title="Chat con Clientes"
                     subtitle="Comunicación directa con tus clientes"
@@ -344,30 +363,11 @@ export function ChatPageClient() {
     }
 
     return (
-        <div className="flex flex-col flex-1 min-h-0 animate-fadeIn">
+        <div className="flex flex-col h-[calc(100vh-140px)] animate-fadeIn">
             <ModuleHeader
                 title="Chat con Clientes"
                 subtitle="Comunicación directa con tus clientes"
                 icon="Messages"
-                actions={
-                    !showNewChatForm ? (
-                        <div className="flex items-center gap-2">
-                            <button
-                                onClick={() => setShowLegend(true)}
-                                title="Leyenda"
-                                className="w-9 h-9 flex items-center justify-center rounded-xl bg-white dark:bg-[var(--bg-secondary)] border border-[var(--border-subtle)] text-gray-500 dark:text-[var(--text-secondary)] hover:text-[var(--turquesa-500)] dark:hover:text-[var(--icons-green)] hover:border-[var(--turquesa-500)] dark:hover:border-[var(--icons-green)] transition-all shadow-sm"
-                            >
-                                <Icon name="Info" className="w-4 h-4" />
-                            </button>
-                            <button
-                                onClick={() => setShowNewChatForm(true)}
-                                className="px-4 py-2 bg-white dark:bg-[var(--bg-secondary)] text-[var(--turquesa-500)] dark:text-[var(--turquesa-500)] rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-gray-50 dark:hover:bg-[#2A3F33] transition-colors border border-[var(--border-subtle)] shadow-sm"
-                            >
-                                + Nuevo Chat
-                            </button>
-                        </div>
-                    ) : null
-                }
             />
 
             {showNewChatForm ? (
@@ -394,8 +394,8 @@ export function ChatPageClient() {
 
             {showLegend && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4" onClick={() => setShowLegend(false)}>
-                    <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-[3rem] max-w-lg w-full shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
-                        <div className="bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--turquesa-500)]/70 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-8 text-white relative">
+                    <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-[3rem] max-w-lg w-full max-h-[80vh] shadow-2xl overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
+                        <div className="bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--turquesa-500)]/70 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-8 text-white relative flex-shrink-0">
                             <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl" />
                             <div className="relative z-10 flex items-center justify-between">
                                 <div className="flex items-center gap-4">
@@ -412,11 +412,12 @@ export function ChatPageClient() {
                                 </button>
                             </div>
                         </div>
-                        <div className="p-8 space-y-4">
+                        <div className="p-8 space-y-4 overflow-y-auto">
                             {[
                                 { icon: 'Package', title: 'Pedidos y logística', desc: 'Resuelve dudas de tus clientes sobre pedidos, coordina entregas y confirma detalles del envío.' },
                                 { icon: 'RotateCcw', title: 'Devoluciones, cambios y reembolsos', desc: 'Atiende solicitudes de devolución, cambio de producto o reembolso que te hayan hecho los clientes.' },
                                 { icon: 'AlertTriangle', title: 'Reclamos y postventa', desc: 'Gestiona reportes de productos defectuosos, diferencias con lo pedido o incidencias comerciales de tus clientes.' },
+                                { icon: 'Receipt', title: 'Problemas de facturación', desc: 'Atiende consultas de tus clientes sobre comprobantes electrónicos (boleta o factura). Los errores de pago o cargos incorrectos los gestiona el administrador de Lyrium.' },
                                 { icon: 'Store', title: 'Cada tienda opera de forma independiente', desc: 'Este canal es para operaciones comerciales. Para incidencias técnicas de la plataforma, usa Soporte Lyrium.' },
                             ].map((item) => (
                                 <div key={item.title} className="flex items-start gap-4 p-4 bg-gray-50 dark:bg-[var(--bg-muted)]/50 rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)]">

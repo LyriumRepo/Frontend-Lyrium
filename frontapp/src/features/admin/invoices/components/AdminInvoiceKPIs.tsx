@@ -79,7 +79,7 @@ export default function AdminInvoiceKPIsDisplay({ kpis }: Props) {
             {kpis.topSellers.length > 0 && (
                 <div className="glass-card overflow-hidden">
                     <div className="px-6 py-5 border-b border-[var(--border-subtle)] flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 flex items-center justify-center text-emerald-600">
+                        <div className="w-9 h-9 rounded-xl bg-[var(--color-success)]/10 flex items-center justify-center text-[var(--color-success)]">
                             <Icon name="Trophy" className="w-5 h-5" />
                         </div>
                         <div>
@@ -119,7 +119,7 @@ export default function AdminInvoiceKPIsDisplay({ kpis }: Props) {
                                                 <div className="flex items-center justify-end gap-2">
                                                     <div className="w-16 h-1.5 bg-[var(--bg-secondary)] rounded-full overflow-hidden">
                                                         <div
-                                                            className="h-full bg-emerald-500 rounded-full"
+                                                            className="h-full bg-[var(--color-success)] rounded-full"
                                                             style={{ width: `${pct}%` }}
                                                         />
                                                     </div>

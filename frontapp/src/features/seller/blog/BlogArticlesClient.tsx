@@ -128,8 +128,8 @@ export function BlogArticlesClient() {
                                     <td className="px-5 py-4 text-gray-500">{a.views_count}</td>
                                     <td className="px-5 py-4 text-xs text-gray-400">{a.published_at ? new Date(a.published_at).toLocaleDateString('es-PE') : new Date(a.created_at).toLocaleDateString('es-PE')}</td>
                                     <td className="px-5 py-4"><div className="flex gap-2">
-                                        <button onClick={() => openEdit(a)} className="p-1.5 rounded-lg hover:bg-sky-50 dark:hover:bg-sky-900/20 text-sky-500 transition"><Edit className="w-4 h-4" /></button>
-                                        <button onClick={() => handleDelete(a.id)} className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-red-400 transition"><Trash2 className="w-4 h-4" /></button>
+                                        <button onClick={() => openEdit(a)} aria-label="Editar" className="p-1.5 rounded-lg hover:bg-sky-50 dark:hover:bg-sky-900/20 text-sky-500 transition"><Edit className="w-4 h-4" /></button>
+                                        <button onClick={() => handleDelete(a.id)} aria-label="Eliminar" className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-red-400 transition"><Trash2 className="w-4 h-4" /></button>
                                     </div></td>
                                 </tr>
                             ))}

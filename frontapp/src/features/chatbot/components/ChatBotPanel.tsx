@@ -17,6 +17,7 @@ interface Props {
     onSend: (content: string) => void;
     onBotResponse: (content: string) => void;
     onClear: () => void;
+    onWhatsAppClick?: () => void;
     tooltipText?: string;
     tooltipVisible?: boolean;
     tooltipShown?: boolean;
@@ -32,6 +33,7 @@ export default function ChatBotPanel({
     onMinimize,
     onSend,
     onClear,
+    onWhatsAppClick,
     tooltipText,
     tooltipVisible,
     tooltipShown,
@@ -111,7 +113,7 @@ export default function ChatBotPanel({
                     style={{ minHeight: '80px', maxHeight: '200px' }}
                 >
                     {messages.map((msg) => (
-                        <ChatBotBubble key={msg.id} message={msg} />
+                        <ChatBotBubble key={msg.id} message={msg} onWhatsAppClick={onWhatsAppClick} />
                     ))}
 
                     {isTyping && (

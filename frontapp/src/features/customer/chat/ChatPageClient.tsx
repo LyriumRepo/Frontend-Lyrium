@@ -192,6 +192,25 @@ export function ChatPageClient({ conversationId }: { conversationId?: string }) 
 
     const listContent = (
         <div className={`flex-col h-full ${(!activeConversation || isMobileListVisible) ? 'flex' : 'hidden'} sm:flex`}>
+            {/* Barra de acciones: Nuevo Chat + Leyenda */}
+            {!showNewChatForm && (
+                <div className="px-4 pt-3 pb-2 flex items-center gap-2 shrink-0">
+                    <button
+                        onClick={() => setShowNewChatForm(true)}
+                        className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--verde-500)] text-white rounded-xl font-bold text-[10px] uppercase tracking-wider hover:opacity-90 transition-all shadow-sm"
+                    >
+                        <Icon name="Plus" className="w-3.5 h-3.5" />
+                        Nuevo Chat
+                    </button>
+                    <button
+                        onClick={() => setShowLegend(true)}
+                        title="Leyenda"
+                        className="w-9 h-9 flex items-center justify-center rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--turquesa-500)] hover:border-[var(--turquesa-500)] transition-all shadow-sm shrink-0"
+                    >
+                        <Icon name="Info" className="w-4 h-4" />
+                    </button>
+                </div>
+            )}
             <div className="p-4 border-b border-[var(--border-subtle)] shrink-0">
                 <div className="flex items-center justify-between">
                     <div>
@@ -346,25 +365,6 @@ export function ChatPageClient({ conversationId }: { conversationId?: string }) 
                 title="Chat con Vendedores"
                 subtitle="Comunicación directa con los vendedores"
                 icon="MessageSquare"
-                actions={
-                    !showNewChatForm ? (
-                        <div className="flex items-center gap-2">
-                            <button
-                                onClick={() => setShowLegend(true)}
-                                title="Leyenda"
-                                className="w-9 h-9 flex items-center justify-center rounded-xl bg-white dark:bg-[var(--bg-secondary)] border border-[var(--border-subtle)] text-gray-500 dark:text-[var(--text-secondary)] hover:text-[var(--turquesa-500)] dark:hover:text-[var(--icons-green)] hover:border-[var(--turquesa-500)] dark:hover:border-[var(--icons-green)] transition-all shadow-sm"
-                            >
-                                <Icon name="Info" className="w-4 h-4" />
-                            </button>
-                            <button
-                                onClick={() => setShowNewChatForm(true)}
-                                className="px-4 py-2 bg-white dark:bg-[var(--bg-secondary)] text-[var(--turquesa-500)] dark:text-[var(--turquesa-500)] rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-gray-50 dark:hover:bg-[#2A3F33] transition-colors border border-[var(--border-subtle)] shadow-sm"
-                            >
-                                + Nuevo Chat
-                            </button>
-                        </div>
-                    ) : null
-                }
             />
 
             {showNewChatForm ? (
@@ -413,6 +413,7 @@ export function ChatPageClient({ conversationId }: { conversationId?: string }) 
                                 { icon: 'Package', title: 'Pedidos y logística', desc: 'Consulta el estado de tu pedido, tiempos de entrega y datos del envío directamente con la tienda.' },
                                 { icon: 'RotateCcw', title: 'Devoluciones, cambios y reembolsos', desc: 'Gestiona devoluciones, cambios de producto o solicitudes de reembolso con el vendedor.' },
                                 { icon: 'AlertTriangle', title: 'Reclamos y postventa', desc: 'Reporta productos defectuosos, diferencias con lo pedido o cualquier incidencia comercial.' },
+                                { icon: 'Receipt', title: 'Problemas de facturación', desc: 'Consulta al vendedor sobre tu comprobante electrónico (boleta o factura). Para errores de pago o cargos incorrectos, contacta a Soporte Lyrium.' },
                                 { icon: 'Store', title: 'Cada tienda opera de forma independiente', desc: 'El vendedor administra sus propias operaciones. Para problemas de la plataforma, usa Soporte Lyrium.' },
                             ].map((item) => (
                                 <div key={item.title} className="flex items-start gap-4 p-4 bg-gray-50 dark:bg-[var(--bg-muted)]/50 rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)]">

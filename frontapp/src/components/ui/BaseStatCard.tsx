@@ -15,91 +15,24 @@ interface BaseStatCardProps {
   onClick?: () => void;
 }
 
+const _info    = { bg: 'bg-[var(--color-info)]/10 dark:bg-[var(--color-info)]/15',    iconBg: 'bg-[var(--color-info)]',    text: 'text-[var(--text-primary)] dark:text-[var(--color-info)]',    border: 'border-[var(--color-info)]/20 dark:border-[var(--color-info)]/25',    shadow: 'shadow-[var(--color-info)]/20' };
+const _success = { bg: 'bg-[var(--color-success)]/10 dark:bg-[var(--color-success)]/15', iconBg: 'bg-[var(--color-success)]', text: 'text-[var(--text-primary)] dark:text-[var(--color-success)]', border: 'border-[var(--color-success)]/20 dark:border-[var(--color-success)]/25', shadow: 'shadow-[var(--color-success)]/20' };
+const _teal    = { bg: 'bg-[var(--icons-green)]/10 dark:bg-[var(--icons-green)]/15',    iconBg: 'bg-[var(--icons-green)]',   text: 'text-[var(--text-primary)] dark:text-[var(--icons-green)]',   border: 'border-[var(--icons-green)]/20 dark:border-[var(--icons-green)]/25',   shadow: 'shadow-[var(--icons-green)]/20' };
+const _error   = { bg: 'bg-[var(--color-error)]/10 dark:bg-[var(--color-error)]/15',    iconBg: 'bg-[var(--color-error)]',   text: 'text-[var(--color-error)] dark:text-[var(--color-error)]',   border: 'border-[var(--color-error)]/20 dark:border-[var(--color-error)]/25',   shadow: 'shadow-[var(--color-error)]/20' };
+
 const colorMap = {
-    sky: {
-        bg: 'bg-[#8FD400]/10 dark:bg-[#8FD400]/15',
-        iconBg: 'bg-[#8FD400]',
-        text: 'text-[var(--text-primary)] dark:text-[#8FD400]',
-        border: 'border-[#8FD400]/20 dark:border-[#8FD400]/25',
-        shadow: 'shadow-[#8FD400]/20 dark:shadow-[#8FD400]/20'
-    },
-    emerald: {
-        bg: 'bg-[#B7E000]/10 dark:bg-[#B7E000]/15',
-        iconBg: 'bg-[#B7E000]',
-        text: 'text-[var(--text-primary)] dark:text-[#B7E000]',
-        border: 'border-[#B7E000]/20 dark:border-[#B7E000]/25',
-        shadow: 'shadow-[#B7E000]/20 dark:shadow-[#B7E000]/20'
-    },
-    amber: {
-        bg: 'bg-[#66D6A8]/10 dark:bg-[#66D6A8]/15',
-        iconBg: 'bg-[#66D6A8]',
-        text: 'text-[var(--text-primary)] dark:text-[#66D6A8]',
-        border: 'border-[#66D6A8]/20 dark:border-[#66D6A8]/25',
-        shadow: 'shadow-[#66D6A8]/20 dark:shadow-[#66D6A8]/20'
-    },
-    indigo: {
-        bg: 'bg-[#4EC7B8]/10 dark:bg-[#4EC7B8]/15',
-        iconBg: 'bg-[#4EC7B8]',
-        text: 'text-[var(--text-primary)] dark:text-[#4EC7B8]',
-        border: 'border-[#4EC7B8]/20 dark:border-[#4EC7B8]/25',
-        shadow: 'shadow-[#4EC7B8]/20 dark:shadow-[#4EC7B8]/20'
-    },
-    rose: {
-        bg: 'bg-[var(--color-error)]/10 dark:bg-[var(--color-error)]/15',
-        iconBg: 'bg-[var(--color-error)]',
-        text: 'text-[var(--color-error)] dark:text-[var(--color-error)]',
-        border: 'border-[var(--color-error)]/20 dark:border-[var(--color-error)]/25',
-        shadow: 'shadow-[var(--color-error)]/20 dark:shadow-[var(--color-error)]/20'
-    },
-    violet: {
-        bg: 'bg-[#69BEEB]/10 dark:bg-[#69BEEB]/15',
-        iconBg: 'bg-[#69BEEB]',
-        text: 'text-[var(--text-primary)] dark:text-[#69BEEB]',
-        border: 'border-[#69BEEB]/20 dark:border-[#69BEEB]/25',
-        shadow: 'shadow-[#69BEEB]/20 dark:shadow-[#69BEEB]/20'
-    },
-    celeste: {
-        bg: 'bg-[#69BEEB]/10 dark:bg-[#69BEEB]/15',
-        iconBg: 'bg-[#69BEEB]',
-        text: 'text-[var(--text-primary)] dark:text-[#69BEEB]',
-        border: 'border-[#69BEEB]/20 dark:border-[#69BEEB]/25',
-        shadow: 'shadow-[#69BEEB]/20 dark:shadow-[#69BEEB]/20'
-    },
-    lima: {
-        bg: 'bg-[#B7E000]/10 dark:bg-[#B7E000]/15',
-        iconBg: 'bg-[#B7E000]',
-        text: 'text-[var(--text-primary)] dark:text-[#B7E000]',
-        border: 'border-[#B7E000]/20 dark:border-[#B7E000]/25',
-        shadow: 'shadow-[#B7E000]/20 dark:shadow-[#B7E000]/20'
-    },
-    verde: {
-        bg: 'bg-[#8FD400]/10 dark:bg-[#8FD400]/15',
-        iconBg: 'bg-[#8FD400]',
-        text: 'text-[var(--text-primary)] dark:text-[#8FD400]',
-        border: 'border-[#8FD400]/20 dark:border-[#8FD400]/25',
-        shadow: 'shadow-[#8FD400]/20 dark:shadow-[#8FD400]/20'
-    },
-    turquesaClaro: {
-        bg: 'bg-[#66D6A8]/10 dark:bg-[#66D6A8]/15',
-        iconBg: 'bg-[#66D6A8]',
-        text: 'text-[var(--text-primary)] dark:text-[#66D6A8]',
-        border: 'border-[#66D6A8]/20 dark:border-[#66D6A8]/25',
-        shadow: 'shadow-[#66D6A8]/20 dark:shadow-[#66D6A8]/20'
-    },
-    turquesa: {
-        bg: 'bg-[#4EC7B8]/10 dark:bg-[#4EC7B8]/15',
-        iconBg: 'bg-[#4EC7B8]',
-        text: 'text-[var(--text-primary)] dark:text-[#4EC7B8]',
-        border: 'border-[#4EC7B8]/20 dark:border-[#4EC7B8]/25',
-        shadow: 'shadow-[#4EC7B8]/20 dark:shadow-[#4EC7B8]/20'
-    },
-    azulCeleste: {
-        bg: 'bg-[#5AAFE6]/10 dark:bg-[#5AAFE6]/15',
-        iconBg: 'bg-[#5AAFE6]',
-        text: 'text-[var(--text-primary)] dark:text-[#5AAFE6]',
-        border: 'border-[#5AAFE6]/20 dark:border-[#5AAFE6]/25',
-        shadow: 'shadow-[#5AAFE6]/20 dark:shadow-[#5AAFE6]/20'
-    }
+    sky:           _info,
+    violet:        _info,
+    celeste:       _info,
+    azulCeleste:   _info,
+    emerald:       _success,
+    lima:          _success,
+    verde:         _success,
+    amber:         _teal,
+    indigo:        _teal,
+    turquesaClaro: _teal,
+    turquesa:      _teal,
+    rose:          _error,
 };
 
 const isValidColor = (c: string): c is keyof typeof colorMap => c in colorMap;
@@ -137,7 +70,7 @@ export default function BaseStatCard({
           )}
 
           {trend && (
-            <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ${trend.isPositive ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 border-emerald-100 dark:border-emerald-800' : 'bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 border-rose-100 dark:border-rose-800'}`}>
+            <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ${trend.isPositive ? 'bg-[var(--color-success)]/10 text-[var(--color-success)] border-[var(--color-success)]/20' : 'bg-[var(--color-error)]/10 text-[var(--color-error)] border-[var(--color-error)]/20'}`}>
               <Icon name={trend.isPositive ? 'TrendingUp' : 'TrendingDown'} className="w-3 h-3" />
               {trend.isPositive ? '+' : '-'}{typeof trend.value === 'number' ? trend.value.toFixed(1) : trend.value}%
             </div>

@@ -100,26 +100,6 @@ export function FinancePageClient() {
     showToast('Datos sincronizados según el periodo seleccionado', 'success');
   };
 
-  const headerActions = (
-    <div className="flex flex-wrap items-center gap-2 bg-white/10 backdrop-blur-md p-2 rounded-2xl border border-white/20">
-      <BaseDatePicker value={filters.startDate}
-        onChange={(v) => setFilters(v, filters.endDate)} placeholder="Desde" />
-      <span className="text-white/30 text-lg font-thin">|</span>
-      <BaseDatePicker value={filters.endDate}
-        onChange={(v) => setFilters(filters.startDate, v)} placeholder="Hasta" />
-      <button
-        onClick={handleApplyFilters}
-        disabled={isRefreshing}
-        className="p-2 bg-white/20 text-white rounded-lg hover:bg-white/30 transition active:scale-95 disabled:opacity-50"
-      >
-        {isRefreshing ? (
-          <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-        ) : (
-          <Icon name="Search" className="w-4 h-4" />
-        )}
-      </button>
-    </div>
-  );
 
   if (isLoading && !data) {
     return <BaseLoading message="Sincronizando Finanzas..." />;
@@ -131,8 +111,8 @@ export function FinancePageClient() {
         <div className="w-20 h-20 rounded-full flex items-center justify-center" style={{ backgroundColor: 'var(--turquesa-100)' }}>
           <Icon name="AlertCircle" className="w-10 h-10" style={{ color: 'var(--turquesa-500)' }} />
         </div>
-        <p className="text-lg font-bold text-gray-800 dark:text-[var(--text-primary)]">No pudimos cargar los datos financieros</p>
-        <p className="text-sm text-gray-500 dark:text-[var(--text-muted)]">Verifica tu conexión e intenta nuevamente</p>
+        <p className="text-lg font-bold text-[var(--text-primary)]">No pudimos cargar los datos financieros</p>
+        <p className="text-sm text-[var(--text-muted)]">Verifica tu conexión e intenta nuevamente</p>
         <button onClick={() => window.location.reload()} className="px-6 py-3 rounded-xl text-white font-bold text-sm transition-all hover:brightness-110" style={{ backgroundColor: 'var(--celeste-500)' }}>Reintentar</button>
       </div>
     );
@@ -200,8 +180,49 @@ export function FinancePageClient() {
         title="Centro de Finanzas y Estadísticas"
         subtitle="Monitoreo en tiempo real de tus KPIs estratégicos"
         icon="PieChart"
-        actions={headerActions}
       />
+
+      {/* Card de filtros — mismo estilo que Facturación y Pagos */}
+      <div className="bg-[var(--bg-card)] p-6 sm:p-8 rounded-[2.5rem] shadow-xl border border-[var(--border-subtle)]">
+        <div className="flex items-center gap-4 mb-6">
+          <div className="w-12 h-12 bg-[var(--brand-green)] rounded-2xl flex items-center justify-center shadow-lg shrink-0">
+            <Icon name="CalendarDays" className="w-6 h-6 text-white" />
+          </div>
+          <h3 className="text-xl font-black text-[var(--text-primary)]">
+            Periodo de Análisis
+          </h3>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-4 items-end">
+          <div className="space-y-2">
+            <BaseDatePicker
+              label="Desde"
+              value={filters.startDate}
+              onChange={(v) => setFilters(v, filters.endDate)}
+              placeholder="dd/mm/aaaa"
+            />
+          </div>
+          <div className="space-y-2">
+            <BaseDatePicker
+              label="Hasta"
+              value={filters.endDate}
+              onChange={(v) => setFilters(filters.startDate, v)}
+              placeholder="dd/mm/aaaa"
+            />
+          </div>
+          <button
+            onClick={handleApplyFilters}
+            disabled={isRefreshing}
+            className="flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-sky-500 to-sky-400 dark:from-emerald-700 dark:to-teal-600 text-white font-black text-xs uppercase tracking-widest transition-all shadow-lg shadow-sky-500/25 dark:shadow-emerald-900/25 hover:shadow-xl hover:-translate-y-0.5 active:scale-95 disabled:opacity-50 w-full sm:w-auto"
+          >
+            {isRefreshing ? (
+              <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <Icon name="Search" className="w-4 h-4" />
+            )}
+            Aplicar
+          </button>
+        </div>
+      </div>
 
       <div className="relative border-b border-[var(--border-subtle)] pb-1">
         <div className="flex flex-nowrap overflow-x-auto gap-2 pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
@@ -210,7 +231,7 @@ export function FinancePageClient() {
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`flex-shrink-0 px-6 py-2.5 rounded-xl text-sm font-black whitespace-nowrap transition-all duration-300 flex items-center gap-2 active:scale-[0.98] ${activeTab === tab.id
-                ? 'bg-[#5AAFE6] text-white shadow-lg shadow-[#5AAFE6]/30'
+                ? 'bg-gradient-to-r from-sky-500 to-sky-400 dark:from-emerald-700 dark:to-teal-600 text-white shadow-lg shadow-sky-500/25 dark:shadow-emerald-900/25'
                 : 'text-[var(--text-secondary)] bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:bg-[var(--bg-secondary)]'
                 }`}
             >
@@ -438,7 +459,7 @@ export function FinancePageClient() {
                 </div>
                 <div className="relative w-40 h-40 mx-auto mb-4">
                   <svg viewBox="0 0 120 120" className="w-full h-full">
-                    <circle cx="60" cy="60" r="54" fill="none" stroke="currentColor" strokeWidth="8" className="text-gray-200 dark:text-gray-700" />
+                    <circle cx="60" cy="60" r="54" fill="none" stroke="currentColor" strokeWidth="8" className="text-[var(--border-subtle)]" />
                     <circle cx="60" cy="60" r="54" fill="none" stroke={chartColorMap.tiempoRespuesta} strokeWidth="8" strokeLinecap="round"
                       strokeDasharray={`${(data.tiempoRespuesta.data[data.tiempoRespuesta.data.length - 1] ?? 0) / 60 * 339.292} 339.292`}
                       transform="rotate(-90 60 60)" />

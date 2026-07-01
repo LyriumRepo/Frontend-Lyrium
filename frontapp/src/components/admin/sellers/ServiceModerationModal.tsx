@@ -68,8 +68,8 @@ export default function ServiceModerationModal({
             }}
           >
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-cyan-500/10 rounded-xl">
-                <Store className="w-5 h-5 text-cyan-500" />
+              <div className="p-2 bg-[var(--icons-green)]/10 rounded-xl">
+                <Store className="w-5 h-5 text-[var(--icons-green)]" />
               </div>
               <div>
                 <h2 className="text-base font-black text-[var(--text-primary)] uppercase tracking-tight">
@@ -95,7 +95,7 @@ export default function ServiceModerationModal({
                 {service.name}
               </h3>
               <div className="flex items-center gap-2 text-[11px] text-[var(--text-secondary)]">
-                <Store className="w-3.5 h-3.5 text-cyan-500" />
+                <Store className="w-3.5 h-3.5 text-[var(--icons-green)]" />
                 {service.seller}
               </div>
               <div className="flex items-center gap-2 text-[11px] text-[var(--text-secondary)]">
@@ -139,7 +139,7 @@ export default function ServiceModerationModal({
                   <button
                     type="button"
                     onClick={() => setPendingAction('APPROVED')}
-                    className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 hover:bg-emerald-500 hover:text-white"
+                    className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all bg-[var(--color-success)]/10 text-[var(--color-success)] border border-[var(--color-success)]/20 hover:bg-[var(--color-success)] hover:text-white"
                   >
                     <CheckCircle className="w-4 h-4" />
                     Aprobar servicio
@@ -147,7 +147,7 @@ export default function ServiceModerationModal({
                   <button
                     type="button"
                     onClick={() => setPendingAction('REJECTED')}
-                    className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all bg-rose-500/10 text-rose-500 border border-rose-500/20 hover:bg-rose-500 hover:text-white"
+                    className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all bg-[var(--color-error)]/10 text-[var(--color-error)] border border-[var(--color-error)]/20 hover:bg-[var(--color-error)] hover:text-white"
                   >
                     <XCircle className="w-4 h-4" />
                     Rechazar servicio
@@ -188,7 +188,7 @@ export default function ServiceModerationModal({
                         : 'Notas de auditoría (opcional)…'
                     }
                     required={pendingAction === 'REJECTED'}
-                    className="w-full p-3 text-[12px] font-medium text-[var(--text-primary)] bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-cyan-500/20 placeholder:text-[var(--text-secondary)]"
+                    className="w-full p-3 text-[12px] font-medium text-[var(--text-primary)] bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-[var(--icons-green)]/20 placeholder:text-[var(--text-secondary)]"
                   />
 
                   <div className="flex gap-3">
@@ -209,8 +209,8 @@ export default function ServiceModerationModal({
                       }
                       className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
                         pendingAction === 'APPROVED'
-                          ? 'bg-emerald-500 hover:bg-emerald-600 text-white'
-                          : 'bg-rose-500 hover:bg-rose-600 text-white'
+                          ? 'bg-[var(--color-success)] hover:bg-[var(--color-success)] text-white'
+                          : 'bg-[var(--color-error)] hover:bg-[var(--color-error)] text-white'
                       }`}
                     >
                       {isSubmitting ? (

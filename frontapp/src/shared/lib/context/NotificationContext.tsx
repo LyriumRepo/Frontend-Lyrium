@@ -95,6 +95,15 @@ function mapApiNotificationToProactive(notification: Notification): ProactiveNot
             action = { type: 'invoices', label: 'Ver comprobantes' };
             secondaryAction = { type: 'resend_email', id: notification.order_id ?? undefined, label: 'Enviar a correo', icon: 'Mail' };
             break;
+        case 'new_order_admin':
+        case 'NewOrderAdminNotification':
+            level = 'INFO';
+            title = 'Nuevo pedido en la plataforma';
+            message = notification.subject ?? 'Un nuevo pedido fue realizado';
+            if (notification.order_id) {
+                action = { type: 'orders', id: notification.order_id, label: 'Ver pedido' };
+            }
+            break;
         case 'store_status_changed':
         case 'StoreStatusNotification':
             level = 'WARNING';
@@ -474,11 +483,27 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         refreshNotifications();
     }, [refreshNotifications]);
 
-    // Polling cada 30s como fallback cuando Reverb no está disponible
+    // Polling cada 30s como fallback cuando Reverb no está disponible.
+    // Se pausa automáticamente cuando el tab está oculto para evitar requests innecesarios.
     useEffect(() => {
         if (!isAuthenticated) return;
-        const id = setInterval(() => refreshNotifications(), 30_000);
-        return () => clearInterval(id);
+
+        let id = setInterval(() => refreshNotifications(), 30_000);
+
+        const handleVisibility = () => {
+            if (document.hidden) {
+                clearInterval(id);
+            } else {
+                refreshNotifications();
+                id = setInterval(() => refreshNotifications(), 30_000);
+            }
+        };
+
+        document.addEventListener('visibilitychange', handleVisibility);
+        return () => {
+            clearInterval(id);
+            document.removeEventListener('visibilitychange', handleVisibility);
+        };
     }, [isAuthenticated, refreshNotifications]);
 
     const markAsRead = useCallback(async (id: string) => {

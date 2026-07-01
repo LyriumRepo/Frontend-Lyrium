@@ -649,14 +649,15 @@ body {
 }
 
 .current-plan-card {
-    background: var(--bg-white);
+    background: var(--bg-card);
     border-radius: 16px;
-    padding: 25px;
+    padding: 0;
     position: relative;
     overflow: hidden;
     border: 3px solid var(--border-light);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    min-height: 320px;
 }
 
 .current-plan-card:hover {
@@ -672,8 +673,30 @@ body {
     bottom: 0;
     background-size: cover;
     background-position: center;
-    opacity: 0.06;
+    opacity: 1;
     pointer-events: none;
+    z-index: 0;
+}
+
+/* Gradiente igual al Showcase: blanco denso a la izquierda, transparente a la derecha */
+.plan-background-image::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to right,
+        var(--bg-card) 0%,
+        color-mix(in srgb, var(--bg-card) 80%, transparent) 45%,
+        color-mix(in srgb, var(--bg-card) 20%, transparent) 70%,
+        transparent 100%
+    );
+    z-index: 1;
+}
+
+.plan-content {
+    position: relative;
+    z-index: 2;
+    padding: 25px;
+    max-width: 70%;
 }
 
 .plan-content {
@@ -852,7 +875,7 @@ body {
 }
 
 .motivation-card-modern {
-    background: linear-gradient(135deg, #1f2937 0%, #374151 50%, #4b5563 100%);
+    background: var(--bg-secondary);
     border-radius: 16px;
     padding: 20px 35px;
     display: flex;
@@ -861,7 +884,8 @@ body {
     gap: 20px;
     position: relative;
     overflow: hidden;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    border: 1px solid var(--border-subtle);
     animation: motivationSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
     animation-delay: 0.3s;
 }
@@ -893,28 +917,28 @@ body {
     width: 44px;
     height: 44px;
     min-width: 44px;
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--bg-muted);
     backdrop-filter: blur(10px);
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
+    color: var(--brand-green);
     position: relative;
     z-index: 1;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--border-subtle);
     transition: transform 0.3s, background 0.3s;
 }
 
 .motivation-card-modern:hover .motivation-icon-modern {
     transform: scale(1.1);
-    background: rgba(255, 255, 255, 0.12);
+    background: var(--bg-card);
 }
 
 .motivation-text-modern {
     font-size: 14px;
     line-height: 1.5;
-    color: #d1d5db;
+    color: var(--text-secondary);
     position: relative;
     z-index: 1;
     margin: 0;

@@ -41,22 +41,37 @@ const fetchSession = async (): Promise<{
     return { authenticated: false, user: null };
   }
 
-  const response = await fetch(`${LARAVEL_API_URL}/auth/validate`, {
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 6000);
 
-  if (!response.ok) {
-    console.log('[Auth] Session fetch failed:', response.status);
+  try {
+    const response = await fetch(`${LARAVEL_API_URL}/auth/validate`, {
+      signal: controller.signal,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    clearTimeout(timer);
+
+    if (!response.ok) {
+      return { authenticated: false, user: null };
+    }
+
+    const data = await response.json();
+    try { localStorage.setItem('lyrium_user_cache', JSON.stringify(data)); } catch {}
+    return { authenticated: true, user: data };
+  } catch {
+    clearTimeout(timer);
+    // API offline o timeout — usar datos de usuario en caché si existen
+    try {
+      const cached = localStorage.getItem('lyrium_user_cache');
+      if (cached) {
+        return { authenticated: true, user: JSON.parse(cached) as User };
+      }
+    } catch {}
     return { authenticated: false, user: null };
   }
-
-  const data = await response.json();
-  console.log('[Auth] Session fetch result:', data);
-
-  return { authenticated: true, user: data };
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -72,7 +87,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     queryKey: ['auth', 'session'],
     queryFn: fetchSession,
     staleTime: 5 * 60_000,
-    retry: 2,
+    retry: 0,
     refetchOnMount: true,
     refetchOnWindowFocus: false,
   });
@@ -126,9 +141,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       if (result.user && result.token) {
         localStorage.setItem('laravel_token', result.token);
-        console.log('[Auth] Server action set httpOnly cookies, verifying...');
+        try { localStorage.setItem('lyrium_user_cache', JSON.stringify(result.user)); } catch {}
         const targetRoute = getRoleBasedRoute(result.user.role);
-        console.log('[Auth] Redirecting to:', targetRoute);
         setUser(result.user);
         window.location.href = targetRoute;
       }
@@ -149,6 +163,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       // Continúa aunque falle el server action
     }
     localStorage.removeItem('laravel_token');
+    localStorage.removeItem('lyrium_user_cache');
     setUser(null);
     setIsHydrated(false); // ← resetea para el próximo login
     window.location.href = '/login';

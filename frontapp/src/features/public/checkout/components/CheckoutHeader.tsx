@@ -23,7 +23,7 @@ export default function CheckoutHeader() {
                 'py-3 px-8 rounded-2xl relative overflow-hidden shadow-xl transition-all duration-700',
                 isSuccess
                     ? 'bg-gradient-to-r from-emerald-500 via-emerald-500 to-teal-400 shadow-emerald-100 dark:shadow-emerald-900/20'
-                    : 'bg-gradient-to-r from-sky-500 via-sky-500 to-sky-300 shadow-sky-100 dark:shadow-sky-900/20'
+                    : 'bg-gradient-to-r from-teal-500 via-sky-500 to-sky-400 shadow-teal-100 dark:shadow-teal-900/20'
             ].join(' ')}>
                 {/* Decorative blur */}
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl animate-pulse" />

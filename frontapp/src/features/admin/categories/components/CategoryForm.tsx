@@ -30,10 +30,15 @@ export default function CategoryForm({
     const [deleting, setDeleting] = useState(false);
     const [confirmDelete, setConfirmDelete] = useState(false);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const blobUrlRef = useRef<string | null>(null);
     const fileRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         if (category) {
+            if (blobUrlRef.current) {
+                URL.revokeObjectURL(blobUrlRef.current);
+                blobUrlRef.current = null;
+            }
             setName(category.name);
             setDescription(category.description || '');
             setParentId(category.parent || 0);
@@ -42,11 +47,17 @@ export default function CategoryForm({
             setImagePreview(category.image?.src || null);
             setConfirmDelete(false);
         }
+        return () => {
+            if (blobUrlRef.current) {
+                URL.revokeObjectURL(blobUrlRef.current);
+                blobUrlRef.current = null;
+            }
+        };
     }, [category]);
 
     if (!category) {
         return (
-            <div className="flex items-center justify-center h-full text-gray-400 text-sm p-10">
+            <div className="flex items-center justify-center h-full text-[var(--text-muted)] text-sm p-10">
                 Selecciona una categoria del arbol para editarla
             </div>
         );
@@ -102,50 +113,50 @@ export default function CategoryForm({
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100">{category.name}</h3>
+                    <h3 className="text-lg font-bold text-[var(--text-primary)]">{category.name}</h3>
                     <span className={`text-xs font-semibold px-2 py-0.5 rounded ${
                         category.level === 0
-                            ? 'bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-400'
+                            ? 'bg-[var(--color-info)]/10 text-[var(--color-info)]'
                             : category.level === 1
-                            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
-                            : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                            ? 'bg-[var(--color-success)]/10 text-[var(--color-success)]'
+                            : 'bg-[var(--color-warning)]/10 text-[var(--color-warning)]'
                     }`}>
                         {LEVEL_LABEL}
                     </span>
                 </div>
-                <span className="text-xs text-gray-400">ID: {category.id}</span>
+                <span className="text-xs text-[var(--text-muted)]">ID: {category.id}</span>
             </div>
 
             {/* Name */}
             <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Nombre</label>
+                <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-1">Nombre</label>
                 <input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200 focus:outline-none focus:border-sky-500 transition"
+                    className="w-full px-4 py-2.5 border-2 border-[var(--border-subtle)] rounded-xl text-sm bg-[var(--bg-muted)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--border-focus)] transition"
                 />
             </div>
 
             {/* Description */}
             <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Descripcion</label>
+                <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-1">Descripcion</label>
                 <textarea
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     rows={2}
-                    className="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200 focus:outline-none focus:border-sky-500 transition resize-none"
+                    className="w-full px-4 py-2.5 border-2 border-[var(--border-subtle)] rounded-xl text-sm bg-[var(--bg-muted)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--border-focus)] transition resize-none"
                 />
             </div>
 
             {/* Parent + Type row */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Padre</label>
+                    <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-1">Padre</label>
                     <select
                         value={parentId}
                         onChange={(e) => setParentId(Number(e.target.value))}
-                        className="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200 focus:outline-none focus:border-sky-500 transition"
+                        className="w-full px-4 py-2.5 border-2 border-[var(--border-subtle)] rounded-xl text-sm bg-[var(--bg-muted)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--border-focus)] transition"
                     >
                         <option value={0}>Ninguno (Raiz)</option>
                         {parentOptions
@@ -158,11 +169,11 @@ export default function CategoryForm({
                     </select>
                 </div>
                 <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Tipo</label>
+                    <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-1">Tipo</label>
                     <select
                         value={type}
                         onChange={(e) => { setType(e.target.value); setParentId(0); }}
-                        className="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200 focus:outline-none focus:border-sky-500 transition"
+                        className="w-full px-4 py-2.5 border-2 border-[var(--border-subtle)] rounded-xl text-sm bg-[var(--bg-muted)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--border-focus)] transition"
                     >
                         <option value="product">Producto</option>
                         <option value="service">Servicio</option>
@@ -172,29 +183,29 @@ export default function CategoryForm({
 
             {/* Sort order */}
             <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Orden</label>
+                <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-1">Orden</label>
                 <input
                     type="number"
                     min={0}
                     value={sortOrder}
                     onChange={(e) => setSortOrder(Number(e.target.value))}
-                    className="w-full sm:w-32 px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200 focus:outline-none focus:border-sky-500 transition"
+                    className="w-full sm:w-32 px-4 py-2.5 border-2 border-[var(--border-subtle)] rounded-xl text-sm bg-[var(--bg-muted)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--border-focus)] transition"
                 />
             </div>
 
             {/* Image (relevant for level 2) */}
             <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                    Imagen {category.level === 1 && <span className="text-xs text-emerald-600 font-normal">(visible en mega-menu)</span>}
+                <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-1">
+                    Imagen {category.level === 1 && <span className="text-xs text-[var(--color-success)] font-normal">(visible en mega-menu)</span>}
                 </label>
                 <div className="flex items-center gap-4">
                     {imagePreview ? (
-                        <div className="relative w-20 h-20 rounded-xl border-2 border-gray-200 dark:border-gray-700 overflow-hidden bg-gray-100 dark:bg-gray-800">
+                        <div className="relative w-20 h-20 rounded-xl border-2 border-[var(--border-subtle)] overflow-hidden bg-[var(--bg-muted)]">
                             <img src={imagePreview} alt="" className="w-full h-full object-cover" />
                         </div>
                     ) : (
-                        <div className="w-20 h-20 rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600 flex items-center justify-center bg-gray-50 dark:bg-gray-800">
-                            <ImageIcon className="w-6 h-6 text-gray-300" />
+                        <div className="w-20 h-20 rounded-xl border-2 border-dashed border-[var(--border-subtle)] flex items-center justify-center bg-[var(--bg-muted)]">
+                            <ImageIcon className="w-6 h-6 text-[var(--text-muted)]" />
                         </div>
                     )}
                     <div>
@@ -209,23 +220,23 @@ export default function CategoryForm({
                             type="button"
                             onClick={() => fileRef.current?.click()}
                             disabled={loading}
-                            className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl text-sm text-gray-700 dark:text-gray-300 transition disabled:opacity-50"
+                            className="flex items-center gap-2 px-4 py-2 bg-[var(--bg-muted)] hover:bg-[var(--bg-secondary)] rounded-xl text-sm text-[var(--text-secondary)] transition disabled:opacity-50"
                         >
                             <Upload className="w-4 h-4" />
                             Subir imagen
                         </button>
-                        <p className="text-xs text-gray-400 mt-1">WebP, PNG o JPG. Max 2MB.</p>
+                        <p className="text-xs text-[var(--text-muted)] mt-1">WebP, PNG o JPG. Max 2MB.</p>
                     </div>
                 </div>
             </div>
 
             {/* Actions */}
-            <div className="flex items-center gap-3 pt-4 border-t border-gray-100 dark:border-gray-800">
+            <div className="flex items-center gap-3 pt-4 border-t border-[var(--border-subtle)]">
                 <button
                     type="button"
                     onClick={handleSave}
                     disabled={saving || loading || !name.trim()}
-                    className="flex items-center gap-2 px-6 py-2.5 bg-sky-500 hover:bg-sky-600 text-white rounded-xl text-sm font-semibold transition disabled:opacity-50"
+                    className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-sky-500 to-sky-400 dark:from-emerald-700 dark:to-teal-600 text-white rounded-xl text-sm font-semibold transition shadow-lg shadow-sky-500/25 dark:shadow-emerald-900/25 hover:shadow-xl hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0"
                 >
                     <Save className="w-4 h-4" />
                     {saving ? 'Guardando...' : 'Guardar'}
@@ -237,8 +248,8 @@ export default function CategoryForm({
                     disabled={deleting || loading}
                     className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition disabled:opacity-50 ${
                         confirmDelete
-                            ? 'bg-red-500 hover:bg-red-600 text-white'
-                            : 'bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-900/20 dark:hover:bg-red-900/30 dark:text-red-400'
+                            ? 'bg-[var(--color-error)] hover:bg-[var(--color-error)] text-white'
+                            : 'bg-[var(--color-error)]/10 hover:bg-[var(--color-error)]/15 text-[var(--color-error)]'
                     }`}
                 >
                     {confirmDelete ? (
@@ -258,7 +269,7 @@ export default function CategoryForm({
                     <button
                         type="button"
                         onClick={() => setConfirmDelete(false)}
-                        className="flex items-center gap-1 px-3 py-2.5 text-sm text-gray-500 hover:text-gray-700 transition"
+                        className="flex items-center gap-1 px-3 py-2.5 text-sm text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition"
                     >
                         <X className="w-4 h-4" />
                         Cancelar

@@ -12,30 +12,44 @@ export function resolveNotificationRoute(
 
     switch (actionType) {
         case 'orders':
-            return actionId ? `${prefix}/orders/${actionId}` : `${prefix}/orders`;
+            if (role === 'administrator') return '/admin/invoices';
+            if (role === 'customer') return '/customer/orders';
+            if (actionId) return `${prefix}/orders/${actionId}`;
+            return `${prefix}/invoices`;
         case 'invoices':
-            return actionId ? `${prefix}/invoices/${actionId}` : `${prefix}/invoices`;
+            if (role === 'administrator') return '/admin/invoices';
+            if (role === 'seller') return '/seller/invoices';
+            if (role === 'customer') return '/customer/invoices';
+            return `${prefix}/invoices`;
         case 'products':
-            return role === 'administrator'
-                ? '/admin/products'
-                : actionId ? `${prefix}/products/${actionId}` : `${prefix}/products`;
+            if (role === 'administrator') return '/admin/sellers';
+            if (role === 'seller') return '/seller/catalog';
+            if (role === 'customer') return '/';
+            return `${prefix}/products`;
         case 'services':
-            return role === 'administrator'
-                ? '/admin/services'
-                : actionId ? `${prefix}/services/${actionId}` : `${prefix}/services`;
+            if (role === 'administrator') return '/admin/sellers';
+            if (role === 'seller') return '/seller/services';
+            if (role === 'customer') return '/customer';
+            return `${prefix}/services`;
         case 'chat':
-            return role === 'administrator' ? '/admin/helpdesk' : `${prefix}/chat`;
+            if (role === 'administrator') return '/admin/helpdesk';
+            if (role === 'logistics_operator') return '/logistics/chat-vendors';
+            return `${prefix}/chat`;
         case 'ticket':
             return role === 'administrator' ? `/admin/helpdesk?id=${actionId}`
                 : role === 'seller' ? `/seller/help?id=${actionId}`
                 : `/customer/support?id=${actionId}`;
         case 'store':
-            return role === 'administrator'
-                ? (actionId ? `/admin/stores/${actionId}` : '/admin/stores')
-                : role === 'seller' ? '/seller/settings'
-                : '/';
+            if (role === 'administrator') {
+                return actionId ? `/admin/sellers/${actionId}` : '/admin/sellers';
+            }
+            if (role === 'seller') return '/seller/store';
+            return '/';
         case 'plans':
-            return role === 'administrator' ? '/admin/planes' : `${prefix}/plans`;
+            if (role === 'administrator') return '/admin/planes';
+            if (role === 'seller') return '/seller/planes';
+            if (role === 'customer') return '/customer/profile';
+            return `${prefix}/plans`;
         default:
             return prefix || '/';
     }

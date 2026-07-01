@@ -5,187 +5,40 @@ import { useSellerHelp } from '@/features/seller/help/hooks/useSellerHelp';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import BaseLoading from '@/components/ui/BaseLoading';
 import Icon from '@/components/ui/Icon';
-import { SellerTicket, TicketStatus, TicketCategory } from '@/features/seller/help/types';
+import { SellerTicket, TicketCategory } from '@/features/seller/help/types';
 import { ChatView } from '@/modules/chat';
 import type { UnifiedTicket, UnifiedMessage } from '@/modules/chat/types';
+import ChatLayout from '@/components/shared/chat/ChatLayout';
+import ConversationList from '@/components/shared/chat/ConversationList';
+import type { Conversation } from '@/components/shared/chat/ConversationList';
 
-function TicketList({
-    tickets,
-    activeTicketId,
-    onSelect
-}: {
-    tickets: SellerTicket[];
-    activeTicketId: string | null;
-    onSelect: (id: string) => void;
-}) {
-    const getStatusColor = (status: TicketStatus) => {
-        switch (status) {
-            case 'open': return 'bg-red-100 text-red-700';
-            case 'in_progress': return 'bg-amber-100 text-amber-700';
-            case 'pending': return 'bg-blue-100 text-blue-700';
-            case 'resolved': return 'bg-emerald-100 text-emerald-700';
-            case 'closed': return 'bg-gray-100 text-gray-700';
-            default: return 'bg-gray-100 text-gray-700';
-        }
+
+function getCategoryLabel(category: TicketCategory): string {
+    switch (category) {
+        case 'admin': return 'Soporte Crítico';
+        case 'tech': return 'Soporte Técnico';
+        case 'comment': return 'Comentario';
+        case 'info': return 'Solicitud de Información';
+        case 'followup': return 'Seguimiento';
+        case 'payments': return 'Pagos';
+        case 'documentation': return 'Documentación';
+        default: return category;
+    }
+}
+
+function mapSellerTicketToConversation(ticket: SellerTicket): Conversation {
+    const lastMsg = ticket.messages.at(-1);
+    return {
+        id: ticket.id,
+        name: ticket.subject,
+        storeName: ticket.subject,
+        lastMessage: lastMsg?.content ?? ticket.description,
+        lastMessageTime: lastMsg?.createdAt
+            ? new Date(lastMsg.createdAt).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })
+            : '',
+        unreadCount: 0,
+        category: getCategoryLabel(ticket.category),
     };
-
-    const getStatusLabel = (status: TicketStatus) => {
-        switch (status) {
-            case 'open': return 'Abierto';
-            case 'in_progress': return 'En proceso';
-            case 'pending': return 'Pendiente';
-            case 'resolved': return 'Resuelto';
-            case 'closed': return 'Cerrado';
-            default: return status;
-        }
-    };
-
-    const getCategoryLabel = (category: TicketCategory) => {
-        switch (category) {
-            case 'admin': return 'Soporte Crítico';
-            case 'tech': return 'Soporte Técnico';
-            case 'comment': return 'Comentario';
-            case 'info': return 'Solicitud de Información';
-            case 'followup': return 'Seguimiento';
-            case 'payments': return 'Pagos';
-            case 'documentation': return 'Documentación';
-            default: return category;
-        }
-    };
-
-    const formatDate = (dateStr: string) => {
-        const date = new Date(dateStr);
-        return date.toLocaleDateString('es-PE', { day: 'numeric', month: 'short' });
-    };
-
-    const [filterType, setFilterType] = useState<'asunto' | 'categoria'>('asunto');
-    const [filterValue, setFilterValue] = useState('');
-    const [showFilter, setShowFilter] = useState(false);
-
-    const filteredTickets = tickets.filter(ticket => {
-        if (!filterValue) return true;
-        if (filterType === 'asunto') {
-            return ticket.subject.toLowerCase().includes(filterValue.toLowerCase());
-        }
-        return ticket.category === filterValue;
-    });
-
-    return (
-        <div className="flex flex-col h-full min-h-0 rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm overflow-hidden" style={{ background: 'linear-gradient(180deg, color-mix(in srgb,#9cb04e 4%,var(--bg-card)) 0%, var(--bg-card) 100%)' }}>
-          <div className="h-1 w-full shrink-0 bg-gradient-to-r from-[#9cb04e] via-[#64c695] to-[#499bbf]" />
-            {/* ── Cabecera con filtro ── */}
-            <div className="p-5 border-b border-[var(--border-subtle)]">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h3 className="text-sm font-black uppercase tracking-wider text-[var(--text-primary)]">Mis Tickets</h3>
-                        <p className="text-[10px] font-medium text-[var(--text-secondary)] mt-0.5">
-                            {filteredTickets.length} tickets
-                        </p>
-                    </div>
-                    <button
-                        onClick={() => {
-                            setShowFilter(prev => !prev);
-                            setFilterValue('');
-                        }}
-                        className={`px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-wider border transition-colors shrink-0 ${showFilter
-                                ? 'bg-[var(--turquesa-500)] text-white border-[var(--turquesa-500)] shadow-sm'
-                                : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:bg-[var(--bg-hover)]'
-                            }`}
-                    >
-                        Filtrar
-                    </button>
-                </div>
-
-                {/* ── Panel de filtro ── */}
-                {showFilter && (
-                    <div className="mt-3 space-y-2 animate-fadeIn">
-                        <div className="flex rounded-xl overflow-hidden border border-[var(--border-subtle)] text-[10px] font-bold">
-                            <button
-                                onClick={() => { setFilterType('asunto'); setFilterValue(''); }}
-                                className={`flex-1 py-1.5 uppercase tracking-wider transition-colors ${filterType === 'asunto'
-                                        ? 'bg-[var(--turquesa-500)] text-white'
-                                        : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]'
-                                    }`}
-                            >
-                                Asunto
-                            </button>
-                            <button
-                                onClick={() => { setFilterType('categoria'); setFilterValue(''); }}
-                                className={`flex-1 py-1.5 uppercase tracking-wider transition-colors ${filterType === 'categoria'
-                                        ? 'bg-[var(--turquesa-500)] text-white'
-                                        : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]'
-                                    }`}
-                            >
-                                Categoría
-                            </button>
-                        </div>
-
-                        {filterType === 'asunto' ? (
-                            <input
-                                type="text"
-                                value={filterValue}
-                                onChange={(e) => setFilterValue(e.target.value)}
-                                placeholder="Buscar por asunto..."
-                                className="w-full px-3 py-1.5 text-sm bg-[var(--bg-secondary)] rounded-xl outline-none text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--turquesa-500)]/20 border border-[var(--border-subtle)]"
-                            />
-                        ) : (
-                            <select
-                                value={filterValue}
-                                onChange={(e) => setFilterValue(e.target.value)}
-                                className="w-full px-3 py-1.5 text-sm bg-[var(--bg-secondary)] rounded-xl outline-none text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--turquesa-500)]/20 border border-[var(--border-subtle)]"
-                            >
-                                <option value="">Todas las categorías</option>
-                                <option value="comment">Comentario</option>
-                                <option value="info">Solicitud de Información</option>
-                                <option value="tech">Soporte Técnico</option>
-                                <option value="admin">Soporte Crítico</option>
-                                <option value="payments">Pagos</option>
-                                <option value="followup">Seguimiento</option>
-                                <option value="documentation">Documentación</option>
-                            </select>
-                        )}
-                    </div>
-                )}
-            </div>
-
-            {/* ── Lista filtrada ── */}
-            <div className="flex-1 overflow-y-auto divide-y divide-[var(--border-subtle)]">
-                {filteredTickets.map((ticket) => (
-                    <button
-                        key={ticket.id}
-                        onClick={() => onSelect(ticket.id)}
-                        className={`w-full p-4 text-left transition-colors ${activeTicketId === ticket.id
-                            ? 'bg-[var(--turquesa-500)]/10 border-l-2 border-[var(--turquesa-500)]'
-                            : 'hover:bg-[var(--bg-secondary)]/50'
-                            }`}
-                    >
-                        <div className="flex items-start justify-between gap-2">
-                            <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 mb-1">
-                                    <span className="text-[10px] font-mono text-[var(--text-muted)]">#{ticket.ticketNumber}</span>
-                                    <span className={`px-2 py-0.5 text-[9px] font-black uppercase tracking-wider rounded-full ${getStatusColor(ticket.status)}`}>
-                                        {getStatusLabel(ticket.status)}
-                                    </span>
-                                </div>
-                                <h4 className="text-xs font-black text-[var(--text-primary)] truncate uppercase tracking-tight">{ticket.subject}</h4>
-                                <p className="text-[10px] text-[var(--text-secondary)] mt-1 line-clamp-2 font-medium">{ticket.description}</p>
-                                <div className="flex items-center gap-3 mt-2">
-                                    <span className="text-[9px] text-[var(--text-muted)] font-medium">{getCategoryLabel(ticket.category)}</span>
-                                    <span className="text-[9px] text-[var(--text-muted)]">•</span>
-                                    <span className="text-[9px] text-[var(--text-muted)] font-medium">{formatDate(ticket.createdAt)}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </button>
-                ))}
-                {filteredTickets.length === 0 && (
-                    <div className="p-8 text-center text-[var(--text-secondary)]">
-                        <p>{filterValue ? 'Sin resultados para este filtro' : 'No hay tickets'}</p>
-                    </div>
-                )}
-            </div>
-        </div>
-    );
 }
 
 function toUnifiedHelpTicket(ticket: SellerTicket): UnifiedTicket {
@@ -366,94 +219,96 @@ export function HelpPageClient() {
         );
     }
 
+    const mappedConversations: Conversation[] = tickets.map(mapSellerTicketToConversation);
+
+    const listContent = (
+        <div className="flex flex-col h-full">
+            <div className="p-4 border-b border-[var(--border-subtle)] shrink-0">
+                <h3 className="text-sm font-black uppercase tracking-wider text-[var(--text-primary)]">Mis Tickets</h3>
+                <p className="text-[10px] font-medium text-[var(--text-secondary)] mt-0.5">{tickets.length} ticket{tickets.length !== 1 ? 's' : ''}</p>
+            </div>
+            <ConversationList
+                conversations={mappedConversations}
+                activeId={activeTicketId ?? undefined}
+                onSelect={(id) => { setActiveTicketId(id); setMobileShowChat(true); }}
+                accentColor="turquesa"
+            />
+        </div>
+    );
+
+    const detailContent = activeTicket ? (
+        <ChatView
+            ticket={toUnifiedHelpTicket(activeTicket)}
+            onSendMessage={({ text }) => handleSendMessage(text)}
+            onCloseTicket={() => handleCloseTicket(activeTicket.id)}
+            onBack={() => setMobileShowChat(false)}
+            isSending={isSending}
+            isClosing={isClosing}
+            showAdminControls={false}
+        />
+    ) : (
+        <div className="h-full flex items-center justify-center">
+            <div className="text-center px-8">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[var(--turquesa-500)]/10 to-[var(--verde-500)]/10 flex items-center justify-center mx-auto mb-4">
+                    <Icon name="Headset" className="w-8 h-8 text-[var(--turquesa-500)]" />
+                </div>
+                <p className="text-sm font-black uppercase tracking-wider text-[var(--text-primary)] mb-1">Selecciona un ticket</p>
+                <p className="text-xs text-[var(--text-secondary)]">O crea uno nuevo si tienes alguna consulta</p>
+            </div>
+        </div>
+    );
+
     return (
-        <div className="flex flex-col flex-1 min-h-0 animate-fadeIn">
+        <div className="flex flex-col h-[calc(100vh-140px)] animate-fadeIn">
             <div className="shrink-0 [&>div]:!mb-3">
                 <ModuleHeader
                     title="Soporte Lyrium"
                     subtitle="Centro de soporte y gestión de incidencias"
                     icon="Headset"
-                    actions={
-                        !showNewTicketForm ? (
-                            <div className="flex items-center gap-2">
-                                <button
-                                    onClick={() => setShowLegend(true)}
-                                    title="Leyenda"
-                                    className="w-9 h-9 flex items-center justify-center rounded-xl bg-white dark:bg-[var(--bg-secondary)] border border-[var(--border-subtle)] text-gray-500 dark:text-[var(--text-secondary)] hover:text-[var(--turquesa-500)] dark:hover:text-[var(--icons-green)] hover:border-[var(--turquesa-500)] dark:hover:border-[var(--icons-green)] transition-all shadow-sm"
-                                >
-                                    <Icon name="Info" className="w-4 h-4" />
-                                </button>
-                                {!activeTicket && (
-                                <button
-                                    onClick={() => { setShowNewTicketForm(true); setTicketError(null); }}
-                                    className="px-4 py-2 bg-white dark:bg-[var(--bg-secondary)] text-[var(--turquesa-500)] rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-[var(--turquesa-500)]/10 transition-colors border border-[var(--border-subtle)] shadow-sm"
-                                >
-                                    + Nuevo Ticket
-                                </button>
-                                )}
-                            </div>
-                        ) : null
-                    }
                 />
             </div>
 
-            <div className="flex-1 flex gap-4 md:gap-6 overflow-hidden">
-                {!showNewTicketForm && (
-                    <div className={`shrink-0 md:w-80 lg:w-96 ${mobileShowChat ? 'hidden md:flex md:flex-col' : 'flex flex-col w-full'}`}>
-                        <TicketList
-                            tickets={tickets}
-                            activeTicketId={activeTicketId}
-                            onSelect={(id) => { setActiveTicketId(id); setMobileShowChat(true); }}
-                        />
-                    </div>
-                )}
-
-                <div className={`min-w-0 ${!mobileShowChat && !showNewTicketForm ? 'hidden md:flex md:flex-col flex-1' : 'flex flex-col flex-1'}`}>
-                    {showNewTicketForm ? (
+            {showNewTicketForm ? (
+                <div className="flex-1 flex items-start justify-center pt-4 px-4 overflow-y-auto">
+                    <div className="w-full max-w-xl">
                         <NewTicketForm
                             onSubmit={async (data) => {
                                 setTicketError(null);
                                 const ok = await handleCreateTicket(data);
-                                if (ok) {
-                                    setShowNewTicketForm(false);
-                                } else {
-                                    setTicketError(hookError || 'No se pudo crear el ticket. Inténtalo de nuevo.');
-                                }
+                                if (ok) setShowNewTicketForm(false);
+                                else setTicketError(hookError || 'No se pudo crear el ticket. Inténtalo de nuevo.');
                             }}
                             onCancel={() => { setShowNewTicketForm(false); setTicketError(null); }}
                             isSubmitting={isSending}
                             submitError={ticketError}
                         />
-                    ) : activeTicket ? (
-                        <ChatView
-                            ticket={toUnifiedHelpTicket(activeTicket)}
-                            onSendMessage={({ text }) => handleSendMessage(text)}
-                            onCloseTicket={() => handleCloseTicket(activeTicket.id)}
-                            onBack={() => setMobileShowChat(false)}
-                            isSending={isSending}
-                            isClosing={isClosing}
-                            showAdminControls={false}
-                        />
-                    ) : (
-                        <div className="h-full flex items-center justify-center bg-[var(--bg-card)] rounded-[2.5rem] border border-[var(--border-subtle)]">
-                            <div className="text-center px-8">
-                                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[var(--turquesa-500)]/10 to-[var(--verde-500)]/10 flex items-center justify-center mx-auto mb-4">
-                                    <svg className="w-8 h-8 text-[var(--turquesa-500)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                                    </svg>
-                                </div>
-                                <p className="text-sm font-black uppercase tracking-wider text-[var(--text-primary)] mb-1">Selecciona un ticket</p>
-                                <p className="text-xs text-[var(--text-secondary)]">O crea uno nuevo si tienes alguna consulta</p>
-                            </div>
-                        </div>
-                    )}
+                    </div>
                 </div>
-            </div>
+            ) : (
+                <>
+                    <div className="flex items-center gap-2 mb-2 shrink-0">
+                        <button
+                            onClick={() => setShowLegend(true)}
+                            title="Leyenda"
+                            className="w-9 h-9 flex items-center justify-center rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--turquesa-500)] hover:border-[var(--turquesa-500)] transition-all shadow-sm"
+                        >
+                            <Icon name="Info" className="w-4 h-4" />
+                        </button>
+                        <button
+                            onClick={() => { setShowNewTicketForm(true); setTicketError(null); }}
+                            className="px-4 py-2 bg-[var(--bg-card)] text-[var(--turquesa-500)] rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-[var(--turquesa-500)]/10 transition-colors border border-[var(--border-subtle)] shadow-sm"
+                        >
+                            + Nuevo Ticket
+                        </button>
+                    </div>
+                    <ChatLayout list={listContent} detail={detailContent} />
+                </>
+            )}
 
             {showLegend && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4" onClick={() => setShowLegend(false)}>
-                    <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-[3rem] max-w-lg w-full shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
-                        <div className="bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--turquesa-500)]/70 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-8 text-white relative">
+                    <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-[3rem] max-w-lg w-full max-h-[80vh] shadow-2xl overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
+                        <div className="bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--turquesa-500)]/70 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-8 text-white relative flex-shrink-0">
                             <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl" />
                             <div className="relative z-10 flex items-center justify-between">
                                 <div className="flex items-center gap-4">
@@ -470,7 +325,7 @@ export function HelpPageClient() {
                                 </button>
                             </div>
                         </div>
-                        <div className="p-8 space-y-4">
+                        <div className="p-8 space-y-4 overflow-y-auto">
                             {[
                                 { icon: 'Settings', title: 'Incidencias técnicas', desc: 'Reporta errores de la plataforma, fallas en el sistema, problemas con módulos o funcionalidades.' },
                                 { icon: 'Shield', title: 'Soporte administrativo', desc: 'Consulta sobre validaciones, configuraciones de tienda, actualizaciones de documentación o estados de aprobación.' },

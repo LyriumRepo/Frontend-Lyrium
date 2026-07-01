@@ -31,7 +31,8 @@ export default function ChatBotWidget() {
 
     const {
         isOpen, isMinimized, messages, isTyping,
-        toggle, minimize, close, sendMessage, addBotResponse, clearHistory,
+        toggle, minimize, restore, close, sendMessage, addBotResponse, clearHistory,
+        handleWhatsAppClick,
     } = useChatBot();
 
     const { text, visible, shown, animKey } = useChatBotTooltip(isTyping, messages);
@@ -89,8 +90,9 @@ export default function ChatBotWidget() {
 
     const handleToggle = useCallback(() => {
         if (didDrag.current) return;
-        toggle();
-    }, [toggle]);
+        if (isMinimized) restore();
+        else toggle();
+    }, [toggle, restore, isMinimized]);
 
     return (
         <>
@@ -104,6 +106,7 @@ export default function ChatBotWidget() {
                 onSend={sendMessage}
                 onBotResponse={addBotResponse}
                 onClear={clearHistory}
+                onWhatsAppClick={handleWhatsAppClick}
                 tooltipText={text}
                 tooltipVisible={visible}
                 tooltipShown={shown}
@@ -112,7 +115,7 @@ export default function ChatBotWidget() {
 
             <div
                 className={`fixed bottom-20 right-6 z-[100] ${
-                    isOpen ? 'opacity-0 pointer-events-none scale-90' : 'opacity-100 scale-100'
+                    isOpen && !isMinimized ? 'opacity-0 pointer-events-none scale-90' : 'opacity-100 scale-100'
                 }`}
                 style={{
                     transform: `translate(${currentPos.x}px, ${currentPos.y}px)`,
@@ -163,7 +166,7 @@ export default function ChatBotWidget() {
                     className="shadow-lg hover:scale-110 active:scale-95 transition-transform duration-300 cursor-grab active:cursor-grabbing select-none"
                     aria-label="Abrir chat"
                 >
-                    <div className="bg-gradient-to-br from-emerald-700 to-teal-600 dark:from-[var(--brand-green)] dark:to-[var(--icons-green)] text-white rounded-full w-14 h-14 flex items-center justify-center shadow-xl hover:shadow-2xl hover:from-emerald-600 hover:to-teal-500 transition-all duration-300">
+                    <div className="bg-gradient-to-br from-sky-600 to-cyan-500 hover:from-sky-500 hover:to-cyan-400 dark:from-[var(--brand-green)] dark:to-[var(--icons-green)] dark:hover:from-emerald-600 dark:hover:to-teal-500 text-white rounded-full w-14 h-14 flex items-center justify-center shadow-xl hover:shadow-2xl transition-all duration-300">
                         <LogoLyrium size="sm" showText={false} frontImg="/img/iconologo.png" />
                     </div>
                 </button>

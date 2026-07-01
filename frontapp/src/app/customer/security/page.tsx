@@ -6,36 +6,7 @@ import { useRouter } from 'next/navigation';
 import Icon from '@/components/ui/Icon';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import { ChangePasswordForm } from '@/features/auth/change-password';
-
-// ─── Mock data (reemplaza con fetch real si necesitas sesiones del backend) ───
-
-interface Session {
-  id: number;
-  dispositivo: string;
-  navegador: string;
-  ubicacion: string;
-  tiempo: string;
-  actual: boolean;
-}
-
-const mockSessions: Session[] = [
-  {
-    id: 1,
-    dispositivo: 'Windows',
-    navegador: 'Chrome',
-    ubicacion: 'Lima, PE',
-    tiempo: 'Sesión actual',
-    actual: true,
-  },
-  {
-    id: 2,
-    dispositivo: 'iPhone 13',
-    navegador: 'Safari',
-    ubicacion: 'Lima, PE',
-    tiempo: 'Hace 2 horas',
-    actual: false,
-  },
-];
+import ActiveSessionsList from '@/features/security/components/ActiveSessionsList';
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
@@ -164,47 +135,7 @@ export default function CustomerSecurityPage() {
               ))}
             </ul>
 
-            {/* Sesiones activas */}
-            <div className="mt-8 pt-6 border-t border-gray-100 dark:border-[var(--border-subtle)]">
-              <p className="text-[10px] font-black text-gray-400 dark:text-gray-400 uppercase mb-4">
-                Sesiones Activas
-              </p>
-              <div className="space-y-4">
-                {mockSessions.map((session) => (
-                  <div
-                    key={session.id}
-                    className="flex items-center justify-between"
-                  >
-                    <div className="flex items-center gap-3">
-                      <Icon
-                        name={session.actual ? 'Monitor' : 'Smartphone'}
-                        className="w-5 h-5 text-gray-400"
-                      />
-                      <div>
-                        <p className="text-xs font-bold text-gray-800 dark:text-[var(--text-primary)]">
-                          {session.dispositivo} • {session.navegador}
-                        </p>
-                        <p
-                          className={`text-[10px] ${
-                            session.actual
-                              ? 'text-green-500 font-bold'
-                              : 'text-gray-400 dark:text-gray-400'
-                          }`}
-                        >
-                          {session.tiempo}
-                          {session.ubicacion && ` • ${session.ubicacion}`}
-                        </p>
-                      </div>
-                    </div>
-                    {!session.actual && (
-                      <button className="text-[10px] font-black text-red-500 hover:underline uppercase">
-                        Cerrar
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
+            <ActiveSessionsList />
           </div>
         </div>
       </div>

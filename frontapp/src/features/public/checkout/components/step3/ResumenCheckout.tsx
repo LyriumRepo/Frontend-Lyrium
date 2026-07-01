@@ -1,5 +1,6 @@
 'use client';
-import { Package, Weight, Truck, ShoppingBag, Store } from 'lucide-react';
+import { Package, Weight, Truck, Store, ChevronDown } from 'lucide-react';
+import { useState } from 'react';
 import { useCheckoutStore } from '@/store/checkoutStore';
 import type { TiendaLogistica, CourierOption, TipoEntrega } from '@/store/checkoutStore';
 
@@ -37,6 +38,9 @@ export default function ResumenCheckout() {
   const shippingQuotes  = useCheckoutStore(s => s.shippingQuotes);
   const selectedCourier = useCheckoutStore(s => s.selectedCourier);
   const tipoEntrega     = useCheckoutStore(s => s.selectedTipoEntrega);
+  const [expanded, setExpanded] = useState<Set<number>>(new Set());
+  const toggle = (id: number) =>
+    setExpanded(prev => { const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s; });
 
   if (!shippingQuotes || !selectedCourier) return null;
 
@@ -70,81 +74,98 @@ export default function ResumenCheckout() {
     <div className="rounded-2xl border-2 border-gray-100 dark:border-gray-800 overflow-hidden bg-white dark:bg-gray-900/40">
       <div className="divide-y divide-gray-100 dark:divide-gray-800">
         {/* ── Por tienda ───────────────────────────────────────────────── */}
-        {tiendaRows.map(({ tienda, items, subtotalProductos, precioEnvio, totalTienda, pesoTotal, op, tipoEfectivo }, idx) => (
-          <div key={tienda.tiendaId} className="px-5 py-4 space-y-3">
+        {tiendaRows.map(({ tienda, items, subtotalProductos, precioEnvio, totalTienda, pesoTotal, tipoEfectivo }) => {
+          const isOpen = expanded.has(tienda.tiendaId);
+          return (
+            <div key={tienda.tiendaId} className="overflow-hidden">
 
-            {/* Nombre tienda */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Store className="w-4 h-4 text-teal-500 shrink-0" />
-                <span className="text-sm font-bold text-gray-900 dark:text-white">
-                  {tienda.tienda}
-                </span>
-              </div>
-              <span className="text-[11px] text-gray-400">
-                📍 {tienda.origen?.display}
-              </span>
-            </div>
-
-            {/* Productos */}
-            <div className="space-y-1">
-              {items.map(item => (
-                <div key={item.id} className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-                  <span className="truncate max-w-[160px]">
-                    {item.name}
-                    <span className="ml-1 text-gray-400">×{item.quantity}</span>
+              {/* Cabecera clicable */}
+              <button
+                type="button"
+                onClick={() => toggle(tienda.tiendaId)}
+                className="w-full px-5 py-3.5 flex items-center justify-between gap-3 hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors text-left"
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <Store className="w-4 h-4 text-teal-500 shrink-0" />
+                  <span className="text-sm font-bold text-gray-900 dark:text-white truncate">
+                    {tienda.tienda}
                   </span>
-                  <span className="font-mono shrink-0">
-                    S/ {(item.price * item.quantity).toFixed(2)}
+                  <span className="hidden sm:inline text-[11px] text-gray-400 shrink-0">
+                    📍 {tienda.origen?.display}
                   </span>
                 </div>
-              ))}
-            </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className="font-mono text-sm font-bold text-sky-600 dark:text-sky-400">
+                    S/ {totalTienda.toFixed(2)}
+                  </span>
+                  <ChevronDown
+                    className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+                  />
+                </div>
+              </button>
 
-            {/* Cajas + peso */}
-            <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-800/60 text-xs text-gray-500 dark:text-gray-400">
-              <Package className="w-3.5 h-3.5 text-teal-500 shrink-0" />
-              <span>{tienda.cajas?.resumen}</span>
-              <span className="text-gray-300 dark:text-gray-600">·</span>
-              <Weight className="w-3.5 h-3.5 shrink-0" />
-              <span className="font-mono">{pesoTotal.toFixed(2)} kg</span>
-            </div>
+              {/* Detalle desplegable */}
+              {isOpen && (
+                <div className="px-5 pb-4 space-y-3 border-t border-gray-100 dark:border-gray-800">
 
-            {/* Courier elegido */}
-            <div className="flex items-center justify-between text-xs">
-              <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
-                <Truck className="w-3.5 h-3.5 shrink-0" />
-                <span className="font-medium">{selectedCourier}</span>
-                <span className="text-gray-300 dark:text-gray-600">·</span>
-                <span>
-                  {isSharf(selectedCourier)
-                    ? 'Puerta a puerta'
-                    : tipoEfectivo === 'domicilio' ? '🏠 A domicilio' : '🏢 En agencia'}
-                </span>
-              </div>
-              <span className="font-mono font-bold text-sky-600 dark:text-sky-400">
-                + S/ {precioEnvio.toFixed(2)}
-              </span>
-            </div>
+                  {/* Productos */}
+                  <div className="space-y-1 pt-3">
+                    {items.map(item => (
+                      <div key={item.id} className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                        <span className="truncate max-w-[160px]">
+                          {item.name}
+                          <span className="ml-1 text-gray-400">×{item.quantity}</span>
+                        </span>
+                        <span className="font-mono shrink-0">
+                          S/ {(item.price * item.quantity).toFixed(2)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
 
-            {/* Subtotales tienda */}
-            <div className="pt-2 space-y-1 border-t border-gray-100 dark:border-gray-800">
-              <div className="flex justify-between text-xs text-gray-400">
-                <span>Subtotal productos</span>
-                <span className="font-mono">S/ {subtotalProductos.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between text-xs text-gray-400">
-                <span>Envío</span>
-                <span className="font-mono">S/ {precioEnvio.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between text-sm font-bold text-gray-800 dark:text-white">
-                <span>Total {tienda.tienda}</span>
-                <span className="font-mono">S/ {totalTienda.toFixed(2)}</span>
-              </div>
-            </div>
+                  {/* Cajas + peso */}
+                  <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-800/60 text-xs text-gray-500 dark:text-gray-400">
+                    <Package className="w-3.5 h-3.5 text-teal-500 shrink-0" />
+                    <span>{tienda.cajas?.resumen}</span>
+                    <span className="text-gray-300 dark:text-gray-600">·</span>
+                    <Weight className="w-3.5 h-3.5 shrink-0" />
+                    <span className="font-mono">{pesoTotal.toFixed(2)} kg</span>
+                  </div>
 
-          </div>
-        ))}
+                  {/* Courier elegido */}
+                  <div className="flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
+                      <Truck className="w-3.5 h-3.5 shrink-0" />
+                      <span className="font-medium">{selectedCourier}</span>
+                      <span className="text-gray-300 dark:text-gray-600">·</span>
+                      <span>
+                        {isSharf(selectedCourier)
+                          ? 'Puerta a puerta'
+                          : tipoEfectivo === 'domicilio' ? '🏠 A domicilio' : '🏢 En agencia'}
+                      </span>
+                    </div>
+                    <span className="font-mono font-bold text-sky-600 dark:text-sky-400">
+                      + S/ {precioEnvio.toFixed(2)}
+                    </span>
+                  </div>
+
+                  {/* Subtotales tienda */}
+                  <div className="pt-2 space-y-1 border-t border-gray-100 dark:border-gray-800">
+                    <div className="flex justify-between text-xs text-gray-400">
+                      <span>Subtotal productos</span>
+                      <span className="font-mono">S/ {subtotalProductos.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between text-xs text-gray-400">
+                      <span>Envío</span>
+                      <span className="font-mono">S/ {precioEnvio.toFixed(2)}</span>
+                    </div>
+                  </div>
+
+                </div>
+              )}
+            </div>
+          );
+        })}
 
         {/* ── TOTALES GENERALES ─────────────────────────────────────── */}
         <div className="px-5 py-4 space-y-2 bg-gray-50 dark:bg-gray-800/40">

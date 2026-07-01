@@ -152,21 +152,24 @@ export default function AdminPage() {
                 </span>
               </button>
             )}
-            <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/20 border border-white/30">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
-                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-              </svg>
-              <span className="text-xs font-semibold text-white">
-                {activePlansCount} plan{activePlansCount !== 1 ? 'es' : ''} activo{activePlansCount !== 1 ? 's' : ''}
+            <button
+              onClick={() => handleSwitchTab('plans')}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-sky-50 dark:bg-emerald-900/20 border border-sky-200 dark:border-emerald-800 cursor-pointer hover:bg-sky-100 dark:hover:bg-emerald-900/30 transition-colors"
+            >
+              <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-gradient-to-br from-sky-500 to-sky-400 dark:from-emerald-600 dark:to-teal-500 text-white text-[10px] font-black shadow-sm shadow-sky-500/30 dark:shadow-emerald-900/40">
+                {activePlansCount}
               </span>
-            </div>
+              <span className="text-xs font-bold text-sky-700 dark:text-emerald-400">
+                plan{activePlansCount !== 1 ? 'es' : ''} activo{activePlansCount !== 1 ? 's' : ''}
+              </span>
+            </button>
           </div>
         )}
       />
 
-      <div className="max-w-7xl mx-auto px-5 pt-0 pb-0">
+      <div className="max-w-7xl mx-auto px-5 pt-0 pb-0 relative">
           {/* Tabs */}
-          <div className="flex gap-0.5 overflow-x-auto scrollbar-hide">
+          <div className="flex gap-0.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {TABS.map(t => {
               const isActive = s.activeTab === t.key;
               const hasBadge = t.key === 'requests' && pendingCount > 0;

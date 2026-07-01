@@ -212,7 +212,7 @@ export default function SmartSidebar({
                                         >
                                             <div className={`grid grid-cols-1 ${(isExpanded || isMobileOpen) ? 'lg:grid-cols-[80%_20%]' : ''} items-center h-14 relative z-10 transition-all duration-500`}>
                                                 <div className={`flex items-center h-full transition-all duration-500 ${active ? 'bg-[var(--bg-sidebar)] rounded-r-[80px] shadow-[10px_0_15px_-5px_rgba(0,0,0,0.05)]' : 'bg-transparent'}`}>
-                                                    <div className={`flex items-center justify-center transition-all duration-500 w-full md:w-full ${(isExpanded || isMobileOpen) ? 'lg:w-14' : 'lg:w-20'}`}>
+                                                    <div className={`flex items-center justify-center transition-all duration-500 ${isMobileOpen ? 'w-14' : 'w-full'} md:w-full ${(isExpanded || isMobileOpen) ? 'lg:w-14' : 'lg:w-20'}`}>
                                                         <div className={`
                                                             relative w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-500
                                                             ${active ? `${colors.bgIcon} ${colors.textActive} shadow-inner` : `bg-[var(--bg-muted)] text-[var(--text-secondary)] group-hover:text-[var(--brand-green)] group-hover:bg-[var(--bg-sidebar)]`}
@@ -233,9 +233,16 @@ export default function SmartSidebar({
                                                     </span>
                                                     )}
                                                 </div>
+                                                {/* Punto parpadeante — desktop (columna 2 del grid) */}
                                                 {active && (isExpanded || isMobileOpen) && (
                                                     <div className="hidden lg:flex justify-center items-center">
                                                         <div className="w-1.5 h-1.5 bg-[var(--bg-sidebar)] dark:bg-[var(--text-primary)] rounded-full animate-ping" />
+                                                    </div>
+                                                )}
+                                                {/* Punto parpadeante — móvil (posición absoluta derecha) */}
+                                                {active && isMobileOpen && (
+                                                    <div className="lg:hidden absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center">
+                                                        <div className="w-2 h-2 bg-[var(--brand-green)] rounded-full animate-ping opacity-80" />
                                                     </div>
                                                 )}
                                             </div>

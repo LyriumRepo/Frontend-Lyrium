@@ -1,8 +1,14 @@
+export interface ChatBotWhatsAppAction {
+    url: string;
+    label: string;
+}
+
 export interface ChatBotMessage {
     id: string;
     role: 'user' | 'assistant' | 'system';
     content: string;
     timestamp: string;
+    whatsappAction?: ChatBotWhatsAppAction;
 }
 
 export interface ChatBotState {
@@ -16,5 +22,6 @@ export interface ChatBotState {
 
 export interface ChatBotResponse {
     reply: string;
-    source: 'faq' | 'ai';
+    source: 'faq' | 'ai' | 'fallback' | 'handoff';
+    whatsapp_url?: string;
 }

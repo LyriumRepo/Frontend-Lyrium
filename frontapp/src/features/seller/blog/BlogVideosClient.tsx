@@ -116,8 +116,8 @@ export function BlogVideosClient() {
                                         <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${v.status === 'published' ? 'bg-emerald-100 text-emerald-600' : v.status === 'review' ? 'bg-amber-100 text-amber-600' : 'bg-gray-100 text-gray-500'}`}>{v.status}</span>
                                     </td>
                                     <td className="px-5 py-4"><div className="flex gap-2">
-                                        <button onClick={() => openEdit(v)} className="p-1.5 rounded-lg hover:bg-sky-50 text-sky-500 transition"><Edit className="w-4 h-4" /></button>
-                                        <button onClick={() => handleDelete(v.id)} className="p-1.5 rounded-lg hover:bg-red-50 text-red-400 transition"><Trash2 className="w-4 h-4" /></button>
+                                        <button onClick={() => openEdit(v)} aria-label="Editar" className="p-1.5 rounded-lg hover:bg-sky-50 text-sky-500 transition"><Edit className="w-4 h-4" /></button>
+                                        <button onClick={() => handleDelete(v.id)} aria-label="Eliminar" className="p-1.5 rounded-lg hover:bg-red-50 text-red-400 transition"><Trash2 className="w-4 h-4" /></button>
                                     </div></td>
                                 </tr>
                             ))}

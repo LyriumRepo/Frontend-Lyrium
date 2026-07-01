@@ -204,8 +204,8 @@ export default function ProductModerationModal({
             }}
           >
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-cyan-500/10 rounded-xl">
-                <Package className="w-5 h-5 text-cyan-500" />
+              <div className="p-2 bg-[var(--icons-green)]/10 rounded-xl">
+                <Package className="w-5 h-5 text-[var(--icons-green)]" />
               </div>
               <div>
                 <h2 className="text-base font-black text-[var(--text-primary)] uppercase tracking-tight">
@@ -230,7 +230,7 @@ export default function ProductModerationModal({
             {/* Loading */}
             {loading && (
               <div className="flex flex-col items-center justify-center py-24 gap-3 text-[var(--text-secondary)]">
-                <Loader2 className="w-8 h-8 animate-spin text-cyan-500" />
+                <Loader2 className="w-8 h-8 animate-spin text-[var(--icons-green)]" />
                 <p className="text-sm font-bold uppercase tracking-widest">
                   Cargando producto…
                 </p>
@@ -239,7 +239,7 @@ export default function ProductModerationModal({
 
             {/* Error */}
             {error && !loading && (
-              <div className="m-8 p-6 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-center gap-3 text-red-500">
+              <div className="m-8 p-6 bg-[var(--color-error)]/10 border border-[var(--color-error)]/20 rounded-2xl flex items-center gap-3 text-[var(--color-error)]">
                 <AlertTriangle className="w-5 h-5 flex-shrink-0" />
                 <p className="text-sm font-bold">Error al cargar: {error}</p>
               </div>
@@ -267,7 +267,7 @@ export default function ProductModerationModal({
                       className="object-contain p-4"
                     />
                     {/* Badge tipo */}
-                    <span className="absolute top-3 left-3 px-2.5 py-1 text-[9px] font-black uppercase tracking-widest bg-cyan-500 text-white rounded-full">
+                    <span className="absolute top-3 left-3 px-2.5 py-1 text-[9px] font-black uppercase tracking-widest bg-[var(--icons-green)] text-white rounded-full">
                       {detail.type}
                     </span>
                   </div>
@@ -363,7 +363,7 @@ export default function ProductModerationModal({
                       <p className="text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)] mb-1">
                         Precio
                       </p>
-                      <p className="text-lg font-black text-cyan-500">
+                      <p className="text-lg font-black text-[var(--icons-green)]">
                         {fmt(detail.price)}
                       </p>
                     </div>
@@ -396,7 +396,7 @@ export default function ProductModerationModal({
                         Estado
                       </p>
                       <p
-                        className={`text-[11px] font-black ${detail.in_stock ? 'text-emerald-500' : 'text-red-500'}`}
+                        className={`text-[11px] font-black ${detail.in_stock ? 'text-[var(--color-success)]' : 'text-[var(--color-error)]'}`}
                       >
                         {detail.in_stock ? 'En stock' : 'Sin stock'}
                       </p>
@@ -546,7 +546,7 @@ export default function ProductModerationModal({
                       }}
                     >
                       <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)] mb-3 flex items-center gap-1.5">
-                        <Leaf className="w-3 h-3 text-emerald-500" />{' '}
+                        <Leaf className="w-3 h-3 text-[var(--color-success)]" />{' '}
                         Información Nutricional
                       </p>
                       {detail.nutritional_info?.serving_note && (
@@ -578,7 +578,7 @@ export default function ProductModerationModal({
                               <td className="py-1.5 font-medium text-[var(--text-primary)]">
                                 {row.label}
                               </td>
-                              <td className="py-1.5 text-center text-cyan-500 font-bold flex items-center justify-center gap-1">
+                              <td className="py-1.5 text-center text-[var(--icons-green)] font-bold flex items-center justify-center gap-1">
                                 <Flame className="w-2.5 h-2.5" />
                                 {row.value}
                               </td>
@@ -630,7 +630,7 @@ export default function ProductModerationModal({
                   <button
                     type="button"
                     onClick={() => setPendingAction('APPROVED')}
-                    className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 hover:bg-emerald-500 hover:text-white"
+                    className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all bg-[var(--color-success)]/10 text-[var(--color-success)] border border-[var(--color-success)]/20 hover:bg-[var(--color-success)] hover:text-white"
                   >
                     <CheckCircle className="w-4 h-4" />
                     Aprobar producto
@@ -638,7 +638,7 @@ export default function ProductModerationModal({
                   <button
                     type="button"
                     onClick={() => setPendingAction('REJECTED')}
-                    className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all bg-rose-500/10 text-rose-500 border border-rose-500/20 hover:bg-rose-500 hover:text-white"
+                    className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all bg-[var(--color-error)]/10 text-[var(--color-error)] border border-[var(--color-error)]/20 hover:bg-[var(--color-error)] hover:text-white"
                   >
                     <XCircle className="w-4 h-4" />
                     Rechazar producto
@@ -686,7 +686,7 @@ export default function ProductModerationModal({
                         : 'Notas de auditoría (opcional)…'
                     }
                     required={pendingAction === 'REJECTED'}
-                    className="w-full p-3 text-[12px] font-medium text-[var(--text-primary)] bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-cyan-500/20 placeholder:text-[var(--text-secondary)]"
+                    className="w-full p-3 text-[12px] font-medium text-[var(--text-primary)] bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-[var(--icons-green)]/20 placeholder:text-[var(--text-secondary)]"
                   />
 
                   <div className="flex gap-3">
@@ -711,8 +711,8 @@ export default function ProductModerationModal({
                       }
                       className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
                         pendingAction === 'APPROVED'
-                          ? 'bg-emerald-500 hover:bg-emerald-600 text-white'
-                          : 'bg-rose-500 hover:bg-rose-600 text-white'
+                          ? 'bg-[var(--color-success)] hover:bg-[var(--color-success)] text-white'
+                          : 'bg-[var(--color-error)] hover:bg-[var(--color-error)] text-white'
                       }`}
                     >
                       {isSubmitting ? (

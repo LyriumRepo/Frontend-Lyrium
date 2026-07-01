@@ -3,17 +3,17 @@ import { ContractStatus, ContractKPI, ContractModality, AuditEvent, ExpiryUrgenc
 import { CheckCircle, AlertTriangle, AlertOctagon, Clock, XCircle, Handshake, Cloud } from 'lucide-react';
 
 const colorMap: Record<string, string> = {
-    emerald: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
+    emerald: 'bg-[var(--color-success)]/10 text-[var(--color-success)] border-[var(--color-success)]/20',
     indigo: 'bg-[var(--celeste-500)]/10 text-[var(--celeste-500)] border border-[var(--celeste-500)]/20',
-    amber: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
-    red: 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20',
+    amber: 'bg-[var(--color-warning)]/10 text-[var(--color-warning)] border-[var(--color-warning)]/20',
+    red: 'bg-[var(--color-error)]/10 text-[var(--color-error)] border-[var(--color-error)]/20',
 };
 
 const borderMap: Record<string, string> = {
-    emerald: 'border-emerald-500',
+    emerald: 'border-[var(--color-success)]',
     indigo: 'border-[var(--celeste-500)]',
-    amber: 'border-amber-500',
-    red: 'border-red-500',
+    amber: 'border-[var(--color-warning)]',
+    red: 'border-[var(--color-error)]',
 };
 
 export const StatusBadge: React.FC<{ status: ContractStatus, large?: boolean }> = ({ status, large }) => {
@@ -33,8 +33,8 @@ export const StatusBadge: React.FC<{ status: ContractStatus, large?: boolean }> 
 export const ExpiryTrafficLight: React.FC<{ urgency?: ExpiryUrgency }> = ({ urgency }) => {
     if (!urgency) return null;
     const configs = {
-        normal: { class: 'bg-emerald-500', label: 'Vigente' },
-        warning: { class: 'bg-orange-500 animate-pulse', label: 'Vence Pronto' },
+        normal: { class: 'bg-[var(--color-success)]', label: 'Vigente' },
+        warning: { class: 'bg-[var(--color-warning)] animate-pulse', label: 'Vence Pronto' },
         critical: { class: 'bg-red-500', label: 'Vencido' }
     };
     const config = configs[urgency];
@@ -78,7 +78,7 @@ export const AuditTimeline: React.FC<{ events?: AuditEvent[] }> = ({ events }) =
 export const ModalityBadge: React.FC<{ modality: ContractModality }> = ({ modality }) => {
     const isVirtual = modality === 'VIRTUAL';
     return (
-        <span className={`text-[10px] font-black ${isVirtual ? 'text-sky-600 dark:text-sky-400' : 'text-amber-600 dark:text-amber-400'} flex items-center gap-1 font-industrial`}>
+        <span className={`text-[10px] font-black ${isVirtual ? 'text-[var(--color-info)]' : 'text-[var(--color-warning)]'} flex items-center gap-1 font-industrial`}>
             {isVirtual ? <Cloud className="w-4 h-4" /> : <Handshake className="w-4 h-4" />}
             {isVirtual ? 'VIRTUAL' : 'PRESENCIAL'}
         </span>

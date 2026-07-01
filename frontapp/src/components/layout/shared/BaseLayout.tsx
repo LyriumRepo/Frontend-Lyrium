@@ -24,7 +24,7 @@ export default function BaseLayout({
     mainClassName = 'p-6 md:p-8'
 }: BaseLayoutProps) {
     const pathname = usePathname();
-    const isImmersiveHelpdeskRoute = pathname === '/seller/help' || pathname === '/admin/helpdesk' || pathname === '/seller/chat';
+    const isImmersiveHelpdeskRoute = pathname === '/admin/helpdesk' || pathname === '/seller/chat';
 
     useEffect(() => {
         onSidebarClose();

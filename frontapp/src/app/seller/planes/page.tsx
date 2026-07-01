@@ -5,7 +5,7 @@ import { useSSE } from '@/features/seller/plans/hooks/useSSE';
 import { motivationalMessages, notificationMessages } from '@/features/seller/plans/lib/plans';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import { sanitizeHtml } from '@/shared/lib/sanitize';
-import { apiGet } from '@/features/seller/plans/lib/api';
+import { apiGet, apiPost } from '@/features/seller/plans/lib/api';
 
 import AccessBlocked from '@/features/seller/plans/shared/AccessBlocked';
 import Notification from '@/features/seller/plans/shared/Notification';
@@ -109,33 +109,32 @@ export default function PlanesPage() {
   // ── Izipay SDK ────────────────────────────────────────────────────────────
   const [izipayError, setIzipayError] = useState<string | null>(null);
 
-  const handleIzipaySuccess = useCallback(() => {
+  const handleIzipaySuccess = useCallback(async (result: import('@/features/public/checkout/hooks/useIzipay').KryptonPaymentSuccessDetail) => {
     planes.setModal('izipayPay', false);
     setIzipayError(null);
     planes.setModal('waitingPayment', true);
-    
-    // Poll /subscriptions/current until plan changes or timeout
-    const planIdBefore = state.subscriptionInfo?.planId || '';
-    let attempts = 0;
-    const poll = setInterval(async () => {
-      attempts++;
-      try {
-        const subRes = await apiGet<{ data?: { plan_id: number; status: string; plan: { slug: string } } }>('/subscriptions/current');
-        const newPlanId = subRes?.data?.plan_id ? String(subRes.data.plan_id) : null;
-        if (subRes?.data?.status === 'active' && newPlanId && newPlanId !== planIdBefore) {
-          clearInterval(poll);
-          planes.setModal('waitingPayment', false);
-          planes.showNotification('¡Pago confirmado! Tu plan ha sido activado.', '#10b981');
-          planes.initialize();
-        }
-      } catch {}
-      if (attempts >= 30) {
-        clearInterval(poll);
-        planes.setModal('waitingPayment', false);
-        planes.showNotification('El pago fue procesado pero hubo un retraso en la activación. Recarga la página.', '#f59e0b');
+
+    const orderId = result?.clientAnswer?.orderDetails?.orderId ?? state.izipayConfig?.orderId ?? '';
+
+    try {
+      const res = await apiPost<{ success: boolean; message?: string }>(
+        '/payments/izipay/plan-callback',
+        { client_answer: result.clientAnswer, order_id: orderId },
+      );
+
+      planes.setModal('waitingPayment', false);
+
+      if (res.success) {
+        planes.showNotification('¡Pago confirmado! Tu plan ha sido activado.', '#10b981');
+        await planes.initialize();
+      } else {
+        planes.showNotification(res.message ?? 'El pago fue recibido pero hubo un error al activar el plan. Contacta soporte.', '#f59e0b');
       }
-    }, 2000);
-  }, []);
+    } catch {
+      planes.setModal('waitingPayment', false);
+      planes.showNotification('El pago fue procesado. Recarga la página para ver tu plan actualizado.', '#f59e0b');
+    }
+  }, [state.izipayConfig?.orderId]);
 
   const {
     loadSmartForm,

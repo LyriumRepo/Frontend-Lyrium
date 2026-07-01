@@ -8,3 +8,5 @@ export type ApiBackend = 'wp' | 'laravel';
 export const API_BACKEND: ApiBackend = (process.env.NEXT_PUBLIC_API_BACKEND as ApiBackend) || 'laravel';
 
 export const IS_DEV_MODE = process.env.NODE_ENV === 'development';
+
+export const WHATSAPP_SUPPORT_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '51937093420';
