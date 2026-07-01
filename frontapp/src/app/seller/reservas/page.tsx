@@ -6,7 +6,6 @@ import {
   Calendar, Clock, User, Star, Loader2, CheckCircle,
   Search, CreditCard, MessageSquare, X, AlertCircle, Eye, Store,
 } from 'lucide-react';
-import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import { LARAVEL_API_URL } from '@/shared/lib/config/flags';
 import type { BookingResponse } from '@/shared/lib/api/bookingRepository';
 import { BookingTimeline } from '@/shared/components/booking/BookingTimeline';

@@ -5,7 +5,7 @@ import { useSellerHelp } from '@/features/seller/help/hooks/useSellerHelp';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import BaseLoading from '@/components/ui/BaseLoading';
 import Icon from '@/components/ui/Icon';
-import { SellerTicket, TicketStatus, TicketCategory } from '@/features/seller/help/types';
+import { SellerTicket, TicketStatus, TicketCategory, CATEGORY_LABELS } from '@/features/seller/help/types';
 import { ChatView } from '@/modules/chat';
 import type { UnifiedTicket, UnifiedMessage } from '@/modules/chat/types';
 
@@ -40,16 +40,7 @@ function TicketList({
         }
     };
 
-    const getCategoryLabel = (category: TicketCategory) => {
-        switch (category) {
-            case 'critico': return 'Soporte Técnico Critico';
-            case 'tecnico': return 'Soporte Técnico';
-            case 'negativo': return 'Comentario Negativo';
-            case 'informacion': return 'Solicitud de Información';
-            case 'positivo': return 'Comentario Positivo';
-            default: return category;
-        }
-    };
+    const getCategoryLabel = (category: TicketCategory) => CATEGORY_LABELS[category] ?? category;
 
     const formatDate = (dateStr: string) => {
         const date = new Date(dateStr);
@@ -133,11 +124,9 @@ function TicketList({
                                 className="w-full px-3 py-1.5 text-sm bg-[var(--bg-secondary)] rounded-xl outline-none text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--turquesa-500)]/20 border border-[var(--border-subtle)]"
                             >
                                 <option value="">Todas las categorías</option>
-                                <option value="positivo">Comentario Positivo</option>
-                                <option value="negativo">Comentario Negativo</option>
-                                <option value="informacion">Solicitud de Información</option>
-                                <option value="tecnico">Soporte Técnico</option>
-                                <option value="critico">Soporte Técnico Crítico</option>
+                                {(Object.entries(CATEGORY_LABELS) as [TicketCategory, string][]).map(([value, label]) => (
+                                    <option key={value} value={value}>{label}</option>
+                                ))}
                             </select>
                         )}
                     </div>
@@ -237,7 +226,7 @@ function NewTicketForm({
 }) {
     const [subject, setSubject] = useState('');
     const [description, setDescription] = useState('');
-    const [category, setCategory] = useState('positivo');
+    const [category, setCategory] = useState<TicketCategory>('info');
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -256,15 +245,13 @@ function NewTicketForm({
                     <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-1.5">Categoría</label>
                     <select
                         value={category}
-                        onChange={(e) => setCategory(e.target.value)}
+                        onChange={(e) => setCategory(e.target.value as TicketCategory)}
                         className="w-full px-4 py-2.5 bg-[var(--bg-secondary)] rounded-xl outline-none text-sm font-medium text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--turquesa-500)]/20 border border-[var(--border-subtle)]"
                         required
                     >
-                        <option value="positivo">Comentario Positivo</option>
-                        <option value="negativo">Comentario Negativo</option>
-                        <option value="informacion">Solicitud de Información</option>
-                        <option value="tecnico">Soporte Técnico</option>
-                        <option value="critico">Soporte Técnico Crítico</option>
+                        {(Object.entries(CATEGORY_LABELS) as [TicketCategory, string][]).map(([value, label]) => (
+                            <option key={value} value={value}>{label}</option>
+                        ))}
                     </select>
                 </div>
 
