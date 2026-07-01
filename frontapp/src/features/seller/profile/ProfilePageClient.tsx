@@ -189,10 +189,10 @@ export function ProfilePageClient(_props: ProfilePageClientProps) {
                 {editBtn}
             </div>
 
-            <form id="form-mis-datos" className="grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-6 md:gap-8 items-start">
+            <form id="form-mis-datos" className="grid grid-cols-1 xl:grid-cols-12 gap-4 sm:gap-6 md:gap-8 items-start">
 
                 {/* ── 1. DATOS EMPRESARIALES ── */}
-                <div className={`md:col-span-8 ${cardCls}`}>
+                <div className={`xl:col-span-8 ${cardCls}`}>
 
                     <div className={cardHeaderCls}>
                         <div className="flex items-center gap-3 sm:gap-4 text-white relative z-10 min-w-0">
@@ -354,7 +354,7 @@ export function ProfilePageClient(_props: ProfilePageClientProps) {
                 </div>
 
                 {/* ── 2. ADMIN DEL PANEL ── */}
-                <div className={`md:col-span-4 ${cardCls}`}>
+                <div className={`xl:col-span-4 ${cardCls}`}>
 
                     <div className={cardHeaderCls}>
                         <div className="flex items-center gap-3 text-white relative z-10 min-w-0 flex-1">
@@ -363,7 +363,7 @@ export function ProfilePageClient(_props: ProfilePageClientProps) {
                             </div>
                             <div className="min-w-0">
                                 <h3 className="text-base sm:text-lg font-black tracking-tight leading-none text-white truncate">Admin del Panel</h3>
-                                <p className="text-[10px] font-black text-white/70 uppercase tracking-widest mt-1">Contacto Directo</p>
+                                <p className="text-[10px] font-black text-white/70 uppercase tracking-widest mt-1 whitespace-nowrap truncate">Contacto Directo</p>
                             </div>
                         </div>
 
@@ -436,7 +436,7 @@ export function ProfilePageClient(_props: ProfilePageClientProps) {
                 </div>
 
                 {/* ── 3. FINANZAS ── */}
-                <div className={`md:col-span-12 ${cardCls}`}>
+                <div className={`xl:col-span-12 ${cardCls}`}>
 
                     <div className={cardHeaderCls}>
                         <div className="flex items-center gap-3 sm:gap-4 text-white relative z-10">

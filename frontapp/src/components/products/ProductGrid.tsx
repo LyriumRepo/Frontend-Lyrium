@@ -74,18 +74,18 @@ function ProductCard({ producto }: { producto: Producto }) {
           </div>
         </Link>
 
-        <span className="absolute top-3 left-3 inline-flex items-center gap-1 text-[11px] px-3 py-1 rounded-full bg-white/85 dark:bg-[var(--bg-card)]/85 border border-sky-100 dark:border-[var(--border-subtle)] backdrop-blur-sm text-slate-700 dark:text-[var(--text-primary)] shadow-sm">
-          <Leaf className="w-3 h-3 text-sky-500 dark:text-[var(--brand-sky)]" /> Lyrium
+        <span className="absolute top-2 left-2 sm:top-3 sm:left-3 inline-flex items-center gap-0.5 sm:gap-1 text-[9px] sm:text-[11px] px-2 py-0.5 sm:px-3 sm:py-1 rounded-full bg-white/85 dark:bg-[var(--bg-card)]/85 border border-sky-100 dark:border-[var(--border-subtle)] backdrop-blur-sm text-slate-700 dark:text-[var(--text-primary)] shadow-sm">
+          <Leaf className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-sky-500 dark:text-[var(--brand-sky)]" /> Lyrium
         </span>
 
         {pct > 0 && (
-          <span className="absolute top-3 right-3 inline-flex items-center gap-1 text-[11px] px-3 py-1 rounded-full bg-emerald-600 text-white shadow">
+          <span className="absolute top-2 right-2 sm:top-3 sm:right-3 inline-flex items-center gap-1 text-[9px] sm:text-[11px] px-2 py-0.5 sm:px-3 sm:py-1 rounded-full bg-emerald-600 text-white shadow">
             -{pct}%
           </span>
         )}
 
         {producto.tag && !pct && (
-          <span className={`absolute top-3 right-3 text-white text-xs font-bold px-2 py-1 rounded-full ${stickerConfig[producto.tag.toLowerCase()]?.class ?? 'bg-gray-500'}`}>
+          <span className={`absolute top-2 right-2 sm:top-3 sm:right-3 text-white text-[9px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full ${stickerConfig[producto.tag.toLowerCase()]?.class ?? 'bg-gray-500'}`}>
             {stickerConfig[producto.tag.toLowerCase()]?.label ?? producto.tag}
           </span>
         )}
@@ -99,67 +99,67 @@ function ProductCard({ producto }: { producto: Producto }) {
         <TopMedalBadge entityType="product" entityId={producto.id} size="md" className="absolute bottom-3 right-3 z-10" />
       </div>
 
-      <div className="p-4 flex flex-col gap-2 flex-1">
+      <div className="p-3 sm:p-4 flex flex-col gap-1.5 sm:gap-2 flex-1">
         <div className="flex items-start justify-between gap-2">
           <Link href={producto.slug ? `/producto/${producto.slug}` : '#'} className="text-left flex-1">
-            <p className="text-slate-800 dark:text-[var(--text-primary)] leading-snug line-clamp-2 min-h-[42px] text-sm font-medium">
+            <p className="text-slate-800 dark:text-[var(--text-primary)] leading-snug line-clamp-2 min-h-[36px] sm:min-h-[42px] text-[13px] sm:text-sm font-medium">
               {producto.titulo}
             </p>
           </Link>
         </div>
 
         {producto.descripcionCorta && (
-          <p className="text-[11px] text-slate-400 dark:text-[var(--text-muted)] line-clamp-2">{producto.descripcionCorta}</p>
+          <p className="text-[10px] sm:text-[11px] text-slate-400 dark:text-[var(--text-muted)] line-clamp-2">{producto.descripcionCorta}</p>
         )}
 
-        <div className="flex items-center justify-between gap-2 mt-auto pt-2">
+        <div className="flex items-center justify-between gap-1.5 sm:gap-2 mt-auto pt-1 sm:pt-2 flex-wrap">
           {producto.categoria && (
-            <span className="text-[11px] px-2 py-1 rounded-full bg-slate-50 dark:bg-[var(--bg-muted)] border border-slate-100 dark:border-[var(--border-subtle)] text-slate-600 dark:text-[var(--text-secondary)] inline-flex items-center gap-1">
-              <FolderOpen className="w-3 h-3 text-sky-500 dark:text-[var(--brand-sky)]" /> {producto.categoria}
+            <span className="text-[9px] sm:text-[11px] px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full bg-slate-50 dark:bg-[var(--bg-muted)] border border-slate-100 dark:border-[var(--border-subtle)] text-slate-600 dark:text-[var(--text-secondary)] inline-flex items-center gap-1 truncate max-w-full">
+              <FolderOpen className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-sky-500 dark:text-[var(--brand-sky)] shrink-0" /> <span className="truncate">{producto.categoria}</span>
             </span>
           )}
           {producto.estrellas
             ? <StarRating estrellas={producto.estrellas} total={producto.reviews} />
             : (
-              <span className="text-[10px] px-2 py-1 rounded-full bg-slate-50 dark:bg-[var(--bg-muted)] border border-slate-100 dark:border-[var(--border-subtle)] text-slate-500 dark:text-[var(--text-muted)] inline-flex items-center gap-1">
-                <ShieldCheck className="w-3 h-3 text-sky-500 dark:text-[var(--brand-sky)]" /> Verificado
+              <span className="text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full bg-slate-50 dark:bg-[var(--bg-muted)] border border-slate-100 dark:border-[var(--border-subtle)] text-slate-500 dark:text-[var(--text-muted)] inline-flex items-center gap-1">
+                <ShieldCheck className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-sky-500 dark:text-[var(--brand-sky)]" /> Verificado
               </span>
             )}
         </div>
 
         <div className="flex items-end justify-between mt-1">
           <div>
-            <p className="text-emerald-700 dark:text-emerald-400 text-xl font-bold">S/{finalPrice.toFixed(2)}</p>
+            <p className="text-emerald-700 dark:text-emerald-400 text-base sm:text-xl font-bold">S/{finalPrice.toFixed(2)}</p>
             {hasOffer ? (
-              <p className="text-xs text-gray-400 dark:text-[var(--text-muted)] line-through">S/{basePrice.toFixed(2)}</p>
+              <p className="text-[10px] sm:text-xs text-gray-400 dark:text-[var(--text-muted)] line-through">S/{basePrice.toFixed(2)}</p>
             ) : (
-              <p className="text-xs text-transparent">-</p>
+              <p className="text-[10px] sm:text-xs text-transparent">-</p>
             )}
           </div>
-          <span className={`text-xs inline-flex items-center gap-1 ${outOfStock ? 'text-rose-500' : 'text-slate-400 dark:text-[var(--text-muted)]'}`}>
-            <Package className="w-3 h-3 text-sky-500 dark:text-[var(--brand-sky)]" />
+          <span className={`text-[10px] sm:text-xs inline-flex items-center gap-1 ${outOfStock ? 'text-rose-500' : 'text-slate-400 dark:text-[var(--text-muted)]'}`}>
+            <Package className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-sky-500 dark:text-[var(--brand-sky)]" />
             {outOfStock ? 'Agotado' : producto.stock ? `Stock: ${producto.stock}` : 'Disponible'}
           </span>
         </div>
 
-        <div className="grid grid-cols-2 gap-2 mt-2">
+        <div className="grid grid-cols-2 gap-1.5 sm:gap-2 mt-2">
           <button
             onClick={(e) => { e.preventDefault(); if (outOfStock || loading) return; addToCart(producto.id); }}
             disabled={outOfStock || loading}
-            className="py-2.5 rounded-2xl bg-sky-500 text-white text-xs font-semibold inline-flex items-center justify-center gap-1.5 hover:bg-sky-600 dark:hover:bg-sky-400 transition shadow-md shadow-sky-100 dark:shadow-sky-900/20 disabled:opacity-40 disabled:cursor-not-allowed hover:-translate-y-px"
+            className="py-2 sm:py-2.5 rounded-xl sm:rounded-2xl bg-sky-500 text-white text-[10px] sm:text-xs font-semibold inline-flex items-center justify-center gap-1 sm:gap-1.5 hover:bg-sky-600 dark:hover:bg-sky-400 transition shadow-md shadow-sky-100 dark:shadow-sky-900/20 disabled:opacity-40 disabled:cursor-not-allowed hover:-translate-y-px whitespace-nowrap px-1"
           >
             {loading ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              <Loader2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 animate-spin shrink-0" />
             ) : addedToCart ? (
-              <Check className="w-3.5 h-3.5" />
+              <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
             ) : (
-              <ShoppingCart className="w-3.5 h-3.5" />
+              <ShoppingCart className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
             )}
-            {loading ? '…' : addedToCart ? '¡Listo!' : outOfStock ? 'No disponible' : 'Añadir'}
+            <span className="truncate">{loading ? '…' : addedToCart ? '¡Listo!' : outOfStock ? 'No disp.' : 'Añadir'}</span>
           </button>
           <Link
             href={producto.slug ? `/producto/${producto.slug}` : '#'}
-            className="py-2.5 rounded-2xl border border-sky-200 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] text-xs font-semibold text-slate-700 dark:text-[var(--text-primary)] inline-flex items-center justify-center gap-1.5 hover:bg-sky-50 dark:hover:bg-sky-900/10 transition hover:-translate-y-px"
+            className="py-2 sm:py-2.5 rounded-xl sm:rounded-2xl border border-sky-200 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] text-[10px] sm:text-xs font-semibold text-slate-700 dark:text-[var(--text-primary)] inline-flex items-center justify-center gap-1 sm:gap-1.5 hover:bg-sky-50 dark:hover:bg-sky-900/10 transition hover:-translate-y-px"
           >
             🔍 Ver
           </Link>
@@ -178,66 +178,66 @@ function ServiceCard({ producto }: { producto: Producto }) {
   return (
     <div className="group bg-white dark:bg-[var(--bg-secondary)] border border-gray-100 dark:border-[var(--border-subtle)] rounded-2xl overflow-hidden hover:shadow-xl hover:border-sky-200 dark:hover:border-[#4A7C59]/40 transition-all duration-200 flex flex-col">
       {/* Header with image or gradient */}
-      <Link href={producto.enlace || '#'} className="block relative h-36 overflow-hidden bg-gray-100 dark:bg-gray-800">
+      <Link href={producto.enlace || '#'} className="block relative h-28 sm:h-32 md:h-36 overflow-hidden bg-gray-100 dark:bg-gray-800">
         {producto.imagen ? (
           <Image
             src={producto.imagen}
             alt={producto.titulo}
             fill
-            sizes="(max-width: 640px) 100vw, 33vw"
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             className="object-cover group-hover:scale-105 transition-transform duration-300"
           />
         ) : (
           <div className="flex items-center justify-center h-full">
-            <Calendar className="w-10 h-10 text-white/40" />
+            <Calendar className="w-8 h-8 sm:w-10 sm:h-10 text-white/40" />
           </div>
         )}
         {discount > 0 && (
-          <span className="absolute top-2 left-2 px-2 py-0.5 bg-red-500 text-white text-xs font-bold rounded-full">
+          <span className="absolute top-2 left-2 px-1.5 sm:px-2 py-0.5 bg-red-500 text-white text-[10px] sm:text-xs font-bold rounded-full">
             -{discount}%
           </span>
         )}
         {producto.tag && (
-          <span className={`absolute top-3 right-3 text-white text-xs font-bold px-2 py-1 rounded-full ${stickerConfig[producto.tag.toLowerCase()]?.class ?? 'bg-gray-500'}`}>
+          <span className={`absolute top-2 right-2 sm:top-3 sm:right-3 text-white text-[9px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full ${stickerConfig[producto.tag.toLowerCase()]?.class ?? 'bg-gray-500'}`}>
             {stickerConfig[producto.tag.toLowerCase()]?.label ?? producto.tag}
           </span>
         )}
-        <TopMedalBadge entityType="service" entityId={producto.id} size="md" className="absolute bottom-3 right-3 z-10" />
+        <TopMedalBadge entityType="service" entityId={producto.id} size="md" className="absolute bottom-2 right-2 sm:bottom-3 sm:right-3 z-10" />
       </Link>
 
       {/* Info */}
-      <div className="p-3 flex flex-col gap-1.5 flex-1">
+      <div className="p-2.5 sm:p-3 flex flex-col gap-1 sm:gap-1.5 flex-1">
         <Link href={producto.enlace || '#'}>
-          <p className="text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] line-clamp-2 leading-tight">
+          <p className="text-[13px] sm:text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] line-clamp-2 leading-tight">
             {producto.titulo}
           </p>
         </Link>
 
         {producto.descripcion && (
-          <p className="text-xs text-gray-500 dark:text-[var(--text-secondary)] line-clamp-2">
+          <p className="text-[10px] sm:text-xs text-gray-500 dark:text-[var(--text-secondary)] line-clamp-2">
             {producto.descripcion}
           </p>
         )}
 
-        <div className="flex items-center gap-3 text-xs text-gray-400 dark:text-[var(--text-secondary)] mt-auto">
+        <div className="flex items-center gap-2 sm:gap-3 text-[10px] sm:text-xs text-gray-400 dark:text-[var(--text-secondary)] mt-auto flex-wrap">
           <span className="flex items-center gap-1">
-            <Clock className="w-3.5 h-3.5" />
+            <Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
             {formatDuration(durationMinutes)}
           </span>
           {producto.vendedor?.nombre && (
-            <span className="flex items-center gap-1 truncate">
-              <Tag className="w-3 h-3 shrink-0" />
+            <span className="flex items-center gap-1 truncate min-w-0">
+              <Tag className="w-2.5 h-2.5 sm:w-3 sm:h-3 shrink-0" />
               <span className="truncate">{producto.vendedor.nombre}</span>
             </span>
           )}
         </div>
 
-        <div className="flex items-baseline gap-2 mt-1">
-          <span className="text-sky-600 dark:text-[var(--pd-accent2)] font-black text-base">
+        <div className="flex items-baseline gap-1.5 sm:gap-2 mt-1">
+          <span className="text-sky-600 dark:text-[var(--pd-accent2)] font-black text-sm sm:text-base">
             S/{(producto.precioOferta ?? producto.precio).toFixed(2)}
           </span>
           {(producto.precioAnterior && producto.precioAnterior > (producto.precioOferta ?? producto.precio)) && (
-            <span className="text-xs text-gray-400 line-through">
+            <span className="text-[10px] sm:text-xs text-gray-400 line-through">
               S/{producto.precioAnterior.toFixed(2)}
             </span>
           )}
@@ -245,10 +245,10 @@ function ServiceCard({ producto }: { producto: Producto }) {
 
         <Link
           href={producto.enlace || '#'}
-          className="block w-full text-center py-2 rounded-xl bg-sky-50 dark:bg-[var(--pd-accent2)]/20 text-sky-600 dark:text-[var(--pd-accent2)] text-xs font-black uppercase tracking-wider hover:bg-sky-500 hover:text-white dark:hover:bg-[var(--pd-accent2)] dark:hover:text-white transition-all mt-1"
+          className="block w-full text-center py-1.5 sm:py-2 rounded-xl bg-sky-50 dark:bg-[var(--pd-accent2)]/20 text-sky-600 dark:text-[var(--pd-accent2)] text-[10px] sm:text-xs font-black uppercase tracking-wider hover:bg-sky-500 hover:text-white dark:hover:bg-[var(--pd-accent2)] dark:hover:text-white transition-all mt-1"
         >
-          <span className="flex items-center justify-center gap-1.5">
-            <Calendar className="w-3.5 h-3.5" />
+          <span className="flex items-center justify-center gap-1 sm:gap-1.5">
+            <Calendar className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
             Agendar cita
           </span>
         </Link>
@@ -261,11 +261,11 @@ function ProductCardSkeleton() {
   return (
     <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-2xl shadow-sm border border-gray-100 dark:border-[var(--border-subtle)] overflow-hidden animate-pulse">
       <div className="aspect-square bg-gray-200 dark:bg-gray-700" />
-      <div className="p-3 space-y-3">
-        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/3" />
-        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4" />
-        <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-1/3" />
-        <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded-xl w-full" />
+      <div className="p-2.5 sm:p-3 space-y-2 sm:space-y-3">
+        <div className="h-2.5 sm:h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/3" />
+        <div className="h-3.5 sm:h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4" />
+        <div className="h-4 sm:h-5 bg-gray-200 dark:bg-gray-700 rounded w-1/3" />
+        <div className="h-7 sm:h-8 bg-gray-200 dark:bg-gray-700 rounded-xl w-full" />
       </div>
     </div>
   );
@@ -274,7 +274,7 @@ function ProductCardSkeleton() {
 export default function ProductGrid({ productos, loading = false }: ProductGridProps) {
   if (loading) {
     return (
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
         {Array.from({ length: 8 }).map((_, i) => (
           <ProductCardSkeleton key={i} />
         ))}
@@ -284,20 +284,20 @@ export default function ProductGrid({ productos, loading = false }: ProductGridP
 
   if (productos.length === 0) {
     return (
-      <div className="text-center py-16">
-        <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gray-100 dark:bg-gray-800 mb-4">
-          <span className="text-4xl">📦</span>
+      <div className="text-center py-10 sm:py-14 md:py-16 px-4">
+        <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gray-100 dark:bg-gray-800 mb-3 sm:mb-4">
+          <span className="text-3xl sm:text-4xl">📦</span>
         </div>
-        <h3 className="text-lg font-medium text-gray-900 dark:text-[var(--text-primary)] mb-2">
+        <h3 className="text-base sm:text-lg font-medium text-gray-900 dark:text-[var(--text-primary)] mb-1.5 sm:mb-2">
           Inventario vacío por ahora
         </h3>
-        <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto">
+        <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400 max-w-md mx-auto">
           Estamos preparando los mejores productos para ti. 
           Pronto tendrás acceso a nuestra selección completa en esta categoría.
         </p>
         <Link 
           href="/" 
-          className="inline-block mt-6 px-6 py-2 bg-sky-500 text-white rounded-full hover:bg-sky-600 transition-colors"
+          className="inline-block mt-5 sm:mt-6 px-5 sm:px-6 py-2 text-sm bg-sky-500 text-white rounded-full hover:bg-sky-600 transition-colors"
         >
           Explorar otras categorías
         </Link>
@@ -306,7 +306,7 @@ export default function ProductGrid({ productos, loading = false }: ProductGridP
   }
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
       {productos.map((producto) =>
         producto.tipo === 'service' ? (
           <ServiceCard key={producto.id} producto={producto} />

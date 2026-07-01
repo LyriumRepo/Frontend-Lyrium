@@ -28,7 +28,7 @@ export default function ModuleHeader({
             style={{ minHeight: height }}
         >
             {/* ── Lado Izquierdo ── */}
-            <div className="lateral-gradient-mask dark:!bg-[var(--bg-card)] pl-4 sm:pl-8 pr-8 sm:pr-16 md:pr-24 py-4 sm:py-7 flex flex-col justify-center flex-none w-auto max-w-[75%] sm:max-w-[90%] z-10 transition-all duration-500">
+            <div className="lateral-gradient-mask dark:!bg-[var(--bg-card)] pl-4 sm:pl-8 pr-8 sm:pr-16 md:pr-24 py-4 sm:py-7 flex flex-col justify-center flex-1 min-w-0 z-10 transition-all duration-500">
                 <div className="flex items-center gap-2 sm:gap-3 min-w-0">
                     {icon && (
                         <div className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 rounded-xl bg-[var(--bg-secondary)] flex items-center justify-center text-[var(--text-secondary)] group-hover:bg-[var(--celeste-500)]/10 group-hover:text-[var(--celeste-500)] transition-all duration-500">
@@ -45,7 +45,7 @@ export default function ModuleHeader({
             </div>
 
             {/* ── Lado Derecho (actions) ── */}
-            <div className="flex-1 flex items-center justify-end px-4 sm:px-10 relative">
+            <div className="flex-shrink-0 flex items-center justify-end px-4 sm:px-10 relative">
                 <div className="absolute inset-0 bg-white/10 dark:bg-black/20 backdrop-blur-[1px] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <div className="relative z-20 flex items-center gap-3">
                     {actions}

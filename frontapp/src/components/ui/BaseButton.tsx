@@ -28,7 +28,7 @@ const variantStyles: Record<string, string> = {
 
 const sizeStyles: Record<string, string> = {
   sm: 'px-4 py-2 text-[10px]',
-  md: 'px-6 py-3 text-xs',
+  md: 'px-5 py-2.5 text-[10px] sm:px-6 sm:py-3 sm:text-xs md:px-7 md:py-3.5 md:text-sm',
   lg: 'px-8 py-4 text-sm',
 };
 
@@ -58,9 +58,9 @@ export default function BaseButton({
       {...props}
     >
       {isLoading ? (
-        <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+        <div className="w-4 h-4 md:w-5 md:h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
       ) : leftIcon ? (
-        <Icon name={leftIcon} className="w-4 h-4" />
+        <Icon name={leftIcon} className="w-4 h-4 md:w-5 md:h-5" />
       ) : null}
       {children}
     </button>

@@ -19,12 +19,12 @@ const layouts = [
                 </div>
                 <div className="w-full border-t border-gray-200 dark:border-gray-700" />
                 <div className="text-[6px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Productos</div>
-                <div className="grid grid-cols-5 gap-0.5">
-                    <div className="aspect-square bg-teal-400/60 dark:bg-teal-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">P</div>
-                    <div className="aspect-square bg-teal-400/60 dark:bg-teal-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">P</div>
-                    <div className="aspect-square bg-teal-400/60 dark:bg-teal-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">P</div>
-                    <div className="aspect-square bg-teal-400/60 dark:bg-teal-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">P</div>
-                    <div className="aspect-square bg-teal-400/60 dark:bg-teal-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">P</div>
+                <div className="flex-1 grid grid-cols-5 gap-0.5">
+                    <div className="w-full h-full bg-teal-400/60 dark:bg-teal-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">P</div>
+                    <div className="w-full h-full bg-teal-400/60 dark:bg-teal-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">P</div>
+                    <div className="w-full h-full bg-teal-400/60 dark:bg-teal-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">P</div>
+                    <div className="w-full h-full bg-teal-400/60 dark:bg-teal-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">P</div>
+                    <div className="w-full h-full bg-teal-400/60 dark:bg-teal-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">P</div>
                 </div>
                 <div className="flex gap-0.5 h-4">
                     <div className="flex-1 bg-sky-500/80 dark:bg-emerald-700/80 rounded flex items-center justify-center text-[6px] font-bold text-white">Banner</div>
@@ -33,12 +33,12 @@ const layouts = [
                 </div>
                 <div className="w-full border-t border-gray-200 dark:border-gray-700" />
                 <div className="text-[6px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Servicios</div>
-                <div className="grid grid-cols-5 gap-0.5">
-                    <div className="aspect-square bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
-                    <div className="aspect-square bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
-                    <div className="aspect-square bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
-                    <div className="aspect-square bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
-                    <div className="aspect-square bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
+                <div className="flex-1 grid grid-cols-5 gap-0.5">
+                    <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
+                    <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
+                    <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
+                    <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
+                    <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
                 </div>
             </>
         )
@@ -49,40 +49,40 @@ const layouts = [
         desc: 'Laterales alternados • Simétrico',
         preview: (
             <>
-                <div className="flex gap-0.5 h-3">
-                    <div className="flex-1 bg-sky-500/80 dark:bg-emerald-700/80 rounded flex items-center justify-center text-[5px] font-bold text-white">B</div>
-                    <div className="flex-1 bg-sky-500/80 dark:bg-emerald-700/80 rounded flex items-center justify-center text-[5px] font-bold text-white">B</div>
-                    <div className="flex-1 bg-sky-500/80 dark:bg-emerald-700/80 rounded flex items-center justify-center text-[5px] font-bold text-white">B</div>
+                <div className="flex gap-0.5 h-4">
+                    <div className="flex-1 bg-sky-500/80 dark:bg-emerald-700/80 rounded flex items-center justify-center text-[6px] font-bold text-white">Banner</div>
+                    <div className="flex-1 bg-sky-500/80 dark:bg-emerald-700/80 rounded flex items-center justify-center text-[6px] font-bold text-white">Banner</div>
+                    <div className="flex-1 bg-sky-500/80 dark:bg-emerald-700/80 rounded flex items-center justify-center text-[6px] font-bold text-white">Banner</div>
                 </div>
                 <div className="w-full border-t border-gray-200 dark:border-gray-700" />
-                <div className="flex gap-0.5 flex-1">
-                    <div className="w-1/4 flex flex-col gap-0.5">
-                        <div className="flex-1 bg-sky-500/60 dark:bg-emerald-700/60 rounded flex items-center justify-center text-[5px] font-bold text-white min-h-[18px]">B</div>
-                        <div className="flex-1 bg-sky-500/60 dark:bg-emerald-700/60 rounded flex items-center justify-center text-[5px] font-bold text-white min-h-[18px]">B</div>
+                <div className="flex-1 grid gap-0.5" style={{ gridTemplateColumns: '1fr 4fr' }}>
+                    <div className="grid grid-rows-2 gap-0.5">
+                        <div className="w-full h-full bg-sky-500/60 dark:bg-emerald-700/60 rounded flex items-center justify-center text-[6px] font-bold text-white">B</div>
+                        <div className="w-full h-full bg-sky-500/60 dark:bg-emerald-700/60 rounded flex items-center justify-center text-[6px] font-bold text-white">B</div>
                     </div>
-                    <div className="flex-1 grid grid-cols-4 gap-0.5">
-                        <div className="aspect-square bg-teal-400/60 dark:bg-teal-600/60 rounded flex items-center justify-center text-[5px] font-bold text-white">P</div>
-                        <div className="aspect-square bg-teal-400/60 dark:bg-teal-600/60 rounded flex items-center justify-center text-[5px] font-bold text-white">P</div>
-                        <div className="aspect-square bg-teal-400/60 dark:bg-teal-600/60 rounded flex items-center justify-center text-[5px] font-bold text-white">P</div>
-                        <div className="aspect-square bg-teal-400/60 dark:bg-teal-600/60 rounded flex items-center justify-center text-[5px] font-bold text-white">P</div>
+                    <div className="grid grid-cols-4 gap-0.5">
+                        <div className="w-full h-full bg-teal-400/60 dark:bg-teal-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">P</div>
+                        <div className="w-full h-full bg-teal-400/60 dark:bg-teal-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">P</div>
+                        <div className="w-full h-full bg-teal-400/60 dark:bg-teal-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">P</div>
+                        <div className="w-full h-full bg-teal-400/60 dark:bg-teal-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">P</div>
                     </div>
                 </div>
-                <div className="flex gap-0.5 h-3">
-                    <div className="flex-1 bg-sky-500/80 dark:bg-emerald-700/80 rounded flex items-center justify-center text-[5px] font-bold text-white">B</div>
-                    <div className="flex-1 bg-sky-500/80 dark:bg-emerald-700/80 rounded flex items-center justify-center text-[5px] font-bold text-white">B</div>
-                    <div className="flex-1 bg-sky-500/80 dark:bg-emerald-700/80 rounded flex items-center justify-center text-[5px] font-bold text-white">B</div>
+                <div className="flex gap-0.5 h-4">
+                    <div className="flex-1 bg-sky-500/80 dark:bg-emerald-700/80 rounded flex items-center justify-center text-[6px] font-bold text-white">Banner</div>
+                    <div className="flex-1 bg-sky-500/80 dark:bg-emerald-700/80 rounded flex items-center justify-center text-[6px] font-bold text-white">Banner</div>
+                    <div className="flex-1 bg-sky-500/80 dark:bg-emerald-700/80 rounded flex items-center justify-center text-[6px] font-bold text-white">Banner</div>
                 </div>
                 <div className="w-full border-t border-gray-200 dark:border-gray-700" />
-                <div className="flex gap-0.5 flex-1">
-                    <div className="flex-1 grid grid-cols-4 gap-0.5">
-                        <div className="aspect-square bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[5px] font-bold text-white">S</div>
-                        <div className="aspect-square bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[5px] font-bold text-white">S</div>
-                        <div className="aspect-square bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[5px] font-bold text-white">S</div>
-                        <div className="aspect-square bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[5px] font-bold text-white">S</div>
+                <div className="flex-1 grid gap-0.5" style={{ gridTemplateColumns: '4fr 1fr' }}>
+                    <div className="grid grid-cols-4 gap-0.5">
+                        <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
+                        <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
+                        <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
+                        <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
                     </div>
-                    <div className="w-1/4 flex flex-col gap-0.5">
-                        <div className="flex-1 bg-sky-500/60 dark:bg-emerald-700/60 rounded flex items-center justify-center text-[5px] font-bold text-white min-h-[18px]">B</div>
-                        <div className="flex-1 bg-sky-500/60 dark:bg-emerald-700/60 rounded flex items-center justify-center text-[5px] font-bold text-white min-h-[18px]">B</div>
+                    <div className="grid grid-rows-2 gap-0.5">
+                        <div className="w-full h-full bg-sky-500/60 dark:bg-emerald-700/60 rounded flex items-center justify-center text-[6px] font-bold text-white">B</div>
+                        <div className="w-full h-full bg-sky-500/60 dark:bg-emerald-700/60 rounded flex items-center justify-center text-[6px] font-bold text-white">B</div>
                     </div>
                 </div>
             </>
@@ -94,33 +94,32 @@ const layouts = [
         desc: 'Banners extremos • Simétrico horizontal',
         preview: (
             <>
-                <div className="w-full border-t border-gray-200 dark:border-gray-700" />
-                <div className="flex gap-0.5 flex-1">
-                    <div className="w-[18%] bg-sky-500/60 dark:bg-emerald-700/60 rounded flex items-center justify-center text-[5px] font-bold text-white" style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>
+                <div className="flex-1 grid gap-0.5" style={{ gridTemplateColumns: '18% 1fr 18%' }}>
+                    <div className="w-full h-full bg-sky-500/60 dark:bg-emerald-700/60 rounded flex items-center justify-center text-[6px] font-bold text-white overflow-hidden" style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>
                         Banner
                     </div>
-                    <div className="flex-1 grid grid-cols-3 gap-0.5">
-                        <div className="aspect-square bg-teal-400/60 dark:bg-teal-600/60 rounded flex items-center justify-center text-[5px] font-bold text-white">P</div>
-                        <div className="aspect-square bg-teal-400/60 dark:bg-teal-600/60 rounded flex items-center justify-center text-[5px] font-bold text-white">P</div>
-                        <div className="aspect-square bg-teal-400/60 dark:bg-teal-600/60 rounded flex items-center justify-center text-[5px] font-bold text-white">P</div>
+                    <div className="grid grid-cols-3 gap-0.5">
+                        <div className="w-full h-full bg-teal-400/60 dark:bg-teal-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">P</div>
+                        <div className="w-full h-full bg-teal-400/60 dark:bg-teal-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">P</div>
+                        <div className="w-full h-full bg-teal-400/60 dark:bg-teal-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">P</div>
                     </div>
-                    <div className="w-[18%] bg-sky-500/60 dark:bg-emerald-700/60 rounded flex items-center justify-center text-[5px] font-bold text-white" style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>
+                    <div className="w-full h-full bg-sky-500/60 dark:bg-emerald-700/60 rounded flex items-center justify-center text-[6px] font-bold text-white overflow-hidden" style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>
                         Banner
                     </div>
                 </div>
                 <div className="w-full border-t border-gray-200 dark:border-gray-700" />
                 <div className="flex gap-0.5 h-4">
-                    <div className="flex-1 bg-sky-500/80 dark:bg-emerald-700/80 rounded flex items-center justify-center text-[5px] font-bold text-white">Banner</div>
-                    <div className="flex-1 bg-sky-500/80 dark:bg-emerald-700/80 rounded flex items-center justify-center text-[5px] font-bold text-white">Banner</div>
-                    <div className="flex-1 bg-sky-500/80 dark:bg-emerald-700/80 rounded flex items-center justify-center text-[5px] font-bold text-white">Banner</div>
+                    <div className="flex-1 bg-sky-500/80 dark:bg-emerald-700/80 rounded flex items-center justify-center text-[6px] font-bold text-white">Banner</div>
+                    <div className="flex-1 bg-sky-500/80 dark:bg-emerald-700/80 rounded flex items-center justify-center text-[6px] font-bold text-white">Banner</div>
+                    <div className="flex-1 bg-sky-500/80 dark:bg-emerald-700/80 rounded flex items-center justify-center text-[6px] font-bold text-white">Banner</div>
                 </div>
                 <div className="w-full border-t border-gray-200 dark:border-gray-700" />
-                <div className="grid grid-cols-5 gap-0.5">
-                    <div className="aspect-square bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[5px] font-bold text-white">S</div>
-                    <div className="aspect-square bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[5px] font-bold text-white">S</div>
-                    <div className="aspect-square bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[5px] font-bold text-white">S</div>
-                    <div className="aspect-square bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[5px] font-bold text-white">S</div>
-                    <div className="aspect-square bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[5px] font-bold text-white">S</div>
+                <div className="flex-1 grid grid-cols-5 gap-0.5">
+                    <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
+                    <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
+                    <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
+                    <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
+                    <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
                 </div>
             </>
         )
@@ -156,8 +155,8 @@ export default function LayoutSelector({ config, updateConfig, storeId }: Layout
                     className="relative z-10 flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl bg-[var(--bg-card)] backdrop-blur-md text-[var(--text-primary)] border border-[var(--border-subtle)] font-black text-[10px] uppercase tracking-widest hover:text-sky-500 dark:hover:text-[var(--icons-green)] transition-all shadow-lg active:scale-95"
                 >
                     <Icon name="Eye" className="w-4 h-4 sm:w-5 sm:h-5" />
-                    <span className="hidden xs:inline">Visualizar Tienda</span>
-                    <span className="xs:hidden">Preview</span>
+                    <span className="hidden sm:inline">Visualizar Tienda</span>
+                    <span className="sm:hidden">Preview</span>
                 </button>
             </div>
 
@@ -172,7 +171,7 @@ export default function LayoutSelector({ config, updateConfig, storeId }: Layout
                             </span>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
                             {layouts.map(layout => (
                                 <label
                                     htmlFor={`layout-${layout.id}`}
