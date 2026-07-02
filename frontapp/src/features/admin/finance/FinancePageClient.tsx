@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import dynamic from 'next/dynamic';
-import type { FinanceChartProps } from './components/FinanceChart';
+import type { FinanceChartProps, FinanceChartDataset } from './components/FinanceChart';
 const FinanceChart = dynamic<FinanceChartProps>(
   () => import('./components/FinanceChart'),
   { ssr: false }
@@ -34,6 +34,7 @@ interface KpiConfig {
   chartColor: string;
   suffix?: string;
   extraInfo: string;
+  chartDatasets?: FinanceChartDataset[];
 }
 
 function buildKpiConfig(
@@ -47,6 +48,7 @@ function buildKpiConfig(
   chartData: number[],
   chartColor: string,
   suffix?: string,
+  chartDatasets?: FinanceChartDataset[],
 ): KpiConfig {
   return {
     label,
@@ -60,7 +62,17 @@ function buildKpiConfig(
     chartColor,
     suffix,
     extraInfo: getKpiDetail(label),
+    chartDatasets,
   };
+}
+
+function trendOf(arr: number[]): { value: number; isPositive: boolean } | undefined {
+  if (arr.length < 2) return undefined;
+  const last = arr[arr.length - 1] ?? 0;
+  const prev = arr[arr.length - 2] ?? 0;
+  if (prev === 0) return undefined;
+  const pct = Math.abs(((last - prev) / prev) * 100);
+  return { value: parseFloat(pct.toFixed(1)), isPositive: last >= prev };
 }
 
 export function FinancePageClient() {
@@ -89,7 +101,7 @@ export function FinancePageClient() {
   };
 
   const headerActions = (
-    <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md p-2 rounded-2xl border border-white/20">
+    <div className="flex flex-wrap items-center gap-2 bg-white/10 backdrop-blur-md p-2 rounded-2xl border border-white/20">
       <BaseDatePicker value={filters.startDate}
         onChange={(v) => setFilters(v, filters.endDate)} placeholder="Desde" />
       <span className="text-white/30 text-lg font-thin">|</span>
@@ -153,6 +165,7 @@ export function FinancePageClient() {
     setSelectedKpi(buildKpiConfig(label, value, description, icon, color, chartType, chartLabels, chartData, chartColor, suffix));
   };
 
+  // Helper to open a stat card with chart data from a data field
   const openStatCard = (
     label: string,
     dataField: keyof FinanceData,
@@ -190,22 +203,27 @@ export function FinancePageClient() {
         actions={headerActions}
       />
 
-      <div className="flex flex-wrap gap-2 border-b border-gray-100 pb-4 overflow-x-auto no-scrollbar">
-        {tabs.map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`px-6 py-2.5 rounded-xl text-sm font-black whitespace-nowrap transition-all duration-300 flex items-center gap-2 active:scale-[0.98] ${activeTab === tab.id
-              ? 'bg-sky-500 hover:bg-sky-600 active:bg-sky-700 dark:bg-brand-green dark:hover:bg-brand-green-hover text-white shadow-lg shadow-sky-500/25 dark:shadow-none'
-              : 'text-[var(--text-secondary)] bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:bg-[var(--bg-secondary)]'
-              }`}
-          >
-            <Icon name={tab.icon as unknown as 'LayoutGrid'} className="w-4 h-4" /> {tab.label}
-          </button>
-        ))}
+      <div className="relative border-b border-[var(--border-subtle)] pb-1">
+        <div className="flex flex-nowrap overflow-x-auto gap-2 pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {tabs.map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex-shrink-0 px-6 py-2.5 rounded-xl text-sm font-black whitespace-nowrap transition-all duration-300 flex items-center gap-2 active:scale-[0.98] ${activeTab === tab.id
+                ? 'bg-[#5AAFE6] text-white shadow-lg shadow-[#5AAFE6]/30'
+                : 'text-[var(--text-secondary)] bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:bg-[var(--bg-secondary)]'
+                }`}
+            >
+              <Icon name={tab.icon as unknown as 'LayoutGrid'} className="w-4 h-4" /> {tab.label}
+            </button>
+          ))}
+        </div>
+        {/* Fade derecho — indica scroll disponible */}
+        <div className="absolute right-0 top-0 bottom-1 w-12 bg-gradient-to-l from-[var(--bg-canvas)] to-transparent pointer-events-none" />
       </div>
 
       <div className="space-y-12">
+        {/* 1. MONETARIO */}
         {isVisible('monetario') && (
           <div className="space-y-6">
             <div className="flex items-center gap-3 mb-2 animate-section-reveal">
@@ -215,25 +233,48 @@ export function FinancePageClient() {
 
             <FinancialBreakdownCard data={data.desgloseFinanciero} />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 stagger-grid">
-              <BaseStatCard
-                label="Ingresos Brutos"
-                value={formatCurrency(data.ingresosBrutos.data.reduce((a, b) => a + b, 0))}
-                description="Subtotal sin IGV (base imponible)"
-                icon="Banknote"
-                color="lima"
-                chart={<FinanceChart type="bar" labels={data.ingresosBrutos.labels} data={data.ingresosBrutos.data} color={chartColorMap.ingresosBrutos} />}
-                onClick={() => openStatCard('Ingresos Brutos', 'ingresosBrutos', data, 'bar', 'lima')}
-              />
-              <BaseStatCard
-                label="Ingresos Netos"
-                value={formatCurrency(data.ingresosNetos.data.reduce((a, b) => a + b, 0))}
-                description="Neto después de comisión Lyrium"
-                icon="LineChart"
-                color="verde"
-                chart={<FinanceChart type="bar" labels={data.ingresosNetos.labels} data={data.ingresosNetos.data} color={chartColorMap.ingresosNetos} />}
-                onClick={() => openStatCard('Ingresos Netos', 'ingresosNetos', data, 'bar', 'verde')}
-              />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 stagger-grid">
+              {/* Tarjeta multi-serie: Brutos + Netos + Reales */}
+              <div className="col-span-1 md:col-span-2 lg:col-span-3">
+                <BaseStatCard
+                  label="Evolución de Ingresos"
+                  value={formatCurrency(data.ingresosBrutos.data.reduce((a, b) => a + b, 0))}
+                  description="Comparativa mensual: Bruto, Neto y Real"
+                  icon="TrendingUp"
+                  color="lima"
+                  chart={
+                    <FinanceChart
+                      type="line"
+                      labels={data.ingresosBrutos.labels}
+                      data={data.ingresosBrutos.data}
+                      datasets={[
+                        { label: 'Brutos', data: data.ingresosBrutos.data, color: chartColorMap.ingresosBrutos },
+                        { label: 'Netos', data: data.ingresosNetos.data, color: chartColorMap.ingresosNetos },
+                        { label: 'Reales', data: data.ingresosReales.data, color: chartColorMap.ingresosReales },
+                      ]}
+                      height="360px"
+                    />
+                  }
+                  onClick={() => setSelectedKpi(buildKpiConfig(
+                    'Evolución de Ingresos',
+                    formatCurrency(data.ingresosBrutos.data.reduce((a, b) => a + b, 0)),
+                    'Comparativa mensual de ingresos: Bruto (sin deducciones), Neto (tras comisión Lyrium) y Real (efectivamente cobrado).',
+                    'TrendingUp',
+                    companyColors.lima,
+                    'line',
+                    data.ingresosBrutos.labels,
+                    data.ingresosBrutos.data,
+                    chartColorMap.ingresosBrutos,
+                    undefined,
+                    [
+                      { label: 'Brutos', data: data.ingresosBrutos.data, color: chartColorMap.ingresosBrutos },
+                      { label: 'Netos', data: data.ingresosNetos.data, color: chartColorMap.ingresosNetos },
+                      { label: 'Reales', data: data.ingresosReales.data, color: chartColorMap.ingresosReales },
+                    ],
+                  ))}
+                />
+              </div>
+
               <CardProxPago data={data.chartProxPago} formatCurrency={formatCurrency} />
 
               <BaseStatCard
@@ -242,6 +283,7 @@ export function FinancePageClient() {
                 description="Retorno sobre inversión en comisiones"
                 icon="TrendingUp"
                 color="turquesaClaro"
+                trend={trendOf(data.roi.data)}
                 chart={<FinanceChart type="bar" labels={data.roi.labels} data={data.roi.data} color={chartColorMap.roi} />}
                 onClick={() => openStatCard('ROI de Ventas', 'roi', data, 'bar', 'turquesaClaro')}
               />
@@ -255,19 +297,10 @@ export function FinancePageClient() {
                 description="Valor medio por pedido (sin IGV)"
                 icon="Tag"
                 color="turquesa"
+                trend={trendOf(data.ticketPromedio.data)}
                 chart={<FinanceChart type="bar" labels={data.ticketPromedio.labels} data={data.ticketPromedio.data} color={chartColorMap.ticketPromedio} />}
                 onClick={() => openStatCard('Ticket Promedio', 'ticketPromedio', data, 'bar', 'turquesa')}
               />
-              <BaseStatCard
-                label="Ingresos Netos Reales"
-                value={formatCurrency(data.ingresosReales.data.reduce((a, b) => a + b, 0))}
-                description="Neto efectivamente cobrado"
-                icon="TrendingDown"
-                color="celeste"
-                chart={<FinanceChart type="bar" labels={data.ingresosReales.labels} data={data.ingresosReales.data} color={chartColorMap.ingresosReales} />}
-                onClick={() => openStatCard('Ingresos Netos Reales', 'ingresosReales', data, 'bar', 'celeste')}
-              />
-
               <BaseStatCard
                 label="Ventas Totales"
                 value={data.ventasTotales.data.reduce((a, b) => a + b, 0).toString()}
@@ -275,6 +308,7 @@ export function FinancePageClient() {
                 icon="ShoppingCart"
                 color="azulCeleste"
                 suffix="Ord."
+                trend={trendOf(data.ventasTotales.data)}
                 chart={<FinanceChart type="bar" labels={data.ventasTotales.labels} data={data.ventasTotales.data} color={chartColorMap.ventasTotales} />}
                 onClick={() => openStatCard('Ventas Totales', 'ventasTotales', data, 'bar', 'azulCeleste')}
               />
@@ -284,13 +318,14 @@ export function FinancePageClient() {
           </div>
         )}
 
+        {/* 2. LOGÍSTICA */}
         {isVisible('logistica') && (
           <div className="space-y-6">
             <div className="flex items-center gap-3 mb-2 animate-section-reveal">
               <div className="w-1.5 h-6 rounded-full" style={{ backgroundColor: companyColors.turquesaClaro }} />
               <h2 className="text-lg font-black text-[var(--text-primary)] uppercase tracking-tight">Rendimiento Logístico</h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 stagger-grid">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 stagger-grid">
               <BaseStatCard
                 label="Lead Time de Despacho"
                 value={(() => {
@@ -308,13 +343,14 @@ export function FinancePageClient() {
           </div>
         )}
 
+        {/* 3. CALIDAD */}
         {isVisible('calidad') && (
           <div className="space-y-6">
             <div className="flex items-center gap-3 mb-2 animate-section-reveal">
               <div className="w-1.5 h-6 rounded-full" style={{ backgroundColor: companyColors.turquesa }} />
               <h2 className="text-lg font-black text-[var(--text-primary)] uppercase tracking-tight">Control de Calidad</h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 stagger-grid">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 stagger-grid">
               <button
                 onClick={() => openKpi(
                   'Tasa de Productos Defectuosos',
@@ -327,9 +363,9 @@ export function FinancePageClient() {
                   data.defectuosos.data,
                   chartColorMap.defectuosos,
                 )}
-                className="group text-left bg-[var(--bg-card)] p-8 rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm hover:shadow-xl hover:shadow-black/10 hover:-translate-y-1 transition-all duration-300 active:scale-[0.98]"
+                className="group text-left bg-[var(--bg-card)] p-4 sm:p-8 rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm hover:shadow-xl hover:shadow-black/10 hover:-translate-y-1 transition-all duration-300 active:scale-[0.98]"
               >
-                <div className="flex items-center justify-between w-full mb-6">
+                <div className="flex items-center justify-between w-full mb-4 sm:mb-6">
                   <span className="text-xs font-bold uppercase tracking-wider" style={{ color: companyColors.turquesa }}>Tasa de Productos Defectuosos</span>
                   <div className="p-2 rounded-lg" style={{ backgroundColor: `${companyColors.turquesa}1A`, color: companyColors.turquesa }}>
                     <Icon name="AlertOctagon" className="w-5 h-5" />
@@ -351,13 +387,14 @@ export function FinancePageClient() {
           </div>
         )}
 
+        {/* 4. FIDELIZACIÓN */}
         {isVisible('fidelizacion') && (
           <div className="space-y-6">
             <div className="flex items-center gap-3 mb-2 animate-section-reveal">
               <div className="w-1.5 h-6 rounded-full" style={{ backgroundColor: companyColors.celeste }} />
               <h2 className="text-lg font-black text-[var(--text-primary)] uppercase tracking-tight">Fidelización de Clientes</h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 stagger-grid">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 stagger-grid">
               <BaseStatCard
                 label="LTV (Lifetime Value)"
                 value={`S/ ${data.ltv.data[data.ltv.data.length - 1] ?? 0}`}
@@ -371,13 +408,14 @@ export function FinancePageClient() {
           </div>
         )}
 
+        {/* 5. SERVICIO */}
         {isVisible('servicio') && (
           <div className="space-y-6">
             <div className="flex items-center gap-3 mb-2 animate-section-reveal">
               <div className="w-1.5 h-6 rounded-full" style={{ backgroundColor: companyColors.turquesaClaro }} />
               <h2 className="text-lg font-black text-[var(--text-primary)] uppercase tracking-tight">Servicio al Cliente</h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 stagger-grid">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 stagger-grid">
               <button
                 onClick={() => openKpi(
                   'Tiempo de Respuesta (Chat)',
@@ -390,9 +428,9 @@ export function FinancePageClient() {
                   data.tiempoRespuesta.data,
                   chartColorMap.tiempoRespuesta,
                 )}
-                className="group text-left bg-[var(--bg-card)] p-8 rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm hover:shadow-xl hover:shadow-black/10 hover:-translate-y-1 transition-all duration-300 active:scale-[0.98]"
+                className="group text-left bg-[var(--bg-card)] p-4 sm:p-8 rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm hover:shadow-xl hover:shadow-black/10 hover:-translate-y-1 transition-all duration-300 active:scale-[0.98]"
               >
-                <div className="flex items-center justify-between w-full mb-6">
+                <div className="flex items-center justify-between w-full mb-4 sm:mb-6">
                   <span className="text-xs font-bold uppercase tracking-wider" style={{ color: companyColors.turquesaClaro }}>Tiempo de Respuesta (Chat)</span>
                   <div className="p-2 rounded-lg" style={{ backgroundColor: `${companyColors.turquesaClaro}1A`, color: companyColors.turquesaClaro }}>
                     <Icon name="Clock" className="w-5 h-5" />
@@ -430,13 +468,14 @@ export function FinancePageClient() {
           </div>
         )}
 
+        {/* 6. CRECIMIENTO */}
         {isVisible('crecimiento') && (
           <div className="space-y-6">
             <div className="flex items-center gap-3 mb-2 animate-section-reveal">
               <div className="w-1.5 h-6 rounded-full" style={{ backgroundColor: companyColors.azulCeleste }} />
               <h2 className="text-lg font-black text-[var(--text-primary)] uppercase tracking-tight">Estrategia de Crecimiento</h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 stagger-grid">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 stagger-grid">
               <BaseStatCard
                 label="Cuota de Mercado Interna"
                 value={`${data.cuotaMercado.data[0] ?? 0}%`}
@@ -450,13 +489,14 @@ export function FinancePageClient() {
           </div>
         )}
 
+        {/* 7. INVENTARIO */}
         {isVisible('inventario') && (
           <div className="space-y-6">
             <div className="flex items-center gap-3 mb-2 animate-section-reveal">
               <div className="w-1.5 h-6 rounded-full" style={{ backgroundColor: companyColors.verde }} />
               <h2 className="text-lg font-black text-[var(--text-primary)] uppercase tracking-tight">Control de Inventario</h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 stagger-grid">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 stagger-grid">
               <BaseStatCard
                 label="Rotación de Stock"
                 value={`${data.stockRotacion.data[data.stockRotacion.data.length - 1] ?? 0}`}
@@ -479,13 +519,14 @@ export function FinancePageClient() {
           </div>
         )}
 
+        {/* 8. SATISFACCIÓN */}
         {isVisible('satisfaccion') && (
           <div className="space-y-6">
             <div className="flex items-center gap-3 mb-2 animate-section-reveal">
               <div className="w-1.5 h-6 rounded-full" style={{ backgroundColor: companyColors.turquesa }} />
               <h2 className="text-lg font-black text-[var(--text-primary)] uppercase tracking-tight">Experiencia del Cliente</h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 stagger-grid">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 stagger-grid">
               <button
                 onClick={() => openKpi(
                   'CSAT - Satisfacción del Cliente',
@@ -498,9 +539,9 @@ export function FinancePageClient() {
                   data.csat.data,
                   chartColorMap.csat,
                 )}
-                className="group text-left bg-[var(--bg-card)] p-8 rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm hover:shadow-xl hover:shadow-black/10 hover:-translate-y-1 transition-all duration-300 active:scale-[0.98]"
+                className="group text-left bg-[var(--bg-card)] p-4 sm:p-8 rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm hover:shadow-xl hover:shadow-black/10 hover:-translate-y-1 transition-all duration-300 active:scale-[0.98]"
               >
-                <div className="flex items-center justify-between w-full mb-6">
+                <div className="flex items-center justify-between w-full mb-4 sm:mb-6">
                   <span className="text-xs font-bold uppercase tracking-wider" style={{ color: companyColors.turquesa }}>CSAT - Satisfacción del Cliente</span>
                   <Icon name="Star" className="w-5 h-5" style={{ color: companyColors.turquesa }} />
                 </div>
@@ -528,6 +569,7 @@ export function FinancePageClient() {
         )}
       </div>
 
+      {/* Modal de detalle de KPI */}
       <KpiDetailModal
         isOpen={!!selectedKpi}
         onClose={() => setSelectedKpi(null)}

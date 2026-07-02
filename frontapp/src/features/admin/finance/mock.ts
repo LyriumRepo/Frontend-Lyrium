@@ -77,11 +77,11 @@ export const MOCK_FINANCE_DATA: FinanceData = {
         completedCount: 95
     },
     comprobantesRecientes: [
-        { id: '1', series: 'F001', number: '000234', type: 'Factura', sunat_status: 'ACCEPTED', total: 1250.00, emission_date: '2026-06-08' },
-        { id: '2', series: 'B001', number: '001509', type: 'Boleta', sunat_status: 'ACCEPTED', total: 450.00, emission_date: '2026-06-07' },
-        { id: '3', series: 'F001', number: '000233', type: 'Factura', sunat_status: 'SENT_WAIT_CDR', total: 3200.00, emission_date: '2026-06-06' },
-        { id: '4', series: 'F001', number: '000232', type: 'Factura', sunat_status: 'OBSERVED', total: 850.00, emission_date: '2026-06-05' },
-        { id: '5', series: 'B001', number: '001508', type: 'Boleta', sunat_status: 'ACCEPTED', total: 120.00, emission_date: '2026-06-04' }
+        { id: '1', series: 'F001', number: '000234', type: 'Factura', sunat_status: 'PAID', total: 1250.00, emission_date: '2026-06-08' },
+        { id: '2', series: 'B001', number: '001509', type: 'Boleta', sunat_status: 'PAID', total: 450.00, emission_date: '2026-06-07' },
+        { id: '3', series: 'F001', number: '000233', type: 'Factura', sunat_status: 'PAID', total: 3200.00, emission_date: '2026-06-06' },
+        { id: '4', series: 'F001', number: '000232', type: 'Factura', sunat_status: 'PAID', total: 850.00, emission_date: '2026-06-05' },
+        { id: '5', series: 'B001', number: '001508', type: 'Boleta', sunat_status: 'PAID', total: 120.00, emission_date: '2026-06-04' }
     ],
     topBuyers: [
         { id: '1', name: 'AgroIndustrias del Norte', clv: 45000, purchases: 12, lastPurchase: 'Hace 2 días' },

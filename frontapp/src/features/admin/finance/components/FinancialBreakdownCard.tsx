@@ -49,6 +49,7 @@ export default function FinancialBreakdownCard({ data }: FinancialBreakdownCardP
                 ))}
             </div>
 
+            {/* Estado de Pagos */}
             <div className="mt-6 pt-6 border-t border-[var(--border-subtle)]">
                 <div className="flex items-center gap-2 mb-3">
                     <Icon name="CheckCircle" className="w-4 h-4" style={{ color: companyColors.verde }} />
@@ -65,7 +66,7 @@ export default function FinancialBreakdownCard({ data }: FinancialBreakdownCardP
                         <p className="text-lg font-black" style={{ color: companyColors.celeste }}>{data.pendingCount}</p>
                         <p className="text-[10px] font-bold" style={{ color: `${companyColors.celeste}B3` }}>{formatCurrency(data.totalPending)}</p>
                     </div>
-                    <div className="rounded-xl md:col-span-2 flex items-center justify-between p-3" style={{ backgroundColor: `${companyColors.azulCeleste}1A` }}>
+                    <div className="rounded-xl col-span-2 md:col-span-2 flex items-center justify-between p-3" style={{ backgroundColor: `${companyColors.azulCeleste}1A` }}>
                         <div>
                             <p className="text-[9px] font-bold uppercase tracking-wider" style={{ color: companyColors.azulCeleste }}>Total Neto a Cobrar</p>
                             <p className="text-xs sm:text-sm font-black" style={{ color: companyColors.azulCeleste }}>{formatCurrency(data.totalPending + data.totalCompleted)}</p>
