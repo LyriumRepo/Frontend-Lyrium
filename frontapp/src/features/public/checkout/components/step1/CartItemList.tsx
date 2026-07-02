@@ -133,95 +133,95 @@ export default function CartItemList({ onDeleteSelected }: Props) {
         {cartItems.map((item) => (
           <div
             key={item.id}
-            className={`flex gap-4 p-4 rounded-2xl border transition
+            className={`flex flex-col sm:flex-row gap-4 p-4 rounded-2xl border transition
               ${
                 item.selected
               ? 'border-emerald-200 dark:border-emerald-800 bg-emerald-50/30 dark:bg-emerald-950/20'
               : 'border-gray-100 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)]'
               }`}
           >
-            {/* Checkbox */}
-            <div className="pt-1">
-              <input
-                type="checkbox"
-                checked={item.selected}
-                onChange={() => toggleSelect(item.id)}
-                className="w-4 h-4 rounded accent-sky-500 cursor-pointer"
-              />
-            </div>
-
-            {/* Imagen */}
-            <div className="w-20 h-20 rounded-xl overflow-hidden bg-gray-100 dark:bg-[var(--bg-muted)] flex-shrink-0">
-              {item.image ? (
-                <Image
-                  src={item.image}
-                  alt={item.name}
-                  width={80}
-                  height={80}
-                  className="w-full h-full object-cover"
-                  unoptimized={item.image.startsWith('data:')}
+            <div className="flex gap-3 sm:gap-4 flex-1 min-w-0">
+              <div className="pt-1">
+                <input
+                  type="checkbox"
+                  checked={item.selected}
+                  onChange={() => toggleSelect(item.id)}
+                  className="w-4 h-4 rounded accent-sky-500 cursor-pointer"
                 />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-2xl">
-                  {isService(item.id) ? '📅' : '📦'}
-                </div>
-              )}
+              </div>
+
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-gray-100 dark:bg-[var(--bg-muted)] flex-shrink-0 relative">
+                {item.image ? (
+                  <Image
+                    src={item.image}
+                    alt={item.name}
+                    fill
+                    sizes="(max-width: 640px) 64px, 80px"
+                    className="object-cover"
+                    unoptimized={item.image.startsWith('data:')}
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-2xl">
+                    {isService(item.id) ? '📅' : '📦'}
+                  </div>
+                )}
+              </div>
+
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-gray-900 dark:text-[var(--text-primary)] text-xs sm:text-sm leading-tight line-clamp-2">
+                  {item.name}
+                </p>
+                {isService(item.id) && (
+                  <span className="inline-block mt-1 px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 text-[10px] font-semibold">
+                    <Calendar className="w-3 h-3 inline mr-0.5" />
+                    Servicio
+                  </span>
+                )}
+                <p className="text-emerald-600 dark:text-emerald-400 font-bold text-sm sm:text-base mt-1">
+                  S/ {item.price.toFixed(2)}
+                </p>
+              </div>
             </div>
 
-            {/* Info */}
-            <div className="flex-1 min-w-0">
-              <p className="font-medium text-gray-900 dark:text-[var(--text-primary)] text-sm leading-tight line-clamp-2">
-                {item.name}
-              </p>
-              {isService(item.id) && (
-                <span className="inline-block mt-1 px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 text-[10px] font-semibold">
-                  <Calendar className="w-3 h-3 inline mr-0.5" />
-                  Servicio
-                </span>
-              )}
-              <p className="text-emerald-600 dark:text-emerald-400 font-bold text-base mt-1">
-                S/ {item.price.toFixed(2)}
-              </p>
-            </div>
+            <div className="flex sm:flex-col items-center sm:items-end justify-between gap-2 border-t border-gray-50 dark:border-gray-800 sm:border-0 pt-3 sm:pt-0 mt-1 sm:mt-0">
+              <div className="flex items-center gap-3 sm:order-2">
+                {isService(item.id) ? (
+                  <span className="text-xs text-gray-400 dark:text-[var(--text-muted)] px-2">
+                    1 unidad
+                  </span>
+                ) : (
+                  <>
+                    <div className="flex items-center gap-1 border border-gray-200 dark:border-[var(--border-subtle)] rounded-xl overflow-hidden">
+                      <button
+                        onClick={() => handleQuantityChange(item.id, -1)}
+                        className="px-2.5 py-1 text-gray-600 dark:text-[var(--text-secondary)] hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] transition text-sm font-medium"
+                      >
+                        −
+                      </button>
+                      <span className="w-6 text-center text-xs sm:text-sm font-semibold text-gray-900 dark:text-[var(--text-primary)]">
+                        {item.quantity}
+                      </span>
+                      <button
+                        onClick={() => handleQuantityChange(item.id, +1)}
+                        className="px-2.5 py-1 text-gray-600 dark:text-[var(--text-secondary)] hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] transition text-sm font-medium"
+                      >
+                        +
+                      </button>
+                    </div>
+                    <p className="text-xs font-semibold text-gray-500 dark:text-[var(--text-secondary)]">
+                      S/ {(item.price * item.quantity).toFixed(2)}
+                    </p>
+                  </>
+                )}
+              </div>
 
-            {/* Cantidad + eliminar */}
-            <div className="flex flex-col items-end justify-between gap-2">
               <button
                 onClick={() => handleRemove(item.id)}
-                className="text-gray-400 hover:text-red-500 transition"
+                className="text-gray-400 hover:text-rose-500 transition sm:order-1 p-1"
                 title="Eliminar"
               >
                 <Trash2 className="w-4 h-4" />
               </button>
-
-              {isService(item.id) ? (
-                  <span className="text-xs text-gray-400 dark:text-[var(--text-muted)] px-2">
-                  1 unidad
-                </span>
-              ) : (
-                <>
-                  <div className="flex items-center gap-2 border border-gray-200 dark:border-[var(--border-subtle)] rounded-xl overflow-hidden">
-                    <button
-                      onClick={() => handleQuantityChange(item.id, -1)}
-                      className="px-3 py-1.5 text-gray-600 dark:text-[var(--text-secondary)] hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] transition text-sm font-medium"
-                    >
-                      −
-                    </button>
-                    <span className="w-8 text-center text-sm font-semibold text-gray-900 dark:text-[var(--text-primary)]">
-                      {item.quantity}
-                    </span>
-                    <button
-                      onClick={() => handleQuantityChange(item.id, +1)}
-                      className="px-3 py-1.5 text-gray-600 dark:text-[var(--text-secondary)] hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] transition text-sm font-medium"
-                    >
-                      +
-                    </button>
-                  </div>
-                  <p className="text-xs text-gray-500 dark:text-[var(--text-secondary)]">
-                    S/ {(item.price * item.quantity).toFixed(2)}
-                  </p>
-                </>
-              )}
             </div>
           </div>
         ))}

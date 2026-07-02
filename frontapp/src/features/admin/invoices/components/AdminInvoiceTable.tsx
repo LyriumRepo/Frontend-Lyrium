@@ -27,7 +27,9 @@ export default function AdminInvoiceTable({ invoices, onViewDetail }: Props) {
                             <th className="px-6 py-5">Documento</th>
                             <th className="px-6 py-5">Serie-Nro</th>
                             <th className="px-6 py-5">Cliente</th>
-                            <th className="px-6 py-5">Monto</th>
+                            <th className="px-6 py-5 text-right">Base Imp.</th>
+                            <th className="px-6 py-5 text-right">IGV (18%)</th>
+                            <th className="px-6 py-5 text-right">Monto</th>
                             <th className="px-6 py-5">Fecha Emisión</th>
                             <th className="px-6 py-5 text-center">Estado</th>
                             <th className="px-6 py-5 text-right">Acciones</th>
@@ -36,7 +38,7 @@ export default function AdminInvoiceTable({ invoices, onViewDetail }: Props) {
                     <tbody className="divide-y divide-[var(--border-subtle)] text-[var(--text-primary)]">
                         {invoices.length === 0 ? (
                             <tr>
-                                <td colSpan={7} className="px-6 py-20 text-center">
+                                <td colSpan={9} className="px-6 py-20 text-center">
                                     <div className="flex flex-col items-center gap-4 text-[var(--text-secondary)]">
                                         <Icon name="FileX" className="w-12 h-12 opacity-30" />
                                         <div className="font-black uppercase text-xs tracking-widest">
@@ -69,7 +71,13 @@ export default function AdminInvoiceTable({ invoices, onViewDetail }: Props) {
                                             <p className="text-sm font-bold text-[var(--text-primary)] truncate max-w-[200px]">{inv.customer_name}</p>
                                             <p className="text-[10px] text-[var(--text-secondary)] font-black font-mono">{inv.customer_ruc}</p>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="px-6 py-4 text-right">
+                                            <p className="text-sm font-medium text-[var(--text-secondary)]">{formatCurrency(inv.subtotal_sin_igv ?? (inv.amount / 1.18))}</p>
+                                        </td>
+                                        <td className="px-6 py-4 text-right">
+                                            <p className="text-sm font-medium text-[var(--text-secondary)]">{formatCurrency(inv.igv_amount ?? (inv.amount - (inv.amount / 1.18)))}</p>
+                                        </td>
+                                        <td className="px-6 py-4 text-right">
                                             <p className="text-sm font-black text-[var(--text-primary)]">{formatCurrency(inv.amount)}</p>
                                         </td>
                                         <td className="px-6 py-4">

@@ -186,7 +186,7 @@ export default function StoreTabs({ tienda, productos, sucursales = [], opinione
               <div key={producto.id} className="bg-white dark:bg-[var(--bg-card)] rounded-xl border border-gray-100 dark:border-[var(--border-subtle)] overflow-hidden hover:shadow-lg transition-all group">
                 <div className="relative aspect-square bg-gray-100 dark:bg-[var(--bg-muted)]">
                   <Link href={producto.slug ? `/producto/${producto.slug}` : '#'}>
-                    <Image src={producto.imagen || '/img/no-image.png'} alt={producto.titulo} fill className="object-cover group-hover:scale-105 transition-transform" sizes="(max-width: 640px) 50vw, 25vw" />
+                    <Image src={producto.imagen || '/img/no-image.png'} alt={producto.titulo} fill className="object-contain md:object-cover group-hover:scale-105 transition-transform" sizes="(max-width: 640px) 50vw, 25vw" />
                   </Link>
                   {descuento > 0 && <span className="absolute top-2 left-2 bg-rose-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">-{descuento}%</span>}
                   {sticker && !descuento && <span className={`absolute top-2 left-2 text-white text-xs font-bold px-2 py-0.5 rounded-full ${sticker.class}`}>{sticker.label}</span>}

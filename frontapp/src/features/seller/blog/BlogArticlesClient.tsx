@@ -66,7 +66,7 @@ export function BlogArticlesClient() {
         const formData = new FormData();
         formData.append('file', file);
         try {
-            const res = await fetch('/api/blog/media/upload', { method: 'POST', body: formData });
+            const res = await window.fetch('/api/blog/media/upload', { method: 'POST', body: formData });
             const json = await res.json();
             return json.data?.url || URL.createObjectURL(file);
         } catch {

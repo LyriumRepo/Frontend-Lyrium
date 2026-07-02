@@ -41,7 +41,7 @@ export default function PersonalDataForm() {
           <label className={labelCls}>
             Tipo de documento <span className="text-red-500">*</span>
           </label>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {DOC_TYPES.map((t) => (
               <button
                 key={t.value}

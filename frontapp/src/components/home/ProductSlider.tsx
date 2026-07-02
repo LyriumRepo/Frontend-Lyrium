@@ -22,26 +22,17 @@ function CategoryCard({ producto, onAddToCart, onQuickView }: {
     <div className="cat-card flex-shrink-0 w-[210px] bg-[var(--azulCeleste-100)] dark:bg-[var(--bg-secondary)]/92 rounded-[14px] overflow-hidden text-center shadow-[0_10px_24px_rgba(15,23,42,0.12)] dark:shadow-[0_10px_24px_rgba(0,0,0,0.3)] border border-slate-200 dark:border-[var(--border-subtle)]/50 mr-5 transition-transform duration-300 hover:-translate-y-[5px] hover:shadow-[0_15px_35px_rgba(15,23,42,0.2)] dark:hover:shadow-[0_15px_35px_rgba(0,0,0,0.5)]">
       {/* Image wrapper with hover actions */}
       <div className="relative overflow-hidden w-full aspect-square bg-white dark:bg-[var(--bg-muted)]">
-        {producto.descuento && producto.descuento > 0 ? (
-          <span className="absolute top-3 left-3 z-10 bg-red-500 text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full">
-            -{producto.descuento}%
-          </span>
-        ) : producto.tag && producto.tag.toLowerCase() !== 'nuevo' ? (
-          <span className="absolute top-3 left-3 z-10 bg-sky-500 text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase">
-            {producto.tag}
-          </span>
-        ) : null}
         <Link href={`/producto/${producto.slug}`}>
           <Image
             src={producto.imagen || '/img/no-image.png'}
             alt={producto.titulo}
             fill
-            sizes="(max-width: 640px) 100vw, 210px"
-            className="object-cover transition-transform duration-500 hover:scale-[1.08]"
+            sizes="210px"
+            className="object-contain md:object-cover transition-transform duration-500 hover:scale-[1.08]"
             draggable={false}
           />
         </Link>
-
+ 
          
         <div className="absolute bottom-0 left-0 w-full h-[44px] flex bg-sky-500 dark:bg-[var(--brand-green)] translate-y-full transition-transform duration-300 cat-actions md:group-hover:translate-y-0">
           <button
@@ -70,13 +61,13 @@ function CategoryCard({ producto, onAddToCart, onQuickView }: {
           </Link>
         </div>
       </div>
-
+ 
       {/* Product info */}
-      <div className="py-2.5 px-3">
+      <div className="py-3 px-3.5">
         <h3 className="text-sm font-semibold text-slate-700 dark:text-[var(--text-primary)] mb-0.5 whitespace-nowrap overflow-hidden text-ellipsis">
           {producto.titulo}
         </h3>
-        <p className="text-[15px] font-bold text-[var(--azulCeleste-500)] dark:text-[var(--azulCeleste-500)]">
+        <p className="text-[15px] font-bold text-[var(--azulCeleste-500)] dark:text-[var(--text-primary)]">
           S/ {producto.precio.toFixed(2)}
         </p>
         <p className="text-amber-400 text-[13px] mt-1">
@@ -90,6 +81,7 @@ function CategoryCard({ producto, onAddToCart, onQuickView }: {
 export default function ProductSlider({ productos, titulo, bannerImage }: ProductSliderProps) {
   const [currentPage, setCurrentPage] = useState(0);
   const [itemsPerView, setItemsPerView] = useState(3);
+  const [isMounted, setIsMounted] = useState(false);
 
   const openCart = useCarritoStore((s) => s.openCart);
   const openDetailModal = useCarritoStore((s) => s.openDetailModal);
@@ -106,6 +98,7 @@ export default function ProductSlider({ productos, titulo, bannerImage }: Produc
 
   // Responsive items per view
   useEffect(() => {
+    setIsMounted(true);
     const update = () => {
       if (window.innerWidth < 640) setItemsPerView(1);
       else if (window.innerWidth < 1024) setItemsPerView(2);
@@ -141,7 +134,7 @@ export default function ProductSlider({ productos, titulo, bannerImage }: Produc
       </h2>
 
       {/* Split layout: banner left + carousel right */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_1fr] gap-8 items-center mb-10">
+      <div className="grid grid-cols-1 xl:grid-cols-[1.1fr_1fr] gap-8 items-center mb-10">
         {/* Left banner */}
         <div className="rounded-[18px] overflow-hidden border border-slate-200 dark:border-[var(--border-subtle)]/50">
           <Image
@@ -157,14 +150,15 @@ export default function ProductSlider({ productos, titulo, bannerImage }: Produc
         {/* Right carousel */}
         <div className="overflow-hidden relative p-4 -m-4">
           <div
-            className="flex will-change-transform"
-            style={{
-              transition: 'transform 0.6s cubic-bezier(0.22, 0.61, 0.36, 1)',
-              transform: `translateX(-${translateX}px)`,
-            }}
+            className="flex will-change-transform transition-transform duration-[600ms] [transition-timing-function:cubic-bezier(0.22,0.61,0.36,1)]"
+            style={
+              isMounted
+                ? { transform: `translateX(-${translateX}px)` }
+                : {}
+            }
           >
             {productos.map((producto) => (
-              <div key={producto.id} className="group">
+              <div key={producto.id} className="group snap-start">
                 <CategoryCard producto={producto} onAddToCart={handleAddToCart} onQuickView={handleQuickView} />
               </div>
             ))}

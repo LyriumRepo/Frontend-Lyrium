@@ -132,7 +132,7 @@ export function LoginPanel({
                         </div>
                     </div>
 
-                    <div className="flex justify-between items-center">
+                    <div className="flex flex-wrap gap-2 justify-between items-center">
                         <label htmlFor="remember-me" className="flex items-center gap-2 cursor-pointer">
                             <input
                                 id="remember-me"

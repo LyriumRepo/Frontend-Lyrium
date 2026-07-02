@@ -64,7 +64,7 @@ export default function CheckoutStepBar() {
                   {/* Circle */}
                   <div
                     className={[
-                      'w-14 h-14 rounded-full flex items-center justify-center font-black text-lg shadow-xl transition-all duration-300 select-none',
+                      'w-10 h-10 sm:w-14 sm:h-14 rounded-full flex items-center justify-center font-black text-sm sm:text-lg shadow-xl transition-all duration-300 select-none',
                       isActive
                         ? 'text-white scale-110 animate-pulse-glow'
                         : isCompleted
@@ -84,7 +84,7 @@ export default function CheckoutStepBar() {
                   </div>
 
                   {/* Icon + label */}
-                  <div className="relative group transition-transform duration-500 hover:scale-110">
+                  <div className="relative group transition-transform duration-500 hover:scale-110 hidden sm:block">
                     <div
                       className={[
                         'absolute -inset-1.5 rounded-xl blur-lg opacity-0 transition-opacity duration-500',
@@ -110,7 +110,7 @@ export default function CheckoutStepBar() {
 
                 {/* Connector (placed after the step column) */}
                 {idx < STEPS.length - 1 && (
-                  <div className="flex-1 h-3 flex items-start px-2 relative z-0 -mt-10">
+                  <div className="flex-1 h-3 flex items-start px-2 relative z-0 -mt-5 sm:-mt-10">
                     {/* Negative margin to align with circle vertical center */}
                     <div className="w-full h-1.5 bg-gray-100 dark:bg-[var(--bg-muted)] rounded-full overflow-hidden transition-all duration-500">
                       <div

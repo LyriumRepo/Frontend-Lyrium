@@ -180,10 +180,9 @@ const SellerRow = ({
                 </span>
               )}
               {seller.email_verified && (
-                <BadgeCheck
-                  className="w-3.5 h-3.5 text-cyan-400 flex-shrink-0"
-                  title="Email verificado"
-                />
+                <span title="Email verificado" className="flex-shrink-0 flex items-center">
+                  <BadgeCheck className="w-3.5 h-3.5 text-cyan-400" />
+                </span>
               )}
             </div>
             <p className="text-[11px] text-[var(--text-secondary)] truncate max-w-[160px]">

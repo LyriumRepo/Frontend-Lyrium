@@ -88,17 +88,16 @@ export function AuthContainer({ onSuccess }: AuthContainerProps) {
     const isRegister = mode === 'register';
 
     return (
-        <div className="h-full bg-[#F8F9FA] dark:bg-[var(--bg-primary)] flex items-center justify-center p-4">
-            <div className="relative w-full max-w-[1200px] min-h-[650px] bg-white dark:bg-[var(--bg-secondary)] rounded-[30px] shadow-[0_40px_100px_rgba(0,0,0,0.1)] overflow-hidden flex">
+        <div className="min-h-screen bg-[#F8F9FA] dark:bg-[var(--bg-primary)] flex items-center justify-center p-2 sm:p-4">
+            <div className="relative w-full max-w-[1200px] min-h-auto min-[600px]:min-h-[650px] bg-white dark:bg-[var(--bg-secondary)] rounded-[20px] sm:rounded-[30px] shadow-[0_40px_100px_rgba(0,0,0,0.1)] overflow-hidden flex flex-col min-[600px]:flex-row">
                 
-                {/* Left Side Panel - visible siempre */}
                 <div
-                    className={`absolute top-0 left-0 h-full w-[40%] 
+                    className="relative w-full min-[600px]:w-[40%] 
                     bg-[linear-gradient(to_bottom_right,rgba(14,165,233,0.9),rgba(132,204,22,0.9))] 
                     dark:bg-[linear-gradient(to_bottom_right,var(--brand-green),var(--icons-green),var(--brand-green-hover))] 
-                    p-10 flex flex-col justify-center gap-16 text-white z-20 rounded-r-[20px]`}
+                    p-6 sm:p-10 flex flex-col justify-center items-center min-[600px]:items-start gap-6 sm:gap-10 min-[600px]:gap-16 text-white z-20 rounded-b-[20px] min-[600px]:rounded-b-none min-[600px]:rounded-r-[20px]"
                 >
-                    <img src="/img/intro/Flor6.png" alt="decoración" className="absolute -bottom-20 -left-80 w-[700px] max-w-none opacity-60 mix-blend-overlay pointer-events-none"/>
+                    <img src="/img/intro/Flor6.png" alt="decoración" className="absolute -bottom-20 -left-80 w-[700px] max-w-none opacity-60 mix-blend-overlay pointer-events-none hidden min-[600px]:block"/>
 
                     <div className="absolute inset-0 opacity-30">
                         <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
@@ -111,24 +110,24 @@ export function AuthContainer({ onSuccess }: AuthContainerProps) {
                         </svg>
                     </div>
 
-                    <div className="relative z-10">
+                    <div className="relative z-10 text-center min-[600px]:text-left">
                         {isRegister ? (
                             <>
-                                <h2 className="text-[2rem] font-black mb-4 leading-tight">
+                                <h2 className="text-[1.5rem] sm:text-[2rem] font-black mb-2 sm:mb-4 leading-tight">
                                     {userType === 'vendedor' ? 'Haz crecer tu marca con nosotros.' : 'Únete a Lyrium'}
                                 </h2>
-                                <p className="text-white/95 text-center max-w-[300px] mx-auto">
+                                <p className="text-white/95 text-center min-[600px]:text-left max-w-[300px] mx-auto min-[600px]:mx-0 text-sm sm:text-base">
                                     {userType === 'vendedor' 
                                         ? 'Únete a la comunidad de vendedores más grande y gestiona tus pedidos en un solo lugar.'
-                                        : 'Crea tu cuenta y descubre los mejores productos naturales y saludables.'}
+                                        : 'Crea tu cuenta y descubre los mejores productos naturales and saludables.'}
                                 </p>
                             </>
                         ) : (
                             <>
-                                <h2 className="text-[2rem] font-black mb-4 leading-tight">
+                                <h2 className="text-[1.5rem] sm:text-[2rem] font-black mb-2 sm:mb-4 leading-tight">
                                     {userType === 'vendedor' ? '¡Qué gusto verte de nuevo!' : '¡Bienvenido de nuevo!'}
                                 </h2>
-                                <p className="text-white/95 text-center max-w-[300px] mx-auto">
+                                <p className="text-white/95 text-center min-[600px]:text-left max-w-[300px] mx-auto min-[600px]:mx-0 text-sm sm:text-base">
                                     {userType === 'vendedor'
                                         ? 'Accede a tu panel para revisar tus ventas de hoy y actualizar tu inventario.'
                                         : 'Accede a tu cuenta para realizar tus compras y gestionar tus pedidos.'}
@@ -137,22 +136,21 @@ export function AuthContainer({ onSuccess }: AuthContainerProps) {
                         )}
                     </div>
 
-                    <div className="relative z-10">
-                        <p className="text-sm mb-4 text-center text-white font-medium tracking-wide dark:[text-shadow:0_1px_2px_rgba(0,0,0,0.9),0_4px_10px_rgba(0,0,0,0.85),0_0px_25px_rgba(0,0,0,0.7)]">
+                    <div className="relative z-10 w-full max-w-[300px] text-center min-[600px]:text-left">
+                        <p className="text-xs sm:text-sm mb-2 sm:mb-4 text-center text-white font-medium tracking-wide dark:[text-shadow:0_1px_2px_rgba(0,0,0,0.9),0_4px_10px_rgba(0,0,0,0.85),0_0px_25px_rgba(0,0,0,0.7)]">
                             {isRegister ? '¿Ya tienes cuenta?' : (userType === 'vendedor' ? '¿Ya eres parte de Lyrium como vendedor?' : '¿Ya tienes una cuenta?')}
                         </p>
                         <button
                             type="button"
                             onClick={toggleMode}
-                            className="w-full py-4 px-6 bg-white text-sky-500 dark:text-[var(--brand-green)] rounded-xl font-bold text-sm uppercase tracking-wider shadow-[0_10px_25px_rgba(0,0,0,0.1)] hover:shadow-[0_8px_20px_rgba(0,0,0,0.15)] hover:-translate-y-0.5 transition-all duration-300"
+                            className="w-full py-3 sm:py-4 px-6 bg-white text-sky-500 dark:text-[var(--brand-green)] rounded-xl font-bold text-xs sm:text-sm uppercase tracking-wider shadow-[0_10px_25px_rgba(0,0,0,0.1)] hover:shadow-[0_8px_20px_rgba(0,0,0,0.15)] hover:-translate-y-0.5 transition-all duration-300"
                         >
                             {isRegister ? 'Iniciar Sesión' : (userType === 'vendedor' ? 'Registrarse como vendedor' : 'Crear cuenta')}
                         </button>
                     </div>
                 </div>
 
-                {/* Right Side - Forms */}
-                <div className="relative ml-auto w-[60%] p-10 flex flex-col">
+                <div className="relative w-full min-[600px]:w-[60%] p-5 sm:p-10 flex flex-col">
                     <UserTypeToggle
                         value={userType}
                         onChange={(type) => {
@@ -162,7 +160,6 @@ export function AuthContainer({ onSuccess }: AuthContainerProps) {
                         }}
                     />
 
-                    {/* Login Panel - only show when NOT register */}
                     {!isRegister && (
                         <div className="flex-1">
                             <LoginPanel
@@ -176,7 +173,6 @@ export function AuthContainer({ onSuccess }: AuthContainerProps) {
                         </div>
                     )}
 
-                    {/* Register Panel - only show when register */}
                     {isRegister && (
                         <div className="flex-1">
                             <RegisterPanel

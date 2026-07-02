@@ -126,7 +126,7 @@ export default function BioForoTopicPage() {
           dangerouslySetInnerHTML={{ __html: sanitizeHtml(topic.content || '') }}
         />
 
-        <div className="flex items-center gap-4 border-t border-slate-100 dark:border-[var(--border-subtle)] pt-4">
+        <div className="flex flex-wrap items-center gap-3 sm:gap-4 border-t border-slate-100 dark:border-[var(--border-subtle)] pt-4">
           <button
             onClick={() => handleVote(topic.id, 'up')}
             className="flex items-center gap-2 px-4 py-2 rounded-full bg-slate-50 dark:bg-[var(--bg-card)] text-slate-700 dark:text-[var(--text-primary)] hover:bg-slate-100 dark:hover:bg-[#182420] transition-all"
@@ -219,7 +219,7 @@ export default function BioForoTopicPage() {
           placeholder="Escribe tu respuesta..."
           className="w-full p-4 border-2 border-slate-200 dark:border-[var(--border-subtle)] rounded-xl focus:border-emerald-500 focus:outline-none min-h-[120px] mb-4 bg-white dark:bg-[var(--bg-card)] text-slate-800 dark:text-[var(--text-primary)] placeholder-slate-400 dark:placeholder-[var(--text-muted)]"
         />
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row gap-3 sm:items-center justify-between">
           <p className="text-xs text-slate-500 dark:text-[var(--text-secondary)]">
             Para responder necesitas{' '}
             <a
@@ -234,7 +234,7 @@ export default function BioForoTopicPage() {
           <button
             onClick={handleReply}
             disabled={submitting || !replyContent.trim()}
-            className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white px-6 py-2 rounded-full font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+            className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white px-6 py-2 rounded-full font-semibold disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto text-center"
           >
             {submitting ? 'Enviando...' : 'Publicar Respuesta'}
           </button>

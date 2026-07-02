@@ -1,5 +1,5 @@
-export type TicketStatus = 'open' | 'in_progress' | 'pending' | 'resolved' | 'closed';
-export type TicketCategory = 'tech' | 'admin' | 'info' | 'comment' | 'followup' | 'payments' | 'documentation';
+export type TicketStatus = 'abierto' | 'proceso' | 'pendiente' | 'resuelto' | 'cerrado';
+export type TicketCategory = 'critico' | 'tecnico' | 'negativo' | 'informacion' | 'positivo';
 export type TicketPriority = 'baja' | 'media' | 'alta' | 'critica';
 
 export interface CustomerTicket {
@@ -8,12 +8,14 @@ export interface CustomerTicket {
     subject: string;
     description: string;
     category: TicketCategory;
-    priority: TicketPriority;
+    priority?: TicketPriority;
     status: TicketStatus;
     createdAt: string;
     updatedAt: string;
     resolvedAt?: string;
     messages: CustomerTicketMessage[];
+    unreadCount?: number;
+    assignedTo?: string;
 }
 
 export interface CustomerTicketMessage {
@@ -33,13 +35,11 @@ export interface CustomerTicketFilters {
 }
 
 export const CATEGORY_LABELS: Record<TicketCategory, string> = {
-  tech: 'Soporte Técnico',
-  admin: 'Administrativo',
-  info: 'Información',
-  comment: 'Comentario',
-  followup: 'Seguimiento',
-  payments: 'Pagos',
-  documentation: 'Documentación',
+  tecnico: 'Soporte Técnico',
+  critico: 'Administrativo',
+  informacion: 'Información',
+  positivo: 'Comentario',
+  negativo: 'Reclamo',
 };
 
 export const PRIORITY_LABELS: Record<TicketPriority, string> = {
@@ -50,9 +50,9 @@ export const PRIORITY_LABELS: Record<TicketPriority, string> = {
 };
 
 export const STATUS_LABELS: Record<TicketStatus, string> = {
-  open: 'Abierto',
-  in_progress: 'En Proceso',
-  pending: 'Pendiente',
-  resolved: 'Resuelto',
-  closed: 'Cerrado',
+  abierto: 'Abierto',
+  proceso: 'En Proceso',
+  pendiente: 'Pendiente',
+  resuelto: 'Resuelto',
+  cerrado: 'Cerrado',
 };

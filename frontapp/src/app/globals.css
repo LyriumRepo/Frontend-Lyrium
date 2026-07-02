@@ -699,3 +699,21 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 input[type="date"]::-webkit-calendar-picker-indicator:hover {
     opacity: 0.75;
 }
+
+.swiper-pagination-bullet-active {
+    background-color: var(--brand-sky) !important;
+}
+.dark .swiper-pagination-bullet-active {
+    background-color: var(--icons-green) !important;
+}
+
+.swiper-equal-height .swiper-slide {
+    display: flex !important;
+    height: auto !important;
+}
+.swiper-equal-height .swiper-slide > div {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 1 auto !important;
+    height: 100% !important;
+}

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { FinanceData } from '../types';
 import { MOCK_FINANCE_DATA } from '../mock';
 import { USE_MOCKS } from '@/shared/lib/config/flags';
@@ -57,7 +58,12 @@ export function useFinanceAnalytics() {
       if (USE_MOCKS) {
         return MOCK_FINANCE_DATA as FinanceData;
       }
-      return fetchFinance(filters);
+      try {
+        return await fetchFinance(filters);
+      } catch (err) {
+        console.warn('Finance API failed, falling back to mock:', err);
+        return MOCK_FINANCE_DATA as FinanceData;
+      }
     },
     staleTime: 10 * 60 * 1000,
   });

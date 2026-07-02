@@ -388,7 +388,7 @@ export function HelpPageClient() {
                     {showNewTicketForm ? (
                         <NewTicketForm
                             onSubmit={(data) => {
-                                handleCreateTicket(data);
+                                handleCreateTicket(data as any);
                                 setShowNewTicketForm(false);
                             }}
                             onCancel={() => setShowNewTicketForm(false)}

@@ -85,7 +85,7 @@ function ProductCard({ producto }: { producto: Producto }) {
           alt={producto.titulo}
           fill
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-          className="object-cover group-hover:scale-105 transition-transform duration-300"
+          className="object-contain md:object-cover group-hover:scale-105 transition-transform duration-300"
         />
         {discount > 0 && (
           <span className="absolute top-2 left-2 px-2 py-0.5 bg-red-500 text-white text-xs font-bold rounded-full">

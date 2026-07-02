@@ -75,7 +75,7 @@ export default function RecommendedProducts({ productos, titulo = 'Más producto
                   src={producto.imagen || '/img/no-image.png'}
                   alt={producto.titulo}
                   fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  className="object-contain md:object-cover group-hover:scale-105 transition-transform duration-300"
                   sizes="200px"
                 />
                 

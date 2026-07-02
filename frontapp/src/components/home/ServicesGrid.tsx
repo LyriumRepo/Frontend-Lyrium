@@ -11,16 +11,22 @@ interface ServicesGridProps {
 export default function ServicesGrid({ categorias }: ServicesGridProps) {
   const [current, setCurrent] = useState(0);
   const [itemsPerView, setItemsPerView] = useState(1);
+  const [isMounted, setIsMounted] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
+  const totalPages = Math.max(1, Math.ceil(categorias.length / itemsPerView));
+  const targetItemIndex = Math.min(current * itemsPerView, Math.max(0, categorias.length - itemsPerView));
+
   useEffect(() => {
+    setIsMounted(true);
     const update = () => {
-      if (window.innerWidth < 640) setItemsPerView(1);
-      else if (window.innerWidth < 1024) setItemsPerView(2);
+      if (window.innerWidth < 480) setItemsPerView(1);
+      else if (window.innerWidth < 768) setItemsPerView(2);
+      else if (window.innerWidth < 1024) setItemsPerView(3);
       else setItemsPerView(4);
     };
     update();
@@ -28,11 +34,13 @@ export default function ServicesGrid({ categorias }: ServicesGridProps) {
     return () => window.removeEventListener('resize', update);
   }, []);
 
-  const maxIndex = Math.max(0, categorias.length - itemsPerView);
+  useEffect(() => {
+    setCurrent((c) => Math.min(c, Math.max(0, totalPages - 1)));
+  }, [itemsPerView, totalPages]);
 
   const goToNext = useCallback(() => {
-    setCurrent((c) => (c >= maxIndex ? 0 : c + 1));
-  }, [maxIndex]);
+    setCurrent((c) => (c >= totalPages - 1 ? 0 : c + 1));
+  }, [totalPages]);
 
   useEffect(() => {
     if (isPaused || isDragging || categorias.length <= 1) return;
@@ -55,7 +63,7 @@ export default function ServicesGrid({ categorias }: ServicesGridProps) {
       if (diff > 0) {
         setCurrent((c) => Math.max(0, c - 1));
       } else {
-        setCurrent((c) => (c >= maxIndex ? 0 : c + 1));
+        setCurrent((c) => (c >= totalPages - 1 ? 0 : c + 1));
       }
       setIsDragging(false);
     }
@@ -85,7 +93,7 @@ export default function ServicesGrid({ categorias }: ServicesGridProps) {
           </p>
         </div>
       ) : (
-                   <div 
+        <div 
           ref={containerRef}
           className="relative overflow-hidden cursor-grab active:cursor-grabbing"
           onMouseDown={handleMouseDown}
@@ -95,9 +103,11 @@ export default function ServicesGrid({ categorias }: ServicesGridProps) {
         >
           <div
             className="flex transition-transform duration-700 gap-4"
-            style={{
-              transform: `translateX(-${current * (100 / itemsPerView)}%)`,
-            }}
+            style={
+              isMounted
+                ? { transform: `translateX(calc(-1 * ${targetItemIndex} * (100% + 1rem) / ${itemsPerView}))` }
+                : {}
+            }
           >
             {categorias.map((categoria, index) => {
               const imageNumber = (index % 7) + 1;
@@ -106,9 +116,9 @@ export default function ServicesGrid({ categorias }: ServicesGridProps) {
               return (
                 <div
                   key={categoria.id}
-                  className="flex-shrink-0 w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(25%-0.75rem)]"
+                  className="flex-shrink-0 w-full min-[480px]:w-[calc(50%-0.5rem)] md:w-[calc(33.333%-0.66rem)] lg:w-[calc(25%-0.75rem)]"
                 >
-                  <article className="rounded-[2.5rem] overflow-hidden shadow-md bg-white dark:bg-[var(--bg-card)] group cursor-default h-56 md:h-64 border border-gray-100 dark:border-[var(--border-subtle)]">
+                  <article className="rounded-[2.5rem] overflow-hidden shadow-md bg-[var(--azulCeleste-100)] dark:bg-[var(--bg-card)] group cursor-default h-56 md:h-64 border border-gray-100 dark:border-[var(--border-subtle)]">
                     <Image
                       src={localImage}
                       alt={categoria.nombre}

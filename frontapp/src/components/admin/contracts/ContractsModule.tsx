@@ -93,28 +93,29 @@ export const ContratosModule: React.FC<ContratosModuleProps> = ({ state, actions
         <div className="space-y-8 animate-fadeIn pb-20 text-left font-industrial">
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                {kpis.map((kpi) => (
-                    <div 
-                        key={kpi.label}
-                        className="bg-[var(--bg-card)] p-6 rounded-[2.2rem] border border-[var(--border-subtle)] shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 relative overflow-hidden group flex flex-col justify-between min-h-[140px]"
-                    >
-                        <div className="absolute top-0 right-0 w-24 h-24 bg-cyan-500/5 rounded-full -mr-8 -mt-8 blur-xl group-hover:bg-cyan-500/10 transition-all"></div>
-                        <div className="flex items-center justify-between">
-                            <span className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest leading-none">
-                                {kpi.label}
-                            </span>
-                            <div className={`p-2.5 rounded-xl ${
-                                kpi.color === 'emerald' ? 'bg-emerald-500/10 text-emerald-500 dark:text-emerald-400' :
-                                kpi.color === 'amber' ? 'bg-amber-500/10 text-amber-500 dark:text-amber-400' :
-                                kpi.color === 'red' ? 'bg-red-500/10 text-red-500 dark:text-red-400' :
-                                kpi.color === 'indigo' ? 'bg-indigo-500/10 text-indigo-500 dark:text-indigo-400' :
-                                'bg-[var(--icons-green)]/10 text-[var(--brand-green)] dark:text-[var(--icons-green)]'
-                            }`}>
-                                {kpi.icon === 'Files' && <Files className="w-5 h-5" />}
-                                {kpi.icon === 'CheckCircle' && <CheckCircle className="w-5 h-5" />}
-                                {kpi.icon === 'Hourglass' && <Hourglass className="w-5 h-5" />}
-                                {kpi.icon === 'AlertOctagon' && <AlertOctagon className="w-5 h-5" />}
-                                {!['Files', 'CheckCircle', 'Hourglass', 'AlertOctagon'].includes(kpi.icon) && <FileText className="w-5 h-5" />}
+                {kpis.map((kpi) => {
+                    const config = getKpiConfig(kpi.icon, kpi.color);
+                    return (
+                        <div 
+                            key={kpi.label}
+                            className="bg-[var(--bg-card)] p-6 rounded-[2.2rem] border border-[var(--border-subtle)] shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 relative overflow-hidden group flex flex-col justify-between min-h-[140px]"
+                        >
+                            <div className="absolute top-0 right-0 w-24 h-24 bg-cyan-500/5 rounded-full -mr-8 -mt-8 blur-xl group-hover:bg-cyan-500/10 transition-all"></div>
+                            <div className="flex items-center justify-between">
+                                <span className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest leading-none">
+                                    {kpi.label}
+                                </span>
+                                <div className={`p-2.5 rounded-xl ${config.classes.iconWrapper}`}>
+                                    {config.icon}
+                                </div>
+                            </div>
+                            <div className="mt-4">
+                                <p className="text-3xl font-black text-[var(--text-primary)] tracking-tighter leading-none">
+                                    {kpi.val}
+                                </p>
+                                <p className="text-[9px] text-[var(--text-muted)] font-bold uppercase tracking-wider mt-2">
+                                    Sistema de Registro Validado
+                                </p>
                             </div>
                         </div>
                     );

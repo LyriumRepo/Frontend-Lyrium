@@ -46,7 +46,7 @@ export default function BillingInfo() {
         <p className="text-xs font-bold text-gray-500 dark:text-[var(--text-secondary)] uppercase tracking-wide">
           Métodos disponibles
         </p>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <div className="flex items-center gap-2 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800/40">
             <CreditCard className="w-4 h-4 text-blue-500 flex-shrink-0" />
             <span className="text-xs font-medium text-gray-700 dark:text-[var(--text-primary)]">

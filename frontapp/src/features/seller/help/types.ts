@@ -1,5 +1,5 @@
 export type TicketStatus = 'open' | 'in_progress' | 'pending' | 'resolved' | 'closed';
-export type TicketCategory = 'tech' | 'admin' | 'info' | 'comment' | 'followup' | 'payments' | 'documentation';
+export type TicketCategory = 'critico' | 'tecnico' | 'negativo' | 'informacion' | 'positivo';
 export type TicketPriority = 'baja' | 'media' | 'alta' | 'critica';
 
 export interface SellerTicket {
@@ -33,13 +33,11 @@ export interface SellerTicketFilters {
 }
 
 export const CATEGORY_LABELS: Record<TicketCategory, string> = {
-  tech: 'Soporte Técnico',
-  admin: 'Administrativo',
-  info: 'Información',
-  comment: 'Comentario',
-  followup: 'Seguimiento',
-  payments: 'Pagos',
-  documentation: 'Documentación',
+  tecnico: 'Soporte Técnico',
+  critico: 'Soporte Técnico Critico',
+  informacion: 'Solicitud de Información',
+  positivo: 'Comentario Positivo',
+  negativo: 'Comentario Negativo',
 };
 
 export const PRIORITY_LABELS: Record<TicketPriority, string> = {

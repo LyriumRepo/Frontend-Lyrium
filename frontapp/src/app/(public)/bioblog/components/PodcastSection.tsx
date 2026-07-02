@@ -74,7 +74,7 @@ export default function PodcastSection() {
                         description="Escucha nuestros podcasts sobre vida ecológica, bienestar natural y sostenibilidad. Entrevistas con expertos, consejos prácticos y experiencias reales para inspirarte a llevar un estilo de vida más consciente y saludable."
                     />
 
-                    <div className="relative overflow-hidden rounded-3xl md:rounded-[3rem] p-6 md:p-20 shadow-2xl group">
+                    <div className="relative overflow-hidden rounded-3xl md:rounded-[3rem] p-5 min-[360px]:p-8 md:p-20 shadow-2xl group">
                         <Image
                             src="/img/bioblog/entrevista_doctora-scaled.webp"
                             alt="Podcast Background"
@@ -84,9 +84,9 @@ export default function PodcastSection() {
                         />
                         <div className="absolute inset-0 bg-slate-900/60 group-hover:bg-slate-900/70 transition-colors duration-1000" />
 
-                        <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-12">
-                            <div className="w-full flex-1 space-y-6">
-                                <h1 className="text-3xl md:text-6xl font-black !text-white leading-tight">
+                        <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6 md:gap-12">
+                            <div className="w-full flex-1 space-y-4 md:space-y-6">
+                                <h1 className="text-2xl md:text-6xl font-black !text-white leading-tight">
                                     Conecta <span className="!text-sky-400 dark:!text-lime-400">Natural</span>
                                 </h1>
 
@@ -94,7 +94,7 @@ export default function PodcastSection() {
 
                                 <div className="w-24 h-px bg-white/30" />
 
-                                <p className="!text-white/80 text-lg max-w-md text-justify">
+                                <p className="!text-white/80 text-sm md:text-lg max-w-md text-justify">
                                     Historias, consejos y conversaciones sobre consumo consciente, sostenibilidad y productos bio.
                                 </p>
                             </div>
@@ -111,7 +111,7 @@ export default function PodcastSection() {
                         description="Disfruta de nuestros videos sobre alimentación saludable, productos ecológicos y estilo de vida sostenible. Tutoriales, entrevistas y tips visuales para inspirarte a vivir de forma más natural y consciente."
                     />
 
-                    <div className="relative overflow-hidden rounded-3xl md:rounded-[3rem] p-6 md:p-20 shadow-2xl group">
+                    <div className="relative overflow-hidden rounded-3xl md:rounded-[3rem] p-5 min-[360px]:p-8 md:p-20 shadow-2xl group">
                         <Image
                             src="/img/bioblog/Familia-en-picnic-scaled.webp"
                             alt="Historias Background"
@@ -121,9 +121,9 @@ export default function PodcastSection() {
                         />
                         <div className="absolute inset-0 bg-slate-900/40 group-hover:bg-slate-900/50 transition-colors duration-1000" />
 
-                        <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-12">
-                            <div className="w-full flex-1 space-y-6">
-                                <h1 className="text-3xl md:text-6xl font-black !text-white leading-tight">
+                        <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6 md:gap-12">
+                            <div className="w-full flex-1 space-y-4 md:space-y-6">
+                                <h1 className="text-2xl md:text-6xl font-black !text-white leading-tight">
                                     Historias que se ven y se sienten
                                 </h1>
 
@@ -131,7 +131,7 @@ export default function PodcastSection() {
 
                                 <div className="w-24 h-px bg-white/30" />
 
-                                <p className="!text-white/80 text-lg max-w-md">
+                                <p className="!text-white/80 text-sm md:text-lg max-w-md">
                                     Un espacio donde cada video cuenta una historia real, visibiliza un propósito y nos inspira a vivir de forma más consciente.
                                 </p>
                             </div>

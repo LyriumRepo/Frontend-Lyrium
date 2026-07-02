@@ -644,7 +644,7 @@ const moodInterval = setInterval(() => {
         {showText && (
           <div
             ref={sideContainerRef}
-            className="lyr-side-container flex items-center justify-center opacity-0 relative cursor-pointer overflow-hidden rounded-[4px]"
+            className="lyr-side-container hidden md:flex items-center justify-center opacity-0 relative cursor-pointer overflow-hidden rounded-[4px]"
           >
             <div ref={sideGlowRingRef} className="lyr-glow-ring" />
             <img

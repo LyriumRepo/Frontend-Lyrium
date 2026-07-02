@@ -11,6 +11,7 @@ interface BrandsCarouselProps {
 export default function BrandsCarousel({ marcas }: BrandsCarouselProps) {
   const [current, setCurrent] = useState(0);
   const [itemsPerView, setItemsPerView] = useState(2);
+  const [isMounted, setIsMounted] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
@@ -18,6 +19,7 @@ export default function BrandsCarousel({ marcas }: BrandsCarouselProps) {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
+    setIsMounted(true);
     const update = () => {
       if (window.innerWidth >= 1280) setItemsPerView(5);
       else if (window.innerWidth >= 1024) setItemsPerView(4);
@@ -86,9 +88,11 @@ export default function BrandsCarousel({ marcas }: BrandsCarouselProps) {
       >
         <div
           className="flex transition-transform duration-700 divide-x-2 divide-gray-800 dark:divide-gray-200"
-          style={{
-            transform: `translateX(-${current * (100 / itemsPerView)}%)`,
-          }}
+          style={
+            isMounted
+              ? { transform: `translateX(-${current * (100 / itemsPerView)}%)` }
+              : {}
+          }
         >
           {marcas.map((marca, index) => {
            
@@ -98,7 +102,7 @@ export default function BrandsCarousel({ marcas }: BrandsCarouselProps) {
             return (
               <div
                 key={marca.id}
-                className="flex-shrink-0 w-1/2 sm:w-1/3 lg:w-1/4 xl:w-1/5"
+                className="flex-shrink-0 w-1/2 sm:w-1/3 lg:w-1/4 xl:w-1/5 snap-start"
               >
                 <div className="h-38 md:h-46 flex items-center justify-center p-1 bg-white dark:bg-gray-900 w-full">
                                    <article className="group cursor-pointer transition-all duration-300 w-full h-full relative rounded-2xl overflow-hidden">

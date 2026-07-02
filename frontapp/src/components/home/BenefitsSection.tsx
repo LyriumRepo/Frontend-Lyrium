@@ -53,6 +53,27 @@ export default function BenefitsSection({ beneficios }: BenefitsSectionProps) {
         .animate-infinite-scroll {
           animation: infiniteScroll 25s linear infinite;
         }
+        .bg-fixed-panel-beneficios {
+          background-size: cover;
+          background-repeat: no-repeat;
+          position: absolute;
+          background-attachment: fixed;
+          background-position: left center;
+        }
+        @media (min-width: 500px) and (max-width: 1023px) {
+          .bg-fixed-panel-beneficios {
+            position: fixed !important;
+            background-attachment: scroll !important;
+            background-position: -300px bottom !important;
+          }
+        }
+        @media (max-width: 499px) {
+          .bg-fixed-panel-beneficios {
+            position: fixed !important;
+            background-attachment: scroll !important;
+            background-position: -300px bottom !important;
+          }
+        }
       `}} />
 
       <div className="px-4 max-w-7xl mx-auto">
@@ -60,12 +81,12 @@ export default function BenefitsSection({ beneficios }: BenefitsSectionProps) {
       </div>
 
       <div
-        className="relative w-full h-[320px] overflow-hidden group"
-        style={{ backgroundColor: '#8BC34A' }}
+        className="relative w-full h-[200px] md:h-[320px] overflow-hidden group"
+        style={{ backgroundColor: '#8BC34A', clipPath: 'inset(0px)', zIndex: 1 }}
       >
         <div
-          className="absolute inset-0 z-0 bg-fixed bg-center bg-cover"
-          style={{ backgroundImage: "url('/img/Inicio/11/1.png')", backgroundPosition: 'center center' }}
+          className="absolute inset-0 z-0 bg-fixed-panel-beneficios bg-cover"
+          style={{ backgroundImage: "url('/img/Inicio/11/1.png')" }}
         />
 
         <div
@@ -86,15 +107,15 @@ export default function BenefitsSection({ beneficios }: BenefitsSectionProps) {
               return (
                 <div
                   key={`${beneficio.id}-${index}`}
-                  className="flex flex-col items-center justify-center text-center w-[250px] mx-1 flex-shrink-0 cursor-default"
+                  className="flex flex-col items-center justify-center text-center w-[130px] md:w-[250px] mx-1 flex-shrink-0 cursor-default"
                 >
-                  <div className="w-60 h-60 flex items-center justify-center mb-4 transition-transform duration-300 hover:scale-105 relative">
+                  <div className="w-28 h-28 md:w-60 md:h-60 flex items-center justify-center mb-2 md:mb-4 transition-transform duration-300 hover:scale-105 relative">
                     <Image
                       src={`/img/Inicio/11/${imageNum}.png`}
                       alt="Beneficio"
                       fill
                       className="object-contain"
-                      sizes="240px"
+                      sizes="(max-width: 768px) 112px, 240px"
                       priority={index < 6}
                     />
                   </div>

@@ -46,14 +46,14 @@ function OfferCard({
   };
 
   return (
-      <article className="w-[220px] shrink-0 bg-[var(--azulCeleste-100)] dark:bg-[#1E3028] backdrop-blur-lg border border-transparent rounded-[20px] overflow-hidden shadow-md group transition-all duration-300 hover:-translate-y-[5px] flex flex-col items-center relative">
+      <article className="w-[100px] min-[360px]:w-[110px] md:w-[220px] shrink-0 bg-[var(--azulCeleste-100)] dark:bg-[#1E3028] backdrop-blur-lg border border-transparent rounded-xl md:rounded-[20px] overflow-hidden shadow-md group transition-all duration-300 hover:-translate-y-[5px] flex flex-col items-center relative">
       <div className="relative w-full aspect-square overflow-hidden bg-transparent flex items-center justify-center">
         {producto.descuento && producto.descuento > 0 ? (
-          <span className="absolute top-3 left-3 z-10 bg-red-500 text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full">
+          <span className="absolute top-1 left-1 md:top-3 md:left-3 z-10 bg-red-500 text-white text-[7px] md:text-[10px] font-extrabold px-1 py-0.5 md:px-2.5 md:py-1 rounded-full">
             -{producto.descuento}%
           </span>
         ) : producto.tag && producto.tag.toLowerCase() !== 'nuevo' ? (
-          <span className="absolute top-3 left-3 z-10 bg-sky-500 text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase">
+          <span className="absolute top-1 left-1 md:top-3 md:left-3 z-10 bg-sky-500 text-white text-[7px] md:text-[10px] font-extrabold px-1 py-0.5 md:px-2.5 md:py-1 rounded-full uppercase">
             {producto.tag}
           </span>
         ) : null}
@@ -65,29 +65,29 @@ function OfferCard({
             onError={handleImageError}
           />
 
-        <div className="absolute bottom-0 left-0 w-full h-[44px] flex bg-sky-500 transform translate-y-full group-hover:translate-y-0 transition-transform">
+        <div className="absolute bottom-0 left-0 w-full h-[30px] md:h-[44px] flex bg-sky-500 transform translate-y-full group-hover:translate-y-0 transition-transform">
           <button onClick={() => onAddToCart(producto)} className="flex-1 flex items-center justify-center text-white">
-            <ShoppingCart className="w-[18px] h-[18px]" />
+            <ShoppingCart className="w-3.5 h-3.5 md:w-[18px] md:h-[18px]" />
           </button>
           <button onClick={() => onQuickView(producto)} className="flex-1 flex items-center justify-center text-white">
-            <Eye className="w-[18px] h-[18px]" />
+            <Eye className="w-3.5 h-3.5 md:w-[18px] md:h-[18px]" />
           </button>
           <Link href={`/producto/${producto.slug}`} className="flex-1 flex items-center justify-center text-white">
-            <ExternalLink className="w-[18px] h-[18px]" />
+            <ExternalLink className="w-3.5 h-3.5 md:w-[18px] md:h-[18px]" />
           </Link>
         </div>
       </div>
 
-       <div className="py-3 px-4 w-full text-center flex flex-col items-center">
-        <h3 className="text-[13px] font-bold truncate w-full text-slate-900 dark:text-white">{producto.titulo}</h3>
-        <p className="text-[15px] font-extrabold text-[var(--azulCeleste-500)] dark:text-[var(--azulCeleste-500)]">S/ {producto.precio.toFixed(2)}</p>
-        <div className="flex justify-center gap-0.5 mt-1">
+       <div className="py-1.5 px-2 md:py-3 md:px-4 w-full text-center flex flex-col items-center">
+        <h3 className="text-[9px] min-[360px]:text-[10px] md:text-[13px] font-bold truncate w-full text-slate-900 dark:text-white">{producto.titulo}</h3>
+        <p className="text-[10px] min-[360px]:text-[11px] md:text-[15px] font-extrabold text-[var(--azulCeleste-500)] dark:text-[var(--azulCeleste-500)]">S/ {producto.precio.toFixed(2)}</p>
+        <div className="flex justify-center gap-0.5 mt-0.5 md:mt-1">
           {Array.from({ length: 5 }).map((_, idx) => {
             const isFilled = idx < (producto.estrellas ? producto.estrellas.length : 5);
             return (
               <Star
                 key={idx}
-                className={`w-3.5 h-3.5 ${
+                className={`w-2 h-2 md:w-3.5 md:h-3.5 ${
                   isFilled ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300 dark:text-gray-600'
                 }`}
               />
@@ -218,28 +218,26 @@ function OfferBlock({
   if (productosAMostrar.length === 0) {
     return (
       <section className="space-y-4 md:space-y-6 flex flex-col items-center">
-        <div className="w-[1467px] max-w-full pl-10 pr-4 space-y-4">
-          <h2 className="text-xl md:text-2xl font-bold pl-8">{titulo}</h2>
+        <div className="w-[1467px] max-w-full pl-4 md:pl-10 pr-4 space-y-4">
+          <h2 className="text-xl md:text-2xl font-bold pl-2 md:pl-8">{titulo}</h2>
 
-          <div className="relative w-full h-[650px] rounded-[30px] shadow-2xl overflow-hidden">
+          <div className="relative w-full h-[280px] min-[360px]:h-[300px] md:h-[650px] rounded-2xl md:rounded-[30px] shadow-2xl overflow-hidden">
             <div className="absolute inset-0">
               {fallbackImages.map((img, i) => (
                 <div
                   key={i}
-                  className={`absolute inset-0 bg-cover bg-no-repeat bg-center transition-opacity duration-1000 ${
+                  className={`absolute inset-0 bg-[length:100%_100%] md:bg-cover bg-fixed sm:bg-scroll md:bg-fixed bg-no-repeat bg-center transition-opacity duration-1000 ${
                     i === bgIndex ? 'opacity-100' : 'opacity-0'
                   }`}
                   style={{
                     backgroundImage: `url('${img}')`,
-                    backgroundAttachment: 'fixed',
-                    backgroundPosition: backgroundPosition || 'center 15%',
-                    backgroundRepeat: 'no-repeat'
+                    backgroundPosition: backgroundPosition || 'center 15%'
                   }}
                 />
               ))}
             </div>
 
-            <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
+            <div className="absolute inset-0 bg-black/25 backdrop-blur-[1px]" />
 
             <div className="relative z-10 h-[200px] flex flex-col items-center justify-center text-center">
               <p className="text-white text-lg font-semibold">
@@ -259,31 +257,29 @@ function OfferBlock({
 
   return (
     <section className="space-y-4 md:space-y-6 flex flex-col items-center w-full">
-      <div className="w-[1467px] max-w-full pl-10 pr-4 flex justify-between items-center">
-        <h2 className="text-xl md:text-2xl font-bold pl-8">{titulo}</h2>
+      <div className="w-[1467px] max-w-full pl-4 md:pl-10 pr-4 flex justify-between items-center">
+        <h2 className="text-xl md:text-2xl font-bold pl-2 md:pl-8">{titulo}</h2>
       </div>
 
-      <div className="relative w-[1467px] max-w-full h-[650px] rounded-[30px] shadow-2xl overflow-hidden mx-auto">
+      <div className="relative w-[1467px] max-w-full h-[280px] min-[360px]:h-[300px] md:h-[650px] rounded-2xl md:rounded-[30px] shadow-2xl overflow-hidden mx-auto">
         <div className="absolute inset-0">
           {fallbackImages.map((img, i) => (
             <div
               key={i}
-              className={`absolute inset-0 bg-cover bg-no-repeat bg-center transition-opacity duration-1000 ${
+              className={`absolute inset-0 bg-[length:100%_100%] md:bg-cover bg-fixed sm:bg-scroll md:bg-fixed bg-no-repeat bg-center transition-opacity duration-1000 ${
                 i === bgIndex ? 'opacity-100' : 'opacity-0'
               }`}
               style={{
                 backgroundImage: `url('${img}')`,
-                backgroundAttachment: 'fixed',
-                backgroundPosition: backgroundPosition || 'center 15%',
-                backgroundRepeat: 'no-repeat'
+                backgroundPosition: backgroundPosition || 'center 15%'
               }}
             />
           ))}
         </div>
 
-        <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
+        <div className="absolute inset-0 bg-black/25 backdrop-blur-[1px]" />
 
-        <div className="relative z-10 p-4 pb-6 md:p-8 md:pb-10 h-full flex flex-col justify-end">
+        <div className="relative z-10 p-2 pb-3 min-[360px]:p-3 min-[360px]:pb-4 md:p-8 md:pb-10 h-full flex flex-col justify-end">
           <style dangerouslySetInnerHTML={{ __html: `
             @keyframes ${animationName} {
               0% {
@@ -310,7 +306,7 @@ function OfferBlock({
             }}
           >
             <div
-              className={`flex gap-5 animate-${animationName}`}
+              className={`flex gap-2 min-[360px]:gap-3 md:gap-5 animate-${animationName}`}
               style={{ width: 'max-content' }}
             >
               {allItems.map((producto, index) => (

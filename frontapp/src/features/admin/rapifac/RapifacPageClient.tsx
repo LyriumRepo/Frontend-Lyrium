@@ -197,14 +197,17 @@ export function RapifacPageClient() {
         setDetailInv(inv);
     };
 
-    const kpiCards = kpis
-        ? [
-              { label: 'Total Facturado (SUNAT)', value: formatCurrency(kpis.totalFacturado), icon: <TrendingUp className="w-5 h-5" />, color: 'emerald' },
-              { label: 'Comprobantes Emitidos', value: kpis.totalComprobantes.toString(), icon: <Receipt className="w-5 h-5" />, color: 'indigo' },
-              { label: 'Pendientes CDR', value: kpis.pendingCount.toString(), icon: <Clock className="w-5 h-5" />, color: 'amber' },
-              { label: 'Rechazados / Observados', value: kpis.rejectedCount.toString(), icon: <XCircle className="w-5 h-5" />, color: 'rose' },
-          ]
-        : [];
+    const totalFacturado = invoices.reduce((sum, inv) => sum + inv.amount, 0);
+    const totalComprobantes = invoices.length;
+    const pendingCount = invoices.filter(inv => inv.sunat_status === 'SENT_WAIT_CDR').length;
+    const rejectedCount = invoices.filter(inv => inv.sunat_status === 'REJECTED' || inv.sunat_status === 'OBSERVED').length;
+
+    const kpiCards = [
+        { label: 'Total Facturado (SUNAT)', value: formatCurrency(totalFacturado), icon: <TrendingUp className="w-5 h-5" />, color: 'emerald' },
+        { label: 'Comprobantes Emitidos', value: totalComprobantes.toString(), icon: <Receipt className="w-5 h-5" />, color: 'indigo' },
+        { label: 'Pendientes CDR', value: pendingCount.toString(), icon: <Clock className="w-5 h-5" />, color: 'amber' },
+        { label: 'Rechazados / Observados', value: rejectedCount.toString(), icon: <XCircle className="w-5 h-5" />, color: 'rose' },
+    ];
 
     return (
         <>

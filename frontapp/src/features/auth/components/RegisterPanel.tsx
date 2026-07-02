@@ -102,9 +102,9 @@ export function RegisterPanel({
                     </div>
                 )}
 
-                <form onSubmit={handleSubmit} className={`grid ${isVendedor ? 'grid-cols-2' : 'grid-cols-1'} gap-5`} noValidate>
+                <form onSubmit={handleSubmit} className={`grid ${isVendedor ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'} gap-5`} noValidate>
                     {/* Nombre Comercial (vendedor) / Tu Nombre (cliente) */}
-                    <div className={isVendedor ? 'col-span-2' : ''}>
+                    <div className={isVendedor ? 'col-span-1 sm:col-span-2' : ''}>
                         <label htmlFor="store-name" className="block text-sm font-semibold text-slate-700 dark:text-[var(--text-primary)] mb-2">
                             {isVendedor ? 'Nombre Comercial' : 'Tu Nombre'} <span className="text-red-500">*</span>
                         </label>
@@ -214,7 +214,7 @@ export function RegisterPanel({
                         </div>
                     )}
 
-                    <div className={isVendedor ? 'col-span-2' : ''}>
+                    <div className={isVendedor ? 'col-span-1 sm:col-span-2' : ''}>
                         <button
                             type="submit"
                             disabled={isLoading}

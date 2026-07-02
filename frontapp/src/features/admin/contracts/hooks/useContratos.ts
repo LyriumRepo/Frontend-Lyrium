@@ -72,7 +72,6 @@ export const useContratos = () => {
                 end: '',
                 storage_path: 'pendiente_de_carga.pdf',
             };
-            return newContract;
         },
         onSuccess: (newContract) => {
             setTempNewContract(newContract);

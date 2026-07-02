@@ -40,22 +40,22 @@ export default function PostGridCarousel() {
                 {/* Custom Navigation Arrows */}
                 <button
                     id="alter-prev-btn"
-                    className="hidden md:block absolute md:left-0 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[var(--text-secondary)] hover:text-sky-500 dark:hover:text-[var(--icons-green)] transition-colors cursor-pointer z-50 p-2"
+                    className="absolute left-0 md:left-0 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[var(--text-secondary)] hover:text-sky-500 dark:hover:text-[var(--icons-green)] transition-colors cursor-pointer z-50 p-1 md:p-2 flex items-center justify-center"
                 >
-                    <ChevronLeft className="w-8 h-8 md:w-10 md:h-10 transform rotate-180" />
+                    <ChevronLeft className="w-6 h-6 md:w-10 md:h-10" />
                 </button>
                 <button
                     id="alter-next-btn"
-                    className="hidden md:block absolute md:right-0 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[var(--text-secondary)] hover:text-sky-500 dark:hover:text-[var(--icons-green)] transition-colors cursor-pointer z-50 p-2"
+                    className="absolute right-0 md:right-0 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[var(--text-secondary)] hover:text-sky-500 dark:hover:text-[var(--icons-green)] transition-colors cursor-pointer z-50 p-1 md:p-2 flex items-center justify-center"
                 >
-                    <ChevronRight className="w-8 h-8 md:w-10 md:h-10" />
+                    <ChevronRight className="w-6 h-6 md:w-10 md:h-10" />
                 </button>
 
                 <Swiper
                     modules={[Navigation, Pagination, Autoplay]}
-                    slidesPerView={1}
+                    slidesPerView={2}
                     slidesPerGroup={1}
-                    spaceBetween={20}
+                    spaceBetween={10}
                     loop={true}
                     speed={600}
                     grabCursor={true}
@@ -79,13 +79,13 @@ export default function PostGridCarousel() {
                         1024: { slidesPerView: 3, spaceBetween: 30 },
                         1280: { slidesPerView: 3, spaceBetween: 40 },
                     }}
-                    className="swiper overflow-visible"
+                    className="swiper swiper-equal-height overflow-visible"
                 >
                     {posts.map((post) => (
-                        <SwiperSlide key={post.id} className="h-auto">
-                            <div className="flex flex-col h-[450px] group bg-white dark:bg-[var(--bg-secondary)] border border-slate-100 dark:border-[var(--border-subtle)] rounded-[2rem] p-5 shadow-sm hover:shadow-2xl hover:scale-[1.03] transition-all duration-500">
+                        <SwiperSlide key={post.id} className="h-auto flex">
+                            <div className="flex flex-col w-full min-h-[260px] min-[360px]:min-h-[290px] md:min-h-[420px] md:h-[450px] h-full group bg-white dark:bg-[var(--bg-secondary)] border border-slate-100 dark:border-[var(--border-subtle)] rounded-2xl md:rounded-[2rem] p-3 min-[360px]:p-4 md:p-5 shadow-sm hover:shadow-2xl hover:scale-[1.03] transition-all duration-500">
                                 {/* Imagen: Rectangular */}
-                                <div className="relative w-full aspect-[16/10] overflow-hidden rounded-xl mb-5">
+                                <div className="relative w-full aspect-[16/10] overflow-hidden rounded-xl mb-3 min-[360px]:mb-5">
                                     <Image
                                         src={post.featured_image}
                                         alt={post.title}
@@ -98,24 +98,23 @@ export default function PostGridCarousel() {
                                 {/* Contenido */}
                                 <div className="flex flex-col flex-grow">
                                     {/* Categoría */}
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <span className="text-[10px] md:text-xs font-black text-sky-500 dark:text-[var(--icons-green)] uppercase tracking-widest leading-none">
+                                    <div className="flex items-center gap-2 mb-1.5 min-[360px]:mb-2">
+                                        <span className="text-[9px] min-[360px]:text-[10px] md:text-xs font-black text-sky-500 dark:text-[var(--icons-green)] uppercase tracking-widest leading-none">
                                             {post.category_name}
                                         </span>
                                     </div>
 
                                     {/* Título */}
-                                    <h3 className="text-xl md:text-2xl font-bold text-slate-800 dark:text-[var(--text-primary)] leading-tight mb-3 group-hover:text-sky-600 dark:group-hover:text-[var(--icons-green)] transition-colors line-clamp-2">
+                                    <h3 className="text-xs min-[360px]:text-sm md:text-2xl font-bold text-slate-800 dark:text-[var(--text-primary)] leading-tight mb-2 min-[360px]:mb-3 group-hover:text-sky-600 dark:group-hover:text-[var(--icons-green)] transition-colors">
                                         <Link href={`/bioblog/${post.slug}`}>{post.title}</Link>
                                     </h3>
 
-                                    {/* Extracto */}
-                                    <p className="text-slate-500 dark:text-[var(--text-secondary)] text-sm leading-relaxed mb-4 line-clamp-3 font-medium text-justify">
+                                    <p className="text-slate-500 dark:text-[var(--text-secondary)] text-[10px] min-[360px]:text-xs md:text-sm leading-relaxed mb-4 font-medium text-justify">
                                         {post.excerpt}
                                     </p>
 
                                     {/* Footer */}
-                                    <div className="mt-auto text-[10px] font-bold text-slate-400 dark:text-[var(--text-secondary)] uppercase tracking-widest flex items-center gap-1">
+                                    <div className="mt-auto text-[8px] min-[360px]:text-[9px] md:text-[10px] font-bold text-slate-400 dark:text-[var(--text-secondary)] uppercase tracking-widest flex items-center gap-1">
                                         LYRIUM <span className="text-slate-300">|</span> {formatDate(post.published_at)}
                                     </div>
                                 </div>

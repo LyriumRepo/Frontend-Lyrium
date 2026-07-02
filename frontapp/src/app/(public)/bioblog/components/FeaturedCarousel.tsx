@@ -41,15 +41,15 @@ export default function FeaturedCarousel() {
                 {/* Navigation */}
                 <button
                     id="ramble-prev-btn"
-                    className="hidden md:block absolute md:left-0 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[var(--text-secondary)] hover:text-sky-500 transition-colors cursor-pointer z-50 p-2"
+                    className="absolute left-0 md:left-0 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[var(--text-secondary)] hover:text-sky-500 transition-colors cursor-pointer z-50 p-1 md:p-2 flex items-center justify-center"
                 >
-                    <ChevronLeft className="w-8 h-8 md:w-10 md:h-10 transform rotate-180" />
+                    <ChevronLeft className="w-6 h-6 md:w-10 md:h-10" />
                 </button>
                 <button
                     id="ramble-next-btn"
-                    className="hidden md:block absolute md:right-0 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[var(--text-secondary)] hover:text-sky-500 transition-colors cursor-pointer z-50 p-2"
+                    className="absolute right-0 md:right-0 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[var(--text-secondary)] hover:text-sky-500 transition-colors cursor-pointer z-50 p-1 md:p-2 flex items-center justify-center"
                 >
-                    <ChevronRight className="w-8 h-8 md:w-10 md:h-10" />
+                    <ChevronRight className="w-6 h-6 md:w-10 md:h-10" />
                 </button>
 
                 <Swiper
@@ -81,7 +81,7 @@ export default function FeaturedCarousel() {
                 >
                     {posts.map((post) => (
                         <SwiperSlide key={post.id} className="h-auto">
-                            <div className="relative w-full h-[450px] rounded-[2rem] overflow-hidden group cursor-pointer shadow-xl bg-slate-900 border border-white/10 transition-all duration-500 hover:scale-[1.03] hover:shadow-2xl">
+                            <div className="relative w-full h-[320px] min-[360px]:h-[400px] md:h-[450px] rounded-2xl md:rounded-[2rem] overflow-hidden group cursor-pointer shadow-xl bg-slate-900 border border-white/10 transition-all duration-500 hover:scale-[1.03] hover:shadow-2xl">
                                 {/* Background Image */}
                                 <Image
                                     src={post.featured_image}
@@ -94,13 +94,13 @@ export default function FeaturedCarousel() {
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/30" />
 
                                 {/* Top Left: Logo & Metadata */}
-                                <div className="absolute top-8 left-8 flex flex-col items-start gap-2">
+                                <div className="absolute top-4 left-4 min-[360px]:top-6 min-[360px]:left-6 md:top-8 md:left-8 flex flex-col items-start gap-2">
                                     <Image
                                         src="/img/bioblog/ICON.png"
                                         alt="Lyrium"
                                         width={40}
                                         height={40}
-                                        className="rounded-full shadow-lg"
+                                        className="rounded-full shadow-lg w-8 h-8 md:w-10 md:h-10"
                                     />
                                     <div className="flex flex-col">
                                         <span className="text-[10px] font-bold text-white uppercase tracking-widest leading-tight">
@@ -113,12 +113,12 @@ export default function FeaturedCarousel() {
                                 </div>
 
                                 {/* Bottom Content */}
-                                <div className="absolute inset-x-0 bottom-0 p-8 flex flex-col justify-end">
-                                    <h3 className="text-3xl font-bold text-white leading-tight mb-3 drop-shadow-md line-clamp-2">
+                                <div className="absolute inset-x-0 bottom-0 p-4 min-[360px]:p-6 md:p-8 flex flex-col justify-end">
+                                    <h3 className="text-lg min-[360px]:text-xl md:text-3xl font-bold text-white leading-tight mb-3 drop-shadow-md line-clamp-2">
                                         {post.title}
                                     </h3>
 
-                                    <p className="text-white/80 text-xs md:text-sm leading-relaxed mb-8 line-clamp-2 max-w-2xl text-justify">
+                                    <p className="text-white/80 text-xs md:text-sm leading-relaxed mb-3 min-[360px]:mb-6 md:mb-8 line-clamp-2 max-w-2xl text-justify">
                                         {post.excerpt}
                                     </p>
 

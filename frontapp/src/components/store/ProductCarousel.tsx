@@ -108,7 +108,7 @@ export default function ProductCarousel({
                       alt={producto.titulo}
                       fill
                       sizes="200px"
-                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="object-contain md:object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                     {descuento && !sticker && (
                       <span className="absolute top-2 left-2 bg-rose-600 text-white text-xs font-bold px-2 py-0.5 rounded-md">

@@ -406,10 +406,10 @@ export class LaravelOrderRepository implements IOrderRepository {
             const maxStep = Math.max(
                 ...updatedServiceItems.map((s) => SERVICE_STATUS_STEP_MAP[s.bookingStatus || s.status] ?? 0), 0
             );
-            const newEstado = maxStep >= 3 ? 'completed'
+            const newEstado = (maxStep >= 3 ? 'completed'
                 : maxStep >= 2 ? 'on_the_way'
                 : maxStep >= 1 ? 'confirmed'
-                : order.estado;
+                : order.estado) as OrderStatus;
 
             const orderWithUpdatedServices = {
                 ...order,

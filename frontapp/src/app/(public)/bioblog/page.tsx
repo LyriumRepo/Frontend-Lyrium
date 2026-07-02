@@ -21,13 +21,13 @@ export default function BioBlogPage() {
             </Suspense>
             
             {/* Sección de Publicaciones Header */}
-            <div className="pt-16 pb-8 text-center max-w-4xl mx-auto px-4">
+            <div className="pt-8 md:pt-16 pb-4 md:pb-8 text-center max-w-4xl mx-auto px-4">
                 <div className="flex items-center justify-center space-x-3 mb-4">
                     <span className="h-px w-12 bg-lime-500" />
                     <span className="text-lime-600 dark:text-lime-400 font-bold tracking-widest text-sm uppercase">Novedades</span>
                     <span className="h-px w-12 bg-lime-500" />
                 </div>
-                <h3 className="text-3xl md:text-5xl font-black text-slate-800 dark:text-[var(--text-primary)] mb-6 drop-shadow-sm uppercase">
+                <h3 className="text-2xl md:text-5xl font-black text-slate-800 dark:text-[var(--text-primary)] mb-4 md:mb-6 drop-shadow-sm uppercase">
                     PUBLICACIONES</h3>
                 <p className="text-slate-600 dark:text-[var(--text-muted)] text-base md:text-lg leading-relaxed font-light text-center max-w-5xl mx-auto">
                     Explora nuestro blog y mantente al día con artículos sobre vida saludable,

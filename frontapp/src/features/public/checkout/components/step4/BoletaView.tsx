@@ -13,7 +13,8 @@ export default function BoletaView() {
 
   if (!result) return null;
 
-  const { orderId, total, items, shipping = 0 } = result;
+  const { orderId, total, items, orderData } = result;
+  const shipping = orderData?.deliveryCost ?? 0;
   const subtotal = items.reduce((a, i) => a + i.price * i.quantity, 0);
 
   const handlePrint = () => {
@@ -146,7 +147,7 @@ export default function BoletaView() {
                       key={item.id}
                       className="border-b border-[#d5f0ef] bg-white"
                     >
-                      <td className="py-3 px-4 font-bold text-[#2BBFBF]">
+                      <td className="py-3 px-4 font-bold text-[#2BBFBF] break-words max-w-[150px] sm:max-w-none">
                         {item.name}
                       </td>
                       <td className="py-3 px-4 text-center font-extrabold text-gray-800">
@@ -209,7 +210,7 @@ export default function BoletaView() {
                   href="https://www.facebook.com/people/Lyrium-Biomarketplace/61579938364350/"
                   target="_blank"
                   rel="noreferrer"
-                  className="px-4 hover:opacity-80 transition-opacity"
+                  className="px-2 sm:px-4 hover:opacity-80 transition-opacity"
                 >
                   <img
                     src="https://fv5-4.files.fm/thumb_show.php?i=726g592gj8&view&v=1&PHPSESSID=53ba53ad2030b8e5aae3cf48c4ba83f8e248150a"
@@ -226,7 +227,7 @@ export default function BoletaView() {
                   href="https://www.instagram.com/lyrium_biomarketplace/"
                   target="_blank"
                   rel="noreferrer"
-                  className="px-4 hover:opacity-80 transition-opacity"
+                  className="px-2 sm:px-4 hover:opacity-80 transition-opacity"
                 >
                   <img
                     src="https://cdn-icons-png.flaticon.com/128/4138/4138124.png"
@@ -243,7 +244,7 @@ export default function BoletaView() {
                   href="https://wa.me/51937093420"
                   target="_blank"
                   rel="noreferrer"
-                  className="px-4 hover:opacity-80 transition-opacity"
+                  className="px-2 sm:px-4 hover:opacity-80 transition-opacity"
                 >
                   <img
                     src="https://cdn-icons-png.flaticon.com/128/15713/15713434.png"
@@ -260,7 +261,7 @@ export default function BoletaView() {
                   href="https://www.youtube.com/@LyriumBiomarketplace"
                   target="_blank"
                   rel="noreferrer"
-                  className="px-4 hover:opacity-80 transition-opacity"
+                  className="px-2 sm:px-4 hover:opacity-80 transition-opacity"
                 >
                   <img
                     src="https://cdn-icons-png.flaticon.com/128/1384/1384060.png"

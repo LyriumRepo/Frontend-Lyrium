@@ -106,7 +106,7 @@ export default function SidebarProducts({ productos, titulo = 'Artículos de ten
                   src={producto.imagen || '/img/no-image.png'}
                   alt={producto.titulo}
                   fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  className="object-contain md:object-cover group-hover:scale-105 transition-transform duration-500"
                   sizes="300px"
                 />
                 

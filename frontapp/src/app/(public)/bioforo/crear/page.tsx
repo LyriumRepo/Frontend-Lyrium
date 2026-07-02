@@ -20,9 +20,21 @@ export default function CrearTemaPage() {
     contenido: '',
     categoria: '',
   });
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     loadCategories();
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('.dropdown-container')) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
   }, []);
 
   const loadCategories = async () => {
@@ -129,24 +141,48 @@ export default function CrearTemaPage() {
             </div>
           )}
 
-          <div>
-            <label htmlFor="categoria" className="block text-sm font-medium text-slate-700 dark:text-[var(--text-primary)] mb-2">
+          <div className="relative dropdown-container">
+            <label className="block text-sm font-medium text-slate-700 dark:text-[var(--text-primary)] mb-2">
               Categoría <span className="text-red-500">*</span>
             </label>
-            <select
-              id="categoria"
-              value={formData.categoria}
-              onChange={(e) => setFormData({ ...formData, categoria: e.target.value })}
-              className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-gray-600 bg-white dark:bg-[var(--bg-card)] text-slate-800 dark:text-[var(--text-primary)] focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 dark:focus:ring-emerald-800 outline-none transition-all"
-              required
+            <button
+              type="button"
+              onClick={() => setIsOpen(!isOpen)}
+              className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-gray-600 bg-white dark:bg-[var(--bg-card)] text-slate-800 dark:text-[var(--text-primary)] focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 dark:focus:ring-emerald-800 outline-none transition-all text-sm md:text-base cursor-pointer flex items-center justify-between text-left"
             >
-              <option value="">Selecciona una categoría</option>
-              {categories.map((cat) => (
-                <option key={cat.id} value={cat.id} className="bg-white dark:bg-[var(--bg-card)]">
-                  {cat.name}
-                </option>
-              ))}
-            </select>
+              <span className={formData.categoria ? "text-slate-800 dark:text-[var(--text-primary)]" : "text-slate-400 dark:text-[var(--text-muted)]"}>
+                {categories.find(cat => cat.id === parseInt(formData.categoria))?.name || 'Selecciona una categoría'}
+              </span>
+              <Icon name={isOpen ? "ChevronUp" : "ChevronDown"} className="w-5 h-5 text-slate-400 dark:text-[var(--text-muted)]" />
+            </button>
+
+            {isOpen && (
+              <div className="absolute top-full left-0 right-0 mt-1.5 bg-white dark:bg-[var(--bg-card)] border border-slate-200 dark:border-gray-600 rounded-xl shadow-xl z-50 max-h-60 overflow-y-auto py-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFormData({ ...formData, categoria: '' });
+                    setIsOpen(false);
+                  }}
+                  className={`w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 dark:hover:bg-[#182420] text-slate-400 dark:text-[var(--text-muted)] ${!formData.categoria ? 'bg-slate-50 dark:bg-[#182420] font-medium' : ''}`}
+                >
+                  Selecciona una categoría
+                </button>
+                {categories.map((cat) => (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    onClick={() => {
+                      setFormData({ ...formData, categoria: cat.id.toString() });
+                      setIsOpen(false);
+                    }}
+                    className={`w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 dark:hover:bg-[#182420] text-slate-800 dark:text-[var(--text-primary)] ${formData.categoria === cat.id.toString() ? 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 font-semibold' : ''}`}
+                  >
+                    {cat.name}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           <div>
@@ -194,17 +230,17 @@ export default function CrearTemaPage() {
             </div>
           </div>
 
-          <div className="flex gap-4 justify-end">
+          <div className="flex flex-col-reverse sm:flex-row gap-3 sm:gap-4 justify-end">
             <Link
               href="/bioforo"
-              className="px-6 py-3 rounded-full border border-slate-300 dark:border-gray-600 text-slate-700 dark:text-[var(--text-primary)] font-medium hover:bg-slate-50 dark:hover:bg-[#182420] transition-colors"
+              className="px-6 py-3 rounded-full border border-slate-300 dark:border-gray-600 text-slate-700 dark:text-[var(--text-primary)] font-medium hover:bg-slate-50 dark:hover:bg-[#182420] transition-colors text-center w-full sm:w-auto"
             >
               Cancelar
             </Link>
             <button
               type="submit"
               disabled={submitting}
-              className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white px-8 py-3 rounded-full font-semibold shadow-lg shadow-emerald-500/30 transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white px-8 py-3 rounded-full font-semibold shadow-lg shadow-emerald-500/30 transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 w-full sm:w-auto"
             >
               {submitting ? (
                 <>

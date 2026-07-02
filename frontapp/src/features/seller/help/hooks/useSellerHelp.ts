@@ -8,8 +8,22 @@ type CreateData = {
   subject: string;
   description: string;
   category: SellerTicket['category'];
-  priority: TicketPriority;
+  priority?: TicketPriority;
 };
+
+const BACKEND_TO_CATEGORY: Record<string, SellerTicket['category']> = {
+  tech: 'tecnico',
+  admin: 'critico',
+  info: 'informacion',
+  comment: 'positivo',
+  followup: 'informacion',
+  payments: 'informacion',
+  documentation: 'informacion',
+};
+
+function mapBackendCategory(c: string): SellerTicket['category'] {
+  return BACKEND_TO_CATEGORY[c] ?? 'informacion';
+}
 
 function toSellerTicket(t: Ticket): SellerTicket {
   return {
@@ -17,7 +31,7 @@ function toSellerTicket(t: Ticket): SellerTicket {
     ticketNumber: t.numero || t.id_display,
     subject: t.titulo,
     description: t.descripcion,
-    category: (t.categoria || t.type || 'info') as SellerTicket['category'],
+    category: mapBackendCategory(t.categoria || t.type || 'info'),
     priority: (t.prioridad || 'media') as SellerTicket['priority'],
     status: mapStatus(t.status || t.estado || 'abierto'),
     createdAt: t.fecha_creacion || t.created_at || '',
@@ -142,12 +156,19 @@ export function useSellerHelp() {
 
   const handleCreateTicket = useCallback(async (data: CreateData) => {
     setIsSending(true);
+    const CATEGORY_TO_BACKEND: Record<string, string> = {
+      informacion: 'info',
+      positivo: 'comment',
+      negativo: 'comment',
+      tecnico: 'tech',
+      critico: 'admin',
+    };
     try {
       const created = await ticketApi.seller.create({
         asunto: data.subject,
         mensaje: data.description,
-        tipo_ticket: data.category,
-        criticidad: data.priority,
+        tipo_ticket: (CATEGORY_TO_BACKEND[data.category] ?? data.category) as any,
+        criticidad: data.priority || 'media',
       });
       const mapped = toSellerTicket(created);
       setTickets((prev) => [mapped, ...prev]);

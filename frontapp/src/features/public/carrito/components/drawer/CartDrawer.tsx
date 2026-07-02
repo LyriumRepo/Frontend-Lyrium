@@ -201,7 +201,7 @@ function CartLineItem({
       <button
         onClick={() => onRemove(item.productId)}
         disabled={loading}
-        className="absolute top-4 right-0 p-1.5 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100 disabled:cursor-not-allowed"
+        className="absolute top-4 right-2 p-1.5 transition-all opacity-100 md:opacity-0 group-hover:opacity-100 focus:opacity-100 disabled:cursor-not-allowed"
         style={{ color: 'var(--pd-ink3)' }}
         onMouseEnter={(e) => {
           (e.currentTarget as HTMLButtonElement).style.color = 'var(--pd-red)';
@@ -311,7 +311,7 @@ function ServiceHoldLineItem({
       <button
         onClick={() => onRemove(hold.id)}
         disabled={removing || expired}
-        className="absolute top-4 right-0 p-1.5 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100 disabled:cursor-not-allowed"
+        className="absolute top-4 right-2 p-1.5 transition-all opacity-100 md:opacity-0 group-hover:opacity-100 focus:opacity-100 disabled:cursor-not-allowed"
         style={{ color: 'var(--pd-ink3)' }}
         onMouseEnter={(e) => {
           (e.currentTarget as HTMLButtonElement).style.color = 'var(--pd-red)';
@@ -484,7 +484,7 @@ export default function CartDrawer() {
     <>
       {/* Backdrop */}
       <div
-        className={`fixed inset-0 z-40 transition-opacity duration-300 ${
+        className={`fixed inset-0 z-[200] transition-opacity duration-300 ${
           ui.cartOpen
             ? 'opacity-100 pointer-events-auto'
             : 'opacity-0 pointer-events-none'
@@ -499,7 +499,7 @@ export default function CartDrawer() {
         role="dialog"
         aria-modal="true"
         aria-label="Carrito de compras"
-        className={`fixed inset-y-0 right-0 z-50 flex flex-col w-full max-w-[400px] shadow-2xl transition-transform duration-300 ease-in-out ${
+        className={`fixed inset-y-0 right-0 z-[210] flex flex-col w-full sm:max-w-[400px] shadow-2xl transition-transform duration-300 ease-in-out ${
           ui.cartOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
         style={{ background: 'var(--pd-white,#ffffff)' }}
@@ -712,21 +712,22 @@ export default function CartDrawer() {
             </div>
           )}
 
+          {/* ── 3. RECOMENDACIONES — colocado al final del scrollable ── */}
+          {!fetchLoading && (items.length > 0 || serviceHolds.length > 0) && (
+            <div className="mt-2">
+              <CartRecommendations
+                cartProductIds={items.map((i) => i.productId)}
+                onAdded={loadCart}
+              />
+            </div>
+          )}
         </div>
         {/* ── FIN BODY SCROLL ── */}
-
-        {/* ── 3. RECOMENDACIONES — shrink-0, FUERA del scroll ── */}
-        {!fetchLoading && (items.length > 0 || serviceHolds.length > 0) && (
-          <CartRecommendations
-            cartProductIds={items.map((i) => i.productId)}
-            onAdded={loadCart}
-          />
-        )}
 
         {/* ── 4. FOOTER — shrink-0 ── */}
         {!fetchLoading && !isEmpty && (
           <div
-            className="shrink-0 px-5 py-4 space-y-3"
+            className="shrink-0 px-5 pt-4 pb-20 space-y-3 bg-white dark:bg-[var(--bg-card)]"
             style={{ borderTop: '1px solid var(--pd-border)' }}
           >
             {/* Cupón */}

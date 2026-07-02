@@ -7,8 +7,8 @@ interface StarRatingProps { rating: number; total: number; }
 
 function StarRating({ rating, total }: StarRatingProps) {
     return (
-        <span className="inline-flex items-center gap-1 text-[11px] px-2 py-1 rounded-full bg-gradient-to-r from-sky-500/10 to-lime-500/8 dark:from-sky-500/20 dark:to-lime-500/15 border border-sky-200/50 dark:border-sky-800/30">
-            <span className="inline-flex items-center gap-0.5">
+        <span className="inline-flex items-center gap-0.5 min-[360px]:gap-1 text-[8px] min-[360px]:text-[11px] px-1 py-0.5 min-[360px]:px-2 min-[360px]:py-1 rounded-full bg-gradient-to-r from-sky-500/10 to-lime-500/8 dark:from-sky-500/20 dark:to-lime-500/15 border border-sky-200/50 dark:border-sky-800/30 max-w-full">
+            <span className="hidden min-[360px]:inline-flex items-center gap-0.5">
                 {Array.from({ length: 5 }).map((_, i) => (
                     <Star
                         key={i}
@@ -16,7 +16,14 @@ function StarRating({ rating, total }: StarRatingProps) {
                     />
                 ))}
             </span>
-            <span className="text-slate-500 dark:text-[var(--text-muted)]">{rating.toFixed(1)} · {total}</span>
+            <span className="inline-flex min-[360px]:hidden items-center gap-0.5">
+                <Star className="w-2.5 h-2.5 text-amber-400 fill-amber-400 shrink-0" />
+            </span>
+            <span className="text-slate-500 dark:text-[var(--text-muted)] truncate">
+                {rating.toFixed(1)}
+                <span className="inline min-[360px]:hidden"> ({total})</span>
+                <span className="hidden min-[360px]:inline"> · {total}</span>
+            </span>
         </span>
     );
 }
@@ -58,10 +65,13 @@ export default function ProductCard({ product: p, onAdd, onView }: Props) {
     const ratingTotal = Number(p.rating_total ?? 0);
     const cat = p.categoria_nombre ?? 'General';
 
-    return (
-        <article className="group flex flex-col rounded-3xl overflow-hidden border border-slate-100 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] transition-all duration-200 hover:border-sky-200 dark:hover:border-[var(--brand-sky)] hover:shadow-[0_18px_52px_rgba(2,132,199,.10)] dark:hover:shadow-[0_18px_52px_rgba(2,132,199,0.15)] hover:-translate-y-0.5">
+    const formatCompactMoney = (val: number) => {
+        return money(val).replace(/[.,]00$/, '');
+    };
 
-            {/* Image */}
+    return (
+        <article className="group flex flex-col rounded-2xl sm:rounded-3xl overflow-hidden border border-slate-100 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] transition-all duration-200 hover:border-sky-200 dark:hover:border-[var(--brand-sky)] hover:shadow-[0_18px_52px_rgba(2,132,199,.10)] dark:hover:shadow-[0_18px_52px_rgba(2,132,199,0.15)] hover:-translate-y-0.5">
+
             <div className="relative">
                 <button onClick={() => onView(p.id)} className="block w-full">
                     <div className="aspect-square bg-gray-100 dark:bg-[var(--bg-muted)] overflow-hidden">
@@ -69,97 +79,150 @@ export default function ProductCard({ product: p, onAdd, onView }: Props) {
                             src={resolveImg(p.imagen_url)}
                             alt={p.nombre}
                             onError={(e) => { (e.target as HTMLImageElement).src = NO_IMAGE; }}
-                            className="w-full h-full object-cover group-hover:scale-[1.05] transition duration-300"
+                            className="w-full h-full object-contain md:object-cover group-hover:scale-[1.05] transition duration-300"
                         />
                     </div>
                 </button>
 
-                {/* Lyrium badge */}
-                <span className="absolute top-3 left-3 inline-flex items-center gap-1 text-[11px] px-3 py-1 rounded-full bg-white/85 dark:bg-[var(--bg-card)]/85 border border-sky-100 dark:border-[var(--border-subtle)] backdrop-blur-sm text-slate-700 dark:text-[var(--text-primary)] shadow-sm">
-                    <Leaf className="w-3 h-3 text-sky-500 dark:text-[var(--brand-sky)]" /> Lyrium
+                <span className="absolute top-1.5 left-1.5 inline-flex items-center gap-0.5 text-[8px] sm:text-[11px] px-1.5 py-0.5 sm:px-3 sm:py-1 rounded-full bg-white/85 dark:bg-[var(--bg-card)]/85 border border-sky-100 dark:border-[var(--border-subtle)] backdrop-blur-sm text-slate-700 dark:text-[var(--text-primary)] shadow-sm">
+                    <Leaf className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-sky-500 dark:text-[var(--brand-sky)] shrink-0" />
+                    <span className="hidden min-[360px]:inline">Lyrium</span>
                 </span>
 
-                {/* Tag badge */}
-                {p.tag && (
-                    <span className={`absolute top-7 right-3 text-white text-xs font-bold px-2 py-1 rounded-full ${stickerConfig[p.tag.toLowerCase()]?.class ?? 'bg-gray-500'}`}>
-                        {stickerConfig[p.tag.toLowerCase()]?.label ?? p.tag}
-                    </span>
-                )}
+                <div className="absolute top-1.5 right-1.5 flex flex-col items-end gap-1 z-10">
+                    {hasOffer && (
+                        <span className="inline-flex items-center gap-0.5 text-[8px] sm:text-[11px] px-1.5 py-0.5 sm:px-3 sm:py-1 rounded-full bg-emerald-600 text-white shadow">
+                            -{pct}%
+                        </span>
+                    )}
 
-                {/* Offer badge */}
-                {hasOffer && (
-                    <span className="absolute top-3 right-3 inline-flex items-center gap-1 text-[11px] px-3 py-1 rounded-full bg-emerald-600 text-white shadow">
-                        -{pct}%
-                    </span>
-                )}
+                    {p.tag && (
+                        <span className={`text-white text-[8px] sm:text-xs font-bold px-1.5 py-0.5 sm:py-1 rounded-full ${stickerConfig[p.tag.toLowerCase()]?.class ?? 'bg-gray-500'}`}>
+                            {stickerConfig[p.tag.toLowerCase()]?.label ?? p.tag}
+                        </span>
+                    )}
+                </div>
 
-                {/* Quick add */}
                 <button
                     onClick={() => onAdd(p.id)}
                     disabled={outOfStock}
                     title="Añadir rápido"
-                    className="absolute bottom-3 right-3 w-11 h-11 rounded-2xl bg-white/95 dark:bg-[var(--bg-card)]/95 border border-sky-100 dark:border-[var(--border-subtle)] text-slate-700 dark:text-[var(--text-primary)] shadow-sm grid place-items-center hover:shadow transition disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="absolute bottom-3 right-3 w-11 h-11 rounded-2xl bg-white/95 dark:bg-[var(--bg-card)]/95 border border-sky-100 dark:border-[var(--border-subtle)] text-slate-700 dark:text-[var(--text-primary)] shadow-sm grid place-items-center hover:shadow transition disabled:opacity-40 disabled:cursor-not-allowed hidden sm:grid"
                 >
                     <span className="text-xl text-sky-500 dark:text-[var(--brand-sky)]">+</span>
                 </button>
             </div>
 
-            {/* Info */}
-            <div className="p-4 flex flex-col gap-2 flex-1">
-                <div className="flex items-start justify-between gap-2">
-                    <button onClick={() => onView(p.id)} className="text-left flex-1">
-                        <p className="text-slate-800 dark:text-[var(--text-primary)] leading-snug line-clamp-2 min-h-[42px] text-sm font-medium">{p.nombre}</p>
+            <div className="p-1.5 sm:p-4 flex flex-col gap-1.5 sm:gap-2 flex-1 min-w-0">
+                <div className="flex flex-col gap-1">
+                    <button onClick={() => onView(p.id)} className="text-left w-full">
+                        <p className="text-slate-800 dark:text-[var(--text-primary)] leading-snug line-clamp-2 min-h-[24px] min-[360px]:min-h-[30px] sm:min-h-[40px] text-[9px] min-[360px]:text-[11px] sm:text-sm font-medium">{p.nombre}</p>
                     </button>
                     {p.sku && (
-                        <span className="shrink-0 text-[10px] px-2 py-1 rounded-full bg-gray-100 dark:bg-[var(--bg-muted)] text-slate-600 dark:text-[var(--text-secondary)] inline-flex items-center gap-1">
-                            <Barcode className="w-3 h-3 text-sky-500 dark:text-[var(--brand-sky)]" /> {p.sku}
+                        <span className="self-start text-[7.5px] min-[360px]:text-[8px] sm:text-[10px] px-1 py-0.5 min-[360px]:px-1.5 sm:px-2 sm:py-1 rounded-full bg-gray-100 dark:bg-[var(--bg-muted)] text-slate-600 dark:text-[var(--text-secondary)] inline-flex items-center gap-0.5 min-[360px]:gap-1 max-w-full">
+                            <Barcode className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-sky-500 dark:text-[var(--brand-sky)] shrink-0" />
+                            <span className="truncate">{p.sku}</span>
                         </span>
                     )}
                 </div>
 
                 {p.descripcion_corta && (
-                    <p className="text-[11px] text-slate-400 dark:text-[var(--text-muted)] line-clamp-2">{p.descripcion_corta}</p>
+                    <p className="text-[10px] sm:text-[11px] text-slate-400 dark:text-[var(--text-muted)] line-clamp-2 hidden sm:block">{p.descripcion_corta}</p>
                 )}
 
-                <div className="flex items-center justify-between gap-2 mt-auto pt-2">
-                    <span className="text-[11px] px-2 py-1 rounded-full bg-slate-50 dark:bg-[var(--bg-muted)] border border-slate-100 dark:border-[var(--border-subtle)] text-slate-600 dark:text-[var(--text-secondary)] inline-flex items-center gap-1">
-                        <FolderOpen className="w-3 h-3 text-sky-500 dark:text-[var(--brand-sky)]" /> {cat}
+                {/* Desktop badges */}
+                <div className="hidden sm:flex flex-col gap-1 mt-auto pt-2">
+                    <span className="text-[11px] px-2 py-1 rounded-full bg-slate-50 dark:bg-[var(--bg-muted)] border border-slate-100 dark:border-[var(--border-subtle)] text-slate-600 dark:text-[var(--text-secondary)] inline-flex items-center gap-1 self-start max-w-full">
+                        <FolderOpen className="w-3 h-3 text-sky-500 dark:text-[var(--brand-sky)] shrink-0" />
+                        <span className="truncate">{cat}</span>
                     </span>
-                    {ratingTotal > 0
-                        ? <StarRating rating={rating} total={ratingTotal} />
-                        : (
-                            <span className="text-[10px] px-2 py-1 rounded-full bg-slate-50 dark:bg-[var(--bg-muted)] border border-slate-100 dark:border-[var(--border-subtle)] text-slate-500 dark:text-[var(--text-muted)] inline-flex items-center gap-1">
-                                <ShieldCheck className="w-3 h-3 text-sky-500 dark:text-[var(--brand-sky)]" /> Verificado
-                            </span>
-                        )}
+                    {ratingTotal > 0 ? (
+                        <div className="self-start">
+                            <StarRating rating={rating} total={ratingTotal} />
+                        </div>
+                    ) : (
+                        <span className="text-[10px] px-2 py-1 rounded-full bg-slate-50 dark:bg-[var(--bg-muted)] border border-slate-100 dark:border-[var(--border-subtle)] text-slate-500 dark:text-[var(--text-muted)] inline-flex items-center gap-1 self-start">
+                            <ShieldCheck className="w-3 h-3 text-sky-500 dark:text-[var(--brand-sky)] shrink-0" /> Verificado
+                        </span>
+                    )}
                 </div>
 
-                <div className="flex items-end justify-between mt-1">
-                    <div>
+                {/* Mobile badges */}
+                <div className="flex flex-wrap items-center gap-1 mt-auto pt-1 sm:hidden">
+                    <span className="text-[7.5px] min-[360px]:text-[9px] px-1 py-0.5 min-[360px]:px-1.5 rounded-full bg-slate-50 dark:bg-[var(--bg-muted)] border border-slate-100 dark:border-[var(--border-subtle)] text-slate-600 dark:text-[var(--text-secondary)] inline-flex items-center gap-0.5 min-[360px]:gap-1 max-w-full">
+                        <FolderOpen className="w-2.5 h-2.5 text-sky-500 dark:text-[var(--brand-sky)] shrink-0" />
+                        <span className="truncate">{cat}</span>
+                    </span>
+                    {ratingTotal > 0 ? (
+                        <StarRating rating={rating} total={ratingTotal} />
+                    ) : (
+                        <span className="text-[7.5px] min-[360px]:text-[8px] px-1 py-0.5 min-[360px]:px-1.5 rounded-full bg-slate-50 dark:bg-[var(--bg-muted)] border border-slate-100 dark:border-[var(--border-subtle)] text-slate-500 dark:text-[var(--text-muted)] inline-flex items-center gap-0.5 min-[360px]:gap-1">
+                            <ShieldCheck className="w-2.5 h-2.5 text-sky-500 dark:text-[var(--brand-sky)] shrink-0" /> Verificado
+                        </span>
+                    )}
+                </div>
+
+                {/* Desktop price & stock */}
+                <div className="hidden sm:flex flex-col gap-1 mt-1">
+                    <div className="flex items-baseline gap-1 flex-wrap">
                         <p className="text-emerald-700 dark:text-emerald-400 text-xl font-bold">{money(finalPrice)}</p>
-                        {hasOffer
-                            ? <p className="text-xs text-gray-400 dark:text-[var(--text-muted)] line-through">{money(basePrice)}</p>
-                            : <p className="text-xs text-transparent">-</p>
-                        }
+                        {hasOffer ? (
+                            <p className="text-xs text-gray-400 dark:text-[var(--text-muted)] line-through">{money(basePrice)}</p>
+                        ) : (
+                            <p className="text-xs text-transparent">-</p>
+                        )}
                     </div>
-                    <span className={`text-xs inline-flex items-center gap-1 ${outOfStock ? 'text-rose-500' : 'text-slate-400 dark:text-[var(--text-muted)]'}`}>
-                        <Package className="w-3 h-3 text-sky-500 dark:text-[var(--brand-sky)]" />
-                        {outOfStock ? 'Agotado' : stock ? `Stock: ${stock}` : 'Disponible'}
+                    <span className={`text-xs inline-flex items-center gap-1 self-start ${outOfStock ? 'text-rose-500' : 'text-slate-400 dark:text-[var(--text-muted)]'}`}>
+                        <Package className="w-3 h-3 text-sky-500 dark:text-[var(--brand-sky)] shrink-0" />
+                        {outOfStock ? 'Agotado' : stock ? `Stk: ${stock}` : 'Disp.'}
                     </span>
                 </div>
 
-                {/* Action buttons */}
-                <div className="grid grid-cols-2 gap-2 mt-2">
+                {/* Mobile price & stock */}
+                <div className="flex flex-col gap-0.5 mt-1 sm:hidden">
+                    <p className="text-emerald-700 dark:text-emerald-400 text-[11px] min-[360px]:text-sm font-bold leading-none">{formatCompactMoney(finalPrice)}</p>
+                    <div className="flex items-center justify-between gap-1 flex-wrap w-full text-[7.5px] min-[360px]:text-[9px]">
+                        {hasOffer ? (
+                            <p className="text-gray-400 dark:text-[var(--text-muted)] line-through">{formatCompactMoney(basePrice)}</p>
+                        ) : (
+                            <div className="w-0 h-0" />
+                        )}
+                        <span className={`inline-flex items-center gap-0.5 ${outOfStock ? 'text-rose-500' : 'text-slate-400 dark:text-[var(--text-muted)]'}`}>
+                            <Package className="w-2.5 h-2.5 text-sky-500 dark:text-[var(--brand-sky)] shrink-0" />
+                            <span>{outOfStock ? 'Agotado' : stock ? `Stk: ${stock}` : 'Disp.'}</span>
+                        </span>
+                    </div>
+                </div>
+
+                {/* Desktop action buttons */}
+                <div className="hidden sm:grid grid-cols-1 md:grid-cols-2 gap-1 mt-2">
                     <button
                         onClick={() => onAdd(p.id)}
                         disabled={outOfStock}
-                        className="py-2.5 rounded-2xl bg-sky-500 text-white text-xs font-semibold inline-flex items-center justify-center gap-1.5 hover:bg-sky-600 dark:hover:bg-sky-400 transition shadow-md shadow-sky-100 dark:shadow-sky-900/20 disabled:opacity-40 disabled:cursor-not-allowed hover:-translate-y-px"
+                        className="py-2 rounded-xl bg-sky-500 text-white text-xs font-semibold inline-flex items-center justify-center gap-1 hover:bg-sky-600 dark:hover:bg-sky-400 transition shadow-sm disabled:opacity-40 disabled:cursor-not-allowed hover:-translate-y-px"
                     >
-                        🛒 {outOfStock ? 'No disponible' : 'Añadir'}
+                        🛒 {outOfStock ? 'Agotado' : 'Añadir'}
                     </button>
                     <button
                         onClick={() => onView(p.id)}
-                        className="py-2.5 rounded-2xl border border-sky-200 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] text-xs font-semibold text-slate-700 dark:text-[var(--text-primary)] inline-flex items-center justify-center gap-1.5 hover:bg-sky-50 dark:hover:bg-sky-900/10 transition hover:-translate-y-px"
+                        className="py-2 rounded-xl border border-sky-200 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] text-xs font-semibold text-slate-700 dark:text-[var(--text-primary)] inline-flex items-center justify-center gap-1 hover:bg-sky-50 dark:hover:bg-sky-900/10 transition hover:-translate-y-px"
+                    >
+                        🔍 Ver
+                    </button>
+                </div>
+
+                {/* Mobile action buttons */}
+                <div className="grid grid-cols-1 min-[360px]:grid-cols-2 gap-1 mt-1.5 sm:hidden">
+                    <button
+                        onClick={() => onAdd(p.id)}
+                        disabled={outOfStock}
+                        className="py-1.5 min-[360px]:py-2 rounded-xl bg-sky-500 text-white text-[8.5px] min-[360px]:text-[10px] font-semibold inline-flex items-center justify-center gap-0.5 hover:bg-sky-600 dark:hover:bg-sky-400 transition shadow-sm disabled:opacity-40 disabled:cursor-not-allowed hover:-translate-y-px"
+                    >
+                        🛒 {outOfStock ? 'Agotado' : 'Añadir'}
+                    </button>
+                    <button
+                        onClick={() => onView(p.id)}
+                        className="py-1.5 min-[360px]:py-2 rounded-xl border border-sky-200 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] text-[8.5px] min-[360px]:text-[10px] font-semibold text-slate-700 dark:text-[var(--text-primary)] inline-flex items-center justify-center gap-0.5 hover:bg-sky-50 dark:hover:bg-sky-900/10 transition hover:-translate-y-px"
                     >
                         🔍 Ver
                     </button>

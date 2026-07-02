@@ -324,7 +324,7 @@ export default function SearchAutocomplete({
                                     alt={product.titulo}
                                     fill
                                     sizes="40px"
-                                    className="object-cover"
+                                    className="object-contain md:object-cover"
                                   />
                                 </div>
                                 <div className="flex-1 min-w-0 text-left">
@@ -364,7 +364,7 @@ export default function SearchAutocomplete({
                                   alt={result.titulo}
                                   fill
                                   sizes="40px"
-                                  className="object-cover"
+                                  className="object-contain md:object-cover"
                                 />
                               </div>
                               <div className="flex-1 min-w-0 text-left">

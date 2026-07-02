@@ -15,8 +15,12 @@ export interface Voucher {
     type: VoucherType;
     customer_name: string;
     customer_ruc: string;
+    store_name?: string;
+    store_ruc?: string;
     order_id: string;
     amount: number;
+    subtotal_sin_igv?: number;
+    igv_amount?: number;
     emission_date: string;
     sunat_status: VoucherStatus;
     pdf_url?: string;
@@ -29,6 +33,9 @@ export interface Voucher {
     qr_data?: string | null;
     xml_url?: string | null;
     cdr_url?: string | null;
+    created_at?: string;
+    updated_at?: string;
+    items?: any[];
 }
 
 export interface InvoiceKPIs {

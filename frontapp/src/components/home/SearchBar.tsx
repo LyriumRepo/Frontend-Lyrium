@@ -321,9 +321,8 @@ export default function SearchBar({ categoriasServicios = [], categoriasProducto
                   <span>Buscando...</span>
                 </div>
               ) : results.length > 0 ? (
-                <div className="flex">
-                  {/* Columna Izquierda: Categorías */}
-                  <div className="w-1/3 border-r border-gray-100 dark:border-[var(--border-subtle)] max-h-80 overflow-y-auto">
+                <div className="flex flex-col sm:flex-row">
+                  <div className="w-full sm:w-1/3 border-b sm:border-b-0 sm:border-r border-gray-100 dark:border-[var(--border-subtle)] max-h-40 sm:max-h-80 overflow-y-auto">
                     <div className="p-2">
                       <p className="text-xs font-bold text-gray-500 dark:text-[var(--text-placeholder)] px-2 py-1 uppercase">
                         Categorías
@@ -351,8 +350,7 @@ export default function SearchBar({ categoriasServicios = [], categoriasProducto
                     </div>
                   </div>
 
-                  {/* Columna Derecha: Productos */}
-                  <div className="w-2/3 max-h-80 overflow-y-auto">
+                  <div className="w-full sm:w-2/3 max-h-60 sm:max-h-80 overflow-y-auto">
                     {hoveredCategory ? (
                       <div className="p-2">
                         <p className="text-xs font-bold text-gray-500 dark:text-[var(--text-placeholder)] px-2 py-1 uppercase">
@@ -377,7 +375,7 @@ export default function SearchBar({ categoriasServicios = [], categoriasProducto
                                       alt={product.titulo}
                                       fill
                                       sizes="40px"
-                                      className="object-cover"
+                                      className="object-contain md:object-cover"
                                     />
                                   </div>
                                   <div className="flex-1 min-w-0 text-left">
@@ -415,7 +413,7 @@ export default function SearchBar({ categoriasServicios = [], categoriasProducto
                                   <img
                                     src={typeof result.imagen === 'string' && result.imagen.startsWith('http') ? result.imagen : '/img/no-image.png'}
                                     alt={result.titulo}
-                                    className="w-full h-full object-cover"
+                                    className="w-full h-full object-contain md:object-cover"
                                   />
                                 </div>
                                 <div className="flex-1 min-w-0 text-left">

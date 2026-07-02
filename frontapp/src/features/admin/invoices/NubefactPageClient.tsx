@@ -42,7 +42,7 @@ export function NubefactPageClient(_props: NubefactPageClientProps) {
     } = useAdminInvoices();
 
     const handleExportCSV = () => {
-        const headers = ['ID', 'Tienda', 'Tipo', 'Serie', 'Número', 'Cliente', 'RUC', 'Monto', 'Estado', 'Fecha'];
+        const headers = ['ID', 'Tienda', 'Tipo', 'Serie', 'Número', 'Cliente', 'RUC', 'Base Imponible', 'IGV', 'Monto', 'Estado', 'Fecha'];
         const rows = invoices.map(i => [
             i.id,
             i.stores.map(s => s.name).join(', ') || '—',
@@ -51,6 +51,8 @@ export function NubefactPageClient(_props: NubefactPageClientProps) {
             i.number,
             i.customer_name,
             i.customer_ruc,
+            (i.subtotal_sin_igv ?? (i.amount / 1.18)).toFixed(2),
+            (i.igv_amount ?? (i.amount - (i.amount / 1.18))).toFixed(2),
             i.amount.toFixed(2),
             i.sunat_status,
             new Date(i.emission_date).toLocaleDateString('es-PE'),
