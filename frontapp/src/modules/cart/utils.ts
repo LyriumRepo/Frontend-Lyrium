@@ -16,6 +16,7 @@ export function resolveImg(url?: string | null): string {
 export interface ApiProduct {
     id: number | string;
     nombre: string;
+    slug?: string;
     tag?: string;
     sku?: string;
     categoria_nombre?: string;
@@ -30,6 +31,7 @@ export interface ApiProduct {
     estado_stock?: string;
     rating_promedio?: number | string;
     rating_total?: number | string;
+    store_logo_marketplace?: string;
 }
 
 export interface ApiCartItem {

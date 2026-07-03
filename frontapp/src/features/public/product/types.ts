@@ -18,6 +18,7 @@ export interface LaravelProductStore {
   name: string;
   slug: string;
   logo: string | null;
+  logo_marketplace?: string | null;
   email: string | null;
   phone: string | null;
 }

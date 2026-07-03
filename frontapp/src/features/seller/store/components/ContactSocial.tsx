@@ -3,6 +3,8 @@
 import React from 'react';
 import { ShopConfig } from '@/features/seller/store/types';
 import Icon from '@/components/ui/Icon';
+import { usePlanCapabilities } from '@/shared/lib/hooks/usePlanCapabilities';
+import PlanUpgradeMessage from './PlanUpgradeMessage';
 
 interface ContactSocialProps {
     config: ShopConfig;
@@ -10,6 +12,13 @@ interface ContactSocialProps {
 }
 
 export default function ContactSocial({ config, updateConfig }: ContactSocialProps) {
+    const { planSlug, limit } = usePlanCapabilities();
+    const maxSocial = limit('max_social_links');
+
+    const socialKeys: (keyof ShopConfig['social'])[] = ['instagram', 'facebook', 'tiktok', 'whatsapp', 'youtube', 'twitter', 'linkedin', 'website'];
+    const filledCount = socialKeys.filter(k => config.social[k]?.trim()).length;
+    const atLimit = planSlug === 'emprende' && filledCount >= maxSocial;
+
     const updateSocial = (updates: Partial<ShopConfig['social']>) => {
         updateConfig({
             social: { ...config.social, ...updates }
@@ -78,7 +87,10 @@ export default function ContactSocial({ config, updateConfig }: ContactSocialPro
                                     placeholder="Instagram URL"
                                     value={config.social.instagram || ''}
                                     onChange={e => updateSocial({ instagram: e.target.value })}
-                                    className="pl-12 w-full text-sm font-black text-[var(--text-primary)] bg-[var(--bg-secondary)] p-3 border-2 border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)] transition-all"
+                                    disabled={atLimit && !config.social.instagram?.trim()}
+                                    className={`pl-12 w-full text-sm font-black text-[var(--text-primary)] bg-[var(--bg-secondary)] p-3 border-2 border-[var(--border-subtle)] rounded-xl outline-none transition-all ${
+                                        atLimit && !config.social.instagram?.trim() ? 'opacity-40 cursor-not-allowed' : 'focus:border-sky-500 dark:focus:border-[var(--icons-green)]'
+                                    }`}
                                 />
                             </div>
                             <div className="relative group">
@@ -88,7 +100,10 @@ export default function ContactSocial({ config, updateConfig }: ContactSocialPro
                                     placeholder="Facebook URL"
                                     value={config.social.facebook || ''}
                                     onChange={e => updateSocial({ facebook: e.target.value })}
-                                    className="pl-12 w-full text-sm font-black text-[var(--text-primary)] bg-[var(--bg-secondary)] p-3 border-2 border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)] transition-all"
+                                    disabled={atLimit && !config.social.facebook?.trim()}
+                                    className={`pl-12 w-full text-sm font-black text-[var(--text-primary)] bg-[var(--bg-secondary)] p-3 border-2 border-[var(--border-subtle)] rounded-xl outline-none transition-all ${
+                                        atLimit && !config.social.facebook?.trim() ? 'opacity-40 cursor-not-allowed' : 'focus:border-sky-500 dark:focus:border-[var(--icons-green)]'
+                                    }`}
                                 />
                             </div>
                             <div className="relative group">
@@ -98,7 +113,10 @@ export default function ContactSocial({ config, updateConfig }: ContactSocialPro
                                     placeholder="TikTok URL (Usa Link de Perfil)"
                                     value={config.social.tiktok || ''}
                                     onChange={e => updateSocial({ tiktok: e.target.value })}
-                                    className="pl-12 w-full text-sm font-black text-[var(--text-primary)] bg-[var(--bg-secondary)] p-3 border-2 border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)] transition-all"
+                                    disabled={atLimit && !config.social.tiktok?.trim()}
+                                    className={`pl-12 w-full text-sm font-black text-[var(--text-primary)] bg-[var(--bg-secondary)] p-3 border-2 border-[var(--border-subtle)] rounded-xl outline-none transition-all ${
+                                        atLimit && !config.social.tiktok?.trim() ? 'opacity-40 cursor-not-allowed' : 'focus:border-sky-500 dark:focus:border-[var(--icons-green)]'
+                                    }`}
                                 />
                             </div>
                             <div className="relative group">
@@ -108,7 +126,10 @@ export default function ContactSocial({ config, updateConfig }: ContactSocialPro
                                     placeholder="WhatsApp Number"
                                     value={config.social.whatsapp || ''}
                                     onChange={e => updateSocial({ whatsapp: e.target.value })}
-                                    className="pl-12 w-full text-sm font-black text-[var(--text-primary)] bg-[var(--bg-secondary)] p-3 border-2 border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)] transition-all"
+                                    disabled={atLimit && !config.social.whatsapp?.trim()}
+                                    className={`pl-12 w-full text-sm font-black text-[var(--text-primary)] bg-[var(--bg-secondary)] p-3 border-2 border-[var(--border-subtle)] rounded-xl outline-none transition-all ${
+                                        atLimit && !config.social.whatsapp?.trim() ? 'opacity-40 cursor-not-allowed' : 'focus:border-sky-500 dark:focus:border-[var(--icons-green)]'
+                                    }`}
                                 />
                             </div>
                         </div>
@@ -124,7 +145,10 @@ export default function ContactSocial({ config, updateConfig }: ContactSocialPro
                                     placeholder="YouTube URL"
                                     value={config.social.youtube || ''}
                                     onChange={e => updateSocial({ youtube: e.target.value })}
-                                    className="pl-12 w-full text-sm font-black text-[var(--text-primary)] bg-[var(--bg-secondary)] p-3 border-2 border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)] transition-all"
+                                    disabled={atLimit && !config.social.youtube?.trim()}
+                                    className={`pl-12 w-full text-sm font-black text-[var(--text-primary)] bg-[var(--bg-secondary)] p-3 border-2 border-[var(--border-subtle)] rounded-xl outline-none transition-all ${
+                                        atLimit && !config.social.youtube?.trim() ? 'opacity-40 cursor-not-allowed' : 'focus:border-sky-500 dark:focus:border-[var(--icons-green)]'
+                                    }`}
                                 />
                             </div>
                             <div className="relative group">
@@ -134,7 +158,10 @@ export default function ContactSocial({ config, updateConfig }: ContactSocialPro
                                     placeholder="Twitter URL"
                                     value={config.social.twitter || ''}
                                     onChange={e => updateSocial({ twitter: e.target.value })}
-                                    className="pl-12 w-full text-sm font-black text-[var(--text-primary)] bg-[var(--bg-secondary)] p-3 border-2 border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)] transition-all"
+                                    disabled={atLimit && !config.social.twitter?.trim()}
+                                    className={`pl-12 w-full text-sm font-black text-[var(--text-primary)] bg-[var(--bg-secondary)] p-3 border-2 border-[var(--border-subtle)] rounded-xl outline-none transition-all ${
+                                        atLimit && !config.social.twitter?.trim() ? 'opacity-40 cursor-not-allowed' : 'focus:border-sky-500 dark:focus:border-[var(--icons-green)]'
+                                    }`}
                                 />
                             </div>
                             <div className="relative group">
@@ -144,7 +171,10 @@ export default function ContactSocial({ config, updateConfig }: ContactSocialPro
                                     placeholder="LinkedIn URL"
                                     value={config.social.linkedin || ''}
                                     onChange={e => updateSocial({ linkedin: e.target.value })}
-                                    className="pl-12 w-full text-sm font-black text-[var(--text-primary)] bg-[var(--bg-secondary)] p-3 border-2 border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)] transition-all"
+                                    disabled={atLimit && !config.social.linkedin?.trim()}
+                                    className={`pl-12 w-full text-sm font-black text-[var(--text-primary)] bg-[var(--bg-secondary)] p-3 border-2 border-[var(--border-subtle)] rounded-xl outline-none transition-all ${
+                                        atLimit && !config.social.linkedin?.trim() ? 'opacity-40 cursor-not-allowed' : 'focus:border-sky-500 dark:focus:border-[var(--icons-green)]'
+                                    }`}
                                 />
                             </div>
                             <div className="relative group">
@@ -154,9 +184,17 @@ export default function ContactSocial({ config, updateConfig }: ContactSocialPro
                                     placeholder="Sitio Web URL"
                                     value={config.social.website || ''}
                                     onChange={e => updateSocial({ website: e.target.value })}
-                                    className="pl-12 w-full text-sm font-black text-[var(--text-primary)] bg-[var(--bg-secondary)] p-3 border-2 border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)] transition-all"
+                                    disabled={atLimit && !config.social.website?.trim()}
+                                    className={`pl-12 w-full text-sm font-black text-[var(--text-primary)] bg-[var(--bg-secondary)] p-3 border-2 border-[var(--border-subtle)] rounded-xl outline-none transition-all ${
+                                        atLimit && !config.social.website?.trim() ? 'opacity-40 cursor-not-allowed' : 'focus:border-sky-500 dark:focus:border-[var(--icons-green)]'
+                                    }`}
                                 />
                             </div>
+                            {atLimit && (
+                                <PlanUpgradeMessage
+                                    message="Has alcanzado el límite máximo de redes sociales permitido por tu plan Emprende. Actualiza al plan Crece para agregar más redes."
+                                />
+                            )}
                         </div>
                     </div>
                 </div>

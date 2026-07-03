@@ -45,15 +45,23 @@ export default function RootLoading() {
             );
           })}
 
-          <div className="relative w-[115px] h-[115px] md:w-[134px] md:h-[134px] z-10">
-            <Image
-              src="/img/iconologo.png"
-              alt="Cargando Lyrium..."
-              fill
-              className="object-contain"
-              priority
-            />
-          </div>
+          {/* Logo según el tema */}
+            <div className="relative w-[115px] h-[115px] md:w-[134px] md:h-[134px] z-10">
+              <Image
+                  src="/img/logolyrium2.png"
+                  alt="Cargando Lyrium..."
+                  fill
+                  className="object-contain block dark:hidden"
+                  priority
+              />
+              <Image
+                src="/img/iconologo.png"
+                alt="Cargando Lyrium..."
+                fill
+                className="object-contain hidden dark:block"
+                priority
+              />
+            </div>
         </div>
 
         {/* Right lines */}

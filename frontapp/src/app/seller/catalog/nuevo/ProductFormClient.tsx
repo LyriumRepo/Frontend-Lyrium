@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useTransition, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useTransition, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import { useFormState, useFormStatus } from 'react-dom';
 import { createProduct, ProductActionResult } from '@/shared/lib/actions/product-form';
@@ -197,6 +197,27 @@ export default function ProductFormClient() {
   const [featuredImage, setFeaturedImage] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
+  const [categoryValue, setCategoryValue] = useState('');
+
+  const [categories, setCategories] = useState<{ id: number; name: string; slug: string; level: number }[]>([]);
+
+  useEffect(() => {
+    fetch(`${LARAVEL_API_URL}/categories?type=product&tree=1&per_page=100`)
+      .then(r => r.json())
+      .then(json => {
+        const tree = json.data || json || [];
+        const flat: typeof categories = [];
+        function flatten(nodes: any[], level = 0) {
+          for (const node of nodes) {
+            flat.push({ id: node.id, name: node.name, slug: node.slug, level });
+            if (node.children?.length) flatten(node.children, level + 1);
+          }
+        }
+        flatten(tree);
+        setCategories(flat);
+      })
+      .catch(() => {});
+  }, []);
 
   React.useEffect(() => {
     const handler = (e: Event) => {
@@ -344,6 +365,30 @@ export default function ProductFormClient() {
                 className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-100 rounded-xl font-bold text-gray-700 focus:outline-none focus:ring-2 focus:border-sky-500 focus:ring-sky-100"
                 placeholder="Describe las características de tu producto..."
               />
+            </div>
+
+            <div>
+              <label htmlFor="product-category" className="block text-sm font-bold text-gray-700 uppercase tracking-wider mb-2">
+                Categoría *
+              </label>
+              <select
+                id="product-category"
+                name="category"
+                required
+                value={categoryValue}
+                onChange={(e) => setCategoryValue(e.target.value)}
+                className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-100 rounded-xl font-bold text-gray-700 focus:outline-none focus:ring-2 focus:border-sky-500 focus:ring-sky-100"
+              >
+                <option value="">Seleccionar Categoría...</option>
+                {categories.map((cat) => {
+                  const isParent = cat.level < 2;
+                  return (
+                    <option key={cat.id} value={isParent ? '' : cat.slug} disabled={isParent}>
+                      {'\u00A0\u00A0'.repeat(cat.level)}{isParent ? '-- ' : ''}{cat.name}
+                    </option>
+                  );
+                })}
+              </select>
             </div>
           </div>
         </div>

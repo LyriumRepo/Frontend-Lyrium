@@ -230,7 +230,7 @@ export default function OrderSummary() {
               placeholder="Código promocional"
               value={orderData.promoCode}
               onChange={(e) => setOrderData({ promoCode: e.target.value })}
-              className="w-full pl-9 pr-4 py-2.5 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-muted)] focus:bg-white dark:focus:bg-[var(--bg-card)] focus:border-sky-400 dark:focus:border-[var(--brand-sky)] focus:outline-none transition-all text-gray-800 dark:text-[var(--text-primary)]"
+              className="w-full pl-9 pr-4 py-2.5 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-muted)] focus:bg-white dark:focus:bg-[var(--bg-card)] focus:border-[var(--brand-sky)] dark:focus:border-[var(--brand-green)] focus:ring-2 focus:ring-[var(--brand-sky)]/30 dark:focus:ring-[var(--brand-green)]/30 focus:outline-none transition-all text-gray-800 dark:text-[var(--text-primary)]"
             />
           </div>
           <button

@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import { ShopConfig } from '@/features/seller/store/types';
 import StorePreviewModal from './StorePreviewModal';
 import Icon from '@/components/ui/Icon';
+import { usePlanCapabilities } from '@/shared/lib/hooks/usePlanCapabilities';
+import PlanUpgradeMessage from './PlanUpgradeMessage';
 
 const layouts = [
     {
@@ -135,6 +137,8 @@ interface LayoutSelectorProps {
 
 export default function LayoutSelector({ config, updateConfig, storeId }: LayoutSelectorProps) {
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+    const { planSlug } = usePlanCapabilities();
+    const isEmprende = planSlug === 'emprende';
 
     return (
         <div className="glass-card p-0 overflow-hidden border-none rounded-[2.5rem] shadow-2xl bg-[var(--bg-card)] mb-8 animate-fadeIn">
@@ -161,6 +165,12 @@ export default function LayoutSelector({ config, updateConfig, storeId }: Layout
 
             <div className="p-8">
                 <div className="space-y-8">
+                    {isEmprende && (
+                        <PlanUpgradeMessage
+                            message="Tu plan Emprende incluye un diseño exclusivo no personalizable. Actualiza tu plan para acceder a más opciones de personalización."
+                        />
+                    )}
+
                     <div className="space-y-6">
                         <div className="flex items-center gap-2 mb-2 ml-1">
                             <Icon name="MousePointerClick" className="text-sky-500 dark:text-[var(--icons-green)] w-4 h-4" />
@@ -169,7 +179,7 @@ export default function LayoutSelector({ config, updateConfig, storeId }: Layout
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             {layouts.map(layout => (
-                                <label htmlFor={`layout-${layout.id}`} key={layout.id} className="cursor-pointer group" aria-label={`Seleccionar diseño ${layout.name}`}>
+                                <label htmlFor={`layout-${layout.id}`} key={layout.id} className={isEmprende ? 'cursor-not-allowed group' : 'cursor-pointer group'} aria-label={`Seleccionar diseño ${layout.name}`}>
                                     <input
                                         id={`layout-${layout.id}`}
                                         type="radio"
@@ -178,11 +188,21 @@ export default function LayoutSelector({ config, updateConfig, storeId }: Layout
                                         checked={config.layout === layout.id}
                                         onChange={e => updateConfig({ layout: e.target.value as any })}
                                         className="sr-only peer"
+                                        disabled={isEmprende}
                                     />
-                                    <div className="p-6 rounded-[2.5rem] border-2 border-[var(--border-subtle)] bg-[var(--bg-card)] hover:border-sky-500/30 dark:hover:border-emerald-500/30 hover:shadow-lg peer-checked:border-sky-500 dark:peer-checked:border-[var(--icons-green)] peer-checked:shadow-2xl peer-checked:shadow-sky-500/20 dark:peer-checked:shadow-emerald-500/30 peer-checked:-translate-y-1 transition-all relative overflow-hidden">
-                                        <div className="absolute top-0 right-0 w-20 h-20 bg-sky-500/10 rounded-bl-[4rem] opacity-0 peer-checked:opacity-100 transition-opacity flex items-center justify-center pl-6 pb-6">
-                                            <Icon name="Check" className="text-sky-500 w-6 h-6" />
-                                        </div>
+                                    <div className={`p-6 rounded-[2.5rem] border-2 bg-[var(--bg-card)] transition-all relative overflow-hidden ${
+                                        isEmprende
+                                            ? 'border-[var(--border-subtle)] opacity-40'
+                                            : 'border-[var(--border-subtle)] hover:border-sky-500/30 dark:hover:border-emerald-500/30 hover:shadow-lg peer-checked:border-sky-500 dark:peer-checked:border-[var(--icons-green)] peer-checked:shadow-2xl peer-checked:shadow-sky-500/20 dark:peer-checked:shadow-emerald-500/30 peer-checked:-translate-y-1'
+                                    }`}>
+                                        {isEmprende && (
+                                            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/10 backdrop-blur-[1px]">
+                                                <img src="/img/LyriumEspecial.png" alt="Bloqueado" className="w-16 h-16 mb-2 object-contain" />
+                                                        <span className="text-[9px] font-black text-[var(--lima-500)] uppercase tracking-widest text-center px-4">
+                                                    Disponible en planes superiores
+                                                </span>
+                                            </div>
+                                        )}
                                         <div className="w-full h-40 bg-[var(--bg-secondary)] rounded-xl p-1.5 mb-4 border border-[var(--border-subtle)] flex flex-col gap-0.5">
                                             {layout.preview}
                                         </div>

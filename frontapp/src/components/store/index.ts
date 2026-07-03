@@ -1,6 +1,6 @@
 export { default as StoreInfoCard } from './StoreInfoCard';
 export { default as StoreDescription } from './StoreDescription';
-export { default as AdBannersGrid } from './AdBannersGrid';
+export { default as AdBannersCarousel } from './AdBannersCarousel';
 export { default as ProductCarousel } from './ProductCarousel';
 export { default as StoreBannerCarousel } from './StoreBannerCarousel';
 export { default as MainProductGrid } from './MainProductGrid';

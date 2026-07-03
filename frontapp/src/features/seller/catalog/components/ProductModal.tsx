@@ -13,12 +13,26 @@ interface Category {
     id: number;
     name: string;
     slug: string;
+    children?: Category[];
+    level?: number;
+}
+
+function flattenCategoryTree(nodes: Category[], level = 0): Category[] {
+    const result: Category[] = [];
+    for (const node of nodes) {
+        const children = node.children ?? [];
+        result.push({ ...node, children: [], level });
+        if (children.length > 0) {
+            result.push(...flattenCategoryTree(children, level + 1));
+        }
+    }
+    return result;
 }
 
 interface ProductModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSave: (product: Product) => void;
+    onSave: (product: Product, file?: File) => void;
     productToEdit?: Product | null;
 }
 
@@ -74,6 +88,7 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit }:
     const [formData, setFormData] = useState<Product>(initialProduct);
     const [etiquetas, setEtiquetas] = useState<ProductEtiquetaConfig>({ nuevo: false });
     const [previewImage, setPreviewImage] = useState<string>('');
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [isDark, setIsDark] = useState(false);
     const [showTagPreview, setShowTagPreview] = useState(false);
     const { showToast } = useToast();
@@ -84,9 +99,10 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit }:
     const { data: categories = [] } = useQuery<Category[]>({
         queryKey: ['seller', 'categories'],
         queryFn: async () => {
-            const res = await fetch(`${LARAVEL_API_URL}/categories?type=product&per_page=100`);
+            const res = await fetch(`${LARAVEL_API_URL}/categories?type=product&tree=1&per_page=100`);
             const data = await res.json();
-            return data.data || data || [];
+            const tree = data.data || data || [];
+            return flattenCategoryTree(tree);
         },
         staleTime: 5 * 60 * 1000,
     });
@@ -106,6 +122,7 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit }:
 
     useEffect(() => {
         if (isOpen) {
+            setSelectedFile(null);
             if (productToEdit) {
                 setFormData(productToEdit);
                 setPreviewImage(productToEdit.image);
@@ -184,10 +201,10 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit }:
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
+            setSelectedFile(file);
             const reader = new FileReader();
             reader.onloadend = () => {
                 setPreviewImage(reader.result as string);
-                setFormData(prev => ({ ...prev, image: reader.result as string }));
             };
             reader.readAsDataURL(file);
         }
@@ -290,7 +307,7 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit }:
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!formData.image) {
+        if (!selectedFile && !formData.image) {
             showToast('Es obligatorio adjuntar una foto del producto', 'error');
             return;
         }
@@ -323,7 +340,7 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit }:
             sticker,
             discountPercentage,
             etiquetas,
-        } as any);
+        } as any, selectedFile ?? undefined);
         onClose();
     };
 
@@ -419,11 +436,14 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit }:
                                                 className="w-full bg-[var(--bg-card)] border-none focus:ring-0 font-bold text-[var(--text-primary)] p-0 outline-none cursor-pointer"
                                             >
                                                 <option value="">Seleccionar Categoría...</option>
-                                                {categories.map((cat) => (
-                                                    <option key={cat.id} value={cat.slug}>
-                                                        {cat.name}
-                                                    </option>
-                                                ))}
+                                                {categories.map((cat) => {
+                                                    const isParent = (cat.level || 0) < 2;
+                                                    return (
+                                                        <option key={cat.id} value={isParent ? '' : cat.slug} disabled={isParent}>
+                                                            {'\u00A0\u00A0'.repeat(cat.level || 0)}{isParent ? '-- ' : ''}{cat.name}
+                                                        </option>
+                                                    );
+                                                })}
                                             </select>
                                         </td>
                                     </tr>

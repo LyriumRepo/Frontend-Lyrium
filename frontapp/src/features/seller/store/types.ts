@@ -30,9 +30,11 @@ export interface ShopPolicies {
 
 export interface VisualIdentity {
     logo: string;
+    logoMarketplace: string;
     banner1: string;
     banner2?: string;
     gallery: string[];
+    adBanners: string[];
 }
 
 export interface Medal {
@@ -68,14 +70,46 @@ export interface TopMedal {
     created_at: string;
 }
 
+export interface PlanCapabilities {
+    max_products: number;
+    max_services: number;
+    max_specialists: number;
+    max_branches: number;
+    max_social_links: number;
+    max_gallery_images: number;
+    max_ad_banners: number;
+    layouts: number[];
+    can_bioblog: boolean;
+    can_export_csv: boolean;
+    can_export_excel: boolean;
+    can_export_pdf: boolean;
+    can_finance_charts: boolean;
+    can_google_calendar: boolean;
+    can_coupons: boolean;
+    can_api: boolean;
+    can_white_label: boolean;
+    can_market_analysis: boolean;
+    support_hours: number;
+    search_priority: string;
+    forum_topics_per_week: number;
+    bioblog_articles_per_month: number;
+    bioblog_videos_per_month: number;
+    bioblog_podcasts_per_month: number;
+    bioblog_shorts_per_month: number;
+    [key: string]: number | boolean | number[] | string;
+}
+
 export interface SubscriptionInfo {
     plan: {
+        id?: number;
         name: string;
         slug: string;
+        capabilities?: PlanCapabilities;
     };
     status: string;
     starts_at?: string;
     ends_at?: string;
+    is_active?: boolean;
 }
 
 export interface ShopConfig {
@@ -107,6 +141,7 @@ export interface ShopConfig {
     bank_secondary?: string;
     // Estatus fields
     subscription?: SubscriptionInfo;
+    plan_capabilities?: PlanCapabilities;
     rating?: number;
     totalSales?: number;
     totalOrders?: number;

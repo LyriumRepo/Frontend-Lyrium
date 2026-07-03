@@ -39,7 +39,7 @@ export function useSellerStore() {
                         returnPdf: '', 
                         privacyPdf: '' 
                     },
-                    visual: { logo: '', banner1: '', banner2: '', gallery: [] },
+                    visual: { logo: '', logoMarketplace: '', banner1: '', banner2: '', gallery: [], adBanners: [] },
                     layout: '1',
                     medals: []
                 };
@@ -85,13 +85,18 @@ export function useSellerStore() {
                 },
                 visual: { 
                     logo: (storeData as any).logo || '', 
+                    logoMarketplace: (storeData as any).logo_marketplace || '', 
                     banner1: (storeData as any).banner || '', 
                     banner2: (storeData as any).banner2 || '',
-                    gallery: Array.isArray((storeData as any).gallery) ? (storeData as any).gallery : [] 
+                    gallery: Array.isArray((storeData as any).gallery) ? (storeData as any).gallery : [],
+                    adBanners: Array.isArray((storeData as any).ad_banners) 
+                        ? (storeData as any).ad_banners.map((b: any) => (typeof b === 'string' ? b : (b?.url || '').trim())).filter(Boolean)
+                        : [],
                 },
                 layout: ((storeData as any).layout as '1' | '2' | '3') || '1',
                 medals: [],
                 subscription: (storeData as any).subscription,
+                plan_capabilities: (storeData as any).plan_capabilities,
                 rating: (storeData as any).rating,
                 totalSales: (storeData as any).totalSales,
                 totalOrders: (storeData as any).totalOrders,
@@ -201,6 +206,18 @@ export function useSellerStore() {
         },
     });
 
+    const uploadLogoMarketplaceMutation = useMutation({
+        mutationFn: async (file: File) => {
+            if (!storeId) throw new Error('No store ID');
+            
+            if (USE_MOCKS) {
+                return { url: URL.createObjectURL(file) };
+            }
+
+            return sellerApi.uploadLogoMarketplace(storeId, file);
+        },
+    });
+
     const uploadBannerMutation = useMutation({
         mutationFn: async ({ file, bannerNumber }: { file: File; bannerNumber: 1 | 2 }) => {
             if (!storeId) throw new Error('No store ID');
@@ -241,10 +258,49 @@ export function useSellerStore() {
         }
     });
 
+    const uploadAdBannerMutation = useMutation({
+        mutationFn: async (file: File) => {
+            if (!storeId) throw new Error('No store ID');
+
+            if (USE_MOCKS) {
+                return { url: URL.createObjectURL(file), id: Date.now() };
+            }
+
+            return sellerApi.uploadAdBanner(storeId, file);
+        },
+        onError: () => {},
+    });
+
+    const deleteAdBannerMutation = useMutation({
+        mutationFn: async (mediaId: number) => {
+            if (!storeId) throw new Error('No store ID');
+
+            if (USE_MOCKS) {
+                return;
+            }
+
+            await sellerApi.deleteAdBanner(storeId, mediaId);
+        },
+    });
+
+    const deleteBannerMutation = useMutation({
+        mutationFn: async (bannerNumber: 1 | 2) => {
+            if (!storeId) throw new Error('No store ID');
+
+            if (USE_MOCKS) {
+                return { bannerNumber };
+            }
+
+            await sellerApi.deleteBanner(storeId, bannerNumber);
+            return { bannerNumber };
+        },
+    });
+
     const updateVisualMutation = useMutation({
         mutationFn: async (payload: {
             layout?: string;
             logo?: string;
+            logo_marketplace?: string;
             banner?: string;
             banner_secondary?: string;
             gallery?: string[];
@@ -268,6 +324,7 @@ export function useSellerStore() {
                         visual: {
                             ...old.config.visual,
                             logo: variables.logo || old.config.visual.logo,
+                            logoMarketplace: variables.logo_marketplace || old.config.visual.logoMarketplace,
                             banner1: variables.banner || old.config.visual.banner1,
                             banner2: variables.banner_secondary || old.config.visual.banner2,
                             gallery: variables.gallery || old.config.visual.gallery,
@@ -417,7 +474,7 @@ export function useSellerStore() {
         loading: isLoading,
         saving: updateStoreMutation.isPending,
         uploadingPolicy: uploadPolicyMutation.isPending,
-        uploadingImage: uploadLogoMutation.isPending || uploadBannerMutation.isPending || uploadGalleryMutation.isPending,
+        uploadingImage: uploadLogoMutation.isPending || uploadLogoMarketplaceMutation.isPending || uploadBannerMutation.isPending || uploadGalleryMutation.isPending || uploadAdBannerMutation.isPending,
         error,
         storeId,
         handleUpdateConfig,
@@ -431,6 +488,10 @@ export function useSellerStore() {
             if (!storeId) throw new Error('Tienda no cargada. Por favor espera.');
             return uploadLogoMutation.mutateAsync(file);
         },
+        uploadLogoMarketplace: (file: File) => {
+            if (!storeId) throw new Error('Tienda no cargada. Por favor espera.');
+            return uploadLogoMarketplaceMutation.mutateAsync(file);
+        },
         uploadBanner: (file: File, bannerNumber: 1 | 2) => {
             if (!storeId) throw new Error('Tienda no cargada. Por favor espera.');
             return uploadBannerMutation.mutateAsync({ file, bannerNumber });
@@ -443,9 +504,22 @@ export function useSellerStore() {
             if (!storeId) throw new Error('Tienda no cargada. Por favor espera.');
             return deleteGalleryMutation.mutateAsync({ index, mediaId });
         },
+        uploadAdBanner: (file: File) => {
+            if (!storeId) throw new Error('Tienda no cargada. Por favor espera.');
+            return uploadAdBannerMutation.mutateAsync(file);
+        },
+        deleteAdBanner: (mediaId: number) => {
+            if (!storeId) throw new Error('Tienda no cargada. Por favor espera.');
+            return deleteAdBannerMutation.mutateAsync(mediaId);
+        },
+        deleteBanner: (bannerNumber: 1 | 2) => {
+            if (!storeId) throw new Error('Tienda no cargada. Por favor espera.');
+            return deleteBannerMutation.mutateAsync(bannerNumber);
+        },
         updateVisual: (payload: {
             layout?: '1' | '2' | '3';
             logo?: string;
+            logo_marketplace?: string;
             banner?: string;
             banner_secondary?: string;
             gallery?: string[];

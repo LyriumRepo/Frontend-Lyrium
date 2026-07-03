@@ -165,6 +165,7 @@ export function mapServiceToLocal(service: any): Producto | null {
     vendedor: service.store_name
       ? { slug: service.store?.slug ?? '', nombre: service.store_name }
       : undefined,
+    store_logo_marketplace: service.store_logo_marketplace ?? undefined,
     tipo: 'service',
     duration_minutes: service.duration_minutes,
   };
@@ -202,6 +203,7 @@ export function mapCatalogProductToLocal(product: any): Producto {
           nombre: product.store.name,
         }
       : undefined,
+    store_logo_marketplace: product.store?.logo_marketplace ?? undefined,
     tipo: 'product',
   };
 }
