@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useEcho } from '@laravel/echo-react';
 import { useAuth } from '@/shared/lib/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import Icon from '@/components/ui/Icon';
 import { Eye, Info } from "lucide-react";
 import { orderApi, OrderResource } from '@/shared/lib/api/orderRepository';
-import { BaseDatePicker } from '@/components/ui';
+import { BaseDatePicker } from '@/components/UI';
 import ClientRescheduleModal, { SelectedSpecialist } from './ClientRescheduleModal';
 
 // ─── Tipos ───────────────────────────────────────────────────────────────────
@@ -650,6 +650,46 @@ async function downloadBoletaCompra(order: Order): Promise<void> {
   win.document.close();
 }
 
+// ── CustomSelect ──────────────────────────────────────────────────────────────
+interface CSelectOption { value: string; label: string }
+function CustomSelect({ value, onChange, options, disabled = false }: {
+  value: string; onChange: (v: string) => void;
+  options: CSelectOption[]; disabled?: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const selected = options.find(o => o.value === value);
+  useEffect(() => {
+    const h = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
+    if (open) document.addEventListener('mousedown', h);
+    return () => document.removeEventListener('mousedown', h);
+  }, [open]);
+  return (
+    <div ref={ref} className={`relative${disabled ? ' opacity-50 pointer-events-none' : ''}`}>
+      <button type="button" onClick={() => !disabled && setOpen(v => !v)}
+        className="w-full flex items-center justify-between p-3 text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-white dark:bg-[var(--bg-secondary)] border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-2xl outline-none hover:border-sky-400 dark:hover:border-[var(--brand-green)] focus:border-sky-500 dark:focus:border-[var(--brand-green)] cursor-pointer transition-all duration-300">
+        <span className="truncate">{selected?.label ?? options[0]?.label ?? ''}</span>
+        <svg className={`w-4 h-4 shrink-0 text-gray-400 transition-transform duration-200${open ? ' rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      {open && (
+        <div className="absolute top-[calc(100%+4px)] left-0 right-0 bg-white dark:bg-[var(--bg-secondary)] rounded-2xl border-2 border-gray-200 dark:border-[var(--border-subtle)] shadow-2xl z-50 overflow-hidden">
+          <div className="max-h-52 overflow-y-auto scrollbar-none">
+            {options.map(opt => (
+              <button key={opt.value} type="button"
+                onClick={() => { onChange(opt.value); setOpen(false); }}
+                className={`w-full text-left px-4 py-2.5 text-sm transition-colors hover:bg-sky-50 dark:hover:bg-[#1e2d28] ${opt.value === value ? 'font-bold text-sky-600 dark:text-[var(--brand-green)] bg-sky-50/60 dark:bg-[#1e2d28]' : 'font-medium text-gray-700 dark:text-[var(--text-primary)]'}`}>
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Página principal ─────────────────────────────────────────────────────────
 
 export default function CustomerOrdersPage() {
@@ -838,8 +878,6 @@ export default function CustomerOrdersPage() {
     );
   }
 
-  const selectClass =
-    'w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-white dark:bg-[var(--bg-secondary)] p-3 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 dark:focus:border-[var(--brand-green)] focus:ring-2 focus:ring-sky-100 transition-all duration-300 cursor-pointer';
   const shippingOptions =
     filters.categoria === 'productos'
       ? [
@@ -890,7 +928,7 @@ export default function CustomerOrdersPage() {
         </p>
       </div>
 
-      <div className="bg-white dark:bg-[var(--bg-secondary)] p-8 rounded-[2.5rem] shadow-xl border border-slate-100 dark:border-[var(--border-subtle)]">
+      <div className="bg-white dark:bg-[var(--bg-secondary)] p-5 md:p-8 rounded-[2.5rem] shadow-xl border border-slate-100 dark:border-[var(--border-subtle)]">
         <div className="flex items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-gradient-to-br from-sky-400 to-sky-600 dark:from-[var(--brand-green)] dark:to-[#1A3A32] rounded-2xl flex items-center justify-center shadow-lg">
@@ -916,20 +954,20 @@ export default function CustomerOrdersPage() {
             <label className="text-[10px] font-black text-gray-400 dark:text-gray-300 uppercase tracking-widest ml-1">
               Tienda
             </label>
-            <select
+            <CustomSelect
               value={filters.empresa}
-              onChange={(e) => setFilters({ ...filters, empresa: e.target.value })}
-              className={selectClass}
-            >
-              <option value="">Todos</option>
-              <option value="Vida Natural Perú">Vida Natural Perú</option>
-              <option value="Tech Store Lima">Tech Store Lima</option>
-              <option value="Moda & Estilo">Moda & Estilo</option>
-              <option value="Clínica Dental Pro">Clínica Dental Pro</option>
-              <option value="Centro Estético Lyra">Centro Estético Lyra</option>
-              <option value="Centro Médico Sur">Centro Médico Sur</option>
-              <option value="Fisioterapia Plus">Fisioterapia Plus</option>
-            </select>
+              onChange={(v) => setFilters({ ...filters, empresa: v })}
+              options={[
+                { value: '', label: 'Todos' },
+                { value: 'Vida Natural Perú',    label: 'Vida Natural Perú' },
+                { value: 'Tech Store Lima',       label: 'Tech Store Lima' },
+                { value: 'Moda & Estilo',         label: 'Moda & Estilo' },
+                { value: 'Clínica Dental Pro',    label: 'Clínica Dental Pro' },
+                { value: 'Centro Estético Lyra',  label: 'Centro Estético Lyra' },
+                { value: 'Centro Médico Sur',     label: 'Centro Médico Sur' },
+                { value: 'Fisioterapia Plus',     label: 'Fisioterapia Plus' },
+              ]}
+            />
           </div>
 
           <BaseDatePicker
@@ -950,45 +988,29 @@ export default function CustomerOrdersPage() {
             <label className="text-[10px] font-black text-gray-400 dark:text-gray-300 uppercase tracking-widest ml-1">
               Tipo de envío
             </label>
-            <select
+            <CustomSelect
               value={filters.tipo_envio}
-              onChange={(e) =>
-                setFilters({
-                  ...filters,
-                  tipo_envio: e.target.value,
-                  estado: '',
-                })
-              }
-              className={selectClass}
-            >
-              <option value="">Todos</option>
-              {shippingOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+              onChange={(v) => setFilters({ ...filters, tipo_envio: v, estado: '' })}
+              options={[
+                { value: '', label: 'Todos' },
+                ...shippingOptions.map(o => ({ value: o.value, label: o.label })),
+              ]}
+            />
           </div>
 
           <div className="space-y-2">
             <label className="text-[10px] font-black text-gray-400 dark:text-gray-300 uppercase tracking-widest ml-1">
               Estado
             </label>
-            <select
+            <CustomSelect
               disabled={!filters.tipo_envio}
               value={filters.estado}
-              onChange={(e) => setFilters({ ...filters, estado: e.target.value })}
-              className={`${selectClass} ${!filters.tipo_envio ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-              <option value="">
-                {!filters.tipo_envio ? 'Seleccione un tipo de envío' : 'Todos los estados'}
-              </option>
-              {selectedStatusOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+              onChange={(v) => setFilters({ ...filters, estado: v })}
+              options={[
+                { value: '', label: !filters.tipo_envio ? 'Seleccione tipo de envío' : 'Todos los estados' },
+                ...selectedStatusOptions.map(o => ({ value: o.value, label: o.label })),
+              ]}
+            />
           </div>
         </div>
 
@@ -996,7 +1018,7 @@ export default function CustomerOrdersPage() {
       </div>
 
       <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-[2.5rem] shadow-xl border border-slate-100 dark:border-[var(--border-subtle)] overflow-hidden">
-        <div className="bg-gradient-to-r from-sky-400 to-sky-500 dark:from-[var(--brand-green)] dark:to-[#1A3A32] p-8 flex items-center justify-between relative overflow-hidden">
+        <div className="bg-gradient-to-r from-sky-400 to-sky-500 dark:from-[var(--brand-green)] dark:to-[#1A3A32] p-6 md:p-8 flex items-center justify-between relative overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl" />
           <div className="flex items-center gap-5 text-white relative z-10">
             <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-inner">
@@ -1004,7 +1026,7 @@ export default function CustomerOrdersPage() {
             </div>
             <div>
               <h3 className="text-2xl font-black tracking-tighter leading-none">Mis Pedidos</h3>
-              <p className="text-[10px] font-bold text-sky-100 uppercase tracking-[0.2em] mt-1">Historial Completo</p>
+              <p className="text-[10px] font-bold text-sky-100 uppercase tracking-wide mt-1">Historial Completo</p>
             </div>
           </div>
 
@@ -1013,29 +1035,30 @@ export default function CustomerOrdersPage() {
               {filteredOrders.length} Pedidos
             </span>
 
-            <select
-              value={filters.categoria}
-              onChange={(e) =>
-                setFilters({
-                  ...filters,
-                  categoria: e.target.value as 'productos' | 'servicios',
-                  tipo_envio: '',
-                  estado: '',
-                })
-              }
-              className="bg-white/10 backdrop-blur-md border border-white/20 text-white text-[10px] font-black uppercase tracking-widest rounded-xl px-4 py-2 outline-none"
-            >
-              <option value="productos" className="text-black">
-                Productos
-              </option>
-              <option value="servicios" className="text-black">
-                Servicios
-              </option>
-            </select>
+            <div className="relative">
+              <select
+                value={filters.categoria}
+                onChange={(e) =>
+                  setFilters({
+                    ...filters,
+                    categoria: e.target.value as 'productos' | 'servicios',
+                    tipo_envio: '',
+                    estado: '',
+                  })
+                }
+                className="bg-white/10 backdrop-blur-md border border-white/20 text-white text-[10px] font-black uppercase tracking-widest rounded-xl pl-4 pr-8 py-2 outline-none appearance-none cursor-pointer"
+              >
+                <option value="productos" className="text-black bg-white">Productos</option>
+                <option value="servicios" className="text-black bg-white">Servicios</option>
+              </select>
+              <svg className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-white pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
           </div>
         </div>
 
-        <div className="p-8 overflow-x-auto">
+        <div className="p-4 xl:p-8 xl:overflow-x-auto">
           {filteredOrders.length === 0 ? (
             <div className="text-center py-16">
               <div className="w-24 h-24 bg-gray-100 dark:bg-[var(--bg-muted)] rounded-full flex items-center justify-center mx-auto mb-4">
@@ -1047,13 +1070,24 @@ export default function CustomerOrdersPage() {
               <p className="text-sm text-gray-500 dark:text-[var(--text-muted)]">Intenta ajustar los filtros de búsqueda</p>
             </div>
           ) : (
-            <table className="w-full">
+            <>
+            <table className="w-full hidden xl:table">
               <thead>
                 <tr className="border-b-2 border-gray-100 dark:border-[var(--border-subtle)]">
-                  {['ID Pedido', 'Fecha', 'Hora', 'Tienda', 'Detalle', 'Total', 'Tipo Envío', 'Estado', 'Acciones'].map((h) => (
+                  {([
+                    { h: 'ID Pedido',   cls: 'min-w-[200px]' },
+                    { h: 'Fecha',       cls: 'min-w-[90px]' },
+                    { h: 'Hora',        cls: 'min-w-[65px]' },
+                    { h: 'Tienda',      cls: 'min-w-[130px]' },
+                    { h: 'Detalle',     cls: 'min-w-[110px]' },
+                    { h: 'Total',       cls: 'min-w-[80px]' },
+                    { h: 'Tipo Envío',  cls: 'min-w-[120px]' },
+                    { h: 'Estado',      cls: 'min-w-[140px]' },
+                    { h: 'Acciones',    cls: 'min-w-[70px] text-center' },
+                  ] as { h: string; cls: string }[]).map(({ h, cls }) => (
                     <th
                       key={h}
-                      className="text-left py-4 px-4 text-[10px] font-black text-gray-400 dark:text-gray-300 uppercase tracking-widest"
+                      className={`text-left py-4 px-4 text-[10px] font-black text-gray-400 dark:text-gray-300 uppercase tracking-widest ${cls}`}
                     >
                       {h}
                     </th>
@@ -1074,8 +1108,8 @@ export default function CustomerOrdersPage() {
                       <td className="py-4 px-4 font-bold text-gray-700 dark:text-[var(--text-primary)]">{order.hora}</td>
                       <td className="py-4 px-4 font-bold text-gray-800 dark:text-[var(--text-primary)]">
                         {order.tienda.length > 5 ? (
-                          <div className="relative group w-[50px]">
-                            <span className="block truncate whitespace-nowrap overflow-hidden text-ellipsis">{order.tienda}</span>
+                          <div className="relative group max-w-[150px] min-w-0">
+                            <span className="block truncate">{order.tienda}</span>
                             <div className="pointer-events-none absolute left-1/2 top-full z-50 mt-2 hidden -translate-x-1/2 whitespace-nowrap rounded-xl bg-black px-3 py-2 text-xs font-bold text-white shadow-lg group-hover:block">
                               {order.tienda}
                               <div className="absolute -top-1 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 bg-black" />
@@ -1087,8 +1121,8 @@ export default function CustomerOrdersPage() {
                       </td>
                       <td className="py-4 px-4 font-bold text-gray-600 dark:text-[var(--text-muted)]">
                         {order.detalle.length > 5 ? (
-                          <div className="relative group w-[50px]">
-                            <span className="block truncate whitespace-nowrap overflow-hidden text-ellipsis">{order.detalle}</span>
+                          <div className="relative group max-w-[130px] min-w-0">
+                            <span className="block truncate">{order.detalle}</span>
                             <div className="pointer-events-none absolute left-1/2 top-full z-50 mt-2 hidden -translate-x-1/2 whitespace-nowrap rounded-xl bg-black px-3 py-2 text-xs font-bold text-white shadow-lg group-hover:block">
                               {order.detalle}
                               <div className="absolute -top-1 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 bg-black" />
@@ -1098,7 +1132,7 @@ export default function CustomerOrdersPage() {
                           <span>{order.detalle}</span>
                         )}
                       </td>
-                      <td className="py-4 px-4 font-bold text-gray-900 dark:text-[var(--text-primary)]">{order.total}</td>
+                      <td className="py-4 px-4 font-bold text-gray-900 dark:text-[var(--text-primary)] whitespace-nowrap">{order.total}</td>
                       <td className="py-4 px-4">
                         {tipoConfig ? (() => {
                           const servicio = tipoConfig.label
@@ -1106,7 +1140,7 @@ export default function CustomerOrdersPage() {
                             .replace('Recojo en ', '');
 
                           return servicio.length > 10 ? (
-                            <div className="relative group w-[90px]">
+                            <div className="relative group max-w-[130px] min-w-0">
                               <span className={`flex items-center gap-1 px-2 py-1 rounded-xl text-[9px] font-black uppercase border ${tipoConfig.accent} block truncate whitespace-nowrap overflow-hidden text-ellipsis`}>
                                 <Icon name={tipoConfig.icon as any} className="w-3 h-3 shrink-0" />
                                 <span className="truncate">{servicio}</span>
@@ -1129,7 +1163,7 @@ export default function CustomerOrdersPage() {
                       </td>
                       <td className="py-4 px-4">
                         {order.estadoLabel.length > 5 ? (
-                          <div className="relative group w-[90px]">
+                          <div className="relative group max-w-[140px] min-w-0">
                             <span className={`flex items-center gap-1 block truncate whitespace-nowrap overflow-hidden text-ellipsis px-2 py-1 rounded-full ${statusStyles.bg} ${statusStyles.text} text-[10px] font-black uppercase tracking-wider`}>
                               <Icon name={statusStyles.icon as any} className="w-3 h-3 shrink-0" />
                               <span className="block truncate">{order.estadoLabel}</span>
@@ -1163,17 +1197,76 @@ export default function CustomerOrdersPage() {
                 })}
               </tbody>
             </table>
+
+            {/* Vista de cards — mobile (< md) */}
+            <div className="xl:hidden space-y-3">
+              {filteredOrders.map((order) => {
+                const statusStyles = getStatusStyles(order.estado);
+                const tipoConfig = order.tipo_envio ? FLOW_CONFIG[order.tipo_envio] : null;
+                const servicio = tipoConfig
+                  ? tipoConfig.label.replace('Entrega a ', '').replace('Recojo en ', '')
+                  : null;
+
+                return (
+                  <button
+                    key={order.id}
+                    type="button"
+                    onClick={() => openDetails(order)}
+                    className="w-full text-left p-4 rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] hover:bg-gray-50 dark:hover:bg-[#182420] active:bg-gray-100 dark:active:bg-[#182420] transition-colors"
+                  >
+                    <div className="flex items-start justify-between gap-3 mb-2">
+                      <div className="min-w-0">
+                        <span className="text-sm font-black text-sky-600 dark:text-[var(--icons-green)] block">
+                          {order.id}
+                        </span>
+                        <span className="text-xs font-bold text-gray-500 dark:text-[var(--text-muted)]">
+                          {order.fecha} · {order.hora}
+                        </span>
+                      </div>
+                      <span className="text-sm font-black text-gray-900 dark:text-[var(--text-primary)] shrink-0">
+                        {order.total}
+                      </span>
+                    </div>
+
+                    <div className="text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] break-words leading-snug mb-0.5">
+                      {order.tienda}
+                    </div>
+                    <div className="text-xs font-medium text-gray-500 dark:text-[var(--text-muted)] line-clamp-2 mb-3">
+                      {order.detalle}
+                    </div>
+
+                    <div className="flex items-center flex-wrap gap-2">
+                      {servicio && tipoConfig && (
+                        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-xl text-[9px] font-black uppercase border ${tipoConfig.accent}`}>
+                          <Icon name={tipoConfig.icon as any} className="w-3 h-3" />
+                          {servicio}
+                        </span>
+                      )}
+                      <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full ${statusStyles.bg} ${statusStyles.text} text-[10px] font-black uppercase tracking-wider`}>
+                        <Icon name={statusStyles.icon as any} className="w-3 h-3" />
+                        {order.estadoLabel}
+                      </span>
+                      <span className="ml-auto inline-flex items-center gap-1 text-[10px] font-black uppercase text-sky-600 dark:text-[var(--icons-green)]">
+                        Ver
+                        <Eye className="w-3.5 h-3.5" />
+                      </span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+            </>
           )}
         </div>
       </div>
 
       {showLegendModal && (
         <div
-          className="fixed inset-0 bg-black/40 backdrop-blur-xl z-50 flex justify-center items-center p-4 lg:p-6 animate-fadeIn"
+          className="fixed inset-0 bg-black/30 backdrop-blur-sm z-[70] flex items-end sm:items-center justify-center sm:px-4 sm:pt-20 sm:pb-4 lg:px-6 lg:pt-20 lg:pb-6 animate-fadeIn"
           onClick={() => setShowLegendModal(false)}
         >
           <div
-            className="bg-white dark:bg-[var(--bg-secondary)] w-full max-w-4xl max-h-[90vh] rounded-[2.5rem] overflow-hidden shadow-[-40px_0_100px_rgba(0,0,0,0.1)] border border-white/20 relative flex flex-col"
+            className="bg-white dark:bg-[var(--bg-secondary)] w-full max-w-4xl max-h-[90dvh] sm:max-h-[calc(100dvh-6rem)] rounded-t-[2rem] sm:rounded-[2.5rem] overflow-hidden shadow-[-40px_0_100px_rgba(0,0,0,0.1)] border border-white/20 relative flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="bg-gradient-to-r from-sky-500 via-sky-500 to-sky-300 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-6 text-white relative flex-shrink-0">
@@ -1185,7 +1278,7 @@ export default function CustomerOrdersPage() {
                   </div>
                   <div>
                     <h3 className="text-xl font-black tracking-tighter leading-none">Leyenda</h3>
-                    <p className="text-[9px] font-bold text-sky-100 uppercase tracking-[0.2em] mt-1">
+                    <p className="text-[9px] font-bold text-sky-100 uppercase tracking-wide mt-1">
                       Tipos de envío y estados
                     </p>
                   </div>
@@ -1200,7 +1293,7 @@ export default function CustomerOrdersPage() {
               </div>
             </div>
 
-            <div className="p-6 lg:p-8 overflow-y-auto space-y-8">
+            <div className="p-6 lg:p-8 overflow-y-auto scrollbar-none space-y-8">
               <section className="space-y-4">
                 <h4 className="text-sm font-black text-gray-800 dark:text-[var(--text-primary)] uppercase tracking-widest">
                   Tipo de envíos para productos
@@ -1311,11 +1404,11 @@ export default function CustomerOrdersPage() {
       
       {showModal && selectedOrder && (
         <div
-          className="fixed inset-0 bg-black/40 backdrop-blur-xl z-50 flex justify-center items-center p-4 lg:p-6 animate-fadeIn"
+          className="fixed inset-0 bg-black/30 backdrop-blur-sm z-[70] flex items-end sm:items-center justify-center sm:px-4 sm:pt-20 sm:pb-4 lg:px-6 lg:pt-20 lg:pb-6 animate-fadeIn"
           onClick={closeModal}
         >
           <div
-            className="bg-white dark:bg-[var(--bg-secondary)] w-full lg:w-[700px] h-full rounded-[2.5rem] overflow-hidden shadow-[-40px_0_100px_rgba(0,0,0,0.1)] border border-white/20 relative flex flex-col transition-all duration-700"
+            className="bg-white dark:bg-[var(--bg-secondary)] w-full max-w-[700px] max-h-[90dvh] sm:max-h-[calc(100dvh-6rem)] rounded-t-[2rem] sm:rounded-[2.5rem] overflow-hidden shadow-[-40px_0_100px_rgba(0,0,0,0.1)] border border-white/20 relative flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="bg-gradient-to-r from-sky-500 via-sky-500 to-sky-300 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-6 text-white relative flex-shrink-0">
@@ -1327,7 +1420,7 @@ export default function CustomerOrdersPage() {
                   </div>
                   <div>
                     <h3 className="text-xl font-black tracking-tighter leading-none">Detalles del Pedido</h3>
-                    <p className="text-[9px] font-bold text-sky-100 uppercase tracking-[0.2em] mt-1">Información detallada</p>
+                    <p className="text-[9px] font-bold text-sky-100 uppercase tracking-wide mt-1">Información detallada</p>
                   </div>
                 </div>
                 <button
@@ -1339,8 +1432,8 @@ export default function CustomerOrdersPage() {
               </div>
             </div>
 
-            <div className="p-6 lg:p-8 space-y-6 overflow-y-auto flex-1">
-              <div className="p-8 bg-sky-50 dark:bg-[var(--bg-muted)]/50 rounded-[2.5rem] border border-sky-100/50 flex flex-col md:flex-row items-center gap-6">
+            <div className="p-6 lg:p-8 space-y-6 overflow-y-auto scrollbar-none flex-1">
+              <div className="p-5 md:p-8 bg-sky-50 dark:bg-[var(--bg-muted)]/50 rounded-[2.5rem] border border-sky-100/50 flex flex-col md:flex-row items-center gap-6">
                 <div className="w-20 h-20 bg-white dark:bg-[var(--bg-secondary)] rounded-[1.5rem] flex items-center justify-center shadow-lg border border-sky-50">
                   <Icon name="Store" className="w-10 h-10 text-sky-600 dark:text-[var(--icons-green)]" />
                 </div>
@@ -1438,7 +1531,7 @@ export default function CustomerOrdersPage() {
                   <h5 className="text-xs font-black text-gray-400 dark:text-gray-400 uppercase tracking-widest">Resumen de Pago</h5>
                   <div className="h-px flex-1 mx-4 bg-gray-100 dark:bg-[var(--border-subtle)]" />
                 </div>
-                <div className="p-8 bg-white dark:bg-[var(--bg-secondary)] rounded-[3rem] border border-gray-100 dark:border-[var(--border-subtle)] shadow-xl space-y-5">
+                <div className="p-5 md:p-8 bg-white dark:bg-[var(--bg-secondary)] rounded-[3rem] border border-gray-100 dark:border-[var(--border-subtle)] shadow-xl space-y-5">
                   <div className="flex justify-between items-center p-3 rounded-2xl hover:bg-gray-50 dark:hover:bg-[#182420] transition-colors">
                     <div className="flex items-center gap-4">
                       <div className="w-10 h-10 bg-sky-50 dark:bg-[var(--bg-muted)] rounded-xl flex items-center justify-center text-sky-500 dark:text-[var(--icons-green)]">
@@ -1454,7 +1547,7 @@ export default function CustomerOrdersPage() {
                   <div className="pt-6 border-t border-dashed border-gray-200 dark:border-[var(--border-subtle)]">
                     <div className="bg-gradient-to-br from-slate-900 to-gray-900 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-5 rounded-[2.5rem] flex items-center justify-between text-white shadow-2xl">
                       <div>
-                        <p className="text-[10px] font-bold text-sky-300 dark:text-[var(--icons-green)] uppercase tracking-[0.3em] mb-1">Monto Total Final</p>
+                        <p className="text-[10px] font-bold text-sky-300 dark:text-[var(--icons-green)] uppercase tracking-wide mb-1">Monto Total Final</p>
                         <h6 className="text-3xl font-black tracking-tighter">{selectedOrder.total}</h6>
                       </div>
                       <div className="w-16 h-16 bg-white/10 backdrop-blur-md rounded-[1.5rem] flex items-center justify-center border border-white/20">
@@ -1468,10 +1561,12 @@ export default function CustomerOrdersPage() {
               {selectedOrder.estado !== 'cancelado' && (
                 <button
                   onClick={() => downloadBoletaCompra(selectedOrder)}
-                  className="w-full py-5 rounded-2xl bg-gradient-to-r from-amber-400 to-orange-500 dark:from-[var(--brand-green)] dark:to-[var(--brand-green-hover)] text-white font-black text-xs uppercase tracking-[0.2em] hover:shadow-lg hover:shadow-amber-200 dark:hover:shadow-[var(--brand-green)]/30 transition-all flex items-center justify-center gap-3"
+                  className="w-full py-4 rounded-2xl bg-gradient-to-r from-amber-400 to-orange-500 dark:from-[var(--brand-green)] dark:to-[var(--brand-green-hover)] text-white font-black text-xs uppercase tracking-wider hover:shadow-lg hover:shadow-amber-200 dark:hover:shadow-[var(--brand-green)]/30 transition-all flex items-center justify-center"
                 >
-                  <Icon name="Download" className="w-5 h-5" />
-                  Descargar Boleta de Compra
+                  <span className="inline-flex items-center justify-center gap-2">
+                    <Icon name="Download" className="w-4 h-4 shrink-0" />
+                    Descargar Boleta de Compra
+                  </span>
                 </button>
               )}
 
@@ -1484,10 +1579,12 @@ export default function CustomerOrdersPage() {
                     console.error('Error al solicitar comprobante:', err);
                   }
                 }}
-                className="w-full py-5 rounded-2xl bg-gradient-to-r from-amber-400 to-orange-500 dark:from-[var(--brand-green)] dark:to-[var(--brand-green-hover)] text-white font-black text-xs uppercase tracking-[0.2em] hover:shadow-lg hover:shadow-amber-200 transition-all flex items-center justify-center gap-3"
+                className="w-full py-4 rounded-2xl bg-gradient-to-r from-amber-400 to-orange-500 dark:from-[var(--brand-green)] dark:to-[var(--brand-green-hover)] text-white font-black text-xs uppercase tracking-wider hover:shadow-lg hover:shadow-amber-200 transition-all flex items-center justify-center"
               >
-                <Icon name="MessageCircle" className="w-5 h-5" />
-                Pedir Comprobante al Vendedor
+                <span className="inline-flex items-center justify-center gap-2">
+                  <Icon name="MessageCircle" className="w-4 h-4 shrink-0" />
+                  Pedir Comprobante al Vendedor
+                </span>
               </button>
             </div>
           </div>

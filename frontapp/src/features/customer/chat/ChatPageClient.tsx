@@ -3,8 +3,8 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useCustomerChat } from '@/features/customer/chat/hooks/useCustomerChat';
 import { useAuth } from '@/shared/lib/context/AuthContext';
-import ModuleHeader from '@/components/layout/shared/ModuleHeader';
-import ChatLayout from '@/components/shared/chat/ChatLayout';
+import CustomerModuleHeader from '@/components/layout/customer/CustomerModuleHeader';
+import CustomerChatLayout from '@/components/layout/customer/CustomerChatLayout';
 import MessageBubble from '@/components/shared/chat/MessageBubble';
 import MessageInput from '@/components/shared/chat/MessageInput';
 import ConversationList from '@/components/shared/chat/ConversationList';
@@ -14,6 +14,44 @@ import { ChatCategory } from '@/features/customer/chat/types';
 import type { ChatSeller } from '@/shared/lib/api/chatRepository';
 import type { Message as BubbleMessage } from '@/components/shared/chat/MessageBubble';
 import type { Conversation } from '@/components/shared/chat/ConversationList';
+
+// ── CustomSelect ──────────────────────────────────────────────────────────────
+interface SelectOption { value: string; label: string }
+function CustomSelect({ value, onChange, options, disabled = false }: {
+    value: string; onChange: (v: string) => void;
+    options: SelectOption[]; disabled?: boolean;
+}) {
+    const [open, setOpen] = React.useState(false);
+    const ref = React.useRef<HTMLDivElement>(null);
+    const selected = options.find(o => o.value === value);
+    React.useEffect(() => {
+        const h = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
+        if (open) document.addEventListener('mousedown', h);
+        return () => document.removeEventListener('mousedown', h);
+    }, [open]);
+    return (
+        <div ref={ref} className={`relative${disabled ? ' opacity-50 pointer-events-none' : ''}`}>
+            <button type="button" onClick={() => setOpen(v => !v)}
+                className="w-full flex items-center justify-between px-4 py-3 bg-[var(--bg-secondary)] rounded-2xl outline-none text-sm font-medium text-[var(--text-primary)] border-2 border-[var(--border-subtle)] hover:border-[var(--turquesa-500)] focus:border-[var(--turquesa-500)] cursor-pointer transition-all">
+                <span className="truncate">{selected?.label ?? options[0]?.label ?? ''}</span>
+                <svg className={`w-4 h-4 shrink-0 text-[var(--text-secondary)] transition-transform duration-200${open ? ' rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+            </button>
+            {open && (
+                <div className="absolute top-[calc(100%+4px)] left-0 right-0 bg-white dark:bg-[var(--bg-card)] rounded-2xl border-2 border-[var(--border-subtle)] shadow-2xl z-[60] overflow-hidden max-h-[126px] overflow-y-auto scrollbar-none">
+                    {options.map(opt => (
+                        <button key={opt.value} type="button"
+                            onClick={() => { onChange(opt.value); setOpen(false); }}
+                            className={`w-full text-left px-4 py-2.5 text-sm transition-colors hover:bg-[var(--turquesa-500)]/8 dark:hover:bg-[#1e2d28] ${opt.value === value ? 'font-bold text-[var(--turquesa-500)] bg-[var(--turquesa-500)]/5' : 'font-medium text-[var(--text-primary)]'}`}>
+                            {opt.label}
+                        </button>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+}
 
 function NewChatForm({
     onSubmit,
@@ -37,41 +75,35 @@ function NewChatForm({
     };
 
     return (
-        <div className="flex flex-col h-full bg-[var(--bg-card)] rounded-3xl border border-[var(--border-subtle)] shadow-sm overflow-hidden">
-            <div className="p-4 border-b border-[var(--border-subtle)]">
+        <div className="flex flex-col bg-[var(--bg-card)] rounded-3xl border border-[var(--border-subtle)] shadow-sm">
+            <div className="p-4 border-b border-[var(--border-subtle)] shrink-0 rounded-t-3xl overflow-hidden">
                 <h3 className="text-sm font-black uppercase tracking-wider text-[var(--text-primary)]">Nuevo Chat</h3>
                 <p className="text-xs text-[var(--text-secondary)] mt-1">Inicia una conversación con un vendedor</p>
             </div>
 
-            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-4">
+            <form onSubmit={handleSubmit} className="p-5 space-y-4">
                 <div>
                     <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-1.5">Vendedor</label>
-                    <select
+                    <CustomSelect
                         value={sellerId}
-                        onChange={(e) => setSellerId(e.target.value)}
-                        className="w-full px-4 py-2.5 bg-[var(--bg-secondary)] rounded-xl outline-none text-sm font-medium text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--turquesa-500)]/20 border border-[var(--border-subtle)]"
-                        required
-                    >
-                        {sellers.map(s => (
-                            <option key={s.id} value={s.id}>{s.store} — {s.name}</option>
-                        ))}
-                    </select>
+                        onChange={setSellerId}
+                        options={sellers.map(s => ({ value: String(s.id), label: `${s.store} — ${s.name}` }))}
+                    />
                 </div>
 
                 <div>
                     <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-1.5">Categoría</label>
-                    <select
+                    <CustomSelect
                         value={category}
-                        onChange={(e) => setCategory(e.target.value as ChatCategory)}
-                        className="w-full px-4 py-2.5 bg-[var(--bg-secondary)] rounded-xl outline-none text-sm font-medium text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--turquesa-500)]/20 border border-[var(--border-subtle)]"
-                        required
-                    >
-                        <option value="informacion">Solicitud de Información</option>
-                        <option value="positivo">Comentario Positivo</option>
-                        <option value="negativo">Comentario Negativo</option>
-                        <option value="logistica">Logística </option>
-                        <option value="facturacion">Soporte de Facturación </option>
-                    </select>
+                        onChange={(v) => setCategory(v as ChatCategory)}
+                        options={[
+                            { value: 'informacion', label: 'Solicitud de Información' },
+                            { value: 'positivo',    label: 'Comentario Positivo' },
+                            { value: 'negativo',    label: 'Comentario Negativo' },
+                            { value: 'logistica',   label: 'Logística' },
+                            { value: 'facturacion', label: 'Soporte de Facturación' },
+                        ]}
+                    />
                 </div>
 
                 <div>
@@ -81,23 +113,23 @@ function NewChatForm({
                         value={subject}
                         onChange={(e) => setSubject(e.target.value)}
                         placeholder="Describe brevemente el motivo"
-                        className="w-full px-4 py-2.5 bg-[var(--bg-secondary)] rounded-xl outline-none text-sm font-medium text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--turquesa-500)]/20 border border-[var(--border-subtle)]"
+                        className="w-full px-4 py-3 bg-[var(--bg-secondary)] rounded-2xl outline-none text-sm font-medium text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] border-2 border-[var(--border-subtle)] focus:border-[var(--turquesa-500)] transition-all"
                         required
                     />
                 </div>
 
-                <div className="flex gap-2 pt-4">
+                <div className="flex gap-2 pt-2">
                     <button
                         type="button"
                         onClick={onCancel}
-                        className="flex-1 px-4 py-2.5 bg-gray-200 dark:bg-[var(--bg-secondary)] text-gray-700 dark:text-[var(--text-secondary)] rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-gray-300 dark:hover:bg-[#2A3F33] transition-colors"
+                        className="flex-1 px-4 py-3 bg-gray-100 dark:bg-[var(--bg-secondary)] text-gray-700 dark:text-[var(--text-secondary)] rounded-2xl font-bold text-xs uppercase tracking-wider hover:bg-gray-200 dark:hover:bg-[#2A3F33] transition-colors"
                     >
                         Cancelar
                     </button>
                     <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="flex-1 px-4 py-2.5 bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--verde-500)] text-white rounded-xl font-bold text-xs uppercase tracking-wider hover:opacity-90 transition-all disabled:opacity-50 shadow-lg shadow-[var(--turquesa-500)]/20"
+                        className="flex-1 px-4 py-3 bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--verde-500)] text-white rounded-2xl font-bold text-xs uppercase tracking-wider hover:opacity-90 transition-all disabled:opacity-50 shadow-lg shadow-[var(--turquesa-500)]/20"
                     >
                         {isSubmitting ? 'Iniciando...' : 'Iniciar Chat'}
                     </button>
@@ -147,6 +179,10 @@ export function ChatPageClient({ conversationId }: { conversationId?: string }) 
         setIsMobileListVisible(false);
     }, [setActiveConversation]);
 
+    const handleBackToList = useCallback(() => {
+        setIsMobileListVisible(true);
+    }, []);
+
     const formatTime = (timestamp: string) => {
         const date = new Date(timestamp);
         return date.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
@@ -181,7 +217,7 @@ export function ChatPageClient({ conversationId }: { conversationId?: string }) 
     }));
 
     const listContent = (
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full min-h-0">
             <div className="p-4 border-b border-[var(--border-subtle)] shrink-0">
                 <div className="flex items-center justify-between">
                     <div>
@@ -239,18 +275,18 @@ export function ChatPageClient({ conversationId }: { conversationId?: string }) 
                                 className="w-full px-3 py-1.5 text-sm bg-[var(--bg-secondary)] rounded-xl outline-none text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--turquesa-500)]/20 border border-[var(--border-subtle)]"
                             />
                         ) : (
-                            <select
+                            <CustomSelect
                                 value={filterValue}
-                                onChange={(e) => setFilterValue(e.target.value)}
-                                className="w-full px-3 py-1.5 text-sm bg-[var(--bg-secondary)] rounded-xl outline-none text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--turquesa-500)]/20 border border-[var(--border-subtle)]"
-                            >
-                                <option value="">Todas las categorías</option>
-                                <option value="informacion">Solicitud de Información</option>
-                                <option value="positivo">Comentario Positivo</option>
-                                <option value="negativo">Comentario Negativo</option>
-                                <option value="logistica">Logística </option>
-                                <option value="facturacion">Soporte de Facturación</option>
-                            </select>
+                                onChange={setFilterValue}
+                                options={[
+                                    { value: '',           label: 'Todas las categorías' },
+                                    { value: 'informacion',label: 'Solicitud de Información' },
+                                    { value: 'positivo',   label: 'Comentario Positivo' },
+                                    { value: 'negativo',   label: 'Comentario Negativo' },
+                                    { value: 'logistica',  label: 'Logística' },
+                                    { value: 'facturacion',label: 'Soporte de Facturación' },
+                                ]}
+                            />
                         )}
                     </div>
                 )}
@@ -266,9 +302,16 @@ export function ChatPageClient({ conversationId }: { conversationId?: string }) 
     );
 
     const chatContent = activeConversation ? (
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full min-h-0">
             <div className="p-5 border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)]/50 shrink-0">
                 <div className="flex items-center gap-3">
+                    <button
+                        onClick={handleBackToList}
+                        className="md:hidden -ml-1 w-9 h-9 shrink-0 flex items-center justify-center rounded-full text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] transition-colors"
+                        aria-label="Volver a conversaciones"
+                    >
+                        <Icon name="ArrowLeft" className="w-5 h-5" />
+                    </button>
                     <div className="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-[var(--turquesa-500)] to-[var(--verde-500)] flex items-center justify-center text-white font-black text-sm shadow-sm">
                         {activeConversation.sellerName.charAt(0)}
                     </div>
@@ -317,8 +360,8 @@ export function ChatPageClient({ conversationId }: { conversationId?: string }) 
 
     if (isLoading) {
         return (
-            <div className="flex flex-col h-[calc(100vh-140px)] animate-fadeIn">
-                <ModuleHeader
+            <div className="flex flex-col h-[calc(100dvh-108px)] md:h-[calc(100vh-140px)] animate-fadeIn">
+                <CustomerModuleHeader
                     title="Chat con Vendedores"
                     subtitle="Comunicación directa con los vendedores"
                     icon="MessageSquare"
@@ -331,8 +374,8 @@ export function ChatPageClient({ conversationId }: { conversationId?: string }) 
     }
 
     return (
-        <div className="flex flex-col h-[calc(100vh-140px)] animate-fadeIn">
-            <ModuleHeader
+        <div className="flex flex-col h-[calc(100dvh-108px)] md:h-[calc(100vh-140px)] animate-fadeIn">
+            <CustomerModuleHeader
                 title="Chat con Vendedores"
                 subtitle="Comunicación directa con los vendedores"
                 icon="MessageSquare"
@@ -358,8 +401,9 @@ export function ChatPageClient({ conversationId }: { conversationId?: string }) 
             />
 
             {showNewChatForm ? (
-                <div className="flex-1 flex items-center justify-center px-8">
-                    <div className="w-full max-w-xl">
+                <div className="flex-1 overflow-y-auto scrollbar-none">
+                    <div className="min-h-full flex items-center justify-center px-4 sm:px-8 py-6">
+                    <div className="w-full max-w-md">
                         <NewChatForm
                             sellers={sellers}
                             onSubmit={(data) => {
@@ -370,18 +414,20 @@ export function ChatPageClient({ conversationId }: { conversationId?: string }) 
                             isSubmitting={isCreating}
                         />
                     </div>
+                    </div>
                 </div>
             ) : (
-                <ChatLayout
+                <CustomerChatLayout
                     list={listContent}
                     detail={chatContent}
+                    mobileView={isMobileListVisible ? 'list' : 'detail'}
                 />
             )}
 
             {showLegend && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4" onClick={() => setShowLegend(false)}>
-                    <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-[3rem] max-w-lg w-full shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
-                        <div className="bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--turquesa-500)]/70 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-8 text-white relative">
+                <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-[70] flex items-end sm:items-center justify-center sm:p-4 sm:pt-20" onClick={() => setShowLegend(false)}>
+                    <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-t-[2.5rem] sm:rounded-[3rem] max-w-lg w-full shadow-2xl overflow-hidden max-h-[90dvh] sm:max-h-[calc(100dvh-6rem)] flex flex-col" onClick={(e) => e.stopPropagation()}>
+                        <div className="bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--turquesa-500)]/70 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-6 md:p-8 text-white relative">
                             <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl" />
                             <div className="relative z-10 flex items-center justify-between">
                                 <div className="flex items-center gap-4">
@@ -390,7 +436,7 @@ export function ChatPageClient({ conversationId }: { conversationId?: string }) 
                                     </div>
                                     <div>
                                         <h3 className="text-2xl font-black tracking-tighter">Chat con Vendedores</h3>
-                                        <p className="text-[10px] font-bold text-white/70 uppercase tracking-[0.2em]">¿Para qué sirve este canal?</p>
+                                        <p className="text-[10px] font-bold text-white/70 uppercase tracking-wide">¿Para qué sirve este canal?</p>
                                     </div>
                                 </div>
                                 <button onClick={() => setShowLegend(false)} className="w-10 h-10 rounded-full bg-black/10 flex items-center justify-center hover:bg-black/20">
@@ -398,7 +444,7 @@ export function ChatPageClient({ conversationId }: { conversationId?: string }) 
                                 </button>
                             </div>
                         </div>
-                        <div className="p-8 space-y-4">
+                        <div className="p-5 md:p-8 space-y-4 overflow-y-auto scrollbar-none">
                             {[
                                 { icon: 'Package', title: 'Pedidos y logística', desc: 'Consulta el estado de tu pedido, tiempos de entrega y datos del envío directamente con la tienda.' },
                                 { icon: 'RotateCcw', title: 'Devoluciones, cambios y reembolsos', desc: 'Gestiona devoluciones, cambios de producto o solicitudes de reembolso con el vendedor.' },
