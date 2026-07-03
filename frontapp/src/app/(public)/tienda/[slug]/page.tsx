@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import StoreHeader from '@/components/store/StoreHeader';
 import StoreBannerCarousel from '@/components/store/StoreBannerCarousel';
 import StoreInfoCard from '@/components/store/StoreInfoCard';
-import { Layout1, Layout2, Layout3 } from '@/components/store/layouts';
+import { Layout1, Layout2, Layout3, LayoutEmprende } from '@/components/store/layouts';
 
 interface StorePageProps {
   params: Promise<{ slug: string }>;
@@ -66,6 +66,7 @@ export default function TiendaPage({ params }: StorePageProps) {
           slug: storeData.slug,
           store_name: storeData.storeName,
           logo: storeData.logo || '',
+          logo_marketplace: storeData.logo_marketplace || '',
           cover: storeData.banner2 || storeData.banner || '',
           banner: storeData.banner || '',
           descripcion: storeData.description || '',
@@ -114,6 +115,9 @@ export default function TiendaPage({ params }: StorePageProps) {
           descripcionCorta: p.short_description || '',
           estrellas: p.rating?.average ? String(p.rating.average) : undefined,
           reviews: p.rating?.count || 0,
+          sku: p.sku || '',
+          tag: p.sticker || undefined,
+          store_logo_marketplace: store.logo_marketplace || undefined,
           vendedor: p.store ? { slug: p.store.slug, nombre: p.store.name } : undefined,
           tipo: p.type === 'service' ? 'service' as const : 'product' as const,
         }));
@@ -148,6 +152,15 @@ export default function TiendaPage({ params }: StorePageProps) {
           ...(storeData.website ? [{ key: 'web' as const, url: storeData.website }] : []),
         ];
 
+        const adBanners = (storeData.ad_banners || [])
+          .filter((b: any) => b && (b.url || typeof b === 'string'))
+          .map((b: any) => ({
+            url: typeof b === 'string' ? b : (b.url || ''),
+            titulo: b.title || 'Banner promocional',
+            link: b.link || '',
+          }))
+          .filter((b: { url: string }) => b.url);
+
         const banners = [
           ...(storeData.banner ? [{ url: storeData.banner, titulo: 'Banner principal' }] : []),
           ...(storeData.banner2 ? [{ url: storeData.banner2, titulo: 'Banner secundario' }] : []),
@@ -168,6 +181,7 @@ export default function TiendaPage({ params }: StorePageProps) {
           store,
           products: allProducts,
           banners,
+          adBanners,
           redes,
           stats: {
             products: allProducts.length,
@@ -227,7 +241,7 @@ export default function TiendaPage({ params }: StorePageProps) {
     );
   }
 
-  const { store, banners, redes } = storeData;
+  const { store, banners, adBanners, redes } = storeData;
   const planHeader = store.plan === 'premium' ? 'premium' : 'basic';
   const planLayout = store.plan || 'basico';
 
@@ -250,7 +264,7 @@ export default function TiendaPage({ params }: StorePageProps) {
 
       <main className="max-w-[1600px] mx-auto px-4 py-3">
         <div className="space-y-8">
-          <StoreBannerCarousel banners={banners} redes={redes} plan={planHeader} />
+          <StoreBannerCarousel banners={banners} redes={redes} plan={planHeader} logo={store.logo} storeId={store.id} />
 
           <div className="flex flex-wrap gap-4 items-center justify-between bg-white p-4 rounded-2xl shadow-sm border">
             <div className="text-sm text-gray-600">
@@ -278,9 +292,10 @@ export default function TiendaPage({ params }: StorePageProps) {
             </div>
           ) : (
             <>
-              {store.layout === '1' && <Layout1 store={store} products={filteredProducts} plan={planLayout} />}
-              {store.layout === '2' && <Layout2 store={store} products={filteredProducts} plan={planLayout} />}
-              {(!store.layout || store.layout === '3') && <Layout3 store={store} products={filteredProducts} plan={planLayout} />}
+              {store.layout === 'emprende' && <LayoutEmprende store={store} products={filteredProducts} plan={planLayout} banners={adBanners} />}
+              {store.layout === '1' && <Layout1 store={store} products={filteredProducts} plan={planLayout} banners={adBanners} />}
+              {store.layout === '2' && <Layout2 store={store} products={filteredProducts} plan={planLayout} banners={adBanners} />}
+              {(!store.layout || store.layout === '3') && <Layout3 store={store} products={filteredProducts} plan={planLayout} banners={adBanners} />}
             </>
           )}
 

@@ -389,6 +389,30 @@ export const sellerApi = {
     return { url: logoUrl };
   },
 
+  uploadLogoMarketplace: async (storeId: number, file: File): Promise<{ url: string }> => {
+    const token = await getAuthToken();
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await fetch(`${LARAVEL_API_URL}/stores/${storeId}/media/logo-marketplace`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: `HTTP ${response.status}` }));
+      throw new Error(error.message || `API Error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const logoUrl = data.data?.logo_marketplace || data.data?.url || '';
+    return { url: logoUrl };
+  },
+
   uploadBanner: async (storeId: number, file: File, bannerNumber: 1 | 2 = 1): Promise<{ url: string }> => {
     const token = await getAuthToken();
     const formData = new FormData();
@@ -436,6 +460,66 @@ export const sellerApi = {
 
     const data = await response.json();
     return { url: data.data?.url || '' };
+  },
+
+  deleteBanner: async (storeId: number, bannerNumber: 1 | 2): Promise<void> => {
+    const token = await getAuthToken();
+    const endpoint = bannerNumber === 2 ? 'banner2' : 'banner';
+
+    const response = await fetch(`${LARAVEL_API_URL}/stores/${storeId}/media/${endpoint}`, {
+      method: 'DELETE',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: `HTTP ${response.status}` }));
+      throw new Error(error.message || `API Error: ${response.status}`);
+    }
+  },
+
+  uploadAdBanner: async (storeId: number, file: File): Promise<{ url: string; id: number }> => {
+    const token = await getAuthToken();
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await fetch(`${LARAVEL_API_URL}/stores/${storeId}/media/ad-banners`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: `HTTP ${response.status}` }));
+      throw new Error(error.message || `API Error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return { url: data.data?.url || data.url || '', id: data.data?.id || data.id || 0 };
+  },
+
+  deleteAdBanner: async (storeId: number, mediaId: number): Promise<void> => {
+    const token = await getAuthToken();
+
+    const response = await fetch(`${LARAVEL_API_URL}/stores/${storeId}/media/ad-banners/${mediaId}`, {
+      method: 'DELETE',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: `HTTP ${response.status}` }));
+      throw new Error(error.message || `API Error: ${response.status}`);
+    }
   },
 
   deleteGalleryItem: async (storeId: number, mediaId: number): Promise<void> => {

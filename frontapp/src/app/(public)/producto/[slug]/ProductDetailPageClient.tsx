@@ -2,7 +2,6 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import ProductCard, { fromLaravelProduct } from '@/features/public/productos/components/ProductCard';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
@@ -62,6 +61,7 @@ import {
 } from '@/components/ui/Cardt';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
+import TopMedalBadge from '@/components/ui/TopMedalBadge';
 import { cn } from '@/lib/utils';
 
 // ─── Token ────────────────────────────────────────────────────────────────────
@@ -881,14 +881,79 @@ function ProductTabs({ product }: { product: LaravelProduct }) {
 
 function RelatedProductCard({ rel }: { rel: LaravelProduct }) {
   const { addToCart, loading, addedToCart } = useAddToCart();
-  const router = useRouter();
-  const data = fromLaravelProduct(rel);
   const handleAdd = useCallback(() => addToCart(Number(rel.id), 1), [addToCart, rel.id]);
-  const handleView = useCallback(() => router.push(`/producto/${rel.slug}`), [router, rel.slug]);
+  const relDiscount = discountPercent(rel.price, rel.regular_price);
   return (
-    <div className="flex-shrink-0 w-72">
-      <ProductCard product={data} onAdd={handleAdd} onView={handleView} adding={loading} added={addedToCart} />
-    </div>
+    <Link
+      href={`/producto/${rel.slug}`}
+      className="flex-shrink-0 w-72"
+      tabIndex={0}
+    >
+      <Card
+        className="group cursor-pointer h-full overflow-hidden border-border/60 
+  hover:border-teal-400 hover:shadow-xl hover:-translate-y-2 
+  transition-all duration-300 rounded-[2rem] py-0 gap-0"
+      >
+        <CardContent className="p-0">
+          <div className="relative aspect-square overflow-hidden bg-muted/40 dark:bg-muted/20">
+            <Image
+              src={
+                rel.images[0]?.medium ?? rel.images[0]?.src ?? '/no-image.png'
+              }
+              alt={rel.images[0]?.alt ?? rel.name}
+              fill
+              sizes="288px"
+              className="object-contain p-6 group-hover:scale-110 transition-transform duration-500 ease-out"
+            />
+            {rel.sticker && (
+              <div className="absolute top-2 left-2">
+                <StickerBadge sticker={rel.sticker} />
+              </div>
+            )}
+            {relDiscount > 0 && (
+              <div className="absolute top-2 right-2">
+                <Badge variant="destructive" className="text-[10px] font-bold">
+                  −{relDiscount}%
+                </Badge>
+              </div>
+            )}
+            <TopMedalBadge entityType="product" entityId={rel.id} size="xl" className="absolute bottom-6 right-6" />
+          </div>
+          <div className="p-4 space-y-2">
+            <div className="flex flex-wrap items-center gap-1">
+              {rel.categories.slice(0, 1).map((cat) => (
+                <Badge key={cat.slug} variant="secondary" className="text-xs">
+                  {cat.name}
+                </Badge>
+              ))}
+            </div>
+            <h3 className="font-bold text-sm line-clamp-2 text-foreground group-hover:text-teal-600 transition-colors leading-snug">
+              {rel.name}
+            </h3>
+            <div className="flex items-center gap-1.5">
+              <Stars value={rel.rating.average} size="sm" />
+              <span className="text-xs text-muted-foreground">
+                ({rel.rating.count})
+              </span>
+            </div>
+            <div className="flex items-center justify-between pt-1">
+              <span className="text-xl font-bold text-foreground">
+                {formatPrice(rel.price)}
+              </span>
+              <Button
+                size="sm"
+                aria-label="Agregar al carrito"
+                disabled={loading}
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleAdd(); }}
+                className="opacity-0 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0 transition-all duration-200 bg-teal-500 hover:bg-teal-600 h-8 w-8 p-0"
+              >
+                {addedToCart ? <Check className="w-3.5 h-3.5" /> : <ShoppingCart className="w-3.5 h-3.5" />}
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </Link>
   );
 }
 
@@ -1180,7 +1245,7 @@ export function ProductDetailPageClient({
       <div ref={gridContainerRef} className="grid lg:grid-cols-[1fr_minmax(360px,420px)] gap-8 items-stretch">
         {/* Columna izquierda: galería */}
         <div className="sticky top-24 h-full flex flex-col justify-center">
-          <ProductGallery images={product.images} name={product.name} size={gallerySize} />
+          <ProductGallery images={product.images} name={product.name} size={gallerySize} productId={product.id} />
         </div>
 
         {/* Columna derecha: info de compra */}
@@ -1466,10 +1531,12 @@ function ProductGallery({
   images,
   name,
   size,
+  productId,
 }: {
   images: LaravelProduct['images'];
   name: string;
   size?: number | null;
+  productId: string;
 }) {
   const [active, setActive] = useState(0);
   const [zooming, setZooming] = useState(false);
@@ -1549,6 +1616,8 @@ function ProductGallery({
           }}
           priority
         />
+
+        <TopMedalBadge entityType="product" entityId={productId} size="xxl" className="absolute bottom-4 right-4 z-10" />
 
         {/* Lupa */}
         <div

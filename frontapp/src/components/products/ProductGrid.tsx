@@ -2,10 +2,11 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { ShoppingCart, Clock, Tag, Calendar, Check, Loader2, Leaf, Package, FolderOpen, Star, ShieldCheck } from 'lucide-react';
+import { Clock, Tag, Calendar, Check, Loader2, Leaf, Package, FolderOpen, Star, ShieldCheck, Barcode } from 'lucide-react';
 import { Producto } from '@/types/public';
 import TopMedalBadge from '@/components/ui/TopMedalBadge';
 import { useAddToCart } from '@/features/public/product/hooks/useAddToCart';
+import { money } from '@/modules/cart/utils';
 
 const stickerConfig: Record<string, { label: string; class: string }> = {
   oferta: { label: 'Oferta', class: 'bg-red-500' },
@@ -13,7 +14,7 @@ const stickerConfig: Record<string, { label: string; class: string }> = {
   nuevo: { label: 'Nuevo', class: 'bg-green-500' },
   limitado: { label: 'Limitado', class: 'bg-amber-500' },
   liquidacion: { label: 'Liquidación', class: 'bg-red-600' },
-  descuento: { label: 'Descuento', class: 'bg-red-500' },
+  descuento: { label: 'Dto.', class: 'bg-red-500' },
   bestseller: { label: 'Best Seller', class: 'bg-amber-500' },
   envio_gratis: { label: 'Envío Gratis', class: 'bg-teal-500' },
   organic: { label: 'Orgánico', class: 'bg-emerald-600' },
@@ -26,6 +27,7 @@ const stickerConfig: Record<string, { label: string; class: string }> = {
 interface ProductGridProps {
   productos: Producto[];
   loading?: boolean;
+  className?: string;
 }
 
 function StarRating({ estrellas, total }: { estrellas: string; total?: number }) {
@@ -58,7 +60,7 @@ function ProductCard({ producto }: { producto: Producto }) {
   const finalPrice = producto.precioOferta ?? producto.precio;
   const basePrice = producto.precioAnterior ?? producto.precio;
   const hasOffer = producto.precioOferta && producto.precioAnterior && producto.precioOferta < producto.precioAnterior;
-  const pct = producto.descuento || (hasOffer ? Math.round(((producto.precioAnterior - producto.precioOferta) / producto.precioAnterior) * 100) : 0);
+  const pct = producto.descuento || (hasOffer ? Math.round((((producto.precioAnterior ?? 0) - (producto.precioOferta ?? 0)) / (producto.precioAnterior ?? 1)) * 100) : 0);
 
   return (
     <article className="group flex flex-col rounded-3xl overflow-hidden border border-slate-100 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] transition-all duration-200 hover:border-sky-200 dark:hover:border-[var(--brand-sky)] hover:shadow-[0_18px_52px_rgba(2,132,199,.10)] dark:hover:shadow-[0_18px_52px_rgba(2,132,199,0.15)] hover:-translate-y-0.5">
@@ -74,20 +76,31 @@ function ProductCard({ producto }: { producto: Producto }) {
           </div>
         </Link>
 
-        <span className="absolute top-3 left-3 inline-flex items-center gap-1 text-[11px] px-3 py-1 rounded-full bg-white/85 dark:bg-[var(--bg-card)]/85 border border-sky-100 dark:border-[var(--border-subtle)] backdrop-blur-sm text-slate-700 dark:text-[var(--text-primary)] shadow-sm">
+        {producto.store_logo_marketplace && (
+          <div className="absolute top-3 left-3 z-10 w-20 h-20 rounded-full bg-white shadow-md overflow-hidden flex items-center justify-center">
+            <img
+              src={producto.store_logo_marketplace}
+              alt="Logo tienda"
+              className="w-[90%] h-[90%] object-contain rounded-full"
+            />
+          </div>
+        )}
+
+        <span className="absolute bottom-3 left-3 inline-flex items-center gap-1 text-[11px] px-3 py-1 rounded-full bg-white/85 dark:bg-[var(--bg-card)]/85 border border-sky-100 dark:border-[var(--border-subtle)] backdrop-blur-sm text-slate-700 dark:text-[var(--text-primary)] shadow-sm">
           <Leaf className="w-3 h-3 text-sky-500 dark:text-[var(--brand-sky)]" /> Lyrium
         </span>
 
-        {pct > 0 && (
-          <span className="absolute top-3 right-3 inline-flex items-center gap-1 text-[11px] px-3 py-1 rounded-full bg-emerald-600 text-white shadow">
-            -{pct}%
-          </span>
-        )}
-
-        {producto.tag && !pct && (
-          <span className={`absolute top-3 right-3 text-white text-xs font-bold px-2 py-1 rounded-full ${stickerConfig[producto.tag.toLowerCase()]?.class ?? 'bg-gray-500'}`}>
-            {stickerConfig[producto.tag.toLowerCase()]?.label ?? producto.tag}
-          </span>
+        {producto.tag && (
+          <div className="absolute top-4 right-0 z-10">
+            <div className={`flex flex-col items-center justify-center text-center leading-tight text-white w-[100px] h-[50px] pl-2 pr-1 rounded-l-full shadow-lg ${stickerConfig[producto.tag.toLowerCase()]?.class ?? 'bg-gray-500'}`}>
+              <span className="text-[14px] font-extrabold uppercase tracking-wide line-clamp-2">
+                {pct > 0 && (
+                  <span className="text-[17px] font-black mt-0.5">-{pct}% </span>
+                )}
+                {stickerConfig[producto.tag.toLowerCase()]?.label ?? producto.tag}
+              </span>
+            </div>
+          </div>
         )}
 
         {outOfStock && (
@@ -96,7 +109,7 @@ function ProductCard({ producto }: { producto: Producto }) {
           </div>
         )}
 
-        <TopMedalBadge entityType="product" entityId={producto.id} size="md" className="absolute bottom-3 right-3 z-10" />
+        <TopMedalBadge entityType="product" entityId={producto.id} size="xxl" className="absolute bottom-2 right-2 z-10" />
       </div>
 
       <div className="p-4 flex flex-col gap-2 flex-1">
@@ -106,13 +119,18 @@ function ProductCard({ producto }: { producto: Producto }) {
               {producto.titulo}
             </p>
           </Link>
+          {(producto as any).sku && (
+            <span className="shrink-0 text-[10px] px-2 py-1 rounded-full bg-gray-100 dark:bg-[var(--bg-muted)] text-slate-600 dark:text-[var(--text-secondary)] inline-flex items-center gap-1">
+              <Barcode className="w-3 h-3 text-sky-500 dark:text-[var(--brand-sky)]" /> {(producto as any).sku}
+            </span>
+          )}
         </div>
 
         {producto.descripcionCorta && (
           <p className="text-[11px] text-slate-400 dark:text-[var(--text-muted)] line-clamp-2">{producto.descripcionCorta}</p>
         )}
 
-        <div className="flex items-center justify-between gap-2 mt-auto pt-2">
+        <div className="flex items-center justify-between gap-2">
           {producto.categoria && (
             <span className="text-[11px] px-2 py-1 rounded-full bg-slate-50 dark:bg-[var(--bg-muted)] border border-slate-100 dark:border-[var(--border-subtle)] text-slate-600 dark:text-[var(--text-secondary)] inline-flex items-center gap-1">
               <FolderOpen className="w-3 h-3 text-sky-500 dark:text-[var(--brand-sky)]" /> {producto.categoria}
@@ -129,9 +147,9 @@ function ProductCard({ producto }: { producto: Producto }) {
 
         <div className="flex items-end justify-between mt-1">
           <div>
-            <p className="text-emerald-700 dark:text-emerald-400 text-xl font-bold">S/{finalPrice.toFixed(2)}</p>
+            <p className="text-emerald-700 dark:text-emerald-400 text-xl font-bold">{money(finalPrice)}</p>
             {hasOffer ? (
-              <p className="text-xs text-gray-400 dark:text-[var(--text-muted)] line-through">S/{basePrice.toFixed(2)}</p>
+              <p className="text-xs text-gray-400 dark:text-[var(--text-muted)] line-through">{money(basePrice)}</p>
             ) : (
               <p className="text-xs text-transparent">-</p>
             )}
@@ -153,7 +171,7 @@ function ProductCard({ producto }: { producto: Producto }) {
             ) : addedToCart ? (
               <Check className="w-3.5 h-3.5" />
             ) : (
-              <ShoppingCart className="w-3.5 h-3.5" />
+              <span>🛒</span>
             )}
             {loading ? '…' : addedToCart ? '¡Listo!' : outOfStock ? 'No disponible' : 'Añadir'}
           </button>
@@ -271,10 +289,10 @@ function ProductCardSkeleton() {
   );
 }
 
-export default function ProductGrid({ productos, loading = false }: ProductGridProps) {
+export default function ProductGrid({ productos, loading = false, className = '' }: ProductGridProps) {
   if (loading) {
     return (
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className={`grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 ${className}`}>
         {Array.from({ length: 8 }).map((_, i) => (
           <ProductCardSkeleton key={i} />
         ))}
@@ -306,7 +324,7 @@ export default function ProductGrid({ productos, loading = false }: ProductGridP
   }
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    <div className={`grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 ${className}`}>
       {productos.map((producto) =>
         producto.tipo === 'service' ? (
           <ServiceCard key={`service-${producto.id}`} producto={producto} />

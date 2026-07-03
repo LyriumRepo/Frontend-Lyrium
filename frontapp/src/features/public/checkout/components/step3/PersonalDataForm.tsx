@@ -11,7 +11,7 @@ const DOC_TYPES = [
 const inputCls =
   'w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-[var(--border-subtle)] ' +
   'bg-white dark:bg-[var(--bg-secondary)] text-gray-900 dark:text-[var(--text-primary)] text-sm ' +
-  'focus:ring-2 focus:ring-[var(--brand-sky)]/30 focus:border-[var(--brand-sky)] outline-none transition';
+  'focus:ring-2 focus:ring-[var(--brand-sky)]/30 focus:border-[var(--brand-sky)] dark:focus:ring-[var(--brand-green)]/30 dark:focus:border-[var(--brand-green)] outline-none transition';
 
 const labelCls =
   'block text-xs font-medium text-gray-500 dark:text-[var(--text-secondary)] mb-1.5';
@@ -53,7 +53,7 @@ export default function PersonalDataForm() {
                   ${
                     data.docType === t.value
                       ? 'bg-[var(--brand-sky)] text-white border-[var(--brand-sky)]'
-                      : 'bg-white dark:bg-[var(--bg-secondary)] text-gray-600 dark:text-[var(--text-secondary)] border-gray-200 dark:border-[var(--border-subtle)] hover:border-[var(--brand-sky)]'
+                      : 'bg-white dark:bg-[var(--bg-secondary)] text-gray-600 dark:text-[var(--text-secondary)] border-gray-200 dark:border-[var(--border-subtle)] hover:border-[var(--brand-sky)] dark:hover:border-[var(--brand-green)]'
                   }`}
               >
                 {t.label}

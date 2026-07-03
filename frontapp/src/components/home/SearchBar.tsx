@@ -1,14 +1,15 @@
 'use client';
 
-import { useState, useRef, useEffect, useMemo } from 'react';
+import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, Mic, Filter, X, Loader2 } from 'lucide-react';
+import { Search, Mic, Filter, X, Loader2, Keyboard } from 'lucide-react';
 import { Categoria, SearchResult } from '@/types/public';
 import { useSearch } from '@/shared/hooks/useSearch';
 import { useUIStore } from '@/store/uiStore';
 import Image from 'next/image';
 import { Package, FolderOpen } from 'lucide-react';
 import { createPortal } from 'react-dom';
+import VirtualKeyboard from '@/components/ui/VirtualKeyboard';
 
 interface SearchBarProps {
   categoriasServicios?: Categoria[];
@@ -55,7 +56,10 @@ export default function SearchBar({ categoriasServicios = [], categoriasProducto
   const [maxPrice, setMaxPrice] = useState(initialMaxPrice);
   const [selectedOffer, setSelectedOffer] = useState<string>(initialOffer);
   const [filterError, setFilterError] = useState('');
-  
+  const [showKeyboard, setShowKeyboard] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const recognitionRef = useRef<any>(null);
+  const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const setActiveDropdown = (dropdown: 'autocomplete' | 'filter' | null) => {
     setActiveDropdownLocal(dropdown);
@@ -171,6 +175,77 @@ export default function SearchBar({ categoriasServicios = [], categoriasProducto
     setActiveDropdown(null);
   };
 
+  const handleKeyboardChange = useCallback((value: string) => {
+    setSearchTerm(value);
+  }, []);
+
+  const handleVoiceSearch = useCallback(() => {
+    if (isListening && recognitionRef.current) {
+      recognitionRef.current.stop();
+      return;
+    }
+
+    const SpeechRecognitionClass = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+
+    if (!SpeechRecognitionClass) {
+      console.warn('SpeechRecognition no soportado en este navegador');
+      return;
+    }
+
+    const recognition = new SpeechRecognitionClass();
+    recognition.lang = 'es-PE';
+    recognition.continuous = true;
+    recognition.interimResults = true;
+
+    recognition.onresult = (event: any) => {
+      let transcript = '';
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        transcript += event.results[i][0].transcript;
+      }
+      setSearchTerm(transcript);
+
+      if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
+      silenceTimerRef.current = setTimeout(() => {
+        recognition.stop();
+      }, 1500);
+    };
+
+    recognition.onerror = () => {
+      setIsListening(false);
+      recognitionRef.current = null;
+      if (silenceTimerRef.current) {
+        clearTimeout(silenceTimerRef.current);
+        silenceTimerRef.current = null;
+      }
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+      recognitionRef.current = null;
+      if (silenceTimerRef.current) {
+        clearTimeout(silenceTimerRef.current);
+        silenceTimerRef.current = null;
+      }
+    };
+
+    recognition.start();
+    recognitionRef.current = recognition;
+    setIsListening(true);
+  }, [isListening]);
+
+  useEffect(() => {
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+        recognitionRef.current = null;
+      }
+      if (silenceTimerRef.current) {
+        clearTimeout(silenceTimerRef.current);
+        silenceTimerRef.current = null;
+      }
+    };
+  }, []);
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (!showAutocomplete || results.length === 0) return;
 
@@ -263,10 +338,28 @@ export default function SearchBar({ categoriasServicios = [], categoriasProducto
             <div className="absolute right-1 top-1 bottom-1 flex items-center gap-1 md:gap-2">
               <button
                 type="button"
-                aria-label="Buscar por voz"
-                className="h-full w-10 md:w-14 rounded-full bg-sky-500 hover:bg-sky-600 dark:bg-[var(--brand-green)] dark:hover:bg-[var(--brand-green-hover)] text-white font-semibold flex items-center justify-center transition-all duration-200 border border-sky-200 dark:border-[var(--border-subtle)]"
+                onClick={handleVoiceSearch}
+                aria-label={isListening ? 'Detener grabación por voz' : 'Buscar por voz'}
+                className={`h-full w-10 md:w-14 rounded-full font-semibold flex items-center justify-center transition-all duration-200 border ${
+                  isListening
+                    ? 'bg-[var(--brand-teal)] hover:bg-teal-600 text-white border-teal-300 animate-pulse shadow-[0_0_12px_rgba(13,148,136,0.5)]'
+                    : 'bg-sky-500 hover:bg-sky-600 dark:bg-[var(--brand-green)] dark:hover:bg-[var(--brand-green-hover)] text-white border-sky-200 dark:border-[var(--border-subtle)]'
+                }`}
               >
                 <Mic className="w-5 h-5" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowKeyboard((prev) => !prev)}
+                aria-label={showKeyboard ? 'Ocultar teclado virtual' : 'Abrir teclado virtual'}
+                className={`h-full w-10 md:w-14 rounded-full font-semibold flex items-center justify-center transition-all duration-200 border ${
+                  showKeyboard
+                    ? 'bg-gray-200 dark:bg-[var(--bg-muted)] text-gray-700 dark:text-[var(--text-primary)] border-gray-300 dark:border-[var(--border-subtle)] shadow-inner'
+                    : 'bg-sky-500 hover:bg-sky-600 dark:bg-[var(--brand-green)] dark:hover:bg-[var(--brand-green-hover)] text-white border-sky-200 dark:border-[var(--border-subtle)]'
+                }`}
+              >
+                <Keyboard className="w-5 h-5" />
               </button>
 
               <button
@@ -735,6 +828,13 @@ export default function SearchBar({ categoriasServicios = [], categoriasProducto
             document.body
           )}
         </form>
+
+        <VirtualKeyboard
+          value={searchTerm}
+          onChange={handleKeyboardChange}
+          onClose={() => setShowKeyboard(false)}
+          visible={showKeyboard}
+        />
       </div>
     </div>
   );

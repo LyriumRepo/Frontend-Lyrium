@@ -7,7 +7,7 @@ import { useHasMedal } from '@/shared/lib/context/TopMedalContext';
 interface TopMedalBadgeProps {
     entityType: 'store' | 'product' | 'service';
     entityId: number | string;
-    size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+    size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
     className?: string;
 }
 
@@ -17,6 +17,7 @@ const sizeMap = {
     md: { w: 32, h: 32, cls: 'w-8 h-8' },
     lg: { w: 36, h: 36, cls: 'w-9 h-9' },
     xl: { w: 50, h: 50, cls: 'w-[50px] h-[50px]' },
+    xxl: { w: 90, h: 90, cls: 'w-[90px] h-[90px]' },
 };
 
 export default function TopMedalBadge({ entityType, entityId, size = 'md', className = '' }: TopMedalBadgeProps) {

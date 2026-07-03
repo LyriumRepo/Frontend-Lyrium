@@ -1,0 +1,99 @@
+.simple-keyboard.hg-theme-lyrium {
+  background: var(--bg-primary);
+  border-top: 1px solid var(--border-subtle);
+  padding: 8px 6px 4px;
+  border-radius: 0;
+  width: 100%;
+}
+
+.simple-keyboard.hg-theme-lyrium .hg-row {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  margin-bottom: 6px;
+}
+
+.simple-keyboard.hg-theme-lyrium .hg-button {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  font-size: 18px;
+  font-weight: 500;
+  height: 46px;
+  min-width: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.12s, transform 0.08s;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  -webkit-tap-highlight-color: transparent;
+  padding: 0 4px;
+  flex: 1;
+}
+
+.simple-keyboard.hg-theme-lyrium .hg-button:hover {
+  background: var(--bg-muted);
+}
+
+.simple-keyboard.hg-theme-lyrium .hg-button:active,
+.simple-keyboard.hg-theme-lyrium .hg-button.hg-activeButton {
+  background: var(--brand-sky) !important;
+  color: #fff !important;
+  transform: scale(0.94);
+}
+
+.simple-keyboard.hg-theme-lyrium .hg-button.hg-functionBtn {
+  background: var(--bg-muted);
+  color: var(--text-secondary);
+  font-size: 20px;
+  min-width: 48px;
+  flex: 0 0 auto;
+}
+
+.simple-keyboard.hg-theme-lyrium .hg-button.hg-functionBtn:active {
+  background: var(--brand-sky) !important;
+  color: #fff !important;
+}
+
+.simple-keyboard.hg-theme-lyrium .hg-button[data-skbtnuid="á"],
+.simple-keyboard.hg-theme-lyrium .hg-button[data-skbtnuid="é"],
+.simple-keyboard.hg-theme-lyrium .hg-button[data-skbtnuid="í"],
+.simple-keyboard.hg-theme-lyrium .hg-button[data-skbtnuid="ó"],
+.simple-keyboard.hg-theme-lyrium .hg-button[data-skbtnuid="ú"],
+.simple-keyboard.hg-theme-lyrium .hg-button[data-skbtnuid="Á"],
+.simple-keyboard.hg-theme-lyrium .hg-button[data-skbtnuid="É"],
+.simple-keyboard.hg-theme-lyrium .hg-button[data-skbtnuid="Í"],
+.simple-keyboard.hg-theme-lyrium .hg-button[data-skbtnuid="Ó"],
+.simple-keyboard.hg-theme-lyrium .hg-button[data-skbtnuid="Ú"] {
+  font-size: 17px;
+  min-width: 40px;
+}
+
+.simple-keyboard.hg-theme-lyrium .hg-button[data-skbtnuid="{bksp}"] {
+  font-size: 18px;
+}
+
+.simple-keyboard.hg-theme-lyrium .hg-button[data-skbtnuid="{hide}"] {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  min-width: 36px;
+  box-shadow: none;
+}
+
+.simple-keyboard.hg-theme-lyrium .hg-button[data-skbtnuid="{hide}"]:hover {
+  background: var(--bg-muted);
+}
+
+.simple-keyboard.hg-theme-lyrium .hg-button[data-skbtnuid="{hide}"]:active {
+  background: var(--brand-sky) !important;
+  transform: scale(0.9);
+}
+
+.simple-keyboard.hg-theme-lyrium .hg-button[data-skbtnuid="{space}"] {
+  min-width: 160px;
+  max-width: 280px;
+  flex: 2;
+}

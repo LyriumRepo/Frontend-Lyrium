@@ -12,12 +12,17 @@ import BaseButton from '@/components/ui/BaseButton';
 import BaseLoading from '@/components/ui/BaseLoading';
 import Icon from '@/components/ui/Icon';
 import { useToast } from '@/shared/lib/context/ToastContext';
-import { deleteProduct, updateProductPrice, uploadProductImageAction } from '@/shared/lib/actions/catalog';
+import { deleteProduct, updateProductPrice } from '@/shared/lib/actions/catalog';
 import { productRepository } from '@/shared/lib/api/factory';
 import { USE_MOCKS } from '@/shared/lib/config/flags';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import { useConfirmDialog } from '@/components/ui/confirm-dialog';
 import CatalogGuideModal from './components/CatalogGuideModal';
+
+function toRelativeStorageUrl(url: string): string {
+    const idx = url.indexOf('/storage/');
+    return idx >= 0 ? url.substring(idx) : url;
+}
 
 interface CatalogClientProps {
     initialProducts: Product[];
@@ -333,13 +338,11 @@ export default function CatalogClient({ initialProducts }: CatalogClientProps) {
     const closeModal          = () => { setIsModalOpen(false); setSelectedProduct(null); };
     const closeDetailModal    = () => { setIsDetailModalOpen(false); setSelectedProduct(null); };
 
-    const onSave = async (product: ProductFormData) => {
+    const onSave = async (product: ProductFormData, file?: File) => {
         try {
             let savedProduct;
 
             if (!USE_MOCKS) {
-                const hasBase64Image = product.image && product.image.startsWith('data:');
-
                 if (selectedProduct) {
                     // UPDATE: solo enviar campos escalares, NO atributos (ya existen en BD)
                     const payload: Record<string, unknown> = {};
@@ -357,12 +360,21 @@ export default function CatalogClient({ initialProducts }: CatalogClientProps) {
                     if ((product as any).expirationDate !== undefined) payload.expirationDate = (product as any).expirationDate || null;
 
                     savedProduct = await productRepository.updateProduct(selectedProduct.id, payload);
-                    if (hasBase64Image && product.image) {
-                        const uploadResult = await uploadProductImageAction(Number(savedProduct.id), product.image);
-                        if (!uploadResult.success) {
-                            showToast(uploadResult.error || 'No se pudo subir la imagen', 'error');
-                        } else if (uploadResult.url) {
-                            savedProduct = { ...savedProduct, image: uploadResult.url } as Product;
+                    if (file) {
+                        try {
+                            const uploadResult = await productRepository.uploadProductImage(savedProduct.id, file);
+                            if (uploadResult.url) {
+                                const newImage = toRelativeStorageUrl(uploadResult.url);
+                                savedProduct = {
+                                    ...savedProduct,
+                                    image: newImage,
+                                    images: savedProduct.images?.length
+                                        ? savedProduct.images.map((img, i) => (i === 0 ? { ...img, src: newImage } : img))
+                                        : [{ src: newImage }],
+                                } as Product;
+                            }
+                        } catch (err: any) {
+                            showToast(err.message || 'No se pudo subir la imagen', 'error');
                         }
                     }
                 } else {
@@ -383,17 +395,20 @@ export default function CatalogClient({ initialProducts }: CatalogClientProps) {
                         additionalAttributes:   product.additionalAttributes || [],
                         nutritionalAttributes:  product.nutritionalAttributes || [],
                         servingNote:            product.servingNote || null,
-                        image:                  (product as any).image || null,
+                        image:                  null,
                         expirationDate:         (product as any).expirationDate || null,
                     } as any;
 
                     savedProduct = await productRepository.createProduct(payload);
-                    if (hasBase64Image && product.image && savedProduct.id) {
-                        const uploadResult = await uploadProductImageAction(Number(savedProduct.id), product.image);
-                        if (!uploadResult.success) {
-                            showToast(uploadResult.error || 'No se pudo subir la imagen', 'error');
-                        } else if (uploadResult.url) {
-                            savedProduct = { ...savedProduct, image: uploadResult.url } as Product;
+                    if (file && savedProduct.id) {
+                        try {
+                            const uploadResult = await productRepository.uploadProductImage(savedProduct.id, file);
+                            if (uploadResult.url) {
+                                const fresh = await productRepository.getProductById(savedProduct.id);
+                                if (fresh) savedProduct = fresh;
+                            }
+                        } catch (err: any) {
+                            showToast(err.message || 'No se pudo subir la imagen', 'error');
                         }
                     }
                 }
@@ -410,11 +425,9 @@ export default function CatalogClient({ initialProducts }: CatalogClientProps) {
 
             showToast('Producto actualizado correctamente', 'success');
 
-            startTransition(() => {
-                setProducts((prev) =>
-                    prev.map((p) => (p.id === selectedProduct.id ? savedProduct as Product : p)),
-                );
-            });
+            setProducts((prev) =>
+                prev.map((p) => (p.id === selectedProduct.id ? savedProduct as Product : p)),
+            );
 
             closeModal();
         } catch (err: any) {
@@ -561,7 +574,7 @@ export default function CatalogClient({ initialProducts }: CatalogClientProps) {
                                 <tbody>
                                     {pagedProducts.map((p) => (
                                         <OptimisticProductRow
-                                            key={p.id}
+                                            key={`${p.id}-${p.image}`}
                                             product={p}
                                             optimisticPrice={optimisticPrices[p.id]}
                                             onEdit={openEditModal}

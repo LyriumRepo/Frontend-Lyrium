@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { Star, ShieldCheck, Leaf, Barcode, FolderOpen, Package } from 'lucide-react';
 import { money, resolveImg, NO_IMAGE, ApiProduct } from '@/modules/cart/utils';
 import TopMedalBadge from '@/components/ui/TopMedalBadge';
@@ -28,7 +29,7 @@ const stickerConfig: Record<string, { label: string; class: string }> = {
     nuevo: { label: 'Nuevo', class: 'bg-green-500' },
     limitado: { label: 'Limitado', class: 'bg-purple-500' },
     liquidacion: { label: 'Liquidación', class: 'bg-red-600' },
-    descuento: { label: 'Descuento', class: 'bg-red-500' },
+    descuento: { label: 'Dto.', class: 'bg-red-500' },
     bestseller: { label: 'Best Seller', class: 'bg-amber-500' },
     envio_gratis: { label: 'Envío Gratis', class: 'bg-teal-500' },
     organic: { label: 'Orgánico', class: 'bg-emerald-600' },
@@ -45,6 +46,7 @@ interface Props {
 }
 
 export default function ProductCard({ product: p, onAdd, onView }: Props) {
+    const router = useRouter();
     const finalPrice = Number(p.precio_final ?? p.precio_oferta ?? p.precio ?? 0);
     const basePrice = Number(p.precio ?? 0);
     const hasOffer = finalPrice > 0 && basePrice > 0 && finalPrice < basePrice;
@@ -75,26 +77,39 @@ export default function ProductCard({ product: p, onAdd, onView }: Props) {
                     </div>
                 </button>
 
+                {/* Store marketplace logo */}
+                {p.store_logo_marketplace && (
+                    <div className="absolute top-3 left-3 z-10 w-20 h-20 rounded-full bg-white shadow-md overflow-hidden flex items-center justify-center">
+                        <img
+                            src={resolveImg(p.store_logo_marketplace)}
+                            alt="Logo tienda"
+                            className="w-[90%] h-[90%] object-contain rounded-full"
+                        />
+                    </div>
+                )}
+
                 {/* Lyrium badge */}
-                <span className="absolute top-3 left-3 inline-flex items-center gap-1 text-[11px] px-3 py-1 rounded-full bg-white/85 dark:bg-[var(--bg-card)]/85 border border-sky-100 dark:border-[var(--border-subtle)] backdrop-blur-sm text-slate-700 dark:text-[var(--text-primary)] shadow-sm">
+                <span className="absolute bottom-3 left-3 inline-flex items-center gap-1 text-[11px] px-3 py-1 rounded-full bg-white/85 dark:bg-[var(--bg-card)]/85 border border-sky-100 dark:border-[var(--border-subtle)] backdrop-blur-sm text-slate-700 dark:text-[var(--text-primary)] shadow-sm">
                     <Leaf className="w-3 h-3 text-sky-500 dark:text-[var(--brand-sky)]" /> Lyrium
                 </span>
 
                 {/* Tag badge */}
                 {p.tag && (
-                    <span className={`absolute top-7 right-3 text-white text-xs font-bold px-2 py-1 rounded-full ${stickerConfig[p.tag.toLowerCase()]?.class ?? 'bg-gray-500'}`}>
-                        {stickerConfig[p.tag.toLowerCase()]?.label ?? p.tag}
-                    </span>
+                    <div className="absolute top-4 right-0 z-10">
+                        <div
+                            className={`flex flex-col items-center justify-center text-center leading-tight text-white w-[100px] h-[50px] pl-2 pr-1 rounded-l-full shadow-lg ${stickerConfig[p.tag.toLowerCase()]?.class ?? 'bg-gray-500'}`}
+                        >
+                            <span className="text-[14px] font-extrabold uppercase tracking-wide line-clamp-2">
+                                {hasOffer && pct > 0 && (
+                                    <span className="text-[17px] font-black mt-0.5">-{pct}% </span>
+                                )}
+                                {stickerConfig[p.tag.toLowerCase()]?.label ?? p.tag}
+                            </span>
+                        </div>
+                    </div>
                 )}
 
-                {/* Offer badge */}
-                {hasOffer && (
-                    <span className="absolute top-3 right-3 inline-flex items-center gap-1 text-[11px] px-3 py-1 rounded-full bg-emerald-600 text-white shadow">
-                        -{pct}%
-                    </span>
-                )}
-
-                <TopMedalBadge entityType="product" entityId={p.id} size="md" className="absolute bottom-3 right-3 z-10" />
+                <TopMedalBadge entityType="product" entityId={p.id} size="xxl" className="absolute bottom-2 right-2 z-10" />
             </div>
 
             {/* Info */}
@@ -151,7 +166,7 @@ export default function ProductCard({ product: p, onAdd, onView }: Props) {
                         🛒 {outOfStock ? 'No disponible' : 'Añadir'}
                     </button>
                     <button
-                        onClick={() => onView(p.id)}
+                        onClick={() => router.push(`/producto/${p.slug ?? p.id}`)}
                         className="py-2.5 rounded-2xl border border-sky-200 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] text-xs font-semibold text-slate-700 dark:text-[var(--text-primary)] inline-flex items-center justify-center gap-1.5 hover:bg-sky-50 dark:hover:bg-sky-900/10 transition hover:-translate-y-px"
                     >
                         🔍 Ver
