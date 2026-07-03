@@ -32,7 +32,7 @@ function flattenCategoryTree(nodes: Category[], level = 0): Category[] {
 interface ProductModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSave: (product: Product) => void;
+    onSave: (product: Product, file?: File) => void;
     productToEdit?: Product | null;
 }
 
@@ -88,6 +88,7 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit }:
     const [formData, setFormData] = useState<Product>(initialProduct);
     const [etiquetas, setEtiquetas] = useState<ProductEtiquetaConfig>({ nuevo: false });
     const [previewImage, setPreviewImage] = useState<string>('');
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [isDark, setIsDark] = useState(false);
     const [showTagPreview, setShowTagPreview] = useState(false);
     const { showToast } = useToast();
@@ -121,6 +122,7 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit }:
 
     useEffect(() => {
         if (isOpen) {
+            setSelectedFile(null);
             if (productToEdit) {
                 setFormData(productToEdit);
                 setPreviewImage(productToEdit.image);
@@ -199,10 +201,10 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit }:
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
+            setSelectedFile(file);
             const reader = new FileReader();
             reader.onloadend = () => {
                 setPreviewImage(reader.result as string);
-                setFormData(prev => ({ ...prev, image: reader.result as string }));
             };
             reader.readAsDataURL(file);
         }
@@ -305,7 +307,7 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit }:
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!formData.image) {
+        if (!selectedFile && !formData.image) {
             showToast('Es obligatorio adjuntar una foto del producto', 'error');
             return;
         }
@@ -338,7 +340,7 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit }:
             sticker,
             discountPercentage,
             etiquetas,
-        } as any);
+        } as any, selectedFile ?? undefined);
         onClose();
     };
 

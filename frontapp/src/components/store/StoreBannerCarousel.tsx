@@ -138,25 +138,38 @@ export default function StoreBannerCarousel({
   }
 
   return (
-    <div className="flex flex-col sm:flex-row gap-3 items-stretch">
+    <div className="flex flex-col sm:flex-row gap-3 items-stretch mb-16 sm:mb-25">
       {/* Slider del Banner */}
-      <div className="flex-1 relative w-full aspect-[2/1] sm:aspect-[1600/500] rounded-2xl overflow-hidden shadow-lg bg-white dark:bg-[var(--bg-card)]">
-        {/* Slides */}
-        <div 
-          className="relative w-full h-full"
-          style={{
-            transform: `translateX(-${currentIndex * 100}%)`,
-            transition: 'transform 0.8s ease',
-          }}
-        >
-          {bannersVisibles.map((banner, idx) => (
-            <div 
-              key={idx}
-              className="absolute inset-0 w-full h-full"
-              style={{ left: `${idx * 100}%` }}
-            >
-              {banner.link ? (
-                <Link href={banner.link} className="block w-full h-full">
+      <div className="flex-1 relative w-full aspect-[2/1] sm:aspect-[1600/500] rounded-2xl shadow-lg bg-white dark:bg-[var(--bg-card)]">
+        
+        {/* Wrapper interno con el overflow-hidden, contiene todo lo que SÍ debe recortarse */}
+        <div className="absolute inset-0 rounded-2xl overflow-hidden">
+          {/* Slides */}
+          <div 
+            className="relative w-full h-full"
+            style={{
+              transform: `translateX(-${currentIndex * 100}%)`,
+              transition: 'transform 0.8s ease',
+            }}
+          >
+            {bannersVisibles.map((banner, idx) => (
+              <div 
+                key={idx}
+                className="absolute inset-0 w-full h-full"
+                style={{ left: `${idx * 100}%` }}
+              >
+                {banner.link ? (
+                  <Link href={banner.link} className="block w-full h-full">
+                    <Image
+                      src={banner.url}
+                      alt={banner.titulo || `Banner ${idx + 1}`}
+                      fill
+                      priority={idx === 0}
+                      className="object-cover"
+                      sizes="(max-width: 640px) 100vw, 70vw"
+                    />
+                  </Link>
+                ) : (
                   <Image
                     src={banner.url}
                     alt={banner.titulo || `Banner ${idx + 1}`}
@@ -165,77 +178,69 @@ export default function StoreBannerCarousel({
                     className="object-cover"
                     sizes="(max-width: 640px) 100vw, 70vw"
                   />
-                </Link>
-              ) : (
-                <Image
-                  src={banner.url}
-                  alt={banner.titulo || `Banner ${idx + 1}`}
-                  fill
-                  priority={idx === 0}
-                  className="object-cover"
-                  sizes="(max-width: 640px) 100vw, 70vw"
-                />
-              )}
-            </div>
-          ))}
-        </div>
-
-        {/* Navigation Arrows */}
-        {bannersVisibles.length > 1 && (
-          <>
-            <button
-              onClick={prev}
-              className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 bg-white/95 hover:bg-white rounded-full flex items-center justify-center shadow-[0_8px_25px_rgba(0,0,0,0.15)] transition-all hover:scale-110 z-10"
-              aria-label="Banner anterior"
-            >
-              <ChevronLeft className="w-5 h-5 text-sky-500 dark:text-[var(--icons-green)]" />
-            </button>
-            <button
-              onClick={next}
-              className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 bg-white/95 hover:bg-white rounded-full flex items-center justify-center shadow-[0_8px_25px_rgba(0,0,0,0.15)] transition-all hover:scale-110 z-10"
-              aria-label="Banner siguiente"
-            >
-              <ChevronRight className="w-5 h-5 text-sky-500 dark:text-[var(--icons-green)]" />
-            </button>
-          </>
-        )}
-
-        {/* Indicators */}
-        {bannersVisibles.length > 1 && (
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
-            {bannersVisibles.map((_, idx) => (
-              <button
-                key={idx}
-                onClick={() => setCurrentIndex(idx)}
-                className={`w-2.5 h-2.5 rounded-full transition-all ${
-                  idx === currentIndex 
-                    ? 'bg-white scale-125' 
-                    : 'bg-white/50 hover:bg-white/80'
-                }`}
-                aria-label={`Ir al banner ${idx + 1}`}
-              />
+                )}
+              </div>
             ))}
           </div>
-        )}
 
-        {/* Logo + Medalla en esquina inferior izquierda */}
-        {logo && (
-          <div className="absolute left-4 bottom-4 z-20">
-          <div className="relative w-50 h-50 sm:w-60 sm:h-60">
-            <div className="w-full h-full rounded-full bg-white/95 backdrop-blur-sm border-4 border-white shadow-xl flex items-center justify-center overflow-hidden">
-              <Image
-                src={logo}
-                alt="Logo tienda"
-                width={250}
-                height={250}
-                className="w-4/5 h-4/5 object-contain"
-              />
+          {/* Navigation Arrows */}
+          {bannersVisibles.length > 1 && (
+            <>
+              <button
+                onClick={prev}
+                className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 bg-white/95 hover:bg-white rounded-full flex items-center justify-center shadow-[0_8px_25px_rgba(0,0,0,0.15)] transition-all hover:scale-110 z-10"
+                aria-label="Banner anterior"
+              >
+                <ChevronLeft className="w-5 h-5 text-sky-500 dark:text-[var(--icons-green)]" />
+              </button>
+              <button
+                onClick={next}
+                className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 bg-white/95 hover:bg-white rounded-full flex items-center justify-center shadow-[0_8px_25px_rgba(0,0,0,0.15)] transition-all hover:scale-110 z-10"
+                aria-label="Banner siguiente"
+              >
+                <ChevronRight className="w-5 h-5 text-sky-500 dark:text-[var(--icons-green)]" />
+              </button>
+            </>
+          )}
+
+          {/* Indicators */}
+          {bannersVisibles.length > 1 && (
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+              {bannersVisibles.map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setCurrentIndex(idx)}
+                  className={`w-2.5 h-2.5 rounded-full transition-all ${
+                    idx === currentIndex 
+                      ? 'bg-white scale-125' 
+                      : 'bg-white/50 hover:bg-white/80'
+                  }`}
+                  aria-label={`Ir al banner ${idx + 1}`}
+                />
+              ))}
             </div>
-            {storeId && (
-              <TopMedalBadge entityType="store" entityId={storeId} size="xxl" className="absolute bottom-6 right-6 sm:bottom-6 sm:right-6 z-10" />
-            )}
-          </div>
+          )}
         </div>
+        {/* fin del wrapper con overflow-hidden */}
+
+        {/* Logo + Medalla — AHORA FUERA del overflow-hidden, puede sobresalir */}
+        {logo && (
+          <div className="absolute -left-3 -bottom-16 sm:-bottom-25 z-20">
+            <div className="relative w-60 h-50 sm:w-60 sm:h-60">
+              <div className="w-full h-full rounded-full bg-white/95 backdrop-blur-sm border-4 border-white shadow-xl flex items-center justify-center overflow-hidden">
+                <Image
+                  src={logo}
+                  alt="Logo tienda"
+                  width={250}
+                  height={250}
+                  className="w-4/5 h-4/5 object-contain"
+                />
+              </div>
+              {storeId && (
+                <TopMedalBadge entityType="store" entityId={storeId} size="xxl" className="absolute bottom-6 right-6 sm:bottom-6 sm:right-6 z-10" />
+              )}
+            </div>
+          </div>
         )}
       </div>
 

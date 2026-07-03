@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import BaseModal from '@/components/ui/BaseModal';
 import Icon from '@/components/ui/Icon';
-import { Layout1, Layout2, Layout3 } from '@/components/store/layouts';
+import { Layout1, Layout2, Layout3, LayoutEmprende } from '@/components/store/layouts';
 import { Tienda, Producto } from '@/types/public';
 import { ShopConfig } from '@/features/seller/store/types';
 import { LARAVEL_API_URL } from '@/shared/lib/config/flags';
@@ -20,6 +20,7 @@ const LAYOUT_MAP: Record<string, React.ComponentType<any>> = {
     '1': Layout1,
     '2': Layout2,
     '3': Layout3,
+    'emprende': LayoutEmprende,
 };
 
 export default function StorePreviewModal({ isOpen, onClose, layoutId, config, storeId }: StorePreviewModalProps) {
@@ -52,7 +53,7 @@ export default function StorePreviewModal({ isOpen, onClose, layoutId, config, s
             .finally(() => setLoadingProducts(false));
     }, [isOpen, storeId]);
 
-    const store: Tienda & { layout?: '1' | '2' | '3' } = {
+    const store: Tienda & { layout?: string } = {
         id: storeId || 0,
         nombre: config?.name || 'Mi Tienda',
         slug: '',
@@ -65,7 +66,7 @@ export default function StorePreviewModal({ isOpen, onClose, layoutId, config, s
         correo: config?.email || undefined,
         valoracion: config?.rating || 0,
         plan: config?.subscription?.plan?.name === 'Premium' ? 'premium' : 'basico',
-        layout: layoutId as '1' | '2' | '3',
+        layout: layoutId,
         instagram: config?.social?.instagram || undefined,
         facebook: config?.social?.facebook || undefined,
         tiktok: config?.social?.tiktok || undefined,

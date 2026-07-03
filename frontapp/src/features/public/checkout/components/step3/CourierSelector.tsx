@@ -153,13 +153,13 @@ export default function CourierSelector({ quotes }: Props) {
               className={[
                 'flex flex-col items-center gap-1 py-3 px-2 rounded-xl border-2 transition text-center',
                 tipoEntrega === key
-                  ? 'bg-sky-500 text-white border-sky-500 shadow-md'
-                  : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-sky-300',
+                  ? 'bg-[var(--brand-sky)] text-white border-[var(--brand-sky)] shadow-md dark:bg-[var(--brand-green)] dark:border-[var(--brand-green)]'
+                  : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-sky-300 dark:hover:border-[var(--brand-green)]',
               ].join(' ')}
             >
               <span className="text-xl">{emoji}</span>
               <span className="font-bold text-sm">{label}</span>
-              <span className={`text-[11px] ${tipoEntrega === key ? 'text-sky-100' : 'text-gray-400'}`}>{desc}</span>
+              <span className={`text-[11px] ${tipoEntrega === key ? 'text-white/80' : 'text-gray-400'}`}>{desc}</span>
             </button>
           ))}
         </div>
@@ -187,7 +187,7 @@ export default function CourierSelector({ quotes }: Props) {
           <select
             value={selectedCourier ?? ''}
             onChange={e => handleCourier(e.target.value)}
-            className="w-full appearance-none px-4 py-3 pr-10 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm font-medium focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition"
+            className="w-full appearance-none px-4 py-3 pr-10 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm font-medium focus:ring-2 focus:ring-[var(--brand-sky)]/30 focus:border-[var(--brand-sky)] dark:focus:ring-[var(--brand-green)]/30 dark:focus:border-[var(--brand-green)] outline-none transition"
           >
             <option value="">— Elige un courier —</option>
             {couriersDisponibles.map(courier => {

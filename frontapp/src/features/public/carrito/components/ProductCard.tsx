@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { Star, ShieldCheck, Leaf, Barcode, FolderOpen, Package } from 'lucide-react';
 import { money, resolveImg, NO_IMAGE, ApiProduct } from '@/modules/cart/utils';
 import TopMedalBadge from '@/components/ui/TopMedalBadge';
@@ -23,19 +24,19 @@ function StarRating({ rating, total }: StarRatingProps) {
 }
 
 const stickerConfig: Record<string, { label: string; class: string }> = {
-    oferta: { label: 'Oferta', class: 'bg-[#5AAFE6]' },
-    promo: { label: 'Promo', class: 'bg-[#4EC7B8]' },
-    nuevo: { label: 'Nuevo', class: 'bg-[#69BEEB]' },
-    limitado: { label: 'Limitado', class: 'bg-[#3F90C7]' },
-    liquidacion: { label: 'Liquidación', class: 'bg-[#6FA800]' },
-    descuento: { label: 'Descuento', class: 'bg-[#8FD400]' },
-    bestseller: { label: 'Best Seller', class: 'bg-[#4EC7B8]' },
-    envio_gratis: { label: 'Envío Gratis', class: 'bg-[#69BEEB]' },
-    organic: { label: 'Orgánico', class: 'bg-[#8FD400]' },
-    natural: { label: 'Natural', class: 'bg-[#8FD400]' },
-    eco: { label: 'Eco', class: 'bg-[#8FD400]' },
-    premium: { label: 'Premium', class: 'bg-[#3F90C7]' },
-    vegan: { label: 'Vegano', class: 'bg-[#8FD400]' },
+    oferta: { label: 'Oferta', class: 'bg-red-500' },
+    promo: { label: 'Promo', class: 'bg-orange-500' },
+    nuevo: { label: 'Nuevo', class: 'bg-green-500' },
+    limitado: { label: 'Limitado', class: 'bg-purple-500' },
+    liquidacion: { label: 'Liquidación', class: 'bg-red-600' },
+    descuento: { label: 'Dto.', class: 'bg-red-500' },
+    bestseller: { label: 'Best Seller', class: 'bg-amber-500' },
+    envio_gratis: { label: 'Envío Gratis', class: 'bg-teal-500' },
+    organic: { label: 'Orgánico', class: 'bg-emerald-600' },
+    natural: { label: 'Natural', class: 'bg-green-600' },
+    eco: { label: 'Eco', class: 'bg-lime-600' },
+    premium: { label: 'Premium', class: 'bg-purple-500' },
+    vegan: { label: 'Vegano', class: 'bg-green-700' },
 };
 
 interface Props {
@@ -45,6 +46,7 @@ interface Props {
 }
 
 export default function ProductCard({ product: p, onAdd, onView }: Props) {
+    const router = useRouter();
     const finalPrice = Number(p.precio_final ?? p.precio_oferta ?? p.precio ?? 0);
     const basePrice = Number(p.precio ?? 0);
     const hasOffer = finalPrice > 0 && basePrice > 0 && finalPrice < basePrice;
@@ -75,6 +77,17 @@ export default function ProductCard({ product: p, onAdd, onView }: Props) {
                     </div>
                 </button>
 
+                {/* Store marketplace logo */}
+                {p.store_logo_marketplace && (
+                    <div className="absolute top-3 left-3 z-10 w-20 h-20 rounded-full bg-white shadow-md overflow-hidden flex items-center justify-center">
+                        <img
+                            src={resolveImg(p.store_logo_marketplace)}
+                            alt="Logo tienda"
+                            className="w-[90%] h-[90%] object-contain rounded-full"
+                        />
+                    </div>
+                )}
+
                 {/* Lyrium badge */}
                 <span className="absolute bottom-3 left-3 inline-flex items-center gap-1 text-[11px] px-3 py-1 rounded-full bg-white/85 dark:bg-[var(--bg-card)]/85 border border-sky-100 dark:border-[var(--border-subtle)] backdrop-blur-sm text-slate-700 dark:text-[var(--text-primary)] shadow-sm">
                     <Leaf className="w-3 h-3 text-sky-500 dark:text-[var(--brand-sky)]" /> Lyrium
@@ -87,11 +100,11 @@ export default function ProductCard({ product: p, onAdd, onView }: Props) {
                             className={`flex flex-col items-center justify-center text-center leading-tight text-white w-[100px] h-[50px] pl-2 pr-1 rounded-l-full shadow-lg ${stickerConfig[p.tag.toLowerCase()]?.class ?? 'bg-gray-500'}`}
                         >
                             <span className="text-[14px] font-extrabold uppercase tracking-wide line-clamp-2">
+                                {hasOffer && pct > 0 && (
+                                    <span className="text-[17px] font-black mt-0.5">-{pct}% </span>
+                                )}
                                 {stickerConfig[p.tag.toLowerCase()]?.label ?? p.tag}
                             </span>
-                            {hasOffer && pct > 0 && (
-                                <span className="text-[17px] font-black mt-0.5">-{pct}%</span>
-                            )}
                         </div>
                     </div>
                 )}
@@ -153,7 +166,7 @@ export default function ProductCard({ product: p, onAdd, onView }: Props) {
                         🛒 {outOfStock ? 'No disponible' : 'Añadir'}
                     </button>
                     <button
-                        onClick={() => onView(p.id)}
+                        onClick={() => router.push(`/producto/${p.slug ?? p.id}`)}
                         className="py-2.5 rounded-2xl border border-sky-200 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] text-xs font-semibold text-slate-700 dark:text-[var(--text-primary)] inline-flex items-center justify-center gap-1.5 hover:bg-sky-50 dark:hover:bg-sky-900/10 transition hover:-translate-y-px"
                     >
                         🔍 Ver

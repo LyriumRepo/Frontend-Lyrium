@@ -37,6 +37,7 @@ export interface Producto {
   };
   categorias?: string[];
   descripcionCorta?: string;
+  store_logo_marketplace?: string;
   tipo?: 'product' | 'service';
   duration_minutes?: number;
 }
@@ -110,6 +111,7 @@ export interface Tienda {
   trade_name?: string;
   descripcion?: string;
   logo?: string;
+  logo_marketplace?: string;
   cover?: string;
   banner?: string;
   plan?: 'basico' | 'premium';

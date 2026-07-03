@@ -37,9 +37,13 @@ export function StorePageClient(_props: StorePageClientProps) {
         uploadPolicy,
         deletePolicy,
         uploadLogo,
+        uploadLogoMarketplace,
         uploadBanner,
         uploadGallery,
         deleteGalleryItem,
+        uploadAdBanner,
+        deleteAdBanner,
+        deleteBanner,
         error,
         storeId
     } = useSellerStore();
@@ -113,9 +117,13 @@ export function StorePageClient(_props: StorePageClientProps) {
                     config={config!} 
                     updateConfig={handleUpdateConfig}
                     uploadLogo={uploadLogo}
+                    uploadLogoMarketplace={uploadLogoMarketplace}
                     uploadBanner={uploadBanner}
                     uploadGallery={uploadGallery}
                     deleteGalleryItem={deleteGalleryItem}
+                    uploadAdBanner={uploadAdBanner}
+                    deleteAdBanner={deleteAdBanner}
+                    deleteBanner={deleteBanner}
                     isUploading={uploadingImage}
                     storeId={storeId}
                 />

@@ -115,7 +115,7 @@ export default function StoreAwards({ config }: StoreAwardsProps) {
                         </div>
                     </div>
 
-                    <div className="flex flex-col gap-4">
+                        <div className="flex flex-col gap-4">
                         <div className="text-xs text-[var(--text-secondary)] mb-4 space-y-1">
                             <p><span className="font-black">Rating:</span> {rating?.toFixed(1) || '0.0'} ⭐</p>
                             <p><span className="font-black">Ventas:</span> {totalSales || 0}</p>

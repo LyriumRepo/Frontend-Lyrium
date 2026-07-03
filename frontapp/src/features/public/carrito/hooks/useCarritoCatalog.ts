@@ -56,6 +56,7 @@ function mapToApiProduct(p: LaravelProduct): ApiProduct {
     vendedor_nombre: p.store?.name,
     vendedor_slug: p.store?.slug,
     tipo: p.type,
+    store_logo_marketplace: p.store?.logo_marketplace ?? undefined,
   } as ApiProduct;
 }
 
