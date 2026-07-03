@@ -118,7 +118,7 @@ export default function CustomerSettingsPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-3xl shadow-xl border border-slate-100 dark:border-[var(--border-subtle)] overflow-hidden">
-          <div className="bg-gradient-to-r from-sky-400 via-sky-500 to-sky-600 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-8 flex items-center gap-5 relative overflow-hidden">
+          <div className="bg-gradient-to-r from-sky-400 via-sky-500 to-sky-600 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-6 md:p-8 flex items-center gap-5 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl" />
             <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-inner">
               <Icon name="Mail" className="w-6 h-6 text-white" />
@@ -127,15 +127,15 @@ export default function CustomerSettingsPage() {
               <h3 className="text-2xl font-black tracking-tighter leading-none text-white">
                 Notificaciones
               </h3>
-              <p className="text-[10px] font-bold text-violet-100 uppercase tracking-[0.2em] mt-1">
+              <p className="text-[10px] font-bold text-violet-100 uppercase tracking-wide mt-1">
                 Correo Electrónico
               </p>
             </div>
           </div>
 
-          <div className="p-8 space-y-6">
-            <div className="flex items-center justify-between">
-                <div className="flex items-start gap-3">
+          <div className="p-5 md:p-8 space-y-6">
+            <div className="flex items-center justify-between gap-3">
+                <div className="flex items-start gap-3 min-w-0 flex-1">
                   <div className="w-8 h-8 rounded-lg bg-sky-50 dark:bg-[var(--bg-muted)] flex items-center justify-center shrink-0 mt-0.5">
                     <Icon name="ShoppingBag" className="w-4 h-4 text-sky-500 dark:text-[var(--icons-green)]" />
                   </div>
@@ -147,7 +147,7 @@ export default function CustomerSettingsPage() {
                 </div>
               <button
                 onClick={() => handleToggle('email_order')}
-                className={`relative w-12 h-6 rounded-full transition-colors ${settings.email_order ? 'bg-sky-500 dark:bg-[var(--icons-green)]' : 'bg-gray-300 dark:bg-[var(--border-subtle)]'
+                className={`relative w-12 h-6 rounded-full shrink-0 transition-colors ${settings.email_order ? 'bg-sky-500 dark:bg-[var(--icons-green)]' : 'bg-gray-300 dark:bg-[var(--border-subtle)]'
                   }`}
               >
                 <span className={`absolute left-0 top-1 w-4 h-4 bg-white rounded-full transition-transform ${settings.email_order ? 'translate-x-7' : 'translate-x-1'
@@ -155,8 +155,8 @@ export default function CustomerSettingsPage() {
               </button>
             </div>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-start gap-3">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-start gap-3 min-w-0 flex-1">
                 <div className="w-8 h-8 rounded-lg bg-sky-50 dark:bg-[var(--bg-muted)] flex items-center justify-center shrink-0 mt-0.5">
                   <Icon name="Tag" className="w-4 h-4 text-sky-500 dark:text-[var(--icons-green)]" />
                 </div>
@@ -167,7 +167,7 @@ export default function CustomerSettingsPage() {
               </div>
               <button
                 onClick={() => handleToggle('email_promotions')}
-                className={`relative w-12 h-6 rounded-full transition-colors ${settings.email_promotions ? 'bg-sky-500 dark:bg-[var(--icons-green)]' : 'bg-gray-300 dark:bg-[var(--border-subtle)]'
+                className={`relative w-12 h-6 rounded-full shrink-0 transition-colors ${settings.email_promotions ? 'bg-sky-500 dark:bg-[var(--icons-green)]' : 'bg-gray-300 dark:bg-[var(--border-subtle)]'
                   }`}
               >
                 <span className={`absolute left-0 top-1 w-4 h-4 bg-white rounded-full transition-transform ${settings.email_promotions ? 'translate-x-7' : 'translate-x-1'
@@ -175,8 +175,8 @@ export default function CustomerSettingsPage() {
               </button>
             </div>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-start gap-3">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-start gap-3 min-w-0 flex-1">
                 <div className="w-8 h-8 rounded-lg bg-sky-50 dark:bg-[var(--bg-muted)] flex items-center justify-center shrink-0 mt-0.5">
                   <Icon name="Newspaper" className="w-4 h-4 text-sky-500 dark:text-[var(--icons-green)]" />
                 </div>
@@ -187,7 +187,7 @@ export default function CustomerSettingsPage() {
               </div>
               <button
                 onClick={() => handleToggle('email_newsletter')}
-                className={`relative w-12 h-6 rounded-full transition-colors ${settings.email_newsletter ? 'bg-sky-500 dark:bg-[var(--icons-green)]' : 'bg-gray-300 dark:bg-[var(--border-subtle)]'
+                className={`relative w-12 h-6 rounded-full shrink-0 transition-colors ${settings.email_newsletter ? 'bg-sky-500 dark:bg-[var(--icons-green)]' : 'bg-gray-300 dark:bg-[var(--border-subtle)]'
                   }`}
               >
                 <span className={`absolute left-0 top-1 w-4 h-4 bg-white rounded-full transition-transform ${settings.email_newsletter ? 'translate-x-7' : 'translate-x-1'
@@ -198,7 +198,7 @@ export default function CustomerSettingsPage() {
         </div>
 
         <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-3xl shadow-xl border border-slate-100 dark:border-[var(--border-subtle)] overflow-hidden">
-          <div className="bg-gradient-to-r from-sky-600 via-sky-400 to-sky-500 dark:from-[var(--brand-green)] dark:via-[var(--brand-green-hover)] dark:to-[var(--brand-green)] p-8 flex items-center gap-5 relative overflow-hidden">
+          <div className="bg-gradient-to-r from-sky-600 via-sky-400 to-sky-500 dark:from-[var(--brand-green)] dark:via-[var(--brand-green-hover)] dark:to-[var(--brand-green)] p-6 md:p-8 flex items-center gap-5 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl" />
             <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-inner">
               <Icon name="Bell" className="w-6 h-6 text-white" />
@@ -207,15 +207,15 @@ export default function CustomerSettingsPage() {
               <h3 className="text-2xl font-black tracking-tighter leading-none text-white">
                 Push
               </h3>
-              <p className="text-[10px] font-bold text-emerald-100 uppercase tracking-[0.2em] mt-1">
+              <p className="text-[10px] font-bold text-emerald-100 uppercase tracking-wide mt-1">
                 Notificaciones en dispositivo
               </p>
             </div>
           </div>
 
-          <div className="p-8 space-y-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-start gap-3">
+          <div className="p-5 md:p-8 space-y-6">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-start gap-3 min-w-0 flex-1">
                 <div className="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center shrink-0 mt-0.5">
                   <Icon name="Bell" className="w-4 h-4 text-amber-500" />
                 </div>
@@ -226,7 +226,7 @@ export default function CustomerSettingsPage() {
               </div>
               <button
                 onClick={() => handleToggle('push_notifications')}
-                className={`relative w-12 h-6 rounded-full transition-colors ${settings.push_notifications ? 'bg-sky-500 dark:bg-[var(--icons-green)]' : 'bg-gray-300 dark:bg-[var(--border-subtle)]'
+                className={`relative w-12 h-6 rounded-full shrink-0 transition-colors ${settings.push_notifications ? 'bg-sky-500 dark:bg-[var(--icons-green)]' : 'bg-gray-300 dark:bg-[var(--border-subtle)]'
                   }`}
               >
                 <span
@@ -241,12 +241,12 @@ export default function CustomerSettingsPage() {
       </div>
 
       {showLegend && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4" onClick={() => setShowLegend(false)}>
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-[70] flex items-end sm:items-center justify-center sm:p-4" onClick={() => setShowLegend(false)}>
           <div
-            className="bg-white dark:bg-[var(--bg-secondary)] rounded-[3rem] max-w-lg w-full max-h-[90vh] overflow-hidden shadow-2xl"
+            className="bg-white dark:bg-[var(--bg-secondary)] rounded-t-[2rem] sm:rounded-[3rem] max-w-lg w-full max-h-[90dvh] overflow-hidden shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-8 text-white relative">
+            <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-6 md:p-8 text-white relative">
               <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl" />
               <div className="relative z-10 flex items-center justify-between">
                 <div className="flex items-center gap-4">
@@ -255,7 +255,7 @@ export default function CustomerSettingsPage() {
                   </div>
                   <div>
                     <h3 className="text-2xl font-black tracking-tighter">Leyenda de Notificaciones</h3>
-                    <p className="text-[10px] font-bold text-sky-100 uppercase tracking-[0.2em]">Conoce cada tipo de notificación</p>
+                    <p className="text-[10px] font-bold text-sky-100 uppercase tracking-wide">Conoce cada tipo de notificación</p>
                   </div>
                 </div>
                 <button onClick={() => setShowLegend(false)} className="w-10 h-10 rounded-full bg-black/10 flex items-center justify-center hover:bg-black/20">
@@ -264,7 +264,7 @@ export default function CustomerSettingsPage() {
               </div>
             </div>
 
-            <div className="p-8 space-y-6 overflow-y-auto max-h-[calc(90vh-180px)]">
+            <div className="p-5 md:p-8 space-y-6 overflow-y-auto scrollbar-none max-h-[calc(90vh-180px)]">
               {NOTIFICATION_LEGEND.map((item) => (
                 <div key={item.key} className="p-5 bg-gray-50 dark:bg-[var(--bg-muted)]/50 rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)]">
                   <div className="flex items-start gap-4">

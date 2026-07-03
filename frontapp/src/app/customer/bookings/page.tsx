@@ -5,11 +5,8 @@ import { useAuth } from '@/shared/lib/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { bookingRepository } from '@/shared/lib/api/bookingRepository';
 import type { BookingResponse } from '@/shared/lib/api/bookingRepository';
-import {
-  Calendar, Clock, User, MapPin, CreditCard,
-  Loader2, X, ChevronRight, Star, CheckCircle,
-  AlertCircle, MessageSquare,
-} from 'lucide-react';
+import { Loader2 } from 'lucide-react';
+import Icon from '@/components/ui/Icon';
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   pending: { label: 'Pendiente', color: 'bg-amber-100 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400' },
@@ -169,16 +166,16 @@ export default function CustomerBookingsPage() {
       {/* List */}
       {((tab === 'upcoming' ? upcoming : past) as BookingResponse[]).length === 0 ? (
         <div className="text-center py-16">
-          <Calendar className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-3" />
+          <Icon name="Calendar" className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-3" />
           <p className="text-gray-500 dark:text-gray-400 font-semibold">
             {tab === 'upcoming' ? 'No tienes reservas próximas' : 'No tienes reservas pasadas'}
           </p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {(tab === 'upcoming' ? upcoming : past).map((booking) => (
             <div key={booking.id} className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 p-5">
-              <div className="flex items-start justify-between gap-4">
+              <div className="flex flex-col sm:flex-row items-start sm:justify-between gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <h3 className="font-bold text-gray-900 dark:text-white text-sm truncate">{booking.service_name}</h3>
@@ -190,16 +187,16 @@ export default function CustomerBookingsPage() {
 
                   <div className="flex flex-wrap gap-x-5 gap-y-1.5 text-xs text-gray-600 dark:text-gray-300">
                     <span className="flex items-center gap-1.5">
-                      <Calendar className="w-3.5 h-3.5 text-sky-400" />
+                      <Icon name="Calendar" className="w-3.5 h-3.5 text-sky-400" />
                       {booking.date && formatDate(booking.date)}
                     </span>
                     <span className="flex items-center gap-1.5">
-                      <Clock className="w-3.5 h-3.5 text-sky-400" />
+                      <Icon name="Clock" className="w-3.5 h-3.5 text-sky-400" />
                       {booking.start_time} - {booking.end_time}
                     </span>
                     {booking.specialist && (
                       <span className="flex items-center gap-1.5">
-                        <User className="w-3.5 h-3.5 text-sky-400" />
+                        <Icon name="User" className="w-3.5 h-3.5 text-sky-400" />
                         {booking.specialist.name}
                       </span>
                     )}
@@ -210,7 +207,7 @@ export default function CustomerBookingsPage() {
                     )}
                     {booking.payment_method && (
                       <span className="flex items-center gap-1.5 text-gray-400">
-                        <CreditCard className="w-3.5 h-3.5" />
+                        <Icon name="CreditCard" className="w-3.5 h-3.5" />
                         {PAYMENT_LABELS[booking.payment_method] ?? booking.payment_method}
                       </span>
                     )}
@@ -218,14 +215,14 @@ export default function CustomerBookingsPage() {
 
                   {booking.notes && (
                     <p className="text-xs text-gray-400 dark:text-gray-500 mt-2 flex items-start gap-1.5">
-                      <MessageSquare className="w-3 h-3 mt-0.5 shrink-0" />
+                      <Icon name="MessageSquare" className="w-3 h-3 mt-0.5 shrink-0" />
                       {booking.notes}
                     </p>
                   )}
                 </div>
 
                 {/* Actions */}
-                <div className="flex flex-col gap-2 shrink-0">
+                <div className="flex flex-row flex-wrap sm:flex-col gap-2 shrink-0 w-full sm:w-auto">
                   {booking.can_cancel && (
                     <button
                       onClick={() => setCancelTarget(booking)}
@@ -241,7 +238,7 @@ export default function CustomerBookingsPage() {
                       disabled={actionLoading === booking.id}
                       className="px-3 py-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 rounded-lg transition-colors disabled:opacity-50 flex items-center gap-1"
                     >
-                      {actionLoading === booking.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle className="w-3 h-3" />}
+                      {actionLoading === booking.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Icon name="CheckCircle" className="w-3 h-3" />}
                       Confirmar atención
                     </button>
                   )}
@@ -265,11 +262,11 @@ export default function CustomerBookingsPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={() => setCancelTarget(null)}>
           <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-sm w-full p-6 relative" onClick={(e) => e.stopPropagation()}>
             <button onClick={() => setCancelTarget(null)} className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-              <X className="w-5 h-5" />
+              <Icon name="X" className="w-5 h-5" />
             </button>
             <div className="text-center mb-5">
               <div className="w-14 h-14 rounded-full bg-red-100 dark:bg-red-950/50 flex items-center justify-center mx-auto mb-3">
-                <AlertCircle className="w-6 h-6 text-red-500" />
+                <Icon name="AlertCircle" className="w-6 h-6 text-red-500" />
               </div>
               <h3 className="text-lg font-bold text-gray-900 dark:text-white">Cancelar reserva</h3>
               <p className="text-sm text-gray-500 mt-2">
@@ -295,11 +292,11 @@ export default function CustomerBookingsPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={() => setRateTarget(null)}>
           <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-sm w-full p-6 relative" onClick={(e) => e.stopPropagation()}>
             <button onClick={() => setRateTarget(null)} className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-              <X className="w-5 h-5" />
+              <Icon name="X" className="w-5 h-5" />
             </button>
             <div className="text-center mb-5">
               <div className="w-14 h-14 rounded-full bg-amber-100 dark:bg-amber-950/50 flex items-center justify-center mx-auto mb-3">
-                <Star className="w-6 h-6 text-amber-500" />
+                <Icon name="Star" className="w-6 h-6 text-amber-500" />
               </div>
               <h3 className="text-lg font-bold text-gray-900 dark:text-white">Califica tu experiencia</h3>
               <p className="text-sm text-gray-500 mt-1">{rateTarget.service_name}</p>
@@ -308,7 +305,7 @@ export default function CustomerBookingsPage() {
             <div className="flex justify-center gap-2 mb-5">
               {[1, 2, 3, 4, 5].map((n) => (
                 <button key={n} onClick={() => setRateValue(n)} className="transition-all hover:scale-110">
-                  <Star className={`w-8 h-8 ${n <= rateValue ? 'text-amber-400 fill-amber-400' : 'text-gray-300 dark:text-gray-600'}`} />
+                  <Icon name="Star" className={`w-8 h-8 ${n <= rateValue ? 'text-amber-400 fill-amber-400' : 'text-gray-300 dark:text-gray-600'}`} style={n <= rateValue ? { fill: 'currentColor' } : undefined} />
                 </button>
               ))}
             </div>
@@ -330,7 +327,7 @@ export default function CustomerBookingsPage() {
               disabled={rateValue === 0 || rateSubmitting}
               className="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-600 hover:to-amber-500 disabled:opacity-50 text-white text-sm font-bold transition-all flex items-center justify-center gap-2"
             >
-              {rateSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Star className="w-4 h-4" />}
+              {rateSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Icon name="Star" className="w-4 h-4" />}
               {rateSubmitting ? 'Enviando…' : 'Enviar calificación'}
             </button>
           </div>
