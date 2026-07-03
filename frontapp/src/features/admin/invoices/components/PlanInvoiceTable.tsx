@@ -21,15 +21,14 @@ function StatusBadge({ status, label }: { status: string; label: string }) {
     );
 }
 
-function PdfLink({ url }: { url: string | null }) {
-    if (!url) return <span className="text-[var(--text-secondary)] opacity-40">—</span>;
+function PdfLink({ url }: { url: string }) {
     return (
         <a
             href={url}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-[var(--icons-green)]/10 text-[var(--icons-green)] hover:bg-[var(--icons-green)]/20 transition-colors"
-            title="Ver PDF"
+            title="Descargar recibo PDF"
         >
             <Icon name="FileText" className="w-4 h-4" />
         </a>
@@ -97,7 +96,7 @@ export default function PlanInvoiceTable({ rows }: Props) {
                             </div>
                             <div className="flex items-center gap-3">
                                 <p className="font-bold text-[var(--text-primary)]">S/ {row.total.toFixed(2)}</p>
-                                <PdfLink url={row.pdf_url} />
+                                <PdfLink url={row.receipt_pdf_url} />
                             </div>
                         </div>
                     </div>
@@ -144,7 +143,7 @@ export default function PlanInvoiceTable({ rows }: Props) {
                                     {new Date(row.emission_date).toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' })}
                                 </td>
                                 <td className="px-4 py-3 text-center">
-                                    <PdfLink url={row.pdf_url} />
+                                    <PdfLink url={row.receipt_pdf_url} />
                                 </td>
                             </tr>
                         ))}

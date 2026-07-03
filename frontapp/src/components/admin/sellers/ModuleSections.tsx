@@ -353,8 +353,81 @@ export const ProductModeration: React.FC<ProductModerationProps> = ({
         </div>
       </div>
 
-      {/* Tabla */}
-      <div className="overflow-x-auto rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--bg-card)]">
+      {/* Mobile: cards */}
+      <div className="sm:hidden divide-y divide-[var(--border-subtle)] rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--bg-card)] overflow-hidden">
+        {filtered.map((p) => {
+          const isBusy = busyId === p.id;
+          const isEdition = !!p.rejection_reason;
+          return (
+            <div
+              key={p.id}
+              className={`p-4 flex gap-3 ${isBusy ? 'opacity-60 pointer-events-none' : ''}`}
+            >
+              <div className="w-14 h-14 rounded-xl bg-[var(--bg-secondary)] overflow-hidden flex items-center justify-center flex-shrink-0">
+                {p.imageUrl ? (
+                  <Image src={p.imageUrl} alt={p.name} width={56} height={56} className="object-cover w-full h-full" />
+                ) : (
+                  <Package className="w-6 h-6 text-[var(--text-secondary)]" />
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="font-black text-[var(--text-primary)] text-sm leading-tight truncate">{p.name}</p>
+                    <p className="text-[9px] font-mono text-[var(--text-secondary)] mt-0.5">ID #{p.id}</p>
+                  </div>
+                  <span
+                    className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest flex-shrink-0 ${
+                      isEdition ? 'bg-[var(--color-warning)]/10 text-[var(--color-warning)]' : 'bg-[var(--color-success)]/10 text-[var(--color-success)]'
+                    }`}
+                  >
+                    {isEdition ? 'Re-enviado' : 'Nuevo'}
+                  </span>
+                </div>
+                {p.rejection_reason && (
+                  <div className="mt-1.5 flex items-start gap-1.5 text-[10px] text-[var(--color-warning)]">
+                    <AlertTriangle className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                    <span className="line-clamp-2">{p.rejection_reason}</span>
+                  </div>
+                )}
+                <div className="flex items-center gap-2 mt-1.5">
+                  <Store className="w-3 h-3 text-[var(--icons-green)]" />
+                  <span className="text-[11px] font-bold text-[var(--text-primary)] truncate">{p.seller}</span>
+                </div>
+                <div className="flex items-center justify-between gap-2 mt-1.5 flex-wrap">
+                  <span className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest">{p.category}</span>
+                  <span className="font-black text-[var(--text-primary)] text-sm">S/ {p.price.toFixed(2)}</span>
+                </div>
+                <div className="flex items-center gap-1.5 mt-1">
+                  <Clock className="w-3 h-3 text-[var(--text-secondary)]" />
+                  <span className="text-[10px] font-bold text-[var(--text-secondary)]">{p.date ?? '—'}</span>
+                </div>
+                <div className="flex items-center gap-2 mt-3">
+                  <button
+                    onClick={() => handleAction(p, 'APPROVED')}
+                    disabled={isBusy}
+                    className="flex-1 px-3 py-2 bg-[var(--color-success)]/10 hover:bg-[var(--color-success)]/20 text-[var(--color-success)] rounded-xl text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-50 flex items-center justify-center gap-1.5"
+                  >
+                    <CheckCircle className="w-3.5 h-3.5" />
+                    {isBusy ? '...' : 'Aprobar'}
+                  </button>
+                  <button
+                    onClick={() => handleAction(p, 'REJECTED')}
+                    disabled={isBusy}
+                    className="flex-1 px-3 py-2 bg-[var(--color-error)]/10 hover:bg-[var(--color-error)]/20 text-[var(--color-error)] rounded-xl text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-50 flex items-center justify-center gap-1.5"
+                  >
+                    <XCircle className="w-3.5 h-3.5" />
+                    {isBusy ? '...' : 'Rechazar'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Tablet+: tabla */}
+      <div className="hidden sm:block overflow-x-auto rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--bg-card)]">
         <table className="w-full text-left">
           <thead>
             <tr className="border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)]/50">
@@ -652,7 +725,67 @@ export const ServiceModeration: React.FC<ServiceModerationProps> = ({
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--bg-card)]">
+      {/* Mobile: cards */}
+      <div className="sm:hidden divide-y divide-[var(--border-subtle)] rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--bg-card)] overflow-hidden">
+        {filtered.map((s) => {
+          const isBusy = busyId === s.id;
+          return (
+            <div
+              key={s.id}
+              className={`p-4 ${isBusy ? 'opacity-60 pointer-events-none' : ''}`}
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="font-black text-[var(--text-primary)] text-sm leading-tight truncate">{s.name}</p>
+                  <p className="text-[9px] font-mono text-[var(--text-secondary)] mt-0.5">ID #{s.id}</p>
+                </div>
+                <span className="px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest bg-[var(--color-success)]/10 text-[var(--color-success)] flex-shrink-0">
+                  Nuevo
+                </span>
+              </div>
+              {s.rejection_reason && (
+                <div className="mt-1.5 flex items-start gap-1.5 text-[10px] text-[var(--color-warning)]">
+                  <AlertTriangle className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                  <span className="line-clamp-2">{s.rejection_reason}</span>
+                </div>
+              )}
+              <div className="flex items-center gap-2 mt-1.5">
+                <Store className="w-3 h-3 text-[var(--icons-green)]" />
+                <span className="text-[11px] font-bold text-[var(--text-primary)] truncate">{s.seller}</span>
+              </div>
+              <div className="flex items-center justify-between gap-2 mt-1.5 flex-wrap">
+                <span className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest">{s.category}</span>
+                <span className="font-black text-[var(--text-primary)] text-sm">S/ {s.price.toFixed(2)}</span>
+              </div>
+              <div className="flex items-center gap-1.5 mt-1">
+                <Clock className="w-3 h-3 text-[var(--text-secondary)]" />
+                <span className="text-[10px] font-bold text-[var(--text-secondary)]">{s.date ?? '—'}</span>
+              </div>
+              <div className="flex items-center gap-2 mt-3">
+                <button
+                  onClick={() => handleAction(s, 'APPROVED')}
+                  disabled={isBusy}
+                  className="flex-1 px-3 py-2 bg-[var(--color-success)]/10 hover:bg-[var(--color-success)]/20 text-[var(--color-success)] rounded-xl text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-50 flex items-center justify-center gap-1.5"
+                >
+                  <CheckCircle className="w-3.5 h-3.5" />
+                  {isBusy ? '...' : 'Aprobar'}
+                </button>
+                <button
+                  onClick={() => handleAction(s, 'REJECTED')}
+                  disabled={isBusy}
+                  className="flex-1 px-3 py-2 bg-[var(--color-error)]/10 hover:bg-[var(--color-error)]/20 text-[var(--color-error)] rounded-xl text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-50 flex items-center justify-center gap-1.5"
+                >
+                  <XCircle className="w-3.5 h-3.5" />
+                  {isBusy ? '...' : 'Rechazar'}
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Tablet+: tabla */}
+      <div className="hidden sm:block overflow-x-auto rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--bg-card)]">
         <table className="w-full text-left">
           <thead>
             <tr className="border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)]/50">
@@ -787,7 +920,29 @@ export const AuditLog: React.FC<{ entries: AuditEntry[] }> = ({ entries }) => {
         </div>
       </div>
 
-      <div className="overflow-x-auto">
+      {/* Mobile: cards */}
+      <div className="sm:hidden divide-y divide-[var(--border-subtle)]">
+        {entries.map((a) => (
+          <div key={a.id} className="p-5">
+            <div className="flex items-center justify-between gap-2 mb-2">
+              <span className="text-[10px] font-bold text-[var(--text-secondary)] font-mono">{a.fecha}</span>
+              <span className="px-2.5 py-1 bg-[var(--text-primary)] text-[var(--bg-card)] text-[8px] font-black rounded-lg uppercase tracking-widest whitespace-nowrap">
+                {a.accion}
+              </span>
+            </div>
+            <p className="text-xs font-black text-[var(--text-primary)] uppercase tracking-tighter">{a.entidad}</p>
+            <p className="text-xs text-[var(--text-secondary)] leading-relaxed italic font-medium mt-1.5">
+              {a.metadata?.motivo ?? 'N/A'}
+            </p>
+            <span className="inline-block mt-2 text-[10px] font-black text-[var(--icons-green)] uppercase tracking-widest bg-[var(--icons-green)]/10 px-3 py-1.5 rounded-lg border border-[var(--icons-green)]/20">
+              {a.usuario}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      {/* Tablet+: tabla */}
+      <div className="hidden sm:block overflow-x-auto">
         <table className="w-full text-left" aria-label="Log de auditoría">
           <thead>
             <tr className="bg-[var(--bg-secondary)]/50 border-b border-[var(--border-subtle)] text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">

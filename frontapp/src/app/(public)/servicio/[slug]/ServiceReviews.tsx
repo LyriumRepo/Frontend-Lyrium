@@ -227,15 +227,18 @@ export function ServiceReviews({ serviceId }: { serviceId: number }) {
 
   if (loading) return null;
   if (!stats || stats.count === 0) {
-    if (!pendingBookingId) return null;
     return (
       <div className="bg-white dark:bg-[var(--bg-card)] rounded-xl border border-gray-100 dark:border-[var(--border-subtle)] p-5">
         <h2 className="text-xs font-bold text-gray-400 dark:text-[var(--text-muted)] uppercase tracking-wide mb-4">Reseñas</h2>
-        <p className="text-xs text-gray-500 mb-3">Sé el primero en calificar este servicio.</p>
-        {!showForm ? (
-          <Button size="sm" onClick={() => setShowForm(true)}>Calificar mi reserva</Button>
-        ) : (
-          <RatingForm onSubmit={handleCreateReview} onCancel={() => setShowForm(false)} loading={submitting} />
+        <p className="text-xs text-gray-500 mb-3">
+          {pendingBookingId ? 'Sé el primero en calificar este servicio.' : 'Aún no hay reseñas para este servicio.'}
+        </p>
+        {pendingBookingId && (
+          !showForm ? (
+            <Button size="sm" onClick={() => setShowForm(true)}>Calificar mi reserva</Button>
+          ) : (
+            <RatingForm onSubmit={handleCreateReview} onCancel={() => setShowForm(false)} loading={submitting} />
+          )
         )}
       </div>
     );

@@ -903,7 +903,10 @@ function RelatedProductsCarousel({ products }: { products: LaravelProduct[] }) {
   const CARD_STEP = 296; // ancho de card + gap aprox
   const RESUME_DELAY = 2500; // ms antes de reanudar auto-scroll tras interacción manual
 
-  const items = [...products, ...products];
+  // Con 1 solo producto, duplicar rompe el auto-scroll infinito (loop entre 2 copias idénticas
+  // sin nada más que mostrar); con 0 no debería renderizarse (el caller ya filtra products.length > 0).
+  const items = products.length > 1 ? [...products, ...products] : products;
+  const canAutoScroll = products.length > 1;
 
   // Pausa temporal y programa reanudación automática
   const pauseTemporarily = () => {
@@ -917,7 +920,7 @@ function RelatedProductsCarousel({ products }: { products: LaravelProduct[] }) {
   // Mueve el carrusel en una dirección, respetando el loop infinito
   const shift = (direction: 'left' | 'right') => {
     const track = trackRef.current;
-    if (!track) return;
+    if (!track || !canAutoScroll) return;
     pauseTemporarily();
     const half = track.scrollWidth / 2;
     let next =
@@ -949,7 +952,7 @@ function RelatedProductsCarousel({ products }: { products: LaravelProduct[] }) {
 
   useEffect(() => {
     const track = trackRef.current;
-    if (!track) return;
+    if (!track || !canAutoScroll) return;
 
     const step = () => {
       if (!pausedRef.current) {
@@ -988,24 +991,29 @@ function RelatedProductsCarousel({ products }: { products: LaravelProduct[] }) {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-3xl font-bold">Productos Relacionados</h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            Usa las flechas o la rueda del mouse para explorar
-          </p>
+          {canAutoScroll && (
+            <p className="text-sm text-muted-foreground mt-1">
+              Usa las flechas o la rueda del mouse para explorar
+            </p>
+          )}
         </div>
-        <div className="flex items-center gap-2">
-          <span className="relative flex h-2.5 w-2.5">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75" />
-            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-teal-500" />
-          </span>
-          <span className="text-xs font-semibold text-teal-600 dark:text-teal-400 uppercase tracking-wider">
-            Auto-scroll
-          </span>
-        </div>
+        {canAutoScroll && (
+          <div className="flex items-center gap-2">
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-teal-500" />
+            </span>
+            <span className="text-xs font-semibold text-teal-600 dark:text-teal-400 uppercase tracking-wider">
+              Auto-scroll
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Contenedor con flechas superpuestas */}
       <div className="relative group/carousel">
         {/* Flecha izquierda */}
+        {canAutoScroll && (
         <button
           onClick={() => shift('left')}
           aria-label="Anterior"
@@ -1021,8 +1029,10 @@ function RelatedProductsCarousel({ products }: { products: LaravelProduct[] }) {
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
+        )}
 
         {/* Flecha derecha */}
+        {canAutoScroll && (
         <button
           onClick={() => shift('right')}
           aria-label="Siguiente"
@@ -1038,6 +1048,7 @@ function RelatedProductsCarousel({ products }: { products: LaravelProduct[] }) {
         >
           <ChevronRight className="w-5 h-5" />
         </button>
+        )}
 
         {/* Fade + overflow */}
         <div
@@ -1179,7 +1190,7 @@ export function ProductDetailPageClient({
             {product.categories.length > 0 && (
               <div className="flex flex-wrap items-center gap-2 mb-4">
                 {product.categories.slice(0, 3).map((cat) => (
-                  <Link key={cat.slug} href={`/categoria/${cat.slug}`}>
+                  <Link key={cat.slug} href={`/productos/${cat.slug}`}>
                     <Badge
                       variant="secondary"
                       className="text-xs font-bold uppercase tracking-wider px-2.5 py-1"
@@ -1372,12 +1383,15 @@ export function ProductDetailPageClient({
           </div>
 
           {/* Garantías */}
-          <div className="grid grid-cols-3 gap-2">
-            {[
-              { icon: Shield, text: 'Compra segura' },
-              { icon: Truck, text: 'Envío rápido' },
-              { icon: RotateCcw, text: 'Devoluciones' },
-            ].map(({ icon: Icon, text }) => (
+          <div className={product.type === 'physical' ? 'grid grid-cols-3 gap-2' : 'grid grid-cols-1 gap-2'}>
+            {(product.type === 'physical'
+              ? [
+                  { icon: Shield, text: 'Compra segura' },
+                  { icon: Truck, text: 'Envío rápido' },
+                  { icon: RotateCcw, text: 'Devoluciones' },
+                ]
+              : [{ icon: Shield, text: 'Compra segura' }]
+            ).map(({ icon: Icon, text }) => (
               <div
                 key={text}
                 className="flex flex-col items-center gap-1.5 text-center p-3 rounded-xl border border-teal-100 dark:border-teal-900/30 bg-teal-50/50 dark:bg-[var(--bg-secondary)]"
@@ -1426,7 +1440,8 @@ export function ProductDetailPageClient({
       </div>
 
       {/* ── NIVEL 2: Tabs debajo de la imagen ────────────────────────────── */}
-      <div className="lg:w-[calc(100%-540px)]">
+      {/* 452px = ancho máximo de la columna de compra (420px, minmax de grid-cols arriba) + gap-8 (32px) */}
+      <div className="lg:w-[calc(100%-452px)]">
         <ProductTabs product={product} />
       </div>
 
@@ -1577,7 +1592,7 @@ function ProductGallery({
       </div>
 
       {images.length > 1 && (
-        <div className="grid grid-cols-4 gap-3">
+        <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
           {images.map((img, i) => (
             <button
               key={i}

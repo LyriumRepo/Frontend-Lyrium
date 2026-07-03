@@ -36,7 +36,7 @@ export function LogisticsPageClient(_props: LogisticsPageClientProps) {
     } = useSellerLogistics();
 
     const headerActions = (
-        <BaseButton variant="action" onClick={saveConfig} leftIcon="Save">
+        <BaseButton variant="action" onClick={saveConfig} leftIcon="Save" size="lg">
             Guardar Configuración
         </BaseButton>
     );
@@ -53,8 +53,11 @@ export function LogisticsPageClient(_props: LogisticsPageClientProps) {
                 title="Mi Logística"
                 subtitle="Configuración estratégica de envíos y operadoras"
                 icon="Truck"
-                actions={headerActions}
             />
+
+            <div className="bg-[var(--bg-card)] p-4 rounded-[2rem] shadow-sm border border-[var(--border-subtle)] flex justify-center">
+                {headerActions}
+            </div>
 
             <div className="glass-card p-8 bg-gradient-to-r from-sky-600/5 to-emerald-600/5 border-none rounded-[2.5rem]">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">

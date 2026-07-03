@@ -155,6 +155,8 @@ export function ProfilePageClient(_props: ProfilePageClientProps) {
             isLoading={isSaving}
             variant="action"
             leftIcon={isEditMode ? "Save" : "Edit3"}
+            size="lg"
+            fullWidth
         >
             {isEditMode ? "Guardar Cambios" : "Editar Información"}
         </BaseButton>
@@ -172,20 +174,13 @@ export function ProfilePageClient(_props: ProfilePageClientProps) {
     return (
         <div className="space-y-4 sm:space-y-6 animate-fadeIn">
 
-            {/* ModuleHeader: en desktop muestra el botón dentro del actions */}
             <ModuleHeader
                 title={moduleConfig.label}
                 subtitle={moduleConfig.description || ''}
                 icon={moduleConfig.icon || 'User'}
-                actions={
-                    <div className="hidden sm:block">
-                        {editBtn}
-                    </div>
-                }
             />
 
-            {/* Botón visible solo en móvil — debajo del header, ancho completo */}
-            <div className="sm:hidden w-full">
+            <div className="w-full sm:max-w-xs mx-auto xl:mx-0 xl:ml-auto">
                 {editBtn}
             </div>
 

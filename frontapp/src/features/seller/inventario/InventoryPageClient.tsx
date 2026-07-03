@@ -36,14 +36,14 @@ export function InventoryPageClient() {
             )}
             <button
                 onClick={() => exportInventoryToExcel(pagedItems).catch(console.error)}
-                className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-[var(--bg-card)] text-[var(--text-primary)] font-bold text-xs border border-[var(--border-subtle)] hover:text-[#5AAFE6] hover:border-[#69BEEB]/30 transition-all shadow-sm"
+                className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-[var(--bg-secondary)] text-[var(--text-primary)] font-bold text-xs border border-[var(--border-subtle)] hover:text-[#5AAFE6] hover:border-[#69BEEB]/30 transition-all shadow-sm"
             >
                 <Icon name="FileSpreadsheet" className="text-xl" />
                 <span className="hidden sm:inline">Excel</span>
             </button>
             <button
                 onClick={() => exportInventoryToPdf(pagedItems).catch(console.error)}
-                className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-[var(--bg-card)] text-[var(--text-primary)] font-bold text-xs border border-[var(--border-subtle)] hover:text-[#5AAFE6] hover:border-[#69BEEB]/30 transition-all shadow-sm"
+                className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-[var(--bg-secondary)] text-[var(--text-primary)] font-bold text-xs border border-[var(--border-subtle)] hover:text-[#5AAFE6] hover:border-[#69BEEB]/30 transition-all shadow-sm"
             >
                 <Icon name="FileText" className="text-xl" />
                 <span className="hidden sm:inline">PDF</span>
@@ -94,7 +94,6 @@ export function InventoryPageClient() {
                 title="Inventario"
                 subtitle="Control de existencias y alertas de stock."
                 icon="Boxes"
-                actions={headerActions}
             />
 
             <InventoryStatsBar stats={stats} />
@@ -106,6 +105,7 @@ export function InventoryPageClient() {
                     onSearch={(v) => setFilter('search', v)}
                     onStatus={(v) => setFilter('status', v)}
                     onCategory={(v) => setFilter('category', v)}
+                    actions={headerActions}
                 />
 
                 <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest px-1">

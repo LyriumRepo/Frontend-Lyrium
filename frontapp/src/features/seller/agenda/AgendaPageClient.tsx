@@ -27,25 +27,21 @@ export function AgendaPageClient() {
         { value: 'services', label: 'Servicios', icon: 'Clock'    },
     ];
 
-    // ── Navegador de mes — compartido entre desktop (ModuleHeader) y móvil ──
-    const MonthNav = ({ compact = false }: { compact?: boolean }) => (
-        <div className={`flex items-center gap-2 bg-white/10 backdrop-blur-md p-1.5 rounded-2xl border border-white/20
-            ${compact ? 'w-full justify-between' : ''}`}>
+    // ── Navegador de mes — su propia caja debajo del banner ──
+    const MonthNav = () => (
+        <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-start">
             <button
                 onClick={prevMonth}
-                className={`flex items-center justify-center hover:bg-white/20 rounded-xl transition-all text-white/90
-                    ${compact ? 'w-9 h-9' : 'w-10 h-10'}`}
+                className="w-9 h-9 flex items-center justify-center hover:bg-[var(--bg-hover)] rounded-xl transition-all text-[var(--text-secondary)]"
             >
                 <Icon name="ChevronLeft" className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
             </button>
-            <span className={`font-black text-white text-center uppercase tracking-widest
-                ${compact ? 'text-[11px] flex-1' : 'text-[11px] min-w-[120px]'}`}>
+            <span className="font-black text-[var(--text-primary)] text-center uppercase tracking-widest text-[11px] flex-1 sm:flex-none sm:min-w-[120px]">
                 {monthDisplay}
             </span>
             <button
                 onClick={nextMonth}
-                className={`flex items-center justify-center hover:bg-white/20 rounded-xl transition-all text-white/90
-                    ${compact ? 'w-9 h-9' : 'w-10 h-10'}`}
+                className="w-9 h-9 flex items-center justify-center hover:bg-[var(--bg-hover)] rounded-xl transition-all text-[var(--text-secondary)]"
             >
                 <Icon name="ChevronRight" className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
             </button>
@@ -59,21 +55,15 @@ export function AgendaPageClient() {
     return (
         <div className="space-y-4 sm:space-y-6 animate-fadeIn pb-20 sm:pb-12">
 
-            {/* ModuleHeader: en desktop el navegador va en actions */}
             <ModuleHeader
                 title="Mi Agenda"
                 subtitle="Gestión cronológica de entregas y compromisos"
                 icon="CalendarCheck"
-                actions={
-                    <div className="hidden sm:block">
-                        <MonthNav />
-                    </div>
-                }
             />
 
-            {/* Navegador de mes — solo visible en móvil */}
-            <div className="sm:hidden px-1">
-                <MonthNav compact />
+            {/* Navegador de mes */}
+            <div className="bg-[var(--bg-card)] p-3 rounded-[1.5rem] shadow-sm border border-[var(--border-subtle)] flex justify-center">
+                <MonthNav />
             </div>
 
             {/* ── Leyenda + Filtros ── */}

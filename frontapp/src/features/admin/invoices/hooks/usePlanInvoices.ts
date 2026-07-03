@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { nubefactApi, type PlanInvoice, mapStatusLabel } from '@/shared/lib/api/nubefactRepository';
 
+const API_URL = process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://localhost:8000/api';
+
 export interface PlanInvoiceRow {
     id: number;
     invoice_number: string;
@@ -15,7 +17,7 @@ export interface PlanInvoiceRow {
     sunat_status: string;
     sunat_label: string;
     emission_date: string;
-    pdf_url: string | null;
+    receipt_pdf_url: string;
 }
 
 function toRow(inv: PlanInvoice): PlanInvoiceRow {
@@ -33,7 +35,7 @@ function toRow(inv: PlanInvoice): PlanInvoiceRow {
         sunat_status: inv.sunat_status,
         sunat_label: mapStatusLabel(inv.sunat_status),
         emission_date: inv.emission_date ?? inv.created_at,
-        pdf_url: inv.pdf_url,
+        receipt_pdf_url: `${API_URL}/plan-invoices/${inv.id}/pdf`,
     };
 }
 

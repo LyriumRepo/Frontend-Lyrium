@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { Clapperboard, Plus, Edit, Trash2, Globe, Clock, User } from 'lucide-react';
+import { Clapperboard, Edit, Trash2, Globe, Clock, User } from 'lucide-react';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import BaseButton from '@/components/ui/BaseButton';
 import { blogApi, BlogShort } from '@/shared/lib/api/bioblogRepository';
@@ -126,16 +126,25 @@ export function BlogShortsClient() {
     return (
         <div className="space-y-6 animate-fadeIn font-industrial pb-20">
             <div className="[&_h1]:!whitespace-normal [&_h1]:!break-words [&_h2]:!whitespace-normal [&_h2]:!break-words [&_p]:!whitespace-normal">
-                <ModuleHeader title="Shorts" subtitle="Gestiona tus videos cortos" icon="Clapperboard"
-                    actions={
-                        <>
-                            <span className="hidden sm:block"><BaseButton onClick={openCreate} variant="primary" leftIcon="Plus" size="md">Nuevo Short</BaseButton></span>
-                            <button onClick={openCreate} className="sm:hidden w-9 h-9 rounded-xl bg-sky-500 dark:bg-[#8FC3A1] flex items-center justify-center text-white dark:text-[#0d1a12] active:scale-95 shadow-md"><Plus className="w-4 h-4" /></button>
-                        </>
-                    } />
+                <ModuleHeader title="Shorts" subtitle="Gestiona tus videos cortos" icon="Clapperboard" />
             </div>
 
             {error && !showEditor && <div className="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 p-4 rounded-2xl border border-red-200 dark:border-red-800">{error}</div>}
+
+            <div className="bg-[var(--bg-card)] p-6 rounded-[2rem] shadow-sm border border-[var(--border-subtle)] flex items-center justify-between gap-4 flex-wrap">
+                <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-[var(--brand-green)] rounded-2xl flex items-center justify-center shadow-lg shrink-0">
+                        <Clapperboard className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                        <h2 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-widest">Shorts</h2>
+                        <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wide">
+                            {items.length} short{items.length !== 1 ? 's' : ''}
+                        </p>
+                    </div>
+                </div>
+                <BaseButton onClick={openCreate} variant="primary" leftIcon="Plus" size="md">Nuevo Short</BaseButton>
+            </div>
 
             <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
                 {loading ? <div className="p-20 text-center text-gray-400">Cargando...</div>

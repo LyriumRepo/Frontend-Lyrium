@@ -271,27 +271,58 @@ export default function SellerReservasPage() {
       )}
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-3">
-        <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-[var(--text-secondary)]" />
-          <input
-            type="text"
-            placeholder="Buscar por servicio, cliente, especialista…"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] text-sm text-gray-700 dark:text-[var(--text-primary)] focus:border-sky-400 focus:ring-2 focus:ring-sky-100 outline-none transition-all"
-          />
+      <div className="bg-[var(--bg-card)] p-6 sm:p-8 rounded-[2.5rem] shadow-xl border border-[var(--border-subtle)] animate-fadeIn">
+
+        {/* Header */}
+        <div className="flex items-center justify-between gap-4 mb-6">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-[var(--brand-green)] rounded-2xl flex items-center justify-center shadow-lg shrink-0">
+              <Calendar className="w-6 h-6 text-white" />
+            </div>
+            <h3 className="text-xl font-black text-[var(--text-primary)]">
+              Filtros de Reservas
+            </h3>
+          </div>
+          <button
+            onClick={() => { setSearchQuery(''); setStatusFilter('all'); }}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-sky-400 dark:from-emerald-700 dark:to-teal-600 text-white font-black text-[10px] uppercase tracking-widest shadow-lg shadow-sky-500/25 dark:shadow-emerald-900/25 hover:shadow-xl hover:-translate-y-0.5 transition-all"
+            title="Limpiar Filtros"
+          >
+            <Search className="w-4 h-4" />
+            <span className="hidden sm:inline">Limpiar</span>
+          </button>
         </div>
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] text-sm font-semibold text-gray-700 dark:text-[var(--text-primary)] outline-none focus:border-sky-400"
-        >
-          <option value="all">Todos los estados</option>
-          {Object.entries(STATUS_LABELS).map(([key, { label }]) => (
-            <option key={key} value={key}>{label}</option>
-          ))}
-        </select>
+
+        {/* Buscador — fila completa */}
+        <div className="mb-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-secondary)] pointer-events-none" />
+            <input
+              type="text"
+              placeholder="Buscar por servicio, cliente, especialista…"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-none focus:border-sky-500/50 dark:focus:border-[#8FC3A1]/50 transition-colors"
+            />
+          </div>
+        </div>
+
+        {/* Estado — grid 1 columna */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <label className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1">Estado</label>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="appearance-none w-full p-3 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-2xl text-[10px] font-black uppercase tracking-widest text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--icons-green)]/20 cursor-pointer outline-none"
+            >
+              <option value="all">Todos los estados</option>
+              {Object.entries(STATUS_LABELS).map(([key, { label }]) => (
+                <option key={key} value={key}>{label}</option>
+              ))}
+            </select>
+          </div>
+        </div>
       </div>
 
       {/* Bookings list */}

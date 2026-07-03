@@ -97,15 +97,15 @@ export default function FAQPage() {
             {/* ===================== HEADER SECTION ===================== */}
             <section className="text-center space-y-4 animate-in">
                <div className="flex justify-center mb-6">
-        <h1 className="flex items-center justify-center gap-3 px-6 md:px-8 py-3 md:py-4 
-               w-full rounded-full 
+        <h1 className="flex items-center justify-center gap-2 sm:gap-3 px-4 sm:px-6 md:px-8 py-3 md:py-4
+               w-full rounded-full
                bg-gradient-to-r from-sky-500 to-sky-400
-               dark:from-[#1A3A32] dark:to-[var(--brand-green)]  
-               text-white 
+               dark:from-[#1A3A32] dark:to-[var(--brand-green)]
+               text-white
                shadow-[0_10px_25px_rgba(14,165,233,0.2)]
                dark:shadow-[0_10px_25px_rgba(74,124,89,0.25)]
                font-black tracking-tight text-center
-               text-[clamp(20px,2.6vw,34px)]" >
+               text-base sm:text-lg md:text-[clamp(20px,2.6vw,34px)]" >
         <svg xmlns="http://www.w3.org/2000/svg"
              viewBox="0 0 24 24"
              fill="none"
@@ -113,7 +113,7 @@ export default function FAQPage() {
              strokeWidth="2"
              strokeLinecap="round"
              strokeLinejoin="round"
-             className="w-7 h-7 md:w-9 md:h-9 animate-float" >
+             className="w-5 h-5 sm:w-7 sm:h-7 md:w-9 md:h-9 shrink-0 animate-float" >
         <circle cx="12" cy="12" r="10"/>
         <path d="M9.09 9a3 3 0 1 1 5.82 1c0 2-3 2-3 4"/>
         <line x1="12" y1="17" x2="12" y2="17"/>

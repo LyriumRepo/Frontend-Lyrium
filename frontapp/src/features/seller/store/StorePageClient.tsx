@@ -86,6 +86,7 @@ export function StorePageClient(_props: StorePageClientProps) {
             onClick={handleSave}
             isLoading={saving}
             leftIcon="Save"
+            size="lg"
         >
             {saving ? 'Guardando...' : 'Guardar Cambios'}
         </BaseButton>
@@ -93,19 +94,12 @@ export function StorePageClient(_props: StorePageClientProps) {
 
     return (
         <div className="space-y-4 sm:space-y-6 md:space-y-8 pb-20">
-            {/* Header — botón oculto en mobile, visible desde sm */}
             <ModuleHeader
                 title="Configuración de Mi Tienda"
                 subtitle="Gestión integral de identidad, sucursales y experiencia visual"
-                actions={
-                    <div className="hidden sm:block">
-                        {saveButton}
-                    </div>
-                }
             />
 
-            {/* Botón guardar solo visible en mobile, debajo del header */}
-            <div className="sm:hidden">
+            <div className="flex justify-center sm:justify-end">
                 {saveButton}
             </div>
 

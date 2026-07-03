@@ -1,9 +1,25 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { Play, Plus } from 'lucide-react';
 import { blogApi } from '@/shared/lib/api/blog';
+
+function extractYoutubeId(url: string, youtubeId: string | null): string {
+    if (youtubeId) return youtubeId;
+    if (!url) return '';
+    const patterns = [
+        /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,
+        /^([a-zA-Z0-9_-]{11})$/,
+    ];
+    for (const pattern of patterns) {
+        const match = url.match(pattern);
+        if (match) return match[1];
+    }
+    return '';
+}
 
 interface VideoItem {
     id: number;
@@ -33,7 +49,7 @@ export default function VideoGallery() {
                 ? data.map((v: any) => ({
                     id: v.id,
                     title: v.title,
-                    videoId: v.youtube_id ?? '',
+                    videoId: extractYoutubeId(v.url ?? '', v.youtube_id),
                     category: v.category ?? 'general',
                     categoryLabel: v.category_label ?? v.category ?? 'General',
                 }))
@@ -108,9 +124,13 @@ export default function VideoGallery() {
                     ) : (
                     <>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {displayedVideos.map((video) => (
-                            <div
+                        {displayedVideos.map((video, index) => (
+                            <motion.div
                                 key={video.id}
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.4, delay: index * 0.06 }}
                                 className={`premium-gallery-item group ${activeFilter !== '*' && video.category !== activeFilter ? 'hidden' : ''}`}
                             >
                                 <div className="relative rounded-[2rem] overflow-hidden shadow-md hover:shadow-2xl transition-all duration-500 border border-slate-100 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-secondary)]">
@@ -127,21 +147,14 @@ export default function VideoGallery() {
                                         <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors" />
 
                                         {/* Botón Play */}
-                                        <a
-                                            href={`https://www.youtube.com/embed/${video.videoId}?feature=oembed&autoplay=1`}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            onClick={(e) => {
-                                                e.preventDefault();
-                                                blogApi.registerVideoView(video.id);
-                                                window.open(`https://www.youtube.com/embed/${video.videoId}?feature=oembed&autoplay=1`, '_blank');
-                                            }}
+                                        <Link
+                                            href={`/bioblog/video/${video.id}`}
                                             className="absolute inset-0 flex items-center justify-center"
                                         >
                                             <div className="w-16 h-16 bg-sky-500 dark:bg-[var(--icons-green)] text-white rounded-full flex items-center justify-center transform transition-all duration-500 scale-90 group-hover:scale-100 shadow-xl group-hover:shadow-sky-500/50 dark:group-hover:shadow-lime-100/50">
                                                 <Play className="w-8 h-8 ml-1" fill="currentColor" />
                                             </div>
-                                        </a>
+                                        </Link>
 
                                         <div className="absolute top-4 left-4">
                                             <span className="px-3 py-1 bg-white/90 dark:bg-[var(--bg-secondary)]/90 backdrop-blur-md text-slate-800 dark:text-[var(--text-primary)] text-[10px] font-bold rounded-full uppercase tracking-wider shadow-sm">
@@ -157,7 +170,7 @@ export default function VideoGallery() {
                                         </h3>
                                     </div>
                                 </div>
-                            </div>
+                            </motion.div>
                         ))}
                     </div>
 

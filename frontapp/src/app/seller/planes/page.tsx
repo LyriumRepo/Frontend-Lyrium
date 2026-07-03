@@ -166,6 +166,19 @@ export default function PlanesPage() {
 
   const hasPending = planes.hasPendingRequest();
 
+  const tabsButtons = (
+    <>
+      <button className={`tab-btn ${state.activeTab === 'my-plan' ? 'active' : ''}`} data-tab="my-plan" onClick={() => planes.switchTab('my-plan')}>
+        <svg className="tab-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+        Mi Plan
+      </button>
+      <button className={`tab-btn ${state.activeTab === 'all-plans' ? 'active' : ''}`} data-tab="all-plans" onClick={() => planes.switchTab('all-plans')}>
+        <svg className="tab-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /></svg>
+        Planes
+      </button>
+    </>
+  );
+
   return (
     <>
       {/* Notification */}
@@ -180,14 +193,7 @@ export default function PlanesPage() {
 
       {/* Tabs */}
       <nav className="tabs-nav">
-        <button className={`tab-btn ${state.activeTab === 'my-plan' ? 'active' : ''}`} data-tab="my-plan" onClick={() => planes.switchTab('my-plan')}>
-          <svg className="tab-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
-          Mi Plan
-        </button>
-        <button className={`tab-btn ${state.activeTab === 'all-plans' ? 'active' : ''}`} data-tab="all-plans" onClick={() => planes.switchTab('all-plans')}>
-          <svg className="tab-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /></svg>
-          Planes
-        </button>
+        {tabsButtons}
       </nav>
 
       <div className="container">
@@ -227,6 +233,10 @@ export default function PlanesPage() {
             </div>
           </div>
           <br />
+
+          <nav className="tabs-nav-mobile">
+            {tabsButtons}
+          </nav>
 
           <div className="my-plan-layout">
             <div className="current-plan-section-wrapper animate-card-entrance">
@@ -268,6 +278,10 @@ export default function PlanesPage() {
             activePlan={state.showcasePlan} suffix="Plans"
             onPointClick={planes.selectCarouselPlan}
           />
+
+          <nav className="tabs-nav-mobile">
+            {tabsButtons}
+          </nav>
 
           <Showcase
             showcasePlan={state.showcasePlan}

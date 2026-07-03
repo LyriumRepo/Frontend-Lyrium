@@ -110,15 +110,15 @@ export default function TermsAndConditionsPage() {
             {/* ===================== HEADER SECTION ===================== */}
             <section className="text-center space-y-6">
                 <div className="flex justify-center mb-6">
-                <h1 className="flex items-center justify-center gap-3 px-6 md:px-8 py-3 md:py-4 
-                    w-full rounded-full 
-                    bg-gradient-to-r from-sky-500 dark:from-[#1A3A32] to-sky-400 dark:to-[var(--brand-green)] 
-                    text-white 
+                <h1 className="flex items-center justify-center gap-2 sm:gap-3 px-4 sm:px-6 md:px-8 py-3 md:py-4
+                    w-full rounded-full
+                    bg-gradient-to-r from-sky-500 dark:from-[#1A3A32] to-sky-400 dark:to-[var(--brand-green)]
+                    text-white
                     shadow-[0_10px_25px_rgba(14,165,233,0.2)]
                     dark:shadow-[0_10px_25px_rgba(74,124,89,0.25)]
                     font-black tracking-tight text-center
-                    text-[clamp(20px,2.6vw,34px)]" >
-                <FileText className="w-7 h-7 md:w-9 md:h-9 animate-float" /> Términos y condiciones </h1>
+                    text-base sm:text-lg md:text-[clamp(20px,2.6vw,34px)]" >
+                <FileText className="w-5 h-5 sm:w-7 sm:h-7 md:w-9 md:h-9 shrink-0 animate-float" /> Términos y condiciones </h1>
 </div>
                 <p className="text-gray-500 dark:text-[var(--text-primary)] max-w-3xl mx-auto text-lg">
                     Revisa los términos aplicables al uso de <strong className="text-sky-600 dark:text-[var(--icons-green)]">LYRIUM BIO MARKETPLACE</strong>.

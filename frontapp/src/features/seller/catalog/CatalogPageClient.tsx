@@ -457,70 +457,69 @@ export default function CatalogClient({ initialProducts }: CatalogClientProps) {
                 title="Gestión de Catálogo"
                 subtitle="Administra tus productos, precios e inventario centralizado."
                 icon="Package"
-                actions={
-                    <div className="flex items-center gap-2 self-center">
-                        <button
-                            onClick={() => setShowGuide(true)}
-                            title="Guía para imágenes de productos"
-                            className="w-9 h-9 self-center rounded-xl border border-white/20 bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-all"
-                        >
-                            <Icon name="HelpCircle" className="w-4 h-4" />
-                        </button>
-
-                        <span className="hidden sm:block">
-                            <BaseButton
-                                onClick={handleCreateProduct}
-                                variant="action"
-                                leftIcon="PlusCircle"
-                            >
-                                Nuevo Producto
-                            </BaseButton>
-                        </span>
-                    </div>
-                }
             />
 
             {/* ── Tabla ── */}
             <div className="space-y-4 mt-8">
 
                 {/* Barra superior */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between px-1 gap-3">
+                <div className="bg-[var(--bg-card)] p-6 sm:p-8 rounded-[2.5rem] shadow-xl border border-[var(--border-subtle)] animate-fadeIn">
 
-                    <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 flex-shrink-0 bg-sky-500/10 dark:bg-[#8FC3A1]/10 rounded-xl flex items-center justify-center border border-sky-500/20 dark:border-[#8FC3A1]/20 text-sky-500 dark:text-[#8FC3A1]">
-                            <Icon name="BookOpen" className="w-4 h-4 stroke-[2.5px]" />
+                    {/* Header */}
+                    <div className="flex items-center justify-between gap-4 mb-6">
+                        <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 bg-[var(--brand-green)] rounded-2xl flex items-center justify-center shadow-lg shrink-0">
+                                <Icon name="Package" className="w-6 h-6 text-white" />
+                            </div>
+                            <div>
+                                <h2 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-widest">
+                                    Catálogo de Productos
+                                </h2>
+                                <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wide">
+                                    {products.length} producto{products.length !== 1 ? 's' : ''} registrado{products.length !== 1 ? 's' : ''}
+                                </p>
+                            </div>
                         </div>
-                        <div>
-                            <h2 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-widest">
-                                Catálogo de Productos
-                            </h2>
-                            <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wide">
-                                {products.length} producto{products.length !== 1 ? 's' : ''} registrado{products.length !== 1 ? 's' : ''}
-                            </p>
-                        </div>
+                        <button
+                            onClick={() => { setSearchText(''); setCurrentPage(1); }}
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-sky-400 dark:from-emerald-700 dark:to-teal-600 text-white font-black text-[10px] uppercase tracking-widest shadow-lg shadow-sky-500/25 dark:shadow-emerald-900/25 hover:shadow-xl hover:-translate-y-0.5 transition-all"
+                            title="Limpiar Filtros"
+                        >
+                            <Icon name="RotateCcw" className="w-4 h-4" />
+                            <span className="hidden sm:inline">Limpiar</span>
+                        </button>
                     </div>
 
-                    {/* Buscador + botón móvil */}
-                    <div className="flex items-center gap-2 w-full sm:w-auto">
-                        <div className="relative flex-1 sm:flex-none">
-                            <Icon name="Search" className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--text-secondary)] pointer-events-none" />
+                    {/* Buscador + acciones */}
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                        <div className="relative flex-1">
+                            <Icon name="Search" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-secondary)] pointer-events-none" />
                             <input
                                 type="text"
                                 value={searchText}
                                 onChange={(e) => { setSearchText(e.target.value); setCurrentPage(1); }}
                                 placeholder="Buscar producto..."
-                                className="pl-8 pr-3 py-1.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] text-[11px] font-bold text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-none focus:border-sky-500/50 dark:focus:border-[#8FC3A1]/50 transition-colors w-full sm:w-44"
+                                className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-none focus:border-sky-500/50 dark:focus:border-[#8FC3A1]/50 transition-colors"
                             />
                         </div>
 
-                        {/* Botón icono "+" — solo móvil, aquí tiene espacio natural */}
-                        <button
-                            onClick={handleCreateProduct}
-                            title="Nuevo Producto"
-                            className="sm:hidden flex-shrink-0 w-9 h-9 rounded-xl bg-sky-500 dark:bg-[#8FC3A1] flex items-center justify-center text-white dark:text-[#0d1a12] transition-all active:scale-95 shadow-md"
-                        >
-                            <Icon name="PlusCircle" className="w-4 h-4" />
-                        </button>
+                        <div className="flex items-center justify-center sm:justify-end gap-3 shrink-0">
+                            <BaseButton
+                                onClick={handleCreateProduct}
+                                variant="action"
+                                leftIcon="PlusCircle"
+                                size="lg"
+                            >
+                                Nuevo Producto
+                            </BaseButton>
+                            <button
+                                onClick={() => setShowGuide(true)}
+                                title="Guía para imágenes de productos"
+                                className="w-9 h-9 flex-shrink-0 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] flex items-center justify-center text-[var(--text-secondary)] hover:text-sky-500 hover:border-sky-500/30 hover:bg-sky-500/5 transition-all"
+                            >
+                                <Icon name="HelpCircle" className="w-4 h-4" />
+                            </button>
+                        </div>
                     </div>
                 </div>
 

@@ -40,7 +40,7 @@ export function fromApiProduct(p: any): ProductCardData {
   return {
     id: p.id,
     name: p.nombre,
-    slug: String(p.id),
+    slug: p.slug ?? String(p.id),
     imageUrl: p.imagen_url,
     price: finalPrice,
     originalPrice: hasOffer ? basePrice : undefined,

@@ -50,7 +50,7 @@ export interface BlogArticle {
     id: number; store_id: number; blog_category_id: number | null; title: string; slug: string;
     summary: string | null; content: string | null; main_image: string | null;
     meta_title: string | null; meta_description: string | null; keywords: string[] | null;
-    status: string; published_at: string | null; views_count: number;
+    status: string; is_featured?: boolean; published_at: string | null; views_count: number;
     created_at: string; updated_at: string;
 }
 

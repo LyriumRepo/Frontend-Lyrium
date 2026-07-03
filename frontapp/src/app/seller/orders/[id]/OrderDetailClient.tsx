@@ -65,16 +65,17 @@ export default function OrderDetailClient({ order: initialOrder }: OrderDetailCl
         title={`Pedido #${order.number}`}
         subtitle={`Cliente: ${order.customer.first_name} ${order.customer.last_name}`}
         icon="ShoppingBag"
-        actions={
-          <button
-            onClick={handlePrint}
-            className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
-          >
-            <Icon name="Printer" className="w-4 h-4" />
-            <span className="text-sm font-bold">Imprimir</span>
-          </button>
-        }
       />
+
+      <div className="glass-card p-4 rounded-3xl bg-white border border-gray-100 shadow-lg flex justify-center print:hidden">
+        <button
+          onClick={handlePrint}
+          className="flex items-center gap-2 px-6 py-3 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
+        >
+          <Icon name="Printer" className="w-4 h-4" />
+          <span className="text-sm font-bold">Imprimir</span>
+        </button>
+      </div>
 
       {/* Status Card */}
       <div className="glass-card p-6 rounded-3xl bg-white border border-gray-100 shadow-lg">

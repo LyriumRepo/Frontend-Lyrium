@@ -409,7 +409,7 @@ body {
 }
 
 .tab-btn.active {
-    background: var(--text-dark);
+    background: #0EA5E9;
     color: #ffffff;
 }
 
@@ -621,25 +621,13 @@ body {
 
 /* Card plan actual */
 .current-plan-section-wrapper {
-    background: var(--bg-white);
-    padding: 30px;
+    background: transparent;
+    padding: 0;
     border-radius: 20px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
-    border: 1px solid var(--border-extra-light);
+    box-shadow: none;
+    border: none;
     position: relative;
     overflow: hidden;
-}
-
-.current-plan-section-wrapper::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 50%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent 0%, rgba(92, 92, 92, 0.04) 40%, rgba(206, 232, 107, 0.08) 50%, rgba(206, 232, 107, 0.04) 60%, transparent 100%);
-    animation: shimmerCard 8s ease-in-out infinite;
-    pointer-events: none;
 }
 
 .current-plan-wrapper {
@@ -718,7 +706,7 @@ body {
     font-size: 11px;
     font-weight: 700;
     letter-spacing: 1px;
-    word-break: break-all;
+    white-space: nowrap;
 }
 
 .plan-price-compact {
@@ -748,7 +736,7 @@ body {
     gap: 10px;
     padding: 7px 0;
     font-size: 14px;
-    word-break: break-all;
+    overflow-wrap: break-word;
 }
 
 .feature-row.active-feature span {
@@ -1013,7 +1001,7 @@ body {
     justify-content: center;
     min-height: 440px;
     max-width: 55%;
-    word-break: break-all;
+    overflow-wrap: break-word;
 }
 
 /* Badge y nombre: colores se aplican inline via JS */
@@ -1026,7 +1014,7 @@ body {
     letter-spacing: 2px;
     margin-bottom: 16px;
     width: fit-content;
-    word-break: break-all;
+    white-space: nowrap;
 }
 
 .showcase-plan-name {
@@ -1035,7 +1023,7 @@ body {
     margin-bottom: 8px;
     letter-spacing: -1px;
     line-height: 1.1;
-    word-break: break-all;
+    overflow-wrap: break-word;
 }
 
 .showcase-description {
@@ -1069,7 +1057,6 @@ body {
     flex-direction: column;
     gap: 8px;
     margin-bottom: 25px;
-    word-break: break-all;
 }
 
 .showcase-feature {
@@ -1077,19 +1064,17 @@ body {
     align-items: center;
     gap: 10px;
     font-size: 14px;
-    word-break: break-all;
+    overflow-wrap: break-word;
 }
 
 .showcase-feature.sf-active span:last-child {
     color: var(--text-dark);
-    word-break: break-all;
 }
 
 .showcase-feature.sf-inactive span:last-child {
     color: var(--inactive-color);
     text-decoration: line-through;
     text-decoration-color: rgba(55, 54, 54, 0.4);
-    word-break: break-all;
 }
 
 .showcase-feature .sf-icon {
@@ -1102,7 +1087,6 @@ body {
     justify-content: center;
     font-size: 12px;
     font-weight: 700;
-    word-break: break-all;
 }
 
 .showcase-feature .sf-icon.active {
@@ -2355,6 +2339,37 @@ body {
 /* ============================================
    RESPONSIVE
    ============================================ */
+.tabs-nav-mobile {
+    display: none;
+}
+
+@media (max-width: 1024px) {
+    .tabs-nav {
+        display: none;
+    }
+
+    .tabs-nav-mobile {
+        display: flex;
+        flex-direction: row;
+        width: fit-content;
+        margin: 0 auto 16px;
+        border-radius: 14px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+        overflow: hidden;
+        background: var(--bg-white);
+        border: 1px solid var(--border-light);
+    }
+
+    .tab-btn {
+        padding: 12px 22px;
+        font-size: 13px;
+    }
+
+    .tab-btn::after {
+        display: none;
+    }
+}
+
 @media (max-width: 768px) {
     /* overflow-x: hidden sólo en contenedores página, NO en wildcard
        porque * { overflow-x:hidden } sobreescribe overflow:visible del Swiper
@@ -2380,28 +2395,32 @@ body {
         overflow: visible !important;
     }
 
-    .tabs-nav {
-        position: fixed;
-        left: 50%;
-        top: auto;
-        bottom: 20px;
-        transform: translateX(-50%);
-        flex-direction: row;
-        border-radius: 14px;
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
-    }
-
-    .tab-btn {
-        padding: 12px 22px;
-        font-size: 13px;
-    }
-
-    .tab-btn::after {
-        display: none;
-    }
-
     .container {
         padding: 15px 15px 90px;
+    }
+
+    .plan-content {
+        max-width: 100%;
+    }
+
+    .current-plan-card {
+        min-height: auto;
+    }
+
+    .plan-background-image {
+        position: relative;
+        inset: auto;
+        top: auto;
+        left: auto;
+        right: auto;
+        bottom: auto;
+        width: 100%;
+        height: 180px;
+        border-radius: 16px 16px 0 0;
+    }
+
+    .plan-background-image::after {
+        display: none;
     }
 
     .my-plan-title,
@@ -2454,6 +2473,22 @@ body {
 
     .showcase-bg::after {
         background: linear-gradient(to bottom, rgba(255, 255, 255, 0.97) 0%, rgba(255, 255, 255, 0.85) 50%, rgba(255, 255, 255, 0.6) 100%) !important;
+    }
+
+    .showcase-bg.has-image {
+        position: relative;
+        inset: auto;
+        top: auto;
+        left: auto;
+        right: auto;
+        bottom: auto;
+        width: 100%;
+        height: 200px;
+        border-radius: 18px 18px 0 0;
+    }
+
+    .showcase-bg.has-image::after {
+        display: none;
     }
 
     .showcase-content {
@@ -2509,12 +2544,12 @@ body {
     }
 
     .current-plan-section-wrapper {
-        padding: 20px;
+        padding: 0;
         border-radius: 18px;
     }
 
     .current-plan-card {
-        padding: 20px;
+        padding: 0;
     }
 
     .point-circle {
@@ -3035,8 +3070,8 @@ body {
 
 /* Tab nav — bg-white var cascades but active tab background uses --text-dark */
 .dark .tab-btn.active {
-    background: #334155;
-    color: #f1f5f9;
+    background: var(--brand-green);
+    color: #ffffff;
 }
 .dark .tab-btn:hover:not(.active) {
     background: #263147;

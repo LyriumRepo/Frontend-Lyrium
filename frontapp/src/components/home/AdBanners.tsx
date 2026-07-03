@@ -154,7 +154,7 @@ export default function AdBanners({ bannersPub }: AdBannersProps) {
 
   return (
     <section className="mt-10 w-full overflow-hidden flex flex-col items-center">
-      <div className="w-[1600px] max-w-full px-4 md:px-8 space-y-6">
+      <div className="w-full max-w-[1600px] px-4 md:px-8 space-y-6">
         <h2 className="text-xl md:text-2xl font-semibold text-gray-900 dark:text-white">Banners publicitarios</h2>
         <MedianoSlider images={medianos1} /> 
         <PequenoSlider images={pequenos1} />

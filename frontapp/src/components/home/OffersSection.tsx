@@ -44,7 +44,7 @@ function OfferCard({
   };
 
   return (
-      <article className="w-[220px] shrink-0 bg-white/[0.92] dark:bg-[var(--bg-secondary)]/92 backdrop-blur-lg border border-white/40 dark:border-[var(--border-subtle)]/50 rounded-[20px] p-3 shadow-md group transition-all duration-300 hover:-translate-y-[5px] flex flex-col items-center relative">
+      <article className="w-[180px] sm:w-[220px] shrink-0 bg-white/[0.92] dark:bg-[var(--bg-secondary)]/92 backdrop-blur-lg border border-white/40 dark:border-[var(--border-subtle)]/50 rounded-[20px] p-3 shadow-md group transition-all duration-300 hover:-translate-y-[5px] flex flex-col items-center relative">
       <div className="relative w-full aspect-square rounded-[18px] overflow-hidden bg-white dark:bg-[var(--bg-muted)] flex items-center justify-center">
                   <Image
             src={imgSrc}

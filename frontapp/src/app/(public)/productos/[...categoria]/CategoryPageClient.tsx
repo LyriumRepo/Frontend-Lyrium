@@ -30,20 +30,25 @@ function discountPct(price: number, regular: number) {
 
 // ProductCard — usa useAddToCart igual que ProductDetailPageClient
 function ProductCard({ product }: { product: LaravelProduct }) {
+    const router = useRouter();
     const { addToCart, loading, addedToCart } = useAddToCart();
     const discount = discountPct(product.price, product.regular_price);
     const imgSrc   = product.images[0]?.medium ?? product.images[0]?.src ?? '/no-image.png';
     const inStock  = product.stock > 0;
 
     const handleAdd = (e: React.MouseEvent) => {
-        e.preventDefault();
+        e.stopPropagation();
         if (!inStock || loading) return;
         addToCart(Number(product.id), 1);
     };
 
+    // Nota: se usa un <div> con navegación programática (no <a>) porque el botón
+    // "Agregar" de abajo es interactivo — anidar <button> dentro de <a> es HTML inválido.
     return (
-        <Link href={`/producto/${product.slug}`}
-            className="group bg-white dark:bg-[var(--bg-secondary)] border border-gray-100 dark:border-[var(--border-subtle)] rounded-2xl overflow-hidden hover:shadow-xl hover:border-sky-200 dark:hover:border-[#4A7C59]/40 transition-all duration-200 flex flex-col">
+        <div role="link" tabIndex={0}
+            onClick={() => router.push(`/producto/${product.slug}`)}
+            onKeyDown={(e) => { if (e.key === 'Enter') router.push(`/producto/${product.slug}`); }}
+            className="group cursor-pointer bg-white dark:bg-[var(--bg-secondary)] border border-gray-100 dark:border-[var(--border-subtle)] rounded-2xl overflow-hidden hover:shadow-xl hover:border-sky-200 dark:hover:border-[#4A7C59]/40 transition-all duration-200 flex flex-col">
             <div className="relative aspect-square overflow-hidden bg-gray-50 dark:bg-[var(--bg-primary)]">
                 <Image src={imgSrc} alt={product.images[0]?.alt ?? product.name} fill
                     sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
@@ -85,7 +90,7 @@ function ProductCard({ product }: { product: LaravelProduct }) {
                     {loading ? 'Agregando…' : addedToCart ? '¡Agregado!' : 'Agregar'}
                 </button>
             </div>
-        </Link>
+        </div>
     );
 }
 

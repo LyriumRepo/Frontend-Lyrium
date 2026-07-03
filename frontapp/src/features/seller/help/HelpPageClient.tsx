@@ -352,45 +352,44 @@ export function HelpPageClient() {
                 title="Soporte Lyrium"
                 subtitle="Centro de soporte y gestión de incidencias"
                 icon="Headset"
-                actions={
-                    !showNewTicketForm && !activeTicket ? (
-                        <div className="flex items-center gap-2">
-                            <button
-                                onClick={() => setShowLegend(true)}
-                                title="Leyenda"
-                                className="w-9 h-9 flex items-center justify-center rounded-xl bg-white dark:bg-[var(--bg-secondary)] border border-[var(--border-subtle)] text-gray-500 dark:text-[var(--text-secondary)] hover:text-[var(--turquesa-500)] dark:hover:text-[var(--icons-green)] hover:border-[var(--turquesa-500)] dark:hover:border-[var(--icons-green)] transition-all shadow-sm"
-                            >
-                                <Icon name="Info" className="w-4 h-4" />
-                            </button>
-                            {/* Mobile / Tablet: solo ícono */}
-                            <button
-                                onClick={() => { setShowNewTicketForm(true); setIsMobileListVisible(false); }}
-                                title="Nuevo Ticket"
-                                className="lg:hidden w-9 h-9 flex items-center justify-center rounded-xl bg-white dark:bg-[var(--bg-secondary)] text-[var(--turquesa-500)] border border-[var(--border-subtle)] hover:bg-[var(--turquesa-500)]/10 transition-colors shadow-sm"
-                            >
-                                <Icon name="Plus" className="w-4 h-4" />
-                            </button>
-                            {/* Desktop: texto completo */}
-                            <button
-                                onClick={() => setShowNewTicketForm(true)}
-                                className="hidden lg:flex items-center gap-1.5 px-4 py-2 bg-white dark:bg-[var(--bg-secondary)] text-[var(--turquesa-500)] rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-[var(--turquesa-500)]/10 transition-colors border border-[var(--border-subtle)] shadow-sm"
-                            >
-                                <Icon name="Plus" className="w-3.5 h-3.5" />
-                                Nuevo Ticket
-                            </button>
-                        </div>
-                    ) : null
-                }
             />
+
+            {!showNewTicketForm && (
+                <div className={`${!isMobileListVisible ? 'hidden md:flex' : 'flex'} bg-[var(--bg-card)] p-3 rounded-[1.5rem] shadow-sm border border-[var(--border-subtle)] items-center justify-center md:justify-start gap-2 mb-4 md:w-72 lg:w-96`}>
+                    {/* Mobile / Tablet: solo ícono */}
+                    <button
+                        onClick={() => { setShowNewTicketForm(true); setIsMobileListVisible(false); }}
+                        title="Nuevo Ticket"
+                        className="md:hidden w-9 h-9 flex items-center justify-center rounded-xl bg-white dark:bg-[var(--bg-secondary)] text-[var(--turquesa-500)] border border-[var(--border-subtle)] hover:bg-[var(--turquesa-500)]/10 transition-colors shadow-sm"
+                    >
+                        <Icon name="Plus" className="w-4 h-4" />
+                    </button>
+                    {/* Desktop: texto completo */}
+                    <button
+                        onClick={() => setShowNewTicketForm(true)}
+                        className="hidden md:flex items-center gap-1.5 px-4 py-2 bg-white dark:bg-[var(--bg-secondary)] text-[var(--turquesa-500)] rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-[var(--turquesa-500)]/10 transition-colors border border-[var(--border-subtle)] shadow-sm"
+                    >
+                        <Icon name="Plus" className="w-3.5 h-3.5" />
+                        Nuevo Ticket
+                    </button>
+                    <button
+                        onClick={() => setShowLegend(true)}
+                        title="Leyenda"
+                        className="w-9 h-9 flex items-center justify-center rounded-xl bg-white dark:bg-[var(--bg-secondary)] border border-[var(--border-subtle)] text-gray-500 dark:text-[var(--text-secondary)] hover:text-[var(--turquesa-500)] dark:hover:text-[var(--icons-green)] hover:border-[var(--turquesa-500)] dark:hover:border-[var(--icons-green)] transition-all shadow-sm"
+                    >
+                        <Icon name="Info" className="w-4 h-4" />
+                    </button>
+                </div>
+            )}
 
             <div className="flex-1 overflow-hidden">
 
                 {/* ─────────────────────────────────────────────────────────────────
-                    DESKTOP (lg+): lista fija + detalle al lado
+                    TABLET+ (md+): lista fija + detalle al lado, igual que Helpdesk admin
                     ───────────────────────────────────────────────────────────────── */}
-                <div className="hidden lg:flex gap-6 h-full">
+                <div className="hidden md:flex gap-6 h-full">
                     {!showNewTicketForm && (
-                        <div className="w-96 shrink-0">
+                        <div className="w-72 lg:w-96 shrink-0">
                             <TicketList
                                 tickets={tickets}
                                 activeTicketId={activeTicketId}
@@ -431,11 +430,11 @@ export function HelpPageClient() {
                 </div>
 
                 {/* ─────────────────────────────────────────────────────────────────
-                    MOBILE / TABLET: lista O detalle (nunca ambos)
+                    MOBILE (< md): lista O detalle (nunca ambos)
                     ───────────────────────────────────────────────────────────────── */}
 
                 {/* Panel lista */}
-                <div className={`lg:hidden h-full ${(isMobileListVisible && !showNewTicketForm) ? 'block' : 'hidden'}`}>
+                <div className={`md:hidden h-full ${(isMobileListVisible && !showNewTicketForm) ? 'block' : 'hidden'}`}>
                     <TicketList
                         tickets={tickets}
                         activeTicketId={activeTicketId}
@@ -444,7 +443,7 @@ export function HelpPageClient() {
                 </div>
 
                 {/* Panel detalle / formulario */}
-                <div className={`lg:hidden h-full ${(!isMobileListVisible || showNewTicketForm) ? 'block' : 'hidden'}`}>
+                <div className={`md:hidden h-full ${(!isMobileListVisible || showNewTicketForm) ? 'block' : 'hidden'}`}>
                     {showNewTicketForm ? (
                         <NewTicketForm
                             onSubmit={(data) => {
@@ -472,43 +471,43 @@ export function HelpPageClient() {
 
             {showLegend && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4" onClick={() => setShowLegend(false)}>
-                    <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-[3rem] max-w-lg w-full shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
-                        <div className="bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--turquesa-500)]/70 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-8 text-white relative">
+                    <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-[1.5rem] sm:rounded-[3rem] max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl" onClick={(e) => e.stopPropagation()}>
+                        <div className="bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--turquesa-500)]/70 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-4 sm:p-8 text-white relative">
                             <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl" />
                             <div className="relative z-10 flex items-center justify-between">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center">
-                                        <Icon name="Headset" className="w-6 h-6" />
+                                <div className="flex items-center gap-2.5 sm:gap-4">
+                                    <div className="w-9 h-9 sm:w-12 sm:h-12 bg-white/20 backdrop-blur-md rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0">
+                                        <Icon name="Headset" className="w-4.5 h-4.5 sm:w-6 sm:h-6" />
                                     </div>
                                     <div>
-                                        <h3 className="text-2xl font-black tracking-tighter">Soporte Lyrium</h3>
-                                        <p className="text-[10px] font-bold text-white/70 uppercase tracking-[0.2em]">¿Para qué sirve este canal?</p>
+                                        <h3 className="text-base sm:text-2xl font-black tracking-tighter">Soporte Lyrium</h3>
+                                        <p className="text-[8px] sm:text-[10px] font-bold text-white/70 uppercase tracking-[0.2em]">¿Para qué sirve este canal?</p>
                                     </div>
                                 </div>
-                                <button onClick={() => setShowLegend(false)} className="w-10 h-10 rounded-full bg-black/10 flex items-center justify-center hover:bg-black/20">
-                                    <Icon name="X" className="w-5 h-5 text-white" />
+                                <button onClick={() => setShowLegend(false)} className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-black/10 flex items-center justify-center hover:bg-black/20 shrink-0">
+                                    <Icon name="X" className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                                 </button>
                             </div>
                         </div>
-                        <div className="p-8 space-y-4">
+                        <div className="p-4 sm:p-8 space-y-2.5 sm:space-y-4">
                             {[
                                 { icon: 'Settings', title: 'Incidencias técnicas', desc: 'Reporta errores de la plataforma, fallas en el sistema, problemas con módulos o funcionalidades.' },
                                 { icon: 'Shield', title: 'Soporte administrativo', desc: 'Consulta sobre validaciones, configuraciones de tienda, actualizaciones de documentación o estados de aprobación.' },
                                 { icon: 'CreditCard', title: 'Facturación y planes', desc: 'Resuelve dudas sobre tu suscripción, planes de vendedor o comisiones.' },
                                 { icon: 'AlertCircle', title: 'No gestiona ventas', desc: 'Para coordinar pedidos, devoluciones o postventa con clientes, usa el Chat con Clientes.' },
                             ].map((item) => (
-                                <div key={item.title} className="flex items-start gap-4 p-4 bg-gray-50 dark:bg-[var(--bg-muted)]/50 rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)]">
-                                    <div className="w-10 h-10 rounded-xl bg-white dark:bg-[var(--bg-secondary)] flex items-center justify-center shadow-sm border border-gray-100 dark:border-[var(--border-subtle)] shrink-0">
-                                        <Icon name={item.icon as any} className="w-5 h-5 text-[var(--turquesa-500)] dark:text-[var(--icons-green)]" />
+                                <div key={item.title} className="flex items-start gap-2.5 sm:gap-4 p-2.5 sm:p-4 bg-gray-50 dark:bg-[var(--bg-muted)]/50 rounded-xl sm:rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)]">
+                                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-white dark:bg-[var(--bg-secondary)] flex items-center justify-center shadow-sm border border-gray-100 dark:border-[var(--border-subtle)] shrink-0">
+                                        <Icon name={item.icon as any} className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--turquesa-500)] dark:text-[var(--icons-green)]" />
                                     </div>
                                     <div>
-                                        <p className="font-black text-sm text-gray-800 dark:text-[var(--text-primary)] mb-0.5">{item.title}</p>
-                                        <p className="text-xs text-gray-500 dark:text-[var(--text-muted)] leading-relaxed">{item.desc}</p>
+                                        <p className="font-black text-xs sm:text-sm text-gray-800 dark:text-[var(--text-primary)] mb-0.5">{item.title}</p>
+                                        <p className="text-[11px] sm:text-xs text-gray-500 dark:text-[var(--text-muted)] leading-relaxed">{item.desc}</p>
                                     </div>
                                 </div>
                             ))}
                             <div className="flex justify-end pt-2">
-                                <button onClick={() => setShowLegend(false)} className="px-6 py-3 rounded-2xl bg-gray-100 dark:bg-[var(--bg-muted)] text-gray-600 dark:text-[var(--text-primary)] font-black text-xs uppercase tracking-widest hover:bg-gray-200 dark:hover:bg-[#2A3F33] transition-all">
+                                <button onClick={() => setShowLegend(false)} className="px-4 sm:px-6 py-2 sm:py-3 rounded-xl sm:rounded-2xl bg-gray-100 dark:bg-[var(--bg-muted)] text-gray-600 dark:text-[var(--text-primary)] font-black text-[10px] sm:text-xs uppercase tracking-widest hover:bg-gray-200 dark:hover:bg-[#2A3F33] transition-all">
                                     Cerrar
                                 </button>
                             </div>

@@ -6,6 +6,7 @@ import { Navigation, Pagination, Autoplay } from 'swiper/modules';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { motion } from 'framer-motion';
 import { blogApi } from '@/shared/lib/api/blog';
 
 import 'swiper/css';
@@ -94,9 +95,14 @@ export default function PostGridCarousel() {
                     }}
                     className="swiper overflow-visible"
                 >
-                    {posts.map((post) => (
+                    {posts.map((post, index) => (
                         <SwiperSlide key={post.id} className="h-auto">
-                            <div className="flex flex-col h-[450px] group bg-white dark:bg-[var(--bg-secondary)] border border-slate-100 dark:border-[var(--border-subtle)] rounded-[2rem] p-5 shadow-sm hover:shadow-2xl hover:scale-[1.03] transition-all duration-500">
+                            <motion.div
+                                initial={{ opacity: 0, y: 30 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.5, delay: index * 0.08 }}
+                                className="flex flex-col h-[450px] group bg-white dark:bg-[var(--bg-secondary)] border border-slate-100 dark:border-[var(--border-subtle)] rounded-[2rem] p-5 shadow-sm hover:shadow-2xl hover:scale-[1.03] transition-all duration-500">
                                 {/* Imagen: Rectangular */}
                                 <div className="relative w-full aspect-[16/10] overflow-hidden rounded-xl mb-5">
                                     <Image
@@ -132,7 +138,7 @@ export default function PostGridCarousel() {
                                         LYRIUM <span className="text-slate-300">|</span> {formatDate(post.published_at)}
                                     </div>
                                 </div>
-                            </div>
+                            </motion.div>
                         </SwiperSlide>
                     ))}
                     <div className="swiper-pagination !relative !mt-8" />

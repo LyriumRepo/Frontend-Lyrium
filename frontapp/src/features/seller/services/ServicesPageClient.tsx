@@ -150,18 +150,45 @@ export function ServicesPageClient() {
 
     // ── Header actions (unchanged) ───────────────────────────────────────────
 
-    const headerActions = (
-        <div className="flex gap-3 items-center whitespace-nowrap">
+    const primaryActions = (
+        <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-3 items-center sm:justify-end">
+            <BaseButton
+                variant="action"
+                leftIcon="Briefcase"
+                size="md"
+                onClick={() => {
+                    setActiveService(null);
+                    setModals({ ...modals, serviceConfig: true });
+                }}
+            >
+                Nuevo Servicio
+            </BaseButton>
+            <BaseButton
+                variant="action"
+                leftIcon="PlusCircle"
+                size="md"
+                onClick={() => {
+                    setSelectedSpecialist(null);
+                    setModals({ ...modals, specialist: true });
+                }}
+            >
+                Especialista
+            </BaseButton>
+        </div>
+    );
+
+    const secondaryActions = (
+        <div className="flex flex-wrap gap-3 items-center justify-center xl:justify-end">
             <button
                 onClick={() => exportServicesToExcel(services).catch(console.error)}
-                className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-[var(--bg-card)] text-[var(--text-primary)] font-bold text-xs border border-[var(--border-subtle)] hover:text-[#5AAFE6] hover:border-[#69BEEB]/30 transition-all shadow-sm"
+                className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-[var(--bg-secondary)] text-[var(--text-primary)] font-bold text-xs border border-[var(--border-subtle)] hover:text-[#5AAFE6] hover:border-[#69BEEB]/30 transition-all shadow-sm"
             >
                 <Icon name="FileSpreadsheet" className="text-xl" />
                 <span className="hidden sm:inline">Excel</span>
             </button>
             <button
                 onClick={() => exportServiciosToPdf(services).catch(console.error)}
-                className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-[var(--bg-card)] text-[var(--text-primary)] font-bold text-xs border border-[var(--border-subtle)] hover:text-[#5AAFE6] hover:border-[#69BEEB]/30 transition-all shadow-sm"
+                className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-[var(--bg-secondary)] text-[var(--text-primary)] font-bold text-xs border border-[var(--border-subtle)] hover:text-[#5AAFE6] hover:border-[#69BEEB]/30 transition-all shadow-sm"
             >
                 <Icon name="FileText" className="text-xl" />
                 <span className="hidden sm:inline">PDF</span>
@@ -173,28 +200,6 @@ export function ServicesPageClient() {
             >
                 <Icon name="HelpCircle" className="w-4 h-4" />
             </button>
-            <div className="hidden sm:flex gap-3 items-center">
-                <BaseButton
-                    variant="action"
-                    leftIcon="Briefcase"
-                    onClick={() => {
-                        setActiveService(null);
-                        setModals({ ...modals, serviceConfig: true });
-                    }}
-                >
-                    Nuevo Servicio
-                </BaseButton>
-                <BaseButton
-                    variant="action"
-                    leftIcon="PlusCircle"
-                    onClick={() => {
-                        setSelectedSpecialist(null);
-                        setModals({ ...modals, specialist: true });
-                    }}
-                >
-                    Especialista
-                </BaseButton>
-            </div>
         </div>
     );
 
@@ -207,109 +212,100 @@ export function ServicesPageClient() {
         <ServicesGuideModal isOpen={showGuide} onClose={() => setShowGuide(false)} />
         <div className="space-y-8 animate-fadeIn pb-20">
 
-            {/* ── Encabezado (sin cambios) ── */}
+            {/* ── Encabezado ── */}
             <ModuleHeader
                 title="Gestión de Servicios"
                 subtitle="Registro y administración de especialistas y servicios disponibles."
                 icon="Services"
-                actions={headerActions}
             />
-
-            {/* Acciones — solo mobile, debajo del header */}
-            <div className="sm:hidden space-y-2">
-                <BaseButton
-                    variant="action"
-                    leftIcon="Briefcase"
-                    className="w-full"
-                    onClick={() => {
-                        setActiveService(null);
-                        setModals({ ...modals, serviceConfig: true });
-                    }}
-                >
-                    Nuevo Servicio
-                </BaseButton>
-                <BaseButton
-                    variant="action"
-                    leftIcon="PlusCircle"
-                    className="w-full"
-                    onClick={() => {
-                        setSelectedSpecialist(null);
-                        setModals({ ...modals, specialist: true });
-                    }}
-                >
-                    Especialista
-                </BaseButton>
-            </div>
 
             {/* ── Catálogo ── */}
             <div className="space-y-4 mt-8">
 
                 {/* Barra superior de la tabla */}
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between px-1">
+                <div className="bg-[var(--bg-card)] p-6 sm:p-8 rounded-[2.5rem] shadow-xl border border-[var(--border-subtle)] animate-fadeIn">
 
-                    {/* Título sección */}
-                    <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 bg-sky-500/10 dark:bg-[#8FC3A1]/10 rounded-xl flex items-center justify-center border border-sky-500/20 dark:border-[#8FC3A1]/20 text-sky-500 dark:text-[#8FC3A1]">
-                            <Icon name="Services" className="w-4 h-4 stroke-[2.5px]" />
+                    {/* Header */}
+                    <div className="flex items-center justify-between gap-4 mb-6">
+                        <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 bg-[var(--brand-green)] rounded-2xl flex items-center justify-center shadow-lg shrink-0">
+                                <Icon name="Services" className="w-6 h-6 text-white" />
+                            </div>
+                            <div>
+                                <h2 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-widest">
+                                    Catálogo de Servicios
+                                </h2>
+                                <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wide">
+                                    {services.length} servicio{services.length !== 1 ? 's' : ''} registrado{services.length !== 1 ? 's' : ''}
+                                </p>
+                            </div>
                         </div>
-                        <div>
-                            <h2 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-widest">
-                                Catálogo de Servicios
-                            </h2>
-                            <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wide">
-                                {services.length} servicio{services.length !== 1 ? 's' : ''} registrado{services.length !== 1 ? 's' : ''}
-                            </p>
-                        </div>
+                        <button
+                            onClick={() => { setSearchText(''); setStatusFilter('todos'); setCurrentPage(1); }}
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-sky-400 dark:from-emerald-700 dark:to-teal-600 text-white font-black text-[10px] uppercase tracking-widest shadow-lg shadow-sky-500/25 dark:shadow-emerald-900/25 hover:shadow-xl hover:-translate-y-0.5 transition-all"
+                            title="Limpiar Filtros"
+                        >
+                            <Icon name="RotateCcw" className="w-4 h-4" />
+                            <span className="hidden sm:inline">Limpiar</span>
+                        </button>
                     </div>
 
-                    {/* Filtros + botón equipo */}
-                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
-
-                        {/* Buscador por nombre */}
-                        <div className="relative w-full sm:w-44">
-                            <Icon name="Search" className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--text-secondary)] pointer-events-none" />
+                    {/* Buscador + acciones principales */}
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
+                        <div className="relative flex-1">
+                            <Icon name="Search" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-secondary)] pointer-events-none" />
                             <input
                                 type="text"
                                 value={searchText}
                                 onChange={(e) => { setSearchText(e.target.value); setCurrentPage(1); }}
                                 placeholder="Buscar servicio..."
-                                className="pl-8 pr-3 py-1.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] text-[11px] font-bold text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-none focus:border-sky-500/50 dark:focus:border-[#8FC3A1]/50 transition-colors w-full sm:w-44"
+                                className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-none focus:border-sky-500/50 dark:focus:border-[#8FC3A1]/50 transition-colors"
                             />
                         </div>
+                        <div className="shrink-0">
+                            {primaryActions}
+                        </div>
+                    </div>
 
-                        <div className="flex items-center gap-2">
-                            {/* Dropdown filtro estado */}
-                            <div className="relative flex-1 sm:flex-none">
+                    {/* Estado + Especialistas + Acciones */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1">Estado</label>
+                            <div className="relative">
                                 <select
                                     value={statusFilter}
                                     onChange={(e) => { setStatusFilter(e.target.value as StatusFilter); setCurrentPage(1); }}
-                                    className="appearance-none w-full pl-3 pr-7 py-1.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] text-[11px] font-bold text-[var(--text-primary)] focus:outline-none focus:border-sky-500/50 dark:focus:border-[#8FC3A1]/50 transition-colors cursor-pointer"
+                                    className="appearance-none w-full p-3 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-2xl text-[10px] font-black uppercase tracking-widest text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--icons-green)]/20 cursor-pointer outline-none"
                                 >
                                     <option value="todos">Todos ({services.length})</option>
                                     <option value="publicado">Publicados ({publishedCount})</option>
                                     <option value="borrador">Borradores ({draftCount})</option>
                                 </select>
-                                <Icon name="ChevronDown" className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-[var(--text-secondary)] pointer-events-none" />
+                                <Icon name="ChevronDown" className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--text-secondary)] pointer-events-none" />
                             </div>
-
-                            {/* Botón off-canvas especialistas */}
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1">Equipo</label>
                             <button
                                 onClick={() => setDrawerOpen(true)}
-                                className="flex items-center justify-center gap-2 px-3 py-1.5 rounded-xl border border-sky-500/20 dark:border-[#8FC3A1]/20 bg-sky-500/10 dark:bg-[#8FC3A1]/10 text-sky-500 dark:text-[#8FC3A1] hover:bg-sky-500/20 dark:hover:bg-[#8FC3A1]/20 transition-colors flex-1 sm:flex-none whitespace-nowrap"
+                                className="w-full flex items-center justify-center gap-2 p-3 rounded-2xl border border-sky-500/20 dark:border-[#8FC3A1]/20 bg-sky-500/10 dark:bg-[#8FC3A1]/10 text-sky-500 dark:text-[#8FC3A1] hover:bg-sky-500/20 dark:hover:bg-[#8FC3A1]/20 transition-colors"
                             >
                                 <Icon name="Users" className="w-4 h-4" />
-                                <span className="text-[11px] font-bold hidden xs:inline sm:inline">
+                                <span className="text-[10px] font-black uppercase tracking-widest">
                                     Mis Especialistas
                                 </span>
-                                <span className="text-[11px] font-bold xs:hidden sm:hidden">
-                                    Equipo
-                                </span>
                                 {specialists.length > 0 && (
-                                    <span className="w-4 h-4 flex items-center justify-center rounded-full bg-sky-500 dark:bg-[#8FC3A1] text-white dark:text-[#0a1a13] text-[9px] font-bold">
+                                    <span className="w-5 h-5 flex items-center justify-center rounded-full bg-sky-500 dark:bg-[#8FC3A1] text-white dark:text-[#0a1a13] text-[9px] font-bold">
                                         {specialists.length}
                                     </span>
                                 )}
                             </button>
+                        </div>
+
+                        {/* Acciones secundarias */}
+                        <div className="space-y-2 sm:col-span-2 xl:col-span-1">
+                            <label className="hidden xl:block text-[10px] font-black text-transparent uppercase tracking-widest ml-1 select-none">.</label>
+                            {secondaryActions}
                         </div>
                     </div>
                 </div>

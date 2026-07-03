@@ -35,7 +35,7 @@ export default function ProductsGrid({ categorias, titulo = 'Categorías de prod
   useEffect(() => {
     const update = () => {
       if (window.innerWidth < 640) setItemsPerView(2);
-      else if (window.innerWidth < 768) setItemsPerView(3);
+      else if (window.innerWidth < 1024) setItemsPerView(3);
       else if (window.innerWidth < 1280) setItemsPerView(4);
       else setItemsPerView(5);
     };
@@ -100,7 +100,9 @@ export default function ProductsGrid({ categorias, titulo = 'Categorías de prod
         <div 
           className="flex transition-transform duration-700 gap-4"
           style={{
-            transform: `translateX(-${current * (100 / itemsPerView)}%)`,
+            // Cada paso = ancho de item + gap. Con gap-4 (1rem) y items de
+            // (100% - (n-1)·1rem)/n, el paso exacto es (100% + 1rem)/n.
+            transform: `translateX(calc(-${current} * ((100% + 1rem) / ${itemsPerView})))`,
           }}
         >
           {displayCategories.map((cat, index) => {

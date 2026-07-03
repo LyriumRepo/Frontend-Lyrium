@@ -66,7 +66,7 @@ export default function CheckoutStepBar() {
                   {/* Circle */}
                   <div
                     className={[
-                      'w-14 h-14 rounded-full flex items-center justify-center font-black text-lg shadow-xl transition-all duration-300 select-none',
+                      'w-9 h-9 text-sm sm:w-14 sm:h-14 sm:text-lg rounded-full flex items-center justify-center font-black shadow-xl transition-all duration-300 select-none flex-shrink-0',
                       isActive
                         ? 'text-white scale-110 animate-pulse-glow'
                         : isCompleted
@@ -96,9 +96,9 @@ export default function CheckoutStepBar() {
                         background: `linear-gradient(135deg, ${color.accent}33, ${color.accent}55)`,
                       }}
                     />
-                    <div className="relative w-10 h-10 bg-white dark:bg-[var(--bg-card)] rounded-xl flex items-center justify-center shadow-md border border-gray-100/50 dark:border-[var(--border-subtle)]">
+                    <div className="relative w-8 h-8 sm:w-10 sm:h-10 bg-white dark:bg-[var(--bg-card)] rounded-xl flex items-center justify-center shadow-md border border-gray-100/50 dark:border-[var(--border-subtle)]">
                       <Icon
-                        className={`w-5 h-5 transition-colors duration-500 ${
+                        className={`w-4 h-4 sm:w-5 sm:h-5 transition-colors duration-500 ${
                           isActive
                             ? 'text-sky-600 dark:text-[var(--brand-sky)]'
                             : isCompleted
@@ -112,7 +112,7 @@ export default function CheckoutStepBar() {
 
                 {/* Connector (placed after the step column) */}
                 {idx < STEPS.length - 1 && (
-                  <div className="flex-1 h-3 flex items-start px-2 relative z-0 -mt-10">
+                  <div className="flex-1 h-3 flex items-start px-1 sm:px-2 relative z-0 -mt-4 sm:-mt-10">
                     {/* Negative margin to align with circle vertical center */}
                     <div className="w-full h-1.5 bg-gray-100 dark:bg-[var(--bg-muted)] rounded-full overflow-hidden transition-all duration-500">
                       <div

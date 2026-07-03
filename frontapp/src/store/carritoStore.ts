@@ -16,11 +16,19 @@ interface CarritoUI {
   popupOpen: boolean; // ← NUEVO
 }
 
+export interface LastAddedService {
+  name: string;
+  price: number;
+  image?: string | null;
+  specialistName?: string;
+}
+
 interface CarritoState {
   products: ApiProduct[];
   filteredProducts: ApiProduct[];
   cartItems: ApiCartItem[];
   serviceHoldCount: number;
+  lastAddedService: LastAddedService | null;
 
   searchQuery: string;
   sortBy: SortOption;
@@ -35,6 +43,7 @@ interface CarritoState {
   setCartItems: (items: ApiCartItem[]) => void;
   setServiceHoldCount: (count: number) => void;
   incrementServiceHoldCount: () => void;
+  setLastAddedService: (service: LastAddedService | null) => void;
 
   setSearchQuery: (q: string) => void;
   setSortBy: (s: SortOption) => void;
@@ -92,6 +101,7 @@ export const useCarritoStore = create<CarritoState>((set, get) => ({
   filteredProducts: [],
   cartItems: [],
   serviceHoldCount: 0,
+  lastAddedService: null,
 
   searchQuery: '',
   sortBy: 'recent',
@@ -123,6 +133,7 @@ export const useCarritoStore = create<CarritoState>((set, get) => ({
   setCartItems: (items) => set({ cartItems: items }),
   setServiceHoldCount: (count) => set({ serviceHoldCount: count }),
   incrementServiceHoldCount: () => set((s) => ({ serviceHoldCount: s.serviceHoldCount + 1 })),
+  setLastAddedService: (lastAddedService) => set({ lastAddedService }),
 
   setSearchQuery: (searchQuery) => {
     set({ searchQuery });

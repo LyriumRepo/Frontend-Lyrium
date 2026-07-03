@@ -61,18 +61,10 @@ export function ForumClient() {
 
     return (
         <div className="space-y-6 animate-fadeIn font-industrial pb-20">
-            <ModuleHeader title="BioForo" subtitle="Foro de discusión con tu comunidad" icon="MessagesSquare"
-                actions={
-                    <div className="hidden sm:block">
-                        <BaseButton onClick={() => setShowCreator(true)} variant="primary" leftIcon="Plus" size="md">Crear Tema</BaseButton>
-                    </div>
-                } />
+            <ModuleHeader title="BioForo" subtitle="Foro de discusión con tu comunidad" icon="MessagesSquare" />
 
-            {/* Botón crear — solo mobile, debajo del header */}
-            <div className="sm:hidden">
-                <BaseButton onClick={() => setShowCreator(true)} variant="primary" leftIcon="Plus" size="md" className="w-full">
-                    Crear Tema
-                </BaseButton>
+            <div className="bg-[var(--bg-card)] p-4 rounded-[2rem] shadow-sm border border-[var(--border-subtle)] flex justify-center">
+                <BaseButton onClick={() => setShowCreator(true)} variant="primary" leftIcon="Plus" size="lg">Crear Tema</BaseButton>
             </div>
 
             <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">

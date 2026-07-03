@@ -94,7 +94,7 @@ export default function CarritoPage() {
 
             <button
               onClick={openCart}
-              className="relative self-start lg:self-center inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-sky-500 text-white font-medium hover:bg-sky-600 transition shadow-lg shadow-sky-200/50"
+              className="relative self-center lg:self-center inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-sky-500 text-white font-medium hover:bg-sky-600 transition shadow-lg shadow-sky-200/50"
             >
               <ShoppingCart className="w-4 h-4" />
               Ver carrito

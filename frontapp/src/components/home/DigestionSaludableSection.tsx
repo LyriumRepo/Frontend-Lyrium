@@ -21,8 +21,19 @@ interface MarketplaceSectionProps {
  
 function MarketplaceSection({ title, bannerImage, products }: MarketplaceSectionProps) {
   const [currentPage, setCurrentPage] = useState(0);
+  const [itemsPerView, setItemsPerView] = useState(3);
 
-  
+  useEffect(() => {
+    const update = () => {
+      if (window.innerWidth < 640) setItemsPerView(1);
+      else if (window.innerWidth < 1024) setItemsPerView(2);
+      else setItemsPerView(3);
+    };
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, []);
+
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentPage((prev) => (prev + 1) % 3);
@@ -64,19 +75,19 @@ function MarketplaceSection({ title, bannerImage, products }: MarketplaceSection
               className="flex -mx-2"
               style={{
                 transition: 'transform 1000ms cubic-bezier(0.25, 1, 0.5, 1)',
-                transform: `translateX(-${currentPage * (100 / 3)}%)`,
+                transform: `translateX(-${currentPage * (100 / itemsPerView)}%)`,
               }}
             >
               {allItems.map((product, index) => (
                 <div
                   key={`${product.id}-${index}`}
-                  className="w-1/3 flex-shrink-0 px-2"
+                  className="w-full sm:w-1/2 lg:w-1/3 flex-shrink-0 px-2"
                 >
                   <div
-                    className="group bg-[#1E3028] rounded-[14px] p-5 text-center shadow-[0_8px_25px_rgba(0,0,0,0.15)] border border-transparent transition-all duration-300 hover:-translate-y-[6px] hover:shadow-[0_15px_35px_rgba(0,0,0,0.3)] flex flex-col justify-between h-full min-h-[360px] cursor-default"
+                    className="group bg-[#1E3028] rounded-[14px] p-5 text-center shadow-[0_8px_25px_rgba(0,0,0,0.15)] border border-transparent transition-all duration-300 hover:-translate-y-[6px] hover:shadow-[0_15px_35px_rgba(0,0,0,0.3)] flex flex-col justify-between h-full min-h-[280px] sm:min-h-[320px] lg:min-h-[360px] cursor-default"
                   >
-                   
-                    <div className="relative overflow-hidden w-full h-[220px] mb-4 flex items-center justify-center group-hover:scale-[1.05] transition-transform duration-300">
+
+                    <div className="relative overflow-hidden w-full h-[160px] sm:h-[190px] lg:h-[220px] mb-4 flex items-center justify-center group-hover:scale-[1.05] transition-transform duration-300">
                       <Image
                         src={product.image}
                         alt={product.title}

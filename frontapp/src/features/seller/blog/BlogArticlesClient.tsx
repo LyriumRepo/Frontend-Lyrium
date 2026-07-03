@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { FileText, Plus, Search, Edit, Trash2, Eye, Send, Save, CheckCircle } from 'lucide-react';
+import { FileText, Search, Edit, Trash2, Eye, Send, Save, CheckCircle, RotateCcw } from 'lucide-react';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import BaseButton from '@/components/ui/BaseButton';
 import { BlogEditor } from '@/components/ui/BlogEditor';
@@ -137,28 +137,50 @@ export function BlogArticlesClient() {
     return (
         <div className="space-y-6 animate-fadeIn font-industrial pb-20">
             <div className="[&_h1]:!whitespace-normal [&_h1]:!break-words [&_h2]:!whitespace-normal [&_h2]:!break-words [&_p]:!whitespace-normal">
-                <ModuleHeader title="Artículos" subtitle="Gestiona tus artículos de blog" icon="FileText"
-                    actions={
-                        <>
-                            <span className="hidden sm:block"><BaseButton onClick={openCreate} variant="primary" leftIcon="Plus" size="md">Nuevo Artículo</BaseButton></span>
-                            <button onClick={openCreate} className="sm:hidden w-9 h-9 rounded-xl bg-sky-500 dark:bg-[#8FC3A1] flex items-center justify-center text-white active:scale-95 shadow-md"><Plus className="w-4 h-4" /></button>
-                        </>
-                    } />
+                <ModuleHeader title="Artículos" subtitle="Gestiona tus artículos de blog" icon="FileText" />
             </div>
 
             {/* Buscador + filtro */}
-            <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
-                <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar artículos..." className="w-full pl-10 pr-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200 focus:outline-none focus:border-sky-500 transition" />
+            <div className="bg-[var(--bg-card)] p-6 sm:p-8 rounded-[2.5rem] shadow-xl border border-[var(--border-subtle)] animate-fadeIn">
+                <div className="flex items-center justify-between gap-4 mb-6">
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-[var(--brand-green)] rounded-2xl flex items-center justify-center shadow-lg shrink-0">
+                            <FileText className="w-6 h-6 text-white" />
+                        </div>
+                        <div>
+                            <h2 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-widest">Artículos</h2>
+                            <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wide">
+                                {articles.length} artículo{articles.length !== 1 ? 's' : ''}
+                            </p>
+                        </div>
+                    </div>
+                    <button
+                        onClick={() => { setSearch(''); setStatusFilter(''); }}
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-sky-400 dark:from-emerald-700 dark:to-teal-600 text-white font-black text-[10px] uppercase tracking-widest shadow-lg shadow-sky-500/25 dark:shadow-emerald-900/25 hover:shadow-xl hover:-translate-y-0.5 transition-all"
+                        title="Limpiar Filtros"
+                    >
+                        <RotateCcw className="w-4 h-4" />
+                        <span className="hidden sm:inline">Limpiar</span>
+                    </button>
                 </div>
-                <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="w-full sm:w-auto px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200">
-                    <option value="">Todos</option>
-                    <option value="draft">Borrador</option>
-                    <option value="review">Revisión</option>
-                    <option value="published">Publicado</option>
-                    <option value="archived">Archivado</option>
-                </select>
+
+                <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
+                    <div className="relative flex-1">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-secondary)] pointer-events-none" />
+                        <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar artículos..." className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-none focus:border-sky-500/50 dark:focus:border-[#8FC3A1]/50 transition-colors" />
+                    </div>
+                    <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] text-sm text-[var(--text-primary)]">
+                        <option value="">Todos</option>
+                        <option value="draft">Borrador</option>
+                        <option value="review">Revisión</option>
+                        <option value="published">Publicado</option>
+                        <option value="archived">Archivado</option>
+                    </select>
+                </div>
+
+                <div className="flex flex-wrap items-center justify-center gap-3 mt-6 pt-5 border-t border-[var(--border-subtle)]">
+                    <BaseButton onClick={openCreate} variant="primary" leftIcon="Plus" size="lg">Nuevo Artículo</BaseButton>
+                </div>
             </div>
 
             {error && <div className="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 p-4 rounded-2xl border border-red-200 dark:border-red-800">{error}</div>}
