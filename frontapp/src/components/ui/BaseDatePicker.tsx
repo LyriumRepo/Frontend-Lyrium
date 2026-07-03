@@ -28,19 +28,12 @@ export default function BaseDatePicker({ label, value, onChange, name, className
   const updatePosition = useCallback(() => {
     if (!containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
-    const calW = Math.min(280, window.innerWidth - 16);
-    const calH = 340;
+    const calH = 340; // altura estimada del calendario
     const spaceBelow = window.innerHeight - rect.bottom;
-    // position:fixed → viewport coords only, never add scrollY/scrollX
     const top = spaceBelow >= calH
-      ? rect.bottom + 6
-      : rect.top - calH - 6;
-    // Prefer aligning to left edge of button; clamp to stay inside viewport
-    const rawLeft = rect.left + calW > window.innerWidth
-      ? rect.right - calW
-      : rect.left;
-    const left = Math.max(8, Math.min(rawLeft, window.innerWidth - calW - 8));
-    setDropdownPos({ top, left, width: calW });
+      ? rect.bottom + window.scrollY + 6
+      : rect.top + window.scrollY - calH - 6;
+    setDropdownPos({ top, left: rect.left + window.scrollX, width: rect.width });
   }, []);
 
   useEffect(() => {
@@ -112,7 +105,7 @@ export default function BaseDatePicker({ label, value, onChange, name, className
   return (
     <div className={`relative ${className || ''}`} ref={containerRef}>
       {label && (
-        <label className="text-[10px] font-black text-gray-400 dark:text-[var(--icons-green)] uppercase tracking-widest ml-1">
+        <label className="text-[10px] font-black text-gray-400 dark:text-gray-300 uppercase tracking-widest ml-1">
           {label}
         </label>
       )}
@@ -132,14 +125,14 @@ export default function BaseDatePicker({ label, value, onChange, name, className
       {isOpen && typeof document !== 'undefined' && createPortal(
         <div
           ref={calendarRef}
-          className="fixed z-[300] bg-sky-50 dark:bg-[#1A3A32] rounded-2xl shadow-2xl border border-gray-200 dark:border-[var(--border-subtle)] p-4"
-          style={{ top: dropdownPos.top, left: dropdownPos.left, width: dropdownPos.width }}
+          className="fixed z-[300] bg-sky-50 dark:bg-[#1A3A32] rounded-2xl shadow-2xl border border-gray-200 dark:border-[var(--border-subtle)] p-4 w-[280px]"
+          style={{ top: dropdownPos.top, left: dropdownPos.left }}
         >
           <div className="flex items-center justify-between mb-4">
             <button
               type="button"
               onClick={prevMonth}
-              className="p-1.5 hover:bg-sky-200 dark:hover:bg-white/10 active:scale-95 rounded-lg transition-all outline-none focus:outline-none text-sky-500 dark:text-[var(--icons-green)]"
+              className="p-1.5 hover:bg-sky-200 dark:hover:bg-white/10 rounded-lg transition-colors text-sky-500 dark:text-[var(--icons-green)]"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -151,7 +144,7 @@ export default function BaseDatePicker({ label, value, onChange, name, className
             <button
               type="button"
               onClick={nextMonth}
-              className="p-1.5 hover:bg-sky-200 dark:hover:bg-white/10 active:scale-95 rounded-lg transition-all outline-none focus:outline-none text-sky-500 dark:text-[var(--icons-green)]"
+              className="p-1.5 hover:bg-sky-200 dark:hover:bg-white/10 rounded-lg transition-colors text-sky-500 dark:text-[var(--icons-green)]"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
@@ -174,7 +167,7 @@ export default function BaseDatePicker({ label, value, onChange, name, className
                   <button
                     type="button"
                     onClick={() => selectDay(day)}
-                    className={`w-9 h-9 rounded-xl text-xs font-bold transition-all cursor-pointer outline-none focus:outline-none active:scale-95 ${
+                    className={`w-9 h-9 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                       isSelected(day)
                         ? 'bg-sky-500 dark:bg-[var(--brand-green)] text-white shadow-md'
                         : isToday(day)
@@ -196,7 +189,7 @@ export default function BaseDatePicker({ label, value, onChange, name, className
               <button
                 type="button"
                 onClick={() => { onChange(''); setIsOpen(false); }}
-                className="text-[10px] font-bold text-red-400 hover:text-red-500 transition-colors cursor-pointer outline-none focus:outline-none"
+                className="text-[10px] font-bold text-red-400 hover:text-red-500 transition-colors cursor-pointer"
               >
                 Limpiar
               </button>
@@ -204,7 +197,7 @@ export default function BaseDatePicker({ label, value, onChange, name, className
             <button
               type="button"
               onClick={selectToday}
-              className="text-[10px] font-bold text-sky-500 dark:text-[var(--icons-green)] hover:underline transition-colors cursor-pointer outline-none focus:outline-none ml-auto"
+              className="text-[10px] font-bold text-sky-500 dark:text-[var(--icons-green)] hover:underline transition-colors cursor-pointer ml-auto"
             >
               Hoy
             </button>
