@@ -42,7 +42,7 @@ export default function CartSummary({ onContinue }: Props) {
   }
 
   return (
-    <div className="rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] p-6 space-y-5 sticky top-24">
+    <div className="rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] p-6 space-y-5 lg:sticky lg:top-24">
       {/* Título */}
       <h2 className="font-bold text-gray-900 dark:text-[var(--text-primary)] flex items-center gap-2">
         <ShoppingBag className="w-5 h-5 text-sky-500" />

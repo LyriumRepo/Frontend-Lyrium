@@ -27,22 +27,13 @@ export default function VisualIdentity(props: VisualIdentityProps): React.ReactE
     const [uploading, setUploading] = useState<string | null>(null);
     const isStoreReady = !!storeId;
 
-    // Sincronizar estados locales SOLO cuando no hay una actualización reciente
     React.useEffect(() => {
         const syncFromConfig = () => {
-            if (lastUpdated !== 'logo') {
-                setLocalLogo(config.visual.logo);
-            }
-            if (lastUpdated !== 'banner1') {
-                setLocalBanner1(config.visual.banner1);
-            }
-            if (lastUpdated !== 'banner2') {
-                setLocalBanner2(config.visual.banner2);
-            }
+            if (lastUpdated !== 'logo') setLocalLogo(config.visual.logo);
+            if (lastUpdated !== 'banner1') setLocalBanner1(config.visual.banner1);
+            if (lastUpdated !== 'banner2') setLocalBanner2(config.visual.banner2);
             setLastUpdated(null);
         };
-        
-        // Pequeño delay para permitir que el estado local se actualice primero
         const timer = setTimeout(syncFromConfig, 100);
         return () => clearTimeout(timer);
     }, [config.visual.logo, config.visual.banner1, config.visual.banner2]);
@@ -50,12 +41,7 @@ export default function VisualIdentity(props: VisualIdentityProps): React.ReactE
     const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file || !uploadLogo) return;
-
-        if (file.size > 2 * 1024 * 1024) {
-            alert('El archivo no debe superar los 2 MB');
-            return;
-        }
-
+        if (file.size > 2 * 1024 * 1024) { alert('El archivo no debe superar los 2 MB'); return; }
         setUploading('logo');
         setLastUpdated('logo');
         try {
@@ -65,8 +51,7 @@ export default function VisualIdentity(props: VisualIdentityProps): React.ReactE
             updateConfig({ visual: { ...config.visual, logo: result.url } });
         } catch (error) {
             console.error('Error uploading logo:', error);
-            const message = error instanceof Error ? error.message : 'Error al subir el logo';
-            alert(message);
+            alert(error instanceof Error ? error.message : 'Error al subir el logo');
             setLastUpdated(null);
         } finally {
             setUploading(null);
@@ -76,12 +61,7 @@ export default function VisualIdentity(props: VisualIdentityProps): React.ReactE
     const handleBannerUpload = (bannerNumber: 1 | 2) => async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file || !uploadBanner) return;
-
-        if (file.size > 5 * 1024 * 1024) {
-            alert('El archivo no debe superar los 5 MB');
-            return;
-        }
-
+        if (file.size > 5 * 1024 * 1024) { alert('El archivo no debe superar los 5 MB'); return; }
         setUploading(`banner${bannerNumber}`);
         setLastUpdated(bannerNumber === 1 ? 'banner1' : 'banner2');
         try {
@@ -106,17 +86,11 @@ export default function VisualIdentity(props: VisualIdentityProps): React.ReactE
     const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file || !uploadGallery) return;
-
-        if (file.size > 5 * 1024 * 1024) {
-            alert('El archivo no debe superar los 5 MB');
-            return;
-        }
-
+        if (file.size > 5 * 1024 * 1024) { alert('El archivo no debe superar los 5 MB'); return; }
         setUploading('gallery');
         try {
             const result = await uploadGallery(file);
-            const newGallery = [...gallery, result.url];
-            updateConfig({ visual: { ...config.visual, gallery: newGallery } });
+            updateConfig({ visual: { ...config.visual, gallery: [...gallery, result.url] } });
         } catch (error) {
             console.error('Error uploading gallery:', error);
             alert('Error al subir la imagen');
@@ -127,20 +101,18 @@ export default function VisualIdentity(props: VisualIdentityProps): React.ReactE
 
     const handleDeleteGalleryItem = (index: number) => {
         const imageUrl = gallery[index];
-        
-        // Extraer mediaId de la URL: http://localhost:8000/storage/3/archivo.webp -> 3
         const mediaIdMatch = imageUrl?.match(/\/storage\/(\d+)\//);
         const mediaId = mediaIdMatch ? parseInt(mediaIdMatch[1]) : undefined;
-        
+
         if (!deleteGalleryItem || !mediaId) {
             const newGallery = [...gallery];
             newGallery.splice(index, 1);
             updateConfig({ visual: { ...config.visual, gallery: newGallery } });
             return;
         }
-        
+
         if (!confirm('¿Eliminar esta imagen de la galería?')) return;
-        
+
         setUploading('gallery-delete');
         deleteGalleryItem(index, mediaId).then(() => {
             const newGallery = [...gallery];
@@ -160,14 +132,15 @@ export default function VisualIdentity(props: VisualIdentityProps): React.ReactE
     };
 
     return (
-        <div className="glass-card p-0 overflow-hidden border-none rounded-[2.5rem] shadow-2xl bg-[var(--bg-card)] animate-fadeIn mb-8">
-            <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[var(--brand-green)] dark:to-[#1A3A32] p-8 flex items-center justify-between relative overflow-hidden">
-                <div className="flex items-center gap-5 text-white relative z-10">
-                    <div className="w-12 h-12 bg-white/20 dark:bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 dark:border-white/20 shadow-inner">
-                        <Icon name="Palette" className="w-6 h-6" />
+        <div className="glass-card p-0 overflow-hidden border-none rounded-[2rem] sm:rounded-[2.5rem] shadow-2xl bg-[var(--bg-card)] animate-fadeIn mb-4 sm:mb-6 md:mb-8">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[var(--brand-green)] dark:to-[#1A3A32] p-4 sm:p-6 md:p-8 flex items-center justify-between relative overflow-hidden">
+                <div className="flex items-center gap-3 sm:gap-5 text-white relative z-10">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white/20 dark:bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 dark:border-white/20 shadow-inner flex-shrink-0">
+                        <Icon name="Palette" className="w-5 h-5 sm:w-6 sm:h-6" />
                     </div>
                     <div>
-                        <h3 className="text-2xl font-black tracking-tighter leading-none">Estudio de Identidad</h3>
+                        <h3 className="text-xl sm:text-2xl font-black tracking-tighter leading-none">Estudio de Identidad</h3>
                         <p className="text-[10px] font-bold text-sky-100 uppercase tracking-[0.2em] mt-1 opacity-80">
                             Gestiona tu logo, banners y galeria de fotos de tu tienda
                         </p>
@@ -175,40 +148,44 @@ export default function VisualIdentity(props: VisualIdentityProps): React.ReactE
                 </div>
             </div>
 
-            <div className="p-10 grid grid-cols-1 lg:grid-cols-12 gap-12">
-                <div className="lg:col-span-4 xl:col-span-3 space-y-8">
-                    <div className="flex flex-col items-start">
-                        <div className="flex items-center gap-2 mb-6">
+            {/* Body */}
+            <div className="p-4 sm:p-6 md:p-8 lg:p-10 grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 lg:gap-12">
+                {/* Logo Column */}
+                <div className="lg:col-span-4 xl:col-span-3 space-y-6 sm:space-y-8">
+                    <div className="flex flex-col items-center sm:items-start">
+                        <div className="flex items-center gap-2 mb-4 sm:mb-6">
                             <span className="w-1.5 h-4 bg-sky-500 dark:bg-[var(--icons-green)] rounded-full"></span>
                             <span className="text-[11px] font-black text-[var(--text-primary)] uppercase tracking-widest">Logo de Marca</span>
                         </div>
                         <div
                             role="button"
                             tabIndex={0}
-                            className="relative w-48 h-48 bg-[var(--bg-secondary)] rounded-full ring-4 ring-[var(--bg-secondary)] ring-offset-4 ring-offset-[var(--bg-card)] border-2 border-dashed border-[var(--border-subtle)] group cursor-pointer overflow-hidden flex items-center justify-center transition-all duration-500 hover:scale-[1.02] hover:border-sky-400 dark:hover:border-[var(--icons-green)]"
+                            className="relative w-36 h-36 sm:w-44 sm:h-44 md:w-48 md:h-48 bg-[var(--bg-secondary)] rounded-full ring-4 ring-[var(--bg-secondary)] ring-offset-4 ring-offset-[var(--bg-card)] border-2 border-dashed border-[var(--border-subtle)] group cursor-pointer overflow-hidden flex items-center justify-center transition-all duration-500 hover:scale-[1.02] hover:border-sky-400 dark:hover:border-[var(--icons-green)]"
                             onClick={() => document.getElementById('input-logo')?.click()}
                             onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') document.getElementById('input-logo')?.click(); }}
                         >
                             {localLogo ? (
-                                <Image src={localLogo} fill sizes="112px" alt="Logo" className="object-contain group-hover:scale-110 transition-transform duration-700" />
+                                <Image src={localLogo} fill sizes="(max-width: 640px) 144px, (max-width: 768px) 176px, 192px" alt="Logo" className="object-contain group-hover:scale-110 transition-transform duration-700" />
                             ) : (
-                                <Icon name="Image" className="w-12 h-12 text-[var(--text-secondary)]" />
+                                <Icon name="Image" className="w-10 h-10 sm:w-12 sm:h-12 text-[var(--text-secondary)]" />
                             )}
                             <div className="absolute inset-0 bg-sky-600/60 dark:bg-[var(--icons-green)] backdrop-blur-[0px] opacity-0 group-hover:opacity-100 transition-all duration-500 flex flex-col items-center justify-center text-white">
-                                <Icon name="Camera" className="w-8 h-8 mb-2 animate-bounce" />
-                                <span className="text-[9px] font-black uppercase tracking-widest">{uploading === 'logo' ? 'Subiendo...' : 'Actualizar'}</span>
+                                <Icon name="Camera" className="w-7 h-7 sm:w-8 sm:h-8 mb-2 animate-bounce" />
+                                <span className="text-[9px] font-black uppercase tracking-widest">
+                                    {uploading === 'logo' ? 'Subiendo...' : 'Actualizar'}
+                                </span>
                             </div>
-                            <input 
-                                type="file" 
-                                id="input-logo" 
-                                className="hidden" 
-                                accept="image/png, image/jpeg, image/webp" 
+                            <input
+                                type="file"
+                                id="input-logo"
+                                className="hidden"
+                                accept="image/png, image/jpeg, image/webp"
                                 onChange={handleLogoUpload}
                                 disabled={uploading !== null || !isStoreReady}
                             />
                         </div>
 
-                        <div className="mt-8 space-y-3 pl-2">
+                        <div className="mt-4 sm:mt-8 space-y-3 pl-0 sm:pl-2">
                             <div className="flex items-center gap-2">
                                 <Icon name="Maximize" className="w-3 h-3 text-sky-500" />
                                 <p className="text-[10px] font-black text-[var(--text-secondary)] uppercase">Ratio Profesional 1:1</p>
@@ -221,9 +198,11 @@ export default function VisualIdentity(props: VisualIdentityProps): React.ReactE
                     </div>
                 </div>
 
-                <div className="lg:col-span-8 xl:col-span-9 space-y-10">
-                    <div className="space-y-6">
-                        <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-4">
+                {/* Banners + Gallery Column */}
+                <div className="lg:col-span-8 xl:col-span-9 space-y-8 sm:space-y-10">
+                    {/* Banners */}
+                    <div className="space-y-4 sm:space-y-6">
+                        <div className="flex flex-wrap items-center justify-between gap-y-2 border-b border-[var(--border-subtle)] pb-4">
                             <div className="flex items-center gap-2">
                                 <span className="w-1.5 h-4 bg-sky-500 dark:bg-[var(--icons-green)] rounded-full"></span>
                                 <span className="text-[11px] font-black text-[var(--text-primary)] uppercase tracking-widest">Escaparate de Banners</span>
@@ -232,71 +211,76 @@ export default function VisualIdentity(props: VisualIdentityProps): React.ReactE
                                 <Icon name="AlertCircle" className="w-3 h-3" /> Resolución Óptima 4:1
                             </p>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                            {/* Banner 1 */}
                             <div
                                 role="button"
                                 tabIndex={0}
-                                className="relative aspect-[4/1.5] rounded-3xl overflow-hidden bg-[var(--bg-secondary)] border border-[var(--border-subtle)] cursor-pointer group"
+                                className="relative aspect-[4/1.5] rounded-2xl sm:rounded-3xl overflow-hidden bg-[var(--bg-secondary)] border border-[var(--border-subtle)] cursor-pointer group"
                                 onClick={() => document.getElementById('input-banner1')?.click()}
                                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') document.getElementById('input-banner1')?.click(); }}
                             >
                                 {localBanner1 ? (
-                                    <Image src={localBanner1} fill sizes="(max-width: 768px) 100vw, 50vw" alt="Banner Principal" className="object-cover group-hover:scale-105 transition-transform duration-1000" />
+                                    <Image src={localBanner1} fill sizes="(max-width: 640px) 100vw, 50vw" alt="Banner Principal" className="object-cover group-hover:scale-105 transition-transform duration-1000" />
                                 ) : (
                                     <div className="absolute inset-0 flex items-center justify-center">
-                                        <Icon name="Image" className="w-12 h-12 text-[var(--text-secondary)]" />
+                                        <Icon name="Image" className="w-10 h-10 sm:w-12 sm:h-12 text-[var(--text-secondary)]" />
                                     </div>
                                 )}
-                                <div className="absolute top-4 left-4">
+                                <div className="absolute top-3 left-3 sm:top-4 sm:left-4">
                                     <span className="px-2 py-1 bg-black/40 backdrop-blur-md rounded-lg text-[8px] font-black text-white uppercase tracking-tighter border border-white/20">Banner Principal</span>
                                 </div>
-                                <input 
-                                    type="file" 
-                                    id="input-banner1" 
-                                    className="hidden" 
-                                    accept="image/*" 
+                                <input
+                                    type="file"
+                                    id="input-banner1"
+                                    className="hidden"
+                                    accept="image/*"
                                     onChange={handleBannerUpload(1)}
                                     disabled={uploading !== null || !isStoreReady}
                                 />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-end p-6">
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-end p-4 sm:p-6">
                                     <span className="text-white text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
-                                        <Icon name="Upload" className="w-4 h-4" /> {uploading === 'banner1' ? 'Subiendo...' : 'Cambiar imagen de fondo'}
+                                        <Icon name="Upload" className="w-4 h-4" />
+                                        {uploading === 'banner1' ? 'Subiendo...' : 'Cambiar imagen'}
                                     </span>
                                 </div>
                             </div>
+
+                            {/* Banner 2 */}
                             <div
                                 role="button"
                                 tabIndex={0}
-                                className={`relative aspect-[4/1.5] rounded-3xl overflow-hidden border-2 border-dashed ${localBanner2 ? 'border-[var(--border-subtle)] bg-[var(--bg-secondary)]' : 'border-sky-500/20 dark:border-emerald-500/20 bg-sky-500/5 dark:bg-emerald-500/5'} flex items-center justify-center cursor-pointer hover:bg-sky-500/10 transition-all group`}
+                                className={`relative aspect-[4/1.5] rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-dashed ${localBanner2 ? 'border-[var(--border-subtle)] bg-[var(--bg-secondary)]' : 'border-sky-500/20 dark:border-emerald-500/20 bg-sky-500/5 dark:bg-emerald-500/5'} flex items-center justify-center cursor-pointer hover:bg-sky-500/10 transition-all group`}
                                 onClick={() => document.getElementById('input-banner2')?.click()}
                                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') document.getElementById('input-banner2')?.click(); }}
                             >
                                 {localBanner2 ? (
                                     <>
-                                        <Image src={localBanner2} fill sizes="(max-width: 768px) 100vw, 50vw" alt="Banner de Oferta" className="object-cover group-hover:scale-105 transition-transform duration-1000" />
-                                        <div className="absolute top-4 left-4">
+                                        <Image src={localBanner2} fill sizes="(max-width: 640px) 100vw, 50vw" alt="Banner de Oferta" className="object-cover group-hover:scale-105 transition-transform duration-1000" />
+                                        <div className="absolute top-3 left-3 sm:top-4 sm:left-4">
                                             <span className="px-2 py-1 bg-black/40 backdrop-blur-md rounded-lg text-[8px] font-black text-white uppercase tracking-tighter border border-white/20">Banner de Oferta</span>
                                         </div>
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-end p-6">
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-end p-4 sm:p-6">
                                             <span className="text-white text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
-                                                <Icon name="Upload" className="w-4 h-4" /> {uploading === 'banner2' ? 'Subiendo...' : 'Cambiar imagen'}
+                                                <Icon name="Upload" className="w-4 h-4" />
+                                                {uploading === 'banner2' ? 'Subiendo...' : 'Cambiar imagen'}
                                             </span>
                                         </div>
                                     </>
                                 ) : (
-                                    <div className="text-center">
-                                        <div className="w-12 h-12 bg-[var(--bg-card)] rounded-2xl flex items-center justify-center mx-auto mb-3 border border-sky-500/20 dark:border-emerald-500/20 shadow-sm">
+                                    <div className="text-center px-4">
+                                        <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[var(--bg-card)] rounded-2xl flex items-center justify-center mx-auto mb-3 border border-sky-500/20 dark:border-emerald-500/20 shadow-sm">
                                             <Icon name="Plus" className="text-sky-500 dark:text-[var(--icons-green)] w-5 h-5" />
                                         </div>
                                         <p className="text-[10px] font-black text-sky-600 dark:text-[var(--icons-green)] uppercase tracking-widest">Expandir Campaña</p>
                                         <p className="text-[8px] font-bold text-sky-300 dark:text-[var(--icons-green)] uppercase mt-1">Añadir Banner de Oferta</p>
                                     </div>
                                 )}
-                                <input 
-                                    type="file" 
-                                    id="input-banner2" 
-                                    className="hidden" 
-                                    accept="image/*" 
+                                <input
+                                    type="file"
+                                    id="input-banner2"
+                                    className="hidden"
+                                    accept="image/*"
                                     onChange={handleBannerUpload(2)}
                                     disabled={uploading !== null || !isStoreReady}
                                 />
@@ -304,14 +288,15 @@ export default function VisualIdentity(props: VisualIdentityProps): React.ReactE
                         </div>
                     </div>
 
-                    <div className="space-y-6">
-                        <div className="flex items-center justify-between">
+                    {/* Gallery */}
+                    <div className="space-y-4 sm:space-y-6">
+                        <div className="flex flex-wrap items-center justify-between gap-y-3">
                             <div className="flex items-center gap-2">
                                 <span className="w-1.5 h-4 bg-sky-500 dark:bg-[var(--icons-green)] rounded-full"></span>
                                 <span className="text-[11px] font-black text-[var(--text-primary)] uppercase tracking-widest">Muro de Instalaciones</span>
                             </div>
-                            <button 
-                                className="flex items-center gap-2 px-5 py-2.5 bg-sky-500/10 dark:bg-emerald-500/10 text-sky-500 dark:text-[var(--icons-green)] rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-sky-500 dark:hover:bg-[var(--brand-green)] hover:text-white transition-all"
+                            <button
+                                className="flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 bg-sky-500/10 dark:bg-emerald-500/10 text-sky-500 dark:text-[var(--icons-green)] rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-sky-500 dark:hover:bg-[var(--brand-green)] hover:text-white transition-all"
                                 onClick={() => document.getElementById('input-gallery')?.click()}
                                 disabled={uploading !== null || !isStoreReady}
                             >
@@ -319,7 +304,7 @@ export default function VisualIdentity(props: VisualIdentityProps): React.ReactE
                                 <span>{uploading === 'gallery' ? 'Subiendo...' : 'Gestionar Galería'}</span>
                             </button>
                         </div>
-                        <div className="flex flex-wrap gap-x-12 gap-y-10 pt-4 pl-4">
+                        <div className="flex flex-wrap gap-x-6 gap-y-6 sm:gap-x-10 sm:gap-y-8 md:gap-x-12 md:gap-y-10 pt-4 pl-2 sm:pl-4">
                             {gallery.map((img, i) => (
                                 <PolaroidCard
                                     key={img || `gallery-${i}`}
@@ -331,17 +316,17 @@ export default function VisualIdentity(props: VisualIdentityProps): React.ReactE
                             <div
                                 role="button"
                                 tabIndex={0}
-                                className="w-28 h-28 border-2 border-dashed border-[var(--border-subtle)] rounded-2xl flex flex-col items-center justify-center bg-[var(--bg-secondary)]/50 hover:bg-[var(--bg-card)] transition-all cursor-pointer rotate-1 group"
+                                className="w-24 h-24 sm:w-28 sm:h-28 border-2 border-dashed border-[var(--border-subtle)] rounded-2xl flex flex-col items-center justify-center bg-[var(--bg-secondary)]/50 hover:bg-[var(--bg-card)] transition-all cursor-pointer rotate-1 group"
                                 onClick={() => document.getElementById('input-gallery')?.click()}
                                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') document.getElementById('input-gallery')?.click(); }}
                             >
                                 <Icon name="Image" className="w-6 h-6 text-[var(--text-secondary)] group-hover:text-sky-400 dark:group-hover:text-[var(--icons-green)]" />
                                 <span className="text-[8px] font-black text-[var(--text-secondary)] uppercase mt-1">Próxima Foto</span>
-                                <input 
-                                    type="file" 
-                                    id="input-gallery" 
-                                    className="hidden" 
-                                    accept="image/*" 
+                                <input
+                                    type="file"
+                                    id="input-gallery"
+                                    className="hidden"
+                                    accept="image/*"
                                     onChange={handleGalleryUpload}
                                     disabled={uploading !== null || !isStoreReady}
                                 />

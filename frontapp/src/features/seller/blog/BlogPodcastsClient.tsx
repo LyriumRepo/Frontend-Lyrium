@@ -1,10 +1,54 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Headphones, Plus, Edit, Trash2, Music, Video, Globe, Clock, User } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import { Headphones, Edit, Trash2, Music, Video, Globe, Clock, User } from 'lucide-react';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import BaseButton from '@/components/ui/BaseButton';
 import { blogApi, BlogPodcast } from '@/shared/lib/api/bioblogRepository';
+
+// ─── Mobile accordion card ────────────────────────────────────────────────────
+
+function MobilePodcastCard({ item: p, statusBadge, platformIcon, fmtDuration, onEdit, onDelete }: {
+    item: any; statusBadge: (s: string) => React.ReactNode;
+    platformIcon: (p: string) => React.ReactNode; fmtDuration: (d: number | null) => string | null;
+    onEdit: (p: any) => void; onDelete: (id: number) => void;
+}) {
+    const [expanded, setExpanded] = useState(false);
+    return (
+        <div>
+            <button onClick={() => setExpanded(v => !v)} className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-gray-50 dark:hover:bg-gray-800/30 active:bg-gray-100 transition-colors">
+                {p.cover_image
+                    ? <img src={p.cover_image} alt="" className="w-9 h-9 rounded-lg object-cover flex-shrink-0" />
+                    : <div className="w-9 h-9 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0"><Headphones className="w-4 h-4 text-gray-400" /></div>}
+                <span className="flex-1 text-sm font-semibold text-gray-700 dark:text-gray-300 truncate">{p.title}</span>
+                {statusBadge(p.status)}
+                <svg className={`w-4 h-4 flex-shrink-0 text-gray-400 transition-transform ${expanded ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+            </button>
+            {expanded && (
+                <div className="px-4 pb-3.5 grid grid-cols-3 gap-3 border-t border-gray-50 dark:border-gray-800/50">
+                    <div>
+                        <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-1">Plataforma</p>
+                        <div className="flex items-center gap-1 text-xs text-gray-500 uppercase">{platformIcon(p.platform)}{p.platform}</div>
+                    </div>
+                    <div>
+                        <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-1">Duración</p>
+                        <span className="text-sm font-bold text-gray-600 dark:text-gray-400">{fmtDuration(p.duration) || '—'}</span>
+                    </div>
+                    <div>
+                        <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-1">Acciones</p>
+                        <div className="flex gap-2">
+                            <button onClick={() => onEdit(p)} className="p-1.5 rounded-lg hover:bg-sky-50 text-sky-500 transition"><Edit className="w-4 h-4" /></button>
+                            <button onClick={() => onDelete(p.id)} className="p-1.5 rounded-lg hover:bg-red-50 text-red-400 transition"><Trash2 className="w-4 h-4" /></button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 export function BlogPodcastsClient() {
     const [items, setItems] = useState<BlogPodcast[]>([]);
@@ -17,6 +61,11 @@ export function BlogPodcastsClient() {
     const [preview, setPreview] = useState<{ title?: string; thumbnail?: string; duration?: number; channel?: string; type?: string } | null>(null);
     const [fetchingPreview, setFetchingPreview] = useState(false);
     const debounceRef = useRef<NodeJS.Timeout | null>(null);
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     const fetch = useCallback(async () => {
         setLoading(true); setError(null);
@@ -100,50 +149,82 @@ export function BlogPodcastsClient() {
 
     return (
         <div className="space-y-6 animate-fadeIn font-industrial pb-20">
-            <ModuleHeader title="Podcasts" subtitle="Gestiona tus podcasts de audio y video" icon="Headphones"
-                actions={<BaseButton onClick={openCreate} variant="primary" leftIcon="Plus" size="md">Nuevo Podcast</BaseButton>} />
+            <div className="[&_h1]:!whitespace-normal [&_h1]:!break-words [&_h2]:!whitespace-normal [&_h2]:!break-words [&_p]:!whitespace-normal">
+                <ModuleHeader title="Podcasts" subtitle="Gestiona tus podcasts de audio y video" icon="Headphones" />
+            </div>
 
             {error && !showEditor && <div className="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 p-4 rounded-2xl border border-red-200 dark:border-red-800">{error}</div>}
+
+            <div className="bg-[var(--bg-card)] p-6 rounded-[2rem] shadow-sm border border-[var(--border-subtle)] flex items-center justify-between gap-4 flex-wrap">
+                <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-[var(--brand-green)] rounded-2xl flex items-center justify-center shadow-lg shrink-0">
+                        <Headphones className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                        <h2 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-widest">Podcasts</h2>
+                        <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wide">
+                            {items.length} podcast{items.length !== 1 ? 's' : ''}
+                        </p>
+                    </div>
+                </div>
+                <BaseButton onClick={openCreate} variant="primary" leftIcon="Plus" size="md">Nuevo Podcast</BaseButton>
+            </div>
+
             <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
                 {loading ? <div className="p-20 text-center text-gray-400">Cargando...</div>
                 : items.length === 0 ? <div className="p-20 text-center text-gray-400">Sin podcasts</div>
-                : <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                        <thead>
-                            <tr className="border-b border-gray-100 dark:border-gray-800 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider">
-                                <th className="px-5 py-4">Portada</th>
-                                <th className="px-5 py-4">Título</th>
-                                <th className="px-5 py-4">Plataforma</th>
-                                <th className="px-5 py-4">Duración</th>
-                                <th className="px-5 py-4">Estado</th>
-                                <th className="px-5 py-4 w-24">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {items.map(p => (
-                                <tr key={p.id} className="border-b border-gray-50 dark:border-gray-800/50 hover:bg-gray-50 dark:hover:bg-gray-800/30 transition">
-                                    <td className="px-5 py-4">{p.cover_image ? <img src={p.cover_image} alt="" className="w-10 h-10 rounded-lg object-cover" /> : <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center"><Headphones className="w-5 h-5 text-gray-400" /></div>}</td>
-                                    <td className="px-5 py-4 font-semibold text-gray-700 dark:text-gray-300 truncate max-w-[200px]">{p.title}</td>
-                                    <td className="px-5 py-4"><div className="flex items-center gap-1.5 text-xs text-gray-500 uppercase">{platformIcon(p.platform)}{p.platform}</div></td>
-                                    <td className="px-5 py-4 text-gray-500">{fmtDuration(p.duration) || '—'}</td>
-                                    <td className="px-5 py-4">{statusBadge(p.status)}</td>
-                                    <td className="px-5 py-4"><div className="flex gap-2">
-                                        <button onClick={() => openEdit(p)} aria-label="Editar" className="p-1.5 rounded-lg hover:bg-sky-50 text-sky-500 transition"><Edit className="w-4 h-4" /></button>
-                                        <button onClick={() => handleDelete(p.id)} aria-label="Eliminar" className="p-1.5 rounded-lg hover:bg-red-50 text-red-400 transition"><Trash2 className="w-4 h-4" /></button>
-                                    </div></td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>}
+                : (
+                    <>
+                        {/* ══ MÓVIL: accordion (sm:hidden) ══ */}
+                        <div className="sm:hidden divide-y divide-gray-50 dark:divide-gray-800/50">
+                            {items.map(p => <MobilePodcastCard key={p.id} item={p} statusBadge={statusBadge} platformIcon={platformIcon} fmtDuration={fmtDuration} onEdit={openEdit} onDelete={handleDelete} />)}
+                        </div>
+
+                        {/* ══ DESKTOP: tabla (hidden sm:block) ══ */}
+                        <div className="hidden sm:block overflow-x-auto">
+                            <table className="w-full text-sm">
+                                <thead>
+                                    <tr className="border-b border-gray-100 dark:border-gray-800 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                                        <th className="px-5 py-4">Portada</th>
+                                        <th className="px-5 py-4">Título</th>
+                                        <th className="px-5 py-4">Plataforma</th>
+                                        <th className="px-5 py-4">Duración</th>
+                                        <th className="px-5 py-4">Estado</th>
+                                        <th className="px-5 py-4 w-24">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {items.map(p => (
+                                        <tr key={p.id} className="border-b border-gray-50 dark:border-gray-800/50 hover:bg-gray-50 dark:hover:bg-gray-800/30 transition">
+                                            <td className="px-5 py-4">{p.cover_image ? <img src={p.cover_image} alt="" className="w-10 h-10 rounded-lg object-cover" /> : <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center"><Headphones className="w-5 h-5 text-gray-400" /></div>}</td>
+                                            <td className="px-5 py-4 font-semibold text-gray-700 dark:text-gray-300 truncate max-w-[200px]">{p.title}</td>
+                                            <td className="px-5 py-4"><div className="flex items-center gap-1.5 text-xs text-gray-500 uppercase">{platformIcon(p.platform)}{p.platform}</div></td>
+                                            <td className="px-5 py-4 text-gray-500">{fmtDuration(p.duration) || '—'}</td>
+                                            <td className="px-5 py-4">{statusBadge(p.status)}</td>
+                                            <td className="px-5 py-4"><div className="flex gap-2">
+                                                <button onClick={() => openEdit(p)} className="p-1.5 rounded-lg hover:bg-sky-50 text-sky-500 transition"><Edit className="w-4 h-4" /></button>
+                                                <button onClick={() => handleDelete(p.id)} className="p-1.5 rounded-lg hover:bg-red-50 text-red-400 transition"><Trash2 className="w-4 h-4" /></button>
+                                            </div></td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </>
+                )}
             </div>
 
-            {showEditor && (
+            {showEditor && mounted && document.getElementById('modal-root') && createPortal(
                 <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 backdrop-blur-sm overflow-y-auto py-10" onClick={() => setShowEditor(false)}>
                     <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 w-full max-w-lg mx-4 p-6 space-y-4 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-                        <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200">{editingId ? 'Editar Podcast' : 'Nuevo Podcast'}</h3>
+                        <div className="flex items-center justify-between">
+                            <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200">{editingId ? 'Editar Podcast' : 'Nuevo Podcast'}</h3>
+                            <button onClick={() => setShowEditor(false)} className="w-8 h-8 flex items-center justify-center rounded-xl text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                            </button>
+                        </div>
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-xs font-semibold text-gray-500 mb-1">Tipo</label>
                                 <select value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))} className="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200">
@@ -186,7 +267,7 @@ export function BlogPodcastsClient() {
                             </div>
                         )}
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-xs font-semibold text-gray-500 mb-1">Título *</label>
                                 <input type="text" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} className="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200" />
@@ -202,7 +283,7 @@ export function BlogPodcastsClient() {
                             <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={3} className="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200" />
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-xs font-semibold text-gray-500 mb-1">Portada (URL)</label>
                                 <input type="text" value={form.cover_image} onChange={e => setForm(f => ({ ...f, cover_image: e.target.value }))} className="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200" />
@@ -223,7 +304,8 @@ export function BlogPodcastsClient() {
                             <button onClick={handleSave} disabled={saving || !form.title.trim() || !form.url.trim()} className="px-6 py-2.5 bg-sky-500 hover:bg-sky-600 text-white rounded-xl text-sm font-semibold transition disabled:opacity-50">{saving ? 'Guardando...' : editingId ? 'Actualizar' : 'Crear'}</button>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.getElementById('modal-root')!
             )}
         </div>
     );

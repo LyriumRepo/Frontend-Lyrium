@@ -74,11 +74,14 @@ export function SalesPageClient(_props?: SalesPageClientProps) {
 
     return (
         <div className="space-y-8 animate-fadeIn pb-20 max-w-7xl mx-auto">
+            {/* Wrapper que fuerza el texto largo del título a romper en móvil */}
+            <div className="[&_h1]:!whitespace-normal [&_h1]:!break-words [&_h2]:!whitespace-normal [&_h2]:!break-words [&_p]:!whitespace-normal">
             <ModuleHeader
                 title="Centro de Control de Ventas"
                 subtitle="Toda la información y trazabilidad sobre tus ventas generadas."
                 icon="Sales"
             />
+            </div>
 
             <SalesKPIs kpis={kpis} onKpiClick={setSelectedKpi} />
 

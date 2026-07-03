@@ -36,10 +36,16 @@ export default function CategoryPageClient({
       // Filtro por stock
       if (filters.stockStatus && filters.stockStatus !== 'all') {
         if (filters.stockStatus === 'out_of_stock') {
-          // Mostrar solo agotados (lógica simplificada)
+          if ((product.stock ?? 1) > 0) return false;
+        } else if (filters.stockStatus === 'in_stock') {
+          if ((product.stock ?? 0) <= 0) return false;
         } else if (filters.stockStatus === 'on_sale') {
-          // Mostrar solo ofertas
-          if (!product.descuento) return false;
+          const hasOffer = !!product.descuento || (
+            product.precioOferta !== undefined &&
+            product.precioAnterior !== undefined &&
+            product.precioOferta < product.precioAnterior
+          );
+          if (!hasOffer) return false;
         }
       }
       return true;
@@ -52,6 +58,11 @@ export default function CategoryPageClient({
   }, [initialProducts]);
 
   const hasFilters = filters.priceMin || filters.priceMax || (filters.stockStatus && filters.stockStatus !== 'all');
+
+  const maxPrice = useMemo(
+    () => initialProducts.reduce((max, p) => Math.max(max, p.precio), 0),
+    [initialProducts],
+  );
 
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-[var(--bg-primary)]">
@@ -92,9 +103,10 @@ export default function CategoryPageClient({
 
         {/* Filtros */}
         <div className="mb-6">
-          <ProductFilters 
+          <ProductFilters
             onFilterChange={setFilters}
             initialFilters={filters}
+            maxPrice={maxPrice}
           />
         </div>
 

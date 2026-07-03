@@ -44,6 +44,7 @@ import { useIzipay } from '@/features/public/checkout/hooks/useIzipay';
 import { useAuth } from '@/shared/lib/context/AuthContext';
 import { useCarritoStore } from '@/store/carritoStore';
 import { LARAVEL_API_URL } from '@/shared/lib/config/flags';
+import TopMedalBadge from '@/components/ui/TopMedalBadge';
 import { ServiceReviews, ServiceReview, ReviewStats } from './ServiceReviews';
 import {
   getDepartamentos,
@@ -466,7 +467,6 @@ function BookingModal({
   const [transactionId, setTransactionId] = useState<number | null>(null);
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
-  const [addedToCart, setAddedToCart] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const transactionIdRef = useRef<number | null>(null);
@@ -482,8 +482,9 @@ function BookingModal({
   const distritos = addressProv ? getDistritos(addressDepto, addressProv) : [];
 
   const { isAuthenticated } = useAuth();
-  const router = useRouter();
   const incrementServiceHoldCount = useCarritoStore((s) => s.incrementServiceHoldCount);
+  const setLastAddedService = useCarritoStore((s) => s.setLastAddedService);
+  const openCartPopup = useCarritoStore((s) => s.openPopup);
 
   const stopPolling = useCallback(() => {
     if (pollRef.current) {
@@ -519,7 +520,6 @@ function BookingModal({
       setSlots([]);
       holdIdRef.current = null;
       setPaymentError(null);
-      setAddedToCart(false);
     }
   }, [open, preselectedSpecialist]);
 
@@ -661,8 +661,17 @@ function BookingModal({
         service_address: service.is_home_service ? fullAddress : null,
       });
       if (result.hold) holdIdRef.current = result.hold.id;
-      setAddedToCart(true);
       incrementServiceHoldCount();
+      setLastAddedService({
+        name: service.name,
+        price:
+          service.discount_percentage && service.discount_percentage > 0
+            ? service.price * (1 - service.discount_percentage / 100)
+            : service.price,
+        image: service.image ?? null,
+        specialistName: selectedSpecialist?.nombre_completo,
+      });
+      openCartPopup();
       return true;
     } catch (e: any) {
       setPaymentError(e.message ?? 'Error al agregar al carrito');
@@ -898,12 +907,12 @@ function BookingModal({
           )}
         </div>
       )}
-      {service.is_home_service && !addedToCart && (
+      {service.is_home_service && (
         <div className="border-t border-gray-100 dark:border-gray-800 pt-3 space-y-3">
           <p className="text-xs font-bold text-cyan-600 dark:text-cyan-400 uppercase tracking-wide flex items-center gap-1">
             <MapPin className="w-3 h-3" /> Dirección de atención
           </p>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             <div>
               <label className="text-xs font-bold text-gray-500 dark:text-[var(--text-muted)] uppercase tracking-wide mb-1 block">Departamento *</label>
               <CustomSelect
@@ -964,76 +973,27 @@ function BookingModal({
           </p>
         </div>
       )}
-      {addedToCart ? (
-        <div className="space-y-3">
-          <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 text-center">
-            <CheckCircle className="w-8 h-8 text-emerald-500 mx-auto mb-2" />
-            <p className="font-bold text-emerald-800 dark:text-emerald-300 text-sm">
-              Agregado al carrito
-            </p>
-            <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-1">
-              {service.name} — {selectedSlot} con{' '}
-              {selectedSpecialist?.nombre_completo}
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <button
-              onClick={close}
-              className="flex-1 py-3 rounded-xl bg-gray-100 dark:bg-[var(--bg-muted)] hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-[var(--text-secondary)] font-bold text-sm transition-colors"
-            >
-              Cerrar
-            </button>
-            {service.is_home_service && (
-              <button
-                onClick={() => { close(); router.push('/checkout'); }}
-                className="flex-1 py-3 rounded-xl bg-sky-500 hover:bg-sky-600 text-white font-bold text-sm transition-colors flex items-center justify-center gap-2"
-              >
-                <ShoppingCart className="w-4 h-4" /> Ir a pagar
-              </button>
-            )}
-          </div>
-        </div>
-      ) : (
-        <div className="flex gap-2">
-          <button
-            onClick={handleAddToCart}
-            disabled={!selectedSlot || isAddingToCart || (service.is_home_service && !addressValid)}
-            className={`flex-1 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${
-              !selectedSlot || (service.is_home_service && !addressValid)
-                ? 'bg-neutral-200 dark:bg-neutral-700 text-neutral-400 cursor-not-allowed'
-                : isAddingToCart
-                  ? 'bg-neutral-200 dark:bg-neutral-700 text-neutral-400'
-                  : 'bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 text-white shadow-sm shadow-emerald-500/20'
-            }`}
-          >
-            {isAddingToCart ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <ShoppingCart className="w-4 h-4" />
-            )}
-            {isAddingToCart ? 'Agregando…' : 'Añadir al carrito'}
-          </button>
-          <button
-            onClick={async () => {
-              const ok = await handleAddToCart();
-              if (ok) {
-                close();
-                router.push('/checkout');
-              }
-            }}
-            disabled={!selectedSlot || isAddingToCart || (service.is_home_service && !addressValid)}
-            className={`flex-1 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${
-              !selectedSlot || (service.is_home_service && !addressValid)
-                ? 'bg-neutral-200 dark:bg-neutral-700 text-neutral-400 cursor-not-allowed'
-                : isAddingToCart
-                  ? 'bg-neutral-200 dark:bg-neutral-700 text-neutral-400'
-                  : 'bg-cyan-500 hover:bg-cyan-600 active:bg-cyan-700 text-white shadow-sm shadow-cyan-500/20'
-            }`}
-          >
-            <ChevronRight className="w-4 h-4" /> Pagar ahora
-          </button>
-        </div>
-      )}
+      <button
+        onClick={async () => {
+          const ok = await handleAddToCart();
+          if (ok) close();
+        }}
+        disabled={!selectedSlot || isAddingToCart || (service.is_home_service && !addressValid)}
+        className={`w-full py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${
+          !selectedSlot || (service.is_home_service && !addressValid)
+            ? 'bg-neutral-200 dark:bg-neutral-700 text-neutral-400 cursor-not-allowed'
+            : isAddingToCart
+              ? 'bg-neutral-200 dark:bg-neutral-700 text-neutral-400'
+              : 'bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 text-white shadow-sm shadow-emerald-500/20'
+        }`}
+      >
+        {isAddingToCart ? (
+          <Loader2 className="w-4 h-4 animate-spin" />
+        ) : (
+          <ShoppingCart className="w-4 h-4" />
+        )}
+        {isAddingToCart ? 'Agregando…' : 'Añadir al carrito'}
+      </button>
     </div>
   );
   const paymentStep = () => (
@@ -1537,6 +1497,7 @@ function RelatedServiceCard({ s }: { s: any }) {
               </div>
             );
           })()}
+          <TopMedalBadge entityType="service" entityId={s.id} size="sm" className="absolute bottom-3 right-3" />
         </div>
         <div className="p-4">
           <p className="text-sm font-semibold text-gray-800 dark:text-[var(--text-primary)] line-clamp-2 leading-tight group-hover:text-cyan-600 dark:text-white transition-colors">
@@ -1860,8 +1821,8 @@ export function ServiceDetailPageClient({ service }: Props) {
           <div className="space-y-6 min-w-0">
             {/* Hero */}
             <div className="bg-white dark:bg-[var(--bg-card)] rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)] p-6 shadow-sm">
-              <div className="flex items-start gap-5">
-                <div className="relative w-[400px] h-[400px] rounded-2xl bg-sky-50 dark:bg-sky-950/50 flex items-center justify-center shrink-0 overflow-hidden">
+              <div className="flex flex-col sm:flex-row items-start gap-5">
+                <div className="relative w-full h-56 sm:w-64 sm:h-64 lg:w-[400px] lg:h-[400px] rounded-2xl bg-sky-50 dark:bg-sky-950/50 flex items-center justify-center shrink-0 overflow-hidden">
                   {heroImg ? (
                     <img
                       src={heroImg}
@@ -2034,7 +1995,7 @@ export function ServiceDetailPageClient({ service }: Props) {
             {/* Store */}
             <Link href={`/tienda/${service.store_id}`} className="block">
               <div className="bg-white dark:bg-[var(--bg-card)] rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)] p-4 hover:border-cyan-400/30 transition-colors flex items-center gap-3 shadow-sm">
-                <div className="w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center shrink-0 overflow-hidden">
+                <div className="w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center shrink-0 overflow-hidden relative">
                   {service.store_logo ? (
                     <Image
                       src={service.store_logo}
@@ -2046,6 +2007,7 @@ export function ServiceDetailPageClient({ service }: Props) {
                   ) : (
                     <MapPin className="w-5 h-5 text-cyan-600 dark:text-white" />
                   )}
+                  <TopMedalBadge entityType="store" entityId={service.store_id} size="lg" className="absolute bottom-3 right-3" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs text-gray-400">Tienda</p>

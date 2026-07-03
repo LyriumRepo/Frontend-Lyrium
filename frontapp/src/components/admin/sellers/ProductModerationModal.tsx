@@ -174,8 +174,12 @@ export default function ProductModerationModal({
   const handleConfirm = async () => {
     if (!pendingAction || !productId) return;
     if (pendingAction === 'REJECTED' && reason.trim().length < 10) return;
-    await onAction(productId, pendingAction, reason);
-    onClose();
+    try {
+      await onAction(productId, pendingAction, reason);
+      onClose();
+    } catch {
+      // El error ya se muestra vía toast en el padre; el modal se mantiene abierto para reintentar.
+    }
   };
 
   if (!isOpen) return null;
@@ -676,18 +680,37 @@ export default function ProductModerationModal({
                   </div>
 
                   {/* Motivo — requerido para rechazo, opcional para aprobación */}
-                  <textarea
-                    value={reason}
-                    onChange={(e) => setReason(e.target.value)}
-                    rows={3}
-                    placeholder={
-                      pendingAction === 'REJECTED'
-                        ? 'Motivo de rechazo (obligatorio, mín. 10 caracteres)…'
-                        : 'Notas de auditoría (opcional)…'
-                    }
-                    required={pendingAction === 'REJECTED'}
-                    className="w-full p-3 text-[12px] font-medium text-[var(--text-primary)] bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-[var(--icons-green)]/20 placeholder:text-[var(--text-secondary)]"
-                  />
+                  {(() => {
+                    const minLen = 10;
+                    const tooShort = pendingAction === 'REJECTED' && reason.trim().length > 0 && reason.trim().length < minLen;
+                    return (
+                      <div>
+                        <textarea
+                          value={reason}
+                          onChange={(e) => setReason(e.target.value)}
+                          rows={3}
+                          placeholder={
+                            pendingAction === 'REJECTED'
+                              ? 'Motivo de rechazo (obligatorio, mín. 10 caracteres)…'
+                              : 'Notas de auditoría (opcional)…'
+                          }
+                          required={pendingAction === 'REJECTED'}
+                          className={`w-full p-3 text-[12px] font-medium text-[var(--text-primary)] bg-[var(--bg-card)] border rounded-xl resize-none focus:outline-none focus:ring-2 placeholder:text-[var(--text-secondary)] ${
+                            tooShort
+                              ? 'border-[var(--color-error)] focus:ring-[var(--color-error)]/20'
+                              : 'border-[var(--border-subtle)] focus:ring-[var(--icons-green)]/20'
+                          }`}
+                        />
+                        {pendingAction === 'REJECTED' && (
+                          <p className={`text-[10px] font-bold mt-1.5 ${tooShort ? 'text-[var(--color-error)]' : 'text-[var(--text-secondary)]'}`}>
+                            {tooShort
+                              ? `Faltan ${minLen - reason.trim().length} caracteres para poder confirmar el rechazo.`
+                              : `${reason.trim().length}/${minLen} caracteres mínimos`}
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })()}
 
                   <div className="flex gap-3">
                     <button

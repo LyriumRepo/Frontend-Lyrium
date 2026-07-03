@@ -32,6 +32,7 @@ import { ContratosModule } from '@/components/admin/contracts/ContractsModule';
 import { ContractDetailModal } from '@/components/admin/contracts/ContractDetailModal';
 import Icon from '@/components/ui/Icon';
 import { exportSellersToExcel, exportSellersToPdf } from './export';
+import { useToast } from '@/shared/lib/context/ToastContext';
 
 interface TabButtonProps {
   active: boolean;
@@ -269,6 +270,7 @@ export function SellersPageClient(_props: SellersPageClientProps) {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const combinedSellers = filteredSellers;
+  const { showToast } = useToast();
 
   const handleExportExcel = () => {
     if (!filteredSellers.length) return;
@@ -736,6 +738,8 @@ export function SellersPageClient(_props: SellersPageClientProps) {
             setServiceModal({ isOpen: false, service: null });
           } catch (err) {
             console.error('Error al moderar servicio:', err);
+            showToast(err instanceof Error ? err.message : 'No se pudo actualizar el servicio.', 'error');
+            throw err;
           } finally {
             setIsSubmitting(false);
           }
@@ -755,6 +759,8 @@ export function SellersPageClient(_props: SellersPageClientProps) {
             setProductModal({ isOpen: false, productId: null });
           } catch (err) {
             console.error('Error al moderar producto:', err);
+            showToast(err instanceof Error ? err.message : 'No se pudo actualizar el producto.', 'error');
+            throw err;
           } finally {
             setIsSubmitting(false);
           }

@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import StoreHeader from '@/components/store/StoreHeader';
 import StoreBannerCarousel from '@/components/store/StoreBannerCarousel';
-import AdBannersGrid from '@/components/store/AdBannersGrid';
 import StoreInfoCard from '@/components/store/StoreInfoCard';
 import { Layout1, Layout2, Layout3 } from '@/components/store/layouts';
 
@@ -52,6 +51,13 @@ export default function TiendaPage({ params }: StorePageProps) {
           rawProducts = productsJson.data || [];
         }
 
+        const servicesRes = await fetch(`${API_URL}/services?store_id=${storeData.id}&per_page=50`);
+        let rawServices: any[] = [];
+        if (servicesRes.ok) {
+          const servicesJson = await servicesRes.json();
+          rawServices = servicesJson.data || [];
+        }
+
         const plan = mapPlan(storeData.subscription?.plan?.slug);
 
         const store = {
@@ -78,6 +84,7 @@ export default function TiendaPage({ params }: StorePageProps) {
           whatsapp: storeData.whatsapp,
           gallery: storeData.gallery || [],
           status: storeData.status,
+          layout: storeData.layout || '1',
           policies: {
             shipping: storeData.policyFiles?.shipping || storeData.policies?.shipping_pdf || null,
             returns: storeData.policyFiles?.return || storeData.policies?.return_pdf || null,
@@ -104,8 +111,31 @@ export default function TiendaPage({ params }: StorePageProps) {
           stock: p.stock || 0,
           categoria: p.categories?.[0]?.name || '',
           categorias: (p.categories || []).map((c: any) => c.name),
+          descripcionCorta: p.short_description || '',
+          estrellas: p.rating?.average ? String(p.rating.average) : undefined,
+          reviews: p.rating?.count || 0,
           vendedor: p.store ? { slug: p.store.slug, nombre: p.store.name } : undefined,
+          tipo: p.type === 'service' ? 'service' as const : 'product' as const,
         }));
+
+        const services = rawServices.map((s: any) => ({
+          id: Number(s.id),
+          titulo: s.name || 'Sin nombre',
+          slug: s.slug,
+          precio: Number(s.price || 0),
+          precioOferta: Number(s.price || 0),
+          precioAnterior: undefined,
+          imagen: s.image || '/img/no-image.png',
+          stock: 0,
+          categoria: s.category || '',
+          categorias: s.category ? [s.category] : [],
+          descripcion: s.description || '',
+          vendedor: s.store_name ? { slug: store.slug, nombre: s.store_name } : undefined,
+          tipo: 'service' as const,
+          duration_minutes: s.duration_minutes,
+        }));
+
+        const allProducts = [...products, ...services];
 
         const redes = [
           ...(storeData.instagram ? [{ key: 'instagram' as const, url: storeData.instagram }] : []),
@@ -126,13 +156,21 @@ export default function TiendaPage({ params }: StorePageProps) {
           }))),
         ];
 
+        console.log('=== DIAGNÓSTICO SERVICIOS ===');
+        console.log('Productos desde API:', rawProducts.length);
+        console.log('Servicios desde API:', rawServices.length);
+        console.log('Total combinado:', allProducts.length);
+        console.log('tipo===service:', allProducts.filter((p:any) => p.tipo === 'service').length);
+        console.log('tipo!==service:', allProducts.filter((p:any) => p.tipo !== 'service').length);
+        console.log('Servicio ejemplo:', JSON.stringify(services[0] || 'N/A'));
+
         setStoreData({
           store,
-          products,
+          products: allProducts,
           banners,
           redes,
           stats: {
-            products: products.length,
+            products: allProducts.length,
             rating: storeData.rating || 0,
             reviews: 0,
           },
@@ -210,43 +248,87 @@ export default function TiendaPage({ params }: StorePageProps) {
         onSearch={setSearchQuery}
       />
 
-      <main className="max-w-[1600px] mx-auto px-4 py-6">
+      <main className="max-w-[1600px] mx-auto px-4 py-3">
         <div className="space-y-8">
           <StoreBannerCarousel banners={banners} redes={redes} plan={planHeader} />
-          <AdBannersGrid />
 
-          {planLayout === 'premium' && <StoreInfoCard tienda={store} horarios={{}} />}
-
-          {store.descripcion && (
-            <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-2xl p-6 border border-gray-100 dark:border-[var(--border-subtle)] shadow-sm">
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Sobre Nosotros</p>
-              <p className="text-sm text-gray-600 dark:text-[var(--text-secondary)] leading-relaxed">{store.descripcion}</p>
+          <div className="flex flex-wrap gap-4 items-center justify-between bg-white p-4 rounded-2xl shadow-sm border">
+            <div className="text-sm text-gray-600">
+              Mostrando <strong>{filteredProducts.length}</strong> productos
             </div>
+
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-gray-500">Ordenar por:</span>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as any)}
+                className="border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="relevant">Más relevantes</option>
+                <option value="priceDesc">Precio: Mayor a Menor</option>
+                <option value="priceAsc">Precio: Menor a Mayor</option>
+                <option value="nameAsc">Nombre (A - Z)</option>
+              </select>
+            </div>
+          </div>
+
+          {filteredProducts.length === 0 ? (
+            <div className="text-center py-20 text-gray-500">
+              {searchQuery ? 'No se encontraron productos para tu búsqueda' : 'No hay productos disponibles'}
+            </div>
+          ) : (
+            <>
+              {store.layout === '1' && <Layout1 store={store} products={filteredProducts} plan={planLayout} />}
+              {store.layout === '2' && <Layout2 store={store} products={filteredProducts} plan={planLayout} />}
+              {(!store.layout || store.layout === '3') && <Layout3 store={store} products={filteredProducts} plan={planLayout} />}
+            </>
           )}
 
-          {(store.actividad || store.telefono || store.correo || store.branches.length > 0 || store.policies.shipping || store.policies.returns || store.policies.privacy) && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {store.actividad && (
-                <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-2xl p-5 border border-gray-100 dark:border-[var(--border-subtle)] shadow-sm">
-                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Actividad</p>
-                  <p className="text-sm font-bold text-gray-700 dark:text-[var(--text-primary)]">{store.actividad}</p>
-                </div>
-              )}
-              {(store.telefono || store.correo) && (
-                <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-2xl p-5 border border-gray-100 dark:border-[var(--border-subtle)] shadow-sm space-y-2">
-                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Contacto</p>
-                  {store.telefono && (
-                    <a href={`tel:${store.telefono}`} className="flex items-center gap-2 text-xs font-bold text-gray-700 dark:text-[var(--text-primary)] hover:text-sky-600 transition-colors">
-                      📞 {store.telefono}
-                    </a>
-                  )}
-                  {store.correo && (
-                    <a href={`mailto:${store.correo}`} className="flex items-center gap-2 text-xs font-bold text-sky-600 hover:underline">
-                      ✉️ {store.correo}
-                    </a>
-                  )}
-                </div>
-              )}
+          <hr className="border-gray-200 dark:border-gray-800" />
+
+          <div className="space-y-6">
+            <h3 className="text-lg font-black text-gray-400 uppercase tracking-widest">Información de la tienda</h3>
+
+            {planLayout === 'premium' && <StoreInfoCard tienda={store} horarios={{}} />}
+
+            {store.descripcion && (
+              <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-2xl p-6 border border-gray-100 dark:border-[var(--border-subtle)] shadow-sm">
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Sobre Nosotros</p>
+                <p className="text-sm text-gray-600 dark:text-[var(--text-secondary)] leading-relaxed">{store.descripcion}</p>
+              </div>
+            )}
+
+            {(store.actividad || store.telefono || store.correo) && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {store.actividad && (
+                  <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-2xl p-5 border border-gray-100 dark:border-[var(--border-subtle)] shadow-sm">
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Actividad</p>
+                    <p className="text-sm font-bold text-gray-700 dark:text-[var(--text-primary)]">{store.actividad}</p>
+                  </div>
+                )}
+                {(store.telefono || store.correo) && (
+                  <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-2xl p-5 border border-gray-100 dark:border-[var(--border-subtle)] shadow-sm space-y-2">
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Contacto</p>
+                    {store.telefono && (
+                      <a href={`tel:${store.telefono}`} className="flex items-center gap-2 text-xs font-bold text-gray-700 dark:text-[var(--text-primary)] hover:text-sky-600 transition-colors">
+                        📞 {store.telefono}
+                      </a>
+                    )}
+                    {store.correo && (
+                      <a href={`mailto:${store.correo}`} className="flex items-center gap-2 text-xs font-bold text-sky-600 hover:underline">
+                        ✉️ {store.correo}
+                      </a>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            <hr className="border-gray-200 dark:border-gray-800" />
+
+            <h3 className="text-lg font-black text-gray-400 uppercase tracking-widest">Información operativa</h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {(store.policies.shipping || store.policies.returns || store.policies.privacy) && (
                 <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-2xl p-5 border border-gray-100 dark:border-[var(--border-subtle)] shadow-sm space-y-2">
                   <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Políticas</p>
@@ -285,41 +367,7 @@ export default function TiendaPage({ params }: StorePageProps) {
                 </div>
               )}
             </div>
-          )}
-
-          <hr className="border-gray-200 dark:border-gray-800 my-8" />
-
-          <div className="flex flex-wrap gap-4 items-center justify-between bg-white p-4 rounded-2xl shadow-sm border">
-            <div className="text-sm text-gray-600">
-              Mostrando <strong>{filteredProducts.length}</strong> productos
-            </div>
-
-            <div className="flex items-center gap-3">
-              <span className="text-sm text-gray-500">Ordenar por:</span>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
-                className="border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="relevant">Más relevantes</option>
-                <option value="priceDesc">Precio: Mayor a Menor</option>
-                <option value="priceAsc">Precio: Menor a Mayor</option>
-                <option value="nameAsc">Nombre (A - Z)</option>
-              </select>
-            </div>
           </div>
-
-          {filteredProducts.length === 0 ? (
-            <div className="text-center py-20 text-gray-500">
-              {searchQuery ? 'No se encontraron productos para tu búsqueda' : 'No hay productos disponibles'}
-            </div>
-          ) : (
-            <>
-              {store.layout === '1' && <Layout1 store={store} products={filteredProducts} plan={planLayout} />}
-              {store.layout === '2' && <Layout2 store={store} products={filteredProducts} plan={planLayout} />}
-              {(!store.layout || store.layout === '3') && <Layout3 store={store} products={filteredProducts} plan={planLayout} />}
-            </>
-          )}
         </div>
       </main>
     </div>

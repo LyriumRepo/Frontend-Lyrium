@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { motion } from 'framer-motion';
 import { blogApi } from '@/shared/lib/api/blog';
 import { Headphones, ExternalLink, Clock, Tag } from 'lucide-react';
 
@@ -85,12 +87,13 @@ export default function PodcastSection() {
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            {audioPodcasts.map((podcast) => (
-                                <a
+                            {audioPodcasts.map((podcast, index) => (
+                                <motion.div
                                     key={podcast.id}
-                                    href={podcast.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
+                                    initial={{ opacity: 0, x: -30 }}
+                                    whileInView={{ opacity: 1, x: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ duration: 0.4, delay: index * 0.08 }}
                                     className="group flex flex-col sm:flex-row gap-6 p-6 rounded-2xl bg-white dark:bg-[var(--bg-secondary)] border border-slate-100 dark:border-[var(--border-subtle)] shadow-md hover:shadow-xl transition-all duration-300"
                                 >
                                     <div className="relative w-full sm:w-40 h-40 rounded-xl overflow-hidden flex-shrink-0 bg-slate-100 dark:bg-[#1e2a2a]">
@@ -108,9 +111,11 @@ export default function PodcastSection() {
                                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
                                     </div>
                                     <div className="flex-1 min-w-0 space-y-2">
-                                        <h4 className="text-lg font-bold text-slate-800 dark:text-[var(--text-primary)] group-hover:text-lime-600 dark:group-hover:text-lime-400 transition-colors line-clamp-2">
-                                            {podcast.title}
-                                        </h4>
+                                        <Link href={`/bioblog/podcast/${podcast.id}`}>
+                                            <h4 className="text-lg font-bold text-slate-800 dark:text-[var(--text-primary)] group-hover:text-lime-600 dark:group-hover:text-lime-400 transition-colors line-clamp-2">
+                                                {podcast.title}
+                                            </h4>
+                                        </Link>
                                         {podcast.description && (
                                             <p className="text-sm text-slate-500 dark:text-[var(--text-secondary)] line-clamp-2">
                                                 {podcast.description}
@@ -138,11 +143,14 @@ export default function PodcastSection() {
                                                 ))}
                                             </div>
                                         )}
-                                        <div className="pt-2 flex items-center text-sm font-medium text-lime-600 dark:text-lime-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <Link
+                                            href={`/bioblog/podcast/${podcast.id}`}
+                                            className="pt-2 flex items-center text-sm font-medium text-lime-600 dark:text-lime-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                                        >
                                             Escuchar <ExternalLink className="w-3.5 h-3.5 ml-1" />
-                                        </div>
+                                        </Link>
                                     </div>
-                                </a>
+                                </motion.div>
                             ))}
                         </div>
                     )}

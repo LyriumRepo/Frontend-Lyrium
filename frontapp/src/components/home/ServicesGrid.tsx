@@ -96,7 +96,9 @@ export default function ServicesGrid({ categorias }: ServicesGridProps) {
           <div
             className="flex transition-transform duration-700 gap-4"
             style={{
-              transform: `translateX(-${current * (100 / itemsPerView)}%)`,
+              // Cada paso = ancho de item + gap. Con gap-4 (1rem) y items de
+              // (100% - (n-1)·1rem)/n, el paso exacto es (100% + 1rem)/n.
+              transform: `translateX(calc(-${current} * ((100% + 1rem) / ${itemsPerView})))`,
             }}
           >
             {categorias.map((categoria, index) => {

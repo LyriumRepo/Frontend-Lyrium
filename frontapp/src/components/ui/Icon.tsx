@@ -2,7 +2,7 @@ import React from 'react';
 import {
   Activity, AlertCircle, AlertOctagon, AlertTriangle, ArrowDown,
   ArrowLeft, ArrowRight, BadgeCheck, Ban, Banknote, BarChart, Bell,
-  Bold, BookOpen, Bot, Briefcase, Building, Building2, Calendar,
+  Bold, BookOpen, Bot, Briefcase, Building, Building2, Clapperboard, Calendar,
   CalendarCheck, CalendarClock, CalendarDays, CalendarSearch, CalendarX,
   Camera, Check, CheckCheck,
   CheckCircle, CheckCircle2, CheckSquare, ChevronDown, ChevronLeft, ChevronRight,
@@ -20,7 +20,7 @@ import {
   Send, Settings, Share2, Shield, ShieldCheck, ShieldX, ShoppingBag,
   ShoppingCart, Smile, Sparkles, Star, Stethoscope, Store, Tag, ThumbsUp,
   Ticket, Timer, Trash2, TrendingDown, TrendingUp, Trophy, Truck, Twitter,
-  Upload, User, UserCheck, UserCircle, UserCog, UserPlus, Users, Wallet,
+  Upload, User, UserCheck, UserCircle, UserCog, UserPlus, Users, Video, Wallet,
   X, XCircle, XSquare, Youtube, Zap,
   type LucideIcon,
 } from 'lucide-react';
@@ -44,7 +44,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Services: Stethoscope,
   Activity, AlertCircle, AlertOctagon, AlertTriangle, ArrowDown,
   ArrowLeft, ArrowRight, BadgeCheck, Ban, Banknote, BarChart, Bell,
-  Bold, BookOpen, Bot, Briefcase, Building, Building2, Calendar,
+  Bold, BookOpen, Bot, Briefcase, Building, Building2, Clapperboard, Calendar,
   CalendarCheck, CalendarClock, CalendarDays, CalendarSearch, CalendarX,
   Camera, Check, CheckCheck,
   CheckCircle, CheckCircle2, CheckSquare, ChevronDown, ChevronLeft, ChevronRight,
@@ -62,7 +62,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Send, Settings, Share2, Shield, ShieldCheck, ShieldX, ShoppingBag,
   ShoppingCart, Smile, Sparkles, Star, Stethoscope, Store, Tag, ThumbsUp,
   Ticket, Timer, Trash2, TrendingDown, TrendingUp, Trophy, Truck, Twitter,
-  Upload, User, UserCheck, UserCircle, UserCog, UserPlus, Users, Wallet,
+  Upload, User, UserCheck, UserCircle, UserCog, UserPlus, Users, Video, Wallet,
   X, XCircle, XSquare, Youtube, Zap,
 };
 

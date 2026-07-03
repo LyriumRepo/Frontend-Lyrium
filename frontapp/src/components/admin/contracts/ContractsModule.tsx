@@ -186,8 +186,56 @@ export const ContratosModule: React.FC<ContratosModuleProps> = ({ state, actions
                 </div>
             </div>
 
-            {/* TABLA DE EXPEDIENTES - Rediseño Híbrido Premium */}
-            <div className="bg-[var(--bg-card)] rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm overflow-hidden p-2">
+            {/* EXPEDIENTES - Mobile: cards */}
+            <div className="sm:hidden bg-[var(--bg-card)] rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm overflow-hidden divide-y divide-[var(--border-subtle)]">
+                {contracts.map((c: Contract) => (
+                    <div
+                        key={c.id}
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => actions.setSelectedContract(c)}
+                        onKeyDown={(e) => { if (e.key === 'Enter') actions.setSelectedContract(c); }}
+                        className="p-5 flex items-start gap-3 active:bg-[var(--celeste-500)]/5 cursor-pointer"
+                    >
+                        <div className="w-9 h-9 rounded-xl bg-brand-green/10 text-brand-green dark:bg-icons-green/10 dark:text-icons-green flex items-center justify-center shrink-0 font-black text-xs mt-0.5">
+                            {c.company ? c.company.substring(0, 2).toUpperCase() : 'CTR'}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between gap-2">
+                                <div className="min-w-0">
+                                    <p className="text-xs font-black text-[var(--text-primary)] uppercase truncate">
+                                        {c.company || 'Sin Empresa Decl.'}
+                                    </p>
+                                    <p className="text-[10px] text-[var(--text-muted)] font-black uppercase tracking-wider mt-0.5 font-mono">
+                                        RUC: {c.ruc || '—'} · <Hash className="w-2.5 h-2.5 inline -mt-0.5" />{c.id}
+                                    </p>
+                                </div>
+                                <ChevronRight className="w-5 h-5 text-[var(--text-muted)] shrink-0 mt-0.5" />
+                            </div>
+                            <p className="text-[11px] font-black text-[var(--text-secondary)] uppercase flex items-center gap-1.5 mt-2">
+                                <Calendar className="w-3.5 h-3.5 text-[var(--text-muted)] shrink-0" />
+                                {c.start || '—'}
+                                <ArrowRight className="w-3 h-3 text-[var(--text-muted)] shrink-0" />
+                                {c.end || '—'}
+                            </p>
+                            <div className="mt-1.5">
+                                <ExpiryTrafficLight urgency={c.expiryUrgency} />
+                            </div>
+                            <div className="flex items-center flex-wrap gap-2 mt-2.5">
+                                <ModalityBadge modality={c.modality} />
+                                <span className="flex items-center gap-1.5 text-xs font-black text-[var(--text-secondary)] uppercase">
+                                    <Landmark className="w-3.5 h-3.5 text-[var(--text-muted)] shrink-0" />
+                                    {c.plan || '—'}
+                                </span>
+                                <StatusBadge status={c.status} />
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            {/* TABLA DE EXPEDIENTES - Rediseño Híbrido Premium (tablet+) */}
+            <div className="hidden sm:block bg-[var(--bg-card)] rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm overflow-hidden p-2">
                 <div className="overflow-x-auto custom-scrollbar">
                     <table className="w-full text-left border-collapse" aria-label="Tabla de contratos">
                         <thead>

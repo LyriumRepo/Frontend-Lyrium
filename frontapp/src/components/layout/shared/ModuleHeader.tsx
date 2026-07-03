@@ -16,48 +16,42 @@ export default function ModuleHeader({
     subtitle,
     icon,
     gradient = 'bg-brand-gradient',
+    // height ignorado en móvil — usamos min-h para que el contenido dicte la altura
+    height = '6rem',
     children,
     actions,
 }: ModuleHeaderProps) {
-    const hasActions = !!actions || !!children;
-
     return (
-        <div className="mb-8">
-            {/* Banner con gradiente — siempre limpio, sin botones dentro */}
-            <div
-                className={`flex flex-row items-stretch justify-between ${gradient} rounded-2xl overflow-visible shadow-sm border border-[var(--border-subtle)] group transition-all duration-300 hover:shadow-md`}
-                style={{ minHeight: '4rem' }}
-            >
-                {/* Lado Izquierdo — máscara blanca con título */}
-                <div className="lateral-gradient-mask dark:!bg-[var(--bg-card)] pl-5 sm:pl-8 pr-5 sm:pr-16 md:pr-24 py-4 sm:py-7 flex flex-col justify-center flex-none z-10 transition-all duration-500 w-auto max-w-[60%] sm:max-w-[55%]">
-                    <div className="flex items-center gap-3">
-                        {icon && (
-                            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-[var(--bg-secondary)] flex items-center justify-center text-[var(--text-secondary)] group-hover:bg-[var(--celeste-500)]/10 group-hover:text-[var(--celeste-500)] transition-all duration-500 flex-shrink-0">
-                                <Icon name={icon} className="w-4 h-4 sm:w-5 sm:h-5 !stroke-[2.5px]" />
-                            </div>
-                        )}
-                        <h1 className="text-lg sm:text-2xl md:text-3xl font-black tracking-tight leading-tight text-[var(--text-primary)]">
-                            {title}
-                        </h1>
-                    </div>
-                    <p className="text-[var(--text-secondary)] text-xs sm:text-sm font-medium mt-1 line-clamp-1">
-                        {subtitle}
-                    </p>
+        <div
+            className={`flex items-stretch justify-between ${gradient} rounded-2xl overflow-hidden shadow-sm border border-[var(--border-subtle)] mb-4 sm:mb-8 group transition-all duration-300 hover:shadow-md`}
+            // En desktop respeta el height prop; en móvil se autoajusta al contenido
+            style={{ minHeight: height }}
+        >
+            {/* ── Lado Izquierdo ── */}
+            <div className="lateral-gradient-mask dark:!bg-[var(--bg-card)] pl-4 sm:pl-8 pr-8 sm:pr-16 md:pr-24 py-4 sm:py-7 flex flex-col justify-center flex-1 min-w-0 z-10 transition-all duration-500">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                    {icon && (
+                        <div className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 rounded-xl bg-[var(--bg-secondary)] flex items-center justify-center text-[var(--text-secondary)] group-hover:bg-[var(--celeste-500)]/10 group-hover:text-[var(--celeste-500)] transition-all duration-500">
+                            <Icon name={icon} className="w-4 h-4 sm:w-5 sm:h-5 !stroke-[2.5px]" />
+                        </div>
+                    )}
+                    <h1 className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight leading-tight truncate min-w-0 text-[var(--text-primary)]">
+                        {title}
+                    </h1>
                 </div>
-
-                {/* Lado Derecho — gradiente siempre visible */}
-                <div className="flex-1 relative">
-                    <div className="absolute inset-0 bg-white/10 dark:bg-black/20 backdrop-blur-[1px] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                </div>
+                <p className="text-[var(--text-secondary)] text-xs sm:text-sm font-medium mt-1 truncate">
+                    {subtitle}
+                </p>
             </div>
 
-            {/* Fila de acciones — alineada a la derecha bajo el banner */}
-            {hasActions && (
-                <div className="flex flex-wrap items-center justify-end gap-2 sm:gap-3 mt-3">
+            {/* ── Lado Derecho (actions) ── */}
+            <div className="flex-shrink-0 flex items-center justify-end px-4 sm:px-10 relative">
+                <div className="absolute inset-0 bg-white/10 dark:bg-black/20 backdrop-blur-[1px] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="relative z-20 flex items-center gap-3">
                     {actions}
                     {children}
                 </div>
-            )}
+            </div>
         </div>
     );
 }

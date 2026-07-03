@@ -4,7 +4,6 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useToast } from '@/shared/lib/context/ToastContext';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
-import Icon from '@/components/ui/Icon';
 import BaseButton from '@/components/ui/BaseButton';
 import BaseLoading from '@/components/ui/BaseLoading';
 
@@ -64,12 +63,12 @@ export function StorePageClient(_props: StorePageClientProps) {
 
     if (error) {
         return (
-            <div className="p-8 text-center">
-                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/30 rounded-2xl p-6 max-w-md mx-auto">
+            <div className="p-4 sm:p-8 text-center">
+                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/30 rounded-2xl p-4 sm:p-6 max-w-md mx-auto">
                     <p className="text-red-600 dark:text-red-400 font-bold mb-2">Error al cargar tienda</p>
                     <p className="text-sm text-gray-600 dark:text-gray-400">{error.message}</p>
-                    <button 
-                        onClick={() => window.location.reload()} 
+                    <button
+                        onClick={() => window.location.reload()}
                         className="mt-4 px-4 py-2 bg-red-500 text-white rounded-lg text-sm font-bold"
                     >
                         Reintentar
@@ -81,36 +80,42 @@ export function StorePageClient(_props: StorePageClientProps) {
 
     if (!config) return <BaseLoading message="Cargando datos de la tienda..." />;
 
+    const saveButton = (
+        <BaseButton
+            variant="action"
+            onClick={handleSave}
+            isLoading={saving}
+            leftIcon="Save"
+            size="lg"
+        >
+            {saving ? 'Guardando...' : 'Guardar Cambios'}
+        </BaseButton>
+    );
+
     return (
-        <div className="space-y-8 pb-20">
+        <div className="space-y-4 sm:space-y-6 md:space-y-8 pb-20">
             <ModuleHeader
                 title="Configuración de Mi Tienda"
                 subtitle="Gestión integral de identidad, sucursales y experiencia visual"
-                actions={
-                    <BaseButton
-                        variant="action"
-                        onClick={handleSave}
-                        isLoading={saving}
-                        leftIcon="Save"
-                    >
-                        {saving ? 'Guardando...' : 'Guardar Cambios'}
-                    </BaseButton>
-                }
             />
+
+            <div className="flex justify-center sm:justify-end">
+                {saveButton}
+            </div>
 
             <div className="animate-fadeIn">
                 <BranchManagement branches={branches} setBranches={updateBranches} />
                 <StoreIdentity config={config!} updateConfig={handleUpdateConfig} categories={categories} />
                 <ContactSocial config={config!} updateConfig={handleUpdateConfig} />
-                <Policies 
-                    config={config!} 
+                <Policies
+                    config={config!}
                     updateConfig={handleUpdateConfig}
                     uploadPolicy={uploadPolicy}
                     deletePolicy={deletePolicy}
                     isUploading={uploadingPolicy}
                 />
-                <VisualIdentity 
-                    config={config!} 
+                <VisualIdentity
+                    config={config!}
                     updateConfig={handleUpdateConfig}
                     uploadLogo={uploadLogo}
                     uploadBanner={uploadBanner}

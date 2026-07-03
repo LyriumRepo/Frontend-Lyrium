@@ -41,7 +41,7 @@ export default function PersonalDataForm() {
           <label className={labelCls}>
             Tipo de documento <span className="text-red-500">*</span>
           </label>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {DOC_TYPES.map((t) => (
               <button
                 key={t.value}
@@ -49,7 +49,7 @@ export default function PersonalDataForm() {
                 onClick={() =>
                   setData({ docType: t.value as 'DNI' | 'CE' | 'PAS' })
                 }
-                className={`px-4 py-2 rounded-xl text-sm font-medium border transition
+                className={`px-3 py-2 sm:px-4 rounded-xl text-sm font-medium border transition
                   ${
                     data.docType === t.value
                       ? 'bg-[var(--brand-sky)] text-white border-[var(--brand-sky)]'

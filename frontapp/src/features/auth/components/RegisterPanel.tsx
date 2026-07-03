@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, useState, useEffect } from 'react';
+import { FormEvent, useState, useEffect, useRef } from 'react';
 import { Loader2, Lock, Mail, Phone, Building2, ArrowRight, CheckCircle, User, FileText, Globe, MapPin, File as FileIcon } from 'lucide-react';
 import { SocialLoginButton } from '@/components/login/social/SocialLoginButton';
 import type { RegisterFormData, UserType } from '../types/auth';
@@ -67,6 +67,7 @@ const INITIAL_FORM: RegisterFormData = {
 
 export function RegisterPanel({ userType, error, success, isLoading, onSubmit, onClearError }: RegisterPanelProps) {
     const [formData, setFormData] = useState<RegisterFormData>(INITIAL_FORM);
+    const errorRef = useRef<HTMLDivElement | null>(null);
 
     const labels = LABELS[userType];
     const isVendedor = userType === 'vendedor';
@@ -79,6 +80,14 @@ export function RegisterPanel({ userType, error, success, isLoading, onSubmit, o
             return () => clearTimeout(timer);
         }
     }, [success]);
+
+    // El error se renderiza arriba del contenedor scrolleable; si el usuario está
+    // abajo (en el botón de enviar), sin esto nunca lo vería.
+    useEffect(() => {
+        if (error) {
+            errorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }, [error]);
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
@@ -122,7 +131,7 @@ export function RegisterPanel({ userType, error, success, isLoading, onSubmit, o
                 </div>
 
                 {error && (
-                    <div role="alert" aria-live="polite" className="error-message mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-red-600 dark:text-red-400 text-sm">
+                    <div ref={errorRef} role="alert" aria-live="polite" className="error-message mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-red-600 dark:text-red-400 text-sm">
                         {error}
                     </div>
                 )}
@@ -132,10 +141,10 @@ export function RegisterPanel({ userType, error, success, isLoading, onSubmit, o
                     </div>
                 )}
 
-                <form onSubmit={handleSubmit} className={`grid ${isVendedor ? 'grid-cols-2' : 'grid-cols-1'} gap-4`} noValidate>
+                <form onSubmit={handleSubmit} className={`grid ${isVendedor ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'} gap-4`} noValidate>
                     {isVendedor && (
                         <>
-                            <div className="col-span-2">
+                            <div className="col-span-full">
                                 <label htmlFor="store-name" className="block text-sm font-semibold text-slate-700 dark:text-[var(--text-primary)] mb-2">
                                     Nombre Comercial <span className="text-red-500">*</span>
                                 </label>
@@ -238,7 +247,7 @@ export function RegisterPanel({ userType, error, success, isLoading, onSubmit, o
                                 </div>
                             </div>
 
-                            <div className="col-span-2">
+                            <div className="col-span-full">
                                 <label htmlFor="reg-password" className="block text-sm font-semibold text-slate-700 dark:text-[var(--text-primary)] mb-2">
                                     Contraseña <span className="text-red-500">*</span>
                                 </label>
@@ -258,7 +267,7 @@ export function RegisterPanel({ userType, error, success, isLoading, onSubmit, o
                                 </div>
                             </div>
 
-                            <div className="col-span-2">
+                            <div className="col-span-full">
                                 <label htmlFor="reg-categoria" className="block text-sm font-semibold text-slate-700 dark:text-[var(--text-primary)] mb-2">
                                     Categoría <span className="text-red-500">*</span>
                                 </label>
@@ -276,7 +285,7 @@ export function RegisterPanel({ userType, error, success, isLoading, onSubmit, o
                                 </select>
                             </div>
 
-                            <div className="col-span-2">
+                            <div className="col-span-full">
                                 <label htmlFor="reg-descripcion" className="block text-sm font-semibold text-slate-700 dark:text-[var(--text-primary)] mb-2">
                                     Descripción de la Actividad <span className="text-red-500">*</span>
                                 </label>
@@ -292,7 +301,7 @@ export function RegisterPanel({ userType, error, success, isLoading, onSubmit, o
                                 />
                             </div>
 
-                            <div className="col-span-2">
+                            <div className="col-span-full">
                                 <label htmlFor="reg-evidencia-tipo" className="block text-sm font-semibold text-slate-700 dark:text-[var(--text-primary)] mb-2">
                                     Tipo de Evidencia <span className="text-red-500">*</span>
                                 </label>
@@ -310,7 +319,7 @@ export function RegisterPanel({ userType, error, success, isLoading, onSubmit, o
                             </div>
 
                             {formData.tipoEvidencia === 'url' && (
-                                <div className="col-span-2">
+                                <div className="col-span-full">
                                     <label htmlFor="reg-evidencia-url" className="block text-sm font-semibold text-slate-700 dark:text-[var(--text-primary)] mb-2">
                                         URL de Evidencia <span className="text-red-500">*</span>
                                     </label>
@@ -331,7 +340,7 @@ export function RegisterPanel({ userType, error, success, isLoading, onSubmit, o
                             )}
 
                             {formData.tipoEvidencia === 'texto' && (
-                                <div className="col-span-2">
+                                <div className="col-span-full">
                                     <label htmlFor="reg-evidencia-texto" className="block text-sm font-semibold text-slate-700 dark:text-[var(--text-primary)] mb-2">
                                         Descripción del Negocio <span className="text-red-500">*</span>
                                     </label>
@@ -349,7 +358,7 @@ export function RegisterPanel({ userType, error, success, isLoading, onSubmit, o
                             )}
 
                             {necesitaPDF && (
-                                <div className="col-span-2">
+                                <div className="col-span-full">
                                     <label htmlFor="reg-evidencia-pdf" className="block text-sm font-semibold text-slate-700 dark:text-[var(--text-primary)] mb-2">
                                         Archivo PDF <span className="text-red-500">*</span>
                                     </label>
@@ -472,7 +481,7 @@ export function RegisterPanel({ userType, error, success, isLoading, onSubmit, o
                         </>
                     )}
 
-                    <div className={isVendedor ? 'col-span-2' : ''}>
+                    <div className={isVendedor ? 'col-span-full' : ''}>
                         <button
                             type="submit"
                             disabled={isLoading}

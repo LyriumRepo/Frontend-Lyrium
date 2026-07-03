@@ -75,16 +75,16 @@ export default function PrivacyPolicyPage() {
             {/* ===================== HEADER SECTION ===================== */}
             <section className="text-center space-y-6 animate-in">
                 <div className="flex justify-center mb-6">
-                    <h1 className="flex items-center justify-center gap-3 px-6 md:px-8 py-3 md:py-4 w-full rounded-full 
-                        bg-gradient-to-r from-sky-500 to-sky-400 
+                    <h1 className="flex items-center justify-center gap-2 sm:gap-3 px-4 sm:px-6 md:px-8 py-3 md:py-4 w-full rounded-full
+                        bg-gradient-to-r from-sky-500 to-sky-400
                         dark:from-[#1A3A32] dark:to-[var(--brand-green)]
-                        text-white 
+                        text-white
                         shadow-[0_10px_25px_rgba(14,165,233,0.2)]
                         dark:shadow-[0_10px_25px_rgba(74,124,89,0.25)]
                         font-black tracking-tight text-center
-                        text-[clamp(20px,2.6vw,34px)]"
+                        text-base sm:text-lg md:text-[clamp(20px,2.6vw,34px)]"
                     >
-                        <ShieldCheck className="w-7 h-7 md:w-9 md:h-9 animate-float" />
+                        <ShieldCheck className="w-5 h-5 sm:w-7 sm:h-7 md:w-9 md:h-9 shrink-0 animate-float" />
                         Políticas de privacidad
                     </h1>
                 </div>

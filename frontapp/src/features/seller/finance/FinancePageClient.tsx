@@ -101,17 +101,17 @@ export function FinancePageClient() {
     showToast('Datos sincronizados según el periodo seleccionado', 'success');
   };
 
-  const headerActions = (
-    <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md p-2 rounded-2xl border border-white/20">
+  const renderDateFilterControls = () => (
+    <>
       <BaseDatePicker value={filters.startDate}
         onChange={(v) => setFilters(v, filters.endDate)} placeholder="Desde" />
-      <span className="text-white/30 text-lg font-thin">|</span>
+      <span className="text-[var(--text-secondary)] text-lg font-thin">|</span>
       <BaseDatePicker value={filters.endDate}
         onChange={(v) => setFilters(filters.startDate, v)} placeholder="Hasta" />
       <button
         onClick={handleApplyFilters}
         disabled={isRefreshing}
-        className="p-2 bg-white/20 text-white rounded-lg hover:bg-white/30 transition active:scale-95 disabled:opacity-50"
+        className="p-2 bg-[var(--celeste-500)] text-white rounded-lg hover:brightness-110 transition active:scale-95 disabled:opacity-50"
       >
         {isRefreshing ? (
           <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -119,7 +119,7 @@ export function FinancePageClient() {
           <Icon name="Search" className="w-4 h-4" />
         )}
       </button>
-    </div>
+    </>
   );
 
   if (isLoading && !data) {
@@ -201,8 +201,12 @@ export function FinancePageClient() {
         title="Centro de Finanzas y Estadísticas"
         subtitle="Monitoreo en tiempo real de tus KPIs estratégicos"
         icon="PieChart"
-        actions={headerActions}
       />
+
+      {/* Filtros de fecha */}
+      <div className="flex items-center gap-3 bg-[var(--bg-card)] p-2 rounded-2xl border border-[var(--border-subtle)] w-full overflow-x-auto no-scrollbar">
+        {renderDateFilterControls()}
+      </div>
 
       <div className="flex flex-wrap gap-2 border-b border-gray-100 dark:border-[var(--border-subtle)] pb-4 overflow-x-auto no-scrollbar">
         {tabs.map(tab => (

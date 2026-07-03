@@ -46,13 +46,13 @@ export default function TiendasRegistradasPage() {
   return (
     <main className="min-h-screen to-transparent py-10 px-4">
       <div className="max-w-7xl mx-auto space-y-10">
-        <h1 className="flex items-center justify-center gap-3 px-6 md:px-8 py-3 md:py-4 w-full rounded-full 
+        <h1 className="flex items-center justify-center gap-2 sm:gap-3 px-4 sm:px-6 md:px-8 py-3 md:py-4 w-full rounded-full
              bg-gradient-to-r from-sky-500 to-sky-400 dark:from-[#1A3A32] dark:to-[var(--brand-green)]
-             text-white 
-             shadow-[0_10px_25px_rgba(14,165,233,0.2)] dark:shadow-[0_10px_25px_rgba(74,124,89,0.25)] 
+             text-white
+             shadow-[0_10px_25px_rgba(14,165,233,0.2)] dark:shadow-[0_10px_25px_rgba(74,124,89,0.25)]
              font-black tracking-tight text-center
-             text-[clamp(20px,2.6vw,34px)]">
-          <Icon name="Store" className="w-[28px] md:w-[38px] h-[28px] md:h-[38px]" />
+             text-base sm:text-lg md:text-[clamp(20px,2.6vw,34px)]">
+          <Icon name="Store" className="w-5 h-5 sm:w-[28px] sm:h-[28px] md:w-[38px] md:h-[38px] shrink-0" />
           Tiendas Registradas
         </h1>
 
@@ -145,12 +145,12 @@ export default function TiendasRegistradasPage() {
 
                     <div className="absolute inset-0 p-4 flex flex-col justify-between z-5">
                       <div>
-                        <h3 className="text-white font-extrabold text-xl drop-shadow-lg leading-tight">
+                        <h3 className="text-white font-extrabold text-lg sm:text-xl drop-shadow-lg leading-tight line-clamp-2">
                           {store.name}
                         </h3>
                       </div>
 
-                      <div className="text-white/95 font-semibold text-sm space-y-1.5">
+                      <div className="text-white/95 font-semibold text-sm space-y-1.5 pr-20">
                         {store.address && (
                           <div className="flex items-center gap-2 drop-shadow-md">
                             <Icon name="MapPin" className="w-4.5 h-4.5" />

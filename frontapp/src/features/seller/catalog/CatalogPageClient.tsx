@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useTransition, useOptimistic } from 'react';
+import Image from 'next/image';
 import { Product } from '@/features/seller/catalog/types';
 import ProductCard from './components/ProductCard';
 import dynamic from 'next/dynamic';
@@ -95,6 +96,124 @@ function PriceEditInput({ product, onPriceUpdate }: PriceEditInputProps) {
             </span>
             <Icon name="Pencil" className="w-3 h-3 text-[var(--text-secondary)] opacity-0 group-hover/price:opacity-50 transition-opacity" />
         </button>
+    );
+}
+
+// ─── Mobile accordion card ────────────────────────────────────────────────────
+
+interface MobileProductCardProps {
+    product:    Product;
+    onEdit:     (product: Product) => void;
+    onDelete:   (productId: string) => void;
+    onViewInfo: (product: Product) => void;
+}
+
+function MobileProductCard({ product, onEdit, onDelete, onViewInfo }: MobileProductCardProps) {
+    const [expanded, setExpanded] = useState(false);
+
+    return (
+        <div className={`rounded-2xl border bg-[var(--bg-card)] overflow-hidden transition-colors ${
+            expanded
+                ? 'border-sky-500/40 dark:border-[#8FC3A1]/40'
+                : 'border-[var(--border-subtle)]'
+        }`}>
+            {/* ── Fila colapsada — siempre visible ── */}
+            <button
+                onClick={() => setExpanded((v) => !v)}
+                className="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors active:bg-[var(--bg-secondary)]/60"
+            >
+                {/* Imagen */}
+                <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] relative">
+                    <Image
+                        src={product.image || 'https://placehold.co/40x40/f3f4f6/9ca3af?text=?'}
+                        alt={product.name}
+                        fill
+                        sizes="40px"
+                        className="object-contain"
+                    />
+                </div>
+
+                {/* Nombre + precio */}
+                <div className="flex-1 min-w-0">
+                    <p className="text-sm font-black text-[var(--text-primary)] truncate leading-tight">
+                        {product.name}
+                    </p>
+                    <p className="text-[11px] font-bold text-sky-500 dark:text-[#8FC3A1] mt-0.5">
+                        S/ {product.price.toFixed(2)}
+                    </p>
+                </div>
+
+                {/* Stock pill */}
+                <span className={`text-[10px] font-black px-2 py-1 rounded-lg flex-shrink-0 ${
+                    product.stock === 0
+                        ? 'bg-red-500/10 text-red-400 border border-red-400/20'
+                        : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] border border-[var(--border-subtle)]'
+                }`}>
+                    {product.stock === 0 ? 'Agotado' : `${product.stock} uds`}
+                </span>
+
+                {/* Chevron */}
+                <Icon
+                    name={expanded ? 'ChevronUp' : 'ChevronDown'}
+                    className="w-4 h-4 flex-shrink-0 text-[var(--text-secondary)] transition-transform"
+                />
+            </button>
+
+            {/* ── Panel expandido ── */}
+            {expanded && (
+                <div className="border-t border-[var(--border-subtle)] px-4 py-3 space-y-2.5">
+
+                    {/* Detalle: Categoría */}
+                    <div className="flex items-center justify-between">
+                        <span className="text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)]">Categoría</span>
+                        <span className="text-xs font-bold text-[var(--text-primary)]">
+                            {product.category || <span className="opacity-30">—</span>}
+                        </span>
+                    </div>
+
+                    {/* Detalle: Precio */}
+                    <div className="flex items-center justify-between">
+                        <span className="text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)]">Precio</span>
+                        <span className="text-sm font-black text-[var(--text-primary)]">S/ {product.price.toFixed(2)}</span>
+                    </div>
+
+                    {/* Detalle: Stock */}
+                    <div className="flex items-center justify-between">
+                        <span className="text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)]">Stock</span>
+                        <span className={`text-sm font-black ${product.stock === 0 ? 'text-red-400' : 'text-[var(--text-primary)]'}`}>
+                            {product.stock}
+                            {product.stock === 0 && (
+                                <span className="ml-1.5 text-[8px] font-black uppercase tracking-wider text-red-400 border border-red-400/30 px-1 py-0.5 rounded">
+                                    Agotado
+                                </span>
+                            )}
+                        </span>
+                    </div>
+
+                    {/* Acciones */}
+                    <div className="flex items-center gap-2 pt-1">
+                        <button
+                            onClick={() => onViewInfo(product)}
+                            className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border border-[var(--border-subtle)] text-[11px] font-black text-[var(--text-secondary)] hover:border-sky-500/30 hover:text-sky-500 hover:bg-sky-500/5 dark:hover:border-[#8FC3A1]/30 dark:hover:text-[#8FC3A1] transition-colors"
+                        >
+                            <Icon name="ArrowRight" className="w-3.5 h-3.5" /> Ver
+                        </button>
+                        <button
+                            onClick={() => onEdit(product)}
+                            className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border border-[var(--border-subtle)] text-[11px] font-black text-[var(--text-secondary)] hover:border-sky-500/30 hover:text-sky-500 hover:bg-sky-500/5 dark:hover:border-[#8FC3A1]/30 dark:hover:text-[#8FC3A1] transition-colors"
+                        >
+                            <Icon name="Pencil" className="w-3.5 h-3.5" /> Editar
+                        </button>
+                        <button
+                            onClick={() => onDelete(product.id)}
+                            className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border border-red-500/20 text-[11px] font-black text-red-400 hover:bg-red-500/10 transition-colors"
+                        >
+                            <Icon name="Trash2" className="w-3.5 h-3.5" /> Eliminar
+                        </button>
+                    </div>
+                </div>
+            )}
+        </div>
     );
 }
 
@@ -337,64 +456,91 @@ export default function CatalogClient({ initialProducts }: CatalogClientProps) {
             <ModuleHeader
                 title="Gestión de Catálogo"
                 subtitle="Administra tus productos, precios e inventario centralizado."
-                icon="Catalog"
-                actions={
-                    <div className="flex items-center gap-2">
-                        <button
-                            onClick={() => setShowGuide(true)}
-                            className="w-9 h-9 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] flex items-center justify-center text-[var(--text-secondary)] hover:text-sky-500 hover:border-sky-500/30 hover:bg-sky-500/5 transition-all"
-                            title="Guía para imágenes de productos"
-                        >
-                            <Icon name="HelpCircle" className="w-4 h-4" />
-                        </button>
-                        <BaseButton
-                            onClick={handleCreateProduct}
-                            variant="action"
-                            leftIcon="PlusCircle"
-                        >
-                            Nuevo Producto
-                        </BaseButton>
-                    </div>
-                }
+                icon="Package"
             />
 
             {/* ── Tabla ── */}
             <div className="space-y-4 mt-8">
 
                 {/* Barra superior */}
-                <div className="flex items-center justify-between px-1">
+                <div className="bg-[var(--bg-card)] p-6 sm:p-8 rounded-[2.5rem] shadow-xl border border-[var(--border-subtle)] animate-fadeIn">
 
-                    <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 bg-sky-500/10 dark:bg-[#8FC3A1]/10 rounded-xl flex items-center justify-center border border-sky-500/20 dark:border-[#8FC3A1]/20 text-sky-500 dark:text-[#8FC3A1]">
-                            <Icon name="Catalog" className="w-4 h-4 stroke-[2.5px]" />
+                    {/* Header */}
+                    <div className="flex items-center justify-between gap-4 mb-6">
+                        <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 bg-[var(--brand-green)] rounded-2xl flex items-center justify-center shadow-lg shrink-0">
+                                <Icon name="Package" className="w-6 h-6 text-white" />
+                            </div>
+                            <div>
+                                <h2 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-widest">
+                                    Catálogo de Productos
+                                </h2>
+                                <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wide">
+                                    {products.length} producto{products.length !== 1 ? 's' : ''} registrado{products.length !== 1 ? 's' : ''}
+                                </p>
+                            </div>
                         </div>
-                        <div>
-                            <h2 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-widest">
-                                Catálogo de Productos
-                            </h2>
-                            <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wide">
-                                {products.length} producto{products.length !== 1 ? 's' : ''} registrado{products.length !== 1 ? 's' : ''}
-                            </p>
-                        </div>
+                        <button
+                            onClick={() => { setSearchText(''); setCurrentPage(1); }}
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-sky-400 dark:from-emerald-700 dark:to-teal-600 text-white font-black text-[10px] uppercase tracking-widest shadow-lg shadow-sky-500/25 dark:shadow-emerald-900/25 hover:shadow-xl hover:-translate-y-0.5 transition-all"
+                            title="Limpiar Filtros"
+                        >
+                            <Icon name="RotateCcw" className="w-4 h-4" />
+                            <span className="hidden sm:inline">Limpiar</span>
+                        </button>
                     </div>
 
-                    {/* Buscador */}
-                    <div className="relative">
-                        <Icon name="Search" className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--text-secondary)] pointer-events-none" />
-                        <input
-                            type="text"
-                            value={searchText}
-                            onChange={(e) => { setSearchText(e.target.value); setCurrentPage(1); }}
-                            placeholder="Buscar producto..."
-                            className="pl-8 pr-3 py-1.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] text-[11px] font-bold text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-none focus:border-sky-500/50 dark:focus:border-[#8FC3A1]/50 transition-colors w-44"
-                        />
+                    {/* Buscador + acciones */}
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                        <div className="relative flex-1">
+                            <Icon name="Search" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-secondary)] pointer-events-none" />
+                            <input
+                                type="text"
+                                value={searchText}
+                                onChange={(e) => { setSearchText(e.target.value); setCurrentPage(1); }}
+                                placeholder="Buscar producto..."
+                                className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-none focus:border-sky-500/50 dark:focus:border-[#8FC3A1]/50 transition-colors"
+                            />
+                        </div>
+
+                        <div className="flex items-center justify-center sm:justify-end gap-3 shrink-0">
+                            <BaseButton
+                                onClick={handleCreateProduct}
+                                variant="action"
+                                leftIcon="PlusCircle"
+                                size="lg"
+                            >
+                                Nuevo Producto
+                            </BaseButton>
+                            <button
+                                onClick={() => setShowGuide(true)}
+                                title="Guía para imágenes de productos"
+                                className="w-9 h-9 flex-shrink-0 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] flex items-center justify-center text-[var(--text-secondary)] hover:text-sky-500 hover:border-sky-500/30 hover:bg-sky-500/5 transition-all"
+                            >
+                                <Icon name="HelpCircle" className="w-4 h-4" />
+                            </button>
+                        </div>
                     </div>
                 </div>
 
                 {/* Tabla */}
                 {filteredProducts.length > 0 ? (
                     <>
-                        <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] overflow-visible">
+                        {/* ══ MÓVIL: tarjetas accordion (sm:hidden) ══════════════════════ */}
+                        <div className="sm:hidden space-y-2">
+                            {pagedProducts.map((p) => (
+                                <MobileProductCard
+                                    key={p.id}
+                                    product={p}
+                                    onEdit={openEditModal}
+                                    onDelete={onDelete}
+                                    onViewInfo={openDetailModal}
+                                />
+                            ))}
+                        </div>
+
+                        {/* ══ DESKTOP: tabla (hidden sm:block) ══════════════════════════ */}
+                        <div className="hidden sm:block rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] overflow-visible">
                             <table className="w-full border-separate border-spacing-0">
                                 <thead>
                                     <tr className="border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)]">
@@ -426,7 +572,6 @@ export default function CatalogClient({ initialProducts }: CatalogClientProps) {
                                     ))}
                                 </tbody>
                             </table>
-                        </div>
 
                         {totalPages > 1 && (
                             <div className="flex items-center justify-between px-1 pt-1">
@@ -460,6 +605,32 @@ export default function CatalogClient({ initialProducts }: CatalogClientProps) {
                                         className="w-7 h-7 flex items-center justify-center rounded-lg border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                                     >
                                         <Icon name="ChevronRight" className="w-3.5 h-3.5" />
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                        </div>{/* /desktop table */}
+
+                        {/* Paginación móvil */}
+                        {totalPages > 1 && (
+                            <div className="sm:hidden flex items-center justify-between px-1">
+                                <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest">
+                                    {safePage} / {totalPages}
+                                </p>
+                                <div className="flex items-center gap-1">
+                                    <button
+                                        onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                                        disabled={safePage === 1}
+                                        className="w-8 h-8 flex items-center justify-center rounded-xl border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                    >
+                                        <Icon name="ChevronLeft" className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                        onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                                        disabled={safePage === totalPages}
+                                        className="w-8 h-8 flex items-center justify-center rounded-xl border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                    >
+                                        <Icon name="ChevronRight" className="w-4 h-4" />
                                     </button>
                                 </div>
                             </div>

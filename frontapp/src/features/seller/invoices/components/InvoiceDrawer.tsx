@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import Icon from '@/components/ui/Icon';
 import { Voucher, VoucherStatus } from '@/features/seller/invoices/types';
 import { formatCurrency } from '@/shared/lib/utils/formatters';
@@ -31,6 +32,12 @@ const statusColorClasses: Record<string, string> = {
 export default function InvoiceDrawer({ voucher, isOpen, onClose }: InvoiceDrawerProps) {
     const [isDownloading, setIsDownloading] = useState(false);
     const [shareStatus, setShareStatus] = useState<'idle' | 'copied'>('idle');
+
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     const handleDownloadPdf = useCallback(async (v: Voucher) => {
         if (isDownloading) return;
@@ -83,12 +90,15 @@ export default function InvoiceDrawer({ voucher, isOpen, onClose }: InvoiceDrawe
         }
     }, []);
 
-    if (!isOpen || !voucher) return null;
+    if (!isOpen || !voucher || !mounted) return null;
+
+    const modalRoot = document.getElementById('modal-root');
+    if (!modalRoot) return null;
 
     const status = statusConfig[voucher.sunat_status] || statusConfig.DRAFT;
     const statusClasses = statusColorClasses[status.color] || statusColorClasses.gray;
 
-    return (
+    return createPortal(
         <div className="fixed inset-0 z-[99999] flex items-center justify-end">
             <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-md" onClick={onClose} role="presentation" aria-hidden="true"></div>
 
@@ -211,6 +221,7 @@ export default function InvoiceDrawer({ voucher, isOpen, onClose }: InvoiceDrawe
                     </button>
                 </div>
             </div>
-        </div>
+        </div>,
+        modalRoot,
     );
 }

@@ -27,6 +27,7 @@ export default function ProductCard({
             {/* ── Producto ── */}
             <td className="px-4 py-3 w-[260px] max-w-[260px]">
                 <div className="flex items-center gap-3">
+                    {/* Imagen — siempre visible (en móvil se usa el accordion) */}
                     <div className="w-9 h-9 rounded-xl overflow-hidden flex-shrink-0 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] relative">
                         <Image
                             src={product.image || 'https://placehold.co/36x36/f3f4f6/9ca3af?text=?'}
