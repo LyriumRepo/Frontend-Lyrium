@@ -717,3 +717,11 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     flex: 1 1 auto !important;
     height: 100% !important;
 }
+
+#goog-gt-tt, .goog-te-balloon-frame, .goog-te-balloon-wrapper {
+    display: none !important;
+}
+.goog-text-highlight {
+    background: none !important;
+    box-shadow: none !important;
+}

@@ -16,6 +16,7 @@ interface OfferBlockProps {
   fallbackImages: string[];
   enableCardCarousel?: boolean;
   backgroundPosition?: string;
+  tabletBackgroundSize?: string;
 }
 
 function OfferCard({
@@ -46,14 +47,14 @@ function OfferCard({
   };
 
   return (
-      <article className="w-[100px] min-[360px]:w-[110px] md:w-[220px] shrink-0 bg-[var(--azulCeleste-100)] dark:bg-[#1E3028] backdrop-blur-lg border border-transparent rounded-xl md:rounded-[20px] overflow-hidden shadow-md group transition-all duration-300 hover:-translate-y-[5px] flex flex-col items-center relative">
+      <article className="w-[100px] min-[360px]:w-[110px] sm:w-[195px] shrink-0 bg-[var(--azulCeleste-100)] dark:bg-[#1E3028] backdrop-blur-lg border border-transparent rounded-xl sm:rounded-[18px] overflow-hidden shadow-md group transition-all duration-300 hover:-translate-y-[5px] flex flex-col items-center relative">
       <div className="relative w-full aspect-square overflow-hidden bg-transparent flex items-center justify-center">
         {producto.descuento && producto.descuento > 0 ? (
-          <span className="absolute top-1 left-1 md:top-3 md:left-3 z-10 bg-red-500 text-white text-[7px] md:text-[10px] font-extrabold px-1 py-0.5 md:px-2.5 md:py-1 rounded-full">
+          <span className="absolute top-1 left-1 sm:top-2 sm:left-2 z-10 bg-red-500 text-white text-[7px] sm:text-[9px] font-extrabold px-1 py-0.5 sm:px-2 sm:py-0.5 rounded-full">
             -{producto.descuento}%
           </span>
         ) : producto.tag && producto.tag.toLowerCase() !== 'nuevo' ? (
-          <span className="absolute top-1 left-1 md:top-3 md:left-3 z-10 bg-sky-500 text-white text-[7px] md:text-[10px] font-extrabold px-1 py-0.5 md:px-2.5 md:py-1 rounded-full uppercase">
+          <span className="absolute top-1 left-1 sm:top-2 sm:left-2 z-10 bg-sky-500 text-white text-[7px] sm:text-[9px] font-extrabold px-1 py-0.5 sm:px-2 sm:py-0.5 rounded-full uppercase">
             {producto.tag}
           </span>
         ) : null}
@@ -65,29 +66,29 @@ function OfferCard({
             onError={handleImageError}
           />
 
-        <div className="absolute bottom-0 left-0 w-full h-[30px] md:h-[44px] flex bg-sky-500 transform translate-y-full group-hover:translate-y-0 transition-transform">
+        <div className="absolute bottom-0 left-0 w-full h-[30px] sm:h-[38px] flex bg-sky-500 transform translate-y-full group-hover:translate-y-0 transition-transform">
           <button onClick={() => onAddToCart(producto)} className="flex-1 flex items-center justify-center text-white">
-            <ShoppingCart className="w-3.5 h-3.5 md:w-[18px] md:h-[18px]" />
+            <ShoppingCart className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </button>
           <button onClick={() => onQuickView(producto)} className="flex-1 flex items-center justify-center text-white">
-            <Eye className="w-3.5 h-3.5 md:w-[18px] md:h-[18px]" />
+            <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </button>
           <Link href={`/producto/${producto.slug}`} className="flex-1 flex items-center justify-center text-white">
-            <ExternalLink className="w-3.5 h-3.5 md:w-[18px] md:h-[18px]" />
+            <ExternalLink className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </Link>
         </div>
       </div>
 
-       <div className="py-1.5 px-2 md:py-3 md:px-4 w-full text-center flex flex-col items-center">
-        <h3 className="text-[9px] min-[360px]:text-[10px] md:text-[13px] font-bold truncate w-full text-slate-900 dark:text-white">{producto.titulo}</h3>
-        <p className="text-[10px] min-[360px]:text-[11px] md:text-[15px] font-extrabold text-[var(--azulCeleste-500)] dark:text-[var(--azulCeleste-500)]">S/ {producto.precio.toFixed(2)}</p>
-        <div className="flex justify-center gap-0.5 mt-0.5 md:mt-1">
+       <div className="py-1.5 px-2 sm:py-2.5 sm:px-3 w-full text-center flex flex-col items-center">
+        <h3 className="text-[9px] min-[360px]:text-[10px] sm:text-[11.5px] font-bold truncate w-full text-slate-900 dark:text-white">{producto.titulo}</h3>
+        <p className="text-[10px] min-[360px]:text-[11px] sm:text-[13.5px] font-extrabold text-[var(--azulCeleste-500)] dark:text-[var(--azulCeleste-500)]">S/ {producto.precio.toFixed(2)}</p>
+        <div className="flex justify-center gap-0.5 mt-0.5 sm:mt-0.5">
           {Array.from({ length: 5 }).map((_, idx) => {
             const isFilled = idx < (producto.estrellas ? producto.estrellas.length : 5);
             return (
               <Star
                 key={idx}
-                className={`w-2 h-2 md:w-3.5 md:h-3.5 ${
+                className={`w-2 h-2 sm:w-3 sm:h-3 ${
                   isFilled ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300 dark:text-gray-600'
                 }`}
               />
@@ -107,6 +108,7 @@ function OfferBlock({
   fallbackImages,
   enableCardCarousel = false,
   backgroundPosition,
+  tabletBackgroundSize,
   onAddToCart,
   onQuickView,
 }: OfferBlockProps & {
@@ -215,18 +217,20 @@ function OfferBlock({
     ? 'infiniteScrollProducts'
     : 'infiniteScrollNewProducts';
 
+  const tabletBgSize = tabletBackgroundSize || 'sm:bg-[length:104%_104%]';
+
   if (productosAMostrar.length === 0) {
     return (
       <section className="space-y-4 md:space-y-6 flex flex-col items-center">
         <div className="w-[1467px] max-w-full pl-4 md:pl-10 pr-4 space-y-4">
           <h2 className="text-xl md:text-2xl font-bold pl-2 md:pl-8">{titulo}</h2>
 
-          <div className="relative w-full h-[280px] min-[360px]:h-[300px] md:h-[650px] rounded-2xl md:rounded-[30px] shadow-2xl overflow-hidden">
+          <div className="relative w-full h-[280px] min-[360px]:h-[300px] sm:h-[500px] rounded-2xl sm:rounded-[30px] shadow-2xl overflow-hidden">
             <div className="absolute inset-0">
               {fallbackImages.map((img, i) => (
                 <div
                   key={i}
-                  className={`absolute inset-0 bg-[length:100%_100%] md:bg-cover bg-fixed sm:bg-scroll md:bg-fixed bg-no-repeat bg-center transition-opacity duration-1000 ${
+                  className={`absolute inset-0 bg-[length:100%_100%] ${tabletBgSize} lg:bg-cover bg-fixed bg-no-repeat bg-center transition-opacity duration-1000 ${
                     i === bgIndex ? 'opacity-100' : 'opacity-0'
                   }`}
                   style={{
@@ -261,12 +265,12 @@ function OfferBlock({
         <h2 className="text-xl md:text-2xl font-bold pl-2 md:pl-8">{titulo}</h2>
       </div>
 
-      <div className="relative w-[1467px] max-w-full h-[280px] min-[360px]:h-[300px] md:h-[650px] rounded-2xl md:rounded-[30px] shadow-2xl overflow-hidden mx-auto">
+      <div className="relative w-[1467px] max-w-full h-[280px] min-[360px]:h-[300px] sm:h-[500px] rounded-2xl sm:rounded-[30px] shadow-2xl overflow-hidden mx-auto">
         <div className="absolute inset-0">
           {fallbackImages.map((img, i) => (
             <div
               key={i}
-              className={`absolute inset-0 bg-[length:100%_100%] md:bg-cover bg-fixed sm:bg-scroll md:bg-fixed bg-no-repeat bg-center transition-opacity duration-1000 ${
+              className={`absolute inset-0 bg-[length:100%_100%] ${tabletBgSize} lg:bg-cover bg-fixed bg-no-repeat bg-center transition-opacity duration-1000 ${
                 i === bgIndex ? 'opacity-100' : 'opacity-0'
               }`}
               style={{
@@ -279,7 +283,7 @@ function OfferBlock({
 
         <div className="absolute inset-0 bg-black/25 backdrop-blur-[1px]" />
 
-        <div className="relative z-10 p-2 pb-3 min-[360px]:p-3 min-[360px]:pb-4 md:p-8 md:pb-10 h-full flex flex-col justify-end">
+        <div className="relative z-10 p-2 pb-3 min-[360px]:p-3 min-[360px]:pb-4 sm:p-8 sm:pb-10 h-full flex flex-col justify-end">
           <style dangerouslySetInnerHTML={{ __html: `
             @keyframes ${animationName} {
               0% {
@@ -306,7 +310,7 @@ function OfferBlock({
             }}
           >
             <div
-              className={`flex gap-2 min-[360px]:gap-3 md:gap-5 animate-${animationName}`}
+              className={`flex gap-2 min-[360px]:gap-3 sm:gap-4 animate-${animationName}`}
               style={{ width: 'max-content' }}
             >
               {allItems.map((producto, index) => (
@@ -390,6 +394,7 @@ export default function OffersSection({
         fallbackImages={productosImages}
         enableCardCarousel
         backgroundPosition="center 80%"
+        tabletBackgroundSize="sm:bg-[length:101%_101%]"
         onAddToCart={handleAddToCart}
         onQuickView={handleQuickView}
       />

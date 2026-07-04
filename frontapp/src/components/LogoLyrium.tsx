@@ -279,14 +279,15 @@ const STYLES = `
     68%, 100% { left: 115%; opacity: 0; }
   }
   .lyr-side-img {
-    max-height: 60px; width: auto; object-fit: contain;
+    max-height: 34px; width: auto; object-fit: contain;
     filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
     transform-origin: center center;
     will-change: transform, filter;
     display: block;
-    padding: 4px 6px;
+    padding: 2px 4px;
   }
-  @media(min-width:768px){ .lyr-side-img { max-height: 80px; } }
+  @media(min-width:768px){ .lyr-side-img { max-height: 60px; padding: 4px 6px; } }
+  @media(min-width:1024px){ .lyr-side-img { max-height: 80px; } }
 
   /* ── Glow ring ── */
   .lyr-glow-ring {
@@ -615,15 +616,14 @@ const moodInterval = setInterval(() => {
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: STYLES }} />
-      <div className={`lyr-root inline-flex items-center gap-1 bg-transparent cursor-default font-[Outfit,sans-serif] ${showText ? 'px-3 py-2' : ''}`}>
+      <div className={`lyr-root inline-flex items-center gap-0.5 md:gap-1 bg-transparent cursor-default font-[Outfit,sans-serif] ${showText ? 'px-1 py-1 md:px-3 md:py-2' : ''}`}>
 
-        {/* Círculo con flip 3D */}
         <div
           ref={circleWrapRef}
           className={`flex-shrink-0 opacity-0 relative ${
             size === 'sm'
-              ? 'w-9 h-9'
-              : 'w-14 h-14 md:w-[4.8rem] md:h-[4.8rem]'
+              ? 'w-7 h-7 md:w-9 md:h-9'
+              : 'w-11 h-11 min-[360px]:w-12 min-[360px]:h-12 md:w-[4.8rem] md:h-[4.8rem]'
           }`}
         >
           <div ref={sceneRef} className="lyr-scene">
@@ -640,11 +640,10 @@ const moodInterval = setInterval(() => {
           </div>
         </div>
 
-        {/* Imagen lateral — solo si showText=true */}
         {showText && (
           <div
             ref={sideContainerRef}
-            className="lyr-side-container hidden md:flex items-center justify-center opacity-0 relative cursor-pointer overflow-hidden rounded-[4px]"
+            className="lyr-side-container flex items-center justify-center opacity-0 relative cursor-pointer overflow-hidden rounded-[4px]"
           >
             <div ref={sideGlowRingRef} className="lyr-glow-ring" />
             <img

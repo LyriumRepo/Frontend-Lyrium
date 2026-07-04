@@ -85,58 +85,58 @@ export default function ContactPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-[#0D1510] py-8 md:py-12 px-4">
+        <div className="min-h-screen bg-gray-50 dark:bg-[#0D1510] py-8 md:py-12 px-3.5 sm:px-4 md:px-8">
             <div className="max-w-6xl mx-auto">
-                <div className="grid md:grid-cols-2 gap-8 rounded-[30px] overflow-hidden bg-white dark:bg-[var(--bg-secondary)] shadow-xl dark:shadow-none border border-gray-200 dark:border-[var(--border-subtle)]">
+                <div className="grid md:grid-cols-2 gap-0 rounded-[30px] overflow-hidden bg-white dark:bg-[var(--bg-secondary)] shadow-xl dark:shadow-none border border-gray-200 dark:border-[var(--border-subtle)]">
                     {/* Visual Section */}
-                    <div className={`contact-visual bg-[linear-gradient(135deg,rgba(14,165,233,0.85)_0%,rgba(132,204,22,0.85))] dark:bg-[linear-gradient(135deg,var(--brand-green)_0%,var(--icons-green)_50%,var(--brand-green-hover)_100%)] bg-cover bg-center rounded-[30px] md:rounded-r-none p-8 md:p-12 text-white relative overflow-hidden h-full`}>                        
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+                    <div className={`contact-visual bg-[linear-gradient(135deg,rgba(14,165,233,0.85)_0%,rgba(132,204,22,0.85))] dark:bg-[linear-gradient(135deg,var(--brand-green)_0%,var(--icons-green)_50%,var(--brand-green-hover)_100%)] bg-cover bg-center rounded-t-[30px] md:rounded-l-[30px] md:rounded-tr-none p-6 pb-24 sm:p-8 sm:pb-28 md:p-12 md:pb-32 text-white relative overflow-hidden h-auto md:h-full flex flex-col justify-between`}>                        
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
                         <img src="/img/intro/Flor6.png" alt="decoración" className="absolute -bottom-20 -right-85 w-[700px] max-w-none opacity-50 mix-blend-overlay pointer-events-none" />
 
                         <div className="relative z-10">
-                            <div className="contact-icon w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mb-6 border border-white/20 backdrop-blur-sm">
-                                <Icon name="ChatCircleDots" className="text-4xl" />
+                            <div className="contact-icon w-16 h-16 md:w-20 md:h-20 bg-white/20 rounded-full flex items-center justify-center mb-6 border border-white/20 backdrop-blur-sm">
+                                <Icon name="ChatCircleDots" className="text-3xl md:text-4xl" />
                             </div>
 
-                            <h2 className="text-3xl font-bold mb-4">¡Contáctanos!</h2>
-                            <p className="text-white/90 mb-8">Estamos aquí para ayudarte. Envíanos tu consulta y te responderemos lo antes posible.</p>
+                            <h2 className="text-2xl sm:text-3xl font-bold mb-3 md:mb-4">¡Contáctanos!</h2>
+                            <p className="text-white/90 mb-6 md:mb-8 text-sm sm:text-base">Estamos aquí para ayudarte. Envíanos tu consulta y te responderemos lo antes posible.</p>
 
                             <div className="space-y-4">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
-                                        <Icon name="MapPin" className="text-xl" />
+                                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
+                                        <Icon name="MapPin" className="text-lg sm:text-xl" />
                                     </div>
-                                    <span>Perú</span>
+                                    <span className="text-sm sm:text-base">Perú</span>
                                 </div>
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
-                                        <Icon name="Mail" className="text-xl" />
+                                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
+                                        <Icon name="Mail" className="text-lg sm:text-xl" />
                                     </div>
-                                    <span>ventas@lyriumbiomarketplace.com</span>
+                                    <span className="text-xs sm:text-sm md:text-base break-all">ventas@lyriumbiomarketplace.com</span>
                                 </div>
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
-                                        <Icon name="PhoneCall" className="text-xl" />
+                                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
+                                        <Icon name="PhoneCall" className="text-lg sm:text-xl" />
                                     </div>
-                                    <span>+51 937 093 420</span>
+                                    <span className="text-sm sm:text-base">+51 937 093 420</span>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="absolute bottom-8 left-8 w-16 h-16 bg-white/20 rounded-full flex items-center justify-center opacity-100">
-                            <Icon name="Headset" className="text-3xl" />
+                        <div className="absolute bottom-6 right-6 md:bottom-8 md:right-8 w-14 h-14 md:w-16 md:h-16 bg-white/20 rounded-full flex items-center justify-center opacity-100 border border-white/20 backdrop-blur-sm">
+                            <Icon name="Headset" className="text-2xl md:text-3xl" />
                         </div>
                     </div>
 
                     {/* Form Section */}
-                    <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-3xl md:rounded-l-none p-8 md:p-10 shadow-lg dark:shadow-none h-full flex flex-col justify-center">
-                        <div className="form-header flex items-start gap-4 mb-8">
-                            <div className="w-12 h-12 bg-sky-100 rounded-full flex items-center justify-center flex-shrink-0">
-                                <Icon name="ChatCircleText" className="text-xl text-sky-600 dark:text-[var(--brand-green)]" />
+                    <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-b-[30px] md:rounded-r-[30px] md:rounded-l-none p-5 sm:p-8 md:p-10 h-full flex flex-col justify-center">
+                        <div className="form-header flex items-start gap-3 md:gap-4 mb-6 md:mb-8">
+                            <div className="w-10 h-10 md:w-12 md:h-12 bg-sky-100 dark:bg-emerald-950/30 rounded-full flex items-center justify-center flex-shrink-0">
+                                <Icon name="ChatCircleText" className="text-lg md:text-xl text-sky-600 dark:text-[var(--brand-green)]" />
                             </div>
                             <div>
-                                <h3 className="text-xl font-bold text-slate-800 dark:text-[var(--text-primary)]">Envíanos un mensaje!</h3>
-                                <p className="text-slate-500 dark:text-[var(--text-secondary)] text-sm">Completa el formulario y nos pondremos en contacto contigo</p>
+                                <h3 className="text-lg md:text-xl font-bold text-slate-800 dark:text-[var(--text-primary)]">Envíanos un mensaje!</h3>
+                                <p className="text-slate-500 dark:text-[var(--text-secondary)] text-xs md:text-sm">Completa el formulario y nos pondremos en contacto contigo</p>
                             </div>
                         </div>
 
@@ -144,15 +144,15 @@ export default function ContactPage() {
                             <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-4 rounded-xl mb-6 flex items-start gap-3">
                                 <Icon name="CheckCircle" className="text-xl flex-shrink-0 mt-0.5" />
                                 <div>
-                                    <h4 className="font-semibold">¡Mensaje enviado con éxito!</h4>
-                                    <p className="text-sm">Nos pondremos en contacto contigo pronto.</p>
+                                    <h4 className="font-semibold text-sm sm:text-base">¡Mensaje enviado con éxito!</h4>
+                                    <p className="text-xs sm:text-sm">Nos pondremos en contacto contigo pronto.</p>
                                 </div>
                             </div>
                         )}
 
-                        <form onSubmit={handleSubmit} className="space-y-5">
+                        <form onSubmit={handleSubmit} className="space-y-4 md:space-y-5">
                             <div className="form-group">
-                                <label htmlFor="name" className="block text-sm font-medium text-slate-700 dark:text-[var(--text-primary)] mb-1">
+                                <label htmlFor="name" className="block text-xs sm:text-sm font-medium text-slate-700 dark:text-[var(--text-primary)] mb-1">
                                     Nombre y Apellidos <span className="text-red-500">*</span>
                                 </label>
                                 <input
@@ -163,13 +163,13 @@ export default function ContactPage() {
                                     onChange={handleInputChange}
                                     placeholder="Escribe tu nombre completo"
                                     aria-label="Nombre y apellidos"
-                                    className={`form-input w-full px-4 py-3 rounded-xl border ${errors.name ? 'border-red-500' : 'border-slate-300'} focus:border-sky-500 dark:focus:border-[var(--icons-green)] focus:ring-2 focus:ring-sky-200 outline-none transition-all`}
+                                    className={`form-input w-full text-base px-4 py-2.5 sm:py-3 rounded-xl border ${errors.name ? 'border-red-500' : 'border-slate-300'} focus:border-sky-500 dark:focus:border-[var(--icons-green)] focus:ring-2 focus:ring-sky-200 outline-none transition-all`}
                                 />
                                 {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
                             </div>
 
                             <div className="form-group">
-                                <label htmlFor="email" className="block text-sm font-medium text-slate-700 dark:text-[var(--text-primary)] mb-1">
+                                <label htmlFor="email" className="block text-xs sm:text-sm font-medium text-slate-700 dark:text-[var(--text-primary)] mb-1">
                                     Correo Electrónico <span className="text-red-500">*</span>
                                 </label>
                                 <input
@@ -180,13 +180,13 @@ export default function ContactPage() {
                                     onChange={handleInputChange}
                                     placeholder="tu@email.com"
                                     aria-label="Correo electrónico"
-                                    className={`form-input w-full px-4 py-3 rounded-xl border ${errors.email ? 'border-red-500' : 'border-slate-300'} focus:border-sky-500 dark:focus:border-[var(--icons-green)] focus:ring-2 focus:ring-sky-200 outline-none transition-all`}
+                                    className={`form-input w-full text-base px-4 py-2.5 sm:py-3 rounded-xl border ${errors.email ? 'border-red-500' : 'border-slate-300'} focus:border-sky-500 dark:focus:border-[var(--icons-green)] focus:ring-2 focus:ring-sky-200 outline-none transition-all`}
                                 />
                                 {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
                             </div>
 
                             <div className="form-group">
-                                <label htmlFor="subject" className="block text-sm font-medium text-slate-700 dark:text-[var(--text-primary)] mb-1">
+                                <label htmlFor="subject" className="block text-xs sm:text-sm font-medium text-slate-700 dark:text-[var(--text-primary)] mb-1">
                                     Asunto <span className="text-red-500">*</span>
                                 </label>
                                 <input
@@ -197,13 +197,13 @@ export default function ContactPage() {
                                     onChange={handleInputChange}
                                     placeholder="¿En qué podemos ayudarte?"
                                     aria-label="Asunto del mensaje"
-                                    className={`form-input w-full px-4 py-3 rounded-xl border ${errors.subject ? 'border-red-500' : 'border-slate-300'} focus:border-sky-500 dark:focus:border-[var(--icons-green)] focus:ring-2 focus:ring-sky-200 outline-none transition-all`}
+                                    className={`form-input w-full text-base px-4 py-2.5 sm:py-3 rounded-xl border ${errors.subject ? 'border-red-500' : 'border-slate-300'} focus:border-sky-500 dark:focus:border-[var(--icons-green)] focus:ring-2 focus:ring-sky-200 outline-none transition-all`}
                                 />
                                 {errors.subject && <p className="text-red-500 text-xs mt-1">{errors.subject}</p>}
                             </div>
 
                             <div className="form-group">
-                                <label htmlFor="message" className="block text-sm font-medium text-slate-700 dark:text-[var(--text-primary)] mb-1">
+                                <label htmlFor="message" className="block text-xs sm:text-sm font-medium text-slate-700 dark:text-[var(--text-primary)] mb-1">
                                     Mensaje <span className="text-red-500">*</span>
                                 </label>
                                 <textarea
@@ -215,7 +215,7 @@ export default function ContactPage() {
                                     maxLength={500}
                                     rows={5}
                                     aria-label="Mensaje"
-                                    className={`form-textarea w-full px-4 py-3 rounded-xl border ${errors.message ? 'border-red-500' : 'border-slate-300'} focus:border-sky-500 dark:focus:border-[var(--icons-green)] focus:ring-2 focus:ring-sky-200 outline-none transition-all resize-none`}
+                                    className={`form-textarea w-full text-base px-4 py-2.5 sm:py-3 rounded-xl border ${errors.message ? 'border-red-500' : 'border-slate-300'} focus:border-sky-500 dark:focus:border-[var(--icons-green)] focus:ring-2 focus:ring-sky-200 outline-none transition-all resize-none`}
                                 />
                                 <div className="flex justify-between mt-1">
                                     {errors.message && <p className="text-red-500 text-xs">{errors.message}</p>}
@@ -232,9 +232,9 @@ export default function ContactPage() {
                                         checked={formData.privacy}
                                         onChange={handleInputChange}
                                         aria-label="Aceptar política de privacidad"
-                                        className="mt-1 w-4 h-4 rounded border-slate-300 text-sky-500 focus:ring-sky-500 dark:accent-[var(--brand-green)]"
+                                        className="mt-1 w-4 h-4 rounded border-slate-300 text-sky-500 focus:ring-sky-500 dark:accent-[var(--brand-green)] flex-shrink-0"
                                     />
-                                    <label htmlFor="privacy" className="form-checkbox-label text-sm text-slate-600 dark:text-[var(--text-primary)]">
+                                    <label htmlFor="privacy" className="form-checkbox-label text-xs sm:text-sm text-slate-600 dark:text-[var(--text-primary)]">
                                         Acepto la <Link href="/politicasdeprivacidad" target="_blank" className="text-sky-500 dark:text-[var(--icons-green)] hover:underline">política de privacidad</Link>
                                     </label>
                                 </div>
@@ -245,7 +245,7 @@ export default function ContactPage() {
                                 type="submit"
                                 disabled={submitting}
                                 className="form-submit w-full bg-gradient-to-r from-sky-500 to-cyan-500 dark:from-[#1A3A32] dark:to-[var(--brand-green)] hover:from-sky-600 hover:to-cyan-600 dark:hover:from-[#1A3A32] dark:hover:to-[var(--brand-green)]
-                                text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg dark:shadow-[0_10px_25px_rgba(74,124,89,0.3)] hover:shadow-xl dark:hover:shadow-[0_15px_35px_rgba(74,124,89,0.4)] hover:-translate-y-1"
+                                text-white py-3 sm:py-3.5 md:py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg dark:shadow-[0_10px_25px_rgba(74,124,89,0.3)] hover:shadow-xl dark:hover:shadow-[0_15px_35px_rgba(74,124,89,0.4)] hover:-translate-y-1 text-sm md:text-base"
                             >
                                 {submitting ? (
                                     <>

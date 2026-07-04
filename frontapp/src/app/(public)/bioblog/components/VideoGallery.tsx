@@ -1,13 +1,64 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { Play, Plus } from 'lucide-react';
-import { videoCategories, videos } from '../data/blogData';
+import { blogApi } from '@/shared/lib/api/blog';
+
+function extractYoutubeId(url: string, youtubeId: string | null): string {
+    if (youtubeId) return youtubeId;
+    if (!url) return '';
+    const patterns = [
+        /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,
+        /^([a-zA-Z0-9_-]{11})$/,
+    ];
+    for (const pattern of patterns) {
+        const match = url.match(pattern);
+        if (match) return match[1];
+    }
+    return '';
+}
+
+interface VideoItem {
+    id: number;
+    title: string;
+    videoId: string;
+    category: string;
+    categoryLabel: string;
+}
+
+const YT_THUMB = (id: string) => `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
 
 export default function VideoGallery() {
+    const [videos, setVideos] = useState<VideoItem[]>([]);
+    const [categories, setCategories] = useState<string[]>([]);
     const [activeFilter, setActiveFilter] = useState('*');
     const [showAll, setShowAll] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [imgErrors, setImgErrors] = useState<Set<number>>(new Set());
+
+    const handleImgError = (id: number) => {
+        setImgErrors(prev => new Set(prev).add(id));
+    };
+
+    useEffect(() => {
+        blogApi.getVideos().then((data: any[]) => {
+            const items: VideoItem[] = (data && data.length > 0)
+                ? data.map((v: any) => ({
+                    id: v.id,
+                    title: v.title,
+                    videoId: extractYoutubeId(v.url ?? '', v.youtube_id),
+                    category: v.category ?? 'general',
+                    categoryLabel: v.category_label ?? v.category ?? 'General',
+                }))
+                : [];
+            setVideos(items);
+            const cats = Array.from(new Set(items.map((v) => v.category)));
+            setCategories(cats);
+        }).catch(() => {}).finally(() => setLoading(false));
+    }, []);
 
     const filteredVideos = activeFilter === '*'
         ? videos
@@ -35,71 +86,91 @@ export default function VideoGallery() {
             {/* Galería de Videos Filtrable */}
             <div className="w-full py-1 bg-slate-50 dark:bg-[var(--bg-primary)]">
                 <div className="max-w-7xl mx-auto px-4">
-                    <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-stretch sm:items-center sm:justify-center gap-2 min-[360px]:gap-3 mb-8 sm:mb-12">
-                        {videoCategories.map((cat) => (
+                    {/* Filtros de Categoría */}
+                    <div className="flex flex-wrap justify-center gap-3 mb-12">
+                        <button
+                            onClick={() => { setActiveFilter('*'); setShowAll(false); }}
+                            className={`px-5 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 ${
+                                activeFilter === '*'
+                                    ? 'bg-sky-500 dark:bg-[var(--brand-green)] text-white shadow-lg'
+                                    : 'bg-white dark:bg-[var(--bg-secondary)] text-slate-600 dark:text-[var(--text-secondary)] hover:bg-slate-100 dark:hover:bg-[#2A3F33] border border-slate-200 dark:border-[var(--border-subtle)]'
+                            }`}
+                        >
+                            Todos
+                        </button>
+                        {categories.map((cat) => (
                             <button
-                                key={cat.id}
-                                onClick={() => {
-                                    setActiveFilter(cat.id);
-                                    setShowAll(false);
-                                }}
-                                className={`category w-full sm:w-auto flex-shrink-0 px-2 py-2.5 min-[360px]:px-3 sm:px-5 sm:py-2 rounded-full text-[10px] min-[360px]:text-xs font-bold uppercase tracking-wider transition-all duration-300 flex items-center justify-center text-center leading-tight ${
-                                    activeFilter === cat.id
+                                key={cat}
+                                onClick={() => { setActiveFilter(cat); setShowAll(false); }}
+                                className={`px-5 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 ${
+                                    activeFilter === cat
                                         ? 'bg-sky-500 dark:bg-[var(--brand-green)] text-white shadow-lg'
                                         : 'bg-white dark:bg-[var(--bg-secondary)] text-slate-600 dark:text-[var(--text-secondary)] hover:bg-slate-100 dark:hover:bg-[#2A3F33] border border-slate-200 dark:border-[var(--border-subtle)]'
                                 }`}
                             >
-                                {cat.name}
+                                {categories.find(c => c === cat) ? cat.charAt(0).toUpperCase() + cat.slice(1) : cat}
                             </button>
                         ))}
                     </div>
 
-                    {/* Contenedor de la Galería */}
-                    <div className="grid grid-cols-3 md:grid-cols-2 lg:grid-cols-3 gap-2 min-[360px]:gap-3 md:gap-8">
-                        {displayedVideos.map((video) => (
-                            <div
+                    {loading ? (
+                        <div className="flex justify-center py-12">
+                            <div className="w-8 h-8 border-2 border-sky-500 border-t-transparent rounded-full animate-spin" />
+                        </div>
+                    ) : videos.length === 0 ? (
+                        <div className="text-center py-12 text-slate-500">
+                            <p>No hay videos disponibles.</p>
+                        </div>
+                    ) : (
+                    <>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {displayedVideos.map((video, index) => (
+                            <motion.div
                                 key={video.id}
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.4, delay: index * 0.06 }}
                                 className={`premium-gallery-item group ${activeFilter !== '*' && video.category !== activeFilter ? 'hidden' : ''}`}
                             >
-                                <div className="relative rounded-xl min-[360px]:rounded-2xl md:rounded-[2rem] overflow-hidden shadow-md hover:shadow-2xl transition-all duration-500 border border-slate-100 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-secondary)]">
+                                <div className="relative rounded-[2rem] overflow-hidden shadow-md hover:shadow-2xl transition-all duration-500 border border-slate-100 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-secondary)]">
                                     {/* Miniatura */}
                                     <div className="aspect-video relative overflow-hidden">
                                         <Image
-                                            src={`https://i.ytimg.com/vi/${video.videoId}/maxresdefault.jpg`}
+                                            src={imgErrors.has(video.id) || !video.videoId ? '/img/bioblog/blog-teclas.jpg' : YT_THUMB(video.videoId)}
                                             alt={video.title}
                                             fill
-                                            sizes="(max-width: 768px) 33vw, 33vw"
+                                            sizes="(max-width: 768px) 100vw, 33vw"
                                             className="object-cover transform transition-transform duration-700 group-hover:scale-110"
+                                            onError={() => handleImgError(video.id)}
                                         />
                                         <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors" />
 
                                         {/* Botón Play */}
-                                        <a
-                                            href={`https://www.youtube.com/embed/${video.videoId}?feature=oembed&autoplay=1`}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
+                                        <Link
+                                            href={`/bioblog/video/${video.id}`}
                                             className="absolute inset-0 flex items-center justify-center"
                                         >
-                                            <div className="w-8 h-8 md:w-16 md:h-16 bg-sky-500 dark:bg-[var(--icons-green)] text-white rounded-full flex items-center justify-center transform transition-all duration-500 scale-90 group-hover:scale-100 shadow-xl group-hover:shadow-sky-500/50 dark:group-hover:shadow-lime-100/50">
-                                                <Play className="w-4 h-4 ml-0.5 md:w-8 md:h-8 md:ml-1" fill="currentColor" />
+                                            <div className="w-16 h-16 bg-sky-500 dark:bg-[var(--icons-green)] text-white rounded-full flex items-center justify-center transform transition-all duration-500 scale-90 group-hover:scale-100 shadow-xl group-hover:shadow-sky-500/50 dark:group-hover:shadow-lime-100/50">
+                                                <Play className="w-8 h-8 ml-1" fill="currentColor" />
                                             </div>
-                                        </a>
+                                        </Link>
 
-                                        <div className="absolute top-0.5 left-1.5 md:top-4 md:left-4">
-                                            <span className="whitespace-nowrap px-1 py-[1px] min-[360px]:px-1.5 min-[360px]:py-0.5 md:px-3 md:py-1 bg-white/90 dark:bg-[var(--bg-secondary)]/90 backdrop-blur-md text-slate-800 dark:text-[var(--text-primary)] text-[6px] min-[360px]:text-[7.5px] md:text-[10px] font-bold rounded-full uppercase tracking-normal md:tracking-wider shadow-sm">
+                                        <div className="absolute top-4 left-4">
+                                            <span className="px-3 py-1 bg-white/90 dark:bg-[var(--bg-secondary)]/90 backdrop-blur-md text-slate-800 dark:text-[var(--text-primary)] text-[10px] font-bold rounded-full uppercase tracking-wider shadow-sm">
                                                 {video.categoryLabel}
                                             </span>
                                         </div>
                                     </div>
 
                                     {/* Contenido */}
-                                    <div className="p-2 min-[360px]:p-3 md:p-6">
-                                        <h3 className="text-[9px] min-[360px]:text-[10px] md:text-lg font-bold text-slate-800 dark:text-[var(--text-primary)] leading-tight group-hover:text-sky-600 dark:group-hover:text-lime-200 transition-colors line-clamp-2">
+                                    <div className="p-6">
+                                        <h3 className="text-base md:text-lg font-bold text-slate-800 dark:text-[var(--text-primary)] leading-tight group-hover:text-sky-600 dark:group-hover:text-lime-200 transition-colors line-clamp-2">
                                             {video.title}
                                         </h3>
                                     </div>
                                 </div>
-                            </div>
+                            </motion.div>
                         ))}
                     </div>
 
@@ -114,6 +185,8 @@ export default function VideoGallery() {
                                 <Plus className="w-4 h-4" />
                             </button>
                         </div>
+                    )}
+                    </>
                     )}
                 </div>
             </div>

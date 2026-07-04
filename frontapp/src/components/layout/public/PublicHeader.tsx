@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 import Icon from '@/components/ui/Icon';
 import ThemeToggle from '@/components/layout/shared/ThemeToggle';
 import TopBanner from './TopBanner';
@@ -15,12 +16,25 @@ import { useAuth } from '@/shared/lib/context/AuthContext';
 import { AUTH_CONFIG } from '@/shared/lib/config/auth';
 import LogoLyrium from '@/components/LogoLyrium';
 
+const iconNameMap: Record<string, string> = {
+    'shopping-bag': 'ShoppingBag',
+    'headset': 'Headset',
+    'info': 'Info',
+    'newspaper': 'Newspaper',
+    'chats-circle': 'ChatCircle',
+    'storefront': 'Storefront',
+    'buildings': 'Buildings',
+    'phone-call': 'PhoneCall',
+};
+
 export default function PublicHeader() {
+    const pathname = usePathname();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [activeMobileMegaMenuItem, setActiveMobileMegaMenuItem] = useState<MenuItem | null>(null);
     const [activeMobileCategory, setActiveMobileCategory] = useState<string>('');
     const [expandedCols, setExpandedCols] = useState<Record<string, boolean>>({});
     const cartItemCount = useCarritoStore((s) => s.cartItems.reduce((sum, i) => sum + Number(i.cantidad ?? 0), 0));
+
     const { menuItems: apiMenuItems, megaMenuData: apiMegaMenuData, hasData } = useMegaMenu();
     const { user, isAuthenticated } = useAuth();
     const dashboardUrl = isAuthenticated && user?.role
@@ -49,57 +63,26 @@ export default function PublicHeader() {
         <>
             <TopBanner />
             <header className="bg-white dark:bg-[var(--bg-secondary)] shadow-md dark:shadow-none sticky top-0 z-50 border-b border-gray-100 dark:border-[var(--border-subtle)]">
-                <div className="max-w-7xl mx-auto flex items-center justify-between px-3 md:px-4 py-3 gap-2 md:gap-6">
-                    <Link href="/" className="flex items-center gap-2 group relative">
+                <div className="max-w-7xl mx-auto flex items-center justify-between px-2.5 md:px-4 py-2 gap-1 min-[360px]:gap-2 md:gap-6">
+                    <Link href="/" className="flex items-center gap-1 md:gap-2 group relative">
                         <LogoLyrium
                             frontImg="/img/iconologo.png"
                             sideImg="/img/nombrelogo.png"
                         />
                     </Link>
 
-                    <div className="flex lg:hidden items-center gap-1 sm:gap-2 ml-auto">
-                        <Link
-                            href="/productos"
-                            onClick={(e) => {
-                                const item = menuItems.find(x => x.label?.toUpperCase() === 'PRODUCTOS');
-                                if (item) {
-                                    e.preventDefault();
-                                    handleMobileMegaMenuOpen(item);
-                                }
-                            }}
-                            className="flex items-center gap-1 px-2 py-1 min-[360px]:px-2.5 min-[360px]:py-1.5 rounded-full bg-sky-50 dark:bg-sky-950/30 border border-sky-100/50 dark:border-sky-900/30 text-sky-600 dark:text-[var(--color-success)] text-[10px] min-[360px]:text-[11px] font-black uppercase tracking-wider hover:bg-sky-100 dark:hover:bg-sky-950/50 transition-all duration-200"
-                        >
-                            <Icon name="ShoppingBag" className="text-[11px] min-[360px]:text-[12px]" />
-                            <span>Productos</span>
-                        </Link>
-                        <Link
-                            href="/servicios"
-                            onClick={(e) => {
-                                const item = menuItems.find(x => x.label?.toUpperCase() === 'SERVICIOS');
-                                if (item) {
-                                    e.preventDefault();
-                                    handleMobileMegaMenuOpen(item);
-                                }
-                            }}
-                            className="flex items-center gap-1 px-2 py-1 min-[360px]:px-2.5 min-[360px]:py-1.5 rounded-full bg-sky-50 dark:bg-sky-950/30 border border-sky-100/50 dark:border-sky-900/30 text-sky-600 dark:text-[var(--color-success)] text-[10px] min-[360px]:text-[11px] font-black uppercase tracking-wider hover:bg-sky-100 dark:hover:bg-sky-950/50 transition-all duration-200"
-                        >
-                            <Icon name="Headset" className="text-[11px] min-[360px]:text-[12px]" />
-                            <span>Servicios</span>
-                        </Link>
-                    </div>
-
                     <div className="flex items-center gap-4">
-                        <div className="hidden sm:flex items-center gap-5 text-xs lg:text-[13px] text-sky-600 dark:text-[var(--color-success)]">
+                        <div className="flex items-center gap-1 min-[360px]:gap-2 sm:gap-5 text-xs lg:text-[13px] text-sky-600 dark:text-[var(--color-success)]">
                             {isAuthenticated && user ? (
-                                <div className="flex items-center gap-3">
-                                    <span className="flex items-center gap-1">
+                                <div className="flex items-center gap-1 sm:gap-3">
+                                    <span className="flex items-center gap-1 p-1.5 sm:p-2.5">
                                         <Icon name="UserCircle" className="text-[18px]" />
-                                        <span className="whitespace-nowrap truncate max-w-[110px]">
+                                        <span className="hidden sm:inline whitespace-nowrap truncate max-w-[110px]">
                                             {user.display_name || user.username || user.email}
                                         </span>
                                     </span>
                                     <div className="relative group">
-                                        <Link href={dashboardUrl} className="p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] transition-colors flex items-center justify-center">
+                                        <Link href={dashboardUrl} className="p-1.5 min-[360px]:p-2 sm:p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] transition-colors flex items-center justify-center">
                                             <Icon name="LayoutDashboard" className="text-[18px]" />
                                         </Link>
                                         <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-[#333333] text-white text-xs px-2 py-1 rounded-md whitespace-nowrap">
@@ -109,7 +92,7 @@ export default function PublicHeader() {
                                 </div>
                             ) : (
                                 <div className="relative group">
-                                    <Link href="/login" className="p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] transition-colors flex items-center justify-center">
+                                    <Link href="/login" className="p-1.5 min-[360px]:p-2 sm:p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] transition-colors flex items-center justify-center">
                                         <Icon name="UserCircle" className="text-[18px]" />
                                     </Link>
                                     <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-[#333333] text-white text-xs px-2 py-1 rounded-md whitespace-nowrap">
@@ -119,7 +102,7 @@ export default function PublicHeader() {
                             )}
 
                             <div className="relative group">
-                                <Link href="/carrito" className="p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] transition-colors flex items-center justify-center">
+                                <Link href="/carrito" className="p-1.5 min-[360px]:p-2 sm:p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] transition-colors flex items-center justify-center">
                                     <Icon name="ShoppingCart" className="text-[18px]" />
                                     {cartItemCount > 0 && (
                                         <span className="absolute -top-1 -right-1 bg-sky-500 text-white text-[11px] rounded-full px-1.5 py-0.5">
@@ -146,6 +129,32 @@ export default function PublicHeader() {
                     </div>
                 </div>
 
+                <div className="lg:hidden w-full border-t border-gray-100 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-secondary)] overflow-x-auto scrollbar-none py-2 px-2 min-[360px]:py-2.5 min-[360px]:px-3.5 flex items-center justify-center sm:justify-start lg:justify-center gap-3.5 min-[360px]:gap-5 sm:gap-6">
+                    {menuItems.map((item) => {
+                        const iconName = item.icon ? iconNameMap[item.icon] : null;
+                        const isAlwaysVisible = ['PRODUCTOS', 'SERVICIOS', 'NOSOTROS'].includes(item.label?.toUpperCase() || '');
+                        return (
+                            <Link
+                                key={item.label}
+                                href={item.href || '#'}
+                                onClick={(e) => {
+                                    if (item.children) {
+                                        e.preventDefault();
+                                        handleMobileMegaMenuOpen(item);
+                                    }
+                                }}
+                                className={`items-center gap-1 min-[360px]:gap-1.5 text-[9px] min-[360px]:text-[10px] font-black text-slate-700 dark:text-[var(--text-primary)] whitespace-nowrap hover:text-sky-500 dark:hover:text-[var(--color-success)] transition-colors uppercase tracking-wider ${
+                                    isAlwaysVisible ? 'flex' : 'hidden sm:flex'
+                                }`}
+                            >
+                                {iconName && <Icon name={iconName} className="text-[11px] min-[360px]:text-[13px] text-slate-500 dark:text-[var(--text-placeholder)]" />}
+                                <span>{item.label}</span>
+                                {item.children && <Icon name="ChevronDown" className="w-2 h-2 min-[360px]:w-2.5 min-[360px]:h-2.5 text-slate-400" />}
+                            </Link>
+                        );
+                    })}
+                </div>
+
                 <DesktopNav menuItems={menuItems} megaMenuData={megaMenuData} />
             </header>
 
@@ -156,6 +165,7 @@ export default function PublicHeader() {
                 isAuthenticated={isAuthenticated}
                 user={user}
                 dashboardUrl={dashboardUrl}
+                onOpenMegaMenu={handleMobileMegaMenuOpen}
             />
 
             {activeMobileMegaMenuItem && (
@@ -211,107 +221,138 @@ export default function PublicHeader() {
                                 if (!megaData) return null;
 
                                 const circleColors = [
-                                    'hover:text-[#B7E000]',
-                                    'hover:text-[#8FD400]',
-                                    'hover:text-[#66D6A8]',
-                                    'hover:text-[#4EC7B8]',
-                                    'hover:text-[#69BEEB]',
-                                    'hover:text-[#5AAFE6]',
+                                    'border-[#B7E000]',
+                                    'border-[#8FD400]',
+                                    'border-[#66D6A8]',
+                                    'border-[#4EC7B8]',
+                                    'border-[#69BEEB]',
+                                    'border-[#5AAFE6]',
                                 ];
-                                const textHoverColors = [
-                                    'group-hover:text-[#B7E000]',
-                                    'group-hover:text-[#8FD400]',
-                                    'group-hover:text-[#66D6A8]',
-                                    'group-hover:text-[#4EC7B8]',
-                                    'group-hover:text-[#69BEEB]',
-                                    'group-hover:text-[#5AAFE6]',
-                                ];
+
+                                const itemsToRender: Array<{
+                                    title: string;
+                                    img: string | null;
+                                    href: string;
+                                    items: any[];
+                                    colKey: string | null;
+                                }> = [];
+                                const matchedColHeaders = new Set<string>();
+
+                                if (megaData.icons) {
+                                    megaData.icons.forEach((icon) => {
+                                        const matchingCol = megaData.cols?.find(
+                                            (col) => col.h.toUpperCase() === icon.title.toUpperCase() ||
+                                                     col.h.toUpperCase().includes(icon.title.toUpperCase()) ||
+                                                     icon.title.toUpperCase().includes(col.h.toUpperCase())
+                                        );
+                                        if (matchingCol) {
+                                            matchedColHeaders.add(matchingCol.h);
+                                        }
+                                        itemsToRender.push({
+                                            title: icon.title,
+                                            img: icon.img,
+                                            href: icon.href,
+                                            items: matchingCol ? matchingCol.items : [],
+                                            colKey: matchingCol ? matchingCol.h : null,
+                                        });
+                                    });
+                                }
+
+                                if (megaData.cols) {
+                                    megaData.cols.forEach((col) => {
+                                        if (!matchedColHeaders.has(col.h)) {
+                                            itemsToRender.push({
+                                                title: col.h,
+                                                img: null,
+                                                href: '#',
+                                                items: col.items,
+                                                colKey: col.h,
+                                            });
+                                        }
+                                    });
+                                }
 
                                 return (
-                                    <>
-                                        <div>
-                                            <h3 className="text-[12px] font-bold text-slate-800 dark:text-[var(--text-primary)] uppercase tracking-wider mb-3">
-                                                Comprar por categoría
-                                            </h3>
-                                            <div className="grid grid-cols-3 gap-2.5">
-                                                {megaData.icons && megaData.icons.map((icon, idx) => (
-                                                    <Link
-                                                        key={icon.title}
-                                                        href={icon.href}
-                                                        onClick={() => setActiveMobileMegaMenuItem(null)}
-                                                        className="group flex flex-col items-center text-center"
-                                                    >
-                                                        <div className={`w-16 h-16 rounded-full border border-gray-200 dark:border-sky-900/30 flex items-center justify-center shadow-sm overflow-hidden bg-white dark:bg-[var(--bg-secondary)] ${circleColors[idx % circleColors.length]}`}>
-                                                            <Image
-                                                                src={icon.img}
-                                                                alt={icon.title}
-                                                                width={64}
-                                                                height={64}
-                                                                className="w-full h-full object-contain scale-125"
-                                                            />
+                                    <div className="space-y-3 pb-8">
+                                        {itemsToRender.map((item, idx) => {
+                                            const isExpanded = item.colKey ? expandedCols[item.colKey] : false;
+                                            return (
+                                                <div
+                                                    key={`${item.title}-${idx}`}
+                                                    className="bg-gray-50/50 dark:bg-[var(--bg-muted)]/20 p-3 rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)] flex items-start gap-3.5"
+                                                >
+                                                    {item.img ? (
+                                                        <Link
+                                                            href={item.href}
+                                                            onClick={() => setActiveMobileMegaMenuItem(null)}
+                                                            className="flex-shrink-0"
+                                                        >
+                                                            <div className={`w-14 h-14 rounded-full border-2 flex items-center justify-center shadow-sm overflow-hidden bg-white dark:bg-[var(--bg-secondary)] ${circleColors[idx % circleColors.length]}`}>
+                                                                <Image
+                                                                    src={item.img}
+                                                                    alt={item.title}
+                                                                    width={56}
+                                                                    height={56}
+                                                                    className="w-full h-full object-contain scale-125"
+                                                                />
+                                                            </div>
+                                                        </Link>
+                                                    ) : (
+                                                        <div className={`w-14 h-14 rounded-full border-2 flex-shrink-0 flex items-center justify-center shadow-sm overflow-hidden bg-slate-50 dark:bg-[var(--bg-secondary)] ${circleColors[idx % circleColors.length]}`}>
+                                                            <span className="text-[12px] font-black text-slate-400 uppercase">
+                                                                {item.title.slice(0, 2)}
+                                                            </span>
                                                         </div>
-                                                        <span className={`mt-1.5 text-[9px] leading-tight font-extrabold text-slate-700 dark:text-[var(--text-primary)] transition ${textHoverColors[idx % textHoverColors.length]}`}>
-                                                            {icon.title}
-                                                        </span>
-                                                    </Link>
-                                                ))}
-                                            </div>
-                                        </div>
+                                                    )}
 
-                                        <div className="h-px bg-lime-400/50"></div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <Link
+                                                            href={item.href}
+                                                            onClick={() => setActiveMobileMegaMenuItem(null)}
+                                                            className="text-[11px] font-black tracking-wide text-slate-800 dark:text-[var(--text-primary)] uppercase mb-1.5 block hover:text-[#6BAF7B] transition truncate"
+                                                        >
+                                                            {item.title}
+                                                        </Link>
 
-                                        {megaData.cols && megaData.cols.length > 0 && (
-                                            <div className="space-y-4 pb-8">
-                                                {megaData.cols.map((col, colIdx) => {
-                                                    const relatedIcon = megaData.icons.find(
-                                                        (icon) => icon.title.toUpperCase() === col.h
-                                                    );
-                                                    const isExpanded = expandedCols[col.h];
-                                                    return (
-                                                        <div key={`${col.h}-${colIdx}`} className="bg-gray-50/50 dark:bg-[var(--bg-muted)]/20 p-3 rounded-xl border border-gray-100 dark:border-[var(--border-subtle)]">
-                                                            <Link
-                                                                href={relatedIcon?.href || '#'}
-                                                                onClick={() => setActiveMobileMegaMenuItem(null)}
-                                                                className="text-[11px] font-black tracking-wide text-slate-800 dark:text-[var(--text-primary)] uppercase mb-2 block hover:text-[#6BAF7B] transition"
-                                                            >
-                                                                {col.h}
-                                                            </Link>
-                                                            <ul className="grid grid-cols-1 gap-1.5">
-                                                                {(isExpanded ? col.items : col.items.slice(0, 4)).map((it, itemIdx) => {
-                                                                    const item = typeof it === 'string' ? { name: it, href: '#' } : it;
-                                                                    return (
-                                                                        <li key={`${item.name}-${colIdx}-${itemIdx}`}>
-                                                                            <Link
-                                                                                href={item.href || '#'}
-                                                                                onClick={() => setActiveMobileMegaMenuItem(null)}
-                                                                                className="text-[11px] text-slate-500 dark:text-[var(--text-placeholder)] hover:text-[#6BAF7B] transition block py-0.5"
-                                                                            >
-                                                                                • {item.name}
-                                                                            </Link>
-                                                                        </li>
-                                                                    );
-                                                                })}
-                                                            </ul>
+                                                        {item.items && item.items.length > 0 && (
+                                                            <>
+                                                                <ul className="grid grid-cols-1 gap-1">
+                                                                    {(isExpanded ? item.items : item.items.slice(0, 3)).map((it, itemIdx) => {
+                                                                        const subItem = typeof it === 'string' ? { name: it, href: '#' } : it;
+                                                                        return (
+                                                                            <li key={`${subItem.name}-${idx}-${itemIdx}`}>
+                                                                                <Link
+                                                                                    href={subItem.href || '#'}
+                                                                                    onClick={() => setActiveMobileMegaMenuItem(null)}
+                                                                                    className="text-[10px] text-slate-500 dark:text-[var(--text-placeholder)] hover:text-[#6BAF7B] transition block py-0.5"
+                                                                                >
+                                                                                    • {subItem.name}
+                                                                                </Link>
+                                                                            </li>
+                                                                        );
+                                                                    })}
+                                                                </ul>
 
-                                                            {col.items.length > 4 && (
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => toggleColumn(col.h)}
-                                                                    className="mt-2.5 flex items-center gap-1 text-[10px] font-bold text-[#6BAF7B] hover:opacity-80 transition"
-                                                                >
-                                                                    <span>{isExpanded ? 'Ver menos' : 'Ver más'}</span>
-                                                                    <Icon
-                                                                        name="ChevronDown"
-                                                                        className={`w-3 h-3 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
-                                                                    />
-                                                                </button>
-                                                            )}
-                                                        </div>
-                                                    );
-                                                })}
-                                            </div>
-                                        )}
-                                    </>
+                                                                {item.items.length > 3 && item.colKey && (
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => toggleColumn(item.colKey!)}
+                                                                        className="mt-1.5 flex items-center gap-0.5 text-[9px] font-bold text-[#6BAF7B] hover:opacity-80 transition"
+                                                                    >
+                                                                        <span>{isExpanded ? 'Ver menos' : 'Ver más'}</span>
+                                                                        <Icon
+                                                                            name="ChevronDown"
+                                                                            className={`w-3.5 h-3.5 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                                                                        />
+                                                                    </button>
+                                                                )}
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
                                 );
                             })()}
                         </div>

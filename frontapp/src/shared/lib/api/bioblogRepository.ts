@@ -50,7 +50,7 @@ export interface BlogArticle {
     id: number; store_id: number; blog_category_id: number | null; title: string; slug: string;
     summary: string | null; content: string | null; main_image: string | null;
     meta_title: string | null; meta_description: string | null; keywords: string[] | null;
-    status: string; published_at: string | null; views_count: number;
+    status: string; is_featured?: boolean; published_at: string | null; views_count: number;
     created_at: string; updated_at: string;
 }
 
@@ -147,6 +147,47 @@ export const blogApi = {
         update: (id: number, data: Partial<BlogShort>) => request<{ success: boolean; data: BlogShort }>(`/blog/shorts/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
         delete: (id: number) => request<{ success: boolean }>(`/blog/shorts/${id}`, { method: 'DELETE' }),
     },
+};
+
+// ─── Admin BioBlog Types ───────────────────────────────────────────────────
+
+export interface AdminPendingItem {
+    id: number;
+    store_id: number;
+    content_type: string;
+    title: string;
+    status: string;
+    summary?: string | null;
+    description?: string | null;
+    main_image?: string | null;
+    thumbnail?: string | null;
+    platform?: string;
+    url?: string;
+    published_at: string | null;
+    created_at: string;
+    updated_at: string;
+    store?: { id: number; name: string; slug: string; logo?: string };
+}
+
+export interface AdminStats {
+    pending_articles: number;
+    pending_podcasts: number;
+    pending_videos: number;
+    pending_shorts: number;
+    total_pending: number;
+}
+
+// ─── Admin BioBlog API ──────────────────────────────────────────────────────
+
+export const adminBioBlogApi = {
+    pending: () =>
+        request<{ success: boolean; data: AdminPendingItem[] }>('/admin/bioblog/pending'),
+    stats: () =>
+        request<{ success: boolean; data: AdminStats }>('/admin/bioblog/stats'),
+    approve: (type: string, id: number) =>
+        request<{ success: boolean; message: string }>(`/admin/bioblog/${type}/${id}/approve`, { method: 'POST' }),
+    reject: (type: string, id: number, note = '') =>
+        request<{ success: boolean; message: string }>(`/admin/bioblog/${type}/${id}/reject`, { method: 'POST', body: JSON.stringify({ note }) }),
 };
 
 export const forumApi = {

@@ -14,13 +14,13 @@ export default function ThemeToggle() {
 
     if (!mounted) {
         return (
-            <div className="p-3 rounded-xl">
+            <div className="p-1.5 sm:p-3 rounded-xl">
                 <Image
                     src="/img/iconologo.png"
                     alt="Modo Bio"
                     width={28}
                     height={28}
-                    className="w-7 h-7 object-contain"
+                    className="w-6 h-6 sm:w-7 sm:h-7 object-contain"
                 />
             </div>
         );
@@ -59,7 +59,7 @@ export default function ThemeToggle() {
         <div className="relative group inline-block">
             <button
                 onClick={cycleTheme}
-                className="p-3 rounded-xl hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] transition-colors"
+                className="p-1.5 sm:p-3 rounded-xl hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] transition-colors flex items-center justify-center"
                 aria-label={getLabel()}
             >
                 <Image
@@ -67,7 +67,7 @@ export default function ThemeToggle() {
                     alt={image.alt}
                     width={30}
                     height={30}
-                    className="w-9 h-9 object-contain"
+                    className="w-6 h-6 sm:w-9 sm:h-9 object-contain"
                 />
             </button>
 
