@@ -69,24 +69,24 @@ const STATUS_CONFIG: Record<
   string,
   { label: string; dot: string; row: string }
 > = {
-  ACTIVE: { label: 'Activo', dot: 'bg-emerald-400', row: '' },
+  ACTIVE: { label: 'Activo', dot: 'bg-[var(--color-success)]', row: '' },
   PENDING: {
     label: 'En espera',
-    dot: 'bg-cyan-400',
+    dot: 'bg-[var(--icons-green)]',
     row: 'border-l-2 border-l-cyan-400/40',
   },
   SUSPENDED: {
     label: 'Suspendido',
-    dot: 'bg-rose-400',
+    dot: 'bg-[var(--color-error)]',
     row: 'border-l-2 border-l-rose-400/40',
   },
-  REJECTED: { label: 'Baja', dot: 'bg-gray-500', row: 'opacity-60' },
+  REJECTED: { label: 'Baja', dot: 'bg-[var(--text-secondary)]', row: 'opacity-60' },
 };
 
 const CONTRACT_CONFIG: Record<string, { label: string; color: string }> = {
-  VIGENTE: { label: 'Vigente', color: 'text-emerald-400' },
-  PENDIENTE: { label: 'Pendiente', color: 'text-cyan-400' },
-  VENCIDO: { label: 'Vencido', color: 'text-rose-400' },
+  VIGENTE: { label: 'Vigente', color: 'text-[var(--color-success)]' },
+  PENDIENTE: { label: 'Pendiente', color: 'text-[var(--icons-green)]' },
+  VENCIDO: { label: 'Vencido', color: 'text-[var(--color-error)]' },
 };
 
 const ALERT_ICONS: Record<
@@ -96,17 +96,17 @@ const ALERT_ICONS: Record<
   strikes: {
     icon: <AlertTriangle className="w-3.5 h-3.5" />,
     tip: 'Tiene strikes',
-    color: 'text-rose-400',
+    color: 'text-[var(--color-error)]',
   },
   disputes: {
     icon: <ShieldAlert className="w-3.5 h-3.5" />,
     tip: 'Disputas abiertas',
-    color: 'text-amber-400',
+    color: 'text-[var(--color-warning)]',
   },
   failed_payment: {
     icon: <Clock className="w-3.5 h-3.5" />,
     tip: 'Pagos fallidos',
-    color: 'text-orange-400',
+    color: 'text-[var(--color-warning)]',
   },
 };
 
@@ -176,13 +176,13 @@ const SellerRow = ({
               </span>
               {seller.is_banned && (
                 <span title="Cuenta baneada" className="flex-shrink-0 flex items-center">
-                  <Ban className="w-3.5 h-3.5 text-rose-400" />
+                  <Ban className="w-3.5 h-3.5 text-[var(--color-error)]" />
                 </span>
               )}
               {seller.email_verified && (
                 <BadgeCheck
-                  className="w-3.5 h-3.5 text-cyan-400 flex-shrink-0"
-                  title="Email verificado"
+                  className="w-3.5 h-3.5 text-[var(--icons-green)] flex-shrink-0"
+                  aria-label="Email verificado"
                 />
               )}
             </div>
@@ -199,7 +199,7 @@ const SellerRow = ({
       </td>
 
       {/* Tienda registrada */}
-      <td className="px-4 py-4">
+      <td className="hidden md:table-cell px-4 py-4">
         {seller.store ? (
           <div className="flex items-center gap-2">
             {seller.store.logo ? (
@@ -235,10 +235,10 @@ const SellerRow = ({
         <div className="flex items-center gap-1.5">
           <span
             className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black border
-                        ${seller.status === 'ACTIVE' ? 'bg-emerald-400/10 text-emerald-400 border-emerald-400/20' : ''}
-                        ${seller.status === 'PENDING' ? 'bg-cyan-400/10   text-cyan-400   border-cyan-400/20' : ''}
-                        ${seller.status === 'SUSPENDED' ? 'bg-rose-400/10    text-rose-400    border-rose-400/20' : ''}
-                        ${seller.status === 'REJECTED' ? 'bg-gray-500/10    text-gray-400    border-gray-500/20' : ''}
+                        ${seller.status === 'ACTIVE' ? 'bg-[var(--color-success)]/10 text-[var(--color-success)] border-[var(--color-success)]/20' : ''}
+                        ${seller.status === 'PENDING' ? 'bg-[var(--icons-green)]/10   text-[var(--icons-green)]   border-[var(--icons-green)]/20' : ''}
+                        ${seller.status === 'SUSPENDED' ? 'bg-[var(--color-error)]/10    text-[var(--color-error)]    border-[var(--color-error)]/20' : ''}
+                        ${seller.status === 'REJECTED' ? 'bg-[var(--text-secondary)]/10    text-[var(--text-muted)]    border-gray-500/20' : ''}
                     `}
           >
             <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
@@ -251,7 +251,7 @@ const SellerRow = ({
       </td>
 
       {/* Seguridad */}
-      <td className="px-4 py-4">
+      <td className="hidden md:table-cell px-4 py-4">
         <div className="space-y-1">
           {/* Contrato */}
           <div className="flex items-center gap-1">
@@ -279,7 +279,7 @@ const SellerRow = ({
               })}
             </div>
           ) : (
-            <div className="flex items-center gap-1 text-[10px] text-emerald-400 font-bold">
+            <div className="flex items-center gap-1 text-[10px] text-[var(--color-success)] font-bold">
               <ShieldCheck className="w-3 h-3" />
               Sin alertas
             </div>
@@ -287,7 +287,7 @@ const SellerRow = ({
 
           {/* Strikes */}
           {(seller.store?.strikes ?? 0) > 0 && (
-            <p className="text-[10px] text-rose-400 font-bold">
+            <p className="text-[10px] text-[var(--color-error)] font-bold">
               {seller.store!.strikes} strike(s)
             </p>
           )}
@@ -300,7 +300,7 @@ const SellerRow = ({
           {/* Ver detalle */}
           <Link
             href={`/admin/sellers/${seller.id}`}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[var(--bg-secondary)] hover:bg-cyan-500/10 text-[var(--text-secondary)] hover:text-cyan-400 text-[10px] font-black transition-colors border border-[var(--border-subtle)] group-hover:border-cyan-500/20"
+            className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[var(--bg-secondary)] hover:bg-[var(--icons-green)]/10 text-[var(--text-secondary)] hover:text-[var(--icons-green)] text-[10px] font-black transition-colors border border-[var(--border-subtle)] group-hover:border-cyan-500/20"
           >
             Ver detalle
             <ChevronRight className="w-3 h-3" />
@@ -333,7 +333,7 @@ const SellerRow = ({
                           ? 'Requiere contrato vigente'
                           : ''
                       }
-                      className="w-full flex items-center gap-2 px-4 py-3 text-[11px] font-bold text-emerald-400 hover:bg-emerald-400/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed text-left"
+                      className="w-full flex items-center gap-2 px-4 py-3 text-[11px] font-bold text-[var(--color-success)] hover:bg-[var(--color-success)]/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed text-left"
                     >
                       <CheckCircle className="w-3.5 h-3.5" />
                       Activar cuenta
@@ -343,7 +343,7 @@ const SellerRow = ({
                   {seller.status !== 'SUSPENDED' && (
                     <button
                       onClick={() => handleAction('SUSPENDED')}
-                      className="w-full flex items-center gap-2 px-4 py-3 text-[11px] font-bold text-amber-400 hover:bg-amber-400/10 transition-colors text-left"
+                      className="w-full flex items-center gap-2 px-4 py-3 text-[11px] font-bold text-[var(--color-warning)] hover:bg-[var(--color-warning)]/10 transition-colors text-left"
                     >
                       <XCircle className="w-3.5 h-3.5" />
                       Suspender
@@ -354,7 +354,7 @@ const SellerRow = ({
                     onClick={() =>
                       handleAction(seller.is_banned ? 'ACTIVE' : 'SUSPENDED')
                     }
-                    className="w-full flex items-center gap-2 px-4 py-3 text-[11px] font-bold text-rose-400 hover:bg-rose-400/10 transition-colors text-left border-t border-[var(--border-subtle)]"
+                    className="w-full flex items-center gap-2 px-4 py-3 text-[11px] font-bold text-[var(--color-error)] hover:bg-[var(--color-error)]/10 transition-colors text-left border-t border-[var(--border-subtle)]"
                   >
                     <Ban className="w-3.5 h-3.5" />
                     {seller.is_banned ? 'Desbanear usuario' : 'Banear usuario'}
@@ -410,7 +410,7 @@ export default function SellerList({
             Control centralizado de cuentas
           </p>
         </div>
-        <span className="px-3 py-1.5 bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 rounded-full text-[10px] font-black">
+        <span className="px-3 py-1.5 bg-[var(--icons-green)]/10 text-[var(--icons-green)] border border-cyan-500/20 rounded-full text-[10px] font-black">
           {sellers.length} vendedor{sellers.length !== 1 ? 'es' : ''}
         </span>
       </div>
@@ -424,38 +424,83 @@ export default function SellerList({
           <p className="text-xs opacity-60">Ajusta los filtros de búsqueda</p>
         </div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-[var(--border-subtle)]">
-                {[
-                  'Vendedor / Contacto',
-                  'Tienda Registrada',
-                  'Estado',
-                  'Seguridad',
-                  'Acciones',
-                ].map((h) => (
-                  <th
-                    key={h}
-                    className="px-4 py-3 text-left text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest"
-                  >
-                    {h}
-                  </th>
+        <>
+          {/* Mobile: cards */}
+          <div className="sm:hidden divide-y divide-[var(--border-subtle)]">
+            {sellers.map((seller) => {
+              const cfg = STATUS_CONFIG[seller.status] ?? STATUS_CONFIG['REJECTED'];
+              const contract = CONTRACT_CONFIG[seller.contractStatus ?? 'PENDIENTE'];
+              return (
+                <div key={seller.id} className="p-4 flex items-start gap-3">
+                  <div className="relative flex-shrink-0">
+                    {seller.avatar ? (
+                      <img src={seller.avatar} alt={seller.name} className="w-10 h-10 rounded-2xl object-cover border border-[var(--border-subtle)]" />
+                    ) : (
+                      <div className="w-10 h-10 rounded-2xl bg-[var(--bg-secondary)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-secondary)] font-black text-sm">
+                        {seller.name?.[0]?.toUpperCase()}
+                      </div>
+                    )}
+                    <span className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-[var(--bg-card)] ${cfg.dot}`} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-sm font-black text-[var(--text-primary)] truncate">{seller.name}</span>
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black border flex-shrink-0
+                        ${seller.status === 'ACTIVE' ? 'bg-[var(--color-success)]/10 text-[var(--color-success)] border-[var(--color-success)]/20' : ''}
+                        ${seller.status === 'PENDING' ? 'bg-[var(--icons-green)]/10 text-[var(--icons-green)] border-[var(--icons-green)]/20' : ''}
+                        ${seller.status === 'SUSPENDED' ? 'bg-[var(--color-error)]/10 text-[var(--color-error)] border-[var(--color-error)]/20' : ''}
+                        ${seller.status === 'REJECTED' ? 'bg-[var(--text-secondary)]/10 text-[var(--text-muted)] border-gray-500/20' : ''}
+                      `}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
+                        {cfg.label}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-[var(--text-secondary)] truncate mt-0.5">{seller.email}</p>
+                    <div className="flex items-center gap-3 mt-1.5 flex-wrap">
+                      <span className={`text-[10px] font-bold ${contract.color}`}>Contrato: {contract.label}</span>
+                      {seller.store && (
+                        <span className="text-[10px] text-[var(--text-secondary)]">{seller.store.total_sales} ventas · ⭐{seller.store.rating ?? '—'}</span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 mt-2">
+                      <Link
+                        href={`/admin/sellers/${seller.id}`}
+                        className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--icons-green)] text-[10px] font-black transition-colors border border-[var(--border-subtle)]"
+                      >
+                        Ver detalle <ChevronRight className="w-3 h-3" />
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Tablet+: table */}
+          <div className="hidden sm:block overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-[var(--border-subtle)]">
+                  <th className="px-4 py-3 text-left text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Vendedor / Contacto</th>
+                  <th className="hidden md:table-cell px-4 py-3 text-left text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Tienda Registrada</th>
+                  <th className="px-4 py-3 text-left text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Estado</th>
+                  <th className="hidden md:table-cell px-4 py-3 text-left text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Seguridad</th>
+                  <th className="px-4 py-3 text-left text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[var(--border-subtle)]">
+                {sellers.map((seller) => (
+                  <SellerRow
+                    key={seller.id}
+                    seller={seller}
+                    onStatusChange={onStatusChange}
+                    onResetPassword={onResetPassword}
+                  />
                 ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[var(--border-subtle)]">
-              {sellers.map((seller) => (
-                <SellerRow
-                  key={seller.id}
-                  seller={seller}
-                  onStatusChange={onStatusChange}
-                  onResetPassword={onResetPassword}
-                />
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
     </div>
   );

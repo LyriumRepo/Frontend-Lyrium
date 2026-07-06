@@ -55,7 +55,7 @@ export default function IzipayCheckoutForm({ orderId, onSuccess, onError, onCanc
     if (loading) {
         return (
             <div className="flex flex-col items-center justify-center py-12 gap-4">
-                <Loader2 className="w-10 h-10 text-sky-500 animate-spin" />
+                <Loader2 className="w-10 h-10 text-sky-500 dark:text-emerald-400 animate-spin" />
                 <p className="text-sm font-medium text-gray-500">Inicializando pago seguro...</p>
             </div>
         );
@@ -82,8 +82,8 @@ export default function IzipayCheckoutForm({ orderId, onSuccess, onError, onCanc
                 <div id="izipayFormContainer" className="min-h-[300px]" />
             ) : (
                 <div className="text-center space-y-6 py-4">
-                    <div className="w-16 h-16 rounded-2xl bg-sky-50 dark:bg-sky-900/20 flex items-center justify-center mx-auto border border-sky-100 dark:border-sky-800/30">
-                        <CreditCard className="w-8 h-8 text-sky-500" />
+                    <div className="w-16 h-16 rounded-2xl bg-sky-50 dark:bg-emerald-900/20 flex items-center justify-center mx-auto border border-sky-100 dark:border-emerald-800/30">
+                        <CreditCard className="w-8 h-8 text-sky-500 dark:text-emerald-400" />
                     </div>
 
                     <div className="space-y-2">
@@ -113,7 +113,7 @@ export default function IzipayCheckoutForm({ orderId, onSuccess, onError, onCanc
                         <button
                             onClick={handleConfirm}
                             disabled={confirming}
-                            className="px-8 py-3 rounded-2xl bg-gray-900 dark:bg-[var(--bg-secondary)] text-white font-black text-xs uppercase tracking-[0.2em] hover:bg-sky-600 transition-all shadow-xl shadow-gray-200 dark:shadow-gray-900/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                            className="px-8 py-3 rounded-2xl bg-gray-900 dark:bg-[var(--bg-secondary)] text-white font-black text-xs uppercase tracking-[0.2em] hover:bg-sky-600 dark:hover:bg-emerald-600 transition-all shadow-xl shadow-gray-200 dark:shadow-gray-900/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                         >
                             {confirming ? (
                                 <><Loader2 className="w-4 h-4 animate-spin" /> Confirmando...</>

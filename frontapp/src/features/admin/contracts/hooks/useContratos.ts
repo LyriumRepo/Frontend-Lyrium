@@ -40,10 +40,11 @@ export const useContratos = () => {
     // --- Mutations ---
     const saveContractMutation = useMutation({
         mutationFn: async ({ id, status, updatedInfo }: { id: string, status: ContractStatus, updatedInfo: Partial<Contract> }) => {
+            const finalInfo = { ...updatedInfo, type: updatedInfo.type || updatedInfo.plan || 'Standard' };
             if (id === TEMP_NEW_ID) {
-                return contractApi.create({ ...updatedInfo, status });
+                return contractApi.create({ ...finalInfo, status });
             }
-            return contractApi.updateStatus(id, status, updatedInfo);
+            return contractApi.updateStatus(id, status, finalInfo);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['admin', 'contracts'] });
@@ -53,9 +54,10 @@ export const useContratos = () => {
     });
 
     const createContractMutation = useMutation({
-        mutationFn: async (): Promise<Contract> => {
-            return {
+        mutationFn: async () => {
+            const newContract: Contract = {
                 id: TEMP_NEW_ID,
+                dbId: 0,
                 company: '',
                 ruc: '',
                 rep: '',
@@ -72,6 +74,7 @@ export const useContratos = () => {
                 end: '',
                 storage_path: 'pendiente_de_carga.pdf',
             };
+            return newContract;
         },
         onSuccess: (newContract) => {
             setTempNewContract(newContract);

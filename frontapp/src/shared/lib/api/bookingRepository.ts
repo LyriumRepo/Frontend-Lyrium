@@ -71,6 +71,7 @@ export interface BookingResponse {
   cancelled_at?: string;
   created_at: string;
   updated_at: string;
+  review?: { rating: number; comment: string | null } | null;
 }
 
 /** Payload para crear una reserva — coincide con BookServiceRequest */
@@ -108,7 +109,11 @@ async function request<T>(
   const headers = await getAuthHeaders();
   const res = await fetch(`${LARAVEL_API_URL}${endpoint}`, {
     ...options,
-    headers: { ...headers, ...(options.headers ?? {}) },
+    headers: {
+      ...headers,
+      ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+      ...(options.headers ?? {}),
+    },
   });
 
   if (res.status === 204) return undefined as T;
@@ -175,7 +180,7 @@ export const bookingRepository = {
     const headers = await getAuthHeaders();
     const res = await fetch(`${LARAVEL_API_URL}/bookings/${id}/rate`, {
       method: 'POST',
-      headers,
+      headers: { ...headers, 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
     const json = await res.json();

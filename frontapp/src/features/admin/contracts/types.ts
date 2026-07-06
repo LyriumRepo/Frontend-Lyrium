@@ -10,6 +10,7 @@ export interface AuditEvent {
 
 export interface Contract {
     id: string;
+    dbId: number;
     company: string;
     ruc: string;
     rep: string;
@@ -27,9 +28,6 @@ export interface Contract {
     storage_path: string;
     auditTrail?: AuditEvent[];
     expiryUrgency?: ExpiryUrgency;
-    phone?: string;
-    email?: string;
-    address?: string;
 }
 
 export interface ContractFilters {

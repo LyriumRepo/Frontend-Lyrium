@@ -60,16 +60,16 @@ export function LoginPanel({
     return (
         <div className="flex flex-col h-full">
             <div className="flex-1 w-[90%] mx-auto">
-                <div className="flex items-center gap-6 mb-8">
-                    <div className="w-16 h-16 bg-sky-50 dark:bg-[var(--bg-primary)] rounded-2xl flex items-center justify-center text-sky-500 dark:text-[var(--icons-green)] shadow-[0_10px_20px_rgba(14,165,233,0.1)] 
+                <div className="flex items-center gap-3 sm:gap-6 mb-4 sm:mb-8">
+                    <div className="w-11 h-11 sm:w-16 sm:h-16 bg-sky-50 dark:bg-[var(--bg-primary)] rounded-2xl flex items-center justify-center text-sky-500 dark:text-[var(--icons-green)] shadow-[0_10px_20px_rgba(14,165,233,0.1)]
                         dark:shadow-[0_10px_25px_rgba(74,124,89,0.25)] flex-shrink-0">
-                        {userType === 'vendedor' ? <Building2 className="w-8 h-8" /> : <User className="w-8 h-8" />}
+                        {userType === 'vendedor' ? <Building2 className="w-6 h-6 sm:w-8 sm:h-8" /> : <User className="w-6 h-6 sm:w-8 sm:h-8" />}
                     </div>
                     <div>
-                        <h3 className="text-2xl font-black text-slate-900 dark:text-[var(--text-primary)]">
+                        <h3 className="text-lg sm:text-2xl font-black text-slate-900 dark:text-[var(--text-primary)]">
                             {labels.title}
                         </h3>
-                        <p className="text-slate-500 dark:text-[var(--text-secondary)] text-sm">
+                        <p className="text-slate-500 dark:text-[var(--text-secondary)] text-xs sm:text-sm">
                             {labels.subtitle}
                         </p>
                     </div>
@@ -86,7 +86,7 @@ export function LoginPanel({
                     </div>
                 )}
 
-                <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+                <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-5" noValidate>
                     <div>
                         <label htmlFor="login-email" className="block text-sm font-semibold text-slate-700 dark:text-[var(--text-primary)] mb-2">
                             Usuario / Nombre de Tienda <span className="text-red-500">*</span>
@@ -104,7 +104,7 @@ export function LoginPanel({
                                 required
                                 aria-required="true"
                                 aria-label={userType === 'vendedor' ? 'Nombre de tienda o usuario' : 'Correo electrónico'}
-                                className="w-full py-3.5 pl-12 pr-4 border-2 border-slate-200 dark:border-[var(--border-subtle)] rounded-xl text-sm text-slate-700 dark:text-[var(--text-primary)] bg-slate-50 dark:bg-[var(--bg-primary)] focus:outline-none 
+                                className="w-full py-2.5 sm:py-3.5 pl-12 pr-4 border-2 border-slate-200 dark:border-[var(--border-subtle)] rounded-xl text-sm text-slate-700 dark:text-[var(--text-primary)] bg-slate-50 dark:bg-[var(--bg-primary)] focus:outline-none
                                 focus:border-sky-500 dark:focus:border-[var(--icons-green)] focus:bg-white dark:focus:bg-[var(--bg-secondary)] focus:shadow-[0_0_0_4px_rgba(66,153,225,0.1)] transition-all duration-300"
                             />
                         </div>
@@ -152,7 +152,7 @@ export function LoginPanel({
                     <button
                         type="submit"
                         disabled={isLoading}
-                        className="group relative w-full py-4 bg-gradient-to-r from-sky-500 to-sky-400 dark:from-[#1A3A32] dark:to-[var(--brand-green)] text-white font-bold text-sm uppercase tracking-wider rounded-xl 
+                        className="group relative w-full py-3 sm:py-4 bg-gradient-to-r from-sky-500 to-sky-400 dark:from-[#1A3A32] dark:to-[var(--brand-green)] text-white font-bold text-sm uppercase tracking-wider rounded-xl
                                    shadow-[0_10px_25px_rgba(14,165,233,0.3)] dark:shadow-[0_10px_25px_rgba(74,124,89,0.3)] hover:shadow-[0_15px_35px_rgba(14,165,233,0.4)] dark:hover:shadow-[0_15px_35px_rgba(74,124,89,0.4)] hover:-translate-y-0.5 
                                    transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex items-center justify-center gap-3 overflow-hidden"
                     >
@@ -182,7 +182,7 @@ export function LoginPanel({
                         </div>
                     </div>
 
-                    <div className="space-y-3">
+                    <div className="space-y-2 sm:space-y-3">
                         <SocialLoginButton provider="google" />
                         <SocialLoginButton provider="facebook" />
                     </div>

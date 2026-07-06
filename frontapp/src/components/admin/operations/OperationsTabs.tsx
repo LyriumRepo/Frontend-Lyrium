@@ -9,27 +9,27 @@ import {
 
 // ─── Shared styles ────────────────────────────────────────────────────────────
 const inputCls =
-  'text-[13px] border border-gray-200 rounded-lg px-3 py-[7px] bg-white text-gray-700 placeholder-gray-400 focus:outline-none focus:border-gray-400 w-full';
+  'text-[13px] border border-[var(--border-subtle)] rounded-lg px-3 py-[7px] bg-[var(--bg-input)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--brand-sky)] dark:focus:border-[var(--brand-green)] w-full';
 const selectCls =
-  'text-[13px] border border-gray-200 rounded-lg px-3 py-[7px] bg-white text-gray-700 focus:outline-none focus:border-gray-400 w-full';
+  'text-[13px] border border-[var(--border-subtle)] rounded-lg px-3 py-[7px] bg-[var(--bg-input)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand-sky)] dark:focus:border-[var(--brand-green)] w-full';
 const thCls =
-  'text-left text-[11px] font-medium text-gray-400 px-3 py-2.5 border-b border-gray-100';
-const tdCls = 'px-3 py-2.5 text-[13px] text-gray-700';
+  'text-left text-[11px] font-medium text-[var(--text-muted)] px-3 py-2.5 border-b border-[var(--border-subtle)]';
+const tdCls = 'px-3 py-2.5 text-[13px] text-[var(--text-secondary)]';
 
 // ─── Badges ───────────────────────────────────────────────────────────────────
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, string> = {
-    Activo: 'bg-[#E1F5EE] text-[#085041]',
-    Suspendido: 'bg-[#FCEBEB] text-[#791F1F]',
-    'En Pausa': 'bg-[#FAEEDA] text-[#633806]',
-    Inactivo: 'bg-gray-100 text-gray-500',
-    Pagado: 'bg-[#E1F5EE] text-[#085041]',
-    Pendiente: 'bg-[#FAEEDA] text-[#633806]',
-    Anulado: 'bg-[#FCEBEB] text-[#791F1F]',
+    Activo: 'bg-[var(--color-success)]/15 text-[var(--color-success)]',
+    Suspendido: 'bg-[var(--color-error)]/15 text-[var(--color-error)]',
+    'En Pausa': 'bg-[var(--color-warning)]/15 text-[var(--color-warning)]',
+    Inactivo: 'bg-[var(--bg-muted)] text-[var(--text-muted)]',
+    Pagado: 'bg-[var(--color-success)]/15 text-[var(--color-success)]',
+    Pendiente: 'bg-[var(--color-warning)]/15 text-[var(--color-warning)]',
+    Anulado: 'bg-[var(--color-error)]/15 text-[var(--color-error)]',
   };
   return (
     <span
-      className={`inline-block text-[11px] font-medium px-2 py-0.5 rounded-full ${map[status] ?? 'bg-gray-100 text-gray-500'}`}
+      className={`inline-block text-[11px] font-medium px-2 py-0.5 rounded-full ${map[status] ?? 'bg-[var(--bg-muted)] text-[var(--text-muted)]'}`}
     >
       {status}
     </span>
@@ -38,14 +38,14 @@ function StatusBadge({ status }: { status: string }) {
 
 function TipoBadge({ tipo }: { tipo: string }) {
   const map: Record<string, string> = {
-    Honorarios: 'bg-[#E6F1FB] text-[#0C447C]',
-    Factura: 'bg-[#FAEEDA] text-[#633806]',
-    Boleta: 'bg-[#EEEDFE] text-[#3C3489]',
-    Servicio: 'bg-[#EAF3DE] text-[#27500A]',
+    Honorarios: 'bg-[var(--color-info)]/15 text-[var(--color-info)]',
+    Factura: 'bg-[var(--color-warning)]/15 text-[var(--color-warning)]',
+    Boleta: 'bg-[var(--color-info)]/15 text-[var(--color-info)]',
+    Servicio: 'bg-[var(--color-success)]/15 text-[var(--color-success)]',
   };
   return (
     <span
-      className={`inline-block text-[11px] font-medium px-2 py-0.5 rounded-full ${map[tipo] ?? 'bg-gray-100 text-gray-500'}`}
+      className={`inline-block text-[11px] font-medium px-2 py-0.5 rounded-full ${map[tipo] ?? 'bg-[var(--bg-muted)] text-[var(--text-muted)]'}`}
     >
       {tipo || '—'}
     </span>
@@ -66,10 +66,10 @@ function IconBtn({
 }) {
   const cls = {
     default:
-      'border-gray-200 text-gray-400 hover:bg-gray-50 hover:text-gray-600',
-    green: 'border-[#9FE1CB] text-[#085041] hover:bg-[#E1F5EE]',
-    red: 'border-[#F7C1C1] text-[#791F1F] hover:bg-[#FCEBEB]',
-    blue: 'border-[#B5D4F4] text-[#0C447C] hover:bg-[#E6F1FB]',
+      'border-[var(--border-subtle)] text-[var(--text-muted)] hover:bg-[var(--bg-muted)] hover:text-[var(--text-secondary)]',
+    green: 'border-[var(--color-success)]/30 text-[var(--color-success)] hover:bg-[var(--color-success)]/10',
+    red: 'border-[var(--color-error)]/30 text-[var(--color-error)] hover:bg-[var(--color-error)]/10',
+    blue: 'border-[var(--color-info)]/30 text-[var(--color-info)] hover:bg-[var(--color-info)]/10',
   }[variant];
   return (
     <button
@@ -213,7 +213,7 @@ export const ProvidersTab: React.FC<{
     {/* Filtros */}
     <div className="flex flex-wrap gap-2 items-center">
       <div className="relative flex-1 min-w-[180px]">
-        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]">
           <IcoSearch />
         </span>
         <input
@@ -249,14 +249,15 @@ export const ProvidersTab: React.FC<{
       </select>
       <button
         onClick={onNewProvider}
-        className="inline-flex items-center gap-1.5 border border-gray-300 rounded-lg px-3.5 py-[7px] text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors shrink-0"
+        className="inline-flex items-center gap-1.5 border border-[var(--border-subtle)] rounded-lg px-3.5 py-[7px] text-[13px] font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-muted)] transition-colors shrink-0"
       >
         <IcoPlus /> Nuevo proveedor
       </button>
     </div>
 
     {/* Tabla */}
-    <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+    <div className="overflow-x-auto rounded-xl">
+    <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl overflow-hidden min-w-[620px]">
       <table
         className="w-full border-collapse"
         style={{ tableLayout: 'fixed' }}
@@ -282,7 +283,7 @@ export const ProvidersTab: React.FC<{
             <tr>
               <td
                 colSpan={5}
-                className="py-10 text-center text-[13px] text-gray-400"
+                className="py-10 text-center text-[13px] text-[var(--text-muted)]"
               >
                 No hay proveedores registrados.
               </td>
@@ -299,27 +300,27 @@ export const ProvidersTab: React.FC<{
             return (
               <tr
                 key={p.id}
-                className="border-b border-gray-50 hover:bg-gray-50 transition-colors"
+                className="border-b border-[var(--border-subtle)] hover:bg-[var(--bg-muted)] transition-colors"
               >
                 <td className={tdCls}>
                   <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 bg-[#E6F1FB] text-[#0C447C] rounded-lg flex items-center justify-center text-[12px] font-medium shrink-0">
+                    <div className="w-8 h-8 bg-[var(--color-info)]/15 text-[var(--color-info)] rounded-lg flex items-center justify-center text-[12px] font-medium shrink-0">
                       {inicial}
                     </div>
                     <div className="min-w-0">
-                      <p className="text-[13px] text-gray-800 font-medium truncate">
+                      <p className="text-[13px] text-[var(--text-primary)] font-medium truncate">
                         {nombre}
                       </p>
-                      <p className="text-[11px] text-gray-400 truncate">
+                      <p className="text-[11px] text-[var(--text-muted)] truncate">
                         {p.especialidad ?? p.tipo ?? '—'}
                       </p>
                     </div>
                   </div>
                 </td>
-                <td className={tdCls + ' font-mono text-[12px] text-gray-500'}>
+                <td className={tdCls + ' font-mono text-[12px] text-[var(--text-muted)]'}>
                   {p.ruc ?? '—'}
                 </td>
-                <td className={tdCls + ' text-gray-500'}>{renovacion}</td>
+                <td className={tdCls + ' text-[var(--text-muted)]'}>{renovacion}</td>
                 <td className={tdCls}>
                   <StatusBadge status={p.estado ?? '—'} />
                 </td>
@@ -349,6 +350,7 @@ export const ProvidersTab: React.FC<{
         </tbody>
       </table>
     </div>
+    </div>
   </div>
 );
 
@@ -359,29 +361,30 @@ export const ExpensesTab: React.FC<{
 }> = ({ expenses, totalInvestment }) => (
   <div className="flex flex-col gap-4">
     {/* Resumen */}
-    <div className="grid grid-cols-3 gap-2.5">
-      <div className="bg-gray-50 rounded-[10px] p-4">
-        <p className="text-[12px] text-gray-400 mb-1">Total inversión</p>
-        <p className="text-[22px] font-medium text-gray-900">
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+      <div className="bg-[var(--bg-muted)] rounded-[10px] p-4">
+        <p className="text-[12px] text-[var(--text-muted)] mb-1">Total inversión</p>
+        <p className="text-[22px] font-medium text-[var(--text-primary)]">
           S/ {totalInvestment.toLocaleString()}
         </p>
       </div>
-      <div className="bg-gray-50 rounded-[10px] p-4">
-        <p className="text-[12px] text-gray-400 mb-1">Comprobantes</p>
-        <p className="text-[22px] font-medium text-gray-900">
+      <div className="bg-[var(--bg-muted)] rounded-[10px] p-4">
+        <p className="text-[12px] text-[var(--text-muted)] mb-1">Comprobantes</p>
+        <p className="text-[22px] font-medium text-[var(--text-primary)]">
           {expenses.length}
         </p>
       </div>
-      <div className="bg-gray-50 rounded-[10px] p-4">
-        <p className="text-[12px] text-gray-400 mb-1">Pendientes</p>
-        <p className="text-[22px] font-medium text-gray-900">
+      <div className="bg-[var(--bg-muted)] rounded-[10px] p-4">
+        <p className="text-[12px] text-[var(--text-muted)] mb-1">Pendientes</p>
+        <p className="text-[22px] font-medium text-[var(--text-primary)]">
           {expenses.filter((e) => e.status === 'Pendiente').length}
         </p>
       </div>
     </div>
 
     {/* Tabla */}
-    <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+    <div className="overflow-x-auto rounded-xl">
+    <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl overflow-hidden min-w-[825px]">
       <table
         className="w-full border-collapse"
         style={{ tableLayout: 'fixed' }}
@@ -411,7 +414,7 @@ export const ExpensesTab: React.FC<{
             <tr>
               <td
                 colSpan={7}
-                className="py-10 text-center text-[13px] text-gray-400"
+                className="py-10 text-center text-[13px] text-[var(--text-muted)]"
               >
                 No hay recibos registrados.
               </td>
@@ -420,20 +423,20 @@ export const ExpensesTab: React.FC<{
           {expenses.map((g) => (
             <tr
               key={g.id}
-              className="border-b border-gray-50 hover:bg-gray-50 transition-colors"
+              className="border-b border-[var(--border-subtle)] hover:bg-[var(--bg-muted)] transition-colors"
             >
               <td className={tdCls}>
                 <TipoBadge tipo={g.voucher_type ?? ''} />
               </td>
-              <td className="px-3 py-2.5 font-mono text-[12px] text-gray-500 truncate">
+              <td className="px-3 py-2.5 font-mono text-[12px] text-[var(--text-muted)] truncate">
                 {g.receipt_number}
               </td>
               <td className={tdCls + ' truncate'}>{g.supplier?.name ?? '—'}</td>
               <td className={tdCls + ' truncate'}>{g.concept}</td>
-              <td className="px-3 py-2.5 text-[13px] text-gray-500">
+              <td className="px-3 py-2.5 text-[13px] text-[var(--text-muted)]">
                 {g.issued_at}
               </td>
-              <td className="px-3 py-2.5 text-[13px] font-medium text-gray-900">
+              <td className="px-3 py-2.5 text-[13px] font-medium text-[var(--text-primary)]">
                 S/ {Number(g.amount).toLocaleString()}
               </td>
               <td className={tdCls}>
@@ -443,6 +446,7 @@ export const ExpensesTab: React.FC<{
           ))}
         </tbody>
       </table>
+    </div>
     </div>
   </div>
 );
@@ -456,19 +460,20 @@ export const CredentialsTab: React.FC<{
 }> = ({ roles, onNewRole, onEditRole, onDeactivateRole }) => (
   <div className="flex flex-col gap-4">
     <div className="flex items-center justify-between">
-      <p className="text-[13px] font-medium text-gray-800">
+      <p className="text-[13px] font-medium text-[var(--text-primary)]">
         Roles y permisos operativos
       </p>
       <button
         onClick={onNewRole}
-        className="inline-flex items-center gap-1.5 border border-gray-300 rounded-lg px-3.5 py-[7px] text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+        className="inline-flex items-center gap-1.5 border border-[var(--border-subtle)] rounded-lg px-3.5 py-[7px] text-[13px] font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-muted)] transition-colors"
       >
         <IcoPlus /> Nuevo rol
       </button>
     </div>
 
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div className="md:col-span-2 bg-white border border-gray-200 rounded-xl overflow-hidden">
+      <div className="md:col-span-2 overflow-x-auto rounded-xl">
+      <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl overflow-hidden min-w-[400px]">
         <table className="w-full border-collapse">
           <thead>
             <tr>
@@ -484,7 +489,7 @@ export const CredentialsTab: React.FC<{
               <tr>
                 <td
                   colSpan={5}
-                  className="py-10 text-center text-[13px] text-gray-400"
+                  className="py-10 text-center text-[13px] text-[var(--text-muted)]"
                 >
                   No hay roles registrados.
                 </td>
@@ -493,14 +498,14 @@ export const CredentialsTab: React.FC<{
             {roles.map((role) => (
               <tr
                 key={role.id}
-                className="border-b border-gray-50 hover:bg-gray-50 transition-colors"
+                className="border-b border-[var(--border-subtle)] hover:bg-[var(--bg-muted)] transition-colors"
               >
                 <td className={tdCls}>
                   <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 bg-[#EEEDFE] text-[#3C3489] rounded-lg flex items-center justify-center text-[11px] font-medium shrink-0">
+                    <div className="w-7 h-7 bg-[var(--color-info)]/15 text-[var(--color-info)] rounded-lg flex items-center justify-center text-[11px] font-medium shrink-0">
                       {(role.name ?? '??').substring(0, 2).toUpperCase()}
                     </div>
-                    <span className="text-[13px] text-gray-800 font-medium">
+                    <span className="text-[13px] text-[var(--text-primary)] font-medium">
                       {role.name}
                     </span>
                   </div>
@@ -510,14 +515,14 @@ export const CredentialsTab: React.FC<{
                     {(role.modules ?? []).map((mod) => (
                       <span
                         key={mod}
-                        className="text-[11px] px-1.5 py-0.5 bg-[#E6F1FB] text-[#0C447C] rounded-md"
+                        className="text-[11px] px-1.5 py-0.5 bg-[var(--color-info)]/15 text-[var(--color-info)] rounded-md"
                       >
                         {mod}
                       </span>
                     ))}
                   </div>
                 </td>
-                <td className="px-3 py-2.5 text-[13px] text-gray-500">
+                <td className="px-3 py-2.5 text-[13px] text-[var(--text-muted)]">
                   {role.users_count ?? 0}
                 </td>
                 <td className={tdCls}>
@@ -548,20 +553,21 @@ export const CredentialsTab: React.FC<{
           </tbody>
         </table>
       </div>
+      </div>
 
       {/* Panel info */}
-      <div className="bg-gray-50 rounded-xl p-5 h-fit flex flex-col gap-3">
-        <div className="w-9 h-9 bg-[#EEEDFE] text-[#3C3489] rounded-lg flex items-center justify-center">
+      <div className="bg-[var(--bg-muted)] rounded-xl p-5 h-fit flex flex-col gap-3">
+        <div className="w-9 h-9 bg-[var(--color-info)]/15 text-[var(--color-info)] rounded-lg flex items-center justify-center">
           <IcoShield />
         </div>
-        <p className="text-[13px] font-medium text-gray-800">
+        <p className="text-[13px] font-medium text-[var(--text-primary)]">
           Editor de permisos
         </p>
-        <p className="text-[12px] text-gray-400 leading-relaxed">
+        <p className="text-[12px] text-[var(--text-muted)] leading-relaxed">
           Gestiona roles operativos y sus permisos. Todas las modificaciones
           requieren verificación 2FA.
         </p>
-        <div className="flex flex-col gap-2 pt-3 border-t border-gray-200">
+        <div className="flex flex-col gap-2 pt-3 border-t border-[var(--border-subtle)]">
           {[
             'Control granular de accesos',
             'Auditoría automática de cambios',
@@ -569,7 +575,7 @@ export const CredentialsTab: React.FC<{
           ].map((item) => (
             <div
               key={item}
-              className="flex items-center gap-2 text-[12px] text-gray-500"
+              className="flex items-center gap-2 text-[12px] text-[var(--text-muted)]"
             >
               <IcoCheck />
               <span>{item}</span>
@@ -583,49 +589,49 @@ export const CredentialsTab: React.FC<{
 
 // ─── AuditTab ─────────────────────────────────────────────────────────────────
 export const AuditTab: React.FC<{ logs: AuditLog[] }> = ({ logs = [] }) => (
-  <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-    <div className="px-4 py-3 border-b border-gray-100">
-      <p className="text-[13px] font-medium text-gray-800">Log de auditoría</p>
-      <p className="text-[12px] text-gray-400">
+  <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl overflow-hidden">
+    <div className="px-4 py-3 border-b border-[var(--border-subtle)]">
+      <p className="text-[13px] font-medium text-[var(--text-primary)]">Log de auditoría</p>
+      <p className="text-[12px] text-[var(--text-muted)]">
         Registro de todas las acciones del sistema
       </p>
     </div>
-    <div className="divide-y divide-gray-50 max-h-[560px] overflow-y-auto">
+    <div className="divide-y divide-[var(--border-subtle)] max-h-[560px] overflow-y-auto">
       {logs.length === 0 && (
-        <p className="py-10 text-center text-[13px] text-gray-400">
+        <p className="py-10 text-center text-[13px] text-[var(--text-muted)]">
           No hay registros de auditoría.
         </p>
       )}
       {logs.map((log) => (
         <div
           key={log.id}
-          className="flex items-start gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
+          className="flex items-start gap-3 px-4 py-3 hover:bg-[var(--bg-muted)] transition-colors"
         >
-          <div className="w-7 h-7 bg-[#E6F1FB] text-[#0C447C] rounded-lg flex items-center justify-center shrink-0 mt-0.5">
+          <div className="w-7 h-7 bg-[var(--color-info)]/15 text-[var(--color-info)] rounded-lg flex items-center justify-center shrink-0 mt-0.5">
             <IcoFinger />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2">
-              <p className="text-[13px] font-medium text-gray-800 truncate">
+              <p className="text-[13px] font-medium text-[var(--text-primary)] truncate">
                 {log.event}
-                <span className="text-gray-300 mx-1.5">·</span>
-                <span className="text-gray-500 font-normal">{log.module}</span>
+                <span className="text-[var(--border-subtle)] mx-1.5">·</span>
+                <span className="text-[var(--text-muted)] font-normal">{log.module}</span>
               </p>
-              <span className="text-[11px] text-gray-400 shrink-0">
+              <span className="text-[11px] text-[var(--text-muted)] shrink-0">
                 {new Date(log.created_at).toLocaleString('es-PE')}
               </span>
             </div>
-            <p className="text-[12px] text-gray-500 mt-0.5">
+            <p className="text-[12px] text-[var(--text-muted)] mt-0.5">
               {log.description}
             </p>
             {log.actor?.email && (
-              <p className="text-[11px] text-gray-400 mt-0.5">
+              <p className="text-[11px] text-[var(--text-muted)] mt-0.5">
                 {log.actor.email} · {log.actor.role ?? 'sistema'}
               </p>
             )}
           </div>
           {log.event === 'created' && (
-            <span className="text-[#085041] mt-0.5 shrink-0">
+            <span className="text-[var(--color-success)] mt-0.5 shrink-0">
               <IcoCheck />
             </span>
           )}

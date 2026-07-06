@@ -40,6 +40,10 @@ export function usePlanCapabilities() {
         return Math.max(0, max - current);
     };
 
+    const stickerTypes: string[] = Array.isArray(capabilities?.sticker_types)
+        ? (capabilities!.sticker_types as string[])
+        : [];
+
     return {
         capabilities,
         planName,
@@ -50,5 +54,6 @@ export function usePlanCapabilities() {
         exceeds,
         available,
         isUnlimited,
+        stickerTypes,
     };
 }

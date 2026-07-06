@@ -6,6 +6,7 @@ import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import BaseLoading from '@/components/ui/BaseLoading';
 import Icon from '@/components/ui/Icon';
 import { useInventory } from './hooks/useInventory';
+import { exportInventoryToExcel, exportInventoryToPdf } from './export';
 import { StockAlertsModal } from './components/StockAlertsModal';
 import { InventoryFiltersBar } from './components/InventoryFiltersBar';
 import { InventoryTable } from './components/InventoryTable';
@@ -19,19 +20,36 @@ export function InventoryPageClient() {
     } = useInventory();
     const [alertsOpen, setAlertsOpen] = useState(false);
 
-    const headerActions = alerts.length > 0 ? (
-        <button
-            onClick={() => setAlertsOpen(true)}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-3xl border border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] text-[var(--text-primary)] font-black text-xs 
-            hover:bg-[var(--bg-card)] hover:text-[var(--brand-sky)] dark:hover:text-[var(--icons-green)] transition-colors"
-        >
-            <AlertTriangle className="w-4 h-4" />
-            <span className="text-[10px] font-black uppercase tracking-widest">Alertas</span>
-            <span className="w-5 h-5 flex items-center justify-center rounded-full bg-sky-500 dark:bg-[var(--icons-green)] text-white text-[9px] font-black">
-                {alerts.length}
-            </span>
-        </button>
-    ) : null;
+    const headerActions = (
+        <div className="flex items-center gap-2">
+            {alerts.length > 0 && (
+                <button
+                    onClick={() => setAlertsOpen(true)}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-3xl border border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] text-[var(--text-primary)] font-black text-xs hover:bg-[var(--bg-card)] hover:text-[var(--brand-sky)] dark:hover:text-[var(--icons-green)] transition-colors"
+                >
+                    <AlertTriangle className="w-4 h-4" />
+                    <span className="text-[10px] font-black uppercase tracking-widest">Alertas</span>
+                    <span className="w-5 h-5 flex items-center justify-center rounded-full bg-sky-500 dark:bg-[var(--icons-green)] text-white text-[9px] font-black">
+                        {alerts.length}
+                    </span>
+                </button>
+            )}
+            <button
+                onClick={() => exportInventoryToExcel(pagedItems).catch(console.error)}
+                className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-[var(--bg-secondary)] text-[var(--text-primary)] font-bold text-xs border border-[var(--border-subtle)] hover:text-[#5AAFE6] hover:border-[#69BEEB]/30 transition-all shadow-sm"
+            >
+                <Icon name="FileSpreadsheet" className="text-xl" />
+                <span className="hidden sm:inline">Excel</span>
+            </button>
+            <button
+                onClick={() => exportInventoryToPdf(pagedItems).catch(console.error)}
+                className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-[var(--bg-secondary)] text-[var(--text-primary)] font-bold text-xs border border-[var(--border-subtle)] hover:text-[#5AAFE6] hover:border-[#69BEEB]/30 transition-all shadow-sm"
+            >
+                <Icon name="FileText" className="text-xl" />
+                <span className="hidden sm:inline">PDF</span>
+            </button>
+        </div>
+    );
 
     if (isLoading) {
         return (
@@ -76,7 +94,6 @@ export function InventoryPageClient() {
                 title="Inventario"
                 subtitle="Control de existencias y alertas de stock."
                 icon="Boxes"
-                actions={headerActions}
             />
 
             <InventoryStatsBar stats={stats} />
@@ -88,6 +105,7 @@ export function InventoryPageClient() {
                     onSearch={(v) => setFilter('search', v)}
                     onStatus={(v) => setFilter('status', v)}
                     onCategory={(v) => setFilter('category', v)}
+                    actions={headerActions}
                 />
 
                 <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest px-1">

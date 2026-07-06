@@ -5,14 +5,14 @@ export const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
     const classes: Record<string, string> = {
         'Abierto': 'bg-[var(--turquesa-500)] text-white',
         'abierto': 'bg-[var(--turquesa-500)] text-white',
-        'En Proceso': 'bg-amber-400 text-white',
-        'proceso': 'bg-amber-400 text-white',
+        'En Proceso': 'bg-[var(--color-warning)] text-white',
+        'proceso': 'bg-[var(--color-warning)] text-white',
         'Resuelto': 'bg-[var(--turquesa-500)] text-white',
         'resuelto': 'bg-[var(--turquesa-500)] text-white',
         'Cerrado': 'bg-red-500 text-white',
         'cerrado': 'bg-red-500 text-white',
-        'Reabierto': 'bg-cyan-600 text-white',
-        'reabierto': 'bg-cyan-600 text-white'
+        'Reabierto': 'bg-[var(--color-info)] text-white',
+        'reabierto': 'bg-[var(--color-info)] text-white'
     };
 
     return (
@@ -28,8 +28,8 @@ export const PriorityDot: React.FC<{ priority: string }> = ({ priority }) => {
         'baja': 'bg-gray-300',
         'Media': 'bg-[var(--turquesa-500)]',
         'media': 'bg-[var(--turquesa-500)]',
-        'Alta': 'bg-amber-400',
-        'alta': 'bg-amber-400',
+        'Alta': 'bg-[var(--color-warning)]',
+        'alta': 'bg-[var(--color-warning)]',
         'Crítica': 'bg-red-500',
         'critica': 'bg-red-500'
     };

@@ -12,14 +12,15 @@ interface HeroSectionProps {
 export default function HeroSection({ banners }: HeroSectionProps) {
   const [current, setCurrent] = useState(0);
 
-  // 6 imágenes PNG locales ubicadas en public/img/Inicio/
+  // 6 imágenes PNG locales ubicadas en public/img/Inicio/ (desktop) y sus
+  // equivalentes recortados para mobile (retrato) en BANNER_GRANDE_INICIO_MOBILE/.
   const displayBanners = [
-    { id: 1, titulo: 'Banner 1', imagen: '/img/BANNER_GRANDE_INICIO/1.png' },
-    { id: 2, titulo: 'Banner 2', imagen: '/img/BANNER_GRANDE_INICIO/2.png' },
-    { id: 3, titulo: 'Banner 3', imagen: '/img/BANNER_GRANDE_INICIO/3.png' },
-    { id: 4, titulo: 'Banner 4', imagen: '/img/BANNER_GRANDE_INICIO/4.png' },
-    { id: 5, titulo: 'Banner 5', imagen: '/img/BANNER_GRANDE_INICIO/5.png' },
-    { id: 6, titulo: 'Banner 6', imagen: '/img/BANNER_GRANDE_INICIO/6.png' },
+    { id: 1, titulo: 'Banner 1', imagen: '/img/BANNER_GRANDE_INICIO/1.png', imagenMobile: '/img/BANNER_GRANDE_INICIO_MOBILE/1.webp' },
+    { id: 2, titulo: 'Banner 2', imagen: '/img/BANNER_GRANDE_INICIO/2.png', imagenMobile: '/img/BANNER_GRANDE_INICIO_MOBILE/2.webp' },
+    { id: 3, titulo: 'Banner 3', imagen: '/img/BANNER_GRANDE_INICIO/3.png', imagenMobile: '/img/BANNER_GRANDE_INICIO_MOBILE/3.webp' },
+    { id: 4, titulo: 'Banner 4', imagen: '/img/BANNER_GRANDE_INICIO/4.png', imagenMobile: '/img/BANNER_GRANDE_INICIO_MOBILE/4.webp' },
+    { id: 5, titulo: 'Banner 5', imagen: '/img/BANNER_GRANDE_INICIO/5.png', imagenMobile: '/img/BANNER_GRANDE_INICIO_MOBILE/5.webp' },
+    { id: 6, titulo: 'Banner 6', imagen: '/img/BANNER_GRANDE_INICIO/6.png', imagenMobile: '/img/BANNER_GRANDE_INICIO_MOBILE/6.webp' },
   ];
 
   const prev = useCallback(
@@ -42,37 +43,60 @@ export default function HeroSection({ banners }: HeroSectionProps) {
   return (
     <section className="relative w-full !mt-0">
       {/* Banner Superior */}
-      <div className="hidden md:block w-full -mb-px">
+      {/* El domo verde del PNG solo ocupa ~54.4% del ancho del lienzo (centrado, con
+          márgenes transparentes a los lados). En mobile recortamos con aspect-ratio +
+          object-cover: aspect-[16/5] deja visible el ~54% central del lienzo, que es
+          exactamente la zona del domo. En md+ se mantiene el render natural original
+          (aspect auto + scaleX(1.005) hairline). */}
+      <div className="block w-full -mb-px overflow-hidden">
         <Image
           src="/img/BANNER_SUPERIOR.png"
           alt="Banner Superior"
           width={1600}
           height={270}
-          className="w-full h-auto object-cover min-h-[80px] block origin-center"
-          style={{ transform: 'scaleX(1.005)' }}
+          className="w-full h-auto object-cover block aspect-[16/5] md:aspect-auto md:min-h-[80px] origin-center md:scale-x-[1.005]"
           priority
         />
       </div>
 
       {/* Carrusel de Banners */}
+      {/* El track necesita un ancho EXPLÍCITO (numSlides * 100%) para que el navegador
+          pueda resolver translateX(-N%) de forma fiable — antes dependía de min-w-full
+          dentro de un contenedor sin ancho propio, lo que en ciertos casos hacía que el
+          transform se calculara sobre una base indeterminada y no se aplicara (quedaba
+          en matrix(1,0,0,1,0,0), sin mover nada), dejando slides mostrando contenido de
+          otro slide con parte de fondo visible = la sensación de "desalineado". */}
       <div className="relative overflow-hidden max-w-full">
         <div
           className="flex transition-transform duration-700 ease-in-out"
-          style={{ transform: `translateX(-${current * 100}%)` }}
+          style={{
+            width: `${displayBanners.length * 100}%`,
+            transform: `translateX(-${(current * 100) / displayBanners.length}%)`,
+          }}
         >
           {displayBanners.map((banner) => (
-            <div key={banner.id} className="min-w-full overflow-hidden">
-              <picture>
-                <Image
-                  src={banner.imagen}
-                  alt={banner.titulo}
-                  width={1600}
-                  height={600}
-                  className="w-full h-auto object-cover cursor-pointer origin-center"
-                  style={{ transform: 'scaleX(1.006)' }}
-                  priority
-                />
-              </picture>
+            <div
+              key={banner.id}
+              className="overflow-hidden"
+              style={{ width: `${100 / displayBanners.length}%` }}
+            >
+              <Image
+                src={banner.imagenMobile}
+                alt={banner.titulo}
+                width={650}
+                height={932}
+                className="w-full h-auto object-cover cursor-pointer origin-center block md:hidden"
+                priority
+              />
+              <Image
+                src={banner.imagen}
+                alt={banner.titulo}
+                width={1600}
+                height={600}
+                className="w-full h-auto object-cover cursor-pointer origin-center hidden md:block"
+                style={{ transform: 'scaleX(1.006)' }}
+                priority
+              />
             </div>
           ))}
         </div>
@@ -108,14 +132,16 @@ export default function HeroSection({ banners }: HeroSectionProps) {
       </div>
 
       {/* Banner Inferior */}
-      <div className="hidden md:block w-full -mt-px">
+      {/* Mismo caso que el banner superior: recorte con aspect-ratio + object-cover
+          solo en mobile (aspect-[17/5] ≈ el zoom 1.75 previo); en desktop se mantiene
+          el render natural con el scaleX(1.006) original. */}
+      <div className="block w-full -mt-px overflow-hidden">
         <Image
           src="/img/BANNER_INFERIOR.png"
           alt="Banner Inferior"
           width={1600}
           height={270}
-          className="w-full h-auto object-cover min-h-[80px] block origin-center"
-          style={{ transform: 'scaleX(1.006)' }}
+          className="w-full h-auto object-cover block aspect-[17/5] md:aspect-auto md:min-h-[80px] origin-center md:scale-x-[1.006]"
         />
       </div>
     </section>

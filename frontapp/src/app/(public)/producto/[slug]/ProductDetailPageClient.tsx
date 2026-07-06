@@ -1,6 +1,7 @@
 ﻿'use client';
 
 import { useState, useCallback, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
@@ -45,8 +46,10 @@ import { useCarritoStore } from '@/store/carritoStore';
 import { useCurrentUser } from '@/features/public/product/hooks/useCurrentUser';
 import { WriteProductReview } from '@/features/public/product/WriteProductReview';
 import { LARAVEL_API_URL } from '@/shared/lib/config/flags';
+import { useAuth } from '@/shared/lib/context/AuthContext';
+import { useToast } from '@/shared/lib/context/ToastContext';
+import { useWishlist } from '@/shared/hooks/useWishlist';
 
-import TopMedalBadge from '@/components/ui/TopMedalBadge';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -58,6 +61,7 @@ import {
 } from '@/components/ui/Cardt';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
+import TopMedalBadge from '@/components/ui/TopMedalBadge';
 import { cn } from '@/lib/utils';
 
 // ─── Token ────────────────────────────────────────────────────────────────────
@@ -876,6 +880,8 @@ function ProductTabs({ product }: { product: LaravelProduct }) {
 // ─── RelatedProductsCarousel (auto-scroll infinito) ──────────────────────────
 
 function RelatedProductCard({ rel }: { rel: LaravelProduct }) {
+  const { addToCart, loading, addedToCart } = useAddToCart();
+  const handleAdd = useCallback(() => addToCart(Number(rel.id), 1), [addToCart, rel.id]);
   const relDiscount = discountPercent(rel.price, rel.regular_price);
   return (
     <Link
@@ -937,9 +943,11 @@ function RelatedProductCard({ rel }: { rel: LaravelProduct }) {
               <Button
                 size="sm"
                 aria-label="Agregar al carrito"
+                disabled={loading}
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleAdd(); }}
                 className="opacity-0 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0 transition-all duration-200 bg-teal-500 hover:bg-teal-600 h-8 w-8 p-0"
               >
-                <ShoppingCart className="w-3.5 h-3.5" />
+                {addedToCart ? <Check className="w-3.5 h-3.5" /> : <ShoppingCart className="w-3.5 h-3.5" />}
               </Button>
             </div>
           </div>
@@ -960,7 +968,10 @@ function RelatedProductsCarousel({ products }: { products: LaravelProduct[] }) {
   const CARD_STEP = 296; // ancho de card + gap aprox
   const RESUME_DELAY = 2500; // ms antes de reanudar auto-scroll tras interacción manual
 
-  const items = [...products, ...products];
+  // Con 1 solo producto, duplicar rompe el auto-scroll infinito (loop entre 2 copias idénticas
+  // sin nada más que mostrar); con 0 no debería renderizarse (el caller ya filtra products.length > 0).
+  const items = products.length > 1 ? [...products, ...products] : products;
+  const canAutoScroll = products.length > 1;
 
   // Pausa temporal y programa reanudación automática
   const pauseTemporarily = () => {
@@ -974,7 +985,7 @@ function RelatedProductsCarousel({ products }: { products: LaravelProduct[] }) {
   // Mueve el carrusel en una dirección, respetando el loop infinito
   const shift = (direction: 'left' | 'right') => {
     const track = trackRef.current;
-    if (!track) return;
+    if (!track || !canAutoScroll) return;
     pauseTemporarily();
     const half = track.scrollWidth / 2;
     let next =
@@ -1006,7 +1017,7 @@ function RelatedProductsCarousel({ products }: { products: LaravelProduct[] }) {
 
   useEffect(() => {
     const track = trackRef.current;
-    if (!track) return;
+    if (!track || !canAutoScroll) return;
 
     const step = () => {
       if (!pausedRef.current) {
@@ -1045,24 +1056,29 @@ function RelatedProductsCarousel({ products }: { products: LaravelProduct[] }) {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-3xl font-bold">Productos Relacionados</h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            Usa las flechas o la rueda del mouse para explorar
-          </p>
+          {canAutoScroll && (
+            <p className="text-sm text-muted-foreground mt-1">
+              Usa las flechas o la rueda del mouse para explorar
+            </p>
+          )}
         </div>
-        <div className="flex items-center gap-2">
-          <span className="relative flex h-2.5 w-2.5">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75" />
-            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-teal-500" />
-          </span>
-          <span className="text-xs font-semibold text-teal-600 dark:text-teal-400 uppercase tracking-wider">
-            Auto-scroll
-          </span>
-        </div>
+        {canAutoScroll && (
+          <div className="flex items-center gap-2">
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-teal-500" />
+            </span>
+            <span className="text-xs font-semibold text-teal-600 dark:text-teal-400 uppercase tracking-wider">
+              Auto-scroll
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Contenedor con flechas superpuestas */}
       <div className="relative group/carousel">
         {/* Flecha izquierda */}
+        {canAutoScroll && (
         <button
           onClick={() => shift('left')}
           aria-label="Anterior"
@@ -1078,8 +1094,10 @@ function RelatedProductsCarousel({ products }: { products: LaravelProduct[] }) {
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
+        )}
 
         {/* Flecha derecha */}
+        {canAutoScroll && (
         <button
           onClick={() => shift('right')}
           aria-label="Siguiente"
@@ -1095,6 +1113,7 @@ function RelatedProductsCarousel({ products }: { products: LaravelProduct[] }) {
         >
           <ChevronRight className="w-5 h-5" />
         </button>
+        )}
 
         {/* Fade + overflow */}
         <div
@@ -1140,8 +1159,62 @@ export function ProductDetailPageClient({
   product: LaravelProduct;
   relatedProducts: LaravelProduct[];
 }) {
+  const router = useRouter();
   const [quantity, setQuantity] = useState(1);
-  const [wishlisted, setWishlisted] = useState(false);
+  const [isDark, setIsDark] = useState(false);
+  const { isAuthenticated } = useAuth();
+  const { showToast } = useToast();
+  const { isWishlisted, toggle: toggleWishlist, loading: wishlistLoading } = useWishlist(product.id);
+
+  const handleToggleWishlist = useCallback(async () => {
+    if (!isAuthenticated) {
+      showToast('Inicia sesión para guardar productos en tu lista de deseos', 'info');
+      return;
+    }
+    const wasWishlisted = isWishlisted;
+    await toggleWishlist();
+    showToast(
+      wasWishlisted ? 'Producto quitado de tu lista de deseos' : 'Agregado a tu lista de deseos',
+      'success',
+    );
+  }, [isAuthenticated, isWishlisted, toggleWishlist, showToast]);
+  const [gallerySize, setGallerySize] = useState<number | null>(null);
+  const gridContainerRef = useRef<HTMLDivElement | null>(null);
+  const buyBoxColRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    setIsDark(document.documentElement.classList.contains('dark'));
+    const observer = new MutationObserver(() => {
+      setIsDark(document.documentElement.classList.contains('dark'));
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const gridContainer = gridContainerRef.current;
+    const buyBoxCol = buyBoxColRef.current;
+    if (!gridContainer || !buyBoxCol) return;
+
+    const recompute = () => {
+      const isDesktop = window.matchMedia('(min-width: 1024px)').matches;
+      if (!isDesktop) {
+        setGallerySize(null);
+        return;
+      }
+      // 32px = gap-8 entre columnas; se mide el ancho real de la columna de compra
+      // en vez de asumir un valor fijo, para que siempre calce con el layout actual
+      const availableWidth = gridContainer.clientWidth - buyBoxCol.getBoundingClientRect().width - 32;
+      const size = Math.min(buyBoxCol.clientHeight, availableWidth);
+      setGallerySize(size > 0 ? size : null);
+    };
+
+    recompute();
+    const observer = new ResizeObserver(recompute);
+    observer.observe(gridContainer);
+    observer.observe(buyBoxCol);
+    return () => observer.disconnect();
+  }, []);
 
   const {
     addToCart,
@@ -1158,32 +1231,31 @@ export function ProductDetailPageClient({
   return (
     <main className="max-w-7xl mx-auto px-4 py-6 space-y-10">
       {/* Navegación */}
-      <Link href="/catalogo">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="gap-2 text-muted-foreground"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Volver al catálogo
-        </Button>
-      </Link>
+      <Button
+        variant="ghost"
+        size="sm"
+        className="gap-2 text-muted-foreground"
+        onClick={() => router.back()}
+      >
+        <ArrowLeft className="w-4 h-4" />
+        Volver al catálogo
+      </Button>
 
       {/* ── NIVEL 1: Imagen + Info de compra ─────────────────────────────── */}
-      <div className="grid lg:grid-cols-[1fr_520px] gap-8 items-start">
+      <div ref={gridContainerRef} className="grid lg:grid-cols-[1fr_minmax(360px,420px)] gap-8 items-stretch">
         {/* Columna izquierda: galería */}
-        <div className="sticky top-24 space-y-4">
-          <ProductGallery images={product.images} name={product.name} productId={product.id} />
+        <div className="sticky top-24 h-full flex flex-col justify-center">
+          <ProductGallery images={product.images} name={product.name} size={gallerySize} productId={product.id} />
         </div>
 
         {/* Columna derecha: info de compra */}
-        <div className="space-y-5">
+        <div ref={buyBoxColRef} className="space-y-5">
           {/* Categorías + título */}
           <div>
             {product.categories.length > 0 && (
               <div className="flex flex-wrap items-center gap-2 mb-4">
                 {product.categories.slice(0, 3).map((cat) => (
-                  <Link key={cat.slug} href={`/categoria/${cat.slug}`}>
+                  <Link key={cat.slug} href={`/productos/${cat.slug}`}>
                     <Badge
                       variant="secondary"
                       className="text-xs font-bold uppercase tracking-wider px-2.5 py-1"
@@ -1314,24 +1386,25 @@ export function ProductDetailPageClient({
             </Button>
             <Button
               variant="outline"
-              size="lg"
-              onClick={() => setWishlisted((w) => !w)}
+              size="icon"
+              onClick={handleToggleWishlist}
+              disabled={wishlistLoading}
               aria-label="Favoritos"
               className={cn(
                 'h-12 w-12',
-                wishlisted
+                isWishlisted
                   ? 'border-rose-400 text-rose-500 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/20'
                   : 'hover:border-teal-300',
               )}
             >
               <Heart
                 className="w-5 h-5"
-                style={{ fill: wishlisted ? 'currentColor' : 'transparent' }}
+                style={{ fill: isWishlisted ? 'currentColor' : 'transparent' }}
               />
             </Button>
             <Button
               variant="outline"
-              size="lg"
+              size="icon"
               onClick={() =>
                 navigator.share?.({
                   title: product.name,
@@ -1351,29 +1424,23 @@ export function ProductDetailPageClient({
               Medios de pago aceptados
             </p>
             <div className="flex flex-wrap items-center justify-center gap-3">
-              {[
-                { src: '/img/intro/visanuevo-Photoroom(1).png', alt: 'Visa' },
-                {
-                  src: '/img/intro/mastercadnuevo-Photoroom(1).png',
-                  alt: 'Mastercard',
-                },
-                {
-                  src: '/img/intro/amexnuevo-Photoroom(1).png',
-                  alt: 'American Express',
-                },
-                { src: '/img/intro/yapenuevo-Photoroom(1).png', alt: 'Yape' },
-                { src: '/img/intro/plinnuevo-Photoroom(1).png', alt: 'Plin' },
-              ].map(({ src, alt }) => (
+              {([
+                { dark: '/img/intro/visa1.png', light: '/img/intro/visanuevo-Photoroom(1).png', alt: 'Visa' },
+                { dark: '/img/intro/mastercard.png', light: '/img/intro/mastercadnuevo-Photoroom(1).png', alt: 'Mastercard' },
+                { dark: '/img/intro/amex1.png', light: '/img/intro/amexnuevo-Photoroom(1).png', alt: 'American Express' },
+                { dark: '/img/intro/yape.png', light: '/img/intro/yapenuevo-Photoroom(1).png', alt: 'Yape' },
+                { dark: '/img/intro/logo-plin.png', light: '/img/intro/plinnuevo-Photoroom(1).png', alt: 'Plin' },
+              ] as const).map((icon) => (
                 <div
-                  key={alt}
+                  key={icon.alt}
                   className="flex items-center justify-center rounded-lg px-3 py-2 dark:bg-[var(--bg-secondary)]"
                 >
                   <Image
-                    src={src}
-                    alt={alt}
+                    src={isDark ? icon.dark : icon.light}
+                    alt={icon.alt}
                     width={60}
                     height={36}
-                    className="h-9 w-auto object-contain"
+                    className="h-9 dark:h-14 w-auto object-contain"
                   />
                 </div>
               ))}
@@ -1381,18 +1448,21 @@ export function ProductDetailPageClient({
           </div>
 
           {/* Garantías */}
-          <div className="grid grid-cols-3 gap-2">
-            {[
-              { icon: Shield, text: 'Compra segura' },
-              { icon: Truck, text: 'Envío rápido' },
-              { icon: RotateCcw, text: 'Devoluciones' },
-            ].map(({ icon: Icon, text }) => (
+          <div className={product.type === 'physical' ? 'grid grid-cols-3 gap-2' : 'grid grid-cols-1 gap-2'}>
+            {(product.type === 'physical'
+              ? [
+                  { icon: Shield, text: 'Compra segura' },
+                  { icon: Truck, text: 'Envío rápido' },
+                  { icon: RotateCcw, text: 'Devoluciones' },
+                ]
+              : [{ icon: Shield, text: 'Compra segura' }]
+            ).map(({ icon: Icon, text }) => (
               <div
                 key={text}
                 className="flex flex-col items-center gap-1.5 text-center p-3 rounded-xl border border-teal-100 dark:border-teal-900/30 bg-teal-50/50 dark:bg-[var(--bg-secondary)]"
               >
                 <Icon className="w-4 h-4 text-teal-500" />
-                <span className="text-[10px] font-semibold tracking-[.06em] uppercase text-teal-700 dark:text-teal-400">
+                <span className="text-[10px] font-semibold tracking-[.06em] uppercase text-teal-700 dark:text-white">
                   {text}
                 </span>
               </div>
@@ -1404,7 +1474,7 @@ export function ProductDetailPageClient({
             <Link href={`/tienda/${product.store.slug}`}>
               <Card className="hover:border-teal-400 transition-colors cursor-pointer">
                 <CardContent className="p-4 flex items-center gap-4">
-                  <div className="w-11 h-11 flex items-center justify-center flex-shrink-0 overflow-hidden rounded-lg bg-muted relative">
+                  <div className="w-11 h-11 flex items-center justify-center flex-shrink-0 overflow-hidden rounded-lg bg-muted">
                     {product.store.logo ? (
                       <Image
                         src={product.store.logo}
@@ -1416,7 +1486,6 @@ export function ProductDetailPageClient({
                     ) : (
                       <Store className="w-5 h-5 text-muted-foreground" />
                     )}
-                    <TopMedalBadge entityType="store" entityId={product.store.id} size="xs" className="absolute bottom-0 right-0 z-10" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-semibold text-muted-foreground mb-0.5">
@@ -1436,7 +1505,8 @@ export function ProductDetailPageClient({
       </div>
 
       {/* ── NIVEL 2: Tabs debajo de la imagen ────────────────────────────── */}
-      <div className="lg:w-[calc(100%-540px)]">
+      {/* 452px = ancho máximo de la columna de compra (420px, minmax de grid-cols arriba) + gap-8 (32px) */}
+      <div className="lg:w-[calc(100%-452px)]">
         <ProductTabs product={product} />
       </div>
 
@@ -1460,10 +1530,12 @@ export function ProductDetailPageClient({
 function ProductGallery({
   images,
   name,
+  size,
   productId,
 }: {
   images: LaravelProduct['images'];
   name: string;
+  size?: number | null;
   productId: string;
 }) {
   const [active, setActive] = useState(0);
@@ -1518,7 +1590,11 @@ function ProductGallery({
     <div className="space-y-4">
       <div
         ref={containerRef}
-        className="relative aspect-square rounded-xl overflow-hidden bg-white border border-teal-100 dark:border-teal-900/30 group"
+        className={cn(
+          'relative rounded-xl overflow-hidden bg-white border border-teal-100 dark:border-teal-900/30 group',
+          size ? 'mx-auto' : 'aspect-square w-full',
+        )}
+        style={size ? { width: size, height: size } : undefined}
         onMouseLeave={() => setZooming(false)}
         onTouchStart={handleTouchStart}
         onTouchMove={(e) => {
@@ -1585,7 +1661,7 @@ function ProductGallery({
       </div>
 
       {images.length > 1 && (
-        <div className="grid grid-cols-4 gap-3">
+        <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
           {images.map((img, i) => (
             <button
               key={i}

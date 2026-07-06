@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 
 interface BaseDatePickerProps {
   label?: string;
@@ -15,23 +16,47 @@ interface BaseDatePickerProps {
 export default function BaseDatePicker({ label, value, onChange, name, className, placeholder, buttonClassName }: BaseDatePickerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [viewDate, setViewDate] = useState(() => value ? new Date(value + 'T12:00:00') : new Date());
+  const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0, width: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
+  const calendarRef = useRef<HTMLDivElement>(null);
 
   const selectedDate = value ? new Date(value + 'T12:00:00') : null;
   const year = viewDate.getFullYear();
   const month = viewDate.getMonth();
   const today = new Date();
 
+  const updatePosition = useCallback(() => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const calH = 340; // altura estimada del calendario
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const top = spaceBelow >= calH
+      ? rect.bottom + window.scrollY + 6
+      : rect.top + window.scrollY - calH - 6;
+    setDropdownPos({ top, left: rect.left + window.scrollX, width: rect.width });
+  }, []);
+
   useEffect(() => {
     if (!isOpen) return;
+    updatePosition();
     const handleClickOutside = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      const target = e.target as Node;
+      if (
+        containerRef.current && !containerRef.current.contains(target) &&
+        calendarRef.current && !calendarRef.current.contains(target)
+      ) {
         setIsOpen(false);
       }
     };
+    window.addEventListener('scroll', updatePosition, true);
+    window.addEventListener('resize', updatePosition);
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isOpen]);
+    return () => {
+      window.removeEventListener('scroll', updatePosition, true);
+      window.removeEventListener('resize', updatePosition);
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen, updatePosition]);
 
   useEffect(() => {
     if (value) setViewDate(new Date(value + 'T12:00:00'));
@@ -97,8 +122,12 @@ export default function BaseDatePicker({ label, value, onChange, name, className
         <span>{value ? formatDisplay(value) : (placeholder || 'Seleccionar fecha')}</span>
       </button>
 
-      {isOpen && (
-        <div className="absolute top-full mt-2 left-0 z-50 bg-sky-50 dark:bg-[#1A3A32] rounded-2xl shadow-2xl border border-gray-200 dark:border-[var(--border-subtle)] p-4 w-[280px]">
+      {isOpen && typeof document !== 'undefined' && createPortal(
+        <div
+          ref={calendarRef}
+          className="fixed z-[300] bg-sky-50 dark:bg-[#1A3A32] rounded-2xl shadow-2xl border border-gray-200 dark:border-[var(--border-subtle)] p-4 w-[280px]"
+          style={{ top: dropdownPos.top, left: dropdownPos.left }}
+        >
           <div className="flex items-center justify-between mb-4">
             <button
               type="button"
@@ -173,7 +202,8 @@ export default function BaseDatePicker({ label, value, onChange, name, className
               Hoy
             </button>
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </div>
   );

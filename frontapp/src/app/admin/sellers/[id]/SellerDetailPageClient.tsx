@@ -159,9 +159,9 @@ export function SellerDetailPageClient() {
 
   if (isLoading) {
     return (
-      <div className="px-8 pb-20 font-industrial animate-pulse space-y-6">
+      <div className="px-4 sm:px-8 pb-20 font-industrial animate-pulse space-y-6">
         <div className="h-20 bg-[var(--bg-card)] rounded-[2rem]" />
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {[1, 2, 3].map((i) => (
             <div key={i} className="h-48 bg-[var(--bg-card)] rounded-[2rem]" />
           ))}
@@ -172,7 +172,7 @@ export function SellerDetailPageClient() {
 
   if (error || !data) {
     return (
-      <div className="px-8 pb-20 font-industrial">
+      <div className="px-4 sm:px-8 pb-20 font-industrial">
         <div className="p-8 bg-rose-500/10 border border-rose-500/20 rounded-[2rem] text-rose-400 font-bold">
           No se pudo cargar la información del vendedor.
         </div>
@@ -188,7 +188,7 @@ export function SellerDetailPageClient() {
   const activeContract = store?.contracts?.find((c) => c.status === 'ACTIVE');
 
   return (
-    <div className="px-8 pb-20 space-y-8 animate-fadeIn font-industrial">
+    <div className="px-4 sm:px-8 pb-20 space-y-8 animate-fadeIn font-industrial">
       <ModuleHeader
         title="Detalle del Vendedor"
         subtitle={`${user.display_name} · ID #${user.id}`}
@@ -229,7 +229,7 @@ export function SellerDetailPageClient() {
       </div>
 
       {/* ── Grid de información ──────────────────────────────────────── */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {/* Usuario */}
         <InfoCard title="Datos del usuario">
           <div className="flex items-center gap-4 mb-2">

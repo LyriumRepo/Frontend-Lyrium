@@ -40,6 +40,11 @@ function getCategoryColor(index: number): string {
     'bg-rose-100 text-rose-600 hover:bg-rose-200',
     'bg-cyan-100 text-cyan-600 hover:bg-cyan-200',
     'bg-orange-100 text-orange-600 hover:bg-orange-200',
+    'bg-lime-100 text-lime-600 hover:bg-lime-200',
+    'bg-fuchsia-100 text-fuchsia-600 hover:bg-fuchsia-200',
+    'bg-indigo-100 text-indigo-600 hover:bg-indigo-200',
+    'bg-teal-100 text-teal-600 hover:bg-teal-200',
+    'bg-red-100 text-red-600 hover:bg-red-200',
   ];
   return colors[index % colors.length];
 }

@@ -11,34 +11,30 @@ interface Props {
 export default function TimelineEditor({ plansData, onSelectIcon }: Props) {
   return (
     <>
-      <div className="mb-6">
-        <h2 className="text-xl font-extrabold text-[var(--text-primary)] mb-1">Iconos de Planes</h2>
-        <p className="text-sm text-[var(--text-secondary)]">Personaliza los iconos de cada plan en la línea de tiempo de progresión</p>
+      <div className="mb-7">
+        <h2 className="text-2xl font-extrabold text-gray-800 dark:text-[var(--text-primary)] mb-2">Iconos de Planes</h2>
+        <p className="text-sm text-gray-400 dark:text-[var(--text-placeholder)]">Personaliza los iconos de cada plan en la línea de tiempo de progresión</p>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {Object.values(plansData).map(plan => (
-          <div key={plan.id} className="bg-[var(--bg-card)] rounded-2xl p-5 border border-[var(--border-subtle)] hover:shadow-sm transition-shadow">
+          <div key={plan.id} className="bg-white dark:bg-[var(--bg-card)] rounded-2xl p-6 border border-gray-200 dark:border-[var(--border-subtle)] shadow-sm">
             <div className="flex justify-between items-center mb-4">
-              <div>
-                <h3 className="text-sm font-bold text-[var(--text-primary)]">{plan.name}</h3>
-                <span className="text-[11px] text-[var(--text-secondary)]">Icono actual</span>
-              </div>
-              <div className="w-6 h-6 rounded-full border-2 border-[var(--border-subtle)] shadow-sm" style={{ background: plan.cssColor }} />
+              <h3 className="text-base font-bold text-gray-800 dark:text-[var(--text-primary)]">{plan.name}</h3>
+              <div className="w-6 h-6 rounded-full border-2 border-white shadow-md" style={{ background: plan.cssColor }} />
             </div>
-            <div className="grid grid-cols-4 gap-2">
+            <span className="block text-xs font-semibold text-gray-700 dark:text-[var(--text-primary)] mb-3">Seleccionar Icono:</span>
+            <div className="grid grid-cols-4 gap-2.5">
               {Object.entries(availableIcons).map(([ik, path]) => (
-                <div
-                  role="button" tabIndex={0} key={ik}
-                  className={`aspect-square flex items-center justify-center rounded-xl cursor-pointer transition-all duration-200 border
-                    ${plan.timelineIcon === ik
-                      ? 'bg-[var(--brand-teal)] border-[var(--brand-teal)] shadow-sm'
-                      : 'bg-[var(--bg-muted)] border-[var(--border-subtle)] hover:border-[var(--brand-teal)] hover:bg-[var(--bg-card)]'}`}
+                <div 
+                  role="button"
+                  tabIndex={0}
+                  key={ik} 
+                  className={`aspect-square flex items-center justify-center bg-gray-50 dark:bg-[var(--bg-muted)] border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-lg cursor-pointer transition-all duration-200 hover:bg-blue-50 hover:border-blue-400
+                    ${plan.timelineIcon === ik ? 'bg-blue-500 border-blue-500' : ''}`}
                   onClick={() => onSelectIcon(plan.id, ik)}
-                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onSelectIcon(plan.id, ik); }}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                    stroke={plan.timelineIcon === ik ? 'white' : 'var(--text-secondary)'}
-                    strokeWidth="2"
-                    dangerouslySetInnerHTML={{ __html: sanitizeHtml(path) }} />
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onSelectIcon(plan.id, ik); }}
+                >
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={plan.timelineIcon === ik ? "white" : "currentColor"} strokeWidth="2" dangerouslySetInnerHTML={{ __html: sanitizeHtml(path) }} />
                 </div>
               ))}
             </div>

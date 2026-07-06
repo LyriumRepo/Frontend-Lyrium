@@ -117,7 +117,7 @@ export default function ShippingForm() {
       >
         <h2 className="font-bold text-gray-900 dark:text-[var(--text-primary)] flex items-center gap-2">
           <span
-            className="w-7 h-7 rounded-full bg-[var(--brand-sky)] text-white text-xs
+            className="w-7 h-7 rounded-full bg-[var(--brand-sky)] dark:bg-[var(--brand-green)] text-white text-xs
             font-black flex items-center justify-center"
           >
             2
@@ -264,7 +264,7 @@ export default function ShippingForm() {
                   type="checkbox"
                   checked={data.saveAddress}
                   onChange={(e) => setData({ saveAddress: e.target.checked })}
-                  className="w-4 h-4 rounded accent-[var(--brand-sky)]"
+                  className="w-4 h-4 rounded accent-[var(--brand-sky)] dark:accent-[var(--brand-green)]"
                 />
                 <span className="text-sm text-gray-600 dark:text-[var(--text-secondary)]">
                   Guardar esta dirección para futuras compras

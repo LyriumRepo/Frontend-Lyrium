@@ -25,7 +25,7 @@ export default function SalesKPIs({ kpis, onKpiClick }: SalesKPIsProps) {
     };
 
     return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4 lg:gap-6 [&>*]:min-w-0">
             {kpis.map((kpi) => {
                 const isMonetary = ['Ventas Totales', 'Ingresos'].some(k => kpi.label.includes(k));
                 return (

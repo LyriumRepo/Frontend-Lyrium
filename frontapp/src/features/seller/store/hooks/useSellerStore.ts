@@ -39,7 +39,7 @@ export function useSellerStore() {
                         returnPdf: '', 
                         privacyPdf: '' 
                     },
-                    visual: { logo: '', logoMarketplace: '', banner1: '', banner2: '', gallery: [], adBanners: [] },
+                    visual: { logo: '', logoMarketplace: '', banner1: '', banner2: '', banner3: '', gallery: [], adBanners: [] },
                     layout: '1',
                     medals: []
                 };
@@ -86,8 +86,9 @@ export function useSellerStore() {
                 visual: { 
                     logo: (storeData as any).logo || '', 
                     logoMarketplace: (storeData as any).logo_marketplace || '', 
-                    banner1: (storeData as any).banner || '', 
+                    banner1: (storeData as any).banner || '',
                     banner2: (storeData as any).banner2 || '',
+                    banner3: (storeData as any).banner3 || '',
                     gallery: Array.isArray((storeData as any).gallery) ? (storeData as any).gallery : [],
                     adBanners: Array.isArray((storeData as any).ad_banners) 
                         ? (storeData as any).ad_banners.map((b: any) => (typeof b === 'string' ? b : (b?.url || '').trim())).filter(Boolean)
@@ -219,7 +220,7 @@ export function useSellerStore() {
     });
 
     const uploadBannerMutation = useMutation({
-        mutationFn: async ({ file, bannerNumber }: { file: File; bannerNumber: 1 | 2 }) => {
+        mutationFn: async ({ file, bannerNumber }: { file: File; bannerNumber: 1 | 2 | 3 }) => {
             if (!storeId) throw new Error('No store ID');
             
             if (USE_MOCKS) {
@@ -284,7 +285,7 @@ export function useSellerStore() {
     });
 
     const deleteBannerMutation = useMutation({
-        mutationFn: async (bannerNumber: 1 | 2) => {
+        mutationFn: async (bannerNumber: 1 | 2 | 3) => {
             if (!storeId) throw new Error('No store ID');
 
             if (USE_MOCKS) {
@@ -492,7 +493,7 @@ export function useSellerStore() {
             if (!storeId) throw new Error('Tienda no cargada. Por favor espera.');
             return uploadLogoMarketplaceMutation.mutateAsync(file);
         },
-        uploadBanner: (file: File, bannerNumber: 1 | 2) => {
+        uploadBanner: (file: File, bannerNumber: 1 | 2 | 3) => {
             if (!storeId) throw new Error('Tienda no cargada. Por favor espera.');
             return uploadBannerMutation.mutateAsync({ file, bannerNumber });
         },
@@ -512,7 +513,7 @@ export function useSellerStore() {
             if (!storeId) throw new Error('Tienda no cargada. Por favor espera.');
             return deleteAdBannerMutation.mutateAsync(mediaId);
         },
-        deleteBanner: (bannerNumber: 1 | 2) => {
+        deleteBanner: (bannerNumber: 1 | 2 | 3) => {
             if (!storeId) throw new Error('Tienda no cargada. Por favor espera.');
             return deleteBannerMutation.mutateAsync(bannerNumber);
         },

@@ -1,6 +1,6 @@
 'use client';
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { apiGet, apiPost, createPlanRequest, getMyPlanRequest, getSystemColors } from '@/features/seller/plans/lib/api';
+import { apiGet, apiPost, createPlanRequest, createIzipayPlanSession, getMyPlanRequest, getSystemColors, updateAutoRenew } from '@/features/seller/plans/lib/api';
 import { buildPlanOrder, defaultPlansData, durationPresets, getDiscountForMonths } from '@/features/seller/plans/lib/plans';
 import type { PlansMap, SubscriptionInfo, Request, ButtonColors, EstadoResponse, AvisoVencimientoResponse } from '@/features/seller/plans/types';
 import { USE_MOCKS } from '@/shared/lib/config/flags';
@@ -142,10 +142,46 @@ export function usePlanes() {
       const userId = String(user.id);
       const userName = user.display_name || user.username || 'Vendedor';
 
+      type SubscriptionResponse = { data?: { id: number; plan_id: number; status: string; starts_at?: string; started_at?: string; ends_at?: string; expires_at?: string; auto_renew?: boolean; payment_method_id?: number | null; plan: { id: number; name: string; slug: string; monthly_fee: string; features: string[] } }; success?: boolean; message?: string };
+
+      // apiGet() (features/seller/plans/lib/api.ts) NUNCA lanza excepción: si la
+      // petición excede su timeout (o falla de red), resuelve silenciosamente con
+      // { success: false, message: 'timeout' } — un objeto que parece válido pero
+      // no tiene `.data`. En dev, el servidor PHP es single-thread y esta llamada
+      // corre en paralelo con /plans (ya señalado como lento en el código), así que
+      // puede quedar en cola y expirar justo tras un F5. Detectamos ese sentinel
+      // explícitamente (no solo excepciones) y reintentamos antes de darnos por
+      // vencidos — si igual falla, lo distinguimos de "no tiene suscripción" (que el
+      // backend responde con 200 y data:null) para no mostrarle al vendedor un plan
+      // inferior al que realmente tiene contratado.
+      const isFailedResponse = (res: SubscriptionResponse): boolean => res.success === false;
+
+      const fetchSubscriptionWithRetry = async (): Promise<SubscriptionResponse | null> => {
+        try {
+          const first = await apiGet<SubscriptionResponse>('/subscriptions/current');
+          if (!isFailedResponse(first)) return first;
+        } catch {
+          // apiGet no debería lanzar, pero por si acaso
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, 400));
+        try {
+          const second = await apiGet<SubscriptionResponse>('/subscriptions/current');
+          if (isFailedResponse(second)) {
+            console.error('[usePlanes] /subscriptions/current falló tras reintento:', second.message);
+            return null;
+          }
+          return second;
+        } catch (err) {
+          console.error('[usePlanes] Error obteniendo suscripción actual tras reintento:', err);
+          return null;
+        }
+      };
+
       // Fuente única de verdad: los planes vienen del backend (definidos por el admin)
       const [plansRes, subRes, colorsData] = await Promise.all([
-        apiGet<{ data: Array<{ id: number; name: string; slug: string; monthly_fee: string; features: string[]; detailed_benefits?: Array<{ title: string; description: string; icon?: string }> }> }>('/plans'),
-        apiGet<{ data?: { id: number; plan_id: number; status: string; starts_at?: string; started_at?: string; ends_at?: string; expires_at?: string; plan: { id: number; name: string; slug: string; monthly_fee: string; features: string[] } } }>('/subscriptions/current').catch(() => ({ data: null })),
+        apiGet<{ data: Array<{ id: number; name: string; slug: string; monthly_fee: string; css_color?: string; accent_color?: string; features: string[]; detailed_benefits?: Array<{ title: string; description: string; icon?: string }> }> }>('/plans'),
+        fetchSubscriptionWithRetry(),
         getSystemColors().catch(() => ({})),
       ]);
 
@@ -154,8 +190,10 @@ export function usePlanes() {
       if (plansRes.data) {
         plansRes.data.forEach((plan) => {
           slugToNumericIdMap[plan.slug] = plan.id;
+          const fallback = defaultPlansData[slugToDefaultKey[plan.slug] ?? plan.slug];
           plansData[plan.slug] = {
             id: plan.slug,
+            numericId: plan.id,
             name: plan.name,
             slug: plan.slug,
             price: parseFloat(plan.monthly_fee) || 0,
@@ -169,17 +207,26 @@ export function usePlanes() {
             description: '',
             badge: '',
             requiresPayment: plan.monthly_fee !== '0.00',
-            features: plan.features?.map(f => ({ text: f, active: true })) || [],
+            features: plan.features?.map(f =>
+              typeof f === 'string' ? { text: f, active: true } : { text: String((f as any).text ?? ''), active: (f as any).active ?? true }
+            ) || [],
             detailedBenefits: plan.detailed_benefits?.map(b => ({ title: b.title, description: b.description, icon: b.icon || '' })) || [],
             isActive: true,
-            bgImage: defaultPlansData[slugToDefaultKey[plan.slug] ?? plan.slug]?.bgImage || '',
-            showBgInCard: defaultPlansData[slugToDefaultKey[plan.slug] ?? plan.slug]?.showBgInCard ?? false,
+            cssColor: plan.css_color || fallback?.cssColor || '#10b981',
+            accentColor: plan.accent_color || fallback?.accentColor || '#059669',
+            bgImage: fallback?.bgImage || '',
+            showBgInCard: fallback?.showBgInCard ?? false,
           };
         });
       }
 
-      const subscription = subRes.data;
-      const currentPlan = subscription?.plan?.slug || 'emprende';
+      const subscriptionFetchFailed = subRes === null;
+      const subscription = subRes?.data;
+      // Si la petición falló de verdad (no que "no tiene suscripción"), no asumamos
+      // 'emprende' — eso le mostraría al vendedor un plan inferior al que realmente
+      // tiene activo. Mantenemos el último plan conocido en ese caso.
+      const currentPlan = subscription?.plan?.slug
+        || (subscriptionFetchFailed ? stateRef.current.currentPlan : 'emprende');
       const endsAt = subscription?.ends_at || subscription?.expires_at || '';
       const startsAt = subscription?.starts_at || subscription?.started_at || '';
       const subscriptionInfo: SubscriptionInfo | null = subscription ? {
@@ -189,6 +236,9 @@ export function usePlanes() {
         planId: String(subscription.plan_id),
         status: subscription.status,
         startDate: startsAt,
+        subscriptionId: subscription.id,
+        autoRenew: subscription.auto_renew ?? false,
+        paymentMethodId: subscription.payment_method_id ?? null,
       } : null;
 
       const buttonColors: ButtonColors = (colorsData && Object.keys(colorsData).length > 0) ? {
@@ -201,16 +251,29 @@ export function usePlanes() {
         warningColor: (colorsData as any).error_color,
       } : {};
 
-      const planOrder = buildPlanOrder(plansData);
-      const carouselIndex = Math.max(0, planOrder.indexOf(currentPlan));
+      const effectivePlans = Object.keys(plansData).length > 0 ? plansData : defaultPlansData;
+      const planOrder = buildPlanOrder(effectivePlans);
+      const effectivePlan = planOrder.includes(currentPlan) ? currentPlan : (planOrder[0] ?? 'basic');
+      const carouselIndex = Math.max(0, planOrder.indexOf(effectivePlan));
       update({
-        plansData, planOrder, currentPlan, userId, userName,
+        plansData: effectivePlans, planOrder, currentPlan: effectivePlan, userId, userName,
         claimedPlans: [], trialUsedPlans: [], subscriptionInfo,
         avisoPorVencer: null, requestsCache: [],
         ...(Object.keys(buttonColors).length > 0 ? { buttonColors } : {}),
-        showcasePlan: currentPlan, carouselIndex, isLoaded: true,
+        showcasePlan: effectivePlan, carouselIndex, isLoaded: true,
       });
-    } catch { update({ isLoaded: true }); }
+    } catch (initErr) {
+      const fallbackPlans = defaultPlansData;
+      const fallbackOrder = buildPlanOrder(fallbackPlans);
+      update({
+        isLoaded: true,
+        plansData: fallbackPlans,
+        planOrder: fallbackOrder,
+        currentPlan: 'basic',
+        showcasePlan: 'basic',
+        carouselIndex: 0,
+      });
+    }
   }, [update]);
 
   const switchTab = (tab: 'my-plan' | 'all-plans') => update({ activeTab: tab });
@@ -229,8 +292,7 @@ export function usePlanes() {
 
   const saveRequest = useCallback(async (req: Omit<Request, 'usuario_id'>) => {
     try {
-      // Usar el mapa slug→ID numérico poblado durante initialize()
-      const numericPlanId = slugToNumericIdMap[req.toPlan] ?? 1;
+      const numericPlanId = stateRef.current.plansData[req.toPlan]?.numericId ?? slugToNumericIdMap[req.toPlan];
 
       const response = await createPlanRequest({
         plan_id: numericPlanId,
@@ -259,8 +321,8 @@ export function usePlanes() {
     if (!plan) { showNotification('Plan no encontrado', '#ef4444'); return; }
 
     try {
-      const numericPlanId = slugToNumericIdMap[planKey] ?? 1;
-      const response = await createPlanRequest({ plan_id: numericPlanId, payment_method: 'trial', months: 1 });
+      const numericPlanId = plan.numericId ?? slugToNumericIdMap[planKey];
+      const response = await createPlanRequest({ plan_id: numericPlanId!, payment_method: 'trial', months: 1 });
       if (response.success) {
         showNotification('¡Plan gratuito activado!', '#10b981');
         initialize();
@@ -297,8 +359,8 @@ export function usePlanes() {
     if (!plan) { showNotification('Plan no encontrado', '#ef4444'); return; }
 
     try {
-      const numericPlanId = slugToNumericIdMap[targetPlanKey] ?? 1;
-      const response = await createPlanRequest({ plan_id: numericPlanId, payment_method: 'trial', months: 1 });
+      const numericPlanId = plan.numericId ?? slugToNumericIdMap[targetPlanKey];
+      const response = await createPlanRequest({ plan_id: numericPlanId!, payment_method: 'trial', months: 1 });
       if (response.success) {
         showNotification('Solicitud de cambio enviada', '#10b981');
         setModal('downgradeConfirm2', false);
@@ -322,7 +384,9 @@ export function usePlanes() {
   const openPaymentModal = useCallback(async (plan: string) => {
     const planData = state.plansData[plan];
     if (!planData) { showNotification('Plan no encontrado', '#ef4444'); return; }
-    update({ selectedPaymentPlan: plan });
+    // Si el plan requiere pago, iniciar en '1m' para que el botón muestre Izipay, no trial
+    const defaultPreset = planData.requiresPayment ? '1m' : 'trial';
+    update({ selectedPaymentPlan: plan, selectedPresetId: defaultPreset });
     setModal('payment', true);
   }, [showNotification, state.plansData, setModal, update]);
 
@@ -360,18 +424,78 @@ export function usePlanes() {
     }
 
     try {
-      const numericPlanId = slugToNumericIdMap[selectedPaymentPlan] ?? 1;
-      const response = await createPlanRequest({ plan_id: numericPlanId, payment_method: 'izipay', months: totalMonths });
-      if (response.success) {
-        showNotification('Pago procesado correctamente. Tu plan está activo.', '#10b981');
-        setState(prev => ({ ...prev, selectedPaymentPlan: null, modals: { ...prev.modals, payment: false, requestSent: true } }));
-        initialize();
+      const planEntry = plansData[selectedPaymentPlan ?? ''];
+      const numericPlanId = planEntry?.numericId ?? slugToNumericIdMap[selectedPaymentPlan ?? ''];
+
+      // Mapa de claves default → slugs del backend (para cuando /plans no cargó a tiempo)
+      const defaultKeyToSlug: Record<string, string> = {
+        basic: 'emprende',
+        standard: 'crece',
+        premium: 'especial',
+      };
+      const planSlug = planEntry?.slug
+        ?? (selectedPaymentPlan ? defaultKeyToSlug[selectedPaymentPlan] : undefined)
+        ?? selectedPaymentPlan
+        ?? undefined;
+
+      if (!numericPlanId && !planSlug) {
+        showNotification('No se pudo identificar el plan. Recarga la página e intenta de nuevo.', '#ef4444');
+        return null;
+      }
+
+      const session = await createIzipayPlanSession({
+        ...(numericPlanId ? { plan_id: numericPlanId } : { plan_slug: planSlug }),
+        months: totalMonths,
+      });
+
+      if (!session.success) {
+        showNotification(session.message ?? 'Error al iniciar el pago con Izipay', '#ef4444');
+        return null;
+      }
+
+      // Modo simulación (backend sin credenciales Izipay reales):
+      // el backend ya aprobó el PlanRequest automáticamente — actualizamos UI directamente
+      // sin esperar a initialize() porque /plans es lento en dev (PHP single-thread).
+      if (session.mode === 'mock') {
+        const planNom = data.name;
+        const newPlanKey = planEntry?.slug ?? planSlug ?? selectedPaymentPlan ?? '';
+        setState(prev => {
+          const planInState = prev.plansData[newPlanKey] ?? prev.plansData[selectedPaymentPlan ?? ''];
+          const resolvedKey = planInState ? newPlanKey : prev.currentPlan;
+          return {
+            ...prev,
+            currentPlan: resolvedKey,
+            showcasePlan: resolvedKey,
+            carouselIndex: Math.max(0, prev.planOrder.indexOf(resolvedKey)),
+            subscriptionInfo: {
+              plan: resolvedKey,
+              expiryDate: new Date(Date.now() + totalMonths * 30 * 24 * 60 * 60 * 1000).toISOString(),
+              months: totalMonths,
+            },
+            sentText: `<strong>✅ ¡Plan activado!</strong><br><br>Tu plan <strong>${planNom}</strong> ha sido activado por <strong>${totalMonths === 1 ? '1 mes' : `${totalMonths} meses`}</strong>.`,
+            pendingUIRefresh: false,
+            modals: { ...prev.modals, payment: false, requestSent: true },
+          };
+        });
+        return null;
+      }
+
+      if (session.form_token && session.public_key && session.izipay_order_id) {
+        setState(prev => ({
+          ...prev,
+          izipayConfig: {
+            formToken: session.form_token!,
+            publicKey: session.public_key!,
+            orderId: session.izipay_order_id!,
+          },
+          modals: { ...prev.modals, payment: false, izipayPay: true },
+        }));
       } else {
-        showNotification('Error al procesar pago', '#ef4444');
+        showNotification('Respuesta de pago incompleta. Intenta más tarde.', '#ef4444');
       }
     } catch (error) {
-      console.error('[usePlanes] Payment error:', error);
-      showNotification('Error al procesar pago', '#ef4444');
+      console.error('[usePlanes] Izipay session error:', error);
+      showNotification('No se pudo conectar con el servicio de pago. Intenta más tarde.', '#ef4444');
     }
 
     return null;
@@ -421,7 +545,7 @@ export function usePlanes() {
         plansRes.data.forEach(plan => {
           slugToNumericIdMap[plan.slug] = plan.id;
           newPlans[plan.slug] = {
-            id: plan.slug, name: plan.name, slug: plan.slug,
+            id: plan.slug, numericId: plan.id, name: plan.name, slug: plan.slug,
             price: parseFloat(plan.monthly_fee) || 0,
             priceAnnual: (parseFloat(plan.monthly_fee) || 0) * 12,
             period: 'mensual', periodAnnual: 'anual', currency: 'S/',
@@ -430,7 +554,9 @@ export function usePlanes() {
             priceSubtext: plan.monthly_fee === '0.00' ? 'Sin costo' : '/mes',
             description: '', badge: '',
             requiresPayment: plan.monthly_fee !== '0.00',
-            features: plan.features?.map(f => ({ text: f, active: true })) || [],
+            features: plan.features?.map(f =>
+              typeof f === 'string' ? { text: f, active: true } : { text: String((f as any).text ?? ''), active: (f as any).active ?? true }
+            ) || [],
             detailedBenefits: plan.detailed_benefits?.map(b => ({ title: b.title, description: b.description, icon: b.icon || '' })) || [],
             isActive: true,
             bgImage: defaultPlansData[slugToDefaultKey[plan.slug] ?? plan.slug]?.bgImage || '',
@@ -479,6 +605,14 @@ export function usePlanes() {
   }, [update]);
   useEffect(() => { handleColoresActualizadosRef.current = handleColoresActualizados; }, [handleColoresActualizados]);
 
+  // Auto-inicializar cuando auth resuelve (authLoading pasa de true a false)
+  useEffect(() => {
+    if (!authLoading) {
+      initialize();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authLoading]);
+
   // Refs para los handlers — evita ReferenceError independientemente del orden de declaración
   const handlePlanesActualizadosRef = useRef(handlePlanesActualizados);
   useEffect(() => { handlePlanesActualizadosRef.current = handlePlanesActualizados; }, [handlePlanesActualizados]);
@@ -493,6 +627,39 @@ export function usePlanes() {
     };
     return () => bc.close();
   }, []);
+
+  const toggleAutoRenewal = useCallback(async (enabled: boolean, paymentMethodId?: number) => {
+    const subscriptionId = stateRef.current.subscriptionInfo?.subscriptionId;
+    if (!subscriptionId) {
+      showNotification('No se encontró tu suscripción activa', '#ef4444');
+      return false;
+    }
+
+    try {
+      const response = await updateAutoRenew(subscriptionId, enabled, paymentMethodId);
+
+      // El backend responde 422 (sin tarjeta tokenizada) con `message` pero sin `subscription`
+      if (!response.subscription) {
+        showNotification(response.message ?? 'No se pudo actualizar la renovación automática', '#ef4444');
+        return false;
+      }
+
+      setState(prev => prev.subscriptionInfo ? {
+        ...prev,
+        subscriptionInfo: {
+          ...prev.subscriptionInfo,
+          autoRenew: response.subscription?.auto_renew ?? enabled,
+          paymentMethodId: response.subscription?.payment_method_id ?? paymentMethodId ?? prev.subscriptionInfo.paymentMethodId,
+        },
+      } : prev);
+      showNotification(enabled ? 'Renovación automática activada' : 'Renovación automática desactivada', '#10b981');
+      return true;
+    } catch (error) {
+      console.error('[usePlanes] Error toggling auto-renewal:', error);
+      showNotification('No se pudo actualizar la renovación automática', '#ef4444');
+      return false;
+    }
+  }, [showNotification, setState]);
 
   const handlePlanVencido = useCallback(async () => {
     await initialize();
@@ -509,6 +676,6 @@ export function usePlanes() {
     isPlanClaimed, isTrialUsed, hasPendingRequest,
     getPaymentTotalMonths, getPaymentDurationLabel, getDiscountForMonths,
     handleSolicitudActualizada, handlePagoConfirmado, handlePlanesActualizados,
-    handlePlanVencido, handleColoresActualizados,
+    handlePlanVencido, handleColoresActualizados, toggleAutoRenewal,
   };
 }

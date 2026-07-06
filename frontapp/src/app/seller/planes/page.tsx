@@ -1,9 +1,11 @@
 'use client';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { usePlanes } from '@/features/seller/plans/hooks/usePlanes';
 import { useSSE } from '@/features/seller/plans/hooks/useSSE';
 import { motivationalMessages, notificationMessages } from '@/features/seller/plans/lib/plans';
+import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import { sanitizeHtml } from '@/shared/lib/sanitize';
+import { apiGet, apiPost } from '@/features/seller/plans/lib/api';
 
 import AccessBlocked from '@/features/seller/plans/shared/AccessBlocked';
 import Notification from '@/features/seller/plans/shared/Notification';
@@ -16,7 +18,8 @@ import PaymentModal from '@/features/seller/plans/components/PaymentModal';
 import { BenefitAskModal, BenefitFullModal } from '@/features/seller/plans/components/BenefitModals';
 import { DowngradeModal, DowngradeConfirm2Modal } from '@/features/seller/plans/components/DowngradeModals';
 import ExpiracionBanner from '@/features/seller/plans/components/ExpiracionBanner';
-import IzipayForm from '@/features/seller/plans/components/IzipayForm';
+import IzipayModal from '@/features/public/checkout/components/modals/IzipayModal';
+import { useIzipay } from '@/features/public/checkout/hooks/useIzipay';
 
 export default function PlanesPage() {
   const planes = usePlanes();
@@ -24,9 +27,7 @@ export default function PlanesPage() {
   const [motivationIndex, setMotivationIndex] = useState(0);
   const [showBanner, setShowBanner] = useState(true);
 
-  // Initialize on mount — eslint-disable-next-line react-hooks/exhaustive-deps
-  // planes.initialize es estable (useCallback sin deps variables), se ejecuta solo una vez
-  useEffect(() => { planes.initialize(); }, [planes.initialize]);
+  // Inicialización automática vía usePlanes (useEffect interno con authLoading)
 
   // Apply button colors as CSS vars
   useEffect(() => {
@@ -88,14 +89,14 @@ export default function PlanesPage() {
   }, [state.activeTab, carouselStep]);
 
   // SSE
-  useSSE(
+  const { disconnect: disconnectSSE } = useSSE(
     'planes', state.userId,
     {
       solicitud_actualizada: planes.handleSolicitudActualizada as never,
       pago_confirmado: planes.handlePagoConfirmado as never,
       pago_fallido: ({ motivo }: { motivo?: string }) => {
-        planes.setModal('waitingPayment', false);
         planes.setModal('izipayPay', false);
+        planes.setModal('waitingPayment', false);
         planes.showNotification(`El pago no pudo completarse. ${motivo ?? 'Inténtalo de nuevo.'}`, '#ef4444');
       },
       planes_actualizados: planes.handlePlanesActualizados as never,
@@ -104,6 +105,56 @@ export default function PlanesPage() {
     },
     state.isLoaded && !state.isBlocked,
   );
+
+  // ── Izipay SDK ────────────────────────────────────────────────────────────
+  const [izipayError, setIzipayError] = useState<string | null>(null);
+
+  const handleIzipaySuccess = useCallback(async (result: import('@/features/public/checkout/hooks/useIzipay').KryptonPaymentSuccessDetail) => {
+    planes.setModal('izipayPay', false);
+    setIzipayError(null);
+    planes.setModal('waitingPayment', true);
+
+    const orderId = result?.clientAnswer?.orderDetails?.orderId ?? state.izipayConfig?.orderId ?? '';
+
+    try {
+      const res = await apiPost<{ success: boolean; message?: string }>(
+        '/payments/izipay/plan-callback',
+        { client_answer: result.clientAnswer, order_id: orderId },
+      );
+
+      planes.setModal('waitingPayment', false);
+
+      if (res.success) {
+        planes.showNotification('¡Pago confirmado! Tu plan ha sido activado.', '#10b981');
+        await planes.initialize();
+      } else {
+        planes.showNotification(res.message ?? 'El pago fue recibido pero hubo un error al activar el plan. Contacta soporte.', '#f59e0b');
+      }
+    } catch {
+      planes.setModal('waitingPayment', false);
+      planes.showNotification('El pago fue procesado. Recarga la página para ver tu plan actualizado.', '#f59e0b');
+    }
+  }, [state.izipayConfig?.orderId]);
+
+  const {
+    loadSmartForm,
+    error: izipaySdkError,
+    isSdkReady: izipaySdkReady,
+  } = useIzipay({ onSuccess: handleIzipaySuccess });
+
+  // Inyectar formToken cuando el modal se abre y está montado en el DOM
+  useEffect(() => {
+    console.log('[page] izipayPay effect:', { modals: state.modals.izipayPay, hasToken: !!state.izipayConfig?.formToken, sdkReady: izipaySdkReady });
+    if (state.modals.izipayPay && state.izipayConfig?.formToken) {
+      setIzipayError(null);
+      loadSmartForm(state.izipayConfig.formToken);
+    }
+  }, [state.modals.izipayPay, state.izipayConfig, loadSmartForm, izipaySdkReady]);
+
+  // Sincronizar error del SDK al estado local
+  useEffect(() => {
+    if (izipaySdkError) setIzipayError(izipaySdkError);
+  }, [izipaySdkError]);
 
   if (!state.isLoaded) {
     return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#f9fafb' }}>
@@ -114,6 +165,19 @@ export default function PlanesPage() {
   if (state.isBlocked && state.blockInfo) return <AccessBlocked {...state.blockInfo} />;
 
   const hasPending = planes.hasPendingRequest();
+
+  const tabsButtons = (
+    <>
+      <button className={`tab-btn ${state.activeTab === 'my-plan' ? 'active' : ''}`} data-tab="my-plan" onClick={() => planes.switchTab('my-plan')}>
+        <svg className="tab-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+        Mi Plan
+      </button>
+      <button className={`tab-btn ${state.activeTab === 'all-plans' ? 'active' : ''}`} data-tab="all-plans" onClick={() => planes.switchTab('all-plans')}>
+        <svg className="tab-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /></svg>
+        Planes
+      </button>
+    </>
+  );
 
   return (
     <>
@@ -129,14 +193,7 @@ export default function PlanesPage() {
 
       {/* Tabs */}
       <nav className="tabs-nav">
-        <button className={`tab-btn ${state.activeTab === 'my-plan' ? 'active' : ''}`} data-tab="my-plan" onClick={() => planes.switchTab('my-plan')}>
-          <svg className="tab-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
-          Mi Plan
-        </button>
-        <button className={`tab-btn ${state.activeTab === 'all-plans' ? 'active' : ''}`} data-tab="all-plans" onClick={() => planes.switchTab('all-plans')}>
-          <svg className="tab-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /></svg>
-          Planes
-        </button>
+        {tabsButtons}
       </nav>
 
       <div className="container">
@@ -153,8 +210,11 @@ export default function PlanesPage() {
             />
           )}
 
-          <h1 className="my-plan-title animate-title">Mi Plan Actual</h1>
-          <p className="my-plan-subtitle animate-subtitle">Gestiona tu suscripción en LYRIUM Biomarketplace</p>
+          <ModuleHeader
+            title="Mi Plan Actual"
+            subtitle="Gestiona tu suscripción en LYRIUM Biomarketplace"
+            icon="CreditCard"
+          />
 
           <Timeline
             planOrder={state.planOrder} plansData={state.plansData}
@@ -174,6 +234,10 @@ export default function PlanesPage() {
           </div>
           <br />
 
+          <nav className="tabs-nav-mobile">
+            {tabsButtons}
+          </nav>
+
           <div className="my-plan-layout">
             <div className="current-plan-section-wrapper animate-card-entrance">
               <div className="current-plan-wrapper">
@@ -184,6 +248,7 @@ export default function PlanesPage() {
                   isDetailsExpanded={state.isDetailsExpanded}
                   onToggleDetails={planes.toggleDetails}
                   onFeatureClick={planes.onFeatureClick}
+                  onToggleAutoRenewal={planes.toggleAutoRenewal}
                 />
               </div>
             </div>
@@ -203,14 +268,21 @@ export default function PlanesPage() {
 
         {/* ── PESTAÑA: PLANES ── */}
         <div className={`tab-panel ${state.activeTab === 'all-plans' ? 'active' : ''}`} id="panel-all-plans">
-          <h1 className="plans-tab-title">Explora Nuestros Planes</h1>
-          <p className="plans-tab-subtitle">Elige el plan perfecto para tu tienda en LYRIUM Biomarketplace</p>
+          <ModuleHeader
+            title="Explora Nuestros Planes"
+            subtitle="Elige el plan perfecto para tu tienda en LYRIUM Biomarketplace"
+            icon="Layers"
+          />
 
           <Timeline
             planOrder={state.planOrder} plansData={state.plansData}
             activePlan={state.showcasePlan} suffix="Plans"
             onPointClick={planes.selectCarouselPlan}
           />
+
+          <nav className="tabs-nav-mobile">
+            {tabsButtons}
+          </nav>
 
           <Showcase
             showcasePlan={state.showcasePlan}
@@ -253,7 +325,7 @@ export default function PlanesPage() {
         onClose={planes.closePaymentModal}
         onSelectPreset={planes.selectPreset}
         onChangeCustomQty={planes.changeCustomQty}
-        onProcess={() => planes.processPayment()}
+        onProcess={() => { disconnectSSE(); planes.processPayment(); }}
       />
 
       <Modal open={state.modals.requestSent} onClose={planes.closeRequestSentModal} className="request-sent-modal" showClose={false}>
@@ -300,34 +372,7 @@ export default function PlanesPage() {
         onClose={() => planes.setModal('benefitFullDetail', false)}
       />
 
-      <Modal open={state.modals.izipayPay} onClose={() => planes.setModal('izipayPay', false)} className="izipay-pay-modal">
-        <div className="izipay-modal-header">
-          <div className="izipay-modal-header-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5">
-              <rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
-            </svg>
-          </div>
-          <div className="izipay-modal-header-text">
-            <h3>Pago seguro con Izipay</h3>
-            <p>Conexión cifrada SSL <span className="izipay-security-badge"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12" /></svg> Verificado</span></p>
-          </div>
-        </div>
-        <div id="izipayFormContainer">
-          <IzipayForm
-            config={state.izipayConfig}
-            open={state.modals.izipayPay}
-            onPaid={() => {
-              planes.setModal('izipayPay', false);
-              planes.setModal('waitingPayment', true);
-            }}
-            onFailed={() => {
-              planes.setModal('izipayPay', false);
-              planes.showNotification('El pago no fue completado. Puedes intentarlo de nuevo.', '#ef4444');
-            }}
-          />
-        </div>
-        <div className="izipay-modal-footer">Procesado por <strong>Izipay</strong> · Tus datos de pago están protegidos</div>
-      </Modal>
+      <IzipayModal isOpen={state.modals.izipayPay} onClose={() => { planes.setModal('izipayPay', false); setIzipayError(null); }} error={izipayError} />
 
       <Modal open={state.modals.waitingPayment} onClose={() => planes.setModal('waitingPayment', false)} className="waiting-admin-modal" showClose={false}>
         <div className="waiting-icon">

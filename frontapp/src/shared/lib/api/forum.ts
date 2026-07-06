@@ -14,6 +14,7 @@ export interface ForumTopic {
   content: string;
   created: string;
   author_name: string;
+  user_id: number | null;
   forum_id: number;
   forum_name: string;
   reply_count: number;
@@ -26,6 +27,7 @@ export interface ForumTopic {
 export interface ForumPost {
   id: number;
   topic_id: number;
+  user_id: number | null;
   author_name: string;
   content: string;
   created: string;
@@ -36,10 +38,32 @@ export interface ForumPost {
   votes_down: number;
 }
 
+let _tokenCache: { value: string | null; ts: number } | null = null;
+
+async function getAuthToken(): Promise<string | null> {
+  const now = Date.now();
+  if (_tokenCache && now - _tokenCache.ts < 30_000) return _tokenCache.value;
+  try {
+    const local = typeof window !== 'undefined' ? localStorage.getItem('laravel_token') : null;
+    if (local) {
+      const clean = local.replace(/^["']|["']$/g, '').trim() || null;
+      if (clean) { _tokenCache = { value: clean, ts: now }; return clean; }
+    }
+    const res = await fetch('/api/auth-token', { credentials: 'include', cache: 'no-store' });
+    if (!res.ok) return null;
+    const { token } = await res.json();
+    const clean = token?.replace(/^["']|["']$/g, '').trim() || null;
+    if (clean) _tokenCache = { value: clean, ts: now };
+    return clean;
+  } catch { return null; }
+}
+
 async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
+  const token = await getAuthToken();
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
   const res = await fetch(url, {
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
+    headers,
     ...options,
   });
 
@@ -92,6 +116,19 @@ export const forumApi = {
     });
   },
 
+  updatePost: async (postId: number, content: string): Promise<{ success: boolean }> => {
+    return apiFetch<{ success: boolean }>(`${API_BASE}/respuestas/${postId}`, {
+      method: 'PUT',
+      body: JSON.stringify({ content }),
+    });
+  },
+
+  deletePost: async (postId: number): Promise<{ success: boolean }> => {
+    return apiFetch<{ success: boolean }>(`${API_BASE}/respuestas/${postId}`, {
+      method: 'DELETE',
+    });
+  },
+
   setVote: async (
     postId: number,
     type: 'up' | 'down',
@@ -104,9 +141,13 @@ export const forumApi = {
 
   getCurrentUser: async () => {
     try {
-      const res = await fetch('/backend/api/user', { credentials: 'include' });
+      const token = await getAuthToken();
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      const res = await fetch('/backend/api/users/me', { headers });
       const json = await res.json();
-      return json.data || { id: null, name: null, username: null };
+      if (json.data) return json.data;
+      return { id: json.id ?? null, name: json.display_name ?? json.nicename ?? null, username: json.username ?? null };
     } catch {
       return { id: null, name: null, username: null };
     }

@@ -67,6 +67,15 @@ function buildKpiConfig(
   };
 }
 
+function trendOf(arr: number[]): { value: number; isPositive: boolean } | undefined {
+  if (arr.length < 2) return undefined;
+  const last = arr[arr.length - 1] ?? 0;
+  const prev = arr[arr.length - 2] ?? 0;
+  if (prev === 0) return undefined;
+  const pct = Math.abs(((last - prev) / prev) * 100);
+  return { value: parseFloat(pct.toFixed(1)), isPositive: last >= prev };
+}
+
 export function FinancePageClient() {
   const {
     data,
@@ -92,17 +101,17 @@ export function FinancePageClient() {
     showToast('Datos sincronizados según el periodo seleccionado', 'success');
   };
 
-  const headerActions = (
-    <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md p-2 rounded-2xl border border-white/20">
+  const renderDateFilterControls = () => (
+    <>
       <BaseDatePicker value={filters.startDate}
         onChange={(v) => setFilters(v, filters.endDate)} placeholder="Desde" />
-      <span className="text-white/30 text-lg font-thin">|</span>
+      <span className="text-[var(--text-secondary)] text-lg font-thin">|</span>
       <BaseDatePicker value={filters.endDate}
         onChange={(v) => setFilters(filters.startDate, v)} placeholder="Hasta" />
       <button
         onClick={handleApplyFilters}
         disabled={isRefreshing}
-        className="p-2 bg-white/20 text-white rounded-lg hover:bg-white/30 transition active:scale-95 disabled:opacity-50"
+        className="p-2 bg-[var(--celeste-500)] text-white rounded-lg hover:brightness-110 transition active:scale-95 disabled:opacity-50"
       >
         {isRefreshing ? (
           <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -110,7 +119,7 @@ export function FinancePageClient() {
           <Icon name="Search" className="w-4 h-4" />
         )}
       </button>
-    </div>
+    </>
   );
 
   if (isLoading && !data) {
@@ -192,8 +201,12 @@ export function FinancePageClient() {
         title="Centro de Finanzas y Estadísticas"
         subtitle="Monitoreo en tiempo real de tus KPIs estratégicos"
         icon="PieChart"
-        actions={headerActions}
       />
+
+      {/* Filtros de fecha */}
+      <div className="flex items-center gap-3 bg-[var(--bg-card)] p-2 rounded-2xl border border-[var(--border-subtle)] w-full overflow-x-auto no-scrollbar">
+        {renderDateFilterControls()}
+      </div>
 
       <div className="flex flex-wrap gap-2 border-b border-gray-100 dark:border-[var(--border-subtle)] pb-4 overflow-x-auto no-scrollbar">
         {tabs.map(tab => (
@@ -271,6 +284,7 @@ export function FinancePageClient() {
                 description="Retorno sobre inversión en comisiones"
                 icon="TrendingUp"
                 color="turquesaClaro"
+                trend={trendOf(data.roi.data)}
                 chart={<FinanceChart type="bar" labels={data.roi.labels} data={data.roi.data} color={chartColorMap.roi} />}
                 onClick={() => openStatCard('ROI de Ventas', 'roi', data, 'bar', 'turquesaClaro')}
               />
@@ -284,6 +298,7 @@ export function FinancePageClient() {
                 description="Valor medio por pedido (sin IGV)"
                 icon="Tag"
                 color="turquesa"
+                trend={trendOf(data.ticketPromedio.data)}
                 chart={<FinanceChart type="bar" labels={data.ticketPromedio.labels} data={data.ticketPromedio.data} color={chartColorMap.ticketPromedio} />}
                 onClick={() => openStatCard('Ticket Promedio', 'ticketPromedio', data, 'bar', 'turquesa')}
               />
@@ -294,6 +309,7 @@ export function FinancePageClient() {
                 icon="ShoppingCart"
                 color="azulCeleste"
                 suffix="Ord."
+                trend={trendOf(data.ventasTotales.data)}
                 chart={<FinanceChart type="bar" labels={data.ventasTotales.labels} data={data.ventasTotales.data} color={chartColorMap.ventasTotales} />}
                 onClick={() => openStatCard('Ventas Totales', 'ventasTotales', data, 'bar', 'azulCeleste')}
               />

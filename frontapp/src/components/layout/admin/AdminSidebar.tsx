@@ -3,6 +3,7 @@
 import React from 'react';
 import SmartSidebar from '@/components/layout/shared/SmartSidebar';
 import { adminNavigation } from '@/shared/lib/constants/admin-nav';
+import { useChatUnreadCount } from '@/shared/hooks/useChatUnreadCount';
 
 interface AdminSidebarProps {
     isMobileOpen: boolean;
@@ -10,11 +11,15 @@ interface AdminSidebarProps {
 }
 
 export default function AdminSidebar({ isMobileOpen, onClose }: AdminSidebarProps) {
+    const chatUnread = useChatUnreadCount();
+
     const adminUser = {
         name: 'Admin Marketplace',
         role: 'Super Administrador',
-        avatar: undefined // Usará el fallback de iniciales 'AM'
+        avatar: undefined
     };
+
+    const badges: Record<string, number> = chatUnread > 0 ? { helpdesk: chatUnread } : {};
 
     return (
         <SmartSidebar
@@ -26,6 +31,7 @@ export default function AdminSidebar({ isMobileOpen, onClose }: AdminSidebarProp
             footerLabel="ADMIN PANEL © 2025"
             isMobileOpen={isMobileOpen}
             onClose={onClose}
+            badges={badges}
         />
     );
 }

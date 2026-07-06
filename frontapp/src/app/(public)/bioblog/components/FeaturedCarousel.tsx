@@ -3,9 +3,10 @@
 import { useState, useEffect } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Autoplay } from 'swiper/modules';
-import { ChevronLeft, ChevronRight, MessageCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, MessageCircle, Star } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { motion } from 'framer-motion';
 import { blogApi } from '@/shared/lib/api/blog';
 
 import 'swiper/css';
@@ -16,7 +17,7 @@ interface BlogPost {
     id: number;
     title: string;
     slug: string;
-    excerpt: string;
+    summary: string;
     featured_image: string;
     category_name: string;
     published_at: string;
@@ -27,16 +28,45 @@ export default function FeaturedCarousel() {
     const [posts, setPosts] = useState<BlogPost[]>([]);
 
     useEffect(() => {
-        blogApi.getFeaturedPosts(4).then(setPosts).catch(console.error);
+        blogApi.getFeaturedPosts(4).then((data) => {
+            if (data && data.length > 0) {
+                setPosts(data.map((p: any) => ({
+                    id: p.id,
+                    title: p.title,
+                    slug: p.slug,
+                    summary: p.summary ?? '',
+                    featured_image: p.featured_image ?? '/img/bioblog/blog-teclas.jpg',
+                    category_name: p.category?.name ?? 'General',
+                    published_at: p.published_at ?? '',
+                    comments_count: 0,
+                })));
+            } else {
+                return blogApi.getRecentPosts(4).then((fallback) => {
+                    if (fallback && fallback.length > 0) {
+                        setPosts(fallback.map((p: any) => ({
+                            id: p.id,
+                            title: p.title,
+                            slug: p.slug,
+                            summary: p.summary ?? '',
+                            featured_image: p.featured_image ?? '/img/bioblog/blog-teclas.jpg',
+                            category_name: p.category?.name ?? 'General',
+                            published_at: p.published_at ?? '',
+                            comments_count: 0,
+                        })));
+                    }
+                });
+            }
+        }).catch(() => {});
     }, []);
 
     const formatDate = (dateString: string) => {
+        if (!dateString) return '';
         const date = new Date(dateString);
         return date.toLocaleDateString('es-ES', { month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase();
     };
 
     return (
-        <div className="w-full py-16 px-4 max-w-[1600px] mx-auto bg-slate-50 dark:bg-[var(--bg-primary)]">
+        <div className="w-full py-16 px-4 max-w-[1600px] mx-auto bg-gradient-to-b from-slate-50 to-white dark:from-[var(--bg-primary)] dark:to-[var(--bg-secondary)]">
             <div className="relative md:px-12">
                 {/* Navigation */}
                 <button
@@ -79,9 +109,14 @@ export default function FeaturedCarousel() {
                     }}
                     className="swiper overflow-visible"
                 >
-                    {posts.map((post) => (
+                    {posts.map((post, index) => (
                         <SwiperSlide key={post.id} className="h-auto">
-                            <div className="relative w-full h-[450px] rounded-[2rem] overflow-hidden group cursor-pointer shadow-xl bg-slate-900 border border-white/10 transition-all duration-500 hover:scale-[1.03] hover:shadow-2xl">
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.4, delay: index * 0.1 }}
+                                className="relative w-full h-[450px] rounded-[2rem] overflow-hidden group cursor-pointer shadow-xl bg-slate-900 border border-amber-500/20 hover:border-amber-400/50 transition-all duration-500 hover:scale-[1.03] hover:shadow-2xl">
                                 {/* Background Image */}
                                 <Image
                                     src={post.featured_image}
@@ -119,7 +154,7 @@ export default function FeaturedCarousel() {
                                     </h3>
 
                                     <p className="text-white/80 text-xs md:text-sm leading-relaxed mb-8 line-clamp-2 max-w-2xl text-justify">
-                                        {post.excerpt}
+                                        {post.summary}
                                     </p>
 
                                     {/* Footer Bar */}
@@ -134,7 +169,7 @@ export default function FeaturedCarousel() {
                                     </div>
                                 </div>
                                 <Link href={`/bioblog/${post.slug}`} className="absolute inset-0 z-20" />
-                            </div>
+                            </motion.div>
                         </SwiperSlide>
                     ))}
                     <div className="swiper-pagination !relative !mt-8" />

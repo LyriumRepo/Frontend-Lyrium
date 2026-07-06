@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/shared/lib/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import Icon from '@/components/ui/Icon';
+import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import { paymentMethodApi, PaymentMethod } from '@/shared/lib/api/paymentMethodRepository';
 import TokenizeNewCardModal from '@/features/customer/payment-methods/TokenizeNewCardModal';
 
@@ -179,16 +180,11 @@ export default function CustomerPaymentMethodsPage() {
 
   return (
     <div className="space-y-8 animate-fadeIn">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-black text-slate-800 dark:text-[var(--text-primary)]">
-            Métodos de Pago
-          </h1>
-          <p className="text-slate-500 dark:text-[var(--text-muted)] mt-1">
-            Gestiona tus datos de facturación de forma segura
-          </p>
-        </div>
-      </div>
+      <ModuleHeader
+        title="Métodos de Pago"
+        subtitle="Gestiona tus datos de facturación de forma segura"
+        icon="CreditCard"
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {methods.map((method) => {
@@ -357,7 +353,7 @@ export default function CustomerPaymentMethodsPage() {
       )}
 
       {(editingMethod && editingMethod.tipo_metodo !== 'tarjeta' || creatingMethod) && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4" onClick={() => { setEditingMethod(null); setCreatingMethod(null); }}>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[60] flex items-center justify-center p-4" onClick={() => { setEditingMethod(null); setCreatingMethod(null); }}>
           <div
             className="bg-white dark:bg-[var(--bg-secondary)] rounded-[3.5rem] max-w-xl w-full max-h-[90vh] overflow-hidden shadow-2xl"
             onClick={(e) => e.stopPropagation()}
@@ -442,7 +438,7 @@ export default function CustomerPaymentMethodsPage() {
       )}
 
       {confirmDeleteId !== null && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setConfirmDeleteId(null)}>
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setConfirmDeleteId(null)}>
           <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-[2rem] p-8 max-w-sm mx-4 shadow-2xl" onClick={e => e.stopPropagation()}>
             <div className="w-14 h-14 rounded-full bg-rose-50 dark:bg-rose-900/20 flex items-center justify-center mx-auto mb-4">
               <Icon name="CreditCard" className="w-7 h-7 text-rose-500" />

@@ -64,6 +64,7 @@ async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promi
 function mapApiToFrontend(api: ApiContractResponse): FrontendContract {
     return {
         id: api.id,
+        dbId: api.dbId,
         company: api.company,
         ruc: api.ruc ?? '',
         rep: api.rep ?? '',
@@ -141,11 +142,12 @@ export const contractApi = {
     },
 
     updateStatus: async (id: string, status: string, updatedInfo: Partial<FrontendContract>): Promise<FrontendContract> => {
-        await apiRequest(`/contracts/${id}/status`, {
+        const dbId = updatedInfo.dbId?.toString() ?? id;
+        await apiRequest(`/contracts/${dbId}/status`, {
             method: 'PUT',
             body: JSON.stringify({ status }),
         });
-        const res = await apiRequest<{ data: ApiContractResponse }>(`/contracts/${id}`, {
+        const res = await apiRequest<{ data: ApiContractResponse }>(`/contracts/${dbId}`, {
             method: 'PUT',
             body: JSON.stringify(frontendToApi(updatedInfo)),
         });

@@ -83,6 +83,7 @@ export interface NubefactInvoice {
     pdfUrl: string | null;
     authorizationCode: string | null;
     total: number;
+    storeAmount?: number;
     status: string;
     items: NubefactItem[] | null;
     order: NubefactOrder | null;
@@ -190,4 +191,34 @@ export const nubefactApi = {
             body: JSON.stringify(payload),
         });
     },
+
+    planInvoices: async (page = 1, perPage = 50): Promise<PaginatedResponse<PlanInvoice>> => {
+        return apiRequest<PaginatedResponse<PlanInvoice>>(
+            `/admin/plan-invoices?page=${page}&per_page=${perPage}`
+        );
+    },
 };
+
+export interface PlanInvoice {
+    id: number;
+    invoice_number: string;
+    series: string | null;
+    number: string | null;
+    type: string;
+    customer_name: string;
+    customer_ruc: string;
+    customer_email: string | null;
+    total: number;
+    subtotal_sin_igv: number;
+    igv_amount: number;
+    sunat_status: string;
+    pdf_url: string | null;
+    xml_url: string | null;
+    emission_date: string;
+    created_at: string;
+    plan_name: string | null;
+    months: number | null;
+    store_name: string | null;
+    store_id: number | null;
+    plan_request_id: number | null;
+}

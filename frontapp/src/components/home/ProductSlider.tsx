@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { ShoppingCart, Eye, ExternalLink } from 'lucide-react';
 import { Producto } from '@/types/public';
 import { useCarritoStore } from '@/store/carritoStore';
+import QuickViewModal from '@/components/products/QuickViewModal';
 
 interface ProductSliderProps {
   productos: Producto[];
@@ -19,7 +20,7 @@ function CategoryCard({ producto, onAddToCart, onQuickView }: {
   onQuickView: (product: Producto) => void;
 }) {
   return (
-    <div className="cat-card flex-shrink-0 w-[210px] bg-white dark:bg-[var(--bg-secondary)]/92 rounded-[14px] p-[14px] text-center shadow-[0_10px_24px_rgba(15,23,42,0.12)] dark:shadow-[0_10px_24px_rgba(0,0,0,0.3)] border border-slate-200 dark:border-[var(--border-subtle)]/50 mr-5 transition-transform duration-300 hover:-translate-y-[5px] hover:shadow-[0_15px_35px_rgba(15,23,42,0.2)] dark:hover:shadow-[0_15px_35px_rgba(0,0,0,0.5)]">
+    <div className="cat-card w-full bg-white dark:bg-[var(--bg-secondary)]/92 rounded-[14px] p-[14px] text-center shadow-[0_10px_24px_rgba(15,23,42,0.12)] dark:shadow-[0_10px_24px_rgba(0,0,0,0.3)] border border-slate-200 dark:border-[var(--border-subtle)]/50 transition-transform duration-300 hover:-translate-y-[5px] hover:shadow-[0_15px_35px_rgba(15,23,42,0.2)] dark:hover:shadow-[0_15px_35px_rgba(0,0,0,0.5)]">
       {/* Image wrapper with hover actions */}
       <div className="relative overflow-hidden w-[120px] h-[120px] mx-auto mb-2 rounded-xl bg-white dark:bg-[var(--bg-muted)]">
         <Link href={`/producto/${producto.slug}`}>
@@ -81,8 +82,8 @@ export default function ProductSlider({ productos, titulo, bannerImage }: Produc
   const [itemsPerView, setItemsPerView] = useState(3);
 
   const openCart = useCarritoStore((s) => s.openCart);
-  const openDetailModal = useCarritoStore((s) => s.openDetailModal);
   const addToCart = useCarritoStore((s) => s.addToCart);
+  const [quickViewProduct, setQuickViewProduct] = useState<Producto | null>(null);
 
   const handleAddToCart = (product: Producto) => {
     addToCart(product);
@@ -90,7 +91,7 @@ export default function ProductSlider({ productos, titulo, bannerImage }: Produc
   };
 
   const handleQuickView = (product: Producto) => {
-    openDetailModal(String(product.id));
+    setQuickViewProduct(product);
   };
 
   // Responsive items per view
@@ -116,10 +117,6 @@ export default function ProductSlider({ productos, titulo, bannerImage }: Produc
     const timer = setInterval(nextPage, 6000);
     return () => clearInterval(timer);
   }, [nextPage]);
-
-  // Calculate the translateX for the track
-  const cardWidth = 230; // 210px card + 20px margin
-  const translateX = currentPage * itemsPerView * cardWidth;
 
   if (productos.length === 0) return null;
 
@@ -149,11 +146,11 @@ export default function ProductSlider({ productos, titulo, bannerImage }: Produc
             className="flex will-change-transform"
             style={{
               transition: 'transform 0.6s cubic-bezier(0.22, 0.61, 0.36, 1)',
-              transform: `translateX(-${translateX}px)`,
+              transform: `translateX(-${currentPage * 100}%)`,
             }}
           >
             {productos.map((producto) => (
-              <div key={producto.id} className="group">
+              <div key={producto.id} className="group flex-shrink-0 w-full sm:w-1/2 lg:w-1/3 px-2">
                 <CategoryCard producto={producto} onAddToCart={handleAddToCart} onQuickView={handleQuickView} />
               </div>
             ))}
@@ -177,6 +174,16 @@ export default function ProductSlider({ productos, titulo, bannerImage }: Produc
           )}
         </div>
       </div>
+
+      <QuickViewModal
+        isOpen={!!quickViewProduct}
+        onClose={() => setQuickViewProduct(null)}
+        producto={quickViewProduct}
+        onAddToCart={(producto, cantidad) => {
+          addToCart(producto, cantidad);
+          openCart();
+        }}
+      />
     </section>
   );
 }

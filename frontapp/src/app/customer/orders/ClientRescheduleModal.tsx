@@ -330,8 +330,8 @@ export default function ClientRescheduleModal({
           {view === 'blocked_same_day' && (
             <>
               <div className="flex flex-col items-center text-center gap-4 py-5">
-                <div className="w-16 h-16 rounded-2xl bg-amber-100 dark:bg-amber-500/15 border border-amber-200 dark:border-amber-500/20 flex items-center justify-center">
-                  <Icon name="CalendarX2" className="w-7 h-7 text-amber-500" />
+                <div className="w-16 h-16 rounded-2xl bg-sky-100 dark:bg-[var(--brand-green)]/30 border border-sky-200 dark:border-[var(--icons-green)]/30 flex items-center justify-center">
+                  <Icon name="CalendarX2" className="w-7 h-7 text-sky-500 dark:text-[var(--icons-green)]" />
                 </div>
                 <div className="space-y-2">
                   <p className="text-sm font-black text-gray-800 dark:text-[var(--text-primary)]">

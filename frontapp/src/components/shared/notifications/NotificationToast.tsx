@@ -6,6 +6,7 @@ import { useNotifications } from '@/shared/lib/context/NotificationContext';
 import { useAuth } from '@/shared/lib/context/AuthContext';
 import { Bell, AlertTriangle, X } from 'lucide-react';
 import { isAllowedForRole } from '@/shared/lib/notifications/roleNotificationTypes';
+import { resolveNotificationRoute } from '@/shared/lib/notifications/resolveNotificationRoute';
 
 interface ToastItem {
   id: string;
@@ -14,32 +15,6 @@ interface ToastItem {
   level: string;
   action?: { type: string; id?: string | number; label: string };
   exiting: boolean;
-}
-
-function resolveRoute(actionType: string, actionId: string | number | undefined, role: string | undefined): string {
-  const prefix = role === 'administrator' ? '/admin'
-    : role === 'seller' ? '/seller'
-    : role === 'customer' ? '/customer'
-    : role === 'logistics_operator' ? '/logistics'
-    : '';
-
-  switch (actionType) {
-    case 'orders':
-      return `${prefix}/orders`;
-    case 'chat':
-      return role === 'administrator' ? '/admin/helpdesk'
-        : `${prefix}/chat`;
-    case 'ticket':
-      return role === 'administrator' ? `/admin/helpdesk?id=${actionId}`
-        : role === 'seller' ? `/seller/help?id=${actionId}`
-        : `/customer/support?id=${actionId}`;
-    case 'store':
-      return role === 'administrator' ? '/admin/stores'
-        : role === 'seller' ? '/seller/settings'
-        : '/';
-    default:
-      return prefix || '/';
-  }
 }
 
 export default function NotificationToast() {
@@ -51,22 +26,26 @@ export default function NotificationToast() {
     isAllowedForRole(n.metadata?.type ?? '', user?.role, 'toast')
   );
   const [items, setItems] = useState<ToastItem[]>([]);
-  const lastIdRef = useRef<string | null>(null);
+  const processedIdsRef = useRef<Set<string>>(new Set());
   const isSeededRef = useRef(false);
+  const timersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
   const remove = useCallback((id: string) => {
+    timersRef.current.delete(id);
     setItems(prev => prev.map(i => i.id === id ? { ...i, exiting: true } : i));
     setTimeout(() => {
       setItems(prev => prev.filter(i => i.id !== id));
     }, 400);
   }, []);
 
-  // Seed the last seen ID once the initial REST load completes, to avoid
+  // Seed processed IDs once the initial REST load completes, to avoid
   // showing toasts for pre-existing notifications on page load.
   useEffect(() => {
     if (!loading && !isSeededRef.current) {
       isSeededRef.current = true;
-      lastIdRef.current = filteredNotifications[0]?.id ?? null;
+      for (const n of filteredNotifications) {
+        processedIdsRef.current.add(n.id);
+      }
     }
   }, [loading, filteredNotifications]);
 
@@ -74,23 +53,29 @@ export default function NotificationToast() {
     if (!isSeededRef.current) return;
     if (filteredNotifications.length === 0) return;
 
-    const latest = filteredNotifications[0];
-    if (latest.id === lastIdRef.current) return;
-    lastIdRef.current = latest.id;
+    // Process any notifications that are not yet in our processed set.
+    // This handles multiple notifications arriving simultaneously.
+    const newItems: ToastItem[] = [];
+    for (const n of filteredNotifications) {
+      if (processedIdsRef.current.has(n.id)) continue;
+      processedIdsRef.current.add(n.id);
+      newItems.push({
+        id: n.id,
+        title: n.title,
+        message: n.message,
+        level: n.level,
+        action: n.action,
+        exiting: false,
+      });
+    }
+    if (newItems.length === 0) return;
 
-    const item: ToastItem = {
-      id: latest.id,
-      title: latest.title,
-      message: latest.message,
-      level: latest.level,
-      action: latest.action,
-      exiting: false,
-    };
+    setItems(prev => [...newItems, ...prev].slice(0, 3));
 
-    setItems(prev => [item, ...prev].slice(0, 3));
-
-    const timer = setTimeout(() => remove(item.id), 5000);
-    return () => clearTimeout(timer);
+    for (const item of newItems) {
+      const timer = setTimeout(() => remove(item.id), 5000);
+      timersRef.current.set(item.id, timer);
+    }
   }, [filteredNotifications, remove]);
 
   const getIcon = (level: string) => {
@@ -101,7 +86,7 @@ export default function NotificationToast() {
       case 'WARNING':
         return <Bell className="w-4 h-4 text-amber-500" />;
       default:
-        return <Bell className="w-4 h-4 text-[#2d5e42]" />;
+        return <Bell className="w-4 h-4 text-sky-500 dark:text-emerald-400" />;
     }
   };
 
@@ -113,7 +98,7 @@ export default function NotificationToast() {
       case 'WARNING':
         return 'border-l-amber-500';
       default:
-        return 'border-l-[#2d5e42]';
+        return 'border-l-sky-500 dark:border-l-emerald-500';
     }
   };
 
@@ -126,12 +111,12 @@ export default function NotificationToast() {
           key={item.id}
           onClick={() => {
             if (item.action) {
-              const route = resolveRoute(item.action.type, item.action.id, user?.role);
+              const route = resolveNotificationRoute(item.action.type, item.action.id, user?.role);
               router.push(route);
             }
             remove(item.id);
           }}
-          className={`pointer-events-auto bg-white dark:bg-[#1a2e26] border border-gray-200 dark:border-[#2d5e42]/30 rounded-xl shadow-lg ${getBorder(item.level)} border-l-4 pl-3 pr-4 py-3 flex items-start gap-3 ${item.exiting ? 'animate-fade-out' : 'animate-fade-slide-in'} ${item.action ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-[#24382e] transition-colors' : ''}`}
+          className={`pointer-events-auto bg-white dark:bg-[var(--bg-card)] border border-gray-200 dark:border-[var(--border-subtle)] rounded-xl shadow-lg ${getBorder(item.level)} border-l-4 pl-3 pr-4 py-3 flex items-start gap-3 ${item.exiting ? 'animate-fade-out' : 'animate-fade-slide-in'} ${item.action ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-[var(--bg-secondary)] transition-colors' : ''}`}
         >
           <div className="mt-0.5 flex-shrink-0">
             {getIcon(item.level)}
@@ -144,7 +129,7 @@ export default function NotificationToast() {
               {item.message}
             </p>
             {item.action && (
-              <p className="text-[10px] font-bold text-[#2d5e42] dark:text-[#4A7C59] mt-1 uppercase tracking-wider">
+              <p className="text-[10px] font-bold text-sky-600 dark:text-emerald-400 mt-1 uppercase tracking-wider">
                 {item.action.label} →
               </p>
             )}

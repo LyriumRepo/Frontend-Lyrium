@@ -5,6 +5,18 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Voucher, InvoiceKPIs, VoucherStatus, VoucherType } from '../types';
 import { invoiceApi } from '@/shared/lib/api/invoiceRepository';
 
+export interface EmitInvoicePayload {
+    seller_id: string;
+    seller_name: string;
+    type: VoucherType;
+    customer_name: string;
+    customer_ruc: string;
+    series: string;
+    number: string;
+    amount: number;
+    order_id: string;
+}
+
 export interface VoucherFilters {
     search: string;
     status: VoucherStatus | 'ALL';

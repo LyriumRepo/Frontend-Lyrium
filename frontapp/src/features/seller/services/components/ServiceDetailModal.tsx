@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import ServiceCalendar from './ServiceCalendar';
 import Image from 'next/image';
 import {
@@ -77,7 +78,16 @@ export default function ServiceDetailModal({
     onReschedule,
 }: ServiceDetailModalProps) {
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-    if (!service) return null;
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    if (!service || !mounted) return null;
+
+    const modalRoot = document.getElementById('modal-root');
+    if (!modalRoot) return null;
 
     // Especialistas asignados resueltos
     const assignedSpecialists = service.especialistasAsignados
@@ -108,7 +118,7 @@ export default function ServiceDetailModal({
         </div>
     );
 
-    return (
+    return createPortal(
         <BaseDrawer
             isOpen={isOpen}
             onClose={onClose}
@@ -346,6 +356,7 @@ export default function ServiceDetailModal({
                 </div>
 
             </div>
-        </BaseDrawer>
+        </BaseDrawer>,
+        modalRoot,
     );
 }

@@ -1,26 +1,26 @@
 import React from 'react';
 import { ContractStatus, ContractKPI, ContractModality, AuditEvent, ExpiryUrgency } from '@/lib/types/admin/contracts';
-import { CheckCircle, AlertTriangle, AlertOctagon, Clock, XCircle, Handshake, Cloud, Files, Hourglass } from 'lucide-react';
+import { CheckCircle, AlertTriangle, AlertOctagon, Clock, XCircle, Handshake, Cloud } from 'lucide-react';
 
 const colorMap: Record<string, string> = {
-    emerald: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
-    indigo: 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/20',
-    amber: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
-    red: 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20',
+    emerald: 'bg-[var(--color-success)]/10 text-[var(--color-success)] border-[var(--color-success)]/20',
+    indigo: 'bg-[var(--celeste-500)]/10 text-[var(--celeste-500)] border border-[var(--celeste-500)]/20',
+    amber: 'bg-[var(--color-warning)]/10 text-[var(--color-warning)] border-[var(--color-warning)]/20',
+    red: 'bg-[var(--color-error)]/10 text-[var(--color-error)] border-[var(--color-error)]/20',
 };
 
 const borderMap: Record<string, string> = {
-    emerald: 'border-emerald-500',
-    indigo: 'border-cyan-500',
-    amber: 'border-amber-500',
-    red: 'border-red-500',
+    emerald: 'border-[var(--color-success)]',
+    indigo: 'border-[var(--celeste-500)]',
+    amber: 'border-[var(--color-warning)]',
+    red: 'border-[var(--color-error)]',
 };
 
 export const StatusBadge: React.FC<{ status: ContractStatus, large?: boolean }> = ({ status, large }) => {
     const configs = {
         ACTIVE: { label: 'Vigente', class: colorMap.emerald },
-        PENDING: { label: 'En Revisión / Pendiente', class: 'bg-[var(--icons-green)] text-[var(--brand-green-hover)] border-transparent' },
-        EXPIRED: { label: 'Vencido / Expirado', class: colorMap.red }
+        PENDING: { label: 'En Revisión / Pendiente', class: colorMap.amber },
+        EXPIRED: { label: 'Rechazado', class: colorMap.red }
     };
     const config = configs[status] || configs.PENDING;
     return (
@@ -33,8 +33,8 @@ export const StatusBadge: React.FC<{ status: ContractStatus, large?: boolean }> 
 export const ExpiryTrafficLight: React.FC<{ urgency?: ExpiryUrgency }> = ({ urgency }) => {
     if (!urgency) return null;
     const configs = {
-        normal: { class: 'bg-emerald-500', label: 'Vigente' },
-        warning: { class: 'bg-orange-500 animate-pulse', label: 'Vence Pronto' },
+        normal: { class: 'bg-[var(--color-success)]', label: 'Vigente' },
+        warning: { class: 'bg-[var(--color-warning)] animate-pulse', label: 'Vence Pronto' },
         critical: { class: 'bg-red-500', label: 'Vencido' }
     };
     const config = configs[urgency];
@@ -60,13 +60,13 @@ export const AuditTimeline: React.FC<{ events?: AuditEvent[] }> = ({ events }) =
         <div className="space-y-6 relative before:absolute before:left-4 before:top-2 before:bottom-2 before:w-0.5 before:bg-[var(--border-subtle)] font-industrial">
             {[...events].map((event) => (
                 <div key={event.timestamp + event.action} className="relative pl-10">
-                    <div className="absolute left-2.5 top-1 w-3 h-3 bg-cyan-500 rounded-full border-4 border-[var(--bg-card)] shadow-sm -ml-0.5"></div>
+                    <div className="absolute left-2.5 top-1 w-3 h-3 bg-[var(--celeste-500)] rounded-full border-4 border-[var(--bg-card)] shadow-sm -ml-0.5"></div>
                     <div>
                         <p className="text-[10px] font-black text-[var(--text-primary)] leading-none mb-1 uppercase tracking-tight">{event.action}</p>
                         <div className="flex items-center gap-2">
                             <span className="text-[9px] font-bold text-[var(--text-muted)] uppercase">{new Date(event.timestamp).toLocaleString()}</span>
                             <span className="w-1 h-1 bg-[var(--border-subtle)] rounded-full"></span>
-                            <span className="text-[9px] font-bold text-cyan-500 uppercase">{event.user}</span>
+                            <span className="text-[9px] font-bold text-[var(--celeste-500)] uppercase">{event.user}</span>
                         </div>
                     </div>
                 </div>
@@ -78,7 +78,7 @@ export const AuditTimeline: React.FC<{ events?: AuditEvent[] }> = ({ events }) =
 export const ModalityBadge: React.FC<{ modality: ContractModality }> = ({ modality }) => {
     const isVirtual = modality === 'VIRTUAL';
     return (
-        <span className={`text-[10px] font-black ${isVirtual ? 'text-cyan-600 dark:text-cyan-400' : 'text-teal-600 dark:text-teal-400'} flex items-center gap-1 font-industrial`}>
+        <span className={`text-[10px] font-black ${isVirtual ? 'text-[var(--color-info)]' : 'text-[var(--color-warning)]'} flex items-center gap-1 font-industrial`}>
             {isVirtual ? <Cloud className="w-4 h-4" /> : <Handshake className="w-4 h-4" />}
             {isVirtual ? 'VIRTUAL' : 'PRESENCIAL'}
         </span>
@@ -86,15 +86,15 @@ export const ModalityBadge: React.FC<{ modality: ContractModality }> = ({ modali
 };
 
 export const KpiCard: React.FC<{ kpi: ContractKPI }> = ({ kpi }) => (
-    <div className={`bg-[var(--bg-card)] p-6 border-l-4 ${borderMap[kpi.color] || 'border-indigo-500'} flex items-center justify-between rounded-[2rem] shadow-sm border border-[var(--border-subtle)] transition-all hover:shadow-md font-industrial`}>
+    <div className={`bg-[var(--bg-card)] p-6 border-l-4 ${borderMap[kpi.color] || 'border-[var(--celeste-500)]'} flex items-center justify-between rounded-[2rem] shadow-sm border border-[var(--border-subtle)] transition-all hover:shadow-md font-industrial`}>
         <div>
             <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-1">{kpi.label}</p>
             <p className="text-2xl font-black text-[var(--text-primary)] tracking-tighter">{kpi.val}</p>
         </div>
         <div className={`p-4 ${colorMap[kpi.color] || colorMap.indigo} rounded-2xl`}>
-            {kpi.icon === 'Files' && <Files className="w-7 h-7" />}
+            {kpi.icon === 'Files' && <Clock className="w-7 h-7" />}
             {kpi.icon === 'CheckCircle' && <CheckCircle className="w-7 h-7" />}
-            {kpi.icon === 'Hourglass' && <Hourglass className="w-7 h-7" />}
+            {kpi.icon === 'Hourglass' && <Clock className="w-7 h-7" />}
             {kpi.icon === 'AlertOctagon' && <AlertOctagon className="w-7 h-7" />}
         </div>
     </div>

@@ -26,8 +26,8 @@ export function InvoicesPageClient() {
     } = useSellerInvoices();
 
     const handleExportExcel = useCallback(() => {
-        exportInvoicesToExcel(filteredVouchers).catch(console.error);
-    }, [filteredVouchers]);
+        exportInvoicesToExcel(filteredVouchers, kpis).catch(console.error);
+    }, [filteredVouchers, kpis]);
 
     const handleExportPDF = useCallback(() => {
         exportInvoicesToPdf(filteredVouchers, kpis).catch(console.error);

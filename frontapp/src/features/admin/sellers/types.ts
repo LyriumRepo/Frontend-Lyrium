@@ -9,6 +9,7 @@ export type SellerStatus =
   | 'approved'
   | 'baja_logica';
 export type ProductStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'en_espera';
+export type ServiceStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'en_espera';
 export type NotificationType = 'critico' | 'seguridad' | 'operativo';
 export type auditAction =
   | 'CAMBIO ESTADO'

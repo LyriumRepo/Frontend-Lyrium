@@ -86,9 +86,9 @@ export default function BenefitsSection({ beneficios }: BenefitsSectionProps) {
               return (
                 <div
                   key={`${beneficio.id}-${index}`}
-                  className="flex flex-col items-center justify-center text-center w-[250px] mx-1 flex-shrink-0 cursor-default"
+                  className="flex flex-col items-center justify-center text-center w-[180px] sm:w-[250px] mx-1 flex-shrink-0 cursor-default"
                 >
-                  <div className="w-60 h-60 flex items-center justify-center mb-4 transition-transform duration-300 hover:scale-105 relative">
+                  <div className="w-44 h-44 sm:w-60 sm:h-60 flex items-center justify-center mb-4 transition-transform duration-300 hover:scale-105 relative">
                     <Image
                       src={`/img/Inicio/11/${imageNum}.png`}
                       alt="Beneficio"

@@ -75,14 +75,14 @@ export default function ComplaintsBookPage() {
 
                 {/* ===================== HEADER ===================== */}
                 <div className="flex flex-col items-center text-center space-y-8">
-                    <h1 className="flex items-center justify-center gap-3 px-6 md:px-8 py-3 md:py-4 
-                        w-full rounded-full 
+                    <h1 className="flex items-center justify-center gap-2 sm:gap-3 px-4 sm:px-6 md:px-8 py-3 md:py-4
+                        w-full rounded-full
                         bg-gradient-to-r from-sky-500 to-sky-400 text-white
-                        dark:from-[#1A3A32] dark:to-[var(--brand-green)] 
-                        shadow-[0_10px_25px_rgba(14,165,233,0.2)] dark:shadow-[0_10px_25px_rgba(74,124,89,0.25)] 
+                        dark:from-[#1A3A32] dark:to-[var(--brand-green)]
+                        shadow-[0_10px_25px_rgba(14,165,233,0.2)] dark:shadow-[0_10px_25px_rgba(74,124,89,0.25)]
                         font-black tracking-tight text-center
-                        text-[clamp(20px,2.6vw,34px)]" >
-                    <BookOpen className="w-7 h-7 md:w-9 md:h-9 animate-float" /> Libro de reclamaciones </h1>
+                        text-base sm:text-lg md:text-[clamp(20px,2.6vw,34px)]" >
+                    <BookOpen className="w-5 h-5 sm:w-7 sm:h-7 md:w-9 md:h-9 shrink-0 animate-float" /> Libro de reclamaciones </h1>
 
                     <div className="bg-white/90 bg-gradient-to-r dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] backdrop-blur-md border border-sky-100 p-6 md:p-8 rounded-[2rem] shadow-xl max-w-3xl animate-in animate-delay-1 text-gray-600 dark:text-[var(--text-primary)] leading-relaxed text-sm md:text-base">
                         {complaintsConfig.header.intro}<br />

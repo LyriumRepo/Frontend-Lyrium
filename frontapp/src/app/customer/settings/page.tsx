@@ -4,7 +4,10 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/shared/lib/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import Icon from '@/components/ui/Icon';
+import BaseButton from '@/components/ui/BaseButton';
+import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import { settingsApi, NotificationSettings } from '@/shared/lib/api/settingsRepository';
+import BaseModal from '@/components/ui/BaseModal';
 
 const defaultSettings: NotificationSettings = {
   id: 0,
@@ -82,38 +85,34 @@ export default function CustomerSettingsPage() {
 
   return (
     <div className="space-y-8 animate-fadeIn">
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-black text-slate-800 dark:text-[var(--text-primary)]">
-            Configuración
-          </h1>
-          <p className="text-slate-500 dark:text-[var(--text-muted)] mt-1">
-            Gestiona tus preferencias y notificaciones
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => setShowLegend(true)}
-            className="flex items-center gap-2 px-4 py-3 rounded-xl font-bold text-xs uppercase tracking-widest bg-gray-100 dark:bg-[var(--bg-muted)] text-gray-600 dark:text-[var(--text-secondary)] hover:bg-gray-200 dark:hover:bg-[#2A3F33] transition-all border border-gray-200 dark:border-[var(--border-subtle)]"
-          >
-            <Icon name="Info" className="w-4 h-4" />
-            Leyenda
-          </button>
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="flex items-center gap-3 px-6 py-3 rounded-xl font-bold text-sm bg-sky-500 dark:bg-[var(--brand-green)] text-white hover:bg-sky-600 dark:hover:bg-[var(--brand-green-hover)] transition-all disabled:opacity-60"
-          >
-            {saving ? (
-              <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
-            ) : (
-              <>
-                <Icon name="Check" className="w-5 h-5" />
-                <span>Guardar Cambios</span>
-              </>
-            )}
-          </button>
-        </div>
+      <ModuleHeader
+        title="Configuración"
+        subtitle="Gestiona tus preferencias y notificaciones"
+        icon="Settings"
+      />
+
+      <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto mx-auto md:mx-0 md:ml-auto sm:justify-end">
+        <BaseButton
+          onClick={() => setShowLegend(true)}
+          variant="secondary"
+          size="lg"
+          leftIcon="Info"
+          fullWidth
+          className="sm:w-auto"
+        >
+          Leyenda
+        </BaseButton>
+        <BaseButton
+          onClick={handleSave}
+          isLoading={saving}
+          variant="action"
+          size="lg"
+          leftIcon="Check"
+          fullWidth
+          className="sm:w-auto"
+        >
+          Guardar Cambios
+        </BaseButton>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -207,7 +206,7 @@ export default function CustomerSettingsPage() {
               <h3 className="text-2xl font-black tracking-tighter leading-none text-white">
                 Push
               </h3>
-              <p className="text-[10px] font-bold text-emerald-100 uppercase tracking-[0.2em] mt-1">
+              <p className="text-[10px] font-bold text-sky-100 uppercase tracking-[0.2em] mt-1">
                 Notificaciones en dispositivo
               </p>
             </div>
@@ -216,8 +215,8 @@ export default function CustomerSettingsPage() {
           <div className="p-8 space-y-6">
             <div className="flex items-center justify-between">
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center shrink-0 mt-0.5">
-                  <Icon name="Bell" className="w-4 h-4 text-amber-500" />
+                <div className="w-8 h-8 rounded-lg bg-sky-50 dark:bg-[var(--brand-green)]/20 flex items-center justify-center shrink-0 mt-0.5">
+                  <Icon name="Bell" className="w-4 h-4 text-sky-500 dark:text-[var(--icons-green)]" />
                 </div>
                 <div>
                   <p className="text-sm font-bold text-gray-800 dark:text-[var(--text-primary)]">Notificaciones Push</p>
@@ -240,71 +239,44 @@ export default function CustomerSettingsPage() {
         </div>
       </div>
 
-      {showLegend && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4" onClick={() => setShowLegend(false)}>
-          <div
-            className="bg-white dark:bg-[var(--bg-secondary)] rounded-[3rem] max-w-lg w-full max-h-[90vh] overflow-hidden shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-8 text-white relative">
-              <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl" />
-              <div className="relative z-10 flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center">
-                    <Icon name="BookOpen" className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-black tracking-tighter">Leyenda de Notificaciones</h3>
-                    <p className="text-[10px] font-bold text-sky-100 uppercase tracking-[0.2em]">Conoce cada tipo de notificación</p>
-                  </div>
+      <BaseModal
+        isOpen={showLegend}
+        onClose={() => setShowLegend(false)}
+        title="Leyenda de Notificaciones"
+        subtitle="Conoce cada tipo de notificación"
+        size="lg"
+        accentColor="from-sky-500 to-sky-300"
+      >
+        <div className="space-y-6">
+          {NOTIFICATION_LEGEND.map((item) => (
+            <div key={item.key} className="p-5 bg-gray-50 dark:bg-[var(--bg-muted)]/50 rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)]">
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 rounded-xl bg-white dark:bg-[var(--bg-secondary)] flex items-center justify-center shadow-sm border border-gray-100 dark:border-[var(--border-subtle)] shrink-0">
+                  <Icon name={item.icon as any} className="w-5 h-5 text-sky-500 dark:text-[var(--icons-green)]" />
                 </div>
-                <button onClick={() => setShowLegend(false)} className="w-10 h-10 rounded-full bg-black/10 flex items-center justify-center hover:bg-black/20">
-                  <Icon name="X" className="w-5 h-5 text-white" />
-                </button>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap mb-1">
+                    <h4 className="font-black text-sm text-gray-800 dark:text-[var(--text-primary)]">{item.label}</h4>
+                    <span className="px-2 py-0.5 rounded-full bg-sky-100 dark:bg-[#2A5A4D] text-[9px] font-black uppercase tracking-wider text-sky-600 dark:text-[var(--icons-green)]">
+                      {item.channel}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-500 dark:text-[var(--text-muted)] leading-relaxed">
+                    {item.description}
+                  </p>
+                </div>
               </div>
             </div>
+          ))}
 
-            <div className="p-8 space-y-6 overflow-y-auto max-h-[calc(90vh-180px)]">
-              {NOTIFICATION_LEGEND.map((item) => (
-                <div key={item.key} className="p-5 bg-gray-50 dark:bg-[var(--bg-muted)]/50 rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)]">
-                  <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-white dark:bg-[var(--bg-secondary)] flex items-center justify-center shadow-sm border border-gray-100 dark:border-[var(--border-subtle)] shrink-0">
-                      <Icon name={item.icon as any} className="w-5 h-5 text-sky-500 dark:text-[var(--icons-green)]" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap mb-1">
-                        <h4 className="font-black text-sm text-gray-800 dark:text-[var(--text-primary)]">{item.label}</h4>
-                        <span className="px-2 py-0.5 rounded-full bg-sky-100 dark:bg-[#2A5A4D] text-[9px] font-black uppercase tracking-wider text-sky-600 dark:text-[var(--icons-green)]">
-                          {item.channel}
-                        </span>
-                      </div>
-                      <p className="text-xs text-gray-500 dark:text-[var(--text-muted)] leading-relaxed">
-                        {item.description}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-
-              <div className="p-4 bg-amber-50 dark:bg-amber-900/10 rounded-2xl border border-amber-200 dark:border-amber-800/30 flex items-start gap-3">
-                <Icon name="Info" className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
-                <p className="text-xs font-bold text-amber-800 dark:text-amber-300">
-                  Los cambios que realices se aplicarán automáticamente al guardar. Las notificaciones de pedidos y las notificaciones push son independientes: puedes activar una sin afectar a las otras.
-                </p>
-              </div>
-
-              <div className="flex justify-end pt-2">
-                <button
-                  onClick={() => setShowLegend(false)}
-                  className="px-6 py-3 rounded-2xl bg-gray-100 dark:bg-[var(--bg-muted)] text-gray-600 dark:text-[var(--text-primary)] font-black text-xs uppercase tracking-widest hover:bg-gray-200 dark:hover:bg-[#2A3F33] transition-all"
-                >
-                  Cerrar
-                </button>
-              </div>
-            </div>
+          <div className="p-4 bg-sky-50 dark:bg-[var(--brand-green)]/10 rounded-2xl border border-sky-200 dark:border-[var(--icons-green)]/30 flex items-start gap-3">
+            <Icon name="Info" className="w-5 h-5 text-sky-500 dark:text-[var(--icons-green)] shrink-0 mt-0.5" />
+            <p className="text-xs font-bold text-sky-800 dark:text-[var(--icons-green)]">
+              Los cambios que realices se aplicarán automáticamente al guardar. Las notificaciones de pedidos y las notificaciones push son independientes: puedes activar una sin afectar a las otras.
+            </p>
           </div>
         </div>
-      )}
+      </BaseModal>
     </div>
   );
 }

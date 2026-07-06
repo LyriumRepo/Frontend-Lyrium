@@ -90,26 +90,32 @@ export const TreasuryModule: React.FC<TreasuryModuleProps> = ({ state, actions }
             </div>
 
             {/* Navigation Tabs (Finanzas + Pagos Combined) */}
-            <div className="flex flex-wrap gap-2 pt-6 border-t border-[var(--border-subtle)] overflow-x-auto custom-scrollbar">
-                {[
-                    { id: 'balance', label: 'Dashboard General (Finanzas)', icon: TrendingUp },
-                    { id: 'cashin', label: 'Aprobaciones de Pago (Cash-In)', icon: Clock },
-                    { id: 'cashout', label: 'Liquidaciones a Vendedores (Cash-Out)', icon: ArrowLeftRight }
-                ].map(tab => {
-                    const IconComp = tab.icon;
-                    return (
-                        <button
-                            key={tab.id}
-                            onClick={() => actions.setActiveTab(tab.id)}
-                            className={`px-6 py-3 rounded-[1.2rem] font-black text-[11px] uppercase transition-all flex items-center gap-2 font-industrial ${activeTab === tab.id
-                                ? 'bg-[var(--brand-sky)] dark:bg-[var(--brand-green)] text-white shadow-xl shadow-[var(--brand-sky)]/10 dark:shadow-[var(--brand-green)]/10'
-                                : 'text-[var(--text-muted)] hover:bg-[var(--bg-card)] dark:hover:bg-[var(--brand-green-hover)]'
-                                }`}
-                        >
-                            <IconComp className="w-4 h-4" /> {tab.label}
-                        </button>
-                    );
-                })}
+            <div className="relative pt-6 border-t border-[var(--border-subtle)]">
+                <div className="flex flex-nowrap overflow-x-auto gap-2 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                    {[
+                        { id: 'balance', label: 'Dashboard', labelExtra: 'General (Finanzas)', icon: TrendingUp },
+                        { id: 'cashin', label: 'Cash-In', labelExtra: 'Aprobaciones de Pago', icon: Clock },
+                        { id: 'cashout', label: 'Cash-Out', labelExtra: 'Liquidaciones a Vendedores', icon: ArrowLeftRight }
+                    ].map(tab => {
+                        const IconComp = tab.icon;
+                        return (
+                            <button
+                                key={tab.id}
+                                onClick={() => actions.setActiveTab(tab.id)}
+                                className={`flex-shrink-0 px-6 py-3 rounded-[1.2rem] font-black text-[11px] uppercase transition-all flex items-center gap-2 font-industrial whitespace-nowrap ${activeTab === tab.id
+                                    ? 'bg-[var(--brand-sky)] dark:bg-[var(--brand-green)] text-white shadow-xl shadow-[var(--brand-sky)]/10 dark:shadow-[var(--brand-green)]/10'
+                                    : 'text-[var(--text-muted)] hover:bg-[var(--bg-card)] dark:hover:bg-[var(--brand-green-hover)]'
+                                    }`}
+                            >
+                                <IconComp className="w-4 h-4" />
+                                <span className="sm:hidden">{tab.label}</span>
+                                <span className="hidden sm:inline">{tab.labelExtra} ({tab.label})</span>
+                            </button>
+                        );
+                    })}
+                </div>
+                {/* Fade derecho — indica scroll disponible en mobile */}
+                <div className="absolute right-0 top-6 bottom-1 w-12 bg-gradient-to-l from-[var(--bg-canvas)] to-transparent pointer-events-none sm:hidden" />
             </div>
 
             {/* Smart Filters (only when in cashin/cashout) */}

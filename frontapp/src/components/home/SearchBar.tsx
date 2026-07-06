@@ -331,7 +331,7 @@ export default function SearchBar({ categoriasServicios = [], categoriasProducto
               aria-expanded={showAutocomplete}
               aria-controls="search-results"
               autoComplete="off"
-              className="w-full h-12 md:h-14 pl-4 pr-36 md:pl-6 md:pr-56 rounded-full border border-gray-200 dark:border-[var(--border-subtle)] text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-sky-400 dark:focus:ring-[var(--text-primary)] focus:border-sky-400 dark:focus:border-[var(--text-primary)] transition-all shadow-inner bg-gray-50/50 dark:bg-[var(--bg-muted)]/50 text-gray-800 dark:text-[var(--text-primary)] placeholder:text-gray-400 dark:placeholder:text-[var(--text-placeholder)]"
+              className="w-full h-12 md:h-14 pl-4 pr-24 md:pl-6 md:pr-56 rounded-full border border-gray-200 dark:border-[var(--border-subtle)] text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-sky-400 dark:focus:ring-[var(--text-primary)] focus:border-sky-400 dark:focus:border-[var(--text-primary)] transition-all shadow-inner bg-gray-50/50 dark:bg-[var(--bg-muted)]/50 text-gray-800 dark:text-[var(--text-primary)] placeholder:text-gray-400 dark:placeholder:text-[var(--text-placeholder)]"
             />
 
             {/* Botones de Acción */}
@@ -367,7 +367,7 @@ export default function SearchBar({ categoriasServicios = [], categoriasProducto
                 aria-label={filterOpen ? "Cerrar filtros" : "Abrir filtros"}
                 aria-expanded={filterOpen}
                 onMouseDown={() => setActiveDropdown(filterOpen ? null : 'filter')}
-                className="flex h-full w-10 md:w-auto md:px-7 rounded-full bg-sky-500 dark:bg-[var(--brand-green)] text-white hover:bg-sky-600 dark:hover:bg-[var(--brand-green-hover)] font-bold items-center justify-center gap-2 transition-all border border-sky-200 dark:border-[var(--border-subtle)]"
+                className="hidden md:flex h-full md:w-auto md:px-7 rounded-full bg-sky-500 dark:bg-[var(--brand-green)] text-white hover:bg-sky-600 dark:hover:bg-[var(--brand-green-hover)] font-bold items-center justify-center gap-2 transition-all border border-sky-200 dark:border-[var(--border-subtle)]"
               >
                 <Filter className="w-5 h-5" />
                 <span className="hidden md:inline">Filtros</span>
@@ -497,8 +497,8 @@ export default function SearchBar({ categoriasServicios = [], categoriasProducto
                           Productos
                         </p>
                         <ul>
-                          {productResults.map((result, index) => (
-                            <li key={`product-${result.id}`}>
+                          {productResults.map((result) => (
+                            <li key={`${result.type}-${result.id}`}>
                               <button
                                 type="button"
                                 onMouseDown={() => handleSelectResult(result)}

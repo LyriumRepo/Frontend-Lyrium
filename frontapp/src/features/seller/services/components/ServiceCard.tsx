@@ -51,41 +51,6 @@ export default function ServiceCard({
 
   return (
     <tr className="border-b border-[var(--border-subtle)] last:border-b-0 hover:bg-[var(--bg-secondary)]/60 transition-colors group">
-      {/* ── Imagen ── */}
-      <td className="px-4 py-3 whitespace-nowrap w-[52px]">
-        <div className="w-10 h-10 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-subtle)] overflow-hidden flex-shrink-0 relative">
-          {service.imagen ? (
-            <Image
-              src={service.imagen}
-              alt=""
-              width={40}
-              height={40}
-              className="w-full h-full object-cover"
-              unoptimized
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-[var(--text-secondary)]">
-              <Icon name="Image" className="w-4 h-4" />
-            </div>
-          )}
-          {(() => {
-            const e = serviceEtiquetasFromService(service);
-            if (!e.nuevo && !e.descuento && !e.oferta && !e.edicionLimitada) return null;
-            return (
-              <div className="absolute -top-0.5 -left-0.5 z-10">
-                <div className={`text-[6px] font-black uppercase tracking-wider px-1 py-[1px] leading-tight ${
-                  e.nuevo ? 'bg-[#ADEBB3] text-[#0d3318]' :
-                  e.descuento || e.oferta ? 'bg-red-500 text-white' :
-                  'bg-[#59a6cb] text-[#1a2e3a]'
-                }`} style={{ borderRadius: '2px 6px 6px 2px' }}>
-                  {e.nuevo ? 'NUEVO' : e.descuento ? `-${e.descuento.valor}%` : e.oferta ? `-${e.oferta.valor}%` : 'ED.LIM'}
-                </div>
-              </div>
-            );
-          })()}
-        </div>
-      </td>
-
       {/* ── Estado ── */}
       <td className="px-4 py-3 whitespace-nowrap">
         <span
@@ -108,30 +73,68 @@ export default function ServiceCard({
         </span>
       </td>
 
-      {/* ── Servicio ── */}
-      <td className="px-4 py-3 w-[240px] max-w-[240px]">
-        {/* Tooltip en el nombre */}
-        <div className="relative group/name">
-          <p className="text-sm font-black text-[var(--text-primary)] truncate leading-tight cursor-default">
-            {service.denominacion}
-          </p>
-          <div className="pointer-events-none absolute left-1/2 top-full z-50 mt-2 hidden -translate-x-1/2 whitespace-nowrap rounded-xl bg-black px-3 py-2 text-xs font-bold text-white shadow-lg group-hover/name:block">
-            {service.denominacion}
-            <div className="absolute -top-1 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 bg-black" />
+      {/* ── Servicio (imagen + nombre) ── */}
+      <td className="px-4 py-3 w-[260px] max-w-[260px]">
+        <div className="flex items-center gap-3">
+          {/* Imagen */}
+          <div className="w-10 h-10 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-subtle)] overflow-hidden flex-shrink-0 relative">
+            {service.imagen ? (
+              <Image
+                src={service.imagen}
+                alt=""
+                width={40}
+                height={40}
+                className="w-full h-full object-cover"
+                unoptimized
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-[var(--text-secondary)]">
+                <Icon name="Image" className="w-4 h-4" />
+              </div>
+            )}
+            {(() => {
+              const e = serviceEtiquetasFromService(service);
+              if (!e.nuevo && !e.descuento && !e.oferta && !e.edicionLimitada) return null;
+              return (
+                <div className="absolute -top-0.5 -left-0.5 z-10">
+                  <div className={`text-[6px] font-black uppercase tracking-wider px-1 py-[1px] leading-tight ${
+                    e.nuevo ? 'bg-[#ADEBB3] text-[#0d3318]' :
+                    e.descuento || e.oferta ? 'bg-red-500 text-white' :
+                    'bg-[#59a6cb] text-[#1a2e3a]'
+                  }`} style={{ borderRadius: '2px 6px 6px 2px' }}>
+                    {e.nuevo ? 'NUEVO' : e.descuento ? `-${e.descuento.valor}%` : e.oferta ? `-${e.oferta.valor}%` : 'ED.LIM'}
+                  </div>
+                </div>
+              );
+            })()}
           </div>
-        </div>
-        <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-          {service.domicilio && (
-            <span className="inline-flex items-center gap-0.5 text-[8px] font-black text-sky-500 dark:text-[#8FC3A1] uppercase tracking-wider">
-              <Icon name="Home" className="w-2.5 h-2.5" />
-              Domicilio
-            </span>
-          )}
-          <span className="text-[10px] text-[var(--text-secondary)] font-bold truncate">
-            {ANTICIPACION_LABELS[service.anticipacionReserva]
-              ? `Anticipación: ${ANTICIPACION_LABELS[service.anticipacionReserva]}`
-              : ''}
-          </span>
+
+          {/* Nombre + etiquetas */}
+          <div className="min-w-0 flex-1">
+            {/* Tooltip en el nombre */}
+            <div className="relative group/name">
+              <p className="text-sm font-black text-[var(--text-primary)] truncate leading-tight cursor-default">
+                {service.denominacion}
+              </p>
+              <div className="pointer-events-none absolute left-1/2 top-full z-50 mt-2 hidden -translate-x-1/2 whitespace-nowrap rounded-xl bg-black px-3 py-2 text-xs font-bold text-white shadow-lg group-hover/name:block">
+                {service.denominacion}
+                <div className="absolute -top-1 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 bg-black" />
+              </div>
+            </div>
+            <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+              {service.domicilio && (
+                <span className="inline-flex items-center gap-0.5 text-[8px] font-black text-sky-500 dark:text-[#8FC3A1] uppercase tracking-wider">
+                  <Icon name="Home" className="w-2.5 h-2.5" />
+                  Domicilio
+                </span>
+              )}
+              <span className="text-[10px] text-[var(--text-secondary)] font-bold truncate">
+                {ANTICIPACION_LABELS[service.anticipacionReserva]
+                  ? `Anticipación: ${ANTICIPACION_LABELS[service.anticipacionReserva]}`
+                  : ''}
+              </span>
+            </div>
+          </div>
         </div>
       </td>
 

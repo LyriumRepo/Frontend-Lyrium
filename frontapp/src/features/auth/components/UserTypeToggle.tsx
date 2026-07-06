@@ -16,12 +16,12 @@ if (mode === 'vendor') {
     return null;
 }
 return (
-    <div className="flex justify-center mb-6">
+    <div className="flex justify-center mb-3 sm:mb-6">
         <div className="bg-slate-100 dark:bg-[var(--bg-primary)] p-1 rounded-full flex">
             <button
                 type="button"
                 onClick={() => onChange('vendedor')}
-                className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${
+                className={`px-4 sm:px-6 py-1.5 sm:py-2 rounded-full text-sm font-medium transition-all ${
                     value === 'vendedor'
                         ? 'bg-sky-500 dark:bg-[var(--brand-green)] text-white shadow-md dark:hover:bg-[var(--brand-green-hover)]'
                         : 'text-slate-600 dark:text-[var(--text-secondary)] hover:text-sky-500 dark:hover:text-[var(--brand-green)]'
@@ -33,7 +33,7 @@ return (
             <button
                 type="button"
                 onClick={() => onChange('cliente')}
-                className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${
+                className={`px-4 sm:px-6 py-1.5 sm:py-2 rounded-full text-sm font-medium transition-all ${
                     value === 'cliente'
                         ? 'bg-sky-500 dark:bg-[var(--brand-green)] text-white shadow-md dark:hover:bg-[var(--brand-green-hover)]'
                         : 'text-slate-600 dark:text-[var(--text-secondary)] hover:text-sky-500 dark:hover:text-[var(--brand-green)]'

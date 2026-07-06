@@ -34,8 +34,6 @@ function toMessage(m: UnifiedMessage): Message {
   };
 }
 
-const helpdeskIsSent = (msg: Message) =>
-  msg.sender === 'admin' || msg.sender === 'logistics';
 
 // ─── SurveyArea ───────────────────────────────────────────────────────────────
 
@@ -184,7 +182,41 @@ export function ChatView({
   const showInput = !isClosed && !ticket.surveyRequired;
   const showAdminPanel = showAdminControls && onPriorityChange && onAdminChange;
 
-  const requesterRole = ticket.requester.company ? 'Vendedor' : 'Cliente';
+  const isSentFn = useMemo(() => {
+    if (ticket.source === 'seller' || ticket.source === 'logistics') {
+      return (msg: Message) => msg.sender === 'vendor' || msg.sender === 'user';
+    }
+    return (msg: Message) => msg.sender === 'admin' || msg.sender === 'logistics';
+  }, [ticket.source]);
+
+  const metaConfig = useMemo(() => {
+    if (ticket.source === 'seller') {
+      return {
+        currentUserName: 'Tú',
+        currentUserRole: 'Vendedor',
+        otherName: ticket.assignedTo.name,
+        otherRole: 'Soporte Lyrium',
+        showAvatar: true,
+      };
+    }
+    if (ticket.source === 'logistics') {
+      return {
+        currentUserName: 'Tú',
+        currentUserRole: 'Operador',
+        otherName: ticket.assignedTo.name,
+        otherRole: 'Soporte Lyrium',
+        showAvatar: true,
+      };
+    }
+    const requesterRole = ticket.requester.company ? 'Vendedor' : 'Cliente';
+    return {
+      currentUserName: ticket.assignedTo.name,
+      currentUserRole: 'Soporte Lyrium',
+      otherName: ticket.requester.name,
+      otherRole: requesterRole,
+      showAvatar: true,
+    };
+  }, [ticket.source, ticket.requester.name, ticket.requester.company, ticket.assignedTo.name]);
 
   // Scroll to bottom when ticket changes or new messages arrive (skip during load-more)
   useEffect(() => {
@@ -221,10 +253,7 @@ export function ChatView({
   };
 
   return (
-    <div className="relative flex h-full flex-1 min-h-0 flex-col overflow-hidden border-[var(--border-subtle)] bg-[var(--bg-card)] overscroll-y-none md:rounded-[2rem] md:border md:shadow-[0_18px_45px_-28px_rgba(15,23,42,0.35)] md:dark:shadow-[0_24px_52px_-34px_rgba(0,0,0,0.65)] lg:rounded-[2.5rem]">
-      {/* Barra Lyrium */}
-      <div className="h-1 w-full shrink-0 bg-gradient-to-r from-[#9cb04e] via-[#64c695] to-[#499bbf]" />
-
+    <div className="relative flex flex-col flex-1 min-h-0 w-full overflow-hidden bg-[var(--bg-card)] overscroll-y-none">
       {/* Header */}
       <div className="flex shrink-0 items-center gap-3 border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)]/90 px-3 py-3 backdrop-blur-sm sm:px-4">
         {onBack && (
@@ -313,14 +342,8 @@ export function ChatView({
 
         <MessageBubble
           messages={messages}
-          isSentOverride={helpdeskIsSent}
-          meta={{
-            currentUserName: ticket.requester.name,
-            currentUserRole: requesterRole,
-            otherName: ticket.assignedTo.name,
-            otherRole: 'Soporte Lyrium',
-            showAvatar: true,
-          }}
+          isSentOverride={isSentFn}
+          meta={metaConfig}
         />
 
         {ticket.surveyRequired && onSubmitSurvey && (

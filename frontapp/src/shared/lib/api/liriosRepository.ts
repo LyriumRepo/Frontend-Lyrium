@@ -74,7 +74,7 @@ export const liriosApi = {
         return get<LiriosEligibility>(`/lirios/checkout-eligibility?${params.toString()}`);
     },
 
-    getTransactions(): Promise<{ data: { data: LiriosTransaction[]; current_page: number; total: number; last_page: number }; pagination: any }> {
-        return get(`/lirios/transactions`);
+    getTransactions(page: number = 1): Promise<{ data: { data: LiriosTransaction[]; current_page: number; total: number; last_page: number }; pagination: any }> {
+        return get(`/lirios/transactions?page=${page}`);
     },
 };

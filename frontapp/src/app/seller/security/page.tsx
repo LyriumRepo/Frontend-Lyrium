@@ -4,11 +4,18 @@ import { useEffect } from "react";
 import { useAuth } from "@/shared/lib/context/AuthContext";
 import { useRouter } from "next/navigation";
 import Icon from "@/components/ui/Icon";
+import ModuleHeader from "@/components/layout/shared/ModuleHeader";
+import { sellerNavigation } from "@/shared/lib/constants/seller-nav";
 import { ChangePasswordForm } from "@/features/auth/change-password";
+import ActiveSessionsList from "@/features/security/components/ActiveSessionsList";
 
 export default function SellerSecurityPage() {
   const { isAuthenticated, loading } = useAuth();
   const router = useRouter();
+
+  const moduleConfig = sellerNavigation
+    .flatMap((section) => section.items)
+    .find((item) => item.id === "seguridad")!;
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
@@ -25,19 +32,16 @@ export default function SellerSecurityPage() {
   }
 
   return (
-    <div className="space-y-8 animate-fadeIn">
-      <div>
-        <h1 className="text-2xl md:text-3xl font-black text-slate-800 dark:text-[var(--text-primary)]">
-          Seguridad
-        </h1>
-        <p className="text-slate-500 dark:text-[var(--text-muted)] mt-1">
-          Protege tu cuenta de vendedor y gestiona tu contraseña
-        </p>
-      </div>
+    <div className="space-y-4 sm:space-y-6 animate-fadeIn">
+      <ModuleHeader
+        title={moduleConfig.label}
+        subtitle={moduleConfig.description || ""}
+        icon={moduleConfig.icon || "ShieldCheck"}
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         <div className="lg:col-span-8 space-y-8">
-          <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-[2.5rem] shadow-2xl overflow-hidden">
+          <div className="bg-white dark:bg-[var(--bg-card)] rounded-[2.5rem] shadow-2xl overflow-hidden">
             <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[var(--brand-green)] dark:to-[#1A3A32] p-8 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl" />
               <div className="flex items-center gap-5 text-white relative z-10">
@@ -71,7 +75,7 @@ export default function SellerSecurityPage() {
         </div>
 
         <div className="lg:col-span-4 space-y-8">
-          <div className="bg-white dark:bg-[var(--bg-secondary)] p-8 rounded-[2.5rem] shadow-2xl">
+          <div className="bg-white dark:bg-[var(--bg-card)] p-8 rounded-[2.5rem] shadow-2xl">
             <div className="flex items-center gap-4 mb-6">
               <div className="w-12 h-12 bg-gradient-to-br from-sky-400 to-sky-600 dark:from-[var(--brand-green)] dark:to-[#1A3A32] rounded-2xl flex items-center justify-center">
                 <Icon name="ShieldCheck" className="w-6 h-6 text-white" />
@@ -126,6 +130,8 @@ export default function SellerSecurityPage() {
                 </li>
               ))}
             </ul>
+
+            <ActiveSessionsList />
           </div>
         </div>
       </div>

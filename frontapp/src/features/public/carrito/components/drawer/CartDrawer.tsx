@@ -332,7 +332,7 @@ function ServiceHoldLineItem({
 // ─── CartDrawer ───────────────────────────────────────────────────────────────
 
 export default function CartDrawer() {
-  const { ui, closeCart } = useCarritoStore();
+  const { ui, closeCart, setServiceHoldCount } = useCarritoStore();
   const [cart, setCart] = useState<CartResource | null>(null);
   const [fetchLoading, setFetchLoading] = useState(false);
   const [mutatingId, setMutatingId] = useState<number | null>(null);
@@ -364,13 +364,15 @@ export default function CartDrawer() {
     setHoldsLoading(true);
     try {
       const res = await serviceRepository.getServiceHolds(token);
-      setServiceHolds(res.holds ?? []);
+      const holds = res.holds ?? [];
+      setServiceHolds(holds);
+      setServiceHoldCount(holds.length);
     } catch {
       // silently fail — holds are optional
     } finally {
       setHoldsLoading(false);
     }
-  }, []);
+  }, [setServiceHoldCount]);
 
   useEffect(() => {
     if (ui.cartOpen) {
@@ -383,7 +385,11 @@ export default function CartDrawer() {
     setRemovingHoldId(holdId);
     try {
       await serviceRepository.removeServiceHold(holdId, getCartToken());
-      setServiceHolds((prev) => prev.filter((h) => h.id !== holdId));
+      setServiceHolds((prev) => {
+        const updated = prev.filter((h) => h.id !== holdId);
+        setServiceHoldCount(updated.length);
+        return updated;
+      });
     } catch {
       setError('Error al eliminar el servicio del carrito.');
     } finally {

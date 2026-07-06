@@ -5,6 +5,7 @@ import AdminSidebar from '@/components/layout/admin/AdminSidebar';
 import AdminHeader from '@/components/layout/admin/AdminHeader';
 import { DashboardLayout } from '@/components/layout/shared/DashboardLayout';
 import { useUIStore } from '@/store/uiStore';
+import NotificationSidebar from '@/components/shared/notifications/NotificationSidebar';
 
 interface AdminLayoutClientProps {
     children: React.ReactNode;
@@ -20,9 +21,10 @@ export function AdminLayoutClient({ children }: AdminLayoutClientProps) {
             sidebarOpen={sidebarOpen}
             onSidebarClose={closeSidebar}
             className="bg-[var(--bg-secondary)]"
-            mainClassName="p-6 md:p-8"
+            mainClassName="p-3 sm:p-5 md:p-6 lg:p-8"
         >
             {children}
+            <NotificationSidebar />
         </DashboardLayout>
     );
 }

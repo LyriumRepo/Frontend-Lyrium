@@ -273,7 +273,7 @@ export function ExpensesPageClient() {
   return (
     <div className="flex flex-col gap-5 pb-20">
       {/* ── Header ──────────────────────────────────────────────────── */}
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
         <div className="flex flex-col gap-1">
           <h2 className="text-[18px] font-medium text-[var(--text-primary)]">
             Gestión operativa
@@ -282,13 +282,13 @@ export function ExpensesPageClient() {
             Recibos, honorarios y servicios
           </p>
         </div>
-        <div className="flex gap-2 items-center">
+        <div className="flex flex-wrap gap-2 items-center">
           <input
             type="password"
             placeholder="Contraseña PDF"
             value={scanPassword}
             onChange={(e) => setScanPassword(e.target.value)}
-            className="text-[13px] border border-[var(--border-subtle)] rounded-lg px-3 py-[7px] bg-[var(--bg-card)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--text-secondary)] w-[140px]"
+            className="text-[13px] border border-[var(--border-subtle)] rounded-lg px-3 py-[7px] bg-[var(--bg-card)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--text-secondary)] w-full sm:w-[140px]"
           />
           <button
             onClick={() => scanInputRef.current?.click()}
@@ -321,7 +321,7 @@ export function ExpensesPageClient() {
       </div>
 
       {/* ── Tabs ────────────────────────────────────────────────────── */}
-      <div className="flex gap-0.5 border-b border-[var(--border-subtle)] pb-2">
+      <div className="flex gap-0.5 border-b border-[var(--border-subtle)] pb-2 overflow-x-auto">
         {TABS.map((tab) => (
           <button
             key={tab}
@@ -358,13 +358,13 @@ export function ExpensesPageClient() {
         </select>
         <input
           type="date"
-          className={`${selectCls} w-[140px]`}
+          className={`${selectCls} w-full sm:w-[140px]`}
           value={dateFrom}
           onChange={(e) => setDateFrom(e.target.value)}
         />
         <input
           type="date"
-          className={`${selectCls} w-[140px]`}
+          className={`${selectCls} w-full sm:w-[140px]`}
           value={dateTo}
           onChange={(e) => setDateTo(e.target.value)}
         />
@@ -456,123 +456,136 @@ export function ExpensesPageClient() {
         )}
       </BaseModal>
 
-      {/* ── Tabla ───────────────────────────────────────────────────── */}
-      <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl overflow-hidden">
-        {loading ? (
-          <div className="py-10 text-center text-[13px] text-[var(--text-muted)]">
-            Cargando...
-          </div>
-        ) : error ? (
-          <div className="py-10 text-center text-[13px] text-[#791F1F]">
-            {error}
-          </div>
-        ) : (
-          <table className="w-full border-collapse" style={{ tableLayout: 'fixed' }}>
-            <colgroup>
-              <col className="w-[110px]" />
-              <col className="w-[130px]" />
-              <col className="w-[160px]" />
-              <col className="w-[150px]" />
-              <col className="w-[100px]" />
-              <col className="w-[90px]" />
-              <col className="w-[85px]" />
-              <col className="w-[100px]" />
-            </colgroup>
-            <thead>
-              <tr>
-                {['Tipo', 'Nro. comprobante', 'Proveedor / Trabajador', 'Concepto', 'Fecha', 'Monto', 'Estado', ''].map((h) => (
-                  <th key={h} className="text-left text-[11px] font-medium text-[var(--text-muted)] px-3 py-2.5 border-b border-[var(--border-subtle)]">
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {expenses.length === 0 && (
-                <tr>
-                  <td colSpan={8} className="py-10 text-center text-[13px] text-[var(--text-muted)]">
-                    No hay comprobantes para este filtro.
-                  </td>
-                </tr>
-              )}
-              {expenses.map((e) => (
-                <tr key={e.id} className="border-b border-[var(--border-subtle)] hover:bg-[var(--bg-muted)] transition-colors">
-                  <td className="px-3 py-2.5">
-                    <TipoBadge tipo={e.voucher_type ?? ''} />
-                  </td>
-                  <td className="px-3 py-2.5 font-mono text-[12px] text-[var(--text-secondary)] truncate">
-                    {e.receipt_number ?? '—'}
-                  </td>
-                  <td className="px-3 py-2.5 text-[13px] text-[var(--text-primary)] truncate">
-                    {e.supplier?.name ?? '—'}
-                  </td>
-                  <td className="px-3 py-2.5 text-[13px] text-[var(--text-primary)] truncate">
-                    {e.concept}
-                  </td>
-                  <td className="px-3 py-2.5 text-[13px] text-[var(--text-secondary)]">
-                    {e.issued_at}
-                  </td>
-                  <td className="px-3 py-2.5 text-[13px] font-medium text-[var(--text-primary)]">
-                    S/ {e.amount.toLocaleString()}
-                  </td>
-                  <td className="px-3 py-2.5">
-                    <StatusBadge status={e.status} />
-                  </td>
-                  <td className="px-3 py-2.5">
-                    <div className="flex gap-1 justify-end">
-                      {e.file_url && (
-                        <IconBtn title="Ver PDF" onClick={() => e.file_url && window.open(e.file_url, '_blank')}>
-                          <IconEye />
-                        </IconBtn>
-                      )}
-                      {e.file_url && (
-                        <IconBtn title="Descargar PDF">
-                          <a href={e.file_url} download className="flex items-center"><IconDown /></a>
-                        </IconBtn>
-                      )}
-                      {e.status === 'Pendiente' && (
-                        <IconBtn variant="green" title="Marcar como pagado" onClick={() => handleMarkPaid(e.id)}>
-                          <IconCheck />
-                        </IconBtn>
-                      )}
-                      {e.status !== 'Anulado' && (
-                        <IconBtn variant="red" title="Anular" onClick={() => handleDelete(e.id)}>
-                          <IconX />
-                        </IconBtn>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+      {/* ── Estado cargando / error ──────────────────────────────────── */}
+      {loading && (
+        <div className="py-10 text-center text-[13px] text-[var(--text-muted)]">Cargando...</div>
+      )}
+      {error && !loading && (
+        <div className="py-10 text-center text-[13px] text-[#791F1F]">{error}</div>
+      )}
 
-        {/* Paginación */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-between px-4 py-3 border-t border-[var(--border-subtle)]">
-            <span className="text-[12px] text-[var(--text-muted)]">
-              Página {safePage} de {totalPages} — {pagination?.total ?? 0} comprobantes
-            </span>
-            <div className="flex gap-2">
-              <button
-                disabled={safePage <= 1}
-                onClick={() => actions.goToPage(safePage - 1)}
-                className="text-[13px] px-3 py-[5px] border border-[var(--border-subtle)] rounded-lg text-[var(--text-secondary)] hover:bg-[var(--bg-muted)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-              >
-                Anterior
-              </button>
-              <button
-                disabled={!hasMore}
-                onClick={() => actions.goToPage(safePage + 1)}
-                className="text-[13px] px-3 py-[5px] border border-[var(--border-subtle)] rounded-lg text-[var(--text-secondary)] hover:bg-[var(--bg-muted)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-              >
-                Siguiente
-              </button>
-            </div>
+      {!loading && !error && (
+        <>
+          {/* ── Cards móvil (< sm) ──────────────────────────────────── */}
+          <div className="flex flex-col gap-3 sm:hidden">
+            {expenses.length === 0 && (
+              <p className="py-10 text-center text-[13px] text-[var(--text-muted)]">
+                No hay comprobantes para este filtro.
+              </p>
+            )}
+            {expenses.map((e) => (
+              <div key={e.id} className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl p-4 flex flex-col gap-2.5">
+                <div className="flex items-center justify-between">
+                  <TipoBadge tipo={e.voucher_type ?? ''} />
+                  <StatusBadge status={e.status} />
+                </div>
+                <div>
+                  <p className="text-[13px] font-medium text-[var(--text-primary)]">{e.supplier?.name ?? '—'}</p>
+                  <p className="text-[12px] text-[var(--text-muted)] mt-0.5">{e.concept}</p>
+                </div>
+                <div className="flex items-center justify-between text-[12px] text-[var(--text-secondary)]">
+                  <span className="font-mono">{e.receipt_number ?? '—'}</span>
+                  <span>{e.issued_at}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[15px] font-semibold text-[var(--text-primary)]">S/ {e.amount.toLocaleString()}</span>
+                  <div className="flex gap-1">
+                    {e.file_url && (
+                      <IconBtn title="Ver PDF" onClick={() => e.file_url && window.open(e.file_url, '_blank')}><IconEye /></IconBtn>
+                    )}
+                    {e.file_url && (
+                      <IconBtn title="Descargar PDF"><a href={e.file_url} download className="flex items-center"><IconDown /></a></IconBtn>
+                    )}
+                    {e.status === 'Pendiente' && (
+                      <IconBtn variant="green" title="Marcar como pagado" onClick={() => handleMarkPaid(e.id)}><IconCheck /></IconBtn>
+                    )}
+                    {e.status !== 'Anulado' && (
+                      <IconBtn variant="red" title="Anular" onClick={() => handleDelete(e.id)}><IconX /></IconBtn>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
-        )}
-      </div>
+
+          {/* ── Tabla desktop (≥ sm) ─────────────────────────────────── */}
+          <div className="hidden sm:block bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl overflow-x-auto">
+            <table className="w-full border-collapse min-w-[700px]">
+              <thead>
+                <tr>
+                  {['Tipo', 'Nro. comprobante', 'Proveedor / Trabajador', 'Concepto', 'Fecha', 'Monto', 'Estado', ''].map((h) => (
+                    <th key={h} className="text-left text-[11px] font-medium text-[var(--text-muted)] px-3 py-2.5 border-b border-[var(--border-subtle)]">
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {expenses.length === 0 && (
+                  <tr>
+                    <td colSpan={8} className="py-10 text-center text-[13px] text-[var(--text-muted)]">
+                      No hay comprobantes para este filtro.
+                    </td>
+                  </tr>
+                )}
+                {expenses.map((e) => (
+                  <tr key={e.id} className="border-b border-[var(--border-subtle)] hover:bg-[var(--bg-muted)] transition-colors">
+                    <td className="px-3 py-2.5"><TipoBadge tipo={e.voucher_type ?? ''} /></td>
+                    <td className="px-3 py-2.5 font-mono text-[12px] text-[var(--text-secondary)] max-w-[130px] truncate">{e.receipt_number ?? '—'}</td>
+                    <td className="px-3 py-2.5 text-[13px] text-[var(--text-primary)] max-w-[160px] truncate">{e.supplier?.name ?? '—'}</td>
+                    <td className="px-3 py-2.5 text-[13px] text-[var(--text-primary)] max-w-[150px] truncate">{e.concept}</td>
+                    <td className="px-3 py-2.5 text-[13px] text-[var(--text-secondary)] whitespace-nowrap">{e.issued_at}</td>
+                    <td className="px-3 py-2.5 text-[13px] font-medium text-[var(--text-primary)] whitespace-nowrap">S/ {e.amount.toLocaleString()}</td>
+                    <td className="px-3 py-2.5"><StatusBadge status={e.status} /></td>
+                    <td className="px-3 py-2.5">
+                      <div className="flex gap-1 justify-end">
+                        {e.file_url && (
+                          <IconBtn title="Ver PDF" onClick={() => e.file_url && window.open(e.file_url, '_blank')}><IconEye /></IconBtn>
+                        )}
+                        {e.file_url && (
+                          <IconBtn title="Descargar PDF"><a href={e.file_url} download className="flex items-center"><IconDown /></a></IconBtn>
+                        )}
+                        {e.status === 'Pendiente' && (
+                          <IconBtn variant="green" title="Marcar como pagado" onClick={() => handleMarkPaid(e.id)}><IconCheck /></IconBtn>
+                        )}
+                        {e.status !== 'Anulado' && (
+                          <IconBtn variant="red" title="Anular" onClick={() => handleDelete(e.id)}><IconX /></IconBtn>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            {/* Paginación */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between px-4 py-3 border-t border-[var(--border-subtle)]">
+                <span className="text-[12px] text-[var(--text-muted)]">
+                  Página {safePage} de {totalPages} — {pagination?.total ?? 0} comprobantes
+                </span>
+                <div className="flex gap-2">
+                  <button disabled={safePage <= 1} onClick={() => actions.goToPage(safePage - 1)} className="text-[13px] px-3 py-[5px] border border-[var(--border-subtle)] rounded-lg text-[var(--text-secondary)] hover:bg-[var(--bg-muted)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors">Anterior</button>
+                  <button disabled={!hasMore} onClick={() => actions.goToPage(safePage + 1)} className="text-[13px] px-3 py-[5px] border border-[var(--border-subtle)] rounded-lg text-[var(--text-secondary)] hover:bg-[var(--bg-muted)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors">Siguiente</button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Paginación móvil */}
+          {totalPages > 1 && (
+            <div className="flex sm:hidden items-center justify-between px-1 py-2">
+              <span className="text-[12px] text-[var(--text-muted)]">
+                Pág. {safePage}/{totalPages}
+              </span>
+              <div className="flex gap-2">
+                <button disabled={safePage <= 1} onClick={() => actions.goToPage(safePage - 1)} className="text-[13px] px-3 py-[5px] border border-[var(--border-subtle)] rounded-lg text-[var(--text-secondary)] hover:bg-[var(--bg-muted)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors">← Ant.</button>
+                <button disabled={!hasMore} onClick={() => actions.goToPage(safePage + 1)} className="text-[13px] px-3 py-[5px] border border-[var(--border-subtle)] rounded-lg text-[var(--text-secondary)] hover:bg-[var(--bg-muted)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors">Sig. →</button>
+              </div>
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }

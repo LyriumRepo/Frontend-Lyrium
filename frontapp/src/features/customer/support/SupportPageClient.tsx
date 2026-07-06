@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useCustomerSupport } from '@/features/customer/support/hooks/useCustomerSupport';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import ChatLayout from '@/components/shared/chat/ChatLayout';
@@ -9,6 +9,7 @@ import MessageInput from '@/components/shared/chat/MessageInput';
 import ConversationList from '@/components/shared/chat/ConversationList';
 import BaseLoading from '@/components/ui/BaseLoading';
 import Icon from '@/components/ui/Icon';
+import BaseModal from '@/components/ui/BaseModal';
 import type { Message as BubbleMessage } from '@/components/shared/chat/MessageBubble';
 import type { Conversation } from '@/components/shared/chat/ConversationList';
 import type { TicketStatus, TicketCategory, CustomerTicket } from './types';
@@ -27,10 +28,11 @@ const CATEGORY_LABELS: Record<TicketCategory, string> = {
     negativo:    'Comentario Negativo',
     informacion: 'Solicitud de Información',
     positivo:    'Comentario Positivo',
+    payments:    'Pagos y Facturación',
 };
 
 const PRIORITY_MAP: Record<string, string> = {
-    critico: 'critica', tecnico: 'media', negativo: 'media', informacion: 'baja', positivo: 'baja',
+    critico: 'critica', tecnico: 'media', negativo: 'media', informacion: 'baja', positivo: 'baja', payments: 'media',
 };
 
 const PRIORITY_DOT: Record<string, string> = {
@@ -60,10 +62,12 @@ function NewTicketForm({
     onSubmit,
     onCancel,
     isSubmitting,
+    submitError,
 }: {
-    onSubmit: (data: { subject: string; description: string; category: string }) => void;
+    onSubmit: (data: { subject: string; description: string; category: string }) => Promise<void>;
     onCancel: () => void;
     isSubmitting: boolean;
+    submitError?: string | null;
 }) {
     const [subject, setSubject] = useState('');
     const [description, setDescription] = useState('');
@@ -71,10 +75,10 @@ function NewTicketForm({
 
     const priority = PRIORITY_MAP[category] ?? 'baja';
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!subject.trim() || !description.trim()) return;
-        onSubmit({ subject, description, category });
+        await onSubmit({ subject, description, category });
     };
 
     return (
@@ -99,6 +103,7 @@ function NewTicketForm({
                         <option value="positivo">Comentario Positivo</option>
                         <option value="negativo">Comentario Negativo</option>
                         <option value="tecnico">Soporte Técnico</option>
+                        <option value="payments">Pagos y Facturación</option>
                         <option value="critico">Soporte Crítico</option>
                     </select>
                 </div>
@@ -148,6 +153,13 @@ function NewTicketForm({
                     </p>
                 </div>
 
+                {submitError && (
+                    <div className="flex items-start gap-2 p-3 rounded-xl bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800">
+                        <span className="text-rose-500 text-xs shrink-0 mt-0.5">⚠</span>
+                        <p className="text-xs font-semibold text-rose-700 dark:text-rose-400">{submitError}</p>
+                    </div>
+                )}
+
                 <div className="flex gap-2 pt-2">
                     <button
                         type="button"
@@ -159,7 +171,7 @@ function NewTicketForm({
                     <button
                         type="submit"
                         disabled={isSubmitting || !subject.trim() || !description.trim()}
-                        className="flex-1 px-4 py-2.5 bg-gradient-to-r from-[#9cb04e] via-[#64c695] to-[#499bbf] text-white rounded-xl font-bold text-xs uppercase tracking-wider hover:opacity-90 transition-all disabled:opacity-50 shadow-lg shadow-[#64c695]/20"
+                        className="flex-1 px-4 py-2.5 bg-[#2E6A4F] text-white rounded-xl font-bold text-xs uppercase tracking-wider hover:opacity-90 transition-all disabled:opacity-50 shadow-sm"
                     >
                         {isSubmitting ? 'Creando...' : 'Crear Ticket'}
                     </button>
@@ -186,14 +198,21 @@ export function SupportPageClient() {
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const [showNewTicketForm, setShowNewTicketForm] = useState(false);
+    const [ticketError, setTicketError] = useState<string | null>(null);
     const [showLegend, setShowLegend] = useState(false);
     const [filterType, setFilterType] = useState<'asunto' | 'categoria'>('asunto');
     const [filterValue, setFilterValue] = useState('');
     const [showFilter, setShowFilter] = useState(false);
+    const [isMobileListVisible, setIsMobileListVisible] = useState(true);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [activeTicket?.messages]);
+
+    const handleTicketSelect = useCallback((id: string) => {
+        setActiveTicketId(id);
+        setIsMobileListVisible(false);
+    }, [setActiveTicketId]);
 
     const filteredTickets = tickets.filter(ticket => {
         if (!filterValue) return true;
@@ -215,7 +234,26 @@ export function SupportPageClient() {
 
     // ── List panel ────────────────────────────────────────────────────────────
     const listContent = (
-        <div className="flex flex-col h-full">
+        <div className={`flex-col h-full ${(!activeTicketId || isMobileListVisible) ? 'flex' : 'hidden'} lg:flex`}>
+            {/* Barra de acciones: Nuevo Ticket + Leyenda */}
+            {!showNewTicketForm && (
+                <div className="px-4 pt-3 pb-2 flex items-center gap-2 shrink-0">
+                    <button
+                        onClick={() => { setShowNewTicketForm(true); setTicketError(null); }}
+                        className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--verde-500)] text-white rounded-xl font-bold text-[10px] uppercase tracking-wider hover:opacity-90 transition-all shadow-sm"
+                    >
+                        <Icon name="Plus" className="w-3.5 h-3.5" />
+                        Nuevo Ticket
+                    </button>
+                    <button
+                        onClick={() => setShowLegend(true)}
+                        title="Leyenda"
+                        className="w-9 h-9 flex items-center justify-center rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--turquesa-500)] hover:border-[var(--turquesa-500)] transition-all shadow-sm shrink-0"
+                    >
+                        <Icon name="Info" className="w-4 h-4" />
+                    </button>
+                </div>
+            )}
             <div className="p-4 border-b border-[var(--border-subtle)] shrink-0">
                 <div className="flex items-center justify-between">
                     <div>
@@ -282,6 +320,7 @@ export function SupportPageClient() {
                                 <option value="negativo">Comentario Negativo</option>
                                 <option value="informacion">Solicitud de Información</option>
                                 <option value="tecnico">Soporte Técnico</option>
+                                <option value="payments">Pagos y Facturación</option>
                                 <option value="critico">Soporte Crítico</option>
                             </select>
                         )}
@@ -292,7 +331,7 @@ export function SupportPageClient() {
             <ConversationList
                 conversations={mappedConversations}
                 activeId={activeTicketId ?? undefined}
-                onSelect={setActiveTicketId}
+                onSelect={handleTicketSelect}
                 accentColor="turquesa"
             />
         </div>
@@ -300,10 +339,18 @@ export function SupportPageClient() {
 
     // ── Detail panel ──────────────────────────────────────────────────────────
     const detailContent = activeTicket ? (
-        <div className="flex flex-col h-full">
+        <div className={`flex-col h-full ${(activeTicket && !isMobileListVisible) ? 'flex' : 'hidden'} lg:flex`}>
             <div className="p-5 border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)]/50 shrink-0">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-[#9cb04e] via-[#64c695] to-[#499bbf] flex items-center justify-center text-white shadow-sm">
+                    {/* Botón regreso — solo visible en mobile/tablet */}
+                    <button
+                        onClick={() => setIsMobileListVisible(true)}
+                        className="lg:hidden w-8 h-8 shrink-0 flex items-center justify-center rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--turquesa-500)] hover:border-[var(--turquesa-500)] transition-all"
+                        title="Volver a tickets"
+                    >
+                        <Icon name="ChevronLeft" className="w-4 h-4" />
+                    </button>
+                    <div className="w-10 h-10 shrink-0 rounded-full bg-[#2E6A4F] flex items-center justify-center text-white shadow-sm">
                         <Icon name="Headset" className="w-5 h-5" />
                     </div>
                     <div className="min-w-0 flex-1">
@@ -351,7 +398,7 @@ export function SupportPageClient() {
                             currentUserName: 'Tú',
                             currentUserRole: 'Cliente',
                             otherName: activeTicket.assignedTo ?? 'Soporte Lyrium',
-                            otherRole: 'Agente',
+                            otherRole: 'Soporte Lyrium',
                             showAvatar: true,
                         }}
                     />
@@ -413,25 +460,6 @@ export function SupportPageClient() {
                 title="Soporte Lyrium"
                 subtitle="Centro de soporte y gestión de incidencias"
                 icon="Headset"
-                actions={
-                    !showNewTicketForm ? (
-                        <div className="flex items-center gap-2">
-                            <button
-                                onClick={() => setShowLegend(true)}
-                                title="Leyenda"
-                                className="w-9 h-9 flex items-center justify-center rounded-xl bg-white dark:bg-[var(--bg-secondary)] border border-[var(--border-subtle)] text-gray-500 dark:text-[var(--text-secondary)] hover:text-[var(--turquesa-500)] dark:hover:text-[var(--icons-green)] hover:border-[var(--turquesa-500)] dark:hover:border-[var(--icons-green)] transition-all shadow-sm"
-                            >
-                                <Icon name="Info" className="w-4 h-4" />
-                            </button>
-                            <button
-                                onClick={() => setShowNewTicketForm(true)}
-                                className="px-4 py-2 bg-white dark:bg-[var(--bg-secondary)] text-[var(--turquesa-500)] rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-[var(--turquesa-500)]/10 dark:hover:bg-[#2A3F33] transition-colors border border-[var(--border-subtle)] shadow-sm"
-                            >
-                                + Nuevo Ticket
-                            </button>
-                        </div>
-                    ) : null
-                }
             />
 
             {error && (
@@ -445,65 +473,52 @@ export function SupportPageClient() {
                 <div className="flex-1 flex items-center justify-center px-8">
                     <div className="w-full max-w-xl">
                         <NewTicketForm
-                            onSubmit={(data) => {
-                                handleCreateTicket(data);
-                                setShowNewTicketForm(false);
+                            onSubmit={async (data) => {
+                                setTicketError(null);
+                                const ok = await handleCreateTicket(data);
+                                if (ok) {
+                                    setShowNewTicketForm(false);
+                                } else {
+                                    setTicketError(error || 'No se pudo crear el ticket. Inténtalo de nuevo.');
+                                }
                             }}
-                            onCancel={() => setShowNewTicketForm(false)}
+                            onCancel={() => { setShowNewTicketForm(false); setTicketError(null); }}
                             isSubmitting={isSending}
+                            submitError={ticketError}
                         />
                     </div>
                 </div>
             ) : (
-                <ChatLayout list={listContent} detail={detailContent} />
+                <ChatLayout list={listContent} detail={detailContent} isMobileListVisible={isMobileListVisible} />
             )}
 
-            {showLegend && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4" onClick={() => setShowLegend(false)}>
-                    <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-[3rem] max-w-lg w-full shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
-                        <div className="bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--turquesa-500)]/70 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-8 text-white relative">
-                            <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl" />
-                            <div className="relative z-10 flex items-center justify-between">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center">
-                                        <Icon name="Headset" className="w-6 h-6" />
-                                    </div>
-                                    <div>
-                                        <h3 className="text-2xl font-black tracking-tighter">Soporte Lyrium</h3>
-                                        <p className="text-[10px] font-bold text-white/70 uppercase tracking-[0.2em]">¿Para qué sirve este canal?</p>
-                                    </div>
-                                </div>
-                                <button onClick={() => setShowLegend(false)} className="w-10 h-10 rounded-full bg-black/10 flex items-center justify-center hover:bg-black/20">
-                                    <Icon name="X" className="w-5 h-5 text-white" />
-                                </button>
+            <BaseModal
+                isOpen={showLegend}
+                onClose={() => setShowLegend(false)}
+                title="Soporte Lyrium"
+                subtitle="¿Para qué sirve este canal?"
+                size="lg"
+                accentColor="from-[var(--turquesa-500)] to-[var(--turquesa-500)]/70"
+            >
+                <div className="space-y-4">
+                    {[
+                        { icon: 'Settings', title: 'Problemas técnicos', desc: 'Errores en la plataforma, fallas en el inicio de sesión, problemas con el sitio web o la app.' },
+                        { icon: 'Shield', title: 'Seguridad y acceso', desc: 'Cuentas bloqueadas, acceso no autorizado, cambios de contraseña o datos comprometidos.' },
+                        { icon: 'CreditCard', title: 'Confirmaciones de pago', desc: 'Consulta si un pago fue procesado correctamente en la plataforma.' },
+                        { icon: 'AlertCircle', title: 'No gestiona reclamos comerciales', desc: 'Para devoluciones, reembolsos, cambios, facturación o consultas sobre productos, usa el Chat con Vendedores.' },
+                    ].map((item) => (
+                        <div key={item.title} className="flex items-start gap-4 p-4 bg-gray-50 dark:bg-[var(--bg-muted)]/50 rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)]">
+                            <div className="w-10 h-10 rounded-xl bg-white dark:bg-[var(--bg-secondary)] flex items-center justify-center shadow-sm border border-gray-100 dark:border-[var(--border-subtle)] shrink-0">
+                                <Icon name={item.icon as any} className="w-5 h-5 text-[var(--turquesa-500)] dark:text-[var(--icons-green)]" />
+                            </div>
+                            <div>
+                                <p className="font-black text-sm text-gray-800 dark:text-[var(--text-primary)] mb-0.5">{item.title}</p>
+                                <p className="text-xs text-gray-500 dark:text-[var(--text-muted)] leading-relaxed">{item.desc}</p>
                             </div>
                         </div>
-                        <div className="p-8 space-y-4">
-                            {[
-                                { icon: 'Settings', title: 'Problemas técnicos', desc: 'Errores en la plataforma, fallas en el inicio de sesión, problemas con el sitio web o la app.' },
-                                { icon: 'Shield', title: 'Seguridad y acceso', desc: 'Cuentas bloqueadas, acceso no autorizado, cambios de contraseña o datos comprometidos.' },
-                                { icon: 'CreditCard', title: 'Confirmaciones de pago', desc: 'Consulta si un pago fue procesado correctamente en la plataforma.' },
-                                { icon: 'AlertCircle', title: 'No gestiona reclamos comerciales', desc: 'Para devoluciones, reembolsos, cambios, facturación o consultas sobre productos, usa el Chat con Vendedores.' },
-                            ].map((item) => (
-                                <div key={item.title} className="flex items-start gap-4 p-4 bg-gray-50 dark:bg-[var(--bg-muted)]/50 rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)]">
-                                    <div className="w-10 h-10 rounded-xl bg-white dark:bg-[var(--bg-secondary)] flex items-center justify-center shadow-sm border border-gray-100 dark:border-[var(--border-subtle)] shrink-0">
-                                        <Icon name={item.icon as any} className="w-5 h-5 text-[var(--turquesa-500)] dark:text-[var(--icons-green)]" />
-                                    </div>
-                                    <div>
-                                        <p className="font-black text-sm text-gray-800 dark:text-[var(--text-primary)] mb-0.5">{item.title}</p>
-                                        <p className="text-xs text-gray-500 dark:text-[var(--text-muted)] leading-relaxed">{item.desc}</p>
-                                    </div>
-                                </div>
-                            ))}
-                            <div className="flex justify-end pt-2">
-                                <button onClick={() => setShowLegend(false)} className="px-6 py-3 rounded-2xl bg-gray-100 dark:bg-[var(--bg-muted)] text-gray-600 dark:text-[var(--text-primary)] font-black text-xs uppercase tracking-widest hover:bg-gray-200 dark:hover:bg-[#2A3F33] transition-all">
-                                    Cerrar
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                    ))}
                 </div>
-            )}
+            </BaseModal>
         </div>
     );
 }

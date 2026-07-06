@@ -1,14 +1,23 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useEcho } from '@laravel/echo-react';
 import { SellerTicket, SellerTicketMessage, SellerTicketFilters } from '../types';
 import { ticketApi } from '@/lib/api/ticketRepository';
-import type { Ticket, TicketMessage, TicketPriority } from '@/modules/helpdesk/types';
+import type { Ticket, TicketMessage, TicketType, TicketPriority } from '@/modules/helpdesk/types';
 
 type CreateData = {
   subject: string;
   description: string;
-  category: SellerTicket['category'];
-  priority: TicketPriority;
+  category: string;
+};
+
+const CRITICIDAD_MAP: Record<string, string> = {
+  admin: 'critica',
+  tech: 'media',
+  comment: 'baja',
+  info: 'baja',
+  followup: 'baja',
+  payments: 'media',
+  documentation: 'baja',
 };
 
 function toSellerTicket(t: Ticket): SellerTicket {
@@ -35,7 +44,9 @@ function toSellerMessage(m: TicketMessage): SellerTicketMessage {
     senderName: m.usuario || m.user || 'Usuario',
     senderType: isAgent ? 'agent' : 'seller',
     content: m.contenido || m.texto || '',
-    createdAt: m.timestamp || m.hora || '',
+    createdAt: m.created_at || (m.timestamp
+      ? `${new Date().toISOString().slice(0, 10)}T${m.timestamp}:00Z`
+      : new Date().toISOString()),
   };
 }
 
@@ -53,6 +64,7 @@ function mapStatus(s: string): SellerTicket['status'] {
 export function useSellerHelp() {
   const [tickets, setTickets] = useState<SellerTicket[]>([]);
   const [activeTicketId, setActiveTicketId] = useState<string | null>(null);
+  const justCreatedRef = useRef(false);
   const [filters, setFilters] = useState<SellerTicketFilters>({
     status: 'all',
     category: 'all',
@@ -61,6 +73,7 @@ export function useSellerHelp() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchTicketDetail = useCallback(async (id: string) => {
     try {
@@ -89,6 +102,10 @@ export function useSellerHelp() {
 
   useEffect(() => {
     if (activeTicketId) {
+      if (justCreatedRef.current) {
+        justCreatedRef.current = false;
+        return;
+      }
       fetchTicketDetail(activeTicketId);
     }
   }, [activeTicketId, fetchTicketDetail]);
@@ -140,20 +157,24 @@ export function useSellerHelp() {
     }
   }, [activeTicketId, fetchTicketDetail]);
 
-  const handleCreateTicket = useCallback(async (data: CreateData) => {
+  const handleCreateTicket = useCallback(async (data: CreateData): Promise<boolean> => {
     setIsSending(true);
+    setError(null);
     try {
       const created = await ticketApi.seller.create({
         asunto: data.subject,
         mensaje: data.description,
-        tipo_ticket: data.category,
-        criticidad: data.priority,
+        tipo_ticket: data.category as TicketType,
+        criticidad: (CRITICIDAD_MAP[data.category] ?? 'baja') as TicketPriority,
       });
       const mapped = toSellerTicket(created);
       setTickets((prev) => [mapped, ...prev]);
+      justCreatedRef.current = true;
       setActiveTicketId(mapped.id);
-    } catch {
-      // silent
+      return true;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al crear ticket');
+      return false;
     } finally {
       setIsSending(false);
     }
@@ -184,6 +205,7 @@ export function useSellerHelp() {
     isLoading,
     isSending,
     isClosing,
+    error,
     filters,
     setFilters,
     handleSendMessage,

@@ -26,8 +26,8 @@ function ConfirmDialog({
   variant = 'danger',
 }: ConfirmDialogProps) {
   return (
-    <BaseModal isOpen={isOpen} onClose={onClose} title={title} size="sm">
-      <p className="text-sm font-medium text-[var(--text-secondary)] mb-8">
+    <BaseModal isOpen={isOpen} onClose={onClose} title={title} size="sm" ariaDescribedby="confirm-dialog-desc">
+      <p id="confirm-dialog-desc" className="text-sm font-medium text-[var(--text-secondary)] mb-8">
         {message}
       </p>
       <div className="flex gap-3">
