@@ -40,6 +40,7 @@ export default function CartPopup() {
   const openCart = useCarritoStore((s) => s.openCart);
   const lastAddedService = useCarritoStore((s) => s.lastAddedService);
   const setLastAddedService = useCarritoStore((s) => s.setLastAddedService);
+  const lastAddedProductId = useCarritoStore((s) => s.lastAddedProductId);
 
   const { goToCheckout } = useCheckoutGuard();
 
@@ -82,7 +83,10 @@ export default function CartPopup() {
   const resumeTimer = () => startTimer();
 
   // Datos del carrito
-  const lastItem = cart?.items?.[0] ?? null;
+  const lastItem =
+    cart?.items?.find((item) => item.productId === lastAddedProductId) ??
+    cart?.items?.[0] ??
+    null;
   const itemCount = cart?.itemCount ?? 0;
   const total = cart?.total ?? 0;
 

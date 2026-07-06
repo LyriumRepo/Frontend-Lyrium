@@ -57,7 +57,7 @@ export default function BaseDrawer({
   const widthClass = width || (size ? sizeMap[size] || sizeMap.md : 'md:w-[500px]');
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end">
+    <div className="fixed inset-0 z-50 flex justify-end" role="dialog" aria-modal="true" aria-label={title || 'Panel lateral'}>
       <div
         className="absolute inset-0 bg-black/40 backdrop-blur-sm"
         onClick={onClose}

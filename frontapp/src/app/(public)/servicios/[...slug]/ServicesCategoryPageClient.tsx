@@ -510,7 +510,7 @@ function ServiceCard({
   return (
     <div className="bg-white dark:bg-[var(--bg-card)] rounded-2xl border border-gray-100 dark:border-[var(--border-default)] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all overflow-hidden group flex flex-col">
       {/* Imagen o placeholder */}
-      <div className="relative h-36 bg-gradient-to-br from-sky-50 to-blue-50 dark:from-[var(--brand-sky)]/10 dark:to-[var(--brand-sky)]/10 overflow-hidden">
+      <div className="relative aspect-[4/3] bg-gradient-to-br from-sky-50 to-blue-50 dark:from-[var(--brand-sky)]/10 dark:to-[var(--brand-sky)]/10 overflow-hidden">
         {service.image ? (
           <img
             src={service.image}

@@ -50,6 +50,10 @@ export function resolveNotificationRoute(
             if (role === 'seller') return '/seller/planes';
             if (role === 'customer') return '/customer/profile';
             return `${prefix}/plans`;
+        case 'support':
+            if (role === 'administrator') return '/admin/helpdesk';
+            if (role === 'seller') return '/seller/help';
+            return '/customer/support';
         default:
             return prefix || '/';
     }

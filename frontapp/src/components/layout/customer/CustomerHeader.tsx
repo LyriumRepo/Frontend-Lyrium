@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import { useEcho } from '@laravel/echo-react';
 import ThemeToggle from '@/components/layout/shared/ThemeToggle';
 import NotificationBell from '@/components/layout/shared/NotificationBell';
@@ -9,7 +10,8 @@ import Breadcrumb from '@/components/layout/shared/Breadcrumb';
 import { useAutoBreadcrumb } from '@/shared/hooks/useAutoBreadcrumb';
 import { useAuth } from '@/shared/lib/context/AuthContext';
 import { orderApi } from '@/shared/lib/api/orderRepository';
-import { Menu } from 'lucide-react';
+import { Menu, Home } from 'lucide-react';
+import { ROUTES } from '@/shared/lib/constants/routes';
 
 export default function CustomerHeader({ onOpenMenu }: { onOpenMenu: () => void }) {
     const breadcrumbs = useAutoBreadcrumb();
@@ -49,6 +51,16 @@ export default function CustomerHeader({ onOpenMenu }: { onOpenMenu: () => void 
                     >
                         <Menu className="w-6 h-6 text-gray-600 dark:text-gray-400" />
                     </button>
+
+                    {/* Volver al Home público — solo en mobile, la sidebar ya cubre esto en desktop */}
+                    <Link
+                        href={ROUTES.HOME}
+                        className="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-[var(--bg-card)] transition-colors"
+                        aria-label="Ir al inicio"
+                        title="Ir al inicio"
+                    >
+                        <Home className="w-6 h-6 text-gray-600 dark:text-gray-400" />
+                    </Link>
                     <span className="hidden md:inline-block px-3 py-1 bg-sky-500 dark:bg-[var(--bg-secondary)] text-white dark:text-[var(--brand-green)] dark:border dark:border-[var(--border-default)] text-xs font-bold uppercase rounded-full whitespace-nowrap">
                         Mi Panel de Usuario
                     </span>

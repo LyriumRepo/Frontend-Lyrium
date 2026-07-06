@@ -4,7 +4,7 @@ import Icon from '@/components/ui/Icon';
 interface ModuleHeaderProps {
     title: React.ReactNode;
     subtitle: string;
-    icon?: string;
+    icon?: string | React.ReactNode;
     gradient?: string;
     height?: string;
     children?: React.ReactNode;
@@ -28,11 +28,15 @@ export default function ModuleHeader({
             style={{ minHeight: height }}
         >
             {/* ── Lado Izquierdo ── */}
-            <div className="lateral-gradient-mask dark:!bg-[var(--bg-card)] pl-4 sm:pl-8 pr-8 sm:pr-16 md:pr-24 py-4 sm:py-7 flex flex-col justify-center flex-1 min-w-0 z-10 transition-all duration-500">
+            <div className="lateral-gradient-mask dark:!bg-[var(--bg-card)] pl-4 sm:pl-8 pr-8 sm:pr-16 md:pr-24 py-4 sm:py-7 flex flex-col justify-center w-fit max-w-[70%] min-w-0 z-10 transition-all duration-500">
                 <div className="flex items-center gap-2 sm:gap-3 min-w-0">
                     {icon && (
                         <div className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 rounded-xl bg-[var(--bg-secondary)] flex items-center justify-center text-[var(--text-secondary)] group-hover:bg-[var(--celeste-500)]/10 group-hover:text-[var(--celeste-500)] transition-all duration-500">
-                            <Icon name={icon} className="w-4 h-4 sm:w-5 sm:h-5 !stroke-[2.5px]" />
+                            {typeof icon === 'string' ? (
+                                <Icon name={icon} className="w-4 h-4 sm:w-5 sm:h-5 !stroke-[2.5px]" />
+                            ) : (
+                                icon
+                            )}
                         </div>
                     )}
                     <h1 className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight leading-tight truncate min-w-0 text-[var(--text-primary)]">

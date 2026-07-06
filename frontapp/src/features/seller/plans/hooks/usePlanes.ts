@@ -1,6 +1,6 @@
 'use client';
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { apiGet, apiPost, createPlanRequest, createIzipayPlanSession, getMyPlanRequest, getSystemColors } from '@/features/seller/plans/lib/api';
+import { apiGet, apiPost, createPlanRequest, createIzipayPlanSession, getMyPlanRequest, getSystemColors, updateAutoRenew } from '@/features/seller/plans/lib/api';
 import { buildPlanOrder, defaultPlansData, durationPresets, getDiscountForMonths } from '@/features/seller/plans/lib/plans';
 import type { PlansMap, SubscriptionInfo, Request, ButtonColors, EstadoResponse, AvisoVencimientoResponse } from '@/features/seller/plans/types';
 import { USE_MOCKS } from '@/shared/lib/config/flags';
@@ -142,10 +142,46 @@ export function usePlanes() {
       const userId = String(user.id);
       const userName = user.display_name || user.username || 'Vendedor';
 
+      type SubscriptionResponse = { data?: { id: number; plan_id: number; status: string; starts_at?: string; started_at?: string; ends_at?: string; expires_at?: string; auto_renew?: boolean; payment_method_id?: number | null; plan: { id: number; name: string; slug: string; monthly_fee: string; features: string[] } }; success?: boolean; message?: string };
+
+      // apiGet() (features/seller/plans/lib/api.ts) NUNCA lanza excepción: si la
+      // petición excede su timeout (o falla de red), resuelve silenciosamente con
+      // { success: false, message: 'timeout' } — un objeto que parece válido pero
+      // no tiene `.data`. En dev, el servidor PHP es single-thread y esta llamada
+      // corre en paralelo con /plans (ya señalado como lento en el código), así que
+      // puede quedar en cola y expirar justo tras un F5. Detectamos ese sentinel
+      // explícitamente (no solo excepciones) y reintentamos antes de darnos por
+      // vencidos — si igual falla, lo distinguimos de "no tiene suscripción" (que el
+      // backend responde con 200 y data:null) para no mostrarle al vendedor un plan
+      // inferior al que realmente tiene contratado.
+      const isFailedResponse = (res: SubscriptionResponse): boolean => res.success === false;
+
+      const fetchSubscriptionWithRetry = async (): Promise<SubscriptionResponse | null> => {
+        try {
+          const first = await apiGet<SubscriptionResponse>('/subscriptions/current');
+          if (!isFailedResponse(first)) return first;
+        } catch {
+          // apiGet no debería lanzar, pero por si acaso
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, 400));
+        try {
+          const second = await apiGet<SubscriptionResponse>('/subscriptions/current');
+          if (isFailedResponse(second)) {
+            console.error('[usePlanes] /subscriptions/current falló tras reintento:', second.message);
+            return null;
+          }
+          return second;
+        } catch (err) {
+          console.error('[usePlanes] Error obteniendo suscripción actual tras reintento:', err);
+          return null;
+        }
+      };
+
       // Fuente única de verdad: los planes vienen del backend (definidos por el admin)
       const [plansRes, subRes, colorsData] = await Promise.all([
         apiGet<{ data: Array<{ id: number; name: string; slug: string; monthly_fee: string; css_color?: string; accent_color?: string; features: string[]; detailed_benefits?: Array<{ title: string; description: string; icon?: string }> }> }>('/plans'),
-        apiGet<{ data?: { id: number; plan_id: number; status: string; starts_at?: string; started_at?: string; ends_at?: string; expires_at?: string; plan: { id: number; name: string; slug: string; monthly_fee: string; features: string[] } } }>('/subscriptions/current').catch(() => ({ data: null })),
+        fetchSubscriptionWithRetry(),
         getSystemColors().catch(() => ({})),
       ]);
 
@@ -184,8 +220,13 @@ export function usePlanes() {
         });
       }
 
-      const subscription = subRes.data;
-      const currentPlan = subscription?.plan?.slug || 'emprende';
+      const subscriptionFetchFailed = subRes === null;
+      const subscription = subRes?.data;
+      // Si la petición falló de verdad (no que "no tiene suscripción"), no asumamos
+      // 'emprende' — eso le mostraría al vendedor un plan inferior al que realmente
+      // tiene activo. Mantenemos el último plan conocido en ese caso.
+      const currentPlan = subscription?.plan?.slug
+        || (subscriptionFetchFailed ? stateRef.current.currentPlan : 'emprende');
       const endsAt = subscription?.ends_at || subscription?.expires_at || '';
       const startsAt = subscription?.starts_at || subscription?.started_at || '';
       const subscriptionInfo: SubscriptionInfo | null = subscription ? {
@@ -195,6 +236,9 @@ export function usePlanes() {
         planId: String(subscription.plan_id),
         status: subscription.status,
         startDate: startsAt,
+        subscriptionId: subscription.id,
+        autoRenew: subscription.auto_renew ?? false,
+        paymentMethodId: subscription.payment_method_id ?? null,
       } : null;
 
       const buttonColors: ButtonColors = (colorsData && Object.keys(colorsData).length > 0) ? {
@@ -584,6 +628,39 @@ export function usePlanes() {
     return () => bc.close();
   }, []);
 
+  const toggleAutoRenewal = useCallback(async (enabled: boolean, paymentMethodId?: number) => {
+    const subscriptionId = stateRef.current.subscriptionInfo?.subscriptionId;
+    if (!subscriptionId) {
+      showNotification('No se encontró tu suscripción activa', '#ef4444');
+      return false;
+    }
+
+    try {
+      const response = await updateAutoRenew(subscriptionId, enabled, paymentMethodId);
+
+      // El backend responde 422 (sin tarjeta tokenizada) con `message` pero sin `subscription`
+      if (!response.subscription) {
+        showNotification(response.message ?? 'No se pudo actualizar la renovación automática', '#ef4444');
+        return false;
+      }
+
+      setState(prev => prev.subscriptionInfo ? {
+        ...prev,
+        subscriptionInfo: {
+          ...prev.subscriptionInfo,
+          autoRenew: response.subscription?.auto_renew ?? enabled,
+          paymentMethodId: response.subscription?.payment_method_id ?? paymentMethodId ?? prev.subscriptionInfo.paymentMethodId,
+        },
+      } : prev);
+      showNotification(enabled ? 'Renovación automática activada' : 'Renovación automática desactivada', '#10b981');
+      return true;
+    } catch (error) {
+      console.error('[usePlanes] Error toggling auto-renewal:', error);
+      showNotification('No se pudo actualizar la renovación automática', '#ef4444');
+      return false;
+    }
+  }, [showNotification, setState]);
+
   const handlePlanVencido = useCallback(async () => {
     await initialize();
     showNotification('Tu plan ha vencido y fue movido automáticamente al plan Emprende.', '#ef4444');
@@ -599,6 +676,6 @@ export function usePlanes() {
     isPlanClaimed, isTrialUsed, hasPendingRequest,
     getPaymentTotalMonths, getPaymentDurationLabel, getDiscountForMonths,
     handleSolicitudActualizada, handlePagoConfirmado, handlePlanesActualizados,
-    handlePlanVencido, handleColoresActualizados,
+    handlePlanVencido, handleColoresActualizados, toggleAutoRenewal,
   };
 }

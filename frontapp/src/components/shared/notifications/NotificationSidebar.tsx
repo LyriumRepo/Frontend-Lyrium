@@ -19,14 +19,14 @@ function getLevelUI(level: ProactiveNotification['level']) {
         case 'WARNING':
             return { dot: 'bg-amber-500', icon: <Activity className="w-4 h-4 text-amber-500 flex-shrink-0" />, text: 'text-amber-500' };
         case 'INFO':
-            return { dot: 'bg-[var(--brand-green)]', icon: <Info className="w-4 h-4 text-[var(--brand-green)] flex-shrink-0" />, text: 'text-[var(--brand-green)]' };
+            return { dot: 'bg-sky-500 dark:bg-emerald-500', icon: <Info className="w-4 h-4 text-sky-500 dark:text-emerald-400 flex-shrink-0" />, text: 'text-sky-600 dark:text-emerald-400' };
         default:
             return { dot: 'bg-[var(--text-secondary)]', icon: <Activity className="w-4 h-4 text-[var(--text-secondary)] flex-shrink-0" />, text: 'text-[var(--text-secondary)]' };
     }
 }
 
 export default function NotificationSidebar() {
-    const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
+    const { notifications, markAsRead, markAllAsRead } = useNotifications();
     const { user } = useAuth();
     const { notificationSidebarOpen, closeNotificationSidebar } = useUIStore();
     const router = useRouter();
@@ -34,6 +34,7 @@ export default function NotificationSidebar() {
     const filtered = notifications.filter(n =>
         isAllowedForRole(n.metadata?.type ?? '', user?.role, 'bell')
     );
+    const filteredUnreadCount = filtered.filter(n => !n.read).length;
 
     const handleClick = (n: ProactiveNotification) => {
         if (!n.read) markAsRead(n.id);
@@ -74,22 +75,22 @@ export default function NotificationSidebar() {
                 <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)] flex-shrink-0">
                     <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] flex items-center justify-center">
-                            <Bell className="w-4 h-4 text-[var(--brand-green)]" />
+                            <Bell className="w-4 h-4 text-sky-500 dark:text-emerald-400" />
                         </div>
                         <div>
                             <h2 className="text-xs font-black uppercase tracking-widest text-[var(--text-primary)]">
                                 Notificaciones
                             </h2>
                             <p className="text-[10px] font-bold text-[var(--text-secondary)] mt-0.5">
-                                {unreadCount > 0 ? `${unreadCount} sin leer` : 'Todo al día'}
+                                {filteredUnreadCount > 0 ? `${filteredUnreadCount} sin leer` : 'Todo al día'}
                             </p>
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
-                        {unreadCount > 0 && (
+                        {filteredUnreadCount > 0 && (
                             <button
                                 onClick={markAllAsRead}
-                                className="text-[10px] font-black uppercase text-[var(--brand-green)] hover:bg-[var(--bg-muted)] px-2 py-1 rounded-lg transition-all"
+                                className="text-[10px] font-black uppercase text-sky-600 dark:text-emerald-400 hover:bg-[var(--bg-muted)] px-2 py-1 rounded-lg transition-all"
                             >
                                 Marcar todo leído
                             </button>
@@ -117,6 +118,7 @@ export default function NotificationSidebar() {
                             </p>
                         </div>
                     ) : (
+                        <>
                         <ul className="divide-y divide-[var(--border-subtle)]">
                             {filtered.map((n) => {
                                 const ui = getLevelUI(n.level);
@@ -142,7 +144,7 @@ export default function NotificationSidebar() {
                                                     {!n.read && (
                                                         <button
                                                             onClick={(e) => { e.stopPropagation(); markAsRead(n.id); }}
-                                                            className="flex-shrink-0 p-1 text-[var(--text-secondary)] hover:text-[var(--brand-green)] hover:bg-[var(--bg-muted)] rounded transition-colors"
+                                                            className="flex-shrink-0 p-1 text-[var(--text-secondary)] hover:text-sky-500 dark:hover:text-emerald-400 hover:bg-[var(--bg-muted)] rounded transition-colors"
                                                             title="Marcar leída"
                                                         >
                                                             <Check className="w-3 h-3" />
@@ -156,7 +158,7 @@ export default function NotificationSidebar() {
                                                     {n.action && (
                                                         <button
                                                             onClick={(e) => { e.stopPropagation(); handleClick(n); }}
-                                                            className="text-[10px] font-black text-[var(--brand-green)] hover:underline"
+                                                            className="text-[10px] font-black text-sky-600 dark:text-emerald-400 hover:underline"
                                                         >
                                                             {n.action.label} →
                                                         </button>
@@ -181,6 +183,7 @@ export default function NotificationSidebar() {
                                 );
                             })}
                         </ul>
+                        </>
                     )}
                 </div>
             </aside>

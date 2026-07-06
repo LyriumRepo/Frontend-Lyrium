@@ -14,6 +14,7 @@ export function ForumClient() {
     const [showCreator, setShowCreator] = useState(false);
     const [form, setForm] = useState({ forum_category_id: '1' as any, title: '', content: '', status: 'published' });
     const [saving, setSaving] = useState(false);
+    const [createError, setCreateError] = useState<string | null>(null);
     const [expandedId, setExpandedId] = useState<number | null>(null);
     const [mounted, setMounted] = useState(false);
 
@@ -32,6 +33,7 @@ export function ForumClient() {
     const handleCreate = async () => {
         if (!form.title.trim() || !form.content.trim()) return;
         setSaving(true);
+        setCreateError(null);
         try {
             await forumApi.topics.create({
                 forum_category_id: Number(form.forum_category_id),
@@ -42,7 +44,9 @@ export function ForumClient() {
             setShowCreator(false);
             setForm({ forum_category_id: '1', title: '', content: '', status: 'published' });
             fetch();
-        } catch {} finally { setSaving(false); }
+        } catch (e) {
+            setCreateError(e instanceof Error ? e.message : 'No se pudo publicar el tema.');
+        } finally { setSaving(false); }
     };
 
     const handleDelete = async (id: number) => {
@@ -205,6 +209,10 @@ export function ForumClient() {
                             <label className="block text-xs font-semibold text-gray-500 mb-1">Contenido</label>
                             <textarea value={form.content} onChange={e => setForm(f => ({ ...f, content: e.target.value }))} rows={6} className="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200" placeholder="Escribe tu contenido aquí..." />
                         </div>
+
+                        {createError && (
+                            <p className="text-xs font-semibold text-rose-500 bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 rounded-xl px-4 py-2.5">{createError}</p>
+                        )}
 
                         <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-2">
                             <button onClick={() => setShowCreator(false)} className="px-5 py-2.5 text-sm font-semibold text-gray-500 hover:text-gray-700 transition">Cancelar</button>

@@ -440,17 +440,20 @@ export default function CustomerProfilePage() {
         title="Mi Perfil"
         subtitle="Gestiona tu información personal"
         icon="User"
-        actions={
-          <BaseButton
-            onClick={() => isEditMode ? handleSave() : setIsEditMode(true)}
-            isLoading={saving}
-            variant="action"
-            leftIcon={isEditMode ? "Check" : "Pencil"}
-          >
-            {isEditMode ? "Guardar Cambios" : "Editar Información"}
-          </BaseButton>
-        }
       />
+
+      <div className="w-full sm:max-w-xs mx-auto md:mx-0 md:ml-auto">
+        <BaseButton
+          onClick={() => isEditMode ? handleSave() : setIsEditMode(true)}
+          isLoading={saving}
+          variant="action"
+          leftIcon={isEditMode ? "Check" : "Pencil"}
+          size="lg"
+          fullWidth
+        >
+          {isEditMode ? "Guardar Cambios" : "Editar Información"}
+        </BaseButton>
+      </div>
 
       <form className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
         <div className="md:col-span-8 bg-white dark:bg-[var(--bg-secondary)] rounded-3xl shadow-xl border border-slate-100 dark:border-[var(--border-subtle)] overflow-hidden">

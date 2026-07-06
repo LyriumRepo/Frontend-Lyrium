@@ -38,7 +38,7 @@ function BoxChip({
 }) {
   if (isLoading) {
     return (
-      <div className="mx-4 mb-3 mt-1 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-800 p-3 flex items-center gap-2 text-xs text-[var(--brand-sky)] dark:text-[var(--brand-green)]">
+      <div className="mx-4 mb-3 mt-1 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-800 p-3 flex items-center gap-2 text-xs text-[var(--brand-sky)] dark:text-emerald-400">
         <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0" />
         <span className="animate-pulse">Calculando caja para este vendedor...</span>
       </div>
@@ -57,7 +57,7 @@ function BoxChip({
 
   const cajas    = tiendaBox.cajas;
   const eff      = Math.round((tiendaBox.eficiencia ?? 0) * 100);
-  const effColor = eff >= 80 ? 'text-teal-600 dark:text-teal-400'
+  const effColor = eff >= 80 ? 'text-teal-600 dark:text-emerald-400'
                  : eff >= 60 ? 'text-sky-600 dark:text-sky-400'
                  : 'text-sky-400 dark:text-sky-500';
 
@@ -66,7 +66,7 @@ function BoxChip({
 
       
       <div className="flex items-center justify-between">
-        <span className="text-sm font-bold text-[var(--brand-sky)] dark:text-[var(--brand-green)] flex items-center gap-1.5">
+        <span className="text-sm font-bold text-[var(--brand-sky)] dark:text-emerald-400 flex items-center gap-1.5">
           📦 {tiendaBox.caja || `${cajas.length} caja${cajas.length !== 1 ? 's' : ''}`}
         </span>
         <span className={`text-[11px] font-bold ${effColor}`}>
@@ -108,7 +108,7 @@ function BoxChip({
       
       <div className="flex justify-between text-[11px] text-gray-400 dark:text-gray-500 pt-0.5 border-t border-gray-100 dark:border-gray-800">
         <span>{cajas.length} caja{cajas.length !== 1 ? 's' : ''} en total</span>
-        <span className="font-mono font-bold text-[var(--brand-sky)] dark:text-[var(--brand-green)]">
+        <span className="font-mono font-bold text-[var(--brand-sky)] dark:text-emerald-400">
           {cajas.reduce((s, c) => s + getPeso(c as any).facturable, 0).toFixed(3)} kg facturable
         </span>
       </div>
@@ -134,7 +134,7 @@ function ProductRow({ item }: { item: CartItem }) {
         <span className="text-xs font-bold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 rounded-full px-2.5 py-0.5">
           ×{item.quantity}
         </span>
-        <span className="font-mono text-sm font-bold text-[var(--brand-sky-hover)] dark:text-[var(--brand-green)]">
+        <span className="font-mono text-sm font-bold text-[var(--brand-sky-hover)] dark:text-emerald-400">
           S/ {(item.price * item.quantity).toFixed(2)}
         </span>
       </div>
@@ -161,22 +161,22 @@ function VendorGroupCard({
     <div className="rounded-2xl border-2 border-gray-100 dark:border-gray-800 overflow-hidden bg-white dark:bg-gray-900/40">
 
       
-      <div className="flex items-start justify-between px-4 py-3 bg-sky-50 dark:bg-[var(--brand-green)]/15 border-b border-sky-100 dark:border-[var(--brand-green)]/30">
+      <div className="flex items-start justify-between px-4 py-3 bg-sky-50 dark:bg-emerald-600/15 border-b border-sky-100 dark:border-emerald-600/30">
         <div>
-          <p className="text-sm font-bold text-[var(--brand-sky)] dark:text-[var(--brand-green)] flex items-center gap-1.5">
+          <p className="text-sm font-bold text-[var(--brand-sky)] dark:text-emerald-400 flex items-center gap-1.5">
             🏪 {storeName}
           </p>
           {origen && (
-            <p className="text-[11px] text-[var(--brand-sky-hover)] dark:text-[var(--brand-green)] mt-0.5">
+            <p className="text-[11px] text-[var(--brand-sky-hover)] dark:text-emerald-400 mt-0.5">
               📍 {origen.distrito}, {origen.provincia} — {origen.departamento}
             </p>
           )}
         </div>
         <div className="text-right shrink-0 ml-3">
-          <span className="inline-flex items-center text-[11px] font-bold bg-[var(--brand-sky)] dark:bg-[var(--brand-green)] text-white rounded-full px-2.5 py-0.5">
+          <span className="inline-flex items-center text-[11px] font-bold bg-[var(--brand-sky)] dark:bg-emerald-600 text-white rounded-full px-2.5 py-0.5">
             {totalUnits} item{totalUnits !== 1 ? 's' : ''}
           </span>
-          <p className="font-mono text-xs text-[var(--brand-sky-hover)] dark:text-[var(--brand-green)] mt-1">
+          <p className="font-mono text-xs text-[var(--brand-sky-hover)] dark:text-emerald-400 mt-1">
             S/ {subtotal.toFixed(2)}
           </p>
         </div>
@@ -198,7 +198,8 @@ export default function BoxCalculatorStep() {
   const setStep   = useCheckoutStore((s) => s.setStep);
   const { boxCalculation, isLoadingBox, boxError, recalcular } = useBoxCalculation();
 
-  const selectedItems = cartItems.filter((i) => i.selected);
+  // Solo productos físicos (id > 0) requieren caja/empaque; los servicios (id <= 0) no.
+  const selectedItems = cartItems.filter((i) => i.selected && i.id > 0);
 
   const grupos = new Map<number, CartItem[]>();
   for (const item of selectedItems) {
@@ -223,7 +224,7 @@ export default function BoxCalculatorStep() {
         <p className="text-sm text-gray-400">Vuelve al carrito y selecciona al menos un producto.</p>
         <button
           onClick={() => setStep(1)}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[var(--brand-sky)] dark:bg-[var(--brand-green)] text-white text-sm font-bold hover:bg-[var(--brand-sky-hover)] dark:hover:bg-[var(--brand-green-hover)] transition"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[var(--brand-sky)] dark:bg-emerald-600 text-white text-sm font-bold hover:bg-[var(--brand-sky-hover)] dark:hover:bg-emerald-700 transition"
         >
           <ChevronLeft className="w-4 h-4" /> Ir al carrito
         </button>
@@ -235,7 +236,7 @@ export default function BoxCalculatorStep() {
     <div className="space-y-5">
 
       
-      <div className="rounded-2xl bg-gradient-to-r from-[var(--brand-sky)] to-[var(--brand-sky-hover)] dark:from-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-5 text-white">
+      <div className="rounded-2xl bg-gradient-to-r from-[var(--brand-sky)] to-[var(--brand-sky-hover)] dark:from-emerald-600 dark:to-emerald-700 p-5 text-white">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2 className="text-lg font-black tracking-tight">📦 Cálculo de Cajas</h2>
@@ -291,7 +292,7 @@ export default function BoxCalculatorStep() {
 
       
       {canContinue && (
-        <div className="flex gap-2 items-start p-4 rounded-xl bg-sky-50 dark:bg-[var(--brand-green)]/15 border border-sky-100 dark:border-[var(--brand-green)]/30 text-[var(--brand-sky)] dark:text-[var(--brand-green)] text-sm">
+        <div className="flex gap-2 items-start p-4 rounded-xl bg-sky-50 dark:bg-emerald-600/15 border border-sky-100 dark:border-emerald-600/30 text-[var(--brand-sky)] dark:text-emerald-400 text-sm">
           <span className="shrink-0">📍</span>
           <p>
             ¡Listo! En el <strong>siguiente paso</strong> elige tu destino y verás
@@ -301,7 +302,7 @@ export default function BoxCalculatorStep() {
       )}
 
       
-      <div className="flex gap-2 items-start p-3 rounded-xl bg-sky-50 dark:bg-sky-950/30 border border-sky-100 dark:border-sky-900/40 text-sky-700 dark:text-sky-400 text-xs">
+      <div className="flex gap-2 items-start p-4 rounded-xl bg-sky-50 dark:bg-emerald-600/15 border border-sky-100 dark:border-emerald-600/30 text-[var(--brand-sky)] dark:text-emerald-400 text-sm">
         <Info className="w-4 h-4 mt-0.5 shrink-0" />
         <p>
           El <strong>peso facturable</strong> es el mayor entre peso real y volumétrico

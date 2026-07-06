@@ -34,6 +34,7 @@ function mapToVoucher(inv: any): Voucher {
         xml_url: inv.xmlUrl ?? inv.xml_url,
         cdr_url: inv.cdrUrl ?? inv.cdr_url,
         items: inv.items,
+        order_type: inv.orderType ?? inv.order_type ?? null,
     };
 }
 

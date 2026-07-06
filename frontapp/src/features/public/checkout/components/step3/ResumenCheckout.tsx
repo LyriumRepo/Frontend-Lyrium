@@ -46,6 +46,9 @@ export default function ResumenCheckout() {
 
   const tiendas        = shippingQuotes.tiendas?.filter(t => !t.error) ?? [];
   const selectedItems  = cartItems.filter(i => i.selected);
+  // Convención del carrito: id > 0 = producto físico, id <= 0 = servicio (no lleva envío).
+  const serviceItems   = selectedItems.filter(i => i.id <= 0);
+  const serviceTotal   = serviceItems.reduce((s, i) => s + i.price * i.quantity, 0);
 
   if (tiendas.length === 0 || selectedItems.length === 0) return null;
   let grandTotalProductos = 0;
@@ -68,7 +71,7 @@ export default function ResumenCheckout() {
     return { tienda, items, subtotalProductos, precioEnvio, totalTienda, pesoTotal, op, tipoEfectivo, sinDomicilioAqui };
   });
 
-  const grandTotal = grandTotalProductos + grandTotalEnvio;
+  const grandTotal = grandTotalProductos + grandTotalEnvio + serviceTotal;
 
   return (
     <div className="rounded-2xl border-2 border-gray-100 dark:border-gray-800 overflow-hidden bg-white dark:bg-gray-900/40">
@@ -86,7 +89,7 @@ export default function ResumenCheckout() {
                 className="w-full px-5 py-3.5 flex items-center justify-between gap-3 hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors text-left"
               >
                 <div className="flex items-center gap-2 min-w-0">
-                  <Store className="w-4 h-4 text-teal-500 shrink-0" />
+                  <Store className="w-4 h-4 text-teal-500 dark:text-emerald-400 shrink-0" />
                   <span className="text-sm font-bold text-gray-900 dark:text-white truncate">
                     {tienda.tienda}
                   </span>
@@ -95,7 +98,7 @@ export default function ResumenCheckout() {
                   </span>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <span className="font-mono text-sm font-bold text-sky-600 dark:text-sky-400">
+                  <span className="font-mono text-sm font-bold text-sky-600 dark:text-emerald-400">
                     S/ {totalTienda.toFixed(2)}
                   </span>
                   <ChevronDown
@@ -125,7 +128,7 @@ export default function ResumenCheckout() {
 
                   {/* Cajas + peso */}
                   <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-800/60 text-xs text-gray-500 dark:text-gray-400">
-                    <Package className="w-3.5 h-3.5 text-teal-500 shrink-0" />
+                    <Package className="w-3.5 h-3.5 text-teal-500 dark:text-emerald-400 shrink-0" />
                     <span>{tienda.cajas?.resumen}</span>
                     <span className="text-gray-300 dark:text-gray-600">·</span>
                     <Weight className="w-3.5 h-3.5 shrink-0" />
@@ -144,7 +147,7 @@ export default function ResumenCheckout() {
                           : tipoEfectivo === 'domicilio' ? '🏠 A domicilio' : '🏢 En agencia'}
                       </span>
                     </div>
-                    <span className="font-mono font-bold text-sky-600 dark:text-sky-400">
+                    <span className="font-mono font-bold text-sky-600 dark:text-emerald-400">
                       + S/ {precioEnvio.toFixed(2)}
                     </span>
                   </div>
@@ -167,12 +170,34 @@ export default function ResumenCheckout() {
           );
         })}
 
+        {/* ── Servicios (sin envío) ────────────────────────────────────── */}
+        {serviceItems.length > 0 && (
+          <div className="px-5 py-3.5 space-y-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <Store className="w-4 h-4 text-teal-500 dark:text-emerald-400 shrink-0" />
+              <span className="text-sm font-bold text-gray-900 dark:text-white">Servicios</span>
+            </div>
+            {serviceItems.map(item => (
+              <div key={item.id} className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 pl-6">
+                <span className="truncate max-w-[220px]">{item.name}</span>
+                <span className="font-mono shrink-0">S/ {(item.price * item.quantity).toFixed(2)}</span>
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* ── TOTALES GENERALES ─────────────────────────────────────── */}
         <div className="px-5 py-4 space-y-2 bg-gray-50 dark:bg-gray-800/40">
           <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400">
             <span>Subtotal productos</span>
             <span className="font-mono">S/ {grandTotalProductos.toFixed(2)}</span>
           </div>
+          {serviceItems.length > 0 && (
+            <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400">
+              <span>Subtotal servicios</span>
+              <span className="font-mono">S/ {serviceTotal.toFixed(2)}</span>
+            </div>
+          )}
           <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400">
             <span>Total envío ({selectedCourier})</span>
             <span className="font-mono">S/ {grandTotalEnvio.toFixed(2)}</span>
@@ -180,7 +205,7 @@ export default function ResumenCheckout() {
           <Divider />
           <div className="flex justify-between items-center pt-1">
             <span className="font-black text-base text-gray-900 dark:text-white">TOTAL GENERAL</span>
-            <span className="font-black font-mono text-2xl text-sky-600 dark:text-sky-400">
+            <span className="font-black font-mono text-2xl text-sky-600 dark:text-emerald-400">
               S/ {grandTotal.toFixed(2)}
             </span>
           </div>

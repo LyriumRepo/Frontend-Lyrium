@@ -186,7 +186,7 @@ export default function OrderSummary() {
   return (
     <>
     <div className="bg-white dark:bg-[var(--bg-card)] border border-gray-200 dark:border-[var(--border-subtle)] rounded-2xl shadow-sm sticky top-[100px]">
-      <div className="px-5 py-4 bg-gradient-to-r from-teal-500 to-sky-500 flex items-center gap-2 rounded-t-2xl">
+      <div className="px-5 py-4 bg-gradient-to-r from-teal-500 to-sky-500 dark:from-emerald-700 dark:to-emerald-600 flex items-center gap-2 rounded-t-2xl">
         <span className="text-white text-2xl">🧾</span>
         <h3 className="font-bold text-white">Resumen del Pedido</h3>
       </div>
@@ -214,11 +214,23 @@ export default function OrderSummary() {
         )}
 
         {/* Resumen por tienda (cajas + courier + TOTAL GENERAL) */}
-        {hasProducts && (
+        {hasProducts ? (
           <>
             <ResumenCheckout />
             <div className="h-px bg-gray-100 dark:bg-[var(--border-subtle)]" />
           </>
+        ) : (
+          selectedItems.length > 0 && (
+            <>
+              <div className="flex justify-between items-center px-1">
+                <span className="font-black text-base text-gray-900 dark:text-white">Total a pagar</span>
+                <span className="font-black font-mono text-2xl text-sky-600 dark:text-emerald-400">
+                  S/ {grandTotal.toFixed(2)}
+                </span>
+              </div>
+              <div className="h-px bg-gray-100 dark:bg-[var(--border-subtle)]" />
+            </>
+          )
         )}
 
         {/* Código promo */}
@@ -324,7 +336,7 @@ export default function OrderSummary() {
                 <span className="font-bold text-gray-800 dark:text-[var(--text-primary)]">
                   Total a pagar
                 </span>
-                <span className="text-2xl font-black text-sky-600 dark:text-[var(--brand-sky)]">
+                <span className="text-2xl font-black text-sky-600 dark:text-emerald-400">
                   S/ {finalTotal.toFixed(2)}
                 </span>
               </div>
@@ -338,7 +350,7 @@ export default function OrderSummary() {
           type="button"
           onClick={handlePagar}
           disabled={isBusy || selectedItems.length === 0}
-          className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-teal-500 to-sky-500 hover:from-teal-600 hover:to-sky-600 text-white font-bold shadow-lg shadow-teal-200 dark:shadow-teal-900/20 transition-all hover:-translate-y-0.5 flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+          className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-teal-500 to-sky-500 dark:from-emerald-700 dark:to-emerald-600 hover:from-teal-600 hover:to-sky-600 dark:hover:from-emerald-800 dark:hover:to-emerald-700 text-white font-bold shadow-lg shadow-teal-200 dark:shadow-emerald-900/20 transition-all hover:-translate-y-0.5 flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0"
         >
           {isBusy ? (
             <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />

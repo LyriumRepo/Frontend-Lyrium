@@ -15,7 +15,8 @@ export function useBoxCalculation() {
   const abortRef = useRef<AbortController | null>(null);
 
   const calcularCajas = useCallback(async () => {
-    const selectedItems = cartItems.filter((i) => i.selected);
+    // Solo productos físicos (id > 0) necesitan caja/empaque; los servicios (id <= 0) se excluyen.
+    const selectedItems = cartItems.filter((i) => i.selected && i.id > 0);
     if (selectedItems.length === 0) return;
 
     const grupos = new Map<number, {
@@ -115,7 +116,7 @@ export function useBoxCalculation() {
     }
   }, [cartItems, setBoxCalculation, setLoadingBox, setBoxError]);
 
-  const cartKey = cartItems.filter((i) => i.selected).map((i) => `${i.id}:${i.quantity}`).sort().join('|');
+  const cartKey = cartItems.filter((i) => i.selected && i.id > 0).map((i) => `${i.id}:${i.quantity}`).sort().join('|');
   const prevKeyRef = useRef('');
 
   useEffect(() => {

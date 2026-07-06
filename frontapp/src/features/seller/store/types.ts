@@ -33,6 +33,7 @@ export interface VisualIdentity {
     logoMarketplace: string;
     banner1: string;
     banner2?: string;
+    banner3?: string;
     gallery: string[];
     adBanners: string[];
 }
@@ -78,6 +79,8 @@ export interface PlanCapabilities {
     max_social_links: number;
     max_gallery_images: number;
     max_ad_banners: number;
+    max_main_banners: number;
+    sticker_types: string[];
     layouts: number[];
     can_bioblog: boolean;
     can_export_csv: boolean;
@@ -92,11 +95,11 @@ export interface PlanCapabilities {
     support_hours: number;
     search_priority: string;
     forum_topics_per_week: number;
-    bioblog_articles_per_month: number;
-    bioblog_videos_per_month: number;
-    bioblog_podcasts_per_month: number;
-    bioblog_shorts_per_month: number;
-    [key: string]: number | boolean | number[] | string;
+    bioblog_articles_per_week: number;
+    bioblog_videos_per_week: number;
+    bioblog_podcasts_per_week: number;
+    bioblog_shorts_per_week: number;
+    [key: string]: number | boolean | number[] | string[] | string;
 }
 
 export interface SubscriptionInfo {

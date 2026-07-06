@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useEcho } from '@laravel/echo-react';
 import { ProactiveNotification, NotificationLevel } from '@/shared/types/notifications';
 import { useSyncNotifications } from '@/shared/hooks/useSyncNotifications';
@@ -389,6 +389,7 @@ function mapApiNotificationToProactive(notification: Notification): ProactiveNot
             title = 'Cuenta suspendida';
             message = 'Tu cuenta ha sido suspendida.';
             if (notification.reason) message += ` Motivo: ${notification.reason}`;
+            action = { type: 'support', label: 'Contactar soporte' };
             break;
         case 'contract_status_changed':
         case 'ContractStatusNotification':
@@ -441,6 +442,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     const [notifications, setNotifications] = useState<ProactiveNotification[]>([]);
     const [loading, setLoading] = useState(true);
     const [tick, setTick] = useState(0);
+    const soundEnabledRef = useRef(false);
 
     // Re-evalúa el filtro de 24h cada minuto para auto-expirar notificaciones
     useEffect(() => {
@@ -448,8 +450,20 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         return () => clearInterval(id);
     }, []);
 
+    // Valida que el archivo de sonido exista al montar
+    useEffect(() => {
+        const audio = new Audio();
+        audio.oncanplaythrough = () => { soundEnabledRef.current = true; };
+        audio.onerror = () => { soundEnabledRef.current = false; };
+        audio.src = '/sounds/notification.mp3';
+        audio.load();
+        return () => { audio.src = ''; };
+    }, []);
+
     const visibleNotifications = useMemo(
-        () => notifications.filter(n => isWithin24h(n.createdAt)),
+        () => notifications
+            .filter(n => isWithin24h(n.createdAt))
+            .map(n => ({ ...n, time: formatRelativeTime(n.createdAt) })),
         // eslint-disable-next-line react-hooks/exhaustive-deps
         [notifications, tick]
     );
@@ -485,17 +499,26 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
     // Polling cada 30s como fallback cuando Reverb no está disponible.
     // Se pausa automáticamente cuando el tab está oculto para evitar requests innecesarios.
+    // Si WebSocket está conectado, se salta la llamada REST.
     useEffect(() => {
         if (!isAuthenticated) return;
 
-        let id = setInterval(() => refreshNotifications(), 30_000);
+        const runPoll = () => {
+            const pusher = typeof window !== 'undefined' ? (window as any).Echo?.connector?.pusher : null;
+            const wsConnected = pusher?.connection?.state === 'connected';
+            if (!wsConnected) {
+                refreshNotifications();
+            }
+        };
+
+        let id = setInterval(runPoll, 30_000);
 
         const handleVisibility = () => {
             if (document.hidden) {
                 clearInterval(id);
             } else {
-                refreshNotifications();
-                id = setInterval(() => refreshNotifications(), 30_000);
+                runPoll();
+                id = setInterval(runPoll, 30_000);
             }
         };
 
@@ -546,8 +569,10 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         setNotifications(prev => [newNotification, ...prev]);
 
         try {
-            const audio = new Audio('/sounds/notification.mp3');
-            audio.play().catch(() => { });
+            if (soundEnabledRef.current) {
+                const audio = new Audio('/sounds/notification.mp3');
+                audio.play().catch(() => { });
+            }
         } catch (e) { }
     }, []);
 
@@ -563,8 +588,10 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
                 return [mapped, ...prev];
             });
             try {
-                const audio = new Audio('/sounds/notification.mp3');
-                audio.play().catch(() => { });
+                if (soundEnabledRef.current) {
+                    const audio = new Audio('/sounds/notification.mp3');
+                    audio.play().catch(() => { });
+                }
             } catch (e) { }
         },
         [user]

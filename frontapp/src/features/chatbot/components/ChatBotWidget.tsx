@@ -55,6 +55,7 @@ export default function ChatBotWidget() {
     };
 
     const handlePointerDown = useCallback((e: React.PointerEvent) => {
+        if (e.pointerType === 'touch') return;
         if (e.button !== 0) return;
         const el = e.currentTarget as HTMLElement;
         el.setPointerCapture(e.pointerId);

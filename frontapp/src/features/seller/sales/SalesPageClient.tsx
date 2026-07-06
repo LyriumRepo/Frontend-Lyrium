@@ -15,6 +15,7 @@ import { useSellerSales } from '@/features/seller/sales/hooks/useSellerSales';
 import { mapOrdersToExportRows } from '@/features/seller/sales/export/mappers';
 import { exportSalesRowsToExcel } from '@/features/seller/sales/export/excelExporter';
 import { generateSalesReportPdf } from '@/features/seller/sales/export/pdfExporter';
+import { usePlanCapabilities } from '@/shared/lib/hooks/usePlanCapabilities';
 
 interface SalesPageClientProps {
     initialOrders?: unknown;
@@ -40,9 +41,14 @@ export function SalesPageClient(_props?: SalesPageClientProps) {
     } = useSellerSales();
 
     const { showToast } = useToast();
+    const { can } = usePlanCapabilities();
     const [selectedKpi, setSelectedKpi] = useState<SalesKPI | null>(null);
 
     const handleExport = async (type: 'excel' | 'pdf') => {
+        if (!can(type === 'excel' ? 'can_export_excel' : 'can_export_pdf')) {
+            showToast(`Tu plan actual no incluye exportar a ${type === 'excel' ? 'Excel' : 'PDF'}. Actualiza tu plan para desbloquear esta función.`, 'warning');
+            return;
+        }
         if (type === 'excel') {
             if (orders.length === 0) {
                 showToast('No hay órdenes para exportar.', 'warning');

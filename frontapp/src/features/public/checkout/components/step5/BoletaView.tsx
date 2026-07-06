@@ -16,6 +16,12 @@ export default function BoletaView() {
   const { orderId, total, items, shipping = 0 } = result;
   const subtotal = items.reduce((a, i) => a + i.price * i.quantity, 0);
 
+  // Convención del carrito: id > 0 = producto físico, id <= 0 = servicio.
+  const hasProducts = items.some((i) => i.id > 0);
+  const hasServices = items.some((i) => i.id <= 0);
+  const orderTypeLabel =
+    hasProducts && hasServices ? 'Producto y Servicio' : hasServices ? 'Servicio' : 'Producto';
+
   const handlePrint = () => {
     const loadImage = (url: string): Promise<string> =>
       fetch(url)
@@ -87,7 +93,7 @@ export default function BoletaView() {
             <button
               type="button"
               onClick={handlePrint}
-              className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-sky-500 text-white font-black text-xs uppercase tracking-widest hover:bg-sky-600 transition-all shadow-lg"
+              className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-sky-500 dark:bg-emerald-600 text-white font-black text-xs uppercase tracking-widest hover:bg-sky-600 dark:hover:bg-emerald-700 transition-all shadow-lg"
             >
               <Download className="w-4 h-4" /> Descargar Boleta
             </button>
@@ -118,6 +124,9 @@ export default function BoletaView() {
                       className="text-left py-3 px-4 font-black uppercase tracking-wider text-sm"
                     >
                       Detalle de su pedido
+                      <span className="ml-2 align-middle text-[10px] font-bold uppercase tracking-wider bg-white/25 rounded-full px-2 py-0.5">
+                        {orderTypeLabel}
+                      </span>
                     </th>
                   </tr>
 

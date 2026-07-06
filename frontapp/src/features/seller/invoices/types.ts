@@ -41,6 +41,7 @@ export interface Voucher {
     created_at?: string;
     updated_at?: string;
     items?: { product_name?: string; service_name?: string; quantity: number; line_total: number }[];
+    order_type?: 'Producto' | 'Servicio' | 'Producto y Servicio' | null;
 }
 
 export interface InvoiceKPIs {

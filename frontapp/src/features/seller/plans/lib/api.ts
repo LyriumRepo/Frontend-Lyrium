@@ -15,7 +15,7 @@ function getAuthHeaders(): Record<string, string> {
   return headers;
 }
 
-async function apiCall<T = unknown>(endpoint: string, options?: RequestInit, timeoutMs = 5000): Promise<T> {
+async function apiCall<T = unknown>(endpoint: string, options?: RequestInit, timeoutMs = 15000): Promise<T> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
@@ -97,6 +97,19 @@ export const createIzipayPlanSession = async (payload: {
 
 export const getMyPlanRequest = async () => {
   return apiGet<{ success: boolean; data: any }>('/stores/me/plan-request');
+};
+
+interface AutoRenewSubscription {
+  id: number;
+  auto_renew: boolean;
+  payment_method_id: number | null;
+}
+
+export const updateAutoRenew = async (subscriptionId: number, enabled: boolean, paymentMethodId?: number) => {
+  return apiCall<{ message: string; subscription?: AutoRenewSubscription }>(`/subscriptions/${subscriptionId}/auto-renew`, {
+    method: 'PUT',
+    body: JSON.stringify({ enabled, ...(paymentMethodId ? { payment_method_id: paymentMethodId } : {}) }),
+  });
 };
 
 // Admin - Plan Requests

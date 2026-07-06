@@ -142,7 +142,7 @@ export default function CourierSelector({ quotes }: Props) {
     <div className="space-y-4">
 
       {/* ── 1. TIPO DE ENTREGA — siempre arriba ────────────────────────── */}
-      <div className="rounded-2xl border-2 border-sky-100 dark:border-sky-900/50 bg-white dark:bg-gray-900/40 p-4">
+      <div className="rounded-2xl border-2 border-sky-100 dark:border-emerald-900/50 bg-white dark:bg-gray-900/40 p-4">
         <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
           <Truck className="w-3.5 h-3.5" /> Tipo de entrega
         </p>
@@ -172,7 +172,7 @@ export default function CourierSelector({ quotes }: Props) {
 
       {/* ── 2. RESUMEN DE EMPAQUE ─────────────────────────────────────── */}
       <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700">
-        <Package className="w-4 h-4 text-teal-500 shrink-0" />
+        <Package className="w-4 h-4 text-teal-500 dark:text-emerald-400 shrink-0" />
         <div className="flex-1 text-sm text-gray-600 dark:text-gray-400">
           <span className="font-bold text-gray-900 dark:text-white">{totalCajas} caja{totalCajas !== 1 ? 's' : ''}</span>
           {' '}desde {totalTiendas} tienda{totalTiendas !== 1 ? 's' : ''}
@@ -250,7 +250,7 @@ export default function CourierSelector({ quotes }: Props) {
           <div key={tienda.tiendaId} className="rounded-2xl border-2 border-gray-100 dark:border-gray-800 overflow-hidden">
 
             {/* Header */}
-            <div className="flex items-start justify-between px-4 py-3 bg-gradient-to-r from-teal-50 to-sky-50 dark:from-gray-800 dark:to-teal-950/20 border-b border-gray-100 dark:border-gray-800">
+            <div className="flex items-start justify-between px-4 py-3 bg-gradient-to-r from-teal-50 to-sky-50 dark:from-gray-800 dark:to-emerald-950/30 border-b border-gray-100 dark:border-gray-800">
               <div>
                 <p className="text-sm font-bold text-gray-900 dark:text-white">🏪 {tienda.tienda}</p>
                 <p className="text-[11px] text-gray-400 mt-0.5">
@@ -260,7 +260,7 @@ export default function CourierSelector({ quotes }: Props) {
               </div>
               <div className="text-right shrink-0 ml-3 space-y-1">
                 <p className="text-[11px] text-gray-400">{tienda.cajas?.resumen}</p>
-                <div className="flex items-center gap-1 justify-end text-[11px] text-teal-600 dark:text-teal-400 font-mono">
+                <div className="flex items-center gap-1 justify-end text-[11px] text-teal-600 dark:text-emerald-400 font-mono">
                   <Weight className="w-3 h-3" />
                   {pesoT.toFixed(2)} kg
                 </div>
@@ -371,18 +371,18 @@ export default function CourierSelector({ quotes }: Props) {
 
       {/* ── 5. TOTAL DE ENVÍO ────────────────────────────────────────── */}
       {selectedCourier && precioPorCourier[selectedCourier] != null && (
-        <div className="flex items-center justify-between px-4 py-3 rounded-xl bg-teal-50 dark:bg-teal-950/30 border border-teal-200 dark:border-teal-900/40">
+        <div className="flex items-center justify-between px-4 py-3 rounded-xl bg-teal-50 dark:bg-emerald-950/30 border border-teal-200 dark:border-emerald-900/40">
           <div>
-            <p className="text-sm font-bold text-teal-700 dark:text-teal-400">
+            <p className="text-sm font-bold text-teal-700 dark:text-emerald-400">
               Total envío con {getMeta(selectedCourier).label}
             </p>
-            <p className="text-[11px] text-teal-600/70 dark:text-teal-500">
+            <p className="text-[11px] text-teal-600/70 dark:text-emerald-500">
               {sinDomicilioPorCourier[selectedCourier]
                 ? '🏢 En agencia (sin domicilio en tu zona)'
                 : tipoEntrega === 'domicilio' ? '🏠 A domicilio' : '🏢 En agencia'} · {totalPeso.toFixed(2)} kg
             </p>
           </div>
-          <p className="font-black font-mono text-xl text-teal-700 dark:text-teal-400">
+          <p className="font-black font-mono text-xl text-teal-700 dark:text-emerald-400">
             S/ {precioPorCourier[selectedCourier].toFixed(2)}
           </p>
         </div>

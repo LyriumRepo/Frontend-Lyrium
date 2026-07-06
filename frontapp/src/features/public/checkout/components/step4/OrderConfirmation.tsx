@@ -57,7 +57,7 @@ export default function OrderConfirmation() {
         <div className="lg:col-span-7 space-y-6">
           {/* Success card */}
           <div className="bg-white dark:bg-[var(--bg-card)] border border-gray-100 dark:border-[var(--border-subtle)] rounded-[2.5rem] shadow-xl overflow-hidden p-8 text-center relative">
-            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-emerald-400 to-teal-500" />
+            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-emerald-400 to-teal-500 dark:from-emerald-700 dark:to-emerald-600" />
 
             <div className="w-20 h-20 rounded-2xl bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center mx-auto mb-6 shadow-sm border border-emerald-100 dark:border-emerald-800/30">
               <CheckCircle className="w-12 h-12 text-emerald-500 dark:text-emerald-400 fill-emerald-50 dark:fill-emerald-900/20" />
@@ -69,7 +69,7 @@ export default function OrderConfirmation() {
             <p className="text-xs text-gray-400 dark:text-[var(--text-muted)] font-bold uppercase tracking-widest mb-2">
               Tu pedido ha sido procesado con éxito
             </p>
-            <p className="text-[10px] text-sky-500 dark:text-[var(--brand-sky)] font-bold uppercase tracking-widest mb-6">
+            <p className="text-[10px] text-sky-500 dark:text-emerald-400 font-bold uppercase tracking-widest mb-6">
               Recibo digital enviado a:{' '}
               <span className="text-gray-900 dark:text-[var(--text-primary)]">
                 {email}
@@ -88,7 +88,7 @@ export default function OrderConfirmation() {
             {/* Shipping + Payment summary */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
               <div className="p-5 bg-white dark:bg-[var(--bg-card)] rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)] space-y-3">
-                <div className="flex items-center gap-2 text-sky-500 dark:text-[var(--brand-sky)]">
+                <div className="flex items-center gap-2 text-sky-500 dark:text-emerald-400">
                   <MapPin className="w-4 h-4" />
                   <span className="text-[11px] font-black uppercase tracking-widest">
                     Envío
@@ -111,7 +111,7 @@ export default function OrderConfirmation() {
                 <p className="text-sm font-bold text-gray-800 dark:text-[var(--text-primary)]">
                   {PAYMENT_LABELS[orderData.paymentMethod]}
                 </p>
-                <p className="text-xl font-black text-sky-600 dark:text-[var(--brand-sky)]">
+                <p className="text-xl font-black text-sky-600 dark:text-emerald-400">
                   S/ {total.toFixed(2)}
                 </p>
               </div>
@@ -134,7 +134,7 @@ export default function OrderConfirmation() {
               <button
                 type="button"
                 onClick={() => setStep(5)}
-                className="px-8 py-4 rounded-2xl bg-sky-500 text-white font-black text-xs uppercase tracking-widest hover:bg-sky-600 transition-all text-center flex items-center justify-center gap-2 shadow-lg shadow-sky-100"
+                className="px-8 py-4 rounded-2xl bg-sky-500 dark:bg-emerald-600 text-white font-black text-xs uppercase tracking-widest hover:bg-sky-600 dark:hover:bg-emerald-700 transition-all text-center flex items-center justify-center gap-2 shadow-lg shadow-sky-100 dark:shadow-emerald-900/20"
               >
                 Siguiente <ArrowRight className="w-4 h-4" />
               </button>
@@ -149,7 +149,7 @@ export default function OrderConfirmation() {
               <h4 className="text-xs font-black text-gray-900 dark:text-[var(--text-primary)] uppercase tracking-[0.3em]">
                 Detalle del Recibo
               </h4>
-              <span className="bg-white dark:bg-[var(--bg-card)] px-3 py-1 rounded-full text-[9px] font-black text-sky-500 dark:text-[var(--brand-sky)] border border-sky-100 dark:border-[var(--border-subtle)] uppercase">
+              <span className="bg-white dark:bg-[var(--bg-card)] px-3 py-1 rounded-full text-[9px] font-black text-sky-500 dark:text-emerald-400 border border-sky-100 dark:border-[var(--border-subtle)] uppercase">
                 Items comprados
               </span>
             </div>
@@ -198,7 +198,7 @@ export default function OrderConfirmation() {
                 <span className="text-sm font-black text-gray-900 dark:text-[var(--text-primary)]">
                   TOTAL PAGADO
                 </span>
-                <span className="text-2xl font-black text-sky-600 dark:text-[var(--brand-sky)]">
+                <span className="text-2xl font-black text-sky-600 dark:text-emerald-400">
                   S/ {total.toFixed(2)}
                 </span>
               </div>

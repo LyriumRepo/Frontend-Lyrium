@@ -353,7 +353,7 @@ export default function CustomerPaymentMethodsPage() {
       )}
 
       {(editingMethod && editingMethod.tipo_metodo !== 'tarjeta' || creatingMethod) && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4" onClick={() => { setEditingMethod(null); setCreatingMethod(null); }}>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[60] flex items-center justify-center p-4" onClick={() => { setEditingMethod(null); setCreatingMethod(null); }}>
           <div
             className="bg-white dark:bg-[var(--bg-secondary)] rounded-[3.5rem] max-w-xl w-full max-h-[90vh] overflow-hidden shadow-2xl"
             onClick={(e) => e.stopPropagation()}
@@ -438,7 +438,7 @@ export default function CustomerPaymentMethodsPage() {
       )}
 
       {confirmDeleteId !== null && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setConfirmDeleteId(null)}>
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setConfirmDeleteId(null)}>
           <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-[2rem] p-8 max-w-sm mx-4 shadow-2xl" onClick={e => e.stopPropagation()}>
             <div className="w-14 h-14 rounded-full bg-rose-50 dark:bg-rose-900/20 flex items-center justify-center mx-auto mb-4">
               <Icon name="CreditCard" className="w-7 h-7 text-rose-500" />

@@ -22,6 +22,17 @@ function formatCommission(_rate: number | null | undefined, amount: number | nul
     return `S/ ${amount.toFixed(2)}`;
 }
 
+function orderTypeStyles(orderType: Voucher['order_type']): { bg: string; text: string } {
+    switch (orderType) {
+        case 'Servicio':
+            return { bg: 'bg-violet-100', text: 'text-violet-600' };
+        case 'Producto y Servicio':
+            return { bg: 'bg-amber-100', text: 'text-amber-600' };
+        default:
+            return { bg: 'bg-gray-100', text: 'text-gray-500' };
+    }
+}
+
 function resolveMonto(v: Voucher): number {
     return (
         v.store_amount ??
@@ -67,6 +78,11 @@ function MobileInvoiceCard({ voucher: v, onViewDetail }: MobileInvoiceCardProps)
                     <span className="text-[9px] font-black text-[var(--text-secondary)] uppercase bg-[var(--bg-secondary)] px-1.5 py-0.5 rounded-md inline-block mt-0.5">
                         {v.type}
                     </span>
+                    {v.order_type && (
+                        <span className={`text-[9px] font-black uppercase px-1.5 py-0.5 rounded-md inline-block mt-0.5 ml-1 ${orderTypeStyles(v.order_type).bg} ${orderTypeStyles(v.order_type).text}`}>
+                            {v.order_type}
+                        </span>
+                    )}
                 </div>
 
                 {/* Estado + monto */}
@@ -230,6 +246,11 @@ export default function InvoiceTable({ vouchers, onViewDetail }: InvoiceTablePro
                                                 </div>
                                                 <div>
                                                     <span className={`text-[10px] font-black uppercase px-1.5 py-0.5 rounded-md ${type.bg} ${type.text}`}>{v.type}</span>
+                                                    {v.order_type && (
+                                                        <span className={`text-[10px] font-black uppercase px-1.5 py-0.5 rounded-md ml-1 ${orderTypeStyles(v.order_type).bg} ${orderTypeStyles(v.order_type).text}`}>
+                                                            {v.order_type}
+                                                        </span>
+                                                    )}
                                                     <p className="text-xs text-[var(--text-secondary)] truncate max-w-[150px] mt-0.5">{v.store_name || '—'}</p>
                                                 </div>
                                             </div>

@@ -7,6 +7,7 @@ import SellerHeader from '@/components/layout/seller/SellerHeader';
 import { DashboardLayout } from '@/components/layout/shared/DashboardLayout';
 import { useUIStore } from '@/store/uiStore';
 import { InventoryAlertsProvider } from '@/features/seller/inventario/context/InventoryAlertsContext';
+import NotificationSidebar from '@/components/shared/notifications/NotificationSidebar';
 import { useAuth } from '@/shared/lib/context/AuthContext';
 import Icon from '@/components/ui/Icon';
 import { WELCOME_MODAL_LIGHT_TEXT, WELCOME_MODAL_LIGHT_BADGE } from '@/shared/lib/theme/welcomeModalTheme';
@@ -660,6 +661,7 @@ export function SellerLayoutClient({ children }: SellerLayoutClientProps) {
             mainClassName="p-4 md:p-8"
         >
             {children}
+            <NotificationSidebar />
             <SellerWelcomeToast />
         </DashboardLayout>
         </InventoryAlertsProvider>

@@ -5,6 +5,9 @@ import Chart, { ChartConfiguration } from 'chart.js/auto';
 import ZoomPlugin from 'chartjs-plugin-zoom';
 import { useTheme } from 'next-themes';
 import { companyColors } from '../colors';
+import { usePlanCapabilities } from '@/shared/lib/hooks/usePlanCapabilities';
+import PlanUpgradeMessage from '@/features/seller/store/components/PlanUpgradeMessage';
+import Icon from '@/components/ui/Icon';
 
 Chart.register(ZoomPlugin);
 
@@ -100,6 +103,8 @@ export default function FinanceChart({
     const [isZoomed, setIsZoomed] = useState(false);
     const canZoom = ZOOMABLE_TYPES.includes(type);
     const isMulti = datasets && datasets.length > 0;
+    const { can } = usePlanCapabilities();
+    const canViewCharts = can('can_finance_charts');
 
     useEffect(() => {
         setIsDark(document.documentElement.classList.contains('dark') || resolvedTheme === 'dark');
@@ -296,6 +301,17 @@ export default function FinanceChart({
         a.download = `lyrium-${label || 'grafica'}.png`;
         a.click();
     };
+
+    if (!canViewCharts) {
+        return (
+            <div style={{ height }} className="relative flex items-center justify-center bg-[var(--bg-secondary)]/40 rounded-2xl">
+                <div className="max-w-xs px-4">
+                    <Icon name="Lock" className="w-6 h-6 text-[var(--lima-500)] mx-auto mb-3" />
+                    <PlanUpgradeMessage message="Los gráficos financieros avanzados están disponibles desde el plan Crece. Actualiza tu plan para visualizarlos." />
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div style={{ height }} className="relative">

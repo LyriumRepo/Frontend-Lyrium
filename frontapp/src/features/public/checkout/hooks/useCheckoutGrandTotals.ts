@@ -44,21 +44,33 @@ export function useCheckoutGrandTotals(): CheckoutGrandTotals {
   const cartItems       = useCheckoutStore(s => s.cartItems);
 
   return useMemo<CheckoutGrandTotals>(() => {
-    const empty: CheckoutGrandTotals = {
-      grandTotalProductos: 0,
-      grandTotalEnvio: 0,
-      grandTotal: 0,
-      isReady: false,
-    };
-
-    if (!shippingQuotes || !selectedCourier) return empty;
-
-    const tiendas       = shippingQuotes.tiendas?.filter(t => !t.error) ?? [];
     const selectedItems = cartItems.filter(i => i.selected);
+    // Convención del carrito: id > 0 = producto físico (necesita envío), id <= 0 = servicio (no).
+    const productItems  = selectedItems.filter(i => i.id > 0);
+    const serviceItems  = selectedItems.filter(i => i.id <= 0);
+    const serviceTotal  = serviceItems.reduce((s, i) => s + i.price * i.quantity, 0);
 
-    if (tiendas.length === 0 || selectedItems.length === 0) return empty;
+    // Carrito solo de servicios: no hay nada que enviar, no hay que esperar cotización de envío.
+    if (productItems.length === 0) {
+      return {
+        grandTotalProductos: serviceTotal,
+        grandTotalEnvio: 0,
+        grandTotal: serviceTotal,
+        isReady: selectedItems.length > 0,
+      };
+    }
 
-    let grandTotalProductos = 0;
+    // Hay productos físicos: se necesita la cotización de envío antes de dar el total por listo.
+    if (!shippingQuotes || !selectedCourier) {
+      return { grandTotalProductos: serviceTotal, grandTotalEnvio: 0, grandTotal: serviceTotal, isReady: false };
+    }
+
+    const tiendas = shippingQuotes.tiendas?.filter(t => !t.error) ?? [];
+    if (tiendas.length === 0) {
+      return { grandTotalProductos: serviceTotal, grandTotalEnvio: 0, grandTotal: serviceTotal, isReady: false };
+    }
+
+    let grandTotalProductos = serviceTotal;
     let grandTotalEnvio     = 0;
 
     tiendas.forEach(tienda => {
@@ -67,7 +79,7 @@ export function useCheckoutGrandTotals(): CheckoutGrandTotals {
         opciones.find(o => o.courier === selectedCourier) ??
         opciones[0]; // fallback: courier más barato disponible para esta tienda
       const precioEnvio = getPrecioFinal(op, tipoEntrega) ?? 0;
-      const items       = selectedItems.filter(i => i.storeId === tienda.tiendaId);
+      const items       = productItems.filter(i => i.storeId === tienda.tiendaId);
       grandTotalProductos += items.reduce((s, i) => s + i.price * i.quantity, 0);
       grandTotalEnvio     += precioEnvio;
     });

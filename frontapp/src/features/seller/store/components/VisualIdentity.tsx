@@ -13,12 +13,12 @@ interface VisualIdentityProps {
     updateConfig: (updates: Partial<ShopConfig>) => void;
     uploadLogo?: (file: File) => Promise<any>;
     uploadLogoMarketplace?: (file: File) => Promise<any>;
-    uploadBanner?: (file: File, bannerNumber: 1 | 2) => Promise<any>;
+    uploadBanner?: (file: File, bannerNumber: 1 | 2 | 3) => Promise<any>;
     uploadGallery?: (file: File) => Promise<any>;
     deleteGalleryItem?: (index: number, mediaId: number) => Promise<any>;
     uploadAdBanner?: (file: File) => Promise<any>;
     deleteAdBanner?: (mediaId: number) => Promise<any>;
-    deleteBanner?: (bannerNumber: 1 | 2) => Promise<any>;
+    deleteBanner?: (bannerNumber: 1 | 2 | 3) => Promise<any>;
     isUploading?: boolean;
     storeId?: number | null;
 }
@@ -29,15 +29,20 @@ export default function VisualIdentity(props: VisualIdentityProps): React.ReactE
     const [localLogoMarketplace, setLocalLogoMarketplace] = useState(config.visual.logoMarketplace);
     const [localBanner1, setLocalBanner1] = useState(config.visual.banner1);
     const [localBanner2, setLocalBanner2] = useState(config.visual.banner2);
+    const [localBanner3, setLocalBanner3] = useState(config.visual.banner3);
     const [lastUpdated, setLastUpdated] = useState<string | null>(null);
     const gallery = Array.isArray(config.visual.gallery) ? config.visual.gallery : [];
     const adBanners = Array.isArray(config.visual.adBanners) ? config.visual.adBanners : [];
     const [uploading, setUploading] = useState<string | null>(null);
     const [showBannerUpgrade, setShowBannerUpgrade] = useState(false);
+    const [showMainBannerUpgrade, setShowMainBannerUpgrade] = useState(false);
     const isStoreReady = !!storeId;
-    const { planSlug, limit: planLimit } = usePlanCapabilities();
+    const { planSlug, limit: planLimit, isUnlimited } = usePlanCapabilities();
     const maxAdBanners = planLimit('max_ad_banners');
     const adBannerAtLimit = adBanners.length >= maxAdBanners;
+    const maxMainBanners = planLimit('max_main_banners');
+    const mainBannersUnlimited = isUnlimited(maxMainBanners);
+    const isMainBannerSlotLocked = (slot: 2 | 3) => !mainBannersUnlimited && slot > maxMainBanners;
 
     React.useEffect(() => {
         const syncFromConfig = () => {
@@ -53,11 +58,14 @@ export default function VisualIdentity(props: VisualIdentityProps): React.ReactE
             if (lastUpdated !== 'banner2') {
                 setLocalBanner2(config.visual.banner2);
             }
+            if (lastUpdated !== 'banner3') {
+                setLocalBanner3(config.visual.banner3);
+            }
             setLastUpdated(null);
         };
         const timer = setTimeout(syncFromConfig, 100);
         return () => clearTimeout(timer);
-    }, [config.visual.logo, config.visual.logoMarketplace, config.visual.banner1, config.visual.banner2]);
+    }, [config.visual.logo, config.visual.logoMarketplace, config.visual.banner1, config.visual.banner2, config.visual.banner3]);
 
     const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -105,25 +113,38 @@ export default function VisualIdentity(props: VisualIdentityProps): React.ReactE
         }
     };
 
-    const handleBannerUpload = (bannerNumber: 1 | 2) => async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleBannerUpload = (bannerNumber: 1 | 2 | 3) => async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file || !uploadBanner) return;
+        if (bannerNumber !== 1 && isMainBannerSlotLocked(bannerNumber)) {
+            setShowMainBannerUpgrade(true);
+            return;
+        }
         if (file.size > 5 * 1024 * 1024) { alert('El archivo no debe superar los 5 MB'); return; }
         setUploading(`banner${bannerNumber}`);
-        setLastUpdated(bannerNumber === 1 ? 'banner1' : 'banner2');
+        setLastUpdated(bannerNumber === 1 ? 'banner1' : bannerNumber === 2 ? 'banner2' : 'banner3');
         try {
             const result = await uploadBanner(file, bannerNumber);
             const newUrl = result.url + '?t=' + Date.now();
+            setShowMainBannerUpgrade(false);
             if (bannerNumber === 1) {
                 setLocalBanner1(newUrl);
                 updateConfig({ visual: { ...config.visual, banner1: result.url } });
-            } else {
+            } else if (bannerNumber === 2) {
                 setLocalBanner2(newUrl);
                 updateConfig({ visual: { ...config.visual, banner2: result.url } });
+            } else {
+                setLocalBanner3(newUrl);
+                updateConfig({ visual: { ...config.visual, banner3: result.url } });
             }
         } catch (error) {
             console.error('Error uploading banner:', error);
-            alert('Error al subir el banner');
+            const msg = error instanceof Error ? error.message : '';
+            if (msg.toLowerCase().includes('banner') || msg.toLowerCase().includes('plan')) {
+                setShowMainBannerUpgrade(true);
+            } else {
+                alert('Error al subir el banner');
+            }
             setLastUpdated(null);
         } finally {
             setUploading(null);
@@ -212,7 +233,7 @@ export default function VisualIdentity(props: VisualIdentityProps): React.ReactE
         }
     };
 
-    const handleDeleteBanner = async (bannerNumber: 1 | 2) => {
+    const handleDeleteBanner = async (bannerNumber: 1 | 2 | 3) => {
         if (!confirm(`¿Eliminar este banner?`)) return;
 
         setUploading(`banner${bannerNumber}-delete`);
@@ -223,9 +244,12 @@ export default function VisualIdentity(props: VisualIdentityProps): React.ReactE
             if (bannerNumber === 1) {
                 setLocalBanner1('');
                 updateConfig({ visual: { ...config.visual, banner1: '' } });
-            } else {
+            } else if (bannerNumber === 2) {
                 setLocalBanner2('');
                 updateConfig({ visual: { ...config.visual, banner2: '' } });
+            } else {
+                setLocalBanner3('');
+                updateConfig({ visual: { ...config.visual, banner3: '' } });
             }
         } catch (error) {
             console.error('Error deleting banner:', error);
@@ -391,7 +415,7 @@ export default function VisualIdentity(props: VisualIdentityProps): React.ReactE
                                 <Icon name="AlertCircle" className="w-3 h-3" /> Resolución Óptima 4:1
                             </p>
                         </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                             {/* Banner 1 */}
                             <div
                                 role="button"
@@ -437,54 +461,79 @@ export default function VisualIdentity(props: VisualIdentityProps): React.ReactE
                                 </div>
                             </div>
 
-                            {/* Banner 2 */}
-                            <div
-                                role="button"
-                                tabIndex={0}
-                                className={`relative aspect-[4/1.5] rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-dashed ${localBanner2 ? 'border-[var(--border-subtle)] bg-[var(--bg-secondary)]' : 'border-sky-500/20 dark:border-emerald-500/20 bg-sky-500/5 dark:bg-emerald-500/5'} flex items-center justify-center cursor-pointer hover:bg-sky-500/10 transition-all group`}
-                                onClick={() => document.getElementById('input-banner2')?.click()}
-                                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') document.getElementById('input-banner2')?.click(); }}
-                            >
-                                {localBanner2 ? (
-                                    <>
-                                        <Image src={localBanner2} fill sizes="(max-width: 640px) 100vw, 50vw" alt="Banner de Oferta" className="object-cover group-hover:scale-105 transition-transform duration-1000" />
-                                        <button
-                                            className="absolute top-3 right-3 z-10 p-1.5 bg-red-500/80 backdrop-blur-sm rounded-full text-white opacity-0 group-hover:opacity-100 hover:bg-red-600 transition-all"
-                                            onClick={(e) => { e.stopPropagation(); handleDeleteBanner(2); }}
-                                            disabled={uploading !== null}
-                                            title="Eliminar banner"
-                                        >
-                                            <Icon name="Trash2" className="w-3.5 h-3.5" />
-                                        </button>
-                                        <div className="absolute top-3 left-3 sm:top-4 sm:left-4">
-                                            <span className="px-2 py-1 bg-black/40 backdrop-blur-md rounded-lg text-[8px] font-black text-white uppercase tracking-tighter border border-white/20">Banner de Oferta</span>
-                                        </div>
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-end p-4 sm:p-6">
-                                            <span className="text-white text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
-                                                <Icon name="Upload" className="w-4 h-4" />
-                                                {uploading === 'banner2' ? 'Subiendo...' : 'Cambiar imagen'}
-                                            </span>
-                                        </div>
-                                    </>
-                                ) : (
-                                    <div className="text-center px-4">
-                                        <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[var(--bg-card)] rounded-2xl flex items-center justify-center mx-auto mb-3 border border-sky-500/20 dark:border-emerald-500/20 shadow-sm">
-                                            <Icon name="Plus" className="text-sky-500 dark:text-[var(--icons-green)] w-5 h-5" />
-                                        </div>
-                                        <p className="text-[10px] font-black text-sky-600 dark:text-[var(--icons-green)] uppercase tracking-widest">Expandir Campaña</p>
-                                        <p className="text-[8px] font-bold text-sky-300 dark:text-[var(--icons-green)] uppercase mt-1">Añadir Banner de Oferta</p>
+                            {/* Banner 2 y 3 (adicionales, sujetos al límite del plan) */}
+                            {([2, 3] as const).map((slot) => {
+                                const localValue = slot === 2 ? localBanner2 : localBanner3;
+                                const locked = isMainBannerSlotLocked(slot);
+                                const label = slot === 2 ? 'Banner de Oferta' : 'Banner Adicional';
+                                return (
+                                    <div
+                                        key={`banner${slot}`}
+                                        role="button"
+                                        tabIndex={0}
+                                        className={`relative aspect-[4/1.5] rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-dashed ${
+                                            locked
+                                                ? 'border-[var(--lima-500)]/30 bg-[var(--lima-500)]/5 cursor-not-allowed'
+                                                : localValue
+                                                    ? 'border-[var(--border-subtle)] bg-[var(--bg-secondary)] cursor-pointer'
+                                                    : 'border-sky-500/20 dark:border-emerald-500/20 bg-sky-500/5 dark:bg-emerald-500/5 cursor-pointer'
+                                        } flex items-center justify-center hover:bg-sky-500/10 transition-all group`}
+                                        onClick={() => locked ? setShowMainBannerUpgrade(true) : document.getElementById(`input-banner${slot}`)?.click()}
+                                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') (locked ? setShowMainBannerUpgrade(true) : document.getElementById(`input-banner${slot}`)?.click()); }}
+                                    >
+                                        {locked ? (
+                                            <div className="text-center px-4">
+                                                <Icon name="Lock" className="w-6 h-6 text-[var(--lima-500)] mx-auto mb-2" />
+                                                <p className="text-[9px] font-black text-[var(--lima-500)] uppercase tracking-widest">Disponible en planes superiores</p>
+                                            </div>
+                                        ) : localValue ? (
+                                            <>
+                                                <Image src={localValue} fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" alt={label} className="object-cover group-hover:scale-105 transition-transform duration-1000" />
+                                                <button
+                                                    className="absolute top-3 right-3 z-10 p-1.5 bg-red-500/80 backdrop-blur-sm rounded-full text-white opacity-0 group-hover:opacity-100 hover:bg-red-600 transition-all"
+                                                    onClick={(e) => { e.stopPropagation(); handleDeleteBanner(slot); }}
+                                                    disabled={uploading !== null}
+                                                    title="Eliminar banner"
+                                                >
+                                                    <Icon name="Trash2" className="w-3.5 h-3.5" />
+                                                </button>
+                                                <div className="absolute top-3 left-3 sm:top-4 sm:left-4">
+                                                    <span className="px-2 py-1 bg-black/40 backdrop-blur-md rounded-lg text-[8px] font-black text-white uppercase tracking-tighter border border-white/20">{label}</span>
+                                                </div>
+                                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-end p-4 sm:p-6">
+                                                    <span className="text-white text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
+                                                        <Icon name="Upload" className="w-4 h-4" />
+                                                        {uploading === `banner${slot}` ? 'Subiendo...' : 'Cambiar imagen'}
+                                                    </span>
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <div className="text-center px-4">
+                                                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[var(--bg-card)] rounded-2xl flex items-center justify-center mx-auto mb-3 border border-sky-500/20 dark:border-emerald-500/20 shadow-sm">
+                                                    <Icon name="Plus" className="text-sky-500 dark:text-[var(--icons-green)] w-5 h-5" />
+                                                </div>
+                                                <p className="text-[10px] font-black text-sky-600 dark:text-[var(--icons-green)] uppercase tracking-widest">Expandir Campaña</p>
+                                                <p className="text-[8px] font-bold text-sky-300 dark:text-[var(--icons-green)] uppercase mt-1">Añadir {label}</p>
+                                            </div>
+                                        )}
+                                        <input
+                                            type="file"
+                                            id={`input-banner${slot}`}
+                                            className="hidden"
+                                            accept="image/*"
+                                            onChange={handleBannerUpload(slot)}
+                                            disabled={uploading !== null || !isStoreReady || locked}
+                                        />
                                     </div>
-                                )}
-                                <input
-                                    type="file"
-                                    id="input-banner2"
-                                    className="hidden"
-                                    accept="image/*"
-                                    onChange={handleBannerUpload(2)}
-                                    disabled={uploading !== null || !isStoreReady}
-                                />
-                            </div>
+                                );
+                            })}
                         </div>
+
+                        {showMainBannerUpgrade && (
+                            <PlanUpgradeMessage
+                                message={`Tu plan actual permite ${maxMainBanners} banner(s) principal(es). Actualiza tu plan para agregar más.`}
+                            />
+                        )}
                     </div>
 
                     {/* Banners Promocionales (Ad Banners) */}

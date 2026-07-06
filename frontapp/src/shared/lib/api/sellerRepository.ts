@@ -413,12 +413,12 @@ export const sellerApi = {
     return { url: logoUrl };
   },
 
-  uploadBanner: async (storeId: number, file: File, bannerNumber: 1 | 2 = 1): Promise<{ url: string }> => {
+  uploadBanner: async (storeId: number, file: File, bannerNumber: 1 | 2 | 3 = 1): Promise<{ url: string }> => {
     const token = await getAuthToken();
     const formData = new FormData();
     formData.append('file', file);
 
-    const endpoint = bannerNumber === 2 ? 'banner2' : 'banner';
+    const endpoint = bannerNumber === 3 ? 'banner3' : bannerNumber === 2 ? 'banner2' : 'banner';
     const response = await fetch(`${LARAVEL_API_URL}/stores/${storeId}/media/${endpoint}`, {
       method: 'POST',
       credentials: 'include',
@@ -434,7 +434,7 @@ export const sellerApi = {
     }
 
     const data = await response.json();
-    const bannerKey = bannerNumber === 2 ? 'banner2' : 'banner';
+    const bannerKey = bannerNumber === 3 ? 'banner3' : bannerNumber === 2 ? 'banner2' : 'banner';
     const bannerUrl = data.data?.url || data.data?.[bannerKey] || data.banner || data.banner1 || '';
     return { url: bannerUrl };
   },
@@ -462,9 +462,9 @@ export const sellerApi = {
     return { url: data.data?.url || '' };
   },
 
-  deleteBanner: async (storeId: number, bannerNumber: 1 | 2): Promise<void> => {
+  deleteBanner: async (storeId: number, bannerNumber: 1 | 2 | 3): Promise<void> => {
     const token = await getAuthToken();
-    const endpoint = bannerNumber === 2 ? 'banner2' : 'banner';
+    const endpoint = bannerNumber === 3 ? 'banner3' : bannerNumber === 2 ? 'banner2' : 'banner';
 
     const response = await fetch(`${LARAVEL_API_URL}/stores/${storeId}/media/${endpoint}`, {
       method: 'DELETE',

@@ -1,11 +1,13 @@
 'use client';
 
+import Link from 'next/link';
 import ThemeToggle from '@/components/layout/shared/ThemeToggle';
 import NotificationBell from '@/components/layout/shared/NotificationBell';
 import UserMenu from '@/components/layout/shared/UserMenu';
 import Breadcrumb from '@/components/layout/shared/Breadcrumb';
 import { useAutoBreadcrumb } from '@/shared/hooks/useAutoBreadcrumb';
-import { Menu } from 'lucide-react';
+import { Menu, Home } from 'lucide-react';
+import { ROUTES } from '@/shared/lib/constants/routes';
 
 export default function SellerHeader({ onOpenMenu }: { onOpenMenu: () => void }) {
     const breadcrumbs = useAutoBreadcrumb();
@@ -23,6 +25,16 @@ export default function SellerHeader({ onOpenMenu }: { onOpenMenu: () => void })
                     >
                         <Menu className="w-5 h-5 sm:w-6 sm:h-6 text-[var(--text-secondary)]" />
                     </button>
+
+                    {/* Volver al Home público — solo en mobile, la sidebar ya cubre esto en desktop */}
+                    <Link
+                        href={ROUTES.HOME}
+                        className="md:hidden p-2 rounded-lg hover:bg-[var(--bg-hover)] active:bg-[var(--bg-hover)] transition-colors"
+                        aria-label="Ir al inicio"
+                        title="Ir al inicio"
+                    >
+                        <Home className="w-5 h-5 text-[var(--text-secondary)]" />
+                    </Link>
 
                     {/* "Mi Panel" — aparece desde tablet en adelante (768px+),
                         en móvil ocupa espacio que necesita el breadcrumb/acciones */}

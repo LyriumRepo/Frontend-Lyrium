@@ -36,6 +36,7 @@ export interface Voucher {
     xml_url?: string | null;
     cdr_url?: string | null;
     items?: unknown;
+    order_type?: 'Producto' | 'Servicio' | 'Producto y Servicio' | null;
 }
 
 export interface InvoiceKPIs {

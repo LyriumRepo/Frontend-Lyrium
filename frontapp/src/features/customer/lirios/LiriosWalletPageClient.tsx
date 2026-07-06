@@ -23,6 +23,7 @@ import {
   type LiriosBalance,
   type LiriosTransaction,
 } from '@/shared/lib/api/liriosRepository';
+import LiriosMinigameModal from './components/LiriosMinigameModal';
 
 /* ── Animated counter ── */
 function AnimatedNumber({ value, isHidden }: { value: number; isHidden: boolean }) {
@@ -54,27 +55,40 @@ function AnimatedNumber({ value, isHidden }: { value: number; isHidden: boolean 
 
 /* ── Tier definitions ── */
 const TIERS = [
-  { min: 0, label: 'Bronce', discount: '1%', color: 'from-emerald-600 to-emerald-400' },
-  { min: 500, label: 'Plata', discount: '2%', color: 'from-teal-600 to-teal-400' },
-  { min: 1500, label: 'Oro', discount: '3%', color: 'from-sky-600 to-sky-400' },
+  { min: 0,     label: 'Brote',        discount: '1%',   color: 'from-green-600 to-green-400' },
+  { min: 200,   label: 'Retoño',       discount: '1%',   color: 'from-emerald-600 to-emerald-400' },
+  { min: 500,   label: 'Hoja',         discount: '1.5%', color: 'from-teal-600 to-teal-400' },
+  { min: 1000,  label: 'Flor',         discount: '2%',   color: 'from-cyan-600 to-cyan-400' },
+  { min: 2000,  label: 'Ramo',         discount: '2.5%', color: 'from-sky-600 to-sky-400' },
+  { min: 3500,  label: 'Jardín',       discount: '3%',   color: 'from-indigo-500 to-indigo-400' },
+  { min: 5500,  label: 'Bosque',       discount: '4%',   color: 'from-violet-600 to-violet-400' },
+  { min: 8000,  label: 'Lirio Épico',  discount: '5%',   color: 'from-amber-500 to-yellow-400' },
 ];
 
 function getTier(balance: number) {
-  if (balance >= 1500) return TIERS[2];
-  if (balance >= 500) return TIERS[1];
-  return TIERS[0];
+  let current = TIERS[0];
+  for (const t of TIERS) {
+    if (balance >= t.min) current = t;
+  }
+  return current;
 }
 
 function getTierProgress(balance: number) {
-  if (balance >= 1500) return 100;
-  if (balance >= 500) return ((balance - 500) / (1500 - 500)) * 100;
-  return (balance / 500) * 100;
+  for (let i = TIERS.length - 1; i >= 0; i--) {
+    if (balance >= TIERS[i].min) {
+      if (i === TIERS.length - 1) return 100;
+      const next = TIERS[i + 1];
+      return ((balance - TIERS[i].min) / (next.min - TIERS[i].min)) * 100;
+    }
+  }
+  return 0;
 }
 
 function getNextTier(balance: number) {
-  if (balance >= 1500) return null;
-  if (balance >= 500) return TIERS[2];
-  return TIERS[1];
+  for (const t of TIERS) {
+    if (balance < t.min) return t;
+  }
+  return null;
 }
 
 /* ── Inline decorative SVG (leaf/flower motif) ── */
@@ -111,6 +125,14 @@ export default function LiriosWalletPageClient() {
   const [hasMore, setHasMore] = useState(true);
   const [txTotal, setTxTotal] = useState(0);
   const [animateIn, setAnimateIn] = useState(false);
+  const [gameOpen, setGameOpen] = useState(false);
+  const [rewardToast, setRewardToast] = useState(false);
+
+  const handleEarnLirios = useCallback((amount: number) => {
+    setBalance((prev) => prev ? { balance: prev.balance + amount } : prev);
+    setRewardToast(true);
+    setTimeout(() => setRewardToast(false), 3000);
+  }, []);
 
   const fetchBalance = useCallback(async () => {
     try {
@@ -170,7 +192,7 @@ export default function LiriosWalletPageClient() {
   if (loading) {
     return (
       <div className="space-y-8">
-        <ModuleHeader title="Mis Lirios" subtitle="Cargando..." icon="Leaf" />
+        <ModuleHeader title="Mis Lirios" subtitle="Cargando..." icon={<><img src="/lirio-icon.png" alt="" className="w-6 h-6 sm:w-7 sm:h-7 object-contain dark:hidden" /><img src="/lirio-icon-night.png" alt="" className="w-6 h-6 sm:w-7 sm:h-7 object-contain hidden dark:block" /></>} />
         <div className="grid lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
             <div className="rounded-3xl bg-[var(--bg-secondary)] h-[320px] animate-pulse" />
@@ -190,7 +212,7 @@ export default function LiriosWalletPageClient() {
       <ModuleHeader
         title="Mis Lirios"
         subtitle="Tus puntos de fidelidad — 1 Lirio = S/ 1 de descuento"
-        icon="Leaf"
+        icon={<><img src="/lirio-icon.png" alt="" className="w-6 h-6 sm:w-7 sm:h-7 object-contain dark:hidden" /><img src="/lirio-icon-night.png" alt="" className="w-6 h-6 sm:w-7 sm:h-7 object-contain hidden dark:block" /></>}
       />
 
       {/* ── Stats summary bar ── */}
@@ -231,7 +253,7 @@ export default function LiriosWalletPageClient() {
         {/* ─── Balance Card ─── */}
         <div className="lg:col-span-2">
           <div
-            className={`relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-500 via-teal-500 to-emerald-500 dark:from-emerald-800 dark:via-teal-800 dark:to-cyan-800 shadow-2xl shadow-teal-500/30 dark:shadow-teal-900/50 p-6 sm:p-8 transition-all duration-700 ${
+            className={`relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-500 via-teal-500 to-emerald-500 dark:from-emerald-800 dark:via-teal-800 dark:to-cyan-800 shadow-2xl shadow-teal-500/30 dark:shadow-teal-900/50 p-5 sm:p-6 transition-all duration-700 ${
               animateIn ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
             }`}
             style={{ backgroundSize: '200% 200%' }}
@@ -241,20 +263,19 @@ export default function LiriosWalletPageClient() {
 
             {/* Decorative blobs */}
             <div className="absolute inset-0 pointer-events-none overflow-hidden">
-              <div className="absolute -top-12 -right-12 w-40 h-40 bg-white/10 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '4s' }} />
-              <div className="absolute -bottom-12 -left-12 w-32 h-32 bg-white/10 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '5s' }} />
+              <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '4s' }} />
+              <div className="absolute -bottom-10 -left-10 w-24 h-24 bg-white/10 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '5s' }} />
             </div>
 
-            {/* Decorative SVG flower (replaces external imgur) */}
-            <DecorativeFlower className="absolute -top-4 -right-4 w-28 h-28 text-white/10 pointer-events-none" />
-            <DecorativeFlower className="absolute -bottom-3 -left-3 w-20 h-20 text-white/10 pointer-events-none scale-x-[-1]" />
+            {/* Decorative SVG flower */}
+            <DecorativeFlower className="absolute -top-3 -right-3 w-24 h-24 text-white/10 pointer-events-none" />
 
             {/* Content */}
-            <div className="relative z-10 space-y-5">
+            <div className="relative z-10 space-y-4">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3 px-4 py-2 bg-white/20 backdrop-blur-md rounded-full">
-                  <Coins className="w-5 h-5 text-white" />
-                  <span className="text-sm font-bold text-white tracking-wide uppercase">
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-white/20 backdrop-blur-md rounded-full">
+                  <Coins className="w-4 h-4 text-white" />
+                  <span className="text-xs font-bold text-white tracking-wide uppercase">
                     Billetera Lirios
                   </span>
                 </div>
@@ -280,59 +301,59 @@ export default function LiriosWalletPageClient() {
                 </div>
               ) : (
                 <>
-                  <div className="py-2">
-                    <p className="text-7xl sm:text-8xl font-black text-white tracking-tight leading-none">
+                  <div className="py-1">
+                    <p className="text-5xl sm:text-7xl font-black text-white tracking-tight leading-none">
                       <AnimatedNumber value={bal} isHidden={hidden} />
                     </p>
-                    <p className="text-lg text-white/80 mt-3 font-semibold flex items-center gap-2">
-                      <Leaf className="w-5 h-5" />
+                    <p className="text-sm text-white/80 mt-1.5 font-semibold flex items-center gap-1.5">
+                      <Leaf className="w-4 h-4" />
                       Lirios disponibles
                     </p>
                   </div>
 
-                  <div className="pt-3 border-t border-white/20 grid grid-cols-2 gap-3">
-                    <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 hover:bg-white/15 transition-colors">
-                      <p className="text-white/70 text-xs mb-1 font-medium">
+                  <div className="pt-2 border-t border-white/20 grid grid-cols-2 gap-2">
+                    <div className="bg-white/10 backdrop-blur-md rounded-xl p-3 hover:bg-white/15 transition-colors">
+                      <p className="text-white/70 text-[10px] mb-0.5 font-medium">
                         Valor en descuento
                       </p>
-                      <p className="text-white text-2xl font-bold">
+                      <p className="text-white text-xl font-bold">
                         {hidden ? '••••' : `S/ ${bal.toLocaleString()}.00`}
                       </p>
                     </div>
-                    <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 hover:bg-white/15 transition-colors">
-                      <p className="text-white/70 text-xs mb-1 font-medium">Conversión</p>
-                      <p className="text-white text-2xl font-bold">1:1</p>
+                    <div className="bg-white/10 backdrop-blur-md rounded-xl p-3 hover:bg-white/15 transition-colors">
+                      <p className="text-white/70 text-[10px] mb-0.5 font-medium">Conversión</p>
+                      <p className="text-white text-xl font-bold">1:1</p>
                     </div>
                   </div>
 
                   {/* Progress / Tier bar */}
-                  <div className="pt-2">
-                    <div className="flex items-center justify-between mb-2.5">
-                      <div className="flex items-center gap-2">
-                        <Trophy className="w-4 h-4 text-teal-200" />
-                        <span className="text-sm font-bold text-white/90">
+                  <div className="pt-1">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-1.5">
+                        <Trophy className="w-3.5 h-3.5 text-teal-200" />
+                        <span className="text-xs font-bold text-white/90">
                           Nivel <span className="text-teal-200">{tier.label}</span>
                         </span>
                       </div>
                       {nextTier ? (
-                        <span className="text-xs text-white/70 font-medium">
+                        <span className="text-[10px] text-white/70 font-medium">
                           {bal.toLocaleString()} / {nextTier.min.toLocaleString()}
                         </span>
                       ) : (
-                        <span className="text-xs text-teal-200 font-bold flex items-center gap-1">
-                          <Gift className="w-3.5 h-3.5" />
+                        <span className="text-[10px] text-teal-200 font-bold flex items-center gap-1">
+                          <Gift className="w-3 h-3" />
                           ¡Nivel máximo!
                         </span>
                       )}
                     </div>
-                    <div className="h-2.5 bg-white/20 rounded-full overflow-hidden shadow-inner">
+                    <div className="h-2 bg-white/20 rounded-full overflow-hidden shadow-inner">
                       <div
                         className="h-full rounded-full bg-gradient-to-r from-emerald-400 via-teal-400 to-sky-400 transition-all duration-1000 ease-out"
                         style={{ width: `${Math.min(tierProgress, 100)}%` }}
                       />
                     </div>
                     {nextTier && (
-                      <p className="text-[10px] text-white/60 mt-1.5 font-medium">
+                      <p className="text-[10px] text-white/60 mt-1 font-medium">
                         {nextTier.min - bal} Lirios para alcanzar nivel{' '}
                         <span className="font-bold text-white/80">{nextTier.label}</span> (hasta{' '}
                         <span className="font-bold text-white/80">{nextTier.discount}</span> descuento)
@@ -345,97 +366,124 @@ export default function LiriosWalletPageClient() {
           </div>
         </div>
 
-        {/* ─── Sidebar ─── */}
-        <div className="space-y-5">
-          {/* Tier info card */}
-          <div className="bg-gradient-to-br from-white to-teal-50/30 dark:from-[var(--bg-card)] dark:to-teal-950/20 rounded-3xl border border-teal-200/40 dark:border-teal-800/20 p-5 shadow-lg">
-            <h3 className="text-sm font-bold text-teal-700 dark:text-teal-400 uppercase tracking-wide mb-3 flex items-center gap-2">
-              <Sparkles className="w-4 h-4" />
-              Tu progreso
-            </h3>
-            <div className="space-y-3">
-              {TIERS.map((t) => {
-                const unlocked = bal >= t.min;
-                const isCurrent = tier.label === t.label;
-                return (
-                  <div
-                    key={t.label}
-                    className={`flex items-center justify-between p-2.5 rounded-2xl transition-all ${
-                      unlocked
-                        ? 'bg-gradient-to-r from-teal-600 to-teal-800/50 dark:from-teal-700 dark:to-transparent text-white'
-                        : 'bg-[var(--bg-muted)] opacity-50'
-                    } ${isCurrent ? 'ring-2 ring-teal-400/50 dark:ring-teal-500/30' : ''}`}
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <Trophy className="w-4 h-4" />
-                      <span className={`text-sm font-bold ${unlocked ? 'text-white' : 'text-[var(--text-muted)]'}`}>
-                        {t.label}
-                      </span>
-                    </div>
-                    <span className={`text-[10px] font-black uppercase ${unlocked ? 'text-white/80' : 'text-[var(--text-muted)]'}`}>
-                      {t.discount}
+        {/* ─── Tier info (right column, row 1) ─── */}
+        <div className="bg-gradient-to-br from-white to-teal-50/30 dark:from-[var(--bg-card)] dark:to-teal-950/20 rounded-3xl border border-teal-200/40 dark:border-teal-800/20 p-5 shadow-lg">
+          <h3 className="text-sm font-bold text-teal-700 dark:text-teal-400 uppercase tracking-wide mb-3 flex items-center gap-2">
+            <Sparkles className="w-4 h-4" />
+            Tu progreso
+          </h3>
+          <div className="space-y-2 max-h-[340px] overflow-y-auto overscroll-contain custom-scrollbar pr-1">
+            {TIERS.map((t) => {
+              const unlocked = bal >= t.min;
+              const isCurrent = tier.label === t.label;
+              return (
+                <div
+                  key={t.label}
+                  className={`flex items-center justify-between p-2.5 rounded-2xl transition-all ${
+                    unlocked
+                      ? 'bg-gradient-to-r from-teal-600 to-teal-800/50 dark:from-teal-700 dark:to-transparent text-white'
+                      : 'bg-[var(--bg-muted)] opacity-50'
+                  } ${isCurrent ? 'ring-2 ring-teal-400/50 dark:ring-teal-500/30' : ''}`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Trophy className="w-4 h-4" />
+                    <span className={`text-sm font-bold ${unlocked ? 'text-white' : 'text-[var(--text-muted)]'}`}>
+                      {t.label}
                     </span>
                   </div>
-                );
-              })}
+                  <span className={`text-[10px] font-black uppercase ${unlocked ? 'text-white/80' : 'text-[var(--text-muted)]'}`}>
+                    {t.discount}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* ─── Quick info (row 2, col 1) ─── */}
+        <div className="bg-gradient-to-br from-white to-cyan-50/50 dark:from-[var(--bg-card)] dark:to-cyan-950/20 rounded-3xl border border-cyan-200/40 dark:border-cyan-800/20 p-5 shadow-lg">
+          <h3 className="text-sm font-bold text-cyan-600 dark:text-cyan-400 uppercase tracking-wide mb-3 flex items-center gap-2">
+            <Sparkles className="w-4 h-4" />
+            Información rápida
+          </h3>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-gray-600 dark:text-[var(--text-muted)]">Tasa de conversión</span>
+              <span className="text-sm font-bold text-teal-600 dark:text-teal-400">1 Lirio = S/ 1</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-gray-600 dark:text-[var(--text-muted)]">Descuento máximo</span>
+              <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">3% del total</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-gray-600 dark:text-[var(--text-muted)]">Mínimo recomendado</span>
+              <span className="text-sm font-bold text-cyan-600 dark:text-cyan-400">S/ 2.00</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-gray-600 dark:text-[var(--text-muted)]">Nivel actual</span>
+              <span className={`text-sm font-bold bg-gradient-to-r ${tier.color} bg-clip-text text-transparent`}>
+                {tier.label}
+              </span>
             </div>
           </div>
+        </div>
 
-          {/* Quick info */}
-          <div className="bg-gradient-to-br from-white to-cyan-50/50 dark:from-[var(--bg-card)] dark:to-cyan-950/20 rounded-3xl border border-cyan-200/40 dark:border-cyan-800/20 p-5 shadow-lg">
-            <h3 className="text-sm font-bold text-cyan-600 dark:text-cyan-400 uppercase tracking-wide mb-3 flex items-center gap-2">
-              <Sparkles className="w-4 h-4" />
-              Información rápida
-            </h3>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-600 dark:text-[var(--text-muted)]">Tasa de conversión</span>
-                <span className="text-sm font-bold text-teal-600 dark:text-teal-400">1 Lirio = S/ 1</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-600 dark:text-[var(--text-muted)]">Descuento máximo</span>
-                <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">3% del total</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-600 dark:text-[var(--text-muted)]">Mínimo recomendado</span>
-                <span className="text-sm font-bold text-cyan-600 dark:text-cyan-400">S/ 2.00</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-600 dark:text-[var(--text-muted)]">Nivel actual</span>
-                <span className={`text-sm font-bold bg-gradient-to-r ${tier.color} bg-clip-text text-transparent`}>
-                  {tier.label}
-                </span>
-              </div>
-            </div>
-          </div>
+        {/* ─── How it works (row 2, col 2) ─── */}
+        <div className="bg-gradient-to-br from-teal-50 to-emerald-50 dark:from-teal-950/30 dark:to-emerald-950/30 rounded-3xl border-2 border-teal-300/40 dark:border-teal-700/20 p-5 shadow-lg">
+          <h3 className="text-xs font-bold text-teal-800 dark:text-teal-300 uppercase tracking-wide mb-3 flex items-center gap-2">
+            <Leaf className="w-4 h-4" />
+            ¿Cómo funciona?
+          </h3>
+          <ul className="space-y-2.5 text-xs text-teal-700 dark:text-teal-300/90 leading-relaxed">
+            <li className="flex items-start gap-2">
+              <span className="text-teal-500 dark:text-teal-400 mt-0.5 shrink-0">●</span>
+              <span>1 Lirio = S/ 1.00 gastado en la plataforma</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-teal-500 dark:text-teal-400 mt-0.5 shrink-0">●</span>
+              <span>Úsalos como descuento en tu próximo checkout</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-teal-500 dark:text-teal-400 mt-0.5 shrink-0">●</span>
+              <span>Descuento máximo: {tier.discount} del valor venta (sin IGV)</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-teal-500 dark:text-teal-400 mt-0.5 shrink-0">●</span>
+              <span>Se acreditan automáticamente tras cada compra pagada</span>
+            </li>
+          </ul>
+        </div>
 
-          {/* How it works */}
-          <div className="bg-gradient-to-br from-teal-50 to-emerald-50 dark:from-teal-950/30 dark:to-emerald-950/30 rounded-3xl border-2 border-teal-300/40 dark:border-teal-700/20 p-5 shadow-lg">
-            <h3 className="text-xs font-bold text-teal-800 dark:text-teal-300 uppercase tracking-wide mb-3 flex items-center gap-2">
-              <Leaf className="w-4 h-4" />
-              ¿Cómo funciona?
-            </h3>
-            <ul className="space-y-2.5 text-xs text-teal-700 dark:text-teal-300/90 leading-relaxed">
-              <li className="flex items-start gap-2">
-                <span className="text-teal-500 dark:text-teal-400 mt-0.5 shrink-0">●</span>
-                <span>1 Lirio = S/ 1.00 gastado en la plataforma</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-teal-500 dark:text-teal-400 mt-0.5 shrink-0">●</span>
-                <span>Úsalos como descuento en tu próximo checkout</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-teal-500 dark:text-teal-400 mt-0.5 shrink-0">●</span>
-                <span>Descuento máximo: {tier.discount} del valor venta (sin IGV)</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-teal-500 dark:text-teal-400 mt-0.5 shrink-0">●</span>
-                <span>Se acreditan automáticamente tras cada compra pagada</span>
-              </li>
-            </ul>
+        {/* ─── Minigame (row 2, col 3) ─── */}
+        <div className="bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-950/40 dark:to-teal-950/40 rounded-3xl border-2 border-emerald-300/40 dark:border-emerald-700/30 p-5 shadow-lg">
+          <h3 className="text-xs font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wide mb-3 flex items-center justify-center gap-2">
+            <Sparkles className="w-4 h-4" />
+            Minijuego
+          </h3>
+          <p className="text-xs text-emerald-700 dark:text-emerald-300/80 mb-4 leading-relaxed text-center">
+            ¿Podrás vencer a la IA en el Tres en Raya?
+          </p>
+          <p className="text-[10px] text-emerald-600 dark:text-emerald-400/80 mb-5 text-center font-medium">
+            💎 Modo difícil: gana <span className="font-bold">+2 Lirios</span> por día
+          </p>
+          <div className="flex justify-center">
+            <button
+              onClick={() => setGameOpen(true)}
+              className="px-5 py-1.5 rounded-xl bg-emerald-500 dark:bg-emerald-600 text-white text-sm font-bold hover:bg-emerald-600 dark:hover:bg-emerald-700 transition active:scale-[0.98] flex items-center justify-center gap-2"
+            >
+              <Sparkles className="w-4 h-4" /> Jugar ahora
+            </button>
           </div>
         </div>
       </div>
+
+      {rewardToast && (
+        <div className="fixed top-4 right-4 z-[110] animate-fade-slide-in bg-emerald-100 dark:bg-emerald-900/60 border border-emerald-300 dark:border-emerald-700 text-emerald-800 dark:text-emerald-200 px-4 py-3 rounded-2xl shadow-xl flex items-center gap-2 text-sm font-bold">
+          <Coins className="w-5 h-5 text-emerald-500" />
+          ¡Has ganado 2 Lirios!
+        </div>
+      )}
+      <LiriosMinigameModal open={gameOpen} onClose={() => setGameOpen(false)} onEarnLirios={handleEarnLirios} />
 
       {/* ─── Transaction History ─── */}
       <div className="bg-white/80 dark:bg-[var(--bg-card)] backdrop-blur-xl rounded-3xl border border-gray-200/50 dark:border-[var(--border-subtle)] overflow-hidden shadow-xl">
@@ -509,7 +557,7 @@ export default function LiriosWalletPageClient() {
           />
         ) : (
           <>
-            <div className="divide-y divide-gray-100 dark:divide-[var(--border-subtle)]">
+            <div className="divide-y divide-gray-100 dark:divide-[var(--border-subtle)] max-h-[460px] overflow-y-auto overscroll-contain custom-scrollbar">
               {filteredTxs.map((tx, idx) => (
                 <div
                   key={tx.id}

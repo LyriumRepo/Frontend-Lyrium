@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { ShoppingCart, Eye, ExternalLink } from 'lucide-react';
 import { Producto } from '@/types/public';
 import { useCarritoStore } from '@/store/carritoStore';
+import QuickViewModal from '@/components/products/QuickViewModal';
 
 interface ProductSliderProps {
   productos: Producto[];
@@ -81,8 +82,8 @@ export default function ProductSlider({ productos, titulo, bannerImage }: Produc
   const [itemsPerView, setItemsPerView] = useState(3);
 
   const openCart = useCarritoStore((s) => s.openCart);
-  const openDetailModal = useCarritoStore((s) => s.openDetailModal);
   const addToCart = useCarritoStore((s) => s.addToCart);
+  const [quickViewProduct, setQuickViewProduct] = useState<Producto | null>(null);
 
   const handleAddToCart = (product: Producto) => {
     addToCart(product);
@@ -90,7 +91,7 @@ export default function ProductSlider({ productos, titulo, bannerImage }: Produc
   };
 
   const handleQuickView = (product: Producto) => {
-    openDetailModal(String(product.id));
+    setQuickViewProduct(product);
   };
 
   // Responsive items per view
@@ -173,6 +174,16 @@ export default function ProductSlider({ productos, titulo, bannerImage }: Produc
           )}
         </div>
       </div>
+
+      <QuickViewModal
+        isOpen={!!quickViewProduct}
+        onClose={() => setQuickViewProduct(null)}
+        producto={quickViewProduct}
+        onAddToCart={(producto, cantidad) => {
+          addToCart(producto, cantidad);
+          openCart();
+        }}
+      />
     </section>
   );
 }

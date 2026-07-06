@@ -84,7 +84,7 @@ export default function VideoGallery() {
             </div>
 
             {/* Galería de Videos Filtrable */}
-            <div className="w-full py-1 bg-slate-50 dark:bg-[var(--bg-primary)]">
+            <div className="w-full py-8 md:py-12 bg-slate-50 dark:bg-[var(--bg-primary)]">
                 <div className="max-w-7xl mx-auto px-4">
                     {/* Filtros de Categoría */}
                     <div className="flex flex-wrap justify-center gap-3 mb-12">

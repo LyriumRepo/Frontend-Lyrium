@@ -70,6 +70,9 @@ export interface SubscriptionInfo {
   planId?: string;
   status?: string;
   startDate?: string;
+  subscriptionId?: number;
+  autoRenew?: boolean;
+  paymentMethodId?: number | null;
 }
 
 export interface Request {

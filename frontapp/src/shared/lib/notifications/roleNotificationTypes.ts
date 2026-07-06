@@ -138,6 +138,21 @@ export const ROLE_NOTIFICATION_TYPES: Record<string, RoleNotificationConfig> = {
         bell: [],   // [] = show all (backend already scopes by user)
         toast: [],  // [] = no popups
     },
+
+    security: {
+        bell: [
+            'ticket_created', 'TicketCreatedNotification',
+            'ticket_replied', 'TicketRepliedNotification',
+            'ticket_status_changed', 'TicketStatusChangedNotification',
+            'new_seller_registration', 'NewSellerRegistrationNotification',
+            'store_status_changed', 'StoreStatusNotification',
+        ],
+        toast: [
+            'ticket_created', 'TicketCreatedNotification',
+            'ticket_replied', 'TicketRepliedNotification',
+            'ticket_status_changed', 'TicketStatusChangedNotification',
+        ],
+    },
 };
 
 /**

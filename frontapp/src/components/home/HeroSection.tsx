@@ -12,14 +12,15 @@ interface HeroSectionProps {
 export default function HeroSection({ banners }: HeroSectionProps) {
   const [current, setCurrent] = useState(0);
 
-  // 6 imágenes PNG locales ubicadas en public/img/Inicio/
+  // 6 imágenes PNG locales ubicadas en public/img/Inicio/ (desktop) y sus
+  // equivalentes recortados para mobile (retrato) en BANNER_GRANDE_INICIO_MOBILE/.
   const displayBanners = [
-    { id: 1, titulo: 'Banner 1', imagen: '/img/BANNER_GRANDE_INICIO/1.png' },
-    { id: 2, titulo: 'Banner 2', imagen: '/img/BANNER_GRANDE_INICIO/2.png' },
-    { id: 3, titulo: 'Banner 3', imagen: '/img/BANNER_GRANDE_INICIO/3.png' },
-    { id: 4, titulo: 'Banner 4', imagen: '/img/BANNER_GRANDE_INICIO/4.png' },
-    { id: 5, titulo: 'Banner 5', imagen: '/img/BANNER_GRANDE_INICIO/5.png' },
-    { id: 6, titulo: 'Banner 6', imagen: '/img/BANNER_GRANDE_INICIO/6.png' },
+    { id: 1, titulo: 'Banner 1', imagen: '/img/BANNER_GRANDE_INICIO/1.png', imagenMobile: '/img/BANNER_GRANDE_INICIO_MOBILE/1.webp' },
+    { id: 2, titulo: 'Banner 2', imagen: '/img/BANNER_GRANDE_INICIO/2.png', imagenMobile: '/img/BANNER_GRANDE_INICIO_MOBILE/2.webp' },
+    { id: 3, titulo: 'Banner 3', imagen: '/img/BANNER_GRANDE_INICIO/3.png', imagenMobile: '/img/BANNER_GRANDE_INICIO_MOBILE/3.webp' },
+    { id: 4, titulo: 'Banner 4', imagen: '/img/BANNER_GRANDE_INICIO/4.png', imagenMobile: '/img/BANNER_GRANDE_INICIO_MOBILE/4.webp' },
+    { id: 5, titulo: 'Banner 5', imagen: '/img/BANNER_GRANDE_INICIO/5.png', imagenMobile: '/img/BANNER_GRANDE_INICIO_MOBILE/5.webp' },
+    { id: 6, titulo: 'Banner 6', imagen: '/img/BANNER_GRANDE_INICIO/6.png', imagenMobile: '/img/BANNER_GRANDE_INICIO_MOBILE/6.webp' },
   ];
 
   const prev = useCallback(
@@ -79,17 +80,23 @@ export default function HeroSection({ banners }: HeroSectionProps) {
               className="overflow-hidden"
               style={{ width: `${100 / displayBanners.length}%` }}
             >
-              <picture>
-                <Image
-                  src={banner.imagen}
-                  alt={banner.titulo}
-                  width={1600}
-                  height={600}
-                  className="w-full h-auto object-cover cursor-pointer origin-center"
-                  style={{ transform: 'scaleX(1.006)' }}
-                  priority
-                />
-              </picture>
+              <Image
+                src={banner.imagenMobile}
+                alt={banner.titulo}
+                width={650}
+                height={932}
+                className="w-full h-auto object-cover cursor-pointer origin-center block md:hidden"
+                priority
+              />
+              <Image
+                src={banner.imagen}
+                alt={banner.titulo}
+                width={1600}
+                height={600}
+                className="w-full h-auto object-cover cursor-pointer origin-center hidden md:block"
+                style={{ transform: 'scaleX(1.006)' }}
+                priority
+              />
             </div>
           ))}
         </div>

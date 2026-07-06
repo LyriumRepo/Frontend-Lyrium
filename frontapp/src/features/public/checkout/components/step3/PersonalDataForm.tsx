@@ -27,7 +27,7 @@ export default function PersonalDataForm() {
     >
       <h2 className="font-bold text-gray-900 dark:text-[var(--text-primary)] flex items-center gap-2">
         <span
-          className="w-7 h-7 rounded-full bg-[var(--brand-sky)] text-white text-xs
+          className="w-7 h-7 rounded-full bg-[var(--brand-sky)] dark:bg-[var(--brand-green)] text-white text-xs
           font-black flex items-center justify-center"
         >
           1
@@ -52,7 +52,7 @@ export default function PersonalDataForm() {
                 className={`px-3 py-2 sm:px-4 rounded-xl text-sm font-medium border transition
                   ${
                     data.docType === t.value
-                      ? 'bg-[var(--brand-sky)] text-white border-[var(--brand-sky)]'
+                      ? 'bg-[var(--brand-sky)] dark:bg-[var(--brand-green)] text-white border-[var(--brand-sky)] dark:border-[var(--brand-green)]'
                       : 'bg-white dark:bg-[var(--bg-secondary)] text-gray-600 dark:text-[var(--text-secondary)] border-gray-200 dark:border-[var(--border-subtle)] hover:border-[var(--brand-sky)] dark:hover:border-[var(--brand-green)]'
                   }`}
               >

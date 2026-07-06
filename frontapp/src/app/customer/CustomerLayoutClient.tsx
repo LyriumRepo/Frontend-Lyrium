@@ -8,6 +8,7 @@ import { useUIStore } from '@/store/uiStore';
 import { useAuth } from '@/shared/lib/context/AuthContext';
 import Icon from '@/components/ui/Icon';
 import ChatBotWidget from '@/features/chatbot/components/ChatBotWidget';
+import NotificationSidebar from '@/components/shared/notifications/NotificationSidebar';
 import { WELCOME_MODAL_LIGHT_TEXT, WELCOME_MODAL_LIGHT_BADGE } from '@/shared/lib/theme/welcomeModalTheme';
 
 interface CustomerLayoutClientProps {
@@ -1091,6 +1092,7 @@ export function CustomerLayoutClient({ children }: CustomerLayoutClientProps) {
             mainClassName="p-4 md:p-8 bg-[var(--bg-secondary)]"
         >
             {children}
+            <NotificationSidebar />
             <ChatBotWidget />
             <CustomerWelcomeToast />
             <BirthdayToast />

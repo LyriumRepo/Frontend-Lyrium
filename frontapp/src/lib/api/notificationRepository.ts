@@ -31,6 +31,7 @@ export interface Notification {
   contract_version: string | null;
   contract_action: string | null;
   is_read: boolean;
+  status: string | null;
   // Store-related notifications
   store_id: number | null;
   // Profile request notifications
@@ -116,6 +117,13 @@ export const notificationRepository = {
   },
 
   deleteAll: async (ids: string[]): Promise<void> => {
-    await Promise.allSettled(ids.map(id => notificationRepository.delete(id)));
+    try {
+      await apiClient<{ success: boolean; message: string }>('/notifications/delete-all', {
+        method: 'POST',
+        body: { ids },
+      });
+    } catch (error) {
+      handleApiError(error, undefined);
+    }
   },
 };

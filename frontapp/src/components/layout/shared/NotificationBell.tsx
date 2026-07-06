@@ -18,7 +18,7 @@ export default function NotificationBell() {
     return (
         <button
             onClick={toggleNotificationSidebar}
-            className={`relative p-2.5 rounded-xl transition-all ${notificationSidebarOpen ? 'bg-[var(--bg-secondary)] text-[var(--brand-green)]' : 'text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)]'}`}
+            className={`relative p-2.5 rounded-xl transition-all ${notificationSidebarOpen ? 'bg-[var(--bg-secondary)] text-sky-500 dark:text-emerald-400' : 'text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)]'}`}
             aria-label="Centro de Notificaciones"
         >
             <Bell className="w-5 h-5" />

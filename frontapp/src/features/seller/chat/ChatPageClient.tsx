@@ -192,7 +192,7 @@ export function ChatPageClient() {
     }));
 
     const listContent = (
-        <div className={`flex-col h-full ${(!activeConversation || isMobileListVisible) ? 'flex' : 'hidden'} sm:flex`}>
+        <div className={`flex-col h-full ${(!activeConversation || isMobileListVisible) ? 'flex' : 'hidden'} lg:flex`}>
             {/* Barra de acciones: Nuevo Chat + Leyenda */}
             {!showNewChatForm && (
                 <div className="px-4 pt-3 pb-2 flex items-center gap-2 shrink-0">

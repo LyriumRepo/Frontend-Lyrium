@@ -248,6 +248,7 @@ export default function PlanesPage() {
                   isDetailsExpanded={state.isDetailsExpanded}
                   onToggleDetails={planes.toggleDetails}
                   onFeatureClick={planes.onFeatureClick}
+                  onToggleAutoRenewal={planes.toggleAutoRenewal}
                 />
               </div>
             </div>

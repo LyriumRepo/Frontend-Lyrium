@@ -88,8 +88,8 @@ export function AuthContainer({ onSuccess }: AuthContainerProps) {
     const isRegister = mode === 'register';
 
     return (
-        <div className="flex-1 flex items-center justify-center p-4 bg-[#F8F9FA] dark:bg-[var(--bg-primary)]">
-            <div className="relative w-full max-w-[1200px] sm:min-h-[650px] bg-white dark:bg-[var(--bg-secondary)] rounded-[30px] shadow-[0_40px_100px_rgba(0,0,0,0.1)] overflow-hidden flex">
+        <div className="flex-1 flex items-start sm:items-center justify-center p-3 pt-6 sm:p-4 bg-[#F8F9FA] dark:bg-[var(--bg-primary)]">
+            <div className="relative w-full max-w-[1200px] sm:min-h-[650px] bg-white dark:bg-[var(--bg-secondary)] rounded-[20px] sm:rounded-[30px] shadow-[0_40px_100px_rgba(0,0,0,0.1)] overflow-hidden flex">
 
                 {/* Left Side Panel - oculto en mobile, visible en sm+ */}
                 <div
@@ -152,7 +152,7 @@ export function AuthContainer({ onSuccess }: AuthContainerProps) {
                 </div>
 
                 {/* Right Side - Forms */}
-                <div className="relative w-full sm:ml-auto sm:w-[60%] p-5 sm:p-10 flex flex-col">
+                <div className="relative w-full sm:ml-auto sm:w-[60%] p-4 sm:p-10 flex flex-col">
                     <UserTypeToggle
                         value={userType}
                         onChange={(type) => {

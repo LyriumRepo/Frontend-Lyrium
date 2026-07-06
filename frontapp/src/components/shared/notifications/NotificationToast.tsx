@@ -26,7 +26,7 @@ export default function NotificationToast() {
     isAllowedForRole(n.metadata?.type ?? '', user?.role, 'toast')
   );
   const [items, setItems] = useState<ToastItem[]>([]);
-  const lastIdRef = useRef<string | null>(null);
+  const processedIdsRef = useRef<Set<string>>(new Set());
   const isSeededRef = useRef(false);
   const timersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
@@ -38,12 +38,14 @@ export default function NotificationToast() {
     }, 400);
   }, []);
 
-  // Seed the last seen ID once the initial REST load completes, to avoid
+  // Seed processed IDs once the initial REST load completes, to avoid
   // showing toasts for pre-existing notifications on page load.
   useEffect(() => {
     if (!loading && !isSeededRef.current) {
       isSeededRef.current = true;
-      lastIdRef.current = filteredNotifications[0]?.id ?? null;
+      for (const n of filteredNotifications) {
+        processedIdsRef.current.add(n.id);
+      }
     }
   }, [loading, filteredNotifications]);
 
@@ -51,25 +53,29 @@ export default function NotificationToast() {
     if (!isSeededRef.current) return;
     if (filteredNotifications.length === 0) return;
 
-    const latest = filteredNotifications[0];
-    if (latest.id === lastIdRef.current) return;
-    lastIdRef.current = latest.id;
+    // Process any notifications that are not yet in our processed set.
+    // This handles multiple notifications arriving simultaneously.
+    const newItems: ToastItem[] = [];
+    for (const n of filteredNotifications) {
+      if (processedIdsRef.current.has(n.id)) continue;
+      processedIdsRef.current.add(n.id);
+      newItems.push({
+        id: n.id,
+        title: n.title,
+        message: n.message,
+        level: n.level,
+        action: n.action,
+        exiting: false,
+      });
+    }
+    if (newItems.length === 0) return;
 
-    const item: ToastItem = {
-      id: latest.id,
-      title: latest.title,
-      message: latest.message,
-      level: latest.level,
-      action: latest.action,
-      exiting: false,
-    };
+    setItems(prev => [...newItems, ...prev].slice(0, 3));
 
-    setItems(prev => [item, ...prev].slice(0, 3));
-
-    // Each notification gets its own independent timer stored in a Map,
-    // so arriving notifications never cancel each other's auto-dismiss.
-    const timer = setTimeout(() => remove(item.id), 5000);
-    timersRef.current.set(item.id, timer);
+    for (const item of newItems) {
+      const timer = setTimeout(() => remove(item.id), 5000);
+      timersRef.current.set(item.id, timer);
+    }
   }, [filteredNotifications, remove]);
 
   const getIcon = (level: string) => {
@@ -80,7 +86,7 @@ export default function NotificationToast() {
       case 'WARNING':
         return <Bell className="w-4 h-4 text-amber-500" />;
       default:
-        return <Bell className="w-4 h-4 text-[var(--brand-green)]" />;
+        return <Bell className="w-4 h-4 text-sky-500 dark:text-emerald-400" />;
     }
   };
 
@@ -92,7 +98,7 @@ export default function NotificationToast() {
       case 'WARNING':
         return 'border-l-amber-500';
       default:
-        return 'border-l-[var(--brand-green)]';
+        return 'border-l-sky-500 dark:border-l-emerald-500';
     }
   };
 
@@ -123,7 +129,7 @@ export default function NotificationToast() {
               {item.message}
             </p>
             {item.action && (
-              <p className="text-[10px] font-bold text-[var(--brand-green)] mt-1 uppercase tracking-wider">
+              <p className="text-[10px] font-bold text-sky-600 dark:text-emerald-400 mt-1 uppercase tracking-wider">
                 {item.action.label} →
               </p>
             )}

@@ -2,6 +2,7 @@
 
 import { ShoppingCart, Package, CreditCard, CheckCircle, FileText } from 'lucide-react';
 import { useCheckoutStore } from '@/store/checkoutStore';
+import { useTheme } from 'next-themes';
 
 const STEPS = [
   { id: 1, label: 'Carrito', Icon: ShoppingCart },
@@ -11,7 +12,7 @@ const STEPS = [
   { id: 5, label: 'Boleta', Icon: FileText },
 ] as const;
 
-const STEP_COLORS = {
+const STEP_COLORS_LIGHT = {
   1: { accent: '#E6EE9C', glow: 'rgba(192,223,22,0.35)' },
   2: { accent: '#38BDF8', glow: 'rgba(56,189,248,0.35)' },
   3: { accent: '#78E0A1', glow: 'rgba(120,224,161,0.35)' },
@@ -19,8 +20,26 @@ const STEP_COLORS = {
   5: { accent: '#0EA5E9', glow: 'rgba(14,165,233,0.35)' },
 };
 
+const STEP_COLORS_DARK = {
+  1: { accent: '#E6EE9C', glow: 'rgba(192,223,22,0.35)' },
+  2: { accent: '#34d399', glow: 'rgba(52,211,153,0.35)' },
+  3: { accent: '#78E0A1', glow: 'rgba(120,224,161,0.35)' },
+  4: { accent: '#10b981', glow: 'rgba(16,185,129,0.35)' },
+  5: { accent: '#059669', glow: 'rgba(5,150,105,0.35)' },
+};
+
+const COMPLETED_GRADIENT_LIGHT = 'linear-gradient(135deg,#C0DF16,#78E0A1,#5B9BD5)';
+const COMPLETED_GRADIENT_DARK = 'linear-gradient(135deg,#C0DF16,#78E0A1,#10b981)';
+const CONNECTOR_GRADIENT_LIGHT = 'linear-gradient(90deg,#C0DF16,#78E0A1,#5B9BD5)';
+const CONNECTOR_GRADIENT_DARK = 'linear-gradient(90deg,#C0DF16,#78E0A1,#10b981)';
+
 export default function CheckoutStepBar() {
   const currentStep = useCheckoutStore((s) => s.currentStep);
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === 'dark';
+  const STEP_COLORS = isDark ? STEP_COLORS_DARK : STEP_COLORS_LIGHT;
+  const completedGradient = isDark ? COMPLETED_GRADIENT_DARK : COMPLETED_GRADIENT_LIGHT;
+  const connectorGradient = isDark ? CONNECTOR_GRADIENT_DARK : CONNECTOR_GRADIENT_LIGHT;
 
   const getCircleClass = (stepId: number) => {
     if (stepId < currentStep) return 'step-circle--completed';
@@ -75,7 +94,7 @@ export default function CheckoutStepBar() {
                     ].join(' ')}
                     style={{
                       background: isCompleted
-                        ? 'linear-gradient(135deg,#C0DF16,#78E0A1,#5B9BD5)'
+                        ? completedGradient
                         : color.accent,
                       boxShadow: isActive
                         ? `0 0 0 4px white, 0 8px 32px ${color.glow}`
@@ -100,7 +119,7 @@ export default function CheckoutStepBar() {
                       <Icon
                         className={`w-4 h-4 sm:w-5 sm:h-5 transition-colors duration-500 ${
                           isActive
-                            ? 'text-sky-600 dark:text-[var(--brand-sky)]'
+                            ? 'text-sky-600 dark:text-emerald-400'
                             : isCompleted
                               ? 'text-emerald-500'
                               : 'text-gray-400 dark:text-[var(--text-muted)]'
@@ -120,7 +139,7 @@ export default function CheckoutStepBar() {
                         style={{
                           width: connectorFill(step.id),
                           background:
-                            'linear-gradient(90deg,#C0DF16,#78E0A1,#5B9BD5)',
+                            connectorGradient,
                           boxShadow: '0 0 10px rgba(16,242,39,0.5)',
                         }}
                       />

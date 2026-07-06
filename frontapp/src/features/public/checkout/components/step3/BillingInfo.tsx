@@ -17,7 +17,7 @@ export default function BillingInfo() {
     >
       {/* Título */}
       <h2 className="font-bold text-gray-900 dark:text-[var(--text-primary)] flex items-center gap-2">
-        <span className="w-7 h-7 rounded-full bg-[var(--brand-sky)] text-white text-xs font-black flex items-center justify-center">
+        <span className="w-7 h-7 rounded-full bg-[var(--brand-sky)] dark:bg-[var(--brand-green)] text-white text-xs font-black flex items-center justify-center">
           3
         </span>
         Método de pago
@@ -25,7 +25,7 @@ export default function BillingInfo() {
       </h2>
 
       {/* Izipay branding */}
-      <div className="flex items-center gap-3 p-4 bg-sky-50 dark:bg-sky-900/20 rounded-xl border border-sky-100 dark:border-sky-800/40">
+      <div className="flex items-center gap-3 p-4 bg-sky-50 dark:bg-emerald-900/20 rounded-xl border border-sky-100 dark:border-emerald-800/40">
         <div className="relative w-20 h-8 shrink-0">
           <Image
             src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS82g5FrC0YFl2vLYDBioVuYkTPKSMR9qyqHQ&s"
@@ -35,7 +35,7 @@ export default function BillingInfo() {
             unoptimized
           />
         </div>
-        <p className="text-sm text-sky-800 dark:text-sky-300 leading-relaxed">
+        <p className="text-sm text-sky-800 dark:text-emerald-300 leading-relaxed">
           Haz clic en <span className="font-bold">&quot;Realizar pedido&quot;</span> y el
           formulario seguro de pago de Izipay se abrirá en una ventana emergente.
         </p>
@@ -48,7 +48,7 @@ export default function BillingInfo() {
         </p>
         <div className="grid grid-cols-2 gap-2">
           <div className="flex items-center gap-2 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800/40">
-            <CreditCard className="w-4 h-4 text-[var(--brand-sky)] flex-shrink-0" />
+            <CreditCard className="w-4 h-4 text-[var(--brand-sky)] dark:text-[var(--brand-green)] flex-shrink-0" />
             <span className="text-xs font-medium text-gray-700 dark:text-[var(--text-primary)]">
               Tarjeta crédito / débito
             </span>
@@ -59,7 +59,7 @@ export default function BillingInfo() {
               Yape / Plin
             </span>
           </div>
-          <div className="flex items-center gap-2 p-3 rounded-xl bg-sky-50 dark:bg-sky-900/20 border border-sky-100 dark:border-sky-800/40">
+          <div className="flex items-center gap-2 p-3 rounded-xl bg-sky-50 dark:bg-emerald-900/20 border border-sky-100 dark:border-emerald-800/40">
             <Smartphone className="w-4 h-4 text-emerald-500 flex-shrink-0" />
             <span className="text-xs font-medium text-gray-700 dark:text-[var(--text-primary)]">
               Billetera digital

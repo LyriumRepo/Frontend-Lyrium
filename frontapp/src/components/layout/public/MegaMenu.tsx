@@ -107,6 +107,7 @@ export default function MegaMenu({
             style={{ top: `${menuPosition.top}px`, bottom: 0 }}
             onMouseEnter={onMouseEnter}
             onMouseLeave={onMouseLeave}
+            onClick={(e) => { if (e.target === e.currentTarget) onMouseLeave(); }}
         >
             <div className="max-w-7xl mx-auto grid grid-cols-12 gap-0 h-full overflow-hidden">
                 {/* LISTA DE CATEGORÍAS (IZQUIERDA) */}

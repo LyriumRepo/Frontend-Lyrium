@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { useAuth } from '@/shared/lib/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEcho } from '@laravel/echo-react';
@@ -109,7 +110,7 @@ export default function CustomerBookingsPage() {
     try {
       await bookingRepository.rate(rateTarget.id, { rating: rateValue, comment: rateComment || undefined });
       setBookings(prev => prev.map(b =>
-        b.id === rateTarget.id ? { ...b, status: 'completed' as any } : b
+        b.id === rateTarget.id ? { ...b, review: { rating: rateValue, comment: rateComment || null } } : b
       ));
       setRateTarget(null);
       setRateValue(0);
@@ -124,7 +125,7 @@ export default function CustomerBookingsPage() {
   if (authLoading || loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="w-10 h-10 animate-spin text-emerald-500" />
+        <Loader2 className="w-10 h-10 animate-spin text-sky-500 dark:text-[var(--icons-green)]" />
       </div>
     );
   }
@@ -171,7 +172,7 @@ export default function CustomerBookingsPage() {
         <div className="space-y-3">
           {list.map((booking) => (
             <div key={booking.id}
-              className="group bg-white dark:bg-[var(--bg-card)] rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)] p-5 transition-all hover:shadow-lg hover:border-emerald-200 dark:hover:border-[var(--icons-green)]/40">
+              className="group bg-white dark:bg-[var(--bg-card)] rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)] p-5 transition-all hover:shadow-lg hover:border-sky-200 dark:hover:border-[var(--icons-green)]/40">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1.5">
@@ -186,16 +187,16 @@ export default function CustomerBookingsPage() {
 
                   <div className="flex flex-wrap gap-x-5 gap-y-1.5 text-xs text-gray-600 dark:text-[var(--text-secondary)]">
                     <span className="flex items-center gap-1.5">
-                      <Calendar className="w-3.5 h-3.5 text-emerald-500 dark:text-[var(--icons-green)]" />
+                      <Calendar className="w-3.5 h-3.5 text-sky-500 dark:text-[var(--icons-green)]" />
                       {booking.date && formatDate(booking.date)}
                     </span>
                     <span className="flex items-center gap-1.5">
-                      <Clock className="w-3.5 h-3.5 text-emerald-500 dark:text-[var(--icons-green)]" />
+                      <Clock className="w-3.5 h-3.5 text-sky-500 dark:text-[var(--icons-green)]" />
                       {booking.start_time} - {booking.end_time}
                     </span>
                     {booking.specialist && (
                       <span className="flex items-center gap-1.5">
-                        <User className="w-3.5 h-3.5 text-emerald-500 dark:text-[var(--icons-green)]" />
+                        <User className="w-3.5 h-3.5 text-sky-500 dark:text-[var(--icons-green)]" />
                         {booking.specialist.name}
                       </span>
                     )}
@@ -209,16 +210,26 @@ export default function CustomerBookingsPage() {
 
                 <div className="flex flex-col gap-2 shrink-0">
                   <button onClick={() => openDetail(booking)}
-                    className="p-2 rounded-xl bg-emerald-50 dark:bg-[var(--bg-muted)] text-emerald-600 dark:text-[var(--icons-green)] hover:bg-emerald-100 dark:hover:bg-[var(--bg-secondary)] transition-colors"
+                    className="p-2 rounded-xl bg-sky-50 dark:bg-[var(--bg-muted)] text-sky-600 dark:text-[var(--icons-green)] hover:bg-sky-100 dark:hover:bg-[var(--bg-secondary)] transition-colors"
                     title="Ver detalle">
                     <Eye className="w-4 h-4" />
                   </button>
                   {booking.status === 'completed' && (
-                    <button onClick={() => { setRateTarget(booking); setRateValue(0); setRateComment(''); setRateError(''); }}
-                      className="p-2 rounded-xl bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-colors"
-                      title="Calificar">
-                      <Star className="w-4 h-4" />
-                    </button>
+                    booking.review ? (
+                      <span
+                        className="p-2 rounded-xl bg-sky-50 dark:bg-[var(--brand-green)]/20 text-sky-600 dark:text-[var(--icons-green)] flex items-center gap-1"
+                        title={`Ya calificaste: ${booking.review.rating}/5`}
+                      >
+                        <Star className="w-4 h-4 fill-current" />
+                        <span className="text-[10px] font-bold">{booking.review.rating}</span>
+                      </span>
+                    ) : (
+                      <button onClick={() => { setRateTarget(booking); setRateValue(0); setRateComment(''); setRateError(''); }}
+                        className="p-2 rounded-xl bg-sky-50 dark:bg-[var(--bg-muted)] text-sky-600 dark:text-[var(--icons-green)] hover:bg-sky-100 dark:hover:bg-[var(--bg-secondary)] transition-colors"
+                        title="Calificar">
+                        <Star className="w-4 h-4" />
+                      </button>
+                    )
                   )}
                 </div>
               </div>
@@ -227,17 +238,19 @@ export default function CustomerBookingsPage() {
         </div>
       )}
 
-      {/* Right-side drawer */}
-      {detailTarget && (
-        <div className="fixed inset-0 z-[60]" onClick={closeDetail}>
+      {/* Right-side drawer — vía portal a document.body: el <div className="animate-fadeIn">
+          de BaseLayout.tsx tiene un transform (translateY vía animación con forwards) que
+          crea un containing block y rompe el position:fixed relativo al viewport real. */}
+      {detailTarget && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-[100]" role="dialog" aria-modal="true" aria-label={`Detalle de reserva: ${detailTarget.service_name}`} onClick={closeDetail}>
           {/* Overlay */}
           <div className={`absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300 ${drawerOpen ? 'opacity-100' : 'opacity-0'}`} />
           {/* Drawer */}
           <div
             onClick={(e) => e.stopPropagation()}
-            className={`absolute right-0 top-0 bottom-0 w-full sm:w-[520px] bg-white dark:bg-[var(--bg-secondary)] shadow-[-40px_0_100px_rgba(0,0,0,0.25)] flex flex-col transition-transform duration-300 ease-out ${drawerOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+            className={`absolute right-0 top-0 bottom-0 w-full sm:w-[520px] bg-white dark:bg-[var(--bg-secondary)] shadow-[-40px_0_100px_rgba(0,0,0,0.25)] flex flex-col transition-transform duration-300 ease-out will-change-transform ${drawerOpen ? 'translate-x-0' : 'translate-x-full'}`}>
             {/* Header gradiente */}
-            <div className="relative px-6 pt-7 pb-5 bg-gradient-to-r from-[#2A5A4D] via-emerald-600 to-[#6BAF7B] dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] text-white flex-shrink-0">
+            <div className="sticky top-0 z-10 px-6 pt-7 pb-5 bg-gradient-to-r from-sky-500 via-sky-400 to-sky-300 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] text-white flex-shrink-0">
               <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full -mr-24 -mt-24 blur-3xl" />
               <div className="relative z-10 flex items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
@@ -297,8 +310,8 @@ export default function CustomerBookingsPage() {
               )}
 
               {detailTarget.seller_notes && (
-                <div className="p-4 bg-emerald-50 dark:bg-[var(--bg-muted)]/40 rounded-2xl border border-emerald-100 dark:border-[var(--icons-green)]/30">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-[var(--icons-green)] mb-2">
+                <div className="p-4 bg-sky-50 dark:bg-[var(--bg-muted)]/40 rounded-2xl border border-sky-100 dark:border-[var(--icons-green)]/30">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-sky-700 dark:text-[var(--icons-green)] mb-2">
                     Notas del vendedor
                   </p>
                   <p className="text-sm text-gray-700 dark:text-[var(--text-secondary)]">{detailTarget.seller_notes}</p>
@@ -308,25 +321,26 @@ export default function CustomerBookingsPage() {
               {/* Total */}
               <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-[var(--border-subtle)]">
                 <span className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-[var(--text-muted)]">Total</span>
-                <span className="text-2xl font-black text-emerald-600 dark:text-[var(--icons-green)]">
+                <span className="text-2xl font-black text-sky-600 dark:text-[var(--icons-green)]">
                   S/ {detailTarget.payment_amount.toFixed(2)}
                 </span>
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
-      {/* Rate modal */}
-      {rateTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={() => setRateTarget(null)}>
+      {/* Rate modal — mismo motivo, vía portal */}
+      {rateTarget && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" role="dialog" aria-modal="true" aria-label="Califica tu experiencia" onClick={() => setRateTarget(null)}>
           <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-2xl shadow-2xl max-w-sm w-full p-6 relative" onClick={(e) => e.stopPropagation()}>
             <button onClick={() => setRateTarget(null)} className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 dark:hover:text-[var(--text-secondary)]">
               <X className="w-5 h-5" />
             </button>
             <div className="text-center mb-5">
-              <div className="w-14 h-14 rounded-full bg-amber-100 dark:bg-amber-950/50 flex items-center justify-center mx-auto mb-3">
-                <Star className="w-6 h-6 text-amber-500" />
+              <div className="w-14 h-14 rounded-full bg-sky-100 dark:bg-[var(--brand-green)]/40 flex items-center justify-center mx-auto mb-3">
+                <Star className="w-6 h-6 text-sky-500 dark:text-[var(--icons-green)]" />
               </div>
               <h3 className="text-lg font-bold text-gray-900 dark:text-[var(--text-primary)]">Califica tu experiencia</h3>
               <p className="text-sm text-gray-500 dark:text-[var(--text-muted)] mt-1">{rateTarget.service_name}</p>
@@ -335,24 +349,25 @@ export default function CustomerBookingsPage() {
             <div className="flex justify-center gap-2 mb-5">
               {[1, 2, 3, 4, 5].map((n) => (
                 <button key={n} onClick={() => setRateValue(n)} className="transition-all hover:scale-110">
-                  <Star className={`w-8 h-8 ${n <= rateValue ? 'text-amber-400 fill-amber-400' : 'text-gray-300 dark:text-gray-600'}`} />
+                  <Star className={`w-8 h-8 ${n <= rateValue ? 'text-sky-500 fill-sky-500 dark:text-[var(--icons-green)] dark:fill-[var(--icons-green)]' : 'text-gray-300 dark:text-gray-600'}`} />
                 </button>
               ))}
             </div>
 
             <textarea value={rateComment} onChange={(e) => setRateComment(e.target.value)}
               placeholder="Cuéntanos tu experiencia (opcional)" rows={3}
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-[var(--border-subtle)] bg-gray-50 dark:bg-[var(--bg-muted)] text-sm text-gray-700 dark:text-[var(--text-secondary)] focus:border-emerald-400 dark:focus:border-[var(--icons-green)] focus:ring-2 focus:ring-emerald-100 dark:focus:ring-[var(--icons-green)]/20 outline-none transition-all resize-none mb-4" />
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-[var(--border-subtle)] bg-gray-50 dark:bg-[var(--bg-muted)] text-sm text-gray-700 dark:text-[var(--text-secondary)] focus:border-sky-400 dark:focus:border-[var(--icons-green)] focus:ring-2 focus:ring-sky-100 dark:focus:ring-[var(--icons-green)]/20 outline-none transition-all resize-none mb-4" />
 
             {rateError && <p className="text-xs text-red-500 mb-3 text-center">{rateError}</p>}
 
             <button onClick={handleRate} disabled={rateValue === 0 || rateSubmitting}
-              className="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-600 hover:to-amber-500 disabled:opacity-50 text-white text-sm font-bold transition-all flex items-center justify-center gap-2">
+              className="w-full py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-sky-400 hover:from-sky-600 hover:to-sky-500 dark:from-[var(--brand-green)] dark:to-[var(--brand-green-hover)] dark:hover:from-[var(--brand-green-hover)] dark:hover:to-[var(--brand-green)] disabled:opacity-50 text-white text-sm font-bold transition-all flex items-center justify-center gap-2">
               {rateSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Star className="w-4 h-4" />}
               {rateSubmitting ? 'Enviando…' : 'Enviar calificación'}
             </button>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

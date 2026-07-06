@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import Icon from '@/components/ui/Icon';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import { wishlistApi, WishlistItem as WishlistItemType } from '@/shared/lib/api/wishlistRepository';
+import ConfirmDialog from '@/components/ui/confirm-dialog';
 
 interface WishlistItem {
   id: number;
@@ -244,21 +245,16 @@ export default function CustomerWishlistPage() {
         </div>
       )}
 
-      {confirmRemoveId !== null && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setConfirmRemoveId(null)}>
-          <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-[2rem] p-8 max-w-sm mx-4 shadow-2xl" onClick={e => e.stopPropagation()}>
-            <div className="w-14 h-14 rounded-full bg-rose-50 dark:bg-rose-900/20 flex items-center justify-center mx-auto mb-4">
-              <Icon name="Heart" className="w-7 h-7 text-rose-500" />
-            </div>
-            <h3 className="text-lg font-black text-center text-gray-800 dark:text-[var(--text-primary)] mb-2">¿Quitar de Favoritos?</h3>
-            <p className="text-sm text-gray-500 dark:text-[var(--text-muted)] text-center mb-6">El producto saldrá de tu lista de deseos.</p>
-            <div className="flex gap-3">
-              <button onClick={() => setConfirmRemoveId(null)} className="flex-1 py-3 rounded-xl bg-gray-100 dark:bg-[var(--bg-muted)] text-gray-600 dark:text-[var(--text-primary)] font-black text-xs uppercase tracking-widest hover:bg-gray-200 dark:hover:bg-[#2A3F33] transition-all">Cancelar</button>
-              <button onClick={() => removeFromWishlist(confirmRemoveId)} className="flex-1 py-3 rounded-xl bg-rose-500 text-white font-black text-xs uppercase tracking-widest hover:bg-rose-600 transition-all">Eliminar</button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmDialog
+        isOpen={confirmRemoveId !== null}
+        onClose={() => setConfirmRemoveId(null)}
+        onConfirm={() => removeFromWishlist(confirmRemoveId!)}
+        title="¿Quitar de Favoritos?"
+        message="El producto saldrá de tu lista de deseos."
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        variant="danger"
+      />
     </div>
   );
 }

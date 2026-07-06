@@ -45,7 +45,7 @@ export default function CartSummary({ onContinue }: Props) {
     <div className="rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] p-6 space-y-5 lg:sticky lg:top-24">
       {/* Título */}
       <h2 className="font-bold text-gray-900 dark:text-[var(--text-primary)] flex items-center gap-2">
-        <ShoppingBag className="w-5 h-5 text-sky-500" />
+        <ShoppingBag className="w-5 h-5 text-sky-500 dark:text-emerald-400" />
         Resumen
       </h2>
 
@@ -80,7 +80,7 @@ export default function CartSummary({ onContinue }: Props) {
       {/* Total */}
       <div className="flex justify-between font-bold text-base">
         <span className="text-gray-900 dark:text-[var(--text-primary)]">Total estimado</span>
-        <span className="text-sky-600 dark:text-sky-400 text-lg">
+        <span className="text-sky-600 dark:text-emerald-400 text-lg">
           S/ {total.toFixed(2)}
         </span>
       </div>
@@ -95,10 +95,10 @@ export default function CartSummary({ onContinue }: Props) {
         onClick={onContinue}
         disabled={selectedItems.length === 0 || isLoading}
         className="w-full flex items-center justify-center gap-2 py-3.5 px-6 rounded-2xl
-          bg-sky-500 hover:bg-sky-600 disabled:bg-gray-200 disabled:dark:bg-[var(--bg-muted)]
+          bg-sky-500 hover:bg-sky-600 dark:bg-emerald-600 dark:hover:bg-emerald-700 disabled:bg-gray-200 disabled:dark:bg-[var(--bg-muted)]
           disabled:text-gray-400 disabled:cursor-not-allowed
           text-white font-semibold transition shadow-lg shadow-sky-200/50
-          dark:shadow-none"
+          dark:shadow-emerald-900/20"
       >
         {isLoading ? (
           <>
@@ -117,7 +117,7 @@ export default function CartSummary({ onContinue }: Props) {
       <a
         href="/tiendas"
         className="block text-center text-sm text-gray-500 dark:text-[var(--text-muted)]
-          hover:text-sky-500 dark:hover:text-sky-400 transition"
+          hover:text-sky-500 dark:hover:text-emerald-400 transition"
       >
         ← Seguir comprando
       </a>

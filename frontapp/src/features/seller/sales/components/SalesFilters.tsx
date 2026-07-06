@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import Icon from '@/components/ui/Icon';
 import CalendarPopover from './CalendarPopover';
 import { Info } from 'lucide-react';
+import { usePlanCapabilities } from '@/shared/lib/hooks/usePlanCapabilities';
 
 interface SalesFiltersProps {
     dateStart: string | null;
@@ -29,6 +30,9 @@ function formatDisplayDate(dateStr: string): string {
 }
 
 export default function SalesFilters({ dateStart, dateEnd, orderType, onDateChange, onOrderTypeChange, onClear, onExport }: SalesFiltersProps) {
+    const { can } = usePlanCapabilities();
+    const canExportExcel = can('can_export_excel');
+    const canExportPdf = can('can_export_pdf');
     const [activePicker, setActivePicker] = useState<'start' | 'end' | null>(null);
     const startRef = useRef<HTMLDivElement | null>(null);
     const endRef   = useRef<HTMLDivElement | null>(null);
@@ -161,16 +165,26 @@ export default function SalesFilters({ dateStart, dateEnd, orderType, onDateChan
 
                     <button
                         onClick={() => onExport('excel')}
-                        className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-[var(--bg-card)] text-[var(--text-primary)] font-bold text-xs border border-[var(--border-subtle)] hover:text-[#5AAFE6] hover:border-[#69BEEB]/30 transition-all shadow-sm"
+                        className={`flex items-center gap-2 px-5 py-3 rounded-2xl bg-[var(--bg-card)] font-bold text-xs border transition-all shadow-sm ${
+                            canExportExcel
+                                ? 'text-[var(--text-primary)] border-[var(--border-subtle)] hover:text-[#5AAFE6] hover:border-[#69BEEB]/30'
+                                : 'text-[var(--text-secondary)]/50 border-dashed border-[var(--border-subtle)]'
+                        }`}
+                        title={canExportExcel ? undefined : 'Disponible en planes superiores'}
                     >
-                        <Icon name="FileSpreadsheet" className="text-xl" />
+                        {canExportExcel ? <Icon name="FileSpreadsheet" className="text-xl" /> : <Icon name="Lock" className="text-base" />}
                         <span className="hidden sm:inline">Excel</span>
                     </button>
                     <button
                         onClick={() => onExport('pdf')}
-                        className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-[var(--bg-card)] text-[var(--text-primary)] font-bold text-xs border border-[var(--border-subtle)] hover:text-[#5AAFE6] hover:border-[#69BEEB]/30 transition-all shadow-sm"
+                        className={`flex items-center gap-2 px-5 py-3 rounded-2xl bg-[var(--bg-card)] font-bold text-xs border transition-all shadow-sm ${
+                            canExportPdf
+                                ? 'text-[var(--text-primary)] border-[var(--border-subtle)] hover:text-[#5AAFE6] hover:border-[#69BEEB]/30'
+                                : 'text-[var(--text-secondary)]/50 border-dashed border-[var(--border-subtle)]'
+                        }`}
+                        title={canExportPdf ? undefined : 'Disponible en planes superiores'}
                     >
-                        <Icon name="FileText" className="text-xl" />
+                        {canExportPdf ? <Icon name="FileText" className="text-xl" /> : <Icon name="Lock" className="text-base" />}
                         <span className="hidden sm:inline">PDF</span>
                     </button>
                 </div>

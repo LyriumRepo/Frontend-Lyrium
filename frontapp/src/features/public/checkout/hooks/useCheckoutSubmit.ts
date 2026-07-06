@@ -1,10 +1,9 @@
 'use client';
 
-import { useCallback, useEffect }    from 'react';
+import { useCallback }    from 'react';
 import { useCheckoutStore }          from '@/store/checkoutStore';
 import { orderApi }                  from '@/shared/lib/api/OrdenRepository';
 import { addressApi }                from '@/shared/lib/api/addressRepository';
-import { cartApi }                   from '@/shared/lib/api/cartRepository';
 import type { CartItem, CourierOption, TipoEntrega } from '@/store/checkoutStore';
 
 // ─── Helpers de envío por tienda ────────────────────────────────────────────────
@@ -59,67 +58,11 @@ export function useCheckoutSubmit(): UseCheckoutSubmitReturn {
   const shippingQuotes      = useCheckoutStore((s) => s.shippingQuotes);
   const isSubmitting   = useCheckoutStore((s) => s.isSubmitting);
   const submitError    = useCheckoutStore((s) => s.submitError);
-  const cartLoaded     = useCheckoutStore((s) => s.cartLoaded);
 
   // Setters del store
   const setProcessing   = useCheckoutStore((s) => s.setProcessing);
   const setIsSubmitting = useCheckoutStore((s) => s.setIsSubmitting);
   const setSubmitError  = useCheckoutStore((s) => s.setSubmitError);
-  const setCartItems    = useCheckoutStore((s) => s.setCartItems);
-  const setCartLoaded   = useCheckoutStore((s) => s.setCartLoaded);
-  const setCartLoading  = useCheckoutStore((s) => s.setCartLoading);
-
-  useEffect(() => {
-    if (cartLoaded) return;
-
-    let cancelled = false;
-
-    async function loadCart() {
-      try {
-        setCartLoading(true);
-        const cart = await cartApi.getCart();
-
-        if (cancelled) return;
-
-        if (!cart.items || cart.items.length === 0) {
-          setCartItems([]);
-          setCartLoaded(true);
-          return;
-        }
-
-        const checkoutItems: CartItem[] = cart.items.map((item) => ({
-          id:            item.productId,
-          name:          item.name ?? item.product?.name ?? '',
-          image:         item.product?.image ?? '',
-          price:         item.unitPrice ?? item.product?.price ?? 0,
-          originalPrice: item.product?.regular_price ?? item.unitPrice ?? item.product?.price ?? 0,
-          quantity:      item.quantity,
-          selected:      true,
-          storeId:   item.store_id   ?? 0,
-          storeName: item.store_name ?? '',
-          storeSlug: item.store_slug ?? undefined,
-          peso:  item.peso,
-          largo: item.largo,
-          ancho: item.ancho,
-          alto:  item.alto,
-          origen: item.origen,
-
-        }));
-
-        setCartItems(checkoutItems);
-        setCartLoaded(true);
-      } catch (err) {
-        if (!cancelled) {
-          console.error('Error cargando carrito en checkout:', err);
-        }
-      } finally {
-        if (!cancelled) setCartLoading(false);
-      }
-    }
-
-    loadCart();
-    return () => { cancelled = true; };
-  }, [cartLoaded, setCartItems, setCartLoaded, setCartLoading]);
 
   // ── Crear la orden ─────────────────────────────────────────────────────────
   const submitOrder = useCallback(async (): Promise<SubmitOrderResult | null> => {

@@ -89,41 +89,41 @@ export default function ContactPage() {
             <div className="max-w-6xl mx-auto">
                 <div className="grid md:grid-cols-2 gap-8 rounded-[30px] overflow-hidden bg-white dark:bg-[var(--bg-secondary)] shadow-xl dark:shadow-none border border-gray-200 dark:border-[var(--border-subtle)]">
                     {/* Visual Section */}
-                    <div className={`contact-visual bg-[linear-gradient(135deg,rgba(14,165,233,0.85)_0%,rgba(132,204,22,0.85))] dark:bg-[linear-gradient(135deg,var(--brand-green)_0%,var(--icons-green)_50%,var(--brand-green-hover)_100%)] bg-cover bg-center rounded-[30px] md:rounded-r-none p-8 md:p-12 text-white relative overflow-hidden h-full`}>                        
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+                    <div className={`contact-visual bg-[linear-gradient(135deg,rgba(14,165,233,0.85)_0%,rgba(132,204,22,0.85))] dark:bg-[linear-gradient(135deg,var(--brand-green)_0%,var(--icons-green)_50%,var(--brand-green-hover)_100%)] bg-cover bg-center rounded-[30px] md:rounded-r-none p-5 sm:p-8 md:p-12 text-white relative overflow-hidden h-full`}>
+                    <div className="absolute top-0 right-0 w-20 h-20 sm:w-32 sm:h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
                         <img src="/img/intro/Flor6.png" alt="decoración" className="absolute -bottom-20 -right-85 w-[700px] max-w-none opacity-50 mix-blend-overlay pointer-events-none" />
 
                         <div className="relative z-10">
-                            <div className="contact-icon w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mb-6 border border-white/20 backdrop-blur-sm">
-                                <Icon name="ChatCircleDots" className="text-4xl" />
+                            <div className="contact-icon w-12 h-12 sm:w-20 sm:h-20 bg-white/20 rounded-full flex items-center justify-center mb-3 sm:mb-6 border border-white/20 backdrop-blur-sm">
+                                <Icon name="ChatCircleDots" className="text-2xl sm:text-4xl" />
                             </div>
 
-                            <h2 className="text-3xl font-bold mb-4">¡Contáctanos!</h2>
-                            <p className="text-white/90 mb-8">Estamos aquí para ayudarte. Envíanos tu consulta y te responderemos lo antes posible.</p>
+                            <h2 className="text-xl sm:text-3xl font-bold mb-2 sm:mb-4">¡Contáctanos!</h2>
+                            <p className="text-white/90 text-sm sm:text-base mb-4 sm:mb-8">Estamos aquí para ayudarte. Envíanos tu consulta y te responderemos lo antes posible.</p>
 
-                            <div className="space-y-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
-                                        <Icon name="MapPin" className="text-xl" />
+                            <div className="space-y-2.5 sm:space-y-4">
+                                <div className="flex items-center gap-2.5 sm:gap-3">
+                                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/10 flex items-center justify-center shrink-0">
+                                        <Icon name="MapPin" className="text-base sm:text-xl" />
                                     </div>
-                                    <span>Perú</span>
+                                    <span className="text-sm sm:text-base">Perú</span>
                                 </div>
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
-                                        <Icon name="Mail" className="text-xl" />
+                                <div className="flex items-center gap-2.5 sm:gap-3">
+                                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/10 flex items-center justify-center shrink-0">
+                                        <Icon name="Mail" className="text-base sm:text-xl" />
                                     </div>
-                                    <span>ventas@lyriumbiomarketplace.com</span>
+                                    <span className="text-sm sm:text-base break-all">ventas@lyriumbiomarketplace.com</span>
                                 </div>
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
-                                        <Icon name="PhoneCall" className="text-xl" />
+                                <div className="flex items-center gap-2.5 sm:gap-3">
+                                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/10 flex items-center justify-center shrink-0">
+                                        <Icon name="PhoneCall" className="text-base sm:text-xl" />
                                     </div>
-                                    <span>+51 937 093 420</span>
+                                    <span className="text-sm sm:text-base">+51 937 093 420</span>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="absolute bottom-8 left-8 w-16 h-16 bg-white/20 rounded-full flex items-center justify-center opacity-100">
+                        <div className="hidden sm:flex absolute bottom-8 left-8 w-16 h-16 bg-white/20 rounded-full items-center justify-center opacity-100">
                             <Icon name="Headset" className="text-3xl" />
                         </div>
                     </div>

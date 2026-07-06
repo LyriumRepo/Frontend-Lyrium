@@ -92,6 +92,18 @@ export default function PublicHeader() {
                             <ThemeToggle />
                         </div>
 
+                        {/* Mobile only: login icon + theme toggle (cart lives in the hamburger menu) */}
+                        <div className="flex md:hidden items-center gap-1 text-sky-600 dark:text-[var(--color-success)]">
+                            <Link
+                                href={isAuthenticated && user ? dashboardUrl : '/login'}
+                                className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] transition-colors flex items-center justify-center"
+                                aria-label={isAuthenticated && user ? 'Mi panel' : 'Iniciar sesión'}
+                            >
+                                <Icon name="UserCircle" className="text-[18px]" />
+                            </Link>
+                            <ThemeToggle />
+                        </div>
+
                         {/* Hamburger button (mobile/tablet) */}
                         <button
                             onClick={() => setMobileMenuOpen(true)}
