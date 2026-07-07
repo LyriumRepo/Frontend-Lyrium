@@ -31,9 +31,15 @@ interface VideoItem {
 
 const YT_THUMB = (id: string) => `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
 
+const CATEGORIES = [
+    { value: '*', label: 'Todos' },
+    { value: 'fitness', label: 'Fitness' },
+    { value: 'cocina', label: 'Cocina' },
+    { value: 'jardineria', label: 'Jardinería' },
+];
+
 export default function VideoGallery() {
     const [videos, setVideos] = useState<VideoItem[]>([]);
-    const [categories, setCategories] = useState<string[]>([]);
     const [activeFilter, setActiveFilter] = useState('*');
     const [showAll, setShowAll] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -55,8 +61,6 @@ export default function VideoGallery() {
                 }))
                 : [];
             setVideos(items);
-            const cats = Array.from(new Set(items.map((v) => v.category)));
-            setCategories(cats);
         }).catch(() => {}).finally(() => setLoading(false));
     }, []);
 
@@ -67,63 +71,50 @@ export default function VideoGallery() {
     const displayedVideos = showAll ? filteredVideos : filteredVideos.slice(0, 6);
 
     return (
-        <>
-            {/* Video Principal */}
-            <div className="w-full pb-6 bg-white dark:bg-[var(--bg-secondary)] overflow-hidden">
+        <div className="w-full py-16 bg-slate-50 dark:bg-[var(--bg-primary)]">
                 <div className="max-w-7xl mx-auto px-4">
-                    <div className="relative rounded-[2.5rem] overflow-hidden shadow-2xl bg-slate-900 aspect-video group">
-                        <iframe
-                            className="absolute inset-0 w-full h-full border-0 transition-opacity duration-300"
-                            src="https://www.youtube.com/embed/wiJzsSP_5Ao?rel=0&modestbranding=1&autoplay=0"
-                            title="Video BioBlog"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                            allowFullScreen
-                        />
+                    {/* Título */}
+                    <div className="pt-8 pb-12 text-center">
+                        <div className="flex items-center justify-center space-x-3 mb-4">
+                            <span className="h-px w-12 bg-sky-500" />
+                            <span className="text-sky-600 dark:text-sky-400 font-bold tracking-widest text-sm uppercase">Lyrium</span>
+                            <span className="h-px w-12 bg-sky-500" />
+                        </div>
+                        <h3 className="text-3xl md:text-5xl font-black text-slate-800 dark:text-[var(--text-primary)] mb-6 drop-shadow-sm uppercase">VIDEOS</h3>
+                        <p className="text-slate-600 dark:text-[var(--text-secondary)] text-base md:text-lg leading-relaxed font-light text-center max-w-5xl mx-auto">
+                            Contenido audiovisual sobre vida saludable, recetas, jardinería y más.
+                        </p>
                     </div>
-                </div>
-            </div>
 
-            {/* Galería de Videos Filtrable */}
-            <div className="w-full py-1 bg-slate-50 dark:bg-[var(--bg-primary)]">
-                <div className="max-w-7xl mx-auto px-4">
                     {/* Filtros de Categoría */}
                     <div className="flex flex-wrap justify-center gap-3 mb-12">
-                        <button
-                            onClick={() => { setActiveFilter('*'); setShowAll(false); }}
-                            className={`px-5 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 ${
-                                activeFilter === '*'
-                                    ? 'bg-sky-500 dark:bg-[var(--brand-green)] text-white shadow-lg'
-                                    : 'bg-white dark:bg-[var(--bg-secondary)] text-slate-600 dark:text-[var(--text-secondary)] hover:bg-slate-100 dark:hover:bg-[#2A3F33] border border-slate-200 dark:border-[var(--border-subtle)]'
-                            }`}
-                        >
-                            Todos
-                        </button>
-                        {categories.map((cat) => (
+                        {CATEGORIES.map((cat) => (
                             <button
-                                key={cat}
-                                onClick={() => { setActiveFilter(cat); setShowAll(false); }}
+                                key={cat.value}
+                                onClick={() => { setActiveFilter(cat.value); setShowAll(false); }}
                                 className={`px-5 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 ${
-                                    activeFilter === cat
+                                    activeFilter === cat.value
                                         ? 'bg-sky-500 dark:bg-[var(--brand-green)] text-white shadow-lg'
                                         : 'bg-white dark:bg-[var(--bg-secondary)] text-slate-600 dark:text-[var(--text-secondary)] hover:bg-slate-100 dark:hover:bg-[#2A3F33] border border-slate-200 dark:border-[var(--border-subtle)]'
                                 }`}
                             >
-                                {categories.find(c => c === cat) ? cat.charAt(0).toUpperCase() + cat.slice(1) : cat}
+                                {cat.label}
                             </button>
                         ))}
                     </div>
 
-                    {loading ? (
+                    {loading && (
                         <div className="flex justify-center py-12">
                             <div className="w-8 h-8 border-2 border-sky-500 border-t-transparent rounded-full animate-spin" />
                         </div>
-                    ) : videos.length === 0 ? (
+                    )}
+                    {!loading && videos.length === 0 && (
                         <div className="text-center py-12 text-slate-500">
                             <p>No hay videos disponibles.</p>
                         </div>
-                    ) : (
-                    <>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    )}
+                    {!loading && videos.length > 0 && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {displayedVideos.map((video, index) => (
                             <motion.div
                                 key={video.id}
@@ -131,50 +122,52 @@ export default function VideoGallery() {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.4, delay: index * 0.06 }}
-                                className={`premium-gallery-item group ${activeFilter !== '*' && video.category !== activeFilter ? 'hidden' : ''}`}
+                                className={activeFilter !== '*' && video.category !== activeFilter ? 'hidden' : ''}
                             >
-                                <div className="relative rounded-[2rem] overflow-hidden shadow-md hover:shadow-2xl transition-all duration-500 border border-slate-100 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-secondary)]">
-                                    {/* Miniatura */}
-                                    <div className="aspect-video relative overflow-hidden">
+                                <div className="group rounded-xl overflow-hidden bg-white dark:bg-[var(--bg-secondary)] border border-slate-100 dark:border-[var(--border-subtle)] shadow-sm hover:shadow-xl transition-all duration-300">
+                                    <Link href={`/bioblog/video/${video.id}`} className="block relative aspect-video overflow-hidden">
                                         <Image
                                             src={imgErrors.has(video.id) || !video.videoId ? '/img/bioblog/blog-teclas.jpg' : YT_THUMB(video.videoId)}
                                             alt={video.title}
                                             fill
                                             sizes="(max-width: 768px) 100vw, 33vw"
-                                            className="object-cover transform transition-transform duration-700 group-hover:scale-110"
+                                            className="object-cover transition-transform duration-500 group-hover:scale-105"
                                             onError={() => handleImgError(video.id)}
                                         />
-                                        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors" />
-
-                                        {/* Botón Play */}
-                                        <Link
-                                            href={`/bioblog/video/${video.id}`}
-                                            className="absolute inset-0 flex items-center justify-center"
-                                        >
-                                            <div className="w-16 h-16 bg-sky-500 dark:bg-[var(--icons-green)] text-white rounded-full flex items-center justify-center transform transition-all duration-500 scale-90 group-hover:scale-100 shadow-xl group-hover:shadow-sky-500/50 dark:group-hover:shadow-lime-100/50">
-                                                <Play className="w-8 h-8 ml-1" fill="currentColor" />
+                                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300" />
+                                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                            <div className="w-12 h-12 bg-black/80 text-white rounded-full flex items-center justify-center">
+                                                <Play className="w-5 h-5 ml-0.5" fill="currentColor" />
                                             </div>
-                                        </Link>
-
-                                        <div className="absolute top-4 left-4">
-                                            <span className="px-3 py-1 bg-white/90 dark:bg-[var(--bg-secondary)]/90 backdrop-blur-md text-slate-800 dark:text-[var(--text-primary)] text-[10px] font-bold rounded-full uppercase tracking-wider shadow-sm">
+                                        </div>
+                                        <div className="absolute bottom-2 left-2">
+                                            <span className="px-2 py-0.5 bg-black/70 text-white text-[10px] font-semibold rounded">
                                                 {video.categoryLabel}
                                             </span>
                                         </div>
-                                    </div>
-
-                                    {/* Contenido */}
-                                    <div className="p-6">
-                                        <h3 className="text-base md:text-lg font-bold text-slate-800 dark:text-[var(--text-primary)] leading-tight group-hover:text-sky-600 dark:group-hover:text-lime-200 transition-colors line-clamp-2">
-                                            {video.title}
-                                        </h3>
+                                    </Link>
+                                    <div className="p-3 flex gap-3">
+                                        <div className="w-9 h-9 rounded-full bg-sky-100 dark:bg-[#2A3F33] flex items-center justify-center flex-shrink-0 mt-0.5">
+                                            <span className="text-xs font-bold text-sky-600 dark:text-lime-300">
+                                                {video.title.charAt(0).toUpperCase()}
+                                            </span>
+                                        </div>
+                                        <div className="min-w-0 flex-1">
+                                            <h3 className="text-sm font-semibold text-slate-800 dark:text-[var(--text-primary)] line-clamp-2 leading-tight">
+                                                <Link href={`/bioblog/video/${video.id}`}>
+                                                    {video.title}
+                                                </Link>
+                                            </h3>
+                                            <p className="text-xs text-slate-500 dark:text-[var(--text-secondary)] mt-1">
+                                                Lyrium
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                             </motion.div>
                         ))}
-                    </div>
-
-                    {/* Botón Cargar Más */}
+                        </div>
+                    )}
                     {filteredVideos.length > 6 && (
                         <div className="flex justify-center mt-12">
                             <button
@@ -186,10 +179,7 @@ export default function VideoGallery() {
                             </button>
                         </div>
                     )}
-                    </>
-                    )}
                 </div>
             </div>
-        </>
     );
 }

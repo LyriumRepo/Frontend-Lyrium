@@ -22,6 +22,7 @@ export interface AdminInvoiceRow {
     order_id: string;
     pdf_url: string | null;
     items: NubefactInvoice['items'];
+    storeCommissions: NubefactInvoice['storeCommissions'];
     order: NubefactInvoice['order'];
     stores: NubefactStore[];
 }
@@ -40,6 +41,7 @@ function toRow(inv: NubefactInvoice): AdminInvoiceRow {
         order_id: inv.orderId ?? '',
         pdf_url: inv.pdfUrl,
         items: inv.items,
+        storeCommissions: inv.storeCommissions,
         order: inv.order,
         stores: inv.order?.stores ?? [],
     };

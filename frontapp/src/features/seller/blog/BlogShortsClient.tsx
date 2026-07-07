@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Clapperboard, Plus, Edit, Trash2, Globe, Clock, User, Send, CheckCircle, Save } from 'lucide-react';
+import { Clapperboard, Plus, Edit, Trash2, Globe, Clock, User, Send, CheckCircle, Save, Info } from 'lucide-react';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import BaseButton from '@/components/ui/BaseButton';
 import { blogApi, BlogShort } from '@/shared/lib/api/bioblogRepository';
@@ -88,6 +88,23 @@ export function BlogShortsClient() {
         <div className="space-y-6 animate-fadeIn font-industrial pb-20">
             <ModuleHeader title="BioBlog" icon="Clapperboard"
                 actions={<BaseButton onClick={openCreate} variant="primary" leftIcon="Plus" size="md">Nuevo Short</BaseButton>} />
+
+            {/* Workflow guide */}
+            <div className="bg-gradient-to-r from-sky-50 to-blue-50 dark:from-sky-950/30 dark:to-blue-950/20 rounded-2xl border border-sky-200/50 dark:border-sky-800/30 p-4 flex items-start gap-3">
+                <Info className="w-5 h-5 text-sky-500 mt-0.5 flex-shrink-0" />
+                <div className="text-sm text-sky-700 dark:text-sky-300 leading-relaxed">
+                    <span className="font-bold">Flujo de contenido:</span>{' '}
+                    <span className="inline-flex items-center gap-1.5 flex-wrap">
+                        <span className="px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-500 text-xs font-bold">Borrador</span>
+                        <span className="text-sky-400">→</span>
+                        <span className="px-2 py-0.5 rounded-md bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 text-xs font-bold">En revisión</span>
+                        <span className="text-sky-400">→</span>
+                        <span className="px-2 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold">Publicado</span>
+                    </span>
+                    <br />
+                    <span className="text-xs text-sky-600/70 dark:text-sky-400/70">Pega la URL del short, completa los datos y envía a revisión. Duración máxima: 60 segundos.</span>
+                </div>
+            </div>
 
             {error && !showEditor && <div className="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 p-4 rounded-2xl border border-red-200 dark:border-red-800">{error}</div>}
             <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
@@ -178,6 +195,7 @@ export function BlogShortsClient() {
                             <label className="block text-xs font-semibold text-gray-500 mb-1">URL *</label>
                             <input type="text" value={form.url} onChange={e => handleUrlChange(e.target.value)} className="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200" placeholder="https://tiktok.com/..." />
                             {fetchingPreview && <div className="text-xs text-gray-400 mt-1">Extrayendo metadata...</div>}
+                            <p className="text-[10px] text-gray-400 mt-1">La información del short se extraerá automáticamente al pegar la URL.</p>
                         </div>
 
                         {preview && (
@@ -202,11 +220,14 @@ export function BlogShortsClient() {
                             <div>
                                 <label className="block text-xs font-semibold text-gray-500 mb-1">Duración (segundos)</label>
                                 <input type="number" min="1" max="60" value={form.duration} onChange={e => setForm(f => ({ ...f, duration: e.target.value }))} className="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200" placeholder="Ej: 30" />
+                                <p className="text-[10px] text-gray-400 mt-1">Duración máxima de 60 segundos.</p>
                             </div>
                         </div>
 
                         <div>
-                            <label className="block text-xs font-semibold text-gray-500 mb-1">Descripción</label>
+                            <label className="block text-xs font-semibold text-gray-500 mb-1">Descripción
+                                <span title="Describe brevemente el contenido del short para que los usuarios sepan qué esperar."><Info className="w-3.5 h-3.5 inline ml-1 text-gray-300" /></span>
+                            </label>
                             <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={3} className="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200" />
                         </div>
                         {error && <div className="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 p-3 rounded-xl">{error}</div>}

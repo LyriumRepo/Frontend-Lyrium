@@ -60,7 +60,7 @@ export default function AdminPage() {
   return (
     <div className="px-8 pb-20 space-y-8 animate-fadeIn font-industrial">
       <ModuleHeader
-        title="Gestión de Planes"
+        title="Planes y Suscripciones"
         subtitle="Administra solicitudes, planes, pagos y vendedores"
         icon="Box"
       />

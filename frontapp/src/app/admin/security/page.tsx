@@ -61,7 +61,7 @@ export default function CustomerSecurityPage() {
       {/* ── Encabezado ──────────────────────────────────────────────────────── */}
       <div>
         <h1 className="text-2xl md:text-3xl font-black text-slate-800 dark:text-[var(--text-primary)]">
-          Seguridad
+          Centro de Seguridad
         </h1>
         <p className="text-slate-500 dark:text-[var(--text-muted)] mt-1">
           Protege tu cuenta y gestiona tu contraseña

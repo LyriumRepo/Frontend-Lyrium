@@ -27,17 +27,17 @@ function formatDateFull(iso: string): string {
 function CustomTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-white dark:bg-[#1E3028] border border-gray-200 dark:border-[#2A4A3E] rounded-2xl shadow-xl px-4 py-3 text-xs">
-      <p className="font-bold text-gray-800 dark:text-gray-100 mb-2">
+    <div className="bg-gray-900/95 dark:bg-black/95 border border-gray-700/50 dark:border-emerald-900/50 rounded-2xl shadow-2xl backdrop-blur-sm px-4 py-3 text-xs">
+      <p className="font-bold text-white mb-2">
         {formatDateFull(label)}
       </p>
       {payload.map((entry: any) => (
         <div key={entry.name} className="flex items-center justify-between gap-4 py-0.5">
           <span className="flex items-center gap-1.5">
             <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: entry.color }} />
-            <span className="text-gray-600 dark:text-gray-400">{entry.name}</span>
+            <span className="text-gray-300">{entry.name}</span>
           </span>
-          <span className="font-bold text-gray-800 dark:text-gray-100">{entry.value}</span>
+          <span className="font-bold text-white">{entry.value}</span>
         </div>
       ))}
     </div>

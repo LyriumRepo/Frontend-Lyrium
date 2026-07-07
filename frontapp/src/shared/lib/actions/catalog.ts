@@ -89,12 +89,12 @@ function mapLaravelProduct(p: any): Product {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// GET /api/products  (productos del vendedor autenticado)
+// GET /api/seller/products  (productos del vendedor autenticado)
 // ─────────────────────────────────────────────────────────────────────────────
 export async function getProducts(): Promise<Product[]> {
   try {
     const token = await getAuthToken();
-    const res = await fetch(`${LARAVEL_API_URL}/products?per_page=100`, {
+    const res = await fetch(`${LARAVEL_API_URL}/seller/products?per_page=100`, {
       headers: authHeaders(token),
       cache: 'no-store',
     });

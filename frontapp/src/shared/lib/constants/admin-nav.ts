@@ -12,7 +12,7 @@ export const adminNavigation: PanelNavigation = [
             },
             {
                 id: 'solicitudes',
-                label: 'Solicitudes',
+                label: 'Solicitudes de Registro',
                 href: '/admin/sellers/solicitudes',
                 icon: 'FileCheck',
             },
@@ -38,9 +38,20 @@ export const adminNavigation: PanelNavigation = [
                 href: '/admin/finance',
                 icon: 'Sales',
             },
+        ],
+    },
+    {
+        title: 'Operaciones',
+        items: [
+            {
+                id: 'operations',
+                label: 'Pagos',
+                href: '/admin/operations',
+                icon: 'Settings',
+            },
             {
                 id: 'payments',
-                label: 'Gestión de Pagos',
+                label: 'Ventas',
                 href: '/admin/payments',
                 icon: 'Landmark',
             },
@@ -49,17 +60,6 @@ export const adminNavigation: PanelNavigation = [
                 label: 'Facturación Rápida',
                 href: '/admin/rapifac',
                 icon: 'Receipt',
-            },
-        ],
-    },
-    {
-        title: 'Operaciones',
-        items: [
-            {
-                id: 'operations',
-                label: 'Gestión Operativa',
-                href: '/admin/operations',
-                icon: 'Settings',
             },
         ],
     },
@@ -86,17 +86,6 @@ export const adminNavigation: PanelNavigation = [
         ],
     },
     {
-        title: 'BioBlog',
-        items: [
-            {
-                id: 'bioblog',
-                label: 'Aprobación de Contenido',
-                href: '/admin/bioblog',
-                icon: 'FileText',
-            },
-        ],
-    },
-    {
         title: 'Gestión',
         items: [
             {
@@ -104,6 +93,18 @@ export const adminNavigation: PanelNavigation = [
                 label: 'Gestión de Categorías',
                 href: '/admin/categories',
                 icon: 'FolderTree',
+            },
+            {
+                id: 'bioblog',
+                label: 'bioBlog',
+                href: '/admin/bioblog',
+                icon: 'FileText',
+            },
+            {
+                id: 'bioforo',
+                label: 'BioForo',
+                href: '/admin/bioforo',
+                icon: 'MessagesSquare',
             },
             {
                 id: 'reviews',

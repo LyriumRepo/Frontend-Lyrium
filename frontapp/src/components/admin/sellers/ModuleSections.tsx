@@ -232,7 +232,7 @@ export const ProductModeration: React.FC<ProductModerationProps> = ({
   const [dateTo, setDateTo] = useState('');
 
   const pending = products.filter(
-    (p) => p.status === 'en_espera' || p.status === 'PENDING',
+    (p) => p.status === 'pending_review' || p.status === 'en_espera' || p.status === 'PENDING',
   );
 
   // Extraer tiendas únicas para el filtro
@@ -534,7 +534,7 @@ export const ServiceModeration: React.FC<ServiceModerationProps> = ({
   const [dateTo, setDateTo] = useState('');
 
   const pending = services.filter(
-    (s) => s.status === 'en_espera' || s.status === 'PENDING',
+    (s) => s.status === 'pending_review' || s.status === 'en_espera' || s.status === 'PENDING',
   );
 
   const stores = React.useMemo(() => {

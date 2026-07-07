@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { FileText, Plus, Search, Edit, Trash2, Eye, Send, Save, CheckCircle, Folder } from 'lucide-react';
+import { FileText, Plus, Search, Edit, Trash2, Eye, Send, Save, CheckCircle, Folder, Info, AlertCircle } from 'lucide-react';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import BaseButton from '@/components/ui/BaseButton';
 import { BlogEditor } from '@/components/ui/BlogEditor';
@@ -106,6 +106,23 @@ export function BlogArticlesClient() {
             <ModuleHeader title="BioBlog" icon="FileText"
                 actions={<BaseButton onClick={openCreate} variant="primary" leftIcon="Plus" size="md">Nuevo Artículo</BaseButton>} />
 
+            {/* Workflow guide */}
+            <div className="bg-gradient-to-r from-sky-50 to-blue-50 dark:from-sky-950/30 dark:to-blue-950/20 rounded-2xl border border-sky-200/50 dark:border-sky-800/30 p-4 flex items-start gap-3">
+                <Info className="w-5 h-5 text-sky-500 mt-0.5 flex-shrink-0" />
+                <div className="text-sm text-sky-700 dark:text-sky-300 leading-relaxed">
+                    <span className="font-bold">Flujo de contenido:</span>{' '}
+                    <span className="inline-flex items-center gap-1.5 flex-wrap">
+                        <span className="px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-500 text-xs font-bold">Borrador</span>
+                        <span className="text-sky-400">→</span>
+                        <span className="px-2 py-0.5 rounded-md bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 text-xs font-bold">En revisión</span>
+                        <span className="text-sky-400">→</span>
+                        <span className="px-2 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold">Publicado</span>
+                    </span>
+                    <br />
+                    <span className="text-xs text-sky-600/70 dark:text-sky-400/70">Crea un borrador, luego envíalo a revisión. Un administrador lo aprobará y podrás publicarlo.</span>
+                </div>
+            </div>
+
             <div className="flex gap-4 items-center">
                 <div className="relative flex-1 max-w-md">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -193,11 +210,17 @@ export function BlogArticlesClient() {
                         {/* Encabezado */}
                         <div className="grid grid-cols-3 gap-4">
                             <div className="col-span-2">
-                                <label className="block text-xs font-semibold text-gray-500 mb-1">Título *</label>
+                                <label className="block text-xs font-semibold text-gray-500 mb-1">
+                                    Título *
+                                    <span title="Elige un título llamativo y descriptivo para captar la atención."><Info className="w-3.5 h-3.5 inline ml-1 text-gray-300" /></span>
+                                </label>
                                 <input type="text" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-base font-bold bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200 focus:outline-none focus:border-sky-500 transition" placeholder="Título del artículo (máx 2 líneas)" />
                             </div>
                             <div>
-                                <label className="block text-xs font-semibold text-gray-500 mb-1">Imagen principal</label>
+                                <label className="block text-xs font-semibold text-gray-500 mb-1">
+                                    Imagen principal
+                                    <span title="URL de la imagen que aparecerá en la portada del artículo. Recomendado: 1024x1024px."><Info className="w-3.5 h-3.5 inline ml-1 text-gray-300" /></span>
+                                </label>
                                 <div className="flex gap-2">
                                     <input type="text" value={form.main_image} onChange={e => setForm(f => ({ ...f, main_image: e.target.value }))} className="flex-1 px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200" placeholder="URL 1024x1024" />
                                 </div>
@@ -208,11 +231,13 @@ export function BlogArticlesClient() {
                         <div>
                             <label className="block text-xs font-semibold text-gray-500 mb-1">Resumen</label>
                             <textarea value={form.summary} onChange={e => setForm(f => ({ ...f, summary: e.target.value }))} rows={2} className="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200 focus:outline-none focus:border-sky-500 transition" placeholder="Resumen (máx 4 líneas)" />
+                            <p className="text-[10px] text-gray-400 mt-1">Aparecerá en la vista previa del artículo en el listado del BioBlog.</p>
                         </div>
 
                         <div>
                             <label className="block text-xs font-semibold text-gray-500 mb-2 flex items-center gap-1.5">
                                 <Folder className="w-3.5 h-3.5" /> Categoría
+                                <span title="Agrupa tu artículo por tema para que los usuarios lo encuentren más fácilmente."><Info className="w-3.5 h-3.5 text-gray-300" /></span>
                             </label>
                             <div className="flex flex-wrap gap-2">
                                 <button
@@ -285,19 +310,32 @@ export function BlogArticlesClient() {
 
                         {/* SEO */}
                         <div className="border-t border-gray-100 dark:border-gray-800 pt-4">
-                            <h4 className="text-sm font-bold text-gray-600 dark:text-gray-400 mb-3">SEO</h4>
+                            <h4 className="text-sm font-bold text-gray-600 dark:text-gray-400 mb-1 flex items-center gap-1.5">
+                                SEO
+                                <span title="El SEO ayuda a que tu artículo aparezca en Google. Personaliza estos campos para mejorar el posicionamiento."><Info className="w-3.5 h-3.5 text-gray-300" /></span>
+                            </h4>
+                            <p className="text-[10px] text-gray-400 mb-3">Personaliza cómo aparece tu artículo en los resultados de búsqueda.</p>
                             <div className="grid grid-cols-2 gap-4 mb-4">
                                 <div>
-                                    <label className="block text-xs font-semibold text-gray-500 mb-1">Meta Title</label>
+                                    <label className="block text-xs font-semibold text-gray-500 mb-1">
+                                        Meta Title
+                                        <span title="Título que aparece en los resultados de Google. Si lo dejas vacío, se usará el título del artículo. Máx 60 caracteres."><Info className="w-3.5 h-3.5 inline ml-1 text-gray-300" /></span>
+                                    </label>
                                     <input type="text" value={form.meta_title} onChange={e => setForm(f => ({ ...f, meta_title: e.target.value }))} className="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200" placeholder={form.title} />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-semibold text-gray-500 mb-1">Slug</label>
+                                    <label className="block text-xs font-semibold text-gray-500 mb-1">
+                                        Slug
+                                        <span title="URL amigable del artículo. Déjalo vacío para generarlo automáticamente desde el título. Ej: beneficios-de-la-miel"><Info className="w-3.5 h-3.5 inline ml-1 text-gray-300" /></span>
+                                    </label>
                                     <input type="text" value={form.slug} onChange={e => setForm(f => ({ ...f, slug: e.target.value }))} className="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm font-mono bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200" placeholder="mi-articulo" />
                                 </div>
                             </div>
                             <div className="mb-3">
-                                <label className="block text-xs font-semibold text-gray-500 mb-1">Meta Description</label>
+                                <label className="block text-xs font-semibold text-gray-500 mb-1">
+                                    Meta Description
+                                    <span title="Descripción corta que aparece en los resultados de búsqueda. Si la dejas vacía, se usará el resumen del artículo. Máx 160 caracteres."><Info className="w-3.5 h-3.5 inline ml-1 text-gray-300" /></span>
+                                </label>
                                 <textarea value={form.meta_description} onChange={e => setForm(f => ({ ...f, meta_description: e.target.value }))} rows={2} className="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200" placeholder={form.summary} />
                             </div>
                             <GooglePreview

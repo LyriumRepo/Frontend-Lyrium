@@ -81,8 +81,8 @@ export function CategoriesPageClient() {
     return (
         <div className="space-y-6 animate-fadeIn font-industrial pb-20">
             <ModuleHeader
-                title="Gestion de Categorias"
-                subtitle="Estructura y taxonomia del marketplace (3 niveles)"
+                title="Gestión de Categorías"
+                subtitle="Estructura y taxonomía del marketplace (3 niveles)"
                 icon="Layers"
                 actions={
                     <div className="flex gap-2">

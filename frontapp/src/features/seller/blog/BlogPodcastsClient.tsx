@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Headphones, Plus, Edit, Trash2, Music, Video, Globe, Clock, User, Send, CheckCircle, Save } from 'lucide-react';
+import { Headphones, Plus, Edit, Trash2, Music, Video, Globe, Clock, User, Send, CheckCircle, Save, Info } from 'lucide-react';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import BaseButton from '@/components/ui/BaseButton';
 import { blogApi, BlogPodcast } from '@/shared/lib/api/bioblogRepository';
@@ -119,6 +119,23 @@ export function BlogPodcastsClient() {
             <ModuleHeader title="BioBlog" icon="Headphones"
                 actions={<BaseButton onClick={openCreate} variant="primary" leftIcon="Plus" size="md">Nuevo Podcast</BaseButton>} />
 
+            {/* Workflow guide */}
+            <div className="bg-gradient-to-r from-sky-50 to-blue-50 dark:from-sky-950/30 dark:to-blue-950/20 rounded-2xl border border-sky-200/50 dark:border-sky-800/30 p-4 flex items-start gap-3">
+                <Info className="w-5 h-5 text-sky-500 mt-0.5 flex-shrink-0" />
+                <div className="text-sm text-sky-700 dark:text-sky-300 leading-relaxed">
+                    <span className="font-bold">Flujo de contenido:</span>{' '}
+                    <span className="inline-flex items-center gap-1.5 flex-wrap">
+                        <span className="px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-500 text-xs font-bold">Borrador</span>
+                        <span className="text-sky-400">→</span>
+                        <span className="px-2 py-0.5 rounded-md bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 text-xs font-bold">En revisión</span>
+                        <span className="text-sky-400">→</span>
+                        <span className="px-2 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold">Publicado</span>
+                    </span>
+                    <br />
+                    <span className="text-xs text-sky-600/70 dark:text-sky-400/70">Selecciona el tipo y plataforma, pega la URL del podcast y completa los datos. Luego envía a revisión.</span>
+                </div>
+            </div>
+
             {error && !showEditor && <div className="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 p-4 rounded-2xl border border-red-200 dark:border-red-800">{error}</div>}
             <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
                 {loading ? <div className="p-20 text-center text-gray-400">Cargando...</div>
@@ -190,7 +207,9 @@ export function BlogPodcastsClient() {
 
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-xs font-semibold text-gray-500 mb-1">Tipo</label>
+                                <label className="block text-xs font-semibold text-gray-500 mb-1">Tipo
+                                    <span title="Selecciona 'Audio' para podcasts solo de sonido o 'Video' si incluye imagen."><Info className="w-3.5 h-3.5 inline ml-1 text-gray-300" /></span>
+                                </label>
                                 <select value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))} className="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200">
                                     <option value="audio">Audio</option>
                                     <option value="video">Video</option>
@@ -212,6 +231,7 @@ export function BlogPodcastsClient() {
                             <label className="block text-xs font-semibold text-gray-500 mb-1">URL *</label>
                             <input type="text" value={form.url} onChange={e => handleUrlChange(e.target.value)} className="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200" placeholder="https://spotify.com/..." />
                             {fetchingPreview && <div className="text-xs text-gray-400 mt-1">Extrayendo metadata...</div>}
+                            <p className="text-[10px] text-gray-400 mt-1">La información del podcast se extraerá automáticamente al pegar la URL.</p>
                         </div>
 
                         {preview && (
@@ -239,16 +259,21 @@ export function BlogPodcastsClient() {
                             <div>
                                 <label className="block text-xs font-semibold text-gray-500 mb-1">Duración (segundos)</label>
                                 <input type="number" min="1" value={form.duration} onChange={e => setForm(f => ({ ...f, duration: e.target.value }))} className="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200" placeholder="Ej: 360" />
+                                <p className="text-[10px] text-gray-400 mt-1">Duración total en segundos. Ej: 1800 = 30 min, 3600 = 60 min.</p>
                             </div>
                         </div>
 
                         <div>
-                            <label className="block text-xs font-semibold text-gray-500 mb-1">Descripción</label>
+                            <label className="block text-xs font-semibold text-gray-500 mb-1">Descripción
+                                <span title="Describe el contenido del podcast para atraer a los oyentes."><Info className="w-3.5 h-3.5 inline ml-1 text-gray-300" /></span>
+                            </label>
                             <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={3} className="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200" />
                         </div>
 
                         <div>
-                            <label className="block text-xs font-semibold text-gray-500 mb-1">Portada (URL)</label>
+                            <label className="block text-xs font-semibold text-gray-500 mb-1">Portada (URL)
+                                <span title="URL de la imagen de portada del podcast. Se usará como thumbnail si no hay portada disponible."><Info className="w-3.5 h-3.5 inline ml-1 text-gray-300" /></span>
+                            </label>
                             <input type="text" value={form.cover_image} onChange={e => setForm(f => ({ ...f, cover_image: e.target.value }))} className="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200" />
                         </div>
 

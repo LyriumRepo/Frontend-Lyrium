@@ -691,8 +691,8 @@ export function OperationsPageClient() {
   return (
     <div className="px-8 pb-20 space-y-8 animate-fadeIn font-industrial">
       <ModuleHeader
-        title={isGlossary ? 'Glosario' : 'Gestión Operativa'}
-        subtitle={isGlossary ? 'Entradas de glosario para clasificación automática de transacciones' : 'Recibos, honorarios y servicios'}
+        title={isGlossary ? 'Glosario' : 'Pagos'}
+        subtitle={isGlossary ? 'Entradas de glosario para clasificación automática de transacciones' : 'Gestión de pagos y transacciones'}
         icon={isGlossary ? 'BookOpen' : 'Briefcase'}
         actions={
           <button

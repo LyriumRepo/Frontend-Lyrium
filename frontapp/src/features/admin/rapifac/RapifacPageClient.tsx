@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import { useAdminInvoices } from '@/features/admin/invoices/hooks/useAdminInvoices';
 import { formatCurrency } from '@/shared/lib/utils/formatters';
+import type { NubefactStoreCommission } from '@/shared/lib/api/nubefactRepository';
 import {
     Receipt, Search, RefreshCw, Download, CheckCircle, Clock, XCircle, AlertCircle,
     FileText, TrendingUp, ExternalLink, Package, Store, Eye,
@@ -136,6 +137,48 @@ function DetailModal({ inv, isOpen, onClose }: { inv: AdminInvoiceRow | null; is
                     <p className="text-xs font-bold text-[var(--text-secondary)] p-4">Sin detalle de productos</p>
                 )}
 
+                {inv.storeCommissions && inv.storeCommissions.length > 0 && (
+                    <div className="bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-500/5 dark:to-cyan-500/5 rounded-2xl p-5 border border-teal-100/50 dark:border-teal-500/10">
+                        <div className="flex items-center gap-2 mb-4">
+                            <TrendingUp className="w-4 h-4 text-teal-500" />
+                            <span className="text-[10px] font-black text-teal-600 dark:text-teal-400 uppercase tracking-widest">Comisiones por Tienda</span>
+                        </div>
+                        <div className="space-y-3">
+                            {inv.storeCommissions.map((sc: NubefactStoreCommission) => (
+                                <div key={sc.storeId} className="bg-white/60 dark:bg-[var(--bg-card)]/60 rounded-xl p-4 border border-teal-100/30 dark:border-teal-500/10">
+                                    <div className="flex items-center justify-between mb-3">
+                                        <div className="flex items-center gap-2">
+                                            <Store className="w-3.5 h-3.5 text-teal-400" />
+                                            <span className="text-xs font-black text-teal-700 dark:text-teal-300">{sc.storeName}</span>
+                                        </div>
+                                        <span className="text-[10px] font-bold text-[var(--text-secondary)]">
+                                            Subtotal: {formatCurrency(sc.subtotal)}
+                                        </span>
+                                    </div>
+                                    <div className="grid grid-cols-3 gap-3 text-center">
+                                        <div className="bg-teal-500/5 rounded-xl p-3">
+                                            <div className="text-[9px] font-black text-teal-500 dark:text-teal-400 uppercase tracking-widest">Tasa</div>
+                                            <div className="text-sm font-black text-teal-700 dark:text-teal-300">{sc.commissionRate}%</div>
+                                        </div>
+                                        <div className="bg-teal-500/5 rounded-xl p-3">
+                                            <div className="text-[9px] font-black text-teal-500 dark:text-teal-400 uppercase tracking-widest">Comisión</div>
+                                            <div className="text-sm font-black text-teal-700 dark:text-teal-300">{formatCurrency(sc.commissionAmount)}</div>
+                                        </div>
+                                        <div className="bg-teal-500/5 rounded-xl p-3">
+                                            <div className="text-[9px] font-black text-teal-500 dark:text-teal-400 uppercase tracking-widest">IGV</div>
+                                            <div className="text-sm font-black text-teal-700 dark:text-teal-300">{formatCurrency(sc.commissionIgv)}</div>
+                                        </div>
+                                    </div>
+                                    <div className="mt-2 pt-2 border-t border-teal-100/30 dark:border-teal-500/10 flex justify-between items-center">
+                                        <span className="text-[10px] font-black text-teal-500 dark:text-teal-400 uppercase tracking-widest">Total Comisión</span>
+                                        <span className="text-sm font-black text-teal-700 dark:text-teal-300">{formatCurrency(sc.commissionTotal)}</span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
                 <div className="flex items-center justify-between pt-2">
                     <div className="flex gap-3">
                         {inv.pdf_url && (
@@ -212,7 +255,7 @@ export function RapifacPageClient() {
 
             <main className="p-8 space-y-8 animate-fadeIn">
                 <ModuleHeader
-                    title="Facturación Electrónica"
+                    title="Facturación Rápida"
                     subtitle="Comprobantes electrónicos emitidos via Nubefact — SUNAT"
                     icon="Receipt"
                 />
@@ -373,6 +416,9 @@ export function RapifacPageClient() {
                                                 Cliente
                                             </th>
                                             <th scope="col" className="px-8 py-5 text-[10px] font-black text-gray-400 dark:text-[var(--text-muted)] uppercase tracking-widest border-b border-gray-100 dark:border-[var(--border-subtle)]">
+                                                Tienda
+                                            </th>
+                                            <th scope="col" className="px-8 py-5 text-[10px] font-black text-gray-400 dark:text-[var(--text-muted)] uppercase tracking-widest border-b border-gray-100 dark:border-[var(--border-subtle)]">
                                                 Monto
                                             </th>
                                             <th scope="col" className="px-8 py-5 text-[10px] font-black text-gray-400 dark:text-[var(--text-muted)] uppercase tracking-widest border-b border-gray-100 dark:border-[var(--border-subtle)] text-center">
@@ -414,6 +460,19 @@ export function RapifacPageClient() {
                                                     <div className="text-[10px] font-bold text-gray-400 dark:text-[var(--text-muted)]">
                                                         {invoice.customer_ruc}
                                                     </div>
+                                                </td>
+                                                <td className="px-8 py-6 border-b border-gray-50 dark:border-[var(--border-subtle)]">
+                                                    {invoice.stores && invoice.stores.length > 0 ? (
+                                                        <div className="flex flex-wrap gap-1.5">
+                                                            {invoice.stores.map(s => (
+                                                                <span key={s.id} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-gradient-to-r from-cyan-50 to-emerald-50 dark:from-cyan-500/10 dark:to-emerald-500/10 text-[10px] font-bold text-cyan-700 dark:text-cyan-300 border border-cyan-100/50 dark:border-cyan-500/20">
+                                                                    {s.name}
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                    ) : (
+                                                        <span className="text-[11px] font-bold text-gray-400 dark:text-[var(--text-muted)]">—</span>
+                                                    )}
                                                 </td>
                                                 <td className="px-8 py-6 border-b border-gray-50 dark:border-[var(--border-subtle)] font-black text-emerald-600 dark:text-emerald-400 font-mono text-sm">
                                                     {formatCurrency(invoice.amount)}

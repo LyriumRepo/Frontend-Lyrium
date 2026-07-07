@@ -51,8 +51,21 @@ export interface NubefactOrderItem {
     quantity: number;
     unitPrice: number;
     lineTotal: number;
+    commissionAmount: number;
+    commissionRate: number;
     storeName: string | null;
     storeSlug: string | null;
+}
+
+export interface NubefactStoreCommission {
+    storeId: string;
+    storeName: string;
+    storeSlug: string;
+    subtotal: number;
+    commissionRate: number;
+    commissionAmount: number;
+    commissionIgv: number;
+    commissionTotal: number;
 }
 
 export interface NubefactOrder {
@@ -85,6 +98,7 @@ export interface NubefactInvoice {
     total: number;
     status: string;
     items: NubefactItem[] | null;
+    storeCommissions: NubefactStoreCommission[] | null;
     order: NubefactOrder | null;
     createdAt: string;
     updatedAt: string;

@@ -89,7 +89,7 @@ export function BioBlogApprovalClient() {
     return (
         <div className="px-8 pb-20 space-y-8 animate-fadeIn font-industrial">
             <ModuleHeader
-                title="Aprobación de BioBlog"
+                title="bioBlog"
                 subtitle="Revisa y aprueba el contenido enviado por los vendedores"
                 icon="FileText"
                 actions={

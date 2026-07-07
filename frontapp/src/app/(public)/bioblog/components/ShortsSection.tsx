@@ -19,6 +19,59 @@ interface ShortItem {
   published_at: string | null;
 }
 
+function ShortCard({ short, index }: { short: ShortItem; index: number }) {
+  const [imgError, setImgError] = useState(false);
+
+  const hasImage = !imgError && (short.cover_image || short.thumbnail);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.4, delay: index * 0.06 }}
+      className="group relative rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 bg-slate-100 dark:bg-[#1e2a2a] aspect-[9/16]"
+    >
+      <Link href={`/bioblog/short/${short.id}`} className="absolute inset-0 z-10" />
+      {hasImage ? (
+        <img
+          src={short.cover_image || short.thumbnail || ''}
+          alt={short.title}
+          onError={() => setImgError(true)}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 pointer-events-none"
+        />
+      ) : (
+        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-lime-900/40 to-emerald-900/40 pointer-events-none">
+          <Play className="w-12 h-12 text-white/60" />
+        </div>
+      )}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent pointer-events-none" />
+      <div className="absolute bottom-0 left-0 right-0 p-4 z-20 pointer-events-none">
+        <h4 className="text-sm font-bold text-white line-clamp-2 mb-1">
+          {short.title}
+        </h4>
+        {short.duration && (
+          <span className="text-xs text-white/70 flex items-center gap-1">
+            <Clock className="w-3 h-3" />
+            {formatDuration(short.duration)}
+          </span>
+        )}
+      </div>
+      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-none">
+        <div className="w-14 h-14 bg-white/90 rounded-full flex items-center justify-center shadow-xl transform scale-90 group-hover:scale-100 transition-transform">
+          <Play
+            className="w-7 h-7 ml-0.5 text-slate-800"
+            fill="currentColor"
+          />
+        </div>
+      </div>
+      <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-none">
+        <ExternalLink className="w-4 h-4 text-white" />
+      </div>
+    </motion.div>
+  );
+}
+
 function formatDuration(duration: string | number | null): string {
   // 1. Safe guard against empty, null, or undefined values
   if (duration === null || duration === undefined || duration === '') return '';
@@ -94,50 +147,7 @@ export default function ShortsSection() {
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {shorts.map((short, index) => (
-              <motion.div
-                key={short.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: index * 0.06 }}
-                className="group relative rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 bg-slate-100 dark:bg-[#1e2a2a] aspect-[9/16]"
-              >
-                <Link href={`/bioblog/short/${short.id}`} className="absolute inset-0 z-10" />
-                {short.cover_image || short.thumbnail ? (
-                  <img
-                    src={short.cover_image || short.thumbnail || ''}
-                    alt={short.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 pointer-events-none"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center pointer-events-none">
-                    <Play className="w-12 h-12 text-slate-400" />
-                  </div>
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent pointer-events-none" />
-                <div className="absolute bottom-0 left-0 right-0 p-4 z-20 pointer-events-none">
-                  <h4 className="text-sm font-bold text-white line-clamp-2 mb-1">
-                    {short.title}
-                  </h4>
-                  {short.duration && (
-                    <span className="text-xs text-white/70 flex items-center gap-1">
-                      <Clock className="w-3 h-3" />
-                      {formatDuration(short.duration)}
-                    </span>
-                  )}
-                </div>
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-none">
-                  <div className="w-14 h-14 bg-white/90 rounded-full flex items-center justify-center shadow-xl transform scale-90 group-hover:scale-100 transition-transform">
-                    <Play
-                      className="w-7 h-7 ml-0.5 text-slate-800"
-                      fill="currentColor"
-                    />
-                  </div>
-                </div>
-                <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-none">
-                  <ExternalLink className="w-4 h-4 text-white" />
-                </div>
-              </motion.div>
+              <ShortCard key={short.id} short={short} index={index} />
             ))}
           </div>
         )}

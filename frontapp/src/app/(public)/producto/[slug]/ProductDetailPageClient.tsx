@@ -883,7 +883,7 @@ function RelatedProductCard({ rel }: { rel: LaravelProduct }) {
   const handleAdd = useCallback(() => addToCart(Number(rel.id), 1), [addToCart, rel.id]);
   const handleView = useCallback(() => router.push(`/producto/${rel.slug}`), [router, rel.slug]);
   return (
-    <div className="flex-shrink-0 w-72">
+    <div className="flex-shrink-0 w-72 flex">
       <ProductCard product={data} onAdd={handleAdd} onView={handleView} adding={loading} added={addedToCart} />
     </div>
   );
@@ -1058,7 +1058,7 @@ function RelatedProductsCarousel({ products }: { products: LaravelProduct[] }) {
         >
           <div
             ref={trackRef}
-            className="flex gap-5 will-change-transform py-4 px-2"
+            className="flex gap-5 will-change-transform py-4 px-2 items-stretch"
             style={{ width: 'max-content' }}
           >
             {items.map((rel, i) => (
