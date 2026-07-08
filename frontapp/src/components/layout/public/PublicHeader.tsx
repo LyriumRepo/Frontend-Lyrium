@@ -71,57 +71,55 @@ export default function PublicHeader() {
                         />
                     </Link>
 
-                    <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-1 min-[360px]:gap-2 sm:gap-5 text-xs lg:text-[13px] text-sky-600 dark:text-[var(--color-success)]">
-                            {isAuthenticated && user ? (
-                                <div className="flex items-center gap-1 sm:gap-3">
-                                    <span className="flex items-center gap-1 p-1.5 sm:p-2.5">
-                                        <Icon name="UserCircle" className="text-[18px]" />
-                                        <span className="hidden sm:inline whitespace-nowrap truncate max-w-[110px]">
-                                            {user.display_name || user.username || user.email}
-                                        </span>
-                                    </span>
-                                    <div className="relative group">
-                                        <Link href={dashboardUrl} className="p-1.5 min-[360px]:p-2 sm:p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] transition-colors flex items-center justify-center">
-                                            <Icon name="LayoutDashboard" className="text-[18px]" />
-                                        </Link>
-                                        <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-[#333333] text-white text-xs px-2 py-1 rounded-md whitespace-nowrap">
-                                            Mi panel
-                                        </span>
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="relative group">
-                                    <Link href="/login" className="p-1.5 min-[360px]:p-2 sm:p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] transition-colors flex items-center justify-center">
-                                        <Icon name="UserCircle" className="text-[18px]" />
-                                    </Link>
-                                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-[#333333] text-white text-xs px-2 py-1 rounded-md whitespace-nowrap">
-                                        Iniciar sesión
-                                    </span>
-                                </div>
-                            )}
-
+                    <div className="flex items-center gap-1.5 min-[360px]:gap-3 sm:gap-5 text-xs lg:text-[13px] text-sky-600 dark:text-[var(--color-success)]">
+                        {isAuthenticated && user ? (
+                            <div className="flex items-center gap-1 sm:gap-3">
+                                <span className="relative flex flex-col sm:flex-row items-center gap-0.5 sm:gap-1 p-1 min-[360px]:p-2 sm:p-2.5">
+                                    <Icon name="UserCircle" className="text-base min-[360px]:text-[18px]" />
+                                    <span className="block sm:inline whitespace-nowrap truncate max-w-[42px] min-[360px]:max-w-[75px] sm:max-w-[110px] text-[8px] min-[360px]:text-[9px] sm:text-xs lg:text-[13px] font-bold sm:font-normal text-slate-500 dark:text-slate-400 sm:text-sky-600 sm:dark:text-[var(--color-success)] absolute bottom-[-6px] min-[360px]:bottom-[-4px] sm:relative sm:bottom-auto left-1/2 -translate-x-1/2 sm:left-auto sm:translate-x-0">
+                                        {user.display_name || user.username || user.email}
+                                     </span>
+                                 </span>
+                                 <div className="relative group hidden sm:block">
+                                     <Link href={dashboardUrl} className="p-1.5 min-[360px]:p-2 sm:p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] transition-colors flex items-center justify-center">
+                                         <Icon name="LayoutDashboard" className="text-[18px]" />
+                                     </Link>
+                                     <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-[#333333] text-white text-xs px-2 py-1 rounded-md whitespace-nowrap">
+                                         Mi panel
+                                     </span>
+                                 </div>
+                            </div>
+                        ) : (
                             <div className="relative group">
-                                <Link href="/carrito" className="p-1.5 min-[360px]:p-2 sm:p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] transition-colors flex items-center justify-center">
-                                    <Icon name="ShoppingCart" className="text-[18px]" />
-                                    {cartItemCount > 0 && (
-                                        <span className="absolute -top-1 -right-1 bg-sky-500 text-white text-[11px] rounded-full px-1.5 py-0.5">
-                                            {cartItemCount}
-                                        </span>
-                                    )}
+                                <Link href="/login" className="p-1 min-[360px]:p-2 sm:p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] transition-colors flex items-center justify-center">
+                                    <Icon name="UserCircle" className="text-base min-[360px]:text-[18px]" />
                                 </Link>
                                 <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-[#333333] text-white text-xs px-2 py-1 rounded-md whitespace-nowrap">
-                                    Carrito
+                                    Iniciar sesión
                                 </span>
                             </div>
+                        )}
 
-                            <ThemeToggle />
+                        <div className="relative group">
+                            <Link href="/carrito" className="p-1 min-[360px]:p-2 sm:p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] transition-colors flex items-center justify-center">
+                                <Icon name="ShoppingCart" className="text-base min-[360px]:text-[18px]" />
+                                {cartItemCount > 0 && (
+                                    <span className="absolute -top-1 -right-1 bg-sky-500 text-white text-[11px] rounded-full px-1.5 py-0.5">
+                                        {cartItemCount}
+                                    </span>
+                                )}
+                            </Link>
+                            <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-[#333333] text-white text-xs px-2 py-1 rounded-md whitespace-nowrap">
+                                Carrito
+                            </span>
                         </div>
+
+                        <ThemeToggle />
 
                         {/* Hamburger button (mobile/tablet) */}
                         <button
                             onClick={() => setMobileMenuOpen(true)}
-                            className="lg:hidden text-3xl text-sky-600 dark:text-[var(--color-success)]"
+                            className="p-1 min-[360px]:p-2 lg:hidden text-2xl min-[360px]:text-3xl text-sky-600 dark:text-[var(--color-success)] flex items-center justify-center"
                             aria-label="Menú"
                         >
                             <Icon name="Menu" />

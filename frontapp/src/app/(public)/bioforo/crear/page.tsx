@@ -14,7 +14,6 @@ export default function CrearTemaPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [moderation, setModeration] = useState<{ show: boolean; message: string }>({ show: false, message: '' });
-  const [showCatDropdown, setShowCatDropdown] = useState(false);
 
   const [formData, setFormData] = useState({
     titulo: '',
@@ -22,19 +21,10 @@ export default function CrearTemaPage() {
     categoria: '',
   });
 
-  useEffect(() => {
-    loadCategories();
-  }, []);
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (!target.closest('.cat-dropdown-container')) {
-        setShowCatDropdown(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    loadCategories();
   }, []);
 
   const loadCategories = async () => {
@@ -42,7 +32,7 @@ export default function CrearTemaPage() {
       const cats = await forumApi.getCategories();
       setCategories(Array.isArray(cats) ? cats : []);
     } catch (err) {
-      console.warn('Error loading categories:', err);
+      console.error('Error loading categories:', err);
     } finally {
       setLoading(false);
     }
@@ -190,7 +180,7 @@ export default function CrearTemaPage() {
           animate={{ opacity: 1, y: 0 }}
           className="bg-white dark:bg-[var(--bg-secondary)] rounded-2xl border border-slate-100 dark:border-[var(--border-subtle)] shadow-sm overflow-hidden"
         >
-          <div className="px-4 pt-5 pb-7 md:px-8 md:pt-8 md:pb-10">
+          <div className="px-6 pt-6 pb-8 md:px-8 md:pt-8 md:pb-10">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-100 to-emerald-100 dark:from-sky-900/30 dark:to-emerald-900/30 flex items-center justify-center">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-sky-600 dark:text-sky-400"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
@@ -213,42 +203,72 @@ export default function CrearTemaPage() {
                 </motion.div>
               )}
 
-              <div className="relative cat-dropdown-container">
-                <label className="block text-sm font-medium text-slate-700 dark:text-[var(--text-primary)] mb-1.5">
+              <div>
+                <label htmlFor="categoria" className="block text-sm font-medium text-slate-700 dark:text-[var(--text-primary)] mb-1.5">
                   Categoría <span className="text-sky-500">*</span>
                 </label>
-                <button
-                  type="button"
-                  onClick={() => setShowCatDropdown(!showCatDropdown)}
-                  className="w-full text-left px-4 py-3 rounded-xl border border-slate-200 dark:border-gray-600 bg-white dark:bg-[var(--bg-card)] text-slate-800 dark:text-[var(--text-primary)] text-base focus:border-sky-400 focus:ring-2 focus:ring-sky-100 dark:focus:ring-sky-900/30 outline-none transition-all flex items-center justify-between"
-                >
-                  <span className="truncate">
-                    {categories.find(c => String(c.id) === String(formData.categoria))?.name || 'Selecciona una categoría'}
-                  </span>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`text-slate-400 transition-transform ${showCatDropdown ? 'rotate-180' : ''}`}><polyline points="6 9 12 15 18 9"/></svg>
-                </button>
+                <div className="relative">
+                  <button
+                    id="categoria"
+                    type="button"
+                    onClick={() => setIsOpen(!isOpen)}
+                    className="w-full flex items-center justify-between px-4 py-3 rounded-xl border border-slate-200 dark:border-gray-600 bg-white dark:bg-[var(--bg-card)] text-slate-800 dark:text-[var(--text-primary)] focus:border-sky-400 focus:ring-2 focus:ring-sky-100 dark:focus:ring-sky-900/30 outline-none transition-all text-left"
+                  >
+                    <span>
+                      {formData.categoria 
+                        ? categories.find(c => String(c.id) === formData.categoria)?.name 
+                        : 'Selecciona una categoría'}
+                    </span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}><polyline points="6 9 12 15 18 9"/></svg>
+                  </button>
 
-                {showCatDropdown && (
-                  <div className="absolute left-0 right-0 mt-1.5 bg-white dark:bg-[var(--bg-card)] rounded-xl shadow-lg border border-slate-200 dark:border-gray-600 py-1.5 z-50 max-h-60 overflow-y-auto">
-                    <button
-                      type="button"
-                      onClick={() => { setFormData({ ...formData, categoria: '' }); setShowCatDropdown(false); }}
-                      className={`w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 dark:hover:bg-[#182420] text-slate-500 dark:text-[var(--text-muted)] ${!formData.categoria ? 'bg-slate-50 dark:bg-[#182420] font-semibold text-sky-600 dark:text-sky-400' : ''}`}
-                    >
-                      Selecciona una categoría
-                    </button>
-                    {categories.map((cat) => (
-                      <button
-                        key={cat.id}
-                        type="button"
-                        onClick={() => { setFormData({ ...formData, categoria: String(cat.id) }); setShowCatDropdown(false); }}
-                        className={`w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 dark:hover:bg-[#182420] text-slate-800 dark:text-[var(--text-primary)] ${String(formData.categoria) === String(cat.id) ? 'bg-sky-50 dark:bg-[#182420] font-semibold text-sky-600 dark:text-sky-400' : ''}`}
-                      >
-                        {cat.name}
-                      </button>
-                    ))}
-                  </div>
-                )}
+                  <AnimatePresence>
+                    {isOpen && (
+                      <>
+                        <div 
+                          className="fixed inset-0 z-10" 
+                          onClick={() => setIsOpen(false)}
+                        />
+                        <motion.ul
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          transition={{ duration: 0.15 }}
+                          className="absolute z-20 w-full mt-2 bg-white dark:bg-[var(--bg-secondary)] border border-slate-100 dark:border-[var(--border-subtle)] rounded-xl shadow-xl max-h-60 overflow-y-auto py-1.5 focus:outline-none"
+                        >
+                          <li
+                            onClick={() => {
+                              setFormData({ ...formData, categoria: '' });
+                              setIsOpen(false);
+                            }}
+                            className="px-4 py-2.5 text-sm text-slate-400 dark:text-[var(--text-muted)] cursor-pointer hover:bg-slate-50 dark:hover:bg-[var(--bg-muted)] transition-colors"
+                          >
+                            Selecciona una categoría
+                          </li>
+                          {categories.map((cat) => (
+                            <li
+                              key={cat.id}
+                              onClick={() => {
+                                setFormData({ ...formData, categoria: String(cat.id) });
+                                setIsOpen(false);
+                              }}
+                              className={`px-4 py-2.5 text-sm cursor-pointer transition-colors flex items-center justify-between ${
+                                formData.categoria === String(cat.id)
+                                  ? 'bg-sky-50 dark:bg-sky-950/30 text-sky-600 dark:text-sky-400 font-semibold'
+                                  : 'text-slate-700 dark:text-[var(--text-primary)] hover:bg-slate-50 dark:hover:bg-[var(--bg-muted)]'
+                              }`}
+                            >
+                              <span>{cat.name}</span>
+                              {formData.categoria === String(cat.id) && (
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-sky-500"><polyline points="20 6 9 17 4 12"/></svg>
+                              )}
+                            </li>
+                          ))}
+                        </motion.ul>
+                      </>
+                    )}
+                  </AnimatePresence>
+                </div>
               </div>
 
               <div>
@@ -262,7 +282,7 @@ export default function CrearTemaPage() {
                   onChange={(e) => setFormData({ ...formData, titulo: e.target.value })}
                   placeholder="Escribe un título para tu tema"
                   maxLength={180}
-                  className="w-full text-base px-4 py-3 rounded-xl border border-slate-200 dark:border-gray-600 bg-white dark:bg-[var(--bg-card)] text-slate-800 dark:text-[var(--text-primary)] placeholder-slate-400 dark:placeholder-[var(--text-muted)] focus:border-sky-400 focus:ring-2 focus:ring-sky-100 dark:focus:ring-sky-900/30 outline-none transition-all"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-gray-600 bg-white dark:bg-[var(--bg-card)] text-slate-800 dark:text-[var(--text-primary)] placeholder-slate-400 dark:placeholder-[var(--text-muted)] focus:border-sky-400 focus:ring-2 focus:ring-sky-100 dark:focus:ring-sky-900/30 outline-none transition-all"
                   required
                 />
                 <p className="text-xs text-slate-400 dark:text-[var(--text-muted)] mt-1 text-right">
@@ -281,7 +301,7 @@ export default function CrearTemaPage() {
                   placeholder="Escribe el contenido de tu tema..."
                   rows={8}
                   maxLength={2000}
-                  className="w-full text-base px-4 py-3 rounded-xl border border-slate-200 dark:border-gray-600 bg-white dark:bg-[var(--bg-card)] text-slate-800 dark:text-[var(--text-primary)] placeholder-slate-400 dark:placeholder-[var(--text-muted)] focus:border-sky-400 focus:ring-2 focus:ring-sky-100 dark:focus:ring-sky-900/30 outline-none transition-all resize-none"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-gray-600 bg-white dark:bg-[var(--bg-card)] text-slate-800 dark:text-[var(--text-primary)] placeholder-slate-400 dark:placeholder-[var(--text-muted)] focus:border-sky-400 focus:ring-2 focus:ring-sky-100 dark:focus:ring-sky-900/30 outline-none transition-all resize-none"
                   required
                 />
                 <p className="text-xs text-slate-400 dark:text-[var(--text-muted)] mt-1 text-right">

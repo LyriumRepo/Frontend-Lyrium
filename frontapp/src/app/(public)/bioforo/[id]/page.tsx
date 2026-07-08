@@ -45,7 +45,7 @@ export default function BioForoTopicPage() {
       setTopic(topicData);
       setPosts(Array.isArray(postsData) ? postsData : []);
     } catch (error) {
-      console.warn('Error loading topic:', error);
+      console.error('Error loading topic:', error);
     } finally {
       setLoading(false);
     }

@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
     }
 
     try {
-        const comments = await blogApi.getComments(parseInt(postId));
+        const comments = await blogApi.getComments({ post_id: parseInt(postId) });
         return NextResponse.json(comments);
     } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error';
@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { post_id, author_name, author_email, content, parent_id } = body;
+        const { post_id, author_name, author_email, content } = body;
 
         if (!post_id || !author_name || !content) {
             return NextResponse.json(
@@ -31,11 +31,10 @@ export async function POST(request: NextRequest) {
         }
 
         const result = await blogApi.createComment({
-            post_id,
+            article_id: post_id,
             author_name,
             author_email: author_email || '',
             content,
-            parent_id,
         });
 
         return NextResponse.json(result);

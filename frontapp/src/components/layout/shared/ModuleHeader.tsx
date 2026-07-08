@@ -3,7 +3,7 @@ import Icon from '@/components/ui/Icon';
 
 interface ModuleHeaderProps {
     title: React.ReactNode;
-    subtitle: string;
+    subtitle?: string;
     icon?: string;
     gradient?: string;
     height?: string;
@@ -37,9 +37,11 @@ export default function ModuleHeader({
                         {title}
                     </h1>
                 </div>
-                <p className="text-[var(--text-secondary)] text-sm font-medium mt-1 truncate">
-                    {subtitle}
-                </p>
+                {subtitle && (
+                    <p className="text-[var(--text-secondary)] text-sm font-medium mt-1 truncate">
+                        {subtitle}
+                    </p>
+                )}
             </div>
 
             {/* Lado Derecho (Degradado dinámico con brillo) */}

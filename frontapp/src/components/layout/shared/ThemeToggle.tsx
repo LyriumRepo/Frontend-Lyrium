@@ -14,13 +14,13 @@ export default function ThemeToggle() {
 
     if (!mounted) {
         return (
-            <div className="p-1.5 sm:p-3 rounded-xl">
+            <div className="p-1 min-[360px]:p-2 sm:p-2.5 rounded-xl shrink-0">
                 <Image
                     src="/img/iconologo.png"
                     alt="Modo Bio"
-                    width={28}
-                    height={28}
-                    className="w-6 h-6 sm:w-7 sm:h-7 object-contain"
+                    width={36}
+                    height={36}
+                    className="w-7 h-7 min-[360px]:w-9 min-[360px]:h-9 object-contain shrink-0"
                 />
             </div>
         );
@@ -56,18 +56,18 @@ export default function ThemeToggle() {
     const image = getImage();
 
     return (
-        <div className="relative group inline-block">
+        <div className="relative group inline-block shrink-0">
             <button
                 onClick={cycleTheme}
-                className="p-1.5 sm:p-3 rounded-xl hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] transition-colors flex items-center justify-center"
+                className="p-1 min-[360px]:p-2 sm:p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] transition-colors flex items-center justify-center shrink-0"
                 aria-label={getLabel()}
             >
                 <Image
                     src={image.src}
                     alt={image.alt}
-                    width={30}
-                    height={30}
-                    className="w-6 h-6 sm:w-9 sm:h-9 object-contain"
+                    width={36}
+                    height={36}
+                    className="w-7 h-7 min-[360px]:w-9 min-[360px]:h-9 object-contain shrink-0"
                 />
             </button>
 

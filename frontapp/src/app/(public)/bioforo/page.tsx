@@ -56,7 +56,7 @@ export default function BioForoPage() {
       setForums(Array.isArray(forumsData) ? forumsData : []);
       setTopics(Array.isArray(topicsData) ? topicsData : []);
     } catch (error) {
-      console.warn('Error loading forum data:', error);
+      console.error('Error loading forum data:', error);
     } finally {
       setLoading(false);
     }
