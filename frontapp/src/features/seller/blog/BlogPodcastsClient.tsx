@@ -1,10 +1,12 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Headphones, Plus, Edit, Trash2, Music, Video, Globe, Clock, User, Send, CheckCircle, Save, Info } from 'lucide-react';
+import { Headphones, Plus, Edit, Trash2, Music, Video, Globe, Clock, User, Send, CheckCircle, Save, Info, FileText, BookOpen, Clapperboard } from 'lucide-react';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import BaseButton from '@/components/ui/BaseButton';
 import { blogApi, BlogPodcast } from '@/shared/lib/api/bioblogRepository';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 export function BlogPodcastsClient() {
     const [items, setItems] = useState<BlogPodcast[]>([]);
@@ -83,9 +85,9 @@ export function BlogPodcastsClient() {
     const statusBadge = (s: string) => {
         const map: Record<string, string> = {
             draft: 'bg-gray-100 dark:bg-gray-800 text-gray-500',
-            pending_review: 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400',
-            approved: 'bg-sky-100 dark:bg-sky-900/30 text-sky-600 dark:text-sky-400',
-            rejected: 'bg-red-100 dark:bg-red-900/30 text-red-500',
+            pending_review: 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400',
+            approved: 'bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400',
+            rejected: 'bg-gray-200 dark:bg-gray-700 text-gray-400',
             published: 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400',
             archived: 'bg-gray-200 dark:bg-gray-700 text-gray-400',
         };
@@ -114,25 +116,55 @@ export function BlogPodcastsClient() {
         return `${m}:${String(s).padStart(2, '0')}`;
     };
 
+    const pathname = usePathname();
+
+    const BLOG_TABS = [
+        { label: 'Dashboard', href: '/seller/blog', icon: BookOpen },
+        { label: 'Artículos', href: '/seller/blog/articles', icon: FileText },
+        { label: 'Podcasts', href: '/seller/blog/podcasts', icon: Headphones },
+        { label: 'Vídeos', href: '/seller/blog/videos', icon: Video },
+        { label: 'Shorts', href: '/seller/blog/shorts', icon: Clapperboard },
+    ];
+
     return (
         <div className="space-y-6 animate-fadeIn font-industrial pb-20">
-            <ModuleHeader title="BioBlog" icon="Headphones"
+            <ModuleHeader title="BioBlog" subtitle="Podcasts" icon="Headphones"
                 actions={<BaseButton onClick={openCreate} variant="primary" leftIcon="Plus" size="md">Nuevo Podcast</BaseButton>} />
 
+            <div className="flex gap-1 p-1 bg-gray-100 dark:bg-[var(--bg-muted)] rounded-2xl overflow-x-auto">
+                {BLOG_TABS.map(tab => {
+                    const isActive = pathname === tab.href;
+                    return (
+                        <Link
+                            key={tab.href}
+                            href={tab.href}
+                            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-wider whitespace-nowrap transition-all ${
+                                isActive
+                                    ? 'bg-white dark:bg-[var(--bg-card)] text-teal-600 dark:text-teal-400 shadow-sm border border-gray-200/50 dark:border-teal-500/20'
+                                    : 'text-gray-400 dark:text-[var(--text-muted)] hover:text-gray-600 dark:hover:text-gray-300'
+                            }`}
+                        >
+                            <tab.icon className="w-4 h-4" />
+                            {tab.label}
+                        </Link>
+                    );
+                })}
+            </div>
+
             {/* Workflow guide */}
-            <div className="bg-gradient-to-r from-sky-50 to-blue-50 dark:from-sky-950/30 dark:to-blue-950/20 rounded-2xl border border-sky-200/50 dark:border-sky-800/30 p-4 flex items-start gap-3">
-                <Info className="w-5 h-5 text-sky-500 mt-0.5 flex-shrink-0" />
-                <div className="text-sm text-sky-700 dark:text-sky-300 leading-relaxed">
+            <div className="bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-950/30 dark:to-cyan-950/20 rounded-2xl border border-teal-200/50 dark:border-teal-800/30 p-4 flex items-start gap-3">
+                <Info className="w-5 h-5 text-teal-500 mt-0.5 flex-shrink-0" />
+                <div className="text-sm text-teal-700 dark:text-teal-300 leading-relaxed">
                     <span className="font-bold">Flujo de contenido:</span>{' '}
                     <span className="inline-flex items-center gap-1.5 flex-wrap">
                         <span className="px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-500 text-xs font-bold">Borrador</span>
-                        <span className="text-sky-400">→</span>
-                        <span className="px-2 py-0.5 rounded-md bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 text-xs font-bold">En revisión</span>
-                        <span className="text-sky-400">→</span>
+                        <span className="text-teal-400">→</span>
+                        <span className="px-2 py-0.5 rounded-md bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400 text-xs font-bold">En revisión</span>
+                        <span className="text-teal-400">→</span>
                         <span className="px-2 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold">Publicado</span>
                     </span>
                     <br />
-                    <span className="text-xs text-sky-600/70 dark:text-sky-400/70">Selecciona el tipo y plataforma, pega la URL del podcast y completa los datos. Luego envía a revisión.</span>
+                    <span className="text-xs text-teal-600/70 dark:text-teal-400/70">Selecciona el tipo y plataforma, pega la URL del podcast y completa los datos. Luego envía a revisión.</span>
                 </div>
             </div>
 
@@ -162,12 +194,12 @@ export function BlogPodcastsClient() {
                                     <td className="px-5 py-4">{statusBadge(p.status)}</td>
                                     <td className="px-5 py-4"><div className="flex gap-1.5 items-center">
                                         {p.status === 'draft' && (
-                                            <button onClick={() => updateStatus(p.id, 'pending_review')} className="px-2.5 py-1.5 text-[11px] font-bold uppercase rounded-lg bg-amber-500 hover:bg-amber-600 text-white transition">
+                                            <button onClick={() => updateStatus(p.id, 'pending_review')} className="px-2.5 py-1.5 text-[11px] font-bold uppercase rounded-lg bg-teal-500 hover:bg-teal-600 text-white transition">
                                                 <Send className="w-3 h-3 inline mr-1" />Enviar
                                             </button>
                                         )}
                                         {p.status === 'pending_review' && (
-                                            <span className="px-2.5 py-1.5 text-[11px] font-bold uppercase rounded-lg bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400">En revisión</span>
+                                            <span className="px-2.5 py-1.5 text-[11px] font-bold uppercase rounded-lg bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400">En revisión</span>
                                         )}
                                         {p.status === 'approved' && (
                                             <>
@@ -180,7 +212,7 @@ export function BlogPodcastsClient() {
                                             </>
                                         )}
                                         {p.status === 'rejected' && (
-                                            <span className="px-2.5 py-1.5 text-[11px] font-bold uppercase rounded-lg bg-red-100 dark:bg-red-900/30 text-red-500">Rechazado</span>
+                                            <span className="px-2.5 py-1.5 text-[11px] font-bold uppercase rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-500">Rechazado</span>
                                         )}
                                         {p.status === 'published' && (
                                             <button onClick={() => updateStatus(p.id, 'approved')} className="px-2.5 py-1.5 text-[11px] font-bold uppercase rounded-lg bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 text-gray-700 dark:text-gray-300 transition">
@@ -190,8 +222,8 @@ export function BlogPodcastsClient() {
                                         {p.status === 'archived' && (
                                             <span className="px-2.5 py-1.5 text-[11px] font-bold uppercase rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-400">Archivado</span>
                                         )}
-                                        <button onClick={() => openEdit(p)} className="p-1.5 rounded-lg hover:bg-sky-50 text-sky-500 transition"><Edit className="w-4 h-4" /></button>
-                                        <button onClick={() => handleDelete(p.id)} className="p-1.5 rounded-lg hover:bg-red-50 text-red-400 transition"><Trash2 className="w-4 h-4" /></button>
+                                        <button onClick={() => openEdit(p)} className="p-1.5 rounded-lg hover:bg-teal-50 text-teal-500 transition"><Edit className="w-4 h-4" /></button>
+                                        <button onClick={() => handleDelete(p.id)} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 transition"><Trash2 className="w-4 h-4" /></button>
                                     </div></td>
                                 </tr>
                             ))}
@@ -280,7 +312,7 @@ export function BlogPodcastsClient() {
                         {error && <div className="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 p-3 rounded-xl">{error}</div>}
                         <div className="flex justify-end gap-3 pt-2">
                             <button onClick={() => setShowEditor(false)} className="px-5 py-2.5 text-sm font-semibold text-gray-500 hover:text-gray-700 transition">Cancelar</button>
-                            <button onClick={handleSave} disabled={saving || !form.title.trim() || !form.url.trim()} className="flex items-center gap-1.5 px-6 py-2.5 bg-sky-500 hover:bg-sky-600 text-white rounded-xl text-sm font-semibold transition disabled:opacity-50">
+                            <button onClick={handleSave} disabled={saving || !form.title.trim() || !form.url.trim()} className="flex items-center gap-1.5 px-6 py-2.5 bg-teal-500 hover:bg-teal-600 text-white rounded-xl text-sm font-semibold transition disabled:opacity-50">
                                 <Save className="w-4 h-4" /> {saving ? 'Guardando...' : (editingId ? 'Guardar Cambios' : 'Crear Borrador')}
                             </button>
                         </div>

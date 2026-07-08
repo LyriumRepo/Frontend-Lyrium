@@ -1,13 +1,15 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { FileText, Plus, Search, Edit, Trash2, Eye, Send, Save, CheckCircle, Folder, Info, AlertCircle } from 'lucide-react';
+import { FileText, Plus, Search, Edit, Trash2, Eye, Send, Save, CheckCircle, Folder, Info, AlertCircle, BookOpen, Headphones, Video, Clapperboard } from 'lucide-react';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import BaseButton from '@/components/ui/BaseButton';
 import { BlogEditor } from '@/components/ui/BlogEditor';
 import { GooglePreview } from '@/components/ui/GooglePreview';
 import { blogApi, BlogArticle } from '@/shared/lib/api/bioblogRepository';
 import { blogApi as publicBlogApi } from '@/shared/lib/api/blog';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 export function BlogArticlesClient() {
     const [articles, setArticles] = useState<BlogArticle[]>([]);
@@ -22,6 +24,8 @@ export function BlogArticlesClient() {
     const [error, setError] = useState<string | null>(null);
     const [previewHtml, setPreviewHtml] = useState<string | null>(null);
     const editorRef = useRef<HTMLDivElement>(null);
+
+    const pathname = usePathname();
 
     const loadArticles = useCallback(async () => {
         setLoading(true); setError(null);
@@ -83,9 +87,9 @@ export function BlogArticlesClient() {
     const statusBadge = (s: string) => {
         const map: Record<string, string> = {
             draft: 'bg-gray-100 dark:bg-gray-800 text-gray-500',
-            pending_review: 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400',
-            approved: 'bg-sky-100 dark:bg-sky-900/30 text-sky-600 dark:text-sky-400',
-            rejected: 'bg-red-100 dark:bg-red-900/30 text-red-500',
+            pending_review: 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400',
+            approved: 'bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400',
+            rejected: 'bg-gray-200 dark:bg-gray-700 text-gray-400',
             published: 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400',
             archived: 'bg-gray-200 dark:bg-gray-700 text-gray-400',
         };
@@ -101,32 +105,60 @@ export function BlogArticlesClient() {
         catch (e: any) { setError(e.message); }
     };
 
+    const BLOG_TABS = [
+        { label: 'Dashboard', href: '/seller/blog', icon: BookOpen },
+        { label: 'Artículos', href: '/seller/blog/articles', icon: FileText },
+        { label: 'Podcasts', href: '/seller/blog/podcasts', icon: Headphones },
+        { label: 'Vídeos', href: '/seller/blog/videos', icon: Video },
+        { label: 'Shorts', href: '/seller/blog/shorts', icon: Clapperboard },
+    ];
+
     return (
         <div className="space-y-6 animate-fadeIn font-industrial pb-20">
-            <ModuleHeader title="BioBlog" icon="FileText"
+            <ModuleHeader title="BioBlog" subtitle="Artículos" icon="FileText"
                 actions={<BaseButton onClick={openCreate} variant="primary" leftIcon="Plus" size="md">Nuevo Artículo</BaseButton>} />
 
+            <div className="flex gap-1 p-1 bg-gray-100 dark:bg-[var(--bg-muted)] rounded-2xl overflow-x-auto">
+                {BLOG_TABS.map(tab => {
+                    const isActive = pathname === tab.href;
+                    return (
+                        <Link
+                            key={tab.href}
+                            href={tab.href}
+                            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-wider whitespace-nowrap transition-all ${
+                                isActive
+                                    ? 'bg-white dark:bg-[var(--bg-card)] text-teal-600 dark:text-teal-400 shadow-sm border border-gray-200/50 dark:border-teal-500/20'
+                                    : 'text-gray-400 dark:text-[var(--text-muted)] hover:text-gray-600 dark:hover:text-gray-300'
+                            }`}
+                        >
+                            <tab.icon className="w-4 h-4" />
+                            {tab.label}
+                        </Link>
+                    );
+                })}
+            </div>
+
             {/* Workflow guide */}
-            <div className="bg-gradient-to-r from-sky-50 to-blue-50 dark:from-sky-950/30 dark:to-blue-950/20 rounded-2xl border border-sky-200/50 dark:border-sky-800/30 p-4 flex items-start gap-3">
-                <Info className="w-5 h-5 text-sky-500 mt-0.5 flex-shrink-0" />
-                <div className="text-sm text-sky-700 dark:text-sky-300 leading-relaxed">
+            <div className="bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-950/30 dark:to-cyan-950/20 rounded-2xl border border-teal-200/50 dark:border-teal-800/30 p-4 flex items-start gap-3">
+                <Info className="w-5 h-5 text-teal-500 mt-0.5 flex-shrink-0" />
+                <div className="text-sm text-teal-700 dark:text-teal-300 leading-relaxed">
                     <span className="font-bold">Flujo de contenido:</span>{' '}
                     <span className="inline-flex items-center gap-1.5 flex-wrap">
                         <span className="px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-500 text-xs font-bold">Borrador</span>
-                        <span className="text-sky-400">→</span>
-                        <span className="px-2 py-0.5 rounded-md bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 text-xs font-bold">En revisión</span>
-                        <span className="text-sky-400">→</span>
+                        <span className="text-teal-400">→</span>
+                        <span className="px-2 py-0.5 rounded-md bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400 text-xs font-bold">En revisión</span>
+                        <span className="text-teal-400">→</span>
                         <span className="px-2 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold">Publicado</span>
                     </span>
                     <br />
-                    <span className="text-xs text-sky-600/70 dark:text-sky-400/70">Crea un borrador, luego envíalo a revisión. Un administrador lo aprobará y podrás publicarlo.</span>
+                    <span className="text-xs text-teal-600/70 dark:text-teal-400/70">Crea un borrador, luego envíalo a revisión. Un administrador lo aprobará y podrás publicarlo.</span>
                 </div>
             </div>
 
             <div className="flex gap-4 items-center">
                 <div className="relative flex-1 max-w-md">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar artículos..." className="w-full pl-10 pr-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200 focus:outline-none focus:border-sky-500 transition" />
+                    <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar artículos..." className="w-full pl-10 pr-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200 focus:outline-none focus:border-teal-500 transition" />
                 </div>
                 <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200">
                     <option value="">Todos</option>
@@ -164,12 +196,12 @@ export function BlogArticlesClient() {
                                     <td className="px-5 py-4 text-xs text-gray-400">{a.published_at ? new Date(a.published_at).toLocaleDateString('es-PE') : new Date(a.created_at).toLocaleDateString('es-PE')}</td>
                                     <td className="px-5 py-4"><div className="flex gap-1.5 items-center">
                                         {a.status === 'draft' && (
-                                            <button onClick={() => updateStatus(a.id, 'pending_review')} className="px-2.5 py-1.5 text-[11px] font-bold uppercase rounded-lg bg-amber-500 hover:bg-amber-600 text-white transition">
+                                            <button onClick={() => updateStatus(a.id, 'pending_review')} className="px-2.5 py-1.5 text-[11px] font-bold uppercase rounded-lg bg-teal-500 hover:bg-teal-600 text-white transition">
                                                 <Send className="w-3 h-3 inline mr-1" />Enviar
                                             </button>
                                         )}
                                         {a.status === 'pending_review' && (
-                                            <span className="px-2.5 py-1.5 text-[11px] font-bold uppercase rounded-lg bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400">En revisión</span>
+                                            <span className="px-2.5 py-1.5 text-[11px] font-bold uppercase rounded-lg bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400">En revisión</span>
                                         )}
                                         {a.status === 'approved' && (
                                             <>
@@ -182,7 +214,7 @@ export function BlogArticlesClient() {
                                             </>
                                         )}
                                         {a.status === 'rejected' && (
-                                            <span className="px-2.5 py-1.5 text-[11px] font-bold uppercase rounded-lg bg-red-100 dark:bg-red-900/30 text-red-500">Rechazado</span>
+                                            <span className="px-2.5 py-1.5 text-[11px] font-bold uppercase rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-500">Rechazado</span>
                                         )}
                                         {a.status === 'published' && (
                                             <button onClick={() => updateStatus(a.id, 'approved')} className="px-2.5 py-1.5 text-[11px] font-bold uppercase rounded-lg bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 text-gray-700 dark:text-gray-300 transition">
@@ -192,8 +224,8 @@ export function BlogArticlesClient() {
                                         {a.status === 'archived' && (
                                             <span className="px-2.5 py-1.5 text-[11px] font-bold uppercase rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-400">Archivado</span>
                                         )}
-                                        <button onClick={() => openEdit(a)} className="p-1.5 rounded-lg hover:bg-sky-50 dark:hover:bg-sky-900/20 text-sky-500 transition"><Edit className="w-4 h-4" /></button>
-                                        <button onClick={() => handleDelete(a.id)} className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-red-400 transition"><Trash2 className="w-4 h-4" /></button>
+                                        <button onClick={() => openEdit(a)} className="p-1.5 rounded-lg hover:bg-teal-50 dark:hover:bg-teal-900/20 text-teal-500 transition"><Edit className="w-4 h-4" /></button>
+                                        <button onClick={() => handleDelete(a.id)} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 transition"><Trash2 className="w-4 h-4" /></button>
                                     </div></td>
                                 </tr>
                             ))}
@@ -245,7 +277,7 @@ export function BlogArticlesClient() {
                                     onClick={() => setForm(f => ({ ...f, blog_category_id: '' }))}
                                     className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all ${
                                         !form.blog_category_id
-                                            ? 'bg-sky-500 text-white shadow-md'
+                                            ? 'bg-teal-500 text-white shadow-md'
                                             : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
                                     }`}
                                 >
@@ -258,7 +290,7 @@ export function BlogArticlesClient() {
                                         onClick={() => setForm(f => ({ ...f, blog_category_id: cat.id }))}
                                         className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all ${
                                             form.blog_category_id === cat.id
-                                                ? 'bg-sky-500 text-white shadow-md'
+                                                ? 'bg-teal-500 text-white shadow-md'
                                                 : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
                                         }`}
                                     >
@@ -269,14 +301,14 @@ export function BlogArticlesClient() {
                         </div>
 
                         {/* Destacado */}
-                        <div className="flex items-center justify-between p-4 bg-amber-50 dark:bg-amber-900/10 rounded-2xl border border-amber-200/50 dark:border-amber-500/20">
+                        <div className="flex items-center justify-between p-4 bg-teal-50 dark:bg-teal-900/10 rounded-2xl border border-teal-200/50 dark:border-teal-500/20">
                             <div className="flex items-center gap-3">
-                                <div className="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-500/20 flex items-center justify-center">
-                                    <svg className="w-5 h-5 text-amber-600 dark:text-amber-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                <div className="w-9 h-9 rounded-xl bg-teal-100 dark:bg-teal-500/20 flex items-center justify-center">
+                                    <svg className="w-5 h-5 text-teal-600 dark:text-teal-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
                                 </div>
                                 <div>
-                                    <p className="text-sm font-bold text-amber-800 dark:text-amber-300">Artículo Destacado</p>
-                                    <p className="text-xs text-amber-600 dark:text-amber-400/70">Aparecerá en la sección Destacados del BioBlog</p>
+                                    <p className="text-sm font-bold text-teal-800 dark:text-teal-300">Artículo Destacado</p>
+                                    <p className="text-xs text-teal-600 dark:text-teal-400/70">Aparecerá en la sección Destacados del BioBlog</p>
                                 </div>
                             </div>
                             <button
@@ -284,7 +316,7 @@ export function BlogArticlesClient() {
                                 onClick={() => setForm(f => ({ ...f, is_featured: !f.is_featured }))}
                                 className={`relative w-14 h-7 rounded-full transition-colors duration-300 ${
                                     form.is_featured
-                                        ? 'bg-amber-500 dark:bg-amber-600'
+                                        ? 'bg-teal-500 dark:bg-teal-600'
                                         : 'bg-gray-200 dark:bg-gray-700'
                                 }`}
                             >
@@ -354,7 +386,7 @@ export function BlogArticlesClient() {
                                 <Eye className="w-4 h-4" /> Vista Previa
                             </button>
                             <button onClick={() => saveWithStatus(form.status)} disabled={saving || !form.title.trim()}
-                                className="flex items-center gap-1.5 px-6 py-2.5 text-sm font-semibold text-white bg-sky-500 hover:bg-sky-600 rounded-xl transition disabled:opacity-50">
+                                className="flex items-center gap-1.5 px-6 py-2.5 text-sm font-semibold text-white bg-teal-500 hover:bg-teal-600 rounded-xl transition disabled:opacity-50">
                                 <Save className="w-4 h-4" /> {saving ? 'Guardando...' : (editingId ? 'Guardar Cambios' : 'Crear Borrador')}
                             </button>
                         </div>

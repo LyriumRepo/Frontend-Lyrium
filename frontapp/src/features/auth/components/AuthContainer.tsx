@@ -78,12 +78,8 @@ export function AuthContainer({ onSuccess }: AuthContainerProps) {
     }, [register, router]);
 
     const handleContinue = useCallback(() => {
-        if (rpaResult?.estado === 'ACEPTADO') {
-            router.push('/seller');
-        } else {
-            resetRegistro();
-        }
-    }, [rpaResult, router, resetRegistro]);
+        router.push('/login');
+    }, [router]);
 
     const handleRetry = useCallback(() => {
         resetRegistro();
@@ -214,6 +210,7 @@ export function AuthContainer({ onSuccess }: AuthContainerProps) {
                                 onContinue={handleContinue}
                                 onRetry={handleRetry}
                                 isSubmitting={isSubmitting}
+                                email={rpaResult?.email || undefined}
                             />
                         </div>
                     )}
