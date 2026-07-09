@@ -17,7 +17,7 @@ import CourierSelector         from './CourierSelector';
 const inputCls =
   'w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-[var(--border-subtle)] ' +
   'bg-white dark:bg-[var(--bg-secondary)] text-gray-900 dark:text-[var(--text-primary)] text-sm ' +
-  'focus:ring-2 focus:ring-[var(--brand-sky)]/30 focus:border-[var(--brand-sky)] outline-none transition';
+  'focus:ring-2 focus:ring-[var(--brand-sky)]/30 focus:border-[var(--brand-sky)] dark:focus:ring-[var(--brand-green)]/30 dark:focus:border-[var(--brand-green)] outline-none transition';
 
 const labelCls =
   'block text-xs font-medium text-gray-500 dark:text-[var(--text-secondary)] mb-1.5';
@@ -139,7 +139,7 @@ export default function ShippingForm() {
               }}
               className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700
                 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm
-                focus:ring-2 focus:ring-sky-500 focus:border-transparent outline-none transition"
+                focus:ring-2 focus:ring-[var(--brand-sky)]/30 focus:border-[var(--brand-sky)] dark:focus:ring-[var(--brand-green)]/30 dark:focus:border-[var(--brand-green)] outline-none transition"
             >
               <option value="">Seleccionar dirección...</option>
               {savedAddresses.map((a) => (
@@ -278,7 +278,7 @@ export default function ShippingForm() {
         {data.distrito && (
           <div className="pt-1">
             {isLoadingQuotes && (
-              <div className="flex items-center gap-3 py-3 text-sky-600 dark:text-sky-400">
+              <div className="flex items-center gap-3 py-3 text-[var(--brand-sky-hover)] dark:text-[var(--brand-green)]">
                 <Loader2 className="w-5 h-5 animate-spin shrink-0" />
                 <div>
                   <p className="text-sm font-semibold">Cotizando couriers...</p>

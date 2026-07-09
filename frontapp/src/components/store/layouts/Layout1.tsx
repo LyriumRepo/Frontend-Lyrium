@@ -2,21 +2,22 @@
 
 import { Tienda, Producto } from '@/types/public';
 import ProductGrid from '@/components/products/ProductGrid';
-import AdBannersGrid from '../AdBannersGrid';
+import AdBannersCarousel from '../AdBannersCarousel';
 
 interface Layout1Props {
   store: Tienda;
   products: Producto[];
   plan: 'basico' | 'premium';
+  banners?: { url: string; titulo: string; link?: string }[];
 }
 
-export default function Layout1({ products }: Layout1Props) {
+export default function Layout1({ products, banners }: Layout1Props) {
   const productosNormales = products.filter((p) => p.tipo !== 'service');
   const productosServicio = products.filter((p) => p.tipo === 'service');
 
   return (
     <div className="space-y-4 sm:space-y-5 md:space-y-6">
-      <AdBannersGrid />
+      <AdBannersCarousel banners={banners} maxBanners={4} startIndex={0} fallback={4} />
 
       <hr className="border-gray-200 dark:border-[var(--border-subtle)]" />
 
@@ -27,7 +28,7 @@ export default function Layout1({ products }: Layout1Props) {
         <ProductGrid productos={productosNormales} />
       </div>
 
-      <AdBannersGrid />
+      <AdBannersCarousel banners={banners} maxBanners={4} startIndex={4} fallback={4} />
 
       <hr className="border-gray-200 dark:border-[var(--border-subtle)]" />
 

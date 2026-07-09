@@ -44,7 +44,7 @@ export default function CustomerHeader({ onOpenMenu }: { onOpenMenu: () => void 
                 <div className="flex items-center gap-4">
                     <button
                         onClick={onOpenMenu}
-                        className="lg:hidden p-2 -ml-2 rounded-lg hover:bg-gray-100 dark:hover:bg-[#182420] transition-colors"
+                        className="lg:hidden p-2.5 -ml-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-[#182420] transition-colors"
                         aria-label="Open menu"
                     >
                         <Menu className="w-6 h-6 text-gray-600 dark:text-gray-400" />

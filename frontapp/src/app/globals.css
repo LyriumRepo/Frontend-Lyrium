@@ -335,6 +335,15 @@
         background: var(--text-secondary);
     }
 
+    /* Scrollbar completamente oculto — para modales y paneles internos */
+    .scrollbar-none {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+    .scrollbar-none::-webkit-scrollbar {
+        display: none;
+    }
+
     .lateral-gradient-mask {
         @apply bg-white dark:bg-[var(--bg-card)] rounded-r-[60px] md:rounded-r-[80px] transition-all duration-500;
         box-shadow: 10px 0 15px -5px rgba(0, 0, 0, 0.05);
@@ -345,14 +354,21 @@
         box-shadow: 10px 0 15px -5px rgba(0, 0, 0, 0.08);
     }
 
+    /*
+     * SIN `transform`. Un `transform` (incluso translateY(0) en reposo) convierte
+     * al elemento en containing block de sus descendientes `position: fixed`,
+     * rompiendo el `inset-0` de cualquier modal/backdrop anidado dentro de un
+     * contenedor con esta animación: el backdrop deja de cubrir el viewport
+     * completo y solo cubre los límites de ESTE div (visible como "fondo oscurecido
+     * a medias" detrás de cualquier modal). Se quitó el translateY por esa razón;
+     * el fade en sí se mantiene idéntico.
+     */
     @keyframes fadeIn {
         from {
             opacity: 0;
-            transform: translateY(10px);
         }
         to {
             opacity: 1;
-            transform: translateY(0);
         }
     }
 
@@ -712,6 +728,16 @@
     }
     .animate-loader-heartbeat {
         animation: loader-heartbeat 5s ease-in-out infinite;
+    }
+
+    @keyframes spin-slow {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    @keyframes spin-reverse {
+        from { transform: rotate(360deg); }
+        to { transform: rotate(0deg); }
     }
 }
 

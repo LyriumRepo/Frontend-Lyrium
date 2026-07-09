@@ -911,7 +911,7 @@ function RelatedProductCard({ rel }: { rel: LaravelProduct }) {
                 </Badge>
               </div>
             )}
-            <TopMedalBadge entityType="product" entityId={rel.id} size="md" className="absolute bottom-3 right-3" />
+            <TopMedalBadge entityType="product" entityId={rel.id} size="xl" className="absolute bottom-6 right-6" />
           </div>
           <div className="p-4 space-y-2">
             <div className="flex flex-wrap items-center gap-1">
@@ -1541,7 +1541,7 @@ function ProductGallery({
           priority
         />
 
-        <TopMedalBadge entityType="product" entityId={productId} size="xl" className="absolute bottom-4 right-4 z-10" />
+        <TopMedalBadge entityType="product" entityId={productId} size="xxl" className="absolute bottom-4 right-4 z-10" />
 
         {/* Lupa */}
         <div

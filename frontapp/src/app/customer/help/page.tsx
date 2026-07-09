@@ -151,7 +151,7 @@ export default function CustomerHelpPage() {
   }
 
   return (
-    <div className="space-y-8 animate-fadeIn -ml-4 md:-ml-8 lg:-ml-12">
+    <div className="space-y-8 animate-fadeIn">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl md:text-3xl font-black text-slate-800 dark:text-[var(--text-primary)]">
@@ -164,7 +164,7 @@ export default function CustomerHelpPage() {
       </div>
 
       <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-[2.5rem] shadow-2xl border border-slate-100 dark:border-[var(--border-subtle)] overflow-hidden">
-        <div className="bg-gradient-to-r from-sky-400 via-sky-500 to-sky-600 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-8 relative overflow-hidden">
+        <div className="bg-gradient-to-r from-sky-400 via-sky-500 to-sky-600 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-6 md:p-8 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl" />
           <div className="relative z-10 flex items-center gap-5">
             <div className="w-14 h-14 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30">
@@ -174,14 +174,14 @@ export default function CustomerHelpPage() {
               <h3 className="text-2xl font-black tracking-tighter text-white">
                 Busca Ayuda
               </h3>
-              <p className="text-[10px] font-bold text-amber-100 uppercase tracking-[0.2em] mt-1">
+              <p className="text-[10px] font-bold text-amber-100 uppercase tracking-wide mt-1">
                 Preguntas Frecuentes
               </p>
             </div>
           </div>
         </div>
 
-        <div className="p-8">
+        <div className="p-5 md:p-8">
           <div className="relative mb-8">
             <input
               type="text"

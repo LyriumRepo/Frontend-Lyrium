@@ -1,10 +1,50 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/shared/lib/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import Icon from '@/components/ui/Icon';
 import { addressApi, Address } from '@/shared/lib/api/addressRepository';
+
+// ── CustomSelect ──────────────────────────────────────────────────────────────
+interface CSOpt { value: string; label: string }
+function CustomSelect({ value, onChange, options, required }: {
+  value: string; onChange: (v: string) => void; options: CSOpt[]; required?: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const selected = options.find(o => o.value === value);
+
+  useEffect(() => {
+    const h = (e: MouseEvent) => { if (containerRef.current && !containerRef.current.contains(e.target as Node)) setOpen(false); };
+    if (open) document.addEventListener('mousedown', h);
+    return () => document.removeEventListener('mousedown', h);
+  }, [open]);
+
+  return (
+    <div ref={containerRef} className="relative">
+      <button type="button" onClick={() => setOpen(v => !v)}
+        className="w-full flex items-center justify-between p-3 text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-2xl outline-none hover:border-sky-400 focus:border-sky-500 dark:focus:border-[var(--icons-green)] cursor-pointer transition-colors">
+        <span className="truncate">{selected?.label ?? options[0]?.label ?? ''}</span>
+        <svg className={`w-4 h-4 shrink-0 text-gray-400 transition-transform duration-200${open ? ' rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      {open && (
+        <div className="absolute top-[calc(100%+4px)] left-0 right-0 bg-white dark:bg-[var(--bg-secondary)] rounded-2xl border-2 border-gray-200 dark:border-[var(--border-subtle)] shadow-2xl z-50 overflow-hidden">
+          <div className="max-h-48 overflow-y-auto scrollbar-none">
+            {options.map(opt => (
+              <button key={opt.value} type="button" onClick={() => { onChange(opt.value); setOpen(false); }}
+                className={`w-full text-left px-4 py-2.5 text-sm transition-colors hover:bg-sky-50 dark:hover:bg-[#1e2d28] ${opt.value === value ? 'font-bold text-sky-600 dark:text-[var(--icons-green)] bg-sky-50/60 dark:bg-[#1e2d28]' : 'font-medium text-gray-700 dark:text-[var(--text-primary)]'}`}>
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function CustomerAddressesPage() {
   const { isAuthenticated, loading } = useAuth();
@@ -15,6 +55,8 @@ export default function CustomerAddressesPage() {
   const [showModal, setShowModal] = useState(false);
   const [editingAddress, setEditingAddress] = useState<Address | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
+  const [saveError, setSaveError] = useState('');
+  const [actionError, setActionError] = useState('');
 
   const [formData, setFormData] = useState<Partial<Address>>({
     etiqueta: undefined,
@@ -56,6 +98,7 @@ export default function CustomerAddressesPage() {
 
   const openAddModal = () => {
     setEditingAddress(null);
+    setSaveError('');
     setFormData({
       etiqueta: undefined,
       destinatario: '',
@@ -74,6 +117,7 @@ export default function CustomerAddressesPage() {
 
   const openEditModal = (address: Address) => {
     setEditingAddress(address);
+    setSaveError('');
     setFormData({
       etiqueta: address.etiqueta,
       destinatario: address.destinatario,
@@ -97,6 +141,7 @@ export default function CustomerAddressesPage() {
       setAddresses(prev => prev.filter(a => a.id !== id));
     } catch (err) {
       console.error('Error al eliminar:', err);
+      setActionError('No se pudo eliminar la dirección. Intenta nuevamente.');
     }
   };
 
@@ -106,6 +151,7 @@ export default function CustomerAddressesPage() {
       setAddresses(prev => prev.map(a => ({ ...a, is_default: a.id === id })));
     } catch (err) {
       console.error('Error al establecer como predeterminada:', err);
+      setActionError('No se pudo actualizar la dirección principal. Intenta nuevamente.');
     }
   };
 
@@ -133,8 +179,10 @@ export default function CustomerAddressesPage() {
         setAddresses(prev => [...prev, created]);
       }
       setShowModal(false);
+      setSaveError('');
     } catch (err) {
       console.error('Error al guardar:', err);
+      setSaveError('Ocurrió un error al guardar la dirección. Intenta nuevamente.');
     }
   };
 
@@ -161,7 +209,7 @@ export default function CustomerAddressesPage() {
 
   return (
     <div className="space-y-8 animate-fadeIn">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-black text-slate-800 dark:text-[var(--text-primary)]">
             Direcciones de Envío
@@ -195,7 +243,7 @@ export default function CustomerAddressesPage() {
               className={`rounded-[2.5rem] shadow-2xl overflow-hidden group/card hover:-translate-y-2 transition-all duration-500 ${address.is_default ? 'bg-gradient-to-br from-emerald-50 to-sky-50 dark:from-[#1a3a2a]/40 dark:to-[#0d1a12]/60 ring-2 ring-emerald-300 dark:ring-[#4A7C59]/50' : 'bg-white dark:bg-[var(--bg-secondary)]'}`}
             >
               <div className={`h-2 bg-gradient-to-r ${styles.grad}`}></div>
-              <div className="p-8">
+              <div className="p-5 md:p-8">
                 <div className="flex items-start justify-between mb-8">
                   <div className={`w-14 h-14 bg-sky-50 dark:bg-[var(--bg-muted)] rounded-2xl flex items-center justify-center border border-sky-100 dark:border-[var(--border-subtle)] group-hover/card:scale-110 transition-transform duration-500`}>
                     <Icon name={styles.icon as any} className={`w-7 h-7 ${styles.color}`} />
@@ -275,12 +323,13 @@ export default function CustomerAddressesPage() {
       </div>
 
       {showModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4" onClick={() => setShowModal(false)}>
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-[200] overflow-y-auto scrollbar-none" onClick={() => { setShowModal(false); setSaveError(''); }}>
+          <div className="flex min-h-full items-center justify-center px-4 py-20">
           <div
-            className="bg-white dark:bg-[var(--bg-secondary)] rounded-[3.5rem] max-w-2xl w-full max-h-[95vh] overflow-hidden shadow-2xl"
+            className="bg-white dark:bg-[var(--bg-secondary)] rounded-2xl sm:rounded-[3rem] max-w-xl w-full overflow-hidden shadow-2xl flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[#1A3A32] dark:to-[var(--brand-green)] p-8 text-white relative">
+            <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[#1A3A32] dark:to-[var(--brand-green)] p-6 md:p-8 text-white relative">
               <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl" />
               <div className="relative z-10 flex items-center justify-between">
                 <div className="flex items-center gap-4">
@@ -291,30 +340,30 @@ export default function CustomerAddressesPage() {
                     <h3 className="text-2xl font-black tracking-tighter">
                       {editingAddress ? 'Editar Dirección' : 'Nueva Dirección'}
                     </h3>
-                    <p className="text-[10px] font-bold text-sky-100 uppercase tracking-[0.2em]">Configuración de Entrega</p>
+                    <p className="text-[10px] font-bold text-sky-100 uppercase tracking-wide">Configuración de Entrega</p>
                   </div>
                 </div>
-                <button onClick={() => setShowModal(false)} className="w-10 h-10 rounded-full bg-black/10 flex items-center justify-center hover:bg-black/20">
+                <button onClick={() => { setShowModal(false); setSaveError(''); }} className="w-10 h-10 rounded-full bg-black/10 flex items-center justify-center hover:bg-black/20">
                   <Icon name="X" className="w-5 h-5 text-white" />
                 </button>
               </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-10 space-y-6 overflow-y-auto max-h-[calc(95vh-140px)]">
+            <form onSubmit={handleSubmit} className="p-4 md:p-6 space-y-4 overflow-y-auto scrollbar-none flex-1">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-gray-400 dark:text-gray-400 uppercase">Etiqueta de ubicación</label>
-                  <select
+                  <CustomSelect
                     value={formData.etiqueta || ''}
-                    onChange={(e) => setFormData({ ...formData, etiqueta: e.target.value as 'casa' | 'trabajo' | 'otro' | undefined })}
+                    onChange={(v) => setFormData({ ...formData, etiqueta: v as 'casa' | 'trabajo' | 'otro' | undefined })}
                     required
-                    className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)]"
-                  >
-                    <option value="">Seleccionar...</option>
-                    <option value="casa">🏠 Casa</option>
-                    <option value="trabajo">💼 Trabajo</option>
-                    <option value="otro">📍 Otro</option>
-                  </select>
+                    options={[
+                      { value: '',       label: 'Seleccionar...' },
+                      { value: 'casa',   label: '🏠 Casa' },
+                      { value: 'trabajo',label: '💼 Trabajo' },
+                      { value: 'otro',   label: '📍 Otro' },
+                    ]}
+                  />
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-gray-400 dark:text-gray-400 uppercase">Nombre Destinatario</label>
@@ -323,7 +372,7 @@ export default function CustomerAddressesPage() {
                     value={formData.destinatario}
                     onChange={(e) => setFormData({ ...formData, destinatario: e.target.value })}
                     required
-                    className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)]"
+                    className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-3 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-2xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)] cursor-pointer transition-colors"
                   />
                 </div>
                 <div className="space-y-2">
@@ -333,44 +382,44 @@ export default function CustomerAddressesPage() {
                     value={formData.pais}
                     onChange={(e) => setFormData({ ...formData, pais: e.target.value })}
                     required
-                    className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)]"
+                    className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-3 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-2xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)] cursor-pointer transition-colors"
                   />
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-gray-400 dark:text-gray-400 uppercase">Departamento</label>
-                  <select
-                    value={formData.departamento}
-                    onChange={(e) => setFormData({ ...formData, departamento: e.target.value })}
+                  <CustomSelect
+                    value={formData.departamento || ''}
+                    onChange={(v) => setFormData({ ...formData, departamento: v })}
                     required
-                    className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)]"
-                  >
-                    <option value="">Seleccionar...</option>
-                    <option value="Amazonas">Amazonas</option>
-                    <option value="Áncash">Áncash</option>
-                    <option value="Apurímac">Apurímac</option>
-                    <option value="Arequipa">Arequipa</option>
-                    <option value="Ayacucho">Ayacucho</option>
-                    <option value="Cajamarca">Cajamarca</option>
-                    <option value="Callao">Callao</option>
-                    <option value="Cusco">Cusco</option>
-                    <option value="Huancavelica">Huancavelica</option>
-                    <option value="Huánuco">Huánuco</option>
-                    <option value="Ica">Ica</option>
-                    <option value="Junín">Junín</option>
-                    <option value="La Libertad">La Libertad</option>
-                    <option value="Lambayeque">Lambayeque</option>
-                    <option value="Lima">Lima</option>
-                    <option value="Loreto">Loreto</option>
-                    <option value="Madre de Dios">Madre de Dios</option>
-                    <option value="Moquegua">Moquegua</option>
-                    <option value="Pasco">Pasco</option>
-                    <option value="Piura">Piura</option>
-                    <option value="Puno">Puno</option>
-                    <option value="San Martín">San Martín</option>
-                    <option value="Tacna">Tacna</option>
-                    <option value="Tumbes">Tumbes</option>
-                    <option value="Ucayali">Ucayali</option>
-                  </select>
+                    options={[
+                      { value: '',               label: 'Seleccionar...' },
+                      { value: 'Amazonas',       label: 'Amazonas' },
+                      { value: 'Áncash',         label: 'Áncash' },
+                      { value: 'Apurímac',       label: 'Apurímac' },
+                      { value: 'Arequipa',       label: 'Arequipa' },
+                      { value: 'Ayacucho',       label: 'Ayacucho' },
+                      { value: 'Cajamarca',      label: 'Cajamarca' },
+                      { value: 'Callao',         label: 'Callao' },
+                      { value: 'Cusco',          label: 'Cusco' },
+                      { value: 'Huancavelica',   label: 'Huancavelica' },
+                      { value: 'Huánuco',        label: 'Huánuco' },
+                      { value: 'Ica',            label: 'Ica' },
+                      { value: 'Junín',          label: 'Junín' },
+                      { value: 'La Libertad',    label: 'La Libertad' },
+                      { value: 'Lambayeque',     label: 'Lambayeque' },
+                      { value: 'Lima',           label: 'Lima' },
+                      { value: 'Loreto',         label: 'Loreto' },
+                      { value: 'Madre de Dios',  label: 'Madre de Dios' },
+                      { value: 'Moquegua',       label: 'Moquegua' },
+                      { value: 'Pasco',          label: 'Pasco' },
+                      { value: 'Piura',          label: 'Piura' },
+                      { value: 'Puno',           label: 'Puno' },
+                      { value: 'San Martín',     label: 'San Martín' },
+                      { value: 'Tacna',          label: 'Tacna' },
+                      { value: 'Tumbes',         label: 'Tumbes' },
+                      { value: 'Ucayali',        label: 'Ucayali' },
+                    ]}
+                  />
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-gray-400 dark:text-gray-400 uppercase">Ciudad / Provincia</label>
@@ -379,7 +428,7 @@ export default function CustomerAddressesPage() {
                     value={formData.provincia}
                     onChange={(e) => setFormData({ ...formData, provincia: e.target.value })}
                     required
-                    className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)]"
+                    className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-3 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-2xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)] cursor-pointer transition-colors"
                   />
                 </div>
                 <div className="space-y-2">
@@ -389,7 +438,7 @@ export default function CustomerAddressesPage() {
                     value={formData.distrito}
                     onChange={(e) => setFormData({ ...formData, distrito: e.target.value })}
                     required
-                    className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)]"
+                    className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-3 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-2xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)] cursor-pointer transition-colors"
                   />
                 </div>
               </div>
@@ -401,7 +450,7 @@ export default function CustomerAddressesPage() {
                     value={formData.avenida}
                     onChange={(e) => setFormData({ ...formData, avenida: e.target.value })}
                     required
-                    className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)]"
+                    className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-3 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-2xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)] cursor-pointer transition-colors"
                   />
                 </div>
                 <div className="space-y-2">
@@ -411,7 +460,7 @@ export default function CustomerAddressesPage() {
                     value={formData.numero}
                     onChange={(e) => setFormData({ ...formData, numero: e.target.value })}
                     required
-                    className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)]"
+                    className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-3 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-2xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)] cursor-pointer transition-colors"
                   />
                 </div>
                 <div className="space-y-2">
@@ -420,7 +469,7 @@ export default function CustomerAddressesPage() {
                     type="text"
                     value={formData.piso_lote || ''}
                     onChange={(e) => setFormData({ ...formData, piso_lote: e.target.value })}
-                    className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)]"
+                    className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-3 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-2xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)] cursor-pointer transition-colors"
                   />
                 </div>
               </div>
@@ -448,28 +497,46 @@ export default function CustomerAddressesPage() {
                 </label>
               </div>
               <div className="flex gap-4 pt-4">
+                {saveError && (
+                  <div className="col-span-full w-full px-4 py-3 rounded-2xl bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800 flex items-center gap-2 mb-0">
+                    <Icon name="AlertCircle" className="w-4 h-4 text-rose-500 shrink-0" />
+                    <p className="text-xs font-bold text-rose-700 dark:text-rose-400">{saveError}</p>
+                  </div>
+                )}
                 <button
                   type="button"
-                  onClick={() => setShowModal(false)}
-                  className="flex-1 px-8 py-4 rounded-2xl bg-gray-100 dark:bg-[var(--bg-muted)] text-gray-600 dark:text-gray-400 dark:text-[var(--text-primary)] font-black text-xs uppercase tracking-widest hover:bg-gray-200 dark:hover:bg-[#2A3F33]"
+                  onClick={() => { setShowModal(false); setSaveError(''); }}
+                  className="flex-1 px-4 py-3 rounded-2xl bg-gray-100 dark:bg-[var(--bg-muted)] text-gray-600 dark:text-[var(--text-primary)] font-black text-xs uppercase tracking-wide hover:bg-gray-200 dark:hover:bg-[#2A3F33]"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="flex-[2] px-8 py-4 rounded-2xl bg-gradient-to-r from-sky-500 to-sky-600 dark:from-[#1A3A32] dark:to-[var(--brand-green)] text-white font-black text-xs uppercase tracking-[0.2em] hover:shadow-lg"
+                  className="flex-[2] px-4 py-4 rounded-2xl bg-gradient-to-r from-sky-500 to-sky-600 dark:from-[#1A3A32] dark:to-[var(--brand-green)] text-white font-black text-sm uppercase tracking-wide hover:shadow-lg whitespace-nowrap"
                 >
                   Guardar Dirección
                 </button>
               </div>
             </form>
           </div>
+          </div>
+        </div>
+      )}
+
+      {actionError && (
+        <div className="fixed bottom-6 right-6 p-4 rounded-2xl bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800 shadow-2xl flex items-start gap-3 z-50 animate-fadeIn">
+          <Icon name="AlertCircle" className="w-5 h-5 text-rose-500 shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-semibold text-rose-700 dark:text-rose-400">{actionError}</p>
+            <button onClick={() => setActionError('')} className="text-[10px] font-bold text-rose-500 hover:underline mt-1">Cerrar</button>
+          </div>
         </div>
       )}
 
       {confirmDeleteId !== null && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setConfirmDeleteId(null)}>
-          <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-[2rem] p-8 max-w-sm mx-4 shadow-2xl" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-[70] overflow-y-auto scrollbar-none bg-black/30 backdrop-blur-sm" onClick={() => setConfirmDeleteId(null)}>
+          <div className="flex min-h-full items-center justify-center p-4 py-20">
+          <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-[2rem] p-8 max-w-sm w-full shadow-2xl" onClick={e => e.stopPropagation()}>
             <div className="w-14 h-14 rounded-full bg-rose-50 dark:bg-rose-900/20 flex items-center justify-center mx-auto mb-4">
               <Icon name="MapPin" className="w-7 h-7 text-rose-500" />
             </div>
@@ -479,6 +546,7 @@ export default function CustomerAddressesPage() {
               <button onClick={() => setConfirmDeleteId(null)} className="flex-1 py-3 rounded-xl bg-gray-100 dark:bg-[var(--bg-muted)] text-gray-600 dark:text-[var(--text-primary)] font-black text-xs uppercase tracking-widest hover:bg-gray-200 dark:hover:bg-[#2A3F33] transition-all">Cancelar</button>
               <button onClick={() => deleteAddress(confirmDeleteId)} className="flex-1 py-3 rounded-xl bg-rose-500 text-white font-black text-xs uppercase tracking-widest hover:bg-rose-600 transition-all">Eliminar</button>
             </div>
+          </div>
           </div>
         </div>
       )}

@@ -2,15 +2,16 @@
 
 import { Tienda, Producto } from '@/types/public';
 import ProductGrid from '@/components/products/ProductGrid';
-import AdBannersGrid from '../AdBannersGrid';
+import AdBannersCarousel from '../AdBannersCarousel';
 
 interface Layout3Props {
   store: Tienda;
   products: Producto[];
   plan: 'basico' | 'premium';
+  banners?: { url: string; titulo: string; link?: string }[];
 }
 
-export default function Layout3({ products }: Layout3Props) {
+export default function Layout3({ products, banners }: Layout3Props) {
   const productosNormales = products.filter((p) => p.tipo !== 'service');
   const productosServicio = products.filter((p) => p.tipo === 'service');
 
@@ -22,22 +23,33 @@ export default function Layout3({ products }: Layout3Props) {
         <h2 className="text-lg sm:text-xl font-bold text-slate-800 dark:text-[var(--text-primary)]">
           Productos destacados
         </h2>
+<<<<<<< HEAD
         <div className="flex flex-col md:flex-row gap-4 sm:gap-5 md:gap-6">
           <div className="hidden md:block w-48 lg:w-72 flex-shrink-0">
             <AdBannersGrid maxBanners={1} vertical />
+=======
+        <div className="flex flex-col lg:flex-row gap-6">
+          <div className="hidden lg:block w-72 flex-shrink-0">
+            <AdBannersCarousel banners={banners} maxBanners={4} vertical startIndex={0} fallback={4} />
+>>>>>>> origin/union-frontend
           </div>
           <div className="flex-1">
-            <ProductGrid productos={productosNormales} />
+            <ProductGrid productos={productosNormales} className="lg:!grid-cols-3" />
           </div>
+<<<<<<< HEAD
           <div className="hidden md:block w-48 lg:w-72 flex-shrink-0">
             <AdBannersGrid maxBanners={1} vertical />
+=======
+          <div className="hidden lg:block w-72 flex-shrink-0">
+            <AdBannersCarousel banners={banners} maxBanners={4} vertical startIndex={4} fallback={4} />
+>>>>>>> origin/union-frontend
           </div>
         </div>
       </div>
 
       <hr className="border-gray-200 dark:border-[var(--border-subtle)]" />
 
-      <AdBannersGrid />
+      <AdBannersCarousel banners={banners} maxBanners={4} startIndex={8} fallback={4} />
 
       <hr className="border-gray-200 dark:border-[var(--border-subtle)]" />
 
@@ -46,7 +58,7 @@ export default function Layout3({ products }: Layout3Props) {
           <h2 className="text-lg sm:text-xl font-bold text-slate-800 dark:text-[var(--text-primary)]">
             Servicios de la tienda
           </h2>
-          <ProductGrid productos={productosServicio} />
+          <ProductGrid productos={productosServicio} className="lg:!grid-cols-3" />
         </div>
       )}
     </div>

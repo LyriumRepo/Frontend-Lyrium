@@ -2,21 +2,22 @@
 
 import { Tienda, Producto } from '@/types/public';
 import ProductGrid from '@/components/products/ProductGrid';
-import AdBannersGrid from '../AdBannersGrid';
+import AdBannersCarousel from '../AdBannersCarousel';
 
 interface Layout2Props {
   store: Tienda;
   products: Producto[];
   plan: 'basico' | 'premium';
+  banners?: { url: string; titulo: string; link?: string }[];
 }
 
-export default function Layout2({ products }: Layout2Props) {
+export default function Layout2({ products, banners }: Layout2Props) {
   const productosNormales = products.filter((p) => p.tipo !== 'service');
   const productosServicio = products.filter((p) => p.tipo === 'service');
 
   return (
     <div className="space-y-4 sm:space-y-5 md:space-y-6">
-      <AdBannersGrid />
+      <AdBannersCarousel banners={banners} maxBanners={4} startIndex={0} fallback={4} />
 
       <hr className="border-gray-200 dark:border-[var(--border-subtle)]" />
 
@@ -26,7 +27,7 @@ export default function Layout2({ products }: Layout2Props) {
         </h2>
         <div className="flex flex-col md:flex-row gap-4 sm:gap-5 md:gap-6">
           <div className="w-full md:w-56 lg:w-80 flex-shrink-0">
-            <AdBannersGrid maxBanners={2} vertical />
+            <AdBannersCarousel banners={banners} maxBanners={4} vertical startIndex={4} fallback={4} />
           </div>
           <div className="flex-1">
             <ProductGrid productos={productosNormales} />
@@ -34,7 +35,7 @@ export default function Layout2({ products }: Layout2Props) {
         </div>
       </div>
 
-      <AdBannersGrid />
+      <AdBannersCarousel banners={banners} maxBanners={4} startIndex={8} fallback={4} />
 
       <hr className="border-gray-200 dark:border-[var(--border-subtle)]" />
 
@@ -48,7 +49,7 @@ export default function Layout2({ products }: Layout2Props) {
               <ProductGrid productos={productosServicio} />
             </div>
             <div className="w-full md:w-56 lg:w-80 flex-shrink-0">
-              <AdBannersGrid maxBanners={2} vertical />
+              <AdBannersCarousel banners={banners} maxBanners={4} vertical startIndex={12} fallback={4} />
             </div>
           </div>
         </div>

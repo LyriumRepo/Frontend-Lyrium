@@ -308,7 +308,7 @@ export default function ClientRescheduleModal({
               <div>
                 <h3 className="text-sm font-black tracking-tighter leading-none">Reprogramar Cita</h3>
                 {order.tienda && (
-                  <p className="text-[9px] font-bold text-sky-100 uppercase tracking-[0.2em] mt-0.5 truncate max-w-[160px]">
+                  <p className="text-[9px] font-bold text-sky-100 uppercase tracking-wide mt-0.5 truncate max-w-[160px]">
                     {order.tienda}
                   </p>
                 )}
@@ -324,7 +324,7 @@ export default function ClientRescheduleModal({
         </div>
 
         {/* ─── Body (scrollable) ────────────────────────────────────────── */}
-        <div className="p-5 space-y-4 overflow-y-auto flex-1">
+        <div className="p-5 space-y-4 overflow-y-auto scrollbar-none flex-1">
 
           {/* ── VIEW: blocked_same_day ───────────────────────────────── */}
           {view === 'blocked_same_day' && (

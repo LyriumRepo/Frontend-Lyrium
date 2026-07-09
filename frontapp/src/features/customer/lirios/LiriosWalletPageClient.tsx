@@ -93,7 +93,7 @@ export default function LiriosWalletPageClient() {
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Balance card */}
           <div className="lg:col-span-2">
-            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-500 via-teal-500 to-emerald-500 shadow-2xl shadow-teal-500/30 dark:shadow-teal-900/50 p-8 sm:p-10">
+            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-500 via-teal-500 to-emerald-500 shadow-2xl shadow-teal-500/30 dark:shadow-teal-900/50 p-5 sm:p-8 lg:p-10">
               {/* Animated blobs */}
               <div className="absolute inset-0 opacity-10 pointer-events-none">
                 <div className="absolute top-10 right-10 w-40 h-40 bg-white rounded-full blur-3xl animate-pulse" />
@@ -158,11 +158,11 @@ export default function LiriosWalletPageClient() {
                   <>
                     <div className="py-4">
                       {hidden ? (
-                        <p className="text-7xl sm:text-8xl font-black text-white tracking-tight leading-none select-none">
+                        <p className="text-5xl sm:text-7xl md:text-8xl font-black text-white tracking-tight leading-none select-none">
                           ••••
                         </p>
                       ) : (
-                        <p className="text-7xl sm:text-8xl font-black text-white tracking-tight leading-none">
+                        <p className="text-5xl sm:text-7xl md:text-8xl font-black text-white tracking-tight leading-none">
                           {balance?.balance ?? 0}
                         </p>
                       )}
@@ -325,8 +325,8 @@ export default function LiriosWalletPageClient() {
                   className="px-6 py-4 hover:bg-gradient-to-r hover:from-cyan-50/50 hover:to-teal-50/50 dark:hover:from-cyan-900/10 dark:hover:to-teal-900/10 transition-all duration-200"
                   style={{ animationDelay: `${idx * 50}ms` }}
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-4 flex-1 min-w-0">
                       <div
                         className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-lg ${
                           tx.type === 'accrue'
@@ -340,8 +340,8 @@ export default function LiriosWalletPageClient() {
                           <ArrowUpRight className="w-5 h-5 text-amber-600 dark:text-amber-400" />
                         )}
                       </div>
-                      <div>
-                        <p className="text-base font-bold text-gray-800 dark:text-[var(--text-primary)]">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] truncate">
                           {tx.description ??
                             (tx.type === 'accrue' ? 'Compra' : 'Canje')}
                         </p>
@@ -356,7 +356,7 @@ export default function LiriosWalletPageClient() {
                         </p>
                       </div>
                     </div>
-                    <div className="text-right">
+                    <div className="text-right shrink-0">
                       <span
                         className={`text-xl font-black ${
                           tx.type === 'accrue'

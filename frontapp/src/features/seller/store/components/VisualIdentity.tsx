@@ -5,38 +5,59 @@ import Image from 'next/image';
 import { ShopConfig } from '@/features/seller/store/types';
 import PolaroidCard from './PolaroidCard';
 import Icon from '@/components/ui/Icon';
+import { usePlanCapabilities } from '@/shared/lib/hooks/usePlanCapabilities';
+import PlanUpgradeMessage from './PlanUpgradeMessage';
 
 interface VisualIdentityProps {
     config: ShopConfig;
     updateConfig: (updates: Partial<ShopConfig>) => void;
     uploadLogo?: (file: File) => Promise<any>;
+    uploadLogoMarketplace?: (file: File) => Promise<any>;
     uploadBanner?: (file: File, bannerNumber: 1 | 2) => Promise<any>;
     uploadGallery?: (file: File) => Promise<any>;
     deleteGalleryItem?: (index: number, mediaId: number) => Promise<any>;
+    uploadAdBanner?: (file: File) => Promise<any>;
+    deleteAdBanner?: (mediaId: number) => Promise<any>;
+    deleteBanner?: (bannerNumber: 1 | 2) => Promise<any>;
     isUploading?: boolean;
     storeId?: number | null;
 }
 
 export default function VisualIdentity(props: VisualIdentityProps): React.ReactElement {
-    const { config, updateConfig, uploadLogo, uploadBanner, uploadGallery, deleteGalleryItem, isUploading, storeId } = props;
+    const { config, updateConfig, uploadLogo, uploadLogoMarketplace, uploadBanner, uploadGallery, deleteGalleryItem, uploadAdBanner, deleteAdBanner, deleteBanner, isUploading, storeId } = props;
     const [localLogo, setLocalLogo] = useState(config.visual.logo);
+    const [localLogoMarketplace, setLocalLogoMarketplace] = useState(config.visual.logoMarketplace);
     const [localBanner1, setLocalBanner1] = useState(config.visual.banner1);
     const [localBanner2, setLocalBanner2] = useState(config.visual.banner2);
     const [lastUpdated, setLastUpdated] = useState<string | null>(null);
     const gallery = Array.isArray(config.visual.gallery) ? config.visual.gallery : [];
+    const adBanners = Array.isArray(config.visual.adBanners) ? config.visual.adBanners : [];
     const [uploading, setUploading] = useState<string | null>(null);
+    const [showBannerUpgrade, setShowBannerUpgrade] = useState(false);
     const isStoreReady = !!storeId;
+    const { planSlug, limit: planLimit } = usePlanCapabilities();
+    const maxAdBanners = planLimit('max_ad_banners');
+    const adBannerAtLimit = adBanners.length >= maxAdBanners;
 
     React.useEffect(() => {
         const syncFromConfig = () => {
-            if (lastUpdated !== 'logo') setLocalLogo(config.visual.logo);
-            if (lastUpdated !== 'banner1') setLocalBanner1(config.visual.banner1);
-            if (lastUpdated !== 'banner2') setLocalBanner2(config.visual.banner2);
+            if (lastUpdated !== 'logo') {
+                setLocalLogo(config.visual.logo);
+            }
+            if (lastUpdated !== 'logo-marketplace') {
+                setLocalLogoMarketplace(config.visual.logoMarketplace);
+            }
+            if (lastUpdated !== 'banner1') {
+                setLocalBanner1(config.visual.banner1);
+            }
+            if (lastUpdated !== 'banner2') {
+                setLocalBanner2(config.visual.banner2);
+            }
             setLastUpdated(null);
         };
         const timer = setTimeout(syncFromConfig, 100);
         return () => clearTimeout(timer);
-    }, [config.visual.logo, config.visual.banner1, config.visual.banner2]);
+    }, [config.visual.logo, config.visual.logoMarketplace, config.visual.banner1, config.visual.banner2]);
 
     const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -52,6 +73,32 @@ export default function VisualIdentity(props: VisualIdentityProps): React.ReactE
         } catch (error) {
             console.error('Error uploading logo:', error);
             alert(error instanceof Error ? error.message : 'Error al subir el logo');
+            setLastUpdated(null);
+        } finally {
+            setUploading(null);
+        }
+    };
+
+    const handleMarketplaceLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file || !uploadLogoMarketplace) return;
+
+        if (file.size > 2 * 1024 * 1024) {
+            alert('El archivo no debe superar los 2 MB');
+            return;
+        }
+
+        setUploading('logo-marketplace');
+        setLastUpdated('logo-marketplace');
+        try {
+            const result = await uploadLogoMarketplace(file);
+            const newUrl = result.url + '?t=' + Date.now();
+            setLocalLogoMarketplace(newUrl);
+            updateConfig({ visual: { ...config.visual, logoMarketplace: result.url } });
+        } catch (error) {
+            console.error('Error uploading marketplace logo:', error);
+            const message = error instanceof Error ? error.message : 'Error al subir el logo para tarjetas';
+            alert(message);
             setLastUpdated(null);
         } finally {
             setUploading(null);
@@ -94,6 +141,95 @@ export default function VisualIdentity(props: VisualIdentityProps): React.ReactE
         } catch (error) {
             console.error('Error uploading gallery:', error);
             alert('Error al subir la imagen');
+        } finally {
+            setUploading(null);
+        }
+    };
+
+    const handleAdBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file || !uploadAdBanner) return;
+
+        if (file.size > 5 * 1024 * 1024) {
+            alert('El archivo no debe superar los 5 MB');
+            return;
+        }
+
+        setUploading('ad-banners');
+        try {
+            const result = await uploadAdBanner(file);
+            const newBanners = [...adBanners, result.url];
+            updateConfig({ visual: { ...config.visual, adBanners: newBanners } });
+            setShowBannerUpgrade(false);
+        } catch (error) {
+            const msg = error instanceof Error ? error.message : '';
+            if (msg.toLowerCase().includes('banner') || msg.toLowerCase().includes('máximo')) {
+                setShowBannerUpgrade(true);
+            } else {
+                alert('Error al subir el banner promocional');
+            }
+        } finally {
+            setUploading(null);
+        }
+    };
+
+    const handleAdBannerClick = () => {
+        if (adBannerAtLimit) {
+            setShowBannerUpgrade(true);
+            return;
+        }
+        setShowBannerUpgrade(false);
+        document.getElementById('input-ad-banner')?.click();
+    };
+
+    const handleDeleteAdBanner = async (index: number) => {
+        const url = adBanners[index];
+        const mediaIdMatch = url?.match(/\/storage\/(\d+)\//);
+        const mediaId = mediaIdMatch ? parseInt(mediaIdMatch[1]) : undefined;
+
+        if (!mediaId) {
+            const newBanners = [...adBanners];
+            newBanners.splice(index, 1);
+            updateConfig({ visual: { ...config.visual, adBanners: newBanners } });
+            return;
+        }
+
+        if (!confirm('¿Eliminar este banner promocional?')) return;
+
+        setUploading('ad-banners-delete');
+        try {
+            if (deleteAdBanner) {
+                await deleteAdBanner(mediaId);
+            }
+            const newBanners = [...adBanners];
+            newBanners.splice(index, 1);
+            updateConfig({ visual: { ...config.visual, adBanners: newBanners } });
+        } catch (error) {
+            console.error('Error deleting ad banner:', error);
+            alert('Error al eliminar el banner promocional');
+        } finally {
+            setUploading(null);
+        }
+    };
+
+    const handleDeleteBanner = async (bannerNumber: 1 | 2) => {
+        if (!confirm(`¿Eliminar este banner?`)) return;
+
+        setUploading(`banner${bannerNumber}-delete`);
+        try {
+            if (deleteBanner) {
+                await deleteBanner(bannerNumber);
+            }
+            if (bannerNumber === 1) {
+                setLocalBanner1('');
+                updateConfig({ visual: { ...config.visual, banner1: '' } });
+            } else {
+                setLocalBanner2('');
+                updateConfig({ visual: { ...config.visual, banner2: '' } });
+            }
+        } catch (error) {
+            console.error('Error deleting banner:', error);
+            alert('Error al eliminar el banner');
         } finally {
             setUploading(null);
         }
@@ -190,17 +326,58 @@ export default function VisualIdentity(props: VisualIdentityProps): React.ReactE
                                 <Icon name="Maximize" className="w-3 h-3 text-sky-500" />
                                 <p className="text-[10px] font-black text-[var(--text-secondary)] uppercase">Ratio Profesional 1:1</p>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <Icon name="Image" className="w-3 h-3 text-sky-500 dark:text-[var(--icons-green)]" />
-                                <p className="text-[9px] font-bold text-red-400 uppercase">PNG • JPG • WEBP (Máx 2MB)</p>
-                            </div>
+                        <div className="flex items-center gap-2">
+                            <Icon name="Image" className="w-3 h-3 text-sky-500 dark:text-[var(--icons-green)]" />
+                            <p className="text-[9px] font-bold text-red-400 uppercase">PNG • JPG • WEBP (Máx 2MB)</p>
                         </div>
                     </div>
                 </div>
 
-                {/* Banners + Gallery Column */}
-                <div className="lg:col-span-8 xl:col-span-9 space-y-8 sm:space-y-10">
-                    {/* Banners */}
+                <div className="border-t border-[var(--border-subtle)] pt-8 mt-2">
+                    <div className="flex items-center gap-2 mb-6">
+                        <span className="w-1.5 h-4 bg-amber-500 dark:bg-[var(--icons-green)] rounded-full"></span>
+                        <span className="text-[11px] font-black text-[var(--text-primary)] uppercase tracking-widest">Logo para Tarjetas</span>
+                    </div>
+                    <div
+                        role="button"
+                        tabIndex={0}
+                        className="relative w-48 h-48 bg-[var(--bg-secondary)] rounded-full ring-4 ring-[var(--bg-secondary)] ring-offset-4 ring-offset-[var(--bg-card)] border-2 border-dashed border-[var(--border-subtle)] group cursor-pointer overflow-hidden flex items-center justify-center transition-all duration-500 hover:scale-[1.02] hover:border-amber-400 dark:hover:border-[var(--icons-green)]"
+                        onClick={() => document.getElementById('input-logo-marketplace')?.click()}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') document.getElementById('input-logo-marketplace')?.click(); }}
+                    >
+                        {localLogoMarketplace ? (
+                            <Image src={localLogoMarketplace} fill sizes="112px" alt="Logo Marketplace" className="object-contain group-hover:scale-110 transition-transform duration-700" />
+                        ) : (
+                            <Icon name="Image" className="w-12 h-12 text-[var(--text-secondary)]" />
+                        )}
+                        <div className="absolute inset-0 bg-amber-600/60 dark:bg-[var(--icons-green)] backdrop-blur-[0px] opacity-0 group-hover:opacity-100 transition-all duration-500 flex flex-col items-center justify-center text-white">
+                            <Icon name="Camera" className="w-8 h-8 mb-2 animate-bounce" />
+                            <span className="text-[9px] font-black uppercase tracking-widest">{uploading === 'logo-marketplace' ? 'Subiendo...' : 'Actualizar'}</span>
+                        </div>
+                        <input 
+                            type="file" 
+                            id="input-logo-marketplace" 
+                            className="hidden" 
+                            accept="image/png, image/jpeg, image/webp" 
+                            onChange={handleMarketplaceLogoUpload}
+                            disabled={uploading !== null || !isStoreReady}
+                        />
+                    </div>
+
+                    <div className="mt-8 space-y-3 pl-2">
+                        <div className="flex items-center gap-2">
+                            <Icon name="Maximize" className="w-3 h-3 text-amber-500" />
+                            <p className="text-[10px] font-black text-[var(--text-secondary)] uppercase">Ratio Profesional 1:1</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Icon name="Image" className="w-3 h-3 text-amber-500 dark:text-[var(--icons-green)]" />
+                            <p className="text-[9px] font-bold text-red-400 uppercase">PNG • JPG • WEBP (Máx 2MB)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div className="lg:col-span-8 xl:col-span-9 space-y-8 sm:space-y-10">
                     <div className="space-y-4 sm:space-y-6">
                         <div className="flex flex-wrap items-center justify-between gap-y-2 border-b border-[var(--border-subtle)] pb-4">
                             <div className="flex items-center gap-2">
@@ -221,7 +398,17 @@ export default function VisualIdentity(props: VisualIdentityProps): React.ReactE
                                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') document.getElementById('input-banner1')?.click(); }}
                             >
                                 {localBanner1 ? (
-                                    <Image src={localBanner1} fill sizes="(max-width: 640px) 100vw, 50vw" alt="Banner Principal" className="object-cover group-hover:scale-105 transition-transform duration-1000" />
+                                    <>
+                                        <Image src={localBanner1} fill sizes="(max-width: 768px) 100vw, 50vw" alt="Banner Principal" className="object-cover group-hover:scale-105 transition-transform duration-1000" />
+                                        <button
+                                            className="absolute top-3 right-3 z-10 p-1.5 bg-red-500/80 backdrop-blur-sm rounded-full text-white opacity-0 group-hover:opacity-100 hover:bg-red-600 transition-all"
+                                            onClick={(e) => { e.stopPropagation(); handleDeleteBanner(1); }}
+                                            disabled={uploading !== null}
+                                            title="Eliminar banner"
+                                        >
+                                            <Icon name="Trash2" className="w-3.5 h-3.5" />
+                                        </button>
+                                    </>
                                 ) : (
                                     <div className="absolute inset-0 flex items-center justify-center">
                                         <Icon name="Image" className="w-10 h-10 sm:w-12 sm:h-12 text-[var(--text-secondary)]" />
@@ -256,7 +443,15 @@ export default function VisualIdentity(props: VisualIdentityProps): React.ReactE
                             >
                                 {localBanner2 ? (
                                     <>
-                                        <Image src={localBanner2} fill sizes="(max-width: 640px) 100vw, 50vw" alt="Banner de Oferta" className="object-cover group-hover:scale-105 transition-transform duration-1000" />
+                                        <Image src={localBanner2} fill sizes="(max-width: 768px) 100vw, 50vw" alt="Banner de Oferta" className="object-cover group-hover:scale-105 transition-transform duration-1000" />
+                                        <button
+                                            className="absolute top-3 right-3 z-10 p-1.5 bg-red-500/80 backdrop-blur-sm rounded-full text-white opacity-0 group-hover:opacity-100 hover:bg-red-600 transition-all"
+                                            onClick={(e) => { e.stopPropagation(); handleDeleteBanner(2); }}
+                                            disabled={uploading !== null}
+                                            title="Eliminar banner"
+                                        >
+                                            <Icon name="Trash2" className="w-3.5 h-3.5" />
+                                        </button>
                                         <div className="absolute top-3 left-3 sm:top-4 sm:left-4">
                                             <span className="px-2 py-1 bg-black/40 backdrop-blur-md rounded-lg text-[8px] font-black text-white uppercase tracking-tighter border border-white/20">Banner de Oferta</span>
                                         </div>
@@ -286,6 +481,86 @@ export default function VisualIdentity(props: VisualIdentityProps): React.ReactE
                                 />
                             </div>
                         </div>
+                    </div>
+
+                    <div className="space-y-6">
+                        <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-4">
+                            <div className="flex items-center gap-2">
+                                <span className="w-1.5 h-4 bg-purple-500 dark:bg-[var(--icons-green)] rounded-full"></span>
+                                <span className="text-[11px] font-black text-[var(--text-primary)] uppercase tracking-widest">Banners Promocionales de la Tienda</span>
+                            </div>
+                            <button 
+                                className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all ${
+                                    adBannerAtLimit
+                                        ? 'bg-[var(--lima-500)]/10 text-[var(--lima-500)] cursor-not-allowed'
+                                        : 'bg-purple-500/10 dark:bg-emerald-500/10 text-purple-500 dark:text-[var(--icons-green)] hover:bg-purple-500 dark:hover:bg-[var(--brand-green)] hover:text-white'
+                                }`}
+                                onClick={handleAdBannerClick}
+                                disabled={uploading !== null || !isStoreReady}
+                            >
+                                <Icon name="PlusCircle" className="w-4 h-4" />
+                                <span>{uploading === 'ad-banners' ? 'Subiendo...' : 'Agregar Banner'}</span>
+                            </button>
+                        </div>
+                        <p className="text-[10px] text-[var(--text-secondary)] leading-relaxed px-1">
+                            Estas imágenes se mostrarán como publicidad dentro de tu tienda pública. 
+                            Se recomienda usar imágenes con texto promocional, ofertas o campañas. 
+                            Máximo {maxAdBanners} banners. El orden de carga determina la prioridad de visualización.
+                        </p>
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                            {adBanners.filter(Boolean).map((bannerUrl, i) => (
+                                <div key={`${bannerUrl}-${i}`} className="relative group aspect-[16/9] rounded-2xl overflow-hidden bg-[var(--bg-secondary)] border border-[var(--border-subtle)] shadow-sm">
+                                    <Image src={bannerUrl} fill sizes="(max-width: 768px) 50vw, 20vw" alt={`Banner ${i + 1}`} className="object-cover" />
+                                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                        <button
+                                            className="p-2 bg-red-500 rounded-full text-white hover:bg-red-600 transition-colors"
+                                            onClick={() => handleDeleteAdBanner(i)}
+                                            disabled={uploading !== null}
+                                            title="Eliminar banner"
+                                        >
+                                            <Icon name="Trash2" className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                    <span className="absolute top-2 left-2 px-2 py-0.5 bg-black/40 backdrop-blur-sm rounded-lg text-[8px] font-black text-white">
+                                        {i + 1}
+                                    </span>
+                                </div>
+                            ))}
+                            {adBanners.length < maxAdBanners && (
+                                <div
+                                    role="button"
+                                    tabIndex={0}
+                                    className={`aspect-[16/9] border-2 border-dashed rounded-2xl flex flex-col items-center justify-center transition-all group ${
+                                        adBannerAtLimit
+                                            ? 'border-[var(--lima-500)]/30 bg-[var(--lima-500)]/5 cursor-not-allowed'
+                                            : 'border-[var(--border-subtle)] bg-[var(--bg-secondary)]/50 hover:bg-[var(--bg-card)] cursor-pointer'
+                                    }`}
+                                    onClick={handleAdBannerClick}
+                                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleAdBannerClick(); }}
+                                >
+                                    {adBannerAtLimit ? (
+                                        <Icon name="Lock" className="w-6 h-6 text-[var(--lima-500)] group-hover:text-white" />
+                                    ) : (
+                                        <Icon name="Image" className="w-6 h-6 text-[var(--text-secondary)] group-hover:text-purple-400 dark:group-hover:text-[var(--icons-green)]" />
+                                    )}
+                                    <span className="text-[8px] font-black text-[var(--text-secondary)] uppercase mt-1">{adBanners.length === 0 ? 'Agregar Banner' : `+ ${maxAdBanners - adBanners.length} disponibles`}</span>
+                                    <input 
+                                        type="file" 
+                                        id="input-ad-banner" 
+                                        className="hidden" 
+                                        accept="image/*" 
+                                        onChange={handleAdBannerUpload}
+                                        disabled={uploading !== null || !isStoreReady}
+                                    />
+                                </div>
+                            )}
+                        </div>
+
+                        {showBannerUpgrade && (
+                            <PlanUpgradeMessage
+                                message="Tu plan Emprende permite hasta 3 banners promocionales. Actualiza al plan Crece para mostrar más promociones en tu tienda."
+                            />
+                        )}
                     </div>
 
                     {/* Gallery */}

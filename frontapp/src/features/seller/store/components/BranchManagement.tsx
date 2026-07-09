@@ -6,6 +6,8 @@ import BranchCard from './BranchCard';
 import BranchModal from './BranchModal';
 import { Plus, Store } from 'lucide-react';
 import { useConfirmDialog } from '@/components/ui/confirm-dialog';
+import { usePlanCapabilities } from '@/shared/lib/hooks/usePlanCapabilities';
+import PlanUpgradeMessage from './PlanUpgradeMessage';
 
 interface BranchManagementProps {
     branches: Branch[];
@@ -16,6 +18,9 @@ export default function BranchManagement({ branches, setBranches }: BranchManage
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingBranch, setEditingBranch] = useState<Branch | null>(null);
     const { confirm, ConfirmDialog } = useConfirmDialog();
+    const { planSlug, limit } = usePlanCapabilities();
+    const maxBranches = limit('max_branches');
+    const atLimit = planSlug === 'emprende' && branches.length >= maxBranches;
 
     const handleOpenModal = (branch?: Branch) => {
         setEditingBranch(branch || null);
@@ -68,12 +73,17 @@ export default function BranchManagement({ branches, setBranches }: BranchManage
                     </div>
                 </div>
                 <button
-                    onClick={() => handleOpenModal()}
-                    className="relative z-10 flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl bg-[var(--bg-card)] backdrop-blur-md text-[var(--text-primary)] font-black text-xs border border-[var(--border-subtle)] hover:text-sky-500 dark:hover:text-[var(--icons-green)] transition-all shadow-lg shadow-black/5 uppercase tracking-widest"
+                    onClick={() => !atLimit && handleOpenModal()}
+                    disabled={atLimit}
+                    className={`relative z-10 flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl backdrop-blur-md font-black text-xs border uppercase tracking-widest transition-all shadow-lg shadow-black/5 ${
+                        atLimit
+                            ? 'bg-[var(--lima-500)]/10 border-[var(--lima-500)]/20 text-[var(--lima-500)] cursor-not-allowed'
+                            : 'bg-[var(--bg-card)] text-[var(--text-primary)] border-[var(--border-subtle)] hover:bg-[var(--bg-card)] hover:text-sky-500 dark:hover:text-[var(--icons-green)]'
+                    }`}
                 >
                     <Plus className="w-4 h-4" />
-                    <span className="hidden xs:inline sm:inline">Agregar Sucursal</span>
-                    <span className="xs:hidden sm:hidden">Agregar</span>
+                    <span className="hidden xs:inline sm:inline">{atLimit ? 'Límite Alcanzado' : 'Agregar Sucursal'}</span>
+                    <span className="xs:hidden sm:hidden">{atLimit ? 'Límite' : 'Agregar'}</span>
                 </button>
             </div>
 
@@ -102,6 +112,14 @@ export default function BranchManagement({ branches, setBranches }: BranchManage
                 onSave={handleSave}
                 branch={editingBranch}
             />
+
+            {atLimit && (
+                <div className="px-8 pb-6">
+                    <PlanUpgradeMessage
+                        message="Has alcanzado el límite máximo de sucursales permitido por tu plan Emprende. Actualiza al plan Crece para administrar más sucursales."
+                    />
+                </div>
+            )}
 
             <ConfirmDialog />
         </div>
