@@ -6,6 +6,7 @@ import Image from 'next/image';
 import Icon from '@/components/ui/Icon';
 import ThemeToggle from '@/components/layout/shared/ThemeToggle';
 import { useCarritoStore } from '@/store/carritoStore';
+import { type MenuItem } from '@/data/menuData';
 
 interface MobileMenuProps {
     isOpen: boolean;
@@ -14,13 +15,7 @@ interface MobileMenuProps {
     isAuthenticated: boolean;
     user: { display_name?: string; username?: string; email?: string } | null;
     dashboardUrl: string;
-}
-
-interface MenuItem {
-    label: string;
-    href?: string;
-    icon?: string;
-    children?: MenuItem[];
+    onOpenMegaMenu?: (item: MenuItem) => void;
 }
 
 // Icon name mapping for Lucide icons
@@ -36,13 +31,13 @@ const iconNameMap: Record<string, string> = {
     'house': 'Home',
 };
 
-export default function MobileMenu({ isOpen, onClose, menuItems, isAuthenticated, user, dashboardUrl }: MobileMenuProps) {
+export default function MobileMenu({ isOpen, onClose, menuItems, isAuthenticated, user, dashboardUrl, onOpenMegaMenu }: MobileMenuProps) {
     // Navigation state: 0 = main, 1 = categories, 2 = subcategories, 3 = items
     const [menuLevel, setMenuLevel] = useState(0);
     const [activeParent, setActiveParent] = useState<MenuItem | null>(null);
     const [secondParent, setSecondParent] = useState<MenuItem | null>(null);
     const [thirdParent, setThirdParent] = useState<MenuItem | null>(null);
-    const cartItemCount = useCarritoStore((s) => s.cartItems.reduce((sum, i) => sum + Number(i.cantidad ?? 0), 0) + s.serviceHoldCount);
+    const cartItemCount = useCarritoStore((s) => s.cartItems.reduce((sum, i) => sum + Number(i.cantidad ?? 0), 0));
 
     // PHP brand identity colors per drill-down level
     const levelColors: Record<number, string> = {
@@ -220,7 +215,14 @@ export default function MobileMenu({ isOpen, onClose, menuItems, isAuthenticated
                                     return (
                                         <button
                                             key={item.label}
-                                            onClick={() => goToSubcategories(item)}
+                                            onClick={() => {
+                                                if (onOpenMegaMenu) {
+                                                    onClose();
+                                                    onOpenMegaMenu(item);
+                                                } else {
+                                                    goToSubcategories(item);
+                                                }
+                                            }}
                                             className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-gray-50 dark:hover:bg-[#182420] transition group border-b border-gray-100 dark:border-[var(--bg-card)]"
                                         >
                                             <div className="flex items-center gap-3">

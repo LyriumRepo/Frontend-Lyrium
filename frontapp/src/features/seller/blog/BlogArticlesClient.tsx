@@ -91,7 +91,7 @@ export function BlogArticlesClient() {
 
     const openEdit = (a: BlogArticle) => {
         setEditingId(a.id); setError(null); setPreviewHtml(null);
-        setForm({ title: a.title, summary: a.summary || '', content: a.content || '', main_image: a.main_image || '', blog_category_id: a.blog_category_id ?? '', meta_title: a.meta_title || '', meta_description: a.meta_description || '', slug: a.slug || '', keywords: a.keywords || [], status: a.status });
+        setForm({ title: a.title || '', summary: a.summary || '', content: a.content || '', main_image: a.main_image || '', blog_category_id: a.blog_category_id ?? '', meta_title: a.meta_title || '', meta_description: a.meta_description || '', slug: a.slug || '', keywords: a.keywords || [], status: a.status });
         setShowEditor(true);
     };
 

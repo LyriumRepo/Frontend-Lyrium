@@ -12,6 +12,7 @@ interface AdminTicket {
     id: number;
     nombre: string;
     empresa?: string;
+    plan?: string;
   };
   prioridad?: string;
   prioridad_ticket?: string;
@@ -56,6 +57,7 @@ export function adaptAdminTicketListItem(ticket: AdminTicket): UnifiedTicketList
     requester: {
       name: ticket.vendedor?.nombre || 'Vendedor',
       company: ticket.vendedor?.empresa,
+      plan: ticket.vendedor?.plan,
     },
     updatedAt: ticket.fecha_actualizacion || 'Ahora',
     unreadCount: ticket.mensajes_sin_leer,

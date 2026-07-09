@@ -89,7 +89,7 @@ export function LoginPanel({
                 <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-5" noValidate>
                     <div>
                         <label htmlFor="login-email" className="block text-sm font-semibold text-slate-700 dark:text-[var(--text-primary)] mb-2">
-                            Usuario / Nombre de Tienda <span className="text-red-500">*</span>
+                            {userType === 'vendedor' ? 'Usuario / Nombre de Tienda' : 'Usuario'} <span className="text-red-500">*</span>
                         </label>
                         <div className="relative">
                             <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" aria-hidden="true" />

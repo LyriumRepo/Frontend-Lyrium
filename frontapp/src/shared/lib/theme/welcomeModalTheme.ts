@@ -8,7 +8,7 @@ export const WELCOME_MODAL_LIGHT_TEXT = {
 } as const;
 
 export const WELCOME_MODAL_LIGHT_BADGE = {
-    badgeBg: 'rgba(3,105,161,0.08)',
-    badgeBorder: '1px solid rgba(3,105,161,0.30)',
+    badgeBg: 'rgba(3,105,161,0.14)',
+    badgeBorder: '1px solid rgba(3,105,161,0.45)',
     badgeColor: '#075985',
 } as const;

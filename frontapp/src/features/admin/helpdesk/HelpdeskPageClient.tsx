@@ -116,7 +116,7 @@ export function HelpdeskPageClient() {
   };
 
   return (
-    <div className="flex flex-col flex-1 min-h-0 animate-fadeIn overflow-hidden">
+    <div className="flex flex-col flex-1 min-h-0 animate-fadeIn overflow-hidden px-4">
       <div className="shrink-0 [&>div]:!mb-3">
         <ModuleHeader
           title="Soporte Lyrium"
@@ -127,7 +127,7 @@ export function HelpdeskPageClient() {
 
       {/* Toggle: Vendedores / Clientes + botón leyenda */}
       <div className="flex items-center gap-3 shrink-0 mb-2">
-        <div className="flex bg-[var(--bg-secondary)]/80 p-1 rounded-2xl max-w-xs border border-[var(--border-subtle)]/50">
+        <div className="flex bg-[var(--bg-secondary)]/80 p-1 rounded-2xl border border-[var(--border-subtle)]/50">
           <button
             onClick={() => setChannel('vendedores')}
             className={`flex-1 py-2.5 px-4 rounded-xl text-[11px] font-black transition-all flex items-center justify-center gap-2 uppercase tracking-wider ${
@@ -167,7 +167,7 @@ export function HelpdeskPageClient() {
         style={{ background: 'linear-gradient(160deg, color-mix(in srgb,#9cb04e 5%,var(--bg-card)) 0%, var(--bg-card) 50%, color-mix(in srgb,#499bbf 4%,var(--bg-card)) 100%)' }}
       >
         {/* Columna izquierda: lista de tickets — oculta en móvil cuando hay chat abierto */}
-        <div className={`flex flex-col flex-shrink-0 border-r border-[var(--border-subtle)] overflow-hidden transition-all duration-300 ease-in-out sm:w-[200px] sm:min-w-[200px] md:w-[220px] md:min-w-[220px] lg:w-60 xl:w-72 sm:opacity-100 ${mobileShowChat ? 'w-0 min-w-0 opacity-0 pointer-events-none' : 'w-full opacity-100 pointer-events-auto'}`}>
+        <div className={`flex flex-col flex-shrink-0 border-r border-[var(--border-subtle)] overflow-hidden transition-opacity duration-300 ease-in-out sm:w-[200px] sm:min-w-[200px] md:w-[220px] md:min-w-[220px] lg:w-60 xl:w-72 sm:opacity-100 ${mobileShowChat ? 'w-0 min-w-0 opacity-0 pointer-events-none sm:pointer-events-auto' : 'w-full opacity-100 pointer-events-auto'}`}>
           <div className="h-1 w-full shrink-0 bg-gradient-to-r from-[#9cb04e] via-[#64c695] to-[#499bbf]" />
           {loading ? (
             <div className="flex-1 flex items-center justify-center">
@@ -191,7 +191,7 @@ export function HelpdeskPageClient() {
         </div>
 
         {/* Columna derecha: chat — ocupa toda la pantalla en móvil */}
-        <div className={`flex flex-col min-w-0 min-h-0 overflow-hidden transition-all duration-300 ease-in-out sm:flex-1 sm:opacity-100 ${!mobileShowChat ? 'w-0 min-w-0 opacity-0 pointer-events-none' : 'flex-1 opacity-100 pointer-events-auto'}`}>
+        <div className={`flex flex-col min-w-0 min-h-0 overflow-hidden transition-opacity duration-300 ease-in-out sm:flex-1 sm:opacity-100 ${!mobileShowChat ? 'w-0 min-w-0 opacity-0 pointer-events-none' : 'flex-1 opacity-100 pointer-events-auto'}`}>
           <div className="h-1 w-full shrink-0 bg-gradient-to-r from-[#9cb04e] via-[#64c695] to-[#499bbf]" />
           {/* ChatView o estado vacío — flex-1 min-h-0 para que el área de mensajes haga scroll sin bloquear */}
           <div className="flex-1 min-h-0 flex flex-col overflow-hidden">

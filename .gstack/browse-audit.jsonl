@@ -65,3 +65,70 @@
 {"ts":"2026-07-02T16:37:32.673Z","cmd":"wait","args":"--networkidle","origin":"http://localhost:3000/tiendasregistradas","durationMs":3,"status":"ok","hasCookies":false,"mode":"launched"}
 {"ts":"2026-07-02T16:37:36.379Z","cmd":"js","args":"document.querySelectorAll('article').length","origin":"http://localhost:3000/tiendasregistradas","durationMs":6,"status":"ok","hasCookies":false,"mode":"launched"}
 {"ts":"2026-07-02T16:37:36.936Z","cmd":"screenshot","args":"--viewport C:/Users/roaca/AppData/Local/Temp/tiendas-mobile3.png","origin":"http://localhost:3000/tiendasregistradas","durationMs":116,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T04:25:56.145Z","cmd":"goto","args":"http://localhost:3000/login","origin":"http://localhost:3000/login","durationMs":4583,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T04:26:07.473Z","cmd":"click","args":"text=Entrar","origin":"http://localhost:3000/login","durationMs":7280,"status":"error","hasCookies":false,"mode":"launched","error":"locator.click: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('text=Entrar')\u001b[22m\n"}
+{"ts":"2026-07-09T04:26:15.555Z","cmd":"fill","args":"#login-email luis.torres@gmail.com","origin":"http://localhost:3000/login","durationMs":5010,"status":"error","hasCookies":false,"mode":"launched","error":"locator.fill: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#login-email')\u001b[22m\n"}
+{"ts":"2026-07-09T04:26:20.892Z","cmd":"fill","args":"#login-password password","origin":"http://localhost:3000/login","durationMs":5011,"status":"error","hasCookies":false,"mode":"launched","error":"locator.fill: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#login-password')\u001b[22m\n"}
+{"ts":"2026-07-09T04:26:55.506Z","cmd":"press","args":"Enter","origin":"about:blank","durationMs":705,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T04:26:58.770Z","cmd":"url","args":"","origin":"about:blank","durationMs":2,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T04:59:11.196Z","cmd":"status","args":"","origin":"about:blank","durationMs":2,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T04:59:28.014Z","cmd":"goto","args":"http://localhost:3000/login","origin":"http://localhost:3000/login","durationMs":11767,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T04:59:36.600Z","cmd":"click","args":"text=Entrar","origin":"http://localhost:3000/login","durationMs":2461,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T04:59:44.950Z","cmd":"fill","args":"#login-email luis.torres@gmail.com","origin":"http://localhost:3000/login","durationMs":2128,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T04:59:52.106Z","cmd":"fill","args":"#login-password password","origin":"http://localhost:3000/login","durationMs":35,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T05:00:01.102Z","cmd":"click","args":"text=Iniciar Sesión","origin":"http://localhost:3000/login","durationMs":211,"status":"error","hasCookies":false,"mode":"launched","error":"locator.click: Error: strict mode violation: locator('text=Iniciar Sesión') resolved to 2 elements:\n    1) <span class=\"absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-[#333333] text-white text-xs px-2 py-1 rounded-md whitespace-nowrap\">Iniciar sesión</span> aka getBy…"}
+{"ts":"2026-07-09T05:00:06.520Z","cmd":"snapshot","args":"-i","origin":"http://localhost:3000/login","durationMs":73,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T05:00:15.577Z","cmd":"click","args":"@e20","origin":"about:blank","durationMs":5,"status":"error","hasCookies":false,"mode":"launched","error":"Ref @e20 not found. Run 'snapshot' to get fresh refs."}
+{"ts":"2026-07-09T05:00:28.554Z","cmd":"goto","args":"http://localhost:3000/login","origin":"http://localhost:3000/login","durationMs":2346,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T05:00:33.014Z","cmd":"click","args":"text=Entrar","origin":"http://localhost:3000/login","durationMs":2811,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T05:00:34.179Z","cmd":"fill","args":"#login-email luis.torres@gmail.com","origin":"http://localhost:3000/login","durationMs":726,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T05:00:34.538Z","cmd":"fill","args":"#login-password password","origin":"http://localhost:3000/login","durationMs":38,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T05:00:34.999Z","cmd":"snapshot","args":"-i","origin":"http://localhost:3000/login","durationMs":102,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T05:00:41.143Z","cmd":"click","args":"@e20","origin":"http://localhost:3000/login","durationMs":279,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T05:00:45.330Z","cmd":"url","args":"","origin":"http://localhost:3000/seller","durationMs":0,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T05:00:52.083Z","cmd":"goto","args":"http://localhost:3000/seller/store","origin":"http://localhost:3000/seller/store","durationMs":2182,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T05:00:54.853Z","cmd":"url","args":"","origin":"http://localhost:3000/seller/store","durationMs":0,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T05:01:02.224Z","cmd":"text","args":"","origin":"http://localhost:3000/seller/store","durationMs":25,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T05:01:09.316Z","cmd":"links","args":"","origin":"http://localhost:3000/seller/store","durationMs":16,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T05:01:20.670Z","cmd":"text","args":"","origin":"about:blank","durationMs":11,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T05:01:29.082Z","cmd":"goto","args":"http://localhost:3000/seller/store","origin":"http://localhost:3000/seller/store","durationMs":2484,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T05:01:33.720Z","cmd":"viewport","args":"1440x2200","origin":"http://localhost:3000/login","durationMs":313,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T05:01:37.373Z","cmd":"screenshot","args":"C:/Users/roaca/AppData/Local/Temp/seller_store.png","origin":"http://localhost:3000/login","durationMs":3258,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T05:01:53.769Z","cmd":"goto","args":"http://localhost:3000/login","origin":"http://localhost:3000/login","durationMs":420,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T05:01:59.703Z","cmd":"click","args":"text=Entrar","origin":"http://localhost:3000/login","durationMs":5514,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T05:02:00.183Z","cmd":"fill","args":"#login-email luis.torres@gmail.com","origin":"http://localhost:3000/login","durationMs":94,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T05:02:00.662Z","cmd":"fill","args":"#login-password password","origin":"http://localhost:3000/login","durationMs":156,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T05:02:01.142Z","cmd":"snapshot","args":"-i","origin":"http://localhost:3000/login","durationMs":114,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T05:02:01.787Z","cmd":"click","args":"#login-password","origin":"http://localhost:3000/login","durationMs":249,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T05:02:02.279Z","cmd":"press","args":"Enter","origin":"http://localhost:3000/login","durationMs":146,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T05:02:05.754Z","cmd":"url","args":"","origin":"http://localhost:3000/seller","durationMs":0,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T05:02:08.041Z","cmd":"goto","args":"http://localhost:3000/seller/store","origin":"http://localhost:3000/seller/store","durationMs":728,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T05:02:12.463Z","cmd":"viewport","args":"1440x2200","origin":"http://localhost:3000/seller/store","durationMs":2,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T05:02:14.158Z","cmd":"screenshot","args":"C:/Users/roaca/AppData/Local/Temp/seller_store2.png","origin":"http://localhost:3000/seller/store","durationMs":1200,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T05:02:30.475Z","cmd":"screenshot","args":"C:/Users/roaca/AppData/Local/Temp/seller_store3.png","origin":"about:blank","durationMs":158,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T05:02:40.931Z","cmd":"goto","args":"http://localhost:3000/login","origin":"http://localhost:3000/login","durationMs":1667,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T05:02:45.532Z","cmd":"click","args":"text=Entrar","origin":"http://localhost:3000/login","durationMs":3297,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T05:02:45.958Z","cmd":"fill","args":"#login-email luis.torres@gmail.com","origin":"http://localhost:3000/login","durationMs":48,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T05:02:46.376Z","cmd":"fill","args":"#login-password password","origin":"http://localhost:3000/login","durationMs":38,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T05:02:46.841Z","cmd":"click","args":"#login-password","origin":"http://localhost:3000/login","durationMs":100,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T05:02:47.387Z","cmd":"press","args":"Enter","origin":"http://localhost:3000/login","durationMs":160,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T05:02:51.598Z","cmd":"goto","args":"http://localhost:3000/seller/store","origin":"http://localhost:3000/seller/store","durationMs":372,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T05:02:58.090Z","cmd":"viewport","args":"1440x2400","origin":"http://localhost:3000/seller/store","durationMs":58,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T05:02:59.311Z","cmd":"screenshot","args":"C:/Users/roaca/AppData/Local/Temp/seller_store4.png","origin":"http://localhost:3000/seller/store","durationMs":844,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T05:02:59.897Z","cmd":"text","args":"","origin":"http://localhost:3000/seller/store","durationMs":23,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T05:03:19.388Z","cmd":"network","args":"--clear","origin":"http://localhost:3000/seller/store","durationMs":1,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T05:03:20.840Z","cmd":"network","args":"","origin":"http://localhost:3000/seller/store","durationMs":0,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T05:03:32.982Z","cmd":"screenshot","args":"C:/Users/roaca/AppData/Local/Temp/seller_store5.png","origin":"about:blank","durationMs":119,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T05:03:33.268Z","cmd":"console","args":"--errors","origin":"about:blank","durationMs":3,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T05:12:34.332Z","cmd":"goto","args":"http://localhost:3000/login","origin":"http://localhost:3000/login","durationMs":2965,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T05:12:43.125Z","cmd":"click","args":"text=Entrar","origin":"http://localhost:3000/login","durationMs":4498,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T05:12:45.947Z","cmd":"fill","args":"#login-email luis.torres@gmail.com","origin":"http://localhost:3000/login","durationMs":2116,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T05:12:48.601Z","cmd":"fill","args":"#login-password password","origin":"http://localhost:3000/login","durationMs":2118,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T05:12:51.879Z","cmd":"click","args":"#login-password","origin":"http://localhost:3000/login","durationMs":2572,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T05:12:52.419Z","cmd":"press","args":"Enter","origin":"http://localhost:3000/login","durationMs":164,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T05:13:11.197Z","cmd":"goto","args":"http://localhost:3000/seller/store","origin":"http://localhost:3000/login","durationMs":15015,"status":"error","hasCookies":false,"mode":"launched","error":"page.goto: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/seller/store\", waiting until \"domcontentloaded\"\u001b[22m\n"}
+{"ts":"2026-07-09T05:13:20.374Z","cmd":"viewport","args":"1500x900","origin":"http://localhost:3000/seller/store","durationMs":53,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T05:13:23.257Z","cmd":"screenshot","args":"C:/Users/roaca/AppData/Local/Temp/layoutselector_v2.png","origin":"http://localhost:3000/seller/store","durationMs":2455,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T05:13:44.991Z","cmd":"url","args":"","origin":"about:blank","durationMs":4,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T05:13:45.697Z","cmd":"screenshot","args":"C:/Users/roaca/AppData/Local/Temp/layoutselector_v3.png","origin":"about:blank","durationMs":140,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-07-09T05:17:06.659Z","cmd":"goto","args":"http://localhost:3000/login","origin":"http://localhost:3000/login","durationMs":9060,"status":"ok","hasCookies":false,"mode":"launched"}

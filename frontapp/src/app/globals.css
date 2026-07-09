@@ -768,14 +768,17 @@
         animation: loader-heartbeat 5s ease-in-out infinite;
     }
 
-    @keyframes spin-slow {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
+    /* Deriva suave tipo nube — sin giro completo, solo vaivén horizontal + respiración */
+    @keyframes cloud-drift-a {
+        0%   { transform: translate(-6px, 2px) scale(1); }
+        50%  { transform: translate(7px, -4px) scale(1.035); }
+        100% { transform: translate(-6px, 2px) scale(1); }
     }
 
-    @keyframes spin-reverse {
-        from { transform: rotate(360deg); }
-        to { transform: rotate(0deg); }
+    @keyframes cloud-drift-b {
+        0%   { transform: translate(5px, -3px) scale(1.06); }
+        50%  { transform: translate(-8px, 4px) scale(1.02); }
+        100% { transform: translate(5px, -3px) scale(1.06); }
     }
 }
 

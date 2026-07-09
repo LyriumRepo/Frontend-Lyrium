@@ -31,7 +31,7 @@ export function TicketList({
     <div className={`w-full lg:w-5/12 bg-[var(--bg-card)] rounded-[2rem] lg:rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm overflow-hidden flex flex-col min-h-[calc(100vh-13rem)] lg:min-h-0 lg:h-full ${className}`}>
       {showFilters && (
         <>
-          <div className="p-4 border-b border-[var(--border-subtle)] shrink-0">
+          <div className="px-5 py-4 border-b border-[var(--border-subtle)] shrink-0">
             <div className="flex items-center justify-between mb-3">
               <div>
                 <h3 className="text-sm font-black uppercase tracking-wider text-[var(--text-primary)]">Tickets</h3>
@@ -53,7 +53,7 @@ export function TicketList({
             </div>
           </div>
 
-          <div className="flex gap-2 px-4 py-3 border-b border-[var(--border-subtle)] shrink-0">
+          <div className="flex gap-2 px-5 py-3 border-b border-[var(--border-subtle)] shrink-0">
             <div className="flex-1">
               <label htmlFor={statusId} className="sr-only">Filtrar por estado</label>
               <select

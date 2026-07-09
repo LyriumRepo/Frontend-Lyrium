@@ -22,6 +22,8 @@ interface LogoLyriumProps {
   sideImg?: string;
   size?: 'sm' | 'md';
   showText?: boolean;
+  /** Overrides the sm/md preset with an explicit pixel size for the circle. */
+  circleSize?: number;
 }
 
 // ─────────────────────────────────────────────
@@ -396,6 +398,7 @@ export default function LogoLyrium({
   sideImg   = 'Letras.png',
   size      = 'md',
   showText  = true,
+  circleSize,
 }: LogoLyriumProps) {
   const circleWrapRef      = useRef<HTMLDivElement>(null);
   const cardRef            = useRef<HTMLDivElement>(null);
@@ -621,10 +624,13 @@ const moodInterval = setInterval(() => {
         <div
           ref={circleWrapRef}
           className={`flex-shrink-0 opacity-0 relative ${
-            size === 'sm'
-              ? 'w-9 h-9'
-              : 'w-14 h-14 md:w-[4.8rem] md:h-[4.8rem]'
+            circleSize
+              ? ''
+              : size === 'sm'
+                ? 'w-9 h-9'
+                : 'w-14 h-14 md:w-[4.8rem] md:h-[4.8rem]'
           }`}
+          style={circleSize ? { width: circleSize, height: circleSize } : undefined}
         >
           <div ref={sceneRef} className="lyr-scene">
             <div ref={cardRef} className="lyr-card">

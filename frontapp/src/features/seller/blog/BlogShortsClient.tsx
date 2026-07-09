@@ -103,7 +103,7 @@ export function BlogShortsClient() {
     };
     const openEdit = (s: BlogShort) => {
         setEditingId(s.id); setError(null); setPreview(null);
-        setForm({ platform: s.platform, url: s.url, title: s.title, description: s.description || '', thumbnail: s.thumbnail || '', duration: s.duration || '', status: s.status });
+        setForm({ platform: s.platform, url: s.url || '', title: s.title || '', description: s.description || '', thumbnail: s.thumbnail || '', duration: s.duration || '', status: s.status });
         setShowEditor(true);
     };
 

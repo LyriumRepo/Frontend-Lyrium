@@ -28,6 +28,13 @@ const layouts = [
                     <div className="w-full h-full bg-teal-400/60 dark:bg-teal-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">P</div>
                     <div className="w-full h-full bg-teal-400/60 dark:bg-teal-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">P</div>
                 </div>
+                <div className="flex-1 grid grid-cols-5 gap-0.5">
+                    <div className="w-full h-full bg-teal-400/60 dark:bg-teal-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">P</div>
+                    <div className="w-full h-full bg-teal-400/60 dark:bg-teal-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">P</div>
+                    <div className="w-full h-full bg-teal-400/60 dark:bg-teal-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">P</div>
+                    <div className="w-full h-full bg-teal-400/60 dark:bg-teal-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">P</div>
+                    <div className="w-full h-full bg-teal-400/60 dark:bg-teal-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">P</div>
+                </div>
                 <div className="flex gap-0.5 h-4">
                     <div className="flex-1 bg-sky-500/80 dark:bg-emerald-700/80 rounded flex items-center justify-center text-[6px] font-bold text-white">Banner</div>
                     <div className="flex-1 bg-sky-500/80 dark:bg-emerald-700/80 rounded flex items-center justify-center text-[6px] font-bold text-white">Banner</div>
@@ -35,6 +42,13 @@ const layouts = [
                 </div>
                 <div className="w-full border-t border-gray-200 dark:border-gray-700" />
                 <div className="text-[6px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Servicios</div>
+                <div className="flex-1 grid grid-cols-5 gap-0.5">
+                    <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
+                    <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
+                    <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
+                    <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
+                    <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
+                </div>
                 <div className="flex-1 grid grid-cols-5 gap-0.5">
                     <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
                     <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
@@ -57,12 +71,22 @@ const layouts = [
                     <div className="flex-1 bg-sky-500/80 dark:bg-emerald-700/80 rounded flex items-center justify-center text-[6px] font-bold text-white">Banner</div>
                 </div>
                 <div className="w-full border-t border-gray-200 dark:border-gray-700" />
-                <div className="flex-1 grid gap-0.5" style={{ gridTemplateColumns: '1fr 4fr' }}>
-                    <div className="grid grid-rows-2 gap-0.5">
-                        <div className="w-full h-full bg-sky-500/60 dark:bg-emerald-700/60 rounded flex items-center justify-center text-[6px] font-bold text-white">B</div>
-                        <div className="w-full h-full bg-sky-500/60 dark:bg-emerald-700/60 rounded flex items-center justify-center text-[6px] font-bold text-white">B</div>
+                <div className="flex-1 grid gap-0.5" style={{ gridTemplateColumns: '18% 1fr', gridTemplateRows: '1fr 1fr' }}>
+                    <div className="grid grid-rows-2 gap-0.5" style={{ gridRow: '1 / span 2', gridColumn: '1' }}>
+                        <div className="w-full h-full bg-sky-500/60 dark:bg-emerald-700/60 rounded flex items-center justify-center text-[6px] font-bold text-white overflow-hidden" style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>
+                            Banner
+                        </div>
+                        <div className="w-full h-full bg-sky-500/60 dark:bg-emerald-700/60 rounded flex items-center justify-center text-[6px] font-bold text-white overflow-hidden" style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>
+                            Banner
+                        </div>
                     </div>
-                    <div className="grid grid-cols-4 gap-0.5">
+                    <div className="grid grid-cols-4 gap-0.5" style={{ gridRow: '1', gridColumn: '2' }}>
+                        <div className="w-full h-full bg-teal-400/60 dark:bg-teal-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">P</div>
+                        <div className="w-full h-full bg-teal-400/60 dark:bg-teal-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">P</div>
+                        <div className="w-full h-full bg-teal-400/60 dark:bg-teal-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">P</div>
+                        <div className="w-full h-full bg-teal-400/60 dark:bg-teal-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">P</div>
+                    </div>
+                    <div className="grid grid-cols-4 gap-0.5" style={{ gridRow: '2', gridColumn: '2' }}>
                         <div className="w-full h-full bg-teal-400/60 dark:bg-teal-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">P</div>
                         <div className="w-full h-full bg-teal-400/60 dark:bg-teal-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">P</div>
                         <div className="w-full h-full bg-teal-400/60 dark:bg-teal-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">P</div>
@@ -75,16 +99,15 @@ const layouts = [
                     <div className="flex-1 bg-sky-500/80 dark:bg-emerald-700/80 rounded flex items-center justify-center text-[6px] font-bold text-white">Banner</div>
                 </div>
                 <div className="w-full border-t border-gray-200 dark:border-gray-700" />
-                <div className="flex-1 grid gap-0.5" style={{ gridTemplateColumns: '4fr 1fr' }}>
+                <div className="flex-1 grid gap-0.5" style={{ gridTemplateColumns: '1fr 18%' }}>
                     <div className="grid grid-cols-4 gap-0.5">
                         <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
                         <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
                         <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
                         <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
                     </div>
-                    <div className="grid grid-rows-2 gap-0.5">
-                        <div className="w-full h-full bg-sky-500/60 dark:bg-emerald-700/60 rounded flex items-center justify-center text-[6px] font-bold text-white">B</div>
-                        <div className="w-full h-full bg-sky-500/60 dark:bg-emerald-700/60 rounded flex items-center justify-center text-[6px] font-bold text-white">B</div>
+                    <div className="w-full h-full bg-sky-500/60 dark:bg-emerald-700/60 rounded flex items-center justify-center text-[6px] font-bold text-white overflow-hidden" style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>
+                        Banner
                     </div>
                 </div>
             </>
@@ -96,17 +119,32 @@ const layouts = [
         desc: 'Banners extremos • Simétrico horizontal',
         preview: (
             <>
-                <div className="flex-1 grid gap-0.5" style={{ gridTemplateColumns: '18% 1fr 18%' }}>
-                    <div className="w-full h-full bg-sky-500/60 dark:bg-emerald-700/60 rounded flex items-center justify-center text-[6px] font-bold text-white overflow-hidden" style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>
-                        Banner
+                <div className="flex-1 grid gap-0.5" style={{ gridTemplateColumns: '18% 1fr 18%', gridTemplateRows: '1fr 1fr' }}>
+                    <div className="grid grid-rows-2 gap-0.5" style={{ gridRow: '1 / span 2', gridColumn: '1' }}>
+                        <div className="w-full h-full bg-sky-500/60 dark:bg-emerald-700/60 rounded flex items-center justify-center text-[6px] font-bold text-white overflow-hidden" style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>
+                            Banner
+                        </div>
+                        <div className="w-full h-full bg-sky-500/60 dark:bg-emerald-700/60 rounded flex items-center justify-center text-[6px] font-bold text-white overflow-hidden" style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>
+                            Banner
+                        </div>
                     </div>
-                    <div className="grid grid-cols-3 gap-0.5">
+                    <div className="grid grid-cols-3 gap-0.5" style={{ gridRow: '1', gridColumn: '2' }}>
                         <div className="w-full h-full bg-teal-400/60 dark:bg-teal-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">P</div>
                         <div className="w-full h-full bg-teal-400/60 dark:bg-teal-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">P</div>
                         <div className="w-full h-full bg-teal-400/60 dark:bg-teal-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">P</div>
                     </div>
-                    <div className="w-full h-full bg-sky-500/60 dark:bg-emerald-700/60 rounded flex items-center justify-center text-[6px] font-bold text-white overflow-hidden" style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>
-                        Banner
+                    <div className="grid grid-rows-2 gap-0.5" style={{ gridRow: '1 / span 2', gridColumn: '3' }}>
+                        <div className="w-full h-full bg-sky-500/60 dark:bg-emerald-700/60 rounded flex items-center justify-center text-[6px] font-bold text-white overflow-hidden" style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>
+                            Banner
+                        </div>
+                        <div className="w-full h-full bg-sky-500/60 dark:bg-emerald-700/60 rounded flex items-center justify-center text-[6px] font-bold text-white overflow-hidden" style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>
+                            Banner
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-0.5" style={{ gridRow: '2', gridColumn: '2' }}>
+                        <div className="w-full h-full bg-teal-400/60 dark:bg-teal-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">P</div>
+                        <div className="w-full h-full bg-teal-400/60 dark:bg-teal-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">P</div>
+                        <div className="w-full h-full bg-teal-400/60 dark:bg-teal-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">P</div>
                     </div>
                 </div>
                 <div className="w-full border-t border-gray-200 dark:border-gray-700" />

@@ -25,6 +25,23 @@ export interface RecentInvoice {
     emission_date: string;
 }
 
+export interface MetaIngresos {
+    /** Ingreso neto del mes anterior (base de la meta). */
+    ingresoMesAnterior: number;
+    /** Ingreso neto acumulado en el mes actual. */
+    ingresoMesActual: number;
+    /** Meta = ingreso del mes anterior + 20%. */
+    metaMensual: number;
+    /** Cuánto falta en soles para alcanzar la meta (0 si ya se alcanzó). */
+    faltanteSoles: number;
+    /** Ticket promedio usado para la proyección. */
+    ticketPromedio: number;
+    /** Ventas adicionales estimadas (redondeadas hacia arriba) para alcanzar la meta. */
+    ventasFaltantes: number;
+    /** true si ya se alcanzó o superó la meta este mes. */
+    metaAlcanzada: boolean;
+}
+
 export interface FinanceData {
     ingresosBrutos: FinanceChartData;
     ingresosNetos: FinanceChartData;
@@ -43,6 +60,7 @@ export interface FinanceData {
     csat: FinanceChartData;
     desgloseFinanciero: FinancialBreakdown;
     comprobantesRecientes: RecentInvoice[];
+    metaIngresos: MetaIngresos;
 }
 
 export interface CustomerKPI {

@@ -148,6 +148,16 @@ export default function ChatBotWidget() {
                         <div className="bg-white border border-emerald-200 rounded-2xl px-4 py-2.5 shadow-lg">
                             <p className="text-sm font-medium text-gray-700 whitespace-nowrap">{text}</p>
                         </div>
+
+                        <div className="absolute -left-8 top-1 w-2.5 h-2.5 rounded-full bg-emerald-200/60 lyrio-float"
+                             style={{ animationDelay: '0.3s', animationDuration: '2.8s' }} />
+                        <div className="absolute -left-12 top-3 w-1.5 h-1.5 rounded-full bg-emerald-300/40 lyrio-float"
+                             style={{ animationDelay: '0.9s', animationDuration: '3.2s' }} />
+                        <div className="absolute -left-6 top-6 w-2 h-2 rounded-full bg-emerald-200/50 lyrio-float"
+                             style={{ animationDelay: '1.5s', animationDuration: '2.5s' }} />
+                        <div className="absolute -left-9 top-9 w-1 h-1 rounded-full bg-emerald-300/30 lyrio-float"
+                             style={{ animationDelay: '2.1s', animationDuration: '3.5s' }} />
+
                         <div className="absolute bottom-0 right-[22px] translate-y-full"
                              style={{ width:0, height:0,
                                  borderLeft:'9px solid transparent', borderRight:'9px solid transparent',
@@ -167,8 +177,8 @@ export default function ChatBotWidget() {
                     className="shadow-lg hover:scale-110 active:scale-95 transition-transform duration-300 cursor-grab active:cursor-grabbing select-none"
                     aria-label="Abrir chat"
                 >
-                    <div className="bg-gradient-to-br from-sky-600 to-cyan-500 hover:from-sky-500 hover:to-cyan-400 dark:from-[var(--brand-green)] dark:to-[var(--icons-green)] dark:hover:from-emerald-600 dark:hover:to-teal-500 text-white rounded-full w-14 h-14 flex items-center justify-center shadow-xl hover:shadow-2xl transition-all duration-300">
-                        <LogoLyrium size="sm" showText={false} frontImg="/img/iconologo.png" />
+                    <div className="bg-gradient-to-br from-sky-600 to-cyan-500 hover:from-sky-500 hover:to-cyan-400 dark:from-[var(--brand-green)] dark:to-[var(--icons-green)] dark:hover:from-emerald-600 dark:hover:to-teal-500 text-white rounded-full w-16 h-16 flex items-center justify-center shadow-xl hover:shadow-2xl transition-all duration-300">
+                        <LogoLyrium size="sm" showText={false} frontImg="/img/iconologo.png" circleSize={46} />
                     </div>
                 </button>
             </div>

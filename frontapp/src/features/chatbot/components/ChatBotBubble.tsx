@@ -46,29 +46,64 @@ function parseInline(text: string, keyPrefix: string): ReactNode[] {
     return nodes;
 }
 
-function renderMarkdown(content: string): ReactNode {
-    const lines = content.split('\n');
-    return lines.map((line, i) => {
-        const isBullet = /^\s*\*\s/.test(line);
-        const lineText = isBullet ? line.replace(/^\s*\*\s/, '') : line;
-        const inline = parseInline(lineText, `l${i}`);
+// Agrupa las líneas en bloques (párrafo o lista de bullets), separados por
+// líneas en blanco, para dar más aire entre ideas y mejorar la legibilidad.
+type Block = { type: 'text' | 'bullets'; lines: string[] };
 
-        if (isBullet) {
-            return (
-                <div key={i} className="flex gap-1.5 items-start">
-                    <span className="mt-0.5 flex-shrink-0">•</span>
-                    <span>{inline}</span>
-                </div>
-            );
+function groupBlocks(content: string): Block[] {
+    const blocks: Block[] = [];
+
+    for (const line of content.split('\n')) {
+        if (line.trim() === '') {
+            blocks.push({ type: 'text', lines: [] }); // separador: fuerza nuevo bloque
+            continue;
         }
 
-        return (
-            <span key={i}>
-                {inline}
-                {i < lines.length - 1 && <br />}
-            </span>
-        );
-    });
+        const type: Block['type'] = /^\s*\*\s/.test(line) ? 'bullets' : 'text';
+        const last = blocks[blocks.length - 1];
+
+        if (last && last.type === type && last.lines.length > 0) {
+            last.lines.push(line);
+        } else {
+            blocks.push({ type, lines: [line] });
+        }
+    }
+
+    return blocks.filter(b => b.lines.length > 0);
+}
+
+function renderMarkdown(content: string): ReactNode {
+    const blocks = groupBlocks(content);
+
+    return (
+        <div className="space-y-2.5">
+            {blocks.map((block, bi) => {
+                if (block.type === 'bullets') {
+                    return (
+                        <div key={bi} className="space-y-1">
+                            {block.lines.map((line, i) => (
+                                <div key={i} className="flex gap-1.5 items-start">
+                                    <span className="mt-0.5 flex-shrink-0">•</span>
+                                    <span>{parseInline(line.replace(/^\s*\*\s/, ''), `b${bi}-${i}`)}</span>
+                                </div>
+                            ))}
+                        </div>
+                    );
+                }
+
+                return (
+                    <p key={bi} className="text-justify [text-align-last:left]">
+                        {block.lines.map((line, i) => (
+                            <span key={i}>
+                                {parseInline(line, `t${bi}-${i}`)}
+                                {i < block.lines.length - 1 && <br />}
+                            </span>
+                        ))}
+                    </p>
+                );
+            })}
+        </div>
+    );
 }
 
 interface Props {

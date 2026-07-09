@@ -4,7 +4,15 @@ import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 
-export default function ThemeToggle() {
+interface ThemeToggleProps {
+    buttonClassName?: string;
+    imageClassName?: string;
+}
+
+export default function ThemeToggle({
+    buttonClassName = 'p-3 rounded-xl',
+    imageClassName = 'w-9 h-9 object-contain',
+}: ThemeToggleProps) {
     const { theme, setTheme, resolvedTheme } = useTheme();
     const [mounted, setMounted] = useState(false);
 
@@ -14,13 +22,13 @@ export default function ThemeToggle() {
 
     if (!mounted) {
         return (
-            <div className="p-3 rounded-xl">
+            <div className={buttonClassName}>
                 <Image
                     src="/img/iconologo.png"
                     alt="Modo Bio"
                     width={28}
                     height={28}
-                    className="w-7 h-7 object-contain"
+                    className={imageClassName}
                 />
             </div>
         );
@@ -35,9 +43,13 @@ export default function ThemeToggle() {
     };
 
     const getImage = () => {
+        // Antes usaba /img/Flor_Dark.png en modo oscuro: es un dibujo de solo
+        // líneas finas sobre fondo transparente, ilegible a tamaño de ícono
+        // pequeño (se pierde por el antialiasing). iconologo.png tiene relleno
+        // sólido de color y se ve bien en cualquier fondo y tamaño.
         if (resolvedTheme === 'dark') {
             return {
-                src: '/img/Flor_Dark.png',
+                src: '/img/iconologo.png',
                 alt: 'Modo Serenidad'
             };
         }
@@ -59,7 +71,7 @@ export default function ThemeToggle() {
         <div className="relative group inline-block">
             <button
                 onClick={cycleTheme}
-                className="p-3 rounded-xl hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] transition-colors"
+                className={`${buttonClassName} hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] transition-colors`}
                 aria-label={getLabel()}
             >
                 <Image
@@ -67,7 +79,7 @@ export default function ThemeToggle() {
                     alt={image.alt}
                     width={30}
                     height={30}
-                    className="w-9 h-9 object-contain"
+                    className={imageClassName}
                 />
             </button>
 

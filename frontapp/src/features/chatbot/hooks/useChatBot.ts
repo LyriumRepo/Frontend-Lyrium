@@ -158,12 +158,15 @@ export function useChatBot() {
                     content: m.content,
                 }));
 
+            const token = typeof window !== 'undefined' ? localStorage.getItem('laravel_token') : null;
+
             const response = await fetch(`${LARAVEL_API_URL}/chatbot/ask`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json',
                     'X-Session-Id': sessionIdRef.current,
+                    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
                 },
                 body: JSON.stringify({
                     message: trimmedContent,

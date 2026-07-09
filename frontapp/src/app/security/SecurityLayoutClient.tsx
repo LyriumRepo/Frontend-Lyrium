@@ -6,6 +6,7 @@ import SecurityHeader from '@/components/layout/security/SecurityHeader';
 import { DashboardLayout } from '@/components/layout/shared/DashboardLayout';
 import { useUIStore } from '@/store/uiStore';
 import NotificationSidebar from '@/components/shared/notifications/NotificationSidebar';
+import ChatBotWidget from '@/features/chatbot/components/ChatBotWidget';
 
 interface SecurityLayoutClientProps {
     children: React.ReactNode;
@@ -25,6 +26,7 @@ export function SecurityLayoutClient({ children }: SecurityLayoutClientProps) {
         >
             {children}
             <NotificationSidebar />
+            <ChatBotWidget />
         </DashboardLayout>
     );
 }

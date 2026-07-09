@@ -29,6 +29,20 @@ const priorityColors: Record<string, string> = {
   Crítica: 'bg-red-500',
 };
 
+// Mismos colores de marca que usa el módulo de planes del vendedor
+// (features/seller/plans/lib/plans.ts → cssColor de cada plan).
+const planColors: Record<string, string> = {
+  emprende: '#9cb04e',
+  crece: '#64c695',
+  especial: '#499bbf',
+};
+
+function getPlanBadge(plan?: string) {
+  if (!plan) return null;
+  const color = planColors[plan.trim().toLowerCase()] ?? '#94a3b8';
+  return { label: plan, color };
+}
+
 const avatarGradients = [
   'from-sky-400 to-blue-500',
   'from-emerald-400 to-teal-500',
@@ -45,15 +59,16 @@ export function TicketItem({ ticket, isActive, onClick, showPriority = true }: T
   const displayName = ticket.requester.company || ticket.requester.name;
   const initial = displayName.charAt(0).toUpperCase();
   const avatarGrad = avatarGradients[parseInt(ticket.id, 10) % avatarGradients.length] ?? avatarGradients[0];
+  const planBadge = getPlanBadge(ticket.requester.plan);
 
   return (
     <button
       type="button"
       onClick={() => onClick(ticket.id)}
-      className={`w-full px-4 py-3.5 border-b border-[var(--border-subtle)] text-left transition-all duration-200 relative group ${
+      className={`w-full px-5 py-3.5 border-b border-[var(--border-subtle)] text-left transition-all duration-200 relative group ${
         isActive
           ? 'bg-[var(--turquesa-500)]/10'
-          : 'hover:bg-[var(--turquesa-500)]/5 hover:pl-6'
+          : 'hover:bg-[var(--turquesa-500)]/5 hover:pl-7'
       }`}
     >
       {isActive && (
@@ -84,6 +99,15 @@ export function TicketItem({ ticket, isActive, onClick, showPriority = true }: T
             <span className={`rounded px-1.5 py-0.5 text-[7px] font-black uppercase tracking-wider ${status.class}`}>
               {status.label}
             </span>
+            {planBadge && (
+              <span
+                className="rounded px-1.5 py-0.5 text-[7px] font-black uppercase tracking-wider"
+                style={{ backgroundColor: `${planBadge.color}26`, color: planBadge.color }}
+                title={`Plan ${planBadge.label}`}
+              >
+                {planBadge.label}
+              </span>
+            )}
             {showPriority && ticket.priority && (
               <span className={`h-1.5 w-1.5 rounded-full ${priorityColors[ticket.priority] ?? 'bg-slate-400'}`} title={ticket.priority} />
             )}

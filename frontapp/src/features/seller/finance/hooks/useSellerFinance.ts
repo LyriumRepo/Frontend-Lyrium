@@ -167,6 +167,14 @@ function computeFinanceData(
     const totalPending = pendingPayments.reduce((sum, p) => sum + (Number(p.net_amount) || 0), 0);
     const totalCompletedAmt = completedPayments.reduce((sum, p) => sum + (Number(p.net_amount) || 0), 0);
 
+    // Meta de ingresos: mes anterior + 20%, y cuántas ventas faltan para alcanzarla
+    // al ticket promedio actual (crecimiento vs. mejor mes reciente).
+    const ingresoMesActual = monthDataIngresosNetos[monthDataIngresosNetos.length - 1] ?? 0;
+    const ingresoMesAnterior = monthDataIngresosNetos[monthDataIngresosNetos.length - 2] ?? 0;
+    const metaMensual = ingresoMesAnterior * 1.2;
+    const faltanteSoles = Math.max(0, metaMensual - ingresoMesActual);
+    const ventasFaltantes = avgTicket > 0 ? Math.ceil(faltanteSoles / avgTicket) : 0;
+
     const analyticsTiempo = analytics?.tiempoRespuesta ?? [0, 0, 0, 0];
     const analyticsStock = analytics?.stockRotation ?? [0, 0, 0, 0];
     const analyticsCuota = analytics?.cuotaMercado ?? 0;
@@ -256,6 +264,15 @@ function computeFinanceData(
         csat: {
             labels: ['CSAT'],
             data: [analytics?.csat ?? 0],
+        },
+        metaIngresos: {
+            ingresoMesAnterior,
+            ingresoMesActual,
+            metaMensual,
+            faltanteSoles,
+            ticketPromedio: avgTicket,
+            ventasFaltantes,
+            metaAlcanzada: ingresoMesAnterior > 0 && ingresoMesActual >= metaMensual,
         },
     };
 }

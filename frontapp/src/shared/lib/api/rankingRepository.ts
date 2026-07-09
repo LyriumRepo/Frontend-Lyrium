@@ -134,13 +134,14 @@ export const rankingApi = {
   getTopProducts(
     limit = 100,
     minReviews = 1,
+    minSales = 3,
   ): Promise<{
     success: boolean;
     data: ProductRanking[];
     meta: { total: number };
   }> {
     return requestRaw(
-      `/rankings/products?limit=${limit}&min_reviews=${minReviews}`,
+      `/rankings/products?limit=${limit}&min_reviews=${minReviews}&min_sales=${minSales}`,
     );
   },
 

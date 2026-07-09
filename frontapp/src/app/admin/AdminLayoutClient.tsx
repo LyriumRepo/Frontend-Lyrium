@@ -6,6 +6,7 @@ import AdminHeader from '@/components/layout/admin/AdminHeader';
 import { DashboardLayout } from '@/components/layout/shared/DashboardLayout';
 import { useUIStore } from '@/store/uiStore';
 import NotificationSidebar from '@/components/shared/notifications/NotificationSidebar';
+import ChatBotWidget from '@/features/chatbot/components/ChatBotWidget';
 
 interface AdminLayoutClientProps {
     children: React.ReactNode;
@@ -25,6 +26,7 @@ export function AdminLayoutClient({ children }: AdminLayoutClientProps) {
         >
             {children}
             <NotificationSidebar />
+            <ChatBotWidget />
         </DashboardLayout>
     );
 }

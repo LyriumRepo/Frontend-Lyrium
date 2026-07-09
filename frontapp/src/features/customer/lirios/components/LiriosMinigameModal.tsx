@@ -282,7 +282,7 @@ export default function LiriosMinigameModal({
       `}</style>
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
       <div className="relative bg-white dark:bg-[var(--bg-card)] rounded-3xl shadow-2xl border border-gray-200 dark:border-[var(--border-subtle)] w-full max-w-sm animate-fade-slide-in">
-        <div className="bg-gradient-to-r from-emerald-500 to-teal-500 dark:from-emerald-700 dark:to-teal-700 p-5 text-white flex items-center justify-between">
+        <div className="bg-gradient-to-r from-sky-500 to-cyan-500 dark:from-emerald-700 dark:to-teal-700 p-5 text-white flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Sparkles className="w-5 h-5" />
             <h3 className="font-black text-sm uppercase tracking-wider">Tres en Raya Lirio</h3>
@@ -303,31 +303,31 @@ export default function LiriosMinigameModal({
                 key={d.key}
                 onClick={() => changeDifficulty(d.key)}
                 className={`flex-1 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1 ${
-                  difficulty === d.key
-                    ? 'bg-white dark:bg-[var(--bg-card)] text-emerald-700 dark:text-emerald-400 shadow-sm border border-gray-200 dark:border-[var(--border-subtle)]'
-                    : 'text-gray-500 dark:text-[var(--text-muted)] hover:text-emerald-600 dark:hover:text-emerald-400'
+                    difficulty === d.key
+                      ? 'bg-white dark:bg-[var(--bg-card)] text-sky-700 dark:text-emerald-400 shadow-sm border border-gray-200 dark:border-[var(--border-subtle)]'
+                      : 'text-gray-500 dark:text-[var(--text-muted)] hover:text-sky-600 dark:hover:text-emerald-400'
                 }`}
               >
                 {d.label}
                 {d.key === 'hard' && (
-                  <span className="relative group inline-flex items-center">
-                    <Info className="w-3 h-3 text-emerald-500 dark:text-emerald-400" />
+                    <span className="relative group inline-flex items-center">
+                    <Info className="w-3 h-3 text-sky-500 dark:text-emerald-400" />
                     <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 hidden group-hover:block z-50">
-                      <div className="bg-emerald-800 dark:bg-emerald-950 text-white text-[10px] leading-relaxed rounded-xl p-3 shadow-xl text-center">
+                      <div className="bg-sky-800 dark:bg-emerald-950 text-white text-[10px] leading-relaxed rounded-xl p-3 shadow-xl text-center">
                         <p className="font-bold mb-1">💎 Modo difícil</p>
                         <p className="text-gray-200">
-                          ¡Gana <span className="text-emerald-400 font-bold">+2 Lirios</span> si vences a la IA!
+                          ¡Gana <span className="text-sky-400 dark:text-emerald-400 font-bold">+2 Lirios</span> si vences a la IA!
                         </p>
                         <p className="text-gray-400 mt-1">
                           Disponible 1 vez al día
                         </p>
                         {claimedToday && (
-                          <p className="text-emerald-400 mt-1 font-bold">
+                          <p className="text-sky-400 dark:text-emerald-400 mt-1 font-bold">
                             ✓ Reclamado hoy
                           </p>
                         )}
                       </div>
-                      <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 w-3 h-3 bg-emerald-800 dark:bg-emerald-950 rotate-45" />
+                      <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 w-3 h-3 bg-sky-800 dark:bg-emerald-950 rotate-45" />
                     </div>
                   </span>
                 )}
@@ -347,13 +347,13 @@ export default function LiriosMinigameModal({
                     ))}
                   </div>
                   <div
-                    className="w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center mx-auto"
+                    className="w-16 h-16 rounded-full bg-sky-100 dark:bg-emerald-900/40 flex items-center justify-center mx-auto"
                     style={{ animation: 'liriosBounceIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards' }}
                   >
-                    <Trophy className="w-8 h-8 text-emerald-500" />
+                    <Trophy className="w-8 h-8 text-sky-500 dark:text-emerald-400" />
                   </div>
                   <p
-                    className="text-xl font-black text-emerald-600 dark:text-emerald-400 mt-4"
+                    className="text-xl font-black text-sky-600 dark:text-emerald-400 mt-4"
                     style={{ animation: 'liriosBounceIn 0.4s 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55) both' }}
                   >
                     ¡Ganaste!
@@ -366,7 +366,7 @@ export default function LiriosMinigameModal({
                   </p>
                   {rewardEarned && (
                     <div
-                      className="mt-3 inline-flex items-center gap-1.5 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 text-xs font-bold px-3 py-1.5 rounded-full"
+                      className="mt-3 inline-flex items-center gap-1.5 bg-sky-100 dark:bg-emerald-900/40 text-sky-700 dark:text-emerald-400 text-xs font-bold px-3 py-1.5 rounded-full"
                       style={{ animation: 'liriosBounceIn 0.4s 0.6s both' }}
                     >
                       <Coins className="w-3.5 h-3.5" />
@@ -378,13 +378,13 @@ export default function LiriosMinigameModal({
               {result === 'draw' && (
                 <>
                   <div
-                    className="w-16 h-16 rounded-full bg-teal-100 dark:bg-teal-900/40 flex items-center justify-center mx-auto"
+                    className="w-16 h-16 rounded-full bg-cyan-100 dark:bg-emerald-900/40 flex items-center justify-center mx-auto"
                     style={{ animation: 'liriosBounceIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards' }}
                   >
-                    <Leaf className="w-8 h-8 text-teal-500" />
+                    <Leaf className="w-8 h-8 text-cyan-500 dark:text-emerald-400" />
                   </div>
                   <p
-                    className="text-xl font-black text-teal-600 dark:text-teal-400 mt-4"
+                    className="text-xl font-black text-cyan-600 dark:text-emerald-400 mt-4"
                     style={{ animation: 'liriosBounceIn 0.4s 0.3s both' }}
                   >
                     ¡Empate!
@@ -397,12 +397,12 @@ export default function LiriosMinigameModal({
               {result === 'lose' && (
                 <>
                   <div
-                    className="w-16 h-16 rounded-full bg-sky-100 dark:bg-sky-900/40 flex items-center justify-center mx-auto"
+                    className="w-16 h-16 rounded-full bg-sky-100 dark:bg-emerald-900/40 flex items-center justify-center mx-auto"
                     style={{ animation: 'liriosShake 0.5s ease-in-out' }}
                   >
-                    <Frown className="w-8 h-8 text-sky-500" />
+                    <Frown className="w-8 h-8 text-sky-500 dark:text-emerald-400" />
                   </div>
-                  <p className="text-xl font-black text-sky-600 dark:text-sky-400 mt-4">Perdiste</p>
+                  <p className="text-xl font-black text-sky-600 dark:text-emerald-400 mt-4">Perdiste</p>
                   <p className="text-sm text-gray-500 dark:text-[var(--text-muted)] mt-1">
                     ¡La próxima será!
                   </p>
@@ -410,7 +410,7 @@ export default function LiriosMinigameModal({
               )}
               <button
                 onClick={() => { reset(); if (!claimedToday) handleWin(); }}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 dark:bg-emerald-600 text-white text-sm font-bold hover:bg-emerald-600 dark:hover:bg-emerald-700 transition"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-sky-500 dark:bg-emerald-600 text-white text-sm font-bold hover:bg-sky-600 dark:hover:bg-emerald-700 transition"
               >
                 <RotateCcw className="w-4 h-4" /> Jugar otra vez
               </button>
@@ -419,7 +419,7 @@ export default function LiriosMinigameModal({
             <>
               <div className="flex items-center justify-between text-xs text-gray-500 dark:text-[var(--text-muted)]">
                 <span className="flex items-center gap-1">
-                  <Leaf className="w-3.5 h-3.5 text-emerald-500" /> Tú (🌿)
+                  <Leaf className="w-3.5 h-3.5 text-sky-500 dark:text-emerald-400" /> Tú (🌿)
                 </span>
                 <span className="font-bold">
                   {turn === 'player' ? 'Tu turno' : 'Pensando...'}
@@ -438,14 +438,14 @@ export default function LiriosMinigameModal({
                       onClick={() => handleClick(i)}
                       disabled={!!cell || turn !== 'player' || !!result}
                       className={`aspect-square rounded-xl text-3xl font-black flex items-center justify-center transition-all duration-200
-                        ${isWinning ? 'bg-emerald-100 dark:bg-emerald-900/40 scale-105' : 'bg-gray-50 dark:bg-[var(--bg-muted)]'}
-                        ${!cell && turn === 'player' && !result ? 'hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:scale-105 active:scale-95 cursor-pointer' : ''}
+                        ${isWinning ? 'bg-sky-100 dark:bg-emerald-900/40 scale-105' : 'bg-gray-50 dark:bg-[var(--bg-muted)]'}
+                        ${!cell && turn === 'player' && !result ? 'hover:bg-sky-50 dark:hover:bg-emerald-900/20 hover:scale-105 active:scale-95 cursor-pointer' : ''}
                         ${cell ? 'shadow-inner' : 'shadow-sm hover:shadow-md'}
                         border border-gray-200 dark:border-[var(--border-subtle)]
                         disabled:opacity-80 disabled:cursor-not-allowed`}
                     >
-                      {cell === 'player' && <span className="text-emerald-500">🌿</span>}
-                      {cell === 'ai' && <span className="text-sky-500">💎</span>}
+                      {cell === 'player' && <span className="text-sky-500 dark:text-emerald-400">🌿</span>}
+                      {cell === 'ai' && <span className="text-sky-500 dark:text-emerald-400">💎</span>}
                     </button>
                   );
                 })}
@@ -455,7 +455,7 @@ export default function LiriosMinigameModal({
                 <div className="flex justify-center">
                   <button
                     onClick={reset}
-                    className="text-[10px] font-black uppercase text-gray-400 hover:text-emerald-500 dark:hover:text-emerald-400 transition flex items-center gap-1"
+                    className="text-[10px] font-black uppercase text-gray-400 hover:text-sky-500 dark:hover:text-emerald-400 transition flex items-center gap-1"
                   >
                     <RotateCcw className="w-3 h-3" /> Reiniciar
                   </button>

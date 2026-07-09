@@ -158,13 +158,6 @@ const SvgUserSilhouette = () => (
     <circle cx="12" cy="7" r="4" />
   </svg>
 );
-const SvgHome = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}
-    strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
-    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-    <polyline points="9 22 9 12 15 12 15 22" />
-  </svg>
-);
 const SvgClock = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}
     strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
@@ -1317,35 +1310,6 @@ export default function ServiceConfigModal({
                   />
                 </Field>
 
-                {/* ── Servicio a domicilio ── */}
-                <div className="space-y-2">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)]">
-                    Modalidad de atención
-                  </p>
-                  <button type="button" onClick={() => set('domicilio', !form.domicilio)}
-                    className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl border transition-all
-                    ${form.domicilio
-                        ? 'bg-sky-500/10 dark:bg-[#8FC3A1]/10 border-sky-500/40 dark:border-[#8FC3A1]/40'
-                        : 'bg-[var(--bg-secondary)] border-[var(--border-subtle)] hover:border-sky-500/20 dark:hover:border-[#8FC3A1]/50'
-                      }`}>
-                    <div className={`flex-shrink-0 transition-colors ${form.domicilio ? 'text-sky-500 dark:text-[#8FC3A1]' : 'text-[var(--text-secondary)]'}`}>
-                      <SvgHome />
-                    </div>
-                    <div className="flex-1 text-left">
-                      <p className={`text-xs font-black uppercase tracking-widest transition-colors
-                      ${form.domicilio ? 'text-sky-500 dark:text-[#8FC3A1]' : 'text-[var(--text-primary)]'}`}>
-                        Disponible a domicilio
-                      </p>
-                    </div>
-                    <div className={`w-10 h-6 rounded-full border-2 flex items-center transition-all flex-shrink-0
-                    ${form.domicilio
-                        ? 'bg-sky-500 dark:bg-[#8FC3A1] border-sky-500 dark:border-[#8FC3A1] justify-end'
-                        : 'bg-[var(--bg-primary)] border-[var(--border-subtle)] justify-start'
-                      }`}>
-                      <div className="w-4 h-4 bg-white rounded-full mx-0.5 shadow-sm" />
-                    </div>
-                  </button>
-                </div>
 
                 {/* Especialistas asignados */}
                 <Field label="Especialistas asignados">
@@ -1756,7 +1720,6 @@ export default function ServiceConfigModal({
                     <SummaryItem label="Precio"
                       value={form.precio > 0 ? `S/. ${form.precio.toFixed(2)}` : '—'} accent="emerald" />
                     <SummaryItem label="Cupos / sesión" value={`${form.cupos}`} accent="sky" />
-                    <SummaryItem label="A domicilio" value={form.domicilio ? 'Sí' : 'No'} />
                     <SummaryItem label="Anticipación" value={ANTICIPACION_LABELS[form.anticipacionReserva]} accent="sky" />
                   </div>
                   {form.descripcion && (

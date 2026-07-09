@@ -88,6 +88,16 @@ export default function AdBannersCarousel({ banners = [], maxBanners = 4, startI
                     </span>
                   </div>
                 </div>
+                <div className="absolute bottom-2 right-2 flex items-center gap-1 bg-black/35 backdrop-blur-sm rounded-full px-2 py-1 pointer-events-none select-none">
+                  <Image
+                    src="/img/iconologo.png"
+                    alt=""
+                    width={14}
+                    height={14}
+                    className="w-3.5 h-3.5 object-contain opacity-90"
+                  />
+                  <span className="text-white text-[10px] font-bold tracking-wide drop-shadow">Lyrium</span>
+                </div>
               </Link>
             </SwiperSlide>
           ))}
@@ -140,6 +150,16 @@ export default function AdBannersCarousel({ banners = [], maxBanners = 4, startI
                   {banner.titulo}
                 </span>
               </div>
+            </div>
+            <div className="absolute bottom-2.5 right-2.5 flex items-center gap-1.5 bg-black/35 backdrop-blur-sm rounded-full px-2.5 py-1.5 pointer-events-none select-none">
+              <Image
+                src="/img/iconologo.png"
+                alt=""
+                width={16}
+                height={16}
+                className="w-4 h-4 object-contain opacity-90"
+              />
+              <span className="text-white text-xs font-bold tracking-wide drop-shadow">Lyrium</span>
             </div>
           </Link>
         </SwiperSlide>

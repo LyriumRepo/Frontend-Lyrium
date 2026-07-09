@@ -59,7 +59,7 @@ export default function CheckoutStepBar() {
     >
       <div className="relative max-w-6xl mx-auto flex items-center justify-center px-4">
         {/* Steps */}
-        <div className="flex items-center justify-between w-full max-w-2xl mx-auto py-3 relative">
+        <div className="flex items-center justify-between w-full max-w-2xl mx-auto py-4 relative">
           {STEPS.map((step, idx) => {
             const color = STEP_COLORS[step.id as 1 | 2 | 3 | 4 | 5];
             const circleClass = getCircleClass(step.id);

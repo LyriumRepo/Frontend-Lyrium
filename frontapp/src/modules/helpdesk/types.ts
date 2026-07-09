@@ -29,6 +29,7 @@ export interface TicketUser {
     id: number;
     nombre: string;
     empresa?: string;
+    plan?: string;
 }
 
 export interface Ticket {
@@ -111,6 +112,7 @@ export interface UnifiedTicketListItem {
     requester: {
         name: string;
         company?: string;
+        plan?: string;
     };
     updatedAt: string;
     unreadCount: number;

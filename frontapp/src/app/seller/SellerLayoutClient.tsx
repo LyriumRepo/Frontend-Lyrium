@@ -8,6 +8,7 @@ import { DashboardLayout } from '@/components/layout/shared/DashboardLayout';
 import { useUIStore } from '@/store/uiStore';
 import { InventoryAlertsProvider } from '@/features/seller/inventario/context/InventoryAlertsContext';
 import NotificationSidebar from '@/components/shared/notifications/NotificationSidebar';
+import ChatBotWidget from '@/features/chatbot/components/ChatBotWidget';
 import { useAuth } from '@/shared/lib/context/AuthContext';
 import Icon from '@/components/ui/Icon';
 import { WELCOME_MODAL_LIGHT_TEXT, WELCOME_MODAL_LIGHT_BADGE } from '@/shared/lib/theme/welcomeModalTheme';
@@ -145,7 +146,7 @@ function SellerWelcomeToast() {
     const { user } = useAuth();
     const [visible,   setVisible]   = useState(false);
     const [exiting,   setExiting]   = useState(false);
-    const [nameReady, setNameReady] = useState(false);
+    const [nameReady, setNameReady] = useState(true);
     const [tilt,      setTilt]      = useState({ x: 0, y: 0 });
     const [isDark,    setIsDark]    = useState(true);
 
@@ -192,10 +193,8 @@ function SellerWelcomeToast() {
         sessionStorage.setItem(key, '1');
 
         setExiting(false);
-        setNameReady(false);
+        setNameReady(true);
         setVisible(true);
-
-        const nameTimer = setTimeout(() => setNameReady(true), 700);
 
         const confettiTimer = setTimeout(() => {
             import('canvas-confetti').then(({ default: confetti }) => {
@@ -213,7 +212,6 @@ function SellerWelcomeToast() {
         const autoClose = setTimeout(close, 7500);
 
         return () => {
-            clearTimeout(nameTimer);
             clearTimeout(confettiTimer);
             clearTimeout(autoClose);
         };
@@ -249,9 +247,9 @@ function SellerWelcomeToast() {
         spark1:      'rgba(52,211,153,0.5)',
         spark2:      'rgba(167,139,250,0.4)',
     } : {
-        overlay:     'radial-gradient(ellipse 72% 62% at 50% 38%, rgba(13,148,136,0.18) 0%, rgba(15,23,42,0.60) 82%)',
+        overlay:     'radial-gradient(ellipse 72% 62% at 50% 38%, rgba(13,148,136,0.22) 0%, rgba(15,23,42,0.76) 82%)',
         cardBg:      'linear-gradient(158deg, rgba(255,255,255,0.99) 0%, rgba(240,253,250,0.99) 55%, rgba(245,255,252,0.99) 100%)',
-        cardShadow:  'inset 0 0 0 1px rgba(16,185,129,0.14), inset 0 0 80px rgba(16,185,129,0.05), 0 32px 80px rgba(0,0,0,0.22), 0 0 120px rgba(16,185,129,0.08)',
+        cardShadow:  'inset 0 0 0 1.5px rgba(16,185,129,0.35), inset 0 0 80px rgba(16,185,129,0.05), 0 32px 80px rgba(0,0,0,0.38), 0 0 120px rgba(16,185,129,0.12)',
         glowTop:     'radial-gradient(ellipse at 50% -20%, rgba(16,185,129,0.10) 0%, transparent 70%)',
         shimmer:     'linear-gradient(108deg, transparent 28%, rgba(255,255,255,0.6) 50%, transparent 72%)',
         ...WELCOME_MODAL_LIGHT_BADGE,
@@ -263,9 +261,9 @@ function SellerWelcomeToast() {
         logoBg:      'rgba(16,185,129,0.07)',
         logoBorder:  '1px solid rgba(16,185,129,0.18)',
         logoSrc:     '/img/iconologo.png',
-        storeBg:     'rgba(16,185,129,0.08)',
-        storeBorder: '1px solid rgba(16,185,129,0.22)',
-        storeColor:  'rgba(5,150,105,0.85)',
+        storeBg:     'rgba(16,185,129,0.12)',
+        storeBorder: '1px solid rgba(16,185,129,0.35)',
+        storeColor:  '#047857',
         divider:     'linear-gradient(90deg, transparent, rgba(16,185,129,0.45), rgba(167,139,250,0.3), transparent)',
         spark1:      'rgba(16,185,129,0.5)',
         spark2:      'rgba(167,139,250,0.45)',
@@ -662,6 +660,7 @@ export function SellerLayoutClient({ children }: SellerLayoutClientProps) {
         >
             {children}
             <NotificationSidebar />
+            <ChatBotWidget />
             <SellerWelcomeToast />
         </DashboardLayout>
         </InventoryAlertsProvider>

@@ -218,31 +218,31 @@ export default function LiriosWalletPageClient() {
       {/* ── Stats summary bar ── */}
       {transactions.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div className="bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-950/40 dark:to-teal-950/40 rounded-2xl border border-emerald-200 dark:border-emerald-800/30 p-4 flex items-center gap-3 shadow-sm">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 dark:from-emerald-700 dark:to-teal-500 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+          <div className="bg-gradient-to-br from-sky-100 to-cyan-100 dark:from-emerald-950/40 dark:to-teal-950/40 rounded-2xl border border-sky-200 dark:border-emerald-800/30 p-4 flex items-center gap-3 shadow-sm">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-sky-400 to-cyan-500 dark:from-emerald-700 dark:to-teal-500 flex items-center justify-center shadow-lg shadow-sky-500/20">
               <ArrowDownLeft className="w-5 h-5 text-white" />
             </div>
             <div>
-              <p className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Ganados</p>
-              <p className="text-xl font-black text-emerald-700 dark:text-emerald-300">+{totalEarned.toLocaleString()}</p>
+              <p className="text-[10px] font-black text-sky-600 dark:text-emerald-400 uppercase tracking-widest">Ganados</p>
+              <p className="text-xl font-black text-sky-700 dark:text-emerald-300">+{totalEarned.toLocaleString()}</p>
             </div>
           </div>
-          <div className="bg-gradient-to-br from-sky-100 to-cyan-100 dark:from-sky-950/40 dark:to-cyan-950/40 rounded-2xl border border-sky-200 dark:border-sky-800/30 p-4 flex items-center gap-3 shadow-sm">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-sky-400 to-cyan-500 dark:from-sky-700 dark:to-cyan-600 flex items-center justify-center shadow-lg shadow-sky-500/20">
+          <div className="bg-gradient-to-br from-sky-100 to-cyan-100 dark:from-emerald-950/40 dark:to-teal-950/40 rounded-2xl border border-sky-200 dark:border-emerald-800/30 p-4 flex items-center gap-3 shadow-sm">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-sky-400 to-cyan-500 dark:from-emerald-700 dark:to-teal-600 flex items-center justify-center shadow-lg shadow-sky-500/20">
               <ArrowUpRight className="w-5 h-5 text-white" />
             </div>
             <div>
-              <p className="text-[10px] font-black text-sky-600 dark:text-sky-400 uppercase tracking-widest">Canjeados</p>
-              <p className="text-xl font-black text-sky-700 dark:text-sky-300">-{totalRedeemed.toLocaleString()}</p>
+              <p className="text-[10px] font-black text-sky-600 dark:text-emerald-400 uppercase tracking-widest">Canjeados</p>
+              <p className="text-xl font-black text-sky-700 dark:text-emerald-300">-{totalRedeemed.toLocaleString()}</p>
             </div>
           </div>
-          <div className="bg-gradient-to-br from-teal-100 to-emerald-100 dark:from-teal-950/40 dark:to-emerald-950/40 rounded-2xl border border-teal-200 dark:border-teal-800/30 p-4 flex items-center gap-3 shadow-sm">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-teal-400 to-emerald-500 dark:from-teal-700 dark:to-emerald-500 flex items-center justify-center shadow-lg shadow-teal-500/20">
+          <div className="bg-gradient-to-br from-sky-100 to-cyan-100 dark:from-emerald-950/40 dark:to-teal-950/40 rounded-2xl border border-sky-200 dark:border-emerald-800/30 p-4 flex items-center gap-3 shadow-sm">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-sky-400 to-cyan-500 dark:from-emerald-700 dark:to-teal-500 flex items-center justify-center shadow-lg shadow-sky-500/20">
               <TrendingUp className="w-5 h-5 text-white" />
             </div>
             <div>
-              <p className="text-[10px] font-black text-teal-600 dark:text-teal-400 uppercase tracking-widest">Total transacciones</p>
-              <p className="text-xl font-black text-teal-700 dark:text-teal-300">{txTotal}</p>
+              <p className="text-[10px] font-black text-sky-600 dark:text-emerald-400 uppercase tracking-widest">Total transacciones</p>
+              <p className="text-xl font-black text-sky-700 dark:text-emerald-300">{txTotal}</p>
             </div>
           </div>
         </div>
@@ -253,7 +253,7 @@ export default function LiriosWalletPageClient() {
         {/* ─── Balance Card ─── */}
         <div className="lg:col-span-2">
           <div
-            className={`relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-500 via-teal-500 to-emerald-500 dark:from-emerald-800 dark:via-teal-800 dark:to-cyan-800 shadow-2xl shadow-teal-500/30 dark:shadow-teal-900/50 p-5 sm:p-6 transition-all duration-700 ${
+            className={`relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-500 via-cyan-500 to-sky-600 dark:from-emerald-800 dark:via-teal-800 dark:to-emerald-900 shadow-2xl shadow-sky-500/30 dark:shadow-emerald-900/50 p-5 sm:p-6 transition-all duration-700 ${
               animateIn ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
             }`}
             style={{ backgroundSize: '200% 200%' }}
@@ -330,9 +330,9 @@ export default function LiriosWalletPageClient() {
                   <div className="pt-1">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-1.5">
-                        <Trophy className="w-3.5 h-3.5 text-teal-200" />
+                        <Trophy className="w-3.5 h-3.5 text-cyan-200" />
                         <span className="text-xs font-bold text-white/90">
-                          Nivel <span className="text-teal-200">{tier.label}</span>
+                          Nivel <span className="text-cyan-200">{tier.label}</span>
                         </span>
                       </div>
                       {nextTier ? (
@@ -340,7 +340,7 @@ export default function LiriosWalletPageClient() {
                           {bal.toLocaleString()} / {nextTier.min.toLocaleString()}
                         </span>
                       ) : (
-                        <span className="text-[10px] text-teal-200 font-bold flex items-center gap-1">
+                        <span className="text-[10px] text-cyan-200 font-bold flex items-center gap-1">
                           <Gift className="w-3 h-3" />
                           ¡Nivel máximo!
                         </span>
@@ -348,7 +348,7 @@ export default function LiriosWalletPageClient() {
                     </div>
                     <div className="h-2 bg-white/20 rounded-full overflow-hidden shadow-inner">
                       <div
-                        className="h-full rounded-full bg-gradient-to-r from-emerald-400 via-teal-400 to-sky-400 transition-all duration-1000 ease-out"
+                        className="h-full rounded-full bg-gradient-to-r from-sky-400 via-cyan-400 to-sky-500 transition-all duration-1000 ease-out"
                         style={{ width: `${Math.min(tierProgress, 100)}%` }}
                       />
                     </div>
@@ -367,8 +367,8 @@ export default function LiriosWalletPageClient() {
         </div>
 
         {/* ─── Tier info (right column, row 1) ─── */}
-        <div className="bg-gradient-to-br from-white to-teal-50/30 dark:from-[var(--bg-card)] dark:to-teal-950/20 rounded-3xl border border-teal-200/40 dark:border-teal-800/20 p-5 shadow-lg">
-          <h3 className="text-sm font-bold text-teal-700 dark:text-teal-400 uppercase tracking-wide mb-3 flex items-center gap-2">
+        <div className="bg-gradient-to-br from-white to-sky-50/30 dark:from-[var(--bg-card)] dark:to-emerald-950/20 rounded-3xl border border-sky-200/40 dark:border-emerald-800/20 p-5 shadow-lg">
+          <h3 className="text-sm font-bold text-sky-700 dark:text-emerald-400 uppercase tracking-wide mb-3 flex items-center gap-2">
             <Sparkles className="w-4 h-4" />
             Tu progreso
           </h3>
@@ -381,9 +381,9 @@ export default function LiriosWalletPageClient() {
                   key={t.label}
                   className={`flex items-center justify-between p-2.5 rounded-2xl transition-all ${
                     unlocked
-                      ? 'bg-gradient-to-r from-teal-600 to-teal-800/50 dark:from-teal-700 dark:to-transparent text-white'
+                      ? 'bg-gradient-to-r from-sky-600 to-sky-800/50 dark:from-emerald-700 dark:to-transparent text-white'
                       : 'bg-[var(--bg-muted)] opacity-50'
-                  } ${isCurrent ? 'ring-2 ring-teal-400/50 dark:ring-teal-500/30' : ''}`}
+                  } ${isCurrent ? 'ring-2 ring-sky-400/50 dark:ring-emerald-500/30' : ''}`}
                 >
                   <div className="flex items-center gap-2.5">
                     <Trophy className="w-4 h-4" />
@@ -401,23 +401,23 @@ export default function LiriosWalletPageClient() {
         </div>
 
         {/* ─── Quick info (row 2, col 1) ─── */}
-        <div className="bg-gradient-to-br from-white to-cyan-50/50 dark:from-[var(--bg-card)] dark:to-cyan-950/20 rounded-3xl border border-cyan-200/40 dark:border-cyan-800/20 p-5 shadow-lg">
-          <h3 className="text-sm font-bold text-cyan-600 dark:text-cyan-400 uppercase tracking-wide mb-3 flex items-center gap-2">
+        <div className="bg-gradient-to-br from-white to-sky-50/50 dark:from-[var(--bg-card)] dark:to-emerald-950/20 rounded-3xl border border-sky-200/40 dark:border-emerald-800/20 p-5 shadow-lg">
+          <h3 className="text-sm font-bold text-sky-600 dark:text-emerald-400 uppercase tracking-wide mb-3 flex items-center gap-2">
             <Sparkles className="w-4 h-4" />
             Información rápida
           </h3>
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-xs text-gray-600 dark:text-[var(--text-muted)]">Tasa de conversión</span>
-              <span className="text-sm font-bold text-teal-600 dark:text-teal-400">1 Lirio = S/ 1</span>
+              <span className="text-sm font-bold text-sky-600 dark:text-emerald-400">1 Lirio = S/ 1</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-xs text-gray-600 dark:text-[var(--text-muted)]">Descuento máximo</span>
-              <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">3% del total</span>
+              <span className="text-sm font-bold text-sky-600 dark:text-emerald-400">3% del total</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-xs text-gray-600 dark:text-[var(--text-muted)]">Mínimo recomendado</span>
-              <span className="text-sm font-bold text-cyan-600 dark:text-cyan-400">S/ 2.00</span>
+              <span className="text-sm font-bold text-sky-600 dark:text-emerald-400">S/ 2.00</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-xs text-gray-600 dark:text-[var(--text-muted)]">Nivel actual</span>
@@ -429,47 +429,47 @@ export default function LiriosWalletPageClient() {
         </div>
 
         {/* ─── How it works (row 2, col 2) ─── */}
-        <div className="bg-gradient-to-br from-teal-50 to-emerald-50 dark:from-teal-950/30 dark:to-emerald-950/30 rounded-3xl border-2 border-teal-300/40 dark:border-teal-700/20 p-5 shadow-lg">
-          <h3 className="text-xs font-bold text-teal-800 dark:text-teal-300 uppercase tracking-wide mb-3 flex items-center gap-2">
+        <div className="bg-gradient-to-br from-sky-50 to-cyan-50 dark:from-emerald-950/30 dark:to-teal-950/30 rounded-3xl border-2 border-sky-300/40 dark:border-emerald-700/20 p-5 shadow-lg">
+          <h3 className="text-xs font-bold text-sky-800 dark:text-emerald-300 uppercase tracking-wide mb-3 flex items-center gap-2">
             <Leaf className="w-4 h-4" />
             ¿Cómo funciona?
           </h3>
-          <ul className="space-y-2.5 text-xs text-teal-700 dark:text-teal-300/90 leading-relaxed">
+          <ul className="space-y-2.5 text-xs text-sky-700 dark:text-emerald-300/90 leading-relaxed">
             <li className="flex items-start gap-2">
-              <span className="text-teal-500 dark:text-teal-400 mt-0.5 shrink-0">●</span>
+              <span className="text-sky-500 dark:text-emerald-400 mt-0.5 shrink-0">●</span>
               <span>1 Lirio = S/ 1.00 gastado en la plataforma</span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="text-teal-500 dark:text-teal-400 mt-0.5 shrink-0">●</span>
+              <span className="text-sky-500 dark:text-emerald-400 mt-0.5 shrink-0">●</span>
               <span>Úsalos como descuento en tu próximo checkout</span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="text-teal-500 dark:text-teal-400 mt-0.5 shrink-0">●</span>
+              <span className="text-sky-500 dark:text-emerald-400 mt-0.5 shrink-0">●</span>
               <span>Descuento máximo: {tier.discount} del valor venta (sin IGV)</span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="text-teal-500 dark:text-teal-400 mt-0.5 shrink-0">●</span>
+              <span className="text-sky-500 dark:text-emerald-400 mt-0.5 shrink-0">●</span>
               <span>Se acreditan automáticamente tras cada compra pagada</span>
             </li>
           </ul>
         </div>
 
         {/* ─── Minigame (row 2, col 3) ─── */}
-        <div className="bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-950/40 dark:to-teal-950/40 rounded-3xl border-2 border-emerald-300/40 dark:border-emerald-700/30 p-5 shadow-lg">
-          <h3 className="text-xs font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wide mb-3 flex items-center justify-center gap-2">
+        <div className="bg-gradient-to-br from-sky-100 to-cyan-100 dark:from-emerald-950/40 dark:to-teal-950/40 rounded-3xl border-2 border-sky-300/40 dark:border-emerald-700/30 p-5 shadow-lg">
+          <h3 className="text-xs font-bold text-sky-800 dark:text-emerald-300 uppercase tracking-wide mb-3 flex items-center justify-center gap-2">
             <Sparkles className="w-4 h-4" />
             Minijuego
           </h3>
-          <p className="text-xs text-emerald-700 dark:text-emerald-300/80 mb-4 leading-relaxed text-center">
+          <p className="text-xs text-sky-700 dark:text-emerald-300/80 mb-4 leading-relaxed text-center">
             ¿Podrás vencer a la IA en el Tres en Raya?
           </p>
-          <p className="text-[10px] text-emerald-600 dark:text-emerald-400/80 mb-5 text-center font-medium">
+          <p className="text-[10px] text-sky-600 dark:text-emerald-400/80 mb-5 text-center font-medium">
             💎 Modo difícil: gana <span className="font-bold">+2 Lirios</span> por día
           </p>
           <div className="flex justify-center">
             <button
               onClick={() => setGameOpen(true)}
-              className="px-5 py-1.5 rounded-xl bg-emerald-500 dark:bg-emerald-600 text-white text-sm font-bold hover:bg-emerald-600 dark:hover:bg-emerald-700 transition active:scale-[0.98] flex items-center justify-center gap-2"
+              className="px-5 py-1.5 rounded-xl bg-sky-500 dark:bg-emerald-600 text-white text-sm font-bold hover:bg-sky-600 dark:hover:bg-emerald-700 transition active:scale-[0.98] flex items-center justify-center gap-2"
             >
               <Sparkles className="w-4 h-4" /> Jugar ahora
             </button>
@@ -478,8 +478,8 @@ export default function LiriosWalletPageClient() {
       </div>
 
       {rewardToast && (
-        <div className="fixed top-4 right-4 z-[110] animate-fade-slide-in bg-emerald-100 dark:bg-emerald-900/60 border border-emerald-300 dark:border-emerald-700 text-emerald-800 dark:text-emerald-200 px-4 py-3 rounded-2xl shadow-xl flex items-center gap-2 text-sm font-bold">
-          <Coins className="w-5 h-5 text-emerald-500" />
+        <div className="fixed top-4 right-4 z-[110] animate-fade-slide-in bg-sky-100 dark:bg-emerald-900/60 border border-sky-300 dark:border-emerald-700 text-sky-800 dark:text-emerald-200 px-4 py-3 rounded-2xl shadow-xl flex items-center gap-2 text-sm font-bold">
+          <Coins className="w-5 h-5 text-sky-500 dark:text-emerald-400" />
           ¡Has ganado 2 Lirios!
         </div>
       )}
@@ -487,10 +487,10 @@ export default function LiriosWalletPageClient() {
 
       {/* ─── Transaction History ─── */}
       <div className="bg-white/80 dark:bg-[var(--bg-card)] backdrop-blur-xl rounded-3xl border border-gray-200/50 dark:border-[var(--border-subtle)] overflow-hidden shadow-xl">
-        <div className="px-5 py-4 border-b border-gray-200/70 dark:border-[var(--border-subtle)] bg-gradient-to-r from-cyan-50 to-teal-50 dark:from-cyan-950/30 dark:to-teal-950/30">
+        <div className="px-5 py-4 border-b border-gray-200/70 dark:border-[var(--border-subtle)] bg-gradient-to-r from-sky-50 to-cyan-50 dark:from-emerald-950/30 dark:to-teal-950/30">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-teal-500 flex items-center justify-center shadow-lg shadow-teal-500/30">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-sky-500/30">
                 <History className="w-5 h-5 text-white" />
               </div>
               <h2 className="text-lg font-bold text-gray-800 dark:text-[var(--text-primary)]">
@@ -513,8 +513,8 @@ export default function LiriosWalletPageClient() {
                   onClick={() => setFilterTab(tab)}
                   className={`px-3.5 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
                     filterTab === tab
-                      ? 'bg-white dark:bg-[var(--bg-secondary)] text-teal-700 dark:text-teal-300 shadow-sm border border-teal-200 dark:border-teal-800/50'
-                      : 'text-gray-500 dark:text-[var(--text-muted)] hover:text-teal-600 dark:hover:text-teal-400 hover:bg-white/50 dark:hover:bg-[var(--bg-muted)]'
+                      ? 'bg-white dark:bg-[var(--bg-secondary)] text-sky-700 dark:text-emerald-300 shadow-sm border border-sky-200 dark:border-emerald-800/50'
+                      : 'text-gray-500 dark:text-[var(--text-muted)] hover:text-sky-600 dark:hover:text-emerald-400 hover:bg-white/50 dark:hover:bg-[var(--bg-muted)]'
                   }`}
                 >
                   {tab === 'all' ? 'Todos' : tab === 'accrue' ? 'Ganados' : 'Canjeados'}
@@ -561,7 +561,7 @@ export default function LiriosWalletPageClient() {
               {filteredTxs.map((tx, idx) => (
                 <div
                   key={tx.id}
-                  className="px-5 py-3.5 transition-all duration-300 hover:bg-gradient-to-r hover:from-cyan-50/50 hover:to-teal-50/50 dark:hover:from-cyan-950/20 dark:hover:to-teal-950/20 hover:pl-7"
+                  className="px-5 py-3.5 transition-all duration-300 hover:bg-gradient-to-r hover:from-sky-50/50 hover:to-cyan-50/50 dark:hover:from-emerald-950/20 dark:hover:to-teal-950/20 hover:pl-7"
                   style={{
                     animation: `fadeSlideUp 0.4s ease-out forwards`,
                     animationDelay: `${idx * 40}ms`,
@@ -573,14 +573,14 @@ export default function LiriosWalletPageClient() {
                       <div
                         className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 shadow-lg transition-transform duration-300 group-hover/card:scale-110 ${
                           tx.type === 'accrue'
-                            ? 'bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900/40 dark:to-teal-900/40 shadow-emerald-200/50 dark:shadow-emerald-900/20'
-                            : 'bg-gradient-to-br from-sky-100 to-cyan-100 dark:from-sky-900/40 dark:to-cyan-900/40 shadow-sky-200/50 dark:shadow-sky-900/20'
+                            ? 'bg-gradient-to-br from-sky-100 to-cyan-100 dark:from-emerald-900/40 dark:to-teal-900/40 shadow-sky-200/50 dark:shadow-emerald-900/20'
+                            : 'bg-gradient-to-br from-sky-100 to-cyan-100 dark:from-emerald-900/40 dark:to-teal-900/40 shadow-sky-200/50 dark:shadow-emerald-900/20'
                         }`}
                       >
                         {tx.type === 'accrue' ? (
-                          <ArrowDownLeft className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                          <ArrowDownLeft className="w-4 h-4 text-sky-600 dark:text-emerald-400" />
                         ) : (
-                          <ArrowUpRight className="w-4 h-4 text-sky-600 dark:text-sky-400" />
+                          <ArrowUpRight className="w-4 h-4 text-sky-600 dark:text-emerald-400" />
                         )}
                       </div>
                       <div>
@@ -603,8 +603,8 @@ export default function LiriosWalletPageClient() {
                       <span
                         className={`text-lg font-black ${
                           tx.type === 'accrue'
-                            ? 'text-emerald-600 dark:text-emerald-400'
-                            : 'text-sky-600 dark:text-sky-400'
+                            ? 'text-sky-600 dark:text-emerald-400'
+                            : 'text-sky-600 dark:text-emerald-400'
                         }`}
                       >
                         {tx.type === 'accrue' ? '+' : '-'}

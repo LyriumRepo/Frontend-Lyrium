@@ -249,8 +249,8 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
                                 type="button"
                                 onClick={() => handleUserTypeChange('vendedor')}
                                 className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${userType === 'vendedor'
-                                        ? 'bg-sky-500 text-white shadow-md'
-                                        : 'text-slate-600 dark:text-[var(--text-secondary)] hover:text-sky-500'
+                                    ? 'bg-sky-500 text-white shadow-md'
+                                    : 'text-slate-600 dark:text-[var(--text-secondary)] hover:text-sky-500'
                                     }`}
                             >
                                 Soy vendedor
@@ -259,8 +259,8 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
                                 type="button"
                                 onClick={() => handleUserTypeChange('cliente')}
                                 className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${userType === 'cliente'
-                                        ? 'bg-sky-500 text-white shadow-md'
-                                        : 'text-slate-600 dark:text-[var(--text-secondary)] hover:text-sky-500'
+                                    ? 'bg-sky-500 text-white shadow-md'
+                                    : 'text-slate-600 dark:text-[var(--text-secondary)] hover:text-sky-500'
                                     }`}
                             >
                                 Soy cliente
@@ -268,7 +268,7 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
                         </div>
                     </div>
 
-                            {/* Login Form */}
+                    {/* Login Form */}
                     <div className={`flex flex-col h-full ${isRegisterMode ? 'opacity-0 hidden' : 'opacity-100'}`}>
                         <div className="flex-1 w-[90%] mx-auto">
                             <div className="flex items-center gap-6 mb-8">
@@ -288,15 +288,15 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
                             </div>
 
                             {/* Error/Success Messages - Accessible */}
-                            <div 
-                                role="alert" 
+                            <div
+                                role="alert"
                                 aria-live="polite"
                                 className={`error-message ${formError || error ? 'block' : 'hidden'}`}
                             >
                                 {formError || error}
                             </div>
-                            <div 
-                                role="status" 
+                            <div
+                                role="status"
                                 aria-live="polite"
                                 className={`success-message ${formSuccess ? 'block' : 'hidden'}`}
                             >
@@ -306,7 +306,7 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
                             <form onSubmit={handleLoginSubmit} className="space-y-5" noValidate>
                                 <div>
                                     <label htmlFor="login-email" className="block text-sm font-semibold text-slate-700 dark:text-[var(--text-primary)] mb-2">
-                                        Usuario / Nombre de Tienda <span className="text-red-500">*</span>
+                                        Usuario <span className="text-red-500">*</span>
                                     </label>
                                     <div className="relative">
                                         <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" aria-hidden="true" />
@@ -316,11 +316,11 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
                                             name="username"
                                             value={loginData.username}
                                             onChange={(e) => handleInputChange(e, 'login')}
-                                            placeholder={userType === 'vendedor' ? 'Nombre de tu tienda o admin' : 'tu@email.com'}
+                                            placeholder={userType === 'vendedor' ? 'o admin' : 'tu@email.com'}
                                             autoComplete="username"
                                             required
                                             aria-required="true"
-                                            aria-label={userType === 'vendedor' ? 'Nombre de tienda o usuario' : 'Correo electrónico'}
+                                            aria-label={userType === 'vendedor' ? 'o usuario' : 'Correo electrónico'}
                                             className="w-full py-3.5 pl-12 pr-4 border-2 border-slate-200 dark:border-[var(--border-subtle)] rounded-xl text-sm text-slate-700 dark:text-[var(--text-primary)] bg-slate-50 dark:bg-[var(--bg-primary)] focus:outline-none focus:border-sky-500 focus:bg-white dark:focus:bg-[var(--bg-secondary)] focus:shadow-[0_0_0_4px_rgba(66,153,225,0.1)] transition-all duration-300"
                                         />
                                     </div>
@@ -409,15 +409,15 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
                             </div>
 
                             {/* Error/Success Messages - Accessible */}
-                            <div 
-                                role="alert" 
+                            <div
+                                role="alert"
                                 aria-live="polite"
                                 className={`error-message ${formError ? 'block' : 'hidden'}`}
                             >
                                 {formError}
                             </div>
-                            <div 
-                                role="status" 
+                            <div
+                                role="status"
                                 aria-live="polite"
                                 className={`success-message ${formSuccess ? 'block' : 'hidden'}`}
                             >

@@ -26,16 +26,21 @@ export default function ProductsGrid({ categorias, titulo = 'Categorías de prod
   }));
   const [current, setCurrent] = useState(0);
   const [itemsPerView, setItemsPerView] = useState(2);
+  const [isMounted, setIsMounted] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
+  const totalPages = Math.max(1, Math.ceil(displayCategories.length / itemsPerView));
+  const targetItemIndex = Math.min(current * itemsPerView, Math.max(0, displayCategories.length - itemsPerView));
+
   useEffect(() => {
+    setIsMounted(true);
     const update = () => {
-      if (window.innerWidth < 640) setItemsPerView(2);
-      else if (window.innerWidth < 1024) setItemsPerView(3);
+      if (window.innerWidth < 480) setItemsPerView(2);
+      else if (window.innerWidth < 768) setItemsPerView(3);
       else if (window.innerWidth < 1280) setItemsPerView(4);
       else setItemsPerView(5);
     };
@@ -44,11 +49,13 @@ export default function ProductsGrid({ categorias, titulo = 'Categorías de prod
     return () => window.removeEventListener('resize', update);
   }, []);
 
-  const maxIndex = Math.max(0, displayCategories.length - itemsPerView);
+  useEffect(() => {
+    setCurrent((c) => Math.min(c, Math.max(0, totalPages - 1)));
+  }, [itemsPerView, totalPages]);
 
   const goToNext = useCallback(() => {
-    setCurrent((c) => (c >= maxIndex ? 0 : c + 1));
-  }, [maxIndex]);
+    setCurrent((c) => (c >= totalPages - 1 ? 0 : c + 1));
+  }, [totalPages]);
 
   useEffect(() => {
     if (isPaused || isDragging || displayCategories.length <= 1) return;
@@ -71,7 +78,7 @@ export default function ProductsGrid({ categorias, titulo = 'Categorías de prod
       if (diff > 0) {
         setCurrent((c) => Math.max(0, c - 1));
       } else {
-        setCurrent((c) => (c >= maxIndex ? 0 : c + 1));
+        setCurrent((c) => (c >= totalPages - 1 ? 0 : c + 1));
       }
       setIsDragging(false);
     }
@@ -89,7 +96,7 @@ export default function ProductsGrid({ categorias, titulo = 'Categorías de prod
     >
       <h2 className="text-xl md:text-2xl font-semibold text-gray-900 dark:text-white">{titulo}</h2>
 
-            <div 
+      <div 
         ref={containerRef}
         className="relative overflow-hidden cursor-grab active:cursor-grabbing"
         onMouseDown={handleMouseDown}
@@ -99,11 +106,11 @@ export default function ProductsGrid({ categorias, titulo = 'Categorías de prod
       >
         <div 
           className="flex transition-transform duration-700 gap-4"
-          style={{
-            // Cada paso = ancho de item + gap. Con gap-4 (1rem) y items de
-            // (100% - (n-1)·1rem)/n, el paso exacto es (100% + 1rem)/n.
-            transform: `translateX(calc(-${current} * ((100% + 1rem) / ${itemsPerView})))`,
-          }}
+          style={
+            isMounted
+              ? { transform: `translateX(calc(-1 * ${targetItemIndex} * (100% + 1rem) / ${itemsPerView}))` }
+              : {}
+          }
         >
           {displayCategories.map((cat, index) => {
              
@@ -113,9 +120,9 @@ export default function ProductsGrid({ categorias, titulo = 'Categorías de prod
               <Link 
                 key={cat.id} 
                 href={cat.slug ? `/productos/${cat.slug}` : '#'}
-                className="flex-shrink-0 w-[calc(50%-0.5rem)] sm:w-[calc(33.333%-0.66rem)] lg:w-[calc(25%-0.75rem)] xl:w-[calc(20%-0.8rem)]"
+                className="block flex-shrink-0 w-[calc(50%-0.5rem)] min-[480px]:w-[calc(33.333%-0.66rem)] md:w-[calc(25%-0.75rem)] xl:w-[calc(20%-0.8rem)] snap-start"
               >
-                <article className="rounded-[2.5rem] overflow-hidden shadow-md bg-sky-400 dark:bg-[var(--bg-secondary)] group cursor-pointer h-40 md:h-48">
+                <article className="rounded-[2.5rem] overflow-hidden shadow-md bg-sky-400 dark:bg-sky-500 group cursor-pointer h-40 md:h-48">
                   <Image
                     src={localImage}
                     alt={cat.nombre}

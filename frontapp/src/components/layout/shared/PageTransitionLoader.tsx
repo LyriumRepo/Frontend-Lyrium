@@ -36,14 +36,14 @@ export function PageTransitionLoader() {
         backdropFilter: 'blur(6px)',
       }}
     >
-      {/* Hurricane — persists, outside key */}
+      {/* Cloud drift — persists, outside key */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-90 dark:opacity-65" style={{ zIndex: -1 }}>
         <div className="relative w-[200px] h-[200px] md:w-[230px] md:h-[230px] flex items-center justify-center">
           {/* Layer 1: inner cloud bands (forward) */}
           <svg
             viewBox="0 0 200 200"
             className="absolute inset-0 w-full h-full"
-            style={{ animation: 'spin-slow 7s linear infinite' }}
+            style={{ animation: 'cloud-drift-a 6s ease-in-out infinite' }}
           >
             <defs>
               <filter id="blurCloud">
@@ -54,7 +54,7 @@ export function PageTransitionLoader() {
               </filter>
             </defs>
 
-            {/* Inner bands — 8, rotated 45°, tight spiral near eye */}
+            {/* Inner bands — 8 cloud puffs, fanned 45° apart around the center */}
             {[0,45,90,135,180,225,270,315].map(angle => (
               <g key={angle} transform={`rotate(${angle} 100 100)`}>
                 <path
@@ -79,7 +79,7 @@ export function PageTransitionLoader() {
           <svg
             viewBox="0 0 200 200"
             className="absolute inset-0 w-full h-full scale-110"
-            style={{ animation: 'spin-reverse 14s linear infinite' }}
+            style={{ animation: 'cloud-drift-b 9s ease-in-out infinite' }}
           >
             {/* Outer bands — 5, rotated 72°, wider and more blurred */}
             {[0,72,144,216,288].map(angle => (
@@ -92,7 +92,7 @@ export function PageTransitionLoader() {
             ))}
           </svg>
 
-          {/* Eye of the hurricane */}
+          {/* Soft glow center */}
           <div className="absolute inset-0 rounded-full" style={{ background: 'radial-gradient(circle, rgba(229,231,235,0) 25%, rgba(229,231,235,0.4) 65%)' }} />
         </div>
       </div>

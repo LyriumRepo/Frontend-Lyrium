@@ -11,15 +11,29 @@ interface Slide {
 
 function MedianoSlider({ images }: { images: string[] }) {
   const [current, setCurrent] = useState(0);
-  const maxIndex = Math.max(0, images.length - 2);
+  const [itemsPerView, setItemsPerView] = useState(2);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    if (images.length <= 2) return;
+    setIsMounted(true);
+    const update = () => {
+      if (window.innerWidth < 540) setItemsPerView(1);
+      else setItemsPerView(2);
+    };
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, []);
+
+  const maxIndex = Math.max(0, images.length - itemsPerView);
+
+  useEffect(() => {
+    if (images.length <= itemsPerView) return;
     const timer = setInterval(() => {
       setCurrent((c) => (c >= maxIndex ? 0 : c + 1));
     }, 5000);
     return () => clearInterval(timer);
-  }, [images.length, maxIndex]);
+  }, [images.length, maxIndex, itemsPerView]);
 
   if (!images || images.length === 0) return null;
 
@@ -27,12 +41,16 @@ function MedianoSlider({ images }: { images: string[] }) {
     <div className="relative overflow-hidden px-2">
       <div
         className="flex transition-transform duration-700"
-        style={{ transform: `translateX(-${current * 50}%)` }}
+        style={
+          isMounted
+            ? { transform: `translateX(-${current * (100 / itemsPerView)}%)` }
+            : {}
+        }
       >
         {images.map((img, i) => (
           <div
             key={`${img}-${i}`}
-            className="flex-shrink-0 w-1/2 px-2"
+            className="flex-shrink-0 w-full min-[540px]:w-1/2 snap-start px-2"
           >
             <div className="rounded-[18px] overflow-hidden shadow-md">
               <Image
@@ -46,9 +64,9 @@ function MedianoSlider({ images }: { images: string[] }) {
           </div>
         ))}
       </div>
-      {images.length > 2 && (
+      {images.length > itemsPerView && (
         <div className="flex justify-center gap-2 mt-3">
-          {Array.from({ length: images.length - 1 }).map((_, i) => (
+          {Array.from({ length: images.length - itemsPerView + 1 }).map((_, i) => (
             <button
               key={i}
               onClick={() => setCurrent(i)}
@@ -66,15 +84,29 @@ function MedianoSlider({ images }: { images: string[] }) {
 
 function PequenoSlider({ images }: { images: string[] }) {
   const [current, setCurrent] = useState(0);
-  const maxIndex = Math.max(0, images.length - 3);
+  const [itemsPerView, setItemsPerView] = useState(3);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    if (images.length <= 3) return;
+    setIsMounted(true);
+    const update = () => {
+      if (window.innerWidth < 540) setItemsPerView(1);
+      else setItemsPerView(3);
+    };
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, []);
+
+  const maxIndex = Math.max(0, images.length - itemsPerView);
+
+  useEffect(() => {
+    if (images.length <= itemsPerView) return;
     const timer = setInterval(() => {
       setCurrent((c) => (c >= maxIndex ? 0 : c + 1));
     }, 5000);
     return () => clearInterval(timer);
-  }, [images.length, maxIndex]);
+  }, [images.length, maxIndex, itemsPerView]);
 
   if (!images || images.length === 0) return null;
 
@@ -82,12 +114,16 @@ function PequenoSlider({ images }: { images: string[] }) {
     <div className="relative overflow-hidden px-2">
       <div
         className="flex transition-transform duration-700"
-        style={{ transform: `translateX(-${current * 33.333333}%)` }}
+        style={
+          isMounted
+            ? { transform: `translateX(-${current * (100 / itemsPerView)}%)` }
+            : {}
+        }
       >
         {images.map((img, i) => (
           <div
             key={`${img}-${i}`}
-            className="flex-shrink-0 w-1/3 px-2"
+            className="flex-shrink-0 w-full min-[540px]:w-1/3 snap-start px-2"
           >
             <div className="rounded-[18px] overflow-hidden shadow-md">
               <Image
@@ -101,9 +137,9 @@ function PequenoSlider({ images }: { images: string[] }) {
           </div>
         ))}
       </div>
-      {images.length > 3 && (
+      {images.length > itemsPerView && (
         <div className="flex justify-center gap-2 mt-3">
-          {Array.from({ length: images.length - 2 }).map((_, i) => (
+          {Array.from({ length: images.length - itemsPerView + 1 }).map((_, i) => (
             <button
               key={i}
               onClick={() => setCurrent(i)}
@@ -154,8 +190,10 @@ export default function AdBanners({ bannersPub }: AdBannersProps) {
 
   return (
     <section className="mt-10 w-full overflow-hidden flex flex-col items-center">
-      <div className="w-full max-w-[1600px] px-4 md:px-8 space-y-6">
+      <div className="w-full max-w-[1440px] mx-auto px-4 md:px-8 mb-6">
         <h2 className="text-xl md:text-2xl font-semibold text-gray-900 dark:text-white">Banners publicitarios</h2>
+      </div>
+      <div className="w-[1600px] max-w-full px-4 md:px-8 space-y-6">
         <MedianoSlider images={medianos1} /> 
         <PequenoSlider images={pequenos1} />
         <MedianoSlider images={medianos2} />  

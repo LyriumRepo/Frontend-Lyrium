@@ -9,6 +9,7 @@ const FinanceChart = dynamic<FinanceChartProps>(
   { ssr: false }
 );
 import CardProxPago from './components/CardProxPago';
+import MetaIngresosCard from './components/MetaIngresosCard';
 import FinancialBreakdownCard from './components/FinancialBreakdownCard';
 import ComprobantesSection from './components/ComprobantesSection';
 import KpiDetailModal, { getKpiDetail } from './components/KpiDetailModal';
@@ -233,6 +234,8 @@ export function FinancePageClient() {
             </div>
 
             <FinancialBreakdownCard data={data.desgloseFinanciero} />
+
+            <MetaIngresosCard data={data.metaIngresos} formatCurrency={formatCurrency} />
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 stagger-grid">
               {/* Tarjeta multi-serie: Brutos + Netos + Reales */}

@@ -78,29 +78,20 @@ export default function DesktopNav({ menuItems, megaMenuData }: DesktopNavProps)
         setActiveMenu(null);
     };
 
-    const handleMenuToggleTap = (label: string, children?: MenuItem[]) => {
-        if (activeMenu === label) {
-            setActiveMenu(null);
-            return;
-        }
-        handleMenuEnter(label, children);
-    };
-
     return (
         <div className="border-t border-gray-200 dark:border-[var(--border-subtle)]">
-            <nav className="max-w-7xl mx-auto px-4 py-2 flex items-center justify-start lg:justify-center gap-4 lg:gap-6 text-[13px] font-medium text-slate-700 dark:text-[var(--text-secondary)] tracking-tight overflow-x-auto no-scrollbar">
+            <nav className="max-w-7xl mx-auto px-4 py-2 hidden lg:flex items-center justify-center gap-6 text-[13px] font-medium text-slate-700 dark:text-[var(--text-secondary)] tracking-tight">
                 {menuItems.map((item) => {
                     const iconName = item.icon ? iconNameMap[item.icon] : null;
 
                     return (
-                        <div key={item.label} className="relative shrink-0">
+                        <div key={item.label} className="relative">
                             {item.children ? (
                                 <button
                                     ref={(el) => { menuRefs.current[item.label] = el; }}
                                     type="button"
                                     onMouseEnter={() => handleMenuEnter(item.label, item.children)}
                                     onMouseLeave={startCloseTimer}
-                                    onClick={() => handleMenuToggleTap(item.label, item.children)}
                                     className={`flex items-center gap-1 hover:text-sky-500 dark:hover:text-[var(--color-success)] transition whitespace-nowrap ${activeMenu === item.label ? 'text-sky-500 dark:text-[var(--color-success)]' : ''
                                         }`}
                                 >
