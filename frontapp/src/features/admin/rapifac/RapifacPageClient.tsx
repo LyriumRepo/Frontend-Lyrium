@@ -93,7 +93,7 @@ function DetailModal({ inv, isOpen, onClose }: { inv: AdminInvoiceRow | null; is
 
                 {hasItems ? (
                     <div className="bg-gradient-to-br from-teal-50/50 to-cyan-50/50 dark:from-teal-500/3 dark:to-cyan-500/3 rounded-2xl border border-teal-100/30 dark:border-teal-500/10 overflow-hidden overflow-x-auto">
-                        <table className="w-full text-left min-w-[400px]">
+                        <table className="w-full text-left">
                             <thead>
                                 <tr className="bg-teal-500/5 dark:bg-teal-500/5">
                                     <th className="px-5 py-3 text-[9px] font-black text-teal-600 dark:text-teal-400 uppercase tracking-widest">Producto</th>

@@ -19,15 +19,22 @@ import {
 import { termsData, termsConfigs } from '@/shared/lib/constants/termsData';
 import { manualSections } from '@/shared/lib/constants/manualData';
 import { sanitizeHtml } from '@/shared/lib/sanitize';
+import TriviaWidget from '@/features/public/terminoscondiciones/TriviaWidget';
 
 export default function TermsAndConditionsPage() {
     const [mode, setMode] = useState<'cliente' | 'vendedor' | 'manual'>('cliente');
+
+    useEffect(() => {
+        const hash = window.location.hash.replace('#', '');
+        if (hash === 'manual' || hash === 'vendedor') {
+            setMode(hash as 'manual' | 'vendedor');
+        }
+    }, []);
     const [activeSection, setActiveSection] = useState<string>('');
     const [isPopupOpen, setIsPopupOpen] = useState(false);
     const [isShareModalOpen, setIsShareModalOpen] = useState(false);
     const [isBtnMini, setIsBtnMini] = useState(false);
     const [isCopied, setIsCopied] = useState(false);
-    const [mounted, setMounted] = useState(false);
 
     const sectionRefs = useRef<{ [key: string]: HTMLElement | null }>({});
 
@@ -36,8 +43,9 @@ export default function TermsAndConditionsPage() {
         ? { subtitle: 'MANUAL DE EMPAQUETADO — SALUD EN CADA PEDIDO', pdfLabel: 'Descargar PDF Manual', pdfHref: '/pdf/manual-empaquetado.pdf', pdfName: 'manual-empaquetado.pdf' }
         : termsConfigs[mode];
 
+    const isBrowser = typeof window !== 'undefined';
+
     useEffect(() => {
-        setMounted(true);
         // 1. Intersection Observer para resaltar el índice
         const observerOptions = {
             root: null,
@@ -110,6 +118,35 @@ export default function TermsAndConditionsPage() {
 
     return (
         <main className="max-w-7xl mx-auto px-4 py-8 md:py-16 space-y-12 relative animate-in">
+            <style>{`
+              .terms-content table th,
+              .terms-content table td {
+                border-color: #555 !important;
+                border-width: 1px !important;
+                border-style: solid !important;
+              }
+              .terms-content .bg-green-50,
+              .terms-content .bg-red-50,
+              .terms-content .bg-yellow-50 {
+                background-color: #f0f0f0 !important;
+              }
+              .terms-content .border-green-400,
+              .terms-content .border-red-400,
+              .terms-content .border-yellow-400 {
+                border-left-color: #999 !important;
+              }
+              .terms-content .text-green-800,
+              .terms-content .text-green-700,
+              .terms-content .text-red-800,
+              .terms-content .text-red-700,
+              .terms-content .text-yellow-800,
+              .terms-content .text-yellow-700 {
+                color: #222 !important;
+              }
+              .terms-content td {
+                color: #000 !important;
+              }
+            `}</style>
 
             {/* ===================== HEADER SECTION ===================== */}
             <section className="text-center space-y-6">
@@ -200,6 +237,7 @@ export default function TermsAndConditionsPage() {
                             </button>
                         ))}
                     </nav>
+                    <TriviaWidget />
                 </aside>
 
                 {/* ===================== CONTENT CARD ===================== */}
@@ -238,6 +276,11 @@ export default function TermsAndConditionsPage() {
                         )}
                     </div>
                 </section>
+            </div>
+
+            {/* ===================== TRIVIA MOBILE ===================== */}
+            <div className="lg:hidden max-w-md mx-auto">
+                <TriviaWidget />
             </div>
 
             {/* ===================== MOBILE INDEX POPUP ===================== */}
@@ -313,7 +356,7 @@ export default function TermsAndConditionsPage() {
 
                         <div className="bg-slate-50 border border-gray-200 rounded-2xl p-4 flex items-center gap-4 group">
                             <div className="flex-1 truncate text-xs font-mono text-gray-400">
-                                {mounted ? `${window.location.origin}${window.location.pathname}#${mode}` : ''}
+                                {isBrowser ? `${window.location.origin}${window.location.pathname}#${mode}` : ''}
                             </div>
                             <button onClick={handleCopyLink} className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black uppercase transition-all duration-300
                 ${isCopied ? 'bg-green-500 text-white' : 'bg-sky-500 text-white hover:bg-sky-600 shadow-lg shadow-sky-100'}`}>

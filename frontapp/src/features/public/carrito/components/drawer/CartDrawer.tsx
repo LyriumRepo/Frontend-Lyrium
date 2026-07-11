@@ -21,6 +21,7 @@ import {
   Calendar,
 } from 'lucide-react';
 import { useCarritoStore } from '@/store/carritoStore';
+import { useFocusTrap } from '@/shared/hooks/useFocusTrap';
 import { cartApi } from '@/shared/lib/api/cartRepository';
 import { serviceRepository } from '@/shared/lib/api/serviRepository';
 import type { CartItem, CartResource } from '@/shared/lib/api/cartRepository';
@@ -346,6 +347,8 @@ export default function CartDrawer() {
 
   const { goToCheckout } = useCheckoutGuard();
 
+  const drawerRef = useFocusTrap<HTMLElement>(ui.cartOpen, closeCart);
+
   const loadCart = useCallback(async () => {
     setFetchLoading(true);
     setError(null);
@@ -502,9 +505,11 @@ export default function CartDrawer() {
 
       {/* Drawer — flex column, altura fija = pantalla */}
       <aside
+        ref={drawerRef}
         role="dialog"
         aria-modal="true"
         aria-label="Carrito de compras"
+        tabIndex={-1}
         className={`fixed inset-y-0 right-0 z-50 flex flex-col w-full max-w-[400px] shadow-2xl transition-transform duration-300 ease-in-out ${
           ui.cartOpen ? 'translate-x-0' : 'translate-x-full'
         }`}

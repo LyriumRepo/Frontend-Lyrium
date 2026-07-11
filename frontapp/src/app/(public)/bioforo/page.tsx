@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import HeroPill from '@/components/layout/public/HeroPill';
@@ -14,6 +14,49 @@ function SafeImage({ src, alt, ...props }: { src: string; alt: string; [key: str
   return <Image {...props} src={src} alt={alt} onError={() => setErrored(true)} />;
 }
 
+const GRADIENTS = [
+  'from-emerald-500 to-teal-600',
+  'from-sky-500 to-cyan-600',
+  'from-violet-500 to-purple-600',
+  'from-rose-500 to-pink-600',
+  'from-amber-500 to-orange-600',
+  'from-lime-500 to-green-600',
+  'from-blue-500 to-indigo-600',
+  'from-teal-500 to-emerald-600',
+  'from-fuchsia-500 to-violet-600',
+  'from-cyan-500 to-blue-600',
+];
+
+function topicGradient(id: number): string {
+  return GRADIENTS[id % GRADIENTS.length];
+}
+
+function topicPlaceholderGradient(id: number): string {
+  const gradients = [
+    ['#059669', '#0d9488'],
+    ['#0284c7', '#0891b2'],
+    ['#7c3aed', '#9333ea'],
+    ['#e11d48', '#db2777'],
+    ['#d97706', '#ea580c'],
+    ['#65a30d', '#4d7c0f'],
+    ['#2563eb', '#4338ca'],
+    ['#0d9488', '#059669'],
+    ['#d946ef', '#7c3aed'],
+    ['#06b6d4', '#0284c7'],
+  ];
+  const [c1, c2] = gradients[id % gradients.length];
+  return `linear-gradient(135deg, ${c1} 0%, ${c2} 100%)`;
+}
+
+type SortMode = 'recent' | 'commented' | 'viewed' | 'reactions';
+
+const SORT_OPTIONS: { value: SortMode; label: string }[] = [
+  { value: 'recent', label: 'M\u00e1s recientes' },
+  { value: 'commented', label: 'M\u00e1s comentados' },
+  { value: 'viewed', label: 'M\u00e1s vistos' },
+  { value: 'reactions', label: 'M\u00e1s reacciones' },
+];
+
 export default function BioForoPage() {
   const [forums, setForums] = useState<ForumCategory[]>([]);
   const [topics, setTopics] = useState<ForumTopic[]>([]);
@@ -22,25 +65,29 @@ export default function BioForoPage() {
   const [selectedForum, setSelectedForum] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [showDropdown, setShowDropdown] = useState(false);
-  const [stats, setStats] = useState({ totalTopics: 0, totalReplies: 0 });
+  const [sortMode, setSortMode] = useState<SortMode>('recent');
+  const [stats, setStats] = useState({ totalTopics: 0, totalReplies: 0, onlineUsers: 0 });
+
+  useEffect(() => { loadData(); }, [selectedForum]);
 
   useEffect(() => {
-    loadData();
-  }, [selectedForum]);
-
-  useEffect(() => {
-    setStats({
+    setStats(prev => ({
+      ...prev,
       totalTopics: topics.length,
       totalReplies: topics.reduce((acc, t) => acc + (t.reply_count || 0), 0),
-    });
+    }));
   }, [topics]);
+
+  useEffect(() => {
+    forumApi.getStats().then(data => {
+      if (data) setStats(prev => ({ ...prev, onlineUsers: data.onlineUsers ?? 0 }));
+    }).catch(() => {});
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      if (!target.closest('.filtro-dropdown-container')) {
-        setShowDropdown(false);
-      }
+      if (!target.closest('.filtro-dropdown-container')) setShowDropdown(false);
     };
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
@@ -62,8 +109,289 @@ export default function BioForoPage() {
     }
   };
 
+  const sortedTopics = useMemo(() => {
+    const list = [...topics];
+    switch (sortMode) {
+      case 'recent':
+        return list.sort((a, b) => new Date(b.created).getTime() - new Date(a.created).getTime());
+      case 'commented':
+        return list.sort((a, b) => (b.reply_count || 0) - (a.reply_count || 0));
+      case 'viewed':
+        return list.sort((a, b) => (b.views || 0) - (a.views || 0));
+      case 'reactions':
+        return list.sort((a, b) => (b.votes_up || 0) - (a.votes_up || 0));
+      default:
+        return list;
+    }
+  }, [topics, sortMode]);
+
+  const trendingTopics = useMemo(() => {
+    return [...topics]
+      .sort((a, b) => (b.votes_up || 0) - (a.votes_up || 0))
+      .slice(0, 4);
+  }, [topics]);
+
+  const latestTopics = useMemo(() => {
+    return [...topics]
+      .sort((a, b) => new Date(b.created).getTime() - new Date(a.created).getTime())
+      .slice(0, 3);
+  }, [topics]);
+
+  const mostCommented = useMemo(() => {
+    return [...topics]
+      .sort((a, b) => (b.reply_count || 0) - (a.reply_count || 0))
+      .slice(0, 4);
+  }, [topics]);
+
+  const topViewed = useMemo(() => {
+    return [...topics]
+      .sort((a, b) => (b.views || 0) - (a.views || 0))
+      .slice(0, 4);
+  }, [topics]);
+
+  const allFeaturedIds = useMemo(() => {
+    const ids = new Set<number>();
+    trendingTopics.forEach(t => ids.add(t.id));
+    latestTopics.forEach(t => ids.add(t.id));
+    mostCommented.forEach(t => ids.add(t.id));
+    topViewed.forEach(t => ids.add(t.id));
+    return ids;
+  }, [trendingTopics, latestTopics, mostCommented, topViewed]);
+
+  function TopicImg({ topic }: { topic: ForumTopic }) {
+    return (
+      <>
+        {topic.image ? (
+          <img
+            src={topic.image}
+            alt={topic.title}
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            onError={e => { (e.target as HTMLImageElement).style.display = 'none'; (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden'); }}
+          />
+        ) : null}
+        <div
+          className={`absolute inset-0 transition-transform duration-500 group-hover:scale-110 ${topic.image ? 'hidden' : ''}`}
+          style={{ background: topicPlaceholderGradient(topic.id) }}
+        />
+      </>
+    );
+  }
+
+  function TrendingCard({ topic }: { topic: ForumTopic }) {
+    return (
+      <Link href={`/bioforo/${topic.id}`} className="group block bg-white dark:bg-[var(--bg-secondary)] rounded-2xl overflow-hidden border border-slate-100 dark:border-[var(--border-subtle)] shadow-md hover:shadow-2xl transition-all duration-500 hover:-translate-y-1.5">
+        <div className="relative aspect-[4/3] overflow-hidden">
+          <TopicImg topic={topic} />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+          <div className="absolute top-3 left-3 flex gap-2">
+            <span className="px-2.5 py-1 bg-rose-500/90 text-white text-[10px] font-bold rounded-full uppercase tracking-wider shadow-sm flex items-center gap-1">
+              <Icon name="Flame" className="w-3 h-3" />
+              {topic.votes_up || 0}
+            </span>
+            <span className="px-2.5 py-1 bg-white/90 dark:bg-[var(--bg-secondary)]/90 backdrop-blur-sm text-slate-700 dark:text-[var(--text-primary)] text-[10px] font-bold rounded-full uppercase tracking-wider shadow-sm">
+              {topic.forum_name || 'General'}
+            </span>
+          </div>
+          <div className="absolute bottom-0 left-0 right-0 p-4 md:p-5">
+            <h3 className="text-white font-bold text-sm md:text-base leading-tight drop-shadow-lg line-clamp-2">
+              {topic.title}
+            </h3>
+            <div className="flex items-center gap-3 mt-2 text-white/80 text-[10px]">
+              <span>{topic.author_name || 'Anónimo'}</span>
+              <span>•</span>
+              <span>{formatDate(topic.created)}</span>
+            </div>
+          </div>
+        </div>
+      </Link>
+    );
+  }
+
+  function LatestCard({ topic }: { topic: ForumTopic }) {
+    return (
+      <Link href={`/bioforo/${topic.id}`} className="group flex gap-4 bg-white dark:bg-[var(--bg-secondary)] rounded-2xl overflow-hidden border border-slate-100 dark:border-[var(--border-subtle)] shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 p-3">
+        <div className="relative w-28 md:w-36 aspect-[4/3] rounded-xl overflow-hidden flex-shrink-0">
+          <TopicImg topic={topic} />
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+        </div>
+        <div className="flex flex-col justify-between min-w-0 flex-1 py-0.5">
+          <div>
+            <span className="px-2 py-0.5 bg-sky-100 dark:bg-sky-900/30 text-sky-600 dark:text-sky-400 text-[9px] font-bold rounded-full uppercase tracking-wider">
+              {topic.forum_name || 'General'}
+            </span>
+            <h3 className="text-sm md:text-base font-bold text-slate-800 dark:text-[var(--text-primary)] leading-tight mt-1.5 line-clamp-2 group-hover:text-sky-600 dark:group-hover:text-lime-300 transition-colors">
+              {topic.title}
+            </h3>
+          </div>
+          <div className="flex items-center justify-between mt-2">
+            <div className="flex items-center gap-1.5 text-[10px] text-slate-400 dark:text-[var(--text-muted)]">
+              <Icon name="Clock" className="w-3 h-3" />
+              {formatDate(topic.created)}
+            </div>
+            <div className="flex items-center gap-2 text-[10px] text-slate-400 dark:text-[var(--text-muted)]">
+              <span className="flex items-center gap-1">
+                <Icon name="Heart" className="w-3 h-3" />
+                {topic.votes_up || 0}
+              </span>
+              <span className="flex items-center gap-1">
+                <Icon name="MessageSquare" className="w-3 h-3" />
+                {topic.reply_count || 0}
+              </span>
+            </div>
+          </div>
+        </div>
+      </Link>
+    );
+  }
+
+  function CommentedCard({ topic }: { topic: ForumTopic }) {
+    return (
+      <Link href={`/bioforo/${topic.id}`} className="group block bg-white dark:bg-[var(--bg-secondary)] rounded-2xl overflow-hidden border border-slate-100 dark:border-[var(--border-subtle)] shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+        <div className="relative aspect-[16/9] overflow-hidden">
+          <TopicImg topic={topic} />
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
+          <div className="absolute top-3 left-3">
+            <span className="px-2.5 py-1 bg-white/90 dark:bg-[var(--bg-secondary)]/90 backdrop-blur-sm text-slate-700 dark:text-[var(--text-primary)] text-[10px] font-bold rounded-full uppercase tracking-wider shadow-sm">
+              {topic.forum_name || 'General'}
+            </span>
+          </div>
+          <div className="absolute bottom-3 right-3">
+            <div className="w-12 h-12 rounded-xl bg-white dark:bg-[var(--bg-secondary)] shadow-lg flex flex-col items-center justify-center">
+              <span className="text-base font-black text-sky-600 dark:text-lime-400 leading-none">{topic.reply_count || 0}</span>
+              <span className="text-[7px] text-slate-400 dark:text-[var(--text-muted)] uppercase tracking-wider font-semibold">resp</span>
+            </div>
+          </div>
+        </div>
+        <div className="p-3 md:p-4">
+          <h3 className="text-xs md:text-sm font-bold text-slate-800 dark:text-[var(--text-primary)] leading-snug line-clamp-2 group-hover:text-sky-600 dark:group-hover:text-lime-300 transition-colors">
+            {topic.title}
+          </h3>
+          <div className="flex items-center gap-2 mt-2 text-[10px] text-slate-400 dark:text-[var(--text-muted)]">
+            <span>{getInitial(topic.author_name)}</span>
+            <span>{topic.author_name || 'Anónimo'}</span>
+            <span>•</span>
+            <span>{formatDate(topic.created)}</span>
+          </div>
+        </div>
+      </Link>
+    );
+  }
+
+  function ViewedCard({ topic }: { topic: ForumTopic }) {
+    return (
+      <Link href={`/bioforo/${topic.id}`} className="group block bg-white dark:bg-[var(--bg-secondary)] rounded-2xl overflow-hidden border border-slate-100 dark:border-[var(--border-subtle)] shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+        <div className="relative aspect-[16/9] overflow-hidden">
+          <TopicImg topic={topic} />
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="backdrop-blur-md bg-white/20 dark:bg-black/30 rounded-2xl px-4 py-2 flex items-center gap-2.5 shadow-xl border border-white/20">
+              <Icon name="Eye" className="w-5 h-5 text-white drop-shadow-lg" />
+              <span className="text-white text-lg font-black drop-shadow-lg">{topic.views || 0}</span>
+              <span className="text-white/80 text-[10px] font-semibold uppercase tracking-wider">vistas</span>
+            </div>
+          </div>
+        </div>
+        <div className="p-3 md:p-4">
+          <h3 className="text-xs md:text-sm font-bold text-slate-800 dark:text-[var(--text-primary)] leading-snug line-clamp-2 group-hover:text-sky-600 dark:group-hover:text-lime-300 transition-colors">
+            {topic.title}
+          </h3>
+          <p className="text-[10px] text-slate-400 dark:text-[var(--text-muted)] mt-1.5 line-clamp-1">
+            {topic.author_name || 'Anónimo'} · {topic.forum_name || 'General'}
+          </p>
+        </div>
+      </Link>
+    );
+  }
+
+  function ExploreCard({ topic }: { topic: ForumTopic }) {
+    return (
+      <div className="group bg-white dark:bg-[var(--bg-secondary)] rounded-2xl overflow-hidden border border-slate-100 dark:border-[var(--border-subtle)] shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+        <Link href={`/bioforo/${topic.id}`} className="block relative aspect-[16/9] overflow-hidden">
+          <TopicImg topic={topic} />
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
+          <div className="absolute top-3 left-3">
+            <span className="px-2.5 py-1 bg-white/90 dark:bg-[var(--bg-secondary)]/90 backdrop-blur-sm text-slate-700 dark:text-[var(--text-primary)] text-[10px] font-bold rounded-full uppercase tracking-wider shadow-sm">
+              {topic.forum_name || 'General'}
+            </span>
+          </div>
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <div className="w-12 h-12 bg-white/90 dark:bg-[var(--bg-secondary)]/90 rounded-full flex items-center justify-center shadow-lg">
+              <Icon name="MessageCircle" className="w-5 h-5 text-sky-600 dark:text-lime-400" />
+            </div>
+          </div>
+        </Link>
+        <div className="p-4 md:p-5">
+          <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-[var(--text-muted)] mb-2.5">
+            <span className="flex items-center gap-1">
+              <Icon name="Eye" className="w-3.5 h-3.5" />
+              {topic.views || 0}
+            </span>
+            <span className="flex items-center gap-1">
+              <Icon name="MessageSquare" className="w-3.5 h-3.5" />
+              {topic.reply_count || 0}
+            </span>
+            <span className="flex items-center gap-1">
+              <Icon name="Heart" className="w-3.5 h-3.5" />
+              {topic.votes_up || 0}
+            </span>
+          </div>
+          <h3 className="text-sm md:text-base font-bold text-slate-800 dark:text-[var(--text-primary)] leading-tight mb-2">
+            <Link href={`/bioforo/${topic.id}`} className="hover:text-sky-600 dark:hover:text-lime-300 transition-colors">
+              {topic.title}
+            </Link>
+          </h3>
+          <p className="text-xs md:text-sm text-slate-500 dark:text-[var(--text-secondary)] line-clamp-2 leading-relaxed mb-3">
+            {topic.content.substring(0, 200)}
+          </p>
+          <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-[var(--border-subtle)]">
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-sky-100 to-emerald-100 dark:from-lime-100 dark:to-emerald-100 flex items-center justify-center text-blue-700 dark:text-lime-600 font-bold text-xs flex-shrink-0">
+                {getInitial(topic.author_name)}
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-medium text-slate-700 dark:text-[var(--text-primary)] truncate">
+                  {topic.author_name || 'Anónimo'}
+                </p>
+                <p className="text-[10px] text-slate-400 dark:text-[var(--text-muted)]">
+                  {formatDate(topic.created)}
+                </p>
+              </div>
+            </div>
+            <Link
+              href={`/bioforo/${topic.id}`}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-sky-50 dark:bg-lime-50 hover:bg-sky-100 dark:hover:bg-lime-100 text-sky-600 dark:text-lime-600 transition-all text-[11px] font-semibold flex-shrink-0"
+            >
+              <span>Ver</span>
+              <Icon name="ArrowRight" className="w-3 h-3" />
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  function SectionHeader({ title, subtitle }: { title: string; subtitle?: string }) {
+    return (
+      <div className="pt-6 pb-8 text-center">
+        <div className="flex items-center justify-center space-x-3 mb-4">
+          <span className="h-px w-12 bg-emerald-500" />
+          <span className="text-emerald-600 dark:text-lime-400 font-bold tracking-widest text-sm uppercase">Lyrium</span>
+          <span className="h-px w-12 bg-emerald-500" />
+        </div>
+        <h2 className="text-2xl md:text-3xl font-black text-slate-800 dark:text-[var(--text-primary)] drop-shadow-sm uppercase">
+          {title}
+        </h2>
+        {subtitle && (
+          <p className="text-slate-600 dark:text-[var(--text-secondary)] text-sm md:text-base leading-relaxed font-light mt-2 max-w-2xl mx-auto">
+            {subtitle}
+          </p>
+        )}
+      </div>
+    );
+  }
+
   return (
-    <div className="w-full max-w-7xl mx-auto px-3 md:px-4 py-4 md:py-8 space-y-6 md:space-y-10">
+    <div className="w-full max-w-7xl mx-auto px-3 md:px-4 py-4 md:py-8 space-y-8 md:space-y-12">
       <HeroPill icon="MessageCircle" text="BioForo" />
 
       <section className="relative mt-2 md:mt-8 rounded-xl md:rounded-[24px] overflow-hidden shadow-lg md:shadow-2xl min-h-[160px] md:min-h-[320px] bg-[#0b1220] group">
@@ -119,12 +447,12 @@ export default function BioForoPage() {
               <div className="w-7 h-7 md:w-10 md:h-10 rounded-full border-2 border-white bg-slate-300" />
               <div className="w-7 h-7 md:w-10 md:h-10 rounded-full border-2 border-white bg-slate-400" />
             </div>
-            <span className="text-xs md:text-sm font-semibold text-slate-500">Únete a la conversación</span>
+            <span className="text-xs md:text-sm font-semibold text-slate-500">&Uacute;nete a la conversaci&oacute;n</span>
           </div>
         </div>
       </section>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6">
         <div className="relative bg-white dark:bg-[var(--bg-secondary)] rounded-xl p-4 md:p-6 flex items-center gap-3 md:gap-4 shadow-sm border border-slate-100 dark:border-[var(--border-subtle)] transition-all duration-300 hover:-translate-y-1 hover:shadow-md overflow-hidden">
           <div className="absolute left-0 top-0 bottom-0 w-[9px] rounded-l-xl" style={{ background: '#67ce00' }} />
           <div className="w-10 h-10 md:w-14 md:h-14 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgb(182, 255, 123)', color: '#499100' }}>
@@ -135,7 +463,6 @@ export default function BioForoPage() {
             <p className="text-xl md:text-2xl font-bold text-slate-800 dark:text-[var(--text-primary)]">{stats.totalTopics}</p>
           </div>
         </div>
-
         <div className="relative bg-white dark:bg-[var(--bg-secondary)] rounded-xl p-4 md:p-6 flex items-center gap-3 md:gap-4 shadow-sm border border-slate-100 dark:border-[var(--border-subtle)] transition-all duration-300 hover:-translate-y-1 hover:shadow-md overflow-hidden">
           <div className="absolute left-0 top-0 bottom-0 w-[9px] rounded-l-xl" style={{ background: '#78e69d' }} />
           <div className="w-10 h-10 md:w-14 md:h-14 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: '#ccfbf1', color: '#019895' }}>
@@ -146,200 +473,179 @@ export default function BioForoPage() {
             <p className="text-xl md:text-2xl font-bold text-slate-800 dark:text-[var(--text-primary)]">{stats.totalReplies}</p>
           </div>
         </div>
-
         <div className="relative bg-white dark:bg-[var(--bg-secondary)] rounded-xl p-4 md:p-6 flex items-center gap-3 md:gap-4 shadow-sm border border-slate-100 dark:border-[var(--border-subtle)] transition-all duration-300 hover:-translate-y-1 hover:shadow-md overflow-hidden">
           <div className="absolute left-0 top-0 bottom-0 w-[9px] rounded-l-xl" style={{ background: '#3b82f6' }} />
           <div className="w-10 h-10 md:w-14 md:h-14 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: '#dbeafe', color: '#3b82f6' }}>
             <Icon name="Users" className="text-xl md:text-2xl" />
           </div>
           <div className="flex flex-col gap-1 flex-1">
-            <p className="text-xs md:text-sm text-slate-500 dark:text-[var(--text-muted)] font-normal">Usuarios en línea</p>
+            <p className="text-xs md:text-sm text-slate-500 dark:text-[var(--text-muted)] font-normal">Usuarios en l&iacute;nea</p>
             <p className="text-xl md:text-2xl font-bold text-slate-800 dark:text-[var(--text-primary)] flex items-center">
               <span className="w-3 h-3 rounded-full bg-emerald-500 mr-2 animate-pulse" />
-              23
+              {stats.onlineUsers || 23}
             </p>
+          </div>
+        </div>
+        <div className="relative bg-white dark:bg-[var(--bg-secondary)] rounded-xl p-4 md:p-6 flex items-center gap-3 md:gap-4 shadow-sm border border-slate-100 dark:border-[var(--border-subtle)] transition-all duration-300 hover:-translate-y-1 hover:shadow-md overflow-hidden">
+          <div className="absolute left-0 top-0 bottom-0 w-[9px] rounded-l-xl" style={{ background: '#f59e0b' }} />
+          <div className="w-10 h-10 md:w-14 md:h-14 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: '#fef3c7', color: '#d97706' }}>
+            <Icon name="Heart" className="text-xl md:text-2xl" />
+          </div>
+          <div className="flex flex-col gap-1 flex-1">
+            <p className="text-xs md:text-sm text-slate-500 dark:text-[var(--text-muted)] font-normal">Reacciones</p>
+            <p className="text-xl md:text-2xl font-bold text-slate-800 dark:text-[var(--text-primary)]">{topics.reduce((acc, t) => acc + (t.votes_up || 0) + (t.votes_down || 0), 0)}</p>
           </div>
         </div>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-3 md:gap-4 mb-6 md:mb-8 items-stretch md:items-center">
-        <div className="flex-1 flex flex-col md:flex-row gap-2 md:items-center">
-          <div className="relative w-full md:w-auto filtro-dropdown-container">
-            <button
-              onClick={() => setShowDropdown(!showDropdown)}
-              className="flex items-center justify-between md:justify-start gap-2 px-4 py-2 rounded-full bg-white dark:bg-[var(--bg-secondary)] border border-slate-200 dark:border-[var(--border-subtle)] hover:bg-slate-50 dark:hover:bg-[#182420] text-slate-700 dark:text-[var(--text-primary)] transition-all w-full md:w-auto"
-            >
-              <div className="flex items-center gap-2">
-                <Icon name="Filter" className="w-4 h-4" />
-                <span className="truncate">Filtrar categoría</span>
-              </div>
-              <Icon name="ChevronDown" className="w-4 h-4" />
-            </button>
+      {!loading && topics.length > 0 && (
+        <>
+          <section>
+            <SectionHeader title="En tendencia" subtitle="Los temas con m&aacute;s reacciones de la comunidad" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
+              {trendingTopics.map(topic => (
+                <TrendingCard key={topic.id} topic={topic} />
+              ))}
+            </div>
+          </section>
 
-            {showDropdown && (
-              <div className="filtro-dropdown show absolute top-full left-0 mt-1 bg-white dark:bg-[var(--bg-secondary)] rounded-xl shadow-lg border border-slate-200 dark:border-[var(--border-subtle)] py-2 z-[9999] min-w-[200px]">
-                <button
-                  onClick={() => { setSelectedForum(null); setShowDropdown(false); }}
-                  className={`w-full text-left px-4 py-2 hover:bg-slate-50 dark:hover:bg-[#182420] text-slate-700 dark:text-[var(--text-primary)] flex items-center gap-2 ${selectedForum === null ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 font-medium' : ''}`}
-                >
-                  <Icon name="Globe" className="w-4 h-4" />
-                  <span>Todas las categorías</span>
-                </button>
-                {forums.map((forum) => (
+          <section>
+            <SectionHeader title="&Uacute;ltimos temas" subtitle="Las discusiones m&aacute;s recientes del foro" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
+              {latestTopics.map(topic => (
+                <LatestCard key={topic.id} topic={topic} />
+              ))}
+            </div>
+          </section>
+
+          <section>
+            <SectionHeader title="M&aacute;s comentados" subtitle="Los temas que generan m&aacute;s conversaci&oacute;n" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
+              {mostCommented.map(topic => (
+                <CommentedCard key={topic.id} topic={topic} />
+              ))}
+            </div>
+          </section>
+
+          <section>
+            <SectionHeader title="M&aacute;s vistos" subtitle="Los temas con mayor cantidad de visitas" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
+              {topViewed.map(topic => (
+                <ViewedCard key={topic.id} topic={topic} />
+              ))}
+            </div>
+          </section>
+        </>
+      )}
+
+      <section>
+        <SectionHeader title="Explorar todos los temas" subtitle="Navega por todos los temas del foro" />
+
+        <div className="flex flex-col md:flex-row gap-3 md:gap-4 mb-6 items-stretch md:items-center">
+          <div className="flex-1 flex flex-col md:flex-row gap-2 md:items-center">
+            <div className="relative w-full md:w-auto filtro-dropdown-container">
+              <button
+                onClick={() => setShowDropdown(!showDropdown)}
+                className="flex items-center justify-between md:justify-start gap-2 px-4 py-2 rounded-full bg-white dark:bg-[var(--bg-secondary)] border border-slate-200 dark:border-[var(--border-subtle)] hover:bg-slate-50 dark:hover:bg-[#182420] text-slate-700 dark:text-[var(--text-primary)] transition-all w-full md:w-auto text-sm"
+              >
+                <div className="flex items-center gap-2">
+                  <Icon name="Filter" className="w-4 h-4" />
+                  <span className="truncate">{selectedForum ? (forums.find(f => f.id === selectedForum)?.name || 'Categoría') : 'Filtrar categoría'}</span>
+                </div>
+                <Icon name="ChevronDown" className="w-4 h-4" />
+              </button>
+
+              {showDropdown && (
+                <div className="filtro-dropdown show absolute top-full left-0 mt-1 bg-white dark:bg-[var(--bg-secondary)] rounded-xl shadow-lg border border-slate-200 dark:border-[var(--border-subtle)] py-2 z-[9999] min-w-[200px]">
                   <button
-                    key={forum.id}
-                    onClick={() => { setSelectedForum(forum.id); setShowDropdown(false); }}
-                    className={`w-full text-left px-4 py-2 hover:bg-slate-50 dark:hover:bg-[#182420] text-slate-700 dark:text-[var(--text-primary)] flex items-center gap-2 ${selectedForum === forum.id ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 font-medium' : ''}`}
+                    onClick={() => { setSelectedForum(null); setShowDropdown(false); }}
+                    className={`w-full text-left px-4 py-2 hover:bg-slate-50 dark:hover:bg-[#182420] text-slate-700 dark:text-[var(--text-primary)] flex items-center gap-2 text-sm ${selectedForum === null ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 font-medium' : ''}`}
                   >
-                    <Icon name="FolderTree" className="w-4 h-4" />
-                    <span>{forum.name}</span>
+                    <Icon name="Globe" className="w-4 h-4" />
+                    <span>Todas las categorías</span>
                   </button>
-                ))}
+                  {forums.map(forum => (
+                    <button
+                      key={forum.id}
+                      onClick={() => { setSelectedForum(forum.id); setShowDropdown(false); }}
+                      className={`w-full text-left px-4 py-2 hover:bg-slate-50 dark:hover:bg-[#182420] text-slate-700 dark:text-[var(--text-primary)] flex items-center gap-2 text-sm ${selectedForum === forum.id ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 font-medium' : ''}`}
+                    >
+                      <Icon name="FolderTree" className="w-4 h-4" />
+                      <span>{forum.name}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {selectedForum && (
+              <div className="px-3 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded-full text-sm font-medium flex items-center justify-between md:justify-start gap-2">
+                <div className="flex items-center gap-2">
+                  <Icon name="Check" className="w-4 h-4" />
+                  <span className="truncate">
+                    {forums.find(f => f.id === selectedForum)?.name || 'Categoría'}
+                  </span>
+                </div>
+                <button onClick={() => setSelectedForum(null)} className="text-emerald-500 hover:text-emerald-700 dark:hover:text-emerald-300">
+                  <Icon name="X" className="w-4 h-4" />
+                </button>
               </div>
             )}
           </div>
 
-          {selectedForum && (
-            <div className="px-3 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded-full text-sm font-medium flex items-center justify-between md:justify-start gap-2">
-              <div className="flex items-center gap-2">
-                <Icon name="Check" className="w-4 h-4" />
-                <span className="truncate">
-                  {forums.find((f) => f.id === selectedForum)?.name || 'Categoría'}
-                </span>
-              </div>
-              <button onClick={() => setSelectedForum(null)} className="text-emerald-500 hover:text-emerald-700 dark:hover:text-emerald-300">
-                <Icon name="X" className="w-4 h-4" />
+          <div className="flex gap-1.5 overflow-x-auto scrollbar-none">
+            {SORT_OPTIONS.map(opt => (
+              <button
+                key={opt.value}
+                onClick={() => setSortMode(opt.value)}
+                className={`px-3.5 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap ${
+                  sortMode === opt.value
+                    ? 'bg-sky-500 dark:bg-[var(--brand-green)] text-white shadow-md'
+                    : 'bg-white dark:bg-[var(--bg-secondary)] text-slate-600 dark:text-[var(--text-secondary)] border border-slate-200 dark:border-[var(--border-subtle)] hover:bg-slate-50 dark:hover:bg-[#182420]'
+                }`}
+              >
+                {opt.label}
               </button>
-            </div>
-          )}
+            ))}
+          </div>
+
+          <div className="px-4 py-2 rounded-full bg-slate-100 dark:bg-[var(--bg-secondary)] text-slate-400 dark:text-[var(--text-muted)] text-xs font-medium flex items-center gap-2 flex-shrink-0">
+            <Icon name="Lock" className="w-3.5 h-3.5" />
+            <span>Crear temas desde el panel Seller</span>
+          </div>
         </div>
 
-        <Link
-          href="/bioforo/crear"
-          className="bg-gradient-to-r from-sky-500 to-sky-400 dark:from-[var(--brand-green)] dark:to-[var(--brand-green-hover)] text-white px-4 py-3 rounded-full font-semibold shadow-lg shadow-[0_10px_25px_rgba(14,165,233,0.2)] dark:shadow-[0_10px_25px_rgba(74,124,89,0.25)] transition-all transform hover:-translate-y-1 flex items-center justify-center gap-2 w-full md:w-auto"
-        >
-          <Icon name="Pencil" className="w-4 h-4" />
-          <span className="truncate">Crear Nuevo Tema</span>
-        </Link>
-      </div>
-
-      <div className="space-y-4 md:space-y-6">
         {loading ? (
-          <div className="flex justify-center py-12">
+          <div className="flex justify-center py-16">
             <div className="loader-small" />
           </div>
         ) : topics.length === 0 ? (
           <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-xl md:rounded-2xl p-8 md:p-12 text-center border border-slate-200 dark:border-[var(--border-subtle)]">
             <Icon name="MessageCircle" className="w-12 h-12 text-slate-300 dark:text-[var(--text-secondary)] mx-auto mb-4" />
-            <h3 className="text-lg md:text-xl font-semibold text-slate-700 dark:text-[var(--text-primary)] mb-2">No hay temas aún</h3>
-            <p className="text-slate-500 dark:text-[var(--text-secondary)] mb-4 md:mb-6 text-sm md:text-base">Sé el primero en crear un tema de discusión</p>
-            <Link
-              href="/bioforo/crear"
-              className="bg-emerald-500 hover:bg-emerald-600 text-white px-4 md:px-6 py-2 md:py-3 rounded-full font-medium inline-flex items-center gap-2 text-sm md:text-base"
-            >
-              <Icon name="Plus" className="w-4 h-4" />
-              Crear primer tema
-            </Link>
+            <h3 className="text-lg md:text-xl font-semibold text-slate-700 dark:text-[var(--text-primary)] mb-2">No hay temas a&uacute;n</h3>
+            <p className="text-slate-500 dark:text-[var(--text-secondary)] mb-4 md:mb-6 text-sm md:text-base">S&eacute; el primero en crear un tema de discusi&oacute;n</p>
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-100 dark:bg-[var(--bg-secondary)] text-slate-400 dark:text-[var(--text-muted)] text-sm font-medium">
+              <Icon name="Lock" className="w-4 h-4" />
+              Crear temas desde el panel Seller
+            </div>
           </div>
         ) : (
-          topics.map((topic) => (
-            <div
-              key={topic.id}
-              id={`tema-${topic.id}`}
-              className="bg-white dark:bg-[var(--bg-secondary)] border-[3px] border-[#009a6279] rounded-xl md:rounded-2xl p-4 md:p-6 shadow-sm hover:shadow-md transition-all"
-              style={{ overflowWrap: 'break-word', wordWrap: 'break-word' }}
-            >
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex-1 flex items-start gap-3">
-                  <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-gradient-to-br from-blue-100 to-emerald-100 dark:from-lime-100 dark:to-emerald-100 flex items-center justify-center text-blue-700 dark:text-lime-600 font-bold text-lg md:text-xl flex-shrink-0">
-                    {getInitial(topic.author_name)}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-2">
-                      <div>
-                        <h4 className="font-bold text-slate-800 dark:text-[var(--text-primary)] text-base md:text-lg">
-                          {topic.author_name || 'Anónimo'}
-                        </h4>
-                        <div className="flex items-center gap-2 text-xs md:text-sm text-slate-500 dark:text-[var(--text-muted)]">
-                          <span className="flex items-center gap-1">
-                            <Icon name="Clock" className="w-3 h-3" />
-                            {formatDate(topic.created)}
-                          </span>
-                          <span className="hidden md:inline">•</span>
-                          <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">
-                            {topic.forum_name || 'General'}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="flex flex-row items-center gap-4">
-                        <div className="text-center">
-                          <div className="text-base md:text-lg font-bold text-slate-800 dark:text-[var(--text-primary)]">
-                            {topic.votes_up || 0}
-                          </div>
-                          <div className="text-xs text-slate-500 dark:text-[var(--text-muted)]">Reacciones</div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-base md:text-lg font-bold text-slate-800 dark:text-[var(--text-primary)]">
-                            {topic.reply_count || 0}
-                          </div>
-                          <div className="text-xs text-slate-500 dark:text-[var(--text-muted)]">Respuestas</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mb-4 md:mb-6">
-                <h3
-                  className="text-[#333333] dark:text-[var(--text-primary)] font-bold text-lg md:text-xl underline decoration-dashed decoration-lime-400 decoration-3 underline-offset-[9px]"
-                  style={{ textUnderlinePosition: 'from-word' }}
-                >
-                  {topic.title}
-                </h3>
-                <br />
-                <p className="text-[#00866d] dark:text-[#00a87e] font-semibold leading-relaxed" style={{ fontWeight: 600, lineHeight: 1.6 }}>
-                  {topic.content.substring(0, 300) || ''}
-                </p>
-                <br />
-              </div>
-
-              <div className="flex items-center justify-between md:justify-between border-t border-slate-100 dark:border-[var(--border-subtle)] pt-3 md:pt-4 gap-2">
-                <Link
-                  href={`/bioforo/${topic.id}`}
-                  className="flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-full bg-blue-50 dark:bg-lime-50 hover:bg-blue-100 dark:hover:bg-lime-100 text-blue-700 dark:text-lime-700 transition-all text-xs md:text-sm"
-                >
-                  <Icon name="MessageCircle" className="w-4 h-4" />
-                  <span>Ver tema</span>
-                </Link>
-
-                <button
-                  onClick={() => {
-                    if (navigator.share) {
-                      navigator.share({ title: topic.title, url: `${window.location.origin}/bioforo/${topic.id}` });
-                    } else {
-                      setShareTopic(topic);
-                    }
-                  }}
-                  className="flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-full bg-slate-50 dark:bg-[var(--bg-secondary)] hover:bg-slate-100 text-slate-700 dark:text-[var(--text-primary)] transition-all text-xs md:text-sm"
-                >
-                  <Icon name="Share2" className="w-4 h-4" />
-                  <span>Compartir</span>
-                </button>
-              </div>
-            </div>
-          ))
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
+            {sortedTopics.map(topic => (
+              <ExploreCard key={`${topic.id}-${sortMode}`} topic={topic} />
+            ))}
+          </div>
         )}
-      </div>
 
-      <div className="flex justify-center">
-        <span className="text-slate-500 dark:text-[var(--text-muted)] text-sm">
-          {topics.length} temas mostrados
-        </span>
-      </div>
+        {!loading && topics.length > 0 && (
+          <div className="flex justify-center mt-6">
+            <span className="text-slate-500 dark:text-[var(--text-muted)] text-sm">
+              {topics.length} temas mostrados
+            </span>
+          </div>
+        )}
+      </section>
 
-      {/* Share Modal */}
       {shareTopic && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setShareTopic(null)}>
           <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-800 w-full max-w-sm mx-4 p-6" onClick={e => e.stopPropagation()}>
@@ -382,20 +688,14 @@ export default function BioForoPage() {
       )}
 
       <style jsx>{`
-        .filtro-dropdown {
-          display: none;
-        }
-        .filtro-dropdown.show {
-          display: block;
-          animation: fadeIn 0.2s ease-out;
-        }
+        .filtro-dropdown { display: none; }
+        .filtro-dropdown.show { display: block; animation: fadeIn 0.2s ease-out; }
         @keyframes fadeIn {
           from { opacity: 0; transform: translateY(10px); }
           to { opacity: 1; transform: translateY(0); }
         }
         .loader-small {
-          width: 12px;
-          height: 12px;
+          width: 12px; height: 12px;
           border: 2px solid transparent;
           border-top-color: currentColor;
           border-radius: 50%;
@@ -405,6 +705,8 @@ export default function BioForoPage() {
         @keyframes spin {
           to { transform: rotate(360deg); }
         }
+        .scrollbar-none::-webkit-scrollbar { display: none; }
+        .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
     </div>
   );

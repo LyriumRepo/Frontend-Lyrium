@@ -306,7 +306,7 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
                             <form onSubmit={handleLoginSubmit} className="space-y-5" noValidate>
                                 <div>
                                     <label htmlFor="login-email" className="block text-sm font-semibold text-slate-700 dark:text-[var(--text-primary)] mb-2">
-                                        Usuario <span className="text-red-500">*</span>
+                                        {userType === 'vendedor' ? 'Vendedor' : 'Usuario'} <span className="text-red-500">*</span>
                                     </label>
                                     <div className="relative">
                                         <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" aria-hidden="true" />
@@ -316,11 +316,11 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
                                             name="username"
                                             value={loginData.username}
                                             onChange={(e) => handleInputChange(e, 'login')}
-                                            placeholder={userType === 'vendedor' ? 'o admin' : 'tu@email.com'}
+                                            placeholder={userType === 'vendedor' ? 'vendedor' : 'tu@email.com'}
                                             autoComplete="username"
                                             required
                                             aria-required="true"
-                                            aria-label={userType === 'vendedor' ? 'o usuario' : 'Correo electrónico'}
+                                            aria-label={userType === 'vendedor' ? 'Vendedor' : 'Correo electrónico'}
                                             className="w-full py-3.5 pl-12 pr-4 border-2 border-slate-200 dark:border-[var(--border-subtle)] rounded-xl text-sm text-slate-700 dark:text-[var(--text-primary)] bg-slate-50 dark:bg-[var(--bg-primary)] focus:outline-none focus:border-sky-500 focus:bg-white dark:focus:bg-[var(--bg-secondary)] focus:shadow-[0_0_0_4px_rgba(66,153,225,0.1)] transition-all duration-300"
                                         />
                                     </div>

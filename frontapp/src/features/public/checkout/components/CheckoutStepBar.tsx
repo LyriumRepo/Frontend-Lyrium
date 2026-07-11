@@ -52,14 +52,23 @@ export default function CheckoutStepBar() {
     return '0%';
   };
 
+  const currentLabel = STEPS.find((s) => s.id === currentStep)?.label ?? '';
+  const progressPct = Math.round((currentStep / STEPS.length) * 100);
+
   return (
     <div
       id="checkout-step-bar"
       className="bg-white dark:bg-[var(--bg-secondary)] relative z-30"
     >
+      <p className="sr-only" role="status" aria-live="polite">
+        Paso {currentStep} de {STEPS.length}: {currentLabel}. Llevas {progressPct}% del proceso de compra.
+      </p>
       <div className="relative max-w-6xl mx-auto flex items-center justify-center px-4">
         {/* Steps */}
-        <div className="flex items-center justify-between w-full max-w-2xl mx-auto py-4 relative">
+        <nav
+          aria-label="Progreso de la compra"
+          className="flex items-center justify-between w-full max-w-2xl mx-auto py-4 relative"
+        >
           {STEPS.map((step, idx) => {
             const color = STEP_COLORS[step.id as 1 | 2 | 3 | 4 | 5];
             const circleClass = getCircleClass(step.id);
@@ -71,6 +80,8 @@ export default function CheckoutStepBar() {
               <div
                 key={step.id}
                 className={`flex items-center ${idx < STEPS.length - 1 ? 'flex-1' : ''}`}
+                aria-current={isActive ? 'step' : undefined}
+                aria-label={`Paso ${step.id} de ${STEPS.length}: ${step.label}${isCompleted ? ' (completado)' : isActive ? ' (paso actual)' : ''}`}
               >
                 {/* Step column */}
                 <div
@@ -84,6 +95,7 @@ export default function CheckoutStepBar() {
                 >
                   {/* Circle */}
                   <div
+                    aria-hidden="true"
                     className={[
                       'w-9 h-9 text-sm sm:w-14 sm:h-14 sm:text-lg rounded-full flex items-center justify-center font-black shadow-xl transition-all duration-300 select-none flex-shrink-0',
                       isActive
@@ -149,7 +161,7 @@ export default function CheckoutStepBar() {
               </div>
             );
           })}
-        </div>
+        </nav>
       </div>
     </div>
   );

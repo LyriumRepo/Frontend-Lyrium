@@ -159,7 +159,7 @@ export default function CustomerWishlistPage() {
               className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${
                 isActive
                   ? 'bg-sky-500 dark:bg-[var(--brand-green)] text-white shadow-lg shadow-sky-100'
-                  : 'bg-gray-100 dark:bg-[var(--bg-muted)] text-gray-700 dark:text-[var(--text-primary)] hover:bg-gray-200 dark:hover:bg-[#2A3F33]'
+                  : 'bg-gray-100 dark:bg-[var(--bg-muted)] text-gray-700 dark:text-[var(--text-primary)] hover:bg-gray-200 dark:hover:bg-[var(--border-default)]'
               }`}
             >
               {category.label} ({count})
@@ -177,7 +177,7 @@ export default function CustomerWishlistPage() {
           <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-[var(--text-muted)] mb-4">Explora nuestros productos y guarda tus favoritos</p>
           <a
             href="/"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-sky-500 text-white font-bold text-sm hover:bg-sky-600 transition-all shadow-lg"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-sky-500 dark:bg-[var(--brand-green)] text-white font-bold text-sm hover:bg-sky-600 dark:hover:bg-[var(--brand-green-hover)] transition-all shadow-lg"
           >
             <Icon name="Store" className="w-5 h-5" />
             Ir a la Tienda

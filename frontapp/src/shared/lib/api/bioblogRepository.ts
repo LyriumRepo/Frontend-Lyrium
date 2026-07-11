@@ -85,6 +85,7 @@ export interface BlogDashboard {
 export interface ForumTopic {
     id: number; store_id: number; forum_category_id: number; user_id: number | null;
     title: string; content: string; status: string; reply_count: number; views: number;
+    image: string | null;
     created_at: string; updated_at: string;
     category?: { id: number; name: string; slug: string };
     user?: { id: number; name: string };
@@ -195,7 +196,7 @@ export const forumApi = {
         list: (params?: { status?: string; category_id?: number; per_page?: number }) =>
             request<PaginatedResponse<ForumTopic>>(`/forum/topics${buildQuery(params as any)}`),
         get: (id: number) => request<{ success: boolean; data: ForumTopic }>(`/forum/topics/${id}`),
-        create: (data: { forum_category_id: number; title: string; content: string; status?: string }) =>
+        create: (data: { forum_category_id: number; title: string; content: string; status?: string; image?: string | null }) =>
             request<{ success: boolean; data: ForumTopic }>('/forum/topics', { method: 'POST', body: JSON.stringify(data) }),
         update: (id: number, data: Partial<ForumTopic>) =>
             request<{ success: boolean; data: ForumTopic }>(`/forum/topics/${id}`, { method: 'PUT', body: JSON.stringify(data) }),

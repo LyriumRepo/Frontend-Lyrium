@@ -12,6 +12,7 @@ export interface ForumTopic {
   id: number;
   title: string;
   content: string;
+  image: string | null;
   created: string;
   author_name: string;
   user_id: number | null;

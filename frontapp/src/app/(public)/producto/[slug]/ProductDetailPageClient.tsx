@@ -34,6 +34,8 @@ import {
   FileText,
   Zap,
   Salad,
+  Pause,
+  Play,
 } from 'lucide-react';
 import type {
   LaravelProduct,
@@ -967,6 +969,12 @@ function RelatedProductsCarousel({ products }: { products: LaravelProduct[] }) {
   const SPEED = 0.5;
   const CARD_STEP = 296; // ancho de card + gap aprox
   const RESUME_DELAY = 2500; // ms antes de reanudar auto-scroll tras interacción manual
+  // Pausa manual (botón/tecla): a diferencia de pausedRef, esta no se reanuda
+  // sola — el usuario decide cuándo volver a activar el auto-scroll.
+  const [isPaused, setIsPaused] = useState(false);
+  const dragRef = useRef<{ startX: number; startPos: number; dragging: boolean }>({
+    startX: 0, startPos: 0, dragging: false,
+  });
 
   // Con 1 solo producto, duplicar rompe el auto-scroll infinito (loop entre 2 copias idénticas
   // sin nada más que mostrar); con 0 no debería renderizarse (el caller ya filtra products.length > 0).
@@ -978,8 +986,20 @@ function RelatedProductsCarousel({ products }: { products: LaravelProduct[] }) {
     pausedRef.current = true;
     if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
     resumeTimerRef.current = setTimeout(() => {
-      pausedRef.current = false;
+      setIsPaused((manuallyPaused) => {
+        if (!manuallyPaused) pausedRef.current = false;
+        return manuallyPaused;
+      });
     }, RESUME_DELAY);
+  };
+
+  const togglePause = () => {
+    setIsPaused((prev) => {
+      const next = !prev;
+      pausedRef.current = next;
+      if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
+      return next;
+    });
   };
 
   // Mueve el carrusel en una dirección, respetando el loop infinito
@@ -1050,6 +1070,37 @@ function RelatedProductsCarousel({ products }: { products: LaravelProduct[] }) {
     return () => wrap.removeEventListener('wheel', onWheel);
   }, []);
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'ArrowLeft') { e.preventDefault(); shift('left'); }
+    else if (e.key === 'ArrowRight') { e.preventDefault(); shift('right'); }
+    else if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); togglePause(); }
+  };
+
+  // Arrastre con mouse/touch — además de la rueda del mouse y las flechas
+  const handlePointerDown = (e: React.PointerEvent) => {
+    dragRef.current = { startX: e.clientX, startPos: posRef.current, dragging: true };
+    pausedRef.current = true;
+    if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
+    (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
+  };
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!dragRef.current.dragging) return;
+    const track = trackRef.current;
+    if (!track) return;
+    const half = track.scrollWidth / 2;
+    if (half === 0) return;
+    const delta = e.clientX - dragRef.current.startX;
+    let current = dragRef.current.startPos - delta;
+    current = ((current % half) + half) % half;
+    posRef.current = current;
+    track.style.transform = `translateX(-${current}px)`;
+  };
+  const handlePointerUp = () => {
+    if (!dragRef.current.dragging) return;
+    dragRef.current.dragging = false;
+    pauseTemporarily();
+  };
+
   return (
     <div className="mb-12">
       {/* Header */}
@@ -1063,15 +1114,22 @@ function RelatedProductsCarousel({ products }: { products: LaravelProduct[] }) {
           )}
         </div>
         {canAutoScroll && (
-          <div className="flex items-center gap-2">
-            <span className="relative flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-teal-500" />
-            </span>
+          <button
+            type="button"
+            onClick={togglePause}
+            aria-pressed={isPaused}
+            aria-label={isPaused ? 'Reanudar carrusel automático' : 'Pausar carrusel automático'}
+            className="flex items-center gap-2 px-2 py-1 rounded-full hover:bg-teal-50 dark:hover:bg-teal-950/40 transition-colors"
+          >
+            {isPaused ? (
+              <Play className="w-3 h-3 text-teal-600 dark:text-teal-400" />
+            ) : (
+              <Pause className="w-3 h-3 text-teal-600 dark:text-teal-400" />
+            )}
             <span className="text-xs font-semibold text-teal-600 dark:text-teal-400 uppercase tracking-wider">
-              Auto-scroll
+              {isPaused ? 'En pausa' : 'Auto-scroll'}
             </span>
-          </div>
+          </button>
         )}
       </div>
 
@@ -1089,8 +1147,8 @@ function RelatedProductsCarousel({ products }: { products: LaravelProduct[] }) {
             text-teal-600 dark:text-teal-400
             hover:bg-teal-50 dark:hover:bg-teal-950/40 hover:border-teal-400
             transition-all duration-200
-            opacity-0 group-hover/carousel:opacity-100
-            -translate-x-1 group-hover/carousel:translate-x-0"
+            opacity-0 group-hover/carousel:opacity-100 focus-visible:opacity-100
+            -translate-x-1 group-hover/carousel:translate-x-0 focus-visible:translate-x-0"
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
@@ -1108,8 +1166,8 @@ function RelatedProductsCarousel({ products }: { products: LaravelProduct[] }) {
             text-teal-600 dark:text-teal-400
             hover:bg-teal-50 dark:hover:bg-teal-950/40 hover:border-teal-400
             transition-all duration-200
-            opacity-0 group-hover/carousel:opacity-100
-            translate-x-1 group-hover/carousel:translate-x-0"
+            opacity-0 group-hover/carousel:opacity-100 focus-visible:opacity-100
+            translate-x-1 group-hover/carousel:translate-x-0 focus-visible:translate-x-0"
         >
           <ChevronRight className="w-5 h-5" />
         </button>
@@ -1118,7 +1176,12 @@ function RelatedProductsCarousel({ products }: { products: LaravelProduct[] }) {
         {/* Fade + overflow */}
         <div
           ref={wrapRef}
-          className="overflow-hidden relative"
+          role="region"
+          aria-roledescription="carousel"
+          aria-label="Productos relacionados"
+          tabIndex={0}
+          onKeyDown={handleKeyDown}
+          className="overflow-hidden relative focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 rounded-xl cursor-grab active:cursor-grabbing"
           style={{
             maskImage:
               'linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)',
@@ -1130,10 +1193,14 @@ function RelatedProductsCarousel({ products }: { products: LaravelProduct[] }) {
             if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
           }}
           onMouseLeave={() => {
-            pausedRef.current = false;
+            if (!isPaused) pausedRef.current = false;
           }}
           onTouchStart={() => pauseTemporarily()}
           onTouchEnd={() => {}}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerCancel={handlePointerUp}
         >
           <div
             ref={trackRef}
@@ -1590,8 +1657,17 @@ function ProductGallery({
     <div className="space-y-4">
       <div
         ref={containerRef}
+        role="region"
+        aria-roledescription="carousel"
+        aria-label={`Imágenes de ${name}`}
+        tabIndex={images.length > 1 ? 0 : undefined}
+        onKeyDown={(e) => {
+          if (images.length <= 1) return;
+          if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }
+          else if (e.key === 'ArrowRight') { e.preventDefault(); next(); }
+        }}
         className={cn(
-          'relative rounded-xl overflow-hidden bg-white border border-teal-100 dark:border-teal-900/30 group',
+          'relative rounded-xl overflow-hidden bg-white border border-teal-100 dark:border-teal-900/30 group focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400',
           size ? 'mx-auto' : 'aspect-square w-full',
         )}
         style={size ? { width: size, height: size } : undefined}
@@ -1643,7 +1719,7 @@ function ProductGallery({
               size="icon"
               onClick={prev}
               aria-label="Anterior"
-              className="absolute left-3 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 backdrop-blur-sm hover:border-teal-400"
+              className="absolute left-3 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity bg-background/80 backdrop-blur-sm hover:border-teal-400"
             >
               <ChevronLeft className="w-4 h-4" />
             </Button>
@@ -1652,7 +1728,7 @@ function ProductGallery({
               size="icon"
               onClick={next}
               aria-label="Siguiente"
-              className="absolute right-3 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 backdrop-blur-sm hover:border-teal-400"
+              className="absolute right-3 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity bg-background/80 backdrop-blur-sm hover:border-teal-400"
             >
               <ChevronRight className="w-4 h-4" />
             </Button>
@@ -1666,6 +1742,8 @@ function ProductGallery({
             <button
               key={i}
               onClick={() => setActive(i)}
+              aria-label={`Ver imagen ${i + 1} de ${images.length}`}
+              aria-current={i === active}
               className={cn(
                 'aspect-square rounded-lg overflow-hidden border-2 transition-all',
                 i === active

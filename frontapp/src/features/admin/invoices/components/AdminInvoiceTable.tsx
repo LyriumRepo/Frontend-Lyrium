@@ -111,8 +111,8 @@ export default function AdminInvoiceTable({ invoices, onViewDetail }: Props) {
                                     </span>
                                 </span>
                             </th>
-                            <th className="px-6 py-5">Comisión</th>
-                            <th className="px-6 py-5">Fecha</th>
+                            <th className="hidden md:table-cell px-6 py-5">Comisión</th>
+                            <th className="hidden md:table-cell px-6 py-5">Fecha</th>
                             <th className="px-6 py-5 text-center">Estado</th>
                             <th className="px-6 py-5 text-right">Acciones</th>
                         </tr>
@@ -151,12 +151,12 @@ export default function AdminInvoiceTable({ invoices, onViewDetail }: Props) {
                                         <td className="px-6 py-4">
                                             <p className="text-sm font-black text-[var(--text-primary)]">{formatCurrency(inv.store_amount ?? inv.order_total)}</p>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="hidden md:table-cell px-6 py-4">
                                             <p className="text-sm font-bold text-[var(--color-warning)]">
                                                 {formatCommission(inv.commission_rate, inv.commission_amount)}
                                             </p>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="hidden md:table-cell px-6 py-4">
                                             <p className="text-xs font-bold text-[var(--text-secondary)]">
                                                 {new Date(inv.emission_date).toLocaleDateString('es-PE')}
                                             </p>

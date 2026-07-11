@@ -247,17 +247,7 @@ function TableHonorarios({
 
       {/* ── Vista desktop: tabla ── */}
       <div className="hidden sm:block overflow-x-auto">
-        <table className="w-full border-collapse" style={{ tableLayout: 'fixed' }}>
-          <colgroup>
-            <col style={{ width: '180px' }} />
-            <col style={{ width: '120px' }} />
-            <col style={{ width: '130px' }} />
-            <col style={{ width: '130px' }} />
-            <col style={{ width: '100px' }} />
-            <col style={{ width: '90px' }} />
-            <col style={{ width: '85px' }} />
-            <col style={{ width: '100px' }} />
-          </colgroup>
+        <table className="w-full border-collapse table-auto">
           <thead>
             <tr>
               {['Nombre emisor','RUC emisor','Tipo documento','Nro. documento','Fecha emisión','Monto','Estado',''].map((h) => (
@@ -341,17 +331,7 @@ function TableFacturas({
 
       {/* ── Vista desktop: tabla ── */}
       <div className="hidden sm:block overflow-x-auto">
-        <table className="w-full border-collapse" style={{ tableLayout: 'fixed' }}>
-          <colgroup>
-            <col style={{ width: '200px' }} />
-            <col style={{ width: '120px' }} />
-            <col style={{ width: '120px' }} />
-            <col style={{ width: '140px' }} />
-            <col style={{ width: '100px' }} />
-            <col style={{ width: '90px' }} />
-            <col style={{ width: '85px' }} />
-            <col style={{ width: '100px' }} />
-          </colgroup>
+        <table className="w-full border-collapse table-auto">
           <thead>
             <tr>
               {['Emisor (proveedor)','RUC emisor','Tipo documento','Nro. documento','Fecha emisión','Total','Estado',''].map((h) => (
@@ -434,17 +414,7 @@ function TableGeneric({
 
       {/* ── Vista desktop: tabla ── */}
       <div className="hidden sm:block overflow-x-auto">
-        <table className="w-full border-collapse" style={{ tableLayout: 'fixed' }}>
-          <colgroup>
-            <col style={{ width: '110px' }} />
-            <col style={{ width: '130px' }} />
-            <col style={{ width: '160px' }} />
-            <col style={{ width: '150px' }} />
-            <col style={{ width: '100px' }} />
-            <col style={{ width: '90px' }} />
-            <col style={{ width: '85px' }} />
-            <col style={{ width: '100px' }} />
-          </colgroup>
+        <table className="w-full border-collapse table-auto">
           <thead>
             <tr>
               {['Tipo','Nro. comprobante','Proveedor / Trabajador','Concepto','Fecha','Monto','Estado',''].map((h) => (
@@ -806,8 +776,8 @@ export function OperationsPageClient() {
           />
         </div>
 
-        {/* Fila 3: acciones en grid de 3 columnas iguales */}
-        <div className="grid grid-cols-3 gap-3 pt-4 border-t border-[var(--border-subtle)]">
+        {/* Fila 3: acciones en grid responsive */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4 border-t border-[var(--border-subtle)]">
           <button
             onClick={() => { setShowScanner((v) => !v); if (showScanner) resetScan(); }}
             className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--bg-card)] text-[var(--text-primary)] font-bold text-xs border border-[var(--border-subtle)] hover:text-[var(--color-success)] hover:border-[var(--color-success)]/30 transition-all shadow-sm"

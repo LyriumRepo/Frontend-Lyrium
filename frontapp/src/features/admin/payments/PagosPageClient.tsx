@@ -378,7 +378,7 @@ export function PagosPageClient() {
         </div>
 
         {/* Acciones — Actualizar, Excel, PDF dentro del card */}
-        <div className="grid grid-cols-3 gap-3 pt-4 border-t border-[var(--border-subtle)]">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4 border-t border-[var(--border-subtle)]">
           <BaseButton variant="primary" size="sm" leftIcon="RotateCw" onClick={() => refetch()} className="justify-center">
             Actualizar
           </BaseButton>

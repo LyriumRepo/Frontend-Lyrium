@@ -1,6 +1,7 @@
 'use client';
 import { ShieldCheck, X } from 'lucide-react';
 import Image from 'next/image';
+import { useFocusTrap } from '@/shared/hooks/useFocusTrap';
 
 interface Props {
   isOpen: boolean;
@@ -9,6 +10,8 @@ interface Props {
 }
 
 export default function IzipayModal({ isOpen, onClose, error }: Props) {
+  const modalRef = useFocusTrap<HTMLDivElement>(isOpen, onClose);
+
   if (!isOpen) return null;
 
   return (
@@ -18,6 +21,11 @@ export default function IzipayModal({ isOpen, onClose, error }: Props) {
         onClick={onClose}
       />
       <div
+        ref={modalRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Pago seguro con Izipay"
+        tabIndex={-1}
         className="relative bg-white dark:bg-[var(--bg-card)] w-full max-w-sm rounded-2xl shadow-2xl border border-gray-100 dark:border-[var(--border-subtle)] overflow-hidden animate-slide-up"
         onClick={(e) => e.stopPropagation()}
       >

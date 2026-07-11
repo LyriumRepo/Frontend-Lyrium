@@ -4,17 +4,19 @@ import { useSellerStore } from '@/features/seller/store/hooks/useSellerStore';
 import type { PlanCapabilities } from '@/features/seller/store/types';
 
 export function usePlanCapabilities() {
-    const { config } = useSellerStore();
+    const { config, loading } = useSellerStore();
 
     const capabilities: PlanCapabilities | undefined = config?.plan_capabilities;
     const planName = config?.subscription?.plan?.name ?? 'Sin Plan';
     const planSlug = config?.subscription?.plan?.slug ?? '';
     const isExpired = config?.subscription?.status === 'expired';
+    const capabilitiesLoading = loading && !capabilities;
 
     const isUnlimited = (value: number | undefined): boolean => value === -1 || value === undefined;
 
     const can = (feature: string): boolean => {
-        if (!capabilities) return true;
+        if (capabilitiesLoading) return false;
+        if (!capabilities) return false;
         const val = capabilities[feature];
         if (typeof val === 'boolean') return val;
         if (typeof val === 'number') return val > 0 || val === -1;
@@ -22,10 +24,11 @@ export function usePlanCapabilities() {
     };
 
     const limit = (resource: string): number => {
-        if (!capabilities) return -1;
+        if (capabilitiesLoading) return 0;
+        if (!capabilities) return 0;
         const val = capabilities[resource];
         if (typeof val === 'number') return val;
-        return -1;
+        return 0;
     };
 
     const exceeds = (resource: string, current: number): boolean => {
@@ -46,6 +49,7 @@ export function usePlanCapabilities() {
 
     return {
         capabilities,
+        capabilitiesLoading,
         planName,
         planSlug,
         isExpired,

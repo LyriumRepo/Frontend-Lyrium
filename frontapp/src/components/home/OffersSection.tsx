@@ -47,14 +47,15 @@ function OfferCard({
   };
 
   return (
-      <article className="w-[100px] min-[360px]:w-[110px] sm:w-[195px] shrink-0 bg-[var(--azulCeleste-100)] dark:bg-[#1E3028] backdrop-blur-lg border border-transparent rounded-xl sm:rounded-[18px] overflow-hidden shadow-md group transition-all duration-300 hover:-translate-y-[5px] flex flex-col items-center relative">
+    <Link href={producto.slug ? `/producto/${producto.slug}` : '#'} className="block">
+      <article className="w-[100px] min-[360px]:w-[110px] sm:w-[195px] shrink-0 bg-[var(--turquesaClaro-100)] dark:bg-[#1E3028] backdrop-blur-lg border border-transparent rounded-xl sm:rounded-[18px] overflow-hidden shadow-md group transition-all duration-300 hover:-translate-y-[5px] flex flex-col items-center relative">
       <div className="relative w-full aspect-square overflow-hidden bg-transparent flex items-center justify-center">
         {producto.descuento && producto.descuento > 0 ? (
           <span className="absolute top-1 left-1 sm:top-2 sm:left-2 z-10 bg-red-500 text-white text-[7px] sm:text-[9px] font-extrabold px-1 py-0.5 sm:px-2 sm:py-0.5 rounded-full">
             -{producto.descuento}%
           </span>
         ) : producto.tag && producto.tag.toLowerCase() !== 'nuevo' ? (
-          <span className="absolute top-1 left-1 sm:top-2 sm:left-2 z-10 bg-sky-500 text-white text-[7px] sm:text-[9px] font-extrabold px-1 py-0.5 sm:px-2 sm:py-0.5 rounded-full uppercase">
+          <span className="absolute top-1 left-1 sm:top-2 sm:left-2 z-10 bg-[var(--brand-green)] text-white text-[7px] sm:text-[9px] font-extrabold px-1 py-0.5 sm:px-2 sm:py-0.5 rounded-full uppercase">
             {producto.tag}
           </span>
         ) : null}
@@ -66,22 +67,22 @@ function OfferCard({
             onError={handleImageError}
           />
 
-        <div className="absolute bottom-0 left-0 w-full h-[30px] sm:h-[38px] flex bg-sky-500 transform translate-y-full group-hover:translate-y-0 transition-transform">
-          <button onClick={() => onAddToCart(producto)} className="flex-1 flex items-center justify-center text-white">
+        <div className="absolute bottom-0 left-0 w-full h-[30px] sm:h-[38px] flex bg-[var(--brand-green)] transform translate-y-full group-hover:translate-y-0 transition-transform">
+          <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onAddToCart(producto); }} className="flex-1 flex items-center justify-center text-white">
             <ShoppingCart className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </button>
-          <button onClick={() => onQuickView(producto)} className="flex-1 flex items-center justify-center text-white">
+          <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onQuickView(producto); }} className="flex-1 flex items-center justify-center text-white">
             <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </button>
-          <Link href={`/producto/${producto.slug}`} className="flex-1 flex items-center justify-center text-white">
+          <span className="flex-1 flex items-center justify-center text-white">
             <ExternalLink className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-          </Link>
+          </span>
         </div>
       </div>
 
        <div className="py-1.5 px-2 sm:py-2.5 sm:px-3 w-full text-center flex flex-col items-center">
         <h3 className="text-[9px] min-[360px]:text-[10px] sm:text-[11.5px] font-bold truncate w-full text-slate-900 dark:text-white">{producto.titulo}</h3>
-        <p className="text-[10px] min-[360px]:text-[11px] sm:text-[13.5px] font-extrabold text-[var(--azulCeleste-500)] dark:text-[var(--azulCeleste-500)]">S/ {producto.precio.toFixed(2)}</p>
+        <p className="text-[10px] min-[360px]:text-[11px] sm:text-[13.5px] font-extrabold text-[var(--brand-green)] dark:text-[var(--azulCeleste-500)]">S/ {producto.precio.toFixed(2)}</p>
         <div className="flex justify-center gap-0.5 mt-0.5 sm:mt-0.5">
           {Array.from({ length: 5 }).map((_, idx) => {
             const isFilled = idx < (producto.estrellas ? producto.estrellas.length : 5);
@@ -97,6 +98,7 @@ function OfferCard({
         </div>
       </div>
     </article>
+    </Link>
   );
 }
 
@@ -130,81 +132,9 @@ function OfferBlock({
 
   let productosAMostrar = productos;
   if (titulo === "Las mejores ofertas de productos" || titulo === "Las mejores ofertas de Productos") {
-    productosAMostrar = [
-      {
-        id: 27,
-        titulo: "Programas de Rehabilitación Integral",
-        precio: 60.00,
-        imagen: "/img/Inicio/5/1.png",
-        estrellas: "★★★★★",
-        slug: "programas-rehabilitacion-integral",
-        vendedor: { slug: "norclab", nombre: "Norclab" },
-        categorias: ["Servicios Médicos"]
-      },
-      {
-        id: 36,
-        titulo: "Masajes Corporales",
-        precio: 30.00,
-        imagen: "/img/Inicio/5/2.png",
-        estrellas: "★★★★★",
-        slug: "masajes-corporales",
-        vendedor: { slug: "pimo", nombre: "Pimó" },
-        categorias: ["Bienestar"]
-      },
-      {
-        id: 34,
-        titulo: "Blanqueamiento Dental",
-        precio: 120.00,
-        imagen: "/img/Inicio/5/3.png",
-        estrellas: "★★★★★",
-        slug: "blanqueamiento-dental",
-        vendedor: { slug: "rydent", nombre: "RyDent" },
-        categorias: ["Servicios Médicos"]
-      },
-      {
-        id: 35,
-        titulo: "Diagnóstico Unipolar",
-        precio: 120.00,
-        imagen: "/img/Inicio/5/4.png",
-        estrellas: "★★★★★",
-        slug: "diagnostico-unipolar",
-        vendedor: { slug: "centro-medico", nombre: "Centro Médico" },
-        categorias: ["Servicios Médicos"]
-      }
-    ];
+    productosAMostrar = homeData.ofertasProductos;
   } else if (titulo === "Las mejores ofertas de Servicios" || titulo === "Las mejores ofertas de servicios") {
-    productosAMostrar = [
-      {
-        id: 21,
-        titulo: "Ecografía Obstétrica",
-        precio: 80.00,
-        imagen: "/img/Inicio/4/3.png",
-        estrellas: "★★★★★",
-        slug: "ecografia-obstetrica",
-        vendedor: { slug: "centromedicodigital", nombre: "Centro Médico Digital" },
-        categorias: ["Servicios Médicos"]
-      },
-      {
-        id: 23,
-        titulo: "EXTRACTO DE ALGARROBO",
-        precio: 38.00,
-        imagen: "/img/Inicio/4/1.png",
-        estrellas: "★★★★★",
-        slug: "extracto-de-algarrobo",
-        vendedor: { slug: "riquesascampesinas", nombre: "Riquesas Campesinas" },
-        categorias: ["Digestión Saludable"]
-      },
-      {
-        id: 22,
-        titulo: "Profilaxis /Destartarización",
-        precio: 50.00,
-        imagen: "/img/Inicio/4/2.png",
-        estrellas: "★★★★★",
-        slug: "profilaxis-destartraje-fluor",
-        vendedor: { slug: "rydent", nombre: "RyDent" },
-        categorias: ["Servicios Médicos"]
-      }
-    ];
+    productosAMostrar = homeData.ofertasServicios;
   } else if (productos.length === 0) {
     if (titulo === "Productos Nuevos" || titulo === "Productos nuevos") {
       productosAMostrar = homeData.productosNuevos;
@@ -225,7 +155,7 @@ function OfferBlock({
         <div className="w-[1467px] max-w-full pl-4 md:pl-10 pr-4 space-y-4">
           <h2 className="text-xl md:text-2xl font-bold pl-2 md:pl-8">{titulo}</h2>
 
-          <div className="relative w-full h-[280px] min-[360px]:h-[300px] sm:h-[500px] rounded-2xl sm:rounded-[30px] shadow-2xl overflow-hidden">
+          <div className="relative w-full h-[320px] min-[360px]:h-[340px] sm:h-[540px] rounded-2xl sm:rounded-[30px] shadow-2xl overflow-hidden">
             <div className="absolute inset-0">
               {fallbackImages.map((img, i) => (
                 <div
@@ -241,7 +171,7 @@ function OfferBlock({
               ))}
             </div>
 
-            <div className="absolute inset-0 bg-black/25 backdrop-blur-[1px]" />
+        <div className="absolute inset-0 bg-black/15" />
 
             <div className="relative z-10 h-[200px] flex flex-col items-center justify-center text-center">
               <p className="text-white text-lg font-semibold">
@@ -265,7 +195,7 @@ function OfferBlock({
         <h2 className="text-xl md:text-2xl font-bold pl-2 md:pl-8">{titulo}</h2>
       </div>
 
-      <div className="relative w-[1467px] max-w-full h-[280px] min-[360px]:h-[300px] sm:h-[500px] rounded-2xl sm:rounded-[30px] shadow-2xl overflow-hidden mx-auto">
+      <div className="relative w-[1467px] max-w-full h-[320px] min-[360px]:h-[340px] sm:h-[540px] rounded-2xl sm:rounded-[30px] shadow-2xl overflow-hidden mx-auto">
         <div className="absolute inset-0">
           {fallbackImages.map((img, i) => (
             <div
@@ -281,7 +211,7 @@ function OfferBlock({
           ))}
         </div>
 
-        <div className="absolute inset-0 bg-black/25 backdrop-blur-[1px]" />
+            <div className="absolute inset-0 bg-black/15" />
 
         <div className="relative z-10 p-2 pb-3 min-[360px]:p-3 min-[360px]:pb-4 sm:p-8 sm:pb-10 h-full flex flex-col justify-end">
           <style dangerouslySetInnerHTML={{ __html: `

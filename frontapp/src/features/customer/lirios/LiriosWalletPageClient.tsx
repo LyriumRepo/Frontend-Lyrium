@@ -61,8 +61,8 @@ const TIERS = [
   { min: 1000,  label: 'Flor',         discount: '2%',   color: 'from-cyan-600 to-cyan-400' },
   { min: 2000,  label: 'Ramo',         discount: '2.5%', color: 'from-sky-600 to-sky-400' },
   { min: 3500,  label: 'Jardín',       discount: '3%',   color: 'from-indigo-500 to-indigo-400' },
-  { min: 5500,  label: 'Bosque',       discount: '4%',   color: 'from-violet-600 to-violet-400' },
-  { min: 8000,  label: 'Lirio Épico',  discount: '5%',   color: 'from-amber-500 to-yellow-400' },
+  { min: 5500,  label: 'Bosque',       discount: '3%',   color: 'from-violet-600 to-violet-400' },
+  { min: 8000,  label: 'Lirio Épico',  discount: '3%',   color: 'from-amber-500 to-yellow-400' },
 ];
 
 function getTier(balance: number) {
@@ -211,7 +211,7 @@ export default function LiriosWalletPageClient() {
     <div className="space-y-6">
       <ModuleHeader
         title="Mis Lirios"
-        subtitle="Tus puntos de fidelidad — 1 Lirio = S/ 1 de descuento"
+        subtitle="Tus puntos de fidelidad — 1,000 Lirios = S/ 1 de descuento"
         icon={<><img src="/lirio-icon.png" alt="" className="w-6 h-6 sm:w-7 sm:h-7 object-contain dark:hidden" /><img src="/lirio-icon-night.png" alt="" className="w-6 h-6 sm:w-7 sm:h-7 object-contain hidden dark:block" /></>}
       />
 
@@ -317,12 +317,12 @@ export default function LiriosWalletPageClient() {
                         Valor en descuento
                       </p>
                       <p className="text-white text-xl font-bold">
-                        {hidden ? '••••' : `S/ ${bal.toLocaleString()}.00`}
+                        {hidden ? '••••' : `S/ ${(bal * 0.001).toFixed(2)}`}
                       </p>
                     </div>
                     <div className="bg-white/10 backdrop-blur-md rounded-xl p-3 hover:bg-white/15 transition-colors">
                       <p className="text-white/70 text-[10px] mb-0.5 font-medium">Conversión</p>
-                      <p className="text-white text-xl font-bold">1:1</p>
+                      <p className="text-white text-xl font-bold">1,000:1</p>
                     </div>
                   </div>
 
@@ -409,7 +409,7 @@ export default function LiriosWalletPageClient() {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-xs text-gray-600 dark:text-[var(--text-muted)]">Tasa de conversión</span>
-              <span className="text-sm font-bold text-sky-600 dark:text-emerald-400">1 Lirio = S/ 1</span>
+              <span className="text-sm font-bold text-sky-600 dark:text-emerald-400">1,000 Lirios = S/ 1</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-xs text-gray-600 dark:text-[var(--text-muted)]">Descuento máximo</span>
@@ -437,7 +437,7 @@ export default function LiriosWalletPageClient() {
           <ul className="space-y-2.5 text-xs text-sky-700 dark:text-emerald-300/90 leading-relaxed">
             <li className="flex items-start gap-2">
               <span className="text-sky-500 dark:text-emerald-400 mt-0.5 shrink-0">●</span>
-              <span>1 Lirio = S/ 1.00 gastado en la plataforma</span>
+              <span>10 Lirios por cada S/ 1.00 gastado en la plataforma</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="text-sky-500 dark:text-emerald-400 mt-0.5 shrink-0">●</span>

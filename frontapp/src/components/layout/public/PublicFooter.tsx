@@ -80,6 +80,8 @@ export default function PublicFooter() {
                         <li><Link href="/politicasdeprivacidad" className="hover:text-sky-200 dark:text-[var(--text-secondary)] dark:hover:text-[#9BAF9F] transition-colors">Políticas de privacidad</Link></li>
                         <li><Link href="/terminoscondiciones" className="hover:text-sky-200 dark:text-[var(--text-secondary)] dark:hover:text-[#9BAF9F] transition-colors">Términos y condiciones</Link></li>
                         <li><Link href="/libroreclamaciones" className="hover:text-sky-200 dark:text-[var(--text-secondary)] dark:hover:text-[#9BAF9F] transition-colors">Libro de reclamaciones</Link></li>
+                        <li><Link href="/contactanos" className="hover:text-sky-200 dark:text-[var(--text-secondary)] dark:hover:text-[#9BAF9F] transition-colors">Contáctanos</Link></li>
+                        <li><Link href="/terminoscondiciones#manual" className="hover:text-sky-200 dark:text-[var(--text-secondary)] dark:hover:text-[#9BAF9F] transition-colors">Manual de empaquetado</Link></li>
                     </ul>
                 </div>
 
@@ -94,7 +96,6 @@ export default function PublicFooter() {
                     <ul className={`footer-accordion-content ${openSections['informacion'] ? 'block' : 'hidden'} md:block mt-4 md:mt-4 space-y-3 text-sm`}>
                         <li><Link href="/nosotros" className="hover:text-sky-200 dark:text-[var(--text-secondary)] dark:hover:text-[#9BAF9F] transition-colors">Nosotros</Link></li>
                         <li><Link href="/tiendasregistradas" className="hover:text-sky-200 dark:text-[var(--text-secondary)] dark:hover:text-[#9BAF9F] transition-colors">Tiendas registradas</Link></li>
-                        <li><Link href="/contactanos" className="hover:text-sky-200 dark:text-[var(--text-secondary)] dark:hover:text-[#9BAF9F] transition-colors">Contáctanos</Link></li>
                     </ul>
                 </div>
 

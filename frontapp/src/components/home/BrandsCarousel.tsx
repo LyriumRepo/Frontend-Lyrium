@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { Marca } from '@/types/public';
 
 interface BrandsCarouselProps {
@@ -94,29 +95,24 @@ export default function BrandsCarousel({ marcas }: BrandsCarouselProps) {
               : {}
           }
         >
-          {marcas.map((marca, index) => {
-           
-            const imageNumber = (index % 9) + 1;
-            const localLogo = `/img/inicio/3/${imageNumber}.png`;
-            
-            return (
-              <div
-                key={marca.id}
-                className="flex-shrink-0 w-1/2 sm:w-1/3 lg:w-1/4 xl:w-1/5 snap-start"
-              >
-                <div className="h-38 md:h-46 flex items-center justify-center p-1 bg-white dark:bg-gray-900 w-full">
-                                   <article className="group cursor-pointer transition-all duration-300 w-full h-full relative rounded-2xl overflow-hidden">
-                    <Image
-                      src={localLogo}  
-                      alt={marca.nombre}
-                      fill
-                      className="object-cover transition-all duration-500 group-hover:scale-110 rounded-2xl"  
-                    />
-                  </article>
-                </div>
+          {marcas.map((marca) => (
+            <Link
+              key={marca.id}
+              href={marca.slug ? `/tienda/${marca.slug}` : '/tiendasregistradas'}
+              className="block flex-shrink-0 w-1/2 sm:w-1/3 lg:w-1/4 xl:w-1/5 snap-start"
+            >
+              <div className="h-38 md:h-46 flex items-center justify-center p-1 bg-white dark:bg-gray-900 w-full">
+                <article className="group transition-all duration-300 w-full h-full relative rounded-2xl overflow-hidden">
+                  <Image
+                    src={marca.logo || '/img/no-image.png'}
+                    alt={marca.nombre}
+                    fill
+                    className="object-contain p-2 transition-all duration-500 group-hover:scale-110 rounded-2xl"
+                  />
+                </article>
               </div>
-            );
-          })}
+            </Link>
+          ))}
         </div>
       </div>
     </section>

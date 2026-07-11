@@ -55,7 +55,6 @@ export default function ChatBotWidget() {
     };
 
     const handlePointerDown = useCallback((e: React.PointerEvent) => {
-        if (e.pointerType === 'touch') return;
         if (e.button !== 0) return;
         const el = e.currentTarget as HTMLElement;
         el.setPointerCapture(e.pointerId);
@@ -115,7 +114,7 @@ export default function ChatBotWidget() {
             />
 
             <div
-                className={`fixed bottom-20 right-6 z-[100] ${
+                className={`fixed bottom-16 right-4 sm:bottom-20 sm:right-6 z-[100] ${
                     isOpen && !isMinimized ? 'opacity-0 pointer-events-none scale-90' : 'opacity-100 scale-100'
                 }`}
                 style={{
@@ -177,7 +176,7 @@ export default function ChatBotWidget() {
                     className="shadow-lg hover:scale-110 active:scale-95 transition-transform duration-300 cursor-grab active:cursor-grabbing select-none"
                     aria-label="Abrir chat"
                 >
-                    <div className="bg-gradient-to-br from-sky-600 to-cyan-500 hover:from-sky-500 hover:to-cyan-400 dark:from-[var(--brand-green)] dark:to-[var(--icons-green)] dark:hover:from-emerald-600 dark:hover:to-teal-500 text-white rounded-full w-16 h-16 flex items-center justify-center shadow-xl hover:shadow-2xl transition-all duration-300">
+                    <div className="bg-gradient-to-br from-sky-600 to-cyan-500 hover:from-sky-500 hover:to-cyan-400 dark:from-[var(--brand-green)] dark:to-[var(--icons-green)] dark:hover:from-emerald-600 dark:hover:to-teal-500 text-white rounded-full w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center shadow-xl hover:shadow-2xl transition-all duration-300">
                         <LogoLyrium size="sm" showText={false} frontImg="/img/iconologo.png" circleSize={46} />
                     </div>
                 </button>

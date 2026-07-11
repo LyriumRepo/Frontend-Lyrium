@@ -2,6 +2,7 @@
 
 import { X, Check } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
+import { useFocusTrap } from '@/shared/hooks/useFocusTrap';
 
 interface Props {
     isOpen: boolean;
@@ -14,6 +15,7 @@ interface Props {
 export default function ModalPostCompra({ isOpen, email, onClose, onSync, onOpenRegistro }: Props) {
     const [phase, setPhase] = useState<1 | 2>(1);
     const confettiRef = useRef<boolean>(false);
+    const modalRef = useFocusTrap<HTMLDivElement>(isOpen, onClose);
 
     useEffect(() => {
         if (isOpen && !confettiRef.current) {
@@ -91,7 +93,14 @@ export default function ModalPostCompra({ isOpen, email, onClose, onSync, onOpen
 
             {/* Modal */}
             <div className="fixed inset-0 z-[30000] flex items-center justify-center p-4 overflow-y-auto">
-                <div className="bg-white dark:bg-[var(--bg-card)] w-full max-w-sm shadow-2xl relative flex flex-col rounded-[2rem] overflow-hidden animate-modal-pop">
+                <div
+                    ref={modalRef}
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label="Compra exitosa"
+                    tabIndex={-1}
+                    className="bg-white dark:bg-[var(--bg-card)] w-full max-w-sm shadow-2xl relative flex flex-col rounded-[2rem] overflow-hidden animate-modal-pop"
+                >
 
                     {/* Header */}
                     <div className="relative h-28 shrink-0 flex flex-col items-center justify-center bg-gradient-to-br from-sky-500 to-blue-700 dark:from-emerald-700 dark:to-emerald-800 p-4 text-center">

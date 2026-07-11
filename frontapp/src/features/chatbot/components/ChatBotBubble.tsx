@@ -84,7 +84,7 @@ function renderMarkdown(content: string): ReactNode {
                             {block.lines.map((line, i) => (
                                 <div key={i} className="flex gap-1.5 items-start">
                                     <span className="mt-0.5 flex-shrink-0">•</span>
-                                    <span>{parseInline(line.replace(/^\s*\*\s/, ''), `b${bi}-${i}`)}</span>
+                                    <span className="text-justify [text-align-last:left]">{parseInline(line.replace(/^\s*\*\s/, ''), `b${bi}-${i}`)}</span>
                                 </div>
                             ))}
                         </div>

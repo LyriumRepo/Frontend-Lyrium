@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { Categoria } from '@/types/public';
 
 interface ServicesGridProps {
@@ -114,11 +115,12 @@ export default function ServicesGrid({ categorias }: ServicesGridProps) {
               const localImage = `/img/categorias_de_servicios/${imageNumber}.png`;
 
               return (
-                <div
+                <Link
                   key={categoria.id}
-                  className="flex-shrink-0 w-full min-[480px]:w-[calc(50%-0.5rem)] md:w-[calc(33.333%-0.66rem)] lg:w-[calc(25%-0.75rem)]"
+                  href={categoria.slug ? `/servicios/${categoria.slug}` : '#'}
+                  className="block flex-shrink-0 w-full min-[480px]:w-[calc(50%-0.5rem)] md:w-[calc(33.333%-0.66rem)] lg:w-[calc(25%-0.75rem)]"
                 >
-                  <article className="rounded-[2.5rem] overflow-hidden shadow-md bg-[var(--azulCeleste-100)] dark:bg-[var(--bg-card)] group cursor-default h-56 md:h-64 border border-gray-100 dark:border-[var(--border-subtle)]">
+                  <article className="rounded-[2.5rem] overflow-hidden shadow-md bg-[var(--turquesaClaro-100)] dark:bg-[var(--bg-card)] group cursor-pointer h-60 md:h-72 border border-[var(--turquesa-100)] dark:border-[var(--border-subtle)]">
                     <Image
                       src={localImage}
                       alt={categoria.nombre}
@@ -127,7 +129,7 @@ export default function ServicesGrid({ categorias }: ServicesGridProps) {
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     />
                   </article>
-                </div>
+                </Link>
               );
             })}
           </div>

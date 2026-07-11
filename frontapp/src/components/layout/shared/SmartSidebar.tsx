@@ -205,6 +205,7 @@ export default function SmartSidebar({
                                         <Link
                                             key={module.href}
                                             href={module.href}
+                                            data-tour={module.id ? `nav-${module.id}` : undefined}
                                             className={`
                                                 relative group block transition-all duration-500 overflow-hidden rounded-2xl mb-2
                                                 ${active ? colors.bgActive : colors.hover}

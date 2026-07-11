@@ -36,9 +36,18 @@ export default function CheckoutPage() {
   const [showPostCompra, setShowPostCompra] = useState(false);
   const [showRegistro, setShowRegistro] = useState(false);
   const dismissedRef = useRef(false);
+  const [showResumedBanner, setShowResumedBanner] = useState(false);
 
-  // Reset checkout state on mount so we always start at step 1
-  useEffect(() => { reset(); }, [reset]);
+  // Si el usuario cerró la pestaña, perdió conexión o se quedó sin batería a
+  // mitad del checkout (pasos 2-3), el borrador queda guardado en localStorage
+  // (ver persist() en checkoutStore) y lo retomamos aquí en vez de perderlo.
+  // Los pasos 4-5 son post-envío (confirmación/boleta de una compra ya hecha),
+  // así que esos sí arrancan siempre desde cero para no "revivir" una orden vieja.
+  useEffect(() => {
+    if (currentStep >= 4) reset();
+    else if (currentStep >= 2) setShowResumedBanner(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (currentStep === 4 && !dismissedRef.current) {
@@ -66,6 +75,25 @@ export default function CheckoutPage() {
         </div>
 
         <CheckoutHeader />
+
+        {showResumedBanner && (
+          <div className="max-w-6xl mx-auto px-4 pt-4">
+            <div
+              role="status"
+              className="flex items-center justify-between gap-4 bg-sky-50 dark:bg-emerald-950/30
+              border border-sky-200 dark:border-emerald-800 text-sky-700 dark:text-emerald-400
+              rounded-2xl px-5 py-3 text-sm"
+            >
+              <span>↺ Retomamos tu compra donde la dejaste.</span>
+              <button
+                onClick={() => setShowResumedBanner(false)}
+                className="text-sky-500 hover:text-sky-700 dark:text-emerald-400 dark:hover:text-emerald-300 font-medium"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        )}
 
         {cartError && (
           <div className="max-w-6xl mx-auto px-4 pt-4">

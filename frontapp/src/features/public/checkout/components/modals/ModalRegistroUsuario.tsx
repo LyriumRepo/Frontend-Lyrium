@@ -2,6 +2,7 @@
 
 import { X, Eye, EyeOff, Check } from 'lucide-react';
 import { useState } from 'react';
+import { useFocusTrap } from '@/shared/hooks/useFocusTrap';
 
 interface Props {
     isOpen: boolean;
@@ -13,6 +14,8 @@ export default function ModalRegistroUsuario({ isOpen, email, onClose }: Props) 
     const [showPass, setShowPass] = useState(false);
     const [password, setPassword] = useState('');
     const [status, setStatus] = useState<'idle' | 'loading' | 'success'>('idle');
+
+    const modalRef = useFocusTrap<HTMLDivElement>(isOpen, onClose);
 
     if (!isOpen) return null;
 
@@ -31,7 +34,14 @@ export default function ModalRegistroUsuario({ isOpen, email, onClose }: Props) 
 
             {/* Modal */}
             <div className="fixed inset-0 z-[1600] flex items-center justify-center p-4 animate-fade-in">
-                <div className="bg-white dark:bg-[var(--bg-card)] w-full max-w-md shadow-2xl relative flex flex-col rounded-[2.5rem] overflow-hidden animate-modal-pop max-h-[90vh]">
+                <div
+                    ref={modalRef}
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label="Activar panel de usuario"
+                    tabIndex={-1}
+                    className="bg-white dark:bg-[var(--bg-card)] w-full max-w-md shadow-2xl relative flex flex-col rounded-[2.5rem] overflow-hidden animate-modal-pop max-h-[90vh]"
+                >
 
                     {/* Header */}
                     <div className="relative h-32 shrink-0 flex items-center justify-center bg-gradient-to-br from-sky-400 to-blue-600 dark:from-emerald-600 dark:to-emerald-800">

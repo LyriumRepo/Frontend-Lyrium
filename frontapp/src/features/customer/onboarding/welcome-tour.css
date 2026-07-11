@@ -1,0 +1,117 @@
+/* Tema Lyrium para el tour de bienvenida (driver.js). Aplicado vía popoverClass="lyrium-tour-popover". */
+.driver-popover.lyrium-tour-popover {
+  background: linear-gradient(158deg, var(--turquesaClaro-100) 0%, var(--turquesa-100) 55%, var(--turquesaClaro-100) 100%);
+  border: 1.5px solid var(--brand-teal);
+  border-radius: 20px;
+  padding: 20px;
+  max-width: 320px;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.28), 0 0 0 1px rgba(13, 148, 136, 0.08);
+}
+
+.driver-popover.lyrium-tour-popover .driver-popover-title {
+  color: var(--brand-sky-active);
+  font-weight: 900;
+  font-size: 16px;
+  letter-spacing: -0.01em;
+}
+
+.driver-popover.lyrium-tour-popover .driver-popover-description {
+  color: var(--brand-sky-hover);
+  font-size: 13px;
+  line-height: 1.6;
+  margin-top: 6px;
+}
+
+.driver-popover.lyrium-tour-popover .driver-popover-progress-text {
+  color: var(--brand-sky);
+  font-weight: 700;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.driver-popover.lyrium-tour-popover .driver-popover-close-btn {
+  color: var(--text-placeholder);
+}
+.driver-popover.lyrium-tour-popover .driver-popover-close-btn:hover,
+.driver-popover.lyrium-tour-popover .driver-popover-close-btn:focus {
+  color: var(--brand-sky-active);
+}
+
+.driver-popover.lyrium-tour-popover .driver-popover-footer button {
+  all: unset;
+  box-sizing: border-box;
+  padding: 7px 14px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  border: none;
+  text-shadow: none;
+}
+
+.driver-popover.lyrium-tour-popover .driver-popover-prev-btn {
+  background: var(--bg-muted);
+  color: var(--brand-sky-active);
+}
+.driver-popover.lyrium-tour-popover .driver-popover-prev-btn:hover {
+  background: var(--border-default);
+}
+
+.driver-popover.lyrium-tour-popover .driver-popover-next-btn,
+.driver-popover.lyrium-tour-popover .driver-popover-next-btn.driver-popover-btn-disabled {
+  background: var(--brand-teal);
+  color: #fff;
+  opacity: 1;
+}
+.driver-popover.lyrium-tour-popover .driver-popover-next-btn:hover {
+  background: var(--brand-green);
+}
+
+.driver-popover.lyrium-tour-popover .driver-popover-arrow-side-left { border-right-color: var(--turquesa-100); }
+.driver-popover.lyrium-tour-popover .driver-popover-arrow-side-right { border-left-color: var(--turquesaClaro-100); }
+.driver-popover.lyrium-tour-popover .driver-popover-arrow-side-top { border-bottom-color: var(--turquesaClaro-100); }
+.driver-popover.lyrium-tour-popover .driver-popover-arrow-side-bottom { border-top-color: var(--turquesa-100); }
+
+/* Modo noche — reusa las superficies oscuras de la app */
+.dark .driver-popover.lyrium-tour-popover {
+  background: linear-gradient(158deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+  border-color: rgba(52, 211, 153, 0.25);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(52, 211, 153, 0.06);
+}
+.dark .driver-popover.lyrium-tour-popover .driver-popover-title {
+  color: var(--text-primary);
+}
+.dark .driver-popover.lyrium-tour-popover .driver-popover-description {
+  color: var(--text-secondary);
+}
+.dark .driver-popover.lyrium-tour-popover .driver-popover-progress-text {
+  color: var(--icons-green);
+}
+.dark .driver-popover.lyrium-tour-popover .driver-popover-close-btn {
+  color: var(--text-placeholder);
+}
+.dark .driver-popover.lyrium-tour-popover .driver-popover-close-btn:hover,
+.dark .driver-popover.lyrium-tour-popover .driver-popover-close-btn:focus {
+  color: var(--text-primary);
+}
+.dark .driver-popover.lyrium-tour-popover .driver-popover-prev-btn {
+  background: var(--bg-muted);
+  color: var(--text-primary);
+}
+.dark .driver-popover.lyrium-tour-popover .driver-popover-prev-btn:hover {
+  background: var(--bg-card);
+}
+.dark .driver-popover.lyrium-tour-popover .driver-popover-next-btn {
+  background: var(--brand-green);
+  color: #fff;
+}
+.dark .driver-popover.lyrium-tour-popover .driver-popover-next-btn:hover {
+  background: var(--brand-green-hover);
+}
+.dark .driver-popover.lyrium-tour-popover .driver-popover-arrow-side-left { border-right-color: var(--bg-secondary); }
+.dark .driver-popover.lyrium-tour-popover .driver-popover-arrow-side-right { border-left-color: var(--bg-primary); }
+.dark .driver-popover.lyrium-tour-popover .driver-popover-arrow-side-top { border-bottom-color: var(--bg-primary); }
+.dark .driver-popover.lyrium-tour-popover .driver-popover-arrow-side-bottom { border-top-color: var(--bg-secondary); }

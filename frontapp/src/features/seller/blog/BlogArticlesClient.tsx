@@ -1,56 +1,15 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { createPortal } from 'react-dom';
-import { FileText, Search, Edit, Trash2, Eye, Send, Save, CheckCircle, RotateCcw } from 'lucide-react';
+import { FileText, Plus, Search, Edit, Trash2, Eye, Send, Save, CheckCircle, Folder, Info, AlertCircle, BookOpen, Headphones, Video, Clapperboard } from 'lucide-react';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import BaseButton from '@/components/ui/BaseButton';
 import { BlogEditor } from '@/components/ui/BlogEditor';
 import { GooglePreview } from '@/components/ui/GooglePreview';
 import { blogApi, BlogArticle } from '@/shared/lib/api/bioblogRepository';
-
-// ─── Mobile accordion card ────────────────────────────────────────────────────
-
-function MobileArticleCard({ article: a, statusBadge, onEdit, onDelete }: {
-    article: any;
-    statusBadge: (s: string) => React.ReactNode;
-    onEdit: (a: any) => void;
-    onDelete: (id: number) => void;
-}) {
-    const [expanded, setExpanded] = useState(false);
-    return (
-        <div>
-            <button onClick={() => setExpanded(v => !v)} className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-gray-50 dark:hover:bg-gray-800/30 active:bg-gray-100 transition-colors">
-                <span className="flex-1 text-sm font-semibold text-gray-700 dark:text-gray-300 truncate">{a.title}</span>
-                {statusBadge(a.status)}
-                <svg className={`w-4 h-4 flex-shrink-0 text-gray-400 transition-transform ${expanded ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                </svg>
-            </button>
-            {expanded && (
-                <div className="px-4 pb-3.5 grid grid-cols-3 gap-3 border-t border-gray-50 dark:border-gray-800/50">
-                    <div>
-                        <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-1">Vistas</p>
-                        <span className="text-sm font-bold text-gray-600 dark:text-gray-400">{a.views_count}</span>
-                    </div>
-                    <div>
-                        <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-1">Fecha</p>
-                        <span className="text-xs text-gray-400">{a.published_at ? new Date(a.published_at).toLocaleDateString('es-PE') : new Date(a.created_at).toLocaleDateString('es-PE')}</span>
-                    </div>
-                    <div>
-                        <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-1">Acciones</p>
-                        <div className="flex gap-2">
-                            <button onClick={() => onEdit(a)} className="p-1.5 rounded-lg hover:bg-sky-50 dark:hover:bg-sky-900/20 text-sky-500 transition"><Edit className="w-4 h-4" /></button>
-                            <button onClick={() => onDelete(a.id)} className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-red-400 transition"><Trash2 className="w-4 h-4" /></button>
-                        </div>
-                    </div>
-                </div>
-            )}
-        </div>
-    );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
+import { blogApi as publicBlogApi } from '@/shared/lib/api/blog';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 export function BlogArticlesClient() {
     const [articles, setArticles] = useState<BlogArticle[]>([]);
@@ -59,16 +18,14 @@ export function BlogArticlesClient() {
     const [statusFilter, setStatusFilter] = useState('');
     const [showEditor, setShowEditor] = useState(false);
     const [editingId, setEditingId] = useState<number | null>(null);
-    const [form, setForm] = useState({ title: '', summary: '', content: '', main_image: '', blog_category_id: '' as any, meta_title: '', meta_description: '', slug: '', keywords: [] as string[], status: 'draft' });
+    const [categories, setCategories] = useState<{ id: number; name: string; slug: string }[]>([]);
+    const [form, setForm] = useState({ title: '', summary: '', content: '', main_image: '', blog_category_id: '' as any, is_featured: false, meta_title: '', meta_description: '', slug: '', keywords: [] as string[], status: 'draft' });
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [previewHtml, setPreviewHtml] = useState<string | null>(null);
     const editorRef = useRef<HTMLDivElement>(null);
-    const [mounted, setMounted] = useState(false);
 
-    useEffect(() => {
-        setMounted(true);
-    }, []);
+    const pathname = usePathname();
 
     const loadArticles = useCallback(async () => {
         setLoading(true); setError(null);
@@ -83,15 +40,19 @@ export function BlogArticlesClient() {
 
     useEffect(() => { loadArticles(); }, [loadArticles]);
 
+    useEffect(() => {
+        publicBlogApi.getCategories().then(setCategories).catch(() => {});
+    }, []);
+
     const openCreate = () => {
         setEditingId(null); setError(null); setPreviewHtml(null);
-        setForm({ title: '', summary: '', content: '', main_image: '', blog_category_id: '', meta_title: '', meta_description: '', slug: '', keywords: [], status: 'draft' });
+        setForm({ title: '', summary: '', content: '', main_image: '', blog_category_id: '', is_featured: false, meta_title: '', meta_description: '', slug: '', keywords: [], status: 'draft' });
         setShowEditor(true);
     };
 
     const openEdit = (a: BlogArticle) => {
         setEditingId(a.id); setError(null); setPreviewHtml(null);
-        setForm({ title: a.title || '', summary: a.summary || '', content: a.content || '', main_image: a.main_image || '', blog_category_id: a.blog_category_id ?? '', meta_title: a.meta_title || '', meta_description: a.meta_description || '', slug: a.slug || '', keywords: a.keywords || [], status: a.status });
+        setForm({ title: a.title, summary: a.summary || '', content: a.content || '', main_image: a.main_image || '', blog_category_id: a.blog_category_id ?? '', is_featured: a.is_featured ?? false, meta_title: a.meta_title || '', meta_description: a.meta_description || '', slug: a.slug || '', keywords: a.keywords || [], status: a.status });
         setShowEditor(true);
     };
 
@@ -99,7 +60,7 @@ export function BlogArticlesClient() {
         if (!form.title.trim()) return;
         setSaving(true); setError(null);
         try {
-            const payload = { ...form, status, blog_category_id: form.blog_category_id || null, slug: form.slug || undefined };
+            const payload = { ...form, is_featured: form.is_featured, status, blog_category_id: form.blog_category_id || null, slug: form.slug || undefined };
             if (editingId) await blogApi.articles.update(editingId, payload);
             else await blogApi.articles.create(payload);
             setShowEditor(false); loadArticles();
@@ -124,63 +85,90 @@ export function BlogArticlesClient() {
     };
 
     const statusBadge = (s: string) => {
-        const map: Record<string, string> = { draft: 'bg-gray-100 dark:bg-gray-800 text-gray-500', review: 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400', published: 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400', archived: 'bg-red-100 dark:bg-red-900/30 text-red-500' };
-        return <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${map[s] || map.draft}`}>{s}</span>;
+        const map: Record<string, string> = {
+            draft: 'bg-gray-100 dark:bg-gray-800 text-gray-500',
+            pending_review: 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400',
+            approved: 'bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400',
+            rejected: 'bg-gray-200 dark:bg-gray-700 text-gray-400',
+            published: 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400',
+            archived: 'bg-gray-200 dark:bg-gray-700 text-gray-400',
+        };
+        const labels: Record<string, string> = {
+            draft: 'Borrador', pending_review: 'En revisión', approved: 'Aprobado',
+            rejected: 'Rechazado', published: 'Publicado', archived: 'Archivado',
+        };
+        return <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${map[s] || map.draft}`}>{labels[s] || s}</span>;
     };
 
-    const actions = [
-        { key: 'draft', label: 'Guardar Borrador', icon: Save, className: 'bg-gray-500 hover:bg-gray-600' },
-        { key: 'review', label: 'Enviar Revisión', icon: Send, className: 'bg-amber-500 hover:bg-amber-600' },
-        { key: 'published', label: 'Publicar', icon: CheckCircle, className: 'bg-emerald-500 hover:bg-emerald-600' },
+    const updateStatus = async (id: number, status: string) => {
+        try { await blogApi.articles.update(id, { status }); loadArticles(); }
+        catch (e: any) { setError(e.message); }
+    };
+
+    const BLOG_TABS = [
+        { label: 'Dashboard', href: '/seller/blog', icon: BookOpen },
+        { label: 'Artículos', href: '/seller/blog/articles', icon: FileText },
+        { label: 'Podcasts', href: '/seller/blog/podcasts', icon: Headphones },
+        { label: 'Vídeos', href: '/seller/blog/videos', icon: Video },
+        { label: 'Shorts', href: '/seller/blog/shorts', icon: Clapperboard },
     ];
 
     return (
         <div className="space-y-6 animate-fadeIn font-industrial pb-20">
-            <div className="[&_h1]:!whitespace-normal [&_h1]:!break-words [&_h2]:!whitespace-normal [&_h2]:!break-words [&_p]:!whitespace-normal">
-                <ModuleHeader title="Artículos" subtitle="Gestiona tus artículos de blog" icon="FileText" />
+            <ModuleHeader title="BioBlog" subtitle="Artículos" icon="FileText"
+                actions={<BaseButton onClick={openCreate} variant="primary" leftIcon="Plus" size="md">Nuevo Artículo</BaseButton>} />
+
+            <div className="flex gap-1 p-1 bg-gray-100 dark:bg-[var(--bg-muted)] rounded-2xl overflow-x-auto">
+                {BLOG_TABS.map(tab => {
+                    const isActive = pathname === tab.href;
+                    return (
+                        <Link
+                            key={tab.href}
+                            href={tab.href}
+                            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-wider whitespace-nowrap transition-all ${
+                                isActive
+                                    ? 'bg-white dark:bg-[var(--bg-card)] text-teal-600 dark:text-teal-400 shadow-sm border border-gray-200/50 dark:border-teal-500/20'
+                                    : 'text-gray-400 dark:text-[var(--text-muted)] hover:text-gray-600 dark:hover:text-gray-300'
+                            }`}
+                        >
+                            <tab.icon className="w-4 h-4" />
+                            {tab.label}
+                        </Link>
+                    );
+                })}
             </div>
 
-            {/* Buscador + filtro */}
-            <div className="bg-[var(--bg-card)] p-6 sm:p-8 rounded-[2.5rem] shadow-xl border border-[var(--border-subtle)] animate-fadeIn">
-                <div className="flex items-center justify-between gap-4 mb-6">
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-[var(--brand-green)] rounded-2xl flex items-center justify-center shadow-lg shrink-0">
-                            <FileText className="w-6 h-6 text-white" />
-                        </div>
-                        <div>
-                            <h2 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-widest">Artículos</h2>
-                            <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wide">
-                                {articles.length} artículo{articles.length !== 1 ? 's' : ''}
-                            </p>
-                        </div>
-                    </div>
-                    <button
-                        onClick={() => { setSearch(''); setStatusFilter(''); }}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-sky-400 dark:from-emerald-700 dark:to-teal-600 text-white font-black text-[10px] uppercase tracking-widest shadow-lg shadow-sky-500/25 dark:shadow-emerald-900/25 hover:shadow-xl hover:-translate-y-0.5 transition-all"
-                        title="Limpiar Filtros"
-                    >
-                        <RotateCcw className="w-4 h-4" />
-                        <span className="hidden sm:inline">Limpiar</span>
-                    </button>
+            {/* Workflow guide */}
+            <div className="bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-950/30 dark:to-cyan-950/20 rounded-2xl border border-teal-200/50 dark:border-teal-800/30 p-4 flex items-start gap-3">
+                <Info className="w-5 h-5 text-teal-500 mt-0.5 flex-shrink-0" />
+                <div className="text-sm text-teal-700 dark:text-teal-300 leading-relaxed">
+                    <span className="font-bold">Flujo de contenido:</span>{' '}
+                    <span className="inline-flex items-center gap-1.5 flex-wrap">
+                        <span className="px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-500 text-xs font-bold">Borrador</span>
+                        <span className="text-teal-400">→</span>
+                        <span className="px-2 py-0.5 rounded-md bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400 text-xs font-bold">En revisión</span>
+                        <span className="text-teal-400">→</span>
+                        <span className="px-2 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold">Publicado</span>
+                    </span>
+                    <br />
+                    <span className="text-xs text-teal-600/70 dark:text-teal-400/70">Crea un borrador, luego envíalo a revisión. Un administrador lo aprobará y podrás publicarlo.</span>
                 </div>
+            </div>
 
-                <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
-                    <div className="relative flex-1">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-secondary)] pointer-events-none" />
-                        <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar artículos..." className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-none focus:border-sky-500/50 dark:focus:border-[#8FC3A1]/50 transition-colors" />
-                    </div>
-                    <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] text-sm text-[var(--text-primary)]">
-                        <option value="">Todos</option>
-                        <option value="draft">Borrador</option>
-                        <option value="review">Revisión</option>
-                        <option value="published">Publicado</option>
-                        <option value="archived">Archivado</option>
-                    </select>
+            <div className="flex gap-4 items-center">
+                <div className="relative flex-1 max-w-md">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar artículos..." className="w-full pl-10 pr-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200 focus:outline-none focus:border-teal-500 transition" />
                 </div>
-
-                <div className="flex flex-wrap items-center justify-center gap-3 mt-6 pt-5 border-t border-[var(--border-subtle)]">
-                    <BaseButton onClick={openCreate} variant="primary" leftIcon="Plus" size="lg">Nuevo Artículo</BaseButton>
-                </div>
+                <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200">
+                    <option value="">Todos</option>
+                    <option value="draft">Borrador</option>
+                    <option value="pending_review">En revisión</option>
+                    <option value="approved">Aprobado</option>
+                    <option value="rejected">Rechazado</option>
+                    <option value="published">Publicado</option>
+                    <option value="archived">Archivado</option>
+                </select>
             </div>
 
             {error && <div className="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 p-4 rounded-2xl border border-red-200 dark:border-red-800">{error}</div>}
@@ -188,67 +176,85 @@ export function BlogArticlesClient() {
             <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
                 {loading ? <div className="p-20 text-center text-gray-400">Cargando...</div>
                 : articles.length === 0 ? <div className="p-20 text-center text-gray-400">Sin artículos</div>
-                : (
-                    <>
-                        {/* ══ MÓVIL: accordion (sm:hidden) ══ */}
-                        <div className="sm:hidden divide-y divide-gray-50 dark:divide-gray-800/50">
-                            {articles.map(a => <MobileArticleCard key={a.id} article={a} statusBadge={statusBadge} onEdit={openEdit} onDelete={handleDelete} />)}
-                        </div>
-
-                        {/* ══ DESKTOP: tabla (hidden sm:block) ══ */}
-                        <div className="hidden sm:block overflow-x-auto">
-                            <table className="w-full text-sm">
-                                <thead>
-                                    <tr className="border-b border-gray-100 dark:border-gray-800 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider">
-                                        <th className="px-5 py-4">Título</th>
-                                        <th className="px-5 py-4">Estado</th>
-                                        <th className="px-5 py-4">Vistas</th>
-                                        <th className="px-5 py-4">Fecha</th>
-                                        <th className="px-5 py-4 w-28">Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {articles.map(a => (
-                                        <tr key={a.id} className="border-b border-gray-50 dark:border-gray-800/50 hover:bg-gray-50 dark:hover:bg-gray-800/30 transition">
-                                            <td className="px-5 py-4 font-semibold text-gray-700 dark:text-gray-300 max-w-xs truncate">{a.title}</td>
-                                            <td className="px-5 py-4">{statusBadge(a.status)}</td>
-                                            <td className="px-5 py-4 text-gray-500">{a.views_count}</td>
-                                            <td className="px-5 py-4 text-xs text-gray-400">{a.published_at ? new Date(a.published_at).toLocaleDateString('es-PE') : new Date(a.created_at).toLocaleDateString('es-PE')}</td>
-                                            <td className="px-5 py-4"><div className="flex gap-2">
-                                                <button onClick={() => openEdit(a)} className="p-1.5 rounded-lg hover:bg-sky-50 dark:hover:bg-sky-900/20 text-sky-500 transition"><Edit className="w-4 h-4" /></button>
-                                                <button onClick={() => handleDelete(a.id)} className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-red-400 transition"><Trash2 className="w-4 h-4" /></button>
-                                            </div></td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    </>
-                )}
+                : <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                        <thead>
+                            <tr className="border-b border-gray-100 dark:border-gray-800 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                                <th className="px-5 py-4">Título</th>
+                                <th className="px-5 py-4">Estado</th>
+                                <th className="px-5 py-4">Vistas</th>
+                                <th className="px-5 py-4">Fecha</th>
+                                <th className="px-5 py-4 w-28">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {articles.map(a => (
+                                <tr key={a.id} className="border-b border-gray-50 dark:border-gray-800/50 hover:bg-gray-50 dark:hover:bg-gray-800/30 transition">
+                                    <td className="px-5 py-4 font-semibold text-gray-700 dark:text-gray-300 max-w-xs truncate">{a.title}</td>
+                                    <td className="px-5 py-4">{statusBadge(a.status)}</td>
+                                    <td className="px-5 py-4 text-gray-500">{a.views_count}</td>
+                                    <td className="px-5 py-4 text-xs text-gray-400">{a.published_at ? new Date(a.published_at).toLocaleDateString('es-PE') : new Date(a.created_at).toLocaleDateString('es-PE')}</td>
+                                    <td className="px-5 py-4"><div className="flex gap-1.5 items-center">
+                                        {a.status === 'draft' && (
+                                            <button onClick={() => updateStatus(a.id, 'pending_review')} className="px-2.5 py-1.5 text-[11px] font-bold uppercase rounded-lg bg-teal-500 hover:bg-teal-600 text-white transition">
+                                                <Send className="w-3 h-3 inline mr-1" />Enviar
+                                            </button>
+                                        )}
+                                        {a.status === 'pending_review' && (
+                                            <span className="px-2.5 py-1.5 text-[11px] font-bold uppercase rounded-lg bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400">En revisión</span>
+                                        )}
+                                        {a.status === 'approved' && (
+                                            <>
+                                                <button onClick={() => updateStatus(a.id, 'published')} className="px-2.5 py-1.5 text-[11px] font-bold uppercase rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white transition">
+                                                    <CheckCircle className="w-3 h-3 inline mr-1" />Publicar
+                                                </button>
+                                                <button onClick={() => updateStatus(a.id, 'draft')} className="px-2.5 py-1.5 text-[11px] font-bold uppercase rounded-lg bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 text-gray-700 dark:text-gray-300 transition">
+                                                    Borrador
+                                                </button>
+                                            </>
+                                        )}
+                                        {a.status === 'rejected' && (
+                                            <span className="px-2.5 py-1.5 text-[11px] font-bold uppercase rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-500">Rechazado</span>
+                                        )}
+                                        {a.status === 'published' && (
+                                            <button onClick={() => updateStatus(a.id, 'approved')} className="px-2.5 py-1.5 text-[11px] font-bold uppercase rounded-lg bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 text-gray-700 dark:text-gray-300 transition">
+                                                Ocultar
+                                            </button>
+                                        )}
+                                        {a.status === 'archived' && (
+                                            <span className="px-2.5 py-1.5 text-[11px] font-bold uppercase rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-400">Archivado</span>
+                                        )}
+                                        <button onClick={() => openEdit(a)} className="p-1.5 rounded-lg hover:bg-teal-50 dark:hover:bg-teal-900/20 text-teal-500 transition"><Edit className="w-4 h-4" /></button>
+                                        <button onClick={() => handleDelete(a.id)} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 transition"><Trash2 className="w-4 h-4" /></button>
+                                    </div></td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>}
             </div>
 
-            {showEditor && mounted && document.getElementById('modal-root') && createPortal(
+            {showEditor && (
                 <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 backdrop-blur-sm overflow-y-auto py-10" onClick={() => setShowEditor(false)}>
                     <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 w-full max-w-4xl mx-4 p-6 space-y-5" onClick={e => e.stopPropagation()} ref={editorRef}>
+                        <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200">{editingId ? 'Editar Artículo' : 'Nuevo Artículo'}</h3>
 
-                        {/* Header del modal */}
-                        <div className="flex items-center justify-between">
-                            <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200">{editingId ? 'Editar Artículo' : 'Nuevo Artículo'}</h3>
-                            <button onClick={() => setShowEditor(false)} className="w-8 h-8 flex items-center justify-center rounded-xl text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition">
-                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                            </button>
-                        </div>
-
-                        {/* Título — col-span-2 en desktop; campo imagen baja en móvil */}
-                        <div className="flex flex-col sm:grid sm:grid-cols-3 gap-4">
-                            <div className="sm:col-span-2">
-                                <label className="block text-xs font-semibold text-gray-500 mb-1">Título *</label>
+                        {/* Encabezado */}
+                        <div className="grid grid-cols-3 gap-4">
+                            <div className="col-span-2">
+                                <label className="block text-xs font-semibold text-gray-500 mb-1">
+                                    Título *
+                                    <span title="Elige un título llamativo y descriptivo para captar la atención."><Info className="w-3.5 h-3.5 inline ml-1 text-gray-300" /></span>
+                                </label>
                                 <input type="text" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-base font-bold bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200 focus:outline-none focus:border-sky-500 transition" placeholder="Título del artículo (máx 2 líneas)" />
                             </div>
                             <div>
-                                <label className="block text-xs font-semibold text-gray-500 mb-1">Imagen principal</label>
+                                <label className="block text-xs font-semibold text-gray-500 mb-1">
+                                    Imagen principal
+                                    <span title="URL de la imagen que aparecerá en la portada del artículo. Recomendado: 1024x1024px."><Info className="w-3.5 h-3.5 inline ml-1 text-gray-300" /></span>
+                                </label>
                                 <div className="flex gap-2">
-                                    <input type="text" value={form.main_image} onChange={e => setForm(f => ({ ...f, main_image: e.target.value }))} className="flex-1 min-w-0 px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200" placeholder="URL 1024x1024" />
+                                    <input type="text" value={form.main_image} onChange={e => setForm(f => ({ ...f, main_image: e.target.value }))} className="flex-1 px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200" placeholder="URL 1024x1024" />
                                 </div>
                                 {form.main_image && <img src={form.main_image} alt="" className="mt-2 w-16 h-16 rounded-lg object-cover border border-gray-200" />}
                             </div>
@@ -257,6 +263,69 @@ export function BlogArticlesClient() {
                         <div>
                             <label className="block text-xs font-semibold text-gray-500 mb-1">Resumen</label>
                             <textarea value={form.summary} onChange={e => setForm(f => ({ ...f, summary: e.target.value }))} rows={2} className="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200 focus:outline-none focus:border-sky-500 transition" placeholder="Resumen (máx 4 líneas)" />
+                            <p className="text-[10px] text-gray-400 mt-1">Aparecerá en la vista previa del artículo en el listado del BioBlog.</p>
+                        </div>
+
+                        <div>
+                            <label className="block text-xs font-semibold text-gray-500 mb-2 flex items-center gap-1.5">
+                                <Folder className="w-3.5 h-3.5" /> Categoría
+                                <span title="Agrupa tu artículo por tema para que los usuarios lo encuentren más fácilmente."><Info className="w-3.5 h-3.5 text-gray-300" /></span>
+                            </label>
+                            <div className="flex flex-wrap gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setForm(f => ({ ...f, blog_category_id: '' }))}
+                                    className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all ${
+                                        !form.blog_category_id
+                                            ? 'bg-teal-500 text-white shadow-md'
+                                            : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+                                    }`}
+                                >
+                                    Sin categoría
+                                </button>
+                                {categories.map(cat => (
+                                    <button
+                                        key={cat.id}
+                                        type="button"
+                                        onClick={() => setForm(f => ({ ...f, blog_category_id: cat.id }))}
+                                        className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all ${
+                                            form.blog_category_id === cat.id
+                                                ? 'bg-teal-500 text-white shadow-md'
+                                                : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+                                        }`}
+                                    >
+                                        {cat.name}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Destacado */}
+                        <div className="flex items-center justify-between p-4 bg-teal-50 dark:bg-teal-900/10 rounded-2xl border border-teal-200/50 dark:border-teal-500/20">
+                            <div className="flex items-center gap-3">
+                                <div className="w-9 h-9 rounded-xl bg-teal-100 dark:bg-teal-500/20 flex items-center justify-center">
+                                    <svg className="w-5 h-5 text-teal-600 dark:text-teal-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                </div>
+                                <div>
+                                    <p className="text-sm font-bold text-teal-800 dark:text-teal-300">Artículo Destacado</p>
+                                    <p className="text-xs text-teal-600 dark:text-teal-400/70">Aparecerá en la sección Destacados del BioBlog</p>
+                                </div>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setForm(f => ({ ...f, is_featured: !f.is_featured }))}
+                                className={`relative w-14 h-7 rounded-full transition-colors duration-300 ${
+                                    form.is_featured
+                                        ? 'bg-teal-500 dark:bg-teal-600'
+                                        : 'bg-gray-200 dark:bg-gray-700'
+                                }`}
+                            >
+                                <span
+                                    className={`absolute top-0.5 left-0.5 w-6 h-6 bg-white rounded-full shadow-md transition-transform duration-300 ${
+                                        form.is_featured ? 'translate-x-7' : ''
+                                    }`}
+                                />
+                            </button>
                         </div>
 
                         {/* Editor visual */}
@@ -273,19 +342,32 @@ export function BlogArticlesClient() {
 
                         {/* SEO */}
                         <div className="border-t border-gray-100 dark:border-gray-800 pt-4">
-                            <h4 className="text-sm font-bold text-gray-600 dark:text-gray-400 mb-3">SEO</h4>
+                            <h4 className="text-sm font-bold text-gray-600 dark:text-gray-400 mb-1 flex items-center gap-1.5">
+                                SEO
+                                <span title="El SEO ayuda a que tu artículo aparezca en Google. Personaliza estos campos para mejorar el posicionamiento."><Info className="w-3.5 h-3.5 text-gray-300" /></span>
+                            </h4>
+                            <p className="text-[10px] text-gray-400 mb-3">Personaliza cómo aparece tu artículo en los resultados de búsqueda.</p>
                             <div className="grid grid-cols-2 gap-4 mb-4">
                                 <div>
-                                    <label className="block text-xs font-semibold text-gray-500 mb-1">Meta Title</label>
+                                    <label className="block text-xs font-semibold text-gray-500 mb-1">
+                                        Meta Title
+                                        <span title="Título que aparece en los resultados de Google. Si lo dejas vacío, se usará el título del artículo. Máx 60 caracteres."><Info className="w-3.5 h-3.5 inline ml-1 text-gray-300" /></span>
+                                    </label>
                                     <input type="text" value={form.meta_title} onChange={e => setForm(f => ({ ...f, meta_title: e.target.value }))} className="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200" placeholder={form.title} />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-semibold text-gray-500 mb-1">Slug</label>
+                                    <label className="block text-xs font-semibold text-gray-500 mb-1">
+                                        Slug
+                                        <span title="URL amigable del artículo. Déjalo vacío para generarlo automáticamente desde el título. Ej: beneficios-de-la-miel"><Info className="w-3.5 h-3.5 inline ml-1 text-gray-300" /></span>
+                                    </label>
                                     <input type="text" value={form.slug} onChange={e => setForm(f => ({ ...f, slug: e.target.value }))} className="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm font-mono bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200" placeholder="mi-articulo" />
                                 </div>
                             </div>
                             <div className="mb-3">
-                                <label className="block text-xs font-semibold text-gray-500 mb-1">Meta Description</label>
+                                <label className="block text-xs font-semibold text-gray-500 mb-1">
+                                    Meta Description
+                                    <span title="Descripción corta que aparece en los resultados de búsqueda. Si la dejas vacía, se usará el resumen del artículo. Máx 160 caracteres."><Info className="w-3.5 h-3.5 inline ml-1 text-gray-300" /></span>
+                                </label>
                                 <textarea value={form.meta_description} onChange={e => setForm(f => ({ ...f, meta_description: e.target.value }))} rows={2} className="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200" placeholder={form.summary} />
                             </div>
                             <GooglePreview
@@ -303,16 +385,13 @@ export function BlogArticlesClient() {
                             <button onClick={() => { setPreviewHtml(form.content); window.open('', 'preview')?.document.write(form.content); }} className="flex items-center gap-1.5 px-5 py-2.5 text-sm font-semibold text-gray-600 bg-gray-100 dark:bg-gray-800 rounded-xl hover:bg-gray-200 transition">
                                 <Eye className="w-4 h-4" /> Vista Previa
                             </button>
-                            {actions.map(action => (
-                                <button key={action.key} onClick={() => saveWithStatus(action.key)} disabled={saving || !form.title.trim()}
-                                    className={`flex items-center gap-1.5 px-5 py-2.5 text-sm font-semibold text-white rounded-xl transition disabled:opacity-50 ${action.className}`}>
-                                    <action.icon className="w-4 h-4" /> {saving ? 'Guardando...' : action.label}
-                                </button>
-                            ))}
+                            <button onClick={() => saveWithStatus(form.status)} disabled={saving || !form.title.trim()}
+                                className="flex items-center gap-1.5 px-6 py-2.5 text-sm font-semibold text-white bg-teal-500 hover:bg-teal-600 rounded-xl transition disabled:opacity-50">
+                                <Save className="w-4 h-4" /> {saving ? 'Guardando...' : (editingId ? 'Guardar Cambios' : 'Crear Borrador')}
+                            </button>
                         </div>
                     </div>
-                </div>,
-                document.getElementById('modal-root')!
+                </div>
             )}
         </div>
     );

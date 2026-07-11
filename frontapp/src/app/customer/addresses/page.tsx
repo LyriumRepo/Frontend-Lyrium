@@ -150,11 +150,11 @@ export default function CustomerAddressesPage() {
   const getLabelStyles = (etiqueta: string | undefined) => {
     switch (etiqueta) {
       case 'casa':
-        return { icon: 'Home', grad: 'from-sky-500 to-[#11B4FC] dark:from-[var(--icons-green)] dark:to-lime-200', color: 'text-sky-500 dark:text-[var(--icons-green)]', label: 'Casa' };
+        return { icon: 'Home', grad: 'from-sky-500 to-sky-400 dark:from-[var(--icons-green)] dark:to-lime-200', color: 'text-sky-500 dark:text-[var(--icons-green)]', label: 'Casa' };
       case 'trabajo':
-        return { icon: 'Building2', grad: 'from-[#11B4FC] to-[#95EA64] dark:from-[var(--icons-green)] dark:to-lime-200', color: 'text-blue-500 dark:text-[var(--icons-green)]', label: 'Trabajo' };
+        return { icon: 'Building2', grad: 'from-sky-400 to-lime-300 dark:from-[var(--icons-green)] dark:to-lime-200', color: 'text-blue-500 dark:text-[var(--icons-green)]', label: 'Trabajo' };
       case 'otro':
-        return { icon: 'MapPin', grad: 'from-[#95EA64] to-[#F1C40F] dark:from-[var(--icons-green)] dark:to-lime-200', color: 'text-emerald-500 dark:text-[var(--icons-green)]', label: 'Otro' };
+        return { icon: 'MapPin', grad: 'from-lime-300 to-yellow-400 dark:from-[var(--icons-green)] dark:to-lime-200', color: 'text-emerald-500 dark:text-[var(--icons-green)]', label: 'Otro' };
       default:
         return { icon: 'MapPin', grad: 'from-gray-500 to-gray-600 dark:from-[var(--icons-green)] dark:to-lime-200', color: 'text-gray-500 dark:text-[var(--icons-green)]', label: 'Otro' };
     }
@@ -201,7 +201,7 @@ export default function CustomerAddressesPage() {
           return (
             <div
               key={address.id}
-              className={`rounded-[2.5rem] shadow-2xl overflow-hidden group/card hover:-translate-y-2 transition-all duration-500 ${address.is_default ? 'bg-gradient-to-br from-emerald-50 to-sky-50 dark:from-[#1a3a2a]/40 dark:to-[#0d1a12]/60 ring-2 ring-emerald-300 dark:ring-[#4A7C59]/50' : 'bg-white dark:bg-[var(--bg-secondary)]'}`}
+              className={`rounded-[2.5rem] shadow-2xl overflow-hidden group/card hover:-translate-y-2 transition-all duration-500 ${address.is_default ? 'bg-gradient-to-br from-emerald-50 to-sky-50 dark:from-[var(--brand-green)]/40 dark:to-[var(--bg-primary)]/60 ring-2 ring-emerald-300 dark:ring-[var(--icons-green)]/50' : 'bg-white dark:bg-[var(--bg-secondary)]'}`}
             >
               <div className={`h-2 bg-gradient-to-r ${styles.grad}`}></div>
               <div className="p-8">
@@ -210,7 +210,7 @@ export default function CustomerAddressesPage() {
                     <Icon name={styles.icon as any} className={`w-7 h-7 ${styles.color}`} />
                   </div>
                   {address.is_default && (
-                    <span className="px-3 py-1 bg-gradient-to-r from-emerald-500 to-sky-500 dark:from-[var(--brand-green)] dark:to-[#4A7C59] text-white text-[9px] font-black uppercase rounded-full shadow-sm flex items-center gap-1">
+                    <span className="px-3 py-1 bg-gradient-to-r from-emerald-500 to-sky-500 dark:from-[var(--brand-green)] dark:to-[var(--icons-green)] text-white text-[9px] font-black uppercase rounded-full shadow-sm flex items-center gap-1">
                       <Icon name="Star" className="w-3 h-3 fill-current" />
                       Principal
                     </span>
@@ -243,7 +243,7 @@ export default function CustomerAddressesPage() {
                 <div className="flex gap-3">
                   <button
                     onClick={() => openEditModal(address)}
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gray-100 dark:bg-[var(--bg-muted)] text-gray-600 dark:text-gray-400 dark:text-[var(--text-primary)] text-xs font-bold hover:bg-sky-50 dark:hover:bg-[#2A3F33] hover:text-sky-600 dark:hover:text-[var(--icons-green)] transition-all"
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gray-100 dark:bg-[var(--bg-muted)] text-gray-600 dark:text-gray-400 dark:text-[var(--text-primary)] text-xs font-bold hover:bg-sky-50 dark:hover:bg-[var(--bg-hover)] hover:text-sky-600 dark:hover:text-[var(--icons-green)] transition-all"
                   >
                     <Icon name="Pencil" className="w-4 h-4" />
                     Editar
@@ -251,7 +251,7 @@ export default function CustomerAddressesPage() {
                   <button
                     onClick={() => setAsDefault(address.id)}
                     title={address.is_default ? 'Dirección principal actual' : 'Establecer como dirección principal'}
-                    className={`group w-12 h-12 flex items-center justify-center rounded-xl transition-all duration-200 ${address.is_default ? 'bg-sky-100 dark:bg-[var(--brand-green)]/30 text-sky-600 dark:text-[var(--icons-green)] hover:bg-sky-200 dark:hover:bg-[var(--brand-green)]/40 ring-2 ring-sky-400 dark:ring-[var(--icons-green)]/60' : 'bg-sky-50 dark:bg-[var(--bg-muted)] text-sky-500 dark:text-[var(--icons-green)] hover:bg-sky-100 dark:hover:bg-[#2A3F33]'} hover:scale-110 active:scale-95`}
+                    className={`group w-12 h-12 flex items-center justify-center rounded-xl transition-all duration-200 ${address.is_default ? 'bg-sky-100 dark:bg-[var(--brand-green)]/30 text-sky-600 dark:text-[var(--icons-green)] hover:bg-sky-200 dark:hover:bg-[var(--brand-green)]/40 ring-2 ring-sky-400 dark:ring-[var(--icons-green)]/60' : 'bg-sky-50 dark:bg-[var(--bg-muted)] text-sky-500 dark:text-[var(--icons-green)] hover:bg-sky-100 dark:hover:bg-[var(--bg-hover)]'} hover:scale-110 active:scale-95`}
                   >
                     <Icon name="Star" className={`w-5 h-5 transition-all duration-200 group-hover:rotate-12 ${address.is_default ? 'fill-current text-sky-600 dark:text-[var(--icons-green)]' : ''}`} style={address.is_default ? { fill: 'currentColor' } : undefined} />
                   </button>
@@ -289,7 +289,7 @@ export default function CustomerAddressesPage() {
             className="bg-white dark:bg-[var(--bg-secondary)] rounded-[3.5rem] max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[#1A3A32] dark:to-[var(--brand-green)] p-8 text-white relative">
+            <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[var(--brand-green-hover)] dark:to-[var(--brand-green)] p-8 text-white relative">
               <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl" />
               <div className="relative z-10 flex items-center justify-between">
                 <div className="flex items-center gap-4">
@@ -474,13 +474,13 @@ export default function CustomerAddressesPage() {
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="flex-1 px-8 py-4 rounded-2xl bg-gray-100 dark:bg-[var(--bg-muted)] text-gray-600 dark:text-gray-400 dark:text-[var(--text-primary)] font-black text-xs uppercase tracking-widest hover:bg-gray-200 dark:hover:bg-[#2A3F33]"
+                  className="flex-1 px-8 py-4 rounded-2xl bg-gray-100 dark:bg-[var(--bg-muted)] text-gray-600 dark:text-gray-400 dark:text-[var(--text-primary)] font-black text-xs uppercase tracking-widest hover:bg-gray-200 dark:hover:bg-[var(--bg-hover)]"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="flex-[2] px-8 py-4 rounded-2xl bg-gradient-to-r from-sky-500 to-sky-600 dark:from-[#1A3A32] dark:to-[var(--brand-green)] text-white font-black text-xs uppercase tracking-[0.2em] hover:shadow-lg"
+                  className="flex-[2] px-8 py-4 rounded-2xl bg-gradient-to-r from-sky-500 to-sky-600 dark:from-[var(--brand-green-hover)] dark:to-[var(--brand-green)] text-white font-black text-xs uppercase tracking-[0.2em] hover:shadow-lg"
                 >
                   Guardar Dirección
                 </button>

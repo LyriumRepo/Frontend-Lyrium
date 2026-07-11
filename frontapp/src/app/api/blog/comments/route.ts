@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
     }
 
     try {
-        const comments = await blogApi.getComments(parseInt(postId));
+        const comments = await blogApi.getComments({ post_id: parseInt(postId) });
         return NextResponse.json(comments);
     } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error';

@@ -317,6 +317,7 @@ export class LaravelHomeRepository implements IHomeRepository {
             return brands.map((b: any) => ({
                 id: b.id,
                 nombre: b.nombre || b.name || '',
+                slug: b.slug || '',
                 logo: transformUrl(b.logo),
             }));
         } catch {

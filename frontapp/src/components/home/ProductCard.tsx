@@ -26,7 +26,7 @@ export default function ProductCard({ producto, minWidth }: ProductCardProps) {
   return (
     <Link
       href={producto.slug ? `/producto/${producto.slug}` : producto.enlace ?? '#'}
-      className="block bg-[var(--azulCeleste-100)] dark:bg-[var(--bg-card)] rounded-2xl shadow-sm border border-gray-100 dark:border-[var(--border-subtle)] overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group"
+      className="block bg-[var(--turquesaClaro-100)] dark:bg-[var(--bg-card)] rounded-2xl shadow-sm border border-[var(--turquesa-100)] dark:border-[var(--border-subtle)] overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group"
       style={minWidth ? { minWidth } : undefined}
       aria-label={`Ver detalles de ${producto.titulo}`}
     >

@@ -171,7 +171,7 @@ function NewTicketForm({
                     <button
                         type="submit"
                         disabled={isSubmitting || !subject.trim() || !description.trim()}
-                        className="flex-1 px-4 py-2.5 bg-[#2E6A4F] text-white rounded-xl font-bold text-xs uppercase tracking-wider hover:opacity-90 transition-all disabled:opacity-50 shadow-sm"
+                        className="flex-1 px-4 py-2.5 bg-[var(--brand-green)] text-white rounded-xl font-bold text-xs uppercase tracking-wider hover:opacity-90 transition-all disabled:opacity-50 shadow-sm"
                     >
                         {isSubmitting ? 'Creando...' : 'Crear Ticket'}
                     </button>
@@ -350,7 +350,7 @@ export function SupportPageClient() {
                     >
                         <Icon name="ChevronLeft" className="w-4 h-4" />
                     </button>
-                    <div className="w-10 h-10 shrink-0 rounded-full bg-[#2E6A4F] flex items-center justify-center text-white shadow-sm">
+                    <div className="w-10 h-10 shrink-0 rounded-full bg-[var(--brand-green)] flex items-center justify-center text-white shadow-sm">
                         <Icon name="Headset" className="w-5 h-5" />
                     </div>
                     <div className="min-w-0 flex-1">

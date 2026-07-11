@@ -45,6 +45,7 @@ export interface Producto {
 export interface Marca {
   id: number;
   nombre: string;
+  slug?: string;
   logo: string;
 }
 

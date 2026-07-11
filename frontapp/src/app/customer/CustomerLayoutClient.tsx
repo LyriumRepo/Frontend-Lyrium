@@ -9,7 +9,7 @@ import { useAuth } from '@/shared/lib/context/AuthContext';
 import Icon from '@/components/ui/Icon';
 import ChatBotWidget from '@/features/chatbot/components/ChatBotWidget';
 import NotificationSidebar from '@/components/shared/notifications/NotificationSidebar';
-import { WELCOME_MODAL_LIGHT_TEXT, WELCOME_MODAL_LIGHT_BADGE } from '@/shared/lib/theme/welcomeModalTheme';
+import { WELCOME_MODAL_LIGHT_TEXT, WELCOME_MODAL_LIGHT_BADGE, WELCOME_MODAL_LIGHT_CARD } from '@/shared/lib/theme/welcomeModalTheme';
 
 interface CustomerLayoutClientProps {
     children: React.ReactNode;
@@ -240,10 +240,9 @@ function CustomerWelcomeToast() {
         spark2:      'rgba(6,182,212,0.4)',
     } : {
         overlay:     'radial-gradient(ellipse 72% 62% at 50% 38%, rgba(13,148,136,0.22) 0%, rgba(15,23,42,0.76) 82%)',
-        cardBg:      'linear-gradient(158deg, rgba(255,255,255,0.99) 0%, rgba(240,253,250,0.99) 55%, rgba(245,255,252,0.99) 100%)',
         cardShadow:  'inset 0 0 0 1.5px rgba(16,185,129,0.35), inset 0 0 80px rgba(16,185,129,0.05), 0 32px 80px rgba(0,0,0,0.38), 0 0 120px rgba(16,185,129,0.12)',
         glowTop:     'radial-gradient(ellipse at 50% -20%, rgba(16,185,129,0.10) 0%, transparent 70%)',
-        shimmer:     'linear-gradient(108deg, transparent 28%, rgba(255,255,255,0.6) 50%, transparent 72%)',
+        ...WELCOME_MODAL_LIGHT_CARD,
         ...WELCOME_MODAL_LIGHT_BADGE,
         ...WELCOME_MODAL_LIGHT_TEXT,
         closeBg:     'rgba(0,0,0,0.05)',
@@ -264,6 +263,7 @@ function CustomerWelcomeToast() {
 
             {/* Overlay */}
             <div
+                data-lyrium-welcome-toast=""
                 className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
                 style={{
                     backdropFilter: 'blur(22px) saturate(160%)',
@@ -764,10 +764,9 @@ function BirthdayToast() {
         spark2:     'rgba(6,182,212,0.45)',
     } : {
         overlay:    'radial-gradient(ellipse 70% 60% at 50% 40%, rgba(13,148,136,0.18) 0%, rgba(15,23,42,0.60) 80%)',
-        cardBg:     'linear-gradient(158deg, rgba(255,255,255,0.99) 0%, rgba(240,253,250,0.99) 55%, rgba(245,255,252,0.99) 100%)',
         cardShadow: 'inset 0 0 0 1px rgba(16,185,129,0.14), inset 0 0 70px rgba(16,185,129,0.05), 0 32px 80px rgba(0,0,0,0.22), 0 0 120px rgba(16,185,129,0.08)',
         glowTop:    'radial-gradient(ellipse at 50% -20%, rgba(16,185,129,0.10) 0%, transparent 70%)',
-        shimmer:    'linear-gradient(108deg, transparent 28%, rgba(255,255,255,0.6) 50%, transparent 72%)',
+        ...WELCOME_MODAL_LIGHT_CARD,
         logoBg:     'rgba(16,185,129,0.07)',
         logoBorder: '1px solid rgba(16,185,129,0.18)',
         logoText:   'rgba(5,150,105,0.85)',

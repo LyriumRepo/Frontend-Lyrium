@@ -41,7 +41,7 @@ export default function CustomerSecurityPage() {
         <div className="lg:col-span-8 space-y-8">
           <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-[2.5rem] shadow-2xl overflow-hidden">
             {/* Header de la card */}
-            <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[var(--brand-green)] dark:to-[#1A3A32] p-8 relative overflow-hidden">
+            <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-8 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl" />
               <div className="flex items-center gap-5 text-white relative z-10">
                 <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30">
@@ -60,7 +60,7 @@ export default function CustomerSecurityPage() {
 
             {/* Sección label */}
             <div className="border-b border-gray-100 dark:border-[var(--border-subtle)] bg-gray-50/50 dark:bg-[var(--bg-muted)]/50 p-6">
-              <div className="flex items-center gap-3 text-sky-600 dark:text-[#6BAF7B]">
+              <div className="flex items-center gap-3 text-sky-600 dark:text-[var(--icons-green)]">
                 <Icon name="Key" className="w-5 h-5" />
                 <span className="text-xs font-black uppercase tracking-widest">
                   Gestión de Contraseña
@@ -80,7 +80,7 @@ export default function CustomerSecurityPage() {
           <div className="bg-white dark:bg-[var(--bg-secondary)] p-8 rounded-[2.5rem] shadow-2xl">
             {/* Tips header */}
             <div className="flex items-center gap-4 mb-6">
-              <div className="w-12 h-12 bg-gradient-to-br from-sky-400 to-sky-600 dark:from-[var(--brand-green)] dark:to-[#1A3A32] rounded-2xl flex items-center justify-center">
+              <div className="w-12 h-12 bg-gradient-to-br from-sky-400 to-sky-600 dark:from-[var(--brand-green)] dark:to-[var(--brand-green-hover)] rounded-2xl flex items-center justify-center">
                 <Icon name="ShieldCheck" className="w-6 h-6 text-white" />
               </div>
               <div>
@@ -98,13 +98,13 @@ export default function CustomerSecurityPage() {
               {[
                 {
                   icon: 'Shield',
-                  color: 'text-sky-500',
+                  color: 'text-sky-500 dark:text-[var(--icons-green)]',
                   title: 'Usa una contraseña única',
                   desc: 'No reutilices contraseñas de otras cuentas.',
                 },
                 {
                   icon: 'RotateCcw',
-                  color: 'text-sky-500',
+                  color: 'text-sky-500 dark:text-[var(--icons-green)]',
                   title: 'Cambia regularmente',
                   desc: 'Recomendamos cada 3 a 6 meses.',
                 },

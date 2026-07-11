@@ -11,6 +11,7 @@ import BaseButton from '@/components/ui/BaseButton';
 import Icon from '@/components/ui/Icon';
 import { useSellerProfile } from '@/features/seller/profile/hooks/useSellerProfile';
 import type { VendorProfileData } from '@/features/seller/profile/types';
+import { useToast } from '@/shared/lib/context/ToastContext';
 
 interface ProfilePageClientProps {
     // TODO Tarea 3: Recibir datos iniciales del Server Component
@@ -74,6 +75,7 @@ export function ProfilePageClient(_props: ProfilePageClientProps) {
     const [isEditMode, setIsEditMode] = useState(false);
     const [photoError, setPhotoError] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const { showToast } = useToast();
 
     const EDIT_FIELD_CLASSES = "bg-white dark:bg-[var(--bg-card)] ring-sky-500/10 px-3 py-1 rounded-xl border-2 border-sky-100 dark:border-[var(--border-subtle)]";
     const READONLY_FIELD_CLASSES = "px-3 py-1";
@@ -102,8 +104,16 @@ export function ProfilePageClient(_props: ProfilePageClientProps) {
 
     const toggleEditMode = async () => {
         if (isEditMode) {
-            await updateProfile(data);
-            setIsEditMode(false);
+            try {
+                await updateProfile(data);
+                setIsEditMode(false);
+                showToast('Cambios guardados correctamente.', 'success');
+            } catch (err) {
+                showToast(
+                    err instanceof Error ? err.message : 'No se pudo guardar el perfil. Intenta nuevamente.',
+                    'error',
+                );
+            }
         } else {
             setIsEditMode(true);
         }

@@ -16,7 +16,7 @@
 #vendedoresPanel {
     padding: 10px 0;
     overflow-y: auto;
-    height: calc(100vh - 130px);
+    min-height: calc(100vh - 130px);
     scrollbar-width: none;
     -ms-overflow-style: none;
 }

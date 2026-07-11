@@ -14,16 +14,18 @@ interface LoginPanelProps {
     onClearError: () => void;
 }
 
-const LABELS: Record<UserType, { title: string; subtitle: string; placeholder: string }> = {
+const LABELS: Record<UserType, { title: string; subtitle: string; placeholder: string; campoLabel: string }> = {
     vendedor: {
         title: 'Inicia sesión como vendedor',
         subtitle: 'Ingresa tus credenciales para acceder al panel de vendedor.',
-        placeholder: 'Nombre de tu tienda o admin'
+        placeholder: 'tu@email.com',
+        campoLabel: 'Vendedor'
     },
     cliente: {
         title: 'Inicia sesión como cliente',
         subtitle: 'Ingresa tus credenciales para acceder a tu cuenta.',
-        placeholder: 'tu@email.com'
+        placeholder: 'tu@email.com',
+        campoLabel: 'Usuario'
     }
 };
 
@@ -89,7 +91,7 @@ export function LoginPanel({
                 <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-5" noValidate>
                     <div>
                         <label htmlFor="login-email" className="block text-sm font-semibold text-slate-700 dark:text-[var(--text-primary)] mb-2">
-                            {userType === 'vendedor' ? 'Usuario / Nombre de Tienda' : 'Usuario'} <span className="text-red-500">*</span>
+                            {labels.campoLabel} <span className="text-red-500">*</span>
                         </label>
                         <div className="relative">
                             <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" aria-hidden="true" />
@@ -103,7 +105,7 @@ export function LoginPanel({
                                 autoComplete="username"
                                 required
                                 aria-required="true"
-                                aria-label={userType === 'vendedor' ? 'Nombre de tienda o usuario' : 'Correo electrónico'}
+                                aria-label={userType === 'vendedor' ? 'Usuario' : 'Correo electrónico'}
                                 className="w-full py-2.5 sm:py-3.5 pl-12 pr-4 border-2 border-slate-200 dark:border-[var(--border-subtle)] rounded-xl text-sm text-slate-700 dark:text-[var(--text-primary)] bg-slate-50 dark:bg-[var(--bg-primary)] focus:outline-none
                                 focus:border-sky-500 dark:focus:border-[var(--icons-green)] focus:bg-white dark:focus:bg-[var(--bg-secondary)] focus:shadow-[0_0_0_4px_rgba(66,153,225,0.1)] transition-all duration-300"
                             />

@@ -153,6 +153,30 @@ export function AuthContainer({ onSuccess }: AuthContainerProps) {
 
                 {/* Right Side - Forms */}
                 <div className="relative w-full sm:ml-auto sm:w-[60%] p-4 sm:p-10 flex flex-col">
+                    {/* Mobile header — visible only on small screens */}
+                    <div className="sm:hidden relative -mx-4 -mt-4 mb-6 px-4 pt-10 pb-6 bg-[linear-gradient(to_bottom_right,rgba(14,165,233,0.9),rgba(132,204,22,0.9))] dark:bg-[linear-gradient(to_bottom_right,var(--brand-green),var(--icons-green),var(--brand-green-hover))] text-white text-center overflow-hidden rounded-b-[20px]">
+                        <img src="/img/intro/Flor6.png" alt="decoración" className="absolute -bottom-8 -left-24 w-[350px] max-w-none opacity-40 mix-blend-overlay pointer-events-none" />
+                        <div className="relative z-10">
+                            <h2 className="text-xl font-black mb-2">
+                                {isRegister
+                                    ? (userType === 'vendedor' ? 'Haz crecer tu marca con nosotros.' : 'Únete a Lyrium')
+                                    : (userType === 'vendedor' ? '¡Qué gusto verte de nuevo!' : '¡Bienvenido de nuevo!')}
+                            </h2>
+                            <p className="text-white/90 text-sm max-w-xs mx-auto">
+                                {isRegister
+                                    ? (userType === 'vendedor' ? 'Únete a la comunidad de vendedores más grande y gestiona tus pedidos en un solo lugar.' : 'Crea tu cuenta y descubre los mejores productos naturales y saludables.')
+                                    : (userType === 'vendedor' ? 'Accede a tu panel para revisar tus ventas de hoy y actualizar tu inventario.' : 'Accede a tu cuenta para realizar tus compras y gestionar tus pedidos.')}
+                            </p>
+                            <button
+                                type="button"
+                                onClick={toggleMode}
+                                className="mt-4 py-3 px-6 bg-white text-sky-500 dark:text-[var(--brand-green)] rounded-xl font-bold text-xs uppercase tracking-wider shadow-md"
+                            >
+                                {isRegister ? 'Iniciar Sesión' : (userType === 'vendedor' ? 'Registrarse como vendedor' : 'Crear cuenta')}
+                            </button>
+                        </div>
+                    </div>
+
                     <UserTypeToggle
                         value={userType}
                         onChange={(type) => {

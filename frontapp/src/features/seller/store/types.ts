@@ -82,6 +82,7 @@ export interface PlanCapabilities {
     max_main_banners: number;
     sticker_types: string[];
     layouts: number[];
+    can_training: boolean;
     can_bioblog: boolean;
     can_export_csv: boolean;
     can_export_excel: boolean;

@@ -81,6 +81,13 @@ export const sellerNavigation: PanelNavigation = [
             //     href: '/seller/logistics'
             // },
             {
+                id: 'capacitaciones',
+                label: 'Capacitaciones',
+                description: 'Videos de formación para impulsar tu negocio',
+                icon: 'Video',
+                href: '/seller/training'
+            },
+            {
                 id: 'finanzas',
                 label: 'Centro de Finanzas',
                 description: 'Monitoreo en tiempo real de tus KPIs estratégicos y monetarios',

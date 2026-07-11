@@ -130,7 +130,7 @@ export function InvoicesPageClient() {
 
   if (isLoading && confirmations.length === 0) {
     return (
-      <div className="flex flex-col h-[calc(100vh-140px)] animate-fadeIn">
+      <div className="flex flex-col min-h-[400px] animate-fadeIn">
         <ModuleHeader title="Mis Confirmaciones de Pago" subtitle="Historial de pagos realizados" icon="CheckCircle" />
         <div className="flex-1 flex items-center justify-center">
           <BaseLoading message="Cargando confirmaciones..." />
@@ -140,7 +140,7 @@ export function InvoicesPageClient() {
   }
 
   return (
-    <div className="flex flex-col min-h-[calc(100vh-140px)] animate-fadeIn">
+    <div className="flex flex-col min-h-[400px] animate-fadeIn">
       <ModuleHeader
         title="Mis Confirmaciones de Pago"
         subtitle="Historial de pagos realizados en tus compras"
@@ -148,7 +148,7 @@ export function InvoicesPageClient() {
         actions={
           <button
             onClick={() => { setFechaInicio(''); setFechaFin(''); loadConfirmations(1); }}
-            className="p-2.5 bg-white dark:bg-[var(--bg-secondary)] border border-gray-200 dark:border-[var(--border-subtle)] rounded-xl hover:bg-gray-50 dark:hover:bg-[#1A3A32] transition-colors"
+            className="p-2.5 bg-white dark:bg-[var(--bg-secondary)] border border-gray-200 dark:border-[var(--border-subtle)] rounded-xl hover:bg-gray-50 dark:hover:bg-[var(--bg-card)] transition-colors"
             title="Actualizar"
           >
             <Icon name="RefreshCw" className="w-4 h-4 text-gray-500" />
@@ -156,10 +156,10 @@ export function InvoicesPageClient() {
         }
       />
 
-      <div className="px-8 mb-6">
+      <div className="px-4 sm:px-8 mb-6">
         <div className="bg-white dark:bg-[var(--bg-secondary)] p-5 rounded-[2rem] border border-gray-100 dark:border-[var(--border-subtle)] shadow-sm">
           <div className="flex items-center gap-2 mb-4">
-            <div className="w-8 h-8 bg-gradient-to-br from-sky-400 to-sky-600 dark:from-[var(--brand-green)] dark:to-[#1A3A32] rounded-xl flex items-center justify-center shadow-sm">
+            <div className="w-8 h-8 bg-gradient-to-br from-sky-400 to-sky-600 dark:from-[var(--brand-green)] dark:to-[var(--brand-green-hover)] rounded-xl flex items-center justify-center shadow-sm">
               <Icon name="Search" className="w-4 h-4 text-white" />
             </div>
             <h3 className="text-sm font-black text-gray-800 dark:text-[var(--text-primary)]">
@@ -184,16 +184,16 @@ export function InvoicesPageClient() {
       </div>
 
       {error && (
-        <div className="mx-8 mb-6 p-4 rounded-2xl bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800 flex items-start gap-3">
+        <div className="mx-4 sm:mx-8 mb-6 p-4 rounded-2xl bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800 flex items-start gap-3">
           <Icon name="AlertCircle" className="w-5 h-5 text-rose-500 shrink-0 mt-0.5" />
           <p className="text-sm font-semibold text-rose-700 dark:text-rose-400">{error}</p>
         </div>
       )}
 
-      <div className="flex-1 px-8 pb-8">
+      <div className="flex-1 px-4 sm:px-8 pb-8">
         {confirmations.length === 0 && !isLoading ? (
           <div className="flex flex-col items-center justify-center h-full text-center py-20">
-            <div className="w-20 h-20 rounded-full bg-gray-100 dark:bg-[#1A3A32] flex items-center justify-center mb-6">
+            <div className="w-20 h-20 rounded-full bg-gray-100 dark:bg-[var(--bg-card)] flex items-center justify-center mb-6">
               <Icon name="CheckCircle" className="w-10 h-10 text-gray-300 dark:text-[var(--text-muted)]" />
             </div>
             <h3 className="text-lg font-black text-gray-900 dark:text-[var(--text-primary)]">Sin confirmaciones de pago</h3>
@@ -214,7 +214,7 @@ export function InvoicesPageClient() {
             <button
               onClick={() => loadConfirmations(pagination.page - 1)}
               disabled={pagination.page <= 1}
-              className="px-4 py-2 rounded-xl bg-white dark:bg-[var(--bg-secondary)] border border-gray-200 dark:border-[var(--border-subtle)] text-xs font-bold disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-[#1A3A32]"
+              className="px-4 py-2 rounded-xl bg-white dark:bg-[var(--bg-secondary)] border border-gray-200 dark:border-[var(--border-subtle)] text-xs font-bold disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-[var(--bg-card)]"
             >
               Anterior
             </button>
@@ -224,7 +224,7 @@ export function InvoicesPageClient() {
             <button
               onClick={() => loadConfirmations(pagination.page + 1)}
               disabled={pagination.page >= pagination.totalPages}
-              className="px-4 py-2 rounded-xl bg-white dark:bg-[var(--bg-secondary)] border border-gray-200 dark:border-[var(--border-subtle)] text-xs font-bold disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-[#1A3A32]"
+              className="px-4 py-2 rounded-xl bg-white dark:bg-[var(--bg-secondary)] border border-gray-200 dark:border-[var(--border-subtle)] text-xs font-bold disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-[var(--bg-card)]"
             >
               Siguiente
             </button>

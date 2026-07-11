@@ -298,7 +298,7 @@ export default function ClientRescheduleModal({
         onClick={(e) => e.stopPropagation()}
       >
         {/* ─── Header ───────────────────────────────────────────────────── */}
-        <div className="bg-gradient-to-r from-sky-500 to-sky-400 dark:from-[var(--brand-green-hover)] dark:to-[var(--brand-green)] p-5 text-white relative flex-shrink-0">
+        <div className="bg-gradient-to-r from-sky-500 to-sky-400 dark:from-[var(--brand-green-hover)] dark:to-[var(--brand-green)] p-4 sm:p-5 text-white relative flex-shrink-0">
           <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl pointer-events-none" />
           <div className="relative z-10 flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -324,7 +324,7 @@ export default function ClientRescheduleModal({
         </div>
 
         {/* ─── Body (scrollable) ────────────────────────────────────────── */}
-        <div className="p-5 space-y-4 overflow-y-auto flex-1">
+        <div className="p-4 sm:p-5 space-y-4 overflow-y-auto flex-1">
 
           {/* ── VIEW: blocked_same_day ───────────────────────────────── */}
           {view === 'blocked_same_day' && (
@@ -429,14 +429,14 @@ export default function ClientRescheduleModal({
                 <>
                   {/* Banner info */}
                   <div className="flex items-start gap-2.5 p-3 rounded-xl bg-sky-50 dark:bg-sky-500/10 border border-sky-100 dark:border-sky-500/20">
-                    <Icon name="Info" className="w-4 h-4 text-sky-500 flex-shrink-0 mt-0.5" />
+                    <Icon name="Info" className="w-4 h-4 text-sky-500 dark:text-[var(--icons-green)] flex-shrink-0 mt-0.5" />
                     <p className="text-[10px] font-bold text-sky-700 dark:text-sky-300 leading-relaxed">
                       El centro de salud necesita mínimo 24 horas de anticipación. El día de hoy está inhabilitado.
                     </p>
                   </div>
 
                   {/* Calendario */}
-                  <div className="space-y-2 bg-sky-50 dark:bg-[#1A3A32] p-3 rounded-2xl">
+                  <div className="space-y-2 bg-sky-50 dark:bg-[var(--bg-card)] p-3 rounded-2xl">
                     <div className="flex items-center justify-between">
                       <button
                         onClick={() => { if (canGoPrev) { setCurrentMonth(new Date(year, month - 1, 1)); setSelectedDate(null); } }}
@@ -477,7 +477,7 @@ export default function ClientRescheduleModal({
                             onClick={() => setSelectedDate(date)}
                             className={`relative h-8 w-full rounded-lg text-[11px] font-black transition-all
                               ${isPast ? 'text-gray-300 dark:text-gray-500 opacity-20 cursor-not-allowed' : ''}
-                              ${isToday && !isSelected ? 'bg-sky-100 dark:bg-[var(--brand-green)]/20 text-sky-500 dark:text-[var(--icons-green)] opacity-50 cursor-not-allowed line-through ring-2 ring-sky-300/50 dark:ring-[var(--icons-green)]/30 ring-offset-1 ring-offset-sky-50 dark:ring-offset-[#1A3A32]' : ''}
+                              ${isToday && !isSelected ? 'bg-sky-100 dark:bg-[var(--brand-green)]/20 text-sky-500 dark:text-[var(--icons-green)] opacity-50 cursor-not-allowed line-through ring-2 ring-sky-300/50 dark:ring-[var(--icons-green)]/30 ring-offset-1 ring-offset-sky-50 dark:ring-offset-[var(--bg-card)]' : ''}
                               ${selectable && !isSelected ? 'text-gray-700 dark:text-[var(--text-primary)] hover:bg-sky-200 dark:hover:bg-white/10 hover:text-sky-500 dark:hover:text-[var(--icons-green)] cursor-pointer' : ''}
                               ${isSelected ? 'bg-sky-500 dark:bg-[var(--brand-green)] text-white shadow-md shadow-sky-500/20 dark:shadow-[var(--icons-green)]/20' : ''}
                             `}

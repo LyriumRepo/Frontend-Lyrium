@@ -16,6 +16,12 @@ export const adminNavigation: PanelNavigation = [
                 href: '/admin/sellers/solicitudes',
                 icon: 'ListChecks',
             },
+            {
+                id: 'trainings',
+                label: 'Capacitaciones',
+                href: '/admin/trainings',
+                icon: 'Video',
+            },
         ],
     },
     {

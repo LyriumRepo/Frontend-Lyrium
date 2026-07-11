@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
 
 export type DocType        = 'DNI' | 'CE' | 'PAS';
 export type DeliveryMethod = 'pickup' | 'delivery' | 'service_store' | 'service_home';
@@ -265,7 +266,7 @@ const defaultOrder: OrderData = {
   liriosDiscount:          0,
 };
 
-export const useCheckoutStore = create<CheckoutState>((set) => ({
+export const useCheckoutStore = create<CheckoutState>()(persist((set) => ({
   currentStep:  1,
   isProcessing: false,
   cartLoading:  false,
@@ -343,4 +344,19 @@ export const useCheckoutStore = create<CheckoutState>((set) => ({
   setSelectedTipoEntrega: (t) => set({ selectedTipoEntrega: t }),
   setLoadingQuotes:       (v) => set({ isLoadingQuotes: v }),
   setQuotesError:         (e) => set({ quotesError: e }),
+}),
+{
+  name: 'lyrium-checkout-draft',
+  storage: createJSONStorage(() => localStorage),
+  // Solo persistimos lo que el usuario escribió a mano — no carrito (viene del
+  // servidor), ni flags de carga/error, ni resultado de orden/pago (evita
+  // reabrir un modal de pago o "revivir" una orden ya procesada).
+  partialize: (state) => ({
+    currentStep: state.currentStep,
+    personalData: state.personalData,
+    shippingData: state.shippingData,
+    orderData: state.orderData,
+    selectedCourier: state.selectedCourier,
+    selectedTipoEntrega: state.selectedTipoEntrega,
+  }),
 }));

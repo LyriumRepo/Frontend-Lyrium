@@ -23,13 +23,15 @@ export default function ThemeToggle({
     if (!mounted) {
         return (
             <div className={buttonClassName}>
-                <Image
-                    src="/img/iconologo.png"
-                    alt="Modo Bio"
-                    width={28}
-                    height={28}
-                    className={imageClassName}
-                />
+                <span className={`relative block ${imageClassName}`}>
+                    <Image
+                        src="/img/iconologo.png"
+                        alt="Modo Bio"
+                        fill
+                        sizes="48px"
+                        className="object-contain"
+                    />
+                </span>
             </div>
         );
     }
@@ -74,13 +76,15 @@ export default function ThemeToggle({
                 className={`${buttonClassName} hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] transition-colors`}
                 aria-label={getLabel()}
             >
-                <Image
-                    src={image.src}
-                    alt={image.alt}
-                    width={30}
-                    height={30}
-                    className={imageClassName}
-                />
+                <span className={`relative block ${imageClassName}`}>
+                    <Image
+                        src={image.src}
+                        alt={image.alt}
+                        fill
+                        sizes="48px"
+                        className="object-contain"
+                    />
+                </span>
             </button>
 
             <span

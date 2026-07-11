@@ -56,7 +56,7 @@ export const ContratosModule: React.FC<ContratosModuleProps> = ({ state, actions
         return (
             <div className="space-y-8 animate-fadeIn pb-20 text-left font-industrial">
                 {/* KPI SKELETONS */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     {[1, 2, 3, 4].map((i) => (
                         <div key={`kpi-skel-${i}`} className="bg-[var(--bg-card)] p-6 rounded-[2rem] shadow-sm space-y-4 border border-[var(--border-subtle)]">
                             <Skeleton className="h-4 w-24 rounded" />

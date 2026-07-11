@@ -71,7 +71,7 @@ export default function PublicHeader() {
                         />
                     </Link>
 
-                    <div className="flex items-center gap-1.5 min-[360px]:gap-3 sm:gap-5 text-xs lg:text-[13px] text-sky-600 dark:text-[var(--color-success)]">
+                    <div className="flex items-center gap-2 min-[360px]:gap-3 sm:gap-5 text-xs lg:text-[13px] text-sky-600 dark:text-[var(--color-success)]">
                         {isAuthenticated && user ? (
                             <div className="flex items-center gap-1 sm:gap-3">
                                 <span className="relative flex flex-col sm:flex-row items-center gap-0.5 sm:gap-1 p-1 min-[360px]:p-2 sm:p-2.5">
@@ -115,8 +115,8 @@ export default function PublicHeader() {
                         </div>
 
                         <ThemeToggle
-                            buttonClassName="p-1 min-[360px]:p-2 sm:p-2.5 rounded-xl"
-                            imageClassName="w-5 h-5 min-[360px]:w-6 min-[360px]:h-6 sm:w-9 sm:h-9 object-contain"
+                            buttonClassName="p-1.5 min-[360px]:p-2 sm:p-2.5 rounded-xl"
+                            imageClassName="w-7 h-7 min-[360px]:w-8 min-[360px]:h-8 sm:w-9 sm:h-9 object-contain"
                         />
 
                         {/* Hamburger button (mobile/tablet) */}

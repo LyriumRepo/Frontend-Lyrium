@@ -12,7 +12,6 @@ import {
     DigestionSaludableSection,
 } from '@/components/home';
 
-import { home } from '@/shared/lib/api';
 import { LaravelHomeRepository } from '@/shared/lib/api/laravel';
 import type { HomeSection } from '@/shared/lib/api/laravel/LaravelHomeRepository';
 import type { Banner, Categoria, Producto, Marca, Beneficio, BannersPub } from '@/types/public';
@@ -50,7 +49,7 @@ export default async function HomePage() {
             repo.getOnSaleProducts(12, 'service'),
             repo.getNewProducts(12),
             repo.getBenefits(),
-            home.getBannersPub(),
+            repo.getBannersPub(),
             repo.getCategories(),
         ]);
 

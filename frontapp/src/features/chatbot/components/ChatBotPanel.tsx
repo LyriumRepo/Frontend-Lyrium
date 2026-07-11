@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
+import { ChevronDown } from 'lucide-react';
 import type { ChatBotMessage } from '../types';
 import ChatBotHeader from './ChatBotHeader';
 import ChatBotBubble from './ChatBotBubble';
@@ -41,7 +42,20 @@ export default function ChatBotPanel({
     tooltipAnimKey,
 }: Props) {
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const messagesContainerRef = useRef<HTMLDivElement>(null);
+    const [showScrollBottom, setShowScrollBottom] = useState(false);
     const mobileKeyboardViewport = useMobileKeyboardViewport();
+
+    const handleScroll = useCallback(() => {
+        const el = messagesContainerRef.current;
+        if (!el) return;
+        const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+        setShowScrollBottom(distanceFromBottom > 100);
+    }, []);
+
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    };
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -61,7 +75,7 @@ export default function ChatBotPanel({
          */
         <div
             className={`fixed z-[100] transition-all duration-300 ease-out
-                inset-x-0 bottom-0 h-[85vh] max-h-[640px] pb-[env(safe-area-inset-bottom)]
+                inset-x-0 bottom-0 h-[85vh] h-[80dvh] max-h-[640px] pb-[env(safe-area-inset-bottom)]
                 sm:inset-auto sm:bottom-20 sm:right-5 sm:h-auto sm:max-h-none sm:w-[560px] sm:max-w-[calc(100vw-2rem)] sm:pb-0 ${
                 isMinimized
                     ? 'opacity-0 pointer-events-none translate-y-4 scale-95'
@@ -125,7 +139,9 @@ export default function ChatBotPanel({
                 <ChatBotHeader onMinimize={onMinimize} onClose={onClose} onClear={onClear} />
 
                 <div
-                    className="flex-1 min-h-0 sm:flex-none sm:min-h-[80px] sm:max-h-[200px] overflow-y-auto p-4 space-y-3 bg-white dark:bg-[var(--bg-card)] custom-scrollbar"
+                    ref={messagesContainerRef}
+                    onScroll={handleScroll}
+                    className="relative flex-1 min-h-0 sm:flex-none sm:min-h-[80px] sm:max-h-[200px] overflow-y-auto p-4 space-y-3 bg-white dark:bg-[var(--bg-card)] custom-scrollbar"
                 >
                     {messages.map((msg) => (
                         <ChatBotBubble key={msg.id} message={msg} onWhatsAppClick={onWhatsAppClick} />
@@ -145,6 +161,16 @@ export default function ChatBotPanel({
                     )}
 
                     <div ref={messagesEndRef} />
+
+                    {showScrollBottom && (
+                        <button
+                            onClick={scrollToBottom}
+                            className="sticky bottom-2 ml-auto flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-emerald-600 to-teal-500 dark:from-[var(--brand-green)] dark:to-[var(--icons-green)] text-white shadow-lg hover:scale-110 active:scale-95 transition-all duration-200"
+                            aria-label="Ir al último mensaje"
+                        >
+                            <ChevronDown className="w-4 h-4" />
+                        </button>
+                    )}
                 </div>
 
                 <ChatBotInput onSend={onSend} disabled={isTyping} />

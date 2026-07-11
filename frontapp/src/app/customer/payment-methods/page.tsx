@@ -203,7 +203,7 @@ export default function CustomerPaymentMethodsPage() {
                   </div>
                   <div className="flex flex-col items-end gap-2">
                     {method.is_default && (
-                      <span className="px-3 py-1 bg-gradient-to-r from-green-400 to-sky-500 dark:from-[var(--brand-green)] dark:via-[var(--icons-green)] dark:to-[var(--brand-green)] text-white text-[9px] font-black uppercase rounded-full shadow-sm">
+                      <span className="px-3 py-1 bg-gradient-to-r from-sky-500 to-sky-400 dark:from-[var(--brand-green)] dark:via-[var(--icons-green)] dark:to-[var(--brand-green-hover)] text-white text-[9px] font-black uppercase rounded-full shadow-sm">
                         Predeterminado
                       </span>
                     )}
@@ -326,9 +326,9 @@ export default function CustomerPaymentMethodsPage() {
         </button>
       </div>
 
-      <div className="bg-gradient-to-br from-sky-500/30 to-green-500/10 dark:from-[#2A5A4D]/40 dark:via-[#8FC3A1]/50 dark:to-[#0F2A24]/40 rounded-[2.5rem] shadow-xl p-8">
+      <div className="bg-gradient-to-br from-sky-500/30 to-green-500/10 dark:from-[var(--brand-green)]/40 dark:via-[var(--icons-green)]/50 dark:to-[var(--brand-green-hover)]/40 rounded-[2.5rem] shadow-xl p-8">
         <div className="flex items-center gap-8">
-          <div className="w-20 h-20 bg-gradient-to-r from-green-400 to-sky-500 dark:from-[var(--brand-green)] dark:via-[var(--icons-green)] dark:to-[var(--brand-green)] rounded-[2rem] flex items-center justify-center shrink-0">
+          <div className="w-20 h-20 bg-gradient-to-r from-sky-500 to-sky-400 dark:from-[var(--brand-green)] dark:via-[var(--icons-green)] dark:to-[var(--brand-green-hover)] rounded-[2rem] flex items-center justify-center shrink-0">
             <Icon name="ShieldCheck" className="w-10 h-10 text-white" />
           </div>
           <div className="space-y-2">

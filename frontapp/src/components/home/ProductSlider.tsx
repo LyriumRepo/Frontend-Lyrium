@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ShoppingCart, Eye, ExternalLink } from 'lucide-react';
+import { ShoppingCart, Eye, ExternalLink, Pause, Play } from 'lucide-react';
 import { Producto } from '@/types/public';
 import { useCarritoStore } from '@/store/carritoStore';
 
@@ -19,7 +19,7 @@ function CategoryCard({ producto, onAddToCart, onQuickView }: {
   onQuickView: (product: Producto) => void;
 }) {
   return (
-    <div className="cat-card flex-shrink-0 w-[210px] bg-[var(--azulCeleste-100)] dark:bg-[var(--bg-secondary)]/92 rounded-[14px] overflow-hidden text-center shadow-[0_10px_24px_rgba(15,23,42,0.12)] dark:shadow-[0_10px_24px_rgba(0,0,0,0.3)] border border-slate-200 dark:border-[var(--border-subtle)]/50 mr-5 transition-transform duration-300 hover:-translate-y-[5px] hover:shadow-[0_15px_35px_rgba(15,23,42,0.2)] dark:hover:shadow-[0_15px_35px_rgba(0,0,0,0.5)]">
+    <div className="cat-card flex-shrink-0 w-[210px] bg-[var(--turquesaClaro-100)] dark:bg-[var(--bg-secondary)]/92 rounded-[14px] overflow-hidden text-center shadow-[0_10px_24px_rgba(15,23,42,0.12)] dark:shadow-[0_10px_24px_rgba(0,0,0,0.3)] border border-[var(--turquesa-100)] dark:border-[var(--border-subtle)]/50 mr-5 transition-transform duration-300 hover:-translate-y-[5px] hover:shadow-[0_15px_35px_rgba(15,23,42,0.2)] dark:hover:shadow-[0_15px_35px_rgba(0,0,0,0.5)]">
       {/* Image wrapper with hover actions */}
       <div className="relative overflow-hidden w-full aspect-square bg-white dark:bg-[var(--bg-muted)]">
         <Link href={`/producto/${producto.slug}`}>
@@ -34,7 +34,7 @@ function CategoryCard({ producto, onAddToCart, onQuickView }: {
         </Link>
  
          
-        <div className="absolute bottom-0 left-0 w-full h-[44px] flex bg-sky-500 dark:bg-[var(--brand-green)] translate-y-full transition-transform duration-300 cat-actions md:group-hover:translate-y-0">
+        <div className="absolute bottom-0 left-0 w-full h-[44px] flex bg-[var(--brand-green)] dark:bg-[var(--brand-green)] translate-y-full transition-transform duration-300 cat-actions md:group-hover:translate-y-0">
           <button
             onClick={() => onAddToCart(producto)}
             className="flex-1 flex items-center justify-center text-white border-r border-white/20 dark:border-white/15 hover:bg-white/15 dark:hover:bg-white/10 transition-colors"
@@ -67,7 +67,7 @@ function CategoryCard({ producto, onAddToCart, onQuickView }: {
         <h3 className="text-sm font-semibold text-slate-700 dark:text-[var(--text-primary)] mb-0.5 whitespace-nowrap overflow-hidden text-ellipsis">
           {producto.titulo}
         </h3>
-        <p className="text-[15px] font-bold text-[var(--azulCeleste-500)] dark:text-[var(--text-primary)]">
+        <p className="text-[15px] font-bold text-[var(--brand-green)] dark:text-[var(--text-primary)]">
           S/ {producto.precio.toFixed(2)}
         </p>
         <p className="text-amber-400 text-[13px] mt-1">
@@ -82,6 +82,7 @@ export default function ProductSlider({ productos, titulo, bannerImage }: Produc
   const [currentPage, setCurrentPage] = useState(0);
   const [itemsPerView, setItemsPerView] = useState(3);
   const [isMounted, setIsMounted] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
 
   const openCart = useCarritoStore((s) => s.openCart);
   const openDetailModal = useCarritoStore((s) => s.openDetailModal);
@@ -116,10 +117,21 @@ export default function ProductSlider({ productos, titulo, bannerImage }: Produc
     setCurrentPage((c) => (c >= totalPages - 1 ? 0 : c + 1));
   }, [totalPages]);
 
+  const prevPage = useCallback(() => {
+    setCurrentPage((c) => (c <= 0 ? totalPages - 1 : c - 1));
+  }, [totalPages]);
+
   useEffect(() => {
+    if (isPaused) return;
     const timer = setInterval(nextPage, 6000);
     return () => clearInterval(timer);
-  }, [nextPage]);
+  }, [nextPage, isPaused]);
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'ArrowLeft') { e.preventDefault(); prevPage(); }
+    else if (e.key === 'ArrowRight') { e.preventDefault(); nextPage(); }
+    else if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); setIsPaused((p) => !p); }
+  };
 
   // Calculate the translateX for the track
   const cardWidth = 230; // 210px card + 20px margin
@@ -148,7 +160,14 @@ export default function ProductSlider({ productos, titulo, bannerImage }: Produc
         </div>
 
         {/* Right carousel */}
-        <div className="overflow-hidden relative p-4 -m-4">
+        <div
+          role="region"
+          aria-roledescription="carousel"
+          aria-label={titulo}
+          tabIndex={totalPages > 1 ? 0 : undefined}
+          onKeyDown={handleKeyDown}
+          className="overflow-hidden relative p-4 -m-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 rounded-[18px]"
+        >
           <div
             className="flex will-change-transform transition-transform duration-[600ms] [transition-timing-function:cubic-bezier(0.22,0.61,0.36,1)]"
             style={
@@ -164,20 +183,32 @@ export default function ProductSlider({ productos, titulo, bannerImage }: Produc
             ))}
           </div>
 
-          {/* Dot navigation */}
+          {/* Dot navigation + pausa */}
           {totalPages > 1 && (
-            <div className="flex justify-center gap-1.5 mt-3">
-              {Array.from({ length: totalPages }).map((_, i) => (
-                <button
-                  key={`page-${i}`}
-                  onClick={() => setCurrentPage(i)}
-                  className={`h-[9px] rounded-full border-none cursor-pointer transition-all duration-200 ${i === currentPage
-                      ? 'w-[22px] bg-indigo-500'
-                      : 'w-[9px] bg-slate-300'
-                    }`}
-                  aria-label={`Página ${i + 1}`}
-                />
-              ))}
+            <div className="flex items-center justify-center gap-3 mt-3">
+              <div className="flex justify-center gap-1.5">
+                {Array.from({ length: totalPages }).map((_, i) => (
+                  <button
+                    key={`page-${i}`}
+                    onClick={() => setCurrentPage(i)}
+                    aria-current={i === currentPage}
+                    className={`h-[9px] rounded-full border-none cursor-pointer transition-all duration-200 ${i === currentPage
+                        ? 'w-[22px] bg-indigo-500'
+                        : 'w-[9px] bg-slate-300'
+                      }`}
+                    aria-label={`Página ${i + 1} de ${totalPages}`}
+                  />
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsPaused((p) => !p)}
+                aria-pressed={isPaused}
+                aria-label={isPaused ? 'Reanudar carrusel automático' : 'Pausar carrusel automático'}
+                className="text-slate-400 hover:text-indigo-500 transition-colors"
+              >
+                {isPaused ? <Play className="w-3.5 h-3.5" /> : <Pause className="w-3.5 h-3.5" />}
+              </button>
             </div>
           )}
         </div>

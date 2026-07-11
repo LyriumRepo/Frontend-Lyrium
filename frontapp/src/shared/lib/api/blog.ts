@@ -135,17 +135,13 @@ export const blogApi = {
         return article ? mapArticleFromApi(article) : null;
     },
 
-    getComments: async (params: number | { article_id?: number; post_id?: number; video_id?: number; podcast_id?: number; short_id?: number }): Promise<CommentApi[]> => {
+    getComments: async (params: { article_id?: number; post_id?: number; video_id?: number; podcast_id?: number; short_id?: number }): Promise<CommentApi[]> => {
         const query = new URLSearchParams();
-        if (typeof params === 'number') {
-            query.set('article_id', String(params));
-        } else {
-            if (params.article_id) query.set('article_id', String(params.article_id));
-            if (params.post_id) query.set('post_id', String(params.post_id));
-            if (params.video_id) query.set('video_id', String(params.video_id));
-            if (params.podcast_id) query.set('podcast_id', String(params.podcast_id));
-            if (params.short_id) query.set('short_id', String(params.short_id));
-        }
+        if (params.article_id) query.set('article_id', String(params.article_id));
+        if (params.post_id) query.set('post_id', String(params.post_id));
+        if (params.video_id) query.set('video_id', String(params.video_id));
+        if (params.podcast_id) query.set('podcast_id', String(params.podcast_id));
+        if (params.short_id) query.set('short_id', String(params.short_id));
         const headers: Record<string, string> = { 'Accept': 'application/json' };
         const token = typeof window !== 'undefined' ? localStorage.getItem('laravel_token') : null;
         if (token) headers['Authorization'] = `Bearer ${token}`;

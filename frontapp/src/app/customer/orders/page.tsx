@@ -429,7 +429,7 @@ function OrderTrackingCards({
               </div>
 
               {/* Etiqueta del paso */}
-              <p className={`text-center text-[7px] sm:text-[8px] font-black uppercase tracking-wider leading-tight px-0.5 transition-all duration-700
+              <p className={`text-center text-[9px] sm:text-[10px] font-black uppercase tracking-wider leading-tight px-0.5 transition-all duration-700
                 ${isActive
                   ? 'text-sky-600 dark:text-[var(--icons-green)]'
                   : isCompleted
@@ -921,10 +921,10 @@ export default function CustomerOrdersPage() {
         icon="Package"
       />
 
-      <div className="bg-white dark:bg-[var(--bg-secondary)] p-8 rounded-[2.5rem] shadow-xl border border-slate-100 dark:border-[var(--border-subtle)]">
+      <div className="bg-white dark:bg-[var(--bg-secondary)] p-4 sm:p-8 rounded-[2.5rem] shadow-xl border border-slate-100 dark:border-[var(--border-subtle)]">
         <div className="flex items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-sky-400 to-sky-600 dark:from-[var(--brand-green)] dark:to-[#1A3A32] rounded-2xl flex items-center justify-center shadow-lg">
+            <div className="w-12 h-12 bg-gradient-to-br from-sky-400 to-sky-600 dark:from-[var(--brand-green)] dark:to-[var(--brand-green-hover)] rounded-2xl flex items-center justify-center shadow-lg">
               <Icon name="Search" className="w-6 h-6 text-white" />
             </div>
             <h3 className="text-xl font-black text-gray-800 dark:text-[var(--text-primary)]">
@@ -1023,7 +1023,7 @@ export default function CustomerOrdersPage() {
       </div>
 
       <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-[2.5rem] shadow-xl border border-slate-100 dark:border-[var(--border-subtle)] overflow-hidden">
-        <div className="bg-gradient-to-r from-sky-400 to-sky-500 dark:from-[var(--brand-green)] dark:to-[#1A3A32] p-8 flex items-center justify-between relative overflow-hidden">
+        <div className="bg-gradient-to-r from-sky-400 to-sky-500 dark:from-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-4 sm:p-8 flex items-center justify-between relative overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl" />
           <div className="flex items-center gap-5 text-white relative z-10">
             <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-inner">
@@ -1062,7 +1062,7 @@ export default function CustomerOrdersPage() {
           </div>
         </div>
 
-        <div className="p-8 overflow-x-auto">
+        <div className="p-4 sm:p-8 overflow-x-auto">
           {filteredOrders.length === 0 ? (
             <div className="text-center py-16">
               <div className="w-24 h-24 bg-gray-100 dark:bg-[var(--bg-muted)] rounded-full flex items-center justify-center mx-auto mb-4">
@@ -1259,7 +1259,7 @@ export default function CustomerOrdersPage() {
           onClick={handleCloseLegend}
         >
           <div
-            className={`bg-white dark:bg-[var(--bg-secondary)] w-full max-w-2xl max-h-[80vh] rounded-[2.5rem] overflow-hidden shadow-[-40px_0_100px_rgba(0,0,0,0.1)] border border-white/20 relative flex flex-col ${isLegendClosing ? 'animate-scale-out' : 'animate-scaleIn'}`}
+            className={`bg-white dark:bg-[var(--bg-secondary)] w-full max-w-2xl md:max-w-xl lg:max-w-2xl max-h-[80vh] rounded-[2.5rem] overflow-hidden shadow-[-40px_0_100px_rgba(0,0,0,0.1)] border border-white/20 relative flex flex-col ${isLegendClosing ? 'animate-scale-out' : 'animate-scaleIn'}`}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="bg-gradient-to-r from-sky-500 via-sky-500 to-sky-300 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-6 text-white relative flex-shrink-0">
@@ -1401,7 +1401,7 @@ export default function CustomerOrdersPage() {
           onClick={closeModal}
         >
           <div
-            className="bg-white dark:bg-[var(--bg-secondary)] w-full lg:w-[700px] max-h-[80vh] rounded-[2.5rem] overflow-hidden shadow-[-40px_0_100px_rgba(0,0,0,0.1)] border border-white/20 relative flex flex-col transition-all duration-700"
+            className="bg-white dark:bg-[var(--bg-secondary)] w-full md:max-w-xl lg:max-w-[700px] max-h-[80vh] rounded-[2.5rem] overflow-hidden shadow-[-40px_0_100px_rgba(0,0,0,0.1)] border border-white/20 relative flex flex-col transition-all duration-700"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="bg-gradient-to-r from-sky-500 via-sky-500 to-sky-300 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-6 text-white relative flex-shrink-0">

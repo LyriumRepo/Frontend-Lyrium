@@ -7,6 +7,9 @@ import Icon from '@/components/ui/Icon';
 import BaseButton from '@/components/ui/BaseButton';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import { userRepository } from '@/shared/lib/api/factory';
+import { useToast } from '@/shared/lib/context/ToastContext';
+import WelcomeGuide from '@/features/customer/onboarding/WelcomeGuide';
+import ProfileCompletionGuide from '@/features/customer/onboarding/ProfileCompletionGuide';
 
 const CONFETTI_COLORS = [
   '#2A5A4D', '#64c695', '#9cb04e',
@@ -113,6 +116,7 @@ const initialData: ProfileFormData = {
 export default function CustomerProfilePage() {
   const { user, isAuthenticated, loading } = useAuth();
   const router = useRouter();
+  const { showToast } = useToast();
   const [isEditMode, setIsEditMode] = useState(false);
   const [formData, setFormData] = useState<ProfileFormData>(initialData);
   const [saving, setSaving] = useState(false);
@@ -282,6 +286,7 @@ export default function CustomerProfilePage() {
       await userRepository.updateUser(user.id, updatePayload as any);
 
       setIsEditMode(false);
+      showToast('Cambios guardados correctamente.', 'success');
     } catch (err: any) {
       console.error('Error al guardar perfil:', err);
       if (err?.validationErrors) {
@@ -398,6 +403,28 @@ export default function CustomerProfilePage() {
     };
   };
 
+  // Campos que cuentan para el % de perfil completo. Los obligatorios casi
+  // siempre están llenos (se exigen al guardar); los opcionales son los que
+  // realmente valen la pena resaltar (cumpleaños, teléfono secundario, foto…).
+  const completionFields: { key: keyof ProfileFormData; label: string }[] = [
+    { key: 'nombres', label: 'Nombres' },
+    { key: 'apellidos', label: 'Apellidos' },
+    { key: 'correo', label: 'Correo principal' },
+    { key: 'telefono', label: 'Celular principal' },
+    { key: 'numero_documento', label: 'Documento de identidad' },
+    { key: 'foto', label: 'Foto de perfil' },
+    { key: 'fecha_cumpleanos', label: 'Fecha de cumpleaños' },
+    { key: 'celular_secundario', label: 'Celular secundario' },
+    { key: 'correo_secundario', label: 'Correo secundario' },
+  ];
+
+  const profileCompletion = useMemo(() => {
+    const missing = completionFields.filter(({ key }) => !formData[key]?.toString().trim());
+    const filledCount = completionFields.length - missing.length;
+    const percent = Math.round((filledCount / completionFields.length) * 100);
+    return { percent, missing };
+  }, [formData]);
+
   const birthdayContent = getBirthdayContent(formData.fecha_cumpleanos);
 
   const isBirthday = useMemo(() => {
@@ -434,6 +461,8 @@ export default function CustomerProfilePage() {
 
   return (
     <>
+    <WelcomeGuide userId={user.id} />
+    <ProfileCompletionGuide userId={user.id} missing={profileCompletion.missing} />
     {isBirthday && <BirthdayCelebration name={firstName} />}
     <div className="space-y-8 animate-fadeIn">
       <ModuleHeader
@@ -441,6 +470,35 @@ export default function CustomerProfilePage() {
         subtitle="Gestiona tu información personal"
         icon="User"
       />
+
+      <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-2xl shadow-md border border-slate-100 dark:border-[var(--border-subtle)] p-5">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-xs font-black text-gray-500 dark:text-gray-300 uppercase tracking-widest">
+            Perfil completo
+          </span>
+          <span className="text-sm font-black text-sky-600 dark:text-[var(--brand-green)]">
+            {profileCompletion.percent}%
+          </span>
+        </div>
+        <div
+          role="progressbar"
+          aria-valuenow={profileCompletion.percent}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-label="Porcentaje de perfil completo"
+          className="w-full h-2.5 rounded-full bg-gray-100 dark:bg-[var(--bg-muted)] overflow-hidden"
+        >
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-sky-500 to-emerald-500 dark:from-[var(--brand-green)] dark:to-[var(--icons-green)] transition-all duration-500"
+            style={{ width: `${profileCompletion.percent}%` }}
+          />
+        </div>
+        {profileCompletion.missing.length > 0 && (
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+            Te falta completar: {profileCompletion.missing.map((f) => f.label).join(', ')}.
+          </p>
+        )}
+      </div>
 
       <div className="w-full sm:max-w-xs mx-auto md:mx-0 md:ml-auto">
         <BaseButton
@@ -457,7 +515,7 @@ export default function CustomerProfilePage() {
 
       <form className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
         <div className="md:col-span-8 bg-white dark:bg-[var(--bg-secondary)] rounded-3xl shadow-xl border border-slate-100 dark:border-[var(--border-subtle)] overflow-hidden">
-          <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[var(--brand-green)] dark:to-[#1A3A32] p-8 flex items-center gap-5 relative overflow-hidden">
+          <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-8 flex items-center gap-5 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl" />
             <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-inner">
               <Icon name="User" className="w-6 h-6 text-white" />
@@ -475,46 +533,63 @@ export default function CustomerProfilePage() {
           <div className="p-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-1">
-                <label className="text-[10px] font-black text-gray-400 dark:text-gray-300 uppercase tracking-widest ml-1">
-                  Nombres <span className="text-red-500">*</span>
+                <label htmlFor="nombres" className="text-[10px] font-black text-gray-400 dark:text-gray-300 uppercase tracking-widest ml-1">
+                  Nombres <span className="text-red-500" aria-hidden="true">*</span>
+                  <span className="sr-only"> (obligatorio)</span>
                 </label>
                 <input
+                  id="nombres"
                   type="text"
                   name="nombres"
                   value={formData.nombres}
                   onChange={handleChange}
                   readOnly={!isEditMode}
                   placeholder="Cargando..."
+                  aria-required="true"
+                  aria-invalid={!!errors.nombres}
+                  aria-describedby={errors.nombres ? 'nombres-error' : undefined}
                   className={inputClassName('nombres')}
                 />
                 {errors.nombres && (
-                  <p className="text-xs text-red-500 font-semibold ml-1">{errors.nombres}</p>
+                  <p id="nombres-error" role="alert" className="flex items-center gap-1 text-xs text-red-500 font-semibold ml-1">
+                    <Icon name="AlertCircle" className="w-3.5 h-3.5 flex-shrink-0" />
+                    {errors.nombres}
+                  </p>
                 )}
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-black text-gray-400 dark:text-gray-300 uppercase tracking-widest ml-1">
-                  Apellidos <span className="text-red-500">*</span>
+                <label htmlFor="apellidos" className="text-[10px] font-black text-gray-400 dark:text-gray-300 uppercase tracking-widest ml-1">
+                  Apellidos <span className="text-red-500" aria-hidden="true">*</span>
+                  <span className="sr-only"> (obligatorio)</span>
                 </label>
                 <input
+                  id="apellidos"
                   type="text"
                   name="apellidos"
                   value={formData.apellidos}
                   onChange={handleChange}
                   readOnly={!isEditMode}
                   placeholder="Cargando..."
+                  aria-required="true"
+                  aria-invalid={!!errors.apellidos}
+                  aria-describedby={errors.apellidos ? 'apellidos-error' : undefined}
                   className={inputClassName('apellidos')}
                 />
                 {errors.apellidos && (
-                  <p className="text-xs text-red-500 font-semibold ml-1">{errors.apellidos}</p>
+                  <p id="apellidos-error" role="alert" className="flex items-center gap-1 text-xs text-red-500 font-semibold ml-1">
+                    <Icon name="AlertCircle" className="w-3.5 h-3.5 flex-shrink-0" />
+                    {errors.apellidos}
+                  </p>
                 )}
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-black text-gray-400 dark:text-gray-300 uppercase tracking-widest ml-1">
+                <label htmlFor="correo" className="text-[10px] font-black text-gray-400 dark:text-gray-300 uppercase tracking-widest ml-1">
                   Correo Principal
                 </label>
                 <input
+                  id="correo"
                   type="email"
                   name="correo"
                   value={formData.correo}
@@ -526,10 +601,11 @@ export default function CustomerProfilePage() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-black text-gray-400 dark:text-gray-300 uppercase tracking-widest ml-1">
+                <label htmlFor="correo_secundario" className="text-[10px] font-black text-gray-400 dark:text-gray-300 uppercase tracking-widest ml-1">
                   Correo Secundario (opcional)
                 </label>
                 <input
+                  id="correo_secundario"
                   type="email"
                   name="correo_secundario"
                   value={formData.correo_secundario}
@@ -540,28 +616,37 @@ export default function CustomerProfilePage() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-black text-gray-400 dark:text-gray-300 uppercase tracking-widest ml-1">
-                  Celular Principal <span className="text-red-500">*</span>
+                <label htmlFor="telefono" className="text-[10px] font-black text-gray-400 dark:text-gray-300 uppercase tracking-widest ml-1">
+                  Celular Principal <span className="text-red-500" aria-hidden="true">*</span>
+                  <span className="sr-only"> (obligatorio)</span>
                 </label>
                 <input
+                  id="telefono"
                   type="tel"
                   name="telefono"
                   value={formData.telefono}
                   onChange={handleChange}
                   readOnly={!isEditMode}
                   placeholder="+51 --- --- ---"
+                  aria-required="true"
+                  aria-invalid={!!errors.telefono}
+                  aria-describedby={errors.telefono ? 'telefono-error' : undefined}
                   className={inputClassName('telefono')}
                 />
                 {errors.telefono && (
-                  <p className="text-xs text-red-500 font-semibold ml-1">{errors.telefono}</p>
+                  <p id="telefono-error" role="alert" className="flex items-center gap-1 text-xs text-red-500 font-semibold ml-1">
+                    <Icon name="AlertCircle" className="w-3.5 h-3.5 flex-shrink-0" />
+                    {errors.telefono}
+                  </p>
                 )}
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-black text-gray-400 dark:text-gray-300 uppercase tracking-widest ml-1">
+                <label htmlFor="celular_secundario" className="text-[10px] font-black text-gray-400 dark:text-gray-300 uppercase tracking-widest ml-1">
                   Celular Secundario (opcional)
                 </label>
                 <input
+                  id="celular_secundario"
                   type="tel"
                   name="celular_secundario"
                   value={formData.celular_secundario}
@@ -572,10 +657,11 @@ export default function CustomerProfilePage() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-black text-gray-400 dark:text-gray-300 uppercase tracking-widest ml-1">
+                <label htmlFor="telefono_fijo" className="text-[10px] font-black text-gray-400 dark:text-gray-300 uppercase tracking-widest ml-1">
                   Teléfono Fijo (opcional)
                 </label>
                 <input
+                  id="telefono_fijo"
                   type="tel"
                   name="telefono_fijo"
                   value={formData.telefono_fijo}
@@ -586,10 +672,11 @@ export default function CustomerProfilePage() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-black text-gray-400 dark:text-gray-300 uppercase tracking-widest ml-1">
+                <label htmlFor="fecha_cumpleanos" className="text-[10px] font-black text-gray-400 dark:text-gray-300 uppercase tracking-widest ml-1">
                   Fecha de Cumpleaños (opcional)
                 </label>
                 <input
+                  id="fecha_cumpleanos"
                   type="date"
                   name="fecha_cumpleanos"
                   value={formData.fecha_cumpleanos}
@@ -603,14 +690,19 @@ export default function CustomerProfilePage() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-black text-gray-400 dark:text-gray-300 uppercase tracking-widest ml-1">
-                  Tipo de Documento <span className="text-red-500">*</span>
+                <label htmlFor="tipo_documento" className="text-[10px] font-black text-gray-400 dark:text-gray-300 uppercase tracking-widest ml-1">
+                  Tipo de Documento <span className="text-red-500" aria-hidden="true">*</span>
+                  <span className="sr-only"> (obligatorio)</span>
                 </label>
                 <select
+                  id="tipo_documento"
                   name="tipo_documento"
                   value={formData.tipo_documento}
                   onChange={handleTipoDocumentoChange}
                   disabled={!isEditMode}
+                  aria-required="true"
+                  aria-invalid={!!errors.tipo_documento}
+                  aria-describedby={errors.tipo_documento ? 'tipo_documento-error' : undefined}
                   className={`w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] p-3 border-2 rounded-xl outline-none transition-all duration-300 bg-white dark:bg-[var(--bg-secondary)] ${
                     errors.tipo_documento
                       ? 'border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-100 dark:focus:ring-red-900/30'
@@ -623,15 +715,20 @@ export default function CustomerProfilePage() {
                   <option value="RUC">RUC</option>
                 </select>
                 {errors.tipo_documento && (
-                  <p className="text-xs text-red-500 font-semibold ml-1">{errors.tipo_documento}</p>
+                  <p id="tipo_documento-error" role="alert" className="flex items-center gap-1 text-xs text-red-500 font-semibold ml-1">
+                    <Icon name="AlertCircle" className="w-3.5 h-3.5 flex-shrink-0" />
+                    {errors.tipo_documento}
+                  </p>
                 )}
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-black text-gray-400 dark:text-gray-300 uppercase tracking-widest ml-1">
-                  Número de Documento <span className="text-red-500">*</span>
+                <label htmlFor="numero_documento" className="text-[10px] font-black text-gray-400 dark:text-gray-300 uppercase tracking-widest ml-1">
+                  Número de Documento <span className="text-red-500" aria-hidden="true">*</span>
+                  <span className="sr-only"> (obligatorio)</span>
                 </label>
                 <input
+                  id="numero_documento"
                   type="text"
                   name="numero_documento"
                   value={formData.numero_documento}
@@ -644,10 +741,16 @@ export default function CustomerProfilePage() {
                       ? 'XX-XXXXXXXX-X'
                       : 'Ingrese el número'
                   }
+                  aria-required="true"
+                  aria-invalid={!!errors.numero_documento}
+                  aria-describedby={errors.numero_documento ? 'numero_documento-error' : undefined}
                   className={inputClassName('numero_documento')}
                 />
                 {errors.numero_documento && (
-                  <p className="text-xs text-red-500 font-semibold ml-1">{errors.numero_documento}</p>
+                  <p id="numero_documento-error" role="alert" className="flex items-center gap-1 text-xs text-red-500 font-semibold ml-1">
+                    <Icon name="AlertCircle" className="w-3.5 h-3.5 flex-shrink-0" />
+                    {errors.numero_documento}
+                  </p>
                 )}
               </div>
             </div>
@@ -656,7 +759,7 @@ export default function CustomerProfilePage() {
 
         <div className="md:col-span-4 space-y-8 self-stretch">
           <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-3xl shadow-xl border border-slate-100 dark:border-[var(--border-subtle)] overflow-hidden">
-            <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[var(--brand-green)] dark:to-[#1A3A32] p-8 flex items-center gap-5 relative overflow-hidden">
+            <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-8 flex items-center gap-5 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl" />
               <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-inner">
                 <Icon name="Camera" className="w-6 h-6 text-white" />
@@ -673,7 +776,7 @@ export default function CustomerProfilePage() {
 
             <div className="p-8 flex flex-col items-center">
               <div className="relative group mb-6">
-                <div className="w-40 h-40 rounded-3xl overflow-hidden border-4 border-sky-100 shadow-xl group-hover:scale-105 transition-all duration-500">
+                <div id="foto" className="w-40 h-40 rounded-3xl overflow-hidden border-4 border-sky-100 shadow-xl group-hover:scale-105 transition-all duration-500">
                   {avatarPreview || formData.foto ? (
                     <img src={avatarPreview || formData.foto} alt="Foto de Perfil" className="w-full h-full object-cover" />
                   ) : (

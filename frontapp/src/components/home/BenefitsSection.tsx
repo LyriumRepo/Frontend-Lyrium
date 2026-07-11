@@ -77,11 +77,11 @@ export default function BenefitsSection({ beneficios }: BenefitsSectionProps) {
       `}} />
 
       <div className="px-4 max-w-7xl mx-auto">
-        <h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white">Beneficios</h2>
+        <h2 className="text-2xl md:text-3xl font-bold mb-6 text-gray-800 dark:text-white">Beneficios</h2>
       </div>
 
       <div
-        className="relative w-full h-[200px] md:h-[320px] overflow-hidden group"
+        className="relative w-full h-[240px] md:h-[340px] overflow-hidden group"
         style={{ backgroundColor: '#8BC34A', clipPath: 'inset(0px)', zIndex: 1 }}
       >
         <div
@@ -107,15 +107,15 @@ export default function BenefitsSection({ beneficios }: BenefitsSectionProps) {
               return (
                 <div
                   key={`${beneficio.id}-${index}`}
-                  className="flex flex-col items-center justify-center text-center w-[130px] md:w-[250px] mx-1 flex-shrink-0 cursor-default"
+                  className="flex flex-col items-center justify-center text-center w-[150px] md:w-[270px] mx-1 flex-shrink-0 cursor-default"
                 >
-                  <div className="w-28 h-28 md:w-60 md:h-60 flex items-center justify-center mb-2 md:mb-4 transition-transform duration-300 hover:scale-105 relative">
+                  <div className="w-32 h-32 md:w-64 md:h-64 flex items-center justify-center mb-2 md:mb-4 transition-transform duration-300 hover:scale-105 relative">
                     <Image
                       src={`/img/Inicio/11/${imageNum}.png`}
                       alt="Beneficio"
                       fill
                       className="object-contain"
-                      sizes="(max-width: 768px) 112px, 240px"
+                      sizes="(max-width: 768px) 128px, 256px"
                       priority={index < 6}
                     />
                   </div>
