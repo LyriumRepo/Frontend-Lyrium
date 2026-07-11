@@ -51,6 +51,7 @@ export async function GET(request: NextRequest) {
                     display_name: user.display_name,
                     role: user.role,
                     avatar: user.avatar,
+                    birthday: user.birthday ?? null,
                 },
             });
         } catch (error) {

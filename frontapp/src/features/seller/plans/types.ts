@@ -56,6 +56,7 @@ export interface PlanData {
   isActive?: boolean;
   orden?: number;
   commission_rate?: number;
+  numericId?: number;
 }
 
 export interface PlansMap {
@@ -69,6 +70,9 @@ export interface SubscriptionInfo {
   planId?: string;
   status?: string;
   startDate?: string;
+  subscriptionId?: number;
+  autoRenew?: boolean;
+  paymentMethodId?: number | null;
 }
 
 export interface Request {

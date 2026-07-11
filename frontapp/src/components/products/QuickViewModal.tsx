@@ -7,13 +7,13 @@ import { Star, Heart, ShoppingCart, Truck, Clock, ShieldCheck, Minus, Plus, Chev
 import BaseModal from '@/components/ui/BaseModal';
 import { Producto } from '@/types/public';
 import { useAuthGuard } from '@/shared/hooks/useAuthGuard';
+import { useWishlist } from '@/shared/hooks/useWishlist';
 
 interface QuickViewModalProps {
   isOpen: boolean;
   onClose: () => void;
   producto: Producto | null;
   onAddToCart?: (producto: Producto, cantidad: number) => void;
-  onAddToWishlist?: (producto: Producto) => void;
 }
 
 interface TiendaInfo {
@@ -53,17 +53,17 @@ const recommendedProducts: Producto[] = [
   },
 ];
 
-export default function QuickViewModal({ 
-  isOpen, 
-  onClose, 
-  producto, 
+export default function QuickViewModal({
+  isOpen,
+  onClose,
+  producto,
   onAddToCart,
-  onAddToWishlist,
-  tienda = defaultTienda 
+  tienda = defaultTienda
 }: QuickViewProps) {
   const [cantidad, setCantidad] = useState(1);
   const [imagenActual, setImagenActual] = useState(0);
   const { isAuthenticated } = useAuthGuard();
+  const { isWishlisted, toggle: toggleWishlist } = useWishlist(producto?.id ?? 0);
   
   const imagenes = producto?.imagen ? [producto.imagen] : [];
   
@@ -97,9 +97,7 @@ export default function QuickViewModal({
       window.location.href = '/login';
       return;
     }
-    if (producto && onAddToWishlist) {
-      onAddToWishlist(producto);
-    }
+    toggleWishlist();
   };
 
   const renderEstrellas = (rating?: string) => {
@@ -247,12 +245,16 @@ export default function QuickViewModal({
           </div>
           
           <div className="flex gap-5 mb-4 pb-4 border-b border-gray-100 dark:border-[var(--border-subtle)]">
-            <button 
+            <button
               onClick={handleAddToWishlist}
-              className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-rose-500 dark:hover:text-rose-400 transition-colors"
+              className={`flex items-center gap-1.5 text-sm transition-colors ${
+                isWishlisted
+                  ? 'text-rose-500 dark:text-rose-400'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-rose-500 dark:hover:text-rose-400'
+              }`}
             >
-              <Heart className="w-4 h-4" />
-              Añadir a favoritos
+              <Heart className={`w-4 h-4 ${isWishlisted ? 'fill-current' : ''}`} />
+              {isWishlisted ? 'En favoritos' : 'Añadir a favoritos'}
             </button>
           </div>
           

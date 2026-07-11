@@ -16,6 +16,7 @@ export function useAddToCart(): UseAddToCartReturn {
   const [error, setError] = useState<string | null>(null);
 
   const openPopup = useCarritoStore((s) => s.openPopup); // ← antes era openCart
+  const setLastAddedProductId = useCarritoStore((s) => s.setLastAddedProductId);
 
   const addToCart = useCallback(
     async (productId: number, quantity = 1) => {
@@ -24,6 +25,7 @@ export function useAddToCart(): UseAddToCartReturn {
       try {
         await cartApi.addItem(productId, quantity);
         setAddedToCart(true);
+        setLastAddedProductId(productId);
         openPopup(); // ← abre popup, no drawer
         setTimeout(() => setAddedToCart(false), 2000);
       } catch (e: unknown) {
@@ -34,7 +36,7 @@ export function useAddToCart(): UseAddToCartReturn {
         setLoading(false);
       }
     },
-    [openPopup],
+    [openPopup, setLastAddedProductId],
   );
 
   return { addToCart, loading, addedToCart, error };

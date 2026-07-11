@@ -20,15 +20,15 @@ export default function Modal({ open, onClose, className = '', children, showClo
   if (!open) return null;
 
   return (
-    <div 
+    <div
       role="dialog"
       aria-modal="true"
       tabIndex={-1}
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4 transition-opacity duration-300"
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4 pt-[calc(60px+1rem)] md:pt-4 transition-opacity duration-300"
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}
       onKeyDown={e => { if (e.key === 'Escape') onClose(); }}
     >
-      <div className={`bg-white dark:bg-[var(--bg-card)] rounded-2xl p-6 max-h-[90vh] overflow-y-auto relative animate-[slideUp_0.3s_ease] ${className}`}>
+      <div className={`bg-white dark:bg-[var(--bg-card)] rounded-2xl p-6 max-h-[calc(100vh-76px)] md:max-h-[90vh] overflow-y-auto relative animate-[slideUp_0.3s_ease] ${className}`}>
         {showClose && (
           <button className="absolute top-4 right-4 w-9 h-9 bg-gray-100 dark:bg-[var(--bg-muted)] border-none rounded-lg text-gray-500 dark:text-[var(--text-muted)] text-xl cursor-pointer flex items-center justify-center transition-colors hover:bg-red-500 hover:text-white"
             onClick={onClose}>×</button>

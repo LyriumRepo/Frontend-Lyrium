@@ -108,7 +108,7 @@ export const ContratosModule: React.FC<ContratosModuleProps> = ({ state, actions
                                 placeholder="Buscar por RUC, Empresa o Ticket ID..."
                                 value={filters.query}
                                 onChange={(e) => actions.setFilters({ ...filters, query: e.target.value })}
-                                className="w-full pl-12 pr-4 py-4 bg-[var(--bg-input)] border-none rounded-2xl text-xs font-black focus:ring-2 focus:ring-indigo-500/10 placeholder:text-[var(--text-muted)] font-industrial transition-all text-[var(--text-primary)]"
+                                className="w-full pl-12 pr-4 py-4 bg-[var(--bg-input)] border-none rounded-2xl text-xs font-black focus:ring-2 focus:ring-[var(--celeste-500)]/10 placeholder:text-[var(--text-muted)] font-industrial transition-all text-[var(--text-primary)]"
                             />
                         </div>
                     </div>
@@ -138,13 +138,13 @@ export const ContratosModule: React.FC<ContratosModuleProps> = ({ state, actions
                             <option value="ALL">Cualquier Estatus</option>
                             <option value="ACTIVE">Vigentes</option>
                             <option value="PENDING">Pendientes</option>
-                            <option value="EXPIRED">Vencidos</option>
+                            <option value="EXPIRED">Rechazados</option>
                         </select>
                     </div>
 
                     <button
                         onClick={actions.createNew}
-                        className="h-14 bg-[var(--color-info)] dark:bg-[var(--brand-green)] text-white rounded-2xl hover:brightness-95 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-[var(--color-info)]/20 dark:shadow-[var(--brand-green)]/20 flex items-center justify-center gap-3 px-8 font-industrial group"
+                        className="h-14 bg-sky-500 hover:bg-sky-600 active:bg-sky-700 text-white rounded-2xl hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-sky-500/20 flex items-center justify-center gap-3 px-8 font-industrial group"
                     >
                         <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform" />
                         <span className="text-xs font-black uppercase tracking-widest">Aperturar</span>
@@ -159,7 +159,7 @@ export const ContratosModule: React.FC<ContratosModuleProps> = ({ state, actions
                             <tr className="bg-[var(--bg-secondary)]/50 border-b border-[var(--border-subtle)] text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest">
                                 <th className="px-8 py-6">ID Contrato</th>
                                 <th className="px-8 py-6">Entidad Vendedora</th>
-                                <th className="px-8 py-6">Ventana de Vigencia</th>
+                                <th className="px-8 py-6 min-w-[240px] whitespace-nowrap">Ventana de Vigencia</th>
                                 <th className="px-8 py-6">Configuración</th>
                                 <th className="px-8 py-6">Estatus</th>
                                 <th className="px-8 py-6 text-right">Acción</th>
@@ -180,16 +180,16 @@ export const ContratosModule: React.FC<ContratosModuleProps> = ({ state, actions
                                     <tr
                                         key={c.id}
                                         onClick={() => actions.setSelectedContract(c)}
-                                        className="hover:bg-indigo-500/5 transition-all group cursor-pointer"
+                                        className="hover:bg-[var(--celeste-500)]/5 dark:hover:bg-[var(--celeste-500)]/10 transition-all group cursor-pointer"
                                     >
                                         <td className="px-8 py-6">
-                                            <span className="text-xs font-black text-indigo-500 italic">#{c.id}</span>
+                                            <span className="text-xs font-black text-[var(--celeste-500)] italic">#{c.id}</span>
                                         </td>
                                         <td className="px-8 py-6">
                                             <p className="text-xs font-black text-[var(--text-primary)] uppercase tracking-tight">{c.company}</p>
                                             <p className="text-[9px] text-[var(--text-muted)] font-black uppercase tracking-widest mt-0.5">RUC {c.ruc}</p>
                                         </td>
-                                        <td className="px-8 py-6">
+                                        <td className="px-8 py-6 min-w-[240px] whitespace-nowrap">
                                             <div className="space-y-1.5">
                                                 <div className="flex items-center gap-2 text-[10px] font-black text-[var(--text-secondary)] uppercase italic">
                                                     <span>{c.start}</span>
@@ -208,11 +208,11 @@ export const ContratosModule: React.FC<ContratosModuleProps> = ({ state, actions
                                         <td className="px-8 py-6">
                                             <StatusBadge status={c.status} />
                                         </td>
-                                         <td className="px-8 py-6 text-right">
-                                             <div className="inline-flex p-3 bg-[var(--bg-secondary)] text-[var(--text-muted)] group-hover:bg-[var(--color-info)] group-hover:text-white rounded-2xl transition-all shadow-sm group-hover:shadow-[var(--color-info)]/20">
-                                                 <ChevronRight className="w-5 h-5" />
-                                             </div>
-                                         </td>
+                                        <td className="px-8 py-6 text-right">
+                                            <div className="inline-flex p-3 bg-[var(--bg-secondary)] text-[var(--text-muted)] group-hover:bg-[var(--celeste-500)] group-hover:text-white rounded-2xl transition-all shadow-sm group-hover:shadow-[var(--celeste-500)]/20">
+                                                <ChevronRight className="w-5 h-5" />
+                                            </div>
+                                        </td>
                                     </tr>
                                 ))
                             )}

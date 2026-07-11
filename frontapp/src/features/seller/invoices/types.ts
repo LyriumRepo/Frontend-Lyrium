@@ -19,6 +19,11 @@ export interface Voucher {
     store_ruc: string;
     order_id: string;
     amount: number;
+    store_amount?: number;
+    order_total?: number;
+    commission_rate?: number | null;
+    commission_amount?: number | null;
+    seller_name?: string;
     subtotal_sin_igv?: number;
     igv_amount?: number;
     emission_date: string;
@@ -36,6 +41,7 @@ export interface Voucher {
     created_at?: string;
     updated_at?: string;
     items?: { product_name?: string; service_name?: string; quantity: number; line_total: number }[];
+    order_type?: 'Producto' | 'Servicio' | 'Producto y Servicio' | null;
 }
 
 export interface InvoiceKPIs {

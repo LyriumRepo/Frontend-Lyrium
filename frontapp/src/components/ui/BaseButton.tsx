@@ -13,17 +13,17 @@ interface BaseButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> 
 
 const variantStyles: Record<string, string> = {
   primary:
-    'bg-gradient-to-r from-sky-500 to-indigo-500 dark:from-[var(--brand-green)] dark:via-[var(--icons-green)] dark:to-[var(--brand-green)] text-white border border-white/20 shadow-lg shadow-sky-500/25 dark:shadow-[#8FC3A1]/25 hover:shadow-xl hover:shadow-sky-500/30 dark:hover:shadow-[#8FC3A1]/30 hover:-translate-y-0.5',
+    'bg-gradient-to-r from-sky-500 to-sky-400 dark:from-emerald-700 dark:to-teal-600 text-white border border-white/20 shadow-lg shadow-sky-500/25 dark:shadow-emerald-900/25 hover:shadow-xl hover:shadow-sky-500/30 dark:hover:shadow-emerald-900/30 hover:-translate-y-0.5',
   secondary:
     'bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-subtle)] hover:bg-[var(--bg-secondary)] hover:border-[var(--border-default)]',
   ghost:
     'bg-transparent text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]',
   danger:
-    'bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-lg shadow-rose-500/25 hover:shadow-xl hover:shadow-rose-500/30 hover:-translate-y-0.5',
+    'bg-gradient-to-r from-rose-500 to-pink-500 dark:from-rose-700 dark:to-rose-600 text-white shadow-lg shadow-rose-500/25 dark:shadow-rose-900/25 hover:shadow-xl hover:shadow-rose-500/30 hover:-translate-y-0.5',
   action:
-    'bg-gradient-to-r from-emerald-400 via-sky-500 to-indigo-500 dark:from-[var(--brand-green)] dark:via-[var(--icons-green)] dark:to-[var(--brand-green)] text-white border border-white/20 shadow-lg shadow-sky-500/25 dark:shadow-[#8FC3A1]/70 hover:shadow-xl hover:shadow-sky-500/30 dark:hover:shadow-[#8FC3A1]/50 hover:-translate-y-0.5',
+    'bg-gradient-to-r from-emerald-400 to-sky-400 dark:from-[var(--brand-green)] dark:to-[var(--icons-green)] text-white border border-white/20 shadow-lg shadow-sky-500/25 dark:shadow-[#8FC3A1]/70 hover:shadow-xl hover:shadow-sky-500/30 dark:hover:shadow-[#8FC3A1]/50 hover:-translate-y-0.5',
   outline:
-    'bg-transparent border-2 border-[var(--border-subtle)] text-[var(--text-primary)] hover:border-sky-500/50 hover:text-sky-500',
+    'bg-transparent border-2 border-[var(--border-subtle)] text-[var(--text-primary)] hover:border-sky-500/50 hover:text-sky-500 dark:hover:border-[var(--brand-green)]/50 dark:hover:text-[var(--brand-green)]',
 };
 
 const sizeStyles: Record<string, string> = {

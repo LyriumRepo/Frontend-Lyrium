@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react';
 import type { ChatBotMessage } from '../types';
-import { LARAVEL_API_URL } from '@/shared/lib/config/flags';
+import { LARAVEL_API_URL, WHATSAPP_SUPPORT_NUMBER } from '@/shared/lib/config/flags';
 
 const STORAGE_KEY = 'lyrium_chatbot_session';
 const SESSION_ID_KEY = 'lyrium_chatbot_session_id';
@@ -48,6 +48,41 @@ function saveMessages(messages: ChatBotMessage[]): void {
     } catch {}
 }
 
+// Mensajes cortos de navegación que no aportan contexto real al operador
+const NAV_MESSAGES = new Set(['a','b','c','d','e','f','1','2','3','4','5','6','7','8','9','vender','comprar','hola','buenas','inicio','menu','menú','atras','atrás','holis']);
+
+function buildWhatsAppUrl(baseUrl: string, history: ChatBotMessage[]): string {
+    // Tomar los últimos 5 mensajes del usuario, descartar navegación pura
+    const userMessages = history
+        .filter((m) => m.role === 'user')
+        .filter((m) => !NAV_MESSAGES.has(m.content.trim().toLowerCase()) && m.content.trim().length > 3)
+        .slice(-5);
+
+    let text: string;
+
+    if (userMessages.length === 0) {
+        text = 'Hola 👋 Vengo del chatbot de Lyrium y necesito ayuda con una consulta.';
+    } else if (userMessages.length === 1) {
+        const consulta = userMessages[0].content.slice(0, 200);
+        text = `Hola 👋 Vengo del chatbot de Lyrium.\nConsulta: "${consulta}"`;
+    } else {
+        // Múltiples mensajes: armar un resumen cronológico
+        const resumen = userMessages
+            .map((m) => `• ${m.content.slice(0, 120)}`)
+            .join('\n');
+        text = `Hola 👋 Vengo del chatbot de Lyrium.\nResumen de mi consulta:\n${resumen}`;
+    }
+
+    // Garantizar que la URL no supere límites prácticos de WhatsApp (~2000 chars total)
+    const encoded = encodeURIComponent(text);
+    if (encoded.length > 1800) {
+        const corto = userMessages.at(-1)?.content.slice(0, 200) ?? '';
+        return `${baseUrl}?text=${encodeURIComponent(`Hola 👋 Vengo del chatbot de Lyrium.\nConsulta: "${corto}"`)}`;
+    }
+
+    return `${baseUrl}?text=${encoded}`;
+}
+
 export function useChatBot() {
     const [isOpen, setIsOpen] = useState(false);
     const [isMinimized, setIsMinimized] = useState(false);
@@ -82,6 +117,10 @@ export function useChatBot() {
 
     const minimize = useCallback(() => {
         setIsMinimized(true);
+    }, []);
+
+    const restore = useCallback(() => {
+        setIsMinimized(false);
     }, []);
 
     const close = useCallback(() => {
@@ -139,11 +178,27 @@ export function useChatBot() {
 
             const data = await response.json();
 
+            const source: string = data.data?.source ?? '';
+            const isHandoff = source === 'handoff' || source === 'fallback';
+            const whatsappBase: string = data.data?.whatsapp_url ?? `https://wa.me/${WHATSAPP_SUPPORT_NUMBER}`;
+
+            // Incluir el mensaje actual del usuario en el historial para el contexto
+            const fullHistory: ChatBotMessage[] = [
+                ...messages,
+                { id: 'current', role: 'user', content: trimmedContent, timestamp: new Date().toISOString() },
+            ];
+
             const botMessage: ChatBotMessage = {
                 id: generateId(),
                 role: 'assistant',
                 content: data.data?.reply || 'Lo siento, no pude procesar tu consulta.',
                 timestamp: new Date().toISOString(),
+                ...(isHandoff && {
+                    whatsappAction: {
+                        url: buildWhatsAppUrl(whatsappBase, fullHistory),
+                        label: 'Continuar por WhatsApp',
+                    },
+                }),
             };
 
             setMessages((prev) => [...prev, botMessage]);
@@ -179,6 +234,12 @@ export function useChatBot() {
         localStorage.removeItem(STORAGE_KEY);
     }, []);
 
+    const handleWhatsAppClick = useCallback(() => {
+        addBotResponse(
+            '¡Listo! 🌿 Te estamos conectando con uno de nuestros asesores. Ellos ya tienen el contexto de tu consulta. ¡Que tengas un buen día!'
+        );
+    }, [addBotResponse]);
+
     return {
         isOpen,
         isMinimized,
@@ -187,9 +248,11 @@ export function useChatBot() {
         error,
         toggle,
         minimize,
+        restore,
         close,
         sendMessage,
         addBotResponse,
         clearHistory,
+        handleWhatsAppClick,
     };
 }

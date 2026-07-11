@@ -44,7 +44,7 @@ export const FAQView: React.FC<FAQViewProps> = ({ articles, onCreateClick, onSea
                         </div>
                         <div className="pt-6 mt-6 border-t border-[var(--border-subtle)] flex justify-between items-center">
                             <div className="flex gap-3 text-[10px] font-bold text-[var(--text-muted)] font-industrial">
-                                <span className="flex items-center gap-1"><ThumbsUp className="w-3.5 h-3.5 text-emerald-500" /> {f.util_si}</span>
+                                <span className="flex items-center gap-1"><ThumbsUp className="w-3.5 h-3.5 text-[var(--color-success)]" /> {f.util_si}</span>
                                 <span className="flex items-center gap-1"><ThumbsDown className="w-3.5 h-3.5 text-red-400" /> {f.util_no}</span>
                             </div>
                             <button
@@ -71,11 +71,11 @@ interface AuditTableProps {
 export const AuditTable: React.FC<AuditTableProps> = ({ entries, filters, onFilterChange }) => {
     const getBadgeClass = (action: ActionType) => {
         const map = {
-            'Escalamiento': 'bg-amber-100 text-amber-600',
+            'Escalamiento': 'bg-[var(--color-warning)]/10 text-[var(--color-warning)]',
             'Cierre': 'bg-red-100 text-red-600',
             'Respuesta': 'bg-[var(--turquesa-500)]/10 text-[var(--turquesa-500)]',
             'Asignación': 'bg-[var(--icons-green)]/10 text-[var(--icons-green)]',
-            'Cambio Prioridad': 'bg-amber-100 text-amber-600'
+            'Cambio Prioridad': 'bg-[var(--color-warning)]/10 text-[var(--color-warning)]'
         };
         return map[action] || 'bg-gray-100 text-gray-600';
     };

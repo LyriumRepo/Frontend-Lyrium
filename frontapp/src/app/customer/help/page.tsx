@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/shared/lib/context/AuthContext';
 import { useRouter } from 'next/navigation';
+import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import Icon from '@/components/ui/Icon';
 
 interface FaqCategory {
@@ -152,16 +153,11 @@ export default function CustomerHelpPage() {
 
   return (
     <div className="space-y-8 animate-fadeIn">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-black text-slate-800 dark:text-[var(--text-primary)]">
-            Centro de Ayuda
-          </h1>
-          <p className="text-slate-500 dark:text-[var(--text-muted)] mt-1">
-            Encuentra respuestas a tus preguntas frecuentes
-          </p>
-        </div>
-      </div>
+      <ModuleHeader
+        title="Centro de Ayuda"
+        subtitle="Encuentra respuestas a tus preguntas frecuentes"
+        icon="HelpCircle"
+      />
 
       <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-[2.5rem] shadow-2xl border border-slate-100 dark:border-[var(--border-subtle)] overflow-hidden">
         <div className="bg-gradient-to-r from-sky-400 via-sky-500 to-sky-600 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-6 md:p-8 relative overflow-hidden">
@@ -279,7 +275,7 @@ export default function CustomerHelpPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <a
           href="/customer/support"
           className="bg-white dark:bg-[var(--bg-secondary)] p-6 rounded-[2rem] shadow-xl border border-slate-100 dark:border-[var(--border-subtle)] hover:border-[#bde90d] dark:hover:border-[var(--icons-green)] transition-all group hover:-translate-y-1"
@@ -311,17 +307,6 @@ export default function CustomerHelpPage() {
           </div>
           <h4 className="font-bold text-gray-800 dark:text-[var(--text-primary)] mb-2">Correo Electrónico</h4>
           <p className="text-sm text-gray-500 dark:text-[var(--text-muted)]">ventas@lyriumbiomarketplace.com</p>
-        </a>
-
-        <a
-          href="/libro-de-reclamaciones"
-          className="bg-white dark:bg-[var(--bg-secondary)] p-6 rounded-[2rem] shadow-xl border border-slate-100 dark:border-[var(--border-subtle)] hover:border-[#bde90d] dark:hover:border-[var(--icons-green)] transition-all group hover:-translate-y-1"
-        >
-          <div className="w-14 h-14 bg-[#bde90d]/15 dark:bg-[#1A3A32] rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-            <Icon name="FileText" className="w-7 h-7 text-[#7a9800] dark:text-[var(--icons-green)]" />
-          </div>
-          <h4 className="font-bold text-gray-800 dark:text-[var(--text-primary)] mb-2">Libro de Reclamaciones</h4>
-          <p className="text-sm text-gray-500 dark:text-[var(--text-muted)]">Presenta un reclamo formal</p>
         </a>
       </div>
 

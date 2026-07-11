@@ -109,7 +109,16 @@ export default function Showcase({ showcasePlan, plansData, planOrder, currentPl
   const badgeBorder = hexToRgba(planCssColor, 0.37);
 
   return (
-    <div className="plan-showcase" id="planShowcase">
+    <div
+      className="plan-showcase plan-neon-glow"
+      id="planShowcase"
+      style={{
+        '--plan-glow':       hexToRgba(planCssColor, 0.55),
+        '--plan-glow-soft':  hexToRgba(planCssColor, 0.18),
+        '--plan-glow-inner': hexToRgba(planCssColor, 0.12),
+        border: `1.5px solid ${hexToRgba(planCssColor, 0.5)}`,
+      } as React.CSSProperties}
+    >
       <div className={`showcase-bg ${data.bgImage ? 'has-image' : ''}`} style={{ ...bgStyle, animation:'showcaseBgFade 2.5s ease' }} />
       <div className="showcase-content" style={{ animation:'showcasePlanChange 1.8s cubic-bezier(0.16,1,0.3,1)' }}>
         <div className="showcase-badge animate-showcase-el" style={{ background:badgeBg, color:badgeColor, border:`1px solid ${badgeBorder}`, animationDelay:'0.1s' }}>{data.badge}</div>

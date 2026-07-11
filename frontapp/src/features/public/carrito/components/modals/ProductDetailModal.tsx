@@ -250,7 +250,9 @@ export default function ProductDetailModal({
                   </div>
 
                   {/* TopMedalBadge */}
-                  <TopMedalBadge entityType="product" entityId={p?.id} size="xxl" className="absolute bottom-2 right-2 z-10" />
+                  {p?.id && (
+                    <TopMedalBadge entityType="product" entityId={p.id} size="xxl" className="absolute bottom-2 right-2 z-10" />
+                  )}
                 </div>
 
                 {/* Thumbnails */}

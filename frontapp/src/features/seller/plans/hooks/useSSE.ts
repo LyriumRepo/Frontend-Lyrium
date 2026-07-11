@@ -22,6 +22,7 @@ export function useSSE(
   const MAX_DELAY = 30000;
   const handlersRef = useRef(handlers);
   handlersRef.current = handlers;
+  const reconnectBlockedUntil = useRef(0);
 
   const connect = useCallback(() => {
     // Canal 'admin' no requiere usuarioId — los demás sí
@@ -71,8 +72,11 @@ export function useSSE(
       source.close();
       sourceRef.current = null;
 
-      // ← NUEVO: no reconectar si es admin y falla CORS
-      // solo reconectar silenciosamente sin bloquear
+      // Bloquear reconexión durante ventana de pago (15s)
+      if (Date.now() < reconnectBlockedUntil.current) {
+        return;
+      }
+
       setTimeout(() => {
         if (document.visibilityState !== 'hidden') {
           connect();
@@ -82,6 +86,14 @@ export function useSSE(
       reconnectDelay.current = Math.min(reconnectDelay.current * 2, MAX_DELAY);
     };
   }, [canal, usuarioId, enabled]);
+
+  const disconnect = useCallback(() => {
+    if (sourceRef.current) {
+      sourceRef.current.close();
+      sourceRef.current = null;
+    }
+    reconnectBlockedUntil.current = Date.now() + 15000;
+  }, []);
 
   useEffect(() => {
     const handleBeforeUnload = () => {
@@ -98,4 +110,6 @@ export function useSSE(
       sourceRef.current = null;
     };
   }, [connect]);
+
+  return { disconnect, connect };
 }

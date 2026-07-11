@@ -30,7 +30,7 @@ const KPI_COLORS: number[][] = [
     [102, 214, 168],  // Productos
     [78, 199, 184],   // Servicios
     [105, 190, 235],  // Mixtas
-    [245, 158, 11],   // Pendientes
+    [78, 199, 184],   // Pendientes
     [99, 102, 241],   // En proceso
     [34, 197, 94],    // Completadas
 ];
@@ -144,13 +144,13 @@ function drawKpiCard(
 ): void {
     doc.setFillColor(color[0], color[1], color[2]);
     doc.rect(x, y, 2.5, h, 'F');
-    doc.setFillColor(G[100][0], G[100][1], G[100][2]);
+    doc.setFillColor(16, 48, 28);
     doc.rect(x + 2.5, y, w - 2.5, h, 'F');
-    doc.setTextColor(G[600][0], G[600][1], G[600][2]);
+    doc.setTextColor(110, 175, 85);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(5.5);
     doc.text(label.toUpperCase(), x + 5, y + 5.5);
-    doc.setTextColor(G[900][0], G[900][1], G[900][2]);
+    doc.setTextColor(230, 248, 215);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(13);
     doc.text(value, x + 5, y + 13.5);
@@ -164,7 +164,7 @@ function sectionTitle(doc: jsPDF, title: string, y: number): number {
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(9);
     doc.text(title.toUpperCase(), ML + 6, y + 7.5);
-    doc.setDrawColor(G[200][0], G[200][1], G[200][2]);
+    doc.setDrawColor(38, 90, 55);
     doc.setLineWidth(0.3);
     doc.line(ML, y + 13, ML + CW, y + 13);
     return y + 18;
@@ -200,10 +200,10 @@ function fieldGrid(doc: jsPDF, fields: Array<[string, string]>, y: number, colCo
 }
 
 function footerText(doc: jsPDF, page: number, total: number): void {
-    doc.setDrawColor(G[300][0], G[300][1], G[300][2]);
+    doc.setDrawColor(38, 90, 55);
     doc.setLineWidth(0.3);
     doc.line(ML, 282, ML + CW, 282);
-    doc.setTextColor(G[400][0], G[400][1], G[400][2]);
+    doc.setTextColor(70, 130, 55);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(6);
     doc.text('Generado por Lyrium — Reporte General de Órdenes', ML, 287);
@@ -367,8 +367,8 @@ function drawOrderDetail(doc: jsPDF, order: Order, idx: number): number {
             body: prodRows,
             theme: 'plain',
             headStyles: {
-                fillColor: [C.primary[0], C.primary[1], C.primary[2]],
-                textColor: [G[900][0], G[900][1], G[900][2]],
+                fillColor: [18, 60, 38],
+                textColor: [163, 230, 53],
                 fontSize: 6.5,
                 fontStyle: 'bold',
             },
@@ -380,7 +380,7 @@ function drawOrderDetail(doc: jsPDF, order: Order, idx: number): number {
                 3: { cellWidth: 22, halign: 'right' },
             },
             margin: { left: ML, right: MR },
-            tableLineColor: [G[200][0], G[200][1], G[200][2]],
+            tableLineColor: [38, 90, 55],
             tableLineWidth: 0.1,
             showHead: 'everyPage',
         });
@@ -409,8 +409,8 @@ function drawOrderDetail(doc: jsPDF, order: Order, idx: number): number {
             body: svcRows,
             theme: 'plain',
             headStyles: {
-                fillColor: [C.teal[0], C.teal[1], C.teal[2]],
-                textColor: [255, 255, 255],
+                fillColor: [18, 60, 38],
+                textColor: [163, 230, 53],
                 fontSize: 6.5,
                 fontStyle: 'bold',
             },
@@ -422,7 +422,7 @@ function drawOrderDetail(doc: jsPDF, order: Order, idx: number): number {
                 3: { cellWidth: 18, halign: 'right' },
             },
             margin: { left: ML, right: MR },
-            tableLineColor: [G[200][0], G[200][1], G[200][2]],
+            tableLineColor: [38, 90, 55],
             tableLineWidth: 0.1,
             showHead: 'everyPage',
         });
@@ -431,7 +431,7 @@ function drawOrderDetail(doc: jsPDF, order: Order, idx: number): number {
     }
 
     // ── Separator between orders ──
-    doc.setDrawColor(G[200][0], G[200][1], G[200][2]);
+    doc.setDrawColor(38, 90, 55);
     doc.setLineWidth(0.2);
     doc.line(ML, y, ML + CW, y);
     return y + 6;
@@ -446,7 +446,7 @@ export async function generateSalesReportPdf(
     const doc = new jsPDF('p', 'mm', 'a4');
 
     // ═══════ 1. HEADER BAR ═══════
-    doc.setFillColor(244, 250, 230);
+    doc.setFillColor(8, 25, 15);
     doc.rect(0, 0, PW, 22, 'F');
     doc.setFillColor(C.primary[0], C.primary[1], C.primary[2]);
     doc.rect(0, 20, PW, 2, 'F');
@@ -455,11 +455,11 @@ export async function generateSalesReportPdf(
         doc.addImage(logo, 'PNG', ML, 2, 38, 17);
     }
 
-    doc.setTextColor(90, 130, 0);
+    doc.setTextColor(163, 230, 53);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(14);
     doc.text('REPORTE GENERAL DE ÓRDENES', PW - MR, 8, { align: 'right' });
-    doc.setTextColor(130, 165, 50);
+    doc.setTextColor(120, 190, 80);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(7);
     doc.text('Panel de Ventas — Seller', PW - MR, 14, { align: 'right' });
@@ -556,13 +556,13 @@ export async function generateSalesReportPdf(
             body: tableBody,
             theme: 'striped',
             headStyles: {
-                fillColor: [C.primary[0], C.primary[1], C.primary[2]],
-                textColor: [G[900][0], G[900][1], G[900][2]],
+                fillColor: [18, 60, 38],
+                textColor: [163, 230, 53],
                 fontSize: 7,
                 fontStyle: 'bold',
                 halign: 'center',
             },
-            bodyStyles: { fontSize: 6.5, halign: 'center' },
+            bodyStyles: { fontSize: 6.5, halign: 'center', fillColor: [12, 35, 22], textColor: [215, 235, 205] },
             columnStyles: {
                 0: { cellWidth: 26, halign: 'left' },
                 1: { cellWidth: 22, halign: 'center' },
@@ -574,7 +574,7 @@ export async function generateSalesReportPdf(
                 7: { cellWidth: 22, halign: 'right' },
             },
             margin: { left: ML, right: MR },
-            tableLineColor: [G[200][0], G[200][1], G[200][2]],
+            tableLineColor: [38, 90, 55],
             tableLineWidth: 0.1,
             showHead: 'everyPage',
         });

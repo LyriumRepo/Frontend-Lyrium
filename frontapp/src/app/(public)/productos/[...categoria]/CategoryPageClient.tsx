@@ -2,6 +2,7 @@
 
 
 import { useState, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import TopMedalBadge from '@/components/ui/TopMedalBadge';
@@ -29,20 +30,25 @@ function discountPct(price: number, regular: number) {
 
 // ProductCard — usa useAddToCart igual que ProductDetailPageClient
 function ProductCard({ product }: { product: LaravelProduct }) {
+    const router = useRouter();
     const { addToCart, loading, addedToCart } = useAddToCart();
     const discount = discountPct(product.price, product.regular_price);
     const imgSrc   = product.images[0]?.medium ?? product.images[0]?.src ?? '/no-image.png';
     const inStock  = product.stock > 0;
 
     const handleAdd = (e: React.MouseEvent) => {
-        e.preventDefault();
+        e.stopPropagation();
         if (!inStock || loading) return;
         addToCart(Number(product.id), 1);
     };
 
+    // Nota: se usa un <div> con navegación programática (no <a>) porque el botón
+    // "Agregar" de abajo es interactivo — anidar <button> dentro de <a> es HTML inválido.
     return (
-        <Link href={`/producto/${product.slug}`}
-            className="group bg-white dark:bg-[var(--bg-secondary)] border border-gray-100 dark:border-[var(--border-subtle)] rounded-2xl overflow-hidden hover:shadow-xl hover:border-sky-200 dark:hover:border-[#4A7C59]/40 transition-all duration-200 flex flex-col">
+        <div role="link" tabIndex={0}
+            onClick={() => router.push(`/producto/${product.slug}`)}
+            onKeyDown={(e) => { if (e.key === 'Enter') router.push(`/producto/${product.slug}`); }}
+            className="group cursor-pointer bg-white dark:bg-[var(--bg-secondary)] border border-gray-100 dark:border-[var(--border-subtle)] rounded-2xl overflow-hidden hover:shadow-xl hover:border-sky-200 dark:hover:border-[#4A7C59]/40 transition-all duration-200 flex flex-col">
             <div className="relative aspect-square overflow-hidden bg-gray-50 dark:bg-[var(--bg-primary)]">
                 <Image src={imgSrc} alt={product.images[0]?.alt ?? product.name} fill
                     sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
@@ -84,7 +90,7 @@ function ProductCard({ product }: { product: LaravelProduct }) {
                     {loading ? 'Agregando…' : addedToCart ? '¡Agregado!' : 'Agregar'}
                 </button>
             </div>
-        </Link>
+        </div>
     );
 }
 
@@ -101,7 +107,7 @@ function FiltersPanel({ filters, onChange, onClose, totalVisible, totalAll }: {
         <div className="bg-white dark:bg-[var(--bg-secondary)] border border-gray-200 dark:border-[var(--border-subtle)] rounded-2xl p-5 space-y-5">
             <div className="flex items-center justify-between">
                 <h3 className="font-black text-gray-800 dark:text-[var(--text-primary)]">Filtros</h3>
-                <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
+                <button onClick={onClose} aria-label="Cerrar filtros" className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
             </div>
             <div>
                 <p className="text-xs font-black uppercase text-gray-400 mb-2">Ordenar por</p>
@@ -165,6 +171,7 @@ interface CategoryPageClientProps {
 }
 
 export default function CategoryPageClient({ category, products: initialProducts, siblingCategories }: CategoryPageClientProps) {
+    const router = useRouter();
     const [filters, setFilters] = useState<LocalFilters>({ sortBy: 'default' });
     const [showFilters, setShowFilters] = useState(false);
 
@@ -191,7 +198,7 @@ export default function CategoryPageClient({ category, products: initialProducts
                 <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-2 text-sm text-gray-500 dark:text-[var(--text-secondary)]">
                     <Link href="/" className="hover:text-sky-500 transition-colors">Inicio</Link>
                     <span>/</span>
-                    <Link href="/productos" className="hover:text-sky-500 transition-colors">Productos</Link>
+                    <button type="button" onClick={() => router.back()} className="hover:text-sky-500 transition-colors">Productos</button>
                     <span>/</span>
                     <span className="text-gray-800 dark:text-[var(--text-primary)] font-medium">{category.name}</span>
                 </div>

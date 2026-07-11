@@ -14,6 +14,7 @@ import {
   Notification,
   AuditEntry,
   ProductStatus,
+  ServiceStatus,
 } from '@/features/admin/sellers/types';
 import { CVCard } from './SharedCVUI';
 import {
@@ -53,40 +54,35 @@ export const StatsOverview: React.FC<{ stats: StatsProps }> = ({ stats }) => {
   const cards = [
     {
       label: 'Vendedores',
-      // Usa totalSellers real del backend
       val: stats.totalSellers,
       icon: <Users className="w-6 h-6" />,
-      color: 'cyan',
-      border: 'border-cyan-500',
-      textColor: 'text-cyan-500',
+      color: 'celeste',
+      border: 'border-[var(--icons-green)]',
+      textColor: 'text-[var(--icons-green)]',
     },
     {
       label: 'Activos',
-      // activeSellers viene de stats.active del backend
       val: stats.activeSellers,
       icon: <CheckCircle className="w-6 h-6" />,
-      color: 'emerald',
-      border: 'border-emerald-400',
-      textColor: 'text-emerald-400',
+      color: 'turquesaClaro',
+      border: 'border-[var(--icons-green)]',
+      textColor: 'text-[var(--icons-green)]',
     },
     {
       label: 'En Espera',
-      // pending = vendedores con store.status='pending' (sin contrato/sin aprobar)
-      // Usa stats.pending si viene del backend, sino fallback a pendingProducts
       val: stats.pending ?? stats.pendingProducts,
       icon: <Clock className="w-6 h-6" />,
-      color: 'amber',
-      border: 'border-amber-400',
-      textColor: 'text-amber-400',
+      color: 'lima',
+      border: 'border-[var(--icons-green)]',
+      textColor: 'text-[var(--icons-green)]',
     },
     {
       label: 'Alertas',
-      // alerts = stores con strikes > 0 || disputas abiertas || pagos fallidos
       val: stats.alerts,
       icon: <Bell className="w-6 h-6" />,
-      color: 'rose',
-      border: 'border-rose-500',
-      textColor: 'text-rose-500',
+      color: 'error',
+      border: 'border-[var(--color-error)]',
+      textColor: 'text-[var(--color-error)]',
     },
   ];
 
@@ -124,9 +120,9 @@ export const NotificationList: React.FC<{
   onMarkAllRead: () => void;
 }> = ({ notifications, onMarkAllRead }) => {
   const impactMap: Record<string, string> = {
-    critico: 'bg-rose-500',
-    seguridad: 'bg-amber-500',
-    operativo: 'bg-blue-500',
+    critico: 'bg-[var(--color-error)]',
+    seguridad: 'bg-[var(--color-warning)]',
+    operativo: 'bg-[var(--color-info)]',
   };
 
   const getIcon = (tipo: string) => {
@@ -148,7 +144,7 @@ export const NotificationList: React.FC<{
         </div>
         <button
           onClick={onMarkAllRead}
-          className="text-[10px] font-black uppercase tracking-widest text-cyan-500 hover:bg-cyan-500/10 px-6 py-3 rounded-2xl transition-all border border-cyan-500/20 w-fit"
+          className="text-[10px] font-black uppercase tracking-widest text-[var(--icons-green)] hover:bg-[var(--icons-green)]/10 px-6 py-3 rounded-2xl transition-all border border-[var(--icons-green)]/20 w-fit"
         >
           Marcar todas como leídas
         </button>
@@ -165,7 +161,7 @@ export const NotificationList: React.FC<{
             }`}
           >
             <div
-              className={`p-4 rounded-2xl ${impactMap[n.tipo] ?? 'bg-cyan-500'} text-white shadow-xl flex-shrink-0`}
+              className={`p-4 rounded-2xl ${impactMap[n.tipo] ?? 'bg-[var(--icons-green)]'} text-white shadow-xl flex-shrink-0`}
             >
               {getIcon(n.tipo)}
             </div>
@@ -175,7 +171,7 @@ export const NotificationList: React.FC<{
                   {n.entidad_relacionada}
                 </p>
                 <span
-                  className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest ${impactMap[n.tipo] ?? 'bg-cyan-500'} text-white`}
+                  className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest ${impactMap[n.tipo] ?? 'bg-[var(--icons-green)]'} text-white`}
                 >
                   {n.tipo}
                 </span>
@@ -188,13 +184,13 @@ export const NotificationList: React.FC<{
                   <Clock className="w-3 h-3" /> {n.timestamp}
                 </span>
                 <span className="w-1 h-1 rounded-full bg-[var(--text-secondary)]" />
-                <span className="text-[10px] font-black text-cyan-500 uppercase tracking-widest italic">
+                <span className="text-[10px] font-black text-[var(--icons-green)] uppercase tracking-widest italic">
                   {n.modulo_origen}
                 </span>
               </div>
             </div>
             {n.estado_revision === 'nueva' && (
-              <div className="w-3 h-3 rounded-full bg-cyan-500 mt-2 animate-pulse shadow-lg shadow-cyan-500/20 flex-shrink-0" />
+              <div className="w-3 h-3 rounded-full bg-[var(--icons-green)] mt-2 animate-pulse shadow-lg shadow-cyan-500/20 flex-shrink-0" />
             )}
           </div>
         ))}
@@ -283,7 +279,7 @@ export const ProductModeration: React.FC<ProductModerationProps> = ({
   if (pending.length === 0) {
     return (
       <div className="p-20 text-center text-[var(--text-secondary)] font-black uppercase tracking-widest border-2 border-dashed border-[var(--border-subtle)] rounded-[3rem]">
-        <CheckCircle className="w-12 h-12 text-emerald-400 mx-auto mb-4 opacity-60" />
+        <CheckCircle className="w-12 h-12 text-[var(--color-success)] mx-auto mb-4 opacity-60" />
         <p className="text-[10px]">
           No hay solicitudes de moderación activas (RF-03)
         </p>
@@ -347,7 +343,7 @@ export const ProductModeration: React.FC<ProductModerationProps> = ({
               setDateFrom('');
               setDateTo('');
             }}
-            className="px-4 py-2 text-[10px] font-black text-rose-500 uppercase tracking-widest hover:bg-rose-500/10 rounded-xl transition-all"
+            className="px-4 py-2 text-[10px] font-black text-[var(--color-error)] uppercase tracking-widest hover:bg-[var(--color-error)]/10 rounded-xl transition-all"
           >
             Limpiar
           </button>
@@ -357,8 +353,81 @@ export const ProductModeration: React.FC<ProductModerationProps> = ({
         </div>
       </div>
 
-      {/* Tabla */}
-      <div className="overflow-x-auto rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--bg-card)]">
+      {/* Mobile: cards */}
+      <div className="sm:hidden divide-y divide-[var(--border-subtle)] rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--bg-card)] overflow-hidden">
+        {filtered.map((p) => {
+          const isBusy = busyId === p.id;
+          const isEdition = !!p.rejection_reason;
+          return (
+            <div
+              key={p.id}
+              className={`p-4 flex gap-3 ${isBusy ? 'opacity-60 pointer-events-none' : ''}`}
+            >
+              <div className="w-14 h-14 rounded-xl bg-[var(--bg-secondary)] overflow-hidden flex items-center justify-center flex-shrink-0">
+                {p.imageUrl ? (
+                  <Image src={p.imageUrl} alt={p.name} width={56} height={56} className="object-cover w-full h-full" />
+                ) : (
+                  <Package className="w-6 h-6 text-[var(--text-secondary)]" />
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="font-black text-[var(--text-primary)] text-sm leading-tight truncate">{p.name}</p>
+                    <p className="text-[9px] font-mono text-[var(--text-secondary)] mt-0.5">ID #{p.id}</p>
+                  </div>
+                  <span
+                    className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest flex-shrink-0 ${
+                      isEdition ? 'bg-[var(--color-warning)]/10 text-[var(--color-warning)]' : 'bg-[var(--color-success)]/10 text-[var(--color-success)]'
+                    }`}
+                  >
+                    {isEdition ? 'Re-enviado' : 'Nuevo'}
+                  </span>
+                </div>
+                {p.rejection_reason && (
+                  <div className="mt-1.5 flex items-start gap-1.5 text-[10px] text-[var(--color-warning)]">
+                    <AlertTriangle className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                    <span className="line-clamp-2">{p.rejection_reason}</span>
+                  </div>
+                )}
+                <div className="flex items-center gap-2 mt-1.5">
+                  <Store className="w-3 h-3 text-[var(--icons-green)]" />
+                  <span className="text-[11px] font-bold text-[var(--text-primary)] truncate">{p.seller}</span>
+                </div>
+                <div className="flex items-center justify-between gap-2 mt-1.5 flex-wrap">
+                  <span className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest">{p.category}</span>
+                  <span className="font-black text-[var(--text-primary)] text-sm">S/ {p.price.toFixed(2)}</span>
+                </div>
+                <div className="flex items-center gap-1.5 mt-1">
+                  <Clock className="w-3 h-3 text-[var(--text-secondary)]" />
+                  <span className="text-[10px] font-bold text-[var(--text-secondary)]">{p.date ?? '—'}</span>
+                </div>
+                <div className="flex items-center gap-2 mt-3">
+                  <button
+                    onClick={() => handleAction(p, 'APPROVED')}
+                    disabled={isBusy}
+                    className="flex-1 px-3 py-2 bg-[var(--color-success)]/10 hover:bg-[var(--color-success)]/20 text-[var(--color-success)] rounded-xl text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-50 flex items-center justify-center gap-1.5"
+                  >
+                    <CheckCircle className="w-3.5 h-3.5" />
+                    {isBusy ? '...' : 'Aprobar'}
+                  </button>
+                  <button
+                    onClick={() => handleAction(p, 'REJECTED')}
+                    disabled={isBusy}
+                    className="flex-1 px-3 py-2 bg-[var(--color-error)]/10 hover:bg-[var(--color-error)]/20 text-[var(--color-error)] rounded-xl text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-50 flex items-center justify-center gap-1.5"
+                  >
+                    <XCircle className="w-3.5 h-3.5" />
+                    {isBusy ? '...' : 'Rechazar'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Tablet+: tabla */}
+      <div className="hidden sm:block overflow-x-auto rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--bg-card)]">
         <table className="w-full text-left">
           <thead>
             <tr className="border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)]/50">
@@ -427,8 +496,8 @@ export const ProductModeration: React.FC<ProductModerationProps> = ({
                       <span
                         className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest ${
                           isEdition
-                            ? 'bg-orange-500/10 text-orange-500'
-                            : 'bg-emerald-500/10 text-emerald-500'
+                            ? 'bg-[var(--color-warning)]/10 text-[var(--color-warning)]'
+                            : 'bg-[var(--color-success)]/10 text-[var(--color-success)]'
                         }`}
                       >
                         {isEdition ? 'Re-enviado' : 'Nuevo'}
@@ -436,7 +505,7 @@ export const ProductModeration: React.FC<ProductModerationProps> = ({
                     </div>
                     {/* Rechazo anterior inline */}
                     {p.rejection_reason && (
-                      <div className="mt-2 flex items-start gap-1.5 text-[10px] text-amber-500">
+                      <div className="mt-2 flex items-start gap-1.5 text-[10px] text-[var(--color-warning)]">
                         <AlertTriangle className="w-3 h-3 mt-0.5 flex-shrink-0" />
                         <span className="line-clamp-1">
                           {p.rejection_reason}
@@ -448,7 +517,7 @@ export const ProductModeration: React.FC<ProductModerationProps> = ({
                   {/* Tienda */}
                   <td className="p-4">
                     <div className="flex items-center gap-2">
-                      <Store className="w-3.5 h-3.5 text-cyan-500" />
+                      <Store className="w-3.5 h-3.5 text-[var(--icons-green)]" />
                       <span className="text-[11px] font-bold text-[var(--text-primary)]">
                         {p.seller}
                       </span>
@@ -485,7 +554,7 @@ export const ProductModeration: React.FC<ProductModerationProps> = ({
                       <button
                         onClick={() => handleAction(p, 'APPROVED')}
                         disabled={isBusy}
-                        className="px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-50 flex items-center gap-1.5"
+                        className="px-4 py-2 bg-[var(--color-success)]/10 hover:bg-[var(--color-success)]/20 text-[var(--color-success)] rounded-xl text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-50 flex items-center gap-1.5"
                       >
                         <CheckCircle className="w-3.5 h-3.5" />
                         {isBusy ? '...' : 'Aprobar'}
@@ -493,14 +562,333 @@ export const ProductModeration: React.FC<ProductModerationProps> = ({
                       <button
                         onClick={() => handleAction(p, 'REJECTED')}
                         disabled={isBusy}
-                        className="px-4 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-50 flex items-center gap-1.5"
+                        className="px-4 py-2 bg-[var(--color-error)]/10 hover:bg-[var(--color-error)]/20 text-[var(--color-error)] rounded-xl text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-50 flex items-center gap-1.5"
                       >
                         <XCircle className="w-3.5 h-3.5" />
                         {isBusy ? '...' : 'Rechazar'}
                       </button>
                     </div>
                     {isBusy && (
-                      <Loader2 className="w-3.5 h-3.5 animate-spin text-cyan-500 mt-1" />
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-[var(--icons-green)] mt-1" />
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
+
+// ─── SERVICE MODERATION ───────────────────────────────────────────────────────
+
+interface ServiceModerationProps {
+  services: (Product & { rejection_reason?: string | null })[];
+  onAction: (service: Product, suggest: ServiceStatus) => void;
+  isLoading?: boolean;
+}
+
+export const ServiceModeration: React.FC<ServiceModerationProps> = ({
+  services,
+  onAction,
+  isLoading = false,
+}) => {
+  const [busyId, setBusyId] = useState<number | null>(null);
+  const [search, setSearch] = useState('');
+  const [storeFilter, setStoreFilter] = useState('');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
+
+  const pending = services.filter(
+    (s) => s.status === 'en_espera' || s.status === 'PENDING',
+  );
+
+  const stores = React.useMemo(() => {
+    const map = new Map<string, string>();
+    pending.forEach((s) => {
+      if (s.seller && s.sellerId) map.set(s.seller, String(s.sellerId));
+    });
+    return Array.from(map.entries()).sort((a, b) =>
+      a[0].localeCompare(b[0]),
+    );
+  }, [pending]);
+
+  const filtered = React.useMemo(() => {
+    return pending.filter((s) => {
+      if (
+        search &&
+        !s.name.toLowerCase().includes(search.toLowerCase())
+      )
+        return false;
+      if (storeFilter && s.seller !== storeFilter) return false;
+      if (dateFrom && s.date && s.date < dateFrom) return false;
+      if (dateTo && s.date && s.date > dateTo) return false;
+      return true;
+    });
+  }, [pending, search, storeFilter, dateFrom, dateTo]);
+
+  const handleAction = async (service: Product, suggest: ServiceStatus) => {
+    setBusyId(service.id);
+    try {
+      await onAction(service, suggest);
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-20 gap-3 text-[var(--text-secondary)]">
+        <Loader2 className="w-6 h-6 animate-spin" />
+        <span className="text-sm font-bold">
+          Cargando servicios pendientes...
+        </span>
+      </div>
+    );
+  }
+
+  if (pending.length === 0) {
+    return (
+      <div className="p-20 text-center text-[var(--text-secondary)] font-black uppercase tracking-widest border-2 border-dashed border-[var(--border-subtle)] rounded-[3rem]">
+        <CheckCircle className="w-12 h-12 text-[var(--color-success)] mx-auto mb-4 opacity-60" />
+        <p className="text-[10px]">
+          No hay solicitudes de moderación de servicios activas
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-center gap-4 p-5 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-[2rem]">
+        <div className="flex items-center gap-2 flex-1 min-w-[200px]">
+          <Search className="w-4 h-4 text-[var(--text-secondary)]" />
+          <input
+            type="text"
+            placeholder="Buscar servicio..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="flex-1 bg-transparent border-none text-sm font-bold text-[var(--text-primary)] outline-none placeholder:text-[var(--text-secondary)]"
+          />
+        </div>
+        <div className="w-px h-6 bg-[var(--border-subtle)]" />
+        <select
+          value={storeFilter}
+          onChange={(e) => setStoreFilter(e.target.value)}
+          className="px-4 py-2 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-xl text-[11px] font-black text-[var(--text-primary)] outline-none cursor-pointer uppercase tracking-widest"
+        >
+          <option value="">Todas las tiendas</option>
+          {stores.map(([name]) => (
+            <option key={name} value={name}>
+              {name}
+            </option>
+          ))}
+        </select>
+        <div className="w-px h-6 bg-[var(--border-subtle)]" />
+        <div className="flex items-center gap-3">
+          <span className="text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest">
+            Desde
+          </span>
+          <input
+            type="date"
+            value={dateFrom}
+            onChange={(e) => setDateFrom(e.target.value)}
+            className="px-3 py-2 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-xl text-[11px] font-bold text-[var(--text-primary)] outline-none"
+          />
+          <span className="text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest">
+            Hasta
+          </span>
+          <input
+            type="date"
+            value={dateTo}
+            onChange={(e) => setDateTo(e.target.value)}
+            className="px-3 py-2 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-xl text-[11px] font-bold text-[var(--text-primary)] outline-none"
+          />
+        </div>
+        {(search || storeFilter || dateFrom || dateTo) && (
+          <button
+            onClick={() => {
+              setSearch('');
+              setStoreFilter('');
+              setDateFrom('');
+              setDateTo('');
+            }}
+            className="px-4 py-2 text-[10px] font-black text-[var(--color-error)] uppercase tracking-widest hover:bg-[var(--color-error)]/10 rounded-xl transition-all"
+          >
+            Limpiar
+          </button>
+        )}
+        <div className="text-[10px] font-bold text-[var(--text-secondary)] ml-auto">
+          {filtered.length} de {pending.length} servicios
+        </div>
+      </div>
+
+      {/* Mobile: cards */}
+      <div className="sm:hidden divide-y divide-[var(--border-subtle)] rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--bg-card)] overflow-hidden">
+        {filtered.map((s) => {
+          const isBusy = busyId === s.id;
+          return (
+            <div
+              key={s.id}
+              className={`p-4 ${isBusy ? 'opacity-60 pointer-events-none' : ''}`}
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="font-black text-[var(--text-primary)] text-sm leading-tight truncate">{s.name}</p>
+                  <p className="text-[9px] font-mono text-[var(--text-secondary)] mt-0.5">ID #{s.id}</p>
+                </div>
+                <span className="px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest bg-[var(--color-success)]/10 text-[var(--color-success)] flex-shrink-0">
+                  Nuevo
+                </span>
+              </div>
+              {s.rejection_reason && (
+                <div className="mt-1.5 flex items-start gap-1.5 text-[10px] text-[var(--color-warning)]">
+                  <AlertTriangle className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                  <span className="line-clamp-2">{s.rejection_reason}</span>
+                </div>
+              )}
+              <div className="flex items-center gap-2 mt-1.5">
+                <Store className="w-3 h-3 text-[var(--icons-green)]" />
+                <span className="text-[11px] font-bold text-[var(--text-primary)] truncate">{s.seller}</span>
+              </div>
+              <div className="flex items-center justify-between gap-2 mt-1.5 flex-wrap">
+                <span className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest">{s.category}</span>
+                <span className="font-black text-[var(--text-primary)] text-sm">S/ {s.price.toFixed(2)}</span>
+              </div>
+              <div className="flex items-center gap-1.5 mt-1">
+                <Clock className="w-3 h-3 text-[var(--text-secondary)]" />
+                <span className="text-[10px] font-bold text-[var(--text-secondary)]">{s.date ?? '—'}</span>
+              </div>
+              <div className="flex items-center gap-2 mt-3">
+                <button
+                  onClick={() => handleAction(s, 'APPROVED')}
+                  disabled={isBusy}
+                  className="flex-1 px-3 py-2 bg-[var(--color-success)]/10 hover:bg-[var(--color-success)]/20 text-[var(--color-success)] rounded-xl text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-50 flex items-center justify-center gap-1.5"
+                >
+                  <CheckCircle className="w-3.5 h-3.5" />
+                  {isBusy ? '...' : 'Aprobar'}
+                </button>
+                <button
+                  onClick={() => handleAction(s, 'REJECTED')}
+                  disabled={isBusy}
+                  className="flex-1 px-3 py-2 bg-[var(--color-error)]/10 hover:bg-[var(--color-error)]/20 text-[var(--color-error)] rounded-xl text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-50 flex items-center justify-center gap-1.5"
+                >
+                  <XCircle className="w-3.5 h-3.5" />
+                  {isBusy ? '...' : 'Rechazar'}
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Tablet+: tabla */}
+      <div className="hidden sm:block overflow-x-auto rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--bg-card)]">
+        <table className="w-full text-left">
+          <thead>
+            <tr className="border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)]/50">
+              <th className="p-4 text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-[0.2em]">
+                Servicio
+              </th>
+              <th className="p-4 text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-[0.2em]">
+                Tienda
+              </th>
+              <th className="p-4 text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-[0.2em]">
+                Categoría
+              </th>
+              <th className="p-4 text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-[0.2em] text-right">
+                Precio
+              </th>
+              <th className="p-4 text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-[0.2em]">
+                Fecha
+              </th>
+              <th className="p-4 text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-[0.2em]">
+                Acciones
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map((s) => {
+              const isBusy = busyId === s.id;
+              return (
+                <tr
+                  key={s.id}
+                  className={`border-b border-[var(--border-subtle)] last:border-none hover:bg-[var(--bg-secondary)]/30 transition-colors ${
+                    isBusy ? 'opacity-60 pointer-events-none' : ''
+                  }`}
+                >
+                  <td className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div>
+                        <p className="font-black text-[var(--text-primary)] text-sm leading-tight">
+                          {s.name}
+                        </p>
+                        <p className="text-[9px] font-mono text-[var(--text-secondary)] mt-0.5">
+                          ID #{s.id}
+                        </p>
+                      </div>
+                      <span className="px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest bg-[var(--color-success)]/10 text-[var(--color-success)]">
+                        Nuevo
+                      </span>
+                    </div>
+                    {s.rejection_reason && (
+                      <div className="mt-2 flex items-start gap-1.5 text-[10px] text-[var(--color-warning)]">
+                        <AlertTriangle className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                        <span className="line-clamp-1">
+                          {s.rejection_reason}
+                        </span>
+                      </div>
+                    )}
+                  </td>
+                  <td className="p-4">
+                    <div className="flex items-center gap-2">
+                      <Store className="w-3.5 h-3.5 text-[var(--icons-green)]" />
+                      <span className="text-[11px] font-bold text-[var(--text-primary)]">
+                        {s.seller}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="p-4">
+                    <span className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest">
+                      {s.category}
+                    </span>
+                  </td>
+                  <td className="p-4 text-right">
+                    <span className="font-black text-[var(--text-primary)] text-sm">
+                      S/ {s.price.toFixed(2)}
+                    </span>
+                  </td>
+                  <td className="p-4">
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-3 h-3 text-[var(--text-secondary)]" />
+                      <span className="text-[10px] font-bold text-[var(--text-secondary)]">
+                        {s.date ?? '—'}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="p-4">
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleAction(s, 'APPROVED')}
+                        disabled={isBusy}
+                        className="px-4 py-2 bg-[var(--color-success)]/10 hover:bg-[var(--color-success)]/20 text-[var(--color-success)] rounded-xl text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-50 flex items-center gap-1.5"
+                      >
+                        <CheckCircle className="w-3.5 h-3.5" />
+                        {isBusy ? '...' : 'Aprobar'}
+                      </button>
+                      <button
+                        onClick={() => handleAction(s, 'REJECTED')}
+                        disabled={isBusy}
+                        className="px-4 py-2 bg-[var(--color-error)]/10 hover:bg-[var(--color-error)]/20 text-[var(--color-error)] rounded-xl text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-50 flex items-center gap-1.5"
+                      >
+                        <XCircle className="w-3.5 h-3.5" />
+                        {isBusy ? '...' : 'Rechazar'}
+                      </button>
+                    </div>
+                    {isBusy && (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-[var(--icons-green)] mt-1" />
                     )}
                   </td>
                 </tr>
@@ -527,12 +915,34 @@ export const AuditLog: React.FC<{ entries: AuditEntry[] }> = ({ entries }) => {
             RF-04: Trazabilidad Absoluta (Log de Transacciones)
           </p>
         </div>
-        <div className="p-3 bg-cyan-500/10 text-cyan-500 rounded-xl">
+        <div className="p-3 bg-[var(--icons-green)]/10 text-[var(--icons-green)] rounded-xl">
           <Terminal className="w-5 h-5" />
         </div>
       </div>
 
-      <div className="overflow-x-auto">
+      {/* Mobile: cards */}
+      <div className="sm:hidden divide-y divide-[var(--border-subtle)]">
+        {entries.map((a) => (
+          <div key={a.id} className="p-5">
+            <div className="flex items-center justify-between gap-2 mb-2">
+              <span className="text-[10px] font-bold text-[var(--text-secondary)] font-mono">{a.fecha}</span>
+              <span className="px-2.5 py-1 bg-[var(--text-primary)] text-[var(--bg-card)] text-[8px] font-black rounded-lg uppercase tracking-widest whitespace-nowrap">
+                {a.accion}
+              </span>
+            </div>
+            <p className="text-xs font-black text-[var(--text-primary)] uppercase tracking-tighter">{a.entidad}</p>
+            <p className="text-xs text-[var(--text-secondary)] leading-relaxed italic font-medium mt-1.5">
+              {a.metadata?.motivo ?? 'N/A'}
+            </p>
+            <span className="inline-block mt-2 text-[10px] font-black text-[var(--icons-green)] uppercase tracking-widest bg-[var(--icons-green)]/10 px-3 py-1.5 rounded-lg border border-[var(--icons-green)]/20">
+              {a.usuario}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      {/* Tablet+: tabla */}
+      <div className="hidden sm:block overflow-x-auto">
         <table className="w-full text-left" aria-label="Log de auditoría">
           <thead>
             <tr className="bg-[var(--bg-secondary)]/50 border-b border-[var(--border-subtle)] text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">
@@ -563,7 +973,7 @@ export const AuditLog: React.FC<{ entries: AuditEntry[] }> = ({ entries }) => {
                   {a.fecha}
                 </td>
                 <td className="px-8 py-6">
-                  <span className="text-xs font-black text-[var(--text-primary)] uppercase tracking-tighter group-hover:text-cyan-500 transition-colors">
+                  <span className="text-xs font-black text-[var(--text-primary)] uppercase tracking-tighter group-hover:text-[var(--icons-green)] transition-colors">
                     {a.entidad}
                   </span>
                 </td>
@@ -586,7 +996,7 @@ export const AuditLog: React.FC<{ entries: AuditEntry[] }> = ({ entries }) => {
                   </div>
                 </td>
                 <td className="px-8 py-6 text-right">
-                  <span className="text-[10px] font-black text-cyan-500 uppercase tracking-widest bg-cyan-500/10 px-3 py-1.5 rounded-lg border border-cyan-500/20 whitespace-nowrap">
+                  <span className="text-[10px] font-black text-[var(--icons-green)] uppercase tracking-widest bg-[var(--icons-green)]/10 px-3 py-1.5 rounded-lg border border-[var(--icons-green)]/20 whitespace-nowrap">
                     {a.usuario}
                   </span>
                 </td>

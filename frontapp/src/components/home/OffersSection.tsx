@@ -7,6 +7,7 @@ import { ShoppingCart, Eye, ExternalLink, Star } from 'lucide-react';
 import { Producto } from '@/types/public';
 import { useCarritoStore } from '@/store/carritoStore';
 import { homeData } from '@/data/homeData';
+import QuickViewModal from '@/components/products/QuickViewModal';
 
 interface OfferBlockProps {
   titulo: string;
@@ -44,7 +45,7 @@ function OfferCard({
   };
 
   return (
-      <article className="w-[220px] shrink-0 bg-white/[0.92] dark:bg-[var(--bg-secondary)]/92 backdrop-blur-lg border border-white/40 dark:border-[var(--border-subtle)]/50 rounded-[20px] p-3 shadow-md group transition-all duration-300 hover:-translate-y-[5px] flex flex-col items-center relative">
+      <article className="w-[180px] sm:w-[220px] shrink-0 bg-white/[0.92] dark:bg-[var(--bg-secondary)]/92 backdrop-blur-lg border border-white/40 dark:border-[var(--border-subtle)]/50 rounded-[20px] p-3 shadow-md group transition-all duration-300 hover:-translate-y-[5px] flex flex-col items-center relative">
       <div className="relative w-full aspect-square rounded-[18px] overflow-hidden bg-white dark:bg-[var(--bg-muted)] flex items-center justify-center">
                   <Image
             src={imgSrc}
@@ -336,8 +337,8 @@ export default function OffersSection({
 }: OffersSectionProps) {
 
   const openCart = useCarritoStore((s) => s.openCart);
-  const openDetailModal = useCarritoStore((s) => s.openDetailModal);
   const addToCart = useCarritoStore((s) => s.addToCart);
+  const [quickViewProduct, setQuickViewProduct] = useState<Producto | null>(null);
 
   const handleAddToCart = (product: Producto) => {
     addToCart(product);
@@ -345,7 +346,7 @@ export default function OffersSection({
   };
 
   const handleQuickView = (product: Producto) => {
-    openDetailModal(String(product.id));
+    setQuickViewProduct(product);
   };
 
   //  Carruseles por sección
@@ -398,6 +399,16 @@ export default function OffersSection({
         backgroundPosition="center 40%"
         onAddToCart={handleAddToCart}
         onQuickView={handleQuickView}
+      />
+
+      <QuickViewModal
+        isOpen={!!quickViewProduct}
+        onClose={() => setQuickViewProduct(null)}
+        producto={quickViewProduct}
+        onAddToCart={(producto, cantidad) => {
+          addToCart(producto, cantidad);
+          openCart();
+        }}
       />
     </div>
   );

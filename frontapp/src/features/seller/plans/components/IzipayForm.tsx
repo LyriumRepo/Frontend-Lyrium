@@ -1,9 +1,4 @@
 'use client';
-// ============================================
-// COMPONENT — IzipayForm
-// Monta e inicializa el SDK KR de Izipay.
-// Equivalente exacto de _montarFormularioIzipay() en planes.controller.js
-// ============================================
 
 import { useEffect, useRef } from 'react';
 
@@ -17,8 +12,8 @@ interface IzipayConfig {
 interface Props {
   config: IzipayConfig | null;
   open: boolean;
-  onPaid: () => void;       // Pago exitoso → mostrar modal de espera SSE
-  onFailed: () => void;     // Pago fallido
+  onPaid: () => void;
+  onFailed: () => void;
 }
 
 interface IzipaySdk {
@@ -31,68 +26,104 @@ function getKR(): IzipaySdk | undefined {
   return (window as unknown as { KR?: IzipaySdk }).KR;
 }
 
-let _scriptLoaded = false;
+const KR_CSS = 'https://static.micuentaweb.pe/static/js/krypton-client/V4.0/stable/kr-payment-form.min.css';
+const KR_JS  = 'https://static.micuentaweb.pe/static/js/krypton-client/V4.0/stable/kr-payment-form.min.js';
+
 let _cssLoaded    = false;
+let _scriptEl: HTMLScriptElement | null = null;
+
+function ensureCSS() {
+  if (_cssLoaded) return;
+  _cssLoaded = true;
+  const link = document.createElement('link');
+  link.rel  = 'stylesheet';
+  link.href = KR_CSS;
+  document.head.appendChild(link);
+}
+
+function loadScript(publicKey: string): Promise<void> {
+  return new Promise((resolve) => {
+    if (_scriptEl) {
+      resolve();
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = KR_JS;
+    script.setAttribute('kr-public-key',       publicKey);
+    script.setAttribute('kr-post-url-success', 'javascript:void(0)');
+    script.onload = () => resolve();
+    document.head.appendChild(script);
+    _scriptEl = script;
+  });
+}
 
 export default function IzipayForm({ config, open, onPaid, onFailed }: Props) {
-  const initDone = useRef(false);
+  const initDone   = useRef(false);
+  const onPaidRef  = useRef(onPaid);
+  const onFailedRef = useRef(onFailed);
+
+  // Mantener refs actualizados sin volver a ejecutar el effect de init
+  useEffect(() => { onPaidRef.current  = onPaid;   });
+  useEffect(() => { onFailedRef.current = onFailed; });
 
   useEffect(() => {
     if (!open || !config) return;
+
+    let cancelled = false;
     initDone.current = false;
 
-    function initKR() {
-      const kr = getKR();
-      if (!kr) {
-        setTimeout(initKR, 300);
-        return;
+    async function init() {
+      ensureCSS();
+      await loadScript(config!.publicKey);
+      if (cancelled) return;
+
+      // Espera a que el objeto KR esté disponible (puede tardar unos ms tras onload)
+      let kr = getKR();
+      let retries = 0;
+      while (!kr && retries < 30) {
+        await new Promise(r => setTimeout(r, 100));
+        kr = getKR();
+        retries++;
       }
-      if (initDone.current) return;
+
+      if (!kr || cancelled || initDone.current) return;
       initDone.current = true;
 
-      if (!config) return;
-
-      kr.setFormConfig({
-        ...config.formConfig,
-        formToken: config.formToken,
+      await kr.setFormConfig({
+        ...config!.formConfig,
+        'kr-public-key': config!.publicKey,
+        formToken: config!.formToken,
       });
-      // Renderizar elementos en el contenedor
-      setTimeout(() => {
-        kr.renderElements('#izipayFormContainer');
-      }, 100);
+
+      if (cancelled) return;
+
+      // Delay para que el DOM del modal esté completamente pintado
+      await new Promise(r => setTimeout(r, 200));
+      if (cancelled) return;
+
+      // El SDK inyecta el formulario en el elemento con clase kr-embedded
+      kr.renderElements('.kr-embedded');
+
       kr.onSubmit((paymentData) => {
         const status = paymentData.clientAnswer.orderStatus;
         if (status === 'PAID') {
-          onPaid();
+          onPaidRef.current();
         } else {
-          onFailed();
+          onFailedRef.current();
         }
-        return false; // Prevenir redirect de Izipay
+        return false;
       });
     }
 
-    // Cargar CSS de Izipay una sola vez
-    if (!_cssLoaded) {
-      _cssLoaded = true;
-      const link = document.createElement('link');
-      link.rel  = 'stylesheet';
-      link.href = 'https://static.micuentaweb.pe/static/js/krypton-client/V4.0/stable/kr-payment-form.min.css';
-      document.head.appendChild(link);
-    }
+    init().catch(console.error);
 
-    // Cargar script de Izipay una sola vez
-    if (!_scriptLoaded) {
-      _scriptLoaded = true;
-      const script = document.createElement('script');
-      script.src   = 'https://static.micuentaweb.pe/static/js/krypton-client/V4.0/stable/kr-payment-form.min.js';
-      script.setAttribute('kr-public-key',        config.publicKey);
-      script.setAttribute('kr-post-url-success',  'javascript:void(0)');
-      script.onload = initKR;
-      document.head.appendChild(script);
-    } else {
-      initKR();
-    }
+    return () => {
+      cancelled = true;
+    };
+  // onPaid / onFailed se acceden via ref para no re-ejecutar el init al cambiar los callbacks
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, config]);
 
-  return <div className="izipay-form-inner" />;
+  // El SDK de Izipay KR V4 requiere un elemento con class="kr-embedded" donde inyecta el form
+  return <div className="kr-embedded" />;
 }

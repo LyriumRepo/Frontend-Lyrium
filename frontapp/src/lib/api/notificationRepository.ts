@@ -16,14 +16,30 @@ export interface Notification {
   priority: string | null;
   category: string | null;
   vendor_name: string | null;
+  store_name: string | null;
+  store_status: string | null;
+  product_name: string | null;
+  product_status: string | null;
+  service_id: number | null;
+  service_name: string | null;
+  service_status: string | null;
+  reason: string | null;
+  contract_id: number | null;
+  contract_number: string | null;
+  contract_name: string | null;
+  contract_status: string | null;
+  contract_version: string | null;
+  contract_action: string | null;
   is_read: boolean;
+  status: string | null;
   // Store-related notifications
   store_id: number | null;
-  store_name: string | null;
   // Profile request notifications
   seller_name: string | null;
   // Chat notifications
   conversation_id: number | null;
+  // Booking notifications
+  booking_id: number | null;
 }
 
 export interface NotificationsResponse {
@@ -97,6 +113,17 @@ export const notificationRepository = {
       });
     } catch (error) {
       return handleApiError(error, null);
+    }
+  },
+
+  deleteAll: async (ids: string[]): Promise<void> => {
+    try {
+      await apiClient<{ success: boolean; message: string }>('/notifications/delete-all', {
+        method: 'POST',
+        body: { ids },
+      });
+    } catch (error) {
+      handleApiError(error, undefined);
     }
   },
 };

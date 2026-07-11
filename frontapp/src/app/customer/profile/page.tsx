@@ -4,6 +4,8 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { useAuth } from '@/shared/lib/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import Icon from '@/components/ui/Icon';
+import BaseButton from '@/components/ui/BaseButton';
+import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import { userRepository } from '@/shared/lib/api/factory';
 
 const CONFETTI_COLORS = [
@@ -260,6 +262,7 @@ export default function CustomerProfilePage() {
 
       const updatePayload: Record<string, string | undefined> = {
         name: `${formData.nombres} ${formData.apellidos}`.trim(),
+        email: formData.correo || undefined,
         secondary_email: formData.correo_secundario || undefined,
         phone: formData.telefono,
         phone_2: formData.celular_secundario || undefined,
@@ -405,6 +408,13 @@ export default function CustomerProfilePage() {
     return today.getMonth() + 1 === parts.month && today.getDate() === parts.day;
   }, [formData.fecha_cumpleanos]);
 
+  // Dispara el modal premium de cumpleaños cuando el perfil detecta que es hoy
+  useEffect(() => {
+    if (isBirthday) {
+      window.dispatchEvent(new CustomEvent('lyrium:birthday'));
+    }
+  }, [isBirthday]);
+
   if (loading || !user) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -426,37 +436,23 @@ export default function CustomerProfilePage() {
     <>
     {isBirthday && <BirthdayCelebration name={firstName} />}
     <div className="space-y-8 animate-fadeIn">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-black text-slate-800 dark:text-[var(--text-primary)]">
-            Mi Perfil
-          </h1>
-          <p className="text-slate-500 dark:text-[var(--text-muted)] mt-1">
-            Gestiona tu información personal
-          </p>
-        </div>
-        <button
+      <ModuleHeader
+        title="Mi Perfil"
+        subtitle="Gestiona tu información personal"
+        icon="User"
+      />
+
+      <div className="w-full sm:max-w-xs mx-auto md:mx-0 md:ml-auto">
+        <BaseButton
           onClick={() => isEditMode ? handleSave() : setIsEditMode(true)}
-          disabled={saving}
-          className={`flex items-center gap-3 px-6 py-3 rounded-xl font-bold text-sm transition-all ${isEditMode
-            ? 'bg-sky-500 dark:bg-[var(--brand-green)] text-white hover:bg-sky-600 dark:hover:bg-[var(--brand-green-hover)]'
-            : 'bg-white dark:bg-[var(--bg-secondary)] text-black dark:text-[var(--text-primary)] border border-gray-200 dark:border-[var(--border-subtle)] hover:text-sky-500 dark:hover:text-[var(--icons-green)]'
-            }`}
+          isLoading={saving}
+          variant="action"
+          leftIcon={isEditMode ? "Check" : "Pencil"}
+          size="lg"
+          fullWidth
         >
-          {saving ? (
-            <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
-          ) : isEditMode ? (
-            <>
-              <Icon name="Check" className="w-5 h-5" />
-              <span>Guardar Cambios</span>
-            </>
-          ) : (
-            <>
-              <Icon name="Pencil" className="w-5 h-5" />
-              <span>Editar Información</span>
-            </>
-          )}
-        </button>
+          {isEditMode ? "Guardar Cambios" : "Editar Información"}
+        </BaseButton>
       </div>
 
       <form className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
@@ -522,13 +518,11 @@ export default function CustomerProfilePage() {
                   type="email"
                   name="correo"
                   value={formData.correo}
-                  readOnly
+                  onChange={handleChange}
+                  readOnly={!isEditMode}
                   placeholder="usuario@ejemplo.com"
-                  className="w-full text-sm font-bold text-gray-500 dark:text-[var(--text-secondary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-3 border-2 border-gray-100 dark:border-[var(--border-subtle)] rounded-xl outline-none cursor-default select-none"
+                  className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-transparent dark:bg-transparent p-3 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 dark:focus:border-[var(--brand-green)] focus:ring-2 focus:ring-sky-100 dark:focus:ring-[var(--icons-green)] transition-all duration-300"
                 />
-                <p className="text-[9px] text-gray-400 dark:text-gray-500 ml-1">
-                  Para cambiar el correo, contacta a soporte
-                </p>
               </div>
 
               <div className="space-y-1">

@@ -3,13 +3,14 @@ import autoTable from 'jspdf-autotable';
 import { saveAs } from 'file-saver';
 import { Order, OrderItem, ServiceOrderItem } from '../types';
 
-// ── Brand palette ──
+// ── Brand palette (misma que invoices/pdfExporter) ──
 const C = {
-    primary:  [183, 224, 0],    // #B7E000
-    secondary:[143, 212, 0],    // #8FD400
-    teal:     [102, 214, 168],  // #66D6A8
-    darkTeal: [78, 199, 184],   // #4EC7B8
-    blue:     [105, 190, 235],  // #69BEEB
+    primary:   [183, 224, 0]  as [number, number, number],  // lima #B7E000
+    secondary: [143, 212, 0]  as [number, number, number],  // #8FD400
+    accent:    [110, 175, 85] as [number, number, number],  // verde medio
+    darkBg:    [8,   25,  15] as [number, number, number],  // header oscuro
+    cardBg:    [16,  48,  28] as [number, number, number],  // cards KPI
+    sectionBar:[21, 128,  61] as [number, number, number],  // barra sección #15803D
 } as const;
 
 const G = {
@@ -23,15 +24,15 @@ const G = {
     900: [17, 24, 39],
 };
 
-const STATUS_META: Record<string, { bg: number[]; label: string }> = {
-    pending_seller: { bg: [245, 158, 11],  label: 'Pendiente' },
-    pending:        { bg: [245, 158, 11],  label: 'Pendiente' },
-    confirmed:      { bg: [14, 165, 233],  label: 'Confirmado' },
-    processing:     { bg: [99, 102, 241],  label: 'En preparación' },
-    shipped:        { bg: [59, 130, 246],  label: 'En transporte' },
-    delivered:      { bg: [34, 197, 94],   label: 'Entregado' },
-    completed:      { bg: [34, 197, 94],   label: 'Atención completada' },
-    cancelled:      { bg: [239, 68, 68],   label: 'Cancelado' },
+const STATUS_META: Record<string, { bg: [number, number, number]; label: string }> = {
+    pending_seller: { bg: [107, 114, 128], label: 'Pendiente' },
+    pending:        { bg: [107, 114, 128], label: 'Pendiente' },
+    confirmed:      { bg: [21,  128,  61], label: 'Confirmado' },
+    processing:     { bg: [16,  85,   48], label: 'En preparación' },
+    shipped:        { bg: [21,  128,  61], label: 'En transporte' },
+    delivered:      { bg: [143, 212,   0], label: 'Entregado' },
+    completed:      { bg: [143, 212,   0], label: 'Atención completada' },
+    cancelled:      { bg: [239,  68,  68], label: 'Cancelado' },
 };
 
 const ORDER_TYPE_LABEL: Record<string, string> = {
@@ -81,7 +82,7 @@ async function loadImageB64(url: string): Promise<string | null> {
 
 // ── Draw helpers ──
 function sectionTitle(doc: jsPDF, title: string, y: number, ml: number, cw: number): number {
-    doc.setFillColor(C.darkTeal[0], C.darkTeal[1], C.darkTeal[2]);
+    doc.setFillColor(C.sectionBar[0], C.sectionBar[1], C.sectionBar[2]);
     doc.rect(ml, y, 2.5, 12, 'F');
     doc.setTextColor(G[800][0], G[800][1], G[800][2]);
     doc.setFont('helvetica', 'bold');
@@ -151,10 +152,10 @@ export async function generateOrderPdf(order: Order): Promise<void> {
     const icon = (n: string) => n; // placeholder — jspdf icons not needed
 
     // ═══════ 1. HEADER BAR ═══════
-    // Soft light background so the logo reads clearly
-    doc.setFillColor(244, 250, 230);
+    // Header oscuro (mismo estilo que Mis Comprobantes)
+    doc.setFillColor(C.darkBg[0], C.darkBg[1], C.darkBg[2]);
     doc.rect(0, 0, PW, 22, 'F');
-    // Thin accent stripe at the bottom of the header
+    // Franja acento lima en la base del header
     doc.setFillColor(C.primary[0], C.primary[1], C.primary[2]);
     doc.rect(0, 20, PW, 2, 'F');
 
@@ -162,13 +163,13 @@ export async function generateOrderPdf(order: Order): Promise<void> {
         doc.addImage(logo, 'PNG', ML, 2, 38, 17);
     }
 
-    doc.setTextColor(90, 130, 0);
+    doc.setTextColor(C.primary[0], C.primary[1], C.primary[2]);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(15);
     doc.text('LYRIUM', PW - MR, 8, { align: 'right' });
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(7);
-    doc.setTextColor(130, 165, 50);
+    doc.setTextColor(C.accent[0], C.accent[1], C.accent[2]);
     doc.text('TECNOLOGÍA & BIENESTAR', PW - MR, 14, { align: 'right' });
 
     // ═══════ 2. TITLE ═══════
@@ -294,7 +295,7 @@ export async function generateOrderPdf(order: Order): Promise<void> {
     doc.setTextColor(G[400][0], G[400][1], G[400][2]);
     doc.text('ESTADO PAGO', ML + 55, y);
     const payStatus = isVerified ? 'VERIFICADO' : (order.estado_pago || 'PENDIENTE').toUpperCase();
-    doc.setFillColor(isVerified ? 34 : 245, isVerified ? 197 : 158, isVerified ? 94 : 11);
+    doc.setFillColor(isVerified ? 21 : 107, isVerified ? 128 : 114, isVerified ? 61 : 128);
     doc.roundedRect(ML + 55, y + 0.5, doc.getTextWidth(payStatus) + 6, 5, 1, 1, 'F');
     doc.setTextColor(255, 255, 255);
     doc.setFont('helvetica', 'bold');
@@ -412,7 +413,7 @@ export async function generateOrderPdf(order: Order): Promise<void> {
             body: svcBody,
             theme: 'striped',
             headStyles: {
-                fillColor: [C.teal[0], C.teal[1], C.teal[2]],
+                fillColor: [C.sectionBar[0], C.sectionBar[1], C.sectionBar[2]],
                 textColor: [255, 255, 255],
                 fontSize: 7,
                 fontStyle: 'bold',

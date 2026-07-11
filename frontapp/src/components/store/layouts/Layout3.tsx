@@ -16,21 +16,21 @@ export default function Layout3({ products, banners }: Layout3Props) {
   const productosServicio = products.filter((p) => p.tipo === 'service');
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-5 md:space-y-6">
       <hr className="border-gray-200 dark:border-[var(--border-subtle)]" />
 
-      <div className="space-y-4">
-        <h2 className="text-xl font-bold text-slate-800 dark:text-[var(--text-primary)]">
+      <div className="space-y-3 sm:space-y-4">
+        <h2 className="text-lg sm:text-xl font-bold text-slate-800 dark:text-[var(--text-primary)]">
           Productos destacados
         </h2>
-        <div className="flex flex-col lg:flex-row gap-6">
-          <div className="hidden lg:block w-72 flex-shrink-0">
+        <div className="flex flex-col md:flex-row gap-4 sm:gap-5 md:gap-6">
+          <div className="hidden md:block w-48 lg:w-72 flex-shrink-0">
             <AdBannersCarousel banners={banners} maxBanners={4} vertical startIndex={0} fallback={4} />
           </div>
           <div className="flex-1">
             <ProductGrid productos={productosNormales} className="lg:!grid-cols-3" />
           </div>
-          <div className="hidden lg:block w-72 flex-shrink-0">
+          <div className="hidden md:block w-48 lg:w-72 flex-shrink-0">
             <AdBannersCarousel banners={banners} maxBanners={4} vertical startIndex={4} fallback={4} />
           </div>
         </div>
@@ -43,8 +43,8 @@ export default function Layout3({ products, banners }: Layout3Props) {
       <hr className="border-gray-200 dark:border-[var(--border-subtle)]" />
 
       {productosServicio.length > 0 && (
-        <div className="space-y-4">
-          <h2 className="text-xl font-bold text-slate-800 dark:text-[var(--text-primary)]">
+        <div className="space-y-3 sm:space-y-4">
+          <h2 className="text-lg sm:text-xl font-bold text-slate-800 dark:text-[var(--text-primary)]">
             Servicios de la tienda
           </h2>
           <ProductGrid productos={productosServicio} className="lg:!grid-cols-3" />

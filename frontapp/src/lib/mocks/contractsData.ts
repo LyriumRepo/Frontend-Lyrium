@@ -3,6 +3,7 @@ import { Contract } from '@/lib/types/admin/contracts';
 export const MOCK_CONTRACTS_DATA: Contract[] = [
     {
         id: "CTR-2024-845",
+        dbId: 1,
         company: "TechStore SAC",
         ruc: "20123456781",
         rep: "Carlos Mendoza",
@@ -25,6 +26,7 @@ export const MOCK_CONTRACTS_DATA: Contract[] = [
     },
     {
         id: "CTR-2024-102",
+        dbId: 2,
         company: "Comercializadora del Sur EIRL",
         ruc: "10456123451",
         rep: "Ana López",
@@ -47,6 +49,7 @@ export const MOCK_CONTRACTS_DATA: Contract[] = [
     },
     {
         id: "CTR-2023-933",
+        dbId: 3,
         company: "Inversiones ABC SAC",
         ruc: "20888877791",
         rep: "Juan Pérez",
@@ -69,6 +72,7 @@ export const MOCK_CONTRACTS_DATA: Contract[] = [
     },
     {
         id: "CTR-2024-055",
+        dbId: 4,
         company: "Moda y Estilo SAC",
         ruc: "20444555661",
         rep: "Lucía Valverde",

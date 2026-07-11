@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
 import { useAuth } from '@/shared/lib/context/AuthContext';
@@ -22,6 +22,14 @@ export function SocialLoginButton({
     const { loginWithSocial } = useAuth();
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [googleWidth, setGoogleWidth] = useState(400);
+
+    useEffect(() => {
+        const updateWidth = () => setGoogleWidth(window.innerWidth < 640 ? 280 : 400);
+        updateWidth();
+        window.addEventListener('resize', updateWidth);
+        return () => window.removeEventListener('resize', updateWidth);
+    }, []);
 
     if (provider === 'google') {
         return (
@@ -61,7 +69,7 @@ export function SocialLoginButton({
                             setError(msg);
                             onError?.(msg);
                         }}
-                        width="400"
+                        width={googleWidth}
                         text="continue_with"
                         shape="rectangular"
                         size="large"

@@ -89,9 +89,29 @@ export default function Timeline({ planOrder, plansData, activePlan, suffix, onP
   }), [planOrder, plansData]);
 
   return (
+    // Orden: [btn-izq] [viewport] [btn-der] — así cuando ambos están ocultos
+    // (visibility:hidden) ocupan espacio simétrico y los puntos quedan centrados.
     <div className="flex items-center gap-2 my-5 px-1 relative">
+
+      {/* ← Flecha izquierda — ANTES del viewport */}
+      <button
+        ref={leftBtnRef}
+        id={`tlArrowLeft${suffix}`}
+        className="flex-shrink-0 w-9 h-9 rounded-full border-2 border-gray-200 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] text-gray-400 dark:text-[var(--text-muted)] flex items-center justify-center cursor-pointer transition-all duration-250 shadow-sm z-20 hover:border-blue-400 hover:text-blue-500 dark:hover:border-[var(--brand-sky)] dark:hover:text-[var(--brand-sky)] opacity-0 pointer-events-none"
+        onClick={() => scrollTimeline(-1)}
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <polyline points="15 18 9 12 15 6" />
+        </svg>
+      </button>
+
+      {/* Viewport central */}
       <div className="flex-1 overflow-hidden min-w-0 py-2" id={`tlViewport${suffix}`}>
-        <div className="flex items-start relative transition-transform duration-300" style={{ width: `${(n / TL_VISIBLE) * 100}%` }} ref={trackRef}>
+        <div
+          className="flex items-start relative transition-transform duration-300"
+          style={{ width: `${(n / TL_VISIBLE) * 100}%` }}
+          ref={trackRef}
+        >
           <div className="absolute top-8 left-0 right-0 h-1 bg-gray-200 dark:bg-[var(--border-subtle)] rounded-full pointer-events-none" id={`tlLine${suffix}`} />
           <div className="absolute top-8 left-0 h-1 rounded-full transition-all duration-300 pointer-events-none" id={`timelineProgress${suffix}`} ref={progressRef} style={{ width: '0%' }} />
           <div className="flex relative z-10 w-full" id={`timelinePoints${suffix}`}>
@@ -103,37 +123,41 @@ export default function Timeline({ planOrder, plansData, activePlan, suffix, onP
                   role="button"
                   tabIndex={0}
                   key={key}
-                  className={`flex flex-col items-center gap-3 cursor-pointer transition-all flex-1 ${isActive ? '' : ''}`}
+                  className="flex flex-col items-center gap-3 cursor-pointer transition-all flex-1"
                   data-plan={key}
                   onClick={() => onClickRef.current(key)}
                   onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClickRef.current(key); }}
                 >
                   <div
-                    className={`w-16 h-16 rounded-full border-3 flex items-center justify-center transition-all duration-400 ${isActive ? '' : 'bg-white dark:bg-[var(--bg-card)] border-gray-300 dark:border-[var(--border-subtle)] text-gray-400 dark:text-[var(--text-muted)]'}`}
+                    className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full border-3 flex items-center justify-center transition-all duration-400 ${isActive ? '' : 'bg-white dark:bg-[var(--bg-card)] border-gray-300 dark:border-[var(--border-subtle)] text-gray-400 dark:text-[var(--text-muted)]'}`}
                     style={isActive ? { background: color, borderColor: color, color: '#fff' } : {}}
                   >
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
                       stroke="currentColor" strokeWidth="2"
-                      // ✅ SEGURO: availableIcons mapea a SVG hardcoded interno
                       dangerouslySetInnerHTML={{ __html: availableIcons[iconKey] }} />
                   </div>
-                  <span className={`text-xs font-semibold text-center max-w-[80px] overflow-hidden text-ellipsis whitespace-nowrap ${isActive ? 'text-gray-800 dark:text-[var(--text-primary)] font-bold' : 'text-gray-400 dark:text-[var(--text-muted)]'}`}>{data?.name ?? key}</span>
+                  <span className={`text-[10px] sm:text-xs font-semibold text-center max-w-[72px] sm:max-w-[80px] overflow-hidden text-ellipsis whitespace-nowrap ${isActive ? 'text-gray-800 dark:text-[var(--text-primary)] font-bold' : 'text-gray-400 dark:text-[var(--text-muted)]'}`}>
+                    {data?.name ?? key}
+                  </span>
                 </div>
               );
             })}
           </div>
         </div>
       </div>
-      <button ref={leftBtnRef} id={`tlArrowLeft${suffix}`} className="flex-shrink-0 w-9 h-9 rounded-full border-2 border-gray-200 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] text-gray-400 dark:text-[var(--text-muted)] flex items-center justify-center cursor-pointer transition-all duration-250 shadow-sm z-20 hover:border-blue-400 hover:text-blue-500 dark:hover:border-[var(--brand-sky)] dark:hover:text-[var(--brand-sky)] opacity-0 pointer-events-none" onClick={() => scrollTimeline(-1)}>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <polyline points="15 18 9 12 15 6" />
-        </svg>
-      </button>
-      <button ref={rightBtnRef} id={`tlArrowRight${suffix}`} className="flex-shrink-0 w-9 h-9 rounded-full border-2 border-gray-200 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] text-gray-400 dark:text-[var(--text-muted)] flex items-center justify-center cursor-pointer transition-all duration-250 shadow-sm z-20 hover:border-blue-400 hover:text-blue-500 dark:hover:border-[var(--brand-sky)] dark:hover:text-[var(--brand-sky)] opacity-0 pointer-events-none" onClick={() => scrollTimeline(1)}>
+
+      {/* → Flecha derecha — DESPUÉS del viewport */}
+      <button
+        ref={rightBtnRef}
+        id={`tlArrowRight${suffix}`}
+        className="flex-shrink-0 w-9 h-9 rounded-full border-2 border-gray-200 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] text-gray-400 dark:text-[var(--text-muted)] flex items-center justify-center cursor-pointer transition-all duration-250 shadow-sm z-20 hover:border-blue-400 hover:text-blue-500 dark:hover:border-[var(--brand-sky)] dark:hover:text-[var(--brand-sky)] opacity-0 pointer-events-none"
+        onClick={() => scrollTimeline(1)}
+      >
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <polyline points="9 18 15 12 9 6" />
         </svg>
       </button>
+
     </div>
   );
 }

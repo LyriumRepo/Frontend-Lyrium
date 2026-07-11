@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Clock, Tag, Calendar, Check, Loader2, Leaf, Package, FolderOpen, Star, ShieldCheck, Barcode } from 'lucide-react';
@@ -7,12 +8,13 @@ import { Producto } from '@/types/public';
 import TopMedalBadge from '@/components/ui/TopMedalBadge';
 import { useAddToCart } from '@/features/public/product/hooks/useAddToCart';
 import { money } from '@/modules/cart/utils';
+import QuickViewModal from './QuickViewModal';
 
 const stickerConfig: Record<string, { label: string; class: string }> = {
   oferta: { label: 'Oferta', class: 'bg-red-500' },
   promo: { label: 'Promo', class: 'bg-orange-500' },
   nuevo: { label: 'Nuevo', class: 'bg-green-500' },
-  limitado: { label: 'Limitado', class: 'bg-purple-500' },
+  limitado: { label: 'Limitado', class: 'bg-amber-500' },
   liquidacion: { label: 'Liquidación', class: 'bg-red-600' },
   descuento: { label: 'Dto.', class: 'bg-red-500' },
   bestseller: { label: 'Best Seller', class: 'bg-amber-500' },
@@ -20,7 +22,7 @@ const stickerConfig: Record<string, { label: string; class: string }> = {
   organic: { label: 'Orgánico', class: 'bg-emerald-600' },
   natural: { label: 'Natural', class: 'bg-green-600' },
   eco: { label: 'Eco', class: 'bg-lime-600' },
-  premium: { label: 'Premium', class: 'bg-purple-500' },
+  premium: { label: 'Premium', class: 'bg-[var(--brand-green)]' },
   vegan: { label: 'Vegano', class: 'bg-green-700' },
 };
 
@@ -33,12 +35,12 @@ interface ProductGridProps {
 function StarRating({ estrellas, total }: { estrellas: string; total?: number }) {
   const rating = parseFloat(estrellas) || 0;
   return (
-    <span className="inline-flex items-center gap-1 text-[11px] px-2 py-1 rounded-full bg-gradient-to-r from-sky-500/10 to-lime-500/8 dark:from-sky-500/20 dark:to-lime-500/15 border border-sky-200/50 dark:border-sky-800/30">
+    <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full bg-gradient-to-r from-sky-500/10 to-lime-500/8 dark:from-sky-500/20 dark:to-lime-500/15 border border-sky-200/50 dark:border-sky-800/30">
       <span className="inline-flex items-center gap-0.5">
         {Array.from({ length: 5 }).map((_, i) => (
           <Star
             key={i}
-            className={`w-3 h-3 ${rating >= i + 0.75 ? 'text-amber-400 fill-amber-400' : 'text-gray-300 dark:text-gray-600'}`}
+            className={`w-2.5 h-2.5 sm:w-3 sm:h-3 ${rating >= i + 0.75 ? 'text-amber-400 fill-amber-400' : 'text-gray-300 dark:text-gray-600'}`}
           />
         ))}
       </span>
@@ -54,7 +56,7 @@ function formatDuration(minutes: number): string {
   return m > 0 ? `${h}h ${m}min` : `${h}h`;
 }
 
-function ProductCard({ producto }: { producto: Producto }) {
+function ProductCard({ producto, onQuickView }: { producto: Producto; onQuickView: (producto: Producto) => void }) {
   const { addToCart, loading, addedToCart } = useAddToCart();
   const outOfStock = producto.stock === 0;
   const finalPrice = producto.precioOferta ?? producto.precio;
@@ -77,7 +79,7 @@ function ProductCard({ producto }: { producto: Producto }) {
         </Link>
 
         {producto.store_logo_marketplace && (
-          <div className="absolute top-3 left-3 z-10 w-20 h-20 rounded-full bg-white shadow-md overflow-hidden flex items-center justify-center">
+          <div className="absolute top-1.5 left-1.5 sm:top-3 sm:left-3 z-10 w-7 h-7 sm:w-20 sm:h-20 rounded-full bg-white shadow-md overflow-hidden flex items-center justify-center">
             <img
               src={producto.store_logo_marketplace}
               alt="Logo tienda"
@@ -91,11 +93,11 @@ function ProductCard({ producto }: { producto: Producto }) {
         </span>
 
         {producto.tag && (
-          <div className="absolute top-4 right-0 z-10">
-            <div className={`flex flex-col items-center justify-center text-center leading-tight text-white w-[100px] h-[50px] pl-2 pr-1 rounded-l-full shadow-lg ${stickerConfig[producto.tag.toLowerCase()]?.class ?? 'bg-gray-500'}`}>
-              <span className="text-[14px] font-extrabold uppercase tracking-wide line-clamp-2">
+          <div className="absolute top-1.5 right-0 sm:top-4 z-10">
+            <div className={`flex flex-col items-center justify-center text-center leading-tight text-white w-[46px] h-[24px] sm:w-[100px] sm:h-[50px] pl-1 pr-0.5 sm:pl-2 sm:pr-1 rounded-l-full shadow-lg ${stickerConfig[producto.tag.toLowerCase()]?.class ?? 'bg-gray-500'}`}>
+              <span className="text-[7px] sm:text-[14px] font-extrabold uppercase tracking-wide line-clamp-2">
                 {pct > 0 && (
-                  <span className="text-[17px] font-black mt-0.5">-{pct}% </span>
+                  <span className="text-[9px] sm:text-[17px] font-black mt-0.5">-{pct}% </span>
                 )}
                 {stickerConfig[producto.tag.toLowerCase()]?.label ?? producto.tag}
               </span>
@@ -112,59 +114,59 @@ function ProductCard({ producto }: { producto: Producto }) {
         <TopMedalBadge entityType="product" entityId={producto.id} size="xxl" className="absolute bottom-2 right-2 z-10" />
       </div>
 
-      <div className="p-4 flex flex-col gap-2 flex-1">
+      <div className="p-2 sm:p-4 flex flex-col gap-1 sm:gap-2 flex-1">
         <div className="flex items-start justify-between gap-2">
           <Link href={producto.slug ? `/producto/${producto.slug}` : '#'} className="text-left flex-1">
-            <p className="text-slate-800 dark:text-[var(--text-primary)] leading-snug line-clamp-2 min-h-[42px] text-sm font-medium">
+            <p className="text-slate-800 dark:text-[var(--text-primary)] leading-snug line-clamp-2 min-h-[34px] sm:min-h-[42px] text-[13px] sm:text-sm font-medium">
               {producto.titulo}
             </p>
           </Link>
           {(producto as any).sku && (
-            <span className="shrink-0 text-[10px] px-2 py-1 rounded-full bg-gray-100 dark:bg-[var(--bg-muted)] text-slate-600 dark:text-[var(--text-secondary)] inline-flex items-center gap-1">
+            <span className="hidden sm:inline-flex shrink-0 text-[10px] px-2 py-1 rounded-full bg-gray-100 dark:bg-[var(--bg-muted)] text-slate-600 dark:text-[var(--text-secondary)] items-center gap-1">
               <Barcode className="w-3 h-3 text-sky-500 dark:text-[var(--brand-sky)]" /> {(producto as any).sku}
             </span>
           )}
         </div>
 
         {producto.descripcionCorta && (
-          <p className="text-[11px] text-slate-400 dark:text-[var(--text-muted)] line-clamp-2">{producto.descripcionCorta}</p>
+          <p className="hidden sm:block text-[11px] text-slate-400 dark:text-[var(--text-muted)] line-clamp-2">{producto.descripcionCorta}</p>
         )}
 
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center flex-wrap gap-1 sm:gap-1.5">
           {producto.categoria && (
-            <span className="text-[11px] px-2 py-1 rounded-full bg-slate-50 dark:bg-[var(--bg-muted)] border border-slate-100 dark:border-[var(--border-subtle)] text-slate-600 dark:text-[var(--text-secondary)] inline-flex items-center gap-1">
-              <FolderOpen className="w-3 h-3 text-sky-500 dark:text-[var(--brand-sky)]" /> {producto.categoria}
+            <span className="text-[10px] sm:text-[11px] px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full bg-slate-50 dark:bg-[var(--bg-muted)] border border-slate-100 dark:border-[var(--border-subtle)] text-slate-600 dark:text-[var(--text-secondary)] inline-flex items-center gap-1 max-w-full truncate">
+              <FolderOpen className="w-3 h-3 text-sky-500 dark:text-[var(--brand-sky)] shrink-0" /> <span className="truncate">{producto.categoria}</span>
             </span>
           )}
           {producto.estrellas
             ? <StarRating estrellas={producto.estrellas} total={producto.reviews} />
             : (
-              <span className="text-[10px] px-2 py-1 rounded-full bg-slate-50 dark:bg-[var(--bg-muted)] border border-slate-100 dark:border-[var(--border-subtle)] text-slate-500 dark:text-[var(--text-muted)] inline-flex items-center gap-1">
+              <span className="hidden sm:inline-flex text-[10px] px-2 py-1 rounded-full bg-slate-50 dark:bg-[var(--bg-muted)] border border-slate-100 dark:border-[var(--border-subtle)] text-slate-500 dark:text-[var(--text-muted)] items-center gap-1">
                 <ShieldCheck className="w-3 h-3 text-sky-500 dark:text-[var(--brand-sky)]" /> Verificado
               </span>
             )}
         </div>
 
-        <div className="flex items-end justify-between mt-1">
-          <div>
-            <p className="text-emerald-700 dark:text-emerald-400 text-xl font-bold">{money(finalPrice)}</p>
+        <div className="flex items-baseline justify-between mt-1 gap-1.5">
+          <div className="min-w-0">
+            <p className="text-sky-600 dark:text-emerald-400 text-base sm:text-xl font-bold whitespace-nowrap">{money(finalPrice)}</p>
             {hasOffer ? (
-              <p className="text-xs text-gray-400 dark:text-[var(--text-muted)] line-through">{money(basePrice)}</p>
+              <p className="text-[10px] sm:text-xs text-gray-400 dark:text-[var(--text-muted)] line-through whitespace-nowrap">{money(basePrice)}</p>
             ) : (
-              <p className="text-xs text-transparent">-</p>
+              <p className="text-[10px] sm:text-xs text-transparent">-</p>
             )}
           </div>
-          <span className={`text-xs inline-flex items-center gap-1 ${outOfStock ? 'text-rose-500' : 'text-slate-400 dark:text-[var(--text-muted)]'}`}>
-            <Package className="w-3 h-3 text-sky-500 dark:text-[var(--brand-sky)]" />
+          <span className={`text-[10px] sm:text-xs inline-flex items-center gap-1 shrink-0 whitespace-nowrap ${outOfStock ? 'text-rose-500' : 'text-slate-400 dark:text-[var(--text-muted)]'}`}>
+            <Package className="w-3 h-3 text-sky-500 dark:text-[var(--brand-sky)] shrink-0" />
             {outOfStock ? 'Agotado' : producto.stock ? `Stock: ${producto.stock}` : 'Disponible'}
           </span>
         </div>
 
-        <div className="grid grid-cols-2 gap-2 mt-2">
+        <div className="grid grid-cols-2 gap-1.5 sm:gap-2 mt-1.5 sm:mt-2">
           <button
             onClick={(e) => { e.preventDefault(); if (outOfStock || loading) return; addToCart(producto.id); }}
             disabled={outOfStock || loading}
-            className="py-2.5 rounded-2xl bg-sky-500 text-white text-xs font-semibold inline-flex items-center justify-center gap-1.5 hover:bg-sky-600 dark:hover:bg-sky-400 transition shadow-md shadow-sky-100 dark:shadow-sky-900/20 disabled:opacity-40 disabled:cursor-not-allowed hover:-translate-y-px"
+            className="py-1.5 sm:py-2.5 rounded-2xl bg-gradient-to-r from-emerald-400 to-sky-400 dark:from-[var(--brand-green)] dark:to-[var(--icons-green)] text-white border border-white/20 text-xs font-semibold inline-flex items-center justify-center gap-1.5 shadow-lg shadow-sky-500/25 dark:shadow-[#8FC3A1]/70 hover:shadow-xl hover:shadow-sky-500/30 dark:hover:shadow-[#8FC3A1]/50 transition disabled:opacity-40 disabled:cursor-not-allowed hover:-translate-y-px"
           >
             {loading ? (
               <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -175,12 +177,12 @@ function ProductCard({ producto }: { producto: Producto }) {
             )}
             {loading ? '…' : addedToCart ? '¡Listo!' : outOfStock ? 'No disponible' : 'Añadir'}
           </button>
-          <Link
-            href={producto.slug ? `/producto/${producto.slug}` : '#'}
-            className="py-2.5 rounded-2xl border border-sky-200 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] text-xs font-semibold text-slate-700 dark:text-[var(--text-primary)] inline-flex items-center justify-center gap-1.5 hover:bg-sky-50 dark:hover:bg-sky-900/10 transition hover:-translate-y-px"
+          <button
+            onClick={(e) => { e.preventDefault(); onQuickView(producto); }}
+            className="py-1.5 sm:py-2.5 rounded-2xl border border-sky-200 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] text-xs font-semibold text-slate-700 dark:text-[var(--text-primary)] inline-flex items-center justify-center gap-1.5 hover:bg-sky-50 dark:hover:bg-sky-900/10 transition hover:-translate-y-px"
           >
             🔍 Ver
-          </Link>
+          </button>
         </div>
       </div>
     </article>
@@ -196,7 +198,7 @@ function ServiceCard({ producto }: { producto: Producto }) {
   return (
     <div className="group bg-white dark:bg-[var(--bg-secondary)] border border-gray-100 dark:border-[var(--border-subtle)] rounded-2xl overflow-hidden hover:shadow-xl hover:border-sky-200 dark:hover:border-[#4A7C59]/40 transition-all duration-200 flex flex-col">
       {/* Header with image or gradient */}
-      <Link href={producto.enlace || '#'} className="block relative h-36 overflow-hidden bg-gray-100 dark:bg-gray-800">
+      <Link href={producto.enlace || '#'} className="block relative h-28 sm:h-36 overflow-hidden bg-gray-100 dark:bg-[var(--bg-secondary)]">
         {producto.imagen ? (
           <Image
             src={producto.imagen}
@@ -224,7 +226,7 @@ function ServiceCard({ producto }: { producto: Producto }) {
       </Link>
 
       {/* Info */}
-      <div className="p-3 flex flex-col gap-1.5 flex-1">
+      <div className="p-2.5 sm:p-3 flex flex-col gap-1.5 flex-1">
         <Link href={producto.enlace || '#'}>
           <p className="text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] line-clamp-2 leading-tight">
             {producto.titulo}
@@ -232,18 +234,18 @@ function ServiceCard({ producto }: { producto: Producto }) {
         </Link>
 
         {producto.descripcion && (
-          <p className="text-xs text-gray-500 dark:text-[var(--text-secondary)] line-clamp-2">
+          <p className="hidden sm:block text-xs text-gray-500 dark:text-[var(--text-secondary)] line-clamp-2">
             {producto.descripcion}
           </p>
         )}
 
-        <div className="flex items-center gap-3 text-xs text-gray-400 dark:text-[var(--text-secondary)] mt-auto">
+        <div className="flex items-center flex-wrap gap-x-3 gap-y-1 text-xs text-gray-400 dark:text-[var(--text-secondary)] mt-auto">
           <span className="flex items-center gap-1">
             <Clock className="w-3.5 h-3.5" />
             {formatDuration(durationMinutes)}
           </span>
           {producto.vendedor?.nombre && (
-            <span className="flex items-center gap-1 truncate">
+            <span className="hidden sm:flex items-center gap-1 truncate">
               <Tag className="w-3 h-3 shrink-0" />
               <span className="truncate">{producto.vendedor.nombre}</span>
             </span>
@@ -278,18 +280,21 @@ function ServiceCard({ producto }: { producto: Producto }) {
 function ProductCardSkeleton() {
   return (
     <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-2xl shadow-sm border border-gray-100 dark:border-[var(--border-subtle)] overflow-hidden animate-pulse">
-      <div className="aspect-square bg-gray-200 dark:bg-gray-700" />
+      <div className="aspect-square bg-gray-200 dark:bg-[var(--bg-muted)]" />
       <div className="p-3 space-y-3">
-        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/3" />
-        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4" />
-        <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-1/3" />
-        <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded-xl w-full" />
+        <div className="h-3 bg-gray-200 dark:bg-[var(--bg-muted)] rounded w-1/3" />
+        <div className="h-4 bg-gray-200 dark:bg-[var(--bg-muted)] rounded w-3/4" />
+        <div className="h-5 bg-gray-200 dark:bg-[var(--bg-muted)] rounded w-1/3" />
+        <div className="h-8 bg-gray-200 dark:bg-[var(--bg-muted)] rounded-xl w-full" />
       </div>
     </div>
   );
 }
 
 export default function ProductGrid({ productos, loading = false, className = '' }: ProductGridProps) {
+  const [quickViewProduct, setQuickViewProduct] = useState<Producto | null>(null);
+  const { addToCart: addToCartApi } = useAddToCart();
+
   if (loading) {
     return (
       <div className={`grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 ${className}`}>
@@ -303,7 +308,7 @@ export default function ProductGrid({ productos, loading = false, className = ''
   if (productos.length === 0) {
     return (
       <div className="text-center py-16">
-        <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gray-100 dark:bg-gray-800 mb-4">
+        <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gray-100 dark:bg-[var(--bg-secondary)] mb-4">
           <span className="text-4xl">📦</span>
         </div>
         <h3 className="text-lg font-medium text-gray-900 dark:text-[var(--text-primary)] mb-2">
@@ -327,11 +332,18 @@ export default function ProductGrid({ productos, loading = false, className = ''
     <div className={`grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 ${className}`}>
       {productos.map((producto) =>
         producto.tipo === 'service' ? (
-          <ServiceCard key={producto.id} producto={producto} />
+          <ServiceCard key={`service-${producto.id}`} producto={producto} />
         ) : (
-          <ProductCard key={producto.id} producto={producto} />
+          <ProductCard key={`product-${producto.id}`} producto={producto} onQuickView={setQuickViewProduct} />
         )
       )}
+
+      <QuickViewModal
+        isOpen={!!quickViewProduct}
+        onClose={() => setQuickViewProduct(null)}
+        producto={quickViewProduct}
+        onAddToCart={(producto, cantidad) => addToCartApi(Number(producto.id), cantidad)}
+      />
     </div>
   );
 }

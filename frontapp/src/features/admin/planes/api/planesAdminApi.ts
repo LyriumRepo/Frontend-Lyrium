@@ -18,6 +18,15 @@ async function getToken(): Promise<string | null> {
   if (_tokenCache && now - _tokenCache.ts < 30_000) {
     return _tokenCache.value;
   }
+  // Leer del localStorage primero (siempre fresco en cliente)
+  if (typeof window !== 'undefined') {
+    const local = localStorage.getItem('laravel_token');
+    if (local) {
+      _tokenCache = { value: local, ts: now };
+      return local;
+    }
+  }
+  // Fallback: cookie httpOnly via route handler
   try {
     const res = await fetch('/api/auth-token', {
       credentials: 'include',
@@ -358,14 +367,11 @@ export const planesAdminApi = {
     return apiFetch('/admin/vendedores/stats');
   },
 
-  /** GET /admin/vendedores/:id */
+  /** GET /admin/vendedores/:id/historial */
   async fetchVendedorDetail(id: number): Promise<{
-    store: VendedorFromApi;
-    subscriptions: any[];
-    plan_requests: any[];
+    data: any[];
   }> {
-    const res = await apiFetch<{ data: any } | any>(`/admin/vendedores/${id}`);
-    return 'data' in res && res.data ? res.data : res;
+    return apiFetch<{ data: any[] }>(`/admin/vendedores/${id}/historial`);
   },
 
   // ── Pagos ──────────────────────────────────────────────────────────────────

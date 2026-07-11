@@ -2,6 +2,7 @@
 
 import React from 'react';
 import BaseLayout from '@/components/layout/shared/BaseLayout';
+import NotificationSidebar from '@/components/shared/notifications/NotificationSidebar';
 
 interface DashboardLayoutProps {
     children: React.ReactNode;
@@ -23,15 +24,18 @@ export function DashboardLayout({
     mainClassName = 'p-6 md:p-8'
 }: DashboardLayoutProps) {
     return (
-        <BaseLayout
-            header={header}
-            sidebar={sidebar}
-            sidebarOpen={sidebarOpen}
-            onSidebarClose={onSidebarClose}
-            className={className}
-            mainClassName={mainClassName}
-        >
-            {children}
-        </BaseLayout>
+        <>
+            <BaseLayout
+                header={header}
+                sidebar={sidebar}
+                sidebarOpen={sidebarOpen}
+                onSidebarClose={onSidebarClose}
+                className={className}
+                mainClassName={mainClassName}
+            >
+                {children}
+            </BaseLayout>
+            <NotificationSidebar />
+        </>
     );
 }

@@ -149,7 +149,7 @@ export default function SearchAutocomplete({
         window.location.href = `/producto/${result.slug}`;
       }
     } else if (result.type === 'service' && result.slug) {
-      window.location.href = `/servicios/${result.slug}`;
+      window.location.href = `/servicio/${result.slug}`;
     } else if (result.type === 'category' && result.slug) {
       window.location.href = `/productos/${result.slug}`;
     }

@@ -5,6 +5,7 @@ import { useEcho } from '@laravel/echo-react';
 import { useAuth } from '@/shared/lib/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import Icon from '@/components/ui/Icon';
+import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import { Eye, Info } from "lucide-react";
 import { orderApi, OrderResource } from '@/shared/lib/api/orderRepository';
 import { BaseDatePicker } from '@/components/UI';
@@ -62,6 +63,13 @@ interface Order {
   userEmail?: string | null;
   orderItems?: Array<{
     productName: string;
+    unitPrice: number;
+    quantity: number;
+    lineTotal: number;
+    storeName?: string;
+  }>;
+  orderServiceItems?: Array<{
+    serviceName: string;
     unitPrice: number;
     quantity: number;
     lineTotal: number;
@@ -214,13 +222,16 @@ function mapOrderResourceToOrder(raw: OrderResource): Order {
   const createdAt = item.createdAt ?? item.created_at;
   const { fecha, hora } = parseDateToDisplay(createdAt);
   const items = item.items ?? [];
+  const serviceItems = item.serviceItems ?? [];
   const itemCount = items.length;
+  const serviceItemCount = serviceItems.length;
   const firstItem = items[0];
   const tienda = firstItem?.store?.name ?? firstItem?.store_name ?? item.customer_name ?? 'Tienda';
   const firstImage = firstItem?.product?.image ?? '';
-  const detalle = itemCount > 0
-    ? `${itemCount} ${itemCount === 1 ? 'producto' : 'productos'}`
-    : 'Sin productos';
+  const detalleParts: string[] = [];
+  if (itemCount > 0) detalleParts.push(`${itemCount} ${itemCount === 1 ? 'producto' : 'productos'}`);
+  if (serviceItemCount > 0) detalleParts.push(`${serviceItemCount} ${serviceItemCount === 1 ? 'servicio' : 'servicios'}`);
+  const detalle = detalleParts.length > 0 ? detalleParts.join(' y ') : 'Sin productos';
   const statusKey = item.status ?? 'pending_seller';
   const shippingTypeRaw = item.shipping?.type;
   const tipoEnvio = shippingTypeRaw ? (SHIPPING_TYPE_MAP[shippingTypeRaw] ?? 'domicilio') : 'domicilio';
@@ -255,6 +266,13 @@ function mapOrderResourceToOrder(raw: OrderResource): Order {
       quantity: Number(i.quantity ?? 1),
       lineTotal: Number(i.lineTotal ?? i.line_total ?? 0),
       storeName: i.store?.name ?? '',
+    })),
+    orderServiceItems: serviceItems.map((i: any) => ({
+      serviceName: i.serviceName ?? i.service_name ?? '',
+      unitPrice: Number(i.unitPrice ?? i.unit_price ?? 0),
+      quantity: Number(i.quantity ?? 1),
+      lineTotal: Number(i.lineTotal ?? i.line_total ?? 0),
+      storeName: i.storeName ?? i.store_name ?? '',
     })),
     subtotalAmount: Number(item.subtotal ?? 0),
     taxAmount: Number(item.taxAmount ?? item.tax_amount ?? 0),
@@ -352,7 +370,7 @@ function OrderTrackingCards({
     <div className="space-y-4 animate-card-entrance">
       <div className="relative flex justify-between items-start pt-2 pb-6">
         {/* Línea base + barra de progreso con gradiente */}
-        <div className="absolute top-[28px] left-[5%] right-[5%] h-[3px] bg-gray-100 dark:bg-[var(--bg-secondary)] rounded-full z-0">
+        <div className="absolute top-[20px] sm:top-[28px] left-[5%] right-[5%] h-[3px] bg-gray-100 dark:bg-[var(--bg-secondary)] rounded-full z-0">
           <div
             className="h-full rounded-full transition-all duration-1000 ease-in-out"
             style={{
@@ -371,13 +389,13 @@ function OrderTrackingCards({
           return (
             <div
               key={s.id}
-              className="flex flex-col items-center relative z-10 gap-2"
+              className="flex flex-col items-center relative z-10 gap-1 sm:gap-2"
               style={{ width: `${100 / totalSteps}%` }}
             >
               {/* Círculo del paso */}
               <div className="relative">
                 <div
-                  className={`w-14 h-14 rounded-full border-[3px] overflow-hidden transition-all duration-700 flex-shrink-0 flex items-center justify-center bg-white dark:bg-[var(--bg-card)]
+                  className={`w-10 h-10 sm:w-14 sm:h-14 rounded-full border-2 sm:border-[3px] overflow-hidden transition-all duration-700 flex-shrink-0 flex items-center justify-center bg-white dark:bg-[var(--bg-card)]
                     ${isCompleted
                       ? `${color.border} shadow-lg ${color.shadow}`
                       : isActive
@@ -395,10 +413,10 @@ function OrderTrackingCards({
                 {/* Badge de completado */}
                 {isCompleted && (
                   <div
-                    className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center border-2 border-white dark:border-[var(--bg-card)]"
+                    className="absolute -bottom-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center border-2 border-white dark:border-[var(--bg-card)]"
                     style={{ backgroundColor: color.dot }}
                   >
-                    <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                    <svg className="w-2 h-2 sm:w-2.5 sm:h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
                   </div>
@@ -411,7 +429,7 @@ function OrderTrackingCards({
               </div>
 
               {/* Etiqueta del paso */}
-              <p className={`text-center text-[8px] font-black uppercase tracking-wider leading-tight px-0.5 transition-all duration-700
+              <p className={`text-center text-[7px] sm:text-[8px] font-black uppercase tracking-wider leading-tight px-0.5 transition-all duration-700
                 ${isActive
                   ? 'text-sky-600 dark:text-[var(--icons-green)]'
                   : isCompleted
@@ -699,18 +717,33 @@ export default function CustomerOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [filteredOrders, setFiltered] = useState<Order[]>([]);
   const [selectedOrder, setSelected] = useState<Order | null>(null);
+  const [showPaymentBreakdown, setShowPaymentBreakdown] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [showLegendModal, setShowLegendModal] = useState(false);
+  const [isLegendClosing, setIsLegendClosing] = useState(false);
   const [showRescheduleModal, setShowRescheduleModal] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [fetchError, setFetchError] = useState('');
+
+  const handleCloseLegend = useCallback(() => {
+    if (isLegendClosing) return;
+    setIsLegendClosing(true);
+    setTimeout(() => {
+      setShowLegendModal(false);
+      setIsLegendClosing(false);
+    }, 250);
+  }, [isLegendClosing]);
 
   const loadOrders = useCallback(async () => {
     try {
       setFetching(true);
       setFetchError('');
       const result = await orderApi.list(1);
-      const mapped = (result.data ?? []).map(mapOrderResourceToOrder);
+      // Los pedidos solo-servicio ya se gestionan en "Reservas" — no deben duplicarse aquí.
+      const productOrders = (result.data ?? []).filter(
+        (o) => ((o as any).items?.length ?? 0) > 0,
+      );
+      const mapped = productOrders.map(mapOrderResourceToOrder);
       setOrders(mapped);
       setFiltered(mapped);
     } catch (err) {
@@ -811,6 +844,7 @@ export default function CustomerOrdersPage() {
 
   const openDetails = (order: Order) => {
     setSelected(order);
+    setShowPaymentBreakdown(false);
     setShowModal(true);
   };
 
@@ -919,14 +953,11 @@ export default function CustomerOrdersPage() {
 
   return (
     <div className="space-y-8 animate-fadeIn">
-      <div>
-        <h1 className="text-2xl md:text-3xl font-black text-slate-800 dark:text-[var(--text-primary)]">
-          Historial de Pedidos
-        </h1>
-        <p className="text-slate-500 dark:text-[var(--text-muted)] mt-1">
-          Revisa todos tus pedidos realizados en Lyrium
-        </p>
-      </div>
+      <ModuleHeader
+        title="Mis Pedidos"
+        subtitle="Revisa el estado e historial completo de tus compras en Lyrium"
+        icon="Package"
+      />
 
       <div className="bg-white dark:bg-[var(--bg-secondary)] p-5 md:p-8 rounded-[2.5rem] shadow-xl border border-slate-100 dark:border-[var(--border-subtle)]">
         <div className="flex items-center justify-between gap-4 mb-6">
@@ -954,20 +985,16 @@ export default function CustomerOrdersPage() {
             <label className="text-[10px] font-black text-gray-400 dark:text-gray-300 uppercase tracking-widest ml-1">
               Tienda
             </label>
-            <CustomSelect
+            <select
               value={filters.empresa}
-              onChange={(v) => setFilters({ ...filters, empresa: v })}
-              options={[
-                { value: '', label: 'Todos' },
-                { value: 'Vida Natural Perú',    label: 'Vida Natural Perú' },
-                { value: 'Tech Store Lima',       label: 'Tech Store Lima' },
-                { value: 'Moda & Estilo',         label: 'Moda & Estilo' },
-                { value: 'Clínica Dental Pro',    label: 'Clínica Dental Pro' },
-                { value: 'Centro Estético Lyra',  label: 'Centro Estético Lyra' },
-                { value: 'Centro Médico Sur',     label: 'Centro Médico Sur' },
-                { value: 'Fisioterapia Plus',     label: 'Fisioterapia Plus' },
-              ]}
-            />
+              onChange={(e) => setFilters({ ...filters, empresa: e.target.value })}
+              className="w-full p-3 text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-white dark:bg-[var(--bg-secondary)] border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-2xl outline-none hover:border-sky-400 dark:hover:border-[var(--brand-green)] focus:border-sky-500 dark:focus:border-[var(--brand-green)] cursor-pointer transition-all duration-300 appearance-none"
+            >
+              <option value="">Todos</option>
+              {Array.from(new Set(orders.map(o => o.tienda).filter(Boolean))).sort().map(tienda => (
+                <option key={tienda} value={tienda}>{tienda}</option>
+              ))}
+            </select>
           </div>
 
           <BaseDatePicker
@@ -1071,7 +1098,7 @@ export default function CustomerOrdersPage() {
             </div>
           ) : (
             <>
-            <table className="w-full hidden xl:table">
+            <table className="hidden md:table w-full">
               <thead>
                 <tr className="border-b-2 border-gray-100 dark:border-[var(--border-subtle)]">
                   {([
@@ -1198,8 +1225,7 @@ export default function CustomerOrdersPage() {
               </tbody>
             </table>
 
-            {/* Vista de cards — mobile (< md) */}
-            <div className="xl:hidden space-y-3">
+            <div className="block md:hidden space-y-4">
               {filteredOrders.map((order) => {
                 const statusStyles = getStatusStyles(order.estado);
                 const tipoConfig = order.tipo_envio ? FLOW_CONFIG[order.tipo_envio] : null;
@@ -1208,50 +1234,50 @@ export default function CustomerOrdersPage() {
                   : null;
 
                 return (
-                  <button
+                  <div
                     key={order.id}
-                    type="button"
-                    onClick={() => openDetails(order)}
-                    className="w-full text-left p-4 rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] hover:bg-gray-50 dark:hover:bg-[#182420] active:bg-gray-100 dark:active:bg-[#182420] transition-colors"
+                    className="rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-secondary)] p-4 shadow-sm"
                   >
-                    <div className="flex items-start justify-between gap-3 mb-2">
-                      <div className="min-w-0">
-                        <span className="text-sm font-black text-sky-600 dark:text-[var(--icons-green)] block">
-                          {order.id}
-                        </span>
-                        <span className="text-xs font-bold text-gray-500 dark:text-[var(--text-muted)]">
+                    <div className="flex items-start justify-between gap-2 mb-3 flex-wrap">
+                      <div className="min-w-0 max-w-full break-words">
+                        <span className="text-sm font-black text-sky-600 dark:text-[var(--icons-green)] break-all">{order.id}</span>
+                        <p className="text-[11px] font-bold text-gray-400 dark:text-[var(--text-muted)] mt-0.5">
                           {order.fecha} · {order.hora}
-                        </span>
+                        </p>
                       </div>
-                      <span className="text-sm font-black text-gray-900 dark:text-[var(--text-primary)] shrink-0">
-                        {order.total}
-                      </span>
-                    </div>
-
-                    <div className="text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] break-words leading-snug mb-0.5">
-                      {order.tienda}
-                    </div>
-                    <div className="text-xs font-medium text-gray-500 dark:text-[var(--text-muted)] line-clamp-2 mb-3">
-                      {order.detalle}
-                    </div>
-
-                    <div className="flex items-center flex-wrap gap-2">
-                      {servicio && tipoConfig && (
-                        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-xl text-[9px] font-black uppercase border ${tipoConfig.accent}`}>
-                          <Icon name={tipoConfig.icon as any} className="w-3 h-3" />
-                          {servicio}
-                        </span>
-                      )}
-                      <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full ${statusStyles.bg} ${statusStyles.text} text-[10px] font-black uppercase tracking-wider`}>
+                      <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full ${statusStyles.bg} ${statusStyles.text} text-[9px] font-black uppercase tracking-wider shrink-0 whitespace-nowrap`}>
                         <Icon name={statusStyles.icon as any} className="w-3 h-3" />
                         {order.estadoLabel}
                       </span>
-                      <span className="ml-auto inline-flex items-center gap-1 text-[10px] font-black uppercase text-sky-600 dark:text-[var(--icons-green)]">
-                        Ver
-                        <Eye className="w-3.5 h-3.5" />
-                      </span>
                     </div>
-                  </button>
+
+                    <div className="space-y-1.5 mb-3">
+                      <p className="text-sm font-bold text-gray-800 dark:text-[var(--text-primary)]">{order.tienda}</p>
+                      <p className="text-xs font-bold text-gray-500 dark:text-[var(--text-muted)]">{order.detalle}</p>
+                    </div>
+
+                    <div className="flex items-center justify-between gap-2 pt-3 border-t border-gray-50 dark:border-[var(--border-subtle)]">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-black text-gray-900 dark:text-[var(--text-primary)]">{order.total}</span>
+                        {tipoConfig ? (
+                          <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-xl text-[9px] font-black uppercase border ${tipoConfig.accent}`}>
+                            <Icon name={tipoConfig.icon as any} className="w-3 h-3" />
+                            {servicio}
+                          </span>
+                        ) : (
+                          <span className="text-[10px] font-bold text-gray-400">Servicio</span>
+                        )}
+                      </div>
+
+                      <button
+                        onClick={() => openDetails(order)}
+                        className="px-3 py-2 rounded-2xl bg-sky-50 dark:bg-[var(--brand-green)] text-sky-600 dark:text-white hover:bg-sky-100 dark:hover:bg-[var(--brand-green-hover)] border border-sky-200 dark:border-[var(--border-subtle)] transition-colors flex items-center gap-1.5 shrink-0"
+                      >
+                        <Eye className="w-4 h-4" />
+                        <span className="text-[10px] font-black uppercase tracking-wide">Ver</span>
+                      </button>
+                    </div>
+                  </div>
                 );
               })}
             </div>
@@ -1260,13 +1286,13 @@ export default function CustomerOrdersPage() {
         </div>
       </div>
 
-      {showLegendModal && (
+      {(showLegendModal || isLegendClosing) && (
         <div
-          className="fixed inset-0 bg-black/30 backdrop-blur-sm z-[70] flex items-end sm:items-center justify-center sm:px-4 sm:pt-20 sm:pb-4 lg:px-6 lg:pt-20 lg:pb-6 animate-fadeIn"
-          onClick={() => setShowLegendModal(false)}
+          className={`fixed inset-0 bg-black/40 backdrop-blur-xl z-50 flex justify-center items-center p-4 lg:p-6 ${isLegendClosing ? 'animate-fade-out-overlay' : 'animate-fadeIn'}`}
+          onClick={handleCloseLegend}
         >
           <div
-            className="bg-white dark:bg-[var(--bg-secondary)] w-full max-w-4xl max-h-[90dvh] sm:max-h-[calc(100dvh-6rem)] rounded-t-[2rem] sm:rounded-[2.5rem] overflow-hidden shadow-[-40px_0_100px_rgba(0,0,0,0.1)] border border-white/20 relative flex flex-col"
+            className={`bg-white dark:bg-[var(--bg-secondary)] w-full max-w-2xl max-h-[80vh] rounded-[2.5rem] overflow-hidden shadow-[-40px_0_100px_rgba(0,0,0,0.1)] border border-white/20 relative flex flex-col ${isLegendClosing ? 'animate-scale-out' : 'animate-scaleIn'}`}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="bg-gradient-to-r from-sky-500 via-sky-500 to-sky-300 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-6 text-white relative flex-shrink-0">
@@ -1285,7 +1311,7 @@ export default function CustomerOrdersPage() {
                 </div>
 
                 <button
-                  onClick={() => setShowLegendModal(false)}
+                  onClick={handleCloseLegend}
                   className="w-9 h-9 rounded-full bg-black/10 flex items-center justify-center hover:bg-black/20 transition-all"
                 >
                   <Icon name="X" className="w-5 h-5 text-white" />
@@ -1391,7 +1417,7 @@ export default function CustomerOrdersPage() {
 
               <div className="flex justify-end pt-2">
                 <button
-                  onClick={() => setShowLegendModal(false)}
+                  onClick={handleCloseLegend}
                   className="px-6 py-3 rounded-xl bg-slate-100 dark:bg-[var(--bg-muted)] text-slate-700 dark:text-[var(--text-primary)] font-black text-xs uppercase tracking-widest hover:bg-slate-200 dark:hover:bg-[#2A3F33] transition-all"
                 >
                   Cerrar
@@ -1404,11 +1430,11 @@ export default function CustomerOrdersPage() {
       
       {showModal && selectedOrder && (
         <div
-          className="fixed inset-0 bg-black/30 backdrop-blur-sm z-[70] flex items-end sm:items-center justify-center sm:px-4 sm:pt-20 sm:pb-4 lg:px-6 lg:pt-20 lg:pb-6 animate-fadeIn"
+          className="fixed inset-0 bg-black/40 backdrop-blur-xl z-[60] flex justify-center items-center p-4 lg:p-6 animate-fadeIn"
           onClick={closeModal}
         >
           <div
-            className="bg-white dark:bg-[var(--bg-secondary)] w-full max-w-[700px] max-h-[90dvh] sm:max-h-[calc(100dvh-6rem)] rounded-t-[2rem] sm:rounded-[2.5rem] overflow-hidden shadow-[-40px_0_100px_rgba(0,0,0,0.1)] border border-white/20 relative flex flex-col"
+            className="bg-white dark:bg-[var(--bg-secondary)] w-full lg:w-[700px] max-h-[80vh] rounded-[2.5rem] overflow-hidden shadow-[-40px_0_100px_rgba(0,0,0,0.1)] border border-white/20 relative flex flex-col transition-all duration-700"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="bg-gradient-to-r from-sky-500 via-sky-500 to-sky-300 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-6 text-white relative flex-shrink-0">
@@ -1531,8 +1557,12 @@ export default function CustomerOrdersPage() {
                   <h5 className="text-xs font-black text-gray-400 dark:text-gray-400 uppercase tracking-widest">Resumen de Pago</h5>
                   <div className="h-px flex-1 mx-4 bg-gray-100 dark:bg-[var(--border-subtle)]" />
                 </div>
-                <div className="p-5 md:p-8 bg-white dark:bg-[var(--bg-secondary)] rounded-[3rem] border border-gray-100 dark:border-[var(--border-subtle)] shadow-xl space-y-5">
-                  <div className="flex justify-between items-center p-3 rounded-2xl hover:bg-gray-50 dark:hover:bg-[#182420] transition-colors">
+                <div className="p-8 bg-white dark:bg-[var(--bg-secondary)] rounded-[3rem] border border-gray-100 dark:border-[var(--border-subtle)] shadow-xl space-y-5">
+                  <button
+                    type="button"
+                    onClick={() => setShowPaymentBreakdown(v => !v)}
+                    className="w-full flex justify-between items-center p-3 rounded-2xl hover:bg-gray-50 dark:hover:bg-[#182420] transition-colors text-left"
+                  >
                     <div className="flex items-center gap-4">
                       <div className="w-10 h-10 bg-sky-50 dark:bg-[var(--bg-muted)] rounded-xl flex items-center justify-center text-sky-500 dark:text-[var(--icons-green)]">
                         <Icon name="Package" className="w-5 h-5" />
@@ -1542,8 +1572,41 @@ export default function CustomerOrdersPage() {
                         <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Subtotal Bruto</p>
                       </div>
                     </div>
-                    <span className="text-sm font-black text-gray-700 dark:text-[var(--text-primary)]">{selectedOrder.total}</span>
-                  </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-black text-gray-700 dark:text-[var(--text-primary)]">{selectedOrder.total}</span>
+                      <Icon
+                        name={showPaymentBreakdown ? 'ChevronUp' : 'ChevronDown'}
+                        className="w-4 h-4 text-gray-400"
+                      />
+                    </div>
+                  </button>
+
+                  {showPaymentBreakdown && (
+                    <div className="px-3 pb-1 -mt-2 space-y-1.5">
+                      {(selectedOrder.orderItems ?? []).map((it, idx) => (
+                        <div key={`prod-${idx}`} className="flex justify-between items-center text-xs">
+                          <span className="text-gray-500 dark:text-gray-400 truncate max-w-[220px]">
+                            {it.productName} <span className="text-gray-400">×{it.quantity}</span>
+                          </span>
+                          <span className="font-mono font-bold text-gray-600 dark:text-gray-300">
+                            S/ {it.lineTotal.toFixed(2)}
+                          </span>
+                        </div>
+                      ))}
+                      {(selectedOrder.orderServiceItems ?? []).map((it, idx) => (
+                        <div key={`serv-${idx}`} className="flex justify-between items-center text-xs">
+                          <span className="text-gray-500 dark:text-gray-400 truncate max-w-[220px]">
+                            {it.serviceName} <span className="text-gray-400">×{it.quantity}</span>
+                            <span className="ml-1.5 text-[9px] font-black uppercase text-violet-500 bg-violet-50 dark:bg-violet-500/10 px-1.5 py-0.5 rounded">Servicio</span>
+                          </span>
+                          <span className="font-mono font-bold text-gray-600 dark:text-gray-300">
+                            S/ {it.lineTotal.toFixed(2)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
                   <div className="pt-6 border-t border-dashed border-gray-200 dark:border-[var(--border-subtle)]">
                     <div className="bg-gradient-to-br from-slate-900 to-gray-900 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-5 rounded-[2.5rem] flex items-center justify-between text-white shadow-2xl">
                       <div>
@@ -1561,7 +1624,7 @@ export default function CustomerOrdersPage() {
               {selectedOrder.estado !== 'cancelado' && (
                 <button
                   onClick={() => downloadBoletaCompra(selectedOrder)}
-                  className="w-full py-4 rounded-2xl bg-gradient-to-r from-amber-400 to-orange-500 dark:from-[var(--brand-green)] dark:to-[var(--brand-green-hover)] text-white font-black text-xs uppercase tracking-wider hover:shadow-lg hover:shadow-amber-200 dark:hover:shadow-[var(--brand-green)]/30 transition-all flex items-center justify-center"
+                  className="w-full py-5 rounded-2xl bg-gradient-to-r from-sky-500 to-sky-600 dark:from-[var(--brand-green)] dark:to-[var(--brand-green-hover)] text-white font-black text-xs uppercase tracking-[0.2em] hover:shadow-lg hover:shadow-sky-200 dark:hover:shadow-[var(--brand-green)]/30 transition-all flex items-center justify-center gap-3"
                 >
                   <span className="inline-flex items-center justify-center gap-2">
                     <Icon name="Download" className="w-4 h-4 shrink-0" />
@@ -1577,9 +1640,10 @@ export default function CustomerOrdersPage() {
                     router.push(`/customer/chat?conversation=${result.conversationId}`);
                   } catch (err) {
                     console.error('Error al solicitar comprobante:', err);
+                    alert('No se pudo abrir el chat con el vendedor. Intenta nuevamente.');
                   }
                 }}
-                className="w-full py-4 rounded-2xl bg-gradient-to-r from-amber-400 to-orange-500 dark:from-[var(--brand-green)] dark:to-[var(--brand-green-hover)] text-white font-black text-xs uppercase tracking-wider hover:shadow-lg hover:shadow-amber-200 transition-all flex items-center justify-center"
+                className="w-full py-5 rounded-2xl bg-gradient-to-r from-sky-500 to-sky-600 dark:from-[var(--brand-green)] dark:to-[var(--brand-green-hover)] text-white font-black text-xs uppercase tracking-[0.2em] hover:shadow-lg hover:shadow-sky-200 dark:hover:shadow-[var(--brand-green)]/30 transition-all flex items-center justify-center gap-3"
               >
                 <span className="inline-flex items-center justify-center gap-2">
                   <Icon name="MessageCircle" className="w-4 h-4 shrink-0" />

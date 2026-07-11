@@ -34,11 +34,11 @@ export const BalanceTab: React.FC<{ resume: FinanceSummary; monthly: MonthlyLiqu
                 <h3 className="text-xs font-black text-[var(--text-muted)] uppercase tracking-widest mb-6">Consolidado Mensual de Tesorería</h3>
                 <div className="space-y-4">
                     {monthly.map((m) => (
-                        <div key={m.mes} className="flex items-center justify-between p-4 bg-[var(--bg-secondary)] rounded-2xl hover:bg-[var(--color-info)]/10 hover:border-[var(--color-info)]/20 border border-transparent transition-all">
-                            <div className="w-16 h-16 bg-[var(--bg-card)] rounded-xl shadow-sm text-center flex flex-col items-center justify-center">
+                        <div key={m.mes} className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 bg-[var(--bg-secondary)] rounded-2xl hover:bg-[var(--color-info)]/10 hover:border-[var(--color-info)]/20 border border-transparent transition-all gap-3 sm:gap-0">
+                            <div className="w-16 h-10 sm:h-16 bg-[var(--bg-card)] rounded-xl shadow-sm text-center flex flex-col items-center justify-center shrink-0">
                                 <span className="text-xs font-black text-[var(--text-primary)] uppercase leading-none">{m.mes}</span>
                             </div>
-                            <div className="flex-1 px-8 grid grid-cols-3 gap-4 text-center">
+                            <div className="flex-1 sm:px-8 grid grid-cols-3 gap-2 sm:gap-4 text-center">
                                 <div>
                                     <p className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-wider mb-1">Cash In (Recaudación)</p>
                                     <p className="text-sm font-bold text-[var(--text-primary)] tracking-tighter">S/ {m.cashIn.toLocaleString()}</p>
@@ -76,13 +76,13 @@ export const CashInTab: React.FC<{
 }> = ({ payments, onSelect }) => {
     return (
         <div className="bg-[var(--bg-card)] rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm overflow-hidden font-industrial">
-            <div className="p-6 border-b border-[var(--border-subtle)] flex items-center justify-between">
+            <div className="p-6 border-b border-[var(--border-subtle)] flex flex-wrap items-start sm:items-center justify-between gap-3">
                 <div>
                     <h3 className="text-xs font-black text-[var(--text-primary)] uppercase tracking-tight">Recaudación de Clientes (Cash-In)</h3>
                     <p className="text-[10px] text-[var(--text-muted)] font-bold tracking-widest uppercase">Validación de Vouchers y Facturación (RF-14)</p>
                 </div>
-                <button 
-                    className="px-4 py-2 bg-[var(--color-info)]/10 text-[var(--color-info)] rounded-xl text-[10px] font-black uppercase flex items-center gap-2"
+                <button
+                    className="px-4 py-2 bg-[var(--color-info)]/10 text-[var(--color-info)] rounded-xl text-[10px] font-black uppercase flex items-center gap-2 shrink-0"
                     aria-label="Exportar conciliación de cash-in"
                 >
                     <Download className="w-4 h-4" aria-hidden="true" /> Exportar Conciliación
@@ -168,7 +168,7 @@ export const CashOutTab: React.FC<{
             )}
 
             <div className="bg-[var(--bg-card)] rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm overflow-hidden">
-                <div className="p-6 border-b border-[var(--border-subtle)] flex items-center justify-between">
+                <div className="p-6 border-b border-[var(--border-subtle)] flex flex-wrap items-start sm:items-center justify-between gap-3">
                     <div>
                         <h3 className="text-xs font-black text-[var(--text-primary)] uppercase tracking-tight">Liquidaciones Programadas a Vendedores (Cash-Out)</h3>
                         <p className="text-[10px] text-[var(--text-muted)] font-bold tracking-widest uppercase">Desembolsos y Cálculo de Comisión Lyrium (RF-15)</p>

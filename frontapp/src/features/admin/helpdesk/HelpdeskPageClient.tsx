@@ -8,7 +8,7 @@ import { ChatView } from '@/modules/chat';
 import { adaptAdminTicket } from '@/modules/chat/adapters/adminTicketAdapter';
 import { UnifiedTicket, ChatViewProps } from '@/modules/chat/types';
 import { TicketListProps } from '@/modules/helpdesk/types';
-import { AlertCircle, Loader2, Store, Users } from 'lucide-react';
+import { AlertCircle, ArrowLeft, Loader2, Settings2, Store, Users, Info, X } from 'lucide-react';
 import type { Priority as AdminPriority } from '@/features/admin/helpdesk/types';
 
 type Channel = 'vendedores' | 'clientes';
@@ -27,6 +27,8 @@ export function HelpdeskPageClient() {
   } = useMesaAyuda();
 
   const [channel, setChannel] = useState<Channel>('vendedores');
+  const [showLegend, setShowLegend] = useState(false);
+  const [mobileShowChat, setMobileShowChat] = useState(false);
 
   const channelTickets = useMemo(
     () =>
@@ -110,67 +112,89 @@ export function HelpdeskPageClient() {
 
   const handleSelectTicket: TicketListProps['onSelect'] = (id) => {
     actions.selectTicket(Number(id));
+    setMobileShowChat(true);
   };
 
   return (
-    <div className="space-y-4 animate-fadeIn pb-20">
-      <ModuleHeader title="Soporte Lyrium" subtitle="Gestión de tickets y soporte" icon="Headset" />
+    <div className="flex flex-col flex-1 min-h-0 animate-fadeIn overflow-hidden">
+      <div className="shrink-0 [&>div]:!mb-3">
+        <ModuleHeader
+          title="Soporte Lyrium"
+          subtitle="Gestión de tickets y soporte"
+          icon="Headset"
+        />
+      </div>
 
-      {/* Toggle: Vendedores / Clientes */}
-      <div className="flex bg-[var(--bg-secondary)]/80 p-1 rounded-2xl w-full max-w-xs border border-[var(--border-subtle)]/50">
+      {/* Toggle: Vendedores / Clientes + botón leyenda */}
+      <div className="flex items-center gap-3 shrink-0 mb-2">
+        <div className="flex bg-[var(--bg-secondary)]/80 p-1 rounded-2xl max-w-xs border border-[var(--border-subtle)]/50">
+          <button
+            onClick={() => setChannel('vendedores')}
+            className={`flex-1 py-2.5 px-4 rounded-xl text-[11px] font-black transition-all flex items-center justify-center gap-2 uppercase tracking-wider ${
+              channel === 'vendedores'
+                ? 'bg-[var(--bg-card)] text-[var(--turquesa-500)] shadow-sm border border-[var(--border-subtle)]/30'
+                : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
+            }`}
+          >
+            <Store className="w-4 h-4" />
+            Vendedores
+          </button>
+          <button
+            onClick={() => setChannel('clientes')}
+            className={`flex-1 py-2.5 px-4 rounded-xl text-[11px] font-black transition-all flex items-center justify-center gap-2 uppercase tracking-wider ${
+              channel === 'clientes'
+                ? 'bg-[var(--bg-card)] text-[var(--turquesa-500)] shadow-sm border border-[var(--border-subtle)]/30'
+                : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
+            }`}
+          >
+            <Users className="w-4 h-4" />
+            Clientes
+          </button>
+        </div>
+
         <button
-          onClick={() => setChannel('vendedores')}
-          className={`flex-1 py-2.5 rounded-xl text-[11px] font-black transition-all flex items-center justify-center gap-2 uppercase tracking-wider ${
-            channel === 'vendedores'
-              ? 'bg-[var(--bg-card)] text-[var(--turquesa-500)] shadow-sm border border-[var(--border-subtle)]/30'
-              : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
-          }`}
+          onClick={() => setShowLegend(true)}
+          title="¿Qué puedo hacer aquí?"
+          className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--icons-green)] hover:border-[var(--icons-green)] transition-all shadow-sm shrink-0"
         >
-          <Store className="w-4 h-4" />
-          Vendedores
-        </button>
-        <button
-          onClick={() => setChannel('clientes')}
-          className={`flex-1 py-2.5 rounded-xl text-[11px] font-black transition-all flex items-center justify-center gap-2 uppercase tracking-wider ${
-            channel === 'clientes'
-              ? 'bg-[var(--bg-card)] text-[var(--turquesa-500)] shadow-sm border border-[var(--border-subtle)]/30'
-              : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
-          }`}
-        >
-          <Users className="w-4 h-4" />
-          Clientes
+          <Info className="w-4 h-4" />
         </button>
       </div>
 
+      {/* Panel principal — patrón WhatsApp: flex-row, cada columna ocupa h-full */}
       <div
-        className="rounded-2xl border border-[var(--border-subtle)] overflow-hidden flex flex-col"
-        style={{ height: 'calc(100vh - 210px)', background: 'linear-gradient(160deg, color-mix(in srgb,#9cb04e 5%,var(--bg-card)) 0%, var(--bg-card) 50%, color-mix(in srgb,#499bbf 4%,var(--bg-card)) 100%)' }}
+        className="flex-1 min-h-0 rounded-2xl border border-[var(--border-subtle)] overflow-hidden flex flex-row"
+        style={{ background: 'linear-gradient(160deg, color-mix(in srgb,#9cb04e 5%,var(--bg-card)) 0%, var(--bg-card) 50%, color-mix(in srgb,#499bbf 4%,var(--bg-card)) 100%)' }}
       >
-        <div className="h-1 w-full shrink-0 bg-gradient-to-r from-[#9cb04e] via-[#64c695] to-[#499bbf]" />
-        <div className="flex h-full overflow-hidden">
-          <div className="h-full flex-shrink-0 border-r border-[var(--border-subtle)] w-[240px] min-w-[240px] lg:w-72">
-            {loading ? (
-              <div className="flex items-center justify-center h-full">
-                <Loader2 className="w-5 h-5 animate-spin text-[var(--text-muted)]" />
-              </div>
-            ) : (
-              <TicketList
-                tickets={channelTickets}
-                selectedId={unifiedSelectedTicket?.id ?? null}
-                onSelect={handleSelectTicket}
-                filters={{
-                  search: filters.search || '',
-                  status: filters.status || ('' as any),
-                  priority: filters.priority || '',
-                }}
-                onFilterChange={handleFilterChange}
-                showPriority
-                className="!w-full !rounded-none !border-none h-full"
-              />
-            )}
-          </div>
+        {/* Columna izquierda: lista de tickets — oculta en móvil cuando hay chat abierto */}
+        <div className={`flex flex-col flex-shrink-0 border-r border-[var(--border-subtle)] overflow-hidden transition-all duration-300 ease-in-out sm:w-[200px] sm:min-w-[200px] md:w-[220px] md:min-w-[220px] lg:w-60 xl:w-72 sm:opacity-100 ${mobileShowChat ? 'w-0 min-w-0 opacity-0 pointer-events-none' : 'w-full opacity-100 pointer-events-auto'}`}>
+          <div className="h-1 w-full shrink-0 bg-gradient-to-r from-[#9cb04e] via-[#64c695] to-[#499bbf]" />
+          {loading ? (
+            <div className="flex-1 flex items-center justify-center">
+              <Loader2 className="w-5 h-5 animate-spin text-[var(--text-muted)]" />
+            </div>
+          ) : (
+            <TicketList
+              tickets={channelTickets}
+              selectedId={unifiedSelectedTicket?.id ?? null}
+              onSelect={handleSelectTicket}
+              filters={{
+                search: filters.search || '',
+                status: filters.status || ('' as any),
+                priority: filters.priority || '',
+              }}
+              onFilterChange={handleFilterChange}
+              showPriority
+              className="!w-full !rounded-none !border-none !min-h-0 flex-1 overflow-hidden"
+            />
+          )}
+        </div>
 
-          <div className="flex-1 h-full min-w-0">
+        {/* Columna derecha: chat — ocupa toda la pantalla en móvil */}
+        <div className={`flex flex-col min-w-0 min-h-0 overflow-hidden transition-all duration-300 ease-in-out sm:flex-1 sm:opacity-100 ${!mobileShowChat ? 'w-0 min-w-0 opacity-0 pointer-events-none' : 'flex-1 opacity-100 pointer-events-auto'}`}>
+          <div className="h-1 w-full shrink-0 bg-gradient-to-r from-[#9cb04e] via-[#64c695] to-[#499bbf]" />
+          {/* ChatView o estado vacío — flex-1 min-h-0 para que el área de mensajes haga scroll sin bloquear */}
+          <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
             {unifiedSelectedTicket ? (
               <ChatView
                 ticket={unifiedSelectedTicket}
@@ -181,6 +205,7 @@ export function HelpdeskPageClient() {
                 onAdminChange={handleAdminChange}
                 onEscalate={handleEscalate}
                 onLoadMore={handleLoadMore}
+                onBack={() => setMobileShowChat(false)}
                 isSending={mutations.isSending}
                 isClosing={mutations.isUpdatingStatus}
                 isLoadingMore={loadingMoreMessages}
@@ -188,18 +213,77 @@ export function HelpdeskPageClient() {
                 showAdminControls
               />
             ) : (
-              <div className="h-full flex items-center justify-center">
-                <div className="text-center">
-                  <div className="w-16 h-16 rounded-2xl bg-[var(--bg-secondary)] flex items-center justify-center mx-auto mb-4">
-                    <AlertCircle className="w-8 h-8 text-[var(--text-muted)]" />
+              <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
+                <div className="flex-1 flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="w-16 h-16 rounded-2xl bg-[var(--bg-secondary)] flex items-center justify-center mx-auto mb-4">
+                      <AlertCircle className="w-8 h-8 text-[var(--text-muted)]" />
+                    </div>
+                    <p className="text-sm font-bold text-[var(--text-secondary)]">Selecciona un ticket para ver la conversación</p>
                   </div>
-                  <p className="text-sm font-bold text-[var(--text-secondary)]">Selecciona un ticket para ver la conversación</p>
                 </div>
               </div>
             )}
           </div>
         </div>
       </div>
+
+      {showLegend && (
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-end sm:items-center justify-center p-4 pt-[calc(60px+1rem)] sm:pt-4"
+          onClick={() => setShowLegend(false)}
+        >
+          {/* Bottom sheet en móvil, card centrado en sm+ */}
+          <div
+            className="w-full max-w-sm sm:max-w-md bg-[var(--bg-card)] rounded-[2rem] shadow-2xl overflow-hidden max-h-[80vh] flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header — mismos colores que HelpPageClient */}
+            <div className="bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--turquesa-500)]/70 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-8 text-white relative shrink-0">
+              <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl" />
+              <div className="relative z-10 flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center">
+                    <Users className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-black tracking-tighter">Mesa de Ayuda</h3>
+                    <p className="text-[10px] font-bold text-white/70 uppercase tracking-[0.2em]">¿Qué puedes hacer aquí?</p>
+                  </div>
+                </div>
+                <button onClick={() => setShowLegend(false)} aria-label="Cerrar leyenda" className="min-w-[44px] min-h-[44px] rounded-full bg-black/10 flex items-center justify-center hover:bg-black/20">
+                  <X className="w-5 h-5 text-white" />
+                </button>
+              </div>
+            </div>
+
+            {/* Items — scrollable en móvil */}
+            <div className="p-8 space-y-4 overflow-y-auto flex-1">
+              {[
+                { icon: Store, title: 'Tickets de vendedores', desc: 'Gestiona incidencias técnicas, consultas administrativas y solicitudes de soporte de las tiendas registradas en Lyrium.' },
+                { icon: Users, title: 'Tickets de clientes', desc: 'Atiende reclamos, consultas y problemas de los compradores que no pudieron ser resueltos por el vendedor.' },
+                { icon: AlertCircle, title: 'Asignar y escalar', desc: 'Asigna tickets a administradores específicos o escálalos a un nivel superior cuando requieren atención prioritaria.' },
+                { icon: Settings2, title: 'Prioridad y estado', desc: 'Actualiza la prioridad (Baja, Media, Alta, Crítica) y el estado del ticket (abierto, en proceso, resuelto, cerrado) en tiempo real.' },
+              ].map((item) => (
+                <div key={item.title} className="flex items-start gap-4 p-4 bg-[var(--bg-muted)]/50 rounded-2xl border border-[var(--border-subtle)]">
+                  <div className="w-10 h-10 rounded-xl bg-[var(--bg-card)] flex items-center justify-center shadow-sm border border-[var(--border-subtle)] shrink-0">
+                    <item.icon className="w-5 h-5 text-[var(--icons-green)]" />
+                  </div>
+                  <div>
+                    <p className="font-black text-sm text-[var(--text-primary)] mb-0.5">{item.title}</p>
+                    <p className="text-xs text-[var(--text-muted)] leading-relaxed">{item.desc}</p>
+                  </div>
+                </div>
+              ))}
+              <div className="flex justify-end pt-2">
+                <button onClick={() => setShowLegend(false)} className="px-6 py-3 rounded-2xl bg-[var(--bg-muted)] text-[var(--text-primary)] font-black text-xs uppercase tracking-widest hover:bg-[var(--bg-hover)] transition-all">
+                  Cerrar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

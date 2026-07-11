@@ -9,10 +9,10 @@ import { formatCurrency } from '@/shared/lib/utils/formatters';
 
 const getStatusStyles = (status: number) => {
     switch (status) {
-        case 1: return 'bg-emerald-50 text-emerald-600 border-emerald-100';
-        case 0: return 'bg-amber-50 text-amber-600 border-amber-100';
-        case 2: return 'bg-rose-50 text-rose-600 border-rose-100';
-        default: return 'bg-gray-50 text-gray-600 border-gray-100';
+        case 1: return 'bg-[var(--color-success)]/10 text-[var(--color-success)] border-[var(--color-success)]/20';
+        case 0: return 'bg-[var(--color-warning)]/10 text-[var(--color-warning)] border-[var(--color-warning)]/20';
+        case 2: return 'bg-[var(--color-error)]/10 text-[var(--color-error)] border-[var(--color-error)]/20';
+        default: return 'bg-[var(--bg-card)] text-[var(--text-secondary)] border-[var(--border-subtle)]';
     }
 };
 
@@ -31,8 +31,8 @@ const columns: Column<Withdrawal>[] = [
         header: 'ID / Fecha',
         render: (w) => (
             <div className="flex flex-col">
-                <span className="text-sm font-black text-gray-900 leading-none">#{w.id}</span>
-                <span className="text-[10px] text-gray-400 font-bold uppercase mt-1">
+                <span className="text-sm font-black text-[var(--text-primary)] leading-none">#{w.id}</span>
+                <span className="text-[10px] text-[var(--text-muted)] font-bold uppercase mt-1">
                     {new Date(w.created).toLocaleDateString()}
                 </span>
             </div>
@@ -43,23 +43,23 @@ const columns: Column<Withdrawal>[] = [
         header: 'Tienda',
         render: (w) => (
             <div className="flex flex-col">
-                <span className="text-sm font-black text-gray-900 uppercase tracking-tight">
+                <span className="text-sm font-black text-[var(--text-primary)] uppercase tracking-tight">
                     {w.user_data?.store_name || `Vendedor #${w.user_id}`}
                 </span>
-                <span className="text-[10px] text-gray-400 font-bold uppercase">ID Usuario: {w.user_id}</span>
+                <span className="text-[10px] text-[var(--text-muted)] font-bold uppercase">ID Usuario: {w.user_id}</span>
             </div>
         )
     },
     {
         key: 'amount',
         header: 'Monto',
-        render: (w) => <span className="text-sm font-black text-gray-900 uppercase">{formatCurrency(Number(w.amount) || 0)}</span>
+        render: (w) => <span className="text-sm font-black text-[var(--text-primary)] uppercase">{formatCurrency(Number(w.amount) || 0)}</span>
     },
     {
         key: 'method',
         header: 'Método',
         render: (w) => (
-            <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest bg-gray-100 px-2 py-1 rounded">
+            <span className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest bg-[var(--bg-muted)] px-2 py-1 rounded">
                 {w.method}
             </span>
         )
@@ -78,17 +78,17 @@ const columns: Column<Withdrawal>[] = [
         header: '',
         align: 'right',
         render: (w) => (
-            <div className="flex items-center justify-end gap-2 text-gray-400">
+            <div className="flex items-center justify-end gap-2 text-[var(--text-muted)]">
                 {w.status === 0 ? (
                     <>
                         <button 
-                            className="p-2 rounded-xl bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-all active:scale-90"
+                            className="p-2 rounded-xl bg-[var(--color-success)]/10 text-[var(--color-success)] hover:bg-[var(--color-success)]/20 transition-all active:scale-90"
                             aria-label={`Aprobar retiro #${w.id}`}
                         >
                             <Icon name="Check" className="w-5 h-5" />
                         </button>
                         <button 
-                            className="p-2 rounded-xl bg-gray-50 hover:bg-rose-50 hover:text-rose-500 transition-all active:scale-90"
+                            className="p-2 rounded-xl bg-[var(--bg-card)] hover:bg-[var(--color-error)]/10 hover:text-[var(--color-error)] transition-all active:scale-90"
                             aria-label={`Rechazar retiro #${w.id}`}
                         >
                             <Icon name="X" className="w-5 h-5" />
@@ -96,7 +96,7 @@ const columns: Column<Withdrawal>[] = [
                     </>
                 ) : (
                     <button 
-                        className="p-2 rounded-xl bg-gray-50 hover:bg-brand-sky/10 hover:text-brand-sky transition-all active:scale-90"
+                        className="p-2 rounded-xl bg-[var(--bg-card)] hover:bg-[var(--icons-green)]/10 hover:text-[var(--icons-green)] transition-all active:scale-90"
                         aria-label={`Ver detalles del retiro #${w.id}`}
                     >
                         <Icon name="FileText" className="w-5 h-5" />

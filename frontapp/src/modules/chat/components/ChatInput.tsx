@@ -166,7 +166,7 @@ export function ChatInput({
         type="submit"
         aria-label="Enviar respuesta"
         disabled={!canSend}
-        className="inline-flex h-12 shrink-0 items-center gap-2 rounded-[1.25rem] bg-gradient-to-r from-[#9cb04e] via-[#64c695] to-[#499bbf] px-4 text-[10px] font-black uppercase tracking-[0.2em] text-white transition hover:opacity-90 active:scale-95 disabled:cursor-not-allowed disabled:bg-slate-300 dark:disabled:bg-[var(--bg-muted)] dark:disabled:text-[var(--text-secondary)] shadow-md shadow-[#64c695]/20"
+        className="inline-flex h-12 shrink-0 items-center gap-2 rounded-[1.25rem] bg-[#2E6A4F] px-4 text-[10px] font-black uppercase tracking-[0.2em] text-white transition hover:opacity-90 active:scale-95 disabled:cursor-not-allowed disabled:bg-slate-300 dark:disabled:bg-[var(--bg-muted)] dark:disabled:text-[var(--text-secondary)] shadow-sm"
       >
         {disabled ? (
           <Loader2 className="h-4 w-4 animate-spin" />

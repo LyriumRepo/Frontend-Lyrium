@@ -8,6 +8,8 @@ import BaseModal from '@/components/ui/BaseModal';
 import BaseButton from '@/components/ui/BaseButton';
 import { useToast } from '@/shared/lib/context/ToastContext';
 import Icon from '@/components/ui/Icon';
+import { usePlanCapabilities } from '@/shared/lib/hooks/usePlanCapabilities';
+import PlanUpgradeMessage from '@/features/seller/store/components/PlanUpgradeMessage';
 
 interface Category {
     id: number;
@@ -91,8 +93,11 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit }:
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [isDark, setIsDark] = useState(false);
     const [showTagPreview, setShowTagPreview] = useState(false);
+    const [showStickerUpgrade, setShowStickerUpgrade] = useState(false);
     const { showToast } = useToast();
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const { stickerTypes, capabilities } = usePlanCapabilities();
+    const isStickerAllowed = (sticker: string) => !capabilities || stickerTypes.includes(sticker);
 
     const LARAVEL_API_URL = process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://localhost:8000/api';
 
@@ -155,8 +160,28 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit }:
         return d.toISOString().split('T')[0];
     };
 
+    const STICKER_BY_TAG: Partial<Record<'nuevo' | 'descuento' | 'oferta' | 'edicionLimitada' | 'promocion', string>> = {
+        nuevo: 'nuevo',
+        descuento: 'descuento',
+        oferta: 'oferta',
+        edicionLimitada: 'liquidacion',
+    };
+
     const toggleTag = (tag: 'nuevo' | 'descuento' | 'oferta' | 'edicionLimitada' | 'promocion') => {
         const e = etiquetas;
+        const sticker = STICKER_BY_TAG[tag];
+        const isTurningOn = !(
+            (tag === 'nuevo' && e.nuevo) ||
+            (tag === 'descuento' && e.descuento) ||
+            (tag === 'oferta' && e.oferta) ||
+            (tag === 'edicionLimitada' && e.edicionLimitada) ||
+            (tag === 'promocion' && e.promocion)
+        );
+        if (isTurningOn && sticker && !isStickerAllowed(sticker)) {
+            setShowStickerUpgrade(true);
+            return;
+        }
+        setShowStickerUpgrade(false);
         switch (tag) {
             case 'nuevo':
                 setEtiquetas({ ...e, nuevo: !e.nuevo, edicionLimitada: !e.nuevo ? undefined : e.edicionLimitada });
@@ -474,20 +499,23 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit }:
                                                     />
                                                 </div>
                                                 <div className="flex flex-col gap-1 pl-4">
-                                                    <span className="text-[8px] font-black text-[var(--text-secondary)] uppercase">Peso (kg)</span>
+                                                    <span className="text-[8px] font-black text-[var(--text-secondary)] uppercase">Peso kg 📦</span>
                                                     <input
-                                                        type="number" name="weight" step="0.1"
+                                                        type="number" name="weight" step="0.1" min="0.1"
                                                         value={formData.weight || ''} onChange={handleChange}
+                                                        placeholder="ej: 1.5"
+                                                        title="Peso real del producto en kilogramos. Se usa para calcular el costo de envío."
                                                         className="w-full bg-transparent border-none focus:ring-0 font-black text-[var(--text-primary)] p-0 outline-none"
                                                     />
                                                 </div>
                                                 <div className="flex flex-col gap-1 pl-4">
-                                                    <span className="text-[8px] font-black text-[var(--text-secondary)] uppercase">Dimen (LxWxH)</span>
+                                                    <span className="text-[8px] font-black text-[var(--text-secondary)] uppercase">Medidas cm 📐</span>
                                                     <input
                                                         type="text" name="dimensions"
                                                         value={formData.dimensions || ''} onChange={handleChange}
                                                         className="w-full bg-transparent border-none focus:ring-0 font-black text-[var(--text-primary)] p-0 outline-none font-mono text-[10px]"
-                                                        placeholder="0x0x0 cm"
+                                                        placeholder="largo×ancho×alto"
+                                                        title="Dimensiones del paquete en centímetros: Largo × Ancho × Alto. Ejemplo: 30x20x15"
                                                     />
                                                 </div>
                                             </div>
@@ -505,11 +533,12 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit }:
                                                     className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-[10px] font-black uppercase tracking-widest transition-all
                                                         ${etiquetas.nuevo
                                                             ? 'bg-sky-500/15 dark:bg-[var(--icons-green)]/15 border-sky-500/40 dark:border-[var(--icons-green)]/40 text-sky-600 dark:text-[var(--icons-green)]'
-                                                            : etiquetas.edicionLimitada
+                                                            : etiquetas.edicionLimitada || !isStickerAllowed('nuevo')
                                                                 ? 'bg-[var(--bg-card)] border-dashed border-[var(--border-subtle)] text-[var(--text-secondary)]/40'
                                                                 : 'bg-[var(--bg-card)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-sky-500/30 dark:hover:border-[var(--icons-green)]/40'
                                                         }`}
                                                 >
+                                                    {!isStickerAllowed('nuevo') && !etiquetas.nuevo && <Icon name="Lock" className="w-2.5 h-2.5" />}
                                                     Nuevo
                                                     {etiquetas.nuevo && <span className="w-1.5 h-1.5 rounded-full bg-sky-500 dark:bg-[var(--icons-green)] flex-shrink-0" />}
                                                 </button>
@@ -537,11 +566,12 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit }:
                                                     className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-[10px] font-black uppercase tracking-widest transition-all
                                                         ${etiquetas.oferta
                                                             ? 'bg-sky-500/15 dark:bg-[var(--icons-green)]/15 border-sky-500/40 dark:border-[var(--icons-green)]/40 text-sky-600 dark:text-[var(--icons-green)]'
-                                                            : (etiquetas.descuento || etiquetas.promocion)
+                                                            : (etiquetas.descuento || etiquetas.promocion || !isStickerAllowed('oferta'))
                                                                 ? 'bg-[var(--bg-card)] border-dashed border-[var(--border-subtle)] text-[var(--text-secondary)]/40'
                                                                 : 'bg-[var(--bg-card)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-sky-500/30 dark:hover:border-[var(--icons-green)]/40'
                                                         }`}
                                                 >
+                                                    {!isStickerAllowed('oferta') && !etiquetas.oferta && <Icon name="Lock" className="w-2.5 h-2.5" />}
                                                     Oferta
                                                     {etiquetas.oferta && <span className="w-1.5 h-1.5 rounded-full bg-sky-500 dark:bg-[var(--icons-green)] flex-shrink-0" />}
                                                 </button>
@@ -553,11 +583,12 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit }:
                                                     className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-[10px] font-black uppercase tracking-widest transition-all
                                                         ${etiquetas.edicionLimitada
                                                             ? 'bg-sky-500/15 dark:bg-[var(--icons-green)]/15 border-sky-500/40 dark:border-[var(--icons-green)]/40 text-sky-600 dark:text-[var(--icons-green)]'
-                                                            : etiquetas.nuevo
+                                                            : etiquetas.nuevo || !isStickerAllowed('liquidacion')
                                                                 ? 'bg-[var(--bg-card)] border-dashed border-[var(--border-subtle)] text-[var(--text-secondary)]/40'
                                                                 : 'bg-[var(--bg-card)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-sky-500/30 dark:hover:border-[var(--icons-green)]/40'
                                                         }`}
                                                 >
+                                                    {!isStickerAllowed('liquidacion') && !etiquetas.edicionLimitada && <Icon name="Lock" className="w-2.5 h-2.5" />}
                                                     Ed. Lim.
                                                     {etiquetas.edicionLimitada && <span className="w-1.5 h-1.5 rounded-full bg-sky-500 dark:bg-[var(--icons-green)] flex-shrink-0" />}
                                                 </button>
@@ -579,6 +610,11 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit }:
                                                 </button>
 
                                             </div>
+                                            {showStickerUpgrade && (
+                                                <div className="mt-2">
+                                                    <PlanUpgradeMessage message="Tu plan actual solo permite el sticker de Descuento. Actualiza tu plan para usar todos los stickers (Nuevo, Oferta, Edición Limitada)." />
+                                                </div>
+                                            )}
                                         </td>
                                     </tr>
                                 </tbody>

@@ -4,7 +4,11 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/shared/lib/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import Icon from '@/components/ui/Icon';
+import BaseButton from '@/components/ui/BaseButton';
+import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import { addressApi, Address } from '@/shared/lib/api/addressRepository';
+import { useGeoData } from '@/features/public/checkout/hooks/useGeoData';
+import ConfirmDialog from '@/components/ui/confirm-dialog';
 
 // ── CustomSelect ──────────────────────────────────────────────────────────────
 interface CSOpt { value: string; label: string }
@@ -71,6 +75,11 @@ export default function CustomerAddressesPage() {
     referencia: '',
     is_default: false,
   });
+
+  const { provincias, distritos, loadingProvincias, loadingDistritos } = useGeoData(
+    formData.departamento || '',
+    formData.provincia || '',
+  );
 
   const loadAddresses = useCallback(async () => {
     try {
@@ -209,28 +218,28 @@ export default function CustomerAddressesPage() {
 
   return (
     <div className="space-y-8 animate-fadeIn">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-black text-slate-800 dark:text-[var(--text-primary)]">
-            Direcciones de Envío
-          </h1>
-          <p className="text-slate-500 dark:text-[var(--text-muted)] mt-1">
-            Gestiona tus direcciones de entrega
-          </p>
-        </div>
-        <button
+      <ModuleHeader
+        title="Direcciones de Envío"
+        subtitle="Gestiona las ubicaciones donde recibirás tus pedidos"
+        icon="MapPin"
+      />
+
+      <div className="w-full sm:max-w-xs mx-auto md:mx-0 md:ml-auto">
+        <BaseButton
           onClick={openAddModal}
-          className="flex items-center gap-3 px-6 py-3 rounded-xl bg-white dark:bg-[var(--bg-secondary)] backdrop-blur-md text-black dark:text-[var(--text-primary)] font-bold text-sm border border-gray-200 dark:border-[var(--border-subtle)] hover:text-sky-500 dark:hover:text-[var(--icons-green)] transition-all"
+          variant="action"
+          leftIcon="Plus"
+          size="lg"
+          fullWidth
         >
-          <Icon name="Plus" className="w-5 h-5" />
-          <span>Agregar Dirección</span>
-        </button>
+          Agregar Dirección
+        </BaseButton>
       </div>
 
-      <div className="p-4 bg-amber-50 dark:bg-amber-900/10 rounded-2xl border border-amber-200 dark:border-amber-800/30 flex items-start gap-3">
-        <Icon name="Star" className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
-        <p className="text-xs font-bold text-amber-800 dark:text-amber-300">
-          Usa la estrella <Icon name="Star" className="w-3.5 h-3.5 inline fill-current text-amber-500" /> para marcar tu dirección principal. Solo una dirección puede ser la predeterminada.
+      <div className="p-4 bg-sky-50 dark:bg-[var(--brand-green)]/10 rounded-2xl border border-sky-200 dark:border-[var(--icons-green)]/30 flex items-start gap-3">
+        <Icon name="Star" className="w-5 h-5 text-sky-500 dark:text-[var(--icons-green)] shrink-0 mt-0.5" />
+        <p className="text-xs font-bold text-sky-800 dark:text-[var(--icons-green)]">
+          Usa la estrella <Icon name="Star" className="w-3.5 h-3.5 inline fill-current text-sky-500 dark:text-[var(--icons-green)]" /> para marcar tu dirección principal. Solo una dirección puede ser la predeterminada.
         </p>
       </div>
 
@@ -290,9 +299,9 @@ export default function CustomerAddressesPage() {
                   <button
                     onClick={() => setAsDefault(address.id)}
                     title={address.is_default ? 'Dirección principal actual' : 'Establecer como dirección principal'}
-                    className={`group w-12 h-12 flex items-center justify-center rounded-xl transition-all duration-200 ${address.is_default ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-500 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/30 ring-2 ring-amber-300 dark:ring-amber-700' : 'bg-sky-50 dark:bg-[var(--bg-muted)] text-sky-500 dark:text-[var(--icons-green)] hover:bg-sky-100 dark:hover:bg-[#2A3F33]'} hover:scale-110 active:scale-95`}
+                    className={`group w-12 h-12 flex items-center justify-center rounded-xl transition-all duration-200 ${address.is_default ? 'bg-sky-100 dark:bg-[var(--brand-green)]/30 text-sky-600 dark:text-[var(--icons-green)] hover:bg-sky-200 dark:hover:bg-[var(--brand-green)]/40 ring-2 ring-sky-400 dark:ring-[var(--icons-green)]/60' : 'bg-sky-50 dark:bg-[var(--bg-muted)] text-sky-500 dark:text-[var(--icons-green)] hover:bg-sky-100 dark:hover:bg-[#2A3F33]'} hover:scale-110 active:scale-95`}
                   >
-                    <Icon name="Star" className={`w-5 h-5 transition-all duration-200 group-hover:rotate-12 ${address.is_default ? 'fill-current text-amber-500' : ''}`} style={address.is_default ? { fill: 'currentColor' } : undefined} />
+                    <Icon name="Star" className={`w-5 h-5 transition-all duration-200 group-hover:rotate-12 ${address.is_default ? 'fill-current text-sky-600 dark:text-[var(--icons-green)]' : ''}`} style={address.is_default ? { fill: 'currentColor' } : undefined} />
                   </button>
                   <button
                     onClick={() => setConfirmDeleteId(address.id)}
@@ -323,10 +332,9 @@ export default function CustomerAddressesPage() {
       </div>
 
       {showModal && (
-        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-[200] overflow-y-auto scrollbar-none" onClick={() => { setShowModal(false); setSaveError(''); }}>
-          <div className="flex min-h-full items-center justify-center px-4 py-20">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[60] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label={editingAddress ? 'Editar Dirección' : 'Nueva Dirección'} onClick={() => setShowModal(false)}>
           <div
-            className="bg-white dark:bg-[var(--bg-secondary)] rounded-2xl sm:rounded-[3rem] max-w-xl w-full overflow-hidden shadow-2xl flex flex-col"
+            className="bg-white dark:bg-[var(--bg-secondary)] rounded-2xl sm:rounded-[3rem] max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[#1A3A32] dark:to-[var(--brand-green)] p-6 md:p-8 text-white relative">
@@ -387,59 +395,73 @@ export default function CustomerAddressesPage() {
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-gray-400 dark:text-gray-400 uppercase">Departamento</label>
-                  <CustomSelect
-                    value={formData.departamento || ''}
-                    onChange={(v) => setFormData({ ...formData, departamento: v })}
+                  <select
+                    value={formData.departamento}
+                    onChange={(e) => setFormData({ ...formData, departamento: e.target.value, provincia: '', distrito: '' })}
                     required
-                    options={[
-                      { value: '',               label: 'Seleccionar...' },
-                      { value: 'Amazonas',       label: 'Amazonas' },
-                      { value: 'Áncash',         label: 'Áncash' },
-                      { value: 'Apurímac',       label: 'Apurímac' },
-                      { value: 'Arequipa',       label: 'Arequipa' },
-                      { value: 'Ayacucho',       label: 'Ayacucho' },
-                      { value: 'Cajamarca',      label: 'Cajamarca' },
-                      { value: 'Callao',         label: 'Callao' },
-                      { value: 'Cusco',          label: 'Cusco' },
-                      { value: 'Huancavelica',   label: 'Huancavelica' },
-                      { value: 'Huánuco',        label: 'Huánuco' },
-                      { value: 'Ica',            label: 'Ica' },
-                      { value: 'Junín',          label: 'Junín' },
-                      { value: 'La Libertad',    label: 'La Libertad' },
-                      { value: 'Lambayeque',     label: 'Lambayeque' },
-                      { value: 'Lima',           label: 'Lima' },
-                      { value: 'Loreto',         label: 'Loreto' },
-                      { value: 'Madre de Dios',  label: 'Madre de Dios' },
-                      { value: 'Moquegua',       label: 'Moquegua' },
-                      { value: 'Pasco',          label: 'Pasco' },
-                      { value: 'Piura',          label: 'Piura' },
-                      { value: 'Puno',           label: 'Puno' },
-                      { value: 'San Martín',     label: 'San Martín' },
-                      { value: 'Tacna',          label: 'Tacna' },
-                      { value: 'Tumbes',         label: 'Tumbes' },
-                      { value: 'Ucayali',        label: 'Ucayali' },
-                    ]}
-                  />
+                    className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-3 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-2xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)] cursor-pointer transition-colors"
+                  >
+                    <option value="">Seleccionar...</option>
+                    <option value="Amazonas">Amazonas</option>
+                    <option value="Áncash">Áncash</option>
+                    <option value="Apurímac">Apurímac</option>
+                    <option value="Arequipa">Arequipa</option>
+                    <option value="Ayacucho">Ayacucho</option>
+                    <option value="Cajamarca">Cajamarca</option>
+                    <option value="Callao">Callao</option>
+                    <option value="Cusco">Cusco</option>
+                    <option value="Huancavelica">Huancavelica</option>
+                    <option value="Huánuco">Huánuco</option>
+                    <option value="Ica">Ica</option>
+                    <option value="Junín">Junín</option>
+                    <option value="La Libertad">La Libertad</option>
+                    <option value="Lambayeque">Lambayeque</option>
+                    <option value="Lima">Lima</option>
+                    <option value="Loreto">Loreto</option>
+                    <option value="Madre de Dios">Madre de Dios</option>
+                    <option value="Moquegua">Moquegua</option>
+                    <option value="Pasco">Pasco</option>
+                    <option value="Piura">Piura</option>
+                    <option value="Puno">Puno</option>
+                    <option value="San Martín">San Martín</option>
+                    <option value="Tacna">Tacna</option>
+                    <option value="Tumbes">Tumbes</option>
+                    <option value="Ucayali">Ucayali</option>
+                  </select>
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-gray-400 dark:text-gray-400 uppercase">Ciudad / Provincia</label>
-                  <input
-                    type="text"
+                  <select
                     value={formData.provincia}
-                    onChange={(e) => setFormData({ ...formData, provincia: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, provincia: e.target.value, distrito: '' })}
                     required
-                    className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-3 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-2xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)] cursor-pointer transition-colors"
-                  />
+                    disabled={!formData.departamento || loadingProvincias}
+                    className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)] disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <option value="">
+                      {!formData.departamento ? 'Selecciona un departamento primero' : loadingProvincias ? 'Cargando...' : 'Seleccionar...'}
+                    </option>
+                    {provincias.map((p) => (
+                      <option key={p} value={p}>{p}</option>
+                    ))}
+                  </select>
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-gray-400 dark:text-gray-400 uppercase">Urbanización / Distrito</label>
-                  <input
-                    type="text"
+                  <select
                     value={formData.distrito}
                     onChange={(e) => setFormData({ ...formData, distrito: e.target.value })}
                     required
-                    className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-3 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-2xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)] cursor-pointer transition-colors"
-                  />
+                    disabled={!formData.provincia || loadingDistritos}
+                    className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)] disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <option value="">
+                      {!formData.provincia ? 'Selecciona una provincia primero' : loadingDistritos ? 'Cargando...' : 'Seleccionar...'}
+                    </option>
+                    {distritos.map((d) => (
+                      <option key={d} value={d}>{d}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -519,7 +541,6 @@ export default function CustomerAddressesPage() {
               </div>
             </form>
           </div>
-          </div>
         </div>
       )}
 
@@ -533,23 +554,16 @@ export default function CustomerAddressesPage() {
         </div>
       )}
 
-      {confirmDeleteId !== null && (
-        <div className="fixed inset-0 z-[70] overflow-y-auto scrollbar-none bg-black/30 backdrop-blur-sm" onClick={() => setConfirmDeleteId(null)}>
-          <div className="flex min-h-full items-center justify-center p-4 py-20">
-          <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-[2rem] p-8 max-w-sm w-full shadow-2xl" onClick={e => e.stopPropagation()}>
-            <div className="w-14 h-14 rounded-full bg-rose-50 dark:bg-rose-900/20 flex items-center justify-center mx-auto mb-4">
-              <Icon name="MapPin" className="w-7 h-7 text-rose-500" />
-            </div>
-            <h3 className="text-lg font-black text-center text-gray-800 dark:text-[var(--text-primary)] mb-2">¿Eliminar Dirección?</h3>
-            <p className="text-sm text-gray-500 dark:text-[var(--text-muted)] text-center mb-6">Esta ubicación dejará de estar disponible.</p>
-            <div className="flex gap-3">
-              <button onClick={() => setConfirmDeleteId(null)} className="flex-1 py-3 rounded-xl bg-gray-100 dark:bg-[var(--bg-muted)] text-gray-600 dark:text-[var(--text-primary)] font-black text-xs uppercase tracking-widest hover:bg-gray-200 dark:hover:bg-[#2A3F33] transition-all">Cancelar</button>
-              <button onClick={() => deleteAddress(confirmDeleteId)} className="flex-1 py-3 rounded-xl bg-rose-500 text-white font-black text-xs uppercase tracking-widest hover:bg-rose-600 transition-all">Eliminar</button>
-            </div>
-          </div>
-          </div>
-        </div>
-      )}
+      <ConfirmDialog
+        isOpen={confirmDeleteId !== null}
+        onClose={() => setConfirmDeleteId(null)}
+        onConfirm={() => deleteAddress(confirmDeleteId!)}
+        title="¿Eliminar Dirección?"
+        message="Esta ubicación dejará de estar disponible."
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        variant="danger"
+      />
     </div>
   );
 }

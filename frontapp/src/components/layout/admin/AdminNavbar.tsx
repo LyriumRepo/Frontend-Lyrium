@@ -9,8 +9,8 @@ interface AdminNavbarProps {
 
 export default function AdminNavbar({ title, breadcrumbs, actions }: AdminNavbarProps) {
     return (
-        <div className="bg-white dark:bg-[var(--bg-secondary)] border-b border-gray-200 dark:border-[var(--border-subtle)] px-6 py-4">
-            <div className="flex items-center justify-between mb-2">
+        <div className="bg-white dark:bg-[var(--bg-secondary)] border-b border-gray-200 dark:border-[var(--border-subtle)] px-3 sm:px-6 py-3 sm:py-4">
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-[var(--text-primary)]">
                     {title}
                 </h1>

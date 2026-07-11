@@ -198,9 +198,10 @@ export function ChangePasswordForm() {
           disabled={isPending || !allRequirementsMet || !passwordsMatch || !formData.actual}
           className="
             w-full py-5 rounded-[2rem]
-            bg-gradient-to-r from-sky-500 to-sky-600
+            bg-gradient-to-r from-sky-500 to-sky-400 dark:from-emerald-700 dark:to-teal-600
             text-white font-black text-xs uppercase tracking-[0.2em]
-            hover:shadow-lg hover:from-sky-600 hover:to-sky-700
+            shadow-lg shadow-sky-500/25 dark:shadow-emerald-900/25
+            hover:shadow-xl hover:-translate-y-0.5
             disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none
             flex items-center justify-center gap-3
             transition-all duration-200

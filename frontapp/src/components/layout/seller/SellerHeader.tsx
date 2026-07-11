@@ -1,57 +1,61 @@
 'use client';
 
+import Link from 'next/link';
 import ThemeToggle from '@/components/layout/shared/ThemeToggle';
 import NotificationBell from '@/components/layout/shared/NotificationBell';
 import UserMenu from '@/components/layout/shared/UserMenu';
 import Breadcrumb from '@/components/layout/shared/Breadcrumb';
 import { useAutoBreadcrumb } from '@/shared/hooks/useAutoBreadcrumb';
-import { useApiConnection, ConnectionStatusPanel } from '@/shared/hooks/useApiConnection';
-
-import { Menu } from 'lucide-react';
+import { Menu, Home } from 'lucide-react';
+import { ROUTES } from '@/shared/lib/constants/routes';
 
 export default function SellerHeader({ onOpenMenu }: { onOpenMenu: () => void }) {
     const breadcrumbs = useAutoBreadcrumb();
-    const { status, checkConnection, isHealthy, showLaravel } = useApiConnection();
 
     return (
-        <header className="h-16 bg-[var(--bg-sidebar)] border-b border-[var(--border-subtle)] sticky top-0 z-50">
+        <header className="h-16 bg-white dark:bg-[var(--bg-secondary)] border-b border-gray-200 dark:border-[var(--border-subtle)] sticky top-0 z-50">
             <div className="flex h-full items-center justify-between px-3 sm:px-4 lg:px-6">
-                {/* Left: Panel Indicator + Breadcrumb */}
+
+                {/* ── Izquierda: Menú + Marca + Breadcrumb ── */}
                 <div className="flex min-w-0 items-center gap-2 sm:gap-4">
                     <button
                         onClick={onOpenMenu}
-                        className="lg:hidden p-2 -ml-2 rounded-lg hover:bg-[var(--bg-hover)] transition-colors"
-                        aria-label="Open menu"
+                        className="md:hidden p-2 -ml-2 rounded-lg hover:bg-[var(--bg-hover)] active:bg-[var(--bg-hover)] transition-colors"
+                        aria-label="Abrir menú"
                     >
-                        <Menu className="w-6 h-6 text-[var(--text-secondary)]" />
+                        <Menu className="w-5 h-5 sm:w-6 sm:h-6 text-[var(--text-secondary)]" />
                     </button>
-                    <span className="hidden md:inline-block px-3 py-1 bg-sky-500 text-white text-xs font-bold uppercase rounded-full whitespace-nowrap">
+
+                    {/* Volver al Home público — solo en mobile, la sidebar ya cubre esto en desktop */}
+                    <Link
+                        href={ROUTES.HOME}
+                        className="md:hidden p-2 rounded-lg hover:bg-[var(--bg-hover)] active:bg-[var(--bg-hover)] transition-colors"
+                        aria-label="Ir al inicio"
+                        title="Ir al inicio"
+                    >
+                        <Home className="w-5 h-5 text-[var(--text-secondary)]" />
+                    </Link>
+
+                    {/* "Mi Panel" — aparece desde tablet en adelante (768px+),
+                        en móvil ocupa espacio que necesita el breadcrumb/acciones */}
+                    <span className="hidden md:inline-block px-3 py-1 bg-sky-500 dark:bg-[var(--bg-secondary)] text-white dark:text-[var(--brand-green)] dark:border dark:border-[var(--border-default)] text-xs font-bold uppercase rounded-full whitespace-nowrap shrink-0">
                         Mi Panel
                     </span>
-                    <div className="hidden sm:block">
+
+                    {/* Breadcrumb — visible desde tablet pequeño (640px).
+                        min-w-0 + overflow-hidden evita que un breadcrumb largo
+                        empuje los íconos de la derecha fuera de pantalla. */}
+                    <div className="hidden sm:block min-w-0 overflow-hidden">
                         <Breadcrumb items={breadcrumbs} />
                     </div>
                 </div>
 
-                {/* Right: Connection Status + Quick Stats + Actions */}
-                <div className="flex items-center gap-1.5 sm:gap-3 md:gap-4">
-                    {/* Connection Status */}
-                    <div className="hidden sm:block">
-                        <ConnectionStatusPanel status={status} onRefresh={checkConnection} showLaravel={showLaravel} />
-                    </div>
+                {/* ── Derecha: Estado + Métricas + Acciones ── */}
+                <div className="flex items-center gap-1.5 sm:gap-3 md:gap-4 shrink-0">
 
-                    {/* Connection Health Indicator */}
-                    <div className={`hidden lg:flex items-center gap-2 px-2 py-1 rounded-full ${isHealthy ? 'bg-emerald-50 dark:bg-[var(--bg-card)]' : 'bg-red-50 dark:bg-red-900/20'
-                        }`}>
-                        <div className={`w-2 h-2 rounded-full ${isHealthy ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
-                        <span className={`text-[10px] font-bold uppercase ${isHealthy ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'
-                            }`}>
-                            {isHealthy ? 'API Activa' : 'API Offline'}
-                        </span>
-                    </div>
-
-                    <div className="hidden lg:block h-6 w-px bg-gray-200 dark:bg-[var(--border-subtle)]" />
-
+                    {/* Métricas rápidas — solo en desktop amplio (1024px+).
+                        En tablet no caben sin truncar o forzar dos líneas,
+                        así que se reservan para cuando hay espacio real. */}
                     <div className="hidden lg:flex items-center gap-6">
                         <div className="text-sm">
                             <span className="text-gray-400 dark:text-[var(--text-secondary)] font-bold uppercase text-[10px] tracking-widest">Ventas del Mes: </span>
@@ -62,12 +66,25 @@ export default function SellerHeader({ onOpenMenu }: { onOpenMenu: () => void })
                             <span className="font-black text-gray-900 dark:text-[var(--text-primary)] tracking-tight">08</span>
                         </div>
                     </div>
-                    <div className="h-8 w-px bg-gray-200 dark:bg-[var(--border-subtle)] mx-2 hidden sm:block" />
-                    <div className="hidden sm:block">
-                        <ThemeToggle />
-                    </div>
+
+                    {/* Separador antes de Theme/Bell — visible desde tablet.
+                        Como los elementos lg-only colapsan a 0px en pantallas
+                        más chicas, este separador queda pegado correctamente
+                        junto al Connection Status (o al borde si ese también
+                        está oculto), sin dejar huecos huérfanos. */}
+                    <div className="hidden sm:block h-8 w-px bg-gray-200 dark:bg-[var(--border-subtle)]" />
+
+                    {/* Theme Toggle — SIEMPRE visible, incluido móvil.
+                        El modo oscuro es un feature central de esta app
+                        (toda la UI tiene variantes dark cuidadosamente
+                        diseñadas), así que ocultarlo en móvil le quita
+                        control al usuario justo donde más navega. */}
+                    <ThemeToggle />
+
                     <NotificationBell />
-                    <div className="hidden sm:block h-8 w-px bg-gray-200 dark:bg-[var(--border-subtle)] mx-2" />
+
+                    <div className="hidden sm:block h-8 w-px bg-gray-200 dark:bg-[var(--border-subtle)]" />
+
                     <UserMenu />
                 </div>
             </div>

@@ -47,6 +47,7 @@ export default function BaseSelectField({
           w-full px-5 py-3 bg-[var(--bg-secondary)] border border-[var(--border-subtle)]
           rounded-2xl font-bold text-[var(--text-primary)]
           focus:ring-4 focus:ring-sky-500/10 focus:bg-[var(--bg-card)] focus:border-sky-500/30
+          dark:focus:ring-[var(--brand-green)]/10 dark:focus:border-[var(--brand-green)]/30
           transition-all outline-none cursor-pointer
           ${error ? 'border-red-500 ring-4 ring-red-500/10' : ''}
         `}

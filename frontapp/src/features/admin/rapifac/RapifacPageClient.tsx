@@ -1,14 +1,16 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import { useAdminInvoices } from '@/features/admin/invoices/hooks/useAdminInvoices';
 import { formatCurrency } from '@/shared/lib/utils/formatters';
 import {
     Receipt, Search, RefreshCw, Download, CheckCircle, Clock, XCircle, AlertCircle,
-    FileText, TrendingUp, ExternalLink, Package, Store, Eye,
+    FileText, TrendingUp, ExternalLink, Package, Store, Eye, FileSpreadsheet, Info,
 } from 'lucide-react';
+import { exportRapifacToExcel, exportRapifacToPdf } from './export';
 import BaseButton from '@/components/ui/BaseButton';
+import BaseDatePicker from '@/components/ui/BaseDatePicker';
 import Skeleton from '@/components/ui/Skeleton';
 import BaseModal from '@/components/ui/BaseModal';
 import type { AdminInvoiceRow } from '@/features/admin/invoices/hooks/useAdminInvoices';
@@ -22,11 +24,11 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.
 };
 
 const statusColorClasses: Record<string, string> = {
-    emerald: 'bg-emerald-50 text-emerald-600 border border-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20',
-    amber: 'bg-amber-50 text-amber-600 border border-amber-100 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20',
-    rose: 'bg-rose-50 text-rose-600 border border-rose-100 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20',
-    orange: 'bg-orange-50 text-orange-600 border border-orange-100 dark:bg-orange-500/10 dark:text-orange-400 dark:border-orange-500/20',
-    gray: 'bg-gray-50 text-gray-600 border border-gray-100 dark:bg-gray-500/10 dark:text-gray-400 dark:border-gray-500/20',
+    emerald: 'bg-[var(--color-success)]/10 text-[var(--color-success)] border border-[var(--color-success)]/20',
+    amber: 'bg-[var(--color-warning)]/10 text-[var(--color-warning)] border border-[var(--color-warning)]/20',
+    rose: 'bg-[var(--color-error)]/10 text-[var(--color-error)] border border-[var(--color-error)]/20',
+    orange: 'bg-[var(--color-warning)]/10 text-[var(--color-warning)] border border-[var(--color-warning)]/20',
+    gray: 'bg-[var(--bg-muted)] text-[var(--text-secondary)] border border-[var(--border-subtle)]',
 };
 
 function StatusBadge({ status }: { status: string }) {
@@ -72,7 +74,7 @@ function DetailModal({ inv, isOpen, onClose }: { inv: AdminInvoiceRow | null; is
                     </div>
                 )}
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div className="bg-gradient-to-br from-sky-50 to-cyan-50 dark:from-sky-500/5 dark:to-cyan-500/5 rounded-2xl p-4 border border-sky-100/50 dark:border-sky-500/10">
                         <span className="text-[9px] font-black text-sky-500 dark:text-sky-400 uppercase tracking-widest">Cliente</span>
                         <p className="text-sm font-black text-[var(--text-primary)] mt-1 truncate">{inv.customer_name}</p>
@@ -90,8 +92,8 @@ function DetailModal({ inv, isOpen, onClose }: { inv: AdminInvoiceRow | null; is
                 </div>
 
                 {hasItems ? (
-                    <div className="bg-gradient-to-br from-teal-50/50 to-cyan-50/50 dark:from-teal-500/3 dark:to-cyan-500/3 rounded-2xl border border-teal-100/30 dark:border-teal-500/10 overflow-hidden">
-                        <table className="w-full text-left">
+                    <div className="bg-gradient-to-br from-teal-50/50 to-cyan-50/50 dark:from-teal-500/3 dark:to-cyan-500/3 rounded-2xl border border-teal-100/30 dark:border-teal-500/10 overflow-hidden overflow-x-auto">
+                        <table className="w-full text-left min-w-[400px]">
                             <thead>
                                 <tr className="bg-teal-500/5 dark:bg-teal-500/5">
                                     <th className="px-5 py-3 text-[9px] font-black text-teal-600 dark:text-teal-400 uppercase tracking-widest">Producto</th>
@@ -175,6 +177,8 @@ export function RapifacPageClient() {
         refresh,
     } = useAdminInvoices();
     const [detailInv, setDetailInv] = useState<AdminInvoiceRow | null>(null);
+    const [montoTooltip, setMontoTooltip] = useState(false);
+    const montoIconRef = useRef<HTMLSpanElement>(null);
 
     const handleExportCSV = () => {
         const headers = ['ID', 'Tipo', 'Serie', 'Nro', 'Cliente', 'RUC/DNI', 'Monto', 'Estado', 'Fecha'];
@@ -210,7 +214,7 @@ export function RapifacPageClient() {
         <>
             <DetailModal inv={detailInv} isOpen={detailInv !== null} onClose={() => setDetailInv(null)} />
 
-            <main className="p-8 space-y-8 animate-fadeIn">
+            <main className="p-4 sm:p-8 space-y-8 animate-fadeIn">
                 <ModuleHeader
                     title="Facturación Electrónica"
                     subtitle="Comprobantes electrónicos emitidos via Nubefact — SUNAT"
@@ -237,15 +241,6 @@ export function RapifacPageClient() {
                     </div>
                 ) : (
                     <>
-                        <div className="flex justify-end items-center gap-3">
-                            <BaseButton onClick={() => refresh()} variant="ghost" leftIcon="RefreshCw" size="md">
-                                Sincronizar
-                            </BaseButton>
-                            <BaseButton onClick={handleExportCSV} variant="primary" leftIcon="Download" size="md">
-                                Exportar Reporte
-                            </BaseButton>
-                        </div>
-
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                             {kpiCards.map(card => (
                                 <div
@@ -272,8 +267,10 @@ export function RapifacPageClient() {
                         </div>
 
                         <div className="bg-white dark:bg-[var(--bg-card)] rounded-[2.5rem] border border-gray-100 dark:border-[var(--border-subtle)] shadow-sm overflow-hidden flex flex-col">
-                            <div className="p-8 border-b border-gray-50 dark:border-[var(--border-subtle)] space-y-5 bg-gray-50/30 dark:bg-[var(--bg-muted)]/50">
-                                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                            <div className="p-4 sm:p-8 border-b border-gray-50 dark:border-[var(--border-subtle)] space-y-4 bg-gray-50/30 dark:bg-[var(--bg-muted)]/50">
+
+                                {/* Título + búsqueda */}
+                                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                                     <div>
                                         <h3 className="text-xl font-black text-gray-900 dark:text-[var(--text-primary)] tracking-tight">
                                             Comprobantes Recientes
@@ -294,145 +291,181 @@ export function RapifacPageClient() {
                                     </div>
                                 </div>
 
-                                <div className="flex flex-wrap items-center gap-4">
-                                    <div className="flex items-center gap-2">
-                                        <Store className="w-4 h-4 text-cyan-500 shrink-0" />
-                                        <select
-                                            value={storeFilter}
-                                            onChange={e => setStoreFilter(e.target.value)}
-                                            className="px-4 py-2.5 bg-white dark:bg-[var(--bg-card)] border border-gray-100 dark:border-[var(--border-subtle)] rounded-xl text-xs font-bold text-[var(--text-primary)] focus:ring-4 focus:ring-cyan-500/10 transition-all outline-none appearance-none cursor-pointer"
-                                        >
-                                            <option value="">Todas las tiendas</option>
-                                            {allStores.map(s => (
-                                                <option key={s} value={s}>{s}</option>
-                                            ))}
-                                        </select>
-                                    </div>
+                                {/* Filtros + acciones — todo en un recuadro en móvil */}
+                                <div className="bg-white dark:bg-[var(--bg-secondary)]/60 border border-gray-100 dark:border-[var(--border-subtle)] rounded-2xl p-3 sm:p-0 sm:bg-transparent sm:border-0 sm:rounded-none space-y-3 sm:space-y-0">
+                                    {/* Fila 1: selects + fechas */}
+                                    <div className="flex flex-wrap items-center gap-3">
+                                        <div className="flex items-center gap-2">
+                                            <Store className="w-4 h-4 text-cyan-500 shrink-0" />
+                                            <select
+                                                value={storeFilter}
+                                                onChange={e => setStoreFilter(e.target.value)}
+                                                className="px-4 py-2.5 bg-white dark:bg-[var(--bg-card)] border border-gray-100 dark:border-[var(--border-subtle)] rounded-xl text-xs font-bold text-[var(--text-primary)] focus:ring-4 focus:ring-cyan-500/10 transition-all outline-none appearance-none cursor-pointer"
+                                            >
+                                                <option value="">Todas las tiendas</option>
+                                                {allStores.map(s => (
+                                                    <option key={s} value={s}>{s}</option>
+                                                ))}
+                                            </select>
+                                        </div>
 
-                                    <div className="flex items-center gap-2">
-                                        <FileText className="w-4 h-4 text-emerald-500 shrink-0" />
-                                        <select
-                                            value={typeFilter}
-                                            onChange={e => setTypeFilter(e.target.value)}
-                                            className="px-4 py-2.5 bg-white dark:bg-[var(--bg-card)] border border-gray-100 dark:border-[var(--border-subtle)] rounded-xl text-xs font-bold text-[var(--text-primary)] focus:ring-4 focus:ring-emerald-500/10 transition-all outline-none appearance-none cursor-pointer"
-                                        >
-                                            <option value="">Todos los tipos</option>
-                                            {allTypes.map(t => (
-                                                <option key={t} value={t}>{t}</option>
-                                            ))}
-                                        </select>
-                                    </div>
+                                        <div className="flex items-center gap-2">
+                                            <FileText className="w-4 h-4 text-emerald-500 shrink-0" />
+                                            <select
+                                                value={typeFilter}
+                                                onChange={e => setTypeFilter(e.target.value)}
+                                                className="px-4 py-2.5 bg-white dark:bg-[var(--bg-card)] border border-gray-100 dark:border-[var(--border-subtle)] rounded-xl text-xs font-bold text-[var(--text-primary)] focus:ring-4 focus:ring-emerald-500/10 transition-all outline-none appearance-none cursor-pointer"
+                                            >
+                                                <option value="">Todos los tipos</option>
+                                                {allTypes.map(t => (
+                                                    <option key={t} value={t}>{t}</option>
+                                                ))}
+                                            </select>
+                                        </div>
 
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-[10px] font-black text-gray-400 dark:text-[var(--text-muted)] uppercase tracking-widest">Desde</span>
-                                        <input
-                                            type="date"
+                                        <BaseDatePicker
+                                            label="Desde"
                                             value={dateFrom}
-                                            onChange={e => setDateFrom(e.target.value)}
-                                            className="px-4 py-2.5 bg-white dark:bg-[var(--bg-card)] border border-gray-100 dark:border-[var(--border-subtle)] rounded-xl text-xs font-bold text-[var(--text-primary)] focus:ring-4 focus:ring-blue-500/10 transition-all outline-none"
+                                            onChange={setDateFrom}
+                                            placeholder="dd/mm/aaaa"
                                         />
-                                    </div>
 
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-[10px] font-black text-gray-400 dark:text-[var(--text-muted)] uppercase tracking-widest">Hasta</span>
-                                        <input
-                                            type="date"
+                                        <BaseDatePicker
+                                            label="Hasta"
                                             value={dateTo}
-                                            onChange={e => setDateTo(e.target.value)}
-                                            className="px-4 py-2.5 bg-white dark:bg-[var(--bg-card)] border border-gray-100 dark:border-[var(--border-subtle)] rounded-xl text-xs font-bold text-[var(--text-primary)] focus:ring-4 focus:ring-blue-500/10 transition-all outline-none"
+                                            onChange={setDateTo}
+                                            placeholder="dd/mm/aaaa"
                                         />
                                     </div>
 
-                                    {(storeFilter || typeFilter || dateFrom || dateTo) && (
+                                    {/* Fila 2: acciones + limpiar */}
+                                    <div className="flex flex-wrap items-center gap-2 pt-2 sm:pt-0 border-t border-gray-100 dark:border-[var(--border-subtle)] sm:border-0 mt-1 sm:mt-0">
+                                        <BaseButton onClick={() => refresh()} variant="ghost" leftIcon="RefreshCw" size="sm">
+                                            Sincronizar
+                                        </BaseButton>
                                         <button
-                                            onClick={() => {
-                                                setStoreFilter('');
-                                                setTypeFilter('');
-                                                setDateFrom('');
-                                                setDateTo('');
-                                            }}
-                                            className="px-4 py-2.5 rounded-xl bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 text-[10px] font-black uppercase tracking-widest hover:bg-rose-100 dark:hover:bg-rose-500/20 transition-all"
+                                            onClick={() => exportRapifacToExcel(invoices, kpis).catch(console.error)}
+                                            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--bg-card)] text-[var(--text-primary)] font-bold text-xs border border-[var(--border-subtle)] hover:text-[#5AAFE6] hover:border-[#69BEEB]/30 transition-all shadow-sm"
                                         >
-                                            Limpiar filtros
+                                            <FileSpreadsheet className="w-4 h-4" />
+                                            Excel
                                         </button>
-                                    )}
+                                        <button
+                                            onClick={() => exportRapifacToPdf(invoices, kpis).catch(console.error)}
+                                            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--bg-card)] text-[var(--text-primary)] font-bold text-xs border border-[var(--border-subtle)] hover:text-[#5AAFE6] hover:border-[#69BEEB]/30 transition-all shadow-sm"
+                                        >
+                                            <FileText className="w-4 h-4" />
+                                            PDF
+                                        </button>
+                                        {(storeFilter || typeFilter || dateFrom || dateTo) && (
+                                            <button
+                                                onClick={() => {
+                                                    setStoreFilter('');
+                                                    setTypeFilter('');
+                                                    setDateFrom('');
+                                                    setDateTo('');
+                                                }}
+                                                className="px-4 py-2.5 rounded-xl bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 text-[10px] font-black uppercase tracking-widest hover:bg-rose-100 dark:hover:bg-rose-500/20 transition-all"
+                                            >
+                                                Limpiar filtros
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
 
-                            <div className="overflow-x-auto">
+                            {/* ── Vista mobile: cards ── */}
+                            <div className="sm:hidden divide-y divide-[var(--border-subtle)]">
+                                {invoices.length === 0 ? (
+                                    <div className="flex flex-col items-center gap-4 text-[var(--text-secondary)] py-16">
+                                        <Receipt className="w-12 h-12 opacity-30" />
+                                        <p className="text-sm font-bold">No hay comprobantes emitidos</p>
+                                    </div>
+                                ) : invoices.map(invoice => (
+                                    <div key={invoice.id} className="p-4 flex items-start gap-3 hover:bg-[var(--bg-secondary)] transition-colors">
+                                        <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-cyan-100 to-emerald-100 dark:from-cyan-500/10 dark:to-emerald-500/10 flex items-center justify-center text-cyan-600 dark:text-cyan-400 shrink-0 mt-0.5">
+                                            <Receipt className="w-5 h-5" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center justify-between gap-2">
+                                                <p className="text-sm font-black text-[var(--text-primary)] truncate uppercase">{invoice.customer_name}</p>
+                                                <StatusBadge status={invoice.sunat_status} />
+                                            </div>
+                                            <p className="text-[11px] text-[var(--text-secondary)] font-mono mt-0.5">{invoice.customer_ruc}</p>
+                                            <div className="flex items-center gap-3 mt-1.5 flex-wrap">
+                                                <span className="text-[10px] font-black text-cyan-600 dark:text-cyan-400 uppercase tracking-tight">{invoice.type}</span>
+                                                <span className="text-xs font-mono text-[var(--text-secondary)]">{invoice.series}-{invoice.number}</span>
+                                                <span className="text-xs font-black text-emerald-600 dark:text-emerald-400">{formatCurrency(invoice.store_amount ?? invoice.amount)}</span>
+                                            </div>
+                                            <div className="flex items-center justify-between mt-2">
+                                                <span className="text-[10px] text-[var(--text-secondary)]">
+                                                    {new Date(invoice.emission_date).toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' })}
+                                                </span>
+                                                <button
+                                                    onClick={() => openDetail(invoice)}
+                                                    className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-500 text-white text-[10px] font-black uppercase tracking-wider transition-all"
+                                                >
+                                                    <Eye className="w-3.5 h-3.5" />
+                                                    Detalle
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* ── Vista desktop: tabla ── */}
+                            <div className="hidden sm:block overflow-x-auto">
                                 <table className="w-full text-left border-collapse" aria-label="Tabla de comprobantes">
                                     <thead>
                                         <tr className="bg-gray-50/50 dark:bg-[var(--bg-muted)]/30">
+                                            <th scope="col" className="px-8 py-5 text-[10px] font-black text-gray-400 dark:text-[var(--text-muted)] uppercase tracking-widest border-b border-gray-100 dark:border-[var(--border-subtle)]">Tipo</th>
+                                            <th scope="col" className="px-8 py-5 text-[10px] font-black text-gray-400 dark:text-[var(--text-muted)] uppercase tracking-widest border-b border-gray-100 dark:border-[var(--border-subtle)]">Serie-Nro</th>
+                                            <th scope="col" className="px-8 py-5 text-[10px] font-black text-gray-400 dark:text-[var(--text-muted)] uppercase tracking-widest border-b border-gray-100 dark:border-[var(--border-subtle)]">Cliente</th>
                                             <th scope="col" className="px-8 py-5 text-[10px] font-black text-gray-400 dark:text-[var(--text-muted)] uppercase tracking-widest border-b border-gray-100 dark:border-[var(--border-subtle)]">
-                                                Tipo
+                                                <span className="flex items-center gap-1.5">
+                                                    Monto
+                                                    <span ref={montoIconRef} onMouseEnter={() => setMontoTooltip(true)} onMouseLeave={() => setMontoTooltip(false)} className="cursor-help">
+                                                        <Info className="w-3 h-3 opacity-60" />
+                                                    </span>
+                                                </span>
                                             </th>
-                                            <th scope="col" className="px-8 py-5 text-[10px] font-black text-gray-400 dark:text-[var(--text-muted)] uppercase tracking-widest border-b border-gray-100 dark:border-[var(--border-subtle)]">
-                                                Serie-Nro
-                                            </th>
-                                            <th scope="col" className="px-8 py-5 text-[10px] font-black text-gray-400 dark:text-[var(--text-muted)] uppercase tracking-widest border-b border-gray-100 dark:border-[var(--border-subtle)]">
-                                                Cliente
-                                            </th>
-                                            <th scope="col" className="px-8 py-5 text-[10px] font-black text-gray-400 dark:text-[var(--text-muted)] uppercase tracking-widest border-b border-gray-100 dark:border-[var(--border-subtle)]">
-                                                Monto
-                                            </th>
-                                            <th scope="col" className="px-8 py-5 text-[10px] font-black text-gray-400 dark:text-[var(--text-muted)] uppercase tracking-widest border-b border-gray-100 dark:border-[var(--border-subtle)] text-center">
-                                                Estado
-                                            </th>
-                                            <th scope="col" className="px-8 py-5 text-[10px] font-black text-gray-400 dark:text-[var(--text-muted)] uppercase tracking-widest border-b border-gray-100 dark:border-[var(--border-subtle)] text-right">
-                                                Fecha
-                                            </th>
-                                            <th scope="col" className="px-8 py-5 text-[10px] font-black text-gray-400 dark:text-[var(--text-muted)] uppercase tracking-widest border-b border-gray-100 dark:border-[var(--border-subtle)] text-center">
-                                                Acción
-                                            </th>
+                                            <th scope="col" className="px-8 py-5 text-[10px] font-black text-gray-400 dark:text-[var(--text-muted)] uppercase tracking-widest border-b border-gray-100 dark:border-[var(--border-subtle)] text-center">Estado</th>
+                                            <th scope="col" className="px-8 py-5 text-[10px] font-black text-gray-400 dark:text-[var(--text-muted)] uppercase tracking-widest border-b border-gray-100 dark:border-[var(--border-subtle)] text-right">Fecha</th>
+                                            <th scope="col" className="px-8 py-5 text-[10px] font-black text-gray-400 dark:text-[var(--text-muted)] uppercase tracking-widest border-b border-gray-100 dark:border-[var(--border-subtle)] text-center">Acción</th>
                                         </tr>
                                     </thead>
                                     <tbody>
+                                        {invoices.length === 0 && (
+                                            <tr>
+                                                <td colSpan={7} className="text-center py-16">
+                                                    <Receipt className="w-12 h-12 text-gray-200 dark:text-gray-600 mx-auto mb-4" />
+                                                    <p className="text-sm font-bold text-gray-400 dark:text-[var(--text-muted)]">No hay comprobantes emitidos</p>
+                                                </td>
+                                            </tr>
+                                        )}
                                         {invoices.map(invoice => (
-                                            <tr
-                                                key={invoice.id}
-                                                className="hover:bg-gradient-to-r hover:from-cyan-50/50 hover:to-emerald-50/50 dark:hover:from-cyan-500/3 dark:hover:to-emerald-500/3 transition-colors group"
-                                            >
+                                            <tr key={invoice.id} className="hover:bg-gradient-to-r hover:from-cyan-50/50 hover:to-emerald-50/50 dark:hover:from-cyan-500/3 dark:hover:to-emerald-500/3 transition-colors group">
                                                 <td className="px-8 py-6 border-b border-gray-50 dark:border-[var(--border-subtle)]">
                                                     <div className="flex items-center gap-4">
-                                                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-100 to-emerald-100 dark:from-cyan-500/10 dark:to-emerald-500/10 flex items-center justify-center text-cyan-600 dark:text-cyan-400 group-hover:shadow-lg group-hover:shadow-cyan-200/50 dark:group-hover:shadow-cyan-500/10 transition-all">
+                                                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-100 to-emerald-100 dark:from-cyan-500/10 dark:to-emerald-500/10 flex items-center justify-center text-cyan-600 dark:text-cyan-400 group-hover:shadow-lg transition-all">
                                                             <Receipt className="w-5 h-5" />
                                                         </div>
-                                                        <div>
-                                                            <div className="text-[11px] font-black text-cyan-600 dark:text-cyan-400 uppercase tracking-tight">
-                                                                {invoice.type}
-                                                            </div>
-                                                        </div>
+                                                        <div className="text-[11px] font-black text-cyan-600 dark:text-cyan-400 uppercase tracking-tight">{invoice.type}</div>
                                                     </div>
                                                 </td>
-                                                <td className="px-8 py-6 border-b border-gray-50 dark:border-[var(--border-subtle)] font-black text-gray-700 dark:text-[var(--text-primary)] font-mono text-sm">
-                                                    {invoice.series}-{invoice.number}
-                                                </td>
+                                                <td className="px-8 py-6 border-b border-gray-50 dark:border-[var(--border-subtle)] font-black text-gray-700 dark:text-[var(--text-primary)] font-mono text-sm">{invoice.series}-{invoice.number}</td>
                                                 <td className="px-8 py-6 border-b border-gray-50 dark:border-[var(--border-subtle)]">
-                                                    <div className="text-[13px] font-black text-gray-900 dark:text-[var(--text-primary)] uppercase truncate max-w-xs">
-                                                        {invoice.customer_name}
-                                                    </div>
-                                                    <div className="text-[10px] font-bold text-gray-400 dark:text-[var(--text-muted)]">
-                                                        {invoice.customer_ruc}
-                                                    </div>
+                                                    <div className="text-[13px] font-black text-gray-900 dark:text-[var(--text-primary)] uppercase truncate max-w-xs">{invoice.customer_name}</div>
+                                                    <div className="text-[10px] font-bold text-gray-400 dark:text-[var(--text-muted)]">{invoice.customer_ruc}</div>
                                                 </td>
-                                                <td className="px-8 py-6 border-b border-gray-50 dark:border-[var(--border-subtle)] font-black text-emerald-600 dark:text-emerald-400 font-mono text-sm">
-                                                    {formatCurrency(invoice.amount)}
-                                                </td>
-                                                <td className="px-8 py-6 border-b border-gray-50 dark:border-[var(--border-subtle)] text-center">
-                                                    <StatusBadge status={invoice.sunat_status} />
-                                                </td>
+                                                <td className="px-8 py-6 border-b border-gray-50 dark:border-[var(--border-subtle)] font-black text-emerald-600 dark:text-emerald-400 font-mono text-sm">{formatCurrency(invoice.store_amount ?? invoice.amount)}</td>
+                                                <td className="px-8 py-6 border-b border-gray-50 dark:border-[var(--border-subtle)] text-center"><StatusBadge status={invoice.sunat_status} /></td>
                                                 <td className="px-8 py-6 border-b border-gray-50 dark:border-[var(--border-subtle)] text-right text-[11px] font-bold text-gray-400 dark:text-[var(--text-muted)] whitespace-nowrap">
-                                                    {new Date(invoice.emission_date).toLocaleDateString('es-PE', {
-                                                        day: '2-digit',
-                                                        month: 'short',
-                                                        year: 'numeric',
-                                                    })}
+                                                    {new Date(invoice.emission_date).toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' })}
                                                 </td>
                                                 <td className="px-8 py-6 border-b border-gray-50 dark:border-[var(--border-subtle)] text-center">
-                                                    <button
-                                                        onClick={() => openDetail(invoice)}
-                                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-500 text-white hover:from-cyan-600 hover:to-emerald-600 transition-all text-[10px] font-black uppercase tracking-wider shadow-md shadow-emerald-500/20"
-                                                    >
+                                                    <button onClick={() => openDetail(invoice)} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-500 text-white hover:from-cyan-600 hover:to-emerald-600 transition-all text-[10px] font-black uppercase tracking-wider shadow-md shadow-emerald-500/20">
                                                         <Eye className="w-3.5 h-3.5" />
                                                         Detalle
                                                     </button>
@@ -442,12 +475,16 @@ export function RapifacPageClient() {
                                     </tbody>
                                 </table>
 
-                                {invoices.length === 0 && (
-                                    <div className="text-center py-16">
-                                        <Receipt className="w-12 h-12 text-gray-200 dark:text-gray-600 mx-auto mb-4" />
-                                        <p className="text-sm font-bold text-gray-400 dark:text-[var(--text-muted)]">No hay comprobantes emitidos</p>
-                                    </div>
-                                )}
+                                {montoTooltip && montoIconRef.current && (() => {
+                                    const r = montoIconRef.current!.getBoundingClientRect();
+                                    return (
+                                        <div style={{ position: 'fixed', top: r.bottom + 8, left: r.left + r.width / 2, transform: 'translateX(-50%)', zIndex: 9999 }} className="w-64 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl p-3 shadow-2xl pointer-events-none">
+                                            <p className="text-[11px] font-black text-[var(--text-primary)] mb-1">¿Qué es el Monto?</p>
+                                            <p className="text-[10px] text-[var(--text-secondary)] leading-relaxed">Total del comprobante electrónico (<span className="text-emerald-500 font-bold">productos/servicios con IGV</span>), emitido a SUNAT.</p>
+                                            <p className="text-[10px] text-[var(--text-secondary)] leading-relaxed mt-1.5 pt-1.5 border-t border-[var(--border-subtle)]">No incluye costos de envío ni cargos adicionales separados del pedido.</p>
+                                        </div>
+                                    );
+                                })()}
                             </div>
                         </div>
                     </>
@@ -458,8 +495,8 @@ export function RapifacPageClient() {
 }
 
 const kpiColorClasses: Record<string, string> = {
-    emerald: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400',
-    indigo: 'bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400',
-    amber: 'bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400',
-    rose: 'bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400',
+    emerald: 'bg-[var(--color-success)]/10 text-[var(--color-success)]',
+    indigo: 'bg-[var(--icons-green)]/10 text-[var(--icons-green)]',
+    amber: 'bg-[var(--color-warning)]/10 text-[var(--color-warning)]',
+    rose: 'bg-[var(--color-error)]/10 text-[var(--color-error)]',
 };

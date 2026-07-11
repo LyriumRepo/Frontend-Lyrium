@@ -55,9 +55,11 @@ export function useShippingQuotes() {
 
     if (!departamento || !provincia || !distrito) return;
 
-    const selectedItems = cartItems.filter((i) => i.selected);
+    // Los service holds (id < 0) no necesitan cotización de envío
+    const selectedItems = cartItems.filter((i) => i.selected && i.id > 0);
     if (!selectedItems.length) {
-      setQuotesError('No hay productos seleccionados.');
+      // Carrito solo con servicios — no hay envío que cotizar
+      setLoadingQuotes(false);
       return;
     }
 
@@ -75,8 +77,8 @@ export function useShippingQuotes() {
       largo:      item.largo  ?? 30,
       ancho:      item.ancho  ?? 20,
       alto:       item.alto   ?? 15,
-      store_id:   item.storeId,
-      store_name: item.storeName,
+      store_id:   item.storeId ?? 0,
+      store_name: item.storeName || `Tienda ${item.storeId ?? 0}`,
       store_slug: item.storeSlug ?? null,
       origen: item.origen ?? {
         departamento: 'LA LIBERTAD',

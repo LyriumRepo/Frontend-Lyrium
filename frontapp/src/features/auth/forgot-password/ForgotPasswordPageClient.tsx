@@ -613,6 +613,16 @@ export function ForgotPasswordPageClient() {
                     outline: none; caret-color: var(--fp-accent);
                     transition: border-color .15s, box-shadow .15s, background .15s;
                 }
+                /* 6 inputs × 48px + 5 × 8px gap = 328px mínimo; en viewports angostos
+                   (<420px) no cabe junto al padding del card, así que se reduce. */
+                @media (max-width: 420px) {
+                    .fp-card { padding: 2rem 1rem; }
+                    .fp-otp-row { gap: 6px; }
+                    .fp-otp-input { width: 40px; height: 48px; font-size: 1.1rem; }
+                }
+                @media (max-width: 340px) {
+                    .fp-otp-input { width: 36px; height: 44px; font-size: 1rem; }
+                }
                 .fp-otp-input:focus {
                     border-color: var(--fp-accent);
                     background: color-mix(in srgb, var(--pd-accent) 5%, transparent);

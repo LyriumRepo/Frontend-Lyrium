@@ -5,7 +5,8 @@ import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import SalesKPIs from './components/SalesKPIs';
 import SalesFilters from './components/SalesFilters';
 import SalesTable from './components/SalesTable';
-import OrderDetailModal from './components/OrderDetailModal';
+import dynamic from 'next/dynamic';
+const OrderDetailModal = dynamic(() => import('./components/OrderDetailModal'), { ssr: false });
 import BaseModal from '@/components/ui/BaseModal';
 import BaseLoading from '@/components/ui/BaseLoading';
 import { SalesKPI } from '@/features/seller/sales/types';
@@ -14,6 +15,7 @@ import { useSellerSales } from '@/features/seller/sales/hooks/useSellerSales';
 import { mapOrdersToExportRows } from '@/features/seller/sales/export/mappers';
 import { exportSalesRowsToExcel } from '@/features/seller/sales/export/excelExporter';
 import { generateSalesReportPdf } from '@/features/seller/sales/export/pdfExporter';
+import { usePlanCapabilities } from '@/shared/lib/hooks/usePlanCapabilities';
 
 interface SalesPageClientProps {
     initialOrders?: unknown;
@@ -39,9 +41,14 @@ export function SalesPageClient(_props?: SalesPageClientProps) {
     } = useSellerSales();
 
     const { showToast } = useToast();
+    const { can } = usePlanCapabilities();
     const [selectedKpi, setSelectedKpi] = useState<SalesKPI | null>(null);
 
     const handleExport = async (type: 'excel' | 'pdf') => {
+        if (!can(type === 'excel' ? 'can_export_excel' : 'can_export_pdf')) {
+            showToast(`Tu plan actual no incluye exportar a ${type === 'excel' ? 'Excel' : 'PDF'}. Actualiza tu plan para desbloquear esta función.`, 'warning');
+            return;
+        }
         if (type === 'excel') {
             if (orders.length === 0) {
                 showToast('No hay órdenes para exportar.', 'warning');
@@ -73,11 +80,14 @@ export function SalesPageClient(_props?: SalesPageClientProps) {
 
     return (
         <div className="space-y-8 animate-fadeIn pb-20 max-w-7xl mx-auto">
+            {/* Wrapper que fuerza el texto largo del título a romper en móvil */}
+            <div className="[&_h1]:!whitespace-normal [&_h1]:!break-words [&_h2]:!whitespace-normal [&_h2]:!break-words [&_p]:!whitespace-normal">
             <ModuleHeader
                 title="Centro de Control de Ventas"
                 subtitle="Toda la información y trazabilidad sobre tus ventas generadas."
                 icon="Sales"
             />
+            </div>
 
             <SalesKPIs kpis={kpis} onKpiClick={setSelectedKpi} />
 

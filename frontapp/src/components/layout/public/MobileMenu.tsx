@@ -42,7 +42,7 @@ export default function MobileMenu({ isOpen, onClose, menuItems, isAuthenticated
     const [activeParent, setActiveParent] = useState<MenuItem | null>(null);
     const [secondParent, setSecondParent] = useState<MenuItem | null>(null);
     const [thirdParent, setThirdParent] = useState<MenuItem | null>(null);
-    const cartItemCount = useCarritoStore((s) => s.cartItems.reduce((sum, i) => sum + Number(i.cantidad ?? 0), 0));
+    const cartItemCount = useCarritoStore((s) => s.cartItems.reduce((sum, i) => sum + Number(i.cantidad ?? 0), 0) + s.serviceHoldCount);
 
     // PHP brand identity colors per drill-down level
     const levelColors: Record<number, string> = {

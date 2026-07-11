@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import BaseModal from '@/components/ui/BaseModal';
 import FinanceChart from './FinanceChart';
 import Icon from '@/components/ui/Icon';
@@ -28,117 +28,148 @@ interface KpiDetailModalProps {
   kpi: KpiConfig | null;
 }
 
-function KpiDetailModal({ isOpen, onClose, kpi }: KpiDetailModalProps) {
-  if (!kpi) return null;
-
+function ChartExpandedModal({ kpi, onClose }: { kpi: KpiConfig; onClose: () => void }) {
   return (
     <BaseModal
-      isOpen={isOpen}
+      isOpen
       onClose={onClose}
       title={kpi.label}
-      subtitle={kpi.description}
-      size="3xl"
-      accentColor={`from-[${kpi.color}] to-[${kpi.color}]/80`}
+      subtitle="Zoom con rueda del mouse · Arrastra para desplazar"
+      size="5xl"
+      rainbowHeader
     >
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-0 modal-stagger">
-        {/* Left: Estadísticas */}
-        <div className="md:col-span-2 space-y-4 pr-0 md:pr-6 md:border-r border-[var(--border-subtle)]">
-          <div>
-            <p className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">
-              Valor Actual
-            </p>
-            <p className="text-3xl font-black text-[var(--text-primary)] tracking-tighter mt-1">
-              {kpi.value}
-              {kpi.suffix && (
-                <span className="text-sm font-black text-[var(--text-secondary)] ml-2">
-                  {kpi.suffix}
-                </span>
-              )}
-            </p>
+      <FinanceChart
+        type={kpi.chartType}
+        labels={kpi.chartLabels}
+        data={kpi.chartData}
+        color={kpi.chartColor}
+        datasets={kpi.chartDatasets}
+        height="58vh"
+      />
+    </BaseModal>
+  );
+}
+
+function KpiDetailModal({ isOpen, onClose, kpi }: KpiDetailModalProps) {
+  const [isChartExpanded, setIsChartExpanded] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) setIsChartExpanded(false);
+  }, [isOpen]);
+
+  if (!kpi) return null;
+
+  const total = kpi.chartData.reduce((a, b) => a + b, 0);
+  const maxVal = Math.max(...kpi.chartData, 1);
+
+  return (
+    <>
+      {isChartExpanded && <ChartExpandedModal kpi={kpi} onClose={() => setIsChartExpanded(false)} />}
+
+      <BaseModal
+        isOpen={isOpen}
+        onClose={onClose}
+        title={kpi.label}
+        subtitle={kpi.description}
+        size="4xl"
+        rainbowHeader
+      >
+        <div className="space-y-6 modal-stagger">
+
+          {/* Fila superior: valor + descripción */}
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <p className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest mb-1">
+                Valor del período
+              </p>
+              <p className="text-4xl font-black text-[var(--text-primary)] tracking-tighter">
+                {kpi.value}
+                {kpi.suffix && (
+                  <span className="text-sm font-black text-[var(--text-secondary)] ml-2">{kpi.suffix}</span>
+                )}
+              </p>
+            </div>
+            <div
+              className="flex items-start gap-2 p-3 rounded-xl max-w-sm"
+              style={{ backgroundColor: `${kpi.color}12`, borderLeft: `3px solid ${kpi.color}` }}
+            >
+              <Icon name="Info" className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color: kpi.color }} />
+              <p className="text-[11px] leading-relaxed text-[var(--text-secondary)]">{kpi.extraInfo}</p>
+            </div>
           </div>
 
+          {/* Gráfico protagonista */}
           <div
-            className="p-3 rounded-xl"
-            style={{ backgroundColor: `${kpi.color}15`, borderLeft: `4px solid ${kpi.color}` }}
+            className="rounded-2xl p-4"
+            style={{ backgroundColor: `${kpi.color}08`, border: `1px solid ${kpi.color}20` }}
           >
-            <div className="flex items-center gap-2 mb-1.5" style={{ color: kpi.color }}>
-              <Icon name="Info" className="w-3.5 h-3.5" />
-              <span className="text-[8px] font-black uppercase tracking-widest">Sobre este indicador</span>
-            </div>
-            <p className="text-[11px] leading-relaxed text-[var(--text-secondary)]">
-              {kpi.extraInfo}
-            </p>
-          </div>
-
-          {/* Desglose por período */}
-          <div>
             <div className="flex items-center gap-2 mb-3">
-              <Icon name="BarChart3" className="w-3.5 h-3.5" style={{ color: kpi.color }} />
-              <span className="text-[9px] font-black uppercase tracking-widest" style={{ color: kpi.color }}>
-                Desglose por Período
+              <Icon name="BarChart3" className="w-4 h-4" style={{ color: kpi.color }} />
+              <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: kpi.color }}>
+                Evolución
               </span>
+              <span className="text-[10px] text-[var(--text-secondary)] ml-2 hidden sm:block">
+                Zoom con rueda · Arrastra para desplazar
+              </span>
+              <button
+                onClick={() => setIsChartExpanded(true)}
+                className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all hover:scale-105 active:scale-95"
+                style={{ backgroundColor: `${kpi.color}20`, color: kpi.color, border: `1px solid ${kpi.color}40` }}
+              >
+                <Icon name="Maximize2" className="w-3 h-3" />
+                Ampliar gráfica
+              </button>
             </div>
-            <div className="max-h-[240px] overflow-y-auto space-y-1 pr-1 custom-scrollbar">
-              {kpi.chartLabels.map((label, i) => {
-                const maxVal = Math.max(...kpi.chartData);
-                const pct = maxVal > 0 ? ((kpi.chartData[i] / maxVal) * 100).toFixed(1) : '0';
-                return (
-                  <div
-                    key={label}
-                    className="group relative flex items-center justify-between p-2.5 rounded-xl bg-[var(--bg-secondary)] hover:bg-[var(--bg-secondary)]/80 transition-colors"
-                  >
-                    <span className="text-xs font-bold text-[var(--text-primary)]">{label}</span>
-                    <div className="flex items-center gap-2">
-                      <div className="relative w-24 h-2 rounded-full overflow-hidden" style={{ backgroundColor: `${kpi.chartColor}30` }}>
-                        <div
-                          className="h-full rounded-full transition-all duration-500 group-hover:opacity-80"
-                          style={{
-                            width: `${Math.max(parseFloat(pct), 2)}%`,
-                            backgroundColor: kpi.chartColor,
-                          }}
-                        />
-                        <div className="absolute -top-7 left-1/2 -translate-x-1/2 px-2 py-1 rounded-lg text-[8px] font-black whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-lg"
-                          style={{ backgroundColor: kpi.chartColor, color: '#fff' }}>
-                          {pct}% del máximo
-                        </div>
-                      </div>
-                      <span className="text-xs font-black text-[var(--text-primary)] min-w-[50px] text-right tabular-nums">
-                        {kpi.chartData[i].toLocaleString()}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Totales */}
-          <div className="flex items-center justify-between p-3 rounded-xl border border-[var(--border-subtle)]">
-            <span className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">
-              Total del Período
-            </span>
-            <span className="text-base font-black text-[var(--text-primary)]">
-              {kpi.chartData.reduce((a, b) => a + b, 0).toLocaleString()}
-              {kpi.suffix ? ` ${kpi.suffix}` : ''}
-            </span>
-          </div>
-        </div>
-
-        {/* Right: Chart grande */}
-        <div className="md:col-span-3 flex items-start justify-center pl-0 md:pl-6">
-          <div className="w-full h-[360px]">
             <FinanceChart
               type={kpi.chartType}
               labels={kpi.chartLabels}
               data={kpi.chartData}
               color={kpi.chartColor}
-              height="360px"
               datasets={kpi.chartDatasets}
+              height="380px"
             />
           </div>
+
+          {/* Desglose por período */}
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <Icon name="List" className="w-4 h-4" style={{ color: kpi.color }} />
+              <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: kpi.color }}>
+                Desglose por período
+              </span>
+              <span
+                className="ml-auto text-[10px] font-black px-2 py-0.5 rounded-lg"
+                style={{ backgroundColor: `${kpi.color}15`, color: kpi.color }}
+              >
+                Total: {total.toLocaleString('es-PE')}{kpi.suffix ? ` ${kpi.suffix}` : ''}
+              </span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-[220px] overflow-y-auto pr-1 custom-scrollbar">
+              {kpi.chartLabels.map((label, i) => {
+                const pct = Math.max((kpi.chartData[i] / maxVal) * 100, 2);
+                return (
+                  <div
+                    key={label}
+                    className="flex items-center gap-3 p-3 rounded-xl bg-[var(--bg-secondary)] hover:bg-[var(--bg-secondary)]/70 transition-colors"
+                  >
+                    <span className="text-[11px] font-bold text-[var(--text-secondary)] w-16 shrink-0">{label}</span>
+                    <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ backgroundColor: `${kpi.chartColor}25` }}>
+                      <div
+                        className="h-full rounded-full transition-all duration-700"
+                        style={{ width: `${pct}%`, backgroundColor: kpi.chartColor }}
+                      />
+                    </div>
+                    <span className="text-[11px] font-black text-[var(--text-primary)] min-w-[64px] text-right tabular-nums">
+                      {kpi.chartData[i].toLocaleString('es-PE')}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
-      </div>
-    </BaseModal>
+      </BaseModal>
+    </>
   );
 }
 

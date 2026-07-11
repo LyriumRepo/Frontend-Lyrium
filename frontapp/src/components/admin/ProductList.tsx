@@ -12,14 +12,14 @@ const columns: Column<Product>[] = [
     {
         key: 'id',
         header: 'ID',
-        render: (p) => <span className="text-xs font-black text-gray-400">#{p.id}</span>
+        render: (p) => <span className="text-xs font-black text-[var(--text-muted)]">#{p.id}</span>
     },
     {
         key: 'name',
         header: 'Producto',
         render: (product) => (
             <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center text-gray-400 overflow-hidden border border-gray-200 group-hover:border-brand-sky/30 transition-all">
+                <div className="w-12 h-12 rounded-xl bg-[var(--bg-muted)] flex items-center justify-center text-[var(--text-muted)] overflow-hidden border border-[var(--border-subtle)] group-hover:border-[var(--icons-green)]/30 transition-all">
                     {product.images?.[0]?.src ? (
                         <Image src={product.images[0].src || '/img/no-image.png'} alt={product.name} width={48} height={48} className="w-full h-full object-cover" />
                     ) : (
@@ -27,12 +27,12 @@ const columns: Column<Product>[] = [
                     )}
                 </div>
                 <div className="flex flex-col">
-                    <span className="text-sm font-black text-gray-900 uppercase tracking-tight">{product.name}</span>
+                    <span className="text-sm font-black text-[var(--text-primary)] uppercase tracking-tight">{product.name}</span>
                     <div className="flex items-center gap-2 mt-0.5">
-                        <span className="text-[9px] text-brand-sky font-black uppercase tracking-widest bg-brand-sky/10 px-2 py-0.5 rounded-md">
+                        <span className="text-[9px] text-[var(--icons-green)] font-black uppercase tracking-widest bg-[var(--icons-green)]/10 px-2 py-0.5 rounded-md">
                             {product.categories?.[0]?.name || 'Sin Categoría'}
                         </span>
-                        <span className="text-[9px] text-gray-400 font-bold uppercase">
+                        <span className="text-[9px] text-[var(--text-muted)] font-bold uppercase">
                             en {product.store?.shop_name || 'Tienda Oficial'}
                         </span>
                     </div>
@@ -45,9 +45,9 @@ const columns: Column<Product>[] = [
         header: 'Precio',
         render: (p) => (
             <div className="flex flex-col">
-                <span className="text-sm font-black text-gray-900">{formatCurrency(Number(p.price) || 0)}</span>
+                <span className="text-sm font-black text-[var(--text-primary)]">{formatCurrency(Number(p.price) || 0)}</span>
                 {p.regular_price !== p.price && (
-                    <span className="text-[10px] text-gray-400 line-through font-bold">{formatCurrency(Number(p.regular_price) || 0)}</span>
+                    <span className="text-[10px] text-[var(--text-muted)] line-through font-bold">{formatCurrency(Number(p.regular_price) || 0)}</span>
                 )}
             </div>
         )
@@ -56,7 +56,7 @@ const columns: Column<Product>[] = [
         key: 'status',
         header: 'Estado',
         render: (p) => (
-            <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ${p.status === 'publish' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-amber-50 text-amber-600 border-amber-100'}`}>
+            <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ${p.status === 'publish' ? 'bg-[var(--color-success)]/10 text-[var(--color-success)] border-[var(--color-success)]/20' : 'bg-[var(--color-warning)]/10 text-[var(--color-warning)] border-[var(--color-warning)]/20'}`}>
                 {p.status === 'publish' ? 'Publicado' : 'Borrador'}
             </span>
         )
@@ -68,13 +68,13 @@ const columns: Column<Product>[] = [
         render: () => (
             <div className="flex items-center justify-end gap-2">
                 <button 
-                    className="p-2 rounded-xl bg-gray-50 text-gray-400 hover:bg-brand-sky/10 hover:text-brand-sky transition-all active:scale-90"
+                    className="p-2 rounded-xl bg-[var(--bg-card)] text-[var(--text-muted)] hover:bg-[var(--icons-green)]/10 hover:text-[var(--icons-green)] transition-all active:scale-90"
                     aria-label="Editar producto"
                 >
                     <Icon name="Pencil" className="w-5 h-5" />
                 </button>
                 <button 
-                    className="p-2 rounded-xl bg-gray-50 text-gray-400 hover:bg-rose-50 hover:text-rose-500 transition-all active:scale-90"
+                    className="p-2 rounded-xl bg-[var(--bg-card)] text-[var(--text-muted)] hover:bg-[var(--color-error)]/10 hover:text-[var(--color-error)] transition-all active:scale-90"
                     aria-label="Eliminar producto"
                 >
                     <Icon name="Trash2" className="w-5 h-5" />

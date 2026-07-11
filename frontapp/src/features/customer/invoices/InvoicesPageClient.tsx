@@ -6,7 +6,11 @@ import BaseLoading from '@/components/ui/BaseLoading';
 import Icon from '@/components/ui/Icon';
 import { BaseDatePicker } from '@/components/ui';
 import { invoiceApi, type PaymentConfirmation } from '@/shared/lib/api/invoiceRepository';
-import { downloadPdf, downloadPng, downloadJpg } from '@/shared/lib/api/boletaExport';
+import {
+  downloadConfirmationPdf,
+  downloadConfirmationPng,
+  downloadConfirmationJpg,
+} from '@/shared/lib/api/paymentConfirmationExport';
 import { useToast } from '@/shared/lib/context/ToastContext';
 
 function formatDate(dateStr: string) {
@@ -27,28 +31,18 @@ function PaymentCard({ confirmation }: { confirmation: PaymentConfirmation }) {
   const [loading, setLoading] = useState<'pdf' | 'png' | 'jpg' | null>(null);
   const { showToast } = useToast();
 
-  const boletaOrder = {
-    id: confirmation.id,
-    orderNumber: confirmation.orderNumber,
-    items: confirmation.items,
-    subtotal: confirmation.subtotal,
-    shippingCost: confirmation.shippingCost,
-    discountAmount: confirmation.discountAmount,
-    total: confirmation.total,
-  };
-
   const handleDownload = async (format: 'pdf' | 'png' | 'jpg') => {
     setLoading(format);
     try {
       if (format === 'pdf') {
-        downloadPdf(boletaOrder);
+        await downloadConfirmationPdf(confirmation.id, confirmation.orderNumber);
       } else if (format === 'png') {
-        await downloadPng(boletaOrder);
+        await downloadConfirmationPng(confirmation.id, confirmation.orderNumber);
       } else {
-        await downloadJpg(boletaOrder);
+        await downloadConfirmationJpg(confirmation.id, confirmation.orderNumber);
       }
     } catch {
-      showToast('Error al descargar la imagen. Intenta usar PDF.', 'error');
+      showToast('Error al descargar. Intenta con PDF.', 'error');
     } finally {
       setLoading(null);
     }

@@ -17,7 +17,7 @@ import LogoLyrium from '@/components/LogoLyrium';
 
 export default function PublicHeader() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const cartItemCount = useCarritoStore((s) => s.cartItems.reduce((sum, i) => sum + Number(i.cantidad ?? 0), 0));
+    const cartItemCount = useCarritoStore((s) => s.cartItems.reduce((sum, i) => sum + Number(i.cantidad ?? 0), 0) + s.serviceHoldCount);
     const { menuItems: apiMenuItems, megaMenuData: apiMegaMenuData, hasData } = useMegaMenu();
     const { user, isAuthenticated } = useAuth();
     const dashboardUrl = isAuthenticated && user?.role
@@ -89,6 +89,18 @@ export default function PublicHeader() {
                                 </span>
                             </div>
 
+                            <ThemeToggle />
+                        </div>
+
+                        {/* Mobile only: login icon + theme toggle (cart lives in the hamburger menu) */}
+                        <div className="flex md:hidden items-center gap-1 text-sky-600 dark:text-[var(--color-success)]">
+                            <Link
+                                href={isAuthenticated && user ? dashboardUrl : '/login'}
+                                className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] transition-colors flex items-center justify-center"
+                                aria-label={isAuthenticated && user ? 'Mi panel' : 'Iniciar sesión'}
+                            >
+                                <Icon name="UserCircle" className="text-[18px]" />
+                            </Link>
                             <ThemeToggle />
                         </div>
 

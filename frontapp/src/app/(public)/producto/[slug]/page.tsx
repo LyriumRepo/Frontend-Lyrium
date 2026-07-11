@@ -52,11 +52,13 @@ export default async function ProductoPage({ params }: PageProps) {
   const product = await getPublicProductBySlug(slug);
   if (!product) notFound();
 
+  // Si el fetch de relacionados falla, la página del producto debe renderizar igual
+  // (sin carrusel), no tumbar todo el server render con un 500.
   const firstCategorySlug = product.categories[0]?.slug;
   const relatedProducts = firstCategorySlug
-    ? await getProductsByCategory(firstCategorySlug, 9).then((products) =>
-        products.filter((p) => p.id !== product.id),
-      )
+    ? await getProductsByCategory(firstCategorySlug, 9)
+        .then((products) => products.filter((p) => p.id !== product.id))
+        .catch(() => [])
     : [];
 
 

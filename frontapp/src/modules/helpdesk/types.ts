@@ -5,6 +5,7 @@ export type TicketPriority = 'baja' | 'media' | 'alta' | 'critica';
 export interface TicketMessage {
     id: number;
     timestamp: string;
+    created_at?: string;
     leido?: boolean;
     tipo?: 'normal' | 'respuesta_rapida' | 'escalamiento' | 'sistema';
     archivo?: string | null;

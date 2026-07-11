@@ -1,47 +1,18 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useAuth } from '@/shared/lib/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import Icon from '@/components/ui/Icon';
+import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import { ChangePasswordForm } from '@/features/auth/change-password';
-
-// ─── Mock data (reemplaza con fetch real si necesitas sesiones del backend) ───
-
-interface Session {
-  id: number;
-  dispositivo: string;
-  navegador: string;
-  ubicacion: string;
-  tiempo: string;
-  actual: boolean;
-}
-
-const MOCK_SESSIONS: Session[] = [
-  {
-    id: 1,
-    dispositivo: 'Windows',
-    navegador: 'Chrome',
-    ubicacion: 'Lima, PE',
-    tiempo: 'Sesión actual',
-    actual: true,
-  },
-  {
-    id: 2,
-    dispositivo: 'iPhone 13',
-    navegador: 'Safari',
-    ubicacion: 'Lima, PE',
-    tiempo: 'Hace 2 horas',
-    actual: false,
-  },
-];
+import ActiveSessionsList from '@/features/security/components/ActiveSessionsList';
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function CustomerSecurityPage() {
   const { isAuthenticated, loading } = useAuth();
   const router = useRouter();
-  const [sessions, setSessions] = useState<Session[]>(MOCK_SESSIONS);
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
@@ -59,15 +30,11 @@ export default function CustomerSecurityPage() {
 
   return (
     <div className="space-y-8 animate-fadeIn">
-      {/* ── Encabezado ──────────────────────────────────────────────────────── */}
-      <div>
-        <h1 className="text-2xl md:text-3xl font-black text-slate-800 dark:text-[var(--text-primary)]">
-          Seguridad
-        </h1>
-        <p className="text-slate-500 dark:text-[var(--text-muted)] mt-1">
-          Protege tu cuenta y gestiona tu contraseña
-        </p>
-      </div>
+      <ModuleHeader
+        title="Seguridad"
+        subtitle="Protege tu cuenta y gestiona tu contraseña"
+        icon="Shield"
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* ── Columna principal: Formulario ────────────────────────────────── */}
@@ -168,50 +135,7 @@ export default function CustomerSecurityPage() {
               ))}
             </ul>
 
-            {/* Sesiones activas */}
-            <div className="mt-8 pt-6 border-t border-gray-100 dark:border-[var(--border-subtle)]">
-              <p className="text-[10px] font-black text-gray-400 dark:text-[var(--text-muted)] uppercase mb-4">
-                Sesiones Activas
-              </p>
-              <div className="space-y-4">
-                {sessions.map((session) => (
-                  <div
-                    key={session.id}
-                    className="flex items-center justify-between gap-2"
-                  >
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <Icon
-                        name={session.actual ? 'Monitor' : 'Smartphone'}
-                        className="w-5 h-5 text-gray-400 shrink-0"
-                      />
-                      <div className="min-w-0">
-                        <p className="text-xs font-bold text-gray-800 dark:text-[var(--text-primary)] truncate">
-                          {session.dispositivo} • {session.navegador}
-                        </p>
-                        <p
-                          className={`text-[10px] truncate ${
-                            session.actual
-                              ? 'text-green-500 font-bold'
-                              : 'text-gray-400 dark:text-[var(--text-muted)]'
-                          }`}
-                        >
-                          {session.tiempo}
-                          {session.ubicacion && ` • ${session.ubicacion}`}
-                        </p>
-                      </div>
-                    </div>
-                    {!session.actual && (
-                      <button
-                        onClick={() => setSessions(prev => prev.filter(s => s.id !== session.id))}
-                        className="text-[10px] font-black text-red-500 hover:underline uppercase shrink-0"
-                      >
-                        Cerrar
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
+            <ActiveSessionsList />
           </div>
         </div>
       </div>

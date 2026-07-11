@@ -16,7 +16,7 @@ export const PaymentModal: React.FC<{
         const p = payment as CashInPayment;
         return (
             <div className="bg-[var(--bg-card)] w-full max-w-2xl rounded-[2.5rem] shadow-2xl relative overflow-hidden animate-modalIn flex flex-col font-industrial max-h-[90vh]">
-                <div className="px-8 py-6 border-b border-[var(--border-subtle)] flex justify-between items-center bg-[var(--bg-secondary)]/50 flex-shrink-0">
+                <div className="px-4 py-4 sm:px-8 sm:py-6 border-b border-[var(--border-subtle)] flex justify-between items-center bg-[var(--bg-secondary)]/50 flex-shrink-0">
                     <div className="flex items-center gap-4">
                         <div className="p-3 bg-[var(--bg-card)] border border-[var(--color-success)]/20 rounded-2xl shadow-sm text-[var(--color-success)]">
                             <DollarSign className="w-6 h-6" />
@@ -28,7 +28,7 @@ export const PaymentModal: React.FC<{
                     </div>
                 </div>
 
-                <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-8 overflow-y-auto custom-scrollbar">
+                <div className="p-4 sm:p-8 grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8 overflow-y-auto custom-scrollbar">
                     <div className="space-y-4">
                         <h4 className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest border-b border-[var(--border-subtle)] pb-2">Datos Transaccionales</h4>
                         <div>
@@ -96,7 +96,7 @@ export const PaymentModal: React.FC<{
                         )}
                     </div>
                 </div>
-                <div className="px-8 py-4 bg-[var(--bg-secondary)] border-t border-[var(--border-subtle)] text-right flex-shrink-0">
+                <div className="px-4 py-4 sm:px-8 bg-[var(--bg-secondary)] border-t border-[var(--border-subtle)] text-right flex-shrink-0">
                     <button onClick={onClose} aria-label="Cerrar inspección de cash-in" className="text-xs font-bold text-[var(--text-muted)] hover:text-[var(--text-primary)] uppercase tracking-wider transition-colors">Cerrar Inspección</button>
                 </div>
             </div>
@@ -105,7 +105,7 @@ export const PaymentModal: React.FC<{
         const p = payment as CashOutPayment;
         return (
             <div className="bg-[var(--bg-card)] w-full max-w-2xl rounded-[2.5rem] shadow-2xl relative overflow-hidden animate-modalIn flex flex-col font-industrial max-h-[90vh]">
-                <div className="px-8 py-6 border-b border-[var(--border-subtle)] flex justify-between items-center bg-[var(--bg-secondary)]/50 flex-shrink-0">
+                <div className="px-4 py-4 sm:px-8 sm:py-6 border-b border-[var(--border-subtle)] flex justify-between items-center bg-[var(--bg-secondary)]/50 flex-shrink-0">
                     <div className="flex items-center gap-4">
                         <div className="p-3 bg-[var(--bg-card)] border border-[var(--color-info)]/20 rounded-2xl shadow-sm text-[var(--color-info)]">
                             <Wallet className="w-6 h-6" />
@@ -117,7 +117,7 @@ export const PaymentModal: React.FC<{
                     </div>
                 </div>
 
-                <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-8 overflow-y-auto custom-scrollbar">
+                <div className="p-4 sm:p-8 grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8 overflow-y-auto custom-scrollbar">
                     <div className="space-y-4">
                         <h4 className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest border-b border-[var(--border-subtle)] pb-2">Destinatario Bancario</h4>
                         <div>
@@ -187,7 +187,7 @@ export const PaymentModal: React.FC<{
                     </div>
                 )}
 
-                <div className="px-8 py-4 bg-[var(--bg-secondary)] border-t border-[var(--border-subtle)] text-right flex-shrink-0">
+                <div className="px-4 py-4 sm:px-8 bg-[var(--bg-secondary)] border-t border-[var(--border-subtle)] text-right flex-shrink-0">
                     <button onClick={onClose} aria-label="Cerrar inspección de cash-out" className="text-xs font-bold text-[var(--text-muted)] hover:text-[var(--text-primary)] uppercase tracking-wider transition-colors">Cerrar Inspección</button>
                 </div>
             </div>

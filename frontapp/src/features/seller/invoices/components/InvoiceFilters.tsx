@@ -70,24 +70,28 @@ export default function InvoiceFilters({ search, status, type, dateFrom, dateTo,
                 </div>
 
                 <button onClick={onClear}
-                    className="p-3 bg-[var(--bg-secondary)] text-[var(--text-secondary)] rounded-2xl hover:bg-[var(--bg-hover)] transition-all shadow-sm active:scale-95 border border-[var(--border-subtle)]"
-                    title="Limpiar Filtros">
-                    <Icon name="RotateCcw" className="w-5 h-5" />
+                    className="p-3 bg-[var(--bg-secondary)] text-[var(--text-secondary)] rounded-2xl hover:bg-rose-500 hover:text-white transition-all flex items-center justify-center min-w-[3rem]"
+                    title="Limpiar filtros">
+                    <Icon name="Trash2" className="text-xl" />
                 </button>
-                {onExportExcel && (
-                    <button onClick={onExportExcel}
-                        className="p-3 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 rounded-2xl hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-all shadow-sm active:scale-95 border border-emerald-100 dark:border-emerald-900/50"
-                        title="Exportar Excel">
-                        <Icon name="FileSpreadsheet" className="w-5 h-5" />
-                    </button>
-                )}
-                {onExportPDF && (
-                    <button onClick={onExportPDF}
-                        className="p-3 bg-rose-50 dark:bg-rose-950/30 text-rose-500 dark:text-rose-400 rounded-2xl hover:bg-rose-100 dark:hover:bg-rose-900/40 transition-all shadow-sm active:scale-95 border border-rose-100 dark:border-rose-900/50"
-                        title="Exportar PDF">
-                        <Icon name="FileText" className="w-5 h-5" />
-                    </button>
-                )}
+                <div className="flex gap-2">
+                    {onExportExcel && (
+                        <button onClick={onExportExcel}
+                            className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-[var(--bg-card)] text-[var(--text-primary)] font-bold text-xs border border-[var(--border-subtle)] hover:text-[#5AAFE6] hover:border-[#69BEEB]/30 transition-all shadow-sm"
+                            title="Exportar Excel">
+                            <Icon name="FileSpreadsheet" className="text-xl" />
+                            <span className="hidden sm:inline">Excel</span>
+                        </button>
+                    )}
+                    {onExportPDF && (
+                        <button onClick={onExportPDF}
+                            className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-[var(--bg-card)] text-[var(--text-primary)] font-bold text-xs border border-[var(--border-subtle)] hover:text-[#5AAFE6] hover:border-[#69BEEB]/30 transition-all shadow-sm"
+                            title="Exportar PDF">
+                            <Icon name="FileText" className="text-xl" />
+                            <span className="hidden sm:inline">PDF</span>
+                        </button>
+                    )}
+                </div>
             </div>
         </div>
     );

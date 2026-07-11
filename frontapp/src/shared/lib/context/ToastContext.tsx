@@ -37,7 +37,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         <ToastContext.Provider value={{ showToast }}>
             {children}
             {/* Toast Container */}
-            <div className="fixed bottom-8 right-8 z-[100001] flex flex-col gap-3 pointer-events-none">
+            <div className="fixed bottom-4 right-4 left-4 sm:left-auto sm:bottom-8 sm:right-8 z-[100001] flex flex-col gap-3 pointer-events-none">
                 {toasts.map(toast => (
                     <BaseToastItem
                         key={toast.id}
@@ -77,7 +77,7 @@ const BaseToastItem = ({ toast, onClose }: { toast: Toast, onClose: () => void }
     return (
         <div className={`
             ${backgrounds[toast.type]} 
-            backdrop-blur-xl border p-5 rounded-[2rem] shadow-2xl flex items-center gap-4 min-w-[320px] max-w-md 
+            backdrop-blur-xl border p-5 rounded-[2rem] shadow-2xl flex items-center gap-4 w-full sm:min-w-[320px] sm:w-auto max-w-md
             animate-slideInRight pointer-events-auto
         `}>
             <div className="w-10 h-10 bg-white rounded-2xl flex items-center justify-center shadow-sm flex-shrink-0">

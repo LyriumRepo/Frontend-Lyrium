@@ -195,17 +195,17 @@ export function GlossaryPageClient() {
             />
 
             {/* Tabs */}
-            <div className="flex gap-4 border-b border-gray-200 dark:border-gray-700">
+            <div className="flex gap-4 border-b border-[var(--border-subtle)]">
                 <button
                     onClick={() => setTab('entries')}
-                    className={`pb-3 px-1 text-sm font-bold border-b-2 transition ${tab === 'entries' ? 'border-sky-500 text-sky-600' : 'border-transparent text-gray-400 hover:text-gray-600'}`}
+                    className={`pb-3 px-1 text-sm font-bold border-b-2 transition ${tab === 'entries' ? 'border-[var(--icons-green)] text-[var(--icons-green)]' : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-secondary)]'}`}
                 >
                     <FileText className="w-4 h-4 inline mr-1.5" />
                     Entradas ({entryCount})
                 </button>
                 <button
                     onClick={() => setTab('pending')}
-                    className={`pb-3 px-1 text-sm font-bold border-b-2 transition ${tab === 'pending' ? 'border-sky-500 text-sky-600' : 'border-transparent text-gray-400 hover:text-gray-600'}`}
+                    className={`pb-3 px-1 text-sm font-bold border-b-2 transition ${tab === 'pending' ? 'border-[var(--icons-green)] text-[var(--icons-green)]' : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-secondary)]'}`}
                 >
                     <Clock className="w-4 h-4 inline mr-1.5" />
                     Pendientes ({pendingTerms.length})
@@ -215,20 +215,20 @@ export function GlossaryPageClient() {
             {/* Search bar */}
             {tab === 'entries' && (
                 <div className="relative max-w-md">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
                     <input
                         type="text"
                         value={search}
                         onChange={e => setSearch(e.target.value)}
                         placeholder="Buscar por clave o descripción..."
-                        className="w-full pl-10 pr-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200 focus:outline-none focus:border-sky-500 transition"
+                        className="w-full pl-10 pr-4 py-2.5 border-2 border-[var(--border-subtle)] rounded-xl text-sm bg-[var(--bg-muted)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--border-focus)] transition"
                     />
                 </div>
             )}
 
             {/* Error */}
             {error && (
-                <div className="flex items-center gap-3 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl text-red-600 dark:text-red-400 text-sm">
+                <div className="flex items-center gap-3 p-4 bg-[var(--color-error)]/10 border border-[var(--color-error)]/30 rounded-2xl text-[var(--color-error)] text-sm">
                     <AlertCircle className="w-5 h-5 flex-shrink-0" />
                     {error}
                 </div>
@@ -236,18 +236,53 @@ export function GlossaryPageClient() {
 
             {/* Entries Table */}
             {tab === 'entries' && (
-                <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
+                <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-subtle)] shadow-sm overflow-hidden">
                     {loading && entries.length === 0 ? (
-                        <div className="p-20 text-center text-gray-400">Cargando...</div>
+                        <div className="p-20 text-center text-[var(--text-muted)]">Cargando...</div>
                     ) : entries.length === 0 ? (
-                        <div className="p-20 text-center text-gray-400">
+                        <div className="p-20 text-center text-[var(--text-muted)]">
                             {search ? 'Sin resultados para esta búsqueda' : 'No hay entradas en el glosario'}
                         </div>
                     ) : (
-                        <div className="overflow-x-auto">
+                        <>
+                        {/* ── Vista mobile: cards ── */}
+                        <div className="sm:hidden divide-y divide-[var(--border-subtle)]">
+                            {entries.map(entry => (
+                                <div key={entry.id} className="p-4 flex items-start gap-3 hover:bg-[var(--bg-secondary)] transition-colors">
+                                    <div className="w-10 h-10 rounded-2xl bg-[var(--bg-secondary)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--icons-green)] font-black text-sm shrink-0">
+                                        {entry.key?.[0]?.toUpperCase() ?? '#'}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-center justify-between gap-2">
+                                            <span className="text-sm font-black text-[var(--text-primary)] font-mono truncate">{entry.key}</span>
+                                            <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black border shrink-0 ${entry.is_income ? 'bg-[var(--color-success)]/10 text-[var(--color-success)] border-[var(--color-success)]/20' : 'bg-[var(--color-error)]/10 text-[var(--color-error)] border-[var(--color-error)]/20'}`}>
+                                                <span className={`w-1.5 h-1.5 rounded-full ${entry.is_income ? 'bg-[var(--color-success)]' : 'bg-[var(--color-error)]'}`} />
+                                                {entry.is_income ? 'Ingreso' : 'Gasto'}
+                                            </span>
+                                        </div>
+                                        <p className="text-[11px] text-[var(--text-secondary)] truncate mt-0.5">{entry.description}</p>
+                                        <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                                            {entry.search_patterns.map((p, i) => (
+                                                <span key={i} className="px-2 py-0.5 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-md text-[10px] font-mono text-[var(--text-secondary)]">{p}</span>
+                                            ))}
+                                            {entry.default_amount != null && (
+                                                <span className="text-[10px] font-bold text-[var(--text-secondary)] ml-1">{entry.default_amount}</span>
+                                            )}
+                                        </div>
+                                        <div className="flex items-center gap-2 mt-2">
+                                            <button onClick={() => openEdit(entry)} className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[var(--icons-green)]/10 text-[var(--icons-green)] text-[10px] font-black transition-colors border border-[var(--icons-green)]/20">Editar</button>
+                                            <button onClick={() => handleDelete(entry.id)} className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[var(--color-error)]/10 text-[var(--color-error)] text-[10px] font-black transition-colors border border-[var(--color-error)]/20">Eliminar</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* ── Vista desktop: tabla ── */}
+                        <div className="hidden sm:block overflow-x-auto">
                             <table className="w-full text-sm">
                                 <thead>
-                                    <tr className="border-b border-gray-100 dark:border-gray-800 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                                    <tr className="border-b border-[var(--border-subtle)] text-left text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">
                                         <th className="px-5 py-4">Clave</th>
                                         <th className="px-5 py-4">Descripción</th>
                                         <th className="px-5 py-4">Patrones</th>
@@ -258,30 +293,26 @@ export function GlossaryPageClient() {
                                 </thead>
                                 <tbody>
                                     {entries.map(entry => (
-                                        <tr key={entry.id} className="border-b border-gray-50 dark:border-gray-800/50 hover:bg-gray-50 dark:hover:bg-gray-800/30 transition">
-                                            <td className="px-5 py-4 font-mono text-xs font-bold text-sky-600 dark:text-sky-400">{entry.key}</td>
-                                            <td className="px-5 py-4 text-gray-700 dark:text-gray-300 max-w-xs truncate">{entry.description}</td>
+                                        <tr key={entry.id} className="border-b border-[var(--border-subtle)] hover:bg-[var(--bg-muted)] transition">
+                                            <td className="px-5 py-4 font-mono text-xs font-bold text-[var(--icons-green)]">{entry.key}</td>
+                                            <td className="px-5 py-4 text-[var(--text-secondary)] max-w-xs truncate">{entry.description}</td>
                                             <td className="px-5 py-4">
                                                 <div className="flex flex-wrap gap-1">
                                                     {entry.search_patterns.map((p, i) => (
-                                                        <span key={i} className="px-2 py-0.5 bg-gray-100 dark:bg-gray-800 rounded-md text-xs font-mono text-gray-500">{p}</span>
+                                                        <span key={i} className="px-2 py-0.5 bg-[var(--bg-muted)] rounded-md text-xs font-mono text-[var(--text-secondary)]">{p}</span>
                                                     ))}
                                                 </div>
                                             </td>
-                                            <td className="px-5 py-4 text-gray-600 dark:text-gray-400">{entry.default_amount ?? '—'}</td>
+                                            <td className="px-5 py-4 text-[var(--text-secondary)]">{entry.default_amount ?? '—'}</td>
                                             <td className="px-5 py-4">
-                                                <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${entry.is_income ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400' : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'}`}>
+                                                <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${entry.is_income ? 'bg-[var(--color-success)]/15 text-[var(--color-success)]' : 'bg-[var(--color-error)]/15 text-[var(--color-error)]'}`}>
                                                     {entry.is_income ? 'Ingreso' : 'Gasto'}
                                                 </span>
                                             </td>
                                             <td className="px-5 py-4">
                                                 <div className="flex gap-2">
-                                                    <button onClick={() => openEdit(entry)} className="text-xs px-3 py-1.5 bg-sky-50 dark:bg-sky-900/20 text-sky-600 dark:text-sky-400 rounded-lg hover:bg-sky-100 transition font-semibold">
-                                                        Editar
-                                                    </button>
-                                                    <button onClick={() => handleDelete(entry.id)} className="text-xs px-3 py-1.5 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-100 transition font-semibold">
-                                                        Eliminar
-                                                    </button>
+                                                    <button onClick={() => openEdit(entry)} className="text-xs px-3 py-1.5 bg-[var(--icons-green)]/10 text-[var(--icons-green)] rounded-lg hover:bg-[var(--icons-green)]/20 transition font-semibold">Editar</button>
+                                                    <button onClick={() => handleDelete(entry.id)} className="text-xs px-3 py-1.5 bg-[var(--color-error)]/10 text-[var(--color-error)] rounded-lg hover:bg-[var(--color-error)]/20 transition font-semibold">Eliminar</button>
                                                 </div>
                                             </td>
                                         </tr>
@@ -289,6 +320,7 @@ export function GlossaryPageClient() {
                                 </tbody>
                             </table>
                         </div>
+                        </>
                     )}
                 </div>
             )}
@@ -297,26 +329,26 @@ export function GlossaryPageClient() {
             {tab === 'pending' && (
                 <div className="space-y-3">
                     {loading && pendingTerms.length === 0 ? (
-                        <div className="p-20 text-center text-gray-400">Cargando...</div>
+                        <div className="p-20 text-center text-[var(--text-muted)]">Cargando...</div>
                     ) : pendingTerms.length === 0 ? (
-                        <div className="p-20 text-center text-gray-400">No hay términos pendientes</div>
+                        <div className="p-20 text-center text-[var(--text-muted)]">No hay términos pendientes</div>
                     ) : (
                         pendingTerms.map(term => (
-                            <div key={term.id} className="bg-white dark:bg-[var(--bg-secondary)] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-5 flex items-start justify-between gap-4">
+                            <div key={term.id} className="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-subtle)] shadow-sm p-5 flex items-start justify-between gap-4">
                                 <div className="flex-1 min-w-0">
-                                    <div className="font-mono text-sm font-bold text-gray-800 dark:text-gray-200 truncate">{term.term}</div>
-                                    <div className="text-xs text-gray-400 mt-1">
+                                    <div className="font-mono text-sm font-bold text-[var(--text-primary)] truncate">{term.term}</div>
+                                    <div className="text-xs text-[var(--text-muted)] mt-1">
                                         {term.document_type && <span className="mr-3">{term.document_type}</span>}
                                         {term.source_field && <span>campo: {term.source_field}</span>}
                                         <span className="ml-3">{new Date(term.created_at).toLocaleString('es-PE')}</span>
                                     </div>
                                 </div>
                                 <div className="flex gap-2 flex-shrink-0">
-                                    <button onClick={() => openApprove(term)} className="flex items-center gap-1.5 px-4 py-2 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-xl text-sm font-semibold hover:bg-emerald-100 transition">
+                                    <button onClick={() => openApprove(term)} className="flex items-center gap-1.5 px-4 py-2 bg-[var(--color-success)]/10 text-[var(--color-success)] rounded-xl text-sm font-semibold hover:bg-[var(--color-success)]/20 transition">
                                         <Check className="w-4 h-4" />
                                         Aprobar
                                     </button>
-                                    <button onClick={() => handleDismiss(term.id)} className="flex items-center gap-1.5 px-4 py-2 bg-gray-50 dark:bg-gray-800 text-gray-500 rounded-xl text-sm font-semibold hover:bg-gray-100 transition">
+                                    <button onClick={() => handleDismiss(term.id)} className="flex items-center gap-1.5 px-4 py-2 bg-[var(--bg-muted)] text-[var(--text-secondary)] rounded-xl text-sm font-semibold hover:bg-[var(--bg-secondary)] transition">
                                         <X className="w-4 h-4" />
                                         Descartar
                                     </button>
@@ -330,27 +362,27 @@ export function GlossaryPageClient() {
             {/* ─── Create/Edit Modal ─────────────────────────────────────── */}
             {showEditor && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setShowEditor(false)}>
-                    <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 w-full max-w-lg mx-4 p-6 space-y-5" onClick={e => e.stopPropagation()}>
-                        <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200">
+                    <div className="bg-[var(--bg-card)] rounded-3xl shadow-2xl border border-[var(--border-subtle)] w-full max-w-lg mx-4 p-6 space-y-5" onClick={e => e.stopPropagation()}>
+                        <h3 className="text-lg font-bold text-[var(--text-primary)]">
                             {editingId ? 'Editar Entrada' : 'Nueva Entrada'}
                         </h3>
 
                         <div>
-                            <label className="block text-xs font-semibold text-gray-500 mb-1">Clave (Key)</label>
+                            <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1">Clave (Key)</label>
                             <input type="text" value={form.key} onChange={e => setForm(f => ({ ...f, key: e.target.value }))}
-                                className="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200 focus:outline-none focus:border-sky-500 transition"
+                                className="w-full px-4 py-2.5 border-2 border-[var(--border-subtle)] rounded-xl text-sm bg-[var(--bg-muted)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--border-focus)] transition"
                                 placeholder="EJ: TRANSFERENCIA_BANCARIA" />
                         </div>
 
                         <div>
-                            <label className="block text-xs font-semibold text-gray-500 mb-1">Descripción</label>
+                            <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1">Descripción</label>
                             <input type="text" value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
-                                className="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200 focus:outline-none focus:border-sky-500 transition"
+                                className="w-full px-4 py-2.5 border-2 border-[var(--border-subtle)] rounded-xl text-sm bg-[var(--bg-muted)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--border-focus)] transition"
                                 placeholder="Transferencia bancaria" />
                         </div>
 
                         <div>
-                            <label className="block text-xs font-semibold text-gray-500 mb-1">Patrones de búsqueda</label>
+                            <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1">Patrones de búsqueda</label>
                             {form.search_patterns.map((p, i) => (
                                 <div key={i} className="flex gap-2 mb-2">
                                     <input type="text" value={p} onChange={e => {
@@ -358,43 +390,43 @@ export function GlossaryPageClient() {
                                         sp[i] = e.target.value;
                                         setForm(f => ({ ...f, search_patterns: sp }));
                                     }}
-                                        className="flex-1 px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm font-mono bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200 focus:outline-none focus:border-sky-500 transition"
+                                        className="flex-1 px-4 py-2.5 border-2 border-[var(--border-subtle)] rounded-xl text-sm font-mono bg-[var(--bg-muted)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--border-focus)] transition"
                                         placeholder="TRANSF.*TERCEROS" />
                                     {form.search_patterns.length > 1 && (
                                         <button onClick={() => setForm(f => ({ ...f, search_patterns: f.search_patterns.filter((_, j) => j !== i) }))}
-                                            className="px-3 text-red-400 hover:text-red-600 text-xs font-bold">X</button>
+                                            className="px-3 text-[var(--color-error)] hover:text-[var(--color-error)] text-xs font-bold">X</button>
                                     )}
                                 </div>
                             ))}
                             <button onClick={() => setForm(f => ({ ...f, search_patterns: [...f.search_patterns, ''] }))}
-                                className="text-xs text-sky-500 hover:text-sky-600 font-semibold">+ Agregar patrón</button>
+                                className="text-xs text-[var(--icons-green)] hover:text-[var(--icons-green)] font-semibold">+ Agregar patrón</button>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-xs font-semibold text-gray-500 mb-1">Monto por defecto</label>
+                                <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1">Monto por defecto</label>
                                 <input type="number" step="0.01" value={form.default_amount} onChange={e => setForm(f => ({ ...f, default_amount: e.target.value }))}
-                                    className="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200 focus:outline-none focus:border-sky-500 transition"
+                                    className="w-full px-4 py-2.5 border-2 border-[var(--border-subtle)] rounded-xl text-sm bg-[var(--bg-muted)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--border-focus)] transition"
                                     placeholder="0.00" />
                             </div>
                             <div>
-                                <label className="block text-xs font-semibold text-gray-500 mb-1">Ref. Contable</label>
+                                <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1">Ref. Contable</label>
                                 <input type="text" value={form.account_reference} onChange={e => setForm(f => ({ ...f, account_reference: e.target.value }))}
-                                    className="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200 focus:outline-none focus:border-sky-500 transition"
+                                    className="w-full px-4 py-2.5 border-2 border-[var(--border-subtle)] rounded-xl text-sm bg-[var(--bg-muted)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--border-focus)] transition"
                                     placeholder="6001" />
                             </div>
                         </div>
 
                         <label className="flex items-center gap-3 cursor-pointer">
                             <input type="checkbox" checked={form.is_income} onChange={e => setForm(f => ({ ...f, is_income: e.target.checked }))}
-                                className="w-4 h-4 rounded border-gray-300 text-sky-500 focus:ring-sky-500" />
-                            <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Es ingreso</span>
+                                className="w-4 h-4 rounded border-[var(--border-default)] text-[var(--icons-green)] focus:ring-[var(--icons-green)]" />
+                            <span className="text-sm font-semibold text-[var(--text-secondary)]">Es ingreso</span>
                         </label>
 
                         <div className="flex justify-end gap-3 pt-2">
-                            <button onClick={() => setShowEditor(false)} className="px-5 py-2.5 text-sm font-semibold text-gray-500 hover:text-gray-700 transition">Cancelar</button>
+                            <button onClick={() => setShowEditor(false)} className="px-5 py-2.5 text-sm font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition">Cancelar</button>
                             <button onClick={handleSave} disabled={saving || !form.key.trim() || !form.description.trim()}
-                                className="px-6 py-2.5 bg-sky-500 hover:bg-sky-600 text-white rounded-xl text-sm font-semibold transition disabled:opacity-50">
+                                className="px-6 py-2.5 bg-gradient-to-r from-sky-500 to-sky-400 dark:from-emerald-700 dark:to-teal-600 text-white rounded-xl text-sm font-semibold transition shadow-lg shadow-sky-500/25 dark:shadow-emerald-900/25 hover:shadow-xl hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0">
                                 {saving ? 'Guardando...' : editingId ? 'Actualizar' : 'Crear'}
                             </button>
                         </div>
@@ -405,32 +437,32 @@ export function GlossaryPageClient() {
             {/* ─── Approve Modal ────────────────────────────────────────── */}
             {approvingId !== null && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setApprovingId(null)}>
-                    <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 w-full max-w-md mx-4 p-6 space-y-5" onClick={e => e.stopPropagation()}>
-                        <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200">Aprobar Término</h3>
-                        <p className="text-sm text-gray-500">Crear una entrada de glosario para este término detectado automáticamente:</p>
+                    <div className="bg-[var(--bg-card)] rounded-3xl shadow-2xl border border-[var(--border-subtle)] w-full max-w-md mx-4 p-6 space-y-5" onClick={e => e.stopPropagation()}>
+                        <h3 className="text-lg font-bold text-[var(--text-primary)]">Aprobar Término</h3>
+                        <p className="text-sm text-[var(--text-secondary)]">Crear una entrada de glosario para este término detectado automáticamente:</p>
 
                         <div>
-                            <label className="block text-xs font-semibold text-gray-500 mb-1">Clave (Key)</label>
+                            <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1">Clave (Key)</label>
                             <input type="text" value={approveForm.key} onChange={e => setApproveForm(f => ({ ...f, key: e.target.value }))}
-                                className="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200 focus:outline-none focus:border-sky-500 transition" />
+                                className="w-full px-4 py-2.5 border-2 border-[var(--border-subtle)] rounded-xl text-sm bg-[var(--bg-muted)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--border-focus)] transition" />
                         </div>
 
                         <div>
-                            <label className="block text-xs font-semibold text-gray-500 mb-1">Descripción</label>
+                            <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1">Descripción</label>
                             <input type="text" value={approveForm.description} onChange={e => setApproveForm(f => ({ ...f, description: e.target.value }))}
-                                className="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200 focus:outline-none focus:border-sky-500 transition" />
+                                className="w-full px-4 py-2.5 border-2 border-[var(--border-subtle)] rounded-xl text-sm bg-[var(--bg-muted)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--border-focus)] transition" />
                         </div>
 
                         <label className="flex items-center gap-3 cursor-pointer">
                             <input type="checkbox" checked={approveForm.is_income} onChange={e => setApproveForm(f => ({ ...f, is_income: e.target.checked }))}
-                                className="w-4 h-4 rounded border-gray-300 text-sky-500 focus:ring-sky-500" />
-                            <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Es ingreso</span>
+                                className="w-4 h-4 rounded border-[var(--border-default)] text-[var(--icons-green)] focus:ring-[var(--icons-green)]" />
+                            <span className="text-sm font-semibold text-[var(--text-secondary)]">Es ingreso</span>
                         </label>
 
                         <div className="flex justify-end gap-3 pt-2">
-                            <button onClick={() => setApprovingId(null)} className="px-5 py-2.5 text-sm font-semibold text-gray-500 hover:text-gray-700 transition">Cancelar</button>
+                            <button onClick={() => setApprovingId(null)} className="px-5 py-2.5 text-sm font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition">Cancelar</button>
                             <button onClick={handleApprove} disabled={approving || !approveForm.key.trim() || !approveForm.description.trim()}
-                                className="px-6 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-sm font-semibold transition disabled:opacity-50">
+                                className="px-6 py-2.5 bg-[var(--color-success)] hover:bg-[var(--color-success)] text-white rounded-xl text-sm font-semibold transition disabled:opacity-50">
                                 {approving ? 'Aprobando...' : 'Aprobar'}
                             </button>
                         </div>

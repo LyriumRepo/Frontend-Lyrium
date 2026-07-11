@@ -65,7 +65,7 @@ function AmountBadge({
 }) {
   if (!amount && amount !== 0) return null;
   return (
-    <span className="inline-block bg-[#EAF3DE] text-[#27500A] text-[11px] font-semibold px-2 py-0.5 rounded-full">
+    <span className="inline-block bg-[var(--color-success)]/10 text-[var(--color-success)] text-[11px] font-semibold px-2 py-0.5 rounded-full">
       {currency}{' '}
       {Number(amount).toLocaleString('es-PE', { minimumFractionDigits: 2 })}
     </span>
@@ -84,15 +84,15 @@ function HonorariosResult({
   return (
     <div className="flex flex-col gap-3">
       {/* Header */}
-      <div className="flex items-center justify-between p-3 bg-[#EEEDFE] rounded-lg">
+      <div className="flex items-center justify-between p-3 bg-[var(--color-info)]/10 rounded-lg">
         <div className="flex items-center gap-2">
-          <Receipt className="w-4 h-4 text-[#3C3489]" />
-          <span className="text-[12px] font-semibold text-[#3C3489]">
+          <Receipt className="w-4 h-4 text-[var(--color-info)]" />
+          <span className="text-[12px] font-semibold text-[var(--color-info)]">
             Recibo por Honorarios
           </span>
         </div>
         <div className="flex flex-col items-end gap-0.5">
-          <span className="text-[11px] text-[#534AB7] font-mono">
+          <span className="text-[11px] text-[var(--color-info)] font-mono">
             {scan.document_number ?? '—'}
           </span>
           <AmountBadge
@@ -162,15 +162,15 @@ function FacturaResult({
   return (
     <div className="flex flex-col gap-3">
       {/* Header */}
-      <div className="flex items-center justify-between p-3 bg-[#FAEEDA] rounded-lg">
+      <div className="flex items-center justify-between p-3 bg-[var(--color-warning)]/10 rounded-lg">
         <div className="flex items-center gap-2">
-          <FileText className="w-4 h-4 text-[#633806]" />
-          <span className="text-[12px] font-semibold text-[#633806]">
+          <FileText className="w-4 h-4 text-[var(--color-warning)]" />
+          <span className="text-[12px] font-semibold text-[var(--color-warning)]">
             Factura Electrónica
           </span>
         </div>
         <div className="flex flex-col items-end gap-0.5">
-          <span className="text-[11px] text-[#854F0B] font-mono">
+          <span className="text-[11px] text-[var(--color-warning)] font-mono">
             {scan.document_number ?? '—'}
           </span>
           <AmountBadge amount={scan.totals?.grand_total} />
@@ -303,15 +303,15 @@ function BoletaResult({
 }) {
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex items-center justify-between p-3 bg-[#EEEDFE] rounded-lg">
+      <div className="flex items-center justify-between p-3 bg-[var(--color-info)]/10 rounded-lg">
         <div className="flex items-center gap-2">
-          <Receipt className="w-4 h-4 text-[#3C3489]" />
-          <span className="text-[12px] font-semibold text-[#3C3489]">
+          <Receipt className="w-4 h-4 text-[var(--color-info)]" />
+          <span className="text-[12px] font-semibold text-[var(--color-info)]">
             Boleta de Venta
           </span>
         </div>
         <div className="flex flex-col items-end gap-0.5">
-          <span className="text-[11px] text-[#534AB7] font-mono">
+          <span className="text-[11px] text-[var(--color-info)] font-mono">
             {scan.document_number ?? '—'}
           </span>
           <AmountBadge amount={scan.totals?.grand_total} />
@@ -388,7 +388,7 @@ export function ScanResultCard({
         onClick={() => setExpanded((v) => !v)}
       >
         <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-emerald-400" />
+          <div className="w-2 h-2 rounded-full bg-[var(--color-success)]" />
           <span className="text-[13px] font-medium text-[var(--text-primary)]">
             Resultado del escaneo — {typeLabel}
           </span>

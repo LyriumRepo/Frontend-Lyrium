@@ -6,6 +6,8 @@ import { SlidersHorizontal, Tag, Package } from 'lucide-react';
 interface ProductFiltersProps {
   onFilterChange: (filters: ProductFilters) => void;
   initialFilters?: ProductFilters;
+  /** Precio máximo real del catálogo mostrado — evita que el slider corte productos por encima de un tope fijo. */
+  maxPrice?: number;
 }
 
 export interface ProductFilters {
@@ -20,11 +22,11 @@ interface PriceRange {
 }
 
 const MIN_PRICE = 0;
-const MAX_PRICE = 1000;
+const FALLBACK_MAX_PRICE = 1000;
 
-const DEFAULT_RANGE: PriceRange = { min: MIN_PRICE, max: MAX_PRICE };
-
-export default function ProductFilters({ onFilterChange, initialFilters }: ProductFiltersProps) {
+export default function ProductFilters({ onFilterChange, initialFilters, maxPrice }: ProductFiltersProps) {
+  const MAX_PRICE = maxPrice && maxPrice > MIN_PRICE ? maxPrice : FALLBACK_MAX_PRICE;
+  const DEFAULT_RANGE: PriceRange = { min: MIN_PRICE, max: MAX_PRICE };
   const [isOpen, setIsOpen] = useState(false);
   const [priceRange, setPriceRange] = useState<PriceRange>(
     initialFilters?.priceMin !== undefined || initialFilters?.priceMax !== undefined
@@ -35,6 +37,9 @@ export default function ProductFilters({ onFilterChange, initialFilters }: Produ
   
   const trackRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState<'min' | 'max' | null>(null);
+  // Gap mínimo entre thumbs proporcional al rango (antes era "10" fijo, que bloqueaba
+  // el slider por completo cuando MAX_PRICE - MIN_PRICE < 10).
+  const MIN_GAP = Math.max(1, Math.round(MAX_PRICE * 0.02));
 
   const hasActiveFilters = (priceRange.min > MIN_PRICE || priceRange.max < MAX_PRICE || stockStatus !== 'all');
 
@@ -44,7 +49,7 @@ export default function ProductFilters({ onFilterChange, initialFilters }: Produ
       priceMax: priceRange.max < MAX_PRICE ? priceRange.max : undefined,
       stockStatus,
     });
-  }, [priceRange, stockStatus, onFilterChange]);
+  }, [priceRange, stockStatus, onFilterChange, MAX_PRICE]);
 
   useEffect(() => {
     applyFilters();
@@ -56,19 +61,23 @@ export default function ProductFilters({ onFilterChange, initialFilters }: Produ
     onFilterChange({});
   };
 
-  const handleTrackClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!trackRef.current) return;
-    
+  const valueFromClientX = useCallback((clientX: number): number | null => {
+    if (!trackRef.current) return null;
     const rect = trackRef.current.getBoundingClientRect();
-    const percent = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-    const value = Math.round(percent * MAX_PRICE);
-    
+    const percent = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+    return Math.round(percent * MAX_PRICE);
+  }, [MAX_PRICE]);
+
+  const handleTrackClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const value = valueFromClientX(e.clientX);
+    if (value === null) return;
+
     const midPoint = (priceRange.min + priceRange.max) / 2;
-    
+
     if (value < midPoint) {
-      setPriceRange({ ...priceRange, min: Math.min(value, priceRange.max - 10) });
+      setPriceRange({ ...priceRange, min: Math.min(value, priceRange.max - MIN_GAP) });
     } else {
-      setPriceRange({ ...priceRange, max: Math.max(value, priceRange.min + 10) });
+      setPriceRange({ ...priceRange, max: Math.max(value, priceRange.min + MIN_GAP) });
     }
   };
 
@@ -77,37 +86,44 @@ export default function ProductFilters({ onFilterChange, initialFilters }: Produ
     setIsDragging(thumb);
   };
 
+  const handleTouchStart = (thumb: 'min' | 'max') => () => {
+    setIsDragging(thumb);
+  };
+
   useEffect(() => {
     if (!isDragging) return;
 
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!trackRef.current) return;
-      
-      const rect = trackRef.current.getBoundingClientRect();
-      const percent = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-      const value = Math.round(percent * MAX_PRICE);
+    const updateFromClientX = (clientX: number) => {
+      const value = valueFromClientX(clientX);
+      if (value === null) return;
 
       setPriceRange(prev => {
         if (isDragging === 'min') {
-          return { ...prev, min: Math.min(value, prev.max - 10) };
+          return { ...prev, min: Math.min(value, prev.max - MIN_GAP) };
         } else {
-          return { ...prev, max: Math.max(value, prev.min + 10) };
+          return { ...prev, max: Math.max(value, prev.min + MIN_GAP) };
         }
       });
     };
 
-    const handleMouseUp = () => {
-      setIsDragging(null);
+    const handleMouseMove = (e: MouseEvent) => updateFromClientX(e.clientX);
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches[0]) updateFromClientX(e.touches[0].clientX);
     };
+    const stopDragging = () => setIsDragging(null);
 
     document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
+    document.addEventListener('mouseup', stopDragging);
+    document.addEventListener('touchmove', handleTouchMove);
+    document.addEventListener('touchend', stopDragging);
 
     return () => {
       document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener('mouseup', stopDragging);
+      document.removeEventListener('touchmove', handleTouchMove);
+      document.removeEventListener('touchend', stopDragging);
     };
-  }, [isDragging]);
+  }, [isDragging, MIN_GAP, valueFromClientX]);
 
   const minPercent = (priceRange.min / MAX_PRICE) * 100;
   const maxPercent = (priceRange.max / MAX_PRICE) * 100;
@@ -188,15 +204,17 @@ export default function ProductFilters({ onFilterChange, initialFilters }: Produ
               {/* Thumb mínimo */}
               <div
                 className="absolute top-1/2 -translate-y-1/2 w-5 h-5 bg-white border-2 border-sky-500 rounded-full shadow-md cursor-ew-resize hover:scale-110 transition-transform z-10"
-                style={{ left: `calc(${minPercent}% - 10px)` }}
+                style={{ left: `calc(${minPercent}% - 10px)`, touchAction: 'none' }}
                 onMouseDown={handleMouseDown('min')}
+                onTouchStart={handleTouchStart('min')}
               />
               
               {/* Thumb máximo */}
               <div
                 className="absolute top-1/2 -translate-y-1/2 w-5 h-5 bg-white border-2 border-sky-500 rounded-full shadow-md cursor-ew-resize hover:scale-110 transition-transform z-10"
-                style={{ left: `calc(${maxPercent}% - 10px)` }}
+                style={{ left: `calc(${maxPercent}% - 10px)`, touchAction: 'none' }}
                 onMouseDown={handleMouseDown('max')}
+                onTouchStart={handleTouchStart('max')}
               />
             </div>
 

@@ -15,7 +15,7 @@ export function ContractsPageClient(_props: ContractsPageClientProps) {
 
     return (
         <div className="space-y-6 animate-fadeIn font-industrial pb-20">
-            <ModuleHeader title="Módulo de Contratación y Organización" subtitle="Sistema Inteligente de Contratos y Gestión Documental (RF-16)" icon="FileText" actions={<div className="flex gap-2"><BaseButton onClick={actions.openTemplates} variant="secondary" leftIcon="FolderOpen" size="md" className="bg-sky-500 hover:bg-sky-600 active:bg-sky-700 dark:bg-[var(--brand-green)] dark:hover:bg-[var(--brand-green-hover)] text-white border-0 shadow-lg shadow-sky-500/25 dark:shadow-none transition-all duration-300">Plantillas Legales</BaseButton></div>} />
+            <ModuleHeader title="Módulo de Contratación y Organización" subtitle="Sistema Inteligente de Contratos y Gestión Documental (RF-16)" icon="FileText" actions={<div className="flex gap-2"><BaseButton onClick={actions.openTemplates} variant="primary" leftIcon="FolderOpen" size="md">Plantillas Legales</BaseButton></div>} />
             <ContratosModule state={state} actions={actions} />
             {selectedContract && (
                 <ModalsPortal>

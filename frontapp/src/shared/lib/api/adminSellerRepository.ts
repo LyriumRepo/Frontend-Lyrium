@@ -18,6 +18,15 @@ async function getToken(): Promise<string | null> {
   if (_tokenCache && now - _tokenCache.ts < 30_000) {
     return _tokenCache.value;
   }
+  // Primero intentar leer del localStorage (disponible en cliente, siempre fresco)
+  if (typeof window !== 'undefined') {
+    const local = localStorage.getItem('laravel_token');
+    if (local) {
+      _tokenCache = { value: local, ts: now };
+      return local;
+    }
+  }
+  // Fallback: cookie httpOnly via route handler (para SSR o cuando localStorage está vacío)
   try {
     const res = await fetch('/api/auth-token', {
       credentials: 'include',
@@ -187,6 +196,30 @@ export interface AdminProductItem {
   images: Array<{ src: string; thumb: string; medium: string; large: string; alt: string }>;
 }
 
+export interface AdminServiceItem {
+  id: number;
+  name: string;
+  slug: string;
+  price: string;
+  status: string;
+  rejection_reason: string | null;
+  reviewed_at: string | null;
+  created_at: string;
+  store?: { id: number; name: string; slug: string };
+  category?: { id: number; name: string };
+}
+
+export interface AdminServicesResponse {
+  success: boolean;
+  data: AdminServiceItem[];
+  meta: {
+    current_page: number;
+    per_page: number;
+    total: number;
+    total_pages: number;
+  };
+}
+
 export interface AdminProductsResponse {
   success: boolean;
   data: AdminProductItem[];
@@ -209,6 +242,12 @@ export interface SellerListParams {
 
 export interface AdminProductsParams {
   status?: 'pending_review' | 'approved' | 'rejected' | 'draft';
+  search?: string;
+  per_page?: number;
+}
+
+export interface AdminServicesParams {
+  status?: 'pending_review' | 'approved' | 'rejected';
   search?: string;
   per_page?: number;
 }
@@ -256,6 +295,42 @@ export const adminSellerRepository = {
   ): Promise<AdminProductsResponse> {
     const q = toQuery(params as Record<string, string | number | undefined>);
     return apiFetch(`/admin/products${q}`);
+  },
+
+  /** GET /admin/services?status=&search=&per_page= */
+  getServices(
+    params: AdminServicesParams = {},
+  ): Promise<AdminServicesResponse> {
+    const q = toQuery(params as Record<string, string | number | undefined>);
+    return apiFetch(`/admin/services${q}`);
+  },
+
+  /** PUT /services/{id}/status */
+  updateServiceStatus(
+    id: number,
+    status: 'approved' | 'rejected' | 'pending_review',
+    reason?: string,
+  ): Promise<unknown> {
+    return apiFetch(`/services/${id}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ status, reason }),
+    });
+  },
+
+  /** GET /audit-logs?per_page=50 */
+  getAuditLogs(params: { per_page?: number; module?: string; search?: string } = {}): Promise<{
+    data: Array<{
+      id: number;
+      event: string;
+      module: string;
+      description: string;
+      created_at: string;
+      actor: { id: number; email: string; role: string };
+      auditable?: { type: string; id: number };
+    }>;
+  }> {
+    const q = toQuery(params as Record<string, string | number | undefined>);
+    return apiFetch(`/audit-logs${q || '?per_page=50'}`);
   },
 
   /** PUT /products/{id}/status */

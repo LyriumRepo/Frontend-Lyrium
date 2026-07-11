@@ -95,7 +95,7 @@ export function ScanDropzone({
           </>
         ) : selectedFile && hasResult ? (
           <>
-            <FileText className="w-8 h-8 text-emerald-500" />
+            <FileText className="w-8 h-8 text-[var(--color-success)]" />
             <p className="text-[13px] text-[var(--text-primary)] font-medium">
               {selectedFile.name}
             </p>
@@ -120,9 +120,9 @@ export function ScanDropzone({
 
       {/* Error */}
       {error && (
-        <div className="flex items-start gap-2 rounded-lg border border-[#F7C1C1] bg-[#FCEBEB] px-3 py-2.5">
-          <AlertCircle className="w-4 h-4 text-[#791F1F] shrink-0 mt-0.5" />
-          <p className="text-[12px] text-[#791F1F]">{error}</p>
+        <div className="flex items-start gap-2 rounded-lg border border-[var(--color-error)]/30 bg-[var(--color-error)]/10 px-3 py-2.5">
+          <AlertCircle className="w-4 h-4 text-[var(--color-error)] shrink-0 mt-0.5" />
+          <p className="text-[12px] text-[var(--color-error)]">{error}</p>
         </div>
       )}
 
