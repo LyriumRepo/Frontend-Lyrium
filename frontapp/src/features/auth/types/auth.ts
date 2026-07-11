@@ -1,6 +1,8 @@
 export type UserType = 'vendedor' | 'cliente';
 export type AuthMode = 'login' | 'register';
 
+export type TipoEvidencia = 'url' | 'catalogo' | 'ficha' | 'boleta' | 'factura';
+
 export interface LoginFormData {
     username: string;
     password: string;
@@ -16,7 +18,7 @@ export interface RegisterFormData {
     dni: string;
     categoria: string;
     descripcionActividad: string;
-    tipoEvidencia: 'url' | 'texto' | 'catalogo' | 'ficha' | 'boleta' | 'factura';
+    tipoEvidencia: TipoEvidencia | '';
     valorEvidencia: string;
     textoEvidencia: string;
     archivoPDF?: File | null;
@@ -35,9 +37,15 @@ export interface RpaResult {
     diagnostico: string[];
     application_id: number;
     store_id: number | null;
+    email?: string;
 }
 
 export type RegistroStep = 'form' | 'loading' | 'result';
+
+export interface ContratoPreviewResponse {
+    html: string;
+    success: boolean;
+}
 
 export interface IntroConfig {
     title: string;

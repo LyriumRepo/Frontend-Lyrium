@@ -84,10 +84,7 @@ export function useAuthForm(): UseAuthFormReturn {
         if (data.tipoEvidencia === 'url') {
             formPayload.append('tipoEvidencia', 'url');
             formPayload.append('valorEvidencia', data.valorEvidencia);
-        } else if (data.tipoEvidencia === 'texto') {
-            formPayload.append('tipoEvidencia', 'texto');
-            formPayload.append('textoEvidencia', data.textoEvidencia);
-        } else {
+        } else if (data.tipoEvidencia && ['catalogo', 'ficha', 'boleta', 'factura'].includes(data.tipoEvidencia)) {
             formPayload.append('tipoEvidencia', data.tipoEvidencia);
             if (data.archivoPDF) {
                 formPayload.append('archivoPDF', data.archivoPDF);
@@ -102,10 +99,9 @@ export function useAuthForm(): UseAuthFormReturn {
 
         try {
             setRpaStep('validar');
-            await sleep(800);
+            await sleep(1000);
 
             setRpaStep('sunat');
-            await sleep(1200);
 
             const response = await fetch(`${RPA_API_URL}/registro-seller`, {
                 method: 'POST',
@@ -121,12 +117,13 @@ export function useAuthForm(): UseAuthFormReturn {
             }
 
             setRpaStep('evidencia');
-            await sleep(600);
+            await sleep(800);
 
             setRpaStep('score');
-            await sleep(600);
+            await sleep(800);
 
             setRpaStep('resultado');
+            await sleep(500);
 
             const result: RpaResult = await response.json();
             return result;
@@ -181,7 +178,7 @@ export function useAuthForm(): UseAuthFormReturn {
 
             try {
                 const result = await callRpaMicroservice(data);
-                setRpaResult(result);
+                setRpaResult({ ...result, email: data.email });
                 setRegistroStep('result');
 
                 if (result.estado === 'ACEPTADO') {
@@ -207,6 +204,7 @@ export function useAuthForm(): UseAuthFormReturn {
                         score: 50,
                         riesgo: 'MEDIO',
                         etapa: 1,
+                        email: data.email,
                         diagnostico: [
                             'Registro enviado para revisión manual',
                             'El RPA no estuvo disponible en este momento',
