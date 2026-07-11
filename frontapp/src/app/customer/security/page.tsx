@@ -41,7 +41,7 @@ export default function CustomerSecurityPage() {
         <div className="lg:col-span-8 space-y-8">
           <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-[2.5rem] shadow-2xl overflow-hidden">
             {/* Header de la card */}
-            <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[var(--brand-green)] dark:to-[#1A3A32] p-8 relative overflow-hidden">
+            <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[var(--brand-green)] dark:to-[#1A3A32] p-6 md:p-8 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl" />
               <div className="flex items-center gap-5 text-white relative z-10">
                 <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30">
@@ -51,7 +51,7 @@ export default function CustomerSecurityPage() {
                   <h3 className="text-2xl font-black tracking-tighter">
                     Protección de Cuenta
                   </h3>
-                  <p className="text-[10px] font-bold text-sky-100 uppercase tracking-[0.2em]">
+                  <p className="text-[10px] font-bold text-sky-100 uppercase tracking-wide">
                     Centro de Seguridad Avanzada
                   </p>
                 </div>
@@ -69,7 +69,7 @@ export default function CustomerSecurityPage() {
             </div>
 
             {/* Formulario ← componente extraído */}
-            <div className="p-8">
+            <div className="p-5 md:p-8">
               <ChangePasswordForm />
             </div>
           </div>
@@ -77,7 +77,7 @@ export default function CustomerSecurityPage() {
 
         {/* ── Columna lateral: Tips de seguridad ───────────────────────── */}
         <div className="lg:col-span-4 space-y-8">
-          <div className="bg-white dark:bg-[var(--bg-secondary)] p-8 rounded-[2.5rem] shadow-2xl">
+          <div className="bg-white dark:bg-[var(--bg-secondary)] p-5 md:p-8 rounded-[2.5rem] shadow-2xl">
             {/* Tips header */}
             <div className="flex items-center gap-4 mb-6">
               <div className="w-12 h-12 bg-gradient-to-br from-sky-400 to-sky-600 dark:from-[var(--brand-green)] dark:to-[#1A3A32] rounded-2xl flex items-center justify-center">
@@ -87,7 +87,7 @@ export default function CustomerSecurityPage() {
                 <h3 className="text-xl font-black text-gray-800 dark:text-[var(--text-primary)]">
                   Consejos de Seguridad
                 </h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
+                <p className="text-xs text-gray-500 dark:text-[var(--text-muted)]">
                   Mantén tu cuenta protegida
                 </p>
               </div>
@@ -127,7 +127,7 @@ export default function CustomerSecurityPage() {
                     <p className="text-sm font-bold text-gray-800 dark:text-[var(--text-primary)]">
                       {tip.title}
                     </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                    <p className="text-xs text-gray-500 dark:text-[var(--text-muted)]">
                       {tip.desc}
                     </p>
                   </div>

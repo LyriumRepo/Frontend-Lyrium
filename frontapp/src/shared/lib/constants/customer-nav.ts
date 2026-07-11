@@ -64,7 +64,7 @@ export const customerNavigation: PanelNavigation = [
                 id: 'lirios',
                 label: 'Mis Lirios',
                 description: 'Tus puntos de fidelidad',
-                icon: 'Leaf',
+                icon: 'Coins',
                 href: '/customer/lirios'
             },
             {

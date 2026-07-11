@@ -2,8 +2,8 @@
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useCustomerSupport } from '@/features/customer/support/hooks/useCustomerSupport';
-import ModuleHeader from '@/components/layout/shared/ModuleHeader';
-import ChatLayout from '@/components/shared/chat/ChatLayout';
+import CustomerModuleHeader from '@/components/layout/customer/CustomerModuleHeader';
+import CustomerChatLayout from '@/components/layout/customer/CustomerChatLayout';
 import MessageBubble from '@/components/shared/chat/MessageBubble';
 import MessageInput from '@/components/shared/chat/MessageInput';
 import ConversationList from '@/components/shared/chat/ConversationList';
@@ -43,6 +43,13 @@ const PRIORITY_LABEL: Record<string, string> = {
     critica: 'Crítica', alta: 'Alta', media: 'Media', baja: 'Baja',
 };
 
+function safeFormatTime(raw: string | null | undefined): string {
+    if (!raw) return '';
+    const d = new Date(raw);
+    if (isNaN(d.getTime())) return '';
+    return d.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
+}
+
 function mapTicketToConversation(ticket: CustomerTicket): Conversation {
     const lastMsg = ticket.messages.at(-1);
     return {
@@ -50,12 +57,48 @@ function mapTicketToConversation(ticket: CustomerTicket): Conversation {
         name: ticket.subject,
         storeName: ticket.subject,
         lastMessage: lastMsg?.content ?? ticket.description,
-        lastMessageTime: lastMsg?.createdAt
-            ? new Date(lastMsg.createdAt).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })
-            : '',
+        lastMessageTime: safeFormatTime(lastMsg?.createdAt),
         unreadCount: ticket.unreadCount,
         category: CATEGORY_LABELS[ticket.category],
     };
+}
+
+// ── CustomSelect ──────────────────────────────────────────────────────────────
+interface SelectOption { value: string; label: string }
+function CustomSelect({ value, onChange, options, disabled = false }: {
+    value: string; onChange: (v: string) => void;
+    options: SelectOption[]; disabled?: boolean;
+}) {
+    const [open, setOpen] = React.useState(false);
+    const ref = React.useRef<HTMLDivElement>(null);
+    const selected = options.find(o => o.value === value);
+    React.useEffect(() => {
+        const h = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
+        if (open) document.addEventListener('mousedown', h);
+        return () => document.removeEventListener('mousedown', h);
+    }, [open]);
+    return (
+        <div ref={ref} className={`relative${disabled ? ' opacity-50 pointer-events-none' : ''}`}>
+            <button type="button" onClick={() => setOpen(v => !v)}
+                className="w-full flex items-center justify-between px-4 py-3 bg-[var(--bg-secondary)] rounded-2xl outline-none text-sm font-medium text-[var(--text-primary)] border-2 border-[var(--border-subtle)] hover:border-[var(--turquesa-500)] focus:border-[var(--turquesa-500)] cursor-pointer transition-all">
+                <span className="truncate">{selected?.label ?? options[0]?.label ?? ''}</span>
+                <svg className={`w-4 h-4 shrink-0 text-[var(--text-secondary)] transition-transform duration-200${open ? ' rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+            </button>
+            {open && (
+                <div className="absolute top-[calc(100%+4px)] left-0 right-0 bg-white dark:bg-[var(--bg-card)] rounded-2xl border-2 border-[var(--border-subtle)] shadow-2xl z-[60] overflow-hidden max-h-[126px] overflow-y-auto scrollbar-none">
+                    {options.map(opt => (
+                        <button key={opt.value} type="button"
+                            onClick={() => { onChange(opt.value); setOpen(false); }}
+                            className={`w-full text-left px-4 py-2.5 text-sm transition-colors hover:bg-[var(--turquesa-500)]/8 dark:hover:bg-[#1e2d28] ${opt.value === value ? 'font-bold text-[var(--turquesa-500)] bg-[var(--turquesa-500)]/5' : 'font-medium text-[var(--text-primary)]'}`}>
+                            {opt.label}
+                        </button>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
 }
 
 function NewTicketForm({
@@ -82,13 +125,13 @@ function NewTicketForm({
     };
 
     return (
-        <div className="flex flex-col bg-[var(--bg-card)] rounded-3xl border border-[var(--border-subtle)] shadow-sm overflow-hidden">
-            <div className="p-4 border-b border-[var(--border-subtle)]">
+        <div className="flex flex-col bg-[var(--bg-card)] rounded-3xl border border-[var(--border-subtle)] shadow-sm">
+            <div className="p-4 border-b border-[var(--border-subtle)] rounded-t-3xl">
                 <h3 className="text-sm font-black uppercase tracking-wider text-[var(--text-primary)]">Nuevo Ticket</h3>
                 <p className="text-xs text-[var(--text-secondary)] mt-1">Solicitud de soporte a Lyrium</p>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+            <form onSubmit={handleSubmit} className="p-5 space-y-4">
                 <div>
                     <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-1.5">
                         Categoría
@@ -112,7 +155,7 @@ function NewTicketForm({
                     <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-1.5">
                         Prioridad
                     </label>
-                    <div className="w-full px-4 py-2.5 bg-[var(--bg-secondary)] rounded-xl text-sm border border-[var(--border-subtle)] flex items-center gap-2">
+                    <div className="w-full px-4 py-3 bg-[var(--bg-secondary)] rounded-2xl text-sm border-2 border-[var(--border-subtle)] flex items-center gap-2">
                         <span className={`w-2 h-2 rounded-full shrink-0 ${PRIORITY_DOT[priority] ?? 'bg-gray-400'}`} />
                         <span className="text-xs font-bold uppercase tracking-widest text-[var(--text-secondary)]">
                             {PRIORITY_LABEL[priority] ?? 'Baja'}
@@ -129,7 +172,7 @@ function NewTicketForm({
                         value={subject}
                         onChange={(e) => setSubject(e.target.value)}
                         placeholder="Describe brevemente el problema"
-                        className="w-full px-4 py-2.5 bg-[var(--bg-secondary)] rounded-xl outline-none text-sm font-medium text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--turquesa-500)]/20 border border-[var(--border-subtle)]"
+                        className="w-full px-4 py-3 bg-[var(--bg-secondary)] rounded-2xl outline-none text-sm font-medium text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] border-2 border-[var(--border-subtle)] focus:border-[var(--turquesa-500)] transition-all"
                         required
                         maxLength={200}
                     />
@@ -143,8 +186,8 @@ function NewTicketForm({
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                         placeholder="Explica detalladamente tu problema o consulta..."
-                        rows={6}
-                        className="w-full px-4 py-2.5 bg-[var(--bg-secondary)] rounded-xl outline-none text-sm font-medium text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--turquesa-500)]/20 border border-[var(--border-subtle)] resize-none"
+                        rows={4}
+                        className="w-full px-4 py-2.5 bg-[var(--bg-secondary)] rounded-2xl outline-none text-sm font-medium text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] border-2 border-[var(--border-subtle)] focus:border-[var(--turquesa-500)] transition-all resize-none"
                         required
                         maxLength={5000}
                     />
@@ -164,7 +207,7 @@ function NewTicketForm({
                     <button
                         type="button"
                         onClick={onCancel}
-                        className="flex-1 px-4 py-2.5 bg-[var(--bg-secondary)] text-[var(--text-secondary)] rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-[var(--bg-hover)] transition-colors border border-[var(--border-subtle)]"
+                        className="flex-1 px-4 py-3 bg-[var(--bg-secondary)] text-[var(--text-secondary)] rounded-2xl font-bold text-xs uppercase tracking-wider hover:bg-[var(--bg-hover)] transition-colors border-2 border-[var(--border-subtle)]"
                     >
                         Cancelar
                     </button>
@@ -197,13 +240,13 @@ export function SupportPageClient() {
     } = useCustomerSupport();
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const [isMobileListVisible, setIsMobileListVisible] = useState(true);
     const [showNewTicketForm, setShowNewTicketForm] = useState(false);
     const [ticketError, setTicketError] = useState<string | null>(null);
     const [showLegend, setShowLegend] = useState(false);
     const [filterType, setFilterType] = useState<'asunto' | 'categoria'>('asunto');
     const [filterValue, setFilterValue] = useState('');
     const [showFilter, setShowFilter] = useState(false);
-    const [isMobileListVisible, setIsMobileListVisible] = useState(true);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -222,20 +265,18 @@ export function SupportPageClient() {
 
     const mappedConversations: Conversation[] = filteredTickets.map(mapTicketToConversation);
 
-    const mappedMessages: BubbleMessage[] = (activeTicket?.messages ?? []).map(msg => ({
-        id: msg.id,
-        sender: msg.senderId,
-        content: msg.content,
-        timestamp: msg.createdAt || new Date().toISOString(),
-        read_at: null,
-    }));
+    const mappedMessages: BubbleMessage[] = (activeTicket?.messages ?? []).map(msg => {
+        const raw = msg.createdAt;
+        const d = raw ? new Date(raw) : null;
+        const timestamp = d && !isNaN(d.getTime()) ? d.toISOString() : new Date().toISOString();
+        return { id: msg.id, sender: msg.senderId, content: msg.content, timestamp, read_at: null };
+    });
 
     const canMessage = activeTicket && activeTicket.status !== 'cerrado';
 
     // ── List panel ────────────────────────────────────────────────────────────
     const listContent = (
         <div className={`flex-col h-full ${(!activeTicketId || isMobileListVisible) ? 'flex' : 'hidden'} lg:flex`}>
-            {/* Barra de acciones: Nuevo Ticket + Leyenda */}
             {!showNewTicketForm && (
                 <div className="px-4 pt-3 pb-2 flex items-center gap-2 shrink-0">
                     <button
@@ -342,7 +383,6 @@ export function SupportPageClient() {
         <div className={`flex-col h-full ${(activeTicket && !isMobileListVisible) ? 'flex' : 'hidden'} lg:flex`}>
             <div className="p-5 border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)]/50 shrink-0">
                 <div className="flex items-center gap-3">
-                    {/* Botón regreso — solo visible en mobile/tablet */}
                     <button
                         onClick={() => setIsMobileListVisible(true)}
                         className="lg:hidden w-8 h-8 shrink-0 flex items-center justify-center rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--turquesa-500)] hover:border-[var(--turquesa-500)] transition-all"
@@ -354,23 +394,23 @@ export function SupportPageClient() {
                         <Icon name="Headset" className="w-5 h-5" />
                     </div>
                     <div className="min-w-0 flex-1">
-                        <h3 className="text-sm font-black uppercase tracking-wider text-[var(--text-primary)] truncate">
+                        <h3 className="text-xs sm:text-sm font-black uppercase tracking-wider text-[var(--text-primary)] truncate leading-tight">
                             {activeTicket.subject}
                         </h3>
-                        <p className="text-xs text-[var(--text-secondary)]">
+                        <p className="text-[10px] text-[var(--text-secondary)] truncate">
                             #{activeTicket.ticketNumber}
-                            {activeTicket.assignedTo && ` · ${activeTicket.assignedTo}`}
+                            {activeTicket.assignedTo ? ` · ${activeTicket.assignedTo}` : ' · Sin asignar'}
                         </p>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                        <span className={`px-2.5 py-0.5 text-[9px] font-black uppercase tracking-widest rounded-full ${STATUS_CONFIG[activeTicket.status].color}`}>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                        <span className={`px-2 py-0.5 text-[9px] font-black uppercase tracking-widest rounded-full ${STATUS_CONFIG[activeTicket.status].color}`}>
                             {STATUS_CONFIG[activeTicket.status].label}
                         </span>
                         {activeTicket.status !== 'cerrado' && (
                             <button
                                 onClick={() => handleCloseTicket(activeTicket.id)}
                                 disabled={isClosing}
-                                className="px-3 py-1.5 rounded-xl bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 font-bold text-[10px] uppercase tracking-wider border border-rose-200 dark:border-rose-800 hover:bg-rose-100 dark:hover:bg-rose-900/30 disabled:opacity-50 transition-all"
+                                className="px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 font-bold text-[9px] sm:text-[10px] uppercase tracking-wider border border-rose-200 dark:border-rose-800 hover:bg-rose-100 dark:hover:bg-rose-900/30 disabled:opacity-50 transition-all whitespace-nowrap"
                             >
                                 {isClosing ? '...' : 'Cerrar'}
                             </button>
@@ -440,8 +480,8 @@ export function SupportPageClient() {
     // ── Loading ───────────────────────────────────────────────────────────────
     if (isLoading) {
         return (
-            <div className="flex flex-col h-[calc(100vh-140px)] animate-fadeIn">
-                <ModuleHeader
+            <div className="flex flex-col h-[calc(100dvh-108px)] md:h-[calc(100vh-140px)] animate-fadeIn">
+                <CustomerModuleHeader
                     title="Soporte Lyrium"
                     subtitle="Centro de soporte y gestión de incidencias"
                     icon="Headset"
@@ -455,8 +495,8 @@ export function SupportPageClient() {
 
     // ── Main render ───────────────────────────────────────────────────────────
     return (
-        <div className="flex flex-col h-[calc(100vh-140px)] animate-fadeIn">
-            <ModuleHeader
+        <div className="flex flex-col h-[calc(100dvh-108px)] md:h-[calc(100vh-140px)] animate-fadeIn">
+            <CustomerModuleHeader
                 title="Soporte Lyrium"
                 subtitle="Centro de soporte y gestión de incidencias"
                 icon="Headset"
@@ -489,7 +529,7 @@ export function SupportPageClient() {
                     </div>
                 </div>
             ) : (
-                <ChatLayout list={listContent} detail={detailContent} isMobileListVisible={isMobileListVisible} />
+                <CustomerChatLayout list={listContent} detail={detailContent} isMobileListVisible={isMobileListVisible} />
             )}
 
             <BaseModal

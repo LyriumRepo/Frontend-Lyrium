@@ -68,7 +68,6 @@ export default function CustomerBookingsPage() {
     loadBookings().finally(() => setLoading(false));
   }, [isAuthenticated, loadBookings]);
 
-  // Realtime: refresca cuando llega notificación de booking
   useEcho<{ type: string }>(
     `user.${user?.id ?? 0}`,
     'NotificationCreated',
@@ -238,18 +237,12 @@ export default function CustomerBookingsPage() {
         </div>
       )}
 
-      {/* Right-side drawer — vía portal a document.body: el <div className="animate-fadeIn">
-          de BaseLayout.tsx tiene un transform (translateY vía animación con forwards) que
-          crea un containing block y rompe el position:fixed relativo al viewport real. */}
       {detailTarget && typeof document !== 'undefined' && createPortal(
         <div className="fixed inset-0 z-[100]" role="dialog" aria-modal="true" aria-label={`Detalle de reserva: ${detailTarget.service_name}`} onClick={closeDetail}>
-          {/* Overlay */}
           <div className={`absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300 ${drawerOpen ? 'opacity-100' : 'opacity-0'}`} />
-          {/* Drawer */}
           <div
             onClick={(e) => e.stopPropagation()}
             className={`absolute right-0 top-0 bottom-0 w-full sm:w-[520px] bg-white dark:bg-[var(--bg-secondary)] shadow-[-40px_0_100px_rgba(0,0,0,0.25)] flex flex-col transition-transform duration-300 ease-out will-change-transform ${drawerOpen ? 'translate-x-0' : 'translate-x-full'}`}>
-            {/* Header gradiente */}
             <div className="sticky top-0 z-10 px-6 pt-7 pb-5 bg-gradient-to-r from-sky-500 via-sky-400 to-sky-300 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] text-white flex-shrink-0">
               <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full -mr-24 -mt-24 blur-3xl" />
               <div className="relative z-10 flex items-start justify-between gap-3">
@@ -272,9 +265,7 @@ export default function CustomerBookingsPage() {
               </div>
             </div>
 
-            {/* Body */}
             <div className="overflow-y-auto flex-1 p-5 space-y-5">
-              {/* Timeline */}
               <div className="p-5 bg-gray-50 dark:bg-[var(--bg-muted)]/50 rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)]">
                 <p className="text-[10px] font-black text-gray-400 dark:text-[var(--text-muted)] uppercase tracking-widest mb-3">
                   Seguimiento
@@ -282,7 +273,6 @@ export default function CustomerBookingsPage() {
                 <BookingTimeline status={detailTarget.status} isHome={!!detailTarget.is_home_service} />
               </div>
 
-              {/* Info cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <InfoCard icon={Calendar} label="Fecha" value={detailTarget.date ? formatDate(detailTarget.date) : '—'} />
                 <InfoCard icon={Clock} label="Horario" value={`${detailTarget.start_time} - ${detailTarget.end_time}`} />
@@ -318,7 +308,6 @@ export default function CustomerBookingsPage() {
                 </div>
               )}
 
-              {/* Total */}
               <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-[var(--border-subtle)]">
                 <span className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-[var(--text-muted)]">Total</span>
                 <span className="text-2xl font-black text-sky-600 dark:text-[var(--icons-green)]">
@@ -331,7 +320,6 @@ export default function CustomerBookingsPage() {
         document.body
       )}
 
-      {/* Rate modal — mismo motivo, vía portal */}
       {rateTarget && typeof document !== 'undefined' && createPortal(
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" role="dialog" aria-modal="true" aria-label="Califica tu experiencia" onClick={() => setRateTarget(null)}>
           <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-2xl shadow-2xl max-w-sm w-full p-6 relative" onClick={(e) => e.stopPropagation()}>

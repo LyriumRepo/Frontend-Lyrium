@@ -456,8 +456,8 @@ export default function CustomerProfilePage() {
       </div>
 
       <form className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
-        <div className="md:col-span-8 bg-white dark:bg-[var(--bg-secondary)] rounded-3xl shadow-xl border border-slate-100 dark:border-[var(--border-subtle)] overflow-hidden">
-          <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[var(--brand-green)] dark:to-[#1A3A32] p-8 flex items-center gap-5 relative overflow-hidden">
+        <div className="md:col-span-8 lg:col-span-9 bg-white dark:bg-[var(--bg-secondary)] rounded-3xl shadow-xl border border-slate-100 dark:border-[var(--border-subtle)] overflow-hidden">
+          <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[var(--brand-green)] dark:to-[#1A3A32] p-6 md:p-8 flex items-center gap-5 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl" />
             <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-inner">
               <Icon name="User" className="w-6 h-6 text-white" />
@@ -466,13 +466,13 @@ export default function CustomerProfilePage() {
               <h3 className="text-2xl font-black tracking-tighter leading-none text-white">
                 Información Personal
               </h3>
-              <p className="text-[10px] font-bold text-sky-100 uppercase tracking-[0.2em] mt-1">
+              <p className="text-[10px] font-bold text-sky-100 uppercase tracking-wide mt-1">
                 Datos del Usuario
               </p>
             </div>
           </div>
 
-          <div className="p-8">
+          <div className="p-5 md:p-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-1">
                 <label className="text-[10px] font-black text-gray-400 dark:text-gray-300 uppercase tracking-widest ml-1">
@@ -606,22 +606,27 @@ export default function CustomerProfilePage() {
                 <label className="text-[10px] font-black text-gray-400 dark:text-gray-300 uppercase tracking-widest ml-1">
                   Tipo de Documento <span className="text-red-500">*</span>
                 </label>
-                <select
-                  name="tipo_documento"
-                  value={formData.tipo_documento}
-                  onChange={handleTipoDocumentoChange}
-                  disabled={!isEditMode}
-                  className={`w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] p-3 border-2 rounded-xl outline-none transition-all duration-300 bg-white dark:bg-[var(--bg-secondary)] ${
-                    errors.tipo_documento
-                      ? 'border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-100 dark:focus:ring-red-900/30'
-                      : 'border-gray-200 dark:border-[var(--border-subtle)] focus:border-sky-500 dark:focus:border-[var(--brand-green)] focus:ring-2 focus:ring-sky-100 dark:focus:ring-[var(--icons-green)]'
-                  }`}
-                >
-                  <option value="DNI">DNI</option>
-                  <option value="CE">Carnet de extranjería</option>
-                  <option value="PASAPORTE">Pasaporte</option>
-                  <option value="RUC">RUC</option>
-                </select>
+                <div className="relative">
+                  <select
+                    name="tipo_documento"
+                    value={formData.tipo_documento}
+                    onChange={handleTipoDocumentoChange}
+                    disabled={!isEditMode}
+                    className={`w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] p-3 pr-10 border-2 rounded-2xl outline-none transition-all duration-300 bg-white dark:bg-[var(--bg-secondary)] appearance-none cursor-pointer disabled:cursor-default disabled:opacity-60 ${
+                      errors.tipo_documento
+                        ? 'border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-100 dark:focus:ring-red-900/30'
+                        : 'border-gray-200 dark:border-[var(--border-subtle)] focus:border-sky-500 dark:focus:border-[var(--brand-green)] focus:ring-2 focus:ring-sky-100 dark:focus:ring-[var(--icons-green)]'
+                    }`}
+                  >
+                    <option value="DNI">DNI</option>
+                    <option value="CE">Carnet de extranjería</option>
+                    <option value="PASAPORTE">Pasaporte</option>
+                    <option value="RUC">RUC</option>
+                  </select>
+                  <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
                 {errors.tipo_documento && (
                   <p className="text-xs text-red-500 font-semibold ml-1">{errors.tipo_documento}</p>
                 )}
@@ -654,9 +659,9 @@ export default function CustomerProfilePage() {
           </div>
         </div>
 
-        <div className="md:col-span-4 space-y-8 self-stretch">
+        <div className="md:col-span-4 lg:col-span-3 space-y-8 self-stretch">
           <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-3xl shadow-xl border border-slate-100 dark:border-[var(--border-subtle)] overflow-hidden">
-            <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[var(--brand-green)] dark:to-[#1A3A32] p-8 flex items-center gap-5 relative overflow-hidden">
+            <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[var(--brand-green)] dark:to-[#1A3A32] p-6 md:p-8 flex items-center gap-5 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl" />
               <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-inner">
                 <Icon name="Camera" className="w-6 h-6 text-white" />
@@ -665,13 +670,13 @@ export default function CustomerProfilePage() {
                 <h3 className="text-xl font-black tracking-tighter leading-none text-white">
                   Foto de Perfil
                 </h3>
-                <p className="text-[10px] font-bold text-sky-100 uppercase tracking-[0.2em] mt-1">
+                <p className="text-[10px] font-bold text-sky-100 uppercase tracking-wide mt-1">
                   Opcional
                 </p>
               </div>
             </div>
 
-            <div className="p-8 flex flex-col items-center">
+            <div className="p-5 md:p-8 flex flex-col items-center">
               <div className="relative group mb-6">
                 <div className="w-40 h-40 rounded-3xl overflow-hidden border-4 border-sky-100 shadow-xl group-hover:scale-105 transition-all duration-500">
                   {avatarPreview || formData.foto ? (
@@ -726,7 +731,7 @@ export default function CustomerProfilePage() {
               />
 
               <div className="inline-block px-2.5 py-0.5 bg-black/10 backdrop-blur-md rounded-full border border-white/10 mt-2">
-                <p className="text-[8px] font-black text-white uppercase tracking-[0.2em]">Celebración Lyrium</p>
+                <p className="text-[8px] font-black text-white uppercase tracking-wide">Celebración Lyrium</p>
               </div>
 
               <p className="text-[11px] font-bold leading-tight text-white/90 max-w-[200px] mx-auto mt-3">
