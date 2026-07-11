@@ -64,6 +64,9 @@ export interface SecuritySessionItem {
   user_agent: string | null;
   device: string;
   browser: string;
+  platform: string;
+  country: string;
+  is_mobile: boolean;
   last_activity: string;
   is_active: boolean;
   user?: { id: number; name: string; email: string } | null;

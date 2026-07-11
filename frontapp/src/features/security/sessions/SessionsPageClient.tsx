@@ -82,13 +82,16 @@ export default function SessionsPageClient() {
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
                       <div className={`p-1.5 rounded-lg ${s.is_active ? 'bg-emerald-100 dark:bg-emerald-900/20' : 'bg-gray-100 dark:bg-gray-800'}`}>
-                        {s.device === 'iPhone' || s.device === 'Android' || s.device === 'iPad'
+                        {s.is_mobile
                           ? <Smartphone className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
                           : <Monitor className="w-3.5 h-3.5 text-[var(--text-secondary)]" />}
                       </div>
                       <div>
                         <p className="text-xs font-bold text-[var(--text-primary)]">{s.device}</p>
-                        <p className="text-[10px] text-[var(--text-muted)]">{s.browser}</p>
+                        <p className="text-[10px] text-[var(--text-muted)]">{s.platform} &middot; {s.browser}</p>
+                        {s.country && s.country !== '--' && (
+                          <p className="text-[10px] text-[var(--text-muted)]">{s.country}</p>
+                        )}
                       </div>
                     </div>
                   </td>
