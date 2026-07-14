@@ -66,6 +66,172 @@ interface ProductEtiquetaConfig {
 
 const inputCls = 'w-full bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-xl px-3 py-2.5 text-sm text-[var(--text-primary)] focus:outline-none focus:border-sky-500/50 transition-colors';
 
+const LARAVEL_API_URL = process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://localhost:8000/api';
+
+interface BranchStockItem {
+    id: number;
+    name: string;
+    address: string;
+    district: string;
+    is_principal: boolean;
+}
+
+function BranchStockSection({ productId, storeId }: { productId?: string | number; storeId?: number }) {
+    const [branches, setBranches] = useState<BranchStockItem[]>([]);
+    const [branchStockMap, setBranchStockMap] = useState<Record<number, { stock: number; pickup_enabled: boolean }>>({});
+    const [loading, setLoading] = useState(false);
+    const [saved, setSaved] = useState(false);
+    const { showToast } = useToast();
+
+    useEffect(() => {
+        if (!productId) return;
+        setLoading(true);
+        const token = localStorage.getItem('laravel_token');
+        const headers = { ...(token ? { Authorization: `Bearer ${token}` } : {}) };
+
+        // Intentar cargar branch stock del producto; si falla (403/404), cargar sucursales desde /stores/me
+        fetch(`${LARAVEL_API_URL}/products/${productId}/branches`, { headers })
+            .then(async r => {
+                if (!r.ok) {
+                    // Fallback: obtener sucursales desde la tienda del vendedor
+                    const storeRes = await fetch(`${LARAVEL_API_URL}/stores/me`, { headers });
+                    if (!storeRes.ok) return [];
+                    const storeJson = await storeRes.json();
+                    const storeBranches = (storeJson.data?.branches || storeJson.branches || []) as any[];
+                    return storeBranches.filter((b: any) => b.is_active !== false).map((b: any) => ({
+                        id: b.id, name: b.name, address: b.address, district: b.district,
+                        branch_stock: 0, pickup_enabled: true,
+                    }));
+                }
+                const json = await r.json();
+                return json.data || [];
+            })
+            .then(data => {
+                setBranches(data);
+                const map: Record<number, { stock: number; pickup_enabled: boolean }> = {};
+                data.forEach((b: any) => {
+                    map[b.id] = { stock: b.branch_stock ?? 0, pickup_enabled: b.pickup_enabled ?? true };
+                });
+                setBranchStockMap(map);
+            })
+            .catch(() => {})
+            .finally(() => setLoading(false));
+    }, [productId]);
+
+    const handleSave = async () => {
+        if (!productId) return;
+        const token = localStorage.getItem('laravel_token');
+        const payload = Object.entries(branchStockMap).map(([branchId, v]) => ({
+            branch_id: parseInt(branchId),
+            stock: v.stock,
+            pickup_enabled: v.pickup_enabled,
+        }));
+        try {
+            const res = await fetch(`${LARAVEL_API_URL}/products/${productId}/branches`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                },
+                body: JSON.stringify({ branches: payload }),
+            });
+            if (res.ok) {
+                setSaved(true);
+                showToast('Stock por sucursal guardado', 'success');
+                setTimeout(() => setSaved(false), 2000);
+            } else {
+                const err = await res.json().catch(() => ({ message: 'Error al guardar' }));
+                showToast(err.message || 'Error al guardar stock por sucursal', 'error');
+            }
+        } catch {
+            showToast('Error de conexión al guardar stock', 'error');
+        }
+    };
+
+    if (!productId) {
+        return (
+            <p className="text-[10px] text-[var(--text-secondary)] italic">
+                Guarda el producto primero para configurar stock por sucursal.
+            </p>
+        );
+    }
+
+    if (loading) {
+        return <p className="text-[10px] text-[var(--text-secondary)]">Cargando sucursales...</p>;
+    }
+
+    if (branches.length === 0) {
+        return (
+            <p className="text-[10px] text-[var(--text-secondary)]">
+                No hay sucursales activas.{' '}
+                <a href="/seller/store" className="text-sky-500 dark:text-[var(--icons-green)] underline font-bold">
+                    Crear sucursal
+                </a>
+            </p>
+        );
+    }
+
+    return (
+        <div className="space-y-2">
+            {branches.map(branch => (
+                <div key={branch.id} className="flex items-center gap-3 py-1.5 border-b border-[var(--border-subtle)] last:border-0">
+                    <span className="text-[10px] font-bold text-[var(--text-primary)] flex-1 truncate">
+                        {branch.name}
+                        {branch.is_principal && <span className="text-[var(--brand-sky)] dark:text-[var(--icons-green)] ml-1">(Principal)</span>}
+                    </span>
+                    <input
+                        type="number"
+                        min="0"
+                        value={branchStockMap[branch.id]?.stock ?? 0}
+                        onChange={(e) => {
+                            const val = parseInt(e.target.value) || 0;
+                            setBranchStockMap(prev => ({ ...prev, [branch.id]: { ...prev[branch.id], stock: val } }));
+                        }}
+                        className="w-16 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-lg px-2 py-1 text-[10px] font-bold text-[var(--text-primary)] text-center focus:outline-none focus:border-sky-500/50"
+                    />
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setBranchStockMap(prev => ({
+                                ...prev,
+                                [branch.id]: { ...prev[branch.id], pickup_enabled: !prev[branch.id]?.pickup_enabled },
+                            }));
+                        }}
+                        className={`relative inline-flex h-4 w-7 items-center rounded-full transition-colors ${
+                            branchStockMap[branch.id]?.pickup_enabled !== false ? 'bg-emerald-500' : 'bg-gray-300'
+                        }`}
+                    >
+                        <span className={`inline-block h-3 w-3 transform rounded-full bg-white shadow transition-transform ${
+                            branchStockMap[branch.id]?.pickup_enabled !== false ? 'translate-x-3.5' : 'translate-x-0.5'
+                        }`} />
+                    </button>
+                </div>
+            ))}
+            <button
+                type="button"
+                onClick={handleSave}
+                className={`mt-2 w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 ${
+                    saved
+                        ? 'bg-emerald-500 text-white shadow-md'
+                        : 'bg-sky-500 hover:bg-sky-600 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white shadow-md shadow-sky-200/50 dark:shadow-emerald-900/20'
+                }`}
+            >
+                {saved ? (
+                    <>
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
+                        Guardado
+                    </>
+                ) : (
+                    <>
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" /></svg>
+                        Guardar stock
+                    </>
+                )}
+            </button>
+        </div>
+    );
+}
+
 export default function ProductModal({ isOpen, onClose, onSave, productToEdit }: ProductModalProps) {
     const initialProduct: Product = {
         id: '',
@@ -519,6 +685,16 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit }:
                                                     />
                                                 </div>
                                             </div>
+                                        </td>
+                                    </tr>
+                                    {/* Retiro en Tienda */}
+                                    <tr>
+                                        <td className="px-5 py-3 font-black text-[var(--text-secondary)] text-[10px] uppercase tracking-tighter">Retiro en Tienda</td>
+                                        <td className="px-5 py-3">
+                                            <BranchStockSection
+                                                productId={formData.id}
+                                                storeId={(formData as any).store_id}
+                                            />
                                         </td>
                                     </tr>
                                     <tr className="bg-[var(--bg-secondary)]/10">

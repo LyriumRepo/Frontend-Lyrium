@@ -27,6 +27,7 @@ const PAYMENT_STATUS_CONFIG: Record<string, { label: string; icon: string; class
 const DELIVERY_LABELS: Record<string, { label: string; icon: string }> = {
   domicilio: { label: 'Entrega a domicilio', icon: 'Truck' },
   agencia: { label: 'Recojo en agencia', icon: 'Package' },
+  retiro_tienda: { label: 'Retiro en tienda', icon: 'Store' },
 };
 
 const SERVICE_MODALITY_LABELS: Record<string, { label: string; icon: string }> = {

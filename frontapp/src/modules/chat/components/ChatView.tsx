@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ChatViewProps, TicketStatus, TicketPriority, UnifiedMessage } from '../types';
 import MessageBubble, { Message } from '@/components/shared/chat/MessageBubble';
 import MessageInput from '@/components/shared/chat/MessageInput';
-import { AlertTriangle, ArrowLeft, CheckSquare, Headset, Loader2, ShieldCheck, Star } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, CheckSquare, Headset, Loader2, MessageSquareText, ShieldCheck, Star, SlidersHorizontal, UserCog } from 'lucide-react';
 
 const scrollbarClass = 'custom-scrollbar';
 const EMPTY_QUICK_REPLIES: string[] = [];
@@ -157,8 +157,12 @@ export function ChatView({
   quickReplies = EMPTY_QUICK_REPLIES,
 }: ChatViewProps) {
   const [showQuickReplies, setShowQuickReplies] = useState(false);
-  const [showOptions, setShowOptions] = useState(false);
+  const [showPriorityPopover, setShowPriorityPopover] = useState(false);
+  const [showAssigneePopover, setShowAssigneePopover] = useState(false);
   const msgContainerRef = useRef<HTMLDivElement>(null);
+  const priorityRef = useRef<HTMLDivElement>(null);
+  const assigneeRef = useRef<HTMLDivElement>(null);
+  const quickRepliesRef = useRef<HTMLDivElement>(null);
   const bottomAnchorRef = useRef<HTMLDivElement>(null);
   const prevScrollHeightRef = useRef<number>(0);
   const isLoadingMoreRef = useRef(isLoadingMore);
@@ -239,6 +243,17 @@ export function ChatView({
     if (added > 0) container.scrollTop += added;
     prevScrollHeightRef.current = 0;
   }, [ticket.messages.length]);
+
+  // Close popovers on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (priorityRef.current && !priorityRef.current.contains(e.target as Node)) setShowPriorityPopover(false);
+      if (assigneeRef.current && !assigneeRef.current.contains(e.target as Node)) setShowAssigneePopover(false);
+      if (quickRepliesRef.current && !quickRepliesRef.current.contains(e.target as Node)) setShowQuickReplies(false);
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleScroll = useCallback(() => {
     const container = msgContainerRef.current;
@@ -352,83 +367,119 @@ export function ChatView({
         <div ref={bottomAnchorRef} />
       </div>
 
-      {/* Bottom bar: admin controls + quick replies + input */}
-      <div className="sticky bottom-0 z-10 flex shrink-0 flex-col gap-3 border-t border-[var(--border-subtle)] bg-[var(--bg-card)]/95 p-3 backdrop-blur sm:p-4">
-        {showAdminPanel && (
-          <>
-            <button
-              type="button"
-              onClick={() => setShowOptions(!showOptions)}
-              className="w-fit text-[9px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)] hover:underline"
-            >
-              {showOptions ? 'Ocultar opciones' : 'Opciones del ticket'}
-            </button>
-            {showOptions && (
-              <div className="flex flex-col gap-3 rounded-lg bg-[var(--bg-secondary)] p-3 text-xs sm:flex-row sm:items-center sm:gap-4">
-                {onPriorityChange && ticket.priority && (
-                  <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
-                    <span className="text-[9px] font-black uppercase text-[var(--text-muted)]">Prioridad:</span>
-                    <select
-                      value={ticket.priority}
-                      onChange={(e) => onPriorityChange(ticket.id, e.target.value as TicketPriority)}
-                      className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-card)] p-2 text-xs font-black text-[var(--text-primary)] sm:px-2 sm:py-1"
-                    >
-                      <option value="Baja">Baja</option>
-                      <option value="Media">Media</option>
-                      <option value="Alta">Alta</option>
-                      <option value="Crítica">Critica</option>
-                    </select>
-                  </div>
-                )}
-                <div className="hidden h-4 w-px bg-[var(--border-subtle)] sm:block" />
-                {onAdminChange && (
-                  <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
-                    <span className="text-[9px] font-black uppercase text-[var(--text-muted)]">Asignado:</span>
-                    <select
-                      value={ticket.assignedTo.id}
-                      onChange={(e) => onAdminChange(ticket.id, e.target.value)}
-                      className="max-w-full truncate rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-card)] p-2 text-xs font-black text-[var(--text-primary)] sm:max-w-[140px] sm:px-2 sm:py-1"
-                    >
-                      <option value={ticket.assignedTo.id}>{ticket.assignedTo.name}</option>
-                    </select>
+      {/* Bottom bar: compact toolbar + input */}
+      <div className="sticky bottom-0 z-10 shrink-0 border-t border-[var(--border-subtle)] bg-[var(--bg-card)]/95 backdrop-blur">
+        {/* Admin toolbar — single compact row */}
+        {showAdminPanel && showInput && (
+          <div className="flex items-center gap-1 border-b border-[var(--border-subtle)]/60 px-3 py-2 sm:px-4">
+            {/* Priority */}
+            {onPriorityChange && ticket.priority && (
+              <div className="relative" ref={priorityRef}>
+                <button
+                  type="button"
+                  onClick={() => { setShowPriorityPopover(!showPriorityPopover); setShowAssigneePopover(false); setShowQuickReplies(false); }}
+                  className="flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-[10px] font-bold text-[var(--text-muted)] hover:bg-[var(--bg-secondary)] transition-colors"
+                >
+                  <SlidersHorizontal className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Prioridad</span>
+                  <span className={`rounded px-1 py-0.5 text-[7px] font-black uppercase tracking-wider ${
+                    ticket.priority === 'Crítica' ? 'bg-red-500/15 text-red-500' :
+                    ticket.priority === 'Alta' ? 'bg-amber-500/15 text-amber-600' :
+                    ticket.priority === 'Media' ? 'bg-[var(--turquesa-500)]/15 text-[var(--turquesa-500)]' :
+                    'bg-emerald-500/15 text-emerald-600'
+                  }`}>
+                    {ticket.priority}
+                  </span>
+                </button>
+                {showPriorityPopover && (
+                  <div className="absolute bottom-full left-0 mb-2 w-36 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-1.5 shadow-xl z-20">
+                    {(['Baja', 'Media', 'Alta', 'Crítica'] as TicketPriority[]).map((p) => (
+                      <button
+                        key={p}
+                        type="button"
+                        onClick={() => { onPriorityChange(ticket.id, p); setShowPriorityPopover(false); }}
+                        className={`w-full rounded-lg px-3 py-1.5 text-left text-[11px] font-bold transition-colors ${
+                          ticket.priority === p
+                            ? 'bg-[var(--turquesa-500)]/10 text-[var(--turquesa-500)]'
+                            : 'text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)]'
+                        }`}
+                      >
+                        {p}
+                      </button>
+                    ))}
                   </div>
                 )}
               </div>
             )}
-          </>
+
+            <div className="h-4 w-px bg-[var(--border-subtle)]" />
+
+            {/* Assignee */}
+            {onAdminChange && (
+              <div className="relative" ref={assigneeRef}>
+                <button
+                  type="button"
+                  onClick={() => { setShowAssigneePopover(!showAssigneePopover); setShowPriorityPopover(false); setShowQuickReplies(false); }}
+                  className="flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-[10px] font-bold text-[var(--text-muted)] hover:bg-[var(--bg-secondary)] transition-colors"
+                >
+                  <UserCog className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline truncate max-w-[80px]">{ticket.assignedTo.name}</span>
+                </button>
+                {showAssigneePopover && (
+                  <div className="absolute bottom-full left-0 mb-2 w-44 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-1.5 shadow-xl z-20">
+                    <button
+                      type="button"
+                      onClick={() => { onAdminChange(ticket.id, ticket.assignedTo.id); setShowAssigneePopover(false); }}
+                      className="w-full rounded-lg px-3 py-1.5 text-left text-[11px] font-bold text-[var(--turquesa-500)] bg-[var(--turquesa-500)]/10"
+                    >
+                      {ticket.assignedTo.name} (actual)
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="h-4 w-px bg-[var(--border-subtle)]" />
+
+            {/* Quick replies */}
+            <div className="relative" ref={quickRepliesRef}>
+              <button
+                type="button"
+                onClick={() => { setShowQuickReplies(!showQuickReplies); setShowPriorityPopover(false); setShowAssigneePopover(false); }}
+                className="flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-[10px] font-bold text-[var(--turquesa-500)] hover:bg-[var(--turquesa-500)]/5 transition-colors"
+              >
+                <MessageSquareText className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Respuestas</span>
+              </button>
+              {showQuickReplies && (
+                <div className="absolute bottom-full left-0 mb-2 w-72 max-h-48 overflow-y-auto rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-2 shadow-xl z-20 custom-scrollbar">
+                  <div className="flex flex-wrap gap-1.5">
+                    {effectiveQuickReplies.map((qr, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => { handleQuickReply(qr); setShowQuickReplies(false); }}
+                        className="rounded-full border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-2.5 py-1 text-[9px] font-bold text-[var(--text-secondary)] transition-all hover:border-[var(--turquesa-500)]/30 hover:text-[var(--turquesa-500)]"
+                      >
+                        {qr.length > 35 ? `${qr.substring(0, 35)}...` : qr}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         )}
 
+        {/* Input area */}
         {showInput ? (
-          <>
-            <button
-              type="button"
-              onClick={() => setShowQuickReplies(!showQuickReplies)}
-              className="w-fit text-[9px] font-black uppercase tracking-[0.2em] text-[var(--turquesa-500)] transition hover:text-[var(--verde-500)]"
-            >
-              {showQuickReplies ? 'Ocultar respuestas' : 'Respuestas rapidas'}
-            </button>
-
-            {showQuickReplies && (
-              <div className="flex max-h-28 flex-wrap gap-2 overflow-y-auto rounded-[1.25rem] border border-[var(--border-subtle)] bg-[var(--bg-secondary)]/85 p-2">
-                {effectiveQuickReplies.map((qr, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => handleQuickReply(qr)}
-                    className="rounded-full border border-[var(--border-subtle)] bg-[var(--bg-card)] px-3 py-1.5 text-[10px] font-bold text-[var(--text-secondary)] transition-all hover:border-[var(--turquesa-500)]/30 hover:bg-[var(--turquesa-500)]/5 hover:text-[var(--turquesa-500)] dark:hover:border-[var(--turquesa-500)]/20 dark:hover:bg-[var(--bg-hover)] dark:hover:text-[var(--turquesa-500)]"
-                  >
-                    {qr.length > 42 ? `${qr.substring(0, 42)}...` : qr}
-                  </button>
-                ))}
-              </div>
-            )}
-
+          <div className="p-3 sm:p-4">
             <MessageInput
               onSend={(text, files) => onSendMessage({ text, attachments: files })}
               disabled={isSending}
               placeholder="Escribe una respuesta..."
             />
-          </>
+          </div>
         ) : isClosed && !ticket.surveyRequired && (
           <div className="border-t border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-6 text-center">
             <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)]">

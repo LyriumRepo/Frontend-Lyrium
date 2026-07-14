@@ -83,7 +83,11 @@ export function ActiveSessionsPanel({ sessions, loading, error, onRevoke, onRefr
                   </span>
                 )}
                 <button
-                  onClick={() => onRevoke(session.id)}
+                  onClick={() => {
+                    if (window.confirm('¿Revocar esta sesión? El usuario será desconectado.')) {
+                      onRevoke(session.id);
+                    }
+                  }}
                   className="p-1.5 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/20 text-red-500 transition-colors"
                   title="Revocar sesión"
                 >

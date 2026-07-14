@@ -71,6 +71,22 @@ export const TreasuryModule: React.FC<TreasuryModuleProps> = ({ state, actions }
         );
     }
 
+    if (!data) {
+        return (
+            <div className="space-y-6 pb-20 font-industrial">
+                <div className="bg-[var(--bg-card)] p-8 rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm text-center">
+                    <p className="text-[var(--text-secondary)] font-bold">No se pudieron cargar los datos de Tesorería. Intente nuevamente.</p>
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="mt-4 px-4 py-2 bg-[var(--brand-green)] text-white rounded-xl text-sm font-bold"
+                    >
+                        Reintentar
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="space-y-6 pb-20 font-industrial">
 

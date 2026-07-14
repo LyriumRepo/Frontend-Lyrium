@@ -3,6 +3,7 @@
 import { Tienda, Producto } from '@/types/public';
 import ProductGrid from '@/components/products/ProductGrid';
 import AdBannersCarousel from '../AdBannersCarousel';
+import ScrollableSection from './ScrollableSection';
 
 interface Layout2Props {
   store: Tienda;
@@ -29,9 +30,9 @@ export default function Layout2({ products, banners }: Layout2Props) {
           <div className="w-full md:w-56 lg:w-80 flex-shrink-0">
             <AdBannersCarousel banners={banners} maxBanners={4} vertical startIndex={4} fallback={4} />
           </div>
-          <div className="flex-1">
+          <ScrollableSection visibleRows={2} className="flex-1 min-h-0">
             <ProductGrid productos={productosNormales} />
-          </div>
+          </ScrollableSection>
         </div>
       </div>
 
@@ -45,9 +46,9 @@ export default function Layout2({ products, banners }: Layout2Props) {
             Servicios de la tienda
           </h2>
           <div className="flex flex-col md:flex-row gap-4 sm:gap-5 md:gap-6">
-            <div className="flex-1">
+            <ScrollableSection visibleRows={2} className="flex-1 min-h-0">
               <ProductGrid productos={productosServicio} />
-            </div>
+            </ScrollableSection>
             <div className="w-full md:w-56 lg:w-80 flex-shrink-0">
               <AdBannersCarousel banners={banners} maxBanners={4} vertical startIndex={12} fallback={4} />
             </div>

@@ -1,10 +1,12 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import AdminSidebar from '@/components/layout/admin/AdminSidebar';
 import AdminHeader from '@/components/layout/admin/AdminHeader';
 import { DashboardLayout } from '@/components/layout/shared/DashboardLayout';
 import { useUIStore } from '@/store/uiStore';
+import { useAuth } from '@/shared/hooks/useAuth';
 import NotificationSidebar from '@/components/shared/notifications/NotificationSidebar';
 import ChatBotWidget from '@/features/chatbot/components/ChatBotWidget';
 
@@ -14,6 +16,22 @@ interface AdminLayoutClientProps {
 
 export function AdminLayoutClient({ children }: AdminLayoutClientProps) {
     const { sidebarOpen, toggleSidebar, closeSidebar } = useUIStore();
+    const { isAuthenticated, loading } = useAuth();
+    const router = useRouter();
+
+    useEffect(() => {
+        if (!loading && !isAuthenticated) {
+            router.replace('/login');
+        }
+    }, [loading, isAuthenticated, router]);
+
+    if (loading) {
+        return null;
+    }
+
+    if (!isAuthenticated) {
+        return null;
+    }
 
     return (
         <DashboardLayout

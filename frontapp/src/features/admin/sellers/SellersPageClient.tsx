@@ -274,12 +274,18 @@ export function SellersPageClient(_props: SellersPageClientProps) {
 
   const handleExportExcel = () => {
     if (!filteredSellers.length) return;
-    exportSellersToExcel(filteredSellers).catch(console.error);
+    exportSellersToExcel(filteredSellers).catch((err) => {
+      console.error(err);
+      showToast(err instanceof Error ? err.message : 'Error al exportar a Excel', 'error');
+    });
   };
 
   const handleExportPdf = () => {
     if (!filteredSellers.length) return;
-    exportSellersToPdf(filteredSellers).catch(console.error);
+    exportSellersToPdf(filteredSellers).catch((err) => {
+      console.error(err);
+      showToast(err instanceof Error ? err.message : 'Error al exportar a PDF', 'error');
+    });
   };
 
   const handleStatusSubmit = async ({
@@ -314,6 +320,7 @@ export function SellersPageClient(_props: SellersPageClientProps) {
       setStatusModal((prev) => ({ ...prev, isOpen: false }));
     } catch (err) {
       console.error('Error al actualizar estado:', err);
+      showToast(err instanceof Error ? err.message : 'No se pudo actualizar el estado.', 'error');
     } finally {
       setIsSubmitting(false);
     }

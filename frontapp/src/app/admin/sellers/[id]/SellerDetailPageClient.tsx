@@ -133,7 +133,7 @@ export function SellerDetailPageClient() {
   const { data, isLoading, error } = useQuery({
     queryKey: ['admin', 'sellers', 'detail', id],
     queryFn: () => adminSellerRepository.getSellerDetail(id),
-    enabled: !!id,
+    enabled: !isNaN(id) && id > 0,
     staleTime: 30_000,
   });
 
@@ -148,8 +148,10 @@ export function SellerDetailPageClient() {
   });
 
   const storeStatusMutation = useMutation({
-    mutationFn: (status: 'active' | 'pending' | 'suspended') =>
-      adminSellerRepository.updateStoreStatus(data!.store!.id, status),
+    mutationFn: (status: 'active' | 'pending' | 'suspended') => {
+      if (!data?.store?.id) throw new Error('No se pudo identificar la tienda');
+      return adminSellerRepository.updateStoreStatus(data.store.id, status);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['admin', 'sellers', 'detail', id],
@@ -165,6 +167,16 @@ export function SellerDetailPageClient() {
           {[1, 2, 3].map((i) => (
             <div key={i} className="h-48 bg-[var(--bg-card)] rounded-[2rem]" />
           ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (isNaN(id) || id <= 0) {
+    return (
+      <div className="px-4 sm:px-8 pb-20 font-industrial">
+        <div className="p-8 bg-rose-500/10 border border-rose-500/20 rounded-[2rem] text-rose-400 font-bold">
+          ID de vendedor inválido.
         </div>
       </div>
     );

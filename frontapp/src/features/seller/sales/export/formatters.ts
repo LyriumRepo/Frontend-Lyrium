@@ -59,6 +59,8 @@ export function normalizeShippingType(type: string | null | undefined): string {
       return 'Domicilio'
     case 'agencia':
       return 'Agencia'
+    case 'retiro_tienda':
+      return 'Retiro en Tienda'
     default:
       return type ?? '—'
   }

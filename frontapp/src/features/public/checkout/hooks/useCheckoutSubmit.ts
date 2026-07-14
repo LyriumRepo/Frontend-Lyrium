@@ -58,6 +58,8 @@ export function useCheckoutSubmit(): UseCheckoutSubmitReturn {
   const shippingQuotes      = useCheckoutStore((s) => s.shippingQuotes);
   const isSubmitting   = useCheckoutStore((s) => s.isSubmitting);
   const submitError    = useCheckoutStore((s) => s.submitError);
+  const deliveryMethod = useCheckoutStore((s) => s.orderData.deliveryMethod);
+  const selectedBranchId = useCheckoutStore((s) => s.orderData.selectedBranchId);
 
   // Setters del store
   const setProcessing   = useCheckoutStore((s) => s.setProcessing);
@@ -76,7 +78,8 @@ export function useCheckoutSubmit(): UseCheckoutSubmitReturn {
 
     const hasProducts = selectedItems.some((i) => i.id > 0);
 
-    if (hasProducts) {
+    // Validación de dirección: solo para envío, no para retiro en tienda
+    if (hasProducts && deliveryMethod !== 'pickup') {
       if (
         !shippingData.avenida    ||
         !shippingData.distrito   ||
@@ -84,6 +87,14 @@ export function useCheckoutSubmit(): UseCheckoutSubmitReturn {
         !shippingData.departamento
       ) {
         setSubmitError('Completa la dirección de envío antes de continuar.');
+        return null;
+      }
+    }
+
+    // Validación de branch: solo para retiro en tienda
+    if (hasProducts && deliveryMethod === 'pickup') {
+      if (!selectedBranchId) {
+        setSubmitError('Selecciona una sucursal de recojo antes de continuar.');
         return null;
       }
     }
@@ -106,14 +117,18 @@ export function useCheckoutSubmit(): UseCheckoutSubmitReturn {
         .filter(Boolean)
         .join(' ');
 
-      const storeShipping = shippingQuotes?.tiendas
-        ?.filter(t => !t.error)
-        .map(t => {
-          const op = t.logistica?.opciones?.find(o => o.courier === selectedCourier);
-          const costo = getPrecioFinal(op ?? {} as CourierOption, selectedTipoEntrega ?? 'agencia');
-          return { store_id: t.tiendaId, shipping_cost: costo ?? 0 };
-        })
-        .filter(s => s.shipping_cost > 0);
+      const isPickup = deliveryMethod === 'pickup';
+
+      const storeShipping = !isPickup
+        ? shippingQuotes?.tiendas
+            ?.filter(t => !t.error)
+            .map(t => {
+              const op = t.logistica?.opciones?.find(o => o.courier === selectedCourier);
+              const costo = getPrecioFinal(op ?? {} as CourierOption, selectedTipoEntrega ?? 'agencia');
+              return { store_id: t.tiendaId, shipping_cost: costo ?? 0 };
+            })
+            .filter(s => s.shipping_cost > 0)
+        : undefined;
 
       const commonFields = {
         shipping_name:  fullName,
@@ -121,46 +136,52 @@ export function useCheckoutSubmit(): UseCheckoutSubmitReturn {
         shipping_phone: personalData.celular,
         coupon_code:    orderData.promoCode   || undefined,
         lirios_used:    orderData.liriosUsed > 0 ? orderData.liriosUsed : undefined,
-        shipping_type:  selectedTipoEntrega,
-        carrier:  selectedCourier?.toLowerCase(),
+        shipping_type:  isPickup ? 'pickup' : selectedTipoEntrega,
+        carrier:        isPickup ? undefined : selectedCourier?.toLowerCase(),
         store_shipping: storeShipping?.length ? storeShipping : undefined,
+        branch_id:      isPickup ? selectedBranchId : undefined,
+        shipping_cost:  isPickup ? 0 : orderData.deliveryCost,
       };
 
       let order;
 
       if (hasProducts) {
-        const shippingAddress = [
-          shippingData.avenida,
-          shippingData.numero,
-          shippingData.urbanizacion,
-        ]
-          .filter(Boolean)
-          .join(', ');
+        if (isPickup) {
+          // Retiro en tienda: sin dirección de envío
+          order = await orderApi.createOrder(commonFields);
+        } else {
+          const shippingAddress = [
+            shippingData.avenida,
+            shippingData.numero,
+            shippingData.urbanizacion,
+          ]
+            .filter(Boolean)
+            .join(', ');
 
-        order = await orderApi.createOrder({
-          ...commonFields,
-          shipping_address:     shippingAddress,
-          shipping_city:        `${shippingData.distrito}, ${shippingData.provincia}, ${shippingData.departamento}`,
-          shipping_postal_code: shippingData.zipCode    || undefined,
-          shipping_notes:       shippingData.referencia || undefined,
-          shipping_cost:        orderData.deliveryCost,
-        });
+          order = await orderApi.createOrder({
+            ...commonFields,
+            shipping_address:     shippingAddress,
+            shipping_city:        `${shippingData.distrito}, ${shippingData.provincia}, ${shippingData.departamento}`,
+            shipping_postal_code: shippingData.zipCode    || undefined,
+            shipping_notes:       shippingData.referencia || undefined,
+          });
 
-        // Guardar dirección si el usuario lo solicitó (no bloquea el flujo si falla)
-        if (shippingData.saveAddress) {
-          addressApi.create({
-            etiqueta:     'otro',
-            destinatario: fullName,
-            pais:         shippingData.pais || 'Perú',
-            departamento: shippingData.departamento,
-            provincia:    shippingData.provincia,
-            distrito:     shippingData.distrito,
-            avenida:      shippingData.avenida,
-            numero:       shippingData.numero,
-            piso_lote:    shippingData.pisoLote   || null,
-            referencia:   shippingData.referencia || null,
-            is_default:   false,
-          }).catch(() => { /* silencioso — no es crítico */ });
+          // Guardar dirección si el usuario lo solicitó (no bloquea el flujo si falla)
+          if (shippingData.saveAddress) {
+            addressApi.create({
+              etiqueta:     'otro',
+              destinatario: fullName,
+              pais:         shippingData.pais || 'Perú',
+              departamento: shippingData.departamento,
+              provincia:    shippingData.provincia,
+              distrito:     shippingData.distrito,
+              avenida:      shippingData.avenida,
+              numero:       shippingData.numero,
+              piso_lote:    shippingData.pisoLote   || null,
+              referencia:   shippingData.referencia || null,
+              is_default:   false,
+            }).catch(() => { /* silencioso — no es crítico */ });
+          }
         }
 
       } else {
@@ -186,6 +207,8 @@ export function useCheckoutSubmit(): UseCheckoutSubmitReturn {
     shippingData,
     personalData,
     orderData,
+    deliveryMethod,
+    selectedBranchId,
     setProcessing,
     setIsSubmitting,
     setSubmitError,

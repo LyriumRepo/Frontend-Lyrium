@@ -62,7 +62,7 @@ Three API utility locations coexist — understand which to use:
 | `src/shared/lib/api/` | Repository pattern — one file per domain (`orderRepository.ts`, `productRepository.ts`, …) | New code; preferred for all server-side and shared calls |
 | `src/shared/lib/api/base-client.ts` | Base class for repository pattern | Extend when creating a new repository |
 
-There are 55+ repository files in `src/shared/lib/api/`. Notable ones: `rankingRepository.ts` (product/store rankings), `operationsRepository.ts` (suppliers, expenses, operational roles, audit logs), `nubefactRepository.ts` (SUNAT invoicing), `settingsRepository.ts` (user/seller settings), `liriosRepository.ts` (Lirios wallet — calls `/lirios/*` endpoints that **do not exist in the backend yet**, will 404), `Specialistrepository.ts` (note capital `S`, inconsistent naming). See Backend CLAUDE.md "Unconnected Controllers" for the full list of 404-prone endpoints.
+There are 55+ repository files in `src/shared/lib/api/`. Notable ones: `rankingRepository.ts` (product/store rankings), `operationsRepository.ts` (suppliers, expenses, operational roles, audit logs), `nubefactRepository.ts` (SUNAT invoicing), `settingsRepository.ts` (user/seller settings), `liriosRepository.ts` (Lirios wallet — calls `/lirios/*` endpoints that **are connected** in the backend), `Specialistrepository.ts` (note capital `S`, inconsistent naming). See Backend CLAUDE.md "Unconnected Controllers" for the full list of 404-prone endpoints.
 
 Prefer `src/shared/lib/api/` repositories for new work. Do not add a new `src/lib/api/` file unless matching an existing one.
 

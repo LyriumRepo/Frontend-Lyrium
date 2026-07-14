@@ -24,6 +24,18 @@ export interface ShippingInfo {
   type: string | null;
 }
 
+export interface BranchInfo {
+  id: number;
+  name: string;
+  address: string | null;
+  department: string | null;
+  province: string | null;
+  district: string | null;
+  phone: string | null;
+  hours: string | null;
+  mapsUrl: string | null;
+}
+
 export interface OrderItemResource {
   id: string;
   sellerId: string;
@@ -48,6 +60,7 @@ export interface OrderResource {
   paymentMethod: string | null;
   paymentStatus: string;
   shipping: ShippingInfo;
+  branch?: BranchInfo | null;
   subtotal: number;
   shippingCost: number;
   taxAmount: number;

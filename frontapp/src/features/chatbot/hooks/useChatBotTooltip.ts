@@ -16,6 +16,10 @@ const PROACTIVE_MESSAGES = [
     'Estoy aquí para ti 😊',
     '¿En qué puedo ayudarte?',
     '¿Sigues ahí? 🫶',
+    'Puedo ayudarte con tus pedidos 📦',
+    '¿Tienes alguna duda? 💚',
+    'También puedo guiarte con compras 🛒',
+    'Estoy disponible para lo que necesites ✨',
 ];
 
 const VISIBLE_DURATION = 4_000;

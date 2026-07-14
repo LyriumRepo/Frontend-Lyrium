@@ -85,6 +85,7 @@ export default function CourierSelector({ quotes }: Props) {
   const selectedCourier        = useCheckoutStore(s => s.selectedCourier);
   const tipoEntrega            = useCheckoutStore(s => s.selectedTipoEntrega);
   const setSelectedTipoEntrega = useCheckoutStore(s => s.setSelectedTipoEntrega);
+  const deliveryMethod         = useCheckoutStore(s => s.orderData.deliveryMethod);
 
   const tiendas = quotes.tiendas?.filter(t => !t.error) ?? [];
   const precioPorCourier: Record<string, number> = {};
@@ -126,6 +127,11 @@ export default function CourierSelector({ quotes }: Props) {
     }
   }
 
+  // Si el usuario eligió RT, no mostramos couriers
+  if (deliveryMethod === 'pickup') {
+    return null;
+  }
+
   if (couriersDisponibles.length === 0) {
     return (
       <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400 text-sm">
@@ -141,10 +147,10 @@ export default function CourierSelector({ quotes }: Props) {
   return (
     <div className="space-y-4">
 
-      {/* ── 1. TIPO DE ENTREGA — siempre arriba ────────────────────────── */}
+      {/* ── 1. TIPO DE ENTREGA — Domicilio vs Agencia ──── */}
       <div className="rounded-2xl border-2 border-sky-100 dark:border-emerald-900/50 bg-white dark:bg-gray-900/40 p-4">
         <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
-          <Truck className="w-3.5 h-3.5" /> Tipo de entrega
+          <Truck className="w-3.5 h-3.5" /> Tipo de envío
         </p>
         <div className="grid grid-cols-2 gap-2">
           {([

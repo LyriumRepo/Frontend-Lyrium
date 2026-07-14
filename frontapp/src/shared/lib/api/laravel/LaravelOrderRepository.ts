@@ -1,4 +1,4 @@
-import { Order, OrderItem, OrderStatus, ShippingInfo, TipoEnvio, ServiceOrderItem, OrderType } from '@/features/seller/sales/types';
+import { Order, OrderItem, OrderStatus, ShippingInfo, TipoEnvio, ServiceOrderItem, OrderType, BranchInfo } from '@/features/seller/sales/types';
 import { IOrderRepository, OrderFilters, CreateOrderInput, UpdateOrderInput } from '../contracts/IOrderRepository';
 
 interface BackendItem {
@@ -49,6 +49,18 @@ interface BackendServiceItem {
     updatedAt: string;
 }
 
+interface BackendBranch {
+    id: number;
+    name: string;
+    address: string | null;
+    department: string | null;
+    province: string | null;
+    district: string | null;
+    phone: string | null;
+    hours: string | null;
+    mapsUrl: string | null;
+}
+
 interface BackendOrder {
     id: string;
     orderNumber: string;
@@ -69,6 +81,7 @@ interface BackendOrder {
     checkoutCarrier?: string | null;
     storeName: string | null;
     shipping: BackendShipping;
+    branch: BackendBranch | null;
     storeShipping: Array<{ store_id: number; shipping_cost: number }> | null;
     subtotal: number;
     shippingCost: number;
@@ -106,6 +119,12 @@ const SERVICE_STATUS_STEP_MAP: Record<string, number> = {
 const ADVANCE_FLOW: Record<string, string> = {
     confirmed: 'processing',
     processing: 'shipped',
+    shipped: 'delivered',
+    delivered: 'delivered',
+};
+
+const ADVANCE_FLOW_RETiro: Record<string, string> = {
+    confirmed: 'shipped',
     shipped: 'delivered',
     delivered: 'delivered',
 };
@@ -160,6 +179,14 @@ export class LaravelOrderRepository implements IOrderRepository {
 
     private normalizeStatus(status: string | null | undefined): string {
         return String(status ?? '').trim();
+    }
+
+    private normalizeTipoEnvio(raw: string | null | undefined): TipoEnvio | null {
+        const v = String(raw ?? '').trim().toLowerCase();
+        if (v === 'pickup' || v === 'retiro_tienda') return 'retiro_tienda';
+        if (v === 'delivery' || v === 'domicilio') return 'domicilio';
+        if (v === 'agencia') return 'agencia';
+        return null;
     }
 
     private mapItem(item: BackendItem): OrderItem {
@@ -243,7 +270,7 @@ export class LaravelOrderRepository implements IOrderRepository {
             serviceCurrentStep,
             orderType: (backend.orderType as OrderType) ?? 'product',
             itemsSummary: backend.itemsSummary ?? '',
-            tipo_envio: (backend.shippingType as TipoEnvio) ?? null,
+            tipo_envio: this.normalizeTipoEnvio(backend.shippingType),
             metodo_pago: backend.paymentMethod ?? '',
             estado_pago: (backend.paymentStatus === 'paid' || backend.paymentStatus === 'verified'
                 ? 'verificado'
@@ -266,6 +293,17 @@ export class LaravelOrderRepository implements IOrderRepository {
                 carrierData: backend.carrierData ?? null,
                 checkoutCarrier: backend.checkoutCarrier ?? null,
             } as ShippingInfo,
+            branch: backend.branch ? {
+                id: backend.branch.id,
+                name: backend.branch.name,
+                address: backend.branch.address ?? '',
+                department: backend.branch.department ?? '',
+                province: backend.branch.province ?? '',
+                district: backend.branch.district ?? '',
+                phone: backend.branch.phone ?? null,
+                hours: backend.branch.hours ?? null,
+                mapsUrl: backend.branch.mapsUrl ?? null,
+            } as BranchInfo : null,
             items,
             serviceItems,
         };
@@ -449,7 +487,8 @@ export class LaravelOrderRepository implements IOrderRepository {
             return this.confirmOrder(id);
         }
 
-        const newStatus = ADVANCE_FLOW[order.estado] || order.estado;
+        const advanceFlow = order.tipo_envio === 'retiro_tienda' ? ADVANCE_FLOW_RETiro : ADVANCE_FLOW;
+        const newStatus = advanceFlow[order.estado] || order.estado;
         if (newStatus === order.estado) return order;
 
         return this.updateOrder(id, { status: newStatus as OrderStatus });
@@ -497,5 +536,14 @@ export class LaravelOrderRepository implements IOrderRepository {
             body: JSON.stringify({ status: 'cancelled' }),
         });
         return this.mapOrder((raw as any).data as BackendOrder);
+    }
+
+    async getDashboardStats(): Promise<{ monthlySales: number; todayOrders: number }> {
+        const raw = await this.request<any>('/orders/dashboard-stats');
+        const d = raw?.data ?? raw;
+        return {
+            monthlySales: Number(d?.monthly_sales ?? 0),
+            todayOrders: Number(d?.today_orders ?? 0),
+        };
     }
 }

@@ -39,10 +39,10 @@ export default function SellerManagementDetailsModal({ isOpen, onClose, contract
     const handleVerifyEmail = () => {
         if (!email) return;
         setIsVerifying(true);
-        setTimeout(() => {
-            setIsVerifying(false);
-            setIsVerified(true);
-        }, 800);
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const isValid = emailRegex.test(email);
+        setIsVerifying(false);
+        setIsVerified(isValid);
     };
 
     const handleEmailChange = (val: string) => {
@@ -54,7 +54,7 @@ export default function SellerManagementDetailsModal({ isOpen, onClose, contract
         if (!selectedContract) return;
 
         const mappedSeller = {
-            id: Math.floor(Math.random() * 1000000),
+            id: Date.now(),
             name: selectedContract.rep,
             company: selectedContract.company,
             email: email,
@@ -66,7 +66,7 @@ export default function SellerManagementDetailsModal({ isOpen, onClose, contract
             has_alerts: false,
             alerts: [],
             store: {
-                id: Math.floor(Math.random() * 100000),
+                id: Date.now() + 1,
                 status: selectedContract.status === 'ACTIVE' ? 'active' : selectedContract.status === 'PENDING' ? 'pending' : 'suspended',
                 strikes: 0,
                 rating: 5.0,
@@ -224,7 +224,7 @@ export default function SellerManagementDetailsModal({ isOpen, onClose, contract
                                                                             : 'bg-[var(--color-success)] text-white hover:bg-[var(--color-success)]'
                                                                     }`}
                                                                 >
-                                                                    {isVerifying ? 'Verificando...' : isVerified ? '✓ Verificado' : 'Verificar Email'}
+                                                                    {isVerifying ? 'Verificando...' : isVerified ? '✓ Formato válido' : 'Validar formato'}
                                                                 </button>
                                                             )}
                                                         </div>

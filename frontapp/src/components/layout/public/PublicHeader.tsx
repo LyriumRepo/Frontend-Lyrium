@@ -30,13 +30,14 @@ const iconNameMap: Record<string, string> = {
 export default function PublicHeader() {
     const pathname = usePathname();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [userMenuOpen, setUserMenuOpen] = useState(false);
     const [activeMobileMegaMenuItem, setActiveMobileMegaMenuItem] = useState<MenuItem | null>(null);
     const [activeMobileCategory, setActiveMobileCategory] = useState<string>('');
     const [expandedCols, setExpandedCols] = useState<Record<string, boolean>>({});
     const cartItemCount = useCarritoStore((s) => s.cartItems.reduce((sum, i) => sum + Number(i.cantidad ?? 0), 0));
 
     const { menuItems: apiMenuItems, megaMenuData: apiMegaMenuData, hasData } = useMegaMenu();
-    const { user, isAuthenticated } = useAuth();
+    const { user, isAuthenticated, logout } = useAuth();
     const dashboardUrl = isAuthenticated && user?.role
         ? (AUTH_CONFIG.routes[user.role as keyof typeof AUTH_CONFIG.routes] ?? '/login')
         : '/login';
@@ -73,22 +74,51 @@ export default function PublicHeader() {
 
                     <div className="flex items-center gap-2 min-[360px]:gap-3 sm:gap-5 text-xs lg:text-[13px] text-sky-600 dark:text-[var(--color-success)]">
                         {isAuthenticated && user ? (
-                            <div className="flex items-center gap-1 sm:gap-3">
-                                <span className="relative flex flex-col sm:flex-row items-center gap-0.5 sm:gap-1 p-1 min-[360px]:p-2 sm:p-2.5">
-                                    <Icon name="UserCircle" className="text-base min-[360px]:text-[18px]" />
-                                    <span className="block sm:inline whitespace-nowrap truncate max-w-[42px] min-[360px]:max-w-[75px] sm:max-w-[110px] text-[8px] min-[360px]:text-[9px] sm:text-xs lg:text-[13px] font-bold sm:font-normal text-slate-500 dark:text-slate-400 sm:text-sky-600 sm:dark:text-[var(--color-success)] absolute bottom-[-6px] min-[360px]:bottom-[-4px] sm:relative sm:bottom-auto left-1/2 -translate-x-1/2 sm:left-auto sm:translate-x-0">
-                                        {user.display_name || user.username || user.email}
-                                     </span>
-                                 </span>
-                                 <div className="relative group hidden sm:block">
-                                     <Link href={dashboardUrl} className="p-1.5 min-[360px]:p-2 sm:p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] transition-colors flex items-center justify-center">
-                                         <Icon name="LayoutDashboard" className="text-[18px]" />
-                                     </Link>
-                                     <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-[#333333] text-white text-xs px-2 py-1 rounded-md whitespace-nowrap">
-                                         Mi panel
-                                     </span>
-                                 </div>
-                            </div>
+                            <>
+                                <div className="relative">
+                                    <button
+                                        onClick={() => setUserMenuOpen(!userMenuOpen)}
+                                        className="flex items-center gap-1 sm:gap-3 p-1 min-[360px]:p-2 sm:p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] active:scale-95 transition-all"
+                                    >
+                                        <Icon name="UserCircle" className="text-base min-[360px]:text-[18px]" />
+                                        <span className="hidden sm:block whitespace-nowrap truncate max-w-[110px] text-xs lg:text-[13px] text-sky-600 dark:text-[var(--color-success)]">
+                                            {user.display_name || user.username || user.email}
+                                        </span>
+                                    </button>
+                                    {userMenuOpen && (
+                                        <>
+                                            <div
+                                                className="fixed inset-0 z-40"
+                                                onClick={() => setUserMenuOpen(false)}
+                                            />
+                                            <div className="absolute right-0 mt-2 w-48 max-w-[calc(100vw-2rem)] bg-white dark:bg-[var(--bg-card)] rounded-xl shadow-lg border border-gray-200 dark:border-[var(--border-subtle)] z-50 py-1">
+                                                <div className="px-3 py-2 border-b border-gray-100 dark:border-[var(--border-subtle)]">
+                                                    <p className="text-xs font-bold text-slate-800 dark:text-[var(--text-primary)] truncate">
+                                                        {user.display_name || user.username}
+                                                    </p>
+                                                    <p className="text-[10px] text-slate-400 dark:text-[var(--text-muted)] truncate">
+                                                        {user.email}
+                                                    </p>
+                                                </div>
+                                                <button
+                                                    onClick={() => { setUserMenuOpen(false); logout(); }}
+                                                    className="flex items-center gap-2.5 w-full px-3 py-2 text-xs text-red-500 dark:text-red-400 hover:bg-gray-50 dark:hover:bg-[var(--bg-muted)] transition-colors"
+                                                >
+                                                    <Icon name="LogOut" className="w-3.5 h-3.5" />
+                                                    Cerrar Sesión
+                                                </button>
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+                                <Link
+                                    href={dashboardUrl}
+                                    className="flex items-center gap-1.5 p-1 min-[360px]:p-2 sm:p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] active:scale-95 transition-all text-sky-600 dark:text-[var(--color-success)]"
+                                >
+                                    <Icon name="LayoutDashboard" className="text-base min-[360px]:text-[18px]" />
+                                    <span className="hidden sm:block whitespace-nowrap text-xs lg:text-[13px]">Mi Panel</span>
+                                </Link>
+                            </>
                         ) : (
                             <div className="relative group">
                                 <Link href="/login" className="p-1 min-[360px]:p-2 sm:p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] transition-colors flex items-center justify-center">

@@ -1249,6 +1249,20 @@ export function ProductDetailPageClient({
   const gridContainerRef = useRef<HTMLDivElement | null>(null);
   const buyBoxColRef = useRef<HTMLDivElement | null>(null);
 
+  // Stock RT (Retiro en Tienda)
+  const [rtStock, setRtStock] = useState<number | null>(null);
+  useEffect(() => {
+    if (!product.id) return;
+    fetch(`${process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://localhost:8000/api'}/products/${product.id}/branches/public`)
+      .then(r => r.json())
+      .then(json => {
+        const branches = json.data || [];
+        const total = branches.reduce((sum: number, b: any) => sum + (b.branch_stock ?? 0), 0);
+        setRtStock(total);
+      })
+      .catch(() => {});
+  }, [product.id]);
+
   useEffect(() => {
     setIsDark(document.documentElement.classList.contains('dark'));
     const observer = new MutationObserver(() => {
@@ -1378,6 +1392,12 @@ export function ProductDetailPageClient({
                 {product.stock > 0
                   ? `Stock: ${product.stock} unidades`
                   : 'No disponible'}
+              </p>
+            )}
+            {rtStock !== null && rtStock > 0 && (
+              <p className="text-xs font-semibold text-sky-600 dark:text-emerald-400 flex items-center gap-1.5 mt-1">
+                <Store className="w-3.5 h-3.5" />
+                Stock RT: {rtStock} unidades disponibles para retiro
               </p>
             )}
           </div>

@@ -110,21 +110,30 @@ export default function OrderSummary() {
       setLiriosEligibility(null);
       return;
     }
+    if (!isReady || cartTotalForLirios <= 0) return;
     let cancelled = false;
     setLiriosLoading(true);
+    console.log('[Lirios] requesting eligibility, cartTotal:', cartTotalForLirios);
     liriosApi.getCheckoutEligibility(cartTotalForLirios)
-      .then((res) => { if (!cancelled) setLiriosEligibility(res); })
-      .catch(() => { if (!cancelled) setLiriosEligibility(null); })
+      .then((res) => {
+        console.log('[Lirios] response:', res);
+        if (!cancelled) setLiriosEligibility(res);
+      })
+      .catch((err) => {
+        console.error('[Lirios] error:', err);
+        if (!cancelled) setLiriosEligibility(null);
+      })
       .finally(() => { if (!cancelled) setLiriosLoading(false); });
     return () => { cancelled = true; };
-  }, [isAuthenticated, cartTotalForLirios]);
+  }, [isAuthenticated, cartTotalForLirios, isReady]);
 
   const handleLiriosChange = (value: string) => {
     setLiriosInput(value);
     const num = parseInt(value, 10);
     if (!isNaN(num) && num > 0 && liriosEligibility) {
       const clamped = Math.min(num, liriosEligibility.max_lirios_usables);
-      setOrderData({ liriosUsed: clamped, liriosDiscount: clamped });
+      const discountInSoles = clamped * (liriosEligibility.max_discount / liriosEligibility.max_lirios_usables);
+      setOrderData({ liriosUsed: clamped, liriosDiscount: discountInSoles });
     } else {
       setOrderData({ liriosUsed: 0, liriosDiscount: 0 });
     }
@@ -292,8 +301,9 @@ export default function OrderSummary() {
                   type="button"
                   onClick={() => {
                     const max = liriosEligibility.max_lirios_usables;
+                    const discountInSoles = liriosEligibility.max_discount;
                     setLiriosInput(String(max));
-                    setOrderData({ liriosUsed: max, liriosDiscount: max });
+                    setOrderData({ liriosUsed: max, liriosDiscount: discountInSoles });
                   }}
                   className="px-3 py-2 bg-emerald-100 dark:bg-emerald-800/40 hover:bg-emerald-200 dark:hover:bg-emerald-700/50 text-emerald-700 dark:text-emerald-300 rounded-xl font-bold text-[10px] transition-all whitespace-nowrap"
                 >
@@ -366,7 +376,7 @@ export default function OrderSummary() {
 
         <button
           type="button"
-          onClick={() => setStep(2)}
+          onClick={() => setStep(orderData.deliveryMethod === 'pickup' ? 1 : 2)}
           disabled={isBusy}
           className="w-full mt-2.5 py-3 rounded-2xl bg-gray-100 dark:bg-[var(--bg-muted)] hover:bg-gray-200 dark:hover:bg-[var(--bg-secondary)] text-gray-700 dark:text-[var(--text-secondary)] font-medium transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >

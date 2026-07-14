@@ -26,11 +26,28 @@ const FLOW_STEPS: Record<TipoEnvio, Step[]> = {
         { id: 9, label: 'En Agencia'    },
         { id: 5, label: 'Confirmado'    },
     ],
+    retiro_tienda: [
+        { id: 1, label: 'Validado'         },
+        { id: 2, label: 'Despacho'         },
+        { id: 3, label: 'Listo en Tienda'  },
+        { id: 4, label: 'Confirmado'       },
+    ],
+};
+
+const RETIRO_STEP_REMAP: Record<number, number> = {
+    1: 1,
+    2: 2,
+    3: 3,
+    4: 3,
+    5: 4,
 };
 
 export default function ProductOrderStepper({ currentStep, tipoEnvio }: OrderStepperProps) {
     const steps = FLOW_STEPS[tipoEnvio ?? 'domicilio'] ?? FLOW_STEPS['domicilio'];
-    const progress = Math.max(0, Math.min(100, ((currentStep - 1) / (steps.length - 1)) * 100));
+    const displayStep = tipoEnvio === 'retiro_tienda'
+        ? (RETIRO_STEP_REMAP[currentStep] ?? currentStep)
+        : currentStep;
+    const progress = Math.max(0, Math.min(100, ((displayStep - 1) / (steps.length - 1)) * 100));
 
     return (
         <div className="rounded-2xl bg-[var(--bg-secondary)] border border-[var(--border-subtle)] overflow-hidden">
@@ -53,8 +70,8 @@ export default function ProductOrderStepper({ currentStep, tipoEnvio }: OrderSte
                     </div>
 
                     {steps.map((step) => {
-                        const isCompleted = step.id < currentStep;
-                        const isActive    = step.id === currentStep;
+                        const isCompleted = step.id < displayStep;
+                        const isActive    = step.id === displayStep;
 
                         return (
                             <div

@@ -48,14 +48,14 @@ function OfferCard({
 
   return (
     <Link href={producto.slug ? `/producto/${producto.slug}` : '#'} className="block">
-      <article className="w-[100px] min-[360px]:w-[110px] sm:w-[195px] shrink-0 bg-[var(--turquesaClaro-100)] dark:bg-[#1E3028] backdrop-blur-lg border border-transparent rounded-xl sm:rounded-[18px] overflow-hidden shadow-md group transition-all duration-300 hover:-translate-y-[5px] flex flex-col items-center relative">
+      <article className="w-[100px] min-[360px]:w-[110px] sm:w-[195px] shrink-0 bg-[var(--celeste-100)] dark:bg-[#1E3028] backdrop-blur-lg border border-transparent rounded-xl sm:rounded-[18px] overflow-hidden shadow-md group transition-all duration-300 hover:-translate-y-[5px] flex flex-col items-center relative">
       <div className="relative w-full aspect-square overflow-hidden bg-transparent flex items-center justify-center">
         {producto.descuento && producto.descuento > 0 ? (
           <span className="absolute top-1 left-1 sm:top-2 sm:left-2 z-10 bg-red-500 text-white text-[7px] sm:text-[9px] font-extrabold px-1 py-0.5 sm:px-2 sm:py-0.5 rounded-full">
             -{producto.descuento}%
           </span>
         ) : producto.tag && producto.tag.toLowerCase() !== 'nuevo' ? (
-          <span className="absolute top-1 left-1 sm:top-2 sm:left-2 z-10 bg-[var(--brand-green)] text-white text-[7px] sm:text-[9px] font-extrabold px-1 py-0.5 sm:px-2 sm:py-0.5 rounded-full uppercase">
+          <span className="absolute top-1 left-1 sm:top-2 sm:left-2 z-10 bg-[var(--celeste-500)] text-white text-[7px] sm:text-[9px] font-extrabold px-1 py-0.5 sm:px-2 sm:py-0.5 rounded-full uppercase">
             {producto.tag}
           </span>
         ) : null}
@@ -67,7 +67,7 @@ function OfferCard({
             onError={handleImageError}
           />
 
-        <div className="absolute bottom-0 left-0 w-full h-[30px] sm:h-[38px] flex bg-[var(--brand-green)] transform translate-y-full group-hover:translate-y-0 transition-transform">
+        <div className="absolute bottom-0 left-0 w-full h-[30px] sm:h-[38px] flex bg-[var(--celeste-500)] transform translate-y-full group-hover:translate-y-0 transition-transform">
           <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onAddToCart(producto); }} className="flex-1 flex items-center justify-center text-white">
             <ShoppingCart className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </button>
@@ -82,7 +82,7 @@ function OfferCard({
 
        <div className="py-1.5 px-2 sm:py-2.5 sm:px-3 w-full text-center flex flex-col items-center">
         <h3 className="text-[9px] min-[360px]:text-[10px] sm:text-[11.5px] font-bold truncate w-full text-slate-900 dark:text-white">{producto.titulo}</h3>
-        <p className="text-[10px] min-[360px]:text-[11px] sm:text-[13.5px] font-extrabold text-[var(--brand-green)] dark:text-[var(--azulCeleste-500)]">S/ {producto.precio.toFixed(2)}</p>
+        <p className="text-[10px] min-[360px]:text-[11px] sm:text-[13.5px] font-extrabold text-[var(--celeste-500)] dark:text-[var(--azulCeleste-500)]">S/ {producto.precio.toFixed(2)}</p>
         <div className="flex justify-center gap-0.5 mt-0.5 sm:mt-0.5">
           {Array.from({ length: 5 }).map((_, idx) => {
             const isFilled = idx < (producto.estrellas ? producto.estrellas.length : 5);

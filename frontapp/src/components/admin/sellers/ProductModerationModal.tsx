@@ -149,9 +149,13 @@ export default function ProductModerationModal({
     setPendingAction(null);
     setLoading(true);
 
+    const token = typeof window !== 'undefined' ? localStorage.getItem('laravel_token') : null;
     fetch(`${LARAVEL_API_URL}/products/${productId}`, {
       credentials: 'include',
-      headers: { Accept: 'application/json' },
+      headers: {
+        Accept: 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
     })
       .then((r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);

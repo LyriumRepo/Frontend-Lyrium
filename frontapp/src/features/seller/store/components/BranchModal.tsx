@@ -5,6 +5,7 @@ import { Branch } from '@/features/seller/store/types';
 import BaseModal from '@/components/ui/BaseModal';
 import BaseButton from '@/components/ui/BaseButton';
 import Icon from '@/components/ui/Icon';
+import { MapPin, ExternalLink } from 'lucide-react';
 import {peruLocations} from '@/data/peruLocations';
 
 interface BranchFormData {
@@ -16,6 +17,7 @@ interface BranchFormData {
     phone: string;
     hours: string;
     isPrincipal: boolean;
+    mapsUrl: string;
 }
 
 type BranchSaveHandler = (branch: unknown) => void;
@@ -36,7 +38,8 @@ export default function BranchModal({ isOpen, onClose, onSave, branch }: BranchM
         district: '',
         phone: '',
         hours: '',
-        isPrincipal: false
+        isPrincipal: false,
+        mapsUrl: ''
     });
 
     const selectedDepartment = peruLocations.find(
@@ -61,7 +64,8 @@ export default function BranchModal({ isOpen, onClose, onSave, branch }: BranchM
                 district: branch.district,
                 phone: branch.phone,
                 hours: branch.hours,
-                isPrincipal: branch.isPrincipal
+                isPrincipal: branch.isPrincipal,
+                mapsUrl: branch.mapsUrl || ''
             });
             console.log('BRANCH MODAL:', branch);
         } else {
@@ -73,7 +77,8 @@ export default function BranchModal({ isOpen, onClose, onSave, branch }: BranchM
                 district: '',
                 phone: '',
                 hours: '',
-                isPrincipal: false
+                isPrincipal: false,
+                mapsUrl: ''
             });
         }
     }, [branch, isOpen]);
@@ -244,6 +249,27 @@ export default function BranchModal({ isOpen, onClose, onSave, branch }: BranchM
                                     className="w-full pl-12 pr-4 sm:pr-5 py-3 sm:py-4 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-[1.5rem] font-bold text-[var(--text-primary)] shadow-lg shadow-black/5 focus:ring-4 focus:ring-sky-500/5 transition-all outline-none"
                                 />
                             </div>
+                        </div>
+
+                        <div className="space-y-1.5">
+                            <label htmlFor="branch-maps-url" className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1">
+                                Ubicación en Maps
+                            </label>
+                            <div className="relative group">
+                                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-sky-500 dark:text-[var(--icons-green)] w-5 h-5 font-bold" />
+                                <input
+                                    id="branch-maps-url"
+                                    type="url"
+                                    value={formData.mapsUrl}
+                                    onChange={e => setFormData({ ...formData, mapsUrl: e.target.value })}
+                                    placeholder="Pega el link de Google Maps..."
+                                    className="w-full pl-12 pr-4 sm:pr-5 py-3 sm:py-4 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-[1.5rem] font-bold text-[var(--text-primary)] shadow-lg shadow-black/5 focus:ring-4 focus:ring-sky-500/5 transition-all outline-none"
+                                />
+                            </div>
+                            <p className="text-[9px] text-[var(--text-muted)] ml-1 flex items-center gap-1">
+                                <ExternalLink className="w-2.5 h-2.5" />
+                                Abre Google Maps, busca tu sucursal y copia el link
+                            </p>
                         </div>
 
                         <label className="flex items-center gap-3 sm:gap-4 p-3 bg-[var(--bg-card)]/50 rounded-2xl border border-[var(--border-subtle)] cursor-pointer group active:scale-95 transition-all">

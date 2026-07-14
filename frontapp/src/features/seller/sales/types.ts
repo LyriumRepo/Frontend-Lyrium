@@ -2,7 +2,7 @@ export type OrderStatus = 'pending_seller' | 'confirmed' | 'processing' | 'shipp
 
 export type ItemStatus = 'pending_seller' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
 
-export type TipoEnvio = 'domicilio' | 'agencia';
+export type TipoEnvio = 'domicilio' | 'agencia' | 'retiro_tienda';
 
 export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
     pending_seller: 'Pendiente Confirmar',
@@ -47,6 +47,18 @@ export interface ShippingInfo {
     carrierCode?: string | null;
     carrierData?: Record<string, string> | null;
     checkoutCarrier?: string | null;
+}
+
+export interface BranchInfo {
+    id: number;
+    name: string;
+    address: string;
+    department: string;
+    province: string;
+    district: string;
+    phone: string | null;
+    hours: string | null;
+    mapsUrl: string | null;
 }
 
 export type OrderType = 'product' | 'service' | 'mixed';
@@ -110,6 +122,7 @@ export interface Order {
     notes: string | null;
     paidAt: string | null;
     envio: ShippingInfo;
+    branch: BranchInfo | null;
     items: OrderItem[];
     serviceItems: ServiceOrderItem[];
 }

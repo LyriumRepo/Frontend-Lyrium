@@ -85,7 +85,7 @@ export default function EmitInvoiceModal({ isOpen, onClose, onEmit }: EmitInvoic
         if (result.success) {
             setState('success');
         } else {
-            setErrorMsg(result.error ?? 'Error al conectar con Rapifac');
+            setErrorMsg(result.error ?? 'Error al conectar con Nubefact');
             setState('error');
         }
     };
@@ -101,7 +101,7 @@ export default function EmitInvoiceModal({ isOpen, onClose, onEmit }: EmitInvoic
                     </div>
                     <div>
                         <p className="text-xs font-black text-[var(--text-primary)] uppercase tracking-[0.2em] animate-pulse">
-                            Enviando a Rapifac...
+                            Enviando a Nubefact...
                         </p>
                         <p className="text-xs text-[var(--text-secondary)] font-medium mt-1">
                             Obteniendo token y emitiendo comprobante en SUNAT
@@ -122,7 +122,7 @@ export default function EmitInvoiceModal({ isOpen, onClose, onEmit }: EmitInvoic
                             ¡Factura emitida con éxito!
                         </h3>
                         <p className="text-xs text-[var(--text-secondary)] font-medium mt-2 max-w-xs mx-auto">
-                            El comprobante fue enviado a SUNAT vía Rapifac.
+                            El comprobante fue enviado a SUNAT vía Nubefact.
                         </p>
                     </div>
                     <BaseButton onClick={onClose} variant="action">
@@ -286,7 +286,7 @@ export default function EmitInvoiceModal({ isOpen, onClose, onEmit }: EmitInvoic
             isOpen={isOpen}
             onClose={onClose}
             title="Nueva Factura Electrónica"
-            subtitle="Rapifac · SUNAT"
+            subtitle="Nubefact · SUNAT"
             size="lg"
             accentColor="from-emerald-500 to-sky-500"
         >

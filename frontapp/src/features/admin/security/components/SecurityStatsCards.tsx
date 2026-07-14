@@ -23,7 +23,7 @@ const StatCard = ({ icon, label, value, color, bgColor }: StatCardProps) => (
           {typeof value === 'number' ? value.toLocaleString() : value}
         </p>
       </div>
-      <div className={`p-3 rounded-2xl ${color.replace('text-', 'bg-').replace('600', '100').replace('500', '100')} dark:opacity-80`}>
+      <div className={`p-3 rounded-2xl ${bgColor} dark:opacity-80`}>
         {icon}
       </div>
     </div>

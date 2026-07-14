@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
@@ -762,11 +762,24 @@ function AllReviewsTab() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [rating, setRating] = useState<number | null>(null);
   const [reported, setReported] = useState(false);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [deleting, setDeleting] = useState<string | null>(null);
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    setPage(1);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => setDebouncedSearch(value), 300);
+  };
+
+  useEffect(() => {
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  }, []);
 
   const fetchReviews = useCallback(() => {
     setLoading(true);
@@ -774,7 +787,7 @@ function AllReviewsTab() {
       .getAdminReviews({
         page,
         per_page: 15,
-        search: search || undefined,
+        search: debouncedSearch || undefined,
         rating: rating ?? undefined,
         reported: reported || undefined,
       })
@@ -787,7 +800,7 @@ function AllReviewsTab() {
       })
       .catch(() => setError('No se pudieron cargar las reseñas.'))
       .finally(() => setLoading(false));
-  }, [page, search, rating, reported]);
+  }, [page, debouncedSearch, rating, reported]);
 
   useEffect(() => {
     fetchReviews();
@@ -814,10 +827,7 @@ function AllReviewsTab() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
           <input
             value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setPage(1);
-            }}
+            onChange={(e) => handleSearchChange(e.target.value)}
             placeholder="Buscar en reseñas..."
             className="w-full pl-9 pr-4 py-2.5 text-sm border border-[var(--border-subtle)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--icons-green)]/30"
           />

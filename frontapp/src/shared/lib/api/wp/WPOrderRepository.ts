@@ -56,4 +56,8 @@ export class WPOrderRepository implements IOrderRepository {
         // WooCommerce no soporta items individuales, lanzar error
         throw new Error('Esta funcionalidad requiere el backend de Laravel');
     }
+
+    async getDashboardStats(): Promise<{ monthlySales: number; todayOrders: number }> {
+        throw new Error('Esta funcionalidad requiere el backend de Laravel');
+    }
 }

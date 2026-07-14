@@ -116,7 +116,7 @@ export function HelpdeskPageClient() {
   };
 
   return (
-    <div className="flex flex-col flex-1 min-h-0 animate-fadeIn overflow-hidden px-4">
+    <div className="flex flex-col flex-1 min-h-0 animate-fadeIn px-4">
       <div className="shrink-0 [&>div]:!mb-3">
         <ModuleHeader
           title="Soporte Lyrium"
@@ -191,7 +191,7 @@ export function HelpdeskPageClient() {
         </div>
 
         {/* Columna derecha: chat — ocupa toda la pantalla en móvil */}
-        <div className={`flex flex-col min-w-0 min-h-0 overflow-hidden transition-opacity duration-300 ease-in-out sm:flex-1 sm:opacity-100 ${!mobileShowChat ? 'w-0 min-w-0 opacity-0 pointer-events-none' : 'flex-1 opacity-100 pointer-events-auto'}`}>
+        <div className={`flex flex-col min-w-0 min-h-0 transition-opacity duration-300 ease-in-out sm:flex-1 sm:opacity-100 ${!mobileShowChat ? 'w-0 min-w-0 opacity-0 pointer-events-none' : 'flex-1 opacity-100 pointer-events-auto'}`}>
           <div className="h-1 w-full shrink-0 bg-gradient-to-r from-[#9cb04e] via-[#64c695] to-[#499bbf]" />
           {/* ChatView o estado vacío — flex-1 min-h-0 para que el área de mensajes haga scroll sin bloquear */}
           <div className="flex-1 min-h-0 flex flex-col overflow-hidden">

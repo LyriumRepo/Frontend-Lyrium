@@ -164,6 +164,7 @@ export interface OrderData {
   selectedPaymentMethodId: number | null;
   liriosUsed:              number;
   liriosDiscount:          number;
+  selectedBranchId:        number | null;
 }
 
 export interface OrderResult {
@@ -264,6 +265,7 @@ const defaultOrder: OrderData = {
   selectedPaymentMethodId: null,
   liriosUsed:              0,
   liriosDiscount:          0,
+  selectedBranchId:        null,
 };
 
 export const useCheckoutStore = create<CheckoutState>()(persist((set) => ({

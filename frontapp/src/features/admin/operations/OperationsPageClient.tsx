@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   CircleDollarSign,
   Receipt,
@@ -499,7 +499,7 @@ export function OperationsPageClient() {
 
   const {
     state: { expenses, stats, suppliers, loading, error, pagination },
-    actions: { markAsPaid, updateExpense, goToPage, refresh },
+    actions: { setFilters, markAsPaid, updateExpense, goToPage, refresh },
   } = useExpenses();
 
   const {
@@ -559,6 +559,10 @@ export function OperationsPageClient() {
     [],
   );
 
+  useEffect(() => {
+    setFilters({ from: dateFrom || undefined, to: dateTo || undefined });
+  }, [dateFrom, dateTo, setFilters]);
+
   const filtered = useMemo(() => {
     let list = expenses as ExpenseWithScan[];
     if (activeTab !== 'Todos') {
@@ -574,10 +578,8 @@ export function OperationsPageClient() {
       );
     }
     if (statusFilter) list = list.filter((e) => e.status === statusFilter);
-    if (dateFrom) list = list.filter((e) => e.issued_at >= dateFrom);
-    if (dateTo) list = list.filter((e) => e.issued_at <= dateTo);
     return list;
-  }, [expenses, activeTab, search, statusFilter, dateFrom, dateTo]);
+  }, [expenses, activeTab, search, statusFilter]);
 
   const perPage = 10;
   const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
@@ -763,15 +765,17 @@ export function OperationsPageClient() {
             ]}
           />
           <BaseDatePicker
+            label="Desde"
             value={dateFrom}
             onChange={setDateFrom}
-            placeholder="Desde"
+            placeholder="Sin fecha"
             buttonClassName="text-xs py-[7px]"
           />
           <BaseDatePicker
+            label="Hasta"
             value={dateTo}
             onChange={setDateTo}
-            placeholder="Hasta"
+            placeholder="Sin fecha"
             buttonClassName="text-xs py-[7px]"
           />
         </div>
@@ -786,14 +790,20 @@ export function OperationsPageClient() {
             {showScanner ? 'Cerrar' : 'Escanear PDF'}
           </button>
           <button
-            onClick={() => exportExpensesToExcel(filtered).catch(console.error)}
+            onClick={() => exportExpensesToExcel(filtered).catch((err) => {
+              console.error(err);
+              alert(err instanceof Error ? err.message : 'Error al exportar a Excel');
+            })}
             className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--bg-card)] text-[var(--text-primary)] font-bold text-xs border border-[var(--border-subtle)] hover:text-[var(--icons-green)] hover:border-[var(--icons-green)]/30 transition-all shadow-sm"
           >
             <Icon name="FileSpreadsheet" className="w-4 h-4" />
             Excel
           </button>
           <button
-            onClick={() => exportExpensesToPdf(filtered).catch(console.error)}
+            onClick={() => exportExpensesToPdf(filtered).catch((err) => {
+              console.error(err);
+              alert(err instanceof Error ? err.message : 'Error al exportar a PDF');
+            })}
             className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--bg-card)] text-[var(--text-primary)] font-bold text-xs border border-[var(--border-subtle)] hover:text-[var(--icons-green)] hover:border-[var(--icons-green)]/30 transition-all shadow-sm"
           >
             <Icon name="FileText" className="w-4 h-4" />

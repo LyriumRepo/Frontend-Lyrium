@@ -201,6 +201,12 @@ export default function ProductFormClient() {
 
   const [categories, setCategories] = useState<{ id: number; name: string; slug: string; level: number }[]>([]);
 
+  // Retiro en Tienda
+  const [pickupEnabled, setPickupEnabled] = useState(false);
+  const [branches, setBranches] = useState<{ id: number; name: string; address: string; district: string; is_principal: boolean }[]>([]);
+  const [branchStockMap, setBranchStockMap] = useState<Record<number, { stock: number; pickup_enabled: boolean }>>({});
+  const [hasFetchedBranches, setHasFetchedBranches] = useState(false);
+
   useEffect(() => {
     fetch(`${LARAVEL_API_URL}/categories?type=product&tree=1&per_page=100`)
       .then(r => r.json())
@@ -218,6 +224,26 @@ export default function ProductFormClient() {
       })
       .catch(() => {});
   }, []);
+
+  // Cargar sucursales del vendedor cuando activa RT
+  useEffect(() => {
+    if (!pickupEnabled || hasFetchedBranches) return;
+    const token = localStorage.getItem('laravel_token');
+    fetch(`${LARAVEL_API_URL}/stores/me`, {
+      headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+    })
+      .then(r => r.json())
+      .then(json => {
+        const data = (json.data?.branches || json.branches || []) as { id: number; name: string; address: string; district: string; is_principal: boolean }[];
+        const active = data.filter((b: any) => b.is_active !== false);
+        setBranches(active);
+        const map: Record<number, { stock: number; pickup_enabled: boolean }> = {};
+        active.forEach((b: any) => { map[b.id] = { stock: 0, pickup_enabled: true }; });
+        setBranchStockMap(map);
+        setHasFetchedBranches(true);
+      })
+      .catch(() => {});
+  }, [pickupEnabled, hasFetchedBranches]);
 
   React.useEffect(() => {
     const handler = (e: Event) => {
@@ -300,6 +326,29 @@ export default function ProductFormClient() {
           setImages(prev => prev.map(i => i.id === img.id ? { ...i, isUploading: false } : i));
           if (uploadResult.error) {
             showToast(`Error al subir ${img.file.name}: ${uploadResult.error}`, 'error');
+          }
+        }
+
+        // Guardar stock por sucursal (Retiro en Tienda)
+        if (pickupEnabled) {
+          const token = localStorage.getItem('laravel_token');
+          const branchesPayload = Object.entries(branchStockMap)
+            .filter(([_, v]) => v.pickup_enabled !== false || v.stock > 0)
+            .map(([branchId, v]) => ({
+              branch_id: parseInt(branchId),
+              stock: v.stock,
+              pickup_enabled: v.pickup_enabled !== false,
+            }));
+
+          if (branchesPayload.length > 0) {
+            await fetch(`${LARAVEL_API_URL}/products/${result.productId}/branches`, {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                ...(token ? { Authorization: `Bearer ${token}` } : {}),
+              },
+              body: JSON.stringify({ branches: branchesPayload }),
+            });
           }
         }
 
@@ -456,6 +505,94 @@ export default function ProductFormClient() {
               />
             </div>
           </div>
+        </div>
+
+        {/* Retiro en Tienda */}
+        <div className="glass-card p-8 rounded-3xl bg-white border border-gray-100 shadow-xl">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h3 className="text-sm font-black text-gray-800 uppercase">Retiro en Tienda</h3>
+              <p className="text-xs text-gray-500 mt-1">Disponible para recoger en tus sucursales</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setPickupEnabled(!pickupEnabled)}
+              className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors ${pickupEnabled ? 'bg-emerald-500' : 'bg-gray-300'}`}
+            >
+              <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${pickupEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
+            </button>
+          </div>
+
+          {pickupEnabled && (
+            <input type="hidden" name="pickup_enabled" value="true" />
+          )}
+
+          {pickupEnabled && branches.length > 0 && (
+            <div className="space-y-3">
+              <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                Selecciona sucursales y stock disponible
+              </p>
+              {branches.map(branch => (
+                <div
+                  key={branch.id}
+                  className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100"
+                >
+                  <div className="flex-1">
+                    <p className="text-sm font-bold text-gray-800">{branch.name}</p>
+                    <p className="text-xs text-gray-500">{branch.address}, {branch.district}</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <label className="text-xs font-bold text-gray-500">Stock:</label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={branchStockMap[branch.id]?.stock ?? 0}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value) || 0;
+                        setBranchStockMap(prev => ({
+                          ...prev,
+                          [branch.id]: { ...prev[branch.id], stock: val },
+                        }));
+                      }}
+                      className="w-20 px-3 py-2 bg-white border-2 border-gray-200 rounded-lg text-sm font-bold text-gray-700 focus:outline-none focus:border-sky-500"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setBranchStockMap(prev => ({
+                          ...prev,
+                          [branch.id]: {
+                            ...prev[branch.id],
+                            pickup_enabled: !prev[branch.id]?.pickup_enabled,
+                          },
+                        }));
+                      }}
+                      className={`relative inline-flex h-6 w-10 items-center rounded-full transition-colors ${
+                        branchStockMap[branch.id]?.pickup_enabled !== false ? 'bg-emerald-500' : 'bg-gray-300'
+                      }`}
+                    >
+                      <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
+                        branchStockMap[branch.id]?.pickup_enabled !== false ? 'translate-x-5' : 'translate-x-1'
+                      }`} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {pickupEnabled && branches.length === 0 && hasFetchedBranches && (
+            <div className="text-center py-6 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+              <Icon name="Store" className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+              <p className="text-sm text-gray-500">No tienes sucursales registradas</p>
+              <a
+                href="/seller/store"
+                className="text-sm font-bold text-sky-500 hover:underline mt-1 inline-block"
+              >
+                Crear sucursal
+              </a>
+            </div>
+          )}
         </div>
 
         <div className="glass-card p-8 rounded-3xl bg-white border border-gray-100 shadow-xl">

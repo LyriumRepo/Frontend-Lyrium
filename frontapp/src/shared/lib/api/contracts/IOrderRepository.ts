@@ -37,4 +37,5 @@ export interface IOrderRepository {
     confirmItem(orderId: string, itemId: string): Promise<Order>;
     updateItemStatus(orderId: string, itemId: string, status: OrderStatus): Promise<Order>;
     cancelItem(orderId: string, itemId: string): Promise<Order>;
+    getDashboardStats(): Promise<{ monthlySales: number; todayOrders: number }>;
 }

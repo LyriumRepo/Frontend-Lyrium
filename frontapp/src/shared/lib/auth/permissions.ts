@@ -10,7 +10,7 @@ import { redirect } from 'next/navigation';
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
-export type UserRole = 'admin' | 'operador' | 'seller' | 'guest';
+export type UserRole = 'admin' | 'operador' | 'seller' | 'logistics_operator' | 'customer' | 'guest';
 
 export interface AuthUser {
   id: string;
@@ -21,6 +21,21 @@ export interface AuthUser {
 }
 
 /**
+ * Mapea los nombres de rol del backend JWT a los roles internos del frontend.
+ * Backend: 'administrator' | 'seller' | 'logistics_operator' | 'customer'
+ * Frontend: 'admin' | 'seller' | 'logistics_operator' | 'customer' | 'guest'
+ */
+function mapBackendRole(backendRole: string): UserRole {
+  switch (backendRole) {
+    case 'administrator': return 'admin';
+    case 'seller': return 'seller';
+    case 'logistics_operator': return 'logistics_operator';
+    case 'customer': return 'customer';
+    default: return 'guest';
+  }
+}
+
+/**
  * Obtener el usuario actual desde los headers del middleware
  */
 export async function getAuthUser(): Promise<AuthUser | null> {
@@ -28,20 +43,13 @@ export async function getAuthUser(): Promise<AuthUser | null> {
   
   const userId = headersList.get('x-user-id');
   const userEmail = headersList.get('x-user-email');
-  const userRole = headersList.get('x-user-role') as UserRole;
+  const rawRole = headersList.get('x-user-role');
 
   if (!userId || !userEmail) {
     return null;
   }
 
-  // Determinar rol por email si no viene del middleware
-  let role: UserRole = userRole || 'seller';
-  
-  if (userEmail.includes('admin')) {
-    role = 'admin';
-  } else if (userEmail.includes('operador')) {
-    role = 'operador';
-  }
+  const role: UserRole = rawRole ? mapBackendRole(rawRole) : 'guest';
 
   return {
     id: userId,
@@ -137,8 +145,8 @@ export function validateOwnership(
  * Obtener el vendorId del usuario actual para filtrar queries
  */
 export function getVendorFilter(user: AuthUser): number | undefined {
-  // Admin y operador ven todos los vendedores
-  if (user.role === 'admin' || user.role === 'operador') {
+  // Admin, operador y logistics_operator ven todos los vendedores
+  if (user.role === 'admin' || user.role === 'operador' || user.role === 'logistics_operator') {
     return undefined;
   }
   

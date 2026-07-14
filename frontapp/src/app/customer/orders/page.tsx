@@ -16,6 +16,7 @@ import ClientRescheduleModal, { SelectedSpecialist } from './ClientRescheduleMod
 type TipoEnvio =
   | 'domicilio'
   | 'agencia'
+  | 'retiro_en_tienda'
   | 'atencion_domicilio'
   | 'atencion_sede';
 
@@ -25,6 +26,7 @@ type EstadoPedido =
   | 'en_transporte'
   | 'en_domicilio'
   | 'listo_recojo_agencia'
+  | 'listo_recojo_tienda'
   | 'confirmado_cliente'
   | 'validacion_centro_salud'
   | 'en_camino'
@@ -36,6 +38,15 @@ interface EnvioInfo {
   carrier: string;
   tracking: string;
   tracking_url: string;
+  branch?: {
+    name: string;
+    address: string;
+    department: string;
+    province: string;
+    district: string;
+    phone: string | null;
+    hours: string | null;
+  } | null;
 }
 
 interface Order {
@@ -104,6 +115,12 @@ const TRACKING_LABELS: Record<TipoEnvio, string[]> = {
     'Listo para recoger en agencia',
     '¡Recibido! Confirmamos la entrega de tu pedido',
   ],
+  retiro_en_tienda: [
+    'Tu pedido ha sido validado por el vendedor',
+    'Tu pedido está siendo despachado',
+    'Listo para recoger en tienda',
+    '¡Recibido! Confirmamos la entrega de tu pedido',
+  ],
   atencion_domicilio: [
     'Validación del centro de salud',
     '¡El especialista va en camino!',
@@ -143,6 +160,18 @@ const FLOW_CONFIG: Record<
       { id: 3, label: 'En Transporte', icon: 'Truck' },
       { id: 4, label: 'Listo Agencia', icon: 'MapPin' },
       { id: 5, label: 'Confirmado', icon: 'UserCheck' },
+    ],
+  },
+  retiro_en_tienda: {
+    label: 'Retiro en Tienda',
+    icon: 'Store',
+    color: 'text-sky-500',
+    accent: 'bg-sky-500/10 border-sky-700/20 text-sky-400',
+    steps: [
+      { id: 1, label: 'Validado', icon: 'CheckSquare' },
+      { id: 2, label: 'Despacho', icon: 'Package' },
+      { id: 3, label: 'Listo en Tienda', icon: 'Store' },
+      { id: 4, label: 'Confirmado', icon: 'UserCheck' },
     ],
   },
   atencion_domicilio: {
@@ -197,6 +226,22 @@ const STATUS_STEP_MAP: Record<string, number> = {
   cancelled: 0,
 };
 
+const STATUS_STEP_MAP_RETiro: Record<string, number> = {
+  pending_seller: 1,
+  confirmed: 2,
+  processing: 2,
+  shipped: 3,
+  delivered: 4,
+  cancelled: 0,
+};
+
+function getStatusStep(statusKey: string, tipoEnvio: TipoEnvio): number {
+  if (tipoEnvio === 'retiro_en_tienda') {
+    return STATUS_STEP_MAP_RETiro[statusKey] ?? 1;
+  }
+  return STATUS_STEP_MAP[statusKey] ?? 1;
+}
+
 function parseDateToDisplay(iso: string): { fecha: string; hora: string } {
   try {
     const d = new Date(iso);
@@ -212,7 +257,7 @@ function parseDateToDisplay(iso: string): { fecha: string; hora: string } {
 
 const SHIPPING_TYPE_MAP: Record<string, TipoEnvio> = {
   delivery: 'domicilio',
-  pickup: 'agencia',
+  pickup: 'retiro_en_tienda',
   service_home: 'atencion_domicilio',
   service_store: 'atencion_sede',
 };
@@ -244,18 +289,37 @@ function mapOrderResourceToOrder(raw: OrderResource): Order {
     tienda,
     detalle,
     total: `S/ ${Number(item.total).toFixed(2)}`,
-    estado: STATUS_MAP[statusKey] ?? 'validado_vendedor',
+    estado: (() => {
+      const base = STATUS_MAP[statusKey] ?? 'validado_vendedor';
+      if (statusKey === 'shipped') {
+        if (tipoEnvio === 'retiro_en_tienda') return 'listo_recojo_tienda';
+        if (tipoEnvio === 'agencia') return 'listo_recojo_agencia';
+      }
+      if (statusKey === 'processing' && tipoEnvio === 'retiro_en_tienda') return 'despachado';
+      return base;
+    })(),
     estadoLabel: item.statusLabel ?? STATUS_LABEL_MAP[statusKey] ?? statusKey,
     tipo: 'productos',
     tipo_envio: tipoEnvio,
-    currentStep: STATUS_STEP_MAP[statusKey] ?? 1,
+    currentStep: getStatusStep(statusKey, tipoEnvio),
     imagen: firstImage,
     envio: item.shipping
       ? {
-          direccion: combineAddressParts([item.shipping.address, item.shipping.city]),
+          direccion: item.branch
+            ? item.branch.name
+            : combineAddressParts([item.shipping.address, item.shipping.city]),
           carrier: 'Por determinar',
           tracking: '-',
           tracking_url: '',
+          branch: item.branch ? {
+            name: item.branch.name,
+            address: item.branch.address ?? '',
+            department: item.branch.department ?? '',
+            province: item.branch.province ?? '',
+            district: item.branch.district ?? '',
+            phone: item.branch.phone ?? null,
+            hours: item.branch.hours ?? null,
+          } : null,
         }
       : undefined,
     paymentMethod: item.paymentMethod ?? null,
@@ -295,6 +359,8 @@ const getStatusStyles = (estado: EstadoPedido) => {
       return { bg: 'bg-emerald-100', text: 'text-emerald-700', icon: 'Home' };
     case 'listo_recojo_agencia':
       return { bg: 'bg-emerald-100', text: 'text-emerald-700', icon: 'MapPin' };
+    case 'listo_recojo_tienda':
+      return { bg: 'bg-sky-100', text: 'text-sky-700', icon: 'Store' };
     case 'confirmado_cliente':
       return { bg: 'bg-green-100', text: 'text-green-700', icon: 'CheckCircle' };
 
@@ -452,50 +518,103 @@ function TrackingCard({ envio, tipoEnvio }: { envio: EnvioInfo; tipoEnvio: TipoE
   const flow = FLOW_CONFIG[tipoEnvio];
   const hasTracking = envio.tracking && envio.tracking !== '-';
   const hasUrl = !!envio.tracking_url;
+  const isPickup = tipoEnvio === 'retiro_en_tienda' && envio.branch;
 
   return (
     <div className="p-6 bg-gray-50 dark:bg-[var(--bg-muted)]/50 rounded-[2rem] border border-gray-100 dark:border-[var(--border-subtle)] space-y-4">
       <h5 className="text-[10px] font-black text-gray-400 dark:text-gray-400 uppercase tracking-widest">
-        Información de Envío
+        {isPickup ? 'Sucursal de Retiro' : 'Información de Envío'}
       </h5>
 
-      <div className="flex items-start gap-3">
-        <div className="w-10 h-10 bg-white dark:bg-[var(--bg-secondary)] rounded-xl flex items-center justify-center text-sky-500 dark:text-[var(--icons-green)] border border-gray-100 dark:border-[var(--border-subtle)] flex-shrink-0 shadow-sm">
-          <Icon name="MapPin" className="w-4 h-4" />
-        </div>
-        <div>
-          <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-0.5">
-            {tipoEnvio === 'domicilio'
-              ? 'Dirección de entrega'
-              : 'Ciudad / Agencia'}
-          </p>
-          <p className="text-sm font-bold text-gray-700 dark:text-[var(--text-primary)]">{envio.direccion}</p>
-        </div>
-      </div>
-
-      <div className="flex items-start gap-3">
-          <div className="w-10 h-10 bg-white dark:bg-[var(--bg-secondary)] rounded-xl flex items-center justify-center text-sky-500 dark:text-[var(--icons-green)] border border-gray-100 dark:border-[var(--border-subtle)] flex-shrink-0 shadow-sm">
-            <Icon name="Truck" className="w-4 h-4" />
+      {isPickup ? (
+        <div className="space-y-3">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 bg-white dark:bg-[var(--bg-secondary)] rounded-xl flex items-center justify-center text-emerald-500 border border-gray-100 dark:border-[var(--border-subtle)] flex-shrink-0 shadow-sm">
+              <Icon name="Store" className="w-4 h-4" />
+            </div>
+            <div>
+              <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-0.5">
+                Sucursal
+              </p>
+              <p className="text-sm font-bold text-gray-700 dark:text-[var(--text-primary)]">{envio.branch!.name}</p>
+            </div>
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-0.5">
-              Operador / Número de seguimiento
-            </p>
-            {hasTracking ? (
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="text-sm font-bold text-gray-700 dark:text-[var(--text-primary)]">{envio.carrier}</span>
-                <span className="text-[10px] font-black text-gray-400">·</span>
-                <span className="font-mono text-[11px] font-black text-sky-600 dark:text-[var(--icons-green)] tracking-wider">
-                  {envio.tracking}
-                </span>
+          <div className="grid grid-cols-2 gap-3 pl-[52px]">
+            {envio.branch!.address && (
+              <div className="col-span-2">
+                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Dirección</p>
+                <p className="text-xs font-bold text-gray-600 dark:text-[var(--text-secondary)]">{envio.branch!.address}</p>
               </div>
-            ) : (
-              <span className="text-[11px] font-bold text-sky-500 dark:text-[var(--icons-green)]">Pendiente de despacho</span>
+            )}
+            {envio.branch!.district && (
+              <div>
+                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Distrito</p>
+                <p className="text-xs font-bold text-gray-600 dark:text-[var(--text-secondary)]">{envio.branch!.district}</p>
+              </div>
+            )}
+            {envio.branch!.province && (
+              <div>
+                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Provincia</p>
+                <p className="text-xs font-bold text-gray-600 dark:text-[var(--text-secondary)]">{envio.branch!.province}</p>
+              </div>
+            )}
+            {envio.branch!.phone && (
+              <div>
+                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Teléfono</p>
+                <p className="text-xs font-bold text-gray-600 dark:text-[var(--text-secondary)]">{envio.branch!.phone}</p>
+              </div>
+            )}
+            {envio.branch!.hours && (
+              <div>
+                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Horario</p>
+                <p className="text-xs font-bold text-gray-600 dark:text-[var(--text-secondary)]">{envio.branch!.hours}</p>
+              </div>
             )}
           </div>
         </div>
+      ) : (
+        <div className="flex items-start gap-3">
+          <div className="w-10 h-10 bg-white dark:bg-[var(--bg-secondary)] rounded-xl flex items-center justify-center text-sky-500 dark:text-[var(--icons-green)] border border-gray-100 dark:border-[var(--border-subtle)] flex-shrink-0 shadow-sm">
+            <Icon name="MapPin" className="w-4 h-4" />
+          </div>
+          <div>
+            <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-0.5">
+              {tipoEnvio === 'domicilio'
+                ? 'Dirección de entrega'
+                : tipoEnvio === 'retiro_en_tienda'
+                  ? 'Sucursal de retiro'
+                  : 'Ciudad / Agencia'}
+            </p>
+            <p className="text-sm font-bold text-gray-700 dark:text-[var(--text-primary)]">{envio.direccion}</p>
+          </div>
+        </div>
+      )}
 
-      {hasTracking && hasUrl && (
+      {!isPickup && (
+        <div className="flex items-start gap-3">
+            <div className="w-10 h-10 bg-white dark:bg-[var(--bg-secondary)] rounded-xl flex items-center justify-center text-sky-500 dark:text-[var(--icons-green)] border border-gray-100 dark:border-[var(--border-subtle)] flex-shrink-0 shadow-sm">
+              <Icon name="Truck" className="w-4 h-4" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-0.5">
+                Operador / Número de seguimiento
+              </p>
+              {hasTracking ? (
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-sm font-bold text-gray-700 dark:text-[var(--text-primary)]">{envio.carrier}</span>
+                  <span className="text-[10px] font-black text-gray-400">·</span>
+                  <span className="font-mono text-[11px] font-black text-sky-600 dark:text-[var(--icons-green)] tracking-wider">
+                    {envio.tracking}
+                  </span>
+                </div>
+              ) : (
+                <span className="text-[11px] font-bold text-sky-500 dark:text-[var(--icons-green)]">Pendiente de despacho</span>
+              )}
+            </div>
+          </div>
+      )}
+
+      {!isPickup && hasTracking && hasUrl && (
         <a
           href={envio.tracking_url}
           target="_blank"
@@ -505,6 +624,13 @@ function TrackingCard({ envio, tipoEnvio }: { envio: EnvioInfo; tipoEnvio: TipoE
           <Icon name="ExternalLink" className="w-3.5 h-3.5" />
           Rastrear mi pedido en {envio.carrier}
         </a>
+      )}
+
+      {isPickup && (
+        <div className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800/30 text-[10px] font-black uppercase tracking-widest text-emerald-700 dark:text-emerald-400">
+          <Icon name="Store" className="w-3.5 h-3.5" />
+          Recoger en sucursal — Sin costo de envío
+        </div>
       )}
     </div>
   );
@@ -726,14 +852,19 @@ export default function CustomerOrdersPage() {
     'OrderStatusChanged',
     (event) => {
       const { order_id, status } = event;
-      const newEstado = STATUS_MAP[status] ?? 'validado_vendedor';
-      const newLabel = STATUS_LABEL_MAP[status] ?? status;
-      const newStep = STATUS_STEP_MAP[status] ?? 1;
 
-      const applyUpdate = (o: Order): Order =>
-        o.originalId === Number(order_id)
-          ? { ...o, estado: newEstado, estadoLabel: newLabel, currentStep: newStep }
-          : o;
+      const applyUpdate = (o: Order): Order => {
+        if (o.originalId !== Number(order_id)) return o;
+        const newEstado = status === 'processing' && o.tipo_envio === 'retiro_en_tienda'
+          ? 'despachado'
+          : STATUS_MAP[status] ?? 'validado_vendedor';
+        return {
+          ...o,
+          estado: newEstado,
+          estadoLabel: STATUS_LABEL_MAP[status] ?? status,
+          currentStep: getStatusStep(status, o.tipo_envio ?? 'domicilio'),
+        };
+      };
 
       setOrders(prev => prev.map(applyUpdate));
       setFiltered(prev => prev.map(applyUpdate));
@@ -879,6 +1010,7 @@ export default function CustomerOrdersPage() {
       ? [
         { value: 'domicilio', label: 'Entrega a domicilio' },
         { value: 'agencia', label: 'Recojo en agencia' },
+        { value: 'retiro_en_tienda', label: 'Retiro en tienda' },
       ]
       : [
         { value: 'atencion_domicilio', label: 'Atención a domicilio' },
@@ -898,6 +1030,13 @@ export default function CustomerOrdersPage() {
       { value: 'despachado', label: 'Despachado' },
       { value: 'en_transporte', label: 'En transporte' },
       { value: 'listo_recojo_agencia', label: 'Listo para recojo en agencia' },
+      { value: 'confirmado_cliente', label: 'Confirmado por cliente' },
+    ],
+    retiro_en_tienda: [
+      { value: 'validado_vendedor', label: 'Validado por vendedor' },
+      { value: 'despachado', label: 'Despachado' },
+      { value: 'en_transporte', label: 'En transporte' },
+      { value: 'listo_recojo_tienda', label: 'Listo para recoger en tienda' },
       { value: 'confirmado_cliente', label: 'Confirmado por cliente' },
     ],
     atencion_domicilio: [
@@ -1304,6 +1443,13 @@ export default function CustomerOrdersPage() {
                     <p className="font-black text-gray-800 dark:text-[var(--text-primary)]">2. Recojo en agencia</p>
                     <p className="text-sm text-gray-600 dark:text-[var(--text-muted)] mt-1">
                       Si deseas recoger tu pedido en la agencia del operador logístico designado por la tienda correspondiente.
+                    </p>
+                  </div>
+
+                  <div className="p-4 rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)] bg-gray-50 dark:bg-[var(--bg-muted)]/50">
+                    <p className="font-black text-gray-800 dark:text-[var(--text-primary)]">3. Retiro en tienda</p>
+                    <p className="text-sm text-gray-600 dark:text-[var(--text-muted)] mt-1">
+                      Si deseas recoger tu pedido directamente en la sucursal de la tienda.
                     </p>
                   </div>
 

@@ -3,6 +3,7 @@
 import { Tienda, Producto } from '@/types/public';
 import ProductGrid from '@/components/products/ProductGrid';
 import AdBannersCarousel from '../AdBannersCarousel';
+import ScrollableSection from './ScrollableSection';
 
 interface Layout3Props {
   store: Tienda;
@@ -27,9 +28,9 @@ export default function Layout3({ products, banners }: Layout3Props) {
           <div className="hidden md:block w-48 lg:w-72 flex-shrink-0">
             <AdBannersCarousel banners={banners} maxBanners={4} vertical startIndex={0} fallback={4} />
           </div>
-          <div className="flex-1">
+          <ScrollableSection visibleRows={2} className="flex-1 min-h-0">
             <ProductGrid productos={productosNormales} className="lg:!grid-cols-3" />
-          </div>
+          </ScrollableSection>
           <div className="hidden md:block w-48 lg:w-72 flex-shrink-0">
             <AdBannersCarousel banners={banners} maxBanners={4} vertical startIndex={4} fallback={4} />
           </div>
@@ -47,7 +48,9 @@ export default function Layout3({ products, banners }: Layout3Props) {
           <h2 className="text-lg sm:text-xl font-bold text-slate-800 dark:text-[var(--text-primary)]">
             Servicios de la tienda
           </h2>
-          <ProductGrid productos={productosServicio} className="lg:!grid-cols-3" />
+          <ScrollableSection visibleRows={2}>
+            <ProductGrid productos={productosServicio} className="lg:!grid-cols-3" />
+          </ScrollableSection>
         </div>
       )}
     </div>

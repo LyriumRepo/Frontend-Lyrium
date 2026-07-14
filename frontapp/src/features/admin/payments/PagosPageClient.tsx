@@ -383,14 +383,20 @@ export function PagosPageClient() {
             Actualizar
           </BaseButton>
           <button
-            onClick={() => exportPaymentsToExcel(data).catch(console.error)}
+            onClick={() => exportPaymentsToExcel(data).catch((err) => {
+              console.error(err);
+              alert(err instanceof Error ? err.message : 'Error al exportar a Excel');
+            })}
             className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--bg-card)] text-[var(--text-primary)] font-bold text-xs border border-[var(--border-subtle)] hover:text-[var(--icons-green)] hover:border-[var(--icons-green)]/30 transition-all shadow-sm"
           >
             <Icon name="FileSpreadsheet" className="w-4 h-4" />
             Excel
           </button>
           <button
-            onClick={() => exportPaymentsToPdf(data).catch(console.error)}
+            onClick={() => exportPaymentsToPdf(data).catch((err) => {
+              console.error(err);
+              alert(err instanceof Error ? err.message : 'Error al exportar a PDF');
+            })}
             className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--bg-card)] text-[var(--text-primary)] font-bold text-xs border border-[var(--border-subtle)] hover:text-[var(--icons-green)] hover:border-[var(--icons-green)]/30 transition-all shadow-sm"
           >
             <Icon name="FileText" className="w-4 h-4" />

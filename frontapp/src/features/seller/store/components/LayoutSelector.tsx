@@ -100,11 +100,19 @@ const layouts = [
                 </div>
                 <div className="w-full border-t border-gray-200 dark:border-gray-700" />
                 <div className="flex-1 grid gap-0.5" style={{ gridTemplateColumns: '1fr 18%' }}>
-                    <div className="grid grid-cols-4 gap-0.5">
-                        <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
-                        <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
-                        <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
-                        <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
+                    <div className="grid grid-rows-2 gap-0.5">
+                      <div className="grid grid-cols-4 gap-0.5">
+                          <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
+                          <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
+                          <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
+                          <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
+                      </div>
+                      <div className="grid grid-cols-4 gap-0.5">
+                          <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
+                          <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
+                          <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
+                          <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
+                      </div>
                     </div>
                     <div className="w-full h-full bg-sky-500/60 dark:bg-emerald-700/60 rounded flex items-center justify-center text-[6px] font-bold text-white overflow-hidden" style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>
                         Banner
@@ -154,12 +162,21 @@ const layouts = [
                     <div className="flex-1 bg-sky-500/80 dark:bg-emerald-700/80 rounded flex items-center justify-center text-[6px] font-bold text-white">Banner</div>
                 </div>
                 <div className="w-full border-t border-gray-200 dark:border-gray-700" />
-                <div className="flex-1 grid grid-cols-5 gap-0.5">
-                    <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
-                    <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
-                    <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
-                    <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
-                    <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
+                <div className="flex-1 grid grid-rows-2 gap-0.5">
+                    <div className="grid grid-cols-5 gap-0.5">
+                        <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
+                        <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
+                        <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
+                        <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
+                        <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
+                    </div>
+                    <div className="grid grid-cols-5 gap-0.5">
+                        <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
+                        <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
+                        <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
+                        <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
+                        <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
+                    </div>
                 </div>
             </>
         )

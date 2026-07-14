@@ -34,6 +34,7 @@ export function useFinanceAnalytics() {
             const res = await apiClient<{ success: boolean; data: FinanceData }>(
                 `/admin/finance?${params.toString()}`
             );
+            if (!res.success) throw new Error('Error al cargar datos financieros');
             return res.data;
         },
         staleTime: 5 * 60 * 1000,
@@ -46,8 +47,9 @@ export function useFinanceAnalytics() {
     const applyFilters = useCallback(async () => {
         setIsRefreshing(true);
         setAppliedFilters({ ...filters });
-        await refetch();
+        const result = await refetch();
         setIsRefreshing(false);
+        return !result.error;
     }, [filters, refetch]);
 
     const isVisible = useCallback(

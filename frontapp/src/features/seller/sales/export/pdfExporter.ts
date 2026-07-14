@@ -275,7 +275,7 @@ function drawOrderDetail(doc: jsPDF, order: Order, idx: number): number {
             doc.text('ENVÍO', ML, y);
             const city = parseCity(order.envio.city);
             y = fieldGrid(doc, [
-                ['Tipo', order.tipo_envio === 'domicilio' ? 'A Domicilio' : order.tipo_envio === 'agencia' ? 'Por Agencia' : '—'],
+                ['Tipo', order.tipo_envio === 'domicilio' ? 'A Domicilio' : order.tipo_envio === 'agencia' ? 'Por Agencia' : order.tipo_envio === 'retiro_tienda' ? 'Retiro en Tienda' : '—'],
                 ['Dirección', order.envio.direccion || '—'],
                 ['Ciudad', `${city.distrito}, ${city.provincia}, ${city.departamento}`],
                 ['Referencia', order.envio.notes || '—'],
@@ -532,6 +532,7 @@ export async function generateSalesReportPdf(
             if (order.items.length > 0) {
                 atencion = order.tipo_envio === 'domicilio' ? 'A Domicilio'
                     : order.tipo_envio === 'agencia' ? 'Por Agencia'
+                    : order.tipo_envio === 'retiro_tienda' ? 'Retiro en Tienda'
                     : '—';
             } else if (order.serviceItems.length > 0) {
                 const svc = order.serviceItems[0];

@@ -42,6 +42,7 @@ export function useCheckoutGrandTotals(): CheckoutGrandTotals {
   const selectedCourier = useCheckoutStore(s => s.selectedCourier);
   const tipoEntrega     = useCheckoutStore(s => s.selectedTipoEntrega);
   const cartItems       = useCheckoutStore(s => s.cartItems);
+  const deliveryMethod  = useCheckoutStore(s => s.orderData.deliveryMethod);
 
   return useMemo<CheckoutGrandTotals>(() => {
     const selectedItems = cartItems.filter(i => i.selected);
@@ -57,6 +58,17 @@ export function useCheckoutGrandTotals(): CheckoutGrandTotals {
         grandTotalEnvio: 0,
         grandTotal: serviceTotal,
         isReady: selectedItems.length > 0,
+      };
+    }
+
+    // Retiro en tienda: no necesita cotización de envío, solo suma productos.
+    if (deliveryMethod === 'pickup') {
+      const grandTotalProductos = productItems.reduce((s, i) => s + i.price * i.quantity, 0);
+      return {
+        grandTotalProductos,
+        grandTotalEnvio: 0,
+        grandTotal: grandTotalProductos + serviceTotal,
+        isReady: true,
       };
     }
 
@@ -90,5 +102,5 @@ export function useCheckoutGrandTotals(): CheckoutGrandTotals {
       grandTotal: grandTotalProductos + grandTotalEnvio,
       isReady: true,
     };
-  }, [shippingQuotes, selectedCourier, tipoEntrega, cartItems]);
+  }, [shippingQuotes, selectedCourier, tipoEntrega, cartItems, deliveryMethod]);
 }

@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
-import BaseLoading from '@/components/ui/BaseLoading';
+import BaseButton from '@/components/ui/BaseButton';
+import Icon from '@/components/ui/Icon';
 import { useAdminTrainings } from '@/features/admin/trainings/hooks/useAdminTrainings';
 import TrainingsList from '@/features/admin/trainings/components/TrainingsList';
 import TrainingEditorModal from '@/features/admin/trainings/components/TrainingEditorModal';
@@ -18,40 +19,20 @@ export function TrainingsPageClient() {
 
     if (error) {
         return (
-            <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-                <div className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/20 flex items-center justify-center">
-                    <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                        <circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" />
-                    </svg>
+            <div className="flex flex-col items-center justify-center min-h-[400px] gap-5 animate-fadeIn">
+                <div className="w-20 h-20 rounded-2xl bg-red-100 dark:bg-red-900/20 flex items-center justify-center">
+                    <Icon name="XCircle" className="w-10 h-10 text-red-500" />
                 </div>
-                <p className="text-lg font-bold text-[var(--text-primary)]">Error al cargar capacitaciones</p>
-                <p className="text-sm text-[var(--text-secondary)]">{error}</p>
-                <button onClick={() => window.location.reload()}
-                    className="px-6 py-3 rounded-xl text-white font-bold text-sm bg-[var(--brand-sky)] dark:bg-[var(--brand-teal)] hover:opacity-90 transition-all">
+                <div className="text-center">
+                    <p className="text-base font-bold text-[var(--text-primary)] mb-1">Error al cargar capacitaciones</p>
+                    <p className="text-sm text-[var(--text-secondary)]">{error}</p>
+                </div>
+                <BaseButton variant="primary" size="md" leftIcon="RefreshCw" onClick={() => window.location.reload()}>
                     Reintentar
-                </button>
+                </BaseButton>
             </div>
         );
     }
-
-    const actionBtns = (
-        <div className="flex flex-wrap gap-2">
-            <button onClick={() => setComplianceOpen(true)}
-                className="px-4 py-2 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] text-[var(--text-primary)] text-sm font-bold hover:border-[var(--brand-sky)] dark:hover:border-[var(--brand-teal)] hover:text-[var(--brand-sky)] dark:hover:text-[var(--brand-teal)] transition-all cursor-pointer flex items-center gap-2 w-full sm:w-auto justify-center">
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-                </svg>
-                Progreso
-            </button>
-            <button onClick={openCreate}
-                className="px-4 py-2 rounded-xl bg-[var(--brand-sky)] dark:bg-[var(--brand-teal)] text-white text-sm font-bold hover:opacity-90 transition-all cursor-pointer flex items-center gap-2 w-full sm:w-auto justify-center">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-                </svg>
-                Nueva capacitación
-            </button>
-        </div>
-    );
 
     return (
         <div className="space-y-6 animate-fadeIn pb-12">
@@ -61,7 +42,14 @@ export function TrainingsPageClient() {
                 icon="Video"
             />
             <div className="px-1">
-                {actionBtns}
+                <div className="flex flex-col sm:flex-row gap-2 sm:justify-end">
+                    <BaseButton variant="secondary" size="md" leftIcon="BarChart" onClick={() => setComplianceOpen(true)} fullWidth>
+                        Progreso
+                    </BaseButton>
+                    <BaseButton variant="primary" size="md" leftIcon="Plus" onClick={openCreate} fullWidth>
+                        Nueva capacitación
+                    </BaseButton>
+                </div>
             </div>
 
             {complianceOpen && (

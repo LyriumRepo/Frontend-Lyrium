@@ -4,6 +4,8 @@ import { CheckCircle, MapPin, CreditCard, Home, ArrowRight } from 'lucide-react'
 import Link from 'next/link';
 import Image from 'next/image';
 import { useCheckoutStore } from '@/store/checkoutStore';
+import { useEffect } from 'react';
+import confetti from 'canvas-confetti';
 
 const PAYMENT_LABELS: Record<string, string> = {
   credit_card: 'Tarjeta de Crédito',
@@ -22,6 +24,30 @@ const DELIVERY_LABELS: Record<string, string> = {
 export default function OrderConfirmation() {
   const result  = useCheckoutStore((s) => s.orderResult);
   const setStep = useCheckoutStore((s) => s.setStep);
+
+  useEffect(() => {
+    const duration = 3000;
+    const end = Date.now() + duration;
+
+    const frame = () => {
+      confetti({
+        particleCount: 3,
+        angle: 60,
+        spread: 55,
+        origin: { x: 0, y: 0.7 },
+        colors: ['#10b981', '#06b6d4', '#f59e0b', '#ec4899', '#8b5cf6'],
+      });
+      confetti({
+        particleCount: 3,
+        angle: 120,
+        spread: 55,
+        origin: { x: 1, y: 0.7 },
+        colors: ['#10b981', '#06b6d4', '#f59e0b', '#ec4899', '#8b5cf6'],
+      });
+      if (Date.now() < end) requestAnimationFrame(frame);
+    };
+    frame();
+  }, []);
 
   if (!result) return null;
 
@@ -64,7 +90,7 @@ export default function OrderConfirmation() {
             </div>
 
             <h2 className="text-3xl font-black text-gray-900 dark:text-[var(--text-primary)] tracking-tight mb-2 uppercase">
-              ¡Gracias por tu compra!
+              ¡Felicidades por tu compra!
             </h2>
             <p className="text-xs text-gray-400 dark:text-[var(--text-muted)] font-bold uppercase tracking-widest mb-2">
               Tu pedido ha sido procesado con éxito

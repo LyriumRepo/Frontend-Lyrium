@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 
 export type EstadoSolicitud = "ACEPTADO" | "REVISION" | "RECHAZADO";
 export type RiesgoSolicitud = "BAJO" | "MEDIO" | "ALTO";
@@ -50,7 +50,15 @@ export type FiltroEstado = "TODOS" | EstadoSolicitud;
 
 export function useSellers() {
   const [buscar, setBuscar] = useState("");
+  const [debouncedBuscar, setDebouncedBuscar] = useState("");
   const [filtroEstado, setFiltroEstado] = useState<FiltroEstado>("TODOS");
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    debounceTimer.current = setTimeout(() => setDebouncedBuscar(buscar), 300);
+    return () => { if (debounceTimer.current) clearTimeout(debounceTimer.current); };
+  }, [buscar]);
   const [expandido, setExpandido] = useState<number | null>(null);
   const [pagina, setPagina] = useState(1);
   const [data, setData] = useState<Solicitud[]>([]);
@@ -66,8 +74,8 @@ export function useSellers() {
       if (filtroEstado !== "TODOS") {
         params.set("estado", filtroEstado);
       }
-      if (buscar) {
-        params.set("buscar", buscar);
+      if (debouncedBuscar) {
+        params.set("buscar", debouncedBuscar);
       }
 
       const res = await fetch(`${LARAVEL_API}/admin/seller-applications?${params}`, {
@@ -96,7 +104,7 @@ export function useSellers() {
     } finally {
       setLoading(false);
     }
-  }, [buscar, filtroEstado]);
+  }, [debouncedBuscar, filtroEstado]);
 
   useEffect(() => {
     fetchData();

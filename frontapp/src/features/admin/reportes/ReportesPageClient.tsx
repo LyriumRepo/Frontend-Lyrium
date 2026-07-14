@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import { downloadExport } from '@/shared/lib/utils/exportFile';
+import BaseDatePicker from '@/components/ui/BaseDatePicker';
 import { FileText, FileSpreadsheet, BarChart3, Store, DollarSign, Package } from 'lucide-react';
 
 type TabKey = 'ventas' | 'vendedores' | 'financiero' | 'productos';
@@ -66,6 +67,7 @@ function ReportCard({ tab }: { tab: TabConfig }) {
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [loading, setLoading] = useState<string | null>(null);
+  const [exportError, setExportError] = useState<string | null>(null);
 
   const buildUrl = (format: string) => {
     const params = new URLSearchParams();
@@ -77,13 +79,11 @@ function ReportCard({ tab }: { tab: TabConfig }) {
 
   const handleDownload = async (format: string) => {
     setLoading(format);
+    setExportError(null);
     try {
       await downloadExport(buildUrl(format), `reporte-${tab.key}.${format === 'excel' ? 'xlsx' : format}`);
-    } catch {
-      // fallback: open in new tab
-      const token = localStorage.getItem('laravel_token');
-      const base = process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://localhost:8000/api';
-      window.open(`${base}${buildUrl(format)}`, '_blank');
+    } catch (err) {
+      setExportError(err instanceof Error ? err.message : 'Error al generar el reporte');
     } finally {
       setLoading(null);
     }
@@ -102,22 +102,20 @@ function ReportCard({ tab }: { tab: TabConfig }) {
       </div>
 
       <div className="flex items-center gap-3 mb-5">
-        <div>
-          <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-[var(--text-secondary)] mb-1">Desde</label>
-          <input
-            type="date"
+        <div className="flex-1">
+          <BaseDatePicker
+            label="Desde"
             value={dateFrom}
-            onChange={(e) => setDateFrom(e.target.value)}
-            className="text-xs px-3 py-2 rounded-lg border border-gray-200 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-muted)] text-gray-700 dark:text-[var(--text-primary)] outline-none focus:ring-2 focus:ring-emerald-400"
+            onChange={setDateFrom}
+            placeholder="Sin fecha"
           />
         </div>
-        <div>
-          <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-[var(--text-secondary)] mb-1">Hasta</label>
-          <input
-            type="date"
+        <div className="flex-1">
+          <BaseDatePicker
+            label="Hasta"
             value={dateTo}
-            onChange={(e) => setDateTo(e.target.value)}
-            className="text-xs px-3 py-2 rounded-lg border border-gray-200 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-muted)] text-gray-700 dark:text-[var(--text-primary)] outline-none focus:ring-2 focus:ring-emerald-400"
+            onChange={setDateTo}
+            placeholder="Sin fecha"
           />
         </div>
       </div>
@@ -142,6 +140,12 @@ function ReportCard({ tab }: { tab: TabConfig }) {
           </button>
         ))}
       </div>
+
+      {exportError && (
+        <div className="mt-3 px-3 py-2 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-xs text-red-600 dark:text-red-400">
+          {exportError}
+        </div>
+      )}
     </div>
   );
 }

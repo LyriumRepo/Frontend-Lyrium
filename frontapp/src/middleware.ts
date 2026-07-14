@@ -19,7 +19,7 @@ const publicPaths = [
   '/api/webhooks',
 ];
 
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (publicPaths.some(path => pathname.startsWith(path))) {
@@ -44,7 +44,7 @@ export async function proxy(request: NextRequest) {
   if (pathname.startsWith('/seller') && userRole !== 'seller') {
     return NextResponse.redirect(new URL('/login', request.url));
   }
-  if (pathname.startsWith('/logistics') && userRole !== 'logistics') {
+  if (pathname.startsWith('/logistics') && userRole !== 'logistics_operator') {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 

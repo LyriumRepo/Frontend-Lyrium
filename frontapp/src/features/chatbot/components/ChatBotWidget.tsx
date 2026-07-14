@@ -177,7 +177,7 @@ export default function ChatBotWidget() {
                     aria-label="Abrir chat"
                 >
                     <div className="bg-gradient-to-br from-sky-600 to-cyan-500 hover:from-sky-500 hover:to-cyan-400 dark:from-[var(--brand-green)] dark:to-[var(--icons-green)] dark:hover:from-emerald-600 dark:hover:to-teal-500 text-white rounded-full w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center shadow-xl hover:shadow-2xl transition-all duration-300">
-                        <LogoLyrium size="sm" showText={false} frontImg="/img/iconologo.png" circleSize={46} />
+                        <LogoLyrium size="sm" showText={false} frontImg="/img/iconologo.png" circleSize={54} />
                     </div>
                 </button>
             </div>

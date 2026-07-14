@@ -76,6 +76,7 @@ export function ProfilePageClient(_props: ProfilePageClientProps) {
     const [photoError, setPhotoError] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { showToast } = useToast();
+    const [errors, setErrors] = useState<Record<string, string>>({});
 
     const EDIT_FIELD_CLASSES = "bg-white dark:bg-[var(--bg-card)] ring-sky-500/10 px-3 py-1 rounded-xl border-2 border-sky-100 dark:border-[var(--border-subtle)]";
     const READONLY_FIELD_CLASSES = "px-3 py-1";
@@ -83,6 +84,31 @@ export function ProfilePageClient(_props: ProfilePageClientProps) {
     useEffect(() => {
         if (hookData && !isEditMode) setData(hookData);
     }, [hookData, isEditMode]);
+
+    const requiredFields = [
+        { key: 'razon_social', label: 'Razón Social' },
+        { key: 'ruc', label: 'RUC' },
+        { key: 'rep_legal_nombre', label: 'Representante Legal' },
+        { key: 'rep_legal_dni', label: 'DNI Representante' },
+        { key: 'admin_nombre', label: 'Nombres y Apellidos' },
+        { key: 'admin_email', label: 'Email de Gestión' },
+        { key: 'direccion_fiscal', label: 'Dirección Fiscal' },
+        { key: 'cuenta_bcp', label: 'Cuenta BCP' },
+        { key: 'cci', label: 'CCI' },
+    ];
+
+    const validateForm = () => {
+        if (!data) return false;
+        const newErrors: Record<string, string> = {};
+        requiredFields.forEach(({ key, label }) => {
+            const value = (data as any)[key];
+            if (!String(value ?? '').trim()) {
+                newErrors[key] = `El campo ${label} es obligatorio.`;
+            }
+        });
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
 
     if (loading) return <BaseLoading message="Sincronizando con tu tienda en WordPress..." />;
 
@@ -104,9 +130,11 @@ export function ProfilePageClient(_props: ProfilePageClientProps) {
 
     const toggleEditMode = async () => {
         if (isEditMode) {
+            if (!validateForm()) return;
             try {
                 await updateProfile(data);
                 setIsEditMode(false);
+                setErrors({});
                 showToast('Cambios guardados correctamente.', 'success');
             } catch (err) {
                 showToast(
@@ -124,6 +152,7 @@ export function ProfilePageClient(_props: ProfilePageClientProps) {
         const value = FIELD_MASKS[name]
             ? extractDigits(e.target.value, MASK_DIGIT_LENGTHS[name])
             : e.target.value;
+        setErrors(prev => ({ ...prev, [name]: '' }));
         setData(prev => {
             if (!prev) return null;
             const newData = { ...prev };
@@ -157,6 +186,13 @@ export function ProfilePageClient(_props: ProfilePageClientProps) {
     };
 
     const fieldCls = `w-full text-sm font-black text-gray-800 dark:text-[var(--text-primary)] bg-transparent p-3 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 transition-all`;
+
+    const getInputClassName = (fieldName: string) =>
+        `${fieldCls} ${isEditMode ? EDIT_FIELD_CLASSES : READONLY_FIELD_CLASSES} ${
+            errors[fieldName]
+                ? '!border-red-500 focus:!border-red-500 focus:ring-2 focus:ring-red-100 dark:focus:ring-red-900/30'
+                : ''
+        }`;
 
     // Reutilizado en ambos botones (móvil + desktop)
     const editBtn = (
@@ -224,19 +260,39 @@ export function ProfilePageClient(_props: ProfilePageClientProps) {
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
                             <div className="space-y-1">
                                 <label htmlFor="razon_social" className="text-xs font-black text-gray-400 dark:text-[var(--text-secondary)] uppercase tracking-widest ml-1">
-                                    Razón Social <span className="text-red-500">*</span>
+                                    Razón Social <span className="text-red-500" aria-hidden="true">*</span>
+                                    <span className="sr-only"> (obligatorio)</span>
                                 </label>
                                 <input id="razon_social" type="text" name="razon_social" required readOnly={!isEditMode}
                                     value={data.razon_social} onChange={handleInputChange}
-                                    className={`${fieldCls} ${isEditMode ? EDIT_FIELD_CLASSES : READONLY_FIELD_CLASSES}`} />
+                                    aria-required="true"
+                                    aria-invalid={!!errors.razon_social}
+                                    aria-describedby={errors.razon_social ? 'razon_social-error' : undefined}
+                                    className={getInputClassName('razon_social')} />
+                                {errors.razon_social && (
+                                    <p id="razon_social-error" role="alert" className="flex items-center gap-1 text-xs text-red-500 font-semibold ml-1">
+                                        <Icon name="AlertCircle" className="w-3.5 h-3.5 flex-shrink-0" />
+                                        {errors.razon_social}
+                                    </p>
+                                )}
                             </div>
                             <div className="space-y-1">
                                 <label htmlFor="ruc" className="text-xs font-black text-gray-400 dark:text-[var(--text-secondary)] uppercase tracking-widest ml-1">
-                                    RUC <span className="text-red-500">*</span>
+                                    RUC <span className="text-red-500" aria-hidden="true">*</span>
+                                    <span className="sr-only"> (obligatorio)</span>
                                 </label>
                                 <input id="ruc" type="text" name="ruc" required readOnly={!isEditMode}
                                     value={data.ruc} onChange={handleInputChange} onKeyDown={allowOnlyNumbers} maxLength={11}
-                                    className={`${fieldCls} ${isEditMode ? EDIT_FIELD_CLASSES : READONLY_FIELD_CLASSES}`} />
+                                    aria-required="true"
+                                    aria-invalid={!!errors.ruc}
+                                    aria-describedby={errors.ruc ? 'ruc-error' : undefined}
+                                    className={getInputClassName('ruc')} />
+                                {errors.ruc && (
+                                    <p id="ruc-error" role="alert" className="flex items-center gap-1 text-xs text-red-500 font-semibold ml-1">
+                                        <Icon name="AlertCircle" className="w-3.5 h-3.5 flex-shrink-0" />
+                                        {errors.ruc}
+                                    </p>
+                                )}
                             </div>
                             <div className="space-y-1">
                                 <label htmlFor="nombre_comercial" className="text-xs font-black text-gray-400 dark:text-[var(--text-secondary)] uppercase tracking-widest ml-1">
@@ -248,19 +304,39 @@ export function ProfilePageClient(_props: ProfilePageClientProps) {
                             </div>
                             <div className="space-y-1">
                                 <label htmlFor="rep_legal_nombre" className="text-xs font-black text-gray-400 dark:text-[var(--text-secondary)] uppercase tracking-widest ml-1">
-                                    Representante Legal <span className="text-red-500">*</span>
+                                    Representante Legal <span className="text-red-500" aria-hidden="true">*</span>
+                                    <span className="sr-only"> (obligatorio)</span>
                                 </label>
                                 <input id="rep_legal_nombre" type="text" name="rep_legal_nombre" required readOnly={!isEditMode}
                                     value={data.rep_legal_nombre} onChange={handleInputChange}
-                                    className={`${fieldCls} ${isEditMode ? EDIT_FIELD_CLASSES : READONLY_FIELD_CLASSES}`} />
+                                    aria-required="true"
+                                    aria-invalid={!!errors.rep_legal_nombre}
+                                    aria-describedby={errors.rep_legal_nombre ? 'rep_legal_nombre-error' : undefined}
+                                    className={getInputClassName('rep_legal_nombre')} />
+                                {errors.rep_legal_nombre && (
+                                    <p id="rep_legal_nombre-error" role="alert" className="flex items-center gap-1 text-xs text-red-500 font-semibold ml-1">
+                                        <Icon name="AlertCircle" className="w-3.5 h-3.5 flex-shrink-0" />
+                                        {errors.rep_legal_nombre}
+                                    </p>
+                                )}
                             </div>
                             <div className="space-y-1">
                                 <label htmlFor="rep_legal_dni" className="text-xs font-black text-gray-400 dark:text-[var(--text-secondary)] uppercase tracking-widest ml-1">
-                                    DNI Representante <span className="text-red-500">*</span>
+                                    DNI Representante <span className="text-red-500" aria-hidden="true">*</span>
+                                    <span className="sr-only"> (obligatorio)</span>
                                 </label>
                                 <input id="rep_legal_dni" type="text" name="rep_legal_dni" required readOnly={!isEditMode}
                                     value={data.rep_legal_dni} onChange={handleInputChange} onKeyDown={allowOnlyNumbers} maxLength={8}
-                                    className={`${fieldCls} ${isEditMode ? EDIT_FIELD_CLASSES : READONLY_FIELD_CLASSES}`} />
+                                    aria-required="true"
+                                    aria-invalid={!!errors.rep_legal_dni}
+                                    aria-describedby={errors.rep_legal_dni ? 'rep_legal_dni-error' : undefined}
+                                    className={getInputClassName('rep_legal_dni')} />
+                                {errors.rep_legal_dni && (
+                                    <p id="rep_legal_dni-error" role="alert" className="flex items-center gap-1 text-xs text-red-500 font-semibold ml-1">
+                                        <Icon name="AlertCircle" className="w-3.5 h-3.5 flex-shrink-0" />
+                                        {errors.rep_legal_dni}
+                                    </p>
+                                )}
                             </div>
                             <div className="space-y-1">
                                 <label htmlFor="experience_years" className="text-xs font-black text-gray-400 dark:text-[var(--text-secondary)] uppercase tracking-widest ml-1">
@@ -401,11 +477,21 @@ export function ProfilePageClient(_props: ProfilePageClientProps) {
                         <div className="space-y-4 sm:space-y-5 md:space-y-6">
                             <div className="space-y-1">
                                 <label htmlFor="admin_nombre" className="text-xs font-black text-gray-400 dark:text-[var(--text-secondary)] uppercase tracking-widest ml-1">
-                                    Nombres y Apellidos <span className="text-red-500">*</span>
+                                    Nombres y Apellidos <span className="text-red-500" aria-hidden="true">*</span>
+                                    <span className="sr-only"> (obligatorio)</span>
                                 </label>
                                 <input id="admin_nombre" type="text" name="admin_nombre" required readOnly={!isEditMode}
                                     value={data.admin_nombre} onChange={handleInputChange}
-                                    className={`${fieldCls} ${isEditMode ? EDIT_FIELD_CLASSES : READONLY_FIELD_CLASSES}`} />
+                                    aria-required="true"
+                                    aria-invalid={!!errors.admin_nombre}
+                                    aria-describedby={errors.admin_nombre ? 'admin_nombre-error' : undefined}
+                                    className={getInputClassName('admin_nombre')} />
+                                {errors.admin_nombre && (
+                                    <p id="admin_nombre-error" role="alert" className="flex items-center gap-1 text-xs text-red-500 font-semibold ml-1">
+                                        <Icon name="AlertCircle" className="w-3.5 h-3.5 flex-shrink-0" />
+                                        {errors.admin_nombre}
+                                    </p>
+                                )}
                             </div>
                             <div className="space-y-1">
                                 <label htmlFor="admin_dni" className="text-xs font-black text-gray-400 dark:text-[var(--text-secondary)] uppercase tracking-widest ml-1">
@@ -417,11 +503,21 @@ export function ProfilePageClient(_props: ProfilePageClientProps) {
                             </div>
                             <div className="space-y-1">
                                 <label htmlFor="admin_email" className="text-xs font-black text-gray-400 dark:text-[var(--text-secondary)] uppercase tracking-widest ml-1">
-                                    Email de Gestión <span className="text-red-500">*</span>
+                                    Email de Gestión <span className="text-red-500" aria-hidden="true">*</span>
+                                    <span className="sr-only"> (obligatorio)</span>
                                 </label>
                                 <input id="admin_email" type="email" name="admin_email" required readOnly={!isEditMode}
                                     value={data.admin_email} onChange={handleInputChange}
-                                    className={`${fieldCls} ${isEditMode ? EDIT_FIELD_CLASSES : READONLY_FIELD_CLASSES}`} />
+                                    aria-required="true"
+                                    aria-invalid={!!errors.admin_email}
+                                    aria-describedby={errors.admin_email ? 'admin_email-error' : undefined}
+                                    className={getInputClassName('admin_email')} />
+                                {errors.admin_email && (
+                                    <p id="admin_email-error" role="alert" className="flex items-center gap-1 text-xs text-red-500 font-semibold ml-1">
+                                        <Icon name="AlertCircle" className="w-3.5 h-3.5 flex-shrink-0" />
+                                        {errors.admin_email}
+                                    </p>
+                                )}
                             </div>
                             <div className="space-y-1">
                                 <label className="text-xs font-black text-gray-400 dark:text-[var(--text-secondary)] uppercase tracking-widest ml-1">
@@ -461,31 +557,65 @@ export function ProfilePageClient(_props: ProfilePageClientProps) {
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6 items-start">
                             <div className="space-y-1 sm:col-span-2 lg:col-span-3">
                                 <label htmlFor="direccion_fiscal" className="text-xs font-black text-gray-400 dark:text-[var(--text-secondary)] uppercase tracking-widest ml-1">
-                                    Dirección Fiscal <span className="text-red-500">*</span>
+                                    Dirección Fiscal <span className="text-red-500" aria-hidden="true">*</span>
+                                    <span className="sr-only"> (obligatorio)</span>
                                 </label>
                                 <textarea id="direccion_fiscal" name="direccion_fiscal" required readOnly={!isEditMode} rows={1}
                                     value={data.direccion_fiscal} onChange={handleInputChange}
-                                    className={`w-full text-xs font-black text-gray-800 dark:text-[var(--text-primary)] bg-transparent p-3 border-2 border-gray-100 dark:border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 transition-all ${isEditMode ? EDIT_FIELD_CLASSES : READONLY_FIELD_CLASSES}`} />
+                                    aria-required="true"
+                                    aria-invalid={!!errors.direccion_fiscal}
+                                    aria-describedby={errors.direccion_fiscal ? 'direccion_fiscal-error' : undefined}
+                                    className={`w-full text-xs font-black text-gray-800 dark:text-[var(--text-primary)] bg-transparent p-3 border-2 rounded-xl outline-none transition-all duration-300 ${isEditMode ? EDIT_FIELD_CLASSES : READONLY_FIELD_CLASSES} ${
+                                        errors.direccion_fiscal
+                                            ? '!border-red-500 focus:!border-red-500 focus:ring-2 focus:ring-red-100 dark:focus:ring-red-900/30'
+                                            : 'border-gray-100 dark:border-[var(--border-subtle)] focus:border-sky-500'
+                                    }`} />
+                                {errors.direccion_fiscal && (
+                                    <p id="direccion_fiscal-error" role="alert" className="flex items-center gap-1 text-xs text-red-500 font-semibold ml-1">
+                                        <Icon name="AlertCircle" className="w-3.5 h-3.5 flex-shrink-0" />
+                                        {errors.direccion_fiscal}
+                                    </p>
+                                )}
                             </div>
                             <div className="space-y-1">
                                 <label htmlFor="cuenta_bcp" className="text-xs font-black text-gray-400 dark:text-[var(--text-secondary)] uppercase tracking-widest ml-1">
-                                    Cuenta BCP (Soles) <span className="text-red-500">*</span>
+                                    Cuenta BCP (Soles) <span className="text-red-500" aria-hidden="true">*</span>
+                                    <span className="sr-only"> (obligatorio)</span>
                                 </label>
                                 <input id="cuenta_bcp" type="text" name="cuenta_bcp" required readOnly={!isEditMode}
                                     maxLength={FIELD_MASKS.cuenta_bcp.length}
                                     inputMode="numeric" placeholder="xxx-xxxxxxxx-x-xx"
                                     value={applyMask(data.cuenta_bcp, FIELD_MASKS.cuenta_bcp)} onChange={handleInputChange}
-                                    className={`${fieldCls} ${isEditMode ? EDIT_FIELD_CLASSES : READONLY_FIELD_CLASSES}`} />
+                                    aria-required="true"
+                                    aria-invalid={!!errors.cuenta_bcp}
+                                    aria-describedby={errors.cuenta_bcp ? 'cuenta_bcp-error' : undefined}
+                                    className={getInputClassName('cuenta_bcp')} />
+                                {errors.cuenta_bcp && (
+                                    <p id="cuenta_bcp-error" role="alert" className="flex items-center gap-1 text-xs text-red-500 font-semibold ml-1">
+                                        <Icon name="AlertCircle" className="w-3.5 h-3.5 flex-shrink-0" />
+                                        {errors.cuenta_bcp}
+                                    </p>
+                                )}
                             </div>
                             <div className="space-y-1">
                                 <label htmlFor="cci" className="text-xs font-black text-gray-400 dark:text-[var(--text-secondary)] uppercase tracking-widest ml-1">
-                                    CCI <span className="text-red-500">*</span>
+                                    CCI <span className="text-red-500" aria-hidden="true">*</span>
+                                    <span className="sr-only"> (obligatorio)</span>
                                 </label>
-                                <input id="cci" type="text" name="cci" readOnly={!isEditMode}
+                                <input id="cci" type="text" name="cci" required readOnly={!isEditMode}
                                     maxLength={FIELD_MASKS.cci.length}
                                     inputMode="numeric" placeholder="xxx-xxx-xxxxxxxxxxxx-xx"
                                     value={applyMask(data.cci, FIELD_MASKS.cci)} onChange={handleInputChange}
-                                    className={`${fieldCls} ${isEditMode ? EDIT_FIELD_CLASSES : READONLY_FIELD_CLASSES}`} />
+                                    aria-required="true"
+                                    aria-invalid={!!errors.cci}
+                                    aria-describedby={errors.cci ? 'cci-error' : undefined}
+                                    className={getInputClassName('cci')} />
+                                {errors.cci && (
+                                    <p id="cci-error" role="alert" className="flex items-center gap-1 text-xs text-red-500 font-semibold ml-1">
+                                        <Icon name="AlertCircle" className="w-3.5 h-3.5 flex-shrink-0" />
+                                        {errors.cci}
+                                    </p>
+                                )}
                             </div>
                             <div className="space-y-1">
                                 <label htmlFor="bank_secondary" className="text-xs font-black text-gray-400 dark:text-[var(--text-secondary)] uppercase tracking-widest ml-1">

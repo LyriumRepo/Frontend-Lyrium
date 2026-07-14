@@ -34,12 +34,16 @@ const CONNECTOR_GRADIENT_LIGHT = 'linear-gradient(90deg,#C0DF16,#78E0A1,#5B9BD5)
 const CONNECTOR_GRADIENT_DARK = 'linear-gradient(90deg,#C0DF16,#78E0A1,#10b981)';
 
 export default function CheckoutStepBar() {
-  const currentStep = useCheckoutStore((s) => s.currentStep);
+  const currentStep     = useCheckoutStore((s) => s.currentStep);
+  const deliveryMethod  = useCheckoutStore((s) => s.orderData.deliveryMethod);
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === 'dark';
   const STEP_COLORS = isDark ? STEP_COLORS_DARK : STEP_COLORS_LIGHT;
   const completedGradient = isDark ? COMPLETED_GRADIENT_DARK : COMPLETED_GRADIENT_LIGHT;
   const connectorGradient = isDark ? CONNECTOR_GRADIENT_DARK : CONNECTOR_GRADIENT_LIGHT;
+
+  const isPickup = deliveryMethod === 'pickup';
+  const visibleSteps = isPickup ? STEPS.filter((s) => s.id !== 2) : STEPS;
 
   const getCircleClass = (stepId: number) => {
     if (stepId < currentStep) return 'step-circle--completed';
@@ -52,8 +56,8 @@ export default function CheckoutStepBar() {
     return '0%';
   };
 
-  const currentLabel = STEPS.find((s) => s.id === currentStep)?.label ?? '';
-  const progressPct = Math.round((currentStep / STEPS.length) * 100);
+  const currentLabel = visibleSteps.find((s) => s.id === currentStep)?.label ?? '';
+  const progressPct = Math.round((currentStep / visibleSteps.length) * 100);
 
   return (
     <div
@@ -61,7 +65,7 @@ export default function CheckoutStepBar() {
       className="bg-white dark:bg-[var(--bg-secondary)] relative z-30"
     >
       <p className="sr-only" role="status" aria-live="polite">
-        Paso {currentStep} de {STEPS.length}: {currentLabel}. Llevas {progressPct}% del proceso de compra.
+        Paso {currentStep} de {visibleSteps.length}: {currentLabel}. Llevas {progressPct}% del proceso de compra.
       </p>
       <div className="relative max-w-6xl mx-auto flex items-center justify-center px-4">
         {/* Steps */}
@@ -69,7 +73,7 @@ export default function CheckoutStepBar() {
           aria-label="Progreso de la compra"
           className="flex items-center justify-between w-full max-w-2xl mx-auto py-4 relative"
         >
-          {STEPS.map((step, idx) => {
+          {visibleSteps.map((step, idx) => {
             const color = STEP_COLORS[step.id as 1 | 2 | 3 | 4 | 5];
             const circleClass = getCircleClass(step.id);
             const isActive = step.id === currentStep;
@@ -79,9 +83,9 @@ export default function CheckoutStepBar() {
             return (
               <div
                 key={step.id}
-                className={`flex items-center ${idx < STEPS.length - 1 ? 'flex-1' : ''}`}
+                className={`flex items-center ${idx < visibleSteps.length - 1 ? 'flex-1' : ''}`}
                 aria-current={isActive ? 'step' : undefined}
-                aria-label={`Paso ${step.id} de ${STEPS.length}: ${step.label}${isCompleted ? ' (completado)' : isActive ? ' (paso actual)' : ''}`}
+                aria-label={`Paso ${step.id} de ${visibleSteps.length}: ${step.label}${isCompleted ? ' (completado)' : isActive ? ' (paso actual)' : ''}`}
               >
                 {/* Step column */}
                 <div
@@ -142,7 +146,7 @@ export default function CheckoutStepBar() {
                 </div>
 
                 {/* Connector (placed after the step column) */}
-                {idx < STEPS.length - 1 && (
+                {idx < visibleSteps.length - 1 && (
                   <div className="flex-1 h-3 flex items-start px-1 sm:px-2 relative z-0 -mt-4 sm:-mt-10">
                     {/* Negative margin to align with circle vertical center */}
                     <div className="w-full h-1.5 bg-gray-100 dark:bg-[var(--bg-muted)] rounded-full overflow-hidden transition-all duration-500">

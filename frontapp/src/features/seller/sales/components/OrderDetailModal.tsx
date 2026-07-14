@@ -40,11 +40,17 @@ const PRODUCT_FLOW_ACTIONS: Record<TipoEnvio, Record<number, StepAction>> = {
         3: { label: 'Confirmar En Transporte',      icon: 'Truck'        },
         4: { label: 'Listo para Recojo en Agencia', icon: 'ScanBarcode'  },
     },
+    retiro_tienda: {
+        1: { label: 'Confirmar Validación',           icon: 'CheckCircle2' },
+        2: { label: 'Marcar Despachado',              icon: 'Package'      },
+        3: { label: 'Listo para Recojo en Tienda',    icon: 'Store'        },
+    },
 };
 
 const PRODUCT_MAX_STEP: Record<TipoEnvio, number> = {
     domicilio: 5,
     agencia:   5,
+    retiro_tienda: 4,
 };
 
 // ── Service flow configs (status→action) ──
@@ -273,7 +279,8 @@ export default function OrderDetailModal({
 
     const handleAdvance = async () => {
         const isLogisticsStep = productAction?.label === 'Confirmar En Transporte';
-        if (isLogisticsStep && onShipWithCarrier) {
+        const isPickup = tipoEnvio === 'retiro_tienda';
+        if (isLogisticsStep && onShipWithCarrier && !isPickup) {
             setShowLogistics(true);
             return;
         }
@@ -472,60 +479,127 @@ export default function OrderDetailModal({
                             <div className="space-y-6">
                                 <ProductOrderStepper currentStep={order.productCurrentStep} tipoEnvio={tipoEnvio} />
                                 <div className="bg-[var(--bg-secondary)]/50 p-6 rounded-[2rem] border border-[var(--border-subtle)]">
-                                    <p className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest mb-4">
-                                        <Icon name="MapPin" className="w-3 h-3 inline mr-1" /> Dirección de Envío
-                                    </p>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5">
-                                        <div>
-                                            <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Departamento</p>
-                                            <p className="text-sm font-black text-[var(--text-primary)]">{departamento}</p>
-                                        </div>
-                                        <div>
-                                            <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Provincia</p>
-                                            <p className="text-sm font-black text-[var(--text-primary)]">{provincia}</p>
-                                        </div>
-                                        <div>
-                                            <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Distrito</p>
-                                            <p className="text-sm font-black text-[var(--text-primary)]">{distrito}</p>
-                                        </div>
-                                        <div>
-                                            <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Dirección</p>
-                                            <p className="text-sm font-black text-[var(--text-primary)]">{order.envio.direccion || '—'}</p>
-                                        </div>
-                                        <div>
-                                            <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Piso / Dpto / Lote</p>
-                                            <p className="text-sm font-black text-[var(--text-secondary)]">—</p>
-                                        </div>
-                                        <div>
-                                            <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Referencia</p>
-                                            <p className="text-sm font-black text-[var(--text-primary)]">{order.envio.notes || '—'}</p>
-                                        </div>
-                                    </div>
-                                    {(order.envio.carrier || (order.envio.tracking && order.envio.tracking !== '-')) && (
-                                        <div className="mt-5 pt-5 border-t border-[var(--border-subtle)] flex flex-wrap gap-x-10 gap-y-3">
-                                            {order.envio.carrier && (
-                                                <div className="flex items-center gap-3.5">
-                                                    <div className="w-9 h-9 rounded-xl bg-[var(--bg-card)] flex items-center justify-center text-emerald-600 shadow-sm border border-[var(--border-subtle)]">
-                                                        <Icon name="Truck" className="w-5 h-5" />
+                                    {tipoEnvio === 'retiro_tienda' ? (
+                                        <>
+                                            <p className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest mb-4">
+                                                <Icon name="Store" className="w-3 h-3 inline mr-1" /> Retiro en Tienda
+                                            </p>
+                                            {order.branch ? (
+                                                <div className="space-y-4">
+                                                    <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border border-emerald-100 dark:border-emerald-800/30">
+                                                        <div className="flex items-center gap-3 mb-3">
+                                                            <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-800/40 flex items-center justify-center">
+                                                                <Icon name="Store" className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-sm font-black text-emerald-800 dark:text-emerald-300">{order.branch.name}</p>
+                                                                <p className="text-[10px] text-emerald-600 dark:text-emerald-500">El cliente recogerá en esta sucursal</p>
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                    <div>
-                                                        <p className="text-[9px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Transportista</p>
-                                                        <p className="text-sm font-black text-[var(--text-primary)]">{order.envio.carrier}</p>
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5">
+                                                        <div>
+                                                            <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Departamento</p>
+                                                            <p className="text-sm font-black text-[var(--text-primary)]">{order.branch.department || '—'}</p>
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Provincia</p>
+                                                            <p className="text-sm font-black text-[var(--text-primary)]">{order.branch.province || '—'}</p>
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Distrito</p>
+                                                            <p className="text-sm font-black text-[var(--text-primary)]">{order.branch.district || '—'}</p>
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Dirección</p>
+                                                            <p className="text-sm font-black text-[var(--text-primary)]">{order.branch.address || '—'}</p>
+                                                        </div>
+                                                        {order.branch.phone && (
+                                                            <div>
+                                                                <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Teléfono</p>
+                                                                <p className="text-sm font-black text-[var(--text-primary)]">{order.branch.phone}</p>
+                                                            </div>
+                                                        )}
+                                                        {order.branch.hours && (
+                                                            <div>
+                                                                <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Horario</p>
+                                                                <p className="text-sm font-black text-[var(--text-primary)]">{order.branch.hours}</p>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border border-emerald-100 dark:border-emerald-800/30">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-800/40 flex items-center justify-center">
+                                                            <Icon name="Store" className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-sm font-black text-emerald-800 dark:text-emerald-300">El cliente recogerá en tienda</p>
+                                                            <p className="text-[10px] text-emerald-600 dark:text-emerald-500">Sin costo de envío — El pedido está listo para recojo</p>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             )}
-                                            {order.envio.tracking && order.envio.tracking !== '-' && (
-                                                <div className="flex items-center gap-3.5">
-                                                    <div className="w-9 h-9 rounded-xl bg-[var(--bg-card)] flex items-center justify-center text-emerald-600 shadow-sm border border-[var(--border-subtle)]">
-                                                        <Icon name="Package" className="w-5 h-5" />
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-[9px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">N° Tracking</p>
-                                                        <p className="text-sm font-black text-[var(--text-primary)]">{order.envio.tracking}</p>
-                                                    </div>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <p className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest mb-4">
+                                                <Icon name="MapPin" className="w-3 h-3 inline mr-1" /> Dirección de Envío
+                                            </p>
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5">
+                                                <div>
+                                                    <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Departamento</p>
+                                                    <p className="text-sm font-black text-[var(--text-primary)]">{departamento}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Provincia</p>
+                                                    <p className="text-sm font-black text-[var(--text-primary)]">{provincia}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Distrito</p>
+                                                    <p className="text-sm font-black text-[var(--text-primary)]">{distrito}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Dirección</p>
+                                                    <p className="text-sm font-black text-[var(--text-primary)]">{order.envio.direccion || '—'}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Piso / Dpto / Lote</p>
+                                                    <p className="text-sm font-black text-[var(--text-secondary)]">—</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Referencia</p>
+                                                    <p className="text-sm font-black text-[var(--text-primary)]">{order.envio.notes || '—'}</p>
+                                                </div>
+                                            </div>
+                                            {(order.envio.carrier || (order.envio.tracking && order.envio.tracking !== '-')) && (
+                                                <div className="mt-5 pt-5 border-t border-[var(--border-subtle)] flex flex-wrap gap-x-10 gap-y-3">
+                                                    {order.envio.carrier && (
+                                                        <div className="flex items-center gap-3.5">
+                                                            <div className="w-9 h-9 rounded-xl bg-[var(--bg-card)] flex items-center justify-center text-emerald-600 shadow-sm border border-[var(--border-subtle)]">
+                                                                <Icon name="Truck" className="w-5 h-5" />
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-[9px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Transportista</p>
+                                                                <p className="text-sm font-black text-[var(--text-primary)]">{order.envio.carrier}</p>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                    {order.envio.tracking && order.envio.tracking !== '-' && (
+                                                        <div className="flex items-center gap-3.5">
+                                                            <div className="w-9 h-9 rounded-xl bg-[var(--bg-card)] flex items-center justify-center text-emerald-600 shadow-sm border border-[var(--border-subtle)]">
+                                                                <Icon name="Package" className="w-5 h-5" />
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-[9px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">N° Tracking</p>
+                                                                <p className="text-sm font-black text-[var(--text-primary)]">{order.envio.tracking}</p>
+                                                            </div>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             )}
-                                        </div>
+                                        </>
                                     )}
                                 </div>
                             </div>
@@ -645,63 +719,130 @@ export default function OrderDetailModal({
                     </div>
                 </div>
 
-                {/* 2 — DIRECCIÓN DE ENVÍO (pure only) */}
+                {/* 2 — DIRECCIÓN DE ENVÍO / RETIRO EN TIENDA (pure only) */}
                 {!isMixed && hasItems && (
                     <div className="bg-[var(--bg-secondary)]/50 p-6 rounded-[2rem] border border-[var(--border-subtle)]">
-                        <p className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest mb-4">
-                            <Icon name="MapPin" className="w-3 h-3 inline mr-1" /> Dirección de Envío
-                        </p>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5">
-                            <div>
-                                <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Departamento</p>
-                                <p className="text-sm font-black text-[var(--text-primary)]">{departamento}</p>
-                            </div>
-                            <div>
-                                <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Provincia</p>
-                                <p className="text-sm font-black text-[var(--text-primary)]">{provincia}</p>
-                            </div>
-                            <div>
-                                <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Distrito</p>
-                                <p className="text-sm font-black text-[var(--text-primary)]">{distrito}</p>
-                            </div>
-                            <div>
-                                <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Dirección</p>
-                                <p className="text-sm font-black text-[var(--text-primary)]">{order.envio.direccion || '—'}</p>
-                            </div>
-                            <div>
-                                <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Piso / Dpto / Lote</p>
-                                <p className="text-sm font-black text-[var(--text-secondary)]">—</p>
-                            </div>
-                            <div>
-                                <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Referencia</p>
-                                <p className="text-sm font-black text-[var(--text-primary)]">{order.envio.notes || '—'}</p>
-                            </div>
-                        </div>
-                        {(order.envio.carrier || (order.envio.tracking && order.envio.tracking !== '-')) && (
-                            <div className="mt-5 pt-5 border-t border-[var(--border-subtle)] flex flex-wrap gap-x-10 gap-y-3">
-                                {order.envio.carrier && (
-                                    <div className="flex items-center gap-3.5">
-                                        <div className="w-9 h-9 rounded-xl bg-[var(--bg-card)] flex items-center justify-center text-emerald-600 shadow-sm border border-[var(--border-subtle)]">
-                                            <Icon name="Truck" className="w-5 h-5" />
+                        {tipoEnvio === 'retiro_tienda' ? (
+                            <>
+                                <p className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest mb-4">
+                                    <Icon name="Store" className="w-3 h-3 inline mr-1" /> Retiro en Tienda
+                                </p>
+                                {order.branch ? (
+                                    <div className="space-y-4">
+                                        <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border border-emerald-100 dark:border-emerald-800/30">
+                                            <div className="flex items-center gap-3 mb-3">
+                                                <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-800/40 flex items-center justify-center">
+                                                    <Icon name="Store" className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm font-black text-emerald-800 dark:text-emerald-300">{order.branch.name}</p>
+                                                    <p className="text-[10px] text-emerald-600 dark:text-emerald-500">El cliente recogerá en esta sucursal</p>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <p className="text-[9px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Transportista</p>
-                                            <p className="text-sm font-black text-[var(--text-primary)]">{order.envio.carrier}</p>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5">
+                                            <div>
+                                                <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Departamento</p>
+                                                <p className="text-sm font-black text-[var(--text-primary)]">{order.branch.department || '—'}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Provincia</p>
+                                                <p className="text-sm font-black text-[var(--text-primary)]">{order.branch.province || '—'}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Distrito</p>
+                                                <p className="text-sm font-black text-[var(--text-primary)]">{order.branch.district || '—'}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Dirección</p>
+                                                <p className="text-sm font-black text-[var(--text-primary)]">{order.branch.address || '—'}</p>
+                                            </div>
+                                            {order.branch.phone && (
+                                                <div>
+                                                    <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Teléfono</p>
+                                                    <p className="text-sm font-black text-[var(--text-primary)]">{order.branch.phone}</p>
+                                                </div>
+                                            )}
+                                            {order.branch.hours && (
+                                                <div>
+                                                    <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Horario</p>
+                                                    <p className="text-sm font-black text-[var(--text-primary)]">{order.branch.hours}</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border border-emerald-100 dark:border-emerald-800/30">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-800/40 flex items-center justify-center">
+                                                <Icon name="Store" className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-black text-emerald-800 dark:text-emerald-300">El cliente recogerá en tienda</p>
+                                                <p className="text-[10px] text-emerald-600 dark:text-emerald-500">Sin costo de envío — El pedido está listo para recojo</p>
+                                            </div>
                                         </div>
                                     </div>
                                 )}
-                                {order.envio.tracking && order.envio.tracking !== '-' && (
-                                    <div className="flex items-center gap-3.5">
-                                        <div className="w-9 h-9 rounded-xl bg-[var(--bg-card)] flex items-center justify-center text-emerald-600 shadow-sm border border-[var(--border-subtle)]">
-                                            <Icon name="Package" className="w-5 h-5" />
-                                        </div>
-                                        <div>
-                                            <p className="text-[9px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">N° Tracking</p>
-                                            <p className="text-sm font-black text-[var(--text-primary)]">{order.envio.tracking}</p>
-                                        </div>
+                            </>
+                        ) : (
+                            <>
+                                <p className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest mb-4">
+                                    <Icon name="MapPin" className="w-3 h-3 inline mr-1" /> Dirección de Envío
+                                </p>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5">
+                                    <div>
+                                        <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Departamento</p>
+                                        <p className="text-sm font-black text-[var(--text-primary)]">{departamento}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Provincia</p>
+                                        <p className="text-sm font-black text-[var(--text-primary)]">{provincia}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Distrito</p>
+                                        <p className="text-sm font-black text-[var(--text-primary)]">{distrito}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Dirección</p>
+                                        <p className="text-sm font-black text-[var(--text-primary)]">{order.envio.direccion || '—'}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Piso / Dpto / Lote</p>
+                                        <p className="text-sm font-black text-[var(--text-secondary)]">—</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Referencia</p>
+                                        <p className="text-sm font-black text-[var(--text-primary)]">{order.envio.notes || '—'}</p>
+                                    </div>
+                                </div>
+                                {(order.envio.carrier || (order.envio.tracking && order.envio.tracking !== '-')) && (
+                                    <div className="mt-5 pt-5 border-t border-[var(--border-subtle)] flex flex-wrap gap-x-10 gap-y-3">
+                                        {order.envio.carrier && (
+                                            <div className="flex items-center gap-3.5">
+                                                <div className="w-9 h-9 rounded-xl bg-[var(--bg-card)] flex items-center justify-center text-emerald-600 shadow-sm border border-[var(--border-subtle)]">
+                                                    <Icon name="Truck" className="w-5 h-5" />
+                                                </div>
+                                                <div>
+                                                    <p className="text-[9px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Transportista</p>
+                                                    <p className="text-sm font-black text-[var(--text-primary)]">{order.envio.carrier}</p>
+                                                </div>
+                                            </div>
+                                        )}
+                                        {order.envio.tracking && order.envio.tracking !== '-' && (
+                                            <div className="flex items-center gap-3.5">
+                                                <div className="w-9 h-9 rounded-xl bg-[var(--bg-card)] flex items-center justify-center text-emerald-600 shadow-sm border border-[var(--border-subtle)]">
+                                                    <Icon name="Package" className="w-5 h-5" />
+                                                </div>
+                                                <div>
+                                                    <p className="text-[9px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">N° Tracking</p>
+                                                    <p className="text-sm font-black text-[var(--text-primary)]">{order.envio.tracking}</p>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
-                            </div>
+                            </>
                         )}
                     </div>
                 )}

@@ -238,6 +238,7 @@ export async function generateOrderPdf(order: Order): Promise<void> {
             ['Referencia', order.envio.notes || '—'],
             ['Tipo de entrega', order.tipo_envio === 'domicilio' ? 'A Domicilio'
                 : order.tipo_envio === 'agencia' ? 'Por Agencia'
+                : order.tipo_envio === 'retiro_tienda' ? 'Retiro en Tienda'
                 : '—'],
         ], y, ML, CW);
 
@@ -261,6 +262,7 @@ export async function generateOrderPdf(order: Order): Promise<void> {
             ['Referencia', order.envio.notes || '—'],
             ['Tipo de entrega', order.tipo_envio === 'domicilio' ? 'A Domicilio'
                 : order.tipo_envio === 'agencia' ? 'Por Agencia'
+                : order.tipo_envio === 'retiro_tienda' ? 'Retiro en Tienda'
                 : '—'],
         ], y, ML, CW);
     } else if (hasServices) {

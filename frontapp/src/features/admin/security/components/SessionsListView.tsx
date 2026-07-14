@@ -99,7 +99,11 @@ export function SessionsListView({ sessions, pagination, loading, error, onRevok
                 <div className="flex items-center justify-between mt-2">
                   <span className="text-[10px] text-[var(--text-secondary)]">{new Date(session.last_activity).toLocaleString()}</span>
                   <button
-                    onClick={() => onRevoke(session.id)}
+                    onClick={() => {
+                      if (window.confirm('¿Revocar esta sesión? El usuario será desconectado.')) {
+                        onRevoke(session.id);
+                      }
+                    }}
                     className="p-1.5 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/20 text-red-500 transition-colors"
                     title="Revocar sesión"
                   >

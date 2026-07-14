@@ -10,23 +10,25 @@ import CartSummary from './step1/CartSummary';
 import BoxCalculatorStep from './step2/BoxCalculatorStep';
 import PackagingSummary from './step2/PackagingSummary';
 import PersonalDataForm from './step3/PersonalDataForm';
-import ShippingForm from './step3/ShippingForm';
-import BillingInfo from './step3/BillingInfo';
-import OrderSummary from './step3/OrderSummary';
+import ShippingForm     from './step3/ShippingForm';
+import BillingInfo      from './step3/BillingInfo';
+import OrderSummary     from './step3/OrderSummary';
 import OrderConfirmation from './step4/OrderConfirmation';
 import BoletaView from './step5/BoletaView';
 import ModalPostCompra from './modals/ModalPostCompra';
 import ModalRegistroUsuario from './modals/ModalRegistroUsuario';
 
 export default function CheckoutPage() {
-  const currentStep = useCheckoutStore((s) => s.currentStep);
-  const setStep = useCheckoutStore((s) => s.setStep);
-  const orderResult = useCheckoutStore((s) => s.orderResult);
-  const isProcessing = useCheckoutStore((s) => s.isProcessing);
-  const reset = useCheckoutStore((s) => s.reset);
-  const cartError = useCheckoutStore((s) => s.cartError);
-  const clearCartError = useCheckoutStore((s) => s.setCartError);
-  const cartItems = useCheckoutStore((s) => s.cartItems);
+  const currentStep      = useCheckoutStore((s) => s.currentStep);
+  const setStep          = useCheckoutStore((s) => s.setStep);
+  const orderResult      = useCheckoutStore((s) => s.orderResult);
+  const isProcessing     = useCheckoutStore((s) => s.isProcessing);
+  const reset            = useCheckoutStore((s) => s.reset);
+  const cartError        = useCheckoutStore((s) => s.cartError);
+  const clearCartError   = useCheckoutStore((s) => s.setCartError);
+  const cartItems        = useCheckoutStore((s) => s.cartItems);
+  const deliveryMethod   = useCheckoutStore((s) => s.orderData.deliveryMethod);
+  const orderData        = useCheckoutStore((s) => s.orderData);
 
   const clearError = useCallback(() => clearCartError(null), [clearCartError]);
 
@@ -128,7 +130,8 @@ export default function CheckoutPage() {
                   <CartSummary
                     onContinue={() => {
                       const hasPhysicalProducts = cartItems.some((i) => i.selected && i.id > 0);
-                      setStep(hasPhysicalProducts ? 2 : 3);
+                      if (!hasPhysicalProducts) { setStep(3); return; }
+                      setStep(deliveryMethod === 'pickup' ? 3 : 2);
                     }}
                   />
                 </div>
@@ -155,7 +158,7 @@ export default function CheckoutPage() {
                     <PersonalDataForm />
                     <div className="absolute -bottom-5 left-6 right-6 h-px bg-gradient-to-r from-transparent via-gray-200 dark:via-[var(--border-subtle)] to-transparent" />
                   </div>
-                  {cartItems.some((i) => i.id > 0) && (
+                  {cartItems.some((i) => i.id > 0) && orderData.deliveryMethod !== 'pickup' && (
                     <div className="relative">
                       <ShippingForm />
                       <div className="absolute -bottom-5 left-6 right-6 h-px bg-gradient-to-r from-transparent via-gray-200 dark:via-[var(--border-subtle)] to-transparent" />

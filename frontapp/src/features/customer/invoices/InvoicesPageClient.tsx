@@ -6,11 +6,8 @@ import BaseLoading from '@/components/ui/BaseLoading';
 import Icon from '@/components/ui/Icon';
 import { BaseDatePicker } from '@/components/ui';
 import { invoiceApi, type PaymentConfirmation } from '@/shared/lib/api/invoiceRepository';
-import {
-  downloadConfirmationPdf,
-  downloadConfirmationPng,
-  downloadConfirmationJpg,
-} from '@/shared/lib/api/paymentConfirmationExport';
+import { downloadPdf, downloadPng, downloadJpg } from '@/shared/lib/api/boletaExport';
+
 import { useToast } from '@/shared/lib/context/ToastContext';
 
 function formatDate(dateStr: string) {
@@ -34,15 +31,29 @@ function PaymentCard({ confirmation }: { confirmation: PaymentConfirmation }) {
   const handleDownload = async (format: 'pdf' | 'png' | 'jpg') => {
     setLoading(format);
     try {
+      const boletaOrder = {
+        id: confirmation.orderNumber,
+        orderNumber: confirmation.orderNumber,
+        orderItems: confirmation.items?.map((item) => ({
+          productName: item.productName,
+          unitPrice: item.unitPrice,
+          quantity: item.quantity,
+          lineTotal: item.lineTotal,
+        })),
+        subtotalAmount: confirmation.subtotal,
+        shippingCost: confirmation.shippingCost,
+        discountAmount: confirmation.discountAmount,
+        total: confirmation.total,
+      };
       if (format === 'pdf') {
-        await downloadConfirmationPdf(confirmation.id, confirmation.orderNumber);
+        downloadPdf(boletaOrder);
       } else if (format === 'png') {
-        await downloadConfirmationPng(confirmation.id, confirmation.orderNumber);
+        await downloadPng(boletaOrder);
       } else {
-        await downloadConfirmationJpg(confirmation.id, confirmation.orderNumber);
+        await downloadJpg(boletaOrder);
       }
     } catch {
-      showToast('Error al descargar. Intenta con PDF.', 'error');
+      showToast('Error al descargar. Intenta de nuevo.', 'error');
     } finally {
       setLoading(null);
     }

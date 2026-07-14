@@ -2,7 +2,8 @@
 
 import React from 'react';
 import Icon from '@/components/ui/Icon';
-import Modal from '@/features/seller/plans/shared/Modal';
+import BaseModal from '@/components/ui/BaseModal';
+import BaseButton from '@/components/ui/BaseButton';
 import type { SellerTraining } from '../types';
 
 function getEmbedUrl(url: string, platform: string): string {
@@ -21,6 +22,24 @@ function getEmbedUrl(url: string, platform: string): string {
     return url;
 }
 
+function getPlatformBadgeStyle(platform: string): string {
+    switch (platform) {
+        case 'youtube': return 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20';
+        case 'vimeo': return 'bg-[var(--brand-sky)]/10 text-[var(--brand-sky)] border-[var(--brand-sky)]/20';
+        case 'drive': return 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20';
+        default: return 'bg-[var(--brand-teal)]/10 text-[var(--brand-teal)] border-[var(--brand-teal)]/20';
+    }
+}
+
+function getPlatformLabel(platform: string): string {
+    switch (platform) {
+        case 'youtube': return 'YouTube';
+        case 'vimeo': return 'Vimeo';
+        case 'drive': return 'Google Drive';
+        default: return platform;
+    }
+}
+
 interface Props {
     training: SellerTraining | null;
     onClose: () => void;
@@ -34,11 +53,15 @@ export default function TrainingPlayer({ training, onClose, onToggleComplete, to
     const embedUrl = getEmbedUrl(training.url, training.platform);
 
     return (
-        <Modal open={!!training} onClose={onClose} className="w-full max-w-4xl">
-            <div className="space-y-4">
-                <h2 className="text-xl font-extrabold text-[var(--text-primary)] pr-8">{training.title}</h2>
-
-                <div className="aspect-video w-full rounded-xl overflow-hidden bg-black">
+        <BaseModal
+            isOpen={!!training}
+            onClose={onClose}
+            title={training.title}
+            size="4xl"
+        >
+            <div className="space-y-5">
+                {/* Video player */}
+                <div className="relative aspect-video w-full rounded-2xl overflow-hidden bg-black shadow-2xl">
                     {embedUrl.startsWith('http') ? (
                         <iframe
                             src={embedUrl}
@@ -48,47 +71,57 @@ export default function TrainingPlayer({ training, onClose, onToggleComplete, to
                             allowFullScreen
                         />
                     ) : (
-                        <div className="flex items-center justify-center h-full text-white">
-                            <p className="text-sm">No se pudo cargar el reproductor. <a href={training.url} target="_blank" rel="noopener noreferrer" className="underline">Abrir enlace</a></p>
+                        <div className="flex flex-col items-center justify-center h-full text-white gap-3">
+                            <Icon name="AlertCircle" className="w-8 h-8 text-white/50" />
+                            <p className="text-sm text-white/70">No se pudo cargar el reproductor</p>
+                            <a href={training.url} target="_blank" rel="noopener noreferrer"
+                                className="text-xs font-bold text-[var(--brand-sky)] hover:underline">
+                                Abrir enlace externo
+                            </a>
                         </div>
                     )}
                 </div>
 
-                {training.description && (
-                    <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{training.description}</p>
-                )}
-
-                {training.is_required && (
-                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[var(--brand-teal)]/10 border border-[var(--brand-teal)]/20">
-                        <Icon name="AlertTriangle" className="w-4 h-4 text-[var(--brand-teal)]" />
-                        <span className="text-[11px] font-bold text-[var(--brand-teal)]">Capacitación obligatoria</span>
+                {/* Info section */}
+                <div className="space-y-3">
+                    {/* Meta badges */}
+                    <div className="flex items-center gap-2 flex-wrap">
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase border ${getPlatformBadgeStyle(training.platform)}`}>
+                            {getPlatformLabel(training.platform)}
+                        </span>
+                        {training.category && (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase bg-[var(--bg-muted)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">
+                                <Icon name="FolderOpen" className="w-2.5 h-2.5" />
+                                {training.category}
+                            </span>
+                        )}
+                        {training.is_required && (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase bg-[var(--brand-sky)]/10 dark:bg-[var(--brand-teal)]/10 text-[var(--brand-sky)] dark:text-[var(--brand-teal)] border border-[var(--brand-sky)]/20 dark:border-[var(--brand-teal)]/20">
+                                <Icon name="Shield" className="w-2.5 h-2.5" /> Obligatorio
+                            </span>
+                        )}
                     </div>
-                )}
 
-                <button
-                    onClick={() => onToggleComplete(training)}
-                    disabled={toggling}
-                    className={`w-full py-3 rounded-xl text-sm font-bold transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2 ${
-                        training.completed
-                            ? 'bg-[var(--bg-muted)] text-[var(--text-secondary)] border border-[var(--border-subtle)] hover:bg-[var(--bg-secondary)]'
-                            : 'bg-[var(--brand-sky)] dark:bg-[var(--brand-teal)] text-white hover:opacity-90'
-                    }`}
-                >
-                    {toggling ? (
-                        <span className="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                    ) : training.completed ? (
-                        <>
-                            <Icon name="CheckSquare" className="w-4 h-4" />
-                            Marcar como pendiente
-                        </>
-                    ) : (
-                        <>
-                            <Icon name="Check" className="w-4 h-4" />
-                            Marcar como completado
-                        </>
+                    {/* Description */}
+                    {training.description && (
+                        <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{training.description}</p>
                     )}
-                </button>
+                </div>
+
+                {/* Action button */}
+                <div className="pt-2 border-t border-[var(--border-subtle)]">
+                    <BaseButton
+                        variant={training.completed ? 'secondary' : 'primary'}
+                        size="lg"
+                        fullWidth
+                        leftIcon={training.completed ? 'CheckSquare' : 'Check'}
+                        onClick={() => onToggleComplete(training)}
+                        isLoading={toggling}
+                    >
+                        {training.completed ? 'Marcar como pendiente' : 'Marcar como completado'}
+                    </BaseButton>
+                </div>
             </div>
-        </Modal>
+        </BaseModal>
     );
 }

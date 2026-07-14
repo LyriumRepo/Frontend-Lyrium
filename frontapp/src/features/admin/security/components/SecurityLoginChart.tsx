@@ -14,7 +14,7 @@ interface Props {
 }
 
 function formatDate(iso: string): string {
-  const [y, m, d] = iso.split('-');
+  const [, m, d] = iso.split('-');
   return `${parseInt(d)}/${parseInt(m)}`;
 }
 
@@ -24,14 +24,20 @@ function formatDateFull(iso: string): string {
   return `${parseInt(d)} ${months[parseInt(m) - 1]} ${y}`;
 }
 
-function CustomTooltip({ active, payload, label }: any) {
+interface TooltipPayloadEntry {
+  name: string;
+  value: number;
+  color: string;
+}
+
+function CustomTooltip({ active, payload, label }: { active?: boolean; payload?: TooltipPayloadEntry[]; label?: string }) {
   if (!active || !payload?.length) return null;
   return (
     <div className="bg-white dark:bg-[#1E3028] border border-gray-200 dark:border-[#2A4A3E] rounded-2xl shadow-xl px-4 py-3 text-xs">
       <p className="font-bold text-gray-800 dark:text-gray-100 mb-2">
-        {formatDateFull(label)}
+        {formatDateFull(label ?? '')}
       </p>
-      {payload.map((entry: any) => (
+      {payload.map((entry) => (
         <div key={entry.name} className="flex items-center justify-between gap-4 py-0.5">
           <span className="flex items-center gap-1.5">
             <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: entry.color }} />
@@ -84,7 +90,7 @@ export function SecurityLoginChart({ data, loading }: Props) {
       dataKey="date"
       tick={{ fontSize: 10, fill: 'var(--text-muted)' }}
       tickFormatter={(v: string) => {
-        const [y, m, d] = v.split('-');
+        const [, m, d] = v.split('-');
         return `${parseInt(d)}/${parseInt(m)}`;
       }}
     />

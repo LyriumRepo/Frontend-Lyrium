@@ -8,9 +8,15 @@ import Breadcrumb from '@/components/layout/shared/Breadcrumb';
 import { useAutoBreadcrumb } from '@/shared/hooks/useAutoBreadcrumb';
 import { Menu, Home } from 'lucide-react';
 import { ROUTES } from '@/shared/lib/constants/routes';
+import { useSellerDashboardStats } from '@/features/seller/hooks/useSellerDashboardStats';
+
+function fmt(n: number) {
+    return n.toLocaleString('es-PE', { style: 'currency', currency: 'PEN', minimumFractionDigits: 2 });
+}
 
 export default function SellerHeader({ onOpenMenu }: { onOpenMenu: () => void }) {
     const breadcrumbs = useAutoBreadcrumb();
+    const { data: stats } = useSellerDashboardStats();
 
     return (
         <header className="h-16 bg-white dark:bg-[var(--bg-secondary)] border-b border-gray-200 dark:border-[var(--border-subtle)] sticky top-0 z-50">
@@ -59,11 +65,11 @@ export default function SellerHeader({ onOpenMenu }: { onOpenMenu: () => void })
                     <div className="hidden lg:flex items-center gap-6">
                         <div className="text-sm">
                             <span className="text-gray-400 dark:text-[var(--text-secondary)] font-bold uppercase text-[10px] tracking-widest">Ventas del Mes: </span>
-                            <span className="font-black text-gray-900 dark:text-[var(--text-primary)] tracking-tight">S/ 4,560.00</span>
+                            <span className="font-black text-gray-900 dark:text-[var(--text-primary)] tracking-tight">{fmt(stats?.monthlySales ?? 0)}</span>
                         </div>
                         <div className="text-sm">
                             <span className="text-gray-400 dark:text-[var(--text-secondary)] font-bold uppercase text-[10px] tracking-widest">Pedidos Hoy: </span>
-                            <span className="font-black text-gray-900 dark:text-[var(--text-primary)] tracking-tight">08</span>
+                            <span className="font-black text-gray-900 dark:text-[var(--text-primary)] tracking-tight">{String(stats?.todayOrders ?? 0).padStart(2, '0')}</span>
                         </div>
                     </div>
 

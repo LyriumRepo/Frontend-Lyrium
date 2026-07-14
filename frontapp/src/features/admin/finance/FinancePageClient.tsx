@@ -96,8 +96,12 @@ export function FinancePageClient() {
       showToast('Selecciona un rango de fechas completo', 'info');
       return;
     }
-    await hookApplyFilters();
-    showToast('Datos sincronizados según el periodo seleccionado', 'success');
+    const success = await hookApplyFilters();
+    if (success) {
+      showToast('Datos sincronizados según el periodo seleccionado', 'success');
+    } else {
+      showToast('Error al sincronizar datos. Intenta nuevamente.', 'error');
+    }
   };
 
 
