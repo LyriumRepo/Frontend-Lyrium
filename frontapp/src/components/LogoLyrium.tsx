@@ -1,20 +1,9 @@
 'use client';
 
-// LogoLyrium.tsx — caritas animadas por horario (v2 · React/Next.js port)
-// Requiere: npm install animejs@3.2.2 y npm install --save-dev @types/animejs
-// para llamarlo <Link href="/" className="flex items-center gap-2 group">
-//                        <LogoLyrium
-//                        frontImg="/img/iconologo.png"
-//                        sideImg="/img/nombrelogo.png"
-//                        />
-//                    </Link>
 
 import anime from 'animejs/lib/anime.es.js';
 import React, { useEffect, useRef, useState } from 'react';
 
-// ─────────────────────────────────────────────
-// Types
-// ─────────────────────────────────────────────
 type Mood = 'welcome' | 'morning' | 'afternoon' | 'evening' | 'night';
 
 interface LogoLyriumProps {
@@ -22,11 +11,9 @@ interface LogoLyriumProps {
   sideImg?: string;
   size?: 'sm' | 'md';
   showText?: boolean;
+    circleSize?: number;
 }
 
-// ─────────────────────────────────────────────
-// Helpers
-// ─────────────────────────────────────────────
 function getMood(isFirst: boolean): Mood {
   if (isFirst) return 'welcome';
   const now      = new Date();
@@ -40,9 +27,6 @@ function getMood(isFirst: boolean): Mood {
   return 'night';
 }
 
-// ─────────────────────────────────────────────
-// SVG faces (idénticos al original)
-// ─────────────────────────────────────────────
 const FACES: Record<Mood, string> = {
   welcome: `
     <svg viewBox="0 0 100 100" width="92%" height="92%" overflow="visible" xmlns="http://www.w3.org/2000/svg">
@@ -221,18 +205,13 @@ const FACES: Record<Mood, string> = {
     </svg>`,
 };
 
-// ─────────────────────────────────────────────
-// CSS (idéntico al original, necesario dentro del scope del componente)
-// ─────────────────────────────────────────────
 const STYLES = `
   @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
 
-  /* ── Hover scale ── */
-  .lyr-root { transition: transform 0.3s; }
+    .lyr-root { transition: transform 0.3s; }
   .lyr-root:hover { transform: scale(1.03); }
 
-  /* ── Spark particles (generadas por JS) ── */
-  .spark {
+    .spark {
     position: absolute; border-radius: 50%;
     pointer-events: none; opacity: 0;
     left: 50%; top: 50%;
@@ -243,14 +222,12 @@ const STYLES = `
     pointer-events: none; opacity: 0;
   }
 
-  /* ── 3D flip ── */
-  .lyr-scene { perspective: 900px; width: 100%; height: 100%; }
+    .lyr-scene { perspective: 900px; width: 100%; height: 100%; }
   .lyr-card  { width: 100%; height: 100%; transform-style: preserve-3d; position: relative; }
   .lyr-card.live { transition: transform 1.3s cubic-bezier(0.4,0,0.2,1); }
   .lyr-scene:hover .lyr-card.live { transform: rotateY(180deg) !important; }
 
-  /* ── Faces ── */
-  .lyr-face {
+    .lyr-face {
     position: absolute; inset: 0; border-radius: 50%;
     backface-visibility: hidden; -webkit-backface-visibility: hidden;
     display: flex; align-items: center; justify-content: center; overflow: hidden;
@@ -261,10 +238,9 @@ const STYLES = `
     background: linear-gradient(135deg, #a3e635 0%, #0ea5e9 100%);
     box-shadow: 0 8px 30px rgba(0,0,0,0.5);
   }
-  .lyr-front-img { width: 110%; height: 131%; object-fit: cover; }
+  .lyr-front-img { width: 110%; height: 133%; object-fit: cover; }
 
-  /* ── Imagen lateral ── */
-  .lyr-side-container::after {
+    .lyr-side-container::after {
     content: ''; position: absolute;
     top: -10%; left: -30%;
     width: 28%; height: 120%;
@@ -280,24 +256,32 @@ const STYLES = `
   }
   .lyr-side-img {
     max-height: 60px; width: auto; object-fit: contain;
-    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
     transform-origin: center center;
-    will-change: transform, filter;
+    will-change: transform;
     display: block;
     padding: 4px 6px;
   }
   @media(min-width:768px){ .lyr-side-img { max-height: 80px; } }
 
-  /* ── Glow ring ── */
-  .lyr-glow-ring {
+    .lyr-hover-shine {
+    position: absolute;
+    top: -10%; left: -30%;
+    width: 28%; height: 120%;
+    background: linear-gradient(to right, transparent 0%, rgba(255,255,255,0.65) 50%, transparent 100%);
+    transform: rotate(18deg);
+    pointer-events: none;
+    opacity: 0;
+  }
+
+    .lyr-glow-ring {
     position: absolute; inset: -8px;
     border-radius: 12px;
     border: 2px solid rgba(163,230,53,0);
+    opacity: 0;
     pointer-events: none;
   }
 
-  /* ── Keyframes caritas ── */
-  @keyframes groovySway{0%{transform:rotate(-5deg) scale(1);}22%{transform:rotate(4deg) scale(1.05) translateY(-5px);}50%{transform:rotate(-3deg) scale(1);}78%{transform:rotate(5deg) scale(1.04) translateY(-3px);}100%{transform:rotate(-5deg) scale(1);}}
+    @keyframes groovySway{0%{transform:rotate(-5deg) scale(1);}22%{transform:rotate(4deg) scale(1.05) translateY(-5px);}50%{transform:rotate(-3deg) scale(1);}78%{transform:rotate(5deg) scale(1.04) translateY(-3px);}100%{transform:rotate(-5deg) scale(1);}}
   @keyframes superBounce{0%,100%{transform:translateY(0) scaleX(1) scaleY(1);}18%{transform:translateY(0) scaleX(1.18) scaleY(.82);}35%{transform:translateY(-20px) scaleX(.88) scaleY(1.14);}55%{transform:translateY(-24px) scaleX(.91) scaleY(1.11);}70%{transform:translateY(-8px) scaleX(1.1) scaleY(.92);}85%{transform:translateY(-14px) scaleX(.94) scaleY(1.07);}}
   @keyframes lazySway{0%,100%{transform:rotate(-4.5deg) translateY(0);}25%{transform:rotate(6deg) translateY(-4px) scale(1.04);}50%{transform:rotate(-5deg) translateY(-1px);}75%{transform:rotate(5.5deg) translateY(-3px) scale(1.03);}}
   @keyframes drowsyNod{0%,100%{transform:rotate(-3deg) translateY(0);}45%{transform:rotate(4.5deg) translateY(6px);}75%{transform:rotate(-1.5deg) translateY(2px);}}
@@ -378,8 +362,7 @@ const STYLES = `
   .lyr-conf4{animation:lyrConf 2s ease-in-out 1.5s infinite;}
   .lyr-heart{animation:lyrHeart 1.4s ease-in-out infinite;transform-origin:50px 91px;}
 
-  /* Pausa animaciones en hover del círculo */
-  .lyr-scene:hover .lyr-party,
+    .lyr-scene:hover .lyr-party,
   .lyr-scene:hover .lyr-hyper,
   .lyr-scene:hover .lyr-sway,
   .lyr-scene:hover .lyr-heavy,
@@ -388,14 +371,12 @@ const STYLES = `
   .lyr-scene:hover .lyr-eve-eye-r { animation-play-state: paused; }
 `;
 
-// ─────────────────────────────────────────────
-// Component
-// ─────────────────────────────────────────────
 export default function LogoLyrium({
   frontImg  = 'ICON.jpg',
   sideImg   = 'Letras.png',
   size      = 'md',
   showText  = true,
+  circleSize,
 }: LogoLyriumProps) {
   const circleWrapRef      = useRef<HTMLDivElement>(null);
   const cardRef            = useRef<HTMLDivElement>(null);
@@ -424,7 +405,6 @@ export default function LogoLyrium({
     const COLORS: string[]      = ['#a3e635','#3b82f6','#0ea5e9','#ffffff','#86efac','#facc15'];
     const CLICK_COLORS: string[] = ['#a3e635','#facc15','#0ea5e9','#f472b6','#86efac','#fff'];
 
-    // ── Sparks de entrada ──
     const spawnSparks = (count: number): void => {
       for (let i = 0; i < count; i++) {
         const s     = document.createElement('div');
@@ -451,7 +431,6 @@ export default function LogoLyrium({
       }
     };
 
-    // ── Partículas de click ──
     const spawnClickParticles = (count: number): void => {
       for (let i = 0; i < count; i++) {
         const p     = document.createElement('div');
@@ -477,7 +456,6 @@ export default function LogoLyrium({
       }
     };
 
-    // ── Reset animaciones al hacer hover en el círculo ──
     const handleSceneEnter = (): void => {
       const animated = scene.querySelectorAll<HTMLElement>(
         '.lyr-party,.lyr-hyper,.lyr-sway,.lyr-heavy,.lyr-eve-nod,.lyr-eve-eye-l,.lyr-eve-eye-r,.lyr-eve-smile,.lyr-ngt-lidtl,.lyr-ngt-lidtr,.lyr-ngt-lidbl,.lyr-ngt-lidbr'
@@ -492,11 +470,10 @@ export default function LogoLyrium({
     };
     scene.addEventListener('mouseenter', handleSceneEnter);
 
-    // ── Hover ola fluida en imagen lateral ──
-    let waveRunning = false;
-    const handleSideEnter = (): void => {
-      if (!hasSide || waveRunning) return;
-      waveRunning = true;
+    let hoverBusy = false;
+    let hoverAnimIndex = 0;
+
+    const hoverWave = (): void => {
       anime({
         targets: sideImage,
         keyframes: [
@@ -505,22 +482,78 @@ export default function LogoLyrium({
           { translateY: -3,  rotate: -1,   scaleX: 1.01, scaleY: 0.98, duration: 180, easing: 'easeInOutSine' },
           { translateY:  0,  rotate:  0,   scaleX: 1,    scaleY: 1,    duration: 280, easing: 'easeOutElastic(1, 0.5)' },
         ],
-        complete: () => { waveRunning = false; },
+      });
+    };
+
+    const hoverTilt = (): void => {
+      anime({
+        targets: sideImage,
+        keyframes: [
+          { perspective: [400, 400], rotateX: 6,  rotateY: -8, scale: 1.03,  duration: 240, easing: 'easeOutSine' },
+          { perspective: [400, 400], rotateX: -3, rotateY: 5,  scale: 1.015, duration: 240, easing: 'easeInOutSine' },
+          { perspective: [400, 400], rotateX: 0,  rotateY: 0,  scale: 1,     duration: 300, easing: 'easeOutElastic(1, 0.6)' },
+        ],
+      });
+    };
+
+    const hoverPulse = (): void => {
+      anime({
+        targets: sideImage,
+        scale: [1, 1.07, 0.98, 1.03, 1],
+        duration: 700,
+        easing: 'easeInOutSine',
+      });
+      anime({
+        targets: sideGlowRing,
+        keyframes: [
+          { opacity: 0.55, scale: 1.15, borderColor: 'rgba(250,204,21,0.85)', duration: 350, easing: 'easeOutSine' },
+          { opacity: 0,    scale: 0.9,  borderColor: 'rgba(250,204,21,0)',    duration: 350, easing: 'easeInSine' },
+        ],
+      });
+    };
+
+    const hoverBounce = (): void => {
+      anime({
+        targets: sideImage,
+        translateY: [0, -8, 0],
+        scaleY: [1, 0.93, 1.04, 1],
+        scaleX: [1, 1.04, 0.98, 1],
+        duration: 620,
+        easing: 'easeOutElastic(1, 0.5)',
+      });
+    };
+
+    const hoverFlash = (): void => {
+      const shine = document.createElement('div');
+      shine.className = 'lyr-hover-shine';
+      sideContainer!.appendChild(shine);
+      anime({
+        targets: shine,
+        left: ['-30%', '115%'],
+        opacity: [0, 1, 0],
+        duration: 560,
+        easing: 'easeInOutSine',
+        complete: () => shine.remove(),
       });
       anime({
         targets: sideImage,
-        filter: [
-          'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
-          'drop-shadow(0 10px 22px rgba(163,230,53,0.55))',
-          'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
-        ],
-        duration: 920,
-        easing: 'easeInOutSine',
+        scale: [1, 1.045, 1],
+        duration: 480,
+        easing: 'easeOutSine',
       });
+    };
+
+    const hoverAnimations = [hoverWave, hoverTilt, hoverPulse, hoverBounce, hoverFlash];
+
+    const handleSideEnter = (): void => {
+      if (!hasSide || hoverBusy) return;
+      hoverBusy = true;
+      hoverAnimations[hoverAnimIndex % hoverAnimations.length]();
+      hoverAnimIndex++;
+      setTimeout(() => { hoverBusy = false; }, 950);
     };
     if (hasSide) sideContainer!.addEventListener('mouseenter', handleSideEnter);
 
-    // ── Click en imagen lateral ──
     const handleSideClick = (): void => {
       if (!hasSide) return;
       anime({ targets: sideImage, scaleX: [1, 0.82, 1.15, 0.94, 1.05, 1], scaleY: [1, 1.18, 0.88, 1.10, 0.97, 1], duration: 600, easing: 'easeOutElastic(1, 0.4)' });
@@ -529,7 +562,6 @@ export default function LogoLyrium({
     };
     if (hasSide) sideContainer!.addEventListener('click', handleSideClick);
 
-    // ── Cambiar carita después de 5s ──
     const moodTimer = setTimeout(() => {
   setCurrentFace(FACES[getMood(false)]);
 }, 5000);
@@ -539,7 +571,6 @@ const moodInterval = setInterval(() => {
 }, 5 * 60 * 1000);
 
 
-    // ── Secuencia de entrada ──
     const seq = anime.timeline({ autoplay: true });
     seq
       .add({
@@ -556,8 +587,22 @@ const moodInterval = setInterval(() => {
           setTimeout(() => spawnSparks(20), 120);
         },
       }, 1050)
-      .add({ targets: hasSide ? sideContainer : [], opacity: [0, 1], translateY: [-32, 0], duration: 380, easing: 'easeOutBack(2.2)' }, 3620)
-      .add({ targets: hasSide ? sideImage : [],     scaleY: [0.75, 1.06, 1], scaleX: [1.18, 0.97, 1], opacity: [0, 1], duration: 360, easing: 'easeOutBack(1.6)' }, 3620)
+      .add({ targets: hasSide ? sideContainer : [], opacity: [0, 1], translateY: [-10, 0], duration: 420, easing: 'easeOutSine' }, 3620)
+      .add({ targets: hasSide ? sideImage : [], clipPath: ['inset(0 100% 0 0)', 'inset(0 0% 0 0)'], duration: 650, easing: 'easeInOutSine' }, 3620)
+      .add({
+        targets: hasSide ? sideGlowRing : [],
+        keyframes: [
+          { opacity: 0.6, scale: 1.08, borderColor: 'rgba(163,230,53,0.85)', duration: 350, easing: 'easeOutSine' },
+          { opacity: 0,   scale: 1,    borderColor: 'rgba(163,230,53,0)',    duration: 350, easing: 'easeInSine' },
+        ],
+      }, 3620)
+      .add({
+        targets: hasSide ? sideImage : [],
+        keyframes: [
+          { scaleY: 1.05, scaleX: 0.98, duration: 150, easing: 'easeOutSine' },
+          { scaleY: 1,    scaleX: 1,    duration: 150, easing: 'easeInOutSine' },
+        ],
+      }, 4270)
       .add({
         targets: card, rotateY: [180, 360], duration: 650, easing: 'easeInOutBack',
         begin: () => spawnSparks(24),
@@ -567,7 +612,6 @@ const moodInterval = setInterval(() => {
         },
       }, 5900);
 
-    // ── Guiño periódico (solo welcome) ──
     const doWelcomeWink = (): void => {
       const eyeOpen   = scene.querySelector<SVGElement>('#wk-eye-open');
       const eyeClosed = scene.querySelector<SVGElement>('#wk-eye-closed');
@@ -587,7 +631,6 @@ const moodInterval = setInterval(() => {
     };
     const winkTimer = setTimeout(doWelcomeWink, 2200);
 
-    // ── Wink periódico ojo derecho en tarde ──
     const doWink = (): void => {
       const eyeR = scene.querySelector<SVGElement>('.lyr-bl-r');
       if (!eyeR) return;
@@ -598,7 +641,6 @@ const moodInterval = setInterval(() => {
     };
     const winkTimer2 = setTimeout(doWink, 8200);
 
-    // ── Cleanup ──
     return () => {
       scene.removeEventListener('mouseenter', handleSceneEnter);
       if (hasSide) {
@@ -617,14 +659,17 @@ const moodInterval = setInterval(() => {
       <style dangerouslySetInnerHTML={{ __html: STYLES }} />
       <div className={`lyr-root inline-flex items-center gap-1 bg-transparent cursor-default font-[Outfit,sans-serif] ${showText ? 'px-3 py-2' : ''}`}>
 
-        {/* Círculo con flip 3D */}
+        {}
         <div
           ref={circleWrapRef}
           className={`flex-shrink-0 opacity-0 relative ${
-            size === 'sm'
-              ? 'w-9 h-9'
-              : 'w-14 h-14 md:w-[4.8rem] md:h-[4.8rem]'
+            circleSize
+              ? ''
+              : size === 'sm'
+                ? 'w-9 h-9'
+                : 'w-14 h-14 md:w-[4.8rem] md:h-[4.8rem]'
           }`}
+          style={circleSize ? { width: circleSize, height: circleSize } : undefined}
         >
           <div ref={sceneRef} className="lyr-scene">
             <div ref={cardRef} className="lyr-card">
@@ -640,7 +685,7 @@ const moodInterval = setInterval(() => {
           </div>
         </div>
 
-        {/* Imagen lateral — solo si showText=true */}
+        {}
         {showText && (
           <div
             ref={sideContainerRef}
