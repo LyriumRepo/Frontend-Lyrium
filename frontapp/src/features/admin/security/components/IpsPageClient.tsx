@@ -17,7 +17,7 @@ const IP_STATUS_MAPPINGS = [
   { status: 'whitelisted', label: 'Lista Blanca', class: 'bg-emerald-50 text-emerald-600 border-emerald-100', icon: 'ShieldCheck' },
 ];
 
-export default function IpsPageClient() {
+export function IpsPageClient() {
   const {
     ips,
     pagination,

@@ -1,1 +1,1 @@
-export type SecurityAlert = Record<string, never>;
+export type { SecurityAlertItem, AlertSeverity, AlertStatus, AlertType, AlertPaginationMeta } from '@/shared/lib/api/alertRepository';

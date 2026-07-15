@@ -1,1 +1,1 @@
-export type SecuritySettings = Record<string, never>;
+export type { SecuritySettings } from '@/shared/lib/api/securitySettingsRepository';

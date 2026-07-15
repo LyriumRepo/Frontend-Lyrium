@@ -11,14 +11,27 @@ import { SecurityLoginChart } from '@/features/admin/security/components/Securit
 import { SecurityEventsChart } from '@/features/admin/security/components/SecurityEventsChart';
 import { ActiveUsersChart } from '@/features/admin/security/components/ActiveUsersChart';
 import { SessionsListView } from '@/features/admin/security/components/SessionsListView';
-import { LayoutDashboard, Monitor } from 'lucide-react';
+import { LayoutDashboard, Monitor, Shield, Bell, ShieldCheck, Settings } from 'lucide-react';
+import { IpsPageClient } from '@/features/admin/security/components/IpsPageClient';
+import AlertsPageClient from '@/features/security/alerts/AlertsPageClient';
+import ProtectionPageClient from '@/features/security/protection/ProtectionPageClient';
+import SettingsPageClient from '@/features/security/settings/SettingsPageClient';
+import { useAlerts } from '@/features/admin/security/hooks/useAlerts';
 
-type Tab = 'dashboard' | 'sessions';
+type TabId = 'dashboard' | 'sessions' | 'ips' | 'alerts' | 'protection' | 'settings';
+
+interface TabItem {
+  id: TabId;
+  label: string;
+  icon: React.ReactNode;
+  badge?: number;
+}
 
 export function AdminSecurityPageClient() {
-  const [tab, setTab] = useState<Tab>('dashboard');
+  const [tab, setTab] = useState<TabId>('dashboard');
   const [sessionPage, setSessionPage] = useState(1);
   const [sessionSearch, setSessionSearch] = useState('');
+  const { activeCount } = useAlerts();
 
   const {
     stats,
@@ -57,9 +70,13 @@ export function AdminSecurityPageClient() {
     fetchSessions({ page: 1, per_page: 15, search: search || undefined });
   };
 
-  const tabs = [
-    { id: 'dashboard' as Tab, label: 'Dashboard', icon: <LayoutDashboard className="w-5 h-5" /> },
-    { id: 'sessions' as Tab, label: 'Sesiones Activas', icon: <Monitor className="w-5 h-5" /> },
+  const tabs: TabItem[] = [
+    { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-5 h-5" /> },
+    { id: 'sessions', label: 'Sesiones', icon: <Monitor className="w-5 h-5" /> },
+    { id: 'ips', label: 'Gestión de IPs', icon: <Shield className="w-5 h-5" /> },
+    { id: 'alerts', label: 'Alertas', icon: <Bell className="w-5 h-5" />, badge: activeCount },
+    { id: 'protection', label: 'Protección', icon: <ShieldCheck className="w-5 h-5" /> },
+    { id: 'settings', label: 'Configuración', icon: <Settings className="w-5 h-5" /> },
   ];
 
   return (
@@ -81,7 +98,7 @@ export function AdminSecurityPageClient() {
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
-            className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all ${
+            className={`relative flex items-center gap-2 px-6 py-3 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all ${
               tab === t.id
                 ? 'bg-[var(--bg-card)] shadow-xl shadow-black/5 text-cyan-500 border border-[var(--border-subtle)]'
                 : 'text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)]'
@@ -89,6 +106,11 @@ export function AdminSecurityPageClient() {
           >
             {t.icon}
             {t.label}
+            {'badge' in t && t.badge > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white text-[9px] font-black rounded-full flex items-center justify-center shadow-lg">
+                {t.badge > 9 ? '9+' : t.badge}
+              </span>
+            )}
           </button>
         ))}
       </div>
@@ -147,6 +169,14 @@ export function AdminSecurityPageClient() {
           onSearch={handleSessionSearch}
         />
       )}
+
+      {tab === 'ips' && <IpsPageClient />}
+
+      {tab === 'alerts' && <AlertsPageClient />}
+
+      {tab === 'protection' && <ProtectionPageClient />}
+
+      {tab === 'settings' && <SettingsPageClient />}
     </div>
   );
 }
