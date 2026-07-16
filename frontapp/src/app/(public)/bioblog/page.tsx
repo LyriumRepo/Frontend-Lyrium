@@ -7,7 +7,6 @@ import FeaturedCarousel from './components/FeaturedCarousel';
 import PodcastSection from './components/PodcastSection';
 import ShortsSection from './components/ShortsSection';
 import VideoGallery from './components/VideoGallery';
-import CommentsSection from './components/CommentsSection';
 import SectionHeader from './components/SectionHeader';
 import AnimatedWrapper from './components/AnimatedWrapper';
 
@@ -61,11 +60,6 @@ export default function BioBlogPage() {
             {/* Video Gallery */}
             <AnimatedWrapper>
                 <VideoGallery />
-            </AnimatedWrapper>
-
-            {/* Comments Section */}
-            <AnimatedWrapper delay={0.2}>
-                <CommentsSection />
             </AnimatedWrapper>
         </div>
     );
