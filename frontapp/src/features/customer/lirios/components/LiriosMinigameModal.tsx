@@ -280,7 +280,7 @@ export default function LiriosMinigameModal({
           80% { transform: translateX(5px) rotate(2deg); }
         }
       `}</style>
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }} role="presentation" />
       <div className="relative bg-white dark:bg-[var(--bg-card)] rounded-3xl shadow-2xl border border-gray-200 dark:border-[var(--border-subtle)] w-full max-w-sm animate-fade-slide-in">
         <div className="bg-gradient-to-r from-sky-500 to-cyan-500 dark:from-emerald-700 dark:to-teal-700 p-5 text-white flex items-center justify-between">
           <div className="flex items-center gap-2">

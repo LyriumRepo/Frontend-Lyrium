@@ -505,6 +505,10 @@ export default function BioForoTopicPage() {
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
             onClick={() => setModeration(prev => ({ ...prev, show: false }))}
+            onKeyDown={(e) => { if (e.key === 'Escape') setModeration(prev => ({ ...prev, show: false })); }}
+            role="dialog"
+            aria-modal="true"
+            tabIndex={-1}
           >
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 10 }}
@@ -513,6 +517,7 @@ export default function BioForoTopicPage() {
               transition={{ type: 'spring', stiffness: 400, damping: 30 }}
               className="bg-white dark:bg-[var(--bg-secondary)] rounded-3xl shadow-2xl border border-slate-100 dark:border-[var(--border-subtle)] w-full max-w-md mx-auto overflow-hidden"
               onClick={e => e.stopPropagation()}
+              onKeyDown={e => e.stopPropagation()}
             >
               <div className="relative px-6 pt-8 pb-6 text-center">
                 <div className="mx-auto w-16 h-16 rounded-2xl bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center mb-4">

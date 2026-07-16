@@ -40,7 +40,7 @@ export default function NewsletterSection() {
   };
 
   return (
-    <section className="bg-teal-300 dark:bg-[#1A3A32] text-white px-6 md:px-10 py-8 md:py-10 max-w-7xl mx-auto">
+    <section className="bg-teal-300 dark:bg-[#1A3A32] text-white px-6 md:px-10 py-8 md:py-10 max-w-7xl mx-auto rounded-2xl">
       {suscrito ? (
         <div className="text-center py-4">
           <p className="font-semibold text-xl">¡Gracias por suscribirte!</p>

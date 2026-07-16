@@ -89,7 +89,7 @@ function ImageUploader({
       if (file.size > 5 * 1024 * 1024) continue;
 
       const previewUrl = URL.createObjectURL(file);
-      const tempId = `temp-${Date.now()}-${Math.random()}`;
+      const tempId = `temp-${Date.now()}-${crypto.randomUUID()}`;
 
       const customEvent = new CustomEvent('image-add', {
         detail: { id: tempId, url: previewUrl, file },

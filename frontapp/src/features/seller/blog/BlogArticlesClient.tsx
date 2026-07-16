@@ -235,8 +235,8 @@ export function BlogArticlesClient() {
             </div>
 
             {showEditor && (
-                <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 backdrop-blur-sm overflow-y-auto py-10" onClick={() => setShowEditor(false)}>
-                    <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 w-full max-w-4xl mx-4 p-6 space-y-5" onClick={e => e.stopPropagation()} ref={editorRef}>
+                <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 backdrop-blur-sm overflow-y-auto py-10" role="dialog" aria-modal="true" tabIndex={-1} onClick={() => setShowEditor(false)} onKeyDown={e => { if (e.key === 'Escape') setShowEditor(false) }}>
+                    <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 w-full max-w-4xl mx-4 p-6 space-y-5" onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()} ref={editorRef}>
                         <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200">{editingId ? 'Editar Artículo' : 'Nuevo Artículo'}</h3>
 
                         {/* Encabezado */}

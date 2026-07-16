@@ -66,6 +66,10 @@ export default function NotificationSidebar() {
             <div
                 className="fixed inset-0 z-[60] bg-black/20 backdrop-blur-[2px]"
                 onClick={closeNotificationSidebar}
+                onKeyDown={(e) => { if (e.key === 'Escape') closeNotificationSidebar(); }}
+                role="dialog"
+                aria-modal="true"
+                tabIndex={-1}
             />
 
             {/* Panel */}

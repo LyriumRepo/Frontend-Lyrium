@@ -376,8 +376,7 @@ export function usePlanes() {
 
   const closeRequestSentModal = () => {
     setState(prev => {
-      const refresh = prev.pendingUIRefresh;
-      return { ...prev, modals: { ...prev.modals, requestSent: false }, pendingUIRefresh: false, currentPlan: refresh ? prev.currentPlan : prev.currentPlan };
+      return { ...prev, modals: { ...prev.modals, requestSent: false }, pendingUIRefresh: false, currentPlan: prev.currentPlan };
     });
   };
 

@@ -1,5 +1,6 @@
 export { default as BaseButton } from './BaseButton';
 export { default as BaseModal } from './BaseModal';
+export { default as ModalOverlay } from './ModalOverlay';
 export { default as BaseLoading } from './BaseLoading';
 export { default as BaseSkeleton } from './BaseSkeleton';
 export { default as Skeleton, SkeletonRow } from './Skeleton';

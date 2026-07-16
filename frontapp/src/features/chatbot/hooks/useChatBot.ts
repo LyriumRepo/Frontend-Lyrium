@@ -17,13 +17,13 @@ const WELCOME_MESSAGE: ChatBotMessage = {
 };
 
 function generateId(): string {
-    return `msg_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+    return `msg_${Date.now()}_${crypto.randomUUID()}`;
 }
 
 function getSessionId(): string {
     let sessionId = localStorage.getItem(SESSION_ID_KEY);
     if (!sessionId) {
-        sessionId = `session_${Date.now()}_${Math.random().toString(36).slice(2, 15)}`;
+        sessionId = `session_${Date.now()}_${crypto.randomUUID()}`;
         localStorage.setItem(SESSION_ID_KEY, sessionId);
     }
     return sessionId;

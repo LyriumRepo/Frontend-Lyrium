@@ -54,6 +54,8 @@ export function ScanDropzone({
     <div className="flex flex-col gap-2">
       {/* Drop zone */}
       <div
+        role="button"
+        tabIndex={0}
         onDrop={onDrop}
         onDragOver={(e) => {
           e.preventDefault();
@@ -61,6 +63,12 @@ export function ScanDropzone({
         }}
         onDragLeave={() => setDragOver(false)}
         onClick={() => !loading && inputRef.current?.click()}
+        onKeyDown={(e) => {
+          if ((e.key === 'Enter' || e.key === ' ') && !loading) {
+            e.preventDefault();
+            inputRef.current?.click();
+          }
+        }}
         className={`
           relative flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed px-6 py-8
           cursor-pointer transition-all select-none

@@ -116,7 +116,7 @@ export function useBoxCalculation() {
     }
   }, [cartItems, setBoxCalculation, setLoadingBox, setBoxError]);
 
-  const cartKey = cartItems.filter((i) => i.selected && i.id > 0).map((i) => `${i.id}:${i.quantity}`).sort().join('|');
+  const cartKey = cartItems.filter((i) => i.selected && i.id > 0).map((i) => `${i.id}:${i.quantity}`).sort((a, b) => a.localeCompare(b, 'es')).join('|');
   const prevKeyRef = useRef('');
 
   useEffect(() => {

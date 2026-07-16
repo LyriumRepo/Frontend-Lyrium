@@ -90,6 +90,10 @@ export default function PublicHeader() {
                                             <div
                                                 className="fixed inset-0 z-40"
                                                 onClick={() => setUserMenuOpen(false)}
+                                                onKeyDown={(e) => { if (e.key === 'Escape') setUserMenuOpen(false); }}
+                                                role="dialog"
+                                                aria-modal="true"
+                                                tabIndex={-1}
                                             />
                                             <div className="absolute right-0 mt-2 w-48 max-w-[calc(100vw-2rem)] bg-white dark:bg-[var(--bg-card)] rounded-xl shadow-lg border border-gray-200 dark:border-[var(--border-subtle)] z-50 py-1">
                                                 <div className="px-3 py-2 border-b border-gray-100 dark:border-[var(--border-subtle)]">

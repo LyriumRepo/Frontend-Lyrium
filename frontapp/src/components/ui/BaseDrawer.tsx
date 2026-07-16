@@ -61,6 +61,8 @@ export default function BaseDrawer({
       <div
         className="absolute inset-0 bg-black/40 backdrop-blur-sm"
         onClick={onClose}
+        onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }}
+        role="presentation"
       />
       <div
         className={`

@@ -13,10 +13,15 @@ export default function SalesLegendModal({ isOpen, onClose }: SalesLegendModalPr
         <div
             className="fixed inset-0 bg-black/40 backdrop-blur-xl z-[100000] flex justify-center items-center p-4 lg:p-6 animate-fadeIn"
             onClick={onClose}
+            onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }}
+            role="dialog"
+            aria-modal="true"
+            tabIndex={-1}
         >
             <div
                 className="bg-white dark:bg-[var(--bg-secondary)] w-full max-w-xl max-h-[88vh] rounded-3xl overflow-hidden shadow-2xl border border-white/20 relative flex flex-col"
                 onClick={(e) => e.stopPropagation()}
+                onKeyDown={(e) => e.stopPropagation()}
             >
                 {/* Header */}
                 <div className="bg-gradient-to-r from-emerald-600 to-emerald-500 dark:from-[#1A3A2A] dark:to-[#2A4A3A] px-5 py-4 text-white flex-shrink-0 flex items-center justify-between">

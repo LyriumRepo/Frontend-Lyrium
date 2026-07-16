@@ -116,6 +116,18 @@ export default function NotificationToast() {
             }
             remove(item.id);
           }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              if (item.action) {
+                const route = resolveNotificationRoute(item.action.type, item.action.id, user?.role);
+                router.push(route);
+              }
+              remove(item.id);
+            }
+          }}
+          role="button"
+          tabIndex={0}
           className={`pointer-events-auto bg-white dark:bg-[var(--bg-card)] border border-gray-200 dark:border-[var(--border-subtle)] rounded-xl shadow-lg ${getBorder(item.level)} border-l-4 pl-3 pr-4 py-3 flex items-start gap-3 ${item.exiting ? 'animate-fade-out' : 'animate-fade-slide-in'} ${item.action ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-[var(--bg-secondary)] transition-colors' : ''}`}
         >
           <div className="mt-0.5 flex-shrink-0">

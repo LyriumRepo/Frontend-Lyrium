@@ -194,6 +194,7 @@ export function SupportPageClient() {
         handleSendMessage,
         handleCreateTicket,
         handleCloseTicket,
+        handleSubmitSurvey,
     } = useCustomerSupport();
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -204,10 +205,18 @@ export function SupportPageClient() {
     const [filterValue, setFilterValue] = useState('');
     const [showFilter, setShowFilter] = useState(false);
     const [isMobileListVisible, setIsMobileListVisible] = useState(true);
+    const [surveyRating, setSurveyRating] = useState(0);
+    const [surveyComment, setSurveyComment] = useState('');
+    const [isSubmittingSurvey, setIsSubmittingSurvey] = useState(false);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [activeTicket?.messages]);
+
+    useEffect(() => {
+        setSurveyRating(0);
+        setSurveyComment('');
+    }, [activeTicketId]);
 
     const handleTicketSelect = useCallback((id: string) => {
         setActiveTicketId(id);
@@ -231,6 +240,15 @@ export function SupportPageClient() {
     }));
 
     const canMessage = activeTicket && activeTicket.status !== 'cerrado';
+
+    const handleSurveySubmit = async () => {
+        if (surveyRating === 0 || !activeTicket) return;
+        setIsSubmittingSurvey(true);
+        await handleSubmitSurvey(surveyRating, surveyComment);
+        setIsSubmittingSurvey(false);
+        setSurveyRating(0);
+        setSurveyComment('');
+    };
 
     // ── List panel ────────────────────────────────────────────────────────────
     const listContent = (
@@ -412,11 +430,51 @@ export function SupportPageClient() {
                     placeholder="Escribe un mensaje al soporte..."
                     disabled={isSending}
                 />
+            ) : activeTicket?.surveyRequired ? (
+                <div className="p-6 border-t border-[var(--border-subtle)]/50 bg-[var(--bg-secondary)]/50">
+                    <div className="flex flex-col items-center text-center max-w-md mx-auto">
+                        <div className="w-12 h-12 rounded-full bg-[var(--turquesa-500)]/10 flex items-center justify-center mb-3">
+                            <Icon name="Star" className="w-6 h-6 text-[var(--turquesa-500)]" />
+                        </div>
+                        <p className="text-sm font-black text-[var(--text-primary)] mb-1">Tu opinion nos ayuda a mejorar</p>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-secondary)] mb-4">Encuesta de satisfaccion</p>
+                        <div className="flex gap-2 mb-4">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                                <button
+                                    key={star}
+                                    type="button"
+                                    onClick={() => setSurveyRating(star)}
+                                    className={`w-10 h-10 rounded-xl border-2 flex items-center justify-center transition-all ${
+                                        surveyRating >= star
+                                            ? 'border-[var(--turquesa-500)]/30 text-[var(--turquesa-500)] bg-[var(--turquesa-500)]/5'
+                                            : 'border-transparent text-gray-300 hover:text-[var(--turquesa-500)]/50'
+                                    }`}
+                                >
+                                    <Icon name="Star" className={`w-5 h-5 ${surveyRating >= star ? 'fill-current' : ''}`} />
+                                </button>
+                            ))}
+                        </div>
+                        <textarea
+                            value={surveyComment}
+                            onChange={(e) => setSurveyComment(e.target.value)}
+                            rows={2}
+                            className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-3 text-xs font-medium text-[var(--text-primary)] outline-none placeholder:text-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--turquesa-500)]/10 mb-3"
+                            placeholder="Comentario adicional (opcional)"
+                        />
+                        <button
+                            onClick={handleSurveySubmit}
+                            disabled={surveyRating === 0 || isSubmittingSurvey}
+                            className="px-8 py-2.5 rounded-xl bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--verde-500)] text-xs font-black uppercase tracking-widest text-white shadow-lg shadow-[var(--turquesa-500)]/20 transition-all hover:opacity-90 disabled:opacity-50 disabled:shadow-none"
+                        >
+                            {isSubmittingSurvey ? 'Enviando...' : 'Enviar encuesta'}
+                        </button>
+                    </div>
+                </div>
             ) : (
                 <div className="p-4 border-t border-[var(--border-subtle)]/50 bg-white/50 dark:bg-[var(--bg-primary)]/50 backdrop-blur-xl">
                     <div className="flex items-center gap-2 justify-center">
                         <Icon name="Lock" className="w-4 h-4 text-[var(--text-secondary)]" />
-                        <p className="text-xs font-bold text-[var(--text-secondary)]">Este ticket está cerrado</p>
+                        <p className="text-xs font-bold text-[var(--text-secondary)]">Este ticket esta cerrado</p>
                     </div>
                 </div>
             )}

@@ -95,7 +95,7 @@ export function TrainingClient() {
         }, {});
     }, [filtered]);
 
-    const filteredCategories = Object.keys(filteredGrouped).sort();
+    const filteredCategories = Object.keys(filteredGrouped).sort((a, b) => a.localeCompare(b, 'es'));
     const categories = ['todas', ...sortedCategories];
 
     const requiredCount = useMemo(() => trainings.filter(t => t.is_required).length, [trainings]);

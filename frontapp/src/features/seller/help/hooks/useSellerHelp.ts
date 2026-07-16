@@ -32,6 +32,9 @@ function toSellerTicket(t: Ticket): SellerTicket {
     createdAt: t.fecha_creacion || t.created_at || '',
     updatedAt: t.fecha_actualizacion || t.updated_at || '',
     messages: (t.mensajes || []).map(toSellerMessage),
+    surveyRequired: (t as any).survey_required ?? false,
+    satisfactionRating: (t as any).satisfaction_rating ?? undefined,
+    satisfactionComment: (t as any).satisfaction_comment ?? undefined,
   };
 }
 
@@ -212,5 +215,6 @@ export function useSellerHelp() {
     handleCreateTicket,
     handleCloseTicket,
     openTicketsCount,
+    fetchTicketDetail,
   };
 }

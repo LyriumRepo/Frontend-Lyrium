@@ -445,6 +445,9 @@ export function PagosPageClient() {
                     key={tx.id}
                     className="p-4 flex items-start gap-3 hover:bg-[var(--bg-secondary)] transition-colors cursor-pointer active:opacity-70"
                     onClick={() => setSelectedId(tx.id)}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedId(tx.id); } }}
+                    role="button"
+                    tabIndex={0}
                   >
                     <div className="w-10 h-10 rounded-2xl bg-[var(--color-info)]/10 text-[var(--color-info)] flex items-center justify-center shrink-0">
                       <CreditCard className="w-5 h-5" />

@@ -44,6 +44,9 @@ function mapTicketData(data: TicketData): CustomerTicket {
     messages: (data.mensajes ?? []).map(mapMessageData),
     unreadCount: data.mensajes_sin_leer,
     assignedTo: data.contacto_adm?.nombre ?? undefined,
+    surveyRequired: data.satisfaction_rating === null && data.status === 'cerrado',
+    satisfactionRating: data.satisfaction_rating ?? undefined,
+    satisfactionComment: data.satisfaction_comment ?? undefined,
   };
 }
 
@@ -205,6 +208,20 @@ export function useCustomerSupport() {
     }
   }, []);
 
+  const handleSubmitSurvey = useCallback(async (rating: number, comment: string) => {
+    if (!activeTicketId) return;
+    try {
+      await ticketApi.submitSurvey(Number(activeTicketId), rating, comment);
+      setTickets(prev => prev.map(t =>
+        t.id === activeTicketId
+          ? { ...t, surveyRequired: false, satisfactionRating: rating, satisfactionComment: comment }
+          : t
+      ));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al enviar encuesta');
+    }
+  }, [activeTicketId]);
+
   return {
     tickets,
     activeTicket,
@@ -219,6 +236,7 @@ export function useCustomerSupport() {
     handleSendMessage,
     handleCreateTicket,
     handleCloseTicket,
+    handleSubmitSurvey,
     openTicketsCount,
     refresh: loadTickets,
   };

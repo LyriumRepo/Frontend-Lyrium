@@ -26,6 +26,10 @@ export function StockAlertsModal({ isOpen, alerts, onClose }: Props) {
             {/* Backdrop */}
             <div
                 onClick={onClose}
+                onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }}
+                role="dialog"
+                aria-modal="true"
+                tabIndex={-1}
                 className="fixed inset-0 z-[70] bg-black/25 backdrop-blur-[2px] transition-opacity duration-200"
             />
 

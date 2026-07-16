@@ -9,7 +9,6 @@ import { ToastProvider } from '@/shared/lib/context/ToastContext';
 import { EchoProvider } from '@/shared/lib/providers/EchoProvider';
 import { ThemeProvider } from 'next-themes';
 import QueryProvider from '@/components/providers/QueryProvider';
-import { GoogleOAuthWrapper } from '@/components/providers/GoogleOAuthWrapper';
 import CartProviders from '@/components/CartProviders';
 import { PageTransitionLoader } from '@/components/layout/shared/PageTransitionLoader';
 import { TopMedalProvider } from '@/shared/lib/context/TopMedalContext';
@@ -78,22 +77,20 @@ export default function RootLayout({
 
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <QueryProvider>
-            <GoogleOAuthWrapper>
-              <AuthProvider>
-                <EchoProvider>
-                  <NotificationProvider>
-                    <ToastProvider>
-                      <NotificationToast />
-                      <TopMedalProvider>
-                        {children}
-                      </TopMedalProvider>
-                      <PageTransitionLoader />
-                      <CartProviders />
-                    </ToastProvider>
-                  </NotificationProvider>
-                </EchoProvider>
-              </AuthProvider>
-            </GoogleOAuthWrapper>
+            <AuthProvider>
+              <EchoProvider>
+                <NotificationProvider>
+                  <ToastProvider>
+                    <NotificationToast />
+                    <TopMedalProvider>
+                      {children}
+                    </TopMedalProvider>
+                    <PageTransitionLoader />
+                    <CartProviders />
+                  </ToastProvider>
+                </NotificationProvider>
+              </EchoProvider>
+            </AuthProvider>
           </QueryProvider>
         </ThemeProvider>
 

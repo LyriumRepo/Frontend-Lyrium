@@ -1,19 +1,15 @@
-// src/shared/hooks/useCheckoutGuard.ts
 'use client';
 import { useRouter } from 'next/navigation';
-import { useAuthStore } from './useAuthstore';
+import { useAuth } from '@/shared/lib/context/AuthContext';
 
 export function useCheckoutGuard() {
   const router = useRouter();
-  const { validate, invalidateCache, showCheckoutModal, setShowCheckoutModal } =
-    useAuthStore();
+  const { isAuthenticated, showCheckoutModal, setShowCheckoutModal, invalidateTokenCache } =
+    useAuth();
 
   const goToCheckout = async () => {
-    // Descarta el cache para releer el token fresco
-    invalidateCache();
-    await validate();
-
-    const { isAuthenticated } = useAuthStore.getState();
+    // Forzar revalidación del token
+    invalidateTokenCache();
 
     if (isAuthenticated) {
       router.push('/checkout');

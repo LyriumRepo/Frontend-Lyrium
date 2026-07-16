@@ -48,7 +48,7 @@ function OfferCard({
 
   return (
     <Link href={producto.slug ? `/producto/${producto.slug}` : '#'} className="block">
-      <article className="w-[100px] min-[360px]:w-[110px] sm:w-[195px] shrink-0 bg-[var(--celeste-100)] dark:bg-[#1E3028] backdrop-blur-lg border border-transparent rounded-xl sm:rounded-[18px] overflow-hidden shadow-md group transition-all duration-300 hover:-translate-y-[5px] flex flex-col items-center relative">
+      <article className="w-[160px] min-[360px]:w-[175px] sm:w-[320px] shrink-0 bg-white dark:bg-[#1E3028] backdrop-blur-lg border border-transparent rounded-2xl sm:rounded-[22px] overflow-hidden shadow-md group transition-all duration-300 hover:-translate-y-[5px] flex flex-col items-center relative">
       <div className="relative w-full aspect-square overflow-hidden bg-transparent flex items-center justify-center">
         {producto.descuento && producto.descuento > 0 ? (
           <span className="absolute top-1 left-1 sm:top-2 sm:left-2 z-10 bg-red-500 text-white text-[7px] sm:text-[9px] font-extrabold px-1 py-0.5 sm:px-2 sm:py-0.5 rounded-full">
@@ -81,8 +81,8 @@ function OfferCard({
       </div>
 
        <div className="py-1.5 px-2 sm:py-2.5 sm:px-3 w-full text-center flex flex-col items-center">
-        <h3 className="text-[9px] min-[360px]:text-[10px] sm:text-[11.5px] font-bold truncate w-full text-slate-900 dark:text-white">{producto.titulo}</h3>
-        <p className="text-[10px] min-[360px]:text-[11px] sm:text-[13.5px] font-extrabold text-[var(--celeste-500)] dark:text-[var(--azulCeleste-500)]">S/ {producto.precio.toFixed(2)}</p>
+        <h3 className="text-[11px] min-[360px]:text-[12px] sm:text-[15px] font-bold truncate w-full text-slate-900 dark:text-white">{producto.titulo}</h3>
+        <p className="text-[12px] min-[360px]:text-[13px] sm:text-[17px] font-extrabold text-[var(--celeste-500)] dark:text-[var(--azulCeleste-500)]">S/ {producto.precio.toFixed(2)}</p>
         <div className="flex justify-center gap-0.5 mt-0.5 sm:mt-0.5">
           {Array.from({ length: 5 }).map((_, idx) => {
             const isFilled = idx < (producto.estrellas ? producto.estrellas.length : 5);

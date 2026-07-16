@@ -20,7 +20,7 @@ export function ContractsPageClient(_props: ContractsPageClientProps) {
             {selectedContract && (
                 <ModalsPortal>
                     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                        <div className="absolute inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-md" onClick={() => actions.setSelectedContract(null)} role="presentation" aria-hidden="true"></div>
+                        <div className="absolute inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-md" onClick={() => actions.setSelectedContract(null)} onKeyDown={(e) => { if (e.key === 'Escape') actions.setSelectedContract(null); }} role="presentation" aria-hidden="true"></div>
                         <div className="relative z-10">
                             <ContractDetailModal 
                                 contract={selectedContract} 

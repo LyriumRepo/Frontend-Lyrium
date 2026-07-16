@@ -1,7 +1,14 @@
+"use client";
+
 import { PublicHeader, PublicFooter } from '@/components/layout/public';
 // 1. Importamos el nuevo CartDrawer
 import CartDrawer from '@/features/public/carrito/components/drawer/CartDrawer';
-import ChatBotWidget from '@/features/chatbot/components/ChatBotWidget';
+import dynamic from 'next/dynamic';
+
+const ChatBotWidget = dynamic(
+  () => import('@/features/chatbot/components/ChatBotWidget'),
+  { ssr: false }
+);
 
 export default function PublicLayout({
     children,

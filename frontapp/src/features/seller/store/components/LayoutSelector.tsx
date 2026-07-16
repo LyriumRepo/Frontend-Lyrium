@@ -12,6 +12,7 @@ const layouts = [
         id: '1',
         name: 'Plantilla 1',
         desc: 'Columna única • Ancho completo',
+        isDefault: true,
         preview: (
             <>
                 <div className="flex gap-0.5 h-4">
@@ -63,6 +64,7 @@ const layouts = [
         id: '2',
         name: 'Plantilla 2',
         desc: 'Laterales alternados • Simétrico',
+        isDefault: false,
         preview: (
             <>
                 <div className="flex gap-0.5 h-4">
@@ -125,6 +127,7 @@ const layouts = [
         id: '3',
         name: 'Plantilla 3',
         desc: 'Banners extremos • Simétrico horizontal',
+        isDefault: false,
         preview: (
             <>
                 <div className="flex-1 grid gap-0.5" style={{ gridTemplateColumns: '18% 1fr 18%', gridTemplateRows: '1fr 1fr' }}>
@@ -279,6 +282,14 @@ export default function LayoutSelector({ config, updateConfig, storeId }: Layout
                                         <p className="text-[9px] font-bold text-[var(--text-secondary)] uppercase mt-1 text-center transition-colors">
                                             {layout.desc}
                                         </p>
+                                        {layout.isDefault && (
+                                            <div className="flex justify-center mt-2">
+                                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                                                    <Icon name="Star" className="w-2.5 h-2.5" />
+                                                    Predeterminada
+                                                </span>
+                                            </div>
+                                        )}
                                     </div>
                                 </label>
                             ))}

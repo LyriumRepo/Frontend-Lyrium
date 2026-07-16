@@ -242,12 +242,16 @@ export default function CustomerBookingsPage() {
           de BaseLayout.tsx tiene un transform (translateY vía animación con forwards) que
           crea un containing block y rompe el position:fixed relativo al viewport real. */}
       {detailTarget && typeof document !== 'undefined' && createPortal(
-        <div className="fixed inset-0 z-[100]" role="dialog" aria-modal="true" aria-label={`Detalle de reserva: ${detailTarget.service_name}`} onClick={closeDetail}>
+        <div className="fixed inset-0 z-[100]" role="dialog" aria-modal="true" aria-label={`Detalle de reserva: ${detailTarget.service_name}`} tabIndex={-1} onClick={closeDetail} onKeyDown={(e) => { if (e.key === 'Escape') closeDetail(); }}>
           {/* Overlay */}
           <div className={`absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300 ${drawerOpen ? 'opacity-100' : 'opacity-0'}`} />
           {/* Drawer */}
           <div
+            tabIndex={-1}
             onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
             className={`absolute right-0 top-0 bottom-0 w-full sm:w-[520px] bg-white dark:bg-[var(--bg-secondary)] shadow-[-40px_0_100px_rgba(0,0,0,0.25)] flex flex-col transition-transform duration-300 ease-out will-change-transform ${drawerOpen ? 'translate-x-0' : 'translate-x-full'}`}>
             {/* Header gradiente */}
             <div className="sticky top-0 z-10 px-6 pt-7 pb-5 bg-gradient-to-r from-sky-500 via-sky-400 to-sky-300 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] text-white flex-shrink-0">
@@ -333,8 +337,8 @@ export default function CustomerBookingsPage() {
 
       {/* Rate modal — mismo motivo, vía portal */}
       {rateTarget && typeof document !== 'undefined' && createPortal(
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" role="dialog" aria-modal="true" aria-label="Califica tu experiencia" onClick={() => setRateTarget(null)}>
-          <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-2xl shadow-2xl max-w-sm w-full p-6 relative" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" role="dialog" aria-modal="true" aria-label="Califica tu experiencia" tabIndex={-1} onClick={() => setRateTarget(null)} onKeyDown={(e) => { if (e.key === 'Escape') setRateTarget(null); }}>
+          <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-2xl shadow-2xl max-w-sm w-full p-6 relative" tabIndex={-1} onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
             <button onClick={() => setRateTarget(null)} className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 dark:hover:text-[var(--text-secondary)]">
               <X className="w-5 h-5" />
             </button>

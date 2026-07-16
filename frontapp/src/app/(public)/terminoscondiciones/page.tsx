@@ -5,7 +5,6 @@ import {
     FileText,
     UserCircle,
     Store,
-    Package,
     Download,
     Share2,
     List,
@@ -17,17 +16,16 @@ import {
     Phone as WhatsApp
 } from 'lucide-react';
 import { termsData, termsConfigs } from '@/shared/lib/constants/termsData';
-import { manualSections } from '@/shared/lib/constants/manualData';
 import { sanitizeHtml } from '@/shared/lib/sanitize';
 import TriviaWidget from '@/features/public/terminoscondiciones/TriviaWidget';
 
 export default function TermsAndConditionsPage() {
-    const [mode, setMode] = useState<'cliente' | 'vendedor' | 'manual'>('cliente');
+    const [mode, setMode] = useState<'cliente' | 'vendedor'>('cliente');
 
     useEffect(() => {
         const hash = window.location.hash.replace('#', '');
-        if (hash === 'manual' || hash === 'vendedor') {
-            setMode(hash as 'manual' | 'vendedor');
+        if (hash === 'vendedor') {
+            setMode('vendedor');
         }
     }, []);
     const [activeSection, setActiveSection] = useState<string>('');
@@ -38,10 +36,8 @@ export default function TermsAndConditionsPage() {
 
     const sectionRefs = useRef<{ [key: string]: HTMLElement | null }>({});
 
-    const currentTerms = mode === 'manual' ? manualSections : termsData[mode];
-    const config = mode === 'manual'
-        ? { subtitle: 'MANUAL DE EMPAQUETADO — SALUD EN CADA PEDIDO', pdfLabel: 'Descargar PDF Manual', pdfHref: '/pdf/manual-empaquetado.pdf', pdfName: 'manual-empaquetado.pdf' }
-        : termsConfigs[mode];
+    const currentTerms = termsData[mode];
+    const config = termsConfigs[mode];
 
     const isBrowser = typeof window !== 'undefined';
 
@@ -162,10 +158,8 @@ export default function TermsAndConditionsPage() {
                 <FileText className="w-5 h-5 sm:w-7 sm:h-7 md:w-9 md:h-9 shrink-0 animate-float" /> Términos y condiciones </h1>
 </div>
                 <p className="text-gray-500 dark:text-[var(--text-primary)] max-w-3xl mx-auto text-lg">
-                    {mode === 'manual'
-                        ? 'Guía paso a paso para el equipo de empaque — Lyrium Biomarketplace.'
-                        : <>Revisa los términos aplicables al uso de <strong className="text-sky-600 dark:text-[var(--icons-green)]">LYRIUM BIO MARKETPLACE</strong>.
-                    Usa las pestañas para cambiar entre Cliente y Vendedor.</>}
+                    Revisa los términos aplicables al uso de <strong className="text-sky-600 dark:text-[var(--icons-green)]">LYRIUM BIO MARKETPLACE</strong>.
+                    Usa las pestañas para cambiar entre Cliente y Vendedor.
                 </p>
 
                 {/* TABS & ACTIONS */}
@@ -185,14 +179,6 @@ export default function TermsAndConditionsPage() {
                     >
                         <Store className="w-5 h-5" />
                         Del Vendedor
-                    </button>
-                    <button
-                        onClick={() => { setMode('manual'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                        className={`flex items-center gap-2 px-6 py-3 rounded-full font-bold transition-all duration-300 shadow-sm border
-              ${mode === 'manual' ? 'bg-sky-500 dark:bg-[var(--brand-green)] text-white border-sky-400 dark:border-[var(--icons-green)] shadow-sky-200 dark:shadow-[var(--icons-green)]' : 'bg-white text-gray-500 border-gray-100 hover:bg-gray-50'}`}
-                    >
-                        <Package className="w-5 h-5" />
-                        Manual Empaque
                     </button>
                     <a
                         href={config.pdfHref}
@@ -218,7 +204,7 @@ export default function TermsAndConditionsPage() {
                 <aside className="hidden lg:block sticky top-28 bg-white/90 dark:bg-[#dddddd] backdrop-blur-md border border-gray-100 rounded-3xl p-6 shadow-xl space-y-6">
                     <div className="flex items-center gap-3 border-b border-gray-50 pb-4">
                         <List className="w-5 h-5 text-sky-500 dark:text-[var(--brand-green)]" />
-                        <h4 className="font-black text-sm tracking-widest text-[#333333]">Contenido {mode === 'cliente' ? 'Cliente' : mode === 'vendedor' ? 'Vendedor' : 'Manual'}</h4>
+                        <h4 className="font-black text-sm tracking-widest text-[#333333]">Contenido {mode === 'cliente' ? 'Cliente' : 'Vendedor'}</h4>
                     </div>
                     <nav className="space-y-1">
                         {currentTerms.map((section) => (
@@ -269,11 +255,9 @@ export default function TermsAndConditionsPage() {
                             ))}
                         </div>
 
-                        {mode !== 'manual' && (
-                            <div className="mt-8 pt-8 border-t border-gray-50 text-center text-sm text-gray-400 italic">
-                                Última actualización: <strong>2025</strong>. Al usar LYRIUM BIOMARKETPLACE, aceptas los términos y condiciones.
-                            </div>
-                        )}
+                        <div className="mt-8 pt-8 border-t border-gray-50 text-center text-sm text-gray-400 italic">
+                            Última actualización: <strong>2025</strong>. Al usar LYRIUM BIOMARKETPLACE, aceptas los términos y condiciones.
+                        </div>
                     </div>
                 </section>
             </div>
@@ -295,11 +279,11 @@ export default function TermsAndConditionsPage() {
 
             {/* MOBILE POPUP OVERLAY */}
             <div className={`fixed inset-0 z-50 lg:hidden transition-all duration-500 ${isPopupOpen ? 'visible' : 'invisible'}`}>
-                <div className={`absolute inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity duration-500 ${isPopupOpen ? 'opacity-100' : 'opacity-0'}`} onClick={() => setIsPopupOpen(false)} role="presentation" aria-hidden="true" />
+                <div className={`absolute inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity duration-500 ${isPopupOpen ? 'opacity-100' : 'opacity-0'}`} onClick={() => setIsPopupOpen(false)} onKeyDown={(e) => { if (e.key === 'Escape') setIsPopupOpen(false); }} role="presentation" aria-hidden="true" />
                 <div className={`absolute bottom-0 left-0 w-full bg-white rounded-t-[3rem] shadow-2xl transition-transform duration-500 transform ${isPopupOpen ? 'translate-y-0' : 'translate-y-full'}`}>
                     <div className="p-8 space-y-6">
                         <div className="flex items-center justify-between border-b border-gray-50 pb-4">
-                            <span className="text-lg font-black uppercase tracking-tight text-gray-900">Contenido {mode === 'cliente' ? 'Cliente' : mode === 'vendedor' ? 'Vendedor' : 'Manual'}</span>
+                            <span className="text-lg font-black uppercase tracking-tight text-gray-900">Contenido {mode === 'cliente' ? 'Cliente' : 'Vendedor'}</span>
                             <button onClick={() => setIsPopupOpen(false)} className="p-2 bg-gray-50 rounded-full text-gray-400 hover:text-gray-900">
                                 <X className="w-6 h-6" />
                             </button>
@@ -323,7 +307,7 @@ export default function TermsAndConditionsPage() {
 
             {/* ===================== SHARE MODAL ===================== */}
             <div className={`fixed inset-0 z-[100] flex items-center justify-center transition-all duration-500 ${isShareModalOpen ? 'visible' : 'invisible'}`}>
-                <div className={`absolute inset-0 bg-gray-900/40 backdrop-blur-md transition-opacity duration-500 ${isShareModalOpen ? 'opacity-100' : 'opacity-0'}`} onClick={() => setIsShareModalOpen(false)} role="presentation" aria-hidden="true" />
+                <div className={`absolute inset-0 bg-gray-900/40 backdrop-blur-md transition-opacity duration-500 ${isShareModalOpen ? 'opacity-100' : 'opacity-0'}`} onClick={() => setIsShareModalOpen(false)} onKeyDown={(e) => { if (e.key === 'Escape') setIsShareModalOpen(false); }} role="presentation" aria-hidden="true" />
                 <div className={`relative bg-white w-[90%] max-w-md rounded-[2rem] shadow-2xl overflow-hidden transition-all duration-500 transform ${isShareModalOpen ? 'scale-100 translate-y-0' : 'scale-95 translate-y-10'}`}>
                     <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
                         <h3 className="font-black text-xl text-gray-900 uppercase tracking-tight">Compartir Términos</h3>

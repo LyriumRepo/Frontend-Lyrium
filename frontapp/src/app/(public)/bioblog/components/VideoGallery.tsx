@@ -83,7 +83,7 @@ export default function VideoGallery() {
                     </div>
                     <h3 className="text-3xl md:text-5xl font-black text-slate-800 dark:text-[var(--text-primary)] mb-6 drop-shadow-sm uppercase">VIDEOS</h3>
                     <p className="text-slate-600 dark:text-[var(--text-secondary)] text-base md:text-lg leading-relaxed font-light text-center max-w-5xl mx-auto">
-                        Contenido audiovisual sobre vida saludable, recetas, jardinería y más.
+                        Aprende viendo: tutoriales, recetas y experiencias sobre vida saludable y sostenible.
                     </p>
                 </div>
 

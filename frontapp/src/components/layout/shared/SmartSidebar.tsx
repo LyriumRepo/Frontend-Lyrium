@@ -216,7 +216,8 @@ export default function SmartSidebar({
                                                     <div className={`flex items-center justify-center transition-all duration-500 ${isMobileOpen ? 'w-14' : 'w-full'} md:w-full ${(isExpanded || isMobileOpen) ? 'lg:w-14' : 'lg:w-20'}`}>
                                                         <div className={`
                                                             relative w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-500
-                                                            ${active ? `${colors.bgIcon} ${colors.textActive} shadow-inner` : `bg-[var(--bg-muted)] text-[var(--text-secondary)] group-hover:text-[var(--brand-green)] group-hover:bg-[var(--bg-sidebar)]`}
+                                                            lg:group-hover:animate-[sidebarIconDraw_0.4s_ease-out_forwards] lg:group-active:animate-[sidebarIconBounce_0.3s_ease-out]
+                                                            ${active ? `${colors.bgIcon} ${colors.textActive} shadow-inner lg:animate-[sidebarIconGlow_2s_ease-in-out_infinite]` : `bg-[var(--bg-muted)] text-[var(--text-secondary)] group-hover:text-[var(--brand-green)] group-hover:bg-[var(--bg-sidebar)]`}
                                                         `}>
                                                             <Icon name={module.icon || 'Package'} className="w-5 h-5" />
                                                             {badgeCount > 0 && (

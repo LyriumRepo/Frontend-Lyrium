@@ -647,8 +647,8 @@ export default function BioForoPage() {
       </section>
 
       {shareTopic && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setShareTopic(null)}>
-          <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-800 w-full max-w-sm mx-4 p-6" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setShareTopic(null)} onKeyDown={(e) => { if (e.key === 'Escape') setShareTopic(null); }} role="dialog" aria-modal="true" tabIndex={-1}>
+          <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-800 w-full max-w-sm mx-4 p-6" onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-bold text-slate-800 dark:text-[var(--text-primary)]">Compartir</h3>
               <button onClick={() => setShareTopic(null)} className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-gray-800 transition">

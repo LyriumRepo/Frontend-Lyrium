@@ -63,7 +63,7 @@ export default function AdminInvoiceDrawer({ invoice, isOpen, onClose }: Props) 
 
     return (
         <div className="fixed inset-0 md:top-[60px] z-50 flex items-end md:items-stretch justify-end">
-            <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-md" onClick={onClose} role="presentation" aria-hidden="true" />
+            <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-md" onClick={onClose} onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }} role="presentation" aria-hidden="true" />
 
             <div className="relative bg-[var(--bg-card)] shadow-[-20px_0_60px_-10px_rgba(0,0,0,0.25)] flex flex-col animate-slideInRight
                 w-full md:w-[420px] lg:w-[480px]

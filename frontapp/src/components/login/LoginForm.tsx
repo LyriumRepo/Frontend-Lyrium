@@ -46,7 +46,7 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
             title: 'Únete a la evolución del comercio',
             subtitle: 'Crea tu cuenta en Lyrium y posiciona tu marca en el marketplace que cuida el futuro.',
             icon: 'Flower2',
-            backgroundImage: '/img/intro/loginIngresar.png',
+            backgroundImage: '/img/intro/contactanos.jpg',
             iconSize: '112px'
         };
 

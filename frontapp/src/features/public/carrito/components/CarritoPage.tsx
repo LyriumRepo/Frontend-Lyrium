@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect } from "react";
 import {
   Loader2,
   ShoppingBag,
@@ -18,14 +17,11 @@ import CartPopup from './CartPopup';
 import ProductDetailModal from './modals/ProductDetailModal';
 import { useAddToCart } from '@/features/public/product/hooks/useAddToCart';
 import AuthRequiredModal from '@/shared/components/AuthRequiredModal';
-import { useAuthStore } from '@/shared/hooks/useAuthstore';
+import { useAuth } from '@/shared/lib/context/AuthContext';
 
 export default function CarritoPage() {
   const { isLoading, isError, refetch } = useCarritoCatalog();
-  const { validate, showCheckoutModal, setShowCheckoutModal } = useAuthStore();
-  useEffect(() => {
-    validate();
-  }, [validate]);
+  const { showCheckoutModal, setShowCheckoutModal } = useAuth();
 
   const products = useCarritoStore((s) => s.products);
   const cartItems = useCarritoStore((s) => s.cartItems);

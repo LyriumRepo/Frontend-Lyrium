@@ -22,7 +22,8 @@ export default function CustomerHeader({ onOpenMenu }: { onOpenMenu: () => void 
         try {
             const count = await orderApi.getActiveCount();
             setActiveCount(count);
-        } catch {
+        } catch (err) {
+            console.error('[CustomerHeader] Error fetching active count:', err);
             setActiveCount(null);
         }
     }, []);
@@ -73,7 +74,7 @@ export default function CustomerHeader({ onOpenMenu }: { onOpenMenu: () => void 
                     <div className="hidden lg:flex items-center gap-6">
                         <div className="h-6 w-px bg-gray-200 dark:bg-[var(--border-subtle)]" />
                         <div className="text-sm">
-                            <span className="text-gray-400 dark:text-gray-500 font-bold uppercase text-[10px] tracking-widest">Pedidos Activos: </span>
+                            <span className="text-gray-400 dark:text-gray-500 font-bold uppercase text-[10px] tracking-widest" title="Órdenes en proceso: pendientes de confirmación, en preparación o en envío">Pedidos Activos: </span>
                             <span className="font-black text-gray-900 dark:text-[var(--text-primary)] tracking-tight">
                                 {activeCount === null ? (
                                     <span className="inline-block w-5 h-4 bg-gray-200 dark:bg-[var(--bg-muted)] rounded animate-pulse align-middle" />

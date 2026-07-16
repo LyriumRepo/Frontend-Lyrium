@@ -1,12 +1,13 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useSellerHelp } from '@/features/seller/help/hooks/useSellerHelp';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import BaseLoading from '@/components/ui/BaseLoading';
 import Icon from '@/components/ui/Icon';
 import { SellerTicket, TicketStatus, TicketCategory, CATEGORY_LABELS } from '@/features/seller/help/types';
 import { ChatView } from '@/modules/chat';
+import { ticketApi } from '@/lib/api/ticketRepository';
 import type { UnifiedTicket, UnifiedMessage } from '@/modules/chat/types';
 
 function TicketList({
@@ -211,6 +212,9 @@ function toUnifiedHelpTicket(ticket: SellerTicket): UnifiedTicket {
         createdAt: new Date(ticket.createdAt || Date.now()),
         updatedAt: new Date(ticket.updatedAt || Date.now()),
         messages,
+        surveyRequired: ticket.surveyRequired,
+        satisfactionRating: ticket.satisfactionRating,
+        satisfactionComment: ticket.satisfactionComment,
         source: 'seller',
     };
 }
@@ -312,13 +316,24 @@ export function HelpPageClient() {
         handleSendMessage,
         handleCreateTicket,
         handleCloseTicket,
-        openTicketsCount
+        openTicketsCount,
+        fetchTicketDetail,
     } = useSellerHelp();
 
     const [showNewTicketForm, setShowNewTicketForm] = useState(false);
     const [showLegend, setShowLegend] = useState(false);
     /** En mobile/tablet: true = muestra lista, false = muestra detalle */
     const [isMobileListVisible, setIsMobileListVisible] = useState(true);
+
+    const handleSubmitSurvey = useCallback(async (rating: number, comment: string) => {
+        if (!activeTicket) return;
+        try {
+            await ticketApi.seller.submitSurvey(Number(activeTicket.id), { rating, comment });
+            await fetchTicketDetail(activeTicket.id);
+        } catch {
+            // silent
+        }
+    }, [activeTicket]);
 
     /** Seleccionar ticket: en mobile oculta la lista y muestra el chat */
     const handleSelectTicket = (id: string) => {
@@ -409,6 +424,7 @@ export function HelpPageClient() {
                                 ticket={toUnifiedHelpTicket(activeTicket)}
                                 onSendMessage={({ text }) => handleSendMessage(text)}
                                 onCloseTicket={() => handleCloseTicket(activeTicket.id)}
+                                onSubmitSurvey={handleSubmitSurvey}
                                 isSending={isSending}
                                 isClosing={isClosing}
                                 showAdminControls={false}
@@ -459,6 +475,7 @@ export function HelpPageClient() {
                             ticket={toUnifiedHelpTicket(activeTicket)}
                             onSendMessage={({ text }) => handleSendMessage(text)}
                             onCloseTicket={() => handleCloseTicket(activeTicket.id)}
+                            onSubmitSurvey={handleSubmitSurvey}
                             onBack={handleBack}
                             isSending={isSending}
                             isClosing={isClosing}
@@ -470,8 +487,8 @@ export function HelpPageClient() {
             </div>
 
             {showLegend && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4" onClick={() => setShowLegend(false)}>
-                    <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-[1.5rem] sm:rounded-[3rem] max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl" onClick={(e) => e.stopPropagation()}>
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4" onClick={() => setShowLegend(false)} onKeyDown={(e) => { if (e.key === 'Escape') setShowLegend(false); }} role="dialog" aria-modal="true" tabIndex={-1}>
+                    <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-[1.5rem] sm:rounded-[3rem] max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl" onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
                         <div className="bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--turquesa-500)]/70 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-4 sm:p-8 text-white relative">
                             <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl" />
                             <div className="relative z-10 flex items-center justify-between">

@@ -76,7 +76,7 @@ export default function PodcastSection() {
                             PODCAST - AUDIOS
                         </h3>
                         <p className="text-slate-600 dark:text-[var(--text-secondary)] text-base md:text-lg leading-relaxed font-light text-center max-w-5xl mx-auto">
-                            Escucha nuestros podcasts sobre vida ecológica, bienestar natural y sostenibilidad.
+                            Escucha en cualquier momento: conversaciones sobre salud, naturaleza y bienestar que puedes acompañar en tu día a día.
                         </p>
                     </div>
 

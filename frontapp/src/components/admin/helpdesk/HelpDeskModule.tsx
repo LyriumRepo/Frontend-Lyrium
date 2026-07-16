@@ -370,6 +370,17 @@ export const HelpDeskModule: React.FC<HelpDeskModuleProps> = ({
                                                 actions.selectTicket(Number(chat.id));
                                             }
                                         }}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter' || e.key === ' ') {
+                                                e.preventDefault();
+                                                setActiveChatId(chat.id);
+                                                if (activeMode === 'vendedores' && actions?.selectTicket) {
+                                                    actions.selectTicket(Number(chat.id));
+                                                }
+                                            }
+                                        }}
+                                        role="button"
+                                        tabIndex={0}
                                         className={`p-4 rounded-3xl flex gap-3.5 cursor-pointer transition-all border ${
                                             isActive
                                                 ? 'bg-[var(--turquesa-500)]/10 border-[var(--turquesa-500)]/30 shadow-md shadow-[var(--turquesa-500)]/5'
@@ -473,7 +484,15 @@ export const HelpDeskModule: React.FC<HelpDeskModuleProps> = ({
                                                             {msg.reactions?.map((r, i) => (
                                                                 <span
                                                                     key={i}
+                                                                    role="button"
+                                                                    tabIndex={0}
                                                                     onClick={() => handleAddReaction(msg.id, r)}
+                                                                    onKeyDown={(e) => {
+                                                                      if (e.key === 'Enter' || e.key === ' ') {
+                                                                        e.preventDefault();
+                                                                        handleAddReaction(msg.id, r);
+                                                                      }
+                                                                    }}
                                                                     className="text-[9px] bg-white/20 dark:bg-black/20 px-1.5 py-0.5 rounded-md cursor-pointer hover:scale-110 transition-transform"
                                                                 >
                                                                     {r}

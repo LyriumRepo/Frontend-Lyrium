@@ -7,8 +7,12 @@ import { DashboardLayout } from '@/components/layout/shared/DashboardLayout';
 import { useUIStore } from '@/store/uiStore';
 import { useAuth } from '@/shared/lib/context/AuthContext';
 import Icon from '@/components/ui/Icon';
-import ChatBotWidget from '@/features/chatbot/components/ChatBotWidget';
-import NotificationSidebar from '@/components/shared/notifications/NotificationSidebar';
+import dynamic from 'next/dynamic';
+
+const ChatBotWidget = dynamic(
+  () => import('@/features/chatbot/components/ChatBotWidget'),
+  { ssr: false }
+);
 import { WELCOME_MODAL_LIGHT_TEXT, WELCOME_MODAL_LIGHT_BADGE, WELCOME_MODAL_LIGHT_CARD } from '@/shared/lib/theme/welcomeModalTheme';
 
 interface CustomerLayoutClientProps {
@@ -16,7 +20,9 @@ interface CustomerLayoutClientProps {
 }
 
 // ─── Paleta bienvenida cliente ─────────────────────────────────────────────
-const CW_COLORS = ['#10b981', '#34d399', '#06b6d4', '#22d3ee', '#6ee7b7', '#a78bfa'];
+const CW_COLORS = ['#0ea5e9', '#38bdf8', '#06b6d4', '#22d3ee', '#7dd3fc', '#818cf8'];
+const CW_COLORS_LIGHT = ['#0ea5e9', '#38bdf8', '#06b6d4', '#22d3ee', '#7dd3fc', '#818cf8'];
+const CW_STAR_COLORS_LIGHT = ['#fbbf24', '#ffffff', '#38bdf8', '#818cf8'];
 
 // ─── CSS keyframes bienvenida cliente ─────────────────────────────────────
 const CW_CSS = `
@@ -168,11 +174,11 @@ function CustomerWelcomeToast() {
             confetti({
                 particleCount: 55, spread: 90, zIndex: 10000,
                 origin: { x: e.clientX / window.innerWidth, y: e.clientY / window.innerHeight },
-                colors: CW_COLORS, scalar: 1.1, gravity: 0.8,
+                colors: isDark ? CW_COLORS : CW_COLORS_LIGHT, scalar: 1.1, gravity: 0.8,
             });
         });
         close();
-    }, [close]);
+    }, [close, isDark]);
 
     useEffect(() => {
         if (!user) return;
@@ -186,13 +192,15 @@ function CustomerWelcomeToast() {
 
         const confettiTimer = setTimeout(() => {
             import('canvas-confetti').then(({ default: confetti }) => {
-                confetti({ particleCount: 120, spread: 170, origin: { x: 0.5, y: 0.38 }, colors: CW_COLORS, scalar: 1.2, gravity: 0.72, zIndex: 10000 });
+                const palette = isDark ? CW_COLORS : CW_COLORS_LIGHT;
+                const starPalette = isDark ? ['#fbbf24','#ffffff','#38bdf8','#818cf8'] : CW_STAR_COLORS_LIGHT;
+                confetti({ particleCount: 120, spread: 170, origin: { x: 0.5, y: 0.38 }, colors: palette, scalar: 1.2, gravity: 0.72, zIndex: 10000 });
                 setTimeout(() => {
-                    confetti({ particleCount: 70, angle: 60,  spread: 70, origin: { x: 0, y: 0.45 }, colors: CW_COLORS, scalar: 1.1, zIndex: 10000 });
-                    confetti({ particleCount: 70, angle: 120, spread: 70, origin: { x: 1, y: 0.45 }, colors: CW_COLORS, scalar: 1.1, zIndex: 10000 });
+                    confetti({ particleCount: 70, angle: 60,  spread: 70, origin: { x: 0, y: 0.45 }, colors: palette, scalar: 1.1, zIndex: 10000 });
+                    confetti({ particleCount: 70, angle: 120, spread: 70, origin: { x: 1, y: 0.45 }, colors: palette, scalar: 1.1, zIndex: 10000 });
                 }, 240);
                 setTimeout(() => {
-                    confetti({ particleCount: 40, spread: 360, startVelocity: 20, origin: { x: 0.5, y: 0.4 }, colors: ['#fbbf24','#ffffff','#34d399','#a78bfa'], shapes: ['star'], scalar: 1.5, gravity: 0.35, zIndex: 10000 });
+                    confetti({ particleCount: 40, spread: 360, startVelocity: 20, origin: { x: 0.5, y: 0.4 }, colors: starPalette, shapes: ['star'], scalar: 1.5, gravity: 0.35, zIndex: 10000 });
                 }, 500);
             });
         }, 700);
@@ -203,7 +211,7 @@ function CustomerWelcomeToast() {
             clearTimeout(confettiTimer);
             clearTimeout(autoClose);
         };
-    }, [user, close]);
+    }, [user, close, isDark]);
 
     if (!visible) return null;
 
@@ -218,43 +226,69 @@ function CustomerWelcomeToast() {
     };
 
     const T = isDark ? {
-        overlay:     'radial-gradient(ellipse 72% 62% at 50% 38%, rgba(16,185,129,0.08) 0%, rgba(0,0,0,0.78) 82%)',
-        cardBg:      'linear-gradient(158deg, rgba(8,18,14,0.97) 0%, rgba(6,14,22,0.97) 55%, rgba(8,16,14,0.96) 100%)',
-        cardShadow:  'inset 0 0 0 1px rgba(255,255,255,0.04), inset 0 0 80px rgba(16,185,129,0.07), 0 44px 100px rgba(0,0,0,0.72), 0 0 160px rgba(16,185,129,0.05)',
-        glowTop:     'radial-gradient(ellipse at 50% -20%, rgba(16,185,129,0.14) 0%, transparent 70%)',
-        shimmer:     'linear-gradient(108deg, transparent 28%, rgba(255,255,255,0.05) 50%, transparent 72%)',
-        badgeBg:     'rgba(6,182,212,0.1)',
-        badgeBorder: '1px solid rgba(6,182,212,0.25)',
-        badgeColor:  'rgba(103,232,249,0.85)',
-        label:       'rgba(255,255,255,0.45)',
-        subtitle:    'rgba(255,255,255,0.34)',
-        closeBg:     'rgba(255,255,255,0.06)',
-        closeBorder: '1px solid rgba(255,255,255,0.1)',
-        closeIcon:   'text-white/45',
-        closeHover:  'rgba(16,185,129,0.2)',
-        logoBg:      'rgba(16,185,129,0.08)',
-        logoBorder:  '1px solid rgba(16,185,129,0.2)',
-        logoSrc:     '/img/logo_lyrium_blanco_01-scaled.webp',
-        divider:     'linear-gradient(90deg, transparent, rgba(52,211,153,0.4), rgba(6,182,212,0.3), transparent)',
-        spark1:      'rgba(52,211,153,0.5)',
-        spark2:      'rgba(6,182,212,0.4)',
+        overlay:       'radial-gradient(ellipse 72% 62% at 50% 38%, rgba(14,165,233,0.08) 0%, rgba(0,0,0,0.78) 82%)',
+        cardBg:        'linear-gradient(158deg, rgba(8,18,28,0.97) 0%, rgba(6,14,24,0.97) 55%, rgba(8,16,26,0.96) 100%)',
+        cardShadow:    'inset 0 0 0 1px rgba(255,255,255,0.04), inset 0 0 80px rgba(14,165,233,0.07), 0 44px 100px rgba(0,0,0,0.72), 0 0 160px rgba(14,165,233,0.05)',
+        glowTop:       'radial-gradient(ellipse at 50% -20%, rgba(14,165,233,0.14) 0%, transparent 70%)',
+        shimmer:       'linear-gradient(108deg, transparent 28%, rgba(255,255,255,0.05) 50%, transparent 72%)',
+        badgeBg:       'rgba(56,189,248,0.1)',
+        badgeBorder:   '1px solid rgba(56,189,248,0.25)',
+        badgeColor:    'rgba(186,230,253,0.85)',
+        label:         'rgba(255,255,255,0.45)',
+        subtitle:      'rgba(255,255,255,0.34)',
+        closeBg:       'rgba(255,255,255,0.06)',
+        closeBorder:   '1px solid rgba(255,255,255,0.1)',
+        closeIcon:     'text-white/45',
+        closeHover:    'rgba(14,165,233,0.2)',
+        logoBg:        'rgba(14,165,233,0.08)',
+        logoBorder:    '1px solid rgba(14,165,233,0.2)',
+        logoSrc:       '/img/logo_lyrium_blanco_01-scaled.webp',
+        divider:       'linear-gradient(90deg, transparent, rgba(56,189,248,0.4), rgba(129,140,248,0.3), transparent)',
+        spark1:        'rgba(56,189,248,0.5)',
+        spark2:        'rgba(129,140,248,0.4)',
+        halo:          'radial-gradient(ellipse, rgba(14,165,233,0.3) 0%, rgba(6,182,212,0.16) 45%, transparent 78%)',
+        orb1Border:    '1px solid rgba(14,165,233,0.18)',
+        orb1Dot:       '#0ea5e9',
+        orb1Shadow:    '0 0 10px #0ea5e9, 0 0 22px rgba(14,165,233,0.55)',
+        orb2Border:    '1px solid rgba(129,140,248,0.12)',
+        orb2Dot:       '#818cf8',
+        orb2Shadow:    '0 0 8px #818cf8, 0 0 16px rgba(129,140,248,0.5)',
+        gradientBorder:'linear-gradient(135deg, rgba(14,165,233,0.8) 0%, rgba(129,140,248,0.5) 35%, rgba(6,182,212,0.65) 65%, rgba(56,189,248,0.5) 100%)',
+        ripple:        (i: number) => `1px solid rgba(14,165,233,${0.25 - i * 0.06})`,
+        logoGlow:      'radial-gradient(circle, rgba(14,165,233,0.4) 0%, rgba(6,182,212,0.2) 45%, transparent 78%)',
+        nameGradient:  'linear-gradient(135deg, #0ea5e9 0%, #38bdf8 28%, #06b6d4 60%, #818cf8 100%)',
+        bottomBar:     'linear-gradient(90deg, #0ea5e9, #06b6d4, #818cf8, #38bdf8, #0ea5e9)',
+        conicRays:     'conic-gradient(from 0deg, transparent 0deg, rgba(14,165,233,0.06) 25deg, transparent 50deg, rgba(6,182,212,0.04) 85deg, transparent 110deg, rgba(56,189,248,0.05) 145deg, transparent 170deg, rgba(129,140,248,0.04) 205deg, transparent 230deg, rgba(14,165,233,0.04) 265deg, transparent 290deg, rgba(6,182,212,0.05) 330deg, transparent 360deg)',
     } : {
-        overlay:     'radial-gradient(ellipse 72% 62% at 50% 38%, rgba(13,148,136,0.22) 0%, rgba(15,23,42,0.76) 82%)',
-        cardShadow:  'inset 0 0 0 1.5px rgba(16,185,129,0.35), inset 0 0 80px rgba(16,185,129,0.05), 0 32px 80px rgba(0,0,0,0.38), 0 0 120px rgba(16,185,129,0.12)',
-        glowTop:     'radial-gradient(ellipse at 50% -20%, rgba(16,185,129,0.10) 0%, transparent 70%)',
+        overlay:       'radial-gradient(ellipse 72% 62% at 50% 38%, rgba(14,165,233,0.18) 0%, rgba(15,23,42,0.72) 82%)',
+        cardShadow:    'inset 0 0 0 1.5px rgba(14,165,233,0.30), inset 0 0 80px rgba(14,165,233,0.04), 0 32px 80px rgba(0,0,0,0.32), 0 0 120px rgba(14,165,233,0.10)',
+        glowTop:       'radial-gradient(ellipse at 50% -20%, rgba(14,165,233,0.10) 0%, transparent 70%)',
         ...WELCOME_MODAL_LIGHT_CARD,
         ...WELCOME_MODAL_LIGHT_BADGE,
         ...WELCOME_MODAL_LIGHT_TEXT,
-        closeBg:     'rgba(0,0,0,0.05)',
-        closeBorder: '1px solid rgba(0,0,0,0.1)',
-        closeIcon:   'text-black/40',
-        closeHover:  'rgba(16,185,129,0.15)',
-        logoBg:      'rgba(16,185,129,0.07)',
-        logoBorder:  '1px solid rgba(16,185,129,0.18)',
-        logoSrc:     '/img/iconologo.png',
-        divider:     'linear-gradient(90deg, transparent, rgba(16,185,129,0.45), rgba(6,182,212,0.3), transparent)',
-        spark1:      'rgba(16,185,129,0.5)',
-        spark2:      'rgba(6,182,212,0.45)',
+        closeBg:       'rgba(0,0,0,0.05)',
+        closeBorder:   '1px solid rgba(0,0,0,0.1)',
+        closeIcon:     'text-black/40',
+        closeHover:    'rgba(14,165,233,0.12)',
+        logoBg:        'rgba(14,165,233,0.07)',
+        logoBorder:    '1px solid rgba(14,165,233,0.18)',
+        logoSrc:       '/img/iconologo.png',
+        divider:       'linear-gradient(90deg, transparent, rgba(14,165,233,0.40), rgba(6,182,212,0.28), transparent)',
+        spark1:        'rgba(56,189,248,0.50)',
+        spark2:        'rgba(6,182,212,0.42)',
+        halo:          'radial-gradient(ellipse, rgba(14,165,233,0.25) 0%, rgba(56,189,248,0.14) 45%, transparent 78%)',
+        orb1Border:    '1px solid rgba(14,165,233,0.18)',
+        orb1Dot:       '#0ea5e9',
+        orb1Shadow:    '0 0 10px #0ea5e9, 0 0 22px rgba(14,165,233,0.55)',
+        orb2Border:    '1px solid rgba(6,182,212,0.12)',
+        orb2Dot:       '#06b6d4',
+        orb2Shadow:    '0 0 8px #06b6d4, 0 0 16px rgba(6,182,212,0.5)',
+        gradientBorder:'linear-gradient(135deg, rgba(14,165,233,0.8) 0%, rgba(6,182,212,0.5) 35%, rgba(129,140,248,0.6) 65%, rgba(125,211,252,0.5) 100%)',
+        ripple:        (i: number) => `1px solid rgba(14,165,233,${0.25 - i * 0.06})`,
+        logoGlow:      'radial-gradient(circle, rgba(14,165,233,0.35) 0%, rgba(56,189,248,0.18) 45%, transparent 78%)',
+        nameGradient:  'linear-gradient(135deg, #0ea5e9 0%, #38bdf8 28%, #06b6d4 60%, #818cf8 100%)',
+        bottomBar:     'linear-gradient(90deg, #0ea5e9, #06b6d4, #818cf8, #38bdf8, #0ea5e9)',
+        conicRays:     'conic-gradient(from 0deg, transparent 0deg, rgba(14,165,233,0.06) 25deg, transparent 50deg, rgba(6,182,212,0.04) 85deg, transparent 110deg, rgba(56,189,248,0.05) 145deg, transparent 170deg, rgba(129,140,248,0.04) 205deg, transparent 230deg, rgba(14,165,233,0.04) 265deg, transparent 290deg, rgba(6,182,212,0.05) 330deg, transparent 360deg)',
     };
 
     return (
@@ -271,6 +305,10 @@ function CustomerWelcomeToast() {
                     animation: `${exiting ? 'cwOverlayOut .54s' : 'cwOverlayIn .6s'} ease both`,
                 }}
                 onClick={handleOverlayClick}
+                onKeyDown={(e) => { if (e.key === 'Escape') close(); }}
+                role="dialog"
+                aria-modal="true"
+                tabIndex={-1}
             >
                 {/* Card wrapper — tilt 3D */}
                 <div
@@ -281,6 +319,10 @@ function CustomerWelcomeToast() {
                         animation: `${exiting ? 'cwCardOut .54s' : 'cwCardIn .74s'} cubic-bezier(0.34,1.56,0.64,1) both`,
                     }}
                     onClick={e => e.stopPropagation()}
+                    onKeyDown={(e) => { if (e.key === 'Escape') e.stopPropagation(); }}
+                    role="dialog"
+                    aria-modal="true"
+                    tabIndex={-1}
                     onMouseMove={handleMouseMove}
                     onMouseLeave={handleMouseLeave}
                 >
@@ -300,7 +342,7 @@ function CustomerWelcomeToast() {
                     {/* Halo exterior */}
                     <div className="absolute pointer-events-none" style={{
                         inset: '-38px', borderRadius: '62px',
-                        background: 'radial-gradient(ellipse, rgba(16,185,129,0.3) 0%, rgba(6,182,212,0.16) 45%, transparent 78%)',
+                        background: T.halo,
                         filter: 'blur(30px)',
                         animation: 'cwGlowPulse 3.4s ease-in-out infinite',
                     }} />
@@ -308,33 +350,33 @@ function CustomerWelcomeToast() {
                     {/* Anillo orbital 1 */}
                     <div className="absolute pointer-events-none" style={{
                         inset: '-24px', borderRadius: '50%',
-                        border: '1px solid rgba(16,185,129,0.18)',
+                        border: T.orb1Border,
                         animation: 'cwOrbitCW 16s linear infinite',
                     }}>
                         <div style={{
                             position:'absolute', top:'-4px', left:'50%', marginLeft:'-4px',
-                            width:8, height:8, borderRadius:'50%', background:'#10b981',
-                            boxShadow:'0 0 10px #10b981, 0 0 22px rgba(16,185,129,0.55)',
+                            width:8, height:8, borderRadius:'50%', background: T.orb1Dot,
+                            boxShadow: T.orb1Shadow,
                         }} />
                     </div>
 
                     {/* Anillo orbital 2 */}
                     <div className="absolute pointer-events-none" style={{
                         inset: '-46px', borderRadius: '50%',
-                        border: '1px solid rgba(6,182,212,0.12)',
+                        border: T.orb2Border,
                         animation: 'cwOrbitCCW 24s linear infinite',
                     }}>
                         <div style={{
                             position:'absolute', bottom:'-3px', right:'28%',
-                            width:5, height:5, borderRadius:'50%', background:'#06b6d4',
-                            boxShadow:'0 0 8px #06b6d4, 0 0 16px rgba(6,182,212,0.5)',
+                            width:5, height:5, borderRadius:'50%', background: T.orb2Dot,
+                            boxShadow: T.orb2Shadow,
                         }} />
                     </div>
 
                     {/* Borde degradado */}
                     <div style={{
                         padding: '1.5px', borderRadius: '40px',
-                        background: 'linear-gradient(135deg, rgba(16,185,129,0.8) 0%, rgba(6,182,212,0.5) 35%, rgba(167,139,250,0.6) 65%, rgba(52,211,153,0.5) 100%)',
+                        background: T.gradientBorder,
                         animation: 'cwBorderPulse 3.2s ease-in-out infinite',
                     }}>
                         {/* Card */}
@@ -362,7 +404,7 @@ function CustomerWelcomeToast() {
                                 top: 0, left: '50%',
                                 width: '320px', height: '320px', marginTop: '-55px',
                                 borderRadius: '50%',
-                                background: 'conic-gradient(from 0deg, transparent 0deg, rgba(16,185,129,0.06) 25deg, transparent 50deg, rgba(6,182,212,0.04) 85deg, transparent 110deg, rgba(52,211,153,0.05) 145deg, transparent 170deg, rgba(167,139,250,0.04) 205deg, transparent 230deg, rgba(16,185,129,0.04) 265deg, transparent 290deg, rgba(6,182,212,0.05) 330deg, transparent 360deg)',
+                                background: T.conicRays,
                                 animation: 'cwRayRotate 26s linear infinite',
                             }} />
 
@@ -406,13 +448,13 @@ function CustomerWelcomeToast() {
                                         {[0, 1, 2].map(i => (
                                             <div key={i} className="absolute rounded-full pointer-events-none" style={{
                                                 inset: `${-(i * 18 + 12)}px`,
-                                                border: `1px solid rgba(16,185,129,${0.25 - i * 0.06})`,
+                                                border: T.ripple(i),
                                                 animation: `cwRipple ${2.8 + i * 0.5}s ease-out ${i * 0.7}s infinite`,
                                             }} />
                                         ))}
                                         <div className="absolute inset-0 pointer-events-none" style={{
                                             transform: 'scale(2.2)',
-                                            background: 'radial-gradient(circle, rgba(16,185,129,0.4) 0%, rgba(6,182,212,0.2) 45%, transparent 78%)',
+                                            background: T.logoGlow,
                                             filter: 'blur(24px)',
                                             animation: 'cwGlowPulse 4s ease-in-out infinite',
                                         }} />
@@ -460,7 +502,7 @@ function CustomerWelcomeToast() {
                                         style={{ letterSpacing: '-0.025em' }}>
                                         {firstName.split('').map((char, i) => (
                                             <span key={i} className="inline-block" style={{
-                                                backgroundImage: 'linear-gradient(135deg, #10b981 0%, #34d399 28%, #06b6d4 60%, #a78bfa 100%)',
+                                                backgroundImage: T.nameGradient,
                                                 WebkitBackgroundClip: 'text',
                                                 WebkitTextFillColor: 'transparent',
                                                 backgroundClip: 'text',
@@ -500,7 +542,7 @@ function CustomerWelcomeToast() {
                             {/* Barra inferior animada */}
                             <div style={{
                                 height: '4px',
-                                background: 'linear-gradient(90deg, #10b981, #06b6d4, #a78bfa, #34d399, #10b981)',
+                                backgroundImage: T.bottomBar,
                                 backgroundSize: '200% auto',
                                 animation: 'cwGradientShift 3s linear infinite',
                             }} />
@@ -513,7 +555,9 @@ function CustomerWelcomeToast() {
 }
 
 // ─── Paleta confeti cumpleaños ─────────────────────────────────────────────
-const BDAY_COLORS = ['#10b981', '#34d399', '#06b6d4', '#22d3ee', '#6ee7b7', '#fbbf24'];
+const BDAY_COLORS = ['#0ea5e9', '#38bdf8', '#06b6d4', '#22d3ee', '#7dd3fc', '#fbbf24'];
+const BDAY_COLORS_LIGHT = ['#0ea5e9', '#38bdf8', '#06b6d4', '#22d3ee', '#7dd3fc', '#fbbf24'];
+const BDAY_STAR_COLORS_LIGHT = ['#fbbf24', '#ffffff', '#38bdf8', '#06b6d4'];
 
 // ─── Keyframes inyectados — React 19 soporta <style> en componentes ───────
 const BDAY_CSS = `
@@ -664,11 +708,11 @@ function BirthdayToast() {
             confetti({
                 particleCount: 60, spread: 100, zIndex: 10000,
                 origin: { x: e.clientX / window.innerWidth, y: e.clientY / window.innerHeight },
-                colors: BDAY_COLORS, scalar: 1.1, gravity: 0.85,
+                colors: isDark ? BDAY_COLORS : BDAY_COLORS_LIGHT, scalar: 1.1, gravity: 0.85,
             });
         });
         close();
-    }, [close]);
+    }, [close, isDark]);
 
     const triggerToast = useCallback(() => {
         const today = new Date();
@@ -683,18 +727,20 @@ function BirthdayToast() {
 
         const confettiTimer = setTimeout(() => {
             import('canvas-confetti').then(({ default: confetti }) => {
-                confetti({ particleCount: 160, spread: 190, origin: { x: 0.5, y: 0.35 }, colors: BDAY_COLORS, scalar: 1.3, gravity: 0.7, zIndex: 10000 });
+                const palette = isDark ? BDAY_COLORS : BDAY_COLORS_LIGHT;
+                const starPalette = isDark ? ['#fbbf24', '#ffffff', '#34d399', '#06b6d4'] : BDAY_STAR_COLORS_LIGHT;
+                confetti({ particleCount: 160, spread: 190, origin: { x: 0.5, y: 0.35 }, colors: palette, scalar: 1.3, gravity: 0.7, zIndex: 10000 });
                 setTimeout(() => {
-                    confetti({ particleCount: 90, angle: 60,  spread: 75, origin: { x: 0, y: 0.42 }, colors: BDAY_COLORS, scalar: 1.2, zIndex: 10000 });
-                    confetti({ particleCount: 90, angle: 120, spread: 75, origin: { x: 1, y: 0.42 }, colors: BDAY_COLORS, scalar: 1.2, zIndex: 10000 });
+                    confetti({ particleCount: 90, angle: 60,  spread: 75, origin: { x: 0, y: 0.42 }, colors: palette, scalar: 1.2, zIndex: 10000 });
+                    confetti({ particleCount: 90, angle: 120, spread: 75, origin: { x: 1, y: 0.42 }, colors: palette, scalar: 1.2, zIndex: 10000 });
                 }, 220);
                 setTimeout(() => {
-                    confetti({ particleCount: 55, spread: 360, startVelocity: 22, origin: { x: 0.5, y: 0.38 }, colors: ['#fbbf24', '#ffffff', '#34d399', '#06b6d4'], shapes: ['star'], scalar: 1.6, gravity: 0.4, zIndex: 10000 });
+                    confetti({ particleCount: 55, spread: 360, startVelocity: 22, origin: { x: 0.5, y: 0.38 }, colors: starPalette, shapes: ['star'], scalar: 1.6, gravity: 0.4, zIndex: 10000 });
                 }, 480);
                 const end = Date.now() + 3800;
                 const rain = () => {
-                    confetti({ particleCount: 6, angle: 65,  spread: 48, origin: { x: 0, y: 0.5 }, colors: BDAY_COLORS, zIndex: 10000, scalar: 0.9 });
-                    confetti({ particleCount: 6, angle: 115, spread: 48, origin: { x: 1, y: 0.5 }, colors: BDAY_COLORS, zIndex: 10000, scalar: 0.9 });
+                    confetti({ particleCount: 6, angle: 65,  spread: 48, origin: { x: 0, y: 0.5 }, colors: palette, zIndex: 10000, scalar: 0.9 });
+                    confetti({ particleCount: 6, angle: 115, spread: 48, origin: { x: 1, y: 0.5 }, colors: palette, zIndex: 10000, scalar: 0.9 });
                     if (Date.now() < end) requestAnimationFrame(rain);
                 };
                 setTimeout(rain, 750);
@@ -742,45 +788,71 @@ function BirthdayToast() {
     };
 
     const T = isDark ? {
-        overlay:    'radial-gradient(ellipse 70% 60% at 50% 40%, rgba(16,185,129,0.07) 0%, rgba(0,0,0,0.76) 80%)',
-        cardBg:     'linear-gradient(158deg, rgba(11,26,16,0.95) 0%, rgba(6,36,22,0.97) 55%, rgba(10,20,18,0.94) 100%)',
-        cardShadow: 'inset 0 0 0 1px rgba(255,255,255,0.04), inset 0 0 70px rgba(16,185,129,0.08), 0 40px 90px rgba(0,0,0,0.65), 0 0 140px rgba(16,185,129,0.06)',
-        glowTop:    'radial-gradient(ellipse at 50% -20%, rgba(16,185,129,0.16) 0%, transparent 70%)',
-        shimmer:    'linear-gradient(108deg, transparent 28%, rgba(255,255,255,0.055) 50%, transparent 72%)',
-        logoBg:     'rgba(16,185,129,0.09)',
-        logoBorder: '1px solid rgba(16,185,129,0.22)',
-        logoText:   'rgba(52,211,153,0.85)',
-        orbBg:      'linear-gradient(145deg, rgba(16,185,129,0.2) 0%, rgba(6,182,212,0.14) 50%, rgba(11,26,16,0.88) 100%)',
-        orbBorder:  '1.5px solid rgba(16,185,129,0.38)',
-        orbShadow:  'inset 0 1px 0 rgba(255,255,255,0.08), 0 0 32px rgba(16,185,129,0.22)',
-        label:      'rgba(255,255,255,0.48)',
-        subtitle:   'rgba(255,255,255,0.36)',
-        closeBg:    'rgba(255,255,255,0.06)',
-        closeBorder:'1px solid rgba(255,255,255,0.1)',
-        closeIcon:  'text-white/45',
-        closeHover: 'rgba(16,185,129,0.22)',
-        divider:    'linear-gradient(90deg, transparent, rgba(52,211,153,0.45), rgba(6,182,212,0.35), transparent)',
-        spark1:     'rgba(52,211,153,0.55)',
-        spark2:     'rgba(6,182,212,0.45)',
+        overlay:       'radial-gradient(ellipse 70% 60% at 50% 40%, rgba(14,165,233,0.07) 0%, rgba(0,0,0,0.76) 80%)',
+        cardBg:        'linear-gradient(158deg, rgba(8,18,28,0.95) 0%, rgba(6,14,24,0.97) 55%, rgba(8,16,26,0.94) 100%)',
+        cardShadow:    'inset 0 0 0 1px rgba(255,255,255,0.04), inset 0 0 70px rgba(14,165,233,0.08), 0 40px 90px rgba(0,0,0,0.65), 0 0 140px rgba(14,165,233,0.06)',
+        glowTop:       'radial-gradient(ellipse at 50% -20%, rgba(14,165,233,0.16) 0%, transparent 70%)',
+        shimmer:       'linear-gradient(108deg, transparent 28%, rgba(255,255,255,0.055) 50%, transparent 72%)',
+        logoBg:        'rgba(14,165,233,0.09)',
+        logoBorder:    '1px solid rgba(14,165,233,0.22)',
+        logoText:      'rgba(56,189,248,0.85)',
+        orbBg:         'linear-gradient(145deg, rgba(14,165,233,0.2) 0%, rgba(6,182,212,0.14) 50%, rgba(8,18,28,0.88) 100%)',
+        orbBorder:     '1.5px solid rgba(14,165,233,0.38)',
+        orbShadow:     'inset 0 1px 0 rgba(255,255,255,0.08), 0 0 32px rgba(14,165,233,0.22)',
+        label:         'rgba(255,255,255,0.48)',
+        subtitle:      'rgba(255,255,255,0.36)',
+        closeBg:       'rgba(255,255,255,0.06)',
+        closeBorder:   '1px solid rgba(255,255,255,0.1)',
+        closeIcon:     'text-white/45',
+        closeHover:    'rgba(14,165,233,0.22)',
+        divider:       'linear-gradient(90deg, transparent, rgba(56,189,248,0.45), rgba(129,140,248,0.35), transparent)',
+        spark1:        'rgba(56,189,248,0.55)',
+        spark2:        'rgba(129,140,248,0.45)',
+        halo:          'radial-gradient(ellipse, rgba(14,165,233,0.32) 0%, rgba(6,182,212,0.18) 45%, transparent 75%)',
+        orb1Border:    '1px solid rgba(14,165,233,0.2)',
+        orb1Dot:       '#0ea5e9',
+        orb1Shadow:    '0 0 10px #0ea5e9, 0 0 20px rgba(14,165,233,0.55)',
+        orb2Border:    '1px solid rgba(129,140,248,0.13)',
+        orb2Dot:       '#818cf8',
+        orb2Shadow:    '0 0 8px #818cf8, 0 0 16px rgba(129,140,248,0.5)',
+        gradientBorder:'linear-gradient(135deg, rgba(14,165,233,0.8) 0%, rgba(129,140,248,0.5) 35%, rgba(56,189,248,0.65) 65%, rgba(14,165,233,0.45) 100%)',
+        ripple:        (i: number) => `1px solid rgba(14,165,233,${0.28 - i * 0.07})`,
+        logoGlow:      'radial-gradient(circle, rgba(14,165,233,0.45) 0%, rgba(6,182,212,0.25) 45%, transparent 80%)',
+        nameGradient:  'linear-gradient(135deg, #0ea5e9 0%, #38bdf8 30%, #06b6d4 65%, #7dd3fc 100%)',
+        bottomBar:     'linear-gradient(90deg, #0ea5e9, #06b6d4, #38bdf8, #22d3ee, #0ea5e9)',
+        conicRays:     'conic-gradient(from 0deg, transparent 0deg, rgba(14,165,233,0.07) 25deg, transparent 50deg, rgba(6,182,212,0.05) 85deg, transparent 110deg, rgba(56,189,248,0.06) 145deg, transparent 170deg, rgba(14,165,233,0.05) 205deg, transparent 230deg, rgba(6,182,212,0.04) 265deg, transparent 290deg, rgba(14,165,233,0.06) 330deg, transparent 360deg)',
     } : {
-        overlay:    'radial-gradient(ellipse 70% 60% at 50% 40%, rgba(13,148,136,0.18) 0%, rgba(15,23,42,0.60) 80%)',
-        cardShadow: 'inset 0 0 0 1px rgba(16,185,129,0.14), inset 0 0 70px rgba(16,185,129,0.05), 0 32px 80px rgba(0,0,0,0.22), 0 0 120px rgba(16,185,129,0.08)',
-        glowTop:    'radial-gradient(ellipse at 50% -20%, rgba(16,185,129,0.10) 0%, transparent 70%)',
+        overlay:       'radial-gradient(ellipse 70% 60% at 50% 40%, rgba(14,165,233,0.16) 0%, rgba(15,23,42,0.56) 80%)',
+        cardShadow:    'inset 0 0 0 1px rgba(14,165,233,0.28), inset 0 0 70px rgba(14,165,233,0.04), 0 32px 80px rgba(0,0,0,0.20), 0 0 120px rgba(14,165,233,0.08)',
+        glowTop:       'radial-gradient(ellipse at 50% -20%, rgba(14,165,233,0.10) 0%, transparent 70%)',
         ...WELCOME_MODAL_LIGHT_CARD,
-        logoBg:     'rgba(16,185,129,0.07)',
-        logoBorder: '1px solid rgba(16,185,129,0.18)',
-        logoText:   'rgba(5,150,105,0.85)',
-        orbBg:      'linear-gradient(145deg, rgba(16,185,129,0.15) 0%, rgba(6,182,212,0.10) 50%, rgba(240,252,246,0.92) 100%)',
-        orbBorder:  '1.5px solid rgba(16,185,129,0.32)',
-        orbShadow:  'inset 0 1px 0 rgba(255,255,255,0.5), 0 0 32px rgba(16,185,129,0.15)',
+        logoBg:        'rgba(14,165,233,0.07)',
+        logoBorder:    '1px solid rgba(14,165,233,0.18)',
+        logoText:      'rgba(3,105,161,0.85)',
+        orbBg:         'linear-gradient(145deg, rgba(14,165,233,0.15) 0%, rgba(56,189,248,0.10) 50%, rgba(240,249,255,0.92) 100%)',
+        orbBorder:     '1.5px solid rgba(14,165,233,0.32)',
+        orbShadow:     'inset 0 1px 0 rgba(255,255,255,0.5), 0 0 32px rgba(14,165,233,0.15)',
         ...WELCOME_MODAL_LIGHT_TEXT,
-        closeBg:    'rgba(0,0,0,0.05)',
-        closeBorder:'1px solid rgba(0,0,0,0.1)',
-        closeIcon:  'text-black/40',
-        closeHover: 'rgba(16,185,129,0.15)',
-        divider:    'linear-gradient(90deg, transparent, rgba(16,185,129,0.45), rgba(6,182,212,0.3), transparent)',
-        spark1:     'rgba(16,185,129,0.5)',
-        spark2:     'rgba(6,182,212,0.45)',
+        closeBg:       'rgba(0,0,0,0.05)',
+        closeBorder:   '1px solid rgba(0,0,0,0.1)',
+        closeIcon:     'text-black/40',
+        closeHover:    'rgba(14,165,233,0.12)',
+        divider:       'linear-gradient(90deg, transparent, rgba(14,165,233,0.40), rgba(6,182,212,0.28), transparent)',
+        spark1:        'rgba(56,189,248,0.50)',
+        spark2:        'rgba(6,182,212,0.42)',
+        halo:          'radial-gradient(ellipse, rgba(14,165,233,0.26) 0%, rgba(56,189,248,0.15) 45%, transparent 75%)',
+        orb1Border:    '1px solid rgba(14,165,233,0.20)',
+        orb1Dot:       '#0ea5e9',
+        orb1Shadow:    '0 0 10px #0ea5e9, 0 0 20px rgba(14,165,233,0.55)',
+        orb2Border:    '1px solid rgba(6,182,212,0.13)',
+        orb2Dot:       '#06b6d4',
+        orb2Shadow:    '0 0 8px #06b6d4, 0 0 16px rgba(6,182,212,0.5)',
+        gradientBorder:'linear-gradient(135deg, rgba(14,165,233,0.8) 0%, rgba(6,182,212,0.5) 35%, rgba(125,211,252,0.65) 65%, rgba(14,165,233,0.45) 100%)',
+        ripple:        (i: number) => `1px solid rgba(14,165,233,${0.28 - i * 0.07})`,
+        logoGlow:      'radial-gradient(circle, rgba(14,165,233,0.40) 0%, rgba(56,189,248,0.22) 45%, transparent 80%)',
+        nameGradient:  'linear-gradient(135deg, #0ea5e9 0%, #38bdf8 30%, #06b6d4 65%, #7dd3fc 100%)',
+        bottomBar:     'linear-gradient(90deg, #0ea5e9, #06b6d4, #38bdf8, #22d3ee, #0ea5e9)',
+        conicRays:     'conic-gradient(from 0deg, transparent 0deg, rgba(14,165,233,0.07) 25deg, transparent 50deg, rgba(56,189,248,0.05) 85deg, transparent 110deg, rgba(125,211,252,0.06) 145deg, transparent 170deg, rgba(14,165,233,0.05) 205deg, transparent 230deg, rgba(56,189,248,0.04) 265deg, transparent 290deg, rgba(14,165,233,0.06) 330deg, transparent 360deg)',
     };
 
     return (
@@ -796,6 +868,10 @@ function BirthdayToast() {
                     animation: `${exiting ? 'bdayOverlayOut .53s' : 'bdayOverlayIn .6s'} ease both`,
                 }}
                 onClick={handleOverlayClick}
+                onKeyDown={(e) => { if (e.key === 'Escape') close(); }}
+                role="dialog"
+                aria-modal="true"
+                tabIndex={-1}
             >
                 {/* ── Card wrapper — perspectiva 3D + tilt ────────────────── */}
                 <div
@@ -806,6 +882,10 @@ function BirthdayToast() {
                         animation: `${exiting ? 'bdayCardOut .53s' : 'bdayCardIn .72s'} cubic-bezier(0.34,1.56,0.64,1) both`,
                     }}
                     onClick={e => e.stopPropagation()}
+                    onKeyDown={(e) => { if (e.key === 'Escape') e.stopPropagation(); }}
+                    role="dialog"
+                    aria-modal="true"
+                    tabIndex={-1}
                     onMouseMove={handleMouseMove}
                     onMouseLeave={handleMouseLeave}
                 >
@@ -832,7 +912,7 @@ function BirthdayToast() {
                         style={{
                             inset: '-36px',
                             borderRadius: '60px',
-                            background: 'radial-gradient(ellipse, rgba(16,185,129,0.32) 0%, rgba(6,182,212,0.18) 45%, transparent 75%)',
+                            background: T.halo,
                             filter: 'blur(28px)',
                             animation: 'bdayGlowPulse 3.2s ease-in-out infinite',
                         }}
@@ -844,15 +924,15 @@ function BirthdayToast() {
                         style={{
                             inset: '-22px',
                             borderRadius: '50%',
-                            border: '1px solid rgba(16,185,129,0.2)',
+                            border: T.orb1Border,
                             animation: 'bdayOrbitCW 14s linear infinite',
                         }}
                     >
                         <div style={{
                             position: 'absolute', top: '-4px', left: '50%', marginLeft: '-4px',
                             width: 8, height: 8, borderRadius: '50%',
-                            background: '#10b981',
-                            boxShadow: '0 0 10px #10b981, 0 0 20px rgba(16,185,129,0.55)',
+                            background: T.orb1Dot,
+                            boxShadow: T.orb1Shadow,
                         }} />
                     </div>
 
@@ -862,15 +942,15 @@ function BirthdayToast() {
                         style={{
                             inset: '-44px',
                             borderRadius: '50%',
-                            border: '1px solid rgba(6,182,212,0.13)',
+                            border: T.orb2Border,
                             animation: 'bdayOrbitCCW 22s linear infinite',
                         }}
                     >
                         <div style={{
                             position: 'absolute', bottom: '-3px', right: '28%', marginRight: '-3px',
                             width: 5, height: 5, borderRadius: '50%',
-                            background: '#06b6d4',
-                            boxShadow: '0 0 8px #06b6d4, 0 0 16px rgba(6,182,212,0.5)',
+                            background: T.orb2Dot,
+                            boxShadow: T.orb2Shadow,
                         }} />
                     </div>
 
@@ -878,7 +958,7 @@ function BirthdayToast() {
                     <div style={{
                         padding: '1.5px',
                         borderRadius: '38px',
-                        background: 'linear-gradient(135deg, rgba(16,185,129,0.8) 0%, rgba(6,182,212,0.5) 35%, rgba(52,211,153,0.65) 65%, rgba(16,185,129,0.45) 100%)',
+                        background: T.gradientBorder,
                         animation: 'bdayBorderPulse 3s ease-in-out infinite',
                     }}>
 
@@ -911,7 +991,7 @@ function BirthdayToast() {
                                 width: '300px', height: '300px',
                                 marginTop: '-50px',
                                 borderRadius: '50%',
-                                background: 'conic-gradient(from 0deg, transparent 0deg, rgba(16,185,129,0.07) 25deg, transparent 50deg, rgba(6,182,212,0.05) 85deg, transparent 110deg, rgba(52,211,153,0.06) 145deg, transparent 170deg, rgba(16,185,129,0.05) 205deg, transparent 230deg, rgba(6,182,212,0.04) 265deg, transparent 290deg, rgba(16,185,129,0.06) 330deg, transparent 360deg)',
+                                background: T.conicRays,
                                 animation: 'bdayRayRotate 22s linear infinite',
                             }} />
 
@@ -972,14 +1052,14 @@ function BirthdayToast() {
                                         {[0, 1, 2].map(i => (
                                             <div key={i} className="absolute rounded-full pointer-events-none" style={{
                                                 inset: `${-(i * 16 + 10)}px`,
-                                                border: `1px solid rgba(16,185,129,${0.28 - i * 0.07})`,
+                                                border: T.ripple(i),
                                                 animation: `bdayRipple ${2.6 + i * 0.45}s ease-out ${i * 0.65}s infinite`,
                                             }} />
                                         ))}
                                         {/* Glow detrás del orb */}
                                         <div className="absolute inset-0 rounded-full pointer-events-none" style={{
                                             transform: 'scale(2)',
-                                            background: 'radial-gradient(circle, rgba(16,185,129,0.45) 0%, rgba(6,182,212,0.25) 45%, transparent 80%)',
+                                            background: T.logoGlow,
                                             filter: 'blur(22px)',
                                             animation: 'bdayOrbPulse 3.8s ease-in-out infinite',
                                         }} />
@@ -1018,7 +1098,7 @@ function BirthdayToast() {
                                                 key={i}
                                                 className="inline-block"
                                                 style={{
-                                                    backgroundImage: 'linear-gradient(135deg, #10b981 0%, #34d399 30%, #06b6d4 65%, #6ee7b7 100%)',
+                                                    backgroundImage: T.nameGradient,
                                                     WebkitBackgroundClip: 'text',
                                                     WebkitTextFillColor: 'transparent',
                                                     backgroundClip: 'text',
@@ -1062,7 +1142,7 @@ function BirthdayToast() {
                             {/* Barra inferior animada */}
                             <div style={{
                                 height: '4px',
-                                background: 'linear-gradient(90deg, #10b981, #06b6d4, #34d399, #22d3ee, #10b981)',
+                                backgroundImage: T.bottomBar,
                                 backgroundSize: '200% auto',
                                 animation: 'bdayGradientShift 3s linear infinite',
                             }} />
@@ -1088,7 +1168,6 @@ export function CustomerLayoutClient({ children }: CustomerLayoutClientProps) {
             mainClassName="p-4 md:p-8 bg-[var(--bg-secondary)]"
         >
             {children}
-            <NotificationSidebar />
             <ChatBotWidget />
             <CustomerWelcomeToast />
             <BirthdayToast />

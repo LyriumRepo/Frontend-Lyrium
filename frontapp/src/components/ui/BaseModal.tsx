@@ -100,6 +100,8 @@ export default function BaseModal({
       <div
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
         onClick={onClose}
+        onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }}
+        role="presentation"
       />
       <div
         ref={modalRef}

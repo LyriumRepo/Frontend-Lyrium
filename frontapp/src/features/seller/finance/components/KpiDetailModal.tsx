@@ -200,6 +200,8 @@ const KPI_DETAILS: Record<string, string> = {
     'Tiempo promedio que tardas en responder a los mensajes de tus clientes a través del chat de la plataforma.',
   'CSAT - Satisfacción del Cliente':
     'Customer Satisfaction Score. Porcentaje de clientes que calificaron positivamente su experiencia de compra en tu tienda.',
+  'Medida de Desempeño':
+    'Score compuesto que agrega tu rendimiento financiero, logístico, de calidad, servicio y satisfacción. Se calcula como promedio ponderado de 6 métricas clave.',
 };
 
 export function getKpiDetail(label: string): string {

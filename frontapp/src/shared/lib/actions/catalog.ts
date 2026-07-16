@@ -29,7 +29,7 @@ function toRelativeStorageUrl(url: string | null | undefined): string {
   if (!url) return '';
   const idx = url.indexOf('/storage/');
   if (idx >= 0) return url.substring(idx);
-  return url.startsWith('/') ? url : url;
+  return url;
 }
 
 const VALID_STICKERS = new Set([

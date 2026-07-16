@@ -31,6 +31,10 @@ export default function PublicCartDrawer() {
             <div
                 className="fixed inset-0 z-[200] bg-slate-900/58 dark:bg-black/70 backdrop-blur-[2px] animate-fade-in"
                 onClick={closeCart}
+                onKeyDown={(e) => { if (e.key === 'Escape') closeCart(); }}
+                role="dialog"
+                aria-modal="true"
+                tabIndex={-1}
             />
 
             {/* Drawer */}

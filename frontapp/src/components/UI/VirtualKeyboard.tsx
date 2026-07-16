@@ -74,6 +74,7 @@ export default function VirtualKeyboard({
         display={display}
         theme="hg-theme-lyrium"
         physicalKeyboard={true}
+        physicalKeyboardHighlight={false}
         autoUseTouchEvents={false}
         buttonTheme={[
           {

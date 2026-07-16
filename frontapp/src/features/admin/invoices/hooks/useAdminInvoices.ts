@@ -109,12 +109,12 @@ export function useAdminInvoices() {
                 names.add(s.name);
             }
         }
-        return Array.from(names).sort();
+        return Array.from(names).sort((a, b) => a.localeCompare(b, 'es'));
     }, [invoices]);
 
     const allTypes = useMemo(() => {
         const types = new Set(invoices.map(i => i.type));
-        return Array.from(types).sort();
+        return Array.from(types).sort((a, b) => a.localeCompare(b, 'es'));
     }, [invoices]);
 
     const filtered = useMemo(() => {

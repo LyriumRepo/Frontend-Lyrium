@@ -232,11 +232,16 @@ export function HelpdeskPageClient() {
         <div
           className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-end sm:items-center justify-center p-4 pt-[calc(60px+1rem)] sm:pt-4"
           onClick={() => setShowLegend(false)}
+          onKeyDown={(e) => { if (e.key === 'Escape') setShowLegend(false); }}
+          role="dialog"
+          aria-modal="true"
+          tabIndex={-1}
         >
           {/* Bottom sheet en móvil, card centrado en sm+ */}
           <div
             className="w-full max-w-sm sm:max-w-md bg-[var(--bg-card)] rounded-[2rem] shadow-2xl overflow-hidden max-h-[80vh] flex flex-col"
             onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
           >
             {/* Header — mismos colores que HelpPageClient */}
             <div className="bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--turquesa-500)]/70 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-8 text-white relative shrink-0">

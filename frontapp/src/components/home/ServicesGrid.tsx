@@ -120,7 +120,7 @@ export default function ServicesGrid({ categorias }: ServicesGridProps) {
                   href={categoria.slug ? `/servicios/${categoria.slug}` : '#'}
                   className="block flex-shrink-0 w-full min-[480px]:w-[calc(50%-0.5rem)] md:w-[calc(33.333%-0.66rem)] lg:w-[calc(25%-0.75rem)]"
                 >
-                  <article className="rounded-[2.5rem] overflow-hidden shadow-md bg-[var(--turquesaClaro-100)] dark:bg-[var(--bg-card)] group cursor-pointer h-60 md:h-72 border border-[var(--turquesa-100)] dark:border-[var(--border-subtle)]">
+                  <article className="rounded-[2.5rem] overflow-hidden shadow-md bg-white dark:bg-[var(--bg-card)] group cursor-pointer h-60 md:h-72 border border-[var(--turquesa-100)] dark:border-[var(--border-subtle)]">
                     <Image
                       src={localImage}
                       alt={categoria.nombre}

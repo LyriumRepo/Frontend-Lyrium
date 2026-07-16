@@ -14,10 +14,11 @@ export default function PlanUpgradeModal({ open, onClose, featureName, requiredP
     if (!open) return null;
 
     return (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={onClose}>
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={onClose} onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }} role="dialog" aria-modal="true" tabIndex={-1}>
             <div
                 className="bg-[var(--bg-card)] rounded-[2rem] p-8 max-w-md w-full mx-4 shadow-2xl border border-[var(--border-subtle)] animate-fadeIn"
                 onClick={(e) => e.stopPropagation()}
+                onKeyDown={(e) => e.stopPropagation()}
             >
                 <div className="text-center mb-6">
                     <div className="w-16 h-16 bg-amber-500/10 rounded-full flex items-center justify-center mx-auto mb-4">

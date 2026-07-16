@@ -137,7 +137,7 @@ export default function ConversationList({
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-2">
                   <p className={`text-xs font-black truncate uppercase tracking-tight transition-colors duration-200 ${
-                    activeId === conv.id ? 'text-[var(--text-primary)]' : 'text-[var(--text-primary)]'
+                    'text-[var(--text-primary)]'
                   }`}>
                     {conv.storeName ?? conv.name}
                   </p>

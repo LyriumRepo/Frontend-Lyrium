@@ -99,6 +99,10 @@ export default function CartPopup() {
       <div
         className="fixed inset-0 z-[60]"
         onClick={handleClose}
+        onKeyDown={(e) => { if (e.key === 'Escape') handleClose(); }}
+        role="dialog"
+        aria-modal="true"
+        tabIndex={-1}
         aria-hidden="true"
       />
 

@@ -38,7 +38,7 @@ export default function BranchManagement({ branches, setBranches }: BranchManage
                         : b
             ));
         } else {
-            const newBranch = { ...data, id: Math.random().toString(36).substr(2, 9) };
+            const newBranch = { ...data, id: crypto.randomUUID() };
             setBranches([
                 ...branches.map(b => data.isPrincipal ? { ...b, isPrincipal: false } : b),
                 newBranch,

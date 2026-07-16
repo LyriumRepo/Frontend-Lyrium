@@ -57,6 +57,10 @@ export default function ServiceModerationModal({
       <div
         className="fixed inset-0 z-[100] bg-black/75 backdrop-blur-sm"
         onClick={onClose}
+        onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }}
+        role="dialog"
+        aria-modal="true"
+        tabIndex={-1}
         aria-hidden="true"
       />
       <div className="fixed inset-0 z-[101] flex items-center justify-center p-4 pointer-events-none">

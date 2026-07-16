@@ -75,12 +75,12 @@ export function AuthContainer({ onSuccess }: AuthContainerProps) {
         return (
             <IntroCover
                 title="Tu marketplace de productos naturales"
-                subtitle="Únete a la comunidad que está transformando el comercio saludable"
+                subtitle="Productos naturales para una vida más saludable"
                 icon="ShoppingBag"
                 buttonText="Entrar"
                 onEnter={handleEnterPortal}
                 autoHideAfter={0}
-                backgroundImage="/img/intro/tienda2.png"
+                backgroundImage="/img/intro/contactanos.jpg"
             />
         );
     }

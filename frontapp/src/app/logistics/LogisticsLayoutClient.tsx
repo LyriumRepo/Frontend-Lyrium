@@ -5,7 +5,6 @@ import LogisticsSidebar from '@/components/layout/logistics/LogisticsSidebar';
 import LogisticsHeader from '@/components/layout/logistics/LogisticsHeader';
 import { DashboardLayout } from '@/components/layout/shared/DashboardLayout';
 import { useUIStore } from '@/store/uiStore';
-import NotificationSidebar from '@/components/shared/notifications/NotificationSidebar';
 
 interface LogisticsLayoutClientProps {
     children: React.ReactNode;
@@ -24,7 +23,6 @@ export function LogisticsLayoutClient({ children }: LogisticsLayoutClientProps) 
             mainClassName="p-6 md:p-8"
         >
             {children}
-            <NotificationSidebar />
         </DashboardLayout>
     );
 }

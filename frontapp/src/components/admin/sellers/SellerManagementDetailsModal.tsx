@@ -95,6 +95,8 @@ export default function SellerManagementDetailsModal({ isOpen, onClose, contract
                 <div
                     className="absolute inset-0 bg-black/75 dark:bg-black/85 backdrop-blur-md animate-fadeIn"
                     onClick={handleClose}
+                    onKeyDown={(e) => { if (e.key === 'Escape') handleClose(); }}
+                    role="presentation"
                 />
 
                 <div className="relative bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-[2.5rem] w-full max-w-5xl shadow-[0_0_50px_rgba(16,185,129,0.1)] overflow-hidden font-industrial animate-scaleUp flex flex-col max-h-[90vh]">

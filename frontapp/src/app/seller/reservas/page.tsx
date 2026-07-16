@@ -458,8 +458,8 @@ export default function SellerReservasPage() {
 
       {/* Cancel modal */}
       {cancelTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={() => setCancelTarget(null)}>
-          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-sm w-full p-6 relative" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={() => setCancelTarget(null)} onKeyDown={(e) => { if (e.key === 'Escape') setCancelTarget(null); }} role="dialog" aria-modal="true" tabIndex={-1}>
+          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-sm w-full p-6 relative" onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()} role="dialog" aria-modal="true" tabIndex={-1}>
             <button onClick={() => setCancelTarget(null)} className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
               <X className="w-5 h-5" />
             </button>
@@ -488,10 +488,12 @@ export default function SellerReservasPage() {
 
       {/* Detail drawer */}
       {detailTarget && (
-        <div className="fixed inset-0 z-50" onClick={closeDetail}>
+        <div className="fixed inset-0 z-50" onClick={closeDetail} onKeyDown={(e) => { if (e.key === 'Escape') closeDetail(); }} role="dialog" aria-modal="true" tabIndex={-1}>
           <div className={`absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300 ${drawerOpen ? 'opacity-100' : 'opacity-0'}`} />
           <div
             onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
+            role="dialog" aria-modal="true" tabIndex={-1}
             className={`absolute right-0 top-0 bottom-0 w-full sm:w-[520px] bg-white dark:bg-[var(--bg-secondary)] shadow-[-40px_0_100px_rgba(0,0,0,0.25)] flex flex-col transition-transform duration-300 ease-out ${drawerOpen ? 'translate-x-0' : 'translate-x-full'}`}>
             <div className="relative px-6 pt-7 pb-5 bg-gradient-to-r from-[#2A5A4D] via-emerald-600 to-[#6BAF7B] dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] text-white flex-shrink-0">
               <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full -mr-24 -mt-24 blur-3xl" />

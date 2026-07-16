@@ -460,6 +460,9 @@ export default function OrderDetailModal({
                         <div
                             className="flex items-center justify-between p-5 bg-[var(--bg-secondary)]/50 rounded-[2rem] border border-[var(--border-subtle)] cursor-pointer hover:bg-[var(--bg-card)] transition-all select-none"
                             onClick={() => setOpenSection(openSection === 'products' ? null : 'products')}
+                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setOpenSection(openSection === 'products' ? null : 'products'); } }}
+                            role="button"
+                            tabIndex={0}
                         >
                             <div className="flex items-center gap-3">
                                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-2xl border text-[9px] font-black uppercase tracking-widest text-sky-500 bg-sky-500/10 border-sky-500/20">
@@ -613,6 +616,9 @@ export default function OrderDetailModal({
                         <div
                             className="flex items-center justify-between p-5 bg-[var(--bg-secondary)]/50 rounded-[2rem] border border-[var(--border-subtle)] cursor-pointer hover:bg-[var(--bg-card)] transition-all select-none"
                             onClick={() => setOpenSection(openSection === 'services' ? null : 'services')}
+                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setOpenSection(openSection === 'services' ? null : 'services'); } }}
+                            role="button"
+                            tabIndex={0}
                         >
                             <div className="flex items-center gap-3">
                                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-2xl border text-[9px] font-black uppercase tracking-widest text-purple-500 bg-purple-500/10 border-purple-500/20">

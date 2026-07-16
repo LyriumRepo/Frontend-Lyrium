@@ -965,7 +965,7 @@ export default function ServiceCalendar({
                 <button
                   onClick={handleRescheduleClick}
                   className={`w-full py-3 rounded-2xl text-white font-black uppercase tracking-widest text-[10px] hover:opacity-90 transition-all ${
-                    detailApptIsPast ? 'bg-[#69BEEB] dark:bg-[#4EC7B8]' : 'bg-[#69BEEB] dark:bg-[#4EC7B8]'
+                    'bg-[#69BEEB] dark:bg-[#4EC7B8]'
                   }`}
                 >
                   Reprogramar

@@ -228,7 +228,7 @@ function getCartToken(): string {
   if (typeof window === 'undefined') return '';
   let sid = sessionStorage.getItem('cart_session_id');
   if (!sid) {
-    sid = `guest_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+    sid = `guest_${Date.now()}_${crypto.randomUUID()}`;
     sessionStorage.setItem('cart_session_id', sid);
   }
   return sid;
@@ -500,6 +500,10 @@ export default function CartDrawer() {
         }`}
         style={{ background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(2px)' }}
         onClick={closeCart}
+        onKeyDown={(e) => { if (e.key === 'Escape') closeCart(); }}
+        role="dialog"
+        aria-modal="true"
+        tabIndex={-1}
         aria-hidden="true"
       />
 

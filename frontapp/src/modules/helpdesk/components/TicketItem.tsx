@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { TicketItemProps } from '../types';
+import Icon from '@/components/ui/Icon';
 
 const statusConfig: Record<string, { label: string; class: string }> = {
   open:       { label: 'Abierto',   class: 'bg-emerald-400/15 text-emerald-600 dark:bg-emerald-400/10 dark:text-emerald-400' },
@@ -39,8 +40,10 @@ const planColors: Record<string, string> = {
 
 function getPlanBadge(plan?: string) {
   if (!plan) return null;
-  const color = planColors[plan.trim().toLowerCase()] ?? '#94a3b8';
-  return { label: plan, color };
+  const slug = plan.trim().toLowerCase();
+  const color = planColors[slug] ?? '#94a3b8';
+  const icon = slug === 'especial' ? 'Crown' : slug === 'crece' ? 'Gem' : 'Sprout';
+  return { label: plan, color, icon };
 }
 
 const avatarGradients = [
@@ -101,10 +104,11 @@ export function TicketItem({ ticket, isActive, onClick, showPriority = true }: T
             </span>
             {planBadge && (
               <span
-                className="rounded px-1.5 py-0.5 text-[7px] font-black uppercase tracking-wider"
-                style={{ backgroundColor: `${planBadge.color}26`, color: planBadge.color }}
+                className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[8px] font-black uppercase tracking-wider border"
+                style={{ backgroundColor: `${planBadge.color}15`, color: planBadge.color, borderColor: `${planBadge.color}30` }}
                 title={`Plan ${planBadge.label}`}
               >
+                <Icon name={planBadge.icon} className="w-2.5 h-2.5" />
                 {planBadge.label}
               </span>
             )}

@@ -629,7 +629,7 @@ function BookingModal({
     if (typeof window === 'undefined') return '';
     let sid = sessionStorage.getItem('cart_session_id');
     if (!sid) {
-      sid = `guest_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+      sid = `guest_${Date.now()}_${crypto.randomUUID()}`;
       sessionStorage.setItem('cart_session_id', sid);
     }
     return sid;
@@ -1169,10 +1169,18 @@ function BookingModal({
     <div
       className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
       onClick={close}
+      onKeyDown={(e) => { if (e.key === 'Escape') close(); }}
+      role="dialog"
+      aria-modal="true"
+      tabIndex={-1}
     >
       <div
         className="bg-white dark:bg-[var(--bg-card)] rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => { if (e.key === 'Escape') e.stopPropagation(); }}
+        role="dialog"
+        aria-modal="true"
+        tabIndex={-1}
       >
         <div className="shrink-0 bg-gradient-to-r from-sky-500 to-sky-400 p-4">
           <div className="flex items-center justify-between">
@@ -1268,10 +1276,18 @@ function SpecialistProfileModal({
     <div
       className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
       onClick={onClose}
+      onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }}
+      role="dialog"
+      aria-modal="true"
+      tabIndex={-1}
     >
       <div
         className="bg-white dark:bg-[var(--bg-card)] rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => { if (e.key === 'Escape') e.stopPropagation(); }}
+        role="dialog"
+        aria-modal="true"
+        tabIndex={-1}
       >
         <div className="shrink-0 bg-gradient-to-r from-sky-500 to-sky-400 p-4 flex items-center justify-between">
           <h2 className="text-white font-bold flex items-center gap-2">

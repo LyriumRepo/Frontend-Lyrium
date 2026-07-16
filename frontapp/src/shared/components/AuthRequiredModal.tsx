@@ -54,6 +54,10 @@ export default function AuthRequiredModal({ open, onClose }: Props) {
         className="fixed inset-0 z-[90]"
         style={{ background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(3px)' }}
         onClick={onClose}
+        onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }}
+        role="dialog"
+        aria-modal="true"
+        tabIndex={-1}
         aria-hidden="true"
       />
 

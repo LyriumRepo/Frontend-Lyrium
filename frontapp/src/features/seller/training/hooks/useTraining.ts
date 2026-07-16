@@ -51,7 +51,7 @@ export function useTraining() {
         return acc;
     }, {});
 
-    const sortedCategories = Object.keys(groupedByCategory).sort();
+    const sortedCategories = Object.keys(groupedByCategory).sort((a, b) => a.localeCompare(b, 'es'));
 
     const completedCount = trainings.filter(t => t.completed).length;
     const totalCount = trainings.length;

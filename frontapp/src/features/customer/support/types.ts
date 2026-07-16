@@ -16,6 +16,9 @@ export interface CustomerTicket {
     messages: CustomerTicketMessage[];
     unreadCount?: number;
     assignedTo?: string;
+    surveyRequired?: boolean;
+    satisfactionRating?: number;
+    satisfactionComment?: string;
 }
 
 export interface CustomerTicketMessage {

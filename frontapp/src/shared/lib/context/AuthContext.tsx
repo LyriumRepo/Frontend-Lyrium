@@ -1,8 +1,8 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { User } from '@/shared/types/auth';
 import {
   loginAction,
@@ -18,6 +18,9 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   isAuthenticated: boolean;
+  showCheckoutModal: boolean;
+  setShowCheckoutModal: (v: boolean) => void;
+  invalidateTokenCache: () => void;
   login: (credentials: {
     username: string;
     password: string;
@@ -79,9 +82,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState(false);
-  const [isHydrated, setIsHydrated] = useState(false); // ← nuevo
+  const [isHydrated, setIsHydrated] = useState(false);
+  const [showCheckoutModal, setShowCheckoutModal] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
+  const queryClient = useQueryClient();
 
   const { isLoading: loading, data: sessionData } = useQuery({
     queryKey: ['auth', 'session'],
@@ -128,7 +133,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, [pathname, user, loading, isHydrated, router, sessionData]);
 
-  const login = async (credentials: { username: string; password: string }) => {
+  const login = useCallback(async (credentials: { username: string; password: string }) => {
     setIsAuthLoading(true);
     try {
       console.log('[Auth] Starting login...');
@@ -154,9 +159,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     } finally {
       setIsAuthLoading(false);
     }
-  };
+  }, []);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     try {
       await logoutAction();
     } catch {
@@ -167,9 +172,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     setUser(null);
     setIsHydrated(false); // ← resetea para el próximo login
     window.location.href = '/login';
-  };
+  }, []);
 
-  const loginWithSocial = async (provider: string, credential: string) => {
+  const loginWithSocial = useCallback(async (provider: string, credential: string) => {
     try {
       const result = await loginWithSocialAction(provider, credential);
 
@@ -189,19 +194,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       console.error('Social login error:', error);
       return { success: false, error: 'Error de conexión' };
     }
-  };
+  }, []);
+
+  const invalidateTokenCache = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ['auth', 'session'] });
+  }, [queryClient]);
+
+  const contextValue = useMemo(() => ({
+    user,
+    loading: loading || !isHydrated,
+    isAuthenticated: !!user,
+    showCheckoutModal,
+    setShowCheckoutModal,
+    invalidateTokenCache,
+    login,
+    logout,
+    loginWithSocial,
+  }), [user, loading, isHydrated, showCheckoutModal, setShowCheckoutModal, invalidateTokenCache, login, logout, loginWithSocial]);
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        loading: loading || !isHydrated, // ← loading verdadero hasta que hidrate
-        isAuthenticated: !!user,
-        login,
-        logout,
-        loginWithSocial,
-      }}
-    >
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );

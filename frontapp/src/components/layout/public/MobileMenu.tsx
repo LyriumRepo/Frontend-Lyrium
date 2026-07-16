@@ -115,8 +115,10 @@ export default function MobileMenu({ isOpen, onClose, menuItems, isAuthenticated
                 className={`fixed inset-0 bg-black/50 z-[100] transition-opacity duration-300 lg:hidden ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
                     }`}
                 onClick={onClose}
-                role="presentation"
-                aria-hidden="true"
+                onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }}
+                role="dialog"
+                aria-modal="true"
+                tabIndex={-1}
             />
 
             {/* Drawer */}

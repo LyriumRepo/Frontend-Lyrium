@@ -16,7 +16,7 @@ function getCartToken(): string {
   if (typeof window === 'undefined') return '';
   let sid = sessionStorage.getItem('cart_session_id');
   if (!sid) {
-    sid = `guest_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+    sid = `guest_${Date.now()}_${crypto.randomUUID()}`;
     sessionStorage.setItem('cart_session_id', sid);
   }
   return sid;

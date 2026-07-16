@@ -42,6 +42,20 @@ export interface MetaIngresos {
     metaAlcanzada: boolean;
 }
 
+export interface DesempenoMetric {
+    nombre: string;
+    score: number;
+    peso: number;
+}
+
+export interface DesempenoData {
+    score: number;
+    nivel: 'alto' | 'bueno' | 'regular' | 'bajo';
+    metrics: DesempenoMetric[];
+    labels: string[];
+    data: number[];
+}
+
 export interface FinanceData {
     ingresosBrutos: FinanceChartData;
     ingresosNetos: FinanceChartData;
@@ -61,6 +75,7 @@ export interface FinanceData {
     desgloseFinanciero: FinancialBreakdown;
     comprobantesRecientes: RecentInvoice[];
     metaIngresos: MetaIngresos;
+    desempeno: DesempenoData;
 }
 
 export interface CustomerKPI {

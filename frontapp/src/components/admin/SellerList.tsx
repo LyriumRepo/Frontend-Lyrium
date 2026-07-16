@@ -321,6 +321,10 @@ const SellerRow = ({
                 <div
                   className="fixed inset-0 z-10"
                   onClick={() => setMenuOpen(false)}
+                  onKeyDown={(e) => { if (e.key === 'Escape') setMenuOpen(false); }}
+                  role="dialog"
+                  aria-modal="true"
+                  tabIndex={-1}
                 />
                 <div className="absolute right-0 top-8 z-20 w-52 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl shadow-xl overflow-hidden">
                   {/* Activar */}

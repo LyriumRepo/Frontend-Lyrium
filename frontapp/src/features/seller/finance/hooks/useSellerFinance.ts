@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { FinanceData, RecentInvoice } from '../types';
+import { FinanceData, RecentInvoice, DesempenoData } from '../types';
 import { paymentApi, SellerPayment } from '@/shared/lib/api/paymentRepository';
 import { shipmentApi, SellerShipment } from '@/shared/lib/api/shipmentRepository';
 import { returnApi, SellerReturn } from '@/shared/lib/api/returnRepository';
@@ -21,6 +21,53 @@ interface AnalyticsData {
     csat: number;
     stockRotation: number[];
     cuotaMercado: number;
+    categories: { labels: string[]; data: number[] };
+}
+
+function clamp(val: number, min: number, max: number): number {
+    return Math.min(Math.max(val, min), max);
+}
+
+function normalize(val: number, min: number, max: number): number {
+    return clamp(((val - min) / (max - min)) * 100, 0, 100);
+}
+
+function invertNormalize(val: number, min: number, max: number): number {
+    return clamp(100 - ((val - min) / (max - min)) * 100, 0, 100);
+}
+
+function computeDesempeno(roi: number[], csat: number, leadTimeAvg: number, defectRate: number, responseTime: number, stockRotation: number): DesempenoData {
+    const roiScore = normalize(roi[roi.length - 1] ?? 0, 0, 500);
+    const csatScore = clamp(csat, 0, 100);
+    const leadScore = invertNormalize(leadTimeAvg, 0, 72);
+    const defectScore = invertNormalize(defectRate, 0, 10);
+    const responseScore = invertNormalize(responseTime, 0, 60);
+    const stockScore = normalize(stockRotation, 0, 12);
+
+    const metrics = [
+        { nombre: 'ROI', score: Math.round(roiScore), peso: 20 },
+        { nombre: 'CSAT', score: Math.round(csatScore), peso: 20 },
+        { nombre: 'Lead Time', score: Math.round(leadScore), peso: 15 },
+        { nombre: 'Defectos', score: Math.round(defectScore), peso: 15 },
+        { nombre: 'Tiempo Respuesta', score: Math.round(responseScore), peso: 15 },
+        { nombre: 'Stock Rotación', score: Math.round(stockScore), peso: 15 },
+    ];
+
+    const score = Math.round(metrics.reduce((sum, m) => sum + m.score * (m.peso / 100), 0));
+
+    let nivel: DesempenoData['nivel'];
+    if (score >= 80) nivel = 'alto';
+    else if (score >= 50) nivel = 'bueno';
+    else if (score >= 30) nivel = 'regular';
+    else nivel = 'bajo';
+
+    return {
+        score,
+        nivel,
+        metrics,
+        labels: metrics.map(m => m.nombre),
+        data: metrics.map(m => m.score),
+    };
 }
 
 function computeFinanceData(
@@ -242,8 +289,8 @@ function computeFinanceData(
             data: ltvData,
         },
         categories: {
-            labels: ['Productos', 'Servicios'],
-            data: [0, 0],
+            labels: analytics?.categories?.labels?.length ? analytics.categories.labels : ['Sin datos'],
+            data: analytics?.categories?.data?.length ? analytics.categories.data : [0],
         },
         leadTime: {
             labels: histogramLabels,
@@ -274,6 +321,14 @@ function computeFinanceData(
             ventasFaltantes,
             metaAlcanzada: ingresoMesAnterior > 0 && ingresoMesActual >= metaMensual,
         },
+        desempeno: computeDesempeno(
+            roiData,
+            analytics?.csat ?? 0,
+            leadTimeValues.length > 0 ? leadTimeValues.reduce((a, b) => a + b, 0) / leadTimeValues.length : 0,
+            defectRate,
+            analyticsTiempo[analyticsTiempo.length - 1] ?? 0,
+            analyticsStock[analyticsStock.length - 1] ?? 0,
+        ),
     };
 }
 

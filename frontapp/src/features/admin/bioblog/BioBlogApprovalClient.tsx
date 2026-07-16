@@ -262,11 +262,16 @@ export function BioBlogApprovalClient() {
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                         className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
                         onClick={() => setPreviewItem(null)}
+                        onKeyDown={(e) => { if (e.key === 'Escape') setPreviewItem(null); }}
+                        role="dialog"
+                        aria-modal="true"
+                        tabIndex={-1}
                     >
                         <motion.div
                             initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
                             className="bg-white dark:bg-[var(--bg-secondary)] rounded-3xl shadow-2xl border border-[var(--border-subtle)] w-full max-w-lg p-6 space-y-4"
                             onClick={e => e.stopPropagation()}
+                            onKeyDown={e => e.stopPropagation()}
                         >
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
@@ -346,11 +351,16 @@ export function BioBlogApprovalClient() {
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                         className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
                         onClick={() => setRejectModal(null)}
+                        onKeyDown={(e) => { if (e.key === 'Escape') setRejectModal(null); }}
+                        role="dialog"
+                        aria-modal="true"
+                        tabIndex={-1}
                     >
                         <motion.div
                             initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
                             className="bg-white dark:bg-[var(--bg-secondary)] rounded-3xl shadow-2xl border border-[var(--border-subtle)] w-full max-w-md p-6 space-y-4"
                             onClick={e => e.stopPropagation()}
+                            onKeyDown={e => e.stopPropagation()}
                         >
                             <div className="flex items-center justify-between">
                                 <h3 className="text-lg font-bold text-[var(--text-primary)]">Rechazar Contenido</h3>

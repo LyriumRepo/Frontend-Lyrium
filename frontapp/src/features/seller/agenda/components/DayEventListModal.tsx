@@ -81,7 +81,7 @@ export default function DayEventListModal({ isOpen, date, allEvents, onClose, on
     return (
         <ModalPortal>
             <div className="fixed inset-0 z-[99999] flex items-center justify-center p-0 sm:p-6">
-                <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-md" onClick={onClose} />
+                <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-md" onClick={onClose} role="presentation" onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }} />
                 <div className="relative w-full h-full sm:h-auto sm:max-h-[85vh] sm:max-w-2xl bg-[var(--bg-card)] rounded-none sm:rounded-[2.5rem] flex flex-col overflow-hidden sm:border sm:border-[var(--border-subtle)] sm:shadow-2xl">
                     {/* Header */}
                     <div className="p-5 sm:p-8 flex items-center justify-between border-b border-[var(--border-subtle)]/50 shrink-0">

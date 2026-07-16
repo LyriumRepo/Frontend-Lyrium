@@ -13,8 +13,6 @@ import { SalesKPI } from '@/features/seller/sales/types';
 import { useToast } from '@/shared/lib/context/ToastContext';
 import { useSellerSales } from '@/features/seller/sales/hooks/useSellerSales';
 import { mapOrdersToExportRows } from '@/features/seller/sales/export/mappers';
-import { exportSalesRowsToExcel } from '@/features/seller/sales/export/excelExporter';
-import { generateSalesReportPdf } from '@/features/seller/sales/export/pdfExporter';
 import { usePlanCapabilities } from '@/shared/lib/hooks/usePlanCapabilities';
 
 interface SalesPageClientProps {
@@ -57,6 +55,7 @@ export function SalesPageClient(_props?: SalesPageClientProps) {
             showToast(`Exportando ${orders.length} órdenes a Excel...`, 'info');
             try {
                 const exportRows = mapOrdersToExportRows(orders);
+                const { exportSalesRowsToExcel } = await import('@/features/seller/sales/export/excelExporter');
                 await exportSalesRowsToExcel(exportRows);
                 showToast('Excel descargado correctamente.', 'success');
             } catch {
@@ -70,6 +69,7 @@ export function SalesPageClient(_props?: SalesPageClientProps) {
         }
         showToast(`Generando reporte PDF de ${orders.length} órdenes...`, 'info');
         try {
+            const { generateSalesReportPdf } = await import('@/features/seller/sales/export/pdfExporter');
             await generateSalesReportPdf(orders);
             showToast('PDF descargado correctamente.', 'success');
         } catch (err) {

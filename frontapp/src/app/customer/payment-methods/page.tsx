@@ -353,10 +353,14 @@ export default function CustomerPaymentMethodsPage() {
       )}
 
       {(editingMethod && editingMethod.tipo_metodo !== 'tarjeta' || creatingMethod) && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[60] flex items-center justify-center p-4" onClick={() => { setEditingMethod(null); setCreatingMethod(null); }}>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[60] flex items-center justify-center p-4" onClick={() => { setEditingMethod(null); setCreatingMethod(null); }} onKeyDown={(e) => { if (e.key === 'Escape') { setEditingMethod(null); setCreatingMethod(null); } }} role="dialog" aria-modal="true" tabIndex={-1}>
           <div
             className="bg-white dark:bg-[var(--bg-secondary)] rounded-[3.5rem] max-w-xl w-full max-h-[90vh] overflow-hidden shadow-2xl"
             onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            tabIndex={-1}
           >
             <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-8 text-white relative">
               <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl" />
@@ -438,8 +442,8 @@ export default function CustomerPaymentMethodsPage() {
       )}
 
       {confirmDeleteId !== null && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setConfirmDeleteId(null)}>
-          <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-[2rem] p-8 max-w-sm mx-4 shadow-2xl" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setConfirmDeleteId(null)} onKeyDown={(e) => { if (e.key === 'Escape') setConfirmDeleteId(null); }} role="dialog" aria-modal="true" tabIndex={-1}>
+          <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-[2rem] p-8 max-w-sm mx-4 shadow-2xl" onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()} role="dialog" aria-modal="true" tabIndex={-1}>
             <div className="w-14 h-14 rounded-full bg-rose-50 dark:bg-rose-900/20 flex items-center justify-center mx-auto mb-4">
               <Icon name="CreditCard" className="w-7 h-7 text-rose-500" />
             </div>

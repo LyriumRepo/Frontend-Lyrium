@@ -19,6 +19,8 @@ export default function IzipayModal({ isOpen, onClose, error }: Props) {
       <div
         className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in"
         onClick={onClose}
+        onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }}
+        role="presentation"
       />
       <div
         ref={modalRef}
@@ -28,6 +30,7 @@ export default function IzipayModal({ isOpen, onClose, error }: Props) {
         tabIndex={-1}
         className="relative bg-white dark:bg-[var(--bg-card)] w-full max-w-sm rounded-2xl shadow-2xl border border-gray-100 dark:border-[var(--border-subtle)] overflow-hidden animate-slide-up"
         onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => e.stopPropagation()}
       >
         <div className="p-5 pb-0 flex items-center justify-between">
           <div className="flex items-center gap-2.5">

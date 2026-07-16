@@ -255,7 +255,7 @@ export default function SpecialistModal({
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }} role="presentation" />
 
       <div className="relative w-full max-w-md bg-[var(--bg-primary)] rounded-[2rem] border border-[var(--border-subtle)] shadow-2xl overflow-hidden animate-fadeIn">
 
@@ -288,6 +288,9 @@ export default function SpecialistModal({
             <div className="relative group">
               <div
                 onClick={() => fileInputRef.current?.click()}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInputRef.current?.click(); } }}
+                role="button"
+                tabIndex={0}
                 className="w-20 h-20 rounded-full bg-[var(--bg-secondary)] border-2 border-dashed border-[var(--border-subtle)] hover:border-sky-500/50 dark:hover:border-[#8FC3A1]/50 transition-all cursor-pointer overflow-hidden flex items-center justify-center shadow-sm text-[var(--text-secondary)]"
               >
                 {fotoPreview ? (
@@ -403,7 +406,7 @@ export default function SpecialistModal({
                 {showCatInfo && (
                   <>
                     {/* Overlay invisible para cerrar al clickar fuera */}
-                    <div className="fixed inset-0 z-10" onClick={() => setShowCatInfo(false)} />
+                    <div className="fixed inset-0 z-10" onClick={() => setShowCatInfo(false)} onKeyDown={(e) => { if (e.key === 'Escape') setShowCatInfo(false); }} role="dialog" aria-modal="true" tabIndex={-1} />
 
                     <div className="absolute left-0 top-7 z-20 w-72
                       bg-[var(--bg-primary)] border border-sky-500/20 dark:border-[#8FC3A1]/20

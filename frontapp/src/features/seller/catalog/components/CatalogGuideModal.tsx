@@ -23,10 +23,15 @@ export default function CatalogGuideModal({ isOpen, onClose }: CatalogGuideModal
         <div
             className="fixed inset-0 bg-black/40 backdrop-blur-xl z-[100000] flex justify-center items-center p-4 lg:p-6 animate-fadeIn"
             onClick={onClose}
+            onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }}
+            role="dialog"
+            aria-modal="true"
+            tabIndex={-1}
         >
             <div
                 className="bg-white dark:bg-[var(--bg-secondary)] w-full max-w-2xl max-h-[90vh] rounded-[2.5rem] overflow-hidden shadow-[-40px_0_100px_rgba(0,0,0,0.1)] border border-white/20 relative flex flex-col"
                 onClick={(e) => e.stopPropagation()}
+                onKeyDown={(e) => e.stopPropagation()}
             >
                 {/* ── Header ── */}
                 <div className="bg-gradient-to-r from-emerald-500 via-emerald-400 to-emerald-300 dark:from-[#2A4A3A] dark:via-[#1A3A32] dark:to-[#2A4A3A] p-6 text-white relative flex-shrink-0">

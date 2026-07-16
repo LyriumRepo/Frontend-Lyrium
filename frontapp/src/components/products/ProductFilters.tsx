@@ -68,8 +68,10 @@ export default function ProductFilters({ onFilterChange, initialFilters, maxPric
     return Math.round(percent * MAX_PRICE);
   }, [MAX_PRICE]);
 
-  const handleTrackClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    const value = valueFromClientX(e.clientX);
+  const handleTrackClick = (e: React.MouseEvent<HTMLDivElement> | React.KeyboardEvent<HTMLDivElement>) => {
+    const clientX = ('clientX' in e ? e.clientX : null);
+    if (clientX === null) return;
+    const value = valueFromClientX(clientX);
     if (value === null) return;
 
     const midPoint = (priceRange.min + priceRange.max) / 2;
@@ -156,9 +158,17 @@ export default function ProductFilters({ onFilterChange, initialFilters, maxPric
         <div className="flex items-center gap-2">
           {hasActiveFilters && (
   <span
+    role="button"
+    tabIndex={0}
     onClick={(e) => {
       e.stopPropagation();
       clearFilters();
+    }}
+    onKeyDown={(e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        clearFilters();
+      }
     }}
     className="text-xs text-rose-500 hover:text-rose-600 font-medium cursor-pointer select-none"
   >
@@ -191,6 +201,9 @@ export default function ProductFilters({ onFilterChange, initialFilters, maxPric
               ref={trackRef}
               className="relative h-2 bg-gray-200 dark:bg-gray-700 rounded-full mb-6 cursor-pointer"
               onClick={handleTrackClick}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleTrackClick(e); } }}
+              role="button"
+              tabIndex={0}
             >
               {/* Barra activa */}
               <div 

@@ -321,6 +321,9 @@ export default function AuditPageClient() {
                     key={ev.id}
                     className="flex items-start gap-3 p-3 rounded-2xl bg-rose-50/50 border border-rose-100 hover:bg-rose-50 cursor-pointer transition-colors"
                     onClick={() => setSelectedLog(ev)}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedLog(ev); } }}
+                    role="button"
+                    tabIndex={0}
                   >
                     <div className="mt-0.5">
                       <AlertCircle className="w-4 h-4 text-rose-500 shrink-0" />

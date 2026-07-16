@@ -1,17 +1,28 @@
 'use client';
 
 import React, { useState } from 'react';
+import dynamic from 'next/dynamic';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import BaseButton from '@/components/ui/BaseButton';
 import { useAdminSecurity } from '@/features/admin/security/hooks/useAdminSecurity';
 import { SecurityStatsCards } from '@/features/admin/security/components/SecurityStatsCards';
 import { ActiveSessionsPanel } from '@/features/admin/security/components/ActiveSessionsPanel';
 import { SecurityActivityFeed } from '@/features/admin/security/components/SecurityActivityFeed';
-import { SecurityLoginChart } from '@/features/admin/security/components/SecurityLoginChart';
-import { SecurityEventsChart } from '@/features/admin/security/components/SecurityEventsChart';
-import { ActiveUsersChart } from '@/features/admin/security/components/ActiveUsersChart';
 import { SessionsListView } from '@/features/admin/security/components/SessionsListView';
 import { LayoutDashboard, Monitor } from 'lucide-react';
+
+const SecurityLoginChart = dynamic(
+  () => import('@/features/admin/security/components/SecurityLoginChart').then(m => m.SecurityLoginChart),
+  { ssr: false }
+);
+const SecurityEventsChart = dynamic(
+  () => import('@/features/admin/security/components/SecurityEventsChart').then(m => m.SecurityEventsChart),
+  { ssr: false }
+);
+const ActiveUsersChart = dynamic(
+  () => import('@/features/admin/security/components/ActiveUsersChart').then(m => m.ActiveUsersChart),
+  { ssr: false }
+);
 
 type Tab = 'dashboard' | 'sessions';
 

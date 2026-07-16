@@ -284,10 +284,11 @@ export default function CustomerAddressesPage() {
       </div>
 
       {showModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[60] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label={editingAddress ? 'Editar Dirección' : 'Nueva Dirección'} onClick={() => setShowModal(false)}>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[60] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label={editingAddress ? 'Editar Dirección' : 'Nueva Dirección'} tabIndex={-1} onClick={() => setShowModal(false)} onKeyDown={(e) => { if (e.key === 'Escape') setShowModal(false); }}>
           <div
             className="bg-white dark:bg-[var(--bg-secondary)] rounded-[3.5rem] max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl"
             onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
           >
             <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[var(--brand-green-hover)] dark:to-[var(--brand-green)] p-8 text-white relative">
               <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl" />

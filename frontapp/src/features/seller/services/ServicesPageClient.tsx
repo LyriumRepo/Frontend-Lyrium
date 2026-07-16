@@ -449,6 +449,8 @@ export function ServicesPageClient() {
                 {/* Backdrop */}
                 <div
                     onClick={() => setDrawerOpen(false)}
+                    onKeyDown={(e) => { if (e.key === 'Escape') setDrawerOpen(false); }}
+                    role="presentation"
                     className={`fixed inset-0 z-[70] bg-black/25 backdrop-blur-[2px] transition-opacity duration-300
                         ${drawerOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
                 />

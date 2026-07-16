@@ -708,7 +708,7 @@ export default function ServiceConfigModal({
         etiquetas={form.etiquetas}
       />
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }} role="presentation" />
 
         <div className="relative w-full max-w-2xl bg-[var(--bg-primary)] rounded-[2rem] border border-[var(--border-subtle)] shadow-2xl flex flex-col max-h-[90vh] overflow-hidden animate-fadeIn">
 
@@ -770,6 +770,9 @@ export default function ServiceConfigModal({
                     <div className="relative group self-start">
                       <div
                         onClick={() => imageInputRef.current?.click()}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); imageInputRef.current?.click(); } }}
+                        role="button"
+                        tabIndex={0}
                         className={`w-28 h-28 md:w-32 md:h-32 rounded-2xl border-2 border-dashed transition-all cursor-pointer overflow-hidden flex flex-col items-center justify-center gap-1.5
                         ${imagenPreview
                             ? 'border-transparent'
@@ -1881,12 +1884,17 @@ function TagPreviewModal({
     <div
       className="fixed inset-0 z-[100] flex items-center justify-center p-4"
       onClick={onClose}
+      onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }}
+      role="dialog"
+      aria-modal="true"
+      tabIndex={-1}
     >
       <div className="absolute inset-0 bg-black/80 backdrop-blur-md" />
       <div
         className="relative z-10 w-full max-w-[300px] rounded-3xl overflow-hidden shadow-2xl animate-fadeIn"
         style={{ background: '#111', border: '1px solid rgba(255,255,255,0.08)' }}
         onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div

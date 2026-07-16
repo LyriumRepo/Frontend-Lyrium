@@ -73,7 +73,7 @@ export default function ContactPage() {
         return (
             <IntroCover
                 title="&quot;¿En qué podemos ayudarte hoy?&quot;"
-                subtitle="Estamos aquí para impulsarte. Si tienes dudas sobre tu tienda o necesitas ayuda para crecer, el equipo de Lyrium está a un clic de distancia."
+                subtitle="Ya seas comprador o vendedor, estamos aquí para ayudarte. Nuestro equipo responde tus dudas y te acompaña en cada paso."
                 icon="Headset"
                 buttonText="ENTRAR"
                 buttonIcon="ArrowDown"
@@ -87,9 +87,9 @@ export default function ContactPage() {
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-[#0D1510] py-8 md:py-12 px-4">
             <div className="max-w-6xl mx-auto">
-                <div className="grid md:grid-cols-2 gap-8 rounded-[30px] overflow-hidden bg-white dark:bg-[var(--bg-secondary)] shadow-xl dark:shadow-none border border-gray-200 dark:border-[var(--border-subtle)]">
+                <div className="grid md:grid-cols-2 gap-8 rounded-[30px] bg-white dark:bg-[var(--bg-secondary)] shadow-xl dark:shadow-none border border-gray-200 dark:border-[var(--border-subtle)]">
                     {/* Visual Section */}
-                    <div className={`contact-visual bg-[linear-gradient(135deg,rgba(14,165,233,0.85)_0%,rgba(132,204,22,0.85))] dark:bg-[linear-gradient(135deg,var(--brand-green)_0%,var(--icons-green)_50%,var(--brand-green-hover)_100%)] bg-cover bg-center rounded-[30px] md:rounded-r-none p-5 sm:p-8 md:p-12 text-white relative overflow-hidden h-full`}>
+                    <div className={`contact-visual bg-[linear-gradient(135deg,rgba(14,165,233,0.85)_0%,rgba(132,204,22,0.85))] dark:bg-[linear-gradient(135deg,var(--brand-green)_0%,var(--icons-green)_50%,var(--brand-green-hover)_100%)] bg-cover bg-center rounded-[30px] p-5 sm:p-8 md:p-12 text-white relative overflow-hidden h-full`}>
                     <div className="absolute top-0 right-0 w-20 h-20 sm:w-32 sm:h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
                         <img src="/img/intro/Flor6.png" alt="decoración" className="absolute -bottom-20 -right-85 w-[700px] max-w-none opacity-50 mix-blend-overlay pointer-events-none" />
 
@@ -129,7 +129,7 @@ export default function ContactPage() {
                     </div>
 
                     {/* Form Section */}
-                    <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-3xl md:rounded-l-none p-8 md:p-10 shadow-lg dark:shadow-none h-full flex flex-col justify-center">
+                    <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-[30px] p-8 md:p-10 shadow-lg dark:shadow-none h-full flex flex-col justify-center">
                         <div className="form-header flex items-start gap-4 mb-8">
                             <div className="w-12 h-12 bg-sky-100 rounded-full flex items-center justify-center flex-shrink-0">
                                 <Icon name="ChatCircleText" className="text-xl text-sky-600 dark:text-[var(--brand-green)]" />

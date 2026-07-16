@@ -361,8 +361,8 @@ export function GlossaryPageClient() {
 
             {/* ─── Create/Edit Modal ─────────────────────────────────────── */}
             {showEditor && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setShowEditor(false)}>
-                    <div className="bg-[var(--bg-card)] rounded-3xl shadow-2xl border border-[var(--border-subtle)] w-full max-w-lg mx-4 p-6 space-y-5" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setShowEditor(false)} onKeyDown={e => { if (e.key === 'Escape') setShowEditor(false); }} role="dialog" aria-modal="true" tabIndex={-1}>
+                    <div className="bg-[var(--bg-card)] rounded-3xl shadow-2xl border border-[var(--border-subtle)] w-full max-w-lg mx-4 p-6 space-y-5" onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()}>
                         <h3 className="text-lg font-bold text-[var(--text-primary)]">
                             {editingId ? 'Editar Entrada' : 'Nueva Entrada'}
                         </h3>
@@ -436,8 +436,8 @@ export function GlossaryPageClient() {
 
             {/* ─── Approve Modal ────────────────────────────────────────── */}
             {approvingId !== null && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setApprovingId(null)}>
-                    <div className="bg-[var(--bg-card)] rounded-3xl shadow-2xl border border-[var(--border-subtle)] w-full max-w-md mx-4 p-6 space-y-5" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setApprovingId(null)} onKeyDown={e => { if (e.key === 'Escape') setApprovingId(null); }} role="dialog" aria-modal="true" tabIndex={-1}>
+                    <div className="bg-[var(--bg-card)] rounded-3xl shadow-2xl border border-[var(--border-subtle)] w-full max-w-md mx-4 p-6 space-y-5" onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()}>
                         <h3 className="text-lg font-bold text-[var(--text-primary)]">Aprobar Término</h3>
                         <p className="text-sm text-[var(--text-secondary)]">Crear una entrada de glosario para este término detectado automáticamente:</p>
 

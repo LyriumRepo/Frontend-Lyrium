@@ -837,3 +837,24 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
 .plan-neon-glow {
     animation: plan-neon-pulse 2.5s ease-in-out infinite;
 }
+
+/* ─── Sidebar collapsed icon micro-animations ─── */
+@keyframes sidebarIconDraw {
+    0%   { clip-path: inset(100% 0 0 0); opacity: 0; transform: scale(0.75) rotate(-12deg); }
+    50%  { clip-path: inset(0 0 0 0); opacity: 0.8; }
+    100% { clip-path: inset(0 0 0 0); opacity: 1; transform: scale(1.15) rotate(0deg); }
+}
+
+@keyframes sidebarIconBounce {
+    0%   { transform: scale(1); }
+    25%  { transform: scale(0.88); }
+    50%  { transform: scale(1.12); }
+    75%  { transform: scale(0.96); }
+    100% { transform: scale(1); }
+}
+
+@keyframes sidebarIconGlow {
+    0%   { box-shadow: 0 0 0 0 var(--brand-green); }
+    50%  { box-shadow: 0 0 12px 3px var(--brand-green); }
+    100% { box-shadow: 0 0 0 0 var(--brand-green); }
+}

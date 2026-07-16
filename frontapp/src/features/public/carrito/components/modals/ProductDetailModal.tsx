@@ -113,6 +113,10 @@ export default function ProductDetailModal({
       <div
         className="fixed inset-0 z-[80] bg-slate-900/58 dark:bg-black/70 backdrop-blur-[2px]"
         onClick={closeDetailModal}
+        onKeyDown={(e) => { if (e.key === 'Escape') closeDetailModal(); }}
+        role="dialog"
+        aria-modal="true"
+        tabIndex={-1}
       />
       <div className="fixed inset-0 z-[85] overflow-y-auto py-4 sm:py-8 px-4">
         <div className="relative max-w-5xl mx-auto bg-white dark:bg-[var(--bg-card)] shadow-2xl overflow-hidden border border-sky-100 dark:border-[var(--border-subtle)] rounded-[22px] flex flex-col max-h-[calc(100vh-32px)]">

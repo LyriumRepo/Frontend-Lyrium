@@ -386,6 +386,9 @@ export function ScanResultCard({
       <div
         className="flex items-center justify-between px-4 py-3 border-b border-[var(--border-subtle)] cursor-pointer hover:bg-[var(--bg-muted)] transition-colors"
         onClick={() => setExpanded((v) => !v)}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setExpanded((v) => !v); } }}
+        role="button"
+        tabIndex={0}
       >
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-[var(--color-success)]" />

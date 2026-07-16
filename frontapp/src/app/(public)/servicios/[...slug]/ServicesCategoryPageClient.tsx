@@ -241,6 +241,8 @@ function ServiceDetailModal({
       <div
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
         onClick={onClose}
+        onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }}
+        role="presentation"
       />
 
       {/* Panel */}

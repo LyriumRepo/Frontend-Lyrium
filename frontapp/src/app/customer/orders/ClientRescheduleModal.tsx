@@ -292,10 +292,15 @@ export default function ClientRescheduleModal({
     <div
       className="fixed inset-0 bg-black/50 backdrop-blur-md z-[100] flex justify-center items-center p-4"
       onClick={onClose}
+      onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }}
+      role="dialog"
+      aria-modal="true"
+      tabIndex={-1}
     >
       <div
         className="bg-white dark:bg-[var(--bg-secondary)] w-full max-w-sm rounded-[2rem] overflow-hidden shadow-2xl border border-white/20 flex flex-col max-h-[92vh]"
         onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => e.stopPropagation()}
       >
         {/* ─── Header ───────────────────────────────────────────────────── */}
         <div className="bg-gradient-to-r from-sky-500 to-sky-400 dark:from-[var(--brand-green-hover)] dark:to-[var(--brand-green)] p-4 sm:p-5 text-white relative flex-shrink-0">

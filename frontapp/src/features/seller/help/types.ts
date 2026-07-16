@@ -14,6 +14,9 @@ export interface SellerTicket {
     updatedAt: string;
     resolvedAt?: string;
     messages: SellerTicketMessage[];
+    surveyRequired?: boolean;
+    satisfactionRating?: number;
+    satisfactionComment?: string;
 }
 
 export interface SellerTicketMessage {

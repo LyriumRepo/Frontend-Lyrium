@@ -82,7 +82,7 @@ export function SecurityLoginChart({ data, loading }: Props) {
             Sin datos
           </div>
         ) : (
-          <div className="cursor-pointer" onClick={() => setModalOpen(true)}>
+          <div className="cursor-pointer" role="button" tabIndex={0} onClick={() => setModalOpen(true)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setModalOpen(true); } }}>
             <ResponsiveContainer width="100%" height={250}>
 <BarChart data={data} barGap={2}>
     <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" />
@@ -120,6 +120,10 @@ export function SecurityLoginChart({ data, loading }: Props) {
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
             onClick={() => setModalOpen(false)}
+            onKeyDown={(e) => { if (e.key === 'Escape') setModalOpen(false); }}
+            role="dialog"
+            aria-modal="true"
+            tabIndex={-1}
           >
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
@@ -128,6 +132,7 @@ export function SecurityLoginChart({ data, loading }: Props) {
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
               className="bg-[var(--bg-card)] rounded-3xl border border-[var(--border-subtle)] shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden"
               onClick={(e) => e.stopPropagation()}
+              onKeyDown={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-subtle)]">
                 <div>

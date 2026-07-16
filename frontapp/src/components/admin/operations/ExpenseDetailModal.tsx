@@ -516,6 +516,10 @@ export function ExpenseDetailModal({
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
+      onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }}
+      role="dialog"
+      aria-modal="true"
+      tabIndex={-1}
     >
       <div
         className="relative w-full max-w-xl max-h-[88vh] flex flex-col rounded-2xl overflow-hidden border border-[var(--border-default)] shadow-[0_24px_64px_rgba(0,0,0,0.15)] bg-[var(--bg-card)]"

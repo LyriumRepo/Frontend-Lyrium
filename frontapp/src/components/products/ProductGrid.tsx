@@ -9,6 +9,7 @@ import TopMedalBadge from '@/components/ui/TopMedalBadge';
 import { useAddToCart } from '@/features/public/product/hooks/useAddToCart';
 import { money } from '@/modules/cart/utils';
 import QuickViewModal from './QuickViewModal';
+import PromoCard from './PromoCard';
 
 const stickerConfig: Record<string, { label: string; class: string }> = {
   oferta: { label: 'Oferta', class: 'bg-red-500' },
@@ -328,6 +329,12 @@ export default function ProductGrid({ productos, loading = false, className = ''
     );
   }
 
+  const isThreeCol = className.includes('lg:!grid-cols-3');
+  const desktopCols = isThreeCol ? 3 : 4;
+  const count = productos.length;
+  const remainder = count % desktopCols;
+  const emptySlots = count === 0 ? 0 : remainder === 0 ? 0 : desktopCols - remainder;
+
   return (
     <div className={`grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 ${className}`}>
       {productos.map((producto) =>
@@ -337,6 +344,14 @@ export default function ProductGrid({ productos, loading = false, className = ''
           <ProductCard key={`product-${producto.id}`} producto={producto} onQuickView={setQuickViewProduct} />
         )
       )}
+
+      {emptySlots > 0 && Array.from({ length: emptySlots }).map((_, i) => (
+        <PromoCard
+          key={`promo-${i}`}
+          variant={isThreeCol ? 'service' : 'product'}
+          index={count + i}
+        />
+      ))}
 
       <QuickViewModal
         isOpen={!!quickViewProduct}

@@ -31,7 +31,7 @@ export default function BioBlogPage() {
             <SectionHeader
                 label="Novedades"
                 title="ÚLTIMAS PUBLICACIONES"
-                description="Los artículos más recientes sobre vida saludable, sostenibilidad y alimentación ecológica."
+                description="Lo que acaba de llegar: artículos frescos sobre bienestar, naturaleza y hábitos saludables."
             />
             <AnimatedWrapper>
                 <PostGridCarousel />
@@ -41,7 +41,7 @@ export default function BioBlogPage() {
             <SectionHeader
                 label="Lo Mejor"
                 title="DESTACADOS"
-                description="Artículos seleccionados por su calidad e impacto para ayudarte a vivir mejor."
+                description="Lo que nuestra comunidad más valora: contenido probado que marca la diferencia."
             />
             <AnimatedWrapper>
                 <FeaturedCarousel />

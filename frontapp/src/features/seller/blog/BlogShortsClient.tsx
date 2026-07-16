@@ -212,8 +212,8 @@ export function BlogShortsClient() {
             </div>
 
             {showEditor && (
-                <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 backdrop-blur-sm overflow-y-auto py-10" onClick={() => setShowEditor(false)}>
-                    <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 w-full max-w-lg mx-4 p-6 space-y-4 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 backdrop-blur-sm overflow-y-auto py-10" role="dialog" aria-modal="true" tabIndex={-1} onClick={() => setShowEditor(false)} onKeyDown={e => { if (e.key === 'Escape') setShowEditor(false) }}>
+                    <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 w-full max-w-lg mx-4 p-6 space-y-4 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()}>
                         <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200">{editingId ? 'Editar Short' : 'Nuevo Short'}</h3>
                         <div>
                             <label className="block text-xs font-semibold text-gray-500 mb-1">Plataforma</label>

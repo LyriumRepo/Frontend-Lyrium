@@ -26,24 +26,44 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.12s, transform 0.08s;
+  transition: background 0.12s ease, transform 0.08s ease, box-shadow 0.15s ease;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
   -webkit-tap-highlight-color: transparent;
   padding: 0 4px;
   flex: 1;
 }
 
+/* ─── Light mode: hover = subtle gray + shadow lift ─── */
 .simple-keyboard.hg-theme-lyrium .hg-button:hover {
-  background: var(--bg-muted);
+  background: #e8ecf0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
 }
 
+/* ─── Light mode: active = sky-blue press ─── */
 .simple-keyboard.hg-theme-lyrium .hg-button:active,
 .simple-keyboard.hg-theme-lyrium .hg-button.hg-activeButton {
-  background: var(--brand-sky) !important;
+  background: #0ea5e9 !important;
   color: #fff !important;
   transform: scale(0.94);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2), 0 0 10px rgba(14, 165, 233, 0.4);
 }
 
+/* ─── Dark mode: hover = slightly shaded green ─── */
+.dark .simple-keyboard.hg-theme-lyrium .hg-button:hover {
+  background: #152820;
+  box-shadow: 0 2px 8px rgba(42, 90, 77, 0.3);
+}
+
+/* ─── Dark mode: active = lighter green press (clearly visible) ─── */
+.dark .simple-keyboard.hg-theme-lyrium .hg-button:active,
+.dark .simple-keyboard.hg-theme-lyrium .hg-button.hg-activeButton {
+  background: #3a7a65 !important;
+  color: #e0f0e8 !important;
+  transform: scale(0.94);
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.3), 0 0 10px rgba(58, 122, 101, 0.4);
+}
+
+/* ─── Function keys (Shift, Bksp, Hide) ─── */
 .simple-keyboard.hg-theme-lyrium .hg-button.hg-functionBtn {
   background: var(--bg-muted);
   color: var(--text-secondary);
@@ -57,6 +77,16 @@
   color: #fff !important;
 }
 
+.dark .simple-keyboard.hg-theme-lyrium .hg-button.hg-functionBtn:hover {
+  background: #152820;
+}
+
+.dark .simple-keyboard.hg-theme-lyrium .hg-button.hg-functionBtn:active {
+  background: #3a7a65 !important;
+  color: #e0f0e8 !important;
+}
+
+/* ─── Accent vowel keys ─── */
 .simple-keyboard.hg-theme-lyrium .hg-button[data-skbtnuid="á"],
 .simple-keyboard.hg-theme-lyrium .hg-button[data-skbtnuid="é"],
 .simple-keyboard.hg-theme-lyrium .hg-button[data-skbtnuid="í"],
@@ -75,6 +105,7 @@
   font-size: 18px;
 }
 
+/* ─── Hide (close) button ─── */
 .simple-keyboard.hg-theme-lyrium .hg-button[data-skbtnuid="{hide}"] {
   background: transparent;
   border: none;
@@ -85,6 +116,7 @@
 
 .simple-keyboard.hg-theme-lyrium .hg-button[data-skbtnuid="{hide}"]:hover {
   background: var(--bg-muted);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
 }
 
 .simple-keyboard.hg-theme-lyrium .hg-button[data-skbtnuid="{hide}"]:active {
@@ -92,6 +124,16 @@
   transform: scale(0.9);
 }
 
+.dark .simple-keyboard.hg-theme-lyrium .hg-button[data-skbtnuid="{hide}"]:hover {
+  background: #152820;
+  box-shadow: 0 1px 4px rgba(42, 90, 77, 0.2);
+}
+
+.dark .simple-keyboard.hg-theme-lyrium .hg-button[data-skbtnuid="{hide}"]:active {
+  background: #3a7a65 !important;
+}
+
+/* ─── Space bar ─── */
 .simple-keyboard.hg-theme-lyrium .hg-button[data-skbtnuid="{space}"] {
   min-width: 160px;
   max-width: 280px;

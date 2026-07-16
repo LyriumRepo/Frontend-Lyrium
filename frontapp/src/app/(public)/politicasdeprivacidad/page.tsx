@@ -206,6 +206,7 @@ export default function PrivacyPolicyPage() {
                 <div
                     className={`absolute inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity duration-500 ${isPopupOpen ? 'opacity-100' : 'opacity-0'}`}
                     onClick={() => setIsPopupOpen(false)}
+                    onKeyDown={(e) => { if (e.key === 'Escape') setIsPopupOpen(false); }}
                     role="presentation"
                     aria-hidden="true"
                 />

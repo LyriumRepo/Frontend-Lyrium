@@ -597,17 +597,19 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         [user]
     );
 
+    const contextValue = useMemo(() => ({
+        notifications: visibleNotifications,
+        unreadCount: visibleNotifications.filter(n => !n.read).length,
+        loading,
+        markAsRead,
+        markAllAsRead,
+        deleteAll,
+        addNotification,
+        refreshNotifications,
+    }), [visibleNotifications, loading, markAsRead, markAllAsRead, deleteAll, addNotification, refreshNotifications]);
+
     return (
-        <NotificationContext.Provider value={{
-            notifications: visibleNotifications,
-            unreadCount: visibleNotifications.filter(n => !n.read).length,
-            loading,
-            markAsRead,
-            markAllAsRead,
-            deleteAll,
-            addNotification,
-            refreshNotifications,
-        }}>
+        <NotificationContext.Provider value={contextValue}>
             <SyncManager />
             {children}
         </NotificationContext.Provider>

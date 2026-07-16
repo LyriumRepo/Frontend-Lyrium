@@ -1092,7 +1092,7 @@ export default function CustomerOrdersPage() {
               className={selectClass}
             >
               <option value="">Todos</option>
-              {Array.from(new Set(orders.map(o => o.tienda).filter(Boolean))).sort().map(tienda => (
+              {Array.from(new Set(orders.map(o => o.tienda).filter(Boolean))).sort((a, b) => a.localeCompare(b, 'es')).map(tienda => (
                 <option key={tienda} value={tienda}>{tienda}</option>
               ))}
             </select>
@@ -1396,10 +1396,18 @@ export default function CustomerOrdersPage() {
         <div
           className={`fixed inset-0 bg-black/40 backdrop-blur-xl z-50 flex justify-center items-center p-4 lg:p-6 ${isLegendClosing ? 'animate-fade-out-overlay' : 'animate-fadeIn'}`}
           onClick={handleCloseLegend}
+          onKeyDown={(e) => { if (e.key === 'Escape') handleCloseLegend(); }}
+          role="dialog"
+          aria-modal="true"
+          tabIndex={-1}
         >
           <div
             className={`bg-white dark:bg-[var(--bg-secondary)] w-full max-w-2xl md:max-w-xl lg:max-w-2xl max-h-[80vh] rounded-[2.5rem] overflow-hidden shadow-[-40px_0_100px_rgba(0,0,0,0.1)] border border-white/20 relative flex flex-col ${isLegendClosing ? 'animate-scale-out' : 'animate-scaleIn'}`}
             onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => { if (e.key === 'Escape') e.stopPropagation(); }}
+            role="dialog"
+            aria-modal="true"
+            tabIndex={-1}
           >
             <div className="bg-gradient-to-r from-sky-500 via-sky-500 to-sky-300 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-6 text-white relative flex-shrink-0">
               <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full -mr-24 -mt-24 blur-3xl" />
@@ -1545,10 +1553,18 @@ export default function CustomerOrdersPage() {
         <div
           className="fixed inset-0 bg-black/40 backdrop-blur-xl z-[60] flex justify-center items-center p-4 lg:p-6 animate-fadeIn"
           onClick={closeModal}
+          onKeyDown={(e) => { if (e.key === 'Escape') closeModal(); }}
+          role="dialog"
+          aria-modal="true"
+          tabIndex={-1}
         >
           <div
             className="bg-white dark:bg-[var(--bg-secondary)] w-full md:max-w-xl lg:max-w-[700px] max-h-[80vh] rounded-[2.5rem] overflow-hidden shadow-[-40px_0_100px_rgba(0,0,0,0.1)] border border-white/20 relative flex flex-col transition-all duration-700"
             onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => { if (e.key === 'Escape') e.stopPropagation(); }}
+            role="dialog"
+            aria-modal="true"
+            tabIndex={-1}
           >
             <div className="bg-gradient-to-r from-sky-500 via-sky-500 to-sky-300 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-6 text-white relative flex-shrink-0">
               <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full -mr-24 -mt-24 blur-3xl" />
@@ -1625,7 +1641,7 @@ export default function CustomerOrdersPage() {
                     <div className="mt-4 flex items-center gap-2 px-3 py-2 rounded-xl bg-white dark:bg-[var(--bg-secondary)] border border-gray-100 dark:border-[var(--border-subtle)]">
                       <Icon
                         name={(selectedOrder.reprogramaciones ?? 0) >= 1 ? 'AlertCircle' : 'Info'}
-                        className={`w-3.5 h-3.5 flex-shrink-0 ${(selectedOrder.reprogramaciones ?? 0) >= 1 ? 'text-sky-500 dark:text-[var(--icons-green)]' : 'text-sky-500 dark:text-[var(--icons-green)]'}`}
+                        className={`w-3.5 h-3.5 flex-shrink-0 ${'text-sky-500 dark:text-[var(--icons-green)]'}`}
                       />
                       <p className="text-[9px] font-bold text-gray-500 dark:text-[var(--text-muted)]">
                         {selectedOrder.solicitudEnviada

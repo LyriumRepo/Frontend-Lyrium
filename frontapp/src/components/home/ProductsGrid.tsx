@@ -122,7 +122,7 @@ export default function ProductsGrid({ categorias, titulo = 'Categorías de prod
                 href={cat.slug ? `/productos/${cat.slug}` : '#'}
                 className="block flex-shrink-0 w-[calc(50%-0.5rem)] min-[480px]:w-[calc(33.333%-0.66rem)] md:w-[calc(25%-0.75rem)] xl:w-[calc(20%-0.8rem)] snap-start"
               >
-                <article className="rounded-[2.5rem] overflow-hidden shadow-md bg-[var(--turquesaClaro-100)] dark:bg-[var(--bg-card)] group cursor-pointer h-44 md:h-52">
+                <article className="rounded-[2.5rem] overflow-hidden shadow-md bg-white dark:bg-[var(--bg-card)] group cursor-pointer h-44 md:h-52">
                   <Image
                     src={localImage}
                     alt={cat.nombre}

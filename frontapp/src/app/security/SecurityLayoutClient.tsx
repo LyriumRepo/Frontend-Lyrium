@@ -7,8 +7,12 @@ import SecuritySidebar from '@/components/layout/security/SecuritySidebar';
 import SecurityHeader from '@/components/layout/security/SecurityHeader';
 import { DashboardLayout } from '@/components/layout/shared/DashboardLayout';
 import { useUIStore } from '@/store/uiStore';
-import NotificationSidebar from '@/components/shared/notifications/NotificationSidebar';
-import ChatBotWidget from '@/features/chatbot/components/ChatBotWidget';
+import dynamic from 'next/dynamic';
+
+const ChatBotWidget = dynamic(
+  () => import('@/features/chatbot/components/ChatBotWidget'),
+  { ssr: false }
+);
 
 interface SecurityLayoutClientProps {
     children: React.ReactNode;
@@ -39,7 +43,6 @@ export function SecurityLayoutClient({ children }: SecurityLayoutClientProps) {
             mainClassName="p-6 md:p-8"
         >
             {children}
-            <NotificationSidebar />
             <ChatBotWidget />
         </DashboardLayout>
     );

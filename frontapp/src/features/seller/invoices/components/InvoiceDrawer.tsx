@@ -100,7 +100,7 @@ export default function InvoiceDrawer({ voucher, isOpen, onClose }: InvoiceDrawe
 
     return createPortal(
         <div className="fixed inset-0 z-[99999] flex items-center justify-end">
-            <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-md" onClick={onClose} role="presentation" aria-hidden="true"></div>
+            <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-md" onClick={onClose} onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }} role="presentation" aria-hidden="true"></div>
 
             <div className="relative h-full bg-[var(--bg-card)] shadow-[-40px_0_80px_-20px_rgba(0,0,0,0.15)] w-full md:w-[600px] flex flex-col animate-slideInRight">
                 <div className="p-8 flex items-center justify-between border-b border-[var(--border-subtle)] bg-[var(--bg-card)]/80 backdrop-blur-xl">

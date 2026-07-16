@@ -54,7 +54,7 @@ export function useInventory() {
 
   const categories = useMemo(() => {
     const set = new Set(items.map((i) => i.category));
-    return ['all', ...Array.from(set).sort()];
+    return ['all', ...Array.from(set).sort((a, b) => a.localeCompare(b, 'es'))];
   }, [items]);
 
   const stats: InventoryStats = useMemo(() => {

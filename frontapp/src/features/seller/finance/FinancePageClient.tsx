@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import dynamic from 'next/dynamic';
 import type { FinanceChartProps } from './components/FinanceChart';
@@ -150,6 +150,7 @@ export function FinancePageClient() {
     { id: 'crecimiento', label: 'Crecimiento', icon: 'TrendingUp' },
     { id: 'inventario', label: 'Inventario', icon: 'Package' },
     { id: 'satisfaccion', label: 'Satisfacción', icon: 'Smile' },
+    { id: 'desempeno', label: 'Desempeño', icon: 'Gauge' },
   ];
 
   const openKpi = (
@@ -562,6 +563,138 @@ export function FinancePageClient() {
             </div>
           </div>
         )}
+
+        {/* 9. DESEMPEÑO */}
+        {isVisible('desempeno') && (() => {
+          const d = data.desempeno;
+          const nivelLabel = d.nivel === 'alto' ? 'Alto' : d.nivel === 'bueno' ? 'Bueno' : d.nivel === 'regular' ? 'Regular' : 'Bajo';
+          const nivelColor = d.nivel === 'alto' ? '#10b981' : d.nivel === 'bueno' ? '#0ea5e9' : d.nivel === 'regular' ? '#f59e0b' : '#ef4444';
+
+          function DesempenoGauge({ score }: { score: number }) {
+            const canvasRef = useRef<HTMLCanvasElement>(null);
+            useEffect(() => {
+              if (!canvasRef.current) return;
+              let destroyed = false;
+              import('chart.js/auto').then(({ default: Chart }) => {
+                if (destroyed || !canvasRef.current) return;
+                const ctx = canvasRef.current.getContext('2d');
+                if (!ctx) return;
+                const gaugeColor = score >= 80 ? '#10b981' : score >= 50 ? '#0ea5e9' : score >= 30 ? '#f59e0b' : '#ef4444';
+                new Chart(ctx, {
+                  type: 'doughnut',
+                  data: {
+                    datasets: [{
+                      data: [score, 100 - score],
+                      backgroundColor: [gaugeColor, '#e2e8f0'],
+                      borderWidth: 0,
+                    }],
+                  },
+                  options: {
+                    circumference: 180,
+                    rotation: -90,
+                    cutout: '78%',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                      legend: { display: false },
+                      tooltip: { enabled: false },
+                    },
+                    animation: false,
+                  },
+                });
+              });
+              return () => { destroyed = true; };
+            }, [score]);
+            return <canvas ref={canvasRef} />;
+          }
+
+          return (
+            <div className="space-y-6" key="desempeno-section">
+              <div className="flex items-center gap-3 mb-2 animate-section-reveal">
+                <div className="w-1.5 h-6 rounded-full bg-gradient-to-b from-emerald-400 to-amber-400" />
+                <h2 className="text-lg font-black text-[var(--text-primary)] uppercase tracking-tight">Tu Desempeño</h2>
+              </div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 stagger-grid">
+                {/* Gauge principal */}
+                <button
+                  onClick={() => {
+                    setSelectedKpi(buildKpiConfig(
+                      'Medida de Desempeño',
+                      `${d.score}/100`,
+                      `Nivel: ${nivelLabel} — Promedio ponderado de 6 métricas`,
+                      'Gauge',
+                      nivelColor,
+                      'doughnut',
+                      d.labels,
+                      d.data,
+                      nivelColor,
+                    ));
+                  }}
+                  className="group text-left bg-[var(--bg-card)] p-8 rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm hover:shadow-xl hover:shadow-black/10 hover:-translate-y-1 transition-all duration-300 active:scale-[0.98]"
+                >
+                  <div className="flex items-center justify-between w-full mb-2">
+                    <span className="text-xs font-bold uppercase tracking-wider" style={{ color: nivelColor }}>Medida de Desempeño</span>
+                    <span
+                      className="text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider"
+                      style={{ backgroundColor: `${nivelColor}18`, color: nivelColor }}
+                    >
+                      {nivelLabel}
+                    </span>
+                  </div>
+                  <div className="relative w-full max-w-[200px] mx-auto mt-4 mb-2">
+                    <DesempenoGauge score={d.score} />
+                    <div className="absolute inset-0 flex flex-col items-center justify-end pb-1">
+                      <span className="text-4xl font-black tabular-nums" style={{ color: nivelColor }}>{d.score}</span>
+                      <span className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest">/ 100</span>
+                    </div>
+                  </div>
+                  <p className="text-xs text-[var(--text-secondary)] mt-3 text-center font-bold">
+                    {d.nivel === 'alto' ? 'Excelente rendimiento general' :
+                     d.nivel === 'bueno' ? 'Buen desempeño, sigue así' :
+                     d.nivel === 'regular' ? 'Hay áreas por mejorar' :
+                     'Revisa tus métricas clave'}
+                  </p>
+                  <div className="mt-4 pt-3 border-t border-[var(--border-subtle)] opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span className="text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest flex items-center gap-1">
+                      <Icon name="ArrowRight" className="w-3 h-3" />
+                      Ver desglose completo
+                    </span>
+                  </div>
+                </button>
+
+                {/* Progress bars por métrica */}
+                <div className="bg-[var(--bg-card)] p-8 rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm">
+                  <div className="flex items-center gap-2 mb-6">
+                    <Icon name="BarChart3" className="w-4 h-4" style={{ color: nivelColor }} />
+                    <span className="text-xs font-black uppercase tracking-wider" style={{ color: nivelColor }}>Desglose por Métrica</span>
+                  </div>
+                  <div className="space-y-4">
+                    {d.metrics.map((m) => {
+                      const barColor = m.score >= 80 ? '#10b981' : m.score >= 50 ? '#0ea5e9' : m.score >= 30 ? '#f59e0b' : '#ef4444';
+                      return (
+                        <div key={m.nombre}>
+                          <div className="flex items-center justify-between mb-1.5">
+                            <span className="text-[11px] font-bold text-[var(--text-primary)]">{m.nombre}</span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-[9px] font-bold text-[var(--text-secondary)]">×{m.peso}%</span>
+                              <span className="text-[11px] font-black tabular-nums" style={{ color: barColor }}>{m.score}</span>
+                            </div>
+                          </div>
+                          <div className="h-2 rounded-full overflow-hidden" style={{ backgroundColor: `${barColor}18` }}>
+                            <div
+                              className="h-full rounded-full transition-all duration-700"
+                              style={{ width: `${m.score}%`, backgroundColor: barColor }}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
       </div>
 
       {/* Modal de detalle de KPI */}
