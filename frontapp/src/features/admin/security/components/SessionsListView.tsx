@@ -105,7 +105,7 @@ export function SessionsListView({ sessions, pagination, loading, error, onRevok
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
                       <div className={`p-1.5 rounded-lg ${session.is_active ? 'bg-emerald-100 dark:bg-emerald-900/20' : 'bg-gray-100 dark:bg-gray-800'}`}>
-                        {session.device === 'iPhone' || session.device === 'Android' || session.device === 'iPad' ? (
+                        {session.is_mobile ? (
                           <Smartphone className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
                         ) : (
                           <Monitor className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
@@ -113,14 +113,23 @@ export function SessionsListView({ sessions, pagination, loading, error, onRevok
                       </div>
                       <div>
                         <p className="text-xs font-bold text-[var(--text-primary)]">{session.device}</p>
-                        <p className="text-[10px] text-[var(--text-muted)]">{session.browser}</p>
+                        <p className="text-[10px] text-[var(--text-muted)]">
+                          {session.platform} &middot; {session.browser} {session.browser_version}
+                        </p>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="font-mono text-xs text-[var(--text-secondary)]">
-                      {session.ip_address || '—'}
-                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-mono text-xs text-[var(--text-secondary)]">
+                        {session.ip_address || '—'}
+                      </span>
+                      {session.country && (
+                        <span className="text-[10px] px-1.5 py-0.5 bg-[var(--bg-secondary)] rounded font-semibold text-[var(--text-muted)] uppercase">
+                          {session.country}
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td className="px-6 py-4">
                     <span className="text-xs text-[var(--text-secondary)]">
