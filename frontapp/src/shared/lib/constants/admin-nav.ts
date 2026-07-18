@@ -96,6 +96,12 @@ export const adminNavigation: PanelNavigation = [
                 href: '/admin/planes',
                 icon: 'Sparkles',
             },
+            {
+                id: 'bioblog',
+                label: 'BioBlog - Aprobaciones',
+                href: '/admin/bioblog',
+                icon: 'BookOpen',
+            },
         ],
     },
 ];
