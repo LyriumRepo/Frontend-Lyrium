@@ -1,1 +1,1 @@
-export type ProtectionRule = Record<string, never>;
+export type { ProtectionRuleItem, ProtectionRuleType, ProtectionRuleStatus, ProtectionRuleSeverity } from '@/shared/lib/api/protectionRuleRepository';

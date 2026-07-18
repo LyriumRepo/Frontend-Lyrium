@@ -1,13 +1,17 @@
 'use client';
 
-import { CheckCircle2, XCircle, AlertTriangle, ArrowRight, RefreshCw, Loader2 } from 'lucide-react';
+import { useState, useCallback } from 'react';
+import { CheckCircle2, XCircle, AlertTriangle, ArrowRight, RefreshCw, Loader2, Mail, Send } from 'lucide-react';
 import type { RpaResult } from '../types/auth';
+
+const LARAVEL_API = process.env.NEXT_PUBLIC_LARAVEL_API_URL || 'http://127.0.0.1:8000/api';
 
 interface ResultadoRegistroProps {
   result: RpaResult;
   onContinue: () => void;
   onRetry: () => void;
   isSubmitting?: boolean;
+  email?: string;
 }
 
 const ESTADO_CONFIG = {
@@ -17,7 +21,7 @@ const ESTADO_CONFIG = {
     text: 'text-emerald-500',
     border: 'border-emerald-500/20',
     title: 'Solicitud Aprobada',
-    subtitle: 'Tu tienda ha sido creada exitosamente',
+    subtitle: 'Tu tienda ha sido creada exitosamente.',
   },
   REVISION: {
     icon: AlertTriangle,
@@ -25,7 +29,7 @@ const ESTADO_CONFIG = {
     text: 'text-amber-500',
     border: 'border-amber-500/20',
     title: 'Solicitud en Revisión',
-    subtitle: 'Se requiere revisión manual por el equipo',
+    subtitle: 'Hemos recibido tu solicitud. El equipo evaluará tu caso.',
   },
   RECHAZADO: {
     icon: XCircle,
@@ -33,26 +37,44 @@ const ESTADO_CONFIG = {
     text: 'text-rose-500',
     border: 'border-rose-500/20',
     title: 'Solicitud Rechazada',
-    subtitle: 'No cumple con los requisitos del marketplace',
+    subtitle: 'No cumple con los requisitos del marketplace.',
   },
 };
 
-const RIESGO_CONFIG = {
-  BAJO: { text: 'text-emerald-500', bg: 'bg-emerald-500/10', label: 'Bajo' },
-  MEDIO: { text: 'text-amber-500', bg: 'bg-amber-500/10', label: 'Medio' },
-  ALTO: { text: 'text-rose-500', bg: 'bg-rose-500/10', label: 'Alto' },
-};
+export function ResultadoRegistro({ result, onContinue, onRetry, isSubmitting, email }: ResultadoRegistroProps) {
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [sendError, setSendError] = useState<string | null>(null);
 
-export function ResultadoRegistro({ result, onContinue, onRetry, isSubmitting }: ResultadoRegistroProps) {
   const config = ESTADO_CONFIG[result.estado];
-  const riesgoKey = result.riesgo.toUpperCase() as keyof typeof RIESGO_CONFIG;
-  const riesgoConfig = RIESGO_CONFIG[riesgoKey];
   const Icon = config.icon;
 
-  const scoreColor =
-    result.score >= 70 ? 'bg-emerald-500'
-    : result.score >= 50 ? 'bg-amber-500'
-    : 'bg-rose-500';
+  const handleSendDiagnostico = useCallback(async () => {
+    setSending(true);
+    setSendError(null);
+    try {
+      const response = await fetch(`${LARAVEL_API}/auth/send-diagnostico`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({
+          application_id: result.application_id,
+          email: email || '',
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Error al enviar');
+      }
+
+      setSent(true);
+    } catch (e: any) {
+      setSendError(e.message || 'No se pudo enviar el diagnóstico.');
+    } finally {
+      setSending(false);
+    }
+  }, [result.application_id, email]);
 
   return (
     <div className="flex flex-col h-full">
@@ -64,54 +86,37 @@ export function ResultadoRegistro({ result, onContinue, onRetry, isSubmitting }:
         <h3 className="text-2xl font-black text-[var(--text-primary)] text-center">
           {config.title}
         </h3>
-        <p className="text-sm text-[var(--text-secondary)] text-center mt-1 mb-8">
+        <p className="text-sm text-[var(--text-secondary)] text-center mt-1 mb-6 max-w-sm">
           {config.subtitle}
         </p>
 
-        <div className="w-full space-y-4 mb-8">
-          <div className="bg-[var(--bg-secondary)] rounded-2xl p-5 border border-[var(--border-subtle)]">
-            <p className="text-[10px] uppercase tracking-widest text-[var(--text-secondary)] font-semibold mb-3">
-              Puntaje de Riesgo
-            </p>
-            <div className="flex items-center gap-4">
-              <span className={`text-4xl font-black tabular-nums ${riesgoConfig.text}`}>
-                {result.score}
-              </span>
-              <div className="flex-1">
-                <div className="h-2 bg-[var(--bg-card)] rounded-full overflow-hidden">
-                  <div
-                    className={`h-full rounded-full transition-all duration-1000 ${scoreColor}`}
-                    style={{ width: `${result.score}%` }}
-                  />
-                </div>
-                <div className="flex justify-between mt-1">
-                  <span className="text-[10px] text-[var(--text-secondary)]">0</span>
-                  <span className="text-[10px] text-[var(--text-secondary)]">100</span>
-                </div>
-              </div>
-              <span className={`text-sm font-bold px-3 py-1 rounded-full ${riesgoConfig.bg} ${riesgoConfig.text}`}>
-                {riesgoConfig.label}
-              </span>
-            </div>
+        {sendError && (
+          <div className="w-full mb-4 p-3 bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800 rounded-xl text-rose-600 dark:text-rose-400 text-sm text-center">
+            {sendError}
           </div>
+        )}
 
-          <div className="bg-[var(--bg-secondary)] rounded-2xl p-5 border border-[var(--border-subtle)]">
-            <p className="text-[10px] uppercase tracking-widest text-[var(--text-secondary)] font-semibold mb-3">
-              Diagnóstico
-            </p>
-            <ul className="space-y-2">
-              {result.diagnostico.map((item, i) => (
-                <li key={i} className="flex items-start gap-2 text-sm text-[var(--text-primary)]">
-                  <span className={`mt-1.5 w-1.5 h-1.5 rounded-full shrink-0 ${
-                    result.estado === 'ACEPTADO' ? 'bg-emerald-500' :
-                    result.estado === 'RECHAZADO' ? 'bg-rose-500' : 'bg-amber-500'
-                  }`} />
-                  {item}
-                </li>
-              ))}
-            </ul>
+        {sent && (
+          <div className="w-full mb-4 p-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl text-emerald-600 dark:text-emerald-400 text-sm text-center flex items-center justify-center gap-2">
+            <Mail className="w-4 h-4" />
+            Diagnóstico enviado a tu correo
           </div>
-        </div>
+        )}
+
+        <button
+          type="button"
+          onClick={handleSendDiagnostico}
+          disabled={sending || sent}
+          className="w-full mb-6 py-3 flex items-center justify-center gap-2 rounded-xl border-2 border-teal-500/30 dark:border-teal-400/20 text-teal-600 dark:text-teal-400 text-sm font-bold hover:bg-teal-50 dark:hover:bg-teal-500/5 transition disabled:opacity-50"
+        >
+          {sending ? (
+            <><Loader2 className="w-4 h-4 animate-spin" /> Enviando...</>
+          ) : sent ? (
+            <><Mail className="w-4 h-4" /> Enviado</>
+          ) : (
+            <><Send className="w-4 h-4" /> Enviar diagnóstico a mi correo</>
+          )}
+        </button>
 
         <div className="w-full space-y-3">
           {result.estado === 'ACEPTADO' && (
@@ -124,7 +129,7 @@ export function ResultadoRegistro({ result, onContinue, onRetry, isSubmitting }:
               {isSubmitting ? (
                 <><Loader2 className="w-5 h-5 animate-spin" /> Procesando...</>
               ) : (
-                <><span>Ir a mi tienda</span> <ArrowRight className="w-5 h-5" /></>
+                <><ArrowRight className="w-5 h-5" /> <span>Volver al inicio</span></>
               )}
             </button>
           )}

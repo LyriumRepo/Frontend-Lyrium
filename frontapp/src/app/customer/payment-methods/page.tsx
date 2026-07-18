@@ -15,10 +15,11 @@ export default function CustomerPaymentMethodsPage() {
   const [methods, setMethods] = useState<PaymentMethod[]>([]);
   const [fetching, setFetching] = useState(true);
   const [showTokenizeModal, setShowTokenizeModal] = useState(false);
-  const [activeTab, setActiveTab] = useState<'pagos' | 'facturacion'>('pagos');
   const [editingMethod, setEditingMethod] = useState<PaymentMethod | null>(null);
   const [creatingMethod, setCreatingMethod] = useState<'yape' | 'plin' | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
+  const [saveError, setSaveError] = useState('');
+  const [actionError, setActionError] = useState('');
 
   const [formData, setFormData] = useState<Partial<PaymentMethod>>({
     tipo_metodo: undefined,
@@ -61,6 +62,7 @@ export default function CustomerPaymentMethodsPage() {
 
   const openEditModal = (method: PaymentMethod) => {
     setEditingMethod(method);
+    setSaveError('');
     setFormData({
       tipo_metodo: method.tipo_metodo,
       documento: method.tipo_metodo === 'tarjeta' ? '' : method.documento,
@@ -71,7 +73,6 @@ export default function CustomerPaymentMethodsPage() {
       razon_social: method.razon_social,
       direccion_fiscal: method.direccion_fiscal,
     });
-    setActiveTab('pagos');
   };
 
   const deleteMethod = async (id: number) => {
@@ -81,12 +82,14 @@ export default function CustomerPaymentMethodsPage() {
       setMethods(prev => prev.filter(m => m.id !== id));
     } catch (err) {
       console.error('Error al eliminar:', err);
+      setActionError('No se pudo eliminar el método de pago. Intenta nuevamente.');
     }
   };
 
   const openAddYapePlin = (tipo: 'yape' | 'plin') => {
     setCreatingMethod(tipo);
     setEditingMethod(null);
+    setSaveError('');
     setFormData({
       tipo_metodo: tipo,
       documento: '',
@@ -118,8 +121,10 @@ export default function CustomerPaymentMethodsPage() {
       }
       setEditingMethod(null);
       setCreatingMethod(null);
+      setSaveError('');
     } catch (err) {
       console.error('Error al guardar:', err);
+      setSaveError('Ocurrió un error al guardar. Intenta nuevamente.');
     }
   };
 
@@ -144,8 +149,10 @@ export default function CustomerPaymentMethodsPage() {
         setMethods(prev => [...prev, created]);
       }
       setEditingMethod(null);
+      setSaveError('');
     } catch (err) {
       console.error('Error al guardar datos fiscales:', err);
+      setSaveError('Ocurrió un error al guardar los datos fiscales. Intenta nuevamente.');
     }
   };
 
@@ -196,7 +203,7 @@ export default function CustomerPaymentMethodsPage() {
               className={`bg-[var(--bg-card)] rounded-[2.5rem] shadow-2xl overflow-hidden group/card hover:-translate-y-2 transition-all duration-500 ${method.is_default ? 'bg-gradient-to-br from-white to-sky-50/30 dark:from-[var(--bg-card)] dark:to-[var(--bg-muted)]' : ''}`}
             >
               <div className={`h-2 bg-gradient-to-r ${styles.grad}`} />
-              <div className="p-8">
+              <div className="p-5 md:p-8">
                 <div className="flex items-start justify-between mb-8">
                   <div className="w-14 h-14 bg-sky-50 dark:bg-[var(--bg-muted)] rounded-2xl flex items-center justify-center border border-sky-100 dark:border-[var(--border-subtle)] group-hover/card:scale-110 transition-transform duration-500">
                     <Icon name={styles.icon} className={`w-7 h-7 ${styles.color}`} />
@@ -355,14 +362,14 @@ export default function CustomerPaymentMethodsPage() {
       {(editingMethod && editingMethod.tipo_metodo !== 'tarjeta' || creatingMethod) && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[60] flex items-center justify-center p-4" onClick={() => { setEditingMethod(null); setCreatingMethod(null); }} onKeyDown={(e) => { if (e.key === 'Escape') { setEditingMethod(null); setCreatingMethod(null); } }} role="dialog" aria-modal="true" tabIndex={-1}>
           <div
-            className="bg-white dark:bg-[var(--bg-secondary)] rounded-[3.5rem] max-w-xl w-full max-h-[90vh] overflow-hidden shadow-2xl"
+            className="bg-white dark:bg-[var(--bg-secondary)] rounded-[3.5rem] max-w-xl w-full overflow-hidden shadow-2xl"
             onClick={(e) => e.stopPropagation()}
             onKeyDown={(e) => e.stopPropagation()}
             role="dialog"
             aria-modal="true"
             tabIndex={-1}
           >
-            <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-8 text-white relative">
+            <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-6 md:p-8 text-white relative">
               <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl" />
               <div className="relative z-10 flex items-center justify-between">
                 <div className="flex items-center gap-4">
@@ -375,15 +382,15 @@ export default function CustomerPaymentMethodsPage() {
                         ? `Editar ${editingMethod.tipo_metodo === 'yape' ? 'Yape' : 'Plin'}`
                         : `Nuevo ${creatingMethod === 'yape' ? 'Yape' : 'Plin'}`}
                     </h3>
-                    <p className="text-[10px] font-bold text-sky-100 uppercase tracking-[0.2em]">Configuración</p>
+                    <p className="text-[10px] font-bold text-sky-100 uppercase tracking-wide">Configuración</p>
                   </div>
                 </div>
-                <button onClick={() => { setEditingMethod(null); setCreatingMethod(null); }} className="w-10 h-10 rounded-full bg-black/10 flex items-center justify-center hover:bg-black/20">
+                <button onClick={() => { setEditingMethod(null); setCreatingMethod(null); setSaveError(''); }} className="w-10 h-10 rounded-full bg-black/10 flex items-center justify-center hover:bg-black/20">
                   <Icon name="X" className="w-5 h-5 text-white" />
                 </button>
               </div>
             </div>
-            <div className="p-10 overflow-y-auto max-h-[calc(90vh-200px)]">
+            <div className="p-5 md:p-10 overflow-y-auto scrollbar-none max-h-[calc(90vh-200px)]">
               <form onSubmit={handleSubmitYapePlin} className="space-y-6">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-gray-400 dark:text-gray-400 uppercase">Número de Celular</label>
@@ -421,22 +428,38 @@ export default function CustomerPaymentMethodsPage() {
                   </label>
                 </div>
                 <div className="flex gap-4 pt-4">
+                  {saveError && (
+                    <div className="w-full px-4 py-3 rounded-2xl bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800 flex items-center gap-2">
+                      <Icon name="AlertCircle" className="w-4 h-4 text-rose-500 shrink-0" />
+                      <p className="text-xs font-bold text-rose-700 dark:text-rose-400">{saveError}</p>
+                    </div>
+                  )}
                   <button
                     type="button"
-                    onClick={() => { setEditingMethod(null); setCreatingMethod(null); }}
-                    className="flex-1 px-8 py-4 rounded-2xl bg-gray-100 dark:bg-[var(--bg-muted)] text-gray-600 dark:text-[var(--text-primary)] font-black text-xs uppercase tracking-widest hover:bg-gray-200 dark:hover:bg-[#2A3F33]"
+                    onClick={() => { setEditingMethod(null); setCreatingMethod(null); setSaveError(''); }}
+                    className="flex-1 px-4 py-3 rounded-2xl bg-gray-100 dark:bg-[var(--bg-muted)] text-gray-600 dark:text-[var(--text-primary)] font-black text-xs uppercase tracking-wide hover:bg-gray-200 dark:hover:bg-[#2A3F33]"
                   >
                     Cancelar
                   </button>
                   <button
                     type="submit"
-                    className="flex-[2] px-8 py-4 rounded-2xl bg-gradient-to-r from-sky-500 to-sky-600 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] text-white font-black text-xs uppercase tracking-[0.2em] hover:shadow-lg"
+                    className="flex-[2] px-4 py-3 rounded-2xl bg-gradient-to-r from-sky-500 to-sky-600 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] text-white font-black text-xs uppercase tracking-wide hover:shadow-lg"
                   >
                     Guardar
                   </button>
                 </div>
               </form>
             </div>
+          </div>
+        </div>
+      )}
+
+      {actionError && (
+        <div className="fixed bottom-6 right-6 p-4 rounded-2xl bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800 shadow-2xl flex items-start gap-3 z-50 animate-fadeIn">
+          <Icon name="AlertCircle" className="w-5 h-5 text-rose-500 shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-semibold text-rose-700 dark:text-rose-400">{actionError}</p>
+            <button onClick={() => setActionError('')} className="text-[10px] font-bold text-rose-500 hover:underline mt-1">Cerrar</button>
           </div>
         </div>
       )}

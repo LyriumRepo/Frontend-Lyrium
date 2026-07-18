@@ -191,11 +191,10 @@ export function ForumClient() {
 
       {/* View Topic Modal */}
       {viewingTopic && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" onClick={() => setViewingTopic(null)} onKeyDown={(e) => { if (e.key === 'Escape') setViewingTopic(null); }} role="dialog" aria-modal="true" tabIndex={-1}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" onClick={() => setViewingTopic(null)}>
           <div
             className="bg-white dark:bg-[var(--bg-secondary)] rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 w-full max-w-2xl max-h-[90vh] overflow-y-auto"
             onClick={e => e.stopPropagation()}
-            onKeyDown={e => e.stopPropagation()}
           >
             {/* Hero */}
             <div className="relative h-48 md:h-56 rounded-t-3xl overflow-hidden">
@@ -284,8 +283,8 @@ export function ForumClient() {
       )}
 
       {showCreator && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 backdrop-blur-sm pt-10 pb-10 overflow-y-auto" onClick={() => setShowCreator(false)} onKeyDown={(e) => { if (e.key === 'Escape') setShowCreator(false); }} role="dialog" aria-modal="true" tabIndex={-1}>
-          <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 w-full max-w-lg mx-4 flex flex-col max-h-[85vh]" onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 backdrop-blur-sm pt-10 pb-10 overflow-y-auto" onClick={() => setShowCreator(false)}>
+          <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 w-full max-w-lg mx-4 flex flex-col max-h-[85vh]" onClick={e => e.stopPropagation()}>
             <div className="p-6 space-y-4 overflow-y-auto">
               <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200">Crear Tema</h3>
 
@@ -328,8 +327,8 @@ export function ForumClient() {
       )}
 
       {editingTopic && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 backdrop-blur-sm pt-10 pb-10 overflow-y-auto" onClick={() => setEditingTopic(null)} onKeyDown={(e) => { if (e.key === 'Escape') setEditingTopic(null); }} role="dialog" aria-modal="true" tabIndex={-1}>
-          <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 w-full max-w-lg mx-4 flex flex-col max-h-[85vh]" onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 backdrop-blur-sm pt-10 pb-10 overflow-y-auto" onClick={() => setEditingTopic(null)}>
+          <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 w-full max-w-lg mx-4 flex flex-col max-h-[85vh]" onClick={e => e.stopPropagation()}>
             <div className="p-6 space-y-4 overflow-y-auto">
               <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200">Editar Tema</h3>
 

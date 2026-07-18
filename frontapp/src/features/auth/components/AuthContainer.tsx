@@ -6,6 +6,8 @@ import IntroCover from '@/components/ui/IntroCover';
 import { UserTypeToggle } from './UserTypeToggle';
 import { LoginPanel } from './LoginPanel';
 import { RegisterPanel } from './RegisterPanel';
+import { RegistroLoadingModal } from './RegistroLoadingModal';
+import { ResultadoRegistro } from './ResultadoRegistro';
 import { useAuthForm } from '../hooks/useAuthForm';
 import type { LoginFormData, RegisterFormData, UserType } from '../types/auth';
 
@@ -16,16 +18,20 @@ interface AuthContainerProps {
 export function AuthContainer({ onSuccess }: AuthContainerProps) {
     const [showIntro, setShowIntro] = useState(true);
     const router = useRouter();
-    
-    const { 
-        mode, 
-        userType, 
-        formError, 
-        formSuccess, 
-        setUserType, 
+
+    const {
+        mode,
+        userType,
+        formError,
+        formSuccess,
+        registroStep,
+        rpaResult,
+        rpaStep,
+        setUserType,
         setFormError,
         setFormSuccess,
         toggleMode,
+        resetRegistro,
         login,
         register,
     } = useAuthForm();
@@ -54,12 +60,12 @@ export function AuthContainer({ onSuccess }: AuthContainerProps) {
             if (result.success && result.requiresVerification && result.email) {
                 const otpUrl = `/auth/verify-otp?email=${encodeURIComponent(result.email)}`;
                 router.push(otpUrl);
-                // Fallback: si router.push no navega en 2s, forzar con window.location
                 setTimeout(() => {
                     if (window.location.pathname !== '/auth/verify-otp') {
                         window.location.href = otpUrl;
                     }
                 }, 2000);
+                setIsSubmitting(false);
                 return result;
             }
 
@@ -71,16 +77,24 @@ export function AuthContainer({ onSuccess }: AuthContainerProps) {
         }
     }, [register, router]);
 
+    const handleContinue = useCallback(() => {
+        router.push('/login');
+    }, [router]);
+
+    const handleRetry = useCallback(() => {
+        resetRegistro();
+    }, [resetRegistro]);
+
     if (showIntro) {
         return (
             <IntroCover
                 title="Tu marketplace de productos naturales"
-                subtitle="Productos naturales para una vida más saludable"
+                subtitle="Únete a la comunidad que está transformando el comercio saludable"
                 icon="ShoppingBag"
                 buttonText="Entrar"
                 onEnter={handleEnterPortal}
                 autoHideAfter={0}
-                backgroundImage="/img/intro/contactanos.jpg"
+                backgroundImage="/img/intro/tienda2.png"
             />
         );
     }
@@ -88,26 +102,26 @@ export function AuthContainer({ onSuccess }: AuthContainerProps) {
     const isRegister = mode === 'register';
 
     return (
-        <div className="flex-1 flex items-start sm:items-center justify-center p-3 pt-6 sm:p-4 bg-[#F8F9FA] dark:bg-[var(--bg-primary)]">
-            <div className="relative w-full max-w-[1200px] sm:min-h-[650px] bg-white dark:bg-[var(--bg-secondary)] rounded-[20px] sm:rounded-[30px] shadow-[0_40px_100px_rgba(0,0,0,0.1)] overflow-hidden flex">
+        <div className="min-h-screen bg-[#F8F9FA] dark:bg-[var(--bg-primary)] flex items-center justify-center p-4">
+            <div className="relative w-full max-w-[1200px] min-h-[650px] bg-white dark:bg-[var(--bg-secondary)] rounded-[30px] shadow-[0_40px_100px_rgba(0,0,0,0.1)] overflow-hidden flex">
 
-                {/* Left Side Panel - oculto en mobile, visible en sm+ */}
+                {/* Left Side Panel */}
                 <div
-                    className={`hidden sm:flex absolute top-0 left-0 h-full w-[40%]
+                    className={`absolute top-0 left-0 h-full w-[40%]
                     bg-[linear-gradient(to_bottom_right,rgba(14,165,233,0.9),rgba(132,204,22,0.9))]
                     dark:bg-[linear-gradient(to_bottom_right,var(--brand-green),var(--icons-green),var(--brand-green-hover))]
-                    p-10 flex-col justify-center gap-16 text-white z-20 rounded-r-[20px]`}
+                    p-10 flex flex-col justify-between text-white z-20 rounded-r-[20px]`}
                 >
-                    <img src="/img/intro/Flor6.png" alt="decoración" className="absolute -bottom-20 -left-80 w-[700px] max-w-none opacity-60 mix-blend-overlay pointer-events-none"/>
+                    <img src="/img/intro/Flor6.png" alt="" className="absolute -bottom-20 -left-80 w-[700px] max-w-none opacity-60 mix-blend-overlay pointer-events-none" />
 
                     <div className="absolute inset-0 opacity-30">
                         <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
                             <defs>
                                 <pattern id="gridAuth" width="20" height="20" patternUnits="userSpaceOnUse">
-                                    <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="1"/>
+                                    <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
                                 </pattern>
                             </defs>
-                            <rect width="100%" height="100%" fill="url(#gridAuth)"/>
+                            <rect width="100%" height="100%" fill="url(#gridAuth)" />
                         </svg>
                     </div>
 
@@ -118,7 +132,7 @@ export function AuthContainer({ onSuccess }: AuthContainerProps) {
                                     {userType === 'vendedor' ? 'Haz crecer tu marca con nosotros.' : 'Únete a Lyrium'}
                                 </h2>
                                 <p className="text-white/95 text-center max-w-[300px] mx-auto">
-                                    {userType === 'vendedor' 
+                                    {userType === 'vendedor'
                                         ? 'Únete a la comunidad de vendedores más grande y gestiona tus pedidos en un solo lugar.'
                                         : 'Crea tu cuenta y descubre los mejores productos naturales y saludables.'}
                                 </p>
@@ -138,7 +152,7 @@ export function AuthContainer({ onSuccess }: AuthContainerProps) {
                     </div>
 
                     <div className="relative z-10">
-                        <p className="text-sm mb-4 text-center text-white font-medium tracking-wide dark:[text-shadow:0_1px_2px_rgba(0,0,0,0.9),0_4px_10px_rgba(0,0,0,0.85),0_0px_25px_rgba(0,0,0,0.7)]">
+                        <p className="text-sm mb-4 text-white font-medium tracking-wide dark:[text-shadow:0_1px_2px_rgba(0,0,0,0.9),0_4px_10px_rgba(0,0,0,0.85),0_0px_25px_rgba(0,0,0,0.7)]">
                             {isRegister ? '¿Ya tienes cuenta?' : (userType === 'vendedor' ? '¿Ya eres parte de Lyrium como vendedor?' : '¿Ya tienes una cuenta?')}
                         </p>
                         <button
@@ -151,42 +165,18 @@ export function AuthContainer({ onSuccess }: AuthContainerProps) {
                     </div>
                 </div>
 
-                {/* Right Side - Forms */}
-                <div className="relative w-full sm:ml-auto sm:w-[60%] p-4 sm:p-10 flex flex-col">
-                    {/* Mobile header — visible only on small screens */}
-                    <div className="sm:hidden relative -mx-4 -mt-4 mb-6 px-4 pt-10 pb-6 bg-[linear-gradient(to_bottom_right,rgba(14,165,233,0.9),rgba(132,204,22,0.9))] dark:bg-[linear-gradient(to_bottom_right,var(--brand-green),var(--icons-green),var(--brand-green-hover))] text-white text-center overflow-hidden rounded-b-[20px]">
-                        <img src="/img/intro/Flor6.png" alt="decoración" className="absolute -bottom-8 -left-24 w-[350px] max-w-none opacity-40 mix-blend-overlay pointer-events-none" />
-                        <div className="relative z-10">
-                            <h2 className="text-xl font-black mb-2">
-                                {isRegister
-                                    ? (userType === 'vendedor' ? 'Haz crecer tu marca con nosotros.' : 'Únete a Lyrium')
-                                    : (userType === 'vendedor' ? '¡Qué gusto verte de nuevo!' : '¡Bienvenido de nuevo!')}
-                            </h2>
-                            <p className="text-white/90 text-sm max-w-xs mx-auto">
-                                {isRegister
-                                    ? (userType === 'vendedor' ? 'Únete a la comunidad de vendedores más grande y gestiona tus pedidos en un solo lugar.' : 'Crea tu cuenta y descubre los mejores productos naturales y saludables.')
-                                    : (userType === 'vendedor' ? 'Accede a tu panel para revisar tus ventas de hoy y actualizar tu inventario.' : 'Accede a tu cuenta para realizar tus compras y gestionar tus pedidos.')}
-                            </p>
-                            <button
-                                type="button"
-                                onClick={toggleMode}
-                                className="mt-4 py-3 px-6 bg-white text-sky-500 dark:text-[var(--brand-green)] rounded-xl font-bold text-xs uppercase tracking-wider shadow-md"
-                            >
-                                {isRegister ? 'Iniciar Sesión' : (userType === 'vendedor' ? 'Registrarse como vendedor' : 'Crear cuenta')}
-                            </button>
-                        </div>
-                    </div>
-
+                {/* Right Side */}
+                <div className="relative ml-auto w-[60%] p-10 flex flex-col">
                     <UserTypeToggle
                         value={userType}
                         onChange={(type) => {
                             setUserType(type);
                             setFormError(null);
                             setFormSuccess(null);
+                            resetRegistro();
                         }}
                     />
 
-                    {/* Login Panel - only show when NOT register */}
                     {!isRegister && (
                         <div className="flex-1">
                             <LoginPanel
@@ -200,8 +190,7 @@ export function AuthContainer({ onSuccess }: AuthContainerProps) {
                         </div>
                     )}
 
-                    {/* Register Panel - only show when register */}
-                    {isRegister && (
+                    {isRegister && registroStep === 'form' && (
                         <div className="flex-1">
                             <RegisterPanel
                                 userType={userType}
@@ -213,8 +202,25 @@ export function AuthContainer({ onSuccess }: AuthContainerProps) {
                             />
                         </div>
                     )}
+
+                    {isRegister && registroStep === 'result' && rpaResult && (
+                        <div className="flex-1">
+                            <ResultadoRegistro
+                                result={rpaResult}
+                                onContinue={handleContinue}
+                                onRetry={handleRetry}
+                                isSubmitting={isSubmitting}
+                                email={rpaResult?.email || undefined}
+                            />
+                        </div>
+                    )}
                 </div>
             </div>
+
+            <RegistroLoadingModal
+                isOpen={registroStep === 'loading'}
+                currentStep={rpaStep}
+            />
         </div>
     );
 }

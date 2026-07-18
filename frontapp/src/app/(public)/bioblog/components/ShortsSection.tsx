@@ -110,7 +110,7 @@ export default function ShortsSection() {
           </div>
           <h3 className="text-3xl md:text-5xl font-black text-slate-800 dark:text-[var(--text-primary)] mb-6 drop-shadow-sm uppercase">SHORTS</h3>
           <p className="text-slate-600 dark:text-[var(--text-secondary)] text-base md:text-lg leading-relaxed font-light text-center max-w-5xl mx-auto">
-            Contenido rápido y directo: tips, datos curiosos y momentos que no querrás perderte.
+            Contenido rápido y directo. Descubre videos cortos sobre productos ecológicos, tips y más.
           </p>
         </div>
 

@@ -599,7 +599,7 @@ export default function LiriosWalletPageClient() {
                         </p>
                       </div>
                     </div>
-                    <div className="text-right">
+                    <div className="text-right shrink-0">
                       <span
                         className={`text-lg font-black ${
                           tx.type === 'accrue'

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { blogApi } from '@/shared/lib/api/blog';
@@ -20,11 +20,7 @@ interface HeroPost {
 export default function HeroCarousel() {
     const [posts, setPosts] = useState<HeroPost[]>([]);
     const shouldDuplicate = posts.length > 3;
-    const {
-        shift, trackRef, pausedRef, resumeTimerRef, pauseTemporarily,
-        isPaused, togglePause, handleKeyDown,
-        handlePointerDown, handlePointerMove, handlePointerUp,
-    } = useAutoScrollCarousel(shouldDuplicate);
+    const { shift, trackRef, pausedRef, posRef, resumeTimerRef, pauseTemporarily } = useAutoScrollCarousel(shouldDuplicate);
 
     useEffect(() => {
         blogApi.getRecentPosts(4).then((data) => {
@@ -55,22 +51,15 @@ export default function HeroCarousel() {
             <div className="relative group/carousel">
                 <div className="flex items-center justify-between mb-6 px-4">
                     <div />
-                    <button
-                        type="button"
-                        onClick={togglePause}
-                        aria-pressed={isPaused}
-                        aria-label={isPaused ? 'Reanudar carrusel automático' : 'Pausar carrusel automático'}
-                        className="flex items-center gap-2 px-2 py-1 rounded-full hover:bg-sky-50 dark:hover:bg-sky-950/40 transition-colors"
-                    >
-                        {isPaused ? (
-                            <Play className="w-3 h-3 text-sky-600 dark:text-sky-400" />
-                        ) : (
-                            <Pause className="w-3 h-3 text-sky-600 dark:text-sky-400" />
-                        )}
-                        <span className="text-xs font-semibold text-sky-600 dark:text-sky-400 uppercase tracking-wider">
-                            {isPaused ? 'En pausa' : 'Auto-scroll'}
+                    <div className="flex items-center gap-2">
+                        <span className="relative flex h-2.5 w-2.5">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75" />
+                            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-sky-500" />
                         </span>
-                    </button>
+                        <span className="text-xs font-semibold text-sky-600 dark:text-sky-400 uppercase tracking-wider">
+                            Auto-scroll
+                        </span>
+                    </div>
                 </div>
 
                 <button
@@ -83,8 +72,8 @@ export default function HeroCarousel() {
                         text-sky-600 dark:text-sky-400
                         hover:bg-sky-50 dark:hover:bg-sky-950/40 hover:border-sky-400
                         transition-all duration-200
-                        opacity-0 group-hover/carousel:opacity-100 focus-visible:opacity-100
-                        -translate-x-1 group-hover/carousel:translate-x-0 focus-visible:translate-x-0"
+                        opacity-0 group-hover/carousel:opacity-100
+                        -translate-x-1 group-hover/carousel:translate-x-0"
                 >
                     <ChevronLeft className="w-5 h-5" />
                 </button>
@@ -98,31 +87,22 @@ export default function HeroCarousel() {
                         text-sky-600 dark:text-sky-400
                         hover:bg-sky-50 dark:hover:bg-sky-950/40 hover:border-sky-400
                         transition-all duration-200
-                        opacity-0 group-hover/carousel:opacity-100 focus-visible:opacity-100
-                        translate-x-1 group-hover/carousel:translate-x-0 focus-visible:translate-x-0"
+                        opacity-0 group-hover/carousel:opacity-100
+                        translate-x-1 group-hover/carousel:translate-x-0"
                 >
                     <ChevronRight className="w-5 h-5" />
                 </button>
 
                 <div
-                    role="region"
-                    aria-roledescription="carousel"
-                    aria-label="Artículos destacados del blog"
-                    tabIndex={0}
-                    onKeyDown={handleKeyDown}
-                    className="overflow-hidden relative focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 rounded-[3rem] cursor-grab active:cursor-grabbing"
+                    className="overflow-hidden relative"
                     style={{
                         maskImage: 'linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)',
                         WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)',
                     }}
                     onMouseEnter={() => { pausedRef.current = true; if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current); }}
-                    onMouseLeave={() => { if (!isPaused) pausedRef.current = false; }}
+                    onMouseLeave={() => { pausedRef.current = false; }}
                     onTouchStart={() => pauseTemporarily()}
                     onTouchEnd={() => {}}
-                    onPointerDown={handlePointerDown}
-                    onPointerMove={handlePointerMove}
-                    onPointerUp={handlePointerUp}
-                    onPointerCancel={handlePointerUp}
                 >
                     <div
                         ref={trackRef}

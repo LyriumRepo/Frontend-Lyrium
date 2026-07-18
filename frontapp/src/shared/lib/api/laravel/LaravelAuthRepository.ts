@@ -53,7 +53,8 @@ export class LaravelAuthRepository implements IAuthRepository {
             });
 
             if (!response.ok) {
-                return { success: false, error: 'Credenciales inválidas' };
+                const body = await response.json().catch(() => ({}));
+                return { success: false, error: body.error || body.message || 'Credenciales inválidas' };
             }
 
             const data = await response.json();
