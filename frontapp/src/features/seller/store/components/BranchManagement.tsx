@@ -7,6 +7,7 @@ import BranchModal from './BranchModal';
 import { Plus, Store } from 'lucide-react';
 import { useConfirmDialog } from '@/components/ui/confirm-dialog';
 import { usePlanCapabilities } from '@/shared/lib/hooks/usePlanCapabilities';
+import { useToast } from '@/shared/lib/context/ToastContext';
 import PlanUpgradeMessage from './PlanUpgradeMessage';
 
 interface BranchManagementProps {
@@ -18,6 +19,7 @@ export default function BranchManagement({ branches, setBranches }: BranchManage
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingBranch, setEditingBranch] = useState<Branch | null>(null);
     const { confirm, ConfirmDialog } = useConfirmDialog();
+    const { showToast } = useToast();
     const { planSlug, limit } = usePlanCapabilities();
     const maxBranches = limit('max_branches');
     const atLimit = planSlug === 'emprende' && branches.length >= maxBranches;
@@ -48,6 +50,11 @@ export default function BranchManagement({ branches, setBranches }: BranchManage
     };
 
     const handleDelete = async (id: string) => {
+        if (branches.length <= 1) {
+            showToast('Debes mantener al menos una sucursal registrada. No puedes eliminar la única sucursal de tu tienda.', 'error');
+            return;
+        }
+
         const confirmed = await confirm(
             'Eliminar sucursal',
             '¿Estás seguro de eliminar esta sucursal estratégica?'
@@ -96,6 +103,7 @@ export default function BranchManagement({ branches, setBranches }: BranchManage
                             branch={branch}
                             onEdit={handleOpenModal}
                             onDelete={handleDelete}
+                            disableDelete={branches.length <= 1}
                         />
                     ))}
                     {branches.length === 0 && (

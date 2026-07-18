@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useSellerHelp } from '@/features/seller/help/hooks/useSellerHelp';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import BaseLoading from '@/components/ui/BaseLoading';
@@ -229,18 +230,32 @@ function toUnifiedHelpTicket(ticket: SellerTicket): UnifiedTicket {
 function NewTicketForm({
     onSubmit,
     onCancel,
-    isSubmitting
+    isSubmitting,
+    serverError
 }: {
     onSubmit: (data: { subject: string; description: string; category: string }) => void;
     onCancel: () => void;
     isSubmitting: boolean;
+    serverError?: string | null;
 }) {
     const [subject, setSubject] = useState('');
     const [description, setDescription] = useState('');
     const [category, setCategory] = useState('positivo');
+    const [fieldErrors, setFieldErrors] = useState<{ subject?: string; description?: string }>({});
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+
+        const errors: { subject?: string; description?: string } = {};
+        if (subject.trim().length < 5) {
+            errors.subject = 'El asunto debe tener al menos 5 caracteres.';
+        }
+        if (description.trim().length < 10) {
+            errors.description = 'El mensaje debe tener al menos 10 caracteres.';
+        }
+        setFieldErrors(errors);
+        if (Object.keys(errors).length > 0) return;
+
         onSubmit({ subject, description, category });
     };
 
@@ -252,6 +267,13 @@ function NewTicketForm({
             </div>
 
             <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-4">
+                {serverError && (
+                    <div className="flex items-start gap-3 p-4 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20">
+                        <Icon name="AlertTriangle" className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
+                        <p className="text-xs font-medium text-red-600 dark:text-red-400 leading-relaxed">{serverError}</p>
+                    </div>
+                )}
+
                 <div>
                     <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-1.5">Categoría</label>
                     <select
@@ -273,23 +295,35 @@ function NewTicketForm({
                     <input
                         type="text"
                         value={subject}
-                        onChange={(e) => setSubject(e.target.value)}
+                        onChange={(e) => {
+                            setSubject(e.target.value);
+                            if (fieldErrors.subject) setFieldErrors((prev) => ({ ...prev, subject: undefined }));
+                        }}
                         placeholder="Describe brevemente el problema"
-                        className="w-full px-4 py-2.5 bg-[var(--bg-secondary)] rounded-xl outline-none text-sm font-medium text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--turquesa-500)]/20 border border-[var(--border-subtle)]"
+                        className={`w-full px-4 py-2.5 bg-[var(--bg-secondary)] rounded-xl outline-none text-sm font-medium text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--turquesa-500)]/20 border ${fieldErrors.subject ? 'border-red-400' : 'border-[var(--border-subtle)]'}`}
                         required
                     />
+                    {fieldErrors.subject && (
+                        <p className="text-[10px] font-bold text-red-500 mt-1">{fieldErrors.subject}</p>
+                    )}
                 </div>
 
                 <div>
                     <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-1.5">Descripción</label>
                     <textarea
                         value={description}
-                        onChange={(e) => setDescription(e.target.value)}
+                        onChange={(e) => {
+                            setDescription(e.target.value);
+                            if (fieldErrors.description) setFieldErrors((prev) => ({ ...prev, description: undefined }));
+                        }}
                         placeholder="Explica detalladamente tu problema..."
                         rows={5}
-                        className="w-full px-4 py-2.5 bg-[var(--bg-secondary)] rounded-xl outline-none text-sm font-medium text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--turquesa-500)]/20 border border-[var(--border-subtle)] resize-none"
+                        className={`w-full px-4 py-2.5 bg-[var(--bg-secondary)] rounded-xl outline-none text-sm font-medium text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--turquesa-500)]/20 border resize-none ${fieldErrors.description ? 'border-red-400' : 'border-[var(--border-subtle)]'}`}
                         required
                     />
+                    {fieldErrors.description && (
+                        <p className="text-[10px] font-bold text-red-500 mt-1">{fieldErrors.description}</p>
+                    )}
                 </div>
 
                 <div className="flex gap-2 pt-4">
@@ -325,11 +359,17 @@ export function HelpPageClient() {
         handleSendMessage,
         handleCreateTicket,
         handleCloseTicket,
-        openTicketsCount
+        openTicketsCount,
+        createError
     } = useSellerHelp();
 
     const [showNewTicketForm, setShowNewTicketForm] = useState(false);
     const [showLegend, setShowLegend] = useState(false);
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
     /** En mobile/tablet: true = muestra lista, false = muestra detalle */
     const [isMobileListVisible, setIsMobileListVisible] = useState(true);
 
@@ -414,9 +454,13 @@ export function HelpPageClient() {
                     <div className="flex-1 min-w-0">
                         {showNewTicketForm ? (
                             <NewTicketForm
-                                onSubmit={(data) => { handleCreateTicket(data); setShowNewTicketForm(false); }}
+                                onSubmit={async (data) => {
+                                    const success = await handleCreateTicket(data);
+                                    if (success) setShowNewTicketForm(false);
+                                }}
                                 onCancel={() => setShowNewTicketForm(false)}
                                 isSubmitting={isSending}
+                                serverError={createError}
                             />
                         ) : activeTicket ? (
                             <ChatView
@@ -460,13 +504,16 @@ export function HelpPageClient() {
                 <div className={`lg:hidden h-full ${(!isMobileListVisible || showNewTicketForm) ? 'block' : 'hidden'}`}>
                     {showNewTicketForm ? (
                         <NewTicketForm
-                            onSubmit={(data) => {
-                                handleCreateTicket(data);
-                                setShowNewTicketForm(false);
-                                setIsMobileListVisible(true);
+                            onSubmit={async (data) => {
+                                const success = await handleCreateTicket(data);
+                                if (success) {
+                                    setShowNewTicketForm(false);
+                                    setIsMobileListVisible(true);
+                                }
                             }}
                             onCancel={() => { setShowNewTicketForm(false); setIsMobileListVisible(true); }}
                             isSubmitting={isSending}
+                            serverError={createError}
                         />
                     ) : activeTicket ? (
                         <ChatView
@@ -483,7 +530,7 @@ export function HelpPageClient() {
 
             </div>
 
-            {showLegend && (
+            {showLegend && mounted && document.getElementById('modal-root') && createPortal(
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4" onClick={() => setShowLegend(false)}>
                     <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-[3rem] max-w-lg w-full shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
                         <div className="bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--turquesa-500)]/70 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-8 text-white relative">
@@ -527,7 +574,8 @@ export function HelpPageClient() {
                             </div>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.getElementById('modal-root')!
             )}
         </div>
     );

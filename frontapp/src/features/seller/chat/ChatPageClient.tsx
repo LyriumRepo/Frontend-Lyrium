@@ -32,6 +32,18 @@ function NewChatForm({
     const [category, setCategory] = useState<ChatCategory>('informacion');
     const [subject, setSubject] = useState('');
 
+    // Las tiendas se cargan de forma async en el hook padre, así que si el
+    // formulario se monta antes de que lleguen (o el seller solo tiene una),
+    // seleccionamos automáticamente en vez de dejar storeId vacío para siempre.
+    useEffect(() => {
+        if (!storeId && stores.length > 0) {
+            setStoreId(stores[0].id);
+        }
+    }, [stores, storeId]);
+
+    const hasNoStore = stores.length === 0;
+    const hasSingleStore = stores.length === 1;
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!subject.trim() || !storeId) return;
@@ -46,20 +58,28 @@ function NewChatForm({
             </div>
 
             <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-4">
-                <div>
-                    <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-1.5">Tu Tienda</label>
-                    <select
-                        value={storeId}
-                        onChange={(e) => setStoreId(e.target.value)}
-                        className="w-full px-4 py-2.5 bg-[var(--bg-secondary)] rounded-xl outline-none text-sm font-medium text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--turquesa-500)]/20 border border-[var(--border-subtle)]"
-                        required
-                    >
-                        {stores.length === 0 && <option value="">Sin tiendas</option>}
-                        {stores.map(s => (
-                            <option key={s.id} value={s.id}>{s.name}</option>
-                        ))}
-                    </select>
-                </div>
+                {hasNoStore ? (
+                    <div className="flex items-start gap-3 p-4 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20">
+                        <Icon name="AlertTriangle" className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
+                        <p className="text-xs font-medium text-red-600 dark:text-red-400 leading-relaxed">
+                            Tu cuenta no tiene una tienda asociada, por lo que no puedes iniciar chats todavía. Contacta a soporte para resolverlo.
+                        </p>
+                    </div>
+                ) : !hasSingleStore ? (
+                    <div>
+                        <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-1.5">Tu Tienda</label>
+                        <select
+                            value={storeId}
+                            onChange={(e) => setStoreId(e.target.value)}
+                            className="w-full px-4 py-2.5 bg-[var(--bg-secondary)] rounded-xl outline-none text-sm font-medium text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--turquesa-500)]/20 border border-[var(--border-subtle)]"
+                            required
+                        >
+                            {stores.map(s => (
+                                <option key={s.id} value={s.id}>{s.name}</option>
+                            ))}
+                        </select>
+                    </div>
+                ) : null}
 
                 <div>
                     <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-1.5">Cliente</label>
@@ -114,7 +134,7 @@ function NewChatForm({
                     </button>
                     <button
                         type="submit"
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || hasNoStore}
                         className="flex-1 px-4 py-2.5 bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--verde-500)] text-white rounded-xl font-bold text-xs uppercase tracking-wider hover:opacity-90 transition-all disabled:opacity-50 shadow-lg shadow-[var(--turquesa-500)]/20"
                     >
                         {isSubmitting ? 'Iniciando...' : 'Iniciar Chat'}

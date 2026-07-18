@@ -1,5 +1,5 @@
 export type TicketStatus = 'abierto' | 'proceso' | 'resuelto' | 'cerrado' | 'reabierto';
-export type TicketType = 'tech' | 'admin' | 'info' | 'comment' | 'followup' | 'payments' | 'documentation';
+export type TicketType = 'positivo' | 'negativo' | 'informacion' | 'tecnico' | 'critico';
 export type TicketPriority = 'baja' | 'media' | 'alta' | 'critica';
 
 export interface TicketMessage {
@@ -78,7 +78,6 @@ export interface CreateTicketPayload {
     asunto: string;
     mensaje?: string;
     tipo_ticket: TicketType;
-    criticidad: TicketPriority;
     adjuntos?: File[];
 }
 
@@ -118,13 +117,11 @@ export interface UnifiedTicketListItem {
 }
 
 export const TICKET_TYPE_LABELS: Record<TicketType, string> = {
-    tech: 'Técnico',
-    admin: 'Administrativo',
-    info: 'Información',
-    comment: 'Comentario',
-    followup: 'Seguimiento',
-    payments: 'Pagos',
-    documentation: 'Documentación',
+    positivo: 'Comentario Positivo',
+    negativo: 'Comentario Negativo',
+    informacion: 'Solicitud de Información',
+    tecnico: 'Soporte Técnico',
+    critico: 'Soporte Técnico Crítico',
 };
 
 export const TICKET_PRIORITY_LABELS: Record<TicketPriority, string> = {

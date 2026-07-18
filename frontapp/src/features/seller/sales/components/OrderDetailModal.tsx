@@ -331,19 +331,19 @@ export default function OrderDetailModal({
     };
 
     const footer = (
-        <div className="flex flex-col sm:flex-row justify-between items-center bg-sky-500 p-8 rounded-[3rem] shadow-2xl w-full">
-            <div className="mb-4 sm:mb-0 text-center sm:text-left">
+        <div className="flex flex-col items-stretch gap-4 bg-sky-500 p-5 sm:p-8 rounded-[2rem] sm:rounded-[3rem] shadow-2xl w-full">
+            <div className="text-center sm:text-left">
                 <p className="text-[10px] font-black text-sky-200 uppercase tracking-widest mb-1 flex items-center gap-1 justify-center sm:justify-start">
-                    <Icon name="CheckCircle2" className="text-white w-3 h-3" /> Total a Liquidar
+                    <Icon name="CheckCircle2" className="text-white w-3 h-3 flex-shrink-0" /> Total a Liquidar
                 </p>
                 <p className="text-1xl font-black text-white tracking-tighter">
                     S/ {order.total.toLocaleString('es-PE', { minimumFractionDigits: 2 })}
                 </p>
             </div>
-            <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+            <div className="grid grid-cols-2 gap-2.5 sm:gap-3 w-full min-w-0">
                 <BaseButton
                     variant="ghost"
-                    className="flex-1 sm:flex-none !text-white !border-gray-700 hover:!bg-[var(--bg-card)] hover:!text-[var(--text-primary)] shadow-lg"
+                    className="w-full min-w-0 !px-2 sm:!px-4 !text-white !border-gray-700 hover:!bg-[var(--bg-card)] hover:!text-[var(--text-primary)] shadow-lg !text-[11px] sm:!text-sm whitespace-normal !leading-tight"
                     leftIcon="Printer"
                     onClick={() => generateOrderPdf(order)}
                 >
@@ -355,7 +355,7 @@ export default function OrderDetailModal({
                             <BaseButton
                                 onClick={handleAdvance}
                                 isLoading={isAdvancing}
-                                className="flex-1 sm:flex-none !text-white !border-white/20 hover:!bg-white/10 shadow-lg"
+                                className="w-full min-w-0 !px-2 sm:!px-4 !text-white !border-white/20 hover:!bg-white/10 shadow-lg !text-[11px] sm:!text-sm whitespace-normal !leading-tight"
                                 variant="ghost"
                                 leftIcon={productAction.icon}
                             >
@@ -367,7 +367,7 @@ export default function OrderDetailModal({
                             <BaseButton
                                 onClick={handleAdvance}
                                 isLoading={isAdvancing}
-                                className="flex-1 sm:flex-none !text-white !border-emerald-500/30 hover:!bg-white/10 shadow-lg"
+                                className="w-full min-w-0 !px-2 sm:!px-4 !text-white !border-emerald-500/30 hover:!bg-white/10 shadow-lg !text-[11px] sm:!text-sm whitespace-normal !leading-tight"
                                 variant="ghost"
                                 leftIcon={serviceAction.icon}
                             >
@@ -380,7 +380,7 @@ export default function OrderDetailModal({
                         <BaseButton
                             onClick={handleAdvance}
                             isLoading={isAdvancing}
-                            className="flex-1 sm:flex-none !text-white !border-white/20 hover:!bg-white/10 shadow-lg"
+                            className="w-full min-w-0 !px-2 sm:!px-4 !text-white !border-white/20 hover:!bg-white/10 shadow-lg !text-[11px] sm:!text-sm whitespace-normal !leading-tight"
                             variant="ghost"
                             leftIcon={action.icon}
                         >

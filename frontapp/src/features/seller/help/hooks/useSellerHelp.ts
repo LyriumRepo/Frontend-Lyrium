@@ -2,13 +2,12 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useEcho } from '@laravel/echo-react';
 import { SellerTicket, SellerTicketMessage, SellerTicketFilters } from '../types';
 import { ticketApi } from '@/lib/api/ticketRepository';
-import type { Ticket, TicketMessage, TicketPriority } from '@/modules/helpdesk/types';
+import type { Ticket, TicketMessage } from '@/modules/helpdesk/types';
 
 type CreateData = {
   subject: string;
   description: string;
   category: SellerTicket['category'];
-  priority: TicketPriority;
 };
 
 function toSellerTicket(t: Ticket): SellerTicket {
@@ -61,6 +60,7 @@ export function useSellerHelp() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
 
   const fetchTicketDetail = useCallback(async (id: string) => {
     try {
@@ -140,20 +140,25 @@ export function useSellerHelp() {
     }
   }, [activeTicketId, fetchTicketDetail]);
 
-  const handleCreateTicket = useCallback(async (data: CreateData) => {
+  const handleCreateTicket = useCallback(async (data: CreateData): Promise<boolean> => {
     setIsSending(true);
+    setCreateError(null);
     try {
       const created = await ticketApi.seller.create({
         asunto: data.subject,
         mensaje: data.description,
         tipo_ticket: data.category,
-        criticidad: data.priority,
       });
       const mapped = toSellerTicket(created);
       setTickets((prev) => [mapped, ...prev]);
       setActiveTicketId(mapped.id);
-    } catch {
-      // silent
+      return true;
+    } catch (err) {
+      const message = err instanceof Error && err.message
+        ? err.message
+        : 'No se pudo crear el ticket. Intenta nuevamente.';
+      setCreateError(message);
+      return false;
     } finally {
       setIsSending(false);
     }
@@ -184,6 +189,7 @@ export function useSellerHelp() {
     isLoading,
     isSending,
     isClosing,
+    createError,
     filters,
     setFilters,
     handleSendMessage,

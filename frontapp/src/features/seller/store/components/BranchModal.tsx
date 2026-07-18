@@ -51,6 +51,25 @@ export default function BranchModal({ isOpen, onClose, onSave, branch }: BranchM
 
     const districts = selectedProvince?.districts || [];
 
+    // Parses a "HH:MM - HH:MM" string into its two time parts for the time inputs
+    const parseHours = (value: string) => {
+        const match = value.match(/^(\d{2}:\d{2})\s*-\s*(\d{2}:\d{2})$/);
+        if (match) {
+            return { open: match[1], close: match[2] };
+        }
+        return { open: '', close: '' };
+    };
+
+    const [openTime, setOpenTime] = useState('');
+    const [closeTime, setCloseTime] = useState('');
+
+    const updateHours = (open: string, close: string) => {
+        setOpenTime(open);
+        setCloseTime(close);
+        const hours = open && close ? `${open} - ${close}` : '';
+        setFormData(prev => ({ ...prev, hours }));
+    };
+
     useEffect(() => {
         if (branch) {
             setFormData({
@@ -63,6 +82,9 @@ export default function BranchModal({ isOpen, onClose, onSave, branch }: BranchM
                 hours: branch.hours,
                 isPrincipal: branch.isPrincipal
             });
+            const { open, close } = parseHours(branch.hours || '');
+            setOpenTime(open);
+            setCloseTime(close);
             console.log('BRANCH MODAL:', branch);
         } else {
             setFormData({
@@ -75,6 +97,8 @@ export default function BranchModal({ isOpen, onClose, onSave, branch }: BranchM
                 hours: '',
                 isPrincipal: false
             });
+            setOpenTime('');
+            setCloseTime('');
         }
     }, [branch, isOpen]);
 
@@ -229,20 +253,45 @@ export default function BranchModal({ isOpen, onClose, onSave, branch }: BranchM
                         </div>
 
                         <div className="space-y-1.5">
-                            <label htmlFor="branch-hours" className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1">
-                                Ventana de Atención
+                            <label className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1">
+                                Horario de Atención
                             </label>
-                            <div className="relative group">
-                                <Icon name="Clock" className="absolute left-4 top-1/2 -translate-y-1/2 text-sky-500 dark:text-[var(--icons-green)] w-5 h-5 font-bold" />
-                                <input
-                                    id="branch-hours"
-                                    type="text"
-                                    required
-                                    value={formData.hours}
-                                    onChange={e => setFormData({ ...formData, hours: e.target.value })}
-                                    placeholder="Ej. 08:00 - 20:00"
-                                    className="w-full pl-12 pr-4 sm:pr-5 py-3 sm:py-4 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-[1.5rem] font-bold text-[var(--text-primary)] shadow-lg shadow-black/5 focus:ring-4 focus:ring-sky-500/5 transition-all outline-none"
-                                />
+                            <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                                {/* Desde */}
+                                <div className="space-y-1">
+                                    <label htmlFor="branch-hours-open" className="text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1">
+                                        Desde
+                                    </label>
+                                    <div className="relative group">
+                                        <Icon name="Clock" className="absolute left-3 top-1/2 -translate-y-1/2 text-sky-500 dark:text-[var(--icons-green)] w-4 h-4" />
+                                        <input
+                                            id="branch-hours-open"
+                                            type="time"
+                                            required
+                                            value={openTime}
+                                            onChange={e => updateHours(e.target.value, closeTime)}
+                                            className="w-full pl-8 pr-2 py-3 sm:py-4 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-[1.25rem] font-bold text-[13px] sm:text-sm text-[var(--text-primary)] shadow-lg shadow-black/5 focus:ring-4 focus:ring-sky-500/5 transition-all outline-none dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Hasta */}
+                                <div className="space-y-1">
+                                    <label htmlFor="branch-hours-close" className="text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1">
+                                        Hasta
+                                    </label>
+                                    <div className="relative group">
+                                        <Icon name="Clock" className="absolute left-3 top-1/2 -translate-y-1/2 text-sky-500 dark:text-[var(--icons-green)] w-4 h-4" />
+                                        <input
+                                            id="branch-hours-close"
+                                            type="time"
+                                            required
+                                            value={closeTime}
+                                            onChange={e => updateHours(openTime, e.target.value)}
+                                            className="w-full pl-8 pr-2 py-3 sm:py-4 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-[1.25rem] font-bold text-[13px] sm:text-sm text-[var(--text-primary)] shadow-lg shadow-black/5 focus:ring-4 focus:ring-sky-500/5 transition-all outline-none dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+                                        />
+                                    </div>
+                                </div>
                             </div>
                         </div>
 

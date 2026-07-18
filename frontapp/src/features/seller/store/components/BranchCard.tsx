@@ -8,9 +8,10 @@ interface BranchCardProps {
     branch: Branch;
     onEdit: (branch: Branch) => void;
     onDelete: (id: string) => void;
+    disableDelete?: boolean;
 }
 
-export default function BranchCard({ branch, onEdit, onDelete }: BranchCardProps) {
+export default function BranchCard({ branch, onEdit, onDelete, disableDelete = false }: BranchCardProps) {
     return (
         <div className="p-4 sm:p-6 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl sm:rounded-3xl relative group hover:shadow-xl hover:shadow-black/5 transition-all">
             {branch.isPrincipal && (
@@ -50,8 +51,14 @@ export default function BranchCard({ branch, onEdit, onDelete }: BranchCardProps
                     <Icon name="Pencil" className="w-5 h-5" />
                 </button>
                 <button
-                    onClick={() => onDelete(branch.id)}
-                    className="p-2 text-[var(--text-secondary)] hover:text-red-500 transition-colors"
+                    onClick={() => !disableDelete && onDelete(branch.id)}
+                    disabled={disableDelete}
+                    title={disableDelete ? 'Debes mantener al menos una sucursal registrada' : undefined}
+                    className={`p-2 transition-colors ${
+                        disableDelete
+                            ? 'text-[var(--text-secondary)]/30 cursor-not-allowed'
+                            : 'text-[var(--text-secondary)] hover:text-red-500'
+                    }`}
                 >
                     <Icon name="Trash2" className="w-5 h-5" />
                 </button>

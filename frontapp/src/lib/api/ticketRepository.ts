@@ -136,7 +136,6 @@ export const ticketApi = {
                 const form = new FormData();
                 form.append('asunto', payload.asunto);
                 form.append('tipo_ticket', payload.tipo_ticket);
-                form.append('criticidad', payload.criticidad);
                 if (payload.mensaje) form.append('mensaje', payload.mensaje);
                 payload.adjuntos!.forEach((f) => form.append('adjuntos[]', f));
                 body = form;
@@ -145,7 +144,6 @@ export const ticketApi = {
                     asunto: payload.asunto,
                     mensaje: payload.mensaje ?? '',
                     tipo_ticket: payload.tipo_ticket,
-                    criticidad: payload.criticidad,
                 });
             }
 
