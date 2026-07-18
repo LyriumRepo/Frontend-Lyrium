@@ -500,14 +500,13 @@ export default function CustomerProfilePage() {
         )}
       </div>
 
-      <div className="w-full sm:max-w-xs mx-auto md:mx-0 md:ml-auto">
+      <div className="flex justify-center">
         <BaseButton
           onClick={() => isEditMode ? handleSave() : setIsEditMode(true)}
           isLoading={saving}
           variant="action"
           leftIcon={isEditMode ? "Check" : "Pencil"}
-          size="lg"
-          fullWidth
+          size="md"
         >
           {isEditMode ? "Guardar Cambios" : "Editar Información"}
         </BaseButton>

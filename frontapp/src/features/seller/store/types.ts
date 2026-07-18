@@ -129,7 +129,7 @@ export interface ShopConfig {
     social: SocialLinks;
     policies: ShopPolicies;
     visual: VisualIdentity;
-    layout: '1' | '2' | '3';
+    layout: '1' | '2' | '3' | 'emprende';
     medals: Medal[];
     ruc?: string;
     razon_social?: string;

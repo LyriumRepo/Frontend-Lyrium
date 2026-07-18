@@ -73,7 +73,7 @@ export function NubefactPageClient(_props: NubefactPageClientProps) {
     return (
         <div className="space-y-8 pb-20 animate-fadeIn">
             <ModuleHeader
-                title="Facturación Electrónica"
+                title="Facturación Rápida"
                 subtitle="Registro centralizado de comprobantes electrónicos SUNAT"
                 icon="Receipt"
             />

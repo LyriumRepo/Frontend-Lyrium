@@ -180,7 +180,7 @@ export default function DigestionSaludableSection() {
   ];
 
   return (
-    <section className="max-w-[1400px] mx-auto px-4 overflow-hidden space-y-16">
+    <section className="max-w-7xl mx-auto px-4 overflow-hidden space-y-16">
       
       {/* 1. SECCIÓN: Digestión Saludable */}
       <MarketplaceSection

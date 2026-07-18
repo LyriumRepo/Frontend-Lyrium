@@ -103,7 +103,7 @@ export function StorePageClient(_props: StorePageClientProps) {
                 subtitle="Gestión integral de identidad, sucursales y experiencia visual"
             />
 
-            <div className="flex justify-center sm:justify-end">
+            <div className="flex justify-center">
                 {saveButton}
             </div>
 

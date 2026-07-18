@@ -3,13 +3,13 @@
 import React, { useState, useMemo } from 'react';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import BaseLoading from '@/components/ui/BaseLoading';
-import BaseStatCard from '@/components/ui/BaseStatCard';
 import BaseButton from '@/components/ui/BaseButton';
 import Icon from '@/components/ui/Icon';
 import { usePlanCapabilities } from '@/shared/lib/hooks/usePlanCapabilities';
 import { useTraining } from '@/features/seller/training/hooks/useTraining';
 import { useAuth } from '@/shared/lib/context/AuthContext';
 import ProgressBadge from '@/features/seller/training/components/ProgressBadge';
+import TrainingHero from '@/features/seller/training/components/TrainingHero';
 import TrainingGrid from '@/features/seller/training/components/TrainingGrid';
 import TrainingPlayer from '@/features/seller/training/components/TrainingPlayer';
 import TrainingGuide from '@/features/seller/training/TrainingGuide';
@@ -197,16 +197,13 @@ export function TrainingClient() {
                 icon="Video"
             />
 
-            <div data-tour="training-stats" className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 animate-card-entrance">
-                <BaseStatCard label="Total" value={totalCount} icon="Video" color="sky" />
-                <BaseStatCard label="Completadas" value={completedCount} icon="CheckCircle" color="emerald" />
-                <BaseStatCard label="Obligatorias" value={requiredCount} icon="Shield" color="amber" />
-                <BaseStatCard label="Categorías" value={categoryCount} icon="LayoutGrid" color="celeste" />
-            </div>
-
-            <div data-tour="training-progress" className="animate-fade-in-up">
-                <ProgressBadge completed={completedCount} total={totalCount} percent={progressPercent} />
-            </div>
+            <TrainingHero
+                totalCount={totalCount}
+                completedCount={completedCount}
+                requiredCount={requiredCount}
+                categoryCount={categoryCount}
+                progressPercent={progressPercent}
+            />
 
             {showContinue && (
                 <div data-tour="training-continue" className="group relative overflow-hidden rounded-2xl border border-[var(--brand-sky)]/20 dark:border-[var(--brand-teal)]/20 animate-fade-in-up" style={{ animationDelay: '100ms' }}>

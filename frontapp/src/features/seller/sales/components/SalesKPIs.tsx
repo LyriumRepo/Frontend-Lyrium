@@ -8,20 +8,24 @@ interface SalesKPIsProps {
 }
 
 export default function SalesKPIs({ kpis, onKpiClick }: SalesKPIsProps) {
-    type ColorType = 'sky' | 'indigo' | 'amber' | 'rose' | 'emerald' | 'violet';
+    type ColorType = 'lima' | 'verde' | 'turquesaClaro' | 'turquesa';
 
     const mapColor = (color: string): ColorType => {
         const mapping: Record<string, ColorType> = {
-            'sky': 'sky',
-            'indigo': 'indigo',
-            'cyan': 'sky',
-            'amber': 'amber',
-            'red': 'rose',
-            'emerald': 'emerald',
-            'violet': 'violet',
-            'rose': 'rose',
+            'sky': 'lima',
+            'indigo': 'turquesaClaro',
+            'cyan': 'turquesa',
+            'amber': 'verde',
+            'red': 'turquesa',
+            'emerald': 'verde',
+            'violet': 'turquesaClaro',
+            'rose': 'turquesa',
+            'lima': 'lima',
+            'verde': 'verde',
+            'turquesaClaro': 'turquesaClaro',
+            'turquesa': 'turquesa',
         };
-        return mapping[color] || 'sky';
+        return mapping[color] || 'lima';
     };
 
     return (

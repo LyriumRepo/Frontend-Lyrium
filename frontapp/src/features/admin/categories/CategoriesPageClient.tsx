@@ -2,6 +2,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { Plus, RefreshCw, Layers, AlertCircle } from 'lucide-react';
+import AdminIndicatorGrid from '@/components/admin/AdminIndicatorGrid';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import { useCategories } from '@/features/admin/categories/hooks/useCategories';
 import CategoryTree from './components/CategoryTree';
@@ -87,19 +88,12 @@ export function CategoriesPageClient() {
             />
 
             {/* Stats */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                {[
-                    { label: 'Total', value: totalCount, color: 'bg-[var(--bg-muted)] text-[var(--text-secondary)]' },
-                    { label: 'Nivel 1', value: level1Count, color: 'bg-[var(--color-info)]/10 text-[var(--color-info)]' },
-                    { label: 'Nivel 2', value: level2Count, color: 'bg-[var(--color-success)]/10 text-[var(--color-success)]' },
-                    { label: 'Nivel 3', value: level3Count, color: 'bg-[var(--icons-green)]/10 text-[var(--icons-green)]' },
-                ].map((stat) => (
-                    <div key={stat.label} className={`${stat.color} rounded-2xl p-4 text-center`}>
-                        <div className="text-2xl font-black">{stat.value}</div>
-                        <div className="text-xs font-semibold uppercase tracking-wide opacity-70">{stat.label}</div>
-                    </div>
-                ))}
-            </div>
+            <AdminIndicatorGrid indicators={[
+                { label: 'Total', value: totalCount, icon: 'Layers', color: 'lima' },
+                { label: 'Nivel 1', value: level1Count, icon: 'ChevronRight', color: 'verde' },
+                { label: 'Nivel 2', value: level2Count, icon: 'ChevronsRight', color: 'turquesa' },
+                { label: 'Nivel 3', value: level3Count, icon: 'List', color: 'turquesaClaro' },
+            ]} />
 
             {/* Error */}
             {error && (

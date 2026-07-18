@@ -74,7 +74,7 @@ export default function DayEventListModal({ isOpen, date, allEvents, onClose, on
 
     const filterOptions: { value: AgendaFilterType; label: string; icon: string }[] = [
         { value: 'all', label: 'Todos', icon: 'Calendar' },
-        { value: 'orders', label: 'Pedidos', icon: 'Package' },
+        { value: 'orders', label: 'Productos', icon: 'Package' },
         { value: 'services', label: 'Servicios', icon: 'Clock' },
     ];
 
@@ -108,7 +108,7 @@ export default function DayEventListModal({ isOpen, date, allEvents, onClose, on
                                 <span className="text-xl font-black text-[var(--text-primary)]">{serviceEvents.length}</span>
                             </div>
                             <div className="bg-amber-500/10 p-4 rounded-2xl border border-amber-500/20 flex items-center justify-between">
-                                <span className="text-[10px] font-black text-amber-500 uppercase tracking-widest">Pedidos</span>
+                                <span className="text-[10px] font-black text-amber-500 uppercase tracking-widest">Productos</span>
                                 <span className="text-xl font-black text-[var(--text-primary)]">{orderEvents.length}</span>
                             </div>
                         </div>

@@ -68,15 +68,54 @@ function OfferCard({
           />
 
         <div className="absolute bottom-0 left-0 w-full h-[30px] sm:h-[38px] flex bg-[var(--celeste-500)] transform translate-y-full group-hover:translate-y-0 transition-transform">
-          <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onAddToCart(producto); }} className="flex-1 flex items-center justify-center text-white">
-            <ShoppingCart className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-          </button>
-          <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onQuickView(producto); }} className="flex-1 flex items-center justify-center text-white">
-            <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-          </button>
-          <span className="flex-1 flex items-center justify-center text-white">
-            <ExternalLink className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-          </span>
+          <div className="relative flex-1 flex group/tip">
+            <button
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); onAddToCart(producto); }}
+              aria-label="Añadir al carrito"
+              title="Añadir al carrito"
+              className="flex-1 flex items-center justify-center text-white"
+            >
+              <ShoppingCart className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            </button>
+            <span
+              role="tooltip"
+              className="pointer-events-none absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-slate-900/90 dark:bg-black/90 px-2 py-1 text-[10px] font-medium text-white opacity-0 shadow-lg transition-opacity duration-150 group-hover/tip:opacity-100 group-focus-within/tip:opacity-100"
+            >
+              Añadir al carrito
+            </span>
+          </div>
+          <div className="relative flex-1 flex group/tip">
+            <button
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); onQuickView(producto); }}
+              aria-label="Vista rápida"
+              title="Vista rápida"
+              className="flex-1 flex items-center justify-center text-white"
+            >
+              <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            </button>
+            <span
+              role="tooltip"
+              className="pointer-events-none absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-slate-900/90 dark:bg-black/90 px-2 py-1 text-[10px] font-medium text-white opacity-0 shadow-lg transition-opacity duration-150 group-hover/tip:opacity-100 group-focus-within/tip:opacity-100"
+            >
+              Vista rápida
+            </span>
+          </div>
+          <div className="relative flex-1 flex group/tip">
+            <span
+              aria-label="Ver producto"
+              title="Ver producto"
+              tabIndex={0}
+              className="flex-1 flex items-center justify-center text-white"
+            >
+              <ExternalLink className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            </span>
+            <span
+              role="tooltip"
+              className="pointer-events-none absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-slate-900/90 dark:bg-black/90 px-2 py-1 text-[10px] font-medium text-white opacity-0 shadow-lg transition-opacity duration-150 group-hover/tip:opacity-100 group-focus-within/tip:opacity-100"
+            >
+              Ver producto
+            </span>
+          </div>
         </div>
       </div>
 

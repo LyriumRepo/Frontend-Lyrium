@@ -139,6 +139,7 @@ const initialEdit: Partial<PlanData> = {
   priceSubtext: '',
   cssColor: '#3b82f6',
   accentColor: '#2563eb',
+  commission_rate: 0.05,
   bgImage: '',
   bgImageFit: 'cover',
   bgImagePosition: 'center',
@@ -208,10 +209,10 @@ function mapPlanToPlansMap(plans: api.PlanFromApi[]): PlansMap {
   for (const p of plans) {
     map[p.slug] = {
       id: p.slug,
+      numericId: p.id,
       name: p.name,
       slug: p.slug,
       price: parseFloat(p.monthly_fee),
-      // FIX #4: no sobreescribir price_text con fallback incorrecto
       priceAnnual: p.price_annual
         ? parseFloat(p.price_annual)
         : parseFloat(p.monthly_fee) * 12,
@@ -225,6 +226,7 @@ function mapPlanToPlansMap(plans: api.PlanFromApi[]): PlansMap {
       badge: p.badge ?? '',
       cssColor: p.css_color ?? '#3b82f6',
       accentColor: p.accent_color ?? '#2563eb',
+      commission_rate: parseFloat(p.commission_rate) || 0.05,
       requiresPayment: p.requires_payment ?? parseFloat(p.monthly_fee) > 0,
       isActive: p.is_active ?? true,
       timelineIcon: p.timeline_icon ?? 'star',
@@ -234,6 +236,10 @@ function mapPlanToPlansMap(plans: api.PlanFromApi[]): PlansMap {
       enableClaimLock: p.enable_claim_lock ?? false,
       claimMonths: p.claim_months ?? 1,
       compactVisibleCount: p.compact_visible_count ?? 5,
+      bgImage: (p as any).bg_image ?? '',
+      bgImageFit: (p as any).bg_image_fit ?? 'cover',
+      bgImagePosition: (p as any).bg_image_position ?? 'center',
+      showBgInCard: (p as any).show_bg_in_card ?? false,
       trialSuccessTitle: p.trial_success_title ?? '',
       trialSuccessMessage: p.trial_success_message ?? '',
       trialWaitMessage: p.trial_wait_message ?? '',
@@ -588,9 +594,10 @@ export function useAdmin() {
       b.title?.trim(),
     );
 
-    // FIX #3: diferenciar slug de URL (original) vs slug del payload
+    // FIX: diferenciar slug de URL (original) vs slug del payload
     const isNew = editorPlanId === 'new';
-    const originalSlug = isNew ? null : editorPlanId!; // slug para la URL del endpoint
+    const originalSlug = isNew ? null : editorPlanId!; // slug para lookup
+    const numericId = isNew ? null : plansData[originalSlug!]?.numericId ?? null;
     const newSlug =
       ep.slug?.trim() ||
       ep.name
@@ -602,9 +609,9 @@ export function useAdmin() {
 
     const payload: Record<string, unknown> = {
       name: ep.name.trim(),
-      slug: isNew ? newSlug : originalSlug, // en update no cambiar slug
+      slug: isNew ? newSlug : originalSlug,
       monthly_fee: ep.price ?? 0,
-      commission_rate: (ep as any).commission_rate ?? 0.05,
+      commission_rate: ep.commission_rate ?? 0.05,
       has_membership_fee: (ep.price ?? 0) > 0,
       features,
       detailed_benefits: detailedBenefits,
@@ -625,6 +632,10 @@ export function useAdmin() {
       price_subtext: ep.priceSubtext ?? '/mes',
       use_price_mode: ep.usePriceMode ?? true,
       compact_visible_count: ep.compactVisibleCount ?? 5,
+      bg_image: ep.bgImage || null,
+      bg_image_fit: ep.bgImageFit ?? 'cover',
+      bg_image_position: ep.bgImagePosition ?? 'center',
+      show_bg_in_card: !!ep.showBgInCard,
       trial_success_title: ep.trialSuccessTitle ?? '',
       trial_success_message: ep.trialSuccessMessage ?? '',
       trial_wait_message: ep.trialWaitMessage ?? '',
@@ -635,7 +646,7 @@ export function useAdmin() {
     try {
       const saved = isNew
         ? await api.createPlan(payload)
-        : await api.updatePlan(originalSlug!, payload);
+        : await api.updatePlan(numericId!, payload);
 
       // ← NUEVO: refrescar todos los planes desde la API
       const planesActualizados = await api.fetchPlans();
@@ -661,7 +672,7 @@ export function useAdmin() {
   const togglePlanActive = useCallback(
     (planId: string) => {
       const plan = stateRef.current.plansData[planId];
-      if (!plan) return;
+      if (!plan?.numericId) return;
 
       if (plan.isActive !== false) {
         // Desactivar → pedir confirmación primero
@@ -674,7 +685,7 @@ export function useAdmin() {
         // Activar → llamar API directo sin modal
         setState((prev) => ({ ...prev, confirmTargetPlan: planId }));
         api
-          .togglePlanActive(planId)
+          .togglePlanActive(plan.numericId)
           .then((saved) => {
             setState((prev) => ({
               ...prev,
@@ -703,9 +714,11 @@ export function useAdmin() {
   const confirmDeactivate = useCallback(async () => {
     const planId = stateRef.current.confirmTargetPlan;
     if (!planId) return;
+    const numericId = stateRef.current.plansData[planId]?.numericId;
+    if (!numericId) return;
 
     try {
-      const saved = await api.togglePlanActive(planId);
+      const saved = await api.togglePlanActive(numericId);
       setState((prev) => ({
         ...prev,
         plansData: {
@@ -734,9 +747,11 @@ export function useAdmin() {
   const confirmDelete = useCallback(async () => {
     const planId = stateRef.current.confirmTargetPlan;
     if (!planId) return;
+    const numericId = stateRef.current.plansData[planId]?.numericId;
+    if (!numericId) return;
 
     try {
-      await api.deletePlan(planId);
+      await api.deletePlan(numericId);
       setState((prev) => {
         const plans = { ...prev.plansData };
         delete plans[planId];
@@ -774,8 +789,10 @@ export function useAdmin() {
     setModal('restoreConfirm', false);
     const slug = stateRef.current.confirmTargetPlan;
     if (!slug) return;
+    const numericId = stateRef.current.plansData[slug]?.numericId;
+    if (!numericId) return;
     try {
-      await api.togglePlanActive(slug);
+      await api.togglePlanActive(numericId);
       broadcast('planes_actualizados');
       setState((prev) => {
         const plan = prev.plansData[slug];
@@ -797,7 +814,8 @@ export function useAdmin() {
 
   const selectTimelineIcon = useCallback(
     async (planId: string, iconKey: string) => {
-      if (!stateRef.current.plansData[planId]) return;
+      const plan = stateRef.current.plansData[planId];
+      if (!plan?.numericId) return;
 
       // Actualizar UI inmediatamente (optimistic)
       setState((prev) => ({
@@ -809,7 +827,7 @@ export function useAdmin() {
       }));
 
       try {
-        await api.updatePlanIcon(planId, iconKey);
+        await api.updatePlanIcon(plan.numericId, iconKey);
         broadcast('planes_actualizados');
       } catch (err) {
         console.error('Error updating icon:', err);

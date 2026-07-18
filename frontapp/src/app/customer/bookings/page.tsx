@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useAuth } from '@/shared/lib/context/AuthContext';
 import { useRouter } from 'next/navigation';
@@ -9,6 +9,7 @@ import { bookingRepository } from '@/shared/lib/api/bookingRepository';
 import type { BookingResponse } from '@/shared/lib/api/bookingRepository';
 import { BookingTimeline } from '@/shared/components/booking/BookingTimeline';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
+import Icon from '@/components/ui/Icon';
 import {
   Calendar, Clock, User, Loader2, X, Star, Eye,
   MessageSquare, Store, CreditCard,
@@ -42,6 +43,7 @@ export default function CustomerBookingsPage() {
   const [bookings, setBookings] = useState<BookingResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<'upcoming' | 'past'>('upcoming');
+  const [page, setPage] = useState(0);
 
   const [detailTarget, setDetailTarget] = useState<BookingResponse | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -122,6 +124,15 @@ export default function CustomerBookingsPage() {
     }
   };
 
+  const list = tab === 'upcoming' ? upcoming : past;
+  const PAGE_SIZE = 10;
+  const totalPages = Math.max(1, Math.ceil(list.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages - 1);
+  const paginatedList = useMemo(
+    () => list.slice(safePage * PAGE_SIZE, (safePage + 1) * PAGE_SIZE),
+    [list, safePage],
+  );
+
   if (authLoading || loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -130,19 +141,27 @@ export default function CustomerBookingsPage() {
     );
   }
 
-  const list = tab === 'upcoming' ? upcoming : past;
-
   return (
     <div className="space-y-6">
       <ModuleHeader
         title="Mis Reservas"
-        subtitle="Servicios agendados y tu historial de reservas"
+        subtitle="Gestiona y revisa el historial de tus servicios reservados en Lyrium"
         icon="Calendar"
       />
 
-      {/* Tabs */}
-      <div className="flex gap-1 bg-gray-100 dark:bg-[var(--bg-secondary)] rounded-xl p-1 w-fit">
-        <button onClick={() => setTab('upcoming')}
+      <div className="bg-white dark:bg-[var(--bg-secondary)] p-5 rounded-[2rem] border border-gray-100 dark:border-[var(--border-subtle)] shadow-sm">
+        <div className="flex items-center gap-4 mb-4">
+          <div className="w-12 h-12 bg-gradient-to-br from-sky-400 to-sky-600 dark:from-[var(--brand-green)] dark:to-[var(--brand-green-hover)] rounded-2xl flex items-center justify-center shadow-lg">
+            <Icon name="Filter" className="w-6 h-6 text-white" />
+          </div>
+          <h3 className="text-xl font-black text-gray-800 dark:text-[var(--text-primary)]">
+            Filtrar por Estado
+          </h3>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex gap-1 bg-gray-100 dark:bg-[var(--bg-secondary)] rounded-xl p-1 w-fit">
+        <button onClick={() => { setTab('upcoming'); setPage(0); }}
           className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${
             tab === 'upcoming'
               ? 'bg-white dark:bg-[var(--bg-card)] text-gray-900 dark:text-[var(--text-primary)] shadow-sm'
@@ -150,7 +169,7 @@ export default function CustomerBookingsPage() {
           }`}>
           Próximas ({upcoming.length})
         </button>
-        <button onClick={() => setTab('past')}
+        <button onClick={() => { setTab('past'); setPage(0); }}
           className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${
             tab === 'past'
               ? 'bg-white dark:bg-[var(--bg-card)] text-gray-900 dark:text-[var(--text-primary)] shadow-sm'
@@ -158,6 +177,7 @@ export default function CustomerBookingsPage() {
           }`}>
           Pasadas ({past.length})
         </button>
+      </div>
       </div>
 
       {/* List */}
@@ -169,72 +189,155 @@ export default function CustomerBookingsPage() {
           </p>
         </div>
       ) : (
-        <div className="space-y-3">
-          {list.map((booking) => (
-            <div key={booking.id}
-              className="group bg-white dark:bg-[var(--bg-card)] rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)] p-5 transition-all hover:shadow-lg hover:border-sky-200 dark:hover:border-[var(--icons-green)]/40">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <h3 className="font-bold text-gray-900 dark:text-[var(--text-primary)] text-sm truncate">{booking.service_name}</h3>
-                    <span className={`shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full ${STATUS_LABELS[booking.status]?.color ?? ''}`}>
+        <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-[2.5rem] shadow-xl border border-slate-100 dark:border-[var(--border-subtle)] overflow-hidden">
+          <p className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest px-8 pt-6 pb-3">
+            {list.length} reserva{list.length !== 1 ? 's' : ''}
+          </p>
+          <div className="overflow-x-auto no-scrollbar">
+          <table className="hidden md:table w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-[var(--bg-secondary)]/50 border-b border-[var(--border-subtle)]">
+                {['Servicio', 'Tienda', 'Fecha', 'Horario', 'Especialista', 'Monto', 'Estado', 'Acciones'].map((h) => (
+                  <th key={h} className="px-6 py-5 text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[var(--border-subtle)]">
+              {paginatedList.map((booking) => (
+                <tr key={booking.id} className="hover:bg-[var(--bg-secondary)]/30 transition-colors">
+                  <td className="px-6 py-4">
+                    <span className="text-sm font-bold text-gray-800 dark:text-[var(--text-primary)]">{booking.service_name}</span>
+                  </td>
+                  <td className="px-6 py-4 text-sm font-bold text-gray-600 dark:text-[var(--text-secondary)] max-w-[150px] truncate">{booking.store_name}</td>
+                  <td className="px-6 py-4 text-sm font-bold text-gray-700 dark:text-[var(--text-primary)]">{booking.date ? formatDate(booking.date) : '—'}</td>
+                  <td className="px-6 py-4 text-sm font-bold text-gray-700 dark:text-[var(--text-primary)]">{booking.start_time} - {booking.end_time}</td>
+                  <td className="px-6 py-4 text-sm font-bold text-gray-600 dark:text-[var(--text-secondary)]">
+                    {booking.specialist?.name ?? '—'}
+                  </td>
+                  <td className="px-6 py-4 text-sm font-bold text-gray-900 dark:text-[var(--text-primary)]">
+                    {booking.payment_amount > 0 ? `S/ ${booking.payment_amount.toFixed(2)}` : '—'}
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${STATUS_LABELS[booking.status]?.color ?? ''}`}>
                       {STATUS_LABELS[booking.status]?.label ?? booking.status}
                     </span>
-                  </div>
-                  <p className="text-xs text-gray-400 dark:text-[var(--text-muted)] mb-3 flex items-center gap-1.5">
-                    <Store className="w-3 h-3" /> {booking.store_name}
-                  </p>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-2">
+                      <button onClick={() => openDetail(booking)}
+                        className="p-2 rounded-xl bg-sky-50 dark:bg-[var(--brand-green)] text-sky-600 dark:text-white hover:bg-sky-100 dark:hover:bg-[var(--brand-green-hover)] border border-sky-200 dark:border-[var(--border-subtle)] transition-colors"
+                        title="Ver detalle">
+                        <Eye className="w-4 h-4" />
+                      </button>
+                      {booking.status === 'completed' && (
+                        booking.review ? (
+                          <span
+                            className="p-2 rounded-xl bg-sky-50 dark:bg-[var(--brand-green)]/20 text-sky-600 dark:text-[var(--icons-green)] flex items-center gap-1"
+                            title={`Ya calificaste: ${booking.review.rating}/5`}
+                          >
+                            <Star className="w-4 h-4 fill-current" />
+                            <span className="text-[10px] font-bold">{booking.review.rating}</span>
+                          </span>
+                        ) : (
+                          <button onClick={() => { setRateTarget(booking); setRateValue(0); setRateComment(''); setRateError(''); }}
+                            className="p-2 rounded-xl bg-sky-50 dark:bg-[var(--bg-muted)] text-sky-600 dark:text-[var(--icons-green)] hover:bg-sky-100 dark:hover:bg-[var(--bg-secondary)] transition-colors"
+                            title="Calificar">
+                            <Star className="w-4 h-4" />
+                          </button>
+                        )
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          </div>
 
-                  <div className="flex flex-wrap gap-x-5 gap-y-1.5 text-xs text-gray-600 dark:text-[var(--text-secondary)]">
-                    <span className="flex items-center gap-1.5">
-                      <Calendar className="w-3.5 h-3.5 text-sky-500 dark:text-[var(--icons-green)]" />
-                      {booking.date && formatDate(booking.date)}
-                    </span>
-                    <span className="flex items-center gap-1.5">
-                      <Clock className="w-3.5 h-3.5 text-sky-500 dark:text-[var(--icons-green)]" />
-                      {booking.start_time} - {booking.end_time}
-                    </span>
-                    {booking.specialist && (
-                      <span className="flex items-center gap-1.5">
-                        <User className="w-3.5 h-3.5 text-sky-500 dark:text-[var(--icons-green)]" />
-                        {booking.specialist.name}
-                      </span>
-                    )}
-                    {booking.payment_amount > 0 && (
-                      <span className="font-bold text-gray-800 dark:text-[var(--text-primary)]">
-                        S/ {booking.payment_amount.toFixed(2)}
-                      </span>
-                    )}
+          <div className="block md:hidden space-y-3 p-4">
+            {paginatedList.map((booking) => (
+              <div key={booking.id}
+                className="group bg-white dark:bg-[var(--bg-card)] rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)] p-4 transition-all hover:shadow-lg hover:border-sky-200 dark:hover:border-[var(--icons-green)]/40">
+                <div className="flex items-start justify-between gap-3 mb-2">
+                  <div className="min-w-0 max-w-full break-words">
+                    <h3 className="font-bold text-gray-900 dark:text-[var(--text-primary)] text-sm truncate">{booking.service_name}</h3>
+                    <p className="text-xs text-gray-400 dark:text-[var(--text-muted)] mt-0.5 flex items-center gap-1.5">
+                      <Store className="w-3 h-3" /> {booking.store_name}
+                    </p>
                   </div>
+                  <span className={`shrink-0 text-[9px] font-bold px-2 py-0.5 rounded-full ${STATUS_LABELS[booking.status]?.color ?? ''}`}>
+                    {STATUS_LABELS[booking.status]?.label ?? booking.status}
+                  </span>
                 </div>
 
-                <div className="flex flex-col gap-2 shrink-0">
-                  <button onClick={() => openDetail(booking)}
-                    className="p-2 rounded-xl bg-sky-50 dark:bg-[var(--bg-muted)] text-sky-600 dark:text-[var(--icons-green)] hover:bg-sky-100 dark:hover:bg-[var(--bg-secondary)] transition-colors"
-                    title="Ver detalle">
-                    <Eye className="w-4 h-4" />
-                  </button>
-                  {booking.status === 'completed' && (
-                    booking.review ? (
-                      <span
-                        className="p-2 rounded-xl bg-sky-50 dark:bg-[var(--brand-green)]/20 text-sky-600 dark:text-[var(--icons-green)] flex items-center gap-1"
-                        title={`Ya calificaste: ${booking.review.rating}/5`}
-                      >
-                        <Star className="w-4 h-4 fill-current" />
-                        <span className="text-[10px] font-bold">{booking.review.rating}</span>
-                      </span>
-                    ) : (
-                      <button onClick={() => { setRateTarget(booking); setRateValue(0); setRateComment(''); setRateError(''); }}
-                        className="p-2 rounded-xl bg-sky-50 dark:bg-[var(--bg-muted)] text-sky-600 dark:text-[var(--icons-green)] hover:bg-sky-100 dark:hover:bg-[var(--bg-secondary)] transition-colors"
-                        title="Calificar">
-                        <Star className="w-4 h-4" />
-                      </button>
-                    )
+                <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-600 dark:text-[var(--text-secondary)] mb-3">
+                  <span className="flex items-center gap-1">
+                    <Calendar className="w-3 h-3 text-sky-500 dark:text-[var(--icons-green)]" />
+                    {booking.date && formatDate(booking.date)}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Clock className="w-3 h-3 text-sky-500 dark:text-[var(--icons-green)]" />
+                    {booking.start_time} - {booking.end_time}
+                  </span>
+                  {booking.specialist && (
+                    <span className="flex items-center gap-1">
+                      <User className="w-3 h-3 text-sky-500 dark:text-[var(--icons-green)]" />
+                      {booking.specialist.name}
+                    </span>
                   )}
                 </div>
+
+                <div className="flex items-center justify-between pt-3 border-t border-gray-50 dark:border-[var(--border-subtle)]">
+                  <span className="text-sm font-bold text-gray-900 dark:text-[var(--text-primary)]">
+                    {booking.payment_amount > 0 ? `S/ ${booking.payment_amount.toFixed(2)}` : ''}
+                  </span>
+                  <div className="flex gap-2">
+                    <button onClick={() => openDetail(booking)}
+                      className="px-3 py-2 rounded-2xl bg-sky-50 dark:bg-[var(--brand-green)] text-sky-600 dark:text-white hover:bg-sky-100 dark:hover:bg-[var(--brand-green-hover)] border border-sky-200 dark:border-[var(--border-subtle)] transition-colors flex items-center gap-1.5">
+                      <Eye className="w-4 h-4" />
+                      <span className="text-[10px] font-black uppercase tracking-wide">Ver</span>
+                    </button>
+                    {booking.status === 'completed' && !booking.review && (
+                      <button onClick={() => { setRateTarget(booking); setRateValue(0); setRateComment(''); setRateError(''); }}
+                        className="px-3 py-2 rounded-2xl bg-sky-50 dark:bg-[var(--bg-muted)] text-sky-600 dark:text-[var(--icons-green)] border border-sky-200 dark:border-[var(--border-subtle)] transition-colors flex items-center gap-1.5">
+                        <Star className="w-4 h-4" />
+                        <span className="text-[10px] font-black uppercase tracking-wide">Calificar</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between px-6 py-4 border-t border-[var(--border-subtle)]">
+              <span className="text-[10px] font-bold text-[var(--text-secondary)]">
+                {list.length} reserva{list.length !== 1 ? 's' : ''} · Pág. {safePage + 1}/{totalPages}
+              </span>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setPage((p) => Math.max(0, p - 1))}
+                  disabled={safePage === 0}
+                  className="px-3 py-1.5 rounded-xl text-[11px] font-bold text-[var(--text-secondary)] bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-sky-300/30 hover:text-sky-500 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  Anterior
+                </button>
+                <span className="px-2 text-[11px] font-bold text-[var(--text-secondary)]">
+                  Pág. {safePage + 1} de {totalPages}
+                </span>
+                <button
+                  onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                  disabled={safePage >= totalPages - 1}
+                  className="px-3 py-1.5 rounded-xl text-[11px] font-bold text-[var(--text-secondary)] bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-sky-300/30 hover:text-sky-500 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  Siguiente
+                </button>
               </div>
             </div>
-          ))}
+          )}
         </div>
       )}
 

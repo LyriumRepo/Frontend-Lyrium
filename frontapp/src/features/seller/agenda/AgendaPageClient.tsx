@@ -23,7 +23,7 @@ export function AgendaPageClient() {
 
     const filterOptions: { value: AgendaFilterType; label: string; icon: string }[] = [
         { value: 'all',      label: 'Todos',     icon: 'Calendar' },
-        { value: 'orders',   label: 'Pedidos',   icon: 'Package'  },
+        { value: 'orders',   label: 'Productos', icon: 'Package'  },
         { value: 'services', label: 'Servicios', icon: 'Clock'    },
     ];
 
@@ -75,7 +75,7 @@ export function AgendaPageClient() {
                         <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500 border border-amber-500/20">
                             <Icon name="Package" className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current" />
                         </div>
-                        <span className="text-[10px] sm:text-xs font-black text-[var(--text-secondary)] uppercase tracking-widest">Pedidos</span>
+                        <span className="text-[10px] sm:text-xs font-black text-[var(--text-secondary)] uppercase tracking-widest">Productos</span>
                     </div>
                     <div className="flex items-center gap-2">
                         <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-[#69BEEB]/10 flex items-center justify-center text-[#69BEEB] border border-[#69BEEB]/20">

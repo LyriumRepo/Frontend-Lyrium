@@ -62,7 +62,7 @@ export default function NewsletterSection() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Correo electrónico"
+                placeholder="Escribe tu correo aquí"
                 className="flex-1 px-4 py-2.5 rounded-full text-gray-800 dark:text-[var(--text-primary)] text-sm border border-teal-200 dark:border-[var(--border-subtle)] focus:outline-none focus:ring-2 focus:ring-teal-500 dark:bg-[var(--bg-secondary)] dark:placeholder:text-[var(--text-placeholder)]"
                 required
               />

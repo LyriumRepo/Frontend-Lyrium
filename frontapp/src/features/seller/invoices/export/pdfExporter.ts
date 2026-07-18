@@ -1,6 +1,3 @@
-import { jsPDF } from 'jspdf';
-import autoTable from 'jspdf-autotable';
-import { saveAs } from 'file-saver';
 import type { Voucher, InvoiceKPIs } from '../types';
 
 // ── Paleta oficial Lyrium (igual que seller/sales) ────────────────────────
@@ -76,7 +73,7 @@ async function loadImageB64(url: string): Promise<string | null> {
 }
 
 function drawKpi(
-    doc: jsPDF,
+    doc: any,
     label: string, value: string, sub: string,
     x: number, y: number, w: number, h: number,
     accent: [number, number, number]
@@ -103,7 +100,7 @@ function drawKpi(
     }
 }
 
-function drawFooter(doc: jsPDF, page: number, total: number): void {
+function drawFooter(doc: any, page: number, total: number): void {
     const y = PH - 8;
     doc.setDrawColor(C.primary[0], C.primary[1], C.primary[2]);
     doc.setLineWidth(0.5);
@@ -128,8 +125,13 @@ export async function exportInvoicesToPdf(
     vouchers: Voucher[],
     kpis: InvoiceKPIs | null
 ): Promise<void> {
+    const [{ jsPDF: JsPDF }, { default: autoTable }, { saveAs }] = await Promise.all([
+        import('jspdf'),
+        import('jspdf-autotable'),
+        import('file-saver'),
+    ]);
     const logo = await loadImageB64('/img/logo.png');
-    const doc  = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const doc  = new JsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
 
     // ── Header (estilo ventas) ───────────────────────────────────────────
     doc.setFillColor(8, 25, 15);

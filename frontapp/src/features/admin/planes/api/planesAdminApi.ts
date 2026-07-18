@@ -225,10 +225,10 @@ export const planesAdminApi = {
     return Array.isArray(res) ? res : (res.data ?? []);
   },
 
-  /** GET /admin/plans/:slug */
-  async fetchPlan(slug: string): Promise<PlanFromApi> {
+  /** GET /admin/plans/:id */
+  async fetchPlan(id: number): Promise<PlanFromApi> {
     const res = await apiFetch<{ data: PlanFromApi } | PlanFromApi>(
-      `/admin/plans/${slug}`,
+      `/admin/plans/${id}`,
     );
     return ('data' in res && res.data ? res.data : res) as PlanFromApi;
   },
@@ -245,13 +245,13 @@ export const planesAdminApi = {
     return res.data ?? (res as unknown as PlanFromApi);
   },
 
-  /** PUT /admin/plans/:slug */
+  /** PUT /admin/plans/:id */
   async updatePlan(
-    slug: string,
+    id: number,
     data: Partial<PlanFromApi>,
   ): Promise<PlanFromApi> {
     const res = await apiFetch<{ data: PlanFromApi; message?: string }>(
-      `/admin/plans/${slug}`,
+      `/admin/plans/${id}`,
       {
         method: 'PUT',
         body: JSON.stringify(data),
@@ -260,25 +260,25 @@ export const planesAdminApi = {
     return res.data ?? (res as unknown as PlanFromApi);
   },
 
-  /** DELETE /admin/plans/:slug */
-  deletePlan(slug: string): Promise<void> {
-    return apiFetch(`/admin/plans/${slug}`, { method: 'DELETE' });
+  /** DELETE /admin/plans/:id */
+  deletePlan(id: number): Promise<void> {
+    return apiFetch(`/admin/plans/${id}`, { method: 'DELETE' });
   },
 
-  /** PUT /admin/plans/:slug/toggle-active */
-  async togglePlanActive(slug: string): Promise<PlanFromApi> {
+  /** POST /admin/plans/:id/status */
+  async togglePlanActive(id: number): Promise<PlanFromApi> {
     const res = await apiFetch<{ data: PlanFromApi; message?: string }>(
-      `/admin/plans/${slug}/toggle-active`,
-      { method: 'PUT' },
+      `/admin/plans/${id}/status`,
+      { method: 'POST' },
     );
     return res.data ?? (res as unknown as PlanFromApi);
   },
 
-  /** PUT /admin/plans/:slug/icon */
-  async updatePlanIcon(slug: string, icon: string): Promise<PlanFromApi> {
+  /** POST /admin/plans/:id/icon */
+  async updatePlanIcon(id: number, icon: string): Promise<PlanFromApi> {
     const res = await apiFetch<{ data: PlanFromApi; message?: string }>(
-      `/admin/plans/${slug}/icon`,
-      { method: 'PUT', body: JSON.stringify({ icon }) },
+      `/admin/plans/${id}/icon`,
+      { method: 'POST', body: JSON.stringify({ icon }) },
     );
     return res.data ?? (res as unknown as PlanFromApi);
   },
@@ -399,16 +399,16 @@ export const planesAdminApi = {
 // Re-exportar las funciones sueltas para compatibilidad con usePlanesAdmin.ts
 // (que hace `import * as api from '...'`)
 export const fetchPlans = () => planesAdminApi.fetchPlans();
-export const fetchPlan = (slug: string) => planesAdminApi.fetchPlan(slug);
+export const fetchPlan = (id: number) => planesAdminApi.fetchPlan(id);
 export const createPlan = (data: Partial<PlanFromApi>) =>
   planesAdminApi.createPlan(data);
-export const updatePlan = (slug: string, data: Partial<PlanFromApi>) =>
-  planesAdminApi.updatePlan(slug, data);
-export const deletePlan = (slug: string) => planesAdminApi.deletePlan(slug);
-export const togglePlanActive = (slug: string) =>
-  planesAdminApi.togglePlanActive(slug);
-export const updatePlanIcon = (slug: string, icon: string) =>
-  planesAdminApi.updatePlanIcon(slug, icon);
+export const updatePlan = (id: number, data: Partial<PlanFromApi>) =>
+  planesAdminApi.updatePlan(id, data);
+export const deletePlan = (id: number) => planesAdminApi.deletePlan(id);
+export const togglePlanActive = (id: number) =>
+  planesAdminApi.togglePlanActive(id);
+export const updatePlanIcon = (id: number, icon: string) =>
+  planesAdminApi.updatePlanIcon(id, icon);
 export const fetchColors = () => planesAdminApi.fetchColors();
 export const saveColors = (c: ButtonColors) => planesAdminApi.saveColors(c);
 export const resetColors = () => planesAdminApi.resetColors();

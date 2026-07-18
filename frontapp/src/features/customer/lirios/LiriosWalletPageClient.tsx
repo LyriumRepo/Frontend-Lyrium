@@ -17,6 +17,7 @@ import {
   Trophy,
   TrendingUp,
   Gift,
+  Info,
 } from 'lucide-react';
 import {
   liriosApi,
@@ -371,6 +372,12 @@ export default function LiriosWalletPageClient() {
           <h3 className="text-sm font-bold text-sky-700 dark:text-emerald-400 uppercase tracking-wide mb-3 flex items-center gap-2">
             <Sparkles className="w-4 h-4" />
             Tu progreso
+            <span className="relative group ml-auto">
+              <Info className="w-3.5 h-3.5 text-sky-400 dark:text-emerald-400/70 cursor-help" />
+              <span className="absolute right-0 top-full mt-2 w-56 p-2.5 bg-sky-900 dark:bg-emerald-900 text-white text-[10px] font-medium leading-relaxed rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-20 pointer-events-none">
+                Tu nivel depende del saldo acumulado. Cada 1,000 Lirios equivale a S/1 de descuento. El progreso se actualiza automáticamente con cada compra.
+              </span>
+            </span>
           </h3>
           <div className="space-y-2 max-h-[340px] overflow-y-auto overscroll-contain custom-scrollbar pr-1">
             {TIERS.map((t) => {

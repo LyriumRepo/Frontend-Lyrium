@@ -126,11 +126,11 @@ export function HelpdeskPageClient() {
       </div>
 
       {/* Toggle: Vendedores / Clientes + botón leyenda */}
-      <div className="flex items-center gap-3 shrink-0 mb-2">
-        <div className="flex bg-[var(--bg-secondary)]/80 p-1 rounded-2xl border border-[var(--border-subtle)]/50">
+      <div className="flex items-center gap-3 shrink-0 mb-3">
+        <div className="grid grid-cols-2 sm:flex flex-1 sm:flex-initial bg-[var(--bg-secondary)]/80 p-1 rounded-2xl border border-[var(--border-subtle)]/50">
           <button
             onClick={() => setChannel('vendedores')}
-            className={`flex-1 py-2.5 px-4 rounded-xl text-[11px] font-black transition-all flex items-center justify-center gap-2 uppercase tracking-wider ${
+            className={`py-2.5 px-4 rounded-xl text-[11px] font-black transition-all flex items-center justify-center gap-2 uppercase tracking-wider ${
               channel === 'vendedores'
                 ? 'bg-[var(--bg-card)] text-[var(--turquesa-500)] shadow-sm border border-[var(--border-subtle)]/30'
                 : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
@@ -141,7 +141,7 @@ export function HelpdeskPageClient() {
           </button>
           <button
             onClick={() => setChannel('clientes')}
-            className={`flex-1 py-2.5 px-4 rounded-xl text-[11px] font-black transition-all flex items-center justify-center gap-2 uppercase tracking-wider ${
+            className={`py-2.5 px-4 rounded-xl text-[11px] font-black transition-all flex items-center justify-center gap-2 uppercase tracking-wider ${
               channel === 'clientes'
                 ? 'bg-[var(--bg-card)] text-[var(--turquesa-500)] shadow-sm border border-[var(--border-subtle)]/30'
                 : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'

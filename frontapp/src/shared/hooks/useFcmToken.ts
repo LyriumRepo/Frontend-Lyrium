@@ -1,10 +1,16 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { getToken, deleteToken, onMessage } from 'firebase/messaging';
-import { getFirebaseMessaging } from '@/shared/lib/firebase/config';
 import { deviceApi } from '@/shared/lib/api/deviceRepository';
 import { useAuth } from '@/shared/lib/context/AuthContext';
+
+async function loadFirebaseMessaging() {
+  const [{ getToken, deleteToken, onMessage }, { getFirebaseMessaging }] = await Promise.all([
+    import('firebase/messaging'),
+    import('@/shared/lib/firebase/config'),
+  ]);
+  return { getToken, deleteToken, onMessage, getFirebaseMessaging };
+}
 
 const STORAGE_KEY = 'lyrium_fcm_token';
 
@@ -56,6 +62,7 @@ export function useFcmToken() {
       const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
       await navigator.serviceWorker.ready;
 
+      const { getToken, getFirebaseMessaging } = await loadFirebaseMessaging();
       const messaging = getFirebaseMessaging();
       const token = await getToken(messaging, {
         vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
@@ -87,6 +94,7 @@ export function useFcmToken() {
     }
 
     try {
+      const { deleteToken, getFirebaseMessaging } = await loadFirebaseMessaging();
       const messaging = getFirebaseMessaging();
       await deleteToken(messaging);
     } catch {
@@ -123,25 +131,29 @@ export function useFcmToken() {
     if (permission !== 'granted') return;
     if (!isAuthenticated) return;
 
-    const messaging = getFirebaseMessaging();
-    const unsubscribe = onMessage(messaging, (payload) => {
-      const { notification, data } = payload;
-      if (notification?.title) {
-        const event = new CustomEvent('lyrium-fcm-foreground', {
-          detail: {
-            title: notification.title,
-            body: notification.body || '',
-            url: data?.url || '/customer/orders',
-            type: data?.type,
-            id: data?.order_id || data?.ticket_id || data?.store_id,
-          },
-        });
-        window.dispatchEvent(event);
-      }
+    let unsubscribe: (() => void) | undefined;
+
+    loadFirebaseMessaging().then(({ onMessage, getFirebaseMessaging }) => {
+      const messaging = getFirebaseMessaging();
+      unsubscribe = onMessage(messaging, (payload) => {
+        const { notification, data } = payload;
+        if (notification?.title) {
+          const event = new CustomEvent('lyrium-fcm-foreground', {
+            detail: {
+              title: notification.title,
+              body: notification.body || '',
+              url: data?.url || '/customer/orders',
+              type: data?.type,
+              id: data?.order_id || data?.ticket_id || data?.store_id,
+            },
+          });
+          window.dispatchEvent(event);
+        }
+      });
     });
 
     return () => {
-      unsubscribe();
+      unsubscribe?.();
     };
   }, [permission, isAuthenticated]);
 
@@ -152,6 +164,7 @@ export function useFcmToken() {
     const checkTokenRefresh = async () => {
       if (document.visibilityState !== 'visible') return;
       try {
+        const { getToken, getFirebaseMessaging } = await loadFirebaseMessaging();
         const messaging = getFirebaseMessaging();
         const newToken = await getToken(messaging, {
           vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,

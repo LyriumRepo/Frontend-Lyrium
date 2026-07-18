@@ -1,7 +1,7 @@
-import { jsPDF } from 'jspdf';
-import autoTable from 'jspdf-autotable';
-import { saveAs } from 'file-saver';
 import { Order, OrderItem, ServiceOrderItem } from '../types';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let autoTableFn: any = null;
 
 // ── Brand palette ──
 const C = {
@@ -102,7 +102,7 @@ async function loadImageB64(url: string): Promise<string | null> {
     } catch { return null; }
 }
 
-function checkPage(doc: jsPDF, needed: number, y: number, ml: number): number {
+function checkPage(doc: any, needed: number, y: number, ml: number): number {
     if (y + needed > 277) {
         doc.addPage();
         return ML;
@@ -140,7 +140,7 @@ function computeReportKPIs(orders: Order[]): ReportKPIs {
 
 // ── Draw helpers ──
 function drawKpiCard(
-    doc: jsPDF, label: string, value: string, x: number, y: number, w: number, h: number, color: number[]
+    doc: any, label: string, value: string, x: number, y: number, w: number, h: number, color: number[]
 ): void {
     doc.setFillColor(color[0], color[1], color[2]);
     doc.rect(x, y, 2.5, h, 'F');
@@ -156,7 +156,7 @@ function drawKpiCard(
     doc.text(value, x + 5, y + 13.5);
 }
 
-function sectionTitle(doc: jsPDF, title: string, y: number): number {
+function sectionTitle(doc: any, title: string, y: number): number {
     y = checkPage(doc, 20, y, ML);
     doc.setFillColor(C.darkTeal[0], C.darkTeal[1], C.darkTeal[2]);
     doc.rect(ML, y, 2.5, 11, 'F');
@@ -170,7 +170,7 @@ function sectionTitle(doc: jsPDF, title: string, y: number): number {
     return y + 18;
 }
 
-function fieldGrid(doc: jsPDF, fields: Array<[string, string]>, y: number, colCount: number = 2): number {
+function fieldGrid(doc: any, fields: Array<[string, string]>, y: number, colCount: number = 2): number {
     const colW = (CW - (colCount - 1) * 6) / colCount;
     const rowH = 8;
     let cy = y;
@@ -199,7 +199,7 @@ function fieldGrid(doc: jsPDF, fields: Array<[string, string]>, y: number, colCo
     return cy + 2;
 }
 
-function footerText(doc: jsPDF, page: number, total: number): void {
+function footerText(doc: any, page: number, total: number): void {
     doc.setDrawColor(38, 90, 55);
     doc.setLineWidth(0.3);
     doc.line(ML, 282, ML + CW, 282);
@@ -211,7 +211,7 @@ function footerText(doc: jsPDF, page: number, total: number): void {
 }
 
 // ── Order detail block ──
-function drawOrderDetail(doc: jsPDF, order: Order, idx: number): number {
+function drawOrderDetail(doc: any, order: Order, idx: number): number {
     let y = (doc as any).lastAutoTable?.finalY ?? (idx === 0 ? 0 : ML);
     const isMixed = order.orderType === 'mixed';
 
@@ -361,7 +361,7 @@ function drawOrderDetail(doc: jsPDF, order: Order, idx: number): number {
             fmtCurrency(item.price * item.qty),
         ]);
 
-        const res = autoTable(doc, {
+        const res = autoTableFn(doc, {
             startY: y,
             head: [['Producto', 'Cant.', 'Precio', 'Subtotal']],
             body: prodRows,
@@ -403,7 +403,7 @@ function drawOrderDetail(doc: jsPDF, order: Order, idx: number): number {
             fmtCurrency(item.unitPrice),
         ]);
 
-        const res = autoTable(doc, {
+        const res = autoTableFn(doc, {
             startY: y,
             head: [['Servicio', 'Modalidad', 'Especialista', 'Precio']],
             body: svcRows,
@@ -442,8 +442,14 @@ export async function generateSalesReportPdf(
     orders: Order[],
     storeName?: string
 ): Promise<void> {
+    const [{ jsPDF: JsPDF }, { default: autoTable }, { saveAs }] = await Promise.all([
+        import('jspdf'),
+        import('jspdf-autotable'),
+        import('file-saver'),
+    ]);
+    autoTableFn = autoTable;
     const logo = await loadImageB64('/img/logo.png');
-    const doc = new jsPDF('p', 'mm', 'a4');
+    const doc = new JsPDF('p', 'mm', 'a4');
 
     // ═══════ 1. HEADER BAR ═══════
     doc.setFillColor(8, 25, 15);

@@ -43,10 +43,10 @@ export function TrainingsPageClient() {
             />
             <div className="px-1">
                 <div className="flex flex-col sm:flex-row gap-2 sm:justify-end">
-                    <BaseButton variant="secondary" size="md" leftIcon="BarChart" onClick={() => setComplianceOpen(true)} fullWidth>
+                    <BaseButton variant="secondary" size="sm" leftIcon="BarChart" onClick={() => setComplianceOpen(true)} className="w-full sm:w-auto">
                         Progreso
                     </BaseButton>
-                    <BaseButton variant="primary" size="md" leftIcon="Plus" onClick={openCreate} fullWidth>
+                    <BaseButton variant="primary" size="sm" leftIcon="Plus" onClick={openCreate} className="w-full sm:w-auto">
                         Nueva capacitación
                     </BaseButton>
                 </div>

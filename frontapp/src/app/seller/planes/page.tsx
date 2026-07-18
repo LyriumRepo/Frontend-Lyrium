@@ -191,10 +191,7 @@ export default function PlanesPage() {
         />
       )}
 
-      {/* Tabs */}
-      <nav className="tabs-nav">
-        {tabsButtons}
-      </nav>
+      {/* Tabs removed from here — now inside each panel below motivation */}
 
       <div className="container">
 
@@ -211,7 +208,7 @@ export default function PlanesPage() {
           )}
 
           <ModuleHeader
-            title="Mi Plan Actual"
+            title="Mi Plan"
             subtitle="Gestiona tu suscripción en LYRIUM Biomarketplace"
             icon="CreditCard"
           />
@@ -234,7 +231,7 @@ export default function PlanesPage() {
           </div>
           <br />
 
-          <nav className="tabs-nav-mobile">
+          <nav className="tabs-nav">
             {tabsButtons}
           </nav>
 
@@ -280,7 +277,7 @@ export default function PlanesPage() {
             onPointClick={planes.selectCarouselPlan}
           />
 
-          <nav className="tabs-nav-mobile">
+          <nav className="tabs-nav">
             {tabsButtons}
           </nav>
 

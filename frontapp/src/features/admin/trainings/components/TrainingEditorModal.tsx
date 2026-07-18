@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import Modal from '@/features/seller/plans/shared/Modal';
+import AdminModal from '@/components/admin/AdminModal';
 import type { AdminTrainingForm } from '../types';
 import { trainingApi } from '@/shared/lib/api/trainingRepository';
 
@@ -70,11 +70,25 @@ export default function TrainingEditorModal({ open, editing, form, saving, onClo
     };
 
     return (
-        <Modal open={open} onClose={onClose} className="w-full max-w-2xl">
-            <h2 className="text-xl font-extrabold text-[var(--text-primary)] mb-3">
-                {editing ? 'Editar capacitación' : 'Nueva capacitación'}
-            </h2>
-
+        <AdminModal
+            isOpen={open}
+            onClose={onClose}
+            title={editing ? 'Editar capacitación' : 'Nueva capacitación'}
+            icon="Video"
+            size="2xl"
+            footer={
+                <>
+                    <button onClick={onClose}
+                        className="flex-1 px-5 py-2.5 border border-[var(--border-subtle)] bg-transparent text-[var(--text-secondary)] rounded-xl text-sm font-bold cursor-pointer hover:border-[var(--text-primary)] hover:text-[var(--text-primary)] transition-all">
+                        Cancelar
+                    </button>
+                    <button onClick={handleSave} disabled={saving || uploading}
+                        className="flex-1 px-5 py-2.5 border-none bg-[var(--brand-sky)] dark:bg-[var(--brand-teal)] text-white rounded-xl text-sm font-bold cursor-pointer hover:opacity-90 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+                        {saving ? 'Guardando...' : editing ? 'Guardar cambios' : 'Crear capacitación'}
+                    </button>
+                </>
+            }
+        >
             {error && (
                 <div className="mb-4 p-3 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-sm text-red-600 dark:text-red-400 font-medium">
                     {error}
@@ -189,17 +203,6 @@ export default function TrainingEditorModal({ open, editing, form, saving, onClo
                     </div>
                 </div>
             </div>
-
-            <div className="flex gap-3 mt-5 pt-4 border-t border-[var(--border-subtle)]">
-                <button onClick={onClose}
-                    className="flex-1 px-5 py-2.5 border border-[var(--border-subtle)] bg-transparent text-[var(--text-secondary)] rounded-xl text-sm font-bold cursor-pointer hover:border-[var(--text-primary)] hover:text-[var(--text-primary)] transition-all">
-                    Cancelar
-                </button>
-                <button onClick={handleSave} disabled={saving || uploading}
-                    className="flex-1 px-5 py-2.5 border-none bg-[var(--brand-sky)] dark:bg-[var(--brand-teal)] text-white rounded-xl text-sm font-bold cursor-pointer hover:opacity-90 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
-                    {saving ? 'Guardando...' : editing ? 'Guardar cambios' : 'Crear capacitación'}
-                </button>
-            </div>
-        </Modal>
+        </AdminModal>
     );
 }

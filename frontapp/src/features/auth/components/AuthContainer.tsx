@@ -88,8 +88,8 @@ export function AuthContainer({ onSuccess }: AuthContainerProps) {
     if (showIntro) {
         return (
             <IntroCover
-                title="Tu marketplace de productos naturales"
-                subtitle="Únete a la comunidad que está transformando el comercio saludable"
+                title="¡Qué bueno tenerte de vuelta!"
+                subtitle="Inicia sesión como comprador o vendedor y sigue disfrutando del biomarketplace natural de Lyrium."
                 icon="ShoppingBag"
                 buttonText="Entrar"
                 onEnter={handleEnterPortal}

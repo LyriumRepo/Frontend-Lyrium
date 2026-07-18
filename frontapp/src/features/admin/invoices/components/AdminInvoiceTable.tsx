@@ -146,10 +146,10 @@ export default function AdminInvoiceTable({ invoices, onViewDetail }: Props) {
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <span className="text-sm font-black text-[var(--text-primary)] font-mono tracking-tight">{inv.series}-{inv.number}</span>
+                                            <span className="text-sm font-bold text-[var(--text-primary)] font-mono tracking-tight">{inv.series}-{inv.number}</span>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <p className="text-sm font-black text-[var(--text-primary)]">{formatCurrency(inv.store_amount ?? inv.order_total)}</p>
+                                            <p className="text-sm font-bold text-[var(--text-primary)]">{formatCurrency(inv.store_amount ?? inv.order_total)}</p>
                                         </td>
                                         <td className="hidden md:table-cell px-6 py-4">
                                             <p className="text-sm font-bold text-[var(--color-warning)]">

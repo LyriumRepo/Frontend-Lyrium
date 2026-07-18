@@ -176,13 +176,12 @@ export default function CustomerAddressesPage() {
         icon="MapPin"
       />
 
-      <div className="w-full sm:max-w-xs mx-auto md:mx-0 md:ml-auto">
+      <div className="flex justify-center">
         <BaseButton
           onClick={openAddModal}
           variant="action"
           leftIcon="Plus"
-          size="lg"
-          fullWidth
+          size="md"
         >
           Agregar Dirección
         </BaseButton>

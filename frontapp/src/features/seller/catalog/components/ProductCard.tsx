@@ -53,7 +53,7 @@ export default function ProductCard({
                         })()}
                     </div>
                     <div className="relative group/name min-w-0">
-                        <p className="text-sm font-black text-[var(--text-primary)] truncate leading-tight cursor-default">
+                        <p className="text-sm font-semibold text-[var(--text-primary)] truncate leading-tight cursor-default">
                             {product.name}
                         </p>
                         <div className="pointer-events-none absolute left-1/2 top-full z-50 mt-2 hidden -translate-x-1/2 whitespace-nowrap rounded-xl bg-black px-3 py-2 text-xs font-bold text-white shadow-lg group-hover/name:block">
@@ -65,10 +65,10 @@ export default function ProductCard({
             </td>
 
             {/* ── Categoría ── */}
-            <td className="px-4 py-3 w-[200px] max-w-[200px]">
+            <td className="px-4 py-3 w-[220px] max-w-[220px]">
                 {product.category ? (
                     <div className="relative group/cat">
-                        <span className="block truncate text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wide cursor-default">
+                        <span className="block truncate text-xs text-[var(--text-secondary)] cursor-default">
                             {product.category}
                         </span>
                         <div className="pointer-events-none absolute left-1/2 top-full z-50 mt-2 hidden -translate-x-1/2 whitespace-nowrap rounded-xl bg-black px-3 py-2 text-xs font-bold text-white shadow-lg group-hover/cat:block">
@@ -82,11 +82,11 @@ export default function ProductCard({
             </td>
 
             {/* ── Precio ── */}
-            <td className="px-4 py-3 whitespace-nowrap">
+            <td className="px-4 py-3 whitespace-nowrap text-center">
                 {renderPrice ? (
                     renderPrice()
                 ) : (
-                    <span className="text-sm font-black text-[var(--text-primary)]">
+                    <span className="text-sm font-semibold text-[var(--text-primary)]">
                         S/ {product.price.toFixed(2)}
                     </span>
                 )}
@@ -94,10 +94,10 @@ export default function ProductCard({
 
             {/* ── Stock ── */}
             <td className="px-4 py-3 whitespace-nowrap">
-                <span className={`text-sm font-black ${product.stock === 0 ? 'text-red-400' : 'text-[var(--text-primary)]'}`}>
+                <span className={`text-sm font-semibold ${product.stock === 0 ? 'text-red-400' : 'text-[var(--text-primary)]'}`}>
                     {product.stock}
                     {product.stock === 0 && (
-                        <span className="ml-1.5 text-[8px] font-black uppercase tracking-wider text-red-400 border border-red-400/30 px-1 py-0.5 rounded">
+                        <span className="ml-1.5 text-[8px] font-semibold uppercase tracking-wider text-red-400 border border-red-400/30 px-1 py-0.5 rounded">
                             Agotado
                         </span>
                     )}

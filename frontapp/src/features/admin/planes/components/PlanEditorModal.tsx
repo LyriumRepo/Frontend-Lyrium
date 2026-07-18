@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import Image from 'next/image';
-import Modal from '@/features/seller/plans/shared/Modal';
+import AdminModal from '@/components/admin/AdminModal';
 import type { PlanData, PlanFeature, DetailedBenefit } from '@/features/seller/plans/types';
 
 interface Props {
@@ -45,8 +45,21 @@ export default function PlanEditorModal({ open, title, activeTab, editingPlan: e
     : editFeatures.filter(f => !f.active);
 
   return (
-    <Modal open={open} onClose={onClose} className="plan-editor-modal">
-      <h2 className="text-2xl font-extrabold text-[var(--text-primary)] mb-5">{title}</h2>
+    <AdminModal
+      isOpen={open}
+      onClose={onClose}
+      title={title}
+      icon="Package"
+      size="5xl"
+      footer={
+        <div className="flex gap-3 justify-end w-full">
+          <button className="px-6 py-3 border-2 border-[var(--border-subtle)] bg-transparent text-[var(--text-secondary)] rounded-xl text-sm font-bold cursor-pointer transition-all hover:border-[var(--border-default)] hover:text-[var(--text-primary)]"
+            onClick={onClose}>Cancelar</button>
+          <button className="px-6 py-3 border-none bg-gradient-to-r from-sky-500 to-sky-400 dark:from-emerald-700 dark:to-teal-600 text-white rounded-xl text-sm font-bold cursor-pointer transition-all shadow-lg shadow-sky-500/25 dark:shadow-emerald-900/25 hover:shadow-xl hover:-translate-y-0.5"
+            onClick={onSave}>Guardar Cambios</button>
+        </div>
+      }
+    >
       <div className="flex gap-1 mb-6 border-b-2 border-[var(--border-subtle)] overflow-x-auto pb-px">
         {EDITOR_TABS.map(t => (
           <button key={t.key} className={`px-4 py-2.5 border-none bg-transparent text-[13px] font-semibold cursor-pointer transition-all duration-300 flex items-center gap-2 whitespace-nowrap border-b-3 border-transparent -mb-px
@@ -385,14 +398,7 @@ export default function PlanEditorModal({ open, title, activeTab, editingPlan: e
             </div>
           </div>
         )}
-
-        <div className="flex gap-3 justify-end pt-5">
-          <button className="px-6 py-3 border-2 border-[var(--border-subtle)] bg-transparent text-[var(--text-secondary)] rounded-xl text-sm font-bold cursor-pointer transition-all hover:border-[var(--border-default)] hover:text-[var(--text-primary)]"
-            onClick={onClose}>Cancelar</button>
-          <button className="px-6 py-3 border-none bg-gradient-to-r from-sky-500 to-sky-400 dark:from-emerald-700 dark:to-teal-600 text-white rounded-xl text-sm font-bold cursor-pointer transition-all shadow-lg shadow-sky-500/25 dark:shadow-emerald-900/25 hover:shadow-xl hover:-translate-y-0.5"
-            onClick={onSave}>Guardar Cambios</button>
-        </div>
       </div>
-    </Modal>
+    </AdminModal>
   );
 }

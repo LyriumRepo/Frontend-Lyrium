@@ -33,21 +33,21 @@ export const sellerNavigation: PanelNavigation = [
             },
             {
                 id: 'catalogo',
-                label: 'Mis Productos',
+                label: 'Gestión de Catálogo',
                 description: 'Gestión integral de productos, categorías y existencias',
                 icon: 'Package',
                 href: '/seller/catalog'
             },
             {
                 id: 'inventario',
-                label: 'Gestión de stock ',
+                label: 'Gestión de Stock',
                 description: 'Control de existencias y alertas de stock',
                 icon: 'Boxes',
                 href: '/seller/inventario'
             },
             {
                 id: 'servicios',
-                label: 'Mis Servicios',
+                label: 'Gestión de Servicios',
                 description: 'Gestión de prestaciones y reservas activas',
                 icon: 'Calendar',
                 href: '/seller/services'
@@ -124,7 +124,7 @@ export const sellerNavigation: PanelNavigation = [
             },
             {
                 id: 'facturacion',
-                label: 'Mis Comprobantes',
+                label: 'Mis Confirmaciones de Pago',
                 description: 'Gestión de facturación y documentos electrónicos',
                 icon: 'FileText',
                 href: '/seller/invoices'

@@ -5,6 +5,7 @@ export const MOCK_ORDERS: Order[] = [
         id: '1',
         orderNumber: 'ORD-001',
         statusLabel: 'Preparando',
+        branch: null,
         fecha: '2024-03-15',
         updatedAt: '2024-03-16T14:30:00',
         cliente: 'Ana Martínez',
@@ -46,6 +47,7 @@ export const MOCK_ORDERS: Order[] = [
         id: '2',
         orderNumber: 'ORD-002',
         statusLabel: 'Pendiente Confirmar',
+        branch: null,
         fecha: '2024-03-16',
         updatedAt: '2024-03-16T10:00:00',
         cliente: 'Roberto Gómez',
@@ -95,7 +97,8 @@ export const MOCK_ORDERS: Order[] = [
                 endTime: '11:00:00',
                 modality: 'presencial',
                 durationMinutes: 60,
-                serviceBookingId: 'bk-001'
+                serviceBookingId: 'bk-001',
+                bookingStatus: 'pending'
             }
         ]
     },
@@ -103,6 +106,7 @@ export const MOCK_ORDERS: Order[] = [
         id: '3',
         orderNumber: 'ORD-003',
         statusLabel: 'Pendiente Confirmar',
+        branch: null,
         fecha: '2024-03-17',
         updatedAt: '2024-03-17T08:00:00',
         cliente: 'Carmen Rojas',
@@ -154,7 +158,8 @@ export const MOCK_ORDERS: Order[] = [
                 endTime: null,
                 modality: 'domicilio',
                 durationMinutes: 45,
-                serviceBookingId: 'bk-002'
+                serviceBookingId: 'bk-002',
+                bookingStatus: null
             }
         ]
     }

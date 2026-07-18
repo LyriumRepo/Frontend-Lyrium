@@ -110,6 +110,41 @@ export function PagosPageClient() {
       ),
     },
     {
+      key: 'tipo',
+      header: 'Tipo',
+      className: 'bg-amber-50/40 dark:bg-amber-500/5',
+      render: (tx) => {
+        const tipo = tx.tipo ?? '—';
+        const iconMap: Record<string, string> = { producto: '📦', servicio: '🔧', ambos: '📦🔧' };
+        const labelMap: Record<string, string> = { producto: 'Producto', servicio: 'Servicio', ambos: 'Ambos' };
+        return (
+          <span className="inline-flex items-center gap-1 text-xs font-semibold">
+            <span>{iconMap[tipo] ?? '📦'}</span>
+            {labelMap[tipo] ?? tipo}
+          </span>
+        );
+      },
+    },
+    {
+      key: 'commission',
+      header: 'Comisión',
+      align: 'right',
+      className: 'bg-rose-50/40 dark:bg-rose-500/5',
+      render: (tx) => (
+        <div className="text-right text-xs">
+          {tx.stores.length > 1 ? (
+            <div className="space-y-0.5">
+              <p className="font-semibold">{formatCurrency(tx.commissionTotal ?? 0)}</p>
+              <p className="text-[10px] text-[var(--text-secondary)]">Base: {formatCurrency(tx.commissionAmount ?? 0)}</p>
+              <p className="text-[10px] text-[var(--text-secondary)]">IGV: {formatCurrency(tx.commissionIgv ?? 0)}</p>
+            </div>
+          ) : (
+            <span className="text-[var(--text-secondary)]">—</span>
+          )}
+        </div>
+      ),
+    },
+    {
       key: 'totalMethod',
       header: 'Total / Método',
       align: 'right',
@@ -163,7 +198,7 @@ export function PagosPageClient() {
   return (
     <div className="px-4 sm:px-8 pb-20 space-y-8 animate-fadeIn font-industrial">
       <ModuleHeader
-        title="Gestión de Pagos"
+        title="Ventas"
         subtitle="Monitoreo de transacciones Izipay — CARD, YAPE y PLIN"
         icon="CreditCard"
       />

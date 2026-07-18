@@ -5,22 +5,22 @@ import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import BaseButton from '@/components/ui/BaseButton';
 import { useControlVendedores } from '@/features/admin/sellers/hooks/useControlVendedores';
 import {
-  StatsOverview,
   ProductModeration,
   ServiceModeration,
-  AuditLog,
 } from '@/components/admin/sellers/ModuleSections';
+import AdminIndicatorGrid from '@/components/admin/AdminIndicatorGrid';
 import SellerList from '@/components/admin/SellerList';
 import {
   Users,
   Search,
-  CheckCircle,
-  ShieldCheck,
   ShieldAlert,
   Sliders,
   X,
   FileCheck,
   Store,
+  CheckCircle,
+  Clock,
+  Bell,
 } from 'lucide-react';
 import { SellerStatus, ProductStatus, ServiceStatus } from '@/features/admin/sellers/types';
 import Skeleton, { SkeletonRow } from '@/components/ui/Skeleton';
@@ -239,12 +239,6 @@ export function SellersPageClient(_props: SellersPageClientProps) {
     products,
     services,
     servicesLoading,
-    profileRequests,
-    profileRequestsLoading,
-    profileRequestsError,
-    pendingProfileRequestsCount,
-    auditEntries,
-    auditLogsLoading,
   } = useControlVendedores();
 
   const { state: contractsState, actions: contractsActions } = useContratos();
@@ -382,23 +376,6 @@ export function SellersPageClient(_props: SellersPageClientProps) {
             badge={services.filter(s => s.status === 'PENDING' || s.status === 'en_espera').length}
           />
           <TabButton
-            active={currentTab === 'auditoria'}
-            onClick={() => setCurrentTab('auditoria')}
-            label="Historial de Auditoría"
-            icon={<ShieldCheck className="w-5 h-5" />}
-          />
-          <TabButton
-            active={currentTab === 'validacion'}
-            onClick={() => setCurrentTab('validacion')}
-            label="Validación de Datos"
-            icon={<FileCheck className="w-5 h-5" />}
-            badge={
-              pendingProfileRequestsCount > 0
-                ? pendingProfileRequestsCount
-                : undefined
-            }
-          />
-          <TabButton
             active={currentTab === 'contratos'}
             onClick={() => setCurrentTab('contratos' as any)}
             label="Contratos"
@@ -447,7 +424,12 @@ export function SellersPageClient(_props: SellersPageClientProps) {
 
         {currentTab === 'vendedores' && (
           <div className="space-y-6 animate-fadeIn">
-            <StatsOverview stats={{ ...stats, pending: stats.pending }} />
+            <AdminIndicatorGrid indicators={[
+                { label: 'Vendedores', value: stats.totalSellers, icon: 'Users', color: 'lima' },
+                { label: 'Activos', value: stats.activeSellers, icon: 'CheckCircle', color: 'verde' },
+                { label: 'En Espera', value: stats.pending, icon: 'Clock', color: 'turquesa' },
+                { label: 'Alertas', value: stats.alerts, icon: 'Bell', color: 'turquesaClaro' },
+            ]} />
             <SellerList sellers={filteredSellers} loading={loading} />
           </div>
         )}
@@ -496,201 +478,6 @@ export function SellersPageClient(_props: SellersPageClientProps) {
                 })
               }
             />
-          </div>
-        )}
-
-        {currentTab === 'auditoria' && (
-          <div className="animate-fadeIn">
-            {auditLogsLoading ? (
-              <div className="bg-[var(--bg-card)] p-8 rounded-[2.5rem] border border-[var(--border-subtle)]">
-                <SkeletonRow count={8} />
-              </div>
-            ) : (
-              <AuditLog entries={auditEntries} />
-            )}
-          </div>
-        )}
-
-        {currentTab === 'validacion' && (
-          <div className="animate-fadeIn">
-            <div className="mb-8">
-              <h2 className="text-xl font-black text-[var(--text-primary)] tracking-tight">
-                Validación de Datos de Vendedores
-              </h2>
-              <p className="text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-widest mt-1">
-                Aprobación de RUC, datos bancarios y representante legal
-              </p>
-            </div>
-
-            {profileRequestsLoading ? (
-              <div className="flex items-center justify-center py-12">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--icons-green)]" />
-              </div>
-            ) : profileRequestsError ? (
-              <div className="bg-[var(--color-error)]/10 p-6 rounded-2xl text-center">
-                <p className="text-[var(--color-error)]">
-                  Error al cargar solicitudes: {String(profileRequestsError)}
-                </p>
-                <button
-                  type="button"
-                  onClick={() => actions.refetchProfileRequests?.()}
-                  className="mt-4 px-4 py-2 bg-[var(--color-error)] text-white rounded-xl"
-                >
-                  Reintentar
-                </button>
-              </div>
-            ) : profileRequests.length === 0 ? (
-              <div className="bg-[var(--bg-card)] p-12 rounded-[2.5rem] border border-[var(--border-subtle)] text-center">
-                <FileCheck className="w-12 h-12 text-[var(--color-success)] mx-auto mb-4" />
-                <p className="text-[var(--text-secondary)]">
-                  No hay solicitudes de validación pendientes
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {profileRequests.map((request: any) => (
-                  <div
-                    key={request.id}
-                    className="bg-[var(--bg-card)] p-6 rounded-[2.5rem] border border-[var(--border-subtle)]"
-                  >
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h3 className="font-black text-[var(--text-primary)]">
-                          {request.store_name || `Tienda #${request.store_id}`}
-                        </h3>
-                        <p className="text-sm text-[var(--text-secondary)]">
-                          {request.seller_name ||
-                            request.seller_email ||
-                            `ID: ${request.store_id}`}
-                        </p>
-                        <p className="text-xs text-[var(--text-secondary)]">
-                          {request.seller_email}
-                        </p>
-                        <p className="text-xs text-[var(--text-secondary)] mt-1">
-                          Solicitud #{request.id} •{' '}
-                          {new Date(request.created_at).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {request.status === 'pending' && (
-                          <span className="px-3 py-1 bg-[var(--color-warning)]/15 text-[var(--color-warning)] text-xs font-bold rounded-full">
-                            Pendiente
-                          </span>
-                        )}
-                        {request.status === 'approved' && (
-                          <span className="px-3 py-1 bg-[var(--color-success)]/15 text-[var(--color-success)] text-xs font-bold rounded-full">
-                            Aprobado
-                          </span>
-                        )}
-                        {request.status === 'rejected' && (
-                          <span className="px-3 py-1 bg-[var(--color-error)]/15 text-[var(--color-error)] text-xs font-bold rounded-full">
-                            Rechazado
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="mt-4 p-4 bg-[var(--bg-secondary)] rounded-2xl">
-                      <h4 className="text-xs font-bold text-[var(--text-secondary)] uppercase mb-2">
-                        Datos solicitados:
-                      </h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                        {request.data?.ruc ? (
-                          <div>
-                            <span className="text-[var(--text-secondary)]">
-                              RUC:
-                            </span>{' '}
-                            <span className="font-mono">
-                              {request.data.ruc}
-                            </span>
-                          </div>
-                        ) : null}
-                        {request.data?.razon_social ? (
-                          <div>
-                            <span className="text-[var(--text-secondary)]">
-                              Razón Social:
-                            </span>{' '}
-                            {request.data.razon_social}
-                          </div>
-                        ) : null}
-                        {request.data?.rep_legal_nombre ? (
-                          <div>
-                            <span className="text-[var(--text-secondary)]">
-                              Rep. Legal:
-                            </span>{' '}
-                            {request.data.rep_legal_nombre}
-                          </div>
-                        ) : null}
-                        {request.data?.rep_legal_dni ? (
-                          <div>
-                            <span className="text-[var(--text-secondary)]">
-                              DNI Rep.:
-                            </span>{' '}
-                            {request.data.rep_legal_dni}
-                          </div>
-                        ) : null}
-                        {request.data?.cuenta_bcp ? (
-                          <div>
-                            <span className="text-[var(--text-secondary)]">
-                              Cuenta BCP:
-                            </span>{' '}
-                            <span className="font-mono">
-                              {request.data.cuenta_bcp}
-                            </span>
-                          </div>
-                        ) : null}
-                        {request.data?.cci ? (
-                          <div>
-                            <span className="text-[var(--text-secondary)]">
-                              CCI:
-                            </span>{' '}
-                            <span className="font-mono">
-                              {request.data.cci}
-                            </span>
-                          </div>
-                        ) : null}
-                      </div>
-                    </div>
-
-                    {request.admin_notes && (
-                      <div className="mt-4 p-4 bg-[var(--color-error)]/10 rounded-2xl">
-                        <h4 className="text-xs font-bold text-[var(--color-error)] uppercase mb-1">
-                          Notas del admin:
-                        </h4>
-                        <p className="text-sm text-[var(--color-error)]">
-                          {request.admin_notes}
-                        </p>
-                      </div>
-                    )}
-
-                    {request.status === 'pending' && (
-                      <div className="mt-4 flex gap-3">
-                        <button
-                          type="button"
-                          onClick={() =>
-                            actions.approveProfileRequest(request.id)
-                          }
-                          className="px-4 py-2 bg-[var(--color-success)] text-white font-bold rounded-xl hover:bg-[var(--color-success)] transition-colors"
-                        >
-                          Aprobar
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const notes = prompt('Ingrese motivo del rechazo:');
-                            if (notes)
-                              actions.rejectProfileRequest(request.id, notes);
-                          }}
-                          className="px-4 py-2 bg-[var(--color-error)] text-white font-bold rounded-xl hover:bg-[var(--color-error)] transition-colors"
-                        >
-                          Rechazar
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
         )}
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { FormEvent, useState } from 'react';
-import { Loader2, Lock, Mail, User, Building2 } from 'lucide-react';
+import { Loader2, Lock, Mail, User, Building2, Eye, EyeOff } from 'lucide-react';
 import { SocialLoginButton } from '@/components/login/social/SocialLoginButton';
 import type { LoginFormData, UserType } from '../types/auth';
 
@@ -42,6 +42,7 @@ export function LoginPanel({
         password: '',
         rememberMe: false
     });
+    const [showPassword, setShowPassword] = useState(false);
 
     const labels = LABELS[userType];
 
@@ -120,7 +121,7 @@ export function LoginPanel({
                             <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" aria-hidden="true" />
                             <input
                                 id="login-password"
-                                type="password"
+                                type={showPassword ? 'text' : 'password'}
                                 name="password"
                                 value={formData.password}
                                 onChange={handleChange}
@@ -128,9 +129,23 @@ export function LoginPanel({
                                 autoComplete="current-password"
                                 required
                                 aria-required="true"
-                                className="w-full py-3.5 pl-12 pr-4 border-2 border-slate-200 dark:border-[var(--border-subtle)] rounded-xl text-sm text-slate-700 dark:text-[var(--text-primary)] bg-slate-50 dark:bg-[var(--bg-primary)] focus:outline-none focus:border-sky-500 
+                                className="w-full py-3.5 pl-12 pr-12 border-2 border-slate-200 dark:border-[var(--border-subtle)] rounded-xl text-sm text-slate-700 dark:text-[var(--text-primary)] bg-slate-50 dark:bg-[var(--bg-primary)] focus:outline-none focus:border-sky-500
                                 dark:focus:border-[var(--icons-green)] focus:bg-white dark:focus:bg-[var(--bg-secondary)] focus:shadow-[0_0_0_4px_rgba(66,153,225,0.1)] transition-all duration-300"
                             />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword((prev) => !prev)}
+                                aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                                aria-pressed={showPassword}
+                                tabIndex={0}
+                                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-sky-500 dark:hover:text-[var(--icons-green)] transition-colors"
+                            >
+                                {showPassword ? (
+                                    <EyeOff className="w-5 h-5" aria-hidden="true" />
+                                ) : (
+                                    <Eye className="w-5 h-5" aria-hidden="true" />
+                                )}
+                            </button>
                         </div>
                     </div>
 

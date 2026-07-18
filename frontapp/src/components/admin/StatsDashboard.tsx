@@ -57,7 +57,7 @@ export default function StatsDashboard() {
                 label="Ventas Netas"
                 value={`S/ ${stats?.netSales}`}
                 icon="DollarSign"
-                color="sky"
+                color="lima"
                 isLoading={loading}
                 description="Periodo Actual"
             />
@@ -66,7 +66,7 @@ export default function StatsDashboard() {
                 label="Tiendas Activas"
                 value={stats?.storeCount || 0}
                 icon="Store"
-                color="violet"
+                color="verde"
                 isLoading={loading}
                 description="Sincronizado vía Dokan"
             />
@@ -75,7 +75,7 @@ export default function StatsDashboard() {
                 label="Pedidos Totales"
                 value={stats?.orderCount || 0}
                 icon="ShoppingCart"
-                color="emerald"
+                color="turquesa"
                 isLoading={loading}
                 description="Últimos 30 días"
             />
@@ -84,7 +84,7 @@ export default function StatsDashboard() {
                 label="Soporte Activo"
                 value="12"
                 icon="MessageSquare"
-                color="rose"
+                color="turquesaClaro"
                 isLoading={loading}
                 description="Tickets Pendientes"
             />

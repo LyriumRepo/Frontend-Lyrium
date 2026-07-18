@@ -17,32 +17,32 @@ export default function PublicFooter() {
 
     return (
         <footer className="bg-sky-500 dark:bg-[var(--bg-secondary)] dark:border-t dark:border-[var(--border-subtle)] text-white mt-12 transition-colors duration-300">
-            <div className="max-w-7xl mx-auto px-4 py-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-10 text-base">
-                <div className="footer-section space-y-4 flex flex-col items-center md:items-start text-center md:text-left">
+            <div className="max-w-7xl mx-auto px-4 py-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-10 text-base">
+                <div className="footer-section sm:col-span-2 lg:col-span-1 space-y-4 flex flex-col items-center md:items-start text-center md:text-left">
                     <div className="flex items-center gap-2">
                         <Image src="/img/logo_lyrium_blanco_01-scaled.webp" alt="Lyrium" width={200} height={48} className="h-10 md:h-12 w-auto" />
                     </div>
-                    <p className="text-sm text-sky-100 dark:text-[var(--text-secondary)] max-w-xs">Biomarketplace de productos y servicios especializados.</p>
-                    <div className="flex items-center gap-4 mt-2">
-                        <a href="https://www.instagram.com/lyrium_biomarketplace/" target="_blank" className="social-icon-btn dark:text-[var(--text-secondary)] dark:hover:text-[#9BAF9F]" title="Síguenos en Instagram">
-                            <Icon name="Instagram" className="text-xl" />
+                    <p className="text-sm text-sky-100 dark:text-[var(--text-secondary)] max-w-xs">Biomarketplace de productos y servicios saludables.</p>
+                    <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 mt-2">
+                        <a href="https://www.instagram.com/lyrium_biomarketplace/" target="_blank" rel="noopener noreferrer" className="social-icon-btn w-9 h-9 flex items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 dark:text-[var(--text-secondary)] dark:hover:text-[#9BAF9F] transition-colors" title="Síguenos en Instagram">
+                            <Icon name="Instagram" className="text-lg" />
                         </a>
-                        <a href="https://www.facebook.com/people/Lyrium-Biomarketplace/61579938364350/" target="_blank" className="social-icon-btn dark:text-[var(--text-secondary)] dark:hover:text-[#9BAF9F]" title="Síguenos en Facebook">
-                            <Icon name="Facebook" className="text-xl" />
+                        <a href="https://www.facebook.com/people/Lyrium-Biomarketplace/61579938364350/" target="_blank" rel="noopener noreferrer" className="social-icon-btn w-9 h-9 flex items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 dark:text-[var(--text-secondary)] dark:hover:text-[#9BAF9F] transition-colors" title="Síguenos en Facebook">
+                            <Icon name="Facebook" className="text-lg" />
                         </a>
-                        <a href="https://www.tiktok.com/@lyrium.biomarkep" target="_blank" className="social-icon-btn dark:text-[var(--text-secondary)] dark:hover:text-[#9BAF9F]" title="Síguenos en TikTok">
-                            <Icon name="TiktokLogo" className="text-xl" />
+                        <a href="https://www.tiktok.com/@lyrium.biomarkep" target="_blank" rel="noopener noreferrer" className="social-icon-btn w-9 h-9 flex items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 dark:text-[var(--text-secondary)] dark:hover:text-[#9BAF9F] transition-colors" title="Síguenos en TikTok">
+                            <Icon name="TiktokLogo" className="text-lg" />
                         </a>
                         <button
                             type="button"
                             onClick={() => window.dispatchEvent(new CustomEvent('lyrium:open-chatbot'))}
-                            className="social-icon-btn dark:text-[var(--text-secondary)] dark:hover:text-[#9BAF9F]"
+                            className="social-icon-btn w-9 h-9 flex items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 dark:text-[var(--text-secondary)] dark:hover:text-[#9BAF9F] transition-colors"
                             title="Chatea con nuestro asistente virtual"
                         >
-                            <Icon name="MessageCircle" className="text-xl" />
+                            <Icon name="MessageCircle" className="text-lg" />
                         </button>
-                        <a href="https://wa.me/51937093420" target="_blank" className="social-icon-btn dark:text-[var(--text-secondary)] dark:hover:text-[#9BAF9F]" title="Escríbenos por WhatsApp">
-                            <Icon name="WhatsAppLogo" className="text-xl" />
+                        <a href="https://wa.me/51937093420" target="_blank" rel="noopener noreferrer" className="social-icon-btn w-9 h-9 flex items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 dark:text-[var(--text-secondary)] dark:hover:text-[#9BAF9F] transition-colors" title="Escríbenos por WhatsApp">
+                            <Icon name="WhatsAppLogo" className="text-lg" />
                         </a>
                     </div>
                 </div>

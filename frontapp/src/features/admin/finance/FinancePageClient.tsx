@@ -331,11 +331,11 @@ export function FinancePageClient() {
                 value={data.ventasTotales.data.reduce((a, b) => a + b, 0).toString()}
                 description="Número de transacciones"
                 icon="ShoppingCart"
-                color="azulCeleste"
+                color="verde"
                 suffix="Ord."
                 trend={trendOf(data.ventasTotales.data)}
                 chart={<FinanceChart type="bar" labels={data.ventasTotales.labels} data={data.ventasTotales.data} color={chartColorMap.ventasTotales} />}
-                onClick={() => openStatCard('Ventas Totales', 'ventasTotales', data, 'bar', 'azulCeleste')}
+                onClick={() => openStatCard('Ventas Totales', 'ventasTotales', data, 'bar', 'verde')}
               />
             </div>
 
@@ -425,9 +425,9 @@ export function FinancePageClient() {
                 value={`S/ ${data.ltv.data[data.ltv.data.length - 1] ?? 0}`}
                 description="Ticket Promedio × Frecuencia de Compra"
                 icon="Coins"
-                color="celeste"
+                color="lima"
                 chart={<FinanceChart type="line" labels={data.ltv.labels} data={data.ltv.data} color={chartColorMap.ltv} fill={true} />}
-                onClick={() => openStatCard('LTV (Lifetime Value)', 'ltv', data, 'line', 'celeste')}
+                onClick={() => openStatCard('LTV (Lifetime Value)', 'ltv', data, 'line', 'lima')}
               />
             </div>
           </div>
@@ -506,9 +506,9 @@ export function FinancePageClient() {
                 value={`${data.cuotaMercado.data[0] ?? 0}%`}
                 description="(Ventas del Vendedor / Ventas Totales) × 100"
                 icon="PieChart"
-                color="azulCeleste"
+                color="verde"
                 chart={<FinanceChart type="radar" labels={data.cuotaMercado.labels} data={data.cuotaMercado.data} color={chartColorMap.cuotaMercado} />}
-                onClick={() => openStatCard('Cuota de Mercado Interna', 'cuotaMercado', data, 'radar', 'azulCeleste')}
+                onClick={() => openStatCard('Cuota de Mercado Interna', 'cuotaMercado', data, 'radar', 'verde')}
               />
             </div>
           </div>
@@ -536,9 +536,9 @@ export function FinancePageClient() {
                 value={data.ventasTotales.data.reduce((a, b) => a + b, 0).toString()}
                 description="Unidades vendidas en el período"
                 icon="Package"
-                color="azulCeleste"
+                color="verde"
                 chart={<FinanceChart type="bar" labels={data.ventasTotales.labels} data={data.ventasTotales.data} color={chartColorMap.ventasTotales} />}
-                onClick={() => openStatCard('Ventas Totales', 'ventasTotales', data, 'bar', 'azulCeleste')}
+                onClick={() => openStatCard('Ventas Totales', 'ventasTotales', data, 'bar', 'verde')}
               />
             </div>
           </div>

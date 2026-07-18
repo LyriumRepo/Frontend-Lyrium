@@ -1,7 +1,6 @@
 'use client';
 
-import ExcelJS from 'exceljs';
-import { saveAs } from 'file-saver';
+import type * as ExcelJS from 'exceljs';
 import type { Voucher, InvoiceKPIs } from '../types';
 
 // ── Paleta oficial Lyrium — lima verde (igual que PDF) ────────────────────
@@ -52,6 +51,10 @@ function borderHair(): Partial<ExcelJS.Borders> {
 }
 
 export async function exportInvoicesToExcel(vouchers: Voucher[], kpis?: InvoiceKPIs | null): Promise<void> {
+    const [{ default: ExcelJS }, { saveAs }] = await Promise.all([
+        import('exceljs'),
+        import('file-saver'),
+    ]);
     if (vouchers.length === 0) return;
 
     const wb = new ExcelJS.Workbook();

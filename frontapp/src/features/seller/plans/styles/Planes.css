@@ -359,17 +359,14 @@ body {
 }
 
 /* ============================================
-   TABS — BARRA FLOTANTE
+   TABS — BARRA
    ============================================ */
 .tabs-nav {
-    position: fixed;
-    left: 90%;
-    bottom: 480px;
-    top: auto;
-    transform: translateX(-50%);
     display: flex;
     flex-direction: row;
     gap: 0;
+    width: fit-content;
+    margin: 0 auto 32px;
     z-index: 100;
     background: var(--bg-white);
     border-radius: 16px;
@@ -2339,36 +2336,6 @@ body {
 /* ============================================
    RESPONSIVE
    ============================================ */
-.tabs-nav-mobile {
-    display: none;
-}
-
-@media (max-width: 1024px) {
-    .tabs-nav {
-        display: none;
-    }
-
-    .tabs-nav-mobile {
-        display: flex;
-        flex-direction: row;
-        width: fit-content;
-        margin: 0 auto 16px;
-        border-radius: 14px;
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
-        overflow: hidden;
-        background: var(--bg-white);
-        border: 1px solid var(--border-light);
-    }
-
-    .tab-btn {
-        padding: 12px 22px;
-        font-size: 13px;
-    }
-
-    .tab-btn::after {
-        display: none;
-    }
-}
 
 @media (max-width: 768px) {
     /* overflow-x: hidden sólo en contenedores página, NO en wildcard

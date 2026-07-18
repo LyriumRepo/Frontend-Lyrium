@@ -626,6 +626,15 @@ export function OperationsPageClient() {
         title="Gestión Operativa"
         subtitle="Recibos, honorarios y servicios"
         icon="Briefcase"
+        actions={
+          <button
+            onClick={() => { setShowScanner((v) => !v); if (showScanner) resetScan(); }}
+            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--bg-card)] text-[var(--text-primary)] font-bold text-xs border border-[var(--border-subtle)] hover:text-[var(--color-success)] hover:border-[var(--color-success)]/30 transition-all shadow-sm"
+          >
+            <Icon name={showScanner ? 'X' : 'ScanLine'} className="w-4 h-4" />
+            {showScanner ? 'Cerrar scanner' : 'Escanear PDF'}
+          </button>
+        }
       />
 
       {/* ── Stats ── */}
@@ -781,14 +790,7 @@ export function OperationsPageClient() {
         </div>
 
         {/* Fila 3: acciones en grid responsive */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4 border-t border-[var(--border-subtle)]">
-          <button
-            onClick={() => { setShowScanner((v) => !v); if (showScanner) resetScan(); }}
-            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--bg-card)] text-[var(--text-primary)] font-bold text-xs border border-[var(--border-subtle)] hover:text-[var(--color-success)] hover:border-[var(--color-success)]/30 transition-all shadow-sm"
-          >
-            <Icon name={showScanner ? 'X' : 'ScanLine'} className="w-4 h-4" />
-            {showScanner ? 'Cerrar' : 'Escanear PDF'}
-          </button>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4 border-t border-[var(--border-subtle)]">
           <button
             onClick={() => exportExpensesToExcel(filtered).catch((err) => {
               console.error(err);

@@ -5,6 +5,7 @@ import { useAuth } from '@/shared/lib/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import Icon from '@/components/ui/Icon';
+import { useToast } from '@/shared/lib/context/ToastContext';
 
 interface FaqCategory {
   id: string;
@@ -124,6 +125,11 @@ export default function CustomerHelpPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [showEmailForm, setShowEmailForm] = useState(false);
+  const [emailAsunto, setEmailAsunto] = useState('');
+  const [emailMensaje, setEmailMensaje] = useState('');
+  const [emailSending, setEmailSending] = useState(false);
+  const { showToast } = useToast();
 
   useEffect(() => {
     if (loading) return;
@@ -298,16 +304,70 @@ export default function CustomerHelpPage() {
           <p className="text-sm text-gray-500 dark:text-[var(--text-muted)]">Asistente virtual inteligente</p>
         </button>
 
-        <a
-          href="mailto:ventas@lyriumbiomarketplace.com"
-          className="bg-white dark:bg-[var(--bg-secondary)] p-6 rounded-[2rem] shadow-xl border border-slate-100 dark:border-[var(--border-subtle)] hover:border-[#78e69d] dark:hover:border-[var(--icons-green)] transition-all group hover:-translate-y-1"
-        >
-          <div className="w-14 h-14 bg-[#78e69d]/20 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-            <Icon name="Mail" className="w-7 h-7 text-[#78e69d]" />
-          </div>
-          <h4 className="font-bold text-gray-800 dark:text-[var(--text-primary)] mb-2">Correo Electrónico</h4>
-          <p className="text-sm text-gray-500 dark:text-[var(--text-muted)]">ventas@lyriumbiomarketplace.com</p>
-        </a>
+        <div className="bg-white dark:bg-[var(--bg-secondary)] p-6 rounded-[2rem] shadow-xl border border-slate-100 dark:border-[var(--border-subtle)] hover:border-[#78e69d] dark:hover:border-[var(--icons-green)] transition-all group">
+          <button
+            onClick={() => setShowEmailForm((v) => !v)}
+            className="w-full text-left cursor-pointer"
+          >
+            <div className="w-14 h-14 bg-[#78e69d]/20 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <Icon name="Mail" className="w-7 h-7 text-[#78e69d]" />
+            </div>
+            <h4 className="font-bold text-gray-800 dark:text-[var(--text-primary)] mb-2">Correo Electrónico</h4>
+            <p className="text-sm text-gray-500 dark:text-[var(--text-muted)]">ventas@lyriumbiomarketplace.com</p>
+          </button>
+
+          {showEmailForm && (
+            <div className="mt-5 pt-5 border-t border-gray-100 dark:border-[var(--border-subtle)] space-y-4">
+              <div>
+                <label className="block text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1.5">Destinatario</label>
+                <input
+                  type="email"
+                  value="ventas@lyriumbiomarketplace.com"
+                  readOnly
+                  className="w-full text-sm font-bold text-gray-500 bg-gray-50 dark:bg-[var(--bg-muted)] px-4 py-3 border border-gray-200 dark:border-[var(--border-subtle)] rounded-xl cursor-not-allowed"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1.5">Asunto *</label>
+                <input
+                  type="text"
+                  placeholder="Asunto del mensaje"
+                  value={emailAsunto}
+                  onChange={(e) => setEmailAsunto(e.target.value)}
+                  className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] px-4 py-3 border border-gray-200 dark:border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 dark:focus:border-[var(--brand-green)] focus:ring-2 focus:ring-sky-100 dark:focus:ring-[var(--icons-green)] transition-all"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1.5">Mensaje *</label>
+                <textarea
+                  placeholder="Describe tu consulta o comentario..."
+                  value={emailMensaje}
+                  onChange={(e) => setEmailMensaje(e.target.value)}
+                  rows={4}
+                  className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] px-4 py-3 border border-gray-200 dark:border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 dark:focus:border-[var(--brand-green)] focus:ring-2 focus:ring-sky-100 dark:focus:ring-[var(--icons-green)] transition-all resize-none"
+                />
+              </div>
+              <button
+                onClick={() => {
+                  if (!emailAsunto.trim()) { showToast('Ingresa el asunto del mensaje', 'error'); return; }
+                  if (!emailMensaje.trim()) { showToast('Ingresa tu mensaje', 'error'); return; }
+                  setEmailSending(true);
+                  const mailtoUrl = `mailto:ventas@lyriumbiomarketplace.com?subject=${encodeURIComponent(emailAsunto.trim())}&body=${encodeURIComponent(emailMensaje.trim())}`;
+                  window.location.href = mailtoUrl;
+                  setTimeout(() => { setEmailSending(false); setEmailAsunto(''); setEmailMensaje(''); showToast('Abriendo cliente de correo...', 'success'); }, 1000);
+                }}
+                disabled={emailSending}
+                className="w-full py-3 bg-[#78e69d] hover:bg-[#6cd48e] dark:bg-[var(--brand-green)] dark:hover:bg-[var(--brand-green-hover)] text-white rounded-xl text-sm font-black uppercase tracking-widest transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {emailSending ? (
+                  <><Icon name="Loader" className="w-4 h-4 animate-spin" /> Abriendo...</>
+                ) : (
+                  <><Icon name="Send" className="w-4 h-4" /> Enviar</>
+                )}
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
     </div>

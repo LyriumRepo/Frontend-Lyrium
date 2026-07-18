@@ -49,7 +49,7 @@ function mapToApiProduct(p: LaravelProduct): ApiProduct {
     tag: p.sticker,
     stock: p.stock,
     estado_stock: p.stock > 0 ? "in_stock" : "out_of_stock",
-    sku: p.slug, // no hay SKU en el tipo LaravelProduct, usamos slug
+    sku: p.sku ?? undefined,
     rating_promedio: p.rating?.average ?? 0,
     rating_total: p.rating?.count ?? 0,
     // Campos opcionales del ApiProduct

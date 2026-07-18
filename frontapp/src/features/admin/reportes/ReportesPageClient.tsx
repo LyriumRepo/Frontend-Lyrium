@@ -156,7 +156,7 @@ export function ReportesPageClient() {
   return (
     <div className="space-y-6">
       <ModuleHeader
-        title="Reportes"
+        title="Centro de Reportes"
         subtitle="Genera reportes en PDF, CSV o Excel con filtros por fecha."
         icon="BarChart3"
       />

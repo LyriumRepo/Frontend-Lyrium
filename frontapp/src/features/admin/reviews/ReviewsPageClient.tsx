@@ -1131,7 +1131,7 @@ function MedalsTab() {
               <div className="flex items-center gap-2 flex-shrink-0">
                 {medal.status !== 'approved' && (
                   <BaseButton
-                    size="xs"
+                    size="sm"
                     variant="primary"
                     onClick={() => handleApprove(medal.id)}
                     disabled={actionLoading === medal.id}
@@ -1142,7 +1142,7 @@ function MedalsTab() {
                 )}
                 {medal.status !== 'suspended' && (
                   <BaseButton
-                    size="xs"
+                    size="sm"
                     variant="secondary"
                     onClick={() => handleSuspend(medal.id)}
                     disabled={actionLoading === medal.id}

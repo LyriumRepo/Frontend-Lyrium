@@ -73,7 +73,7 @@ export default function ContactPage() {
         return (
             <IntroCover
                 title="&quot;¿En qué podemos ayudarte hoy?&quot;"
-                subtitle="Ya seas comprador o vendedor, estamos aquí para ayudarte. Nuestro equipo responde tus dudas y te acompaña en cada paso."
+                subtitle="Compres o vendas, en Lyrium tenemos un equipo listo para resolver tus dudas y acompañarte en cada paso."
                 icon="Headset"
                 buttonText="ENTRAR"
                 buttonIcon="ArrowDown"
@@ -91,7 +91,12 @@ export default function ContactPage() {
                     {/* Visual Section */}
                     <div className={`contact-visual bg-[linear-gradient(135deg,rgba(14,165,233,0.85)_0%,rgba(132,204,22,0.85))] dark:bg-[linear-gradient(135deg,var(--brand-green)_0%,var(--icons-green)_50%,var(--brand-green-hover)_100%)] bg-cover bg-center rounded-[30px] p-5 sm:p-8 md:p-12 text-white relative overflow-hidden h-full`}>
                     <div className="absolute top-0 right-0 w-20 h-20 sm:w-32 sm:h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-                        <img src="/img/intro/Flor6.png" alt="decoración" className="absolute -bottom-20 -right-85 w-[700px] max-w-none opacity-50 mix-blend-overlay pointer-events-none" />
+                        <img
+                            src="/img/intro/Flor6.png"
+                            alt=""
+                            aria-hidden="true"
+                            className="absolute -bottom-12 -right-16 sm:-right-24 md:-right-32 w-[420px] sm:w-[560px] md:w-[760px] max-w-none opacity-70 mix-blend-overlay pointer-events-none select-none"
+                        />
 
                         <div className="relative z-10">
                             <div className="contact-icon w-12 h-12 sm:w-20 sm:h-20 bg-white/20 rounded-full flex items-center justify-center mb-3 sm:mb-6 border border-white/20 backdrop-blur-sm">

@@ -1,7 +1,6 @@
 'use client';
 
-import ExcelJS from 'exceljs';
-import { saveAs } from 'file-saver';
+import type * as ExcelJS from 'exceljs';
 import type { SalesExportRow } from './types';
 import { EXPORT_COLUMNS } from './constants';
 
@@ -63,6 +62,10 @@ export async function exportSalesRowsToExcel(
     reportTitle?: string;
   }
 ): Promise<void> {
+  const [{ default: ExcelJS }, { saveAs }] = await Promise.all([
+      import('exceljs'),
+      import('file-saver'),
+  ]);
   if (rows.length === 0) return;
 
   const {

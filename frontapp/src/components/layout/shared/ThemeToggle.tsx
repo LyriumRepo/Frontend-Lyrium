@@ -1,7 +1,7 @@
 'use client';
 
 import { useTheme } from 'next-themes';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 
 interface ThemeToggleProps {
@@ -15,6 +15,7 @@ export default function ThemeToggle({
 }: ThemeToggleProps) {
     const { theme, setTheme, resolvedTheme } = useTheme();
     const [mounted, setMounted] = useState(false);
+    const buttonRef = useRef<HTMLButtonElement>(null);
 
     useEffect(() => {
         setMounted(true);
@@ -37,11 +38,31 @@ export default function ThemeToggle({
     }
 
     const cycleTheme = () => {
-        if (resolvedTheme === 'dark') {
-            setTheme('light'); // Bio
-        } else {
-            setTheme('dark'); // Serenidad
+        const next = resolvedTheme === 'dark' ? 'light' : 'dark';
+
+        const canAnimate =
+            typeof document !== 'undefined' &&
+            'startViewTransition' in document &&
+            !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        if (!canAnimate || !buttonRef.current) {
+            setTheme(next);
+            return;
         }
+
+        const rect = buttonRef.current.getBoundingClientRect();
+        const x = rect.left + rect.width / 2;
+        const y = rect.top + rect.height / 2;
+        const endRadius = Math.hypot(
+            Math.max(x, window.innerWidth - x),
+            Math.max(y, window.innerHeight - y),
+        );
+
+        document.documentElement.style.setProperty('--theme-vt-x', `${x}px`);
+        document.documentElement.style.setProperty('--theme-vt-y', `${y}px`);
+        document.documentElement.style.setProperty('--theme-vt-r', `${endRadius}px`);
+
+        document.startViewTransition(() => setTheme(next));
     };
 
     const getImage = () => {
@@ -51,7 +72,7 @@ export default function ThemeToggle({
         // sólido de color y se ve bien en cualquier fondo y tamaño.
         if (resolvedTheme === 'dark') {
             return {
-                src: '/img/iconologo.png',
+                src: '/img/Flor_Dark.png',
                 alt: 'Modo Serenidad'
             };
         }
@@ -72,6 +93,7 @@ export default function ThemeToggle({
     return (
         <div className="relative group inline-block">
             <button
+                ref={buttonRef}
                 onClick={cycleTheme}
                 className={`${buttonClassName} hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] transition-colors`}
                 aria-label={getLabel()}

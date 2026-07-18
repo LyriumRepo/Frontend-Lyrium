@@ -62,7 +62,7 @@ export default function IntroCover({
           style={{ backgroundImage: `url(${backgroundImage})` }}
         />
       )}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-black/25 to-black/55" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/20 to-black/45" />
 
       <div className="relative z-10 flex flex-col items-center text-center px-6 max-w-lg">
         {icon && (
@@ -71,11 +71,11 @@ export default function IntroCover({
           </div>
         )}
 
-        <h1 className="text-4xl md:text-5xl font-black text-white tracking-tight mb-4 leading-tight">
+        <h1 className="text-4xl md:text-5xl font-black text-white tracking-tight mb-4 leading-tight [text-shadow:0_2px_12px_rgba(0,0,0,0.55)]">
           {title}
         </h1>
 
-        <p className="text-lg text-white/70 font-medium mb-10 max-w-sm">
+        <p className="text-lg text-white/90 font-medium mb-10 max-w-sm [text-shadow:0_1px_8px_rgba(0,0,0,0.5)]">
           {subtitle}
         </p>
 

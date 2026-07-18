@@ -467,7 +467,7 @@ export class LaravelOrderRepository implements IOrderRepository {
 
             const orderWithUpdatedServices = {
                 ...order,
-                estado: newEstado,
+                estado: newEstado as Order['estado'],
                 serviceItems: updatedServiceItems,
                 serviceCurrentStep: Math.max(
                     ...updatedServiceItems.map((s) => SERVICE_STATUS_STEP_MAP[s.bookingStatus || s.status] ?? 0), 0

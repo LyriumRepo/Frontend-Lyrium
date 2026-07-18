@@ -11,11 +11,15 @@ import {
   Check,
   AlertCircle,
   Leaf,
+  Minus,
+  Plus,
+  ExternalLink,
 } from "lucide-react";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { money, resolveImg, NO_IMAGE, ApiProduct } from "@/modules/cart/utils";
 import { useCarritoStore } from "@/store/carritoStore";
 import { useAddToCart } from "@/features/public/product/hooks/useAddToCart";
+import { useRouter } from "next/navigation";
 import TopMedalBadge from '@/components/ui/TopMedalBadge';
 
 const stickerConfig: Record<string, { label: string; class: string }> = {
@@ -47,6 +51,7 @@ export default function ProductDetailModal({
   const detailOpen = useCarritoStore((s) => s.ui.detailModalOpen);
   const productId = useCarritoStore((s) => s.ui.detailProductId);
   const closeDetailModal = useCarritoStore((s) => s.closeDetailModal);
+  const router = useRouter();
 
   const {
     addToCart,
@@ -58,6 +63,7 @@ export default function ProductDetailModal({
   const p =
     productsCache.find((x) => String(x.id) === String(productId)) ?? null;
   const [mainImg, setMainImg] = useState("");
+  const [quantity, setQuantity] = useState(1);
 
   const [scale, setScale] = useState(1);
   const [pos, setPos] = useState({ x: 0, y: 0 });
@@ -77,6 +83,7 @@ export default function ProductDetailModal({
     if (!detailOpen || !p) return;
     resetZoom();
     setMainImg(resolveImg(p.imagen_url));
+    setQuantity(1);
   }, [detailOpen, p, resetZoom]);
 
   useEffect(() => {
@@ -105,8 +112,8 @@ export default function ProductDetailModal({
     : 0;
 
   const handleAdd = () => {
-    if (!p || !productId || outOfStock || cartLoading) return; // agregar !p
-    addToCart(Number(p.id), 1); // usar p.id en lugar de productId
+    if (!p || !productId || outOfStock || cartLoading) return;
+    addToCart(Number(p.id), quantity);
   };
   return (
     <>
@@ -308,7 +315,7 @@ export default function ProductDetailModal({
                       )}
                     </p>
                   </div>
-                  <div className="text-right shrink-0">
+                   <div className="text-right shrink-0">
                     {totalR > 0 && (
                       <span className="inline-flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-full bg-gradient-to-r from-sky-500/10 to-lime-500/8 dark:from-sky-500/20 dark:to-lime-500/15 border border-sky-200/50 dark:border-sky-800/30">
                         {Array.from({ length: 5 }).map((_, i) => (
@@ -327,62 +334,107 @@ export default function ProductDetailModal({
                     >
                       {outOfStock ? "⚠️ Agotado" : `📦 Stock: ${stock}`}
                     </p>
+                    {stock > 0 && (
+                      <div className="mt-1.5 w-24">
+                        <div className="w-full h-1.5 rounded-full bg-slate-100 dark:bg-[var(--bg-muted)] overflow-hidden">
+                          <div
+                            className={`h-full rounded-full transition-all duration-500 ${
+                              stock <= 5 ? 'bg-rose-400' : stock <= 15 ? 'bg-amber-400' : 'bg-emerald-400'
+                            }`}
+                            style={{ width: `${Math.min(100, (stock / 50) * 100)}%` }}
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 
-                {/* Precio */}
-                <div className="flex items-end justify-between">
-                  <div>
-                    <p className="text-2xl text-emerald-700 dark:text-emerald-400 font-bold flex items-center gap-1.5">
-                      {money(finalPrice)}
-                    </p>
-                    {hasOffer && (
-                      <>
-                        <p className="text-sm text-slate-400 dark:text-[var(--text-muted)] line-through">
-                          {money(basePrice)}
-                        </p>
-                        <p className="text-sm text-emerald-700 dark:text-emerald-400">
-                          🏷️ Ahorra {money(saving)}
-                        </p>
-                      </>
+                {/* Precio + Quantity */}
+                <div className="space-y-3">
+                  <div className="flex items-end justify-between">
+                    <div>
+                      <p className="text-2xl text-emerald-700 dark:text-emerald-400 font-bold flex items-center gap-1.5">
+                        {money(finalPrice)}
+                      </p>
+                      {hasOffer && (
+                        <>
+                          <p className="text-sm text-slate-400 dark:text-[var(--text-muted)] line-through">
+                            {money(basePrice)}
+                          </p>
+                          <p className="text-sm text-emerald-700 dark:text-emerald-400">
+                            🏷️ Ahorra {money(saving)}
+                          </p>
+                        </>
+                      )}
+                    </div>
+
+                    {/* Quantity selector */}
+                    {!outOfStock && (
+                      <div className="flex items-center gap-2 rounded-2xl border border-sky-100 dark:border-[var(--border-subtle)] px-3 py-1.5">
+                        <button
+                          onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                          disabled={quantity <= 1}
+                          className="w-7 h-7 rounded-lg bg-slate-50 dark:bg-[var(--bg-muted)] border border-slate-200 dark:border-[var(--border-subtle)] flex items-center justify-center text-slate-500 dark:text-[var(--text-muted)] hover:bg-slate-100 dark:hover:bg-[var(--bg-secondary)] transition disabled:opacity-30"
+                        >
+                          <Minus className="w-3.5 h-3.5" />
+                        </button>
+                        <span className="w-8 text-center font-semibold text-slate-800 dark:text-[var(--text-primary)] text-sm tabular-nums">{quantity}</span>
+                        <button
+                          onClick={() => setQuantity(q => Math.min(stock, q + 1))}
+                          disabled={quantity >= stock}
+                          className="w-7 h-7 rounded-lg bg-slate-50 dark:bg-[var(--bg-muted)] border border-slate-200 dark:border-[var(--border-subtle)] flex items-center justify-center text-slate-500 dark:text-[var(--text-muted)] hover:bg-slate-100 dark:hover:bg-[var(--bg-secondary)] transition disabled:opacity-30"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     )}
                   </div>
+                </div>
 
-                  {/* Botones de acción */}
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={handleAdd}
-                      disabled={outOfStock || cartLoading}
-                      className={`px-4 py-3 rounded-2xl inline-flex items-center gap-2 font-bold text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
-                        addedToCart
-                          ? "bg-emerald-500 text-white"
-                          : "bg-sky-500 hover:bg-sky-600 dark:hover:bg-sky-400 text-white shadow-lg shadow-sky-500/20 hover:-translate-y-0.5"
-                      }`}
-                    >
-                      {cartLoading ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      ) : addedToCart ? (
-                        <Check className="w-4 h-4" />
-                      ) : (
-                        <ShoppingCart className="w-4 h-4" />
-                      )}
-                      {cartLoading
-                        ? "Agregando…"
-                        : addedToCart
-                          ? "¡Agregado!"
-                          : "Añadir"}
-                    </button>
+                {/* Botones de acción */}
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handleAdd}
+                    disabled={outOfStock || cartLoading}
+                    className={`px-5 py-3 rounded-2xl inline-flex items-center gap-2 font-bold text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
+                      addedToCart
+                        ? "bg-emerald-500 text-white"
+                        : "bg-sky-500 hover:bg-sky-600 dark:hover:bg-sky-400 text-white shadow-lg shadow-sky-500/20 hover:-translate-y-0.5"
+                    }`}
+                  >
+                    {cartLoading ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : addedToCart ? (
+                      <Check className="w-4 h-4" />
+                    ) : (
+                      <ShoppingCart className="w-4 h-4" />
+                    )}
+                    {cartLoading
+                      ? "Agregando…"
+                      : addedToCart
+                        ? "¡Agregado!"
+                        : "Añadir"}
+                  </button>
 
-                    <button
-                      onClick={() => {
-                        closeDetailModal();
-                        onOpenCart();
-                      }}
-                      className="px-4 py-3 rounded-2xl border border-sky-200 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] text-slate-700 dark:text-[var(--text-primary)] inline-flex items-center gap-2 hover:bg-sky-50 dark:hover:bg-sky-900/10 transition"
-                    >
-                      🛍️ Ver carrito
-                    </button>
-                  </div>
+                  <button
+                    onClick={() => {
+                      closeDetailModal();
+                      onOpenCart();
+                    }}
+                    className="px-5 py-3 rounded-2xl border border-sky-200 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] text-slate-700 dark:text-[var(--text-primary)] inline-flex items-center gap-2 hover:bg-sky-50 dark:hover:bg-sky-900/10 transition text-sm font-semibold"
+                  >
+                    <ShoppingCart className="w-4 h-4" /> Ver carrito
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      closeDetailModal();
+                      router.push(`/producto/${p?.slug ?? p?.id}`);
+                    }}
+                    className="px-5 py-3 rounded-2xl border border-sky-200 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] text-slate-700 dark:text-[var(--text-primary)] inline-flex items-center gap-2 hover:bg-sky-50 dark:hover:bg-sky-900/10 transition text-sm font-semibold"
+                  >
+                    <ExternalLink className="w-4 h-4" /> Ver detalle completo
+                  </button>
                 </div>
 
                 {/* Error del carrito */}
@@ -410,8 +462,7 @@ export default function ProductDetailModal({
           {/* Footer */}
           <div className="border-t border-sky-50 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] px-5 py-3">
             <p className="text-xs text-slate-400 dark:text-[var(--text-muted)] flex items-center gap-2">
-              ℹ️ Tip: miniatura cambia imagen · rueda = zoom · doble click =
-              reset
+              ℹ️ Selecciona la cantidad y haz clic en Añadir · rueda = zoom · doble click = reset
             </p>
           </div>
         </div>

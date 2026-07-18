@@ -34,7 +34,7 @@ function flattenCategoryTree(nodes: Category[], level = 0): Category[] {
 interface ProductModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSave: (product: Product, file?: File) => void;
+    onSave: (product: Product, file?: File) => void | Promise<void>;
     productToEdit?: Product | null;
 }
 
@@ -260,6 +260,7 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit }:
     const [isDark, setIsDark] = useState(false);
     const [showTagPreview, setShowTagPreview] = useState(false);
     const [showStickerUpgrade, setShowStickerUpgrade] = useState(false);
+    const [saving, setSaving] = useState(false);
     const { showToast } = useToast();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { stickerTypes, capabilities } = usePlanCapabilities();
@@ -495,7 +496,7 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit }:
         });
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         if (!selectedFile && !formData.image) {
@@ -526,13 +527,18 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit }:
             sticker = 'liquidacion';
         }
 
-        onSave({
-            ...formData,
-            sticker,
-            discountPercentage,
-            etiquetas,
-        } as any, selectedFile ?? undefined);
-        onClose();
+        setSaving(true);
+        try {
+            await onSave({
+                ...formData,
+                sticker,
+                discountPercentage,
+                etiquetas,
+            } as any, selectedFile ?? undefined);
+        } finally {
+            setSaving(false);
+            onClose();
+        }
     };
 
     return (
@@ -544,6 +550,14 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit }:
             size="4xl"
             accentColor={isDark ? 'from-[#0F2A24] via-[#2A5A4D] to-[#8FC3A1]' : 'from-emerald-400 via-sky-500 to-indigo-500'}
         >
+            {saving && (
+                <div className="absolute inset-0 z-50 bg-[var(--bg-card)]/80 backdrop-blur-sm flex flex-col items-center justify-center rounded-[inherit]">
+                    <div className="w-10 h-10 border-[3px] border-[var(--border-subtle)] border-t-[var(--brand-green)] rounded-full animate-spin mb-3" />
+                    <p className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-widest">
+                        {productToEdit ? 'Actualizando producto...' : 'Registrando producto...'}
+                    </p>
+                </div>
+            )}
             {showTagPreview && (
                 <ProductTagPreviewModal
                     isOpen={showTagPreview}

@@ -1,5 +1,4 @@
-import ExcelJS from 'exceljs';
-import { saveAs } from 'file-saver';
+import type * as ExcelJS from 'exceljs';
 import type { AdminInvoiceRow, AdminInvoiceKPIs } from '../hooks/useAdminInvoices';
 
 // ── Paleta oficial Lyrium — lima verde (igual que PDF) ────────────────────
@@ -96,6 +95,10 @@ export async function exportAdminInvoicesToExcel(
     rows: AdminInvoiceRow[],
     kpis: AdminInvoiceKPIs | null,
 ): Promise<void> {
+    const [{ default: ExcelJS }, { saveAs }] = await Promise.all([
+        import('exceljs'),
+        import('file-saver'),
+    ]);
     if (rows.length === 0) return;
 
     const wb = new ExcelJS.Workbook();

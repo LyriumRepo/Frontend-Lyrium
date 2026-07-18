@@ -14,7 +14,7 @@ export default function AboutPage() {
                     className="absolute inset-0 bg-cover bg-center bg-fixed transition-transform duration-700 hover:scale-105"
                     style={{ backgroundImage: `url('/${aboutData.hero.bgImage1}')` }}
                 />
-                <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
+                <div className="absolute inset-0 bg-black/25 backdrop-blur-[2px]" />
 
                 <div className="relative z-10 px-6 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
 

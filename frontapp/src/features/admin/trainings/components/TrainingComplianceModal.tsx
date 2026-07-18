@@ -58,10 +58,10 @@ export default function TrainingComplianceModal({ open, onClose }: Props) {
                     {/* Stats */}
                     {meta && (
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5 animate-card-entrance">
-                            <BaseStatCard label="Vendedores" value={meta.total_sellers} icon="Users" color="sky" />
-                            <BaseStatCard label="Capacitaciones" value={meta.total_trainings} icon="Video" color="celeste" />
-                            <BaseStatCard label="Progreso global" value={`${meta.overall_completion}%`} icon="TrendingUp" color="emerald" />
-                            <BaseStatCard label="Obligatorias" value={`${meta.required_completion}%`} icon="Shield" color="amber" />
+                            <BaseStatCard label="Vendedores" value={meta.total_sellers} icon="Users" color="lima" />
+                            <BaseStatCard label="Capacitaciones" value={meta.total_trainings} icon="Video" color="verde" />
+                            <BaseStatCard label="Progreso global" value={`${meta.overall_completion}%`} icon="TrendingUp" color="turquesa" />
+                            <BaseStatCard label="Obligatorias" value={`${meta.required_completion}%`} icon="Shield" color="turquesaClaro" />
                         </div>
                     )}
 

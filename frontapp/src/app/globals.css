@@ -630,6 +630,40 @@
     .animate-float-emoji-zig    { animation: floatEmojiZig 1.9s ease-in-out infinite; }
     .animate-float-emoji-pop    { animation: floatEmojiPop 2.1s ease-in-out infinite; }
     .animate-gradient-shift     { background-size: 300% auto; animation: gradientShift 2.5s linear infinite; }
+
+    /* Hero de Capacitaciones (seller) — blobs flotantes + anillo de progreso */
+    @keyframes blobFloat {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        50% { transform: translate(14px, -16px) scale(1.08); }
+    }
+    @keyframes blobFloatReverse {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        50% { transform: translate(-12px, 14px) scale(1.1); }
+    }
+    @keyframes spinSlow {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    @keyframes ringPulse {
+        0%, 100% { opacity: 0.35; transform: scale(1); }
+        50% { opacity: 0.6; transform: scale(1.04); }
+    }
+    .animate-blob-float         { animation: blobFloat 9s ease-in-out infinite; }
+    .animate-blob-float-reverse { animation: blobFloatReverse 11s ease-in-out infinite; }
+    .animate-spin-slow          { animation: spinSlow 14s linear infinite; }
+    .animate-ring-pulse         { animation: ringPulse 3s ease-in-out infinite; }
+
+    /* Transición modo día/noche — barrido circular desde el botón (View Transitions API) */
+    @keyframes themeVtReveal {
+        from { clip-path: circle(0px at var(--theme-vt-x, 50%) var(--theme-vt-y, 50%)); }
+        to   { clip-path: circle(var(--theme-vt-r, 150%) at var(--theme-vt-x, 50%) var(--theme-vt-y, 50%)); }
+    }
+    ::view-transition-old(root) {
+        animation: none;
+    }
+    ::view-transition-new(root) {
+        animation: themeVtReveal 420ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
     /* Lyrium brand gradient — celeste → turquesa → verde, lento y fluido */
     .lyrium-rainbow-header {
         background: linear-gradient(

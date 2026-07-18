@@ -34,14 +34,14 @@ export function InvoicesPageClient() {
     }, [filteredVouchers, kpis]);
 
     if (isLoading && filteredVouchers.length === 0) {
-        return <BaseLoading message="Cargando comprobantes electrónicos..." />;
+        return <BaseLoading message="Cargando confirmaciones de pago..." />;
     }
 
     return (
         <div className="space-y-8 pb-20 animate-fadeIn">
             <ModuleHeader
-                title="Mis Comprobantes"
-                subtitle="Los comprobantes se generan automáticamente al confirmarse el pago"
+                title="Mis Confirmaciones de Pago"
+                subtitle="Las confirmaciones se generan automáticamente al confirmarse el pago"
                 icon="Receipt"
             />
 

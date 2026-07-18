@@ -20,7 +20,7 @@ import {
   Send, Settings, Share2, Shield, ShieldCheck, ShieldX, ShoppingBag,
   ShoppingCart, Smile, Sparkles, Star, Stethoscope, Store, Tag, ThumbsUp,
   Ticket, Timer, Trash2, TrendingDown, TrendingUp, Trophy, Truck, Twitter,
-  Upload, User, UserCheck, UserCircle, UserCog, UserPlus, Users, Video, Wallet,
+  Upload, Undo, User, UserCheck, UserCircle, UserCog, UserPlus, Users, Video, Wallet,
   X, XCircle, XSquare, Youtube, Zap,
   type LucideIcon,
 } from 'lucide-react';
@@ -62,7 +62,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Send, Settings, Share2, Shield, ShieldCheck, ShieldX, ShoppingBag,
   ShoppingCart, Smile, Sparkles, Star, Stethoscope, Store, Tag, ThumbsUp,
   Ticket, Timer, Trash2, TrendingDown, TrendingUp, Trophy, Truck, Twitter,
-  Upload, User, UserCheck, UserCircle, UserCog, UserPlus, Users, Video, Wallet,
+  Upload, Undo, User, UserCheck, UserCircle, UserCog, UserPlus, Users, Video, Wallet,
   X, XCircle, XSquare, Youtube, Zap,
 };
 

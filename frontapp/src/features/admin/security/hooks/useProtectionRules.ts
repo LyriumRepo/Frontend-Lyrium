@@ -41,7 +41,7 @@ export function useProtectionRules() {
   });
 
   const createRule = useCallback(async (payload: Parameters<typeof createMut.mutateAsync>[0]) => createMut.mutateAsync(payload), [createMut]);
-  const updateRule = useCallback(async (id: number, payload: Parameters<typeof updateMut.mutateAsync>[1]['payload']) => updateMut.mutateAsync({ id, payload }), [updateMut]);
+  const updateRule = useCallback(async (id: number, payload: Partial<{ name: string; type: ProtectionRuleType; severity: ProtectionRuleSeverity; status: ProtectionRuleStatus; pattern?: string | null; priority?: number; description?: string | null; config?: Record<string, unknown> | null }>) => updateMut.mutateAsync({ id, payload }), [updateMut]);
   const toggleRule = useCallback(async (id: number) => toggleMut.mutateAsync(id), [toggleMut]);
   const deleteRule = useCallback(async (id: number) => deleteMut.mutateAsync(id), [deleteMut]);
 

@@ -12,7 +12,7 @@ export const adminNavigation: PanelNavigation = [
             },
             {
                 id: 'solicitudes',
-                label: 'Solicitudes',
+                label: 'Solicitudes de Registro',
                 href: '/admin/sellers/solicitudes',
                 icon: 'ListChecks',
             },
@@ -44,29 +44,28 @@ export const adminNavigation: PanelNavigation = [
                 href: '/admin/finance',
                 icon: 'TrendingUp',
             },
-            {
-                id: 'payments',
-                label: 'Gestión de Pagos',
-                href: '/admin/payments',
-                icon: 'Landmark',
-            },
-            {
-                id: 'invoices',
-                label: 'Facturación Electrónica',
-                href: '/admin/invoices',
-                icon: 'Receipt',
-            },
         ],
     },
     {
         title: 'Operaciones',
         items: [
-
             {
                 id: 'operations',
-                label: 'Gestión Operativa',
+                label: 'Pagos',
                 href: '/admin/operations',
                 icon: 'Settings',
+            },
+            {
+                id: 'payments',
+                label: 'Ventas',
+                href: '/admin/payments',
+                icon: 'Landmark',
+            },
+            {
+                id: 'rapifac',
+                label: 'Facturación Rápida',
+                href: '/admin/rapifac',
+                icon: 'Receipt',
             },
         ],
     },
@@ -75,9 +74,20 @@ export const adminNavigation: PanelNavigation = [
         items: [
             {
                 id: 'security',
-                label: 'Seguridad',
+                label: 'Centro de Seguridad',
                 href: '/admin/security',
                 icon: 'Shield',
+            },
+        ],
+    },
+    {
+        title: 'Reportes',
+        items: [
+            {
+                id: 'reportes',
+                label: 'Centro de Reportes',
+                href: '/admin/reportes',
+                icon: 'BarChart3',
             },
         ],
     },
@@ -91,6 +101,18 @@ export const adminNavigation: PanelNavigation = [
                 icon: 'FolderTree',
             },
             {
+                id: 'bioblog',
+                label: 'BioBlog',
+                href: '/admin/bioblog',
+                icon: 'BookOpen',
+            },
+            {
+                id: 'bioforo',
+                label: 'BioForo',
+                href: '/admin/bioforo',
+                icon: 'MessagesSquare',
+            },
+            {
                 id: 'reviews',
                 label: 'Gestión de Puntuación',
                 href: '/admin/reviews',
@@ -101,12 +123,6 @@ export const adminNavigation: PanelNavigation = [
                 label: 'Planes y Suscripciones',
                 href: '/admin/planes',
                 icon: 'Sparkles',
-            },
-            {
-                id: 'bioblog',
-                label: 'BioBlog - Aprobaciones',
-                href: '/admin/bioblog',
-                icon: 'BookOpen',
             },
         ],
     },

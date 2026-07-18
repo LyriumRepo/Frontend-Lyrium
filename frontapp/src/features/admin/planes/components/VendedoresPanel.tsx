@@ -1,7 +1,9 @@
 'use client';
+import type { ReactNode } from 'react';
 import { formatAdminDate } from '@/features/seller/plans/lib/helpers';
-import Modal from '@/features/seller/plans/shared/Modal';
+import AdminModal from '@/components/admin/AdminModal';
 import type { Vendedor } from '@/features/seller/plans/types';
+import AdminTable, { Column } from '@/components/admin/AdminTable';
 
 function getEstado(v: Vendedor): 'activo' | 'por_vencer' | 'vencido' | 'indefinido' {
   if (!v.fecha_expiracion || v.plan_actual === 'basic') return 'indefinido';
@@ -25,6 +27,90 @@ interface Props {
 const ESTADO_DOT: Record<string, string> = { activo:'#22c55e', por_vencer:'#f59e0b', vencido:'#ef4444', indefinido:'#9ca3af' };
 const ESTADO_LABEL: Record<string, string> = { activo:'Activo', por_vencer:'Por vencer', vencido:'Vencido', indefinido:'Sin vencimiento' };
 
+function getVenceBadge(v: Vendedor, est: string): ReactNode {
+  if (est === 'por_vencer' && v.fecha_expiracion) {
+    const days = Math.ceil((new Date(v.fecha_expiracion).getTime() - Date.now()) / 86400000);
+    return <span className="inline-block px-2 py-1 rounded-md text-[10px] font-bold bg-amber-100 text-amber-700">Vence en {days}d</span>;
+  }
+  if (est === 'vencido') {
+    return <span className="inline-block px-2 py-1 rounded-md text-[10px] font-bold bg-red-100 text-red-700">Expirado</span>;
+  }
+  if (v.fecha_expiracion) {
+    return <span className="inline-block px-2 py-1 rounded-md text-[10px] font-semibold text-[var(--text-secondary)]">Vence: {formatAdminDate(v.fecha_expiracion)}</span>;
+  }
+  return null;
+}
+
+const VendedorCell = ({ v }: { v: Vendedor }) => {
+  const planColor = v.css_color ?? '#9ca3af';
+  const initials = (v.username ?? 'V').substring(0, 2).toUpperCase();
+  const correo = v.correo ?? v.email ?? '';
+  return (
+    <div className="flex items-center gap-3">
+      <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-extrabold text-sm flex-shrink-0" style={{ background: planColor }}>{initials}</div>
+      <div className="min-w-0">
+        <div className="font-bold text-[var(--text-primary)] truncate">{v.username ?? 'Vendedor'}</div>
+        <div className="text-xs text-[var(--text-placeholder)] truncate">{correo}</div>
+      </div>
+    </div>
+  );
+};
+
+const PlanCell = ({ v }: { v: Vendedor }) => {
+  const planColor = v.css_color ?? '#9ca3af';
+  return (
+    <span className="inline-block px-3 py-1.5 rounded-lg text-[11px] font-bold" style={{ color: planColor, background: `${planColor}18`, border:`1px solid ${planColor}40` }}>
+      {v.nombre_plan ?? 'Emprende'}
+    </span>
+  );
+};
+
+const EstadoCell = ({ v }: { v: Vendedor }) => {
+  const est = getEstado(v);
+  const estadoColor = ESTADO_DOT[est] ?? '#9ca3af';
+  const histCount = v.historial?.length ?? 0;
+  return (
+    <div>
+      <div className="flex items-center gap-2">
+        <span className="w-2 h-2 rounded-full" style={{ background: estadoColor }} />
+        <span className="text-xs font-semibold text-[var(--text-secondary)]">{ESTADO_LABEL[est]}</span>
+        {histCount > 0 && (
+          <span className="text-xs bg-[var(--bg-muted)] text-[var(--text-secondary)] px-2 py-0.5 rounded-full">{histCount} cambio{histCount !== 1 ? 's' : ''}</span>
+        )}
+      </div>
+      <div className="mt-1.5">{getVenceBadge(v, est)}</div>
+    </div>
+  );
+};
+
+const vendedorColumns: Column<Vendedor>[] = [
+  { key: 'vendedor', header: 'Vendedor', render: (v) => <VendedorCell v={v} /> },
+  { key: 'plan', header: 'Plan', render: (v) => <PlanCell v={v} /> },
+  { key: 'estado', header: 'Estado', render: (v) => <EstadoCell v={v} /> },
+];
+
+const VendedorMobileCard = ({ vendedor: v, onOpenModal }: { vendedor: Vendedor; onOpenModal: (uid: string) => void }) => {
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      className="p-5 cursor-pointer"
+      onClick={() => onOpenModal(String(v.usuario_id))}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onOpenModal(String(v.usuario_id)); }}
+    >
+      <div className="mb-3"><VendedorCell v={v} /></div>
+      <div className="mb-3"><PlanCell v={v} /></div>
+      <EstadoCell v={v} />
+      <div className="flex items-center gap-2 mt-3 text-xs font-semibold text-[var(--text-placeholder)]">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 14 14"/>
+        </svg>
+        Historial
+      </div>
+    </div>
+  );
+};
+
 export default function VendedoresPanel({ vendedores, loading, filter, search, selectedVendedor: sv, modalOpen, onFilterChange, onSearchChange, onOpenModal, onCloseModal }: Props) {
   const filtered = vendedores.filter(v => {
     if (filter !== 'all' && getEstado(v) !== filter) return false;
@@ -43,128 +129,61 @@ export default function VendedoresPanel({ vendedores, loading, filter, search, s
             <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
           </svg>
           <input type="text" placeholder="Buscar por nombre o correo…" value={search} onChange={e => onSearchChange(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-[var(--border-subtle)] rounded-xl text-sm focus:outline-none focus:border-[var(--brand-sky)] dark:focus:border-[var(--brand-green)]" />
+            className="w-full pl-10 pr-4 py-2.5 bg-[var(--bg-primary)] text-[var(--text-primary)] border border-[var(--border-subtle)] rounded-xl text-sm focus:outline-none focus:border-[var(--brand-sky)] dark:focus:border-[var(--brand-green)]" />
         </div>
         <div className="flex items-center gap-3 flex-wrap">
-          <div className="flex flex-wrap gap-1 bg-gray-100 dark:bg-[var(--bg-muted)] p-1 rounded-xl">
+          <div className="flex flex-wrap gap-1 bg-[var(--bg-muted)] p-1 rounded-xl">
             {[['all','Todos'],['activo','Activos'],['por_vencer','Por vencer'],['vencido','Vencidos'],['indefinido','Sin plan']].map(([f, l]) => (
               <button key={f}
                 className={`px-3 py-2 min-h-[36px] rounded-lg text-xs font-semibold transition-all
-                  ${filter === f ? 'bg-white dark:bg-[var(--bg-card)] shadow-sm text-gray-800 dark:text-[var(--text-primary)]' : 'text-gray-500 dark:text-[var(--text-secondary)] hover:text-gray-700 dark:hover:text-[var(--text-primary)]'}
-                  ${f === 'por_vencer' ? (filter === f ? 'text-amber-600' : '') : f === 'vencido' ? (filter === f ? 'text-red-600' : '') : f === 'indefinido' ? (filter === f ? 'text-gray-400 dark:text-[var(--text-placeholder)]' : '') : ''}`}
+                  ${filter === f ? 'bg-[var(--bg-card)] shadow-sm text-[var(--text-primary)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}
+                  ${f === 'por_vencer' ? (filter === f ? 'text-amber-600' : '') : f === 'vencido' ? (filter === f ? 'text-red-600' : '') : f === 'indefinido' ? (filter === f ? 'text-[var(--text-placeholder)]' : '') : ''}`}
                 onClick={() => onFilterChange(f)}>
                 {l}
               </button>
             ))}
           </div>
-          <span className="text-xs font-semibold text-gray-400 dark:text-[var(--text-placeholder)] whitespace-nowrap">{filtered.length} vendedor{filtered.length !== 1 ? 'es' : ''}</span>
+          <span className="text-xs font-semibold text-[var(--text-placeholder)] whitespace-nowrap">{filtered.length} vendedor{filtered.length !== 1 ? 'es' : ''}</span>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="vendedoresList">
-        {loading && (
-          <div className="col-span-full flex items-center justify-center gap-3 py-12 text-gray-400 dark:text-[var(--text-placeholder)]">
-            <div className="w-6 h-6 border-2 border-gray-300 border-t-[var(--brand-sky)] dark:border-t-[var(--brand-green)] rounded-full animate-spin" />
-            <span>Cargando vendedores…</span>
-          </div>
-        )}
-        {!loading && filtered.length === 0 && (
-          <div className="col-span-full text-center py-16 text-gray-300 dark:text-[var(--text-placeholder)] flex flex-col items-center">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
-            </svg>
-            <p className="mt-4 text-sm text-gray-400 dark:text-[var(--text-placeholder)]">No se encontraron vendedores</p>
-          </div>
-        )}
-        {!loading && filtered.map(v => {
-          const est         = getEstado(v);
-          const planColor   = v.css_color ?? '#9ca3af';
-          const initials    = (v.username ?? 'V').substring(0, 2).toUpperCase();
-          const estadoColor = ESTADO_DOT[est] ?? '#9ca3af';
-          const histCount   = v.historial?.length ?? 0;
-          const correo      = v.correo ?? v.email ?? '';
-
-          let venceBadge: React.ReactNode = null;
-          if (est === 'por_vencer' && v.fecha_expiracion) {
-            const days = Math.ceil((new Date(v.fecha_expiracion).getTime() - Date.now()) / 86400000);
-            venceBadge = <span className="inline-block px-2 py-1 rounded-md text-[10px] font-bold bg-amber-100 text-amber-700">Vence en {days}d</span>;
-          } else if (est === 'vencido') {
-            venceBadge = <span className="inline-block px-2 py-1 rounded-md text-[10px] font-bold bg-red-100 text-red-700">Expirado</span>;
-          } else if (v.fecha_expiracion) {
-            venceBadge = <span className="inline-block px-2 py-1 rounded-md text-[10px] font-semibold text-gray-500 dark:text-[var(--text-secondary)]">Vence: {formatAdminDate(v.fecha_expiracion)}</span>;
-          }
-
-          return (
-            <div 
-              key={v.usuario_id} 
-              role="button"
-              tabIndex={0}
-              className="bg-white dark:bg-[var(--bg-card)] rounded-2xl overflow-hidden border border-gray-100 dark:border-[var(--border-subtle)] shadow-sm hover:shadow-md transition-all cursor-pointer group"
-              onClick={() => onOpenModal(String(v.usuario_id))}
-              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onOpenModal(String(v.usuario_id)); }}
-            >
-              <div className="h-1.5" style={{ background: planColor }} />
-              <div className="p-5">
-                <div className="flex items-start gap-3 mb-3">
-                  <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-extrabold text-sm flex-shrink-0" style={{ background: planColor }}>{initials}</div>
-                  <div className="flex-1 min-w-0">
-                    <div className="font-bold text-gray-800 dark:text-[var(--text-primary)] truncate">{v.username ?? 'Vendedor'}</div>
-                    <div className="text-xs text-gray-400 dark:text-[var(--text-placeholder)] truncate">{correo}</div>
-                  </div>
-                </div>
-                <span className="inline-block px-3 py-1.5 rounded-lg text-[11px] font-bold mb-3" style={{ color: planColor, background: `${planColor}18`, border:`1px solid ${planColor}40` }}>
-                  {v.nombre_plan ?? 'Emprende'}
-                </span>
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="w-2 h-2 rounded-full" style={{ background: estadoColor }} />
-                  <span className="text-xs font-semibold text-gray-600 dark:text-[var(--text-secondary)]">{ESTADO_LABEL[est]}</span>
-                  {histCount > 0 && (
-                    <span className="ml-auto text-xs bg-gray-100 dark:bg-[var(--bg-muted)] text-gray-500 dark:text-[var(--text-secondary)] px-2 py-0.5 rounded-full">{histCount} cambio{histCount !== 1 ? 's' : ''}</span>
-                  )}
-                </div>
-                {venceBadge}
-              </div>
-              <div className="px-5 py-3 bg-gray-50 dark:bg-[var(--bg-muted)] border-t border-gray-100 dark:border-[var(--border-subtle)] flex items-center gap-2 text-xs font-semibold text-gray-400 dark:text-[var(--text-placeholder)] group-hover:text-[var(--brand-sky)] dark:group-hover:text-[var(--brand-green)] transition-colors">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 14 14"/>
-                </svg>
-                Historial
-              </div>
-            </div>
-          );
-        })}
+      <div id="vendedoresList">
+        <AdminTable
+          data={filtered}
+          columns={vendedorColumns}
+          keyField="usuario_id"
+          loading={loading}
+          onRowClick={(v) => onOpenModal(String(v.usuario_id))}
+          emptyIcon="Users"
+          emptyTitle="No se encontraron vendedores"
+          mobileCardRender={(v) => <VendedorMobileCard vendedor={v} onOpenModal={onOpenModal} />}
+        />
       </div>
 
-      <Modal open={modalOpen} onClose={onCloseModal} className="max-w-lg mx-4">
+      <AdminModal
+        isOpen={modalOpen}
+        onClose={onCloseModal}
+        title={sv?.username ?? 'Vendedor'}
+        subtitle={sv ? (sv.correo ?? sv.email ?? '') : undefined}
+        size="lg"
+      >
         {sv && (() => {
           const est       = getEstado(sv);
           const planColor = sv.css_color ?? '#9ca3af';
-          const correo    = sv.correo ?? sv.email ?? '';
           const historial = (sv.historial ?? []) as Record<string, unknown>[];
           const firstHist = historial[0];
 
           return (
-            <div className="max-h-[75vh] overflow-y-auto">
-              <div className="flex items-center gap-4 pb-4 border-b-2" style={{ borderColor: planColor }}>
-                <div className="w-14 h-14 rounded-xl flex items-center justify-center text-white font-extrabold text-lg" style={{ background: planColor }}>
-                  {(sv.username ?? 'V').substring(0, 2).toUpperCase()}
-                </div>
-                <div>
-                  <h3 className="text-lg font-extrabold text-gray-800 dark:text-[var(--text-primary)]">{sv.username ?? 'Vendedor'}</h3>
-                  <span className="text-xs text-gray-400 dark:text-[var(--text-placeholder)]">{correo}</span>
-                </div>
-              </div>
-
-              <div className="py-4">
-                <div className="bg-white dark:bg-[var(--bg-card)] rounded-xl p-4 border-l-4 mb-5" style={{ borderLeftColor: planColor }}>
+            <div>
+                <div className="bg-[var(--bg-card)] rounded-xl p-4 border-l-4 mb-5" style={{ borderLeftColor: planColor }}>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-[11px] font-bold uppercase text-gray-400 dark:text-[var(--text-placeholder)]">Plan actual</span>
+                    <span className="text-[11px] font-bold uppercase text-[var(--text-placeholder)]">Plan actual</span>
                     <span className="px-2.5 py-1 rounded-full text-[11px] font-bold" style={{ background:`${ESTADO_DOT[est]}22`, color: ESTADO_DOT[est] }}>
                       {ESTADO_LABEL[est]}
                     </span>
                   </div>
                   <div className="text-lg font-extrabold mb-2" style={{ color: planColor }}>{sv.nombre_plan ?? 'Emprende'}</div>
-                  <div className="text-xs text-gray-500 dark:text-[var(--text-secondary)] space-y-1">
+                  <div className="text-xs text-[var(--text-secondary)] space-y-1">
                     {Boolean(firstHist?.fecha_inicio ?? firstHist?.cambiado_en) && (
                       <div className="flex items-center gap-1.5">
                         <span>📅</span>
@@ -189,10 +208,10 @@ export default function VendedoresPanel({ vendedores, loading, filter, search, s
                 </div>
 
                 <div>
-                  <h4 className="text-sm font-bold text-gray-700 dark:text-[var(--text-primary)] mb-3">Historial de cambios</h4>
+                  <h4 className="text-sm font-bold text-[var(--text-primary)] mb-3">Historial de cambios</h4>
                   <div className="space-y-3">
                     {historial.length === 0
-                      ? <p className="text-center text-gray-400 dark:text-[var(--text-placeholder)] text-xs py-5">Sin historial de cambios</p>
+                      ? <p className="text-center text-[var(--text-placeholder)] text-xs py-5">Sin historial de cambios</p>
                       : historial.map((h, i) => {
                           const motivoMap: Record<string,string> = { manual:'Cambio manual', vencido:'Venció — bajó a Emprende', eliminado:'Plan eliminado' };
                           const motivo = String(h.motivo ?? '');
@@ -201,11 +220,11 @@ export default function VendedoresPanel({ vendedores, loading, filter, search, s
                             <div key={`history-${h.cambiado_en}-${i}`} className="flex gap-3">
                               <div className="w-2 h-2 rounded-full mt-1.5 flex-shrink-0" style={{ background: mColor }} />
                               <div className="flex-1">
-                                <div className="text-xs font-semibold text-gray-700 dark:text-[var(--text-primary)]">
+                                <div className="text-xs font-semibold text-[var(--text-primary)]">
                                   {String(h.nombre_desde ?? h.plan_desde ?? '?')} → {String(h.nombre_hasta ?? h.plan_hasta ?? '?')}
                                 </div>
                                 <div className="text-[11px]" style={{ color: mColor }}>{motivoMap[motivo] ?? motivo}</div>
-                                <div className="text-[10px] text-gray-400 dark:text-[var(--text-placeholder)]">{formatAdminDate(String(h.cambiado_en ?? ''))}</div>
+                                <div className="text-[10px] text-[var(--text-placeholder)]">{formatAdminDate(String(h.cambiado_en ?? ''))}</div>
                               </div>
                             </div>
                           );
@@ -213,11 +232,10 @@ export default function VendedoresPanel({ vendedores, loading, filter, search, s
                     }
                   </div>
                 </div>
-              </div>
             </div>
           );
         })()}
-      </Modal>
+      </AdminModal>
     </>
   );
 }

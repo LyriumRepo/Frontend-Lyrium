@@ -1,6 +1,3 @@
-import { jsPDF } from 'jspdf';
-import autoTable from 'jspdf-autotable';
-import { saveAs } from 'file-saver';
 import { Order, OrderItem, ServiceOrderItem } from '../types';
 
 // ── Brand palette (misma que invoices/pdfExporter) ──
@@ -81,7 +78,7 @@ async function loadImageB64(url: string): Promise<string | null> {
 }
 
 // ── Draw helpers ──
-function sectionTitle(doc: jsPDF, title: string, y: number, ml: number, cw: number): number {
+function sectionTitle(doc: any, title: string, y: number, ml: number, cw: number): number {
     doc.setFillColor(C.sectionBar[0], C.sectionBar[1], C.sectionBar[2]);
     doc.rect(ml, y, 2.5, 12, 'F');
     doc.setTextColor(G[800][0], G[800][1], G[800][2]);
@@ -94,7 +91,7 @@ function sectionTitle(doc: jsPDF, title: string, y: number, ml: number, cw: numb
     return y + 24;
 }
 
-function fieldRow(doc: jsPDF, pairs: Array<[string, string]>, y: number, ml: number, cw: number): number {
+function fieldRow(doc: any, pairs: Array<[string, string]>, y: number, ml: number, cw: number): number {
     const halfW = (cw - 6) / 2;
     pairs.forEach(([label, value], i) => {
         const x = ml + (i % 2) * (halfW + 6);
@@ -116,12 +113,12 @@ function fieldRow(doc: jsPDF, pairs: Array<[string, string]>, y: number, ml: num
     return y + 10;
 }
 
-function infoBlock(doc: jsPDF, title: string, pairs: Array<[string, string]>, y: number, ml: number, cw: number): number {
+function infoBlock(doc: any, title: string, pairs: Array<[string, string]>, y: number, ml: number, cw: number): number {
     y = sectionTitle(doc, title, y, ml, cw);
     return fieldRows(doc, pairs, y, ml, cw);
 }
 
-function fieldRows(doc: jsPDF, pairs: Array<[string, string]>, y: number, ml: number, cw: number): number {
+function fieldRows(doc: any, pairs: Array<[string, string]>, y: number, ml: number, cw: number): number {
     let cy = y;
     for (let i = 0; i < pairs.length; i += 2) {
         const chunk = pairs.slice(i, i + 2);
@@ -130,7 +127,7 @@ function fieldRows(doc: jsPDF, pairs: Array<[string, string]>, y: number, ml: nu
     return cy + 5;
 }
 
-function footerText(doc: jsPDF, page: number, total: number, ml: number, cw: number): void {
+function footerText(doc: any, page: number, total: number, ml: number, cw: number): void {
     doc.setDrawColor(G[300][0], G[300][1], G[300][2]);
     doc.setLineWidth(0.3);
     doc.line(ml, 282, ml + cw, 282);
@@ -144,8 +141,13 @@ function footerText(doc: jsPDF, page: number, total: number, ml: number, cw: num
 
 // ── Main ──
 export async function generateOrderPdf(order: Order): Promise<void> {
+    const [{ jsPDF: JsPDF }, { default: autoTable }, { saveAs }] = await Promise.all([
+        import('jspdf'),
+        import('jspdf-autotable'),
+        import('file-saver'),
+    ]);
     const logo = await loadImageB64('/img/logo.png');
-    const doc = new jsPDF('p', 'mm', 'a4');
+    const doc = new JsPDF('p', 'mm', 'a4');
 
     const PW = 210, ML = 18, MR = 18, CW = PW - ML - MR;
     const PH = 297;

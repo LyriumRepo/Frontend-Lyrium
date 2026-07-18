@@ -187,7 +187,7 @@ function SkeletonRows() {
       {Array.from({ length: 6 }).map((_, i) => (
         <tr key={i} className="animate-pulse">
           {SKELETON_WIDTHS.map((w, j) => (
-            <td key={j} className="px-6 py-5">
+            <td key={j} className="px-4 py-3">
               <div className="h-4 bg-[var(--bg-secondary)] rounded-md" style={{ width: w }} />
             </td>
           ))}
@@ -475,13 +475,15 @@ const SalesTable = memo(function SalesTable({
         </div>
 
         {/* Desktop skeleton */}
-        <div className="hidden sm:block bg-[var(--bg-card)] rounded-3xl overflow-hidden border border-[var(--border-subtle)] shadow-sm">
+        <div className="hidden sm:block rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] overflow-visible">
           <div className="overflow-x-auto no-scrollbar">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full border-separate border-spacing-0">
               <thead>
-                <tr className="bg-[var(--bg-secondary)]">
-                  {['Número de Orden', 'Tipo', 'Cliente', 'Concepto', 'Modalidad', 'Cant.', 'Pago', 'Estado de la Orden', 'Total', 'Fecha', 'Acciones'].map((h) => (
-                    <th key={h} className="px-6 py-5 text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest border-b border-[var(--border-subtle)]">
+                <tr className="border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)]">
+                  {['Número de Orden', 'Tipo', 'Cliente', 'Concepto', 'Modalidad', 'Cant.', 'Pago', 'Estado de la Orden', 'Total', 'Fecha', 'Acciones'].map((h, i, arr) => (
+                    <th key={h} className={`px-4 py-2.5 text-left text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)]
+                      ${i === 0 ? 'rounded-tl-2xl' : ''}
+                      ${i === arr.length - 1 ? 'rounded-tr-2xl' : ''}`}>
                       {h}
                     </th>
                   ))}
@@ -558,17 +560,19 @@ const SalesTable = memo(function SalesTable({
       </div>
 
       {/* ══ DESKTOP: tabla completa (hidden sm:block) ════════════════════════ */}
-      <div className="hidden sm:block bg-[var(--bg-card)] rounded-3xl overflow-hidden border border-[var(--border-subtle)] shadow-sm transition-all hover:shadow-md">
+      <div className="hidden sm:block rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] overflow-visible">
         <div className="overflow-x-auto no-scrollbar">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full border-separate border-spacing-0">
             <thead>
-              <tr className="bg-[var(--bg-secondary)]">
+              <tr className="border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)]">
                 {table.getHeaderGroups().map((headerGroup) =>
-                  headerGroup.headers.map((header) => (
+                  headerGroup.headers.map((header, idx, arr) => (
                     <th
                       key={header.id}
                       scope="col"
-                      className="px-6 py-5 text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest border-b border-[var(--border-subtle)] whitespace-nowrap"
+                      className={`px-4 py-2.5 text-left text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)] whitespace-nowrap
+                        ${idx === 0 ? 'rounded-tl-2xl' : ''}
+                        ${idx === arr.length - 1 ? 'rounded-tr-2xl' : ''}`}
                     >
                       {header.isPlaceholder
                         ? null
@@ -578,15 +582,15 @@ const SalesTable = memo(function SalesTable({
                 )}
               </tr>
             </thead>
-            <tbody className="divide-y divide-[var(--border-subtle)]">
+            <tbody>
               {table.getRowModel().rows.map((row) => (
                 <tr
                   key={row.id}
-                  className="group hover:bg-[var(--bg-secondary)] transition-colors cursor-pointer"
+                  className="group hover:bg-[var(--bg-secondary)] transition-colors cursor-pointer border-b border-[var(--border-subtle)] last:border-b-0"
                   onClick={() => onViewDetail(row.original)}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className="px-6 py-4">
+                    <td key={cell.id} className="px-4 py-3">
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </td>
                   ))}
@@ -598,27 +602,37 @@ const SalesTable = memo(function SalesTable({
 
         {/* Paginación desktop */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between px-6 py-4 border-t border-[var(--border-subtle)] bg-[var(--bg-secondary)]/30">
-            <span className="text-[11px] font-bold text-[var(--text-secondary)]">
-              {data.length} órdenes
-            </span>
-            <div className="flex items-center gap-2">
+          <div className="flex items-center justify-between px-4 pt-1">
+            <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest">
+              Página {safePage + 1} de {totalPages} · {data.length} órdenes
+            </p>
+            <div className="flex items-center gap-1">
               <button
                 onClick={() => setPage(p => Math.max(0, p - 1))}
                 disabled={safePage === 0}
-                className="px-3 py-1.5 rounded-xl text-[11px] font-bold text-[var(--text-secondary)] bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-[#69BEEB]/30 hover:text-[#5AAFE6] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                className="w-7 h-7 flex items-center justify-center rounded-lg border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
               >
-                Anterior
+                <Icon name="ChevronLeft" className="w-3.5 h-3.5" />
               </button>
-              <span className="px-3 py-1.5 text-[11px] font-bold text-[var(--text-secondary)]">
-                Pág. {safePage + 1} de {totalPages}
-              </span>
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((pg) => (
+                <button
+                  key={pg}
+                  onClick={() => setPage(pg - 1)}
+                  className={`w-7 h-7 flex items-center justify-center rounded-lg text-[10px] font-black transition-colors
+                    ${safePage === pg - 1
+                      ? 'bg-sky-500/20 dark:bg-[#8FC3A1]/20 text-sky-500 dark:text-[#8FC3A1] border border-sky-500/30 dark:border-[#8FC3A1]/30'
+                      : 'border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]'
+                    }`}
+                >
+                  {pg}
+                </button>
+              ))}
               <button
                 onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
                 disabled={safePage >= totalPages - 1}
-                className="px-3 py-1.5 rounded-xl text-[11px] font-bold text-[var(--text-secondary)] bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-[#69BEEB]/30 hover:text-[#5AAFE6] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                className="w-7 h-7 flex items-center justify-center rounded-lg border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
               >
-                Siguiente
+                <Icon name="ChevronRight" className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>

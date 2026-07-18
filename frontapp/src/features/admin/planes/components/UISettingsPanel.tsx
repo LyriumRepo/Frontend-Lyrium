@@ -28,23 +28,23 @@ export default function UISettingsPanel({ colors: c, onChange, onSave, onReset }
   return (
     <>
       <div className="mb-6">
-        <h2 className="text-2xl font-extrabold text-gray-800 dark:text-[var(--text-primary)] mb-2">Apariencia del Panel de Usuario</h2>
-        <p className="text-sm text-gray-400 dark:text-[var(--text-placeholder)]">Personaliza los colores de los botones de suscripción</p>
+        <h2 className="text-2xl font-extrabold text-[var(--text-primary)] mb-2">Apariencia del Panel de Usuario</h2>
+        <p className="text-sm text-[var(--text-placeholder)]">Personaliza los colores de los botones de suscripción</p>
       </div>
-      <div className="bg-white dark:bg-[var(--bg-card)] rounded-2xl p-7 border border-gray-200 dark:border-[var(--border-subtle)]">
+      <div className="bg-[var(--bg-card)] rounded-2xl p-7 border border-[var(--border-subtle)]">
         {sections.map(s => (
           <div key={s.section}>
-            <h3 className="text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] mt-5 mb-4 uppercase tracking-wide">{s.section}</h3>
+            <h3 className="text-sm font-bold text-[var(--text-primary)] mt-5 mb-4 uppercase tracking-wide">{s.section}</h3>
             {s.section === 'Texto de Advertencia / Bloqueo' && (
-              <p className="text-xs text-gray-400 dark:text-[var(--text-placeholder)] mb-3">Es el texto que aparece debajo del botón bloqueado (ej: "⚠ Este plan solo puede reclamarse una vez")</p>
+              <p className="text-xs text-[var(--text-placeholder)] mb-3">Es el texto que aparece debajo del botón bloqueado (ej: "⚠ Este plan solo puede reclamarse una vez")</p>
             )}
             <div className="flex gap-5 flex-wrap mb-4">
               {s.fields.map(f => (
                 <div key={f.id} className="flex flex-col gap-2">
-                  <label className="text-xs font-semibold text-gray-500 dark:text-[var(--text-secondary)] uppercase tracking-wide">{f.label}</label>
+                  <label className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wide">{f.label}</label>
                   <div className="flex items-center gap-2">
                     <input type="color" value={c[f.id] ?? '#ffffff'} onChange={e => onChange(f.id, e.target.value)}
-                      className="w-11 h-11 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-lg cursor-pointer p-1" />
+                      className="w-11 h-11 border-2 border-[var(--border-subtle)] rounded-lg cursor-pointer p-1" />
                     <div className="w-8 h-8 rounded-lg" style={{ background: c[f.id] ?? '#ffffff', border: f.id === 'subscribeColor' ? '1px solid #e5e7eb' : undefined }} />
                   </div>
                 </div>
@@ -53,8 +53,8 @@ export default function UISettingsPanel({ colors: c, onChange, onSave, onReset }
           </div>
         ))}
 
-        <div className="mt-5 pt-5 border-t border-gray-200 dark:border-[var(--border-subtle)]">
-          <p className="text-xs font-semibold text-gray-400 dark:text-[var(--text-placeholder)] mb-3">Vista previa de botones:</p>
+        <div className="mt-5 pt-5 border-t border-[var(--border-subtle)]">
+          <p className="text-xs font-semibold text-[var(--text-placeholder)] mb-3">Vista previa de botones:</p>
           <div className="flex gap-2.5 flex-wrap mt-2">
             <button className="px-5 py-2.5 rounded-lg text-[13px] font-bold cursor-default" style={{ pointerEvents:'none', background:c.subscribeBg, color:c.subscribeColor }}>Suscribirse</button>
             <button className="px-5 py-2.5 rounded-lg text-[13px] font-bold cursor-default" style={{ pointerEvents:'none', background:c.currentBg, color:c.currentColor }}>Plan Actual</button>
@@ -66,7 +66,7 @@ export default function UISettingsPanel({ colors: c, onChange, onSave, onReset }
         <div className="mt-5 flex gap-3">
           <button className="px-6 py-3 border-none bg-gradient-to-r from-sky-500 to-sky-400 dark:from-emerald-700 dark:to-teal-600 text-white rounded-xl text-sm font-bold cursor-pointer transition-all duration-300 shadow-lg shadow-sky-500/25 dark:shadow-emerald-900/25 hover:shadow-xl hover:-translate-y-0.5"
             onClick={onSave}>Guardar Colores</button>
-          <button className="px-6 py-3 border-2 border-gray-200 dark:border-[var(--border-subtle)] bg-transparent text-gray-400 dark:text-[var(--text-placeholder)] rounded-xl text-sm font-semibold cursor-pointer transition-all duration-300 hover:border-gray-800 dark:hover:border-[var(--text-primary)] hover:text-gray-800 dark:hover:text-[var(--text-primary)]"
+          <button className="px-6 py-3 border-2 border-[var(--border-subtle)] bg-transparent text-[var(--text-placeholder)] rounded-xl text-sm font-semibold cursor-pointer transition-all duration-300 hover:border-[var(--text-primary)] hover:text-[var(--text-primary)]"
             onClick={onReset}>Restablecer</button>
         </div>
       </div>

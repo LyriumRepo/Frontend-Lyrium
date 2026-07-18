@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useSellers, type Solicitud, type FiltroEstado } from "./hooks/useSellers";
 import ModuleHeader from "@/components/layout/shared/ModuleHeader";
 import Icon from "@/components/ui/Icon";
+import AdminIndicatorGrid from '@/components/admin/AdminIndicatorGrid';
 
 function formatFecha(iso: string) {
   const d = new Date(iso);
@@ -45,15 +46,6 @@ function ScoreBar({ score }: { score: number }) {
       <div className="flex-1 h-1.5 bg-[var(--bg-secondary)] rounded-full overflow-hidden">
         <div className={`h-full rounded-full transition-all duration-500 ${color}`} style={{ width: `${score}%` }} />
       </div>
-    </div>
-  );
-}
-
-function StatCard({ label, value, accent }: { label: string; value: number; accent: string }) {
-  return (
-    <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl px-5 py-4 flex flex-col gap-1">
-      <span className="text-[11px] uppercase tracking-widest text-[var(--text-secondary)] font-medium">{label}</span>
-      <span className={`text-3xl font-bold tabular-nums ${accent}`}>{value}</span>
     </div>
   );
 }
@@ -159,12 +151,12 @@ export default function SellersSolicitudes() {
         icon="Users"
       />
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <StatCard label="Total"       value={resumen.total}      accent="text-[var(--text-primary)]" />
-        <StatCard label="Aceptados"   value={resumen.aceptados}  accent="text-[var(--color-success)]" />
-        <StatCard label="En revisión" value={resumen.revision}   accent="text-[var(--color-warning)]" />
-        <StatCard label="Rechazados"  value={resumen.rechazados} accent="text-[var(--color-error)]"   />
-      </div>
+      <AdminIndicatorGrid indicators={[
+          { label: 'Total', value: resumen.total, icon: 'Users', color: 'lima' },
+          { label: 'Aceptados', value: resumen.aceptados, icon: 'CheckCircle', color: 'verde' },
+          { label: 'En revisión', value: resumen.revision, icon: 'Clock', color: 'turquesa' },
+          { label: 'Rechazados', value: resumen.rechazados, icon: 'XCircle', color: 'turquesaClaro' },
+      ]} />
 
       {loading ? (
         <div className="flex items-center justify-center py-20 text-[var(--text-secondary)]">

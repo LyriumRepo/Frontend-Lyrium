@@ -422,7 +422,7 @@ export function ChatPageClient({ conversationId }: { conversationId?: string }) 
                 <CustomerChatLayout
                     list={listContent}
                     detail={chatContent}
-                    isMobileListVisible={isMobileListVisible}
+                    mobileView={isMobileListVisible ? 'list' : 'detail'}
                 />
             )}
 

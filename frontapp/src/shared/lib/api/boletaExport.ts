@@ -233,10 +233,26 @@ async function downloadImage(order: BoletaOrder, format: 'png' | 'jpeg'): Promis
   // Mount in an off-screen div in the current document so html2canvas can
   // measure layout. All <img> sources are now data URLs — no CORS risk.
   const container = document.createElement('div');
+  container.className = 'boleta-capture-root';
   container.style.cssText =
     'position:fixed;left:-9999px;top:0;width:672px;background:#f3f4f6;font-family:Arial,Helvetica,sans-serif;';
   container.innerHTML = printArea.outerHTML;
   document.body.appendChild(container);
+
+  // html2canvas (v1.4.1) can't parse the oklch() colors that Tailwind v4's
+  // base layer applies globally (`* { border-color: var(--border) }`,
+  // `body { background/color }`). It throws "unsupported color function"
+  // while walking up from our container to <body>/<html>. Temporarily pin
+  // those to plain hex for the duration of the capture.
+  const captureStyleOverride = document.createElement('style');
+  captureStyleOverride.textContent = `
+    html, body, .boleta-capture-root, .boleta-capture-root * {
+      border-color: #e5e7eb;
+      outline-color: transparent;
+    }
+    body { background-color: #f3f4f6; color: #1f2937; }
+  `;
+  document.head.appendChild(captureStyleOverride);
 
   // Wait for the data-URL images inside the container to decode.
   await Promise.all(
@@ -283,6 +299,9 @@ async function downloadImage(order: BoletaOrder, format: 'png' | 'jpeg'): Promis
       );
     });
   } finally {
+    if (document.head.contains(captureStyleOverride)) {
+      document.head.removeChild(captureStyleOverride);
+    }
     if (document.body.contains(container)) {
       document.body.removeChild(container);
     }

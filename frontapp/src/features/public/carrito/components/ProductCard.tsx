@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { Star, ShieldCheck, Leaf, Barcode, FolderOpen, Package } from 'lucide-react';
+import { Star, ShieldCheck, Leaf, Barcode, FolderOpen, Package, ExternalLink } from 'lucide-react';
 import { money, resolveImg, NO_IMAGE, ApiProduct } from '@/modules/cart/utils';
 import TopMedalBadge from '@/components/ui/TopMedalBadge';
 
@@ -150,7 +150,7 @@ export default function ProductCard({ product: p, onAdd, onView }: Props) {
                             : <p className="text-xs text-transparent">-</p>
                         }
                     </div>
-                    <span className={`text-xs inline-flex items-center gap-1 ${outOfStock ? 'text-rose-500' : 'text-slate-400 dark:text-[var(--text-muted)]'}`}>
+                    <span className={`text-sm inline-flex items-center gap-1 ${outOfStock ? 'text-rose-500' : 'text-slate-400 dark:text-[var(--text-muted)]'}`}>
                         <Package className="w-3 h-3 text-sky-500 dark:text-[var(--brand-sky)]" />
                         {outOfStock ? 'Agotado' : stock ? `Stock: ${stock}` : 'Disponible'}
                     </span>
@@ -169,7 +169,7 @@ export default function ProductCard({ product: p, onAdd, onView }: Props) {
                         onClick={() => router.push(`/producto/${p.slug ?? p.id}`)}
                         className="py-2.5 rounded-2xl border border-sky-200 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] text-xs font-semibold text-slate-700 dark:text-[var(--text-primary)] inline-flex items-center justify-center gap-1.5 hover:bg-sky-50 dark:hover:bg-sky-900/10 transition hover:-translate-y-px"
                     >
-                        🔍 Ver
+                        <ExternalLink className="w-3.5 h-3.5" /> Detalle
                     </button>
                 </div>
             </div>

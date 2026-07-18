@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, Suspense } from 'react';
 import { FileText, Plus, Search, Edit, Trash2, Eye, Send, Save, CheckCircle, Folder, Info, AlertCircle, BookOpen, Headphones, Video, Clapperboard } from 'lucide-react';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import BaseButton from '@/components/ui/BaseButton';
-import { BlogEditor } from '@/components/ui/BlogEditor';
+import dynamic from 'next/dynamic';
+const BlogEditor = dynamic(() => import('@/components/ui/BlogEditor').then(m => ({ default: m.BlogEditor })), { ssr: false, loading: () => <div className="h-[300px] bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse" /> });
 import { GooglePreview } from '@/components/ui/GooglePreview';
 import { blogApi, BlogArticle } from '@/shared/lib/api/bioblogRepository';
 import { blogApi as publicBlogApi } from '@/shared/lib/api/blog';

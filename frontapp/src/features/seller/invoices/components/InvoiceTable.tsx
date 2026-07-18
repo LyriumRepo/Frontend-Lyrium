@@ -142,7 +142,7 @@ function MobileInvoiceCard({ voucher: v, onViewDetail }: MobileInvoiceCardProps)
                     {/* Comisión */}
                     <div className="flex items-center justify-between">
                         <span className="text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)]">Comisión</span>
-                        <span className="text-sm font-bold text-amber-600 dark:text-amber-400">
+                        <span className="text-sm font-bold text-sky-500 dark:text-[#8FC3A1]">
                             {formatCommission(v.commission_rate, v.commission_amount)}
                         </span>
                     </div>
@@ -184,11 +184,20 @@ export default function InvoiceTable({ vouchers, onViewDetail }: InvoiceTablePro
     /* ── Estado vacío compartido ── */
     if (vouchers.length === 0) {
         return (
-            <div className="glass-card px-6 py-16 sm:py-24 flex flex-col items-center gap-4 text-[var(--text-secondary)] animate-fadeIn">
-                <Icon name="FileX" className="w-10 h-10 sm:w-12 sm:h-12 opacity-30" />
-                <p className="font-black uppercase text-xs tracking-widest text-center">
-                    No se encontraron comprobantes
-                </p>
+            <div className="w-full py-16 sm:py-24 flex flex-col items-center justify-center text-center px-6 bg-[var(--bg-card)] rounded-[2rem] sm:rounded-[3rem] border border-[var(--border-subtle)] shadow-sm">
+                <div className="relative inline-block">
+                    <div className="w-20 h-20 sm:w-24 sm:h-24 bg-[var(--bg-muted)] rounded-[2rem] sm:rounded-[2.5rem] flex items-center justify-center shadow-inner border border-[var(--border-subtle)] text-[var(--text-secondary)]">
+                        <Icon name="FileX" className="w-10 h-10 sm:w-12 sm:h-12 stroke-[1.5px]" />
+                    </div>
+                </div>
+                <div className="space-y-3 mt-6 sm:mt-8">
+                    <h3 className="text-xl sm:text-2xl font-black text-[var(--text-primary)] tracking-tighter">
+                        No se encontraron comprobantes
+                    </h3>
+                    <p className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest leading-relaxed">
+                        No hay registros que coincidan con los filtros aplicados actualmente.
+                    </p>
+                </div>
             </div>
         );
     }
@@ -207,14 +216,14 @@ export default function InvoiceTable({ vouchers, onViewDetail }: InvoiceTablePro
             </div>
 
             {/* ══ DESKTOP: tabla completa (hidden sm:block) ════════════════ */}
-            <div className="hidden sm:block glass-card overflow-hidden animate-fadeIn">
+            <div className="hidden sm:block rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] overflow-visible animate-fadeIn">
                 <div className="overflow-x-auto no-scrollbar">
-                    <table className="w-full text-left">
+                    <table className="w-full border-separate border-spacing-0">
                         <thead>
-                            <tr className="bg-[var(--bg-secondary)]/50 border-b border-[var(--border-subtle)] text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">
-                                <th className="px-6 py-5">Comprobante</th>
-                                <th className="px-6 py-5">Serie-Código</th>
-                                <th className="px-6 py-5">
+                            <tr className="border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)]">
+                                <th className="px-4 py-2.5 text-left text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)] rounded-tl-2xl">Comprobante</th>
+                                <th className="px-4 py-2.5 text-left text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)]">Serie-Código</th>
+                                <th className="px-4 py-2.5 text-left text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)]">
                                     <span className="flex items-center gap-1.5">
                                         Monto
                                         <span
@@ -227,19 +236,19 @@ export default function InvoiceTable({ vouchers, onViewDetail }: InvoiceTablePro
                                         </span>
                                     </span>
                                 </th>
-                                <th className="px-6 py-5">Comisión</th>
-                                <th className="px-6 py-5">Fecha</th>
-                                <th className="px-6 py-5 text-center">Estado</th>
-                                <th className="px-6 py-5 text-right">Acciones</th>
+                                <th className="px-4 py-2.5 text-left text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)]">Comisión</th>
+                                <th className="px-4 py-2.5 text-left text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)]">Fecha</th>
+                                <th className="px-4 py-2.5 text-center text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)]">Estado</th>
+                                <th className="px-4 py-2.5 text-right text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)] rounded-tr-2xl">Acciones</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-[var(--border-subtle)] text-[var(--text-primary)]">
+                        <tbody>
                             {vouchers.map((v) => {
                                 const type = typeConfig[v.type] || typeConfig.FACTURA;
                                 return (
-                                    <tr key={v.id} className="hover:bg-[var(--bg-secondary)]/50 transition-colors group">
+                                    <tr key={v.id} className="hover:bg-[var(--bg-secondary)]/50 transition-colors group border-b border-[var(--border-subtle)] last:border-b-0">
                                         {/* Comprobante: badge tipo + nombre tienda */}
-                                        <td className="px-6 py-4">
+                                        <td className="px-4 py-3">
                                             <div className="flex items-center gap-2">
                                                 <div className={`w-9 h-9 ${type.bg} rounded-xl flex items-center justify-center ${type.text} group-hover:scale-110 transition-transform shrink-0`}>
                                                     <Icon name={type.icon} className="w-4 h-4" />
@@ -256,27 +265,27 @@ export default function InvoiceTable({ vouchers, onViewDetail }: InvoiceTablePro
                                             </div>
                                         </td>
                                         {/* Serie-Código */}
-                                        <td className="px-6 py-4">
+                                        <td className="px-4 py-3">
                                             <span className="text-sm font-black text-[var(--text-primary)] font-mono tracking-tight">{v.series}-{v.number}</span>
                                         </td>
                                         {/* Monto — subtotal productos/servicios sin envío */}
-                                        <td className="px-6 py-4">
+                                        <td className="px-4 py-3">
                                             <p className="text-sm font-black text-[var(--text-primary)]">
                                                 S/ {resolveMonto(v).toLocaleString('es-PE', { minimumFractionDigits: 2 })}
                                             </p>
                                         </td>
                                         {/* Comisión */}
-                                        <td className="px-6 py-4">
-                                            <p className="text-sm font-bold text-amber-600 dark:text-amber-400">
+                                        <td className="px-4 py-3">
+                                            <p className="text-sm font-bold text-sky-500 dark:text-[#8FC3A1]">
                                                 {formatCommission(v.commission_rate, v.commission_amount)}
                                             </p>
                                         </td>
                                         {/* Fecha */}
-                                        <td className="px-6 py-4">
+                                        <td className="px-4 py-3">
                                             <p className="text-xs font-bold text-[var(--text-secondary)]">{formatDate(v.emission_date)}</p>
                                         </td>
                                         {/* Estado */}
-                                        <td className="px-6 py-4 text-center">
+                                        <td className="px-4 py-3 text-center">
                                             <BaseStatusBadge
                                                 status={v.sunat_status}
                                                 mappings={VOUCHER_STATUS_MAPPINGS}
@@ -285,7 +294,7 @@ export default function InvoiceTable({ vouchers, onViewDetail }: InvoiceTablePro
                                             />
                                         </td>
                                         {/* Acciones — sin cambios */}
-                                        <td className="px-6 py-4 text-right">
+                                        <td className="px-4 py-3 text-right">
                                             <button
                                                 onClick={() => onViewDetail(v)}
                                                 className="w-10 h-10 bg-[var(--bg-card)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-emerald-600 hover:border-emerald-200 rounded-xl transition-all shadow-sm active:scale-90 flex items-center justify-center m-auto mr-0"

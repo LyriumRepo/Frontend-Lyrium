@@ -9,10 +9,57 @@ import PlanUpgradeMessage from './PlanUpgradeMessage';
 
 const layouts = [
     {
+        id: 'emprende',
+        name: 'Plantilla Emprende',
+        desc: 'Columna única • Un solo banner • Sin laterales',
+        isDefault: true,
+        preview: (
+            <>
+                <div className="flex gap-0.5 h-4">
+                    <div className="flex-1 bg-sky-500/80 dark:bg-emerald-700/80 rounded flex items-center justify-center text-[6px] font-bold text-white">Banner</div>
+                    <div className="flex-1 bg-sky-500/80 dark:bg-emerald-700/80 rounded flex items-center justify-center text-[6px] font-bold text-white">Banner</div>
+                    <div className="flex-1 bg-sky-500/80 dark:bg-emerald-700/80 rounded flex items-center justify-center text-[6px] font-bold text-white">Banner</div>
+                </div>
+                <div className="w-full border-t border-gray-200 dark:border-gray-700" />
+                <div className="text-[6px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Productos</div>
+                <div className="flex-1 grid grid-cols-5 gap-0.5">
+                    <div className="w-full h-full bg-teal-400/60 dark:bg-teal-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">P</div>
+                    <div className="w-full h-full bg-teal-400/60 dark:bg-teal-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">P</div>
+                    <div className="w-full h-full bg-teal-400/60 dark:bg-teal-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">P</div>
+                    <div className="w-full h-full bg-teal-400/60 dark:bg-teal-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">P</div>
+                    <div className="w-full h-full bg-teal-400/60 dark:bg-teal-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">P</div>
+                </div>
+                <div className="flex-1 grid grid-cols-5 gap-0.5">
+                    <div className="w-full h-full bg-teal-400/60 dark:bg-teal-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">P</div>
+                    <div className="w-full h-full bg-teal-400/60 dark:bg-teal-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">P</div>
+                    <div className="w-full h-full bg-teal-400/60 dark:bg-teal-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">P</div>
+                    <div className="w-full h-full bg-teal-400/60 dark:bg-teal-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">P</div>
+                    <div className="w-full h-full bg-teal-400/60 dark:bg-teal-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">P</div>
+                </div>
+                <div className="w-full border-t border-gray-200 dark:border-gray-700" />
+                <div className="text-[6px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Servicios</div>
+                <div className="flex-1 grid grid-cols-5 gap-0.5">
+                    <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
+                    <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
+                    <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
+                    <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
+                    <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
+                </div>
+                <div className="flex-1 grid grid-cols-5 gap-0.5">
+                    <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
+                    <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
+                    <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
+                    <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
+                    <div className="w-full h-full bg-rose-400/60 dark:bg-rose-600/60 rounded flex items-center justify-center text-[6px] font-bold text-white">S</div>
+                </div>
+            </>
+        )
+    },
+    {
         id: '1',
         name: 'Plantilla 1',
         desc: 'Columna única • Ancho completo',
-        isDefault: true,
+        isDefault: false,
         preview: (
             <>
                 <div className="flex gap-0.5 h-4">
@@ -239,60 +286,63 @@ export default function LayoutSelector({ config, updateConfig, storeId }: Layout
                             </span>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
-                            {layouts.map(layout => (
-                                <label
-                                    htmlFor={`layout-${layout.id}`}
-                                    key={layout.id}
-                                    className={isEmprende ? 'cursor-not-allowed group' : 'cursor-pointer group'}
-                                    aria-label={`Seleccionar diseño ${layout.name}`}
-                                >
-                                    <input
-                                        id={`layout-${layout.id}`}
-                                        type="radio"
-                                        name="layout"
-                                        value={layout.id}
-                                        checked={config.layout === layout.id}
-                                        onChange={e => updateConfig({ layout: e.target.value as any })}
-                                        className="sr-only peer"
-                                        disabled={isEmprende}
-                                    />
-                                    <div className={`p-4 sm:p-5 md:p-6 rounded-[2rem] sm:rounded-[2.5rem] border-2 bg-[var(--bg-card)] transition-all relative overflow-hidden ${
-                                        isEmprende
-                                            ? 'border-[var(--border-subtle)] opacity-40'
-                                            : 'border-[var(--border-subtle)] hover:border-sky-500/30 dark:hover:border-emerald-500/30 hover:shadow-lg peer-checked:border-sky-500 dark:peer-checked:border-[var(--icons-green)] peer-checked:shadow-2xl peer-checked:shadow-sky-500/20 dark:peer-checked:shadow-emerald-500/30 peer-checked:-translate-y-1'
-                                    }`}>
-                                        {isEmprende && (
-                                            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/10 backdrop-blur-[1px]">
-                                                <img src="/img/LyriumEspecial.png" alt="Bloqueado" className="w-16 h-16 mb-2 object-contain" />
-                                                <span className="text-[9px] font-black text-[var(--lima-500)] uppercase tracking-widest text-center px-4">
-                                                    Disponible en planes superiores
-                                                </span>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
+                            {layouts.map(layout => {
+                                const isLocked = isEmprende && layout.id !== 'emprende';
+                                return (
+                                    <label
+                                        htmlFor={`layout-${layout.id}`}
+                                        key={layout.id}
+                                        className={isLocked ? 'cursor-not-allowed group' : 'cursor-pointer group'}
+                                        aria-label={`Seleccionar diseño ${layout.name}`}
+                                    >
+                                        <input
+                                            id={`layout-${layout.id}`}
+                                            type="radio"
+                                            name="layout"
+                                            value={layout.id}
+                                            checked={config.layout === layout.id}
+                                            onChange={e => updateConfig({ layout: e.target.value as any })}
+                                            className="sr-only peer"
+                                            disabled={isLocked}
+                                        />
+                                        <div className={`p-4 sm:p-5 md:p-6 rounded-[2rem] sm:rounded-[2.5rem] border-2 bg-[var(--bg-card)] transition-all relative overflow-hidden ${
+                                            isLocked
+                                                ? 'border-[var(--border-subtle)] opacity-40'
+                                                : 'border-[var(--border-subtle)] hover:border-sky-500/30 dark:hover:border-emerald-500/30 hover:shadow-lg peer-checked:border-sky-500 dark:peer-checked:border-[var(--icons-green)] peer-checked:shadow-2xl peer-checked:shadow-sky-500/20 dark:peer-checked:shadow-emerald-500/30 peer-checked:-translate-y-1'
+                                        }`}>
+                                            {isLocked && (
+                                                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/10 backdrop-blur-[1px]">
+                                                    <img src="/img/LyriumEspecial.png" alt="Bloqueado" className="w-16 h-16 mb-2 object-contain" />
+                                                    <span className="text-[9px] font-black text-[var(--lima-500)] uppercase tracking-widest text-center px-4">
+                                                        Disponible en planes superiores
+                                                    </span>
+                                                </div>
+                                            )}
+                                            <div className="absolute top-0 right-0 w-16 h-16 sm:w-20 sm:h-20 bg-sky-500/10 rounded-bl-[3rem] sm:rounded-bl-[4rem] opacity-0 peer-checked:opacity-100 transition-opacity flex items-center justify-center pl-4 pb-4 sm:pl-6 sm:pb-6">
+                                                <Icon name="Check" className="text-sky-500 w-5 h-5 sm:w-6 sm:h-6" />
                                             </div>
-                                        )}
-                                        <div className="absolute top-0 right-0 w-16 h-16 sm:w-20 sm:h-20 bg-sky-500/10 rounded-bl-[3rem] sm:rounded-bl-[4rem] opacity-0 peer-checked:opacity-100 transition-opacity flex items-center justify-center pl-4 pb-4 sm:pl-6 sm:pb-6">
-                                            <Icon name="Check" className="text-sky-500 w-5 h-5 sm:w-6 sm:h-6" />
-                                        </div>
-                                        <div className="w-full h-32 sm:h-36 md:h-40 bg-[var(--bg-secondary)] rounded-xl p-1.5 mb-3 sm:mb-4 border border-[var(--border-subtle)] flex flex-col gap-0.5">
-                                            {layout.preview}
-                                        </div>
-                                        <p className="text-[11px] font-black uppercase text-[var(--text-secondary)] peer-checked:text-[var(--text-primary)] tracking-tight text-center transition-colors">
-                                            {layout.name}
-                                        </p>
-                                        <p className="text-[9px] font-bold text-[var(--text-secondary)] uppercase mt-1 text-center transition-colors">
-                                            {layout.desc}
-                                        </p>
-                                        {layout.isDefault && (
-                                            <div className="flex justify-center mt-2">
-                                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                                                    <Icon name="Star" className="w-2.5 h-2.5" />
-                                                    Predeterminada
-                                                </span>
+                                            <div className="w-full h-32 sm:h-36 md:h-40 bg-[var(--bg-secondary)] rounded-xl p-1.5 mb-3 sm:mb-4 border border-[var(--border-subtle)] flex flex-col gap-0.5">
+                                                {layout.preview}
                                             </div>
-                                        )}
-                                    </div>
-                                </label>
-                            ))}
+                                            <p className="text-[11px] font-black uppercase text-[var(--text-secondary)] peer-checked:text-[var(--text-primary)] tracking-tight text-center transition-colors">
+                                                {layout.name}
+                                            </p>
+                                            <p className="text-[9px] font-bold text-[var(--text-secondary)] uppercase mt-1 text-center transition-colors">
+                                                {layout.desc}
+                                            </p>
+                                            {layout.isDefault && (
+                                                <div className="flex justify-center mt-2">
+                                                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                                                        <Icon name="Star" className="w-2.5 h-2.5" />
+                                                        Predeterminada
+                                                    </span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </label>
+                                );
+                            })}
                         </div>
                     </div>
                 </div>

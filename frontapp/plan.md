@@ -1,32 +1,32 @@
-# Plan: Sidebar Icon SVG Stroke Animations
+# Plan: Correcciones visuales Panel Admin — Light Mode + Helpdesk + Tablas
 
-## Goal
-Replace generic scale/rotate/reveal sidebar icon animations with SVG stroke-based "drawing" effect on mount, plus per-icon hover personality. Keep active glow as-is.
+## Contexto de lo avanzado
 
-## Approach
+Ya se crearon 3 componentes reutilizables (`AdminIndicatorGrid`, `AdminTable`, `AdminModal` en `src/components/admin/`) y se migraron los indicadores de Vendedores, Categorías y Solicitudes a `AdminIndicatorGrid`. También se corrigió `font-black` → `font-bold` en Facturación Rápida y se reemplazaron todos los `text-gray-*`, `bg-white`, `bg-gray-*`, `border-gray-*` por variables CSS en los 6 archivos del módulo Planes (`PlansGrid`, `PaymentPanel`, `VendedoresPanel`, `RequestsPanel`, `TimelineEditor`, `UISettingsPanel`). Light mode del módulo Planes está listo.
 
-### Layer 1 — Mount: SVG stroke-draw (one-time, on page load)
-- Add `animate` prop to `Icon.tsx` that applies `.icon-stroke-mount` class to the `<svg>` element
-- CSS rule: `.icon-stroke-mount path, .icon-stroke-mount circle, ...` sets `stroke-dasharray: 500; stroke-dashoffset: 500` and animates `stroke-dashoffset` to `0` over 1.5s with staggered `animation-delay` per icon
-- After animation completes (`forwards` fill), stroke stays visible
-- SmartSidebar passes `animate` to Icon
+## Pendiente
 
-### Layer 2 — Hover: color transition + per-icon effects
-- `.group:hover .icon-stroke-mount path { transition: stroke 0.3s }` — smooth color change on hover
-- `getIconEffectClass()` maps icon names to CSS classes (`icon-wobble`, `icon-tilt`, `icon-slide-in`, etc.)
-- Each class targets `.icon-wobble svg` with a delayed animation (350ms after mount)
+### 1. Migrar tablas a AdminTable
+- `SellerList` → `AdminTable` (Control Vendedores)
+- `TrainingsList` → `AdminTable` (Capacitaciones)
+- `PaymentPanel` / `VendedoresPanel` → `AdminTable` (Planes)
 
-### Layer 3 — Active: keep existing breathing glow
-- `sidebarIconGlow` stays on container div, box-shadow only (no transform conflict)
+### 2. Migrar modales a AdminModal
+- `TrainingEditorModal` → `AdminModal` (Capacitaciones)
+- Modales de Planes → `AdminModal`
 
-## Files to modify
+### 3. Helpdesk — corregir layout del toggle Vendedores/Clientes
+Revisar espaciado y alineación del toggle en el módulo helpdesk.
 
-| File | Change |
-|------|--------|
-| `Icon.tsx` | Add `animate` prop, apply `icon-stroke-mount` class to `<svg>` |
-| `globals.css` | Add `.icon-stroke-mount` rules + keyframes + per-icon effects |
-| `SmartSidebar.tsx` | Pass `animate` to Icon, add `getIconEffectClass()`, add per-icon classes to container |
+### 4. Verificación final
+- `npx tsc --noEmit` — sin errores
+- `npm run lint` — sin errores
+- Verificar visualmente que light mode funciona en Planes y el resto de módulos admin
 
-## Verification
-- `npx tsc --noEmit` — no new TS errors
-- Visual: icons draw their strokes on page load (staggered), hover changes color + triggers per-icon effect, active glows
+## Reglas
+- No modificar lógica funcional existente
+- Priorizar componentes compartidos sobre código inline
+- `AdminIndicatorGrid` usa `grid-cols-1 sm:grid-cols-2 lg:grid-cols-N`
+- `AdminTable` soporta `mobileCardRender`, columnas `hideMobile`, alineación por columna
+- `BaseStatCard` ya tiene mapping de colores: `lima`, `verde`, `turquesa`, `turquesaClaro`, `celeste`, `azulCeleste`, `sky`, `emerald`, `amber`, `rose`, `violet`
+- Archivos relevantes en `src/features/admin/` y `src/components/admin/`

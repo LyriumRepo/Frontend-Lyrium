@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useEcho } from '@laravel/echo-react';
 import { useAuth } from '@/shared/lib/context/AuthContext';
 import { useRouter } from 'next/navigation';
@@ -810,6 +810,7 @@ export default function CustomerOrdersPage() {
   const [showRescheduleModal, setShowRescheduleModal] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [fetchError, setFetchError] = useState('');
+  const [page, setPage] = useState(0);
 
   const handleCloseLegend = useCallback(() => {
     if (isLegendClosing) return;
@@ -846,6 +847,14 @@ export default function CustomerOrdersPage() {
       loadOrders();
     }
   }, [loading, isAuthenticated, loadOrders]);
+
+  const PAGE_SIZE = 10;
+  const totalPages = Math.max(1, Math.ceil(filteredOrders.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages - 1);
+  const paginatedOrders = useMemo(
+    () => filteredOrders.slice(safePage * PAGE_SIZE, (safePage + 1) * PAGE_SIZE),
+    [filteredOrders, safePage],
+  );
 
   useEcho<{ order_id: string; status: string; active: boolean }>(
     `user.${user?.id ?? 0}`,
@@ -931,6 +940,7 @@ export default function CustomerOrdersPage() {
     }
 
     setFiltered(result);
+    setPage(0);
   }, [filters, orders]);
 
   const openDetails = (order: Order) => {
@@ -1201,7 +1211,7 @@ export default function CustomerOrdersPage() {
           </div>
         </div>
 
-        <div className="p-4 sm:p-8 overflow-x-auto">
+        <div className="p-4 sm:p-8">
           {filteredOrders.length === 0 ? (
             <div className="text-center py-16">
               <div className="w-24 h-24 bg-gray-100 dark:bg-[var(--bg-muted)] rounded-full flex items-center justify-center mx-auto mb-4">
@@ -1214,13 +1224,17 @@ export default function CustomerOrdersPage() {
             </div>
           ) : (
             <>
-            <table className="hidden md:table w-full">
+            <p className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest mb-3 px-1">
+              {filteredOrders.length} pedido{filteredOrders.length !== 1 ? 's' : ''}
+            </p>
+            <div className="overflow-x-auto no-scrollbar">
+            <table className="hidden md:table w-full text-left border-collapse">
               <thead>
-                <tr className="border-b-2 border-gray-100 dark:border-[var(--border-subtle)]">
+                <tr className="bg-[var(--bg-secondary)]/50 border-b border-[var(--border-subtle)]">
                   {['ID Pedido', 'Fecha', 'Hora', 'Tienda', 'Detalle', 'Total', 'Tipo Envío', 'Estado', 'Acciones'].map((h) => (
                     <th
                       key={h}
-                      className="text-left py-4 px-4 text-[10px] font-black text-gray-400 dark:text-gray-300 uppercase tracking-widest"
+                      className="px-6 py-5 text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest"
                     >
                       {h}
                     </th>
@@ -1228,7 +1242,7 @@ export default function CustomerOrdersPage() {
                 </tr>
               </thead>
               <tbody>
-                {filteredOrders.map((order) => {
+                {paginatedOrders.map((order) => {
                   const statusStyles = getStatusStyles(order.estado);
                   const tipoConfig = order.tipo_envio ? FLOW_CONFIG[order.tipo_envio] : null;
 
@@ -1330,9 +1344,10 @@ export default function CustomerOrdersPage() {
                 })}
               </tbody>
             </table>
+            </div>
 
             <div className="block md:hidden space-y-4">
-              {filteredOrders.map((order) => {
+              {paginatedOrders.map((order) => {
                 const statusStyles = getStatusStyles(order.estado);
                 const tipoConfig = order.tipo_envio ? FLOW_CONFIG[order.tipo_envio] : null;
                 const servicio = tipoConfig
@@ -1387,6 +1402,33 @@ export default function CustomerOrdersPage() {
                 );
               })}
             </div>
+
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between px-1 pt-4">
+                <span className="text-[10px] font-bold text-[var(--text-secondary)]">
+                  {filteredOrders.length} pedido{filteredOrders.length !== 1 ? 's' : ''} · Pág. {safePage + 1}/{totalPages}
+                </span>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => setPage((p) => Math.max(0, p - 1))}
+                    disabled={safePage === 0}
+                    className="px-3 py-1.5 rounded-xl text-[11px] font-bold text-[var(--text-secondary)] bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-sky-300/30 hover:text-sky-500 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    Anterior
+                  </button>
+                  <span className="px-2 text-[11px] font-bold text-[var(--text-secondary)]">
+                    Pág. {safePage + 1} de {totalPages}
+                  </span>
+                  <button
+                    onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                    disabled={safePage >= totalPages - 1}
+                    className="px-3 py-1.5 rounded-xl text-[11px] font-bold text-[var(--text-secondary)] bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-sky-300/30 hover:text-sky-500 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    Siguiente
+                  </button>
+                </div>
+              </div>
+            )}
             </>
           )}
         </div>

@@ -1,7 +1,6 @@
 'use client';
 
-import ExcelJS from 'exceljs';
-import { saveAs } from 'file-saver';
+import type * as ExcelJS from 'exceljs';
 import type { Service } from '../types';
 
 const COLORS = {
@@ -22,6 +21,10 @@ function borderHair(): Partial<ExcelJS.Borders> {
 }
 
 export async function exportServicesToExcel(services: Service[]): Promise<void> {
+    const [{ default: ExcelJS }, { saveAs }] = await Promise.all([
+        import('exceljs'),
+        import('file-saver'),
+    ]);
     if (services.length === 0) return;
 
     const wb = new ExcelJS.Workbook();

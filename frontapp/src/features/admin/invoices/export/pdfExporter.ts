@@ -1,6 +1,3 @@
-import { jsPDF } from 'jspdf';
-import autoTable from 'jspdf-autotable';
-import { saveAs } from 'file-saver';
 import type { AdminInvoiceRow, AdminInvoiceKPIs } from '../hooks/useAdminInvoices';
 
 // ── Paleta oficial Lyrium (igual que seller/sales) ────────────────────────
@@ -88,7 +85,7 @@ async function loadImageB64(url: string): Promise<string | null> {
 
 // ── KPI card (estilo ventas) ─────────────────────────────────────────────
 function drawKpi(
-    doc: jsPDF,
+    doc: any,
     label: string, value: string, sub: string,
     x: number, y: number, w: number, h: number,
     accent: [number, number, number]
@@ -118,7 +115,7 @@ function drawKpi(
 }
 
 // ── Footer ───────────────────────────────────────────────────────────────
-function drawFooter(doc: jsPDF, page: number, total: number): void {
+function drawFooter(doc: any, page: number, total: number): void {
     const y = PH - 8;
     doc.setDrawColor(C.primary[0], C.primary[1], C.primary[2]);
     doc.setLineWidth(0.6);
@@ -145,8 +142,13 @@ export async function exportAdminInvoicesToPdf(
     kpis: AdminInvoiceKPIs | null,
     dateRange?: { from: string; to: string }
 ): Promise<void> {
+    const [{ jsPDF: JsPDF }, { default: autoTable }, { saveAs }] = await Promise.all([
+        import('jspdf'),
+        import('jspdf-autotable'),
+        import('file-saver'),
+    ]);
     const logo = await loadImageB64('/img/logo.png');
-    const doc  = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+    const doc  = new JsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
 
     // ── Header (estilo ventas) ───────────────────────────────────────────
     doc.setFillColor(8, 25, 15);

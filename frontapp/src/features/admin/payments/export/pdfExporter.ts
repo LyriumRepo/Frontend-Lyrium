@@ -1,6 +1,3 @@
-import { jsPDF } from 'jspdf';
-import autoTable from 'jspdf-autotable';
-import { saveAs } from 'file-saver';
 import type { Transaction } from '../types/transactions';
 
 const C = {
@@ -56,7 +53,7 @@ function fmtCurrency(n: number | null | undefined): string {
 }
 
 function drawKpi(
-    doc: jsPDF,
+    doc: any,
     label: string, value: string, sub: string,
     x: number, y: number, w: number, h: number,
     accent: [number, number, number]
@@ -83,7 +80,7 @@ function drawKpi(
     }
 }
 
-function drawFooter(doc: jsPDF, page: number, total: number): void {
+function drawFooter(doc: any, page: number, total: number): void {
     const y = PH - 8;
     doc.setDrawColor(C.primary[0], C.primary[1], C.primary[2]);
     doc.setLineWidth(0.5);
@@ -105,7 +102,12 @@ function drawFooter(doc: jsPDF, page: number, total: number): void {
 }
 
 export async function exportPaymentsToPdf(transactions: Transaction[]): Promise<void> {
-    const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+    const [{ jsPDF: JsPDF }, { default: autoTable }, { saveAs }] = await Promise.all([
+        import('jspdf'),
+        import('jspdf-autotable'),
+        import('file-saver'),
+    ]);
+    const doc = new JsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
 
     // ── Header ───────────────────────────────────────────────────────────
     doc.setFillColor(8, 25, 15);
