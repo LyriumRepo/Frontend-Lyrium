@@ -1,17 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, Pagination, Autoplay } from 'swiper/modules';
-import { ChevronLeft, ChevronRight, MessageCircle, Star } from 'lucide-react';
+import { ChevronLeft, ChevronRight, MessageCircle } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { blogApi } from '@/shared/lib/api/blog';
-
-import 'swiper/css';
-import 'swiper/css/navigation';
-import 'swiper/css/pagination';
+import { useAutoScrollCarousel } from '../hooks/useAutoScrollCarousel';
 
 interface BlogPost {
     id: number;
@@ -26,9 +21,11 @@ interface BlogPost {
 
 export default function FeaturedCarousel() {
     const [posts, setPosts] = useState<BlogPost[]>([]);
+    const shouldDuplicate = posts.length > 3;
+    const { shift, trackRef, pausedRef, resumeTimerRef, pauseTemporarily } = useAutoScrollCarousel(shouldDuplicate);
 
     useEffect(() => {
-        blogApi.getFeaturedPosts(4).then((data) => {
+        blogApi.getFeaturedPosts(7).then((data) => {
             if (data && data.length > 0) {
                 setPosts(data.map((p: any) => ({
                     id: p.id,
@@ -41,7 +38,7 @@ export default function FeaturedCarousel() {
                     comments_count: 0,
                 })));
             } else {
-                return blogApi.getRecentPosts(4).then((fallback) => {
+                return blogApi.getRecentPosts(7).then((fallback) => {
                     if (fallback && fallback.length > 0) {
                         setPosts(fallback.map((p: any) => ({
                             id: p.id,
@@ -65,115 +62,126 @@ export default function FeaturedCarousel() {
         return date.toLocaleDateString('es-ES', { month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase();
     };
 
+    const items = shouldDuplicate ? [...posts, ...posts] : posts;
+
     return (
         <div className="w-full py-16 px-4 max-w-[1600px] mx-auto bg-gradient-to-b from-slate-50 to-white dark:from-[var(--bg-primary)] dark:to-[var(--bg-secondary)]">
-            <div className="relative md:px-12">
-                {/* Navigation */}
+            <div className="relative group/carousel">
+                <div className="flex items-center justify-between mb-6">
+                    <div />
+                    <div className="flex items-center gap-2">
+                        <span className="relative flex h-2.5 w-2.5">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
+                            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500" />
+                        </span>
+                        <span className="text-xs font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
+                            Auto-scroll
+                        </span>
+                    </div>
+                </div>
+
                 <button
-                    id="ramble-prev-btn"
-                    className="hidden md:block absolute md:left-0 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[var(--text-secondary)] hover:text-sky-500 transition-colors cursor-pointer z-50 p-2"
+                    onClick={() => shift('left')}
+                    aria-label="Anterior"
+                    className="absolute left-2 top-1/2 -translate-y-1/2 z-20
+                        w-10 h-10 rounded-full bg-white dark:bg-zinc-800 shadow-lg
+                        border border-amber-100 dark:border-amber-900/40
+                        flex items-center justify-center
+                        text-amber-600 dark:text-amber-400
+                        hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:border-amber-400
+                        transition-all duration-200
+                        opacity-0 group-hover/carousel:opacity-100
+                        -translate-x-1 group-hover/carousel:translate-x-0"
                 >
-                    <ChevronLeft className="w-8 h-8 md:w-10 md:h-10 transform rotate-180" />
+                    <ChevronLeft className="w-5 h-5" />
                 </button>
                 <button
-                    id="ramble-next-btn"
-                    className="hidden md:block absolute md:right-0 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[var(--text-secondary)] hover:text-sky-500 transition-colors cursor-pointer z-50 p-2"
+                    onClick={() => shift('right')}
+                    aria-label="Siguiente"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 z-20
+                        w-10 h-10 rounded-full bg-white dark:bg-zinc-800 shadow-lg
+                        border border-amber-100 dark:border-amber-900/40
+                        flex items-center justify-center
+                        text-amber-600 dark:text-amber-400
+                        hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:border-amber-400
+                        transition-all duration-200
+                        opacity-0 group-hover/carousel:opacity-100
+                        translate-x-1 group-hover/carousel:translate-x-0"
                 >
-                    <ChevronRight className="w-8 h-8 md:w-10 md:h-10" />
+                    <ChevronRight className="w-5 h-5" />
                 </button>
 
-                <Swiper
-                    modules={[Navigation, Pagination, Autoplay]}
-                    slidesPerView={1}
-                    slidesPerGroup={1}
-                    spaceBetween={20}
-                    loop={true}
-                    speed={600}
-                    grabCursor={true}
-                    autoplay={{
-                        delay: 5000,
-                        disableOnInteraction: false,
+                <div
+                    className="overflow-hidden relative"
+                    style={{
+                        maskImage: 'linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)',
+                        WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)',
                     }}
-                    navigation={{
-                        prevEl: '#ramble-prev-btn',
-                        nextEl: '#ramble-next-btn',
-                    }}
-                    pagination={{
-                        el: '.swiper-pagination',
-                        clickable: true,
-                    }}
-                    breakpoints={{
-                        640: { slidesPerView: 2, spaceBetween: 20 },
-                        1024: { slidesPerView: 3, spaceBetween: 30 },
-                        1280: { slidesPerView: 4, spaceBetween: 30 },
-                    }}
-                    className="swiper overflow-visible"
+                    onMouseEnter={() => { pausedRef.current = true; if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current); }}
+                    onMouseLeave={() => { pausedRef.current = false; }}
+                    onTouchStart={() => pauseTemporarily()}
+                    onTouchEnd={() => {}}
                 >
-                    {posts.map((post, index) => (
-                        <SwiperSlide key={post.id} className="h-auto">
-                            <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ duration: 0.4, delay: index * 0.1 }}
-                                className="relative w-full h-[450px] rounded-[2rem] overflow-hidden group cursor-pointer shadow-xl bg-slate-900 border border-amber-500/20 hover:border-amber-400/50 transition-all duration-500 hover:scale-[1.03] hover:shadow-2xl">
-                                {/* Background Image */}
-                                <Image
-                                    src={post.featured_image}
-                                    alt={post.title}
-                                    fill
-                                    sizes="(max-width: 768px) 100vw, 50vw"
-                                    className="object-cover transition-transform duration-700 group-hover:scale-105 opacity-60"
-                                />
-                                {/* Dark Overlay */}
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/30" />
-
-                                {/* Top Left: Logo & Metadata */}
-                                <div className="absolute top-8 left-8 flex flex-col items-start gap-2">
+                    <div
+                        ref={trackRef}
+                        className="flex gap-5 will-change-transform py-4 px-2 items-stretch"
+                        style={{ width: 'max-content' }}
+                    >
+                        {items.map((post, i) => (
+                            <div key={`${post.id}-${i}`} className="flex-shrink-0 w-[350px] flex">
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ duration: 0.4, delay: (i % posts.length) * 0.1 }}
+                                    className="relative w-full h-[450px] rounded-[2rem] overflow-hidden group cursor-pointer shadow-xl bg-slate-900 border border-amber-500/20 hover:border-amber-400/50 transition-all duration-500 hover:scale-[1.03] hover:shadow-2xl"
+                                >
                                     <Image
-                                        src="/img/bioblog/ICON.png"
-                                        alt="Lyrium"
-                                        width={40}
-                                        height={40}
-                                        className="rounded-full shadow-lg"
+                                        src={post.featured_image}
+                                        alt={post.title}
+                                        fill
+                                        sizes="(max-width: 768px) 100vw, 50vw"
+                                        className="object-cover transition-transform duration-700 group-hover:scale-105 opacity-60"
                                     />
-                                    <div className="flex flex-col">
-                                        <span className="text-[10px] font-bold text-white uppercase tracking-widest leading-tight">
-                                            LYRIUM
-                                        </span>
-                                        <span className="text-[9px] font-bold text-white/70 uppercase tracking-widest leading-tight">
-                                            {formatDate(post.published_at)}
-                                        </span>
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/30" />
+                                    <div className="absolute top-8 left-8 flex flex-col items-start gap-2">
+                                        <Image
+                                            src="/img/bioblog/ICON.png"
+                                            alt="Lyrium"
+                                            width={40}
+                                            height={40}
+                                            className="rounded-full shadow-lg"
+                                        />
+                                        <div className="flex flex-col">
+                                            <span className="text-[10px] font-bold text-white uppercase tracking-widest leading-tight">LYRIUM</span>
+                                            <span className="text-[9px] font-bold text-white/70 uppercase tracking-widest leading-tight">
+                                                {formatDate(post.published_at)}
+                                            </span>
+                                        </div>
                                     </div>
-                                </div>
-
-                                {/* Bottom Content */}
-                                <div className="absolute inset-x-0 bottom-0 p-8 flex flex-col justify-end">
-                                    <h3 className="text-3xl font-bold text-white leading-tight mb-3 drop-shadow-md line-clamp-2">
-                                        {post.title}
-                                    </h3>
-
-                                    <p className="text-white/80 text-xs md:text-sm leading-relaxed mb-8 line-clamp-2 max-w-2xl text-justify">
-                                        {post.summary}
-                                    </p>
-
-                                    {/* Footer Bar */}
-                                    <div className="w-full flex justify-between items-center py-4 border-t border-white/20">
-                                        <Link href={`/bioblog/${post.slug}`} className="text-xs font-bold text-white hover:text-sky-300 transition-colors">
-                                            Leer Más
-                                        </Link>
-                                        <span className="text-xs text-white/60 font-medium flex items-center gap-1">
-                                            <MessageCircle className="w-3 h-3" />
-                                            {post.comments_count} Comments
-                                        </span>
+                                    <div className="absolute inset-x-0 bottom-0 p-8 flex flex-col justify-end">
+                                        <h3 className="text-3xl font-bold text-white leading-tight mb-3 drop-shadow-md line-clamp-2">
+                                            {post.title}
+                                        </h3>
+                                        <p className="text-white/80 text-xs md:text-sm leading-relaxed mb-8 line-clamp-2 max-w-2xl text-justify">
+                                            {post.summary}
+                                        </p>
+                                        <div className="w-full flex justify-between items-center py-4 border-t border-white/20">
+                                            <Link href={`/bioblog/${post.slug}`} className="text-xs font-bold text-white hover:text-sky-300 transition-colors">
+                                                Leer Más
+                                            </Link>
+                                            <span className="text-xs text-white/60 font-medium flex items-center gap-1">
+                                                <MessageCircle className="w-3 h-3" />
+                                                {post.comments_count} Comments
+                                            </span>
+                                        </div>
                                     </div>
-                                </div>
-                                <Link href={`/bioblog/${post.slug}`} className="absolute inset-0 z-20" />
-                            </motion.div>
-                        </SwiperSlide>
-                    ))}
-                    <div className="swiper-pagination !relative !mt-8" />
-                </Swiper>
+                                    <Link href={`/bioblog/${post.slug}`} className="absolute inset-0 z-20" />
+                                </motion.div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
             </div>
         </div>
     );
