@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { MessagesSquare, Plus, Eye, MessageCircle, ThumbsUp, Pencil, Image as ImageIcon, X, Calendar, User, Hash, ChevronLeft, Heart } from 'lucide-react';
+import { MessagesSquare, Plus, Eye, MessageCircle, ThumbsUp, Pencil, Image as ImageIcon, X, Calendar, User, Hash, ChevronLeft, Heart, Send, CheckCircle } from 'lucide-react';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import BaseButton from '@/components/ui/BaseButton';
 import { forumApi, ForumTopic } from '@/shared/lib/api/bioblogRepository';
@@ -21,7 +21,7 @@ export function ForumClient() {
   const [topics, setTopics] = useState<ForumTopic[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreator, setShowCreator] = useState(false);
-  const [form, setForm] = useState({ forum_category_id: '1' as any, title: '', content: '', status: 'published', image: '' });
+  const [form, setForm] = useState({ forum_category_id: '1' as any, title: '', content: '', status: 'draft', image: '' });
   const [saving, setSaving] = useState(false);
   const [editingTopic, setEditingTopic] = useState<ForumTopic | null>(null);
   const [editForm, setEditForm] = useState({ forum_category_id: '1' as any, title: '', content: '', status: 'published', image: '' });
@@ -50,7 +50,7 @@ export function ForumClient() {
       });
       if (res.success === false) { setErrorMsg('Error al crear el tema'); return; }
       setShowCreator(false);
-      setForm({ forum_category_id: '1', title: '', content: '', status: 'published', image: '' });
+      setForm({ forum_category_id: '1', title: '', content: '', status: 'draft', image: '' });
       fetch();
     } catch (e: any) {
       setErrorMsg(e?.message || 'Error al crear el tema');
@@ -95,8 +95,9 @@ export function ForumClient() {
   };
 
   const statusBadge = (s: string) => {
-    const styles: Record<string, string> = { draft: 'bg-gray-100 text-gray-500', published: 'bg-emerald-100 text-emerald-600', closed: 'bg-red-100 text-red-500' };
-    return <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${styles[s] || styles.draft}`}>{s}</span>;
+    const styles: Record<string, string> = { draft: 'bg-gray-100 text-gray-500', pending_review: 'bg-amber-100 text-amber-600', approved: 'bg-sky-100 text-sky-600', rejected: 'bg-red-100 text-red-500', published: 'bg-emerald-100 text-emerald-600', closed: 'bg-red-100 text-red-500' };
+    const labels: Record<string, string> = { draft: 'Borrador', pending_review: 'En revisión', approved: 'Aprobado', rejected: 'Rechazado', published: 'Publicado', closed: 'Cerrado' };
+    return <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${styles[s] || styles.draft}`}>{labels[s] || s}</span>;
   };
 
   function ImageInput({ value, onChange, label }: { value: string; onChange: (v: string) => void; label?: string }) {
@@ -178,6 +179,15 @@ export function ForumClient() {
                   <td className="px-5 py-4">
                     <div className="flex gap-2">
                       <button onClick={() => setViewingTopic(t)} className="text-xs px-3 py-1.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition font-semibold">Ver</button>
+                      {t.status === 'draft' && (
+                        <button onClick={async () => { try { await forumApi.topics.submitForReview(t.id); fetch(); } catch {} }} className="text-xs px-3 py-1.5 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 rounded-lg hover:bg-amber-100 dark:hover:bg-amber-900/30 transition font-semibold flex items-center gap-1"><Send className="w-3 h-3" /> Enviar</button>
+                      )}
+                      {t.status === 'approved' && (
+                        <button onClick={async () => { try { await forumApi.topics.publish(t.id); fetch(); } catch {} }} className="text-xs px-3 py-1.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition font-semibold flex items-center gap-1"><CheckCircle className="w-3 h-3" /> Publicar</button>
+                      )}
+                      {t.status === 'published' && (
+                        <button onClick={async () => { try { await forumApi.topics.hide(t.id); fetch(); } catch {} }} className="text-xs px-3 py-1.5 bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition font-semibold flex items-center gap-1"><Eye className="w-3 h-3" /> Ocultar</button>
+                      )}
                       <button onClick={() => openEdit(t)} className="text-xs px-3 py-1.5 bg-sky-50 dark:bg-sky-900/20 text-sky-600 dark:text-sky-400 rounded-lg hover:bg-sky-100 dark:hover:bg-sky-900/30 transition font-semibold">Editar</button>
                       <button onClick={() => handleDelete(t.id)} className="text-xs px-3 py-1.5 bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition font-semibold">Eliminar</button>
                     </div>
@@ -288,6 +298,11 @@ export function ForumClient() {
             <div className="p-6 space-y-4 overflow-y-auto">
               <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200">Crear Tema</h3>
 
+              <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300 text-xs space-y-1">
+                <p className="font-semibold">Flujo de aprobación:</p>
+                <p>1. Crea el tema como borrador → 2. Envíalo a revisión → 3. Un administrador lo aprueba → 4. Publícalo</p>
+              </div>
+
               {errorMsg && (
                 <div className="p-3 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-sm">
                   {errorMsg}
@@ -320,7 +335,7 @@ export function ForumClient() {
 
             <div className="flex-shrink-0 flex justify-end gap-3 px-6 py-4 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-[var(--bg-secondary)] rounded-b-3xl">
               <button type="button" onClick={() => { setShowCreator(false); setErrorMsg(''); }} className="px-5 py-2.5 text-sm font-semibold text-gray-500 hover:text-gray-700 transition">Cancelar</button>
-              <button type="button" onClick={handleCreate} disabled={saving || !form.title.trim() || !form.content.trim()} className="px-6 py-2.5 bg-gradient-to-r from-emerald-500 to-emerald-400 hover:from-emerald-600 hover:to-emerald-500 text-white rounded-xl text-sm font-semibold transition disabled:opacity-50 shadow-lg shadow-emerald-200/50">{saving ? 'Creando...' : 'Publicar Tema'}</button>
+              <button type="button" onClick={handleCreate} disabled={saving || !form.title.trim() || !form.content.trim()} className="px-6 py-2.5 bg-gradient-to-r from-emerald-500 to-emerald-400 hover:from-emerald-600 hover:to-emerald-500 text-white rounded-xl text-sm font-semibold transition disabled:opacity-50 shadow-lg shadow-emerald-200/50">{saving ? 'Creando...' : 'Guardar Borrador'}</button>
             </div>
           </div>
         </div>
@@ -364,8 +379,9 @@ export function ForumClient() {
               <div>
                 <label className="block text-xs font-semibold text-gray-500 mb-1">Estado</label>
                 <select value={editForm.status} onChange={e => setEditForm(f => ({ ...f, status: e.target.value }))} className="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200">
-                  <option value="published">Publicado</option>
                   <option value="draft">Borrador</option>
+                  <option value="pending_review">En revisión</option>
+                  <option value="published">Publicado</option>
                   <option value="closed">Cerrado</option>
                 </select>
               </div>
