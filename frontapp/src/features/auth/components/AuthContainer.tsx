@@ -102,15 +102,35 @@ export function AuthContainer({ onSuccess }: AuthContainerProps) {
     const isRegister = mode === 'register';
 
     return (
-        <div className="min-h-screen bg-[#F8F9FA] dark:bg-[var(--bg-primary)] flex items-center justify-center p-4">
-            <div className="relative w-full max-w-[1200px] min-h-[650px] bg-white dark:bg-[var(--bg-secondary)] rounded-[30px] shadow-[0_40px_100px_rgba(0,0,0,0.1)] overflow-hidden flex">
+        <div className="min-h-screen bg-[#F8F9FA] dark:bg-[var(--bg-primary)] flex-1 flex items-start sm:items-center justify-center p-3 pt-6 sm:p-4">
+            <div className="relative w-full max-w-[1200px] min-h-[650px] bg-white dark:bg-[var(--bg-secondary)] rounded-[30px] shadow-[0_40px_100px_rgba(0,0,0,0.1)] overflow-hidden flex flex-col sm:flex-row">
 
-                {/* Left Side Panel */}
+                {/* Mobile Header */}
+                <div className="sm:hidden relative w-full bg-gradient-to-br from-sky-500/90 to-lime-500/90 dark:from-[var(--brand-green)] dark:to-[var(--icons-green)] p-6 text-white overflow-hidden">
+                    <img src="/img/intro/Flor6.png" alt="" className="absolute -bottom-10 -right-20 w-[300px] max-w-none opacity-50 mix-blend-overlay pointer-events-none" />
+                    <div className="relative z-10">
+                        <h2 className="text-xl font-black mb-2 tracking-[0.2em]">
+                            {isRegister ? 'Únete a Lyrium' : '¡Bienvenido!'}
+                        </h2>
+                        <p className="text-sm text-white/80 mb-3">
+                            {isRegister ? 'Crea tu cuenta' : 'Accede a tu cuenta'}
+                        </p>
+                        <button
+                            type="button"
+                            onClick={toggleMode}
+                            className="py-2 px-4 bg-white text-sky-500 dark:text-[var(--brand-green)] rounded-xl font-bold text-xs uppercase tracking-wider shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
+                        >
+                            {isRegister ? 'Iniciar Sesión' : 'Crear cuenta'}
+                        </button>
+                    </div>
+                </div>
+
+                {/* Left Side Panel (desktop) */}
                 <div
-                    className={`absolute top-0 left-0 h-full w-[40%]
+                    className={`hidden sm:flex absolute top-0 left-0 h-full w-[40%]
                     bg-[linear-gradient(to_bottom_right,rgba(14,165,233,0.9),rgba(132,204,22,0.9))]
                     dark:bg-[linear-gradient(to_bottom_right,var(--brand-green),var(--icons-green),var(--brand-green-hover))]
-                    p-10 flex flex-col justify-between text-white z-20 rounded-r-[20px]`}
+                    p-10 flex-col justify-between text-white z-20 rounded-r-[20px]`}
                 >
                     <img src="/img/intro/Flor6.png" alt="" className="absolute -bottom-20 -left-80 w-[700px] max-w-none opacity-60 mix-blend-overlay pointer-events-none" />
 
@@ -128,7 +148,7 @@ export function AuthContainer({ onSuccess }: AuthContainerProps) {
                     <div className="relative z-10">
                         {isRegister ? (
                             <>
-                                <h2 className="text-[2rem] font-black mb-4 leading-tight">
+                                <h2 className="text-[2rem] font-black mb-4 leading-tight tracking-[0.2em]">
                                     {userType === 'vendedor' ? 'Haz crecer tu marca con nosotros.' : 'Únete a Lyrium'}
                                 </h2>
                                 <p className="text-white/95 text-center max-w-[300px] mx-auto">
@@ -139,7 +159,7 @@ export function AuthContainer({ onSuccess }: AuthContainerProps) {
                             </>
                         ) : (
                             <>
-                                <h2 className="text-[2rem] font-black mb-4 leading-tight">
+                                <h2 className="text-[2rem] font-black mb-4 leading-tight tracking-[0.2em]">
                                     {userType === 'vendedor' ? '¡Qué gusto verte de nuevo!' : '¡Bienvenido de nuevo!'}
                                 </h2>
                                 <p className="text-white/95 text-center max-w-[300px] mx-auto">
@@ -166,7 +186,7 @@ export function AuthContainer({ onSuccess }: AuthContainerProps) {
                 </div>
 
                 {/* Right Side */}
-                <div className="relative ml-auto w-[60%] p-10 flex flex-col">
+                <div className="relative w-full sm:ml-auto sm:w-[60%] p-4 sm:p-10 flex flex-col">
                     <UserTypeToggle
                         value={userType}
                         onChange={(type) => {
