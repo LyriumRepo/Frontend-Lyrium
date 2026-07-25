@@ -14,27 +14,57 @@ interface BaseStatCardProps {
   className?: string;
   isLoading?: boolean;
   onClick?: () => void;
-  badge?: { label: string; level: 'regular' | 'good' | 'excellent'; tip?: string; scale?: string | null };
+  badge?: {
+    label: string;
+    level: 'regular' | 'good' | 'excellent';
+    tip?: string;
+    scale?: string | null;
+  };
 }
 
-const _info    = { bg: 'bg-[var(--color-info)]/10 dark:bg-[var(--color-info)]/15',    iconBg: 'bg-[var(--color-info)]',    text: 'text-[var(--text-primary)] dark:text-[var(--color-info)]',    border: 'border-[var(--color-info)]/20 dark:border-[var(--color-info)]/25',    shadow: 'shadow-[var(--color-info)]/20' };
-const _success = { bg: 'bg-[var(--color-success)]/10 dark:bg-[var(--color-success)]/15', iconBg: 'bg-[var(--color-success)]', text: 'text-[var(--text-primary)] dark:text-[var(--color-success)]', border: 'border-[var(--color-success)]/20 dark:border-[var(--color-success)]/25', shadow: 'shadow-[var(--color-success)]/20' };
-const _teal    = { bg: 'bg-[var(--icons-green)]/10 dark:bg-[var(--icons-green)]/15',    iconBg: 'bg-[var(--icons-green)]',   text: 'text-[var(--text-primary)] dark:text-[var(--icons-green)]',   border: 'border-[var(--icons-green)]/20 dark:border-[var(--icons-green)]/25',   shadow: 'shadow-[var(--icons-green)]/20' };
-const _error   = { bg: 'bg-[var(--color-error)]/10 dark:bg-[var(--color-error)]/15',    iconBg: 'bg-[var(--color-error)]',   text: 'text-[var(--color-error)] dark:text-[var(--color-error)]',   border: 'border-[var(--color-error)]/20 dark:border-[var(--color-error)]/25',   shadow: 'shadow-[var(--color-error)]/20' };
+const _info = {
+  bg: 'bg-[var(--color-info)]/10 dark:bg-[var(--color-info)]/15',
+  iconBg: 'bg-[var(--color-info)]',
+  text: 'text-[var(--text-primary)] dark:text-[var(--color-info)]',
+  border: 'border-[var(--color-info)]/20 dark:border-[var(--color-info)]/25',
+  shadow: 'shadow-[var(--color-info)]/20',
+};
+const _success = {
+  bg: 'bg-[var(--color-success)]/10 dark:bg-[var(--color-success)]/15',
+  iconBg: 'bg-[var(--color-success)]',
+  text: 'text-[var(--text-primary)] dark:text-[var(--color-success)]',
+  border:
+    'border-[var(--color-success)]/20 dark:border-[var(--color-success)]/25',
+  shadow: 'shadow-[var(--color-success)]/20',
+};
+const _teal = {
+  bg: 'bg-[var(--icons-green)]/10 dark:bg-[var(--icons-green)]/15',
+  iconBg: 'bg-[var(--icons-green)]',
+  text: 'text-[var(--text-primary)] dark:text-[var(--icons-green)]',
+  border: 'border-[var(--icons-green)]/20 dark:border-[var(--icons-green)]/25',
+  shadow: 'shadow-[var(--icons-green)]/20',
+};
+const _error = {
+  bg: 'bg-[var(--color-error)]/10 dark:bg-[var(--color-error)]/15',
+  iconBg: 'bg-[var(--color-error)]',
+  text: 'text-[var(--color-error)] dark:text-[var(--color-error)]',
+  border: 'border-[var(--color-error)]/20 dark:border-[var(--color-error)]/25',
+  shadow: 'shadow-[var(--color-error)]/20',
+};
 
 const colorMap = {
-    sky:           _info,
-    violet:        _info,
-    celeste:       _info,
-    azulCeleste:   _info,
-    emerald:       _success,
-    lima:          _success,
-    verde:         _success,
-    amber:         _teal,
-    indigo:        _teal,
-    turquesaClaro: _teal,
-    turquesa:      _teal,
-    rose:          _error,
+  sky: _info,
+  violet: _info,
+  celeste: _info,
+  azulCeleste: _info,
+  emerald: _success,
+  lima: _success,
+  verde: _success,
+  amber: _teal,
+  indigo: _teal,
+  turquesaClaro: _teal,
+  turquesa: _teal,
+  rose: _error,
 };
 
 const isValidColor = (c: string): c is keyof typeof colorMap => c in colorMap;
@@ -62,20 +92,33 @@ export default function BaseStatCard({
         onClick ? 'cursor-pointer active:scale-[0.98] text-left w-full' : ''
       } ${className}`}
     >
-      <div className={`absolute top-0 right-0 w-40 h-40 ${theme.bg} rounded-full -mr-20 -mt-20 blur-3xl transition-all duration-500 group-hover:scale-150`}></div>
+      <div
+        className={`absolute top-0 right-0 w-40 h-40 ${theme.bg} rounded-full -mr-20 -mt-20 blur-3xl transition-all duration-500 group-hover:scale-150`}
+      ></div>
 
       <div className="relative z-10">
         <div className="flex items-center gap-3 mb-4">
           {icon && (
-            <div className={`w-10 h-10 ${theme.iconBg} text-white dark:text-white/90 rounded-xl flex items-center justify-center shadow-md ${theme.shadow} transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg`}>
+            <div
+              className={`w-10 h-10 ${theme.iconBg} text-white dark:text-white/90 rounded-xl flex items-center justify-center shadow-md ${theme.shadow} transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg`}
+            >
               <Icon name={icon} className="w-5 h-5 stroke-[2.5px]" />
             </div>
           )}
 
           {trend && (
-            <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ${trend.isPositive ? 'bg-[var(--color-success)]/10 text-[var(--color-success)] border-[var(--color-success)]/20' : 'bg-[var(--color-error)]/10 text-[var(--color-error)] border-[var(--color-error)]/20'}`}>
-              <Icon name={trend.isPositive ? 'TrendingUp' : 'TrendingDown'} className="w-3 h-3" />
-              {trend.isPositive ? '+' : '-'}{typeof trend.value === 'number' ? trend.value.toFixed(1) : trend.value}%
+            <div
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ${trend.isPositive ? 'bg-[var(--color-success)]/10 text-[var(--color-success)] border-[var(--color-success)]/20' : 'bg-[var(--color-error)]/10 text-[var(--color-error)] border-[var(--color-error)]/20'}`}
+            >
+              <Icon
+                name={trend.isPositive ? 'TrendingUp' : 'TrendingDown'}
+                className="w-3 h-3"
+              />
+              {trend.isPositive ? '+' : '-'}
+              {typeof trend.value === 'number'
+                ? trend.value.toFixed(1)
+                : trend.value}
+              %
             </div>
           )}
         </div>
@@ -85,11 +128,17 @@ export default function BaseStatCard({
             <h3 className="text-3xl font-black text-[var(--text-primary)] tracking-tight leading-none tabular-nums">
               {value}
             </h3>
-            {suffix && <span className="text-xs font-black text-[var(--text-secondary)] uppercase tracking-tight">{suffix}</span>}
+            {suffix && (
+              <span className="text-xs font-black text-[var(--text-secondary)] uppercase tracking-tight">
+                {suffix}
+              </span>
+            )}
           </div>
 
           <div>
-            <p className={`text-[11px] font-bold ${theme.text} uppercase tracking-wider`}>
+            <p
+              className={`text-[11px] font-bold ${theme.text} uppercase tracking-wider`}
+            >
               {label}
             </p>
             {description && (
@@ -101,14 +150,14 @@ export default function BaseStatCard({
         </div>
 
         {badge && (
-          <KpiBadge label={badge.label} level={badge.level} scale={badge.scale} />
+          <KpiBadge
+            label={badge.label}
+            level={badge.level}
+            scale={badge.scale}
+          />
         )}
 
-        {chart && (
-          <div className="mt-4 mb-1 min-h-[120px] w-full">
-            {chart}
-          </div>
-        )}
+        {chart && <div className="mt-4 mb-1 min-h-[120px] w-full">{chart}</div>}
       </div>
 
       {onClick && (
