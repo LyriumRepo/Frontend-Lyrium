@@ -536,7 +536,7 @@ export default function ProductModerationModal({
                   )}
 
                   {/* Información nutricional */}
-                  {detail.nutritional_info?.rows?.length > 0 && (
+                  {(() => { const ni = detail.nutritional_info; return ni && ni.rows?.length > 0 ? (
                     <div
                       className="p-4"
                       style={{
@@ -549,9 +549,9 @@ export default function ProductModerationModal({
                         <Leaf className="w-3 h-3 text-emerald-500" />{' '}
                         Información Nutricional
                       </p>
-                      {detail.nutritional_info.serving_note && (
+                      {ni.serving_note && (
                         <p className="text-[10px] italic text-[var(--text-secondary)] mb-3">
-                          {detail.nutritional_info.serving_note}
+                          {ni.serving_note}
                         </p>
                       )}
                       <table className="w-full text-[11px]">
@@ -568,7 +568,7 @@ export default function ProductModerationModal({
                           </tr>
                         </thead>
                         <tbody>
-                          {detail.nutritional_info.rows.map((row, i) => (
+                          {ni.rows.map((row, i) => (
                             <tr
                               key={i}
                               style={{
@@ -590,7 +590,7 @@ export default function ProductModerationModal({
                         </tbody>
                       </table>
                     </div>
-                  )}
+                  ) : null})()}
 
                   {/* Rechazo previo */}
                   {rejectionReason && (

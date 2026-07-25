@@ -120,7 +120,7 @@ function adaptMessage(msg: AdminMessage, ticketId: string): UnifiedMessage {
     senderRole: isAdmin ? 'admin' : 'vendor',
     content: msg.contenido || msg.texto || '',
     timestamp: new Date(msg.timestamp),
-    hour: msg.timestamp instanceof Date ? msg.timestamp.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' }) : msg.timestamp,
+    hour: new Date(msg.timestamp).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' }),
     isQuickReply: msg.tipo === 'respuesta_rapida',
     isEscalation: msg.tipo === 'escalamiento',
     isRead: msg.leido ?? false,

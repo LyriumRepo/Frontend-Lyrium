@@ -91,7 +91,7 @@ export async function createProduct(
     const responseData = await res.json();
     const product = responseData.data ?? responseData;
 
-    revalidateTag('seller-catalog');
+    revalidateTag('seller-catalog', 'default');
     revalidatePath('/seller/catalog');
 
     return {
@@ -165,7 +165,7 @@ export async function updateProduct(
       };
     }
 
-    revalidateTag('seller-catalog');
+    revalidateTag('seller-catalog', 'default');
     revalidatePath('/seller/catalog');
 
     return {

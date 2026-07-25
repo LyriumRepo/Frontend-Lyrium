@@ -22,6 +22,8 @@ export function BaseSkeleton({
   );
 }
 
+export default BaseSkeleton;
+
 export const SkeletonCard = ({ count = 1 }: { count?: number }) => (
   <>
     {Array.from({ length: count }).map((_, i) => (

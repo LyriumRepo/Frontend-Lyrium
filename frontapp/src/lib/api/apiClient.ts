@@ -58,6 +58,9 @@ export async function apiClient<T = unknown>(
 
     if (response.status === 401) {
         invalidateTokenCache();
+        if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('session-expired'));
+        }
         throw new Error(`API Error: 401 Unauthorized`);
     }
 

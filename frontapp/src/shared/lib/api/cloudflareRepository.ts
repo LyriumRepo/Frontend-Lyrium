@@ -11,11 +11,25 @@ async function fetchJson<T>(url: string, options?: RequestInit): Promise<T> {
         ...((options?.method && options.method !== 'GET') ? { 'Content-Type': 'application/json' } : {}),
     };
 
-    const response = await fetch(url, { ...options, headers: { ...headers, ...options?.headers as Record<string, string> } });
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+    const response = await fetch(url, {
+        ...options,
+        signal: controller.signal,
+        headers: { ...headers, ...options?.headers as Record<string, string> },
+    });
+    clearTimeout(timeoutId);
+
+    if (response.status === 401) {
+        if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('session-expired'));
+        }
+    }
 
     if (!response.ok) {
         const body = await response.json().catch(() => ({}));
-        const message = body?.error?.message || body?.error || `HTTP ${response.status}`;
+        const message = body?.message || body?.error || `HTTP ${response.status}`;
         throw new Error(message);
     }
 

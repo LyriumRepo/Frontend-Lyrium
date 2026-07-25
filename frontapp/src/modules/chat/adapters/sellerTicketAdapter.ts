@@ -72,7 +72,7 @@ function adaptMessage(msg: SellerMessage, ticketId: string): UnifiedMessage {
       name: a.name,
       type: a.type,
     })),
-    isRead: msg.leido ?? false,
+    isRead: (msg as any).leido ?? false,
   };
 }
 

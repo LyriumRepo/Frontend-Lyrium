@@ -660,7 +660,7 @@ export default function ServiceConfigModal({
     const categoria = [form.categoriaL1, form.categoriaL2, form.categoriaL3]
       .filter(Boolean).join(' > ');
 
-    let sticker: string | null = null;
+    let sticker: "liquidacion" | "oferta" | "descuento" | "nuevo" | "bestseller" | "envio_gratis" | null = null;
     let discountPercentage: number | null = null;
     if (form.etiquetas.descuento) {
       sticker = 'descuento';

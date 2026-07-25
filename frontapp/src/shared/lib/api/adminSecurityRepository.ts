@@ -31,6 +31,12 @@ async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> 
       ...(options.headers ?? {}),
     },
   });
+  if (res.status === 401) {
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('session-expired'));
+    }
+    throw new Error('Sesión no autorizada');
+  }
   if (!res.ok) {
     const err = await res.json().catch(() => ({ message: res.statusText }));
     throw new Error(err.message ?? `HTTP ${res.status}`);
@@ -64,6 +70,7 @@ export interface SecuritySessionItem {
   user_agent: string | null;
   device: string;
   browser: string;
+  browser_version?: string;
   platform: string;
   country: string;
   is_mobile: boolean;

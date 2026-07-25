@@ -285,9 +285,9 @@ export default function ProductFormClient() {
         showToast('Producto creado exitosamente', 'success');
         router.push('/seller/catalog');
       } else {
-        showToast(result.error || 'Error al crear el producto', 'error');
-        if (result.fieldErrors) {
-          setFieldErrors(result.fieldErrors);
+        showToast((result as any).error || 'Error al crear el producto', 'error');
+        if ((result as any).fieldErrors) {
+          setFieldErrors((result as any).fieldErrors);
         }
       }
     } catch (err: any) {

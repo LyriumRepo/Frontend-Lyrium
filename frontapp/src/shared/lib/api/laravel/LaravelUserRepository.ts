@@ -69,6 +69,9 @@ export class LaravelUserRepository implements IUserRepository {
         if (!response.ok) {
             if (response.status === 401) {
                 console.log('[LaravelUserRepository] 401 Unauthorized - token may be invalid');
+                if (typeof window !== 'undefined') {
+                    window.dispatchEvent(new CustomEvent('session-expired'));
+                }
                 return null as unknown as T;
             }
             throw new Error(`Laravel API Error: ${response.status}`);

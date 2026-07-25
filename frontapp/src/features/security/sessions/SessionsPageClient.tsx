@@ -2,20 +2,26 @@
 
 import React, { useState } from 'react';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
-import { Monitor, Smartphone, XCircle, Search, ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react';
+import BaseModal from '@/components/ui/BaseModal';
+import { Monitor, Smartphone, XCircle, Search, ChevronLeft, ChevronRight, RefreshCw, AlertTriangle } from 'lucide-react';
 import { useSecuritySessions } from '@/features/security/sessions/hooks/useSecuritySessions';
 
 export default function SessionsPageClient() {
   const { sessions, pagination, loading, error, fetch, revoke } = useSecuritySessions();
   const [searchInput, setSearchInput] = useState('');
+  const [revokeTarget, setRevokeTarget] = useState<{ id: string; name: string } | null>(null);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     fetch({ search: searchInput || undefined, page: 1, per_page: 15 });
   };
 
-  const handleRevoke = async (id: string) => {
-    try { await revoke(id) } catch { /* ignore */ }
+  const handleRevoke = async () => {
+    if (!revokeTarget) return;
+    try {
+      await revoke(revokeTarget.id);
+    } catch { /* ignore */ }
+    setRevokeTarget(null);
   };
 
   return (
@@ -103,7 +109,7 @@ export default function SessionsPageClient() {
                       : <span className="px-2.5 py-1 bg-gray-100 dark:bg-gray-800 text-gray-500 text-[10px] font-black uppercase rounded-full">Inactiva</span>}
                   </td>
                   <td className="px-6 py-4 text-center">
-                    <button onClick={() => handleRevoke(s.id)} className="p-1.5 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/20 text-red-500 transition-colors" title="Revocar">
+                    <button onClick={() => setRevokeTarget({ id: s.id, name: s.user?.name || s.user?.email || `ID: ${s.user_id}` })} className="p-1.5 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/20 text-red-500 transition-colors" title="Revocar">
                       <XCircle className="w-4 h-4" />
                     </button>
                   </td>
@@ -132,6 +138,44 @@ export default function SessionsPageClient() {
           </div>
         )}
       </div>
+
+      <BaseModal
+        isOpen={!!revokeTarget}
+        onClose={() => setRevokeTarget(null)}
+        title="Revocar sesión"
+        subtitle="SEGURIDAD"
+        size="sm"
+        accentColor="from-rose-500 to-red-600"
+      >
+        <div className="flex flex-col items-center text-center py-4">
+          <div className="w-16 h-16 bg-red-100 dark:bg-red-900/20 rounded-2xl flex items-center justify-center mb-4">
+            <AlertTriangle className="w-8 h-8 text-red-500" />
+          </div>
+          <p className="text-lg font-black text-[var(--text-primary)] mb-2">
+            ¿Estás seguro de revocar esta sesión?
+          </p>
+          <p className="text-sm text-[var(--text-secondary)] mb-1">
+            El usuario <span className="font-bold text-[var(--text-primary)]">{revokeTarget?.name}</span> será desconectado inmediatamente.
+          </p>
+          <p className="text-xs text-[var(--text-muted)] mb-6">
+            Esta acción no se puede deshacer.
+          </p>
+          <div className="flex gap-3 w-full">
+            <button
+              onClick={() => setRevokeTarget(null)}
+              className="flex-1 py-3 px-4 bg-[var(--bg-secondary)] text-[var(--text-primary)] rounded-xl font-bold text-sm uppercase tracking-wider hover:bg-[var(--bg-muted)] transition-all duration-300"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={handleRevoke}
+              className="flex-1 py-3 px-4 bg-red-500 hover:bg-red-600 text-white rounded-xl font-bold text-sm uppercase tracking-wider shadow-lg shadow-red-500/25 transition-all duration-300"
+            >
+              Revocar
+            </button>
+          </div>
+        </div>
+      </BaseModal>
     </div>
   );
 }

@@ -76,16 +76,16 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <QueryProvider>
             <GoogleOAuthWrapper>
-              <AuthProvider>
-                <EchoProvider>
-                  <NotificationProvider>
-                    <ToastProvider>
+              <ToastProvider>
+                <AuthProvider>
+                  <EchoProvider>
+                    <NotificationProvider>
                       {children}
                       <CartProviders />
-                    </ToastProvider>
-                  </NotificationProvider>
-                </EchoProvider>
-              </AuthProvider>
+                    </NotificationProvider>
+                  </EchoProvider>
+                </AuthProvider>
+              </ToastProvider>
             </GoogleOAuthWrapper>
           </QueryProvider>
         </ThemeProvider>

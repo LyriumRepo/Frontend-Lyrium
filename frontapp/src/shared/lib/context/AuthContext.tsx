@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { User } from '@/shared/types/auth';
@@ -10,6 +10,7 @@ import {
   loginWithSocialAction,
 } from '@/shared/lib/actions/auth';
 import { getRoleBasedRoute } from '@/shared/lib/config/auth';
+import { useToast } from '@/shared/lib/context/ToastContext';
 
 const LARAVEL_API_URL =
   process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://localhost:8000/api';
@@ -64,9 +65,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState(false);
-  const [isHydrated, setIsHydrated] = useState(false); // ← nuevo
+  const [isHydrated, setIsHydrated] = useState(false);
+  const wasAuthenticated = useRef(false);
   const router = useRouter();
   const pathname = usePathname();
+  const { showToast } = useToast();
 
   const { isLoading: loading, data: sessionData } = useQuery({
     queryKey: ['auth', 'session'],
@@ -77,17 +80,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     refetchOnWindowFocus: true,
   });
 
-  // Sincroniza el user con la query
   useEffect(() => {
     if (!loading) {
-      setIsHydrated(true); // ← la query terminó al menos una vez
+      setIsHydrated(true);
       if (sessionData?.authenticated && sessionData.user) {
         setUser(sessionData.user);
+        wasAuthenticated.current = true;
       } else {
+        if (wasAuthenticated.current) {
+          handleSessionExpired();
+        }
         setUser(null);
       }
     }
-  }, [loading, sessionData]);
+  }, [loading, sessionData, showToast, router]);
+
+  const handleSessionExpired = useCallback(() => {
+    showToast('Su sesión ha sido revocada por un administrador.', 'error');
+    const loginUrl = new URL('/login', window.location.origin);
+    loginUrl.searchParams.set('reason', 'revoked');
+    window.location.href = loginUrl.pathname + loginUrl.search;
+  }, [showToast]);
+
+  useEffect(() => {
+    const onSessionExpired = () => handleSessionExpired();
+    window.addEventListener('session-expired', onSessionExpired);
+    return () => window.removeEventListener('session-expired', onSessionExpired);
+  }, [handleSessionExpired]);
 
   // Redirecciones — solo actúa cuando la query ya hidrat ó
   useEffect(() => {

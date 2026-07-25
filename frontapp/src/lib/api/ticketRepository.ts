@@ -63,6 +63,9 @@ function normalizeAdminPriority(priority: string): string {
 async function handleResponse<T>(response: Response): Promise<T> {
     if (response.status === 401) {
         invalidateTokenCache();
+        if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('session-expired'));
+        }
     }
     
     if (!response.ok) {

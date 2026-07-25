@@ -16,7 +16,7 @@ interface BaseButtonProps {
   variant?: ButtonVariant;
   size?: ButtonSize;
   isLoading?: boolean;
-  leftIcon?: string;
+  leftIcon?: string | React.ReactNode;
   rightIcon?: string;
   fullWidth?: boolean;
   children?: ReactNode;
@@ -128,7 +128,7 @@ export default function BaseButton({
         <Loader2 className="w-4 h-4 animate-spin" />
       ) : (
         <>
-          {leftIcon && <Icon name={leftIcon} className="w-4 h-4" />}
+          {leftIcon && (typeof leftIcon === 'string' ? <Icon name={leftIcon} className="w-4 h-4" /> : leftIcon)}
           {children}
           {rightIcon && <Icon name={rightIcon} className="w-4 h-4" />}
         </>

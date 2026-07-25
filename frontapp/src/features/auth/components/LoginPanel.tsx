@@ -1,7 +1,8 @@
 'use client';
 
 import { FormEvent, useState } from 'react';
-import { Loader2, Lock, Mail, User, Building2 } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
+import { Loader2, Lock, Mail, User, Building2, AlertTriangle } from 'lucide-react';
 import { SocialLoginButton } from '@/components/login/social/SocialLoginButton';
 import type { LoginFormData, UserType } from '../types/auth';
 
@@ -41,6 +42,8 @@ export function LoginPanel({
         rememberMe: false
     });
 
+    const searchParams = useSearchParams();
+    const reason = searchParams.get('reason');
     const labels = LABELS[userType];
 
     const handleSubmit = async (e: FormEvent) => {
@@ -75,14 +78,13 @@ export function LoginPanel({
                     </div>
                 </div>
 
-                {error && (
-                    <div role="alert" aria-live="polite" className="error-message mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-red-600 dark:text-red-400 text-sm">
-                        {error}
-                    </div>
-                )}
-                {success && (
-                    <div role="status" aria-live="polite" className="success-message mb-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl text-green-600 dark:text-green-400 text-sm">
-                        {success}
+                {reason === 'revoked' && (
+                    <div role="alert" aria-live="polite" className="mb-4 p-4 bg-sky-50 dark:bg-[var(--bg-card)] border border-sky-200 dark:border-[var(--border-subtle)] rounded-xl flex items-start gap-3">
+                        <AlertTriangle className="w-5 h-5 text-sky-500 dark:text-[var(--icons-green)] mt-0.5 flex-shrink-0" />
+                        <div>
+                            <p className="text-sm font-bold text-sky-700 dark:text-[var(--text-primary)]">Sesión revocada</p>
+                            <p className="text-xs text-sky-600 dark:text-[var(--text-secondary)] mt-0.5">Su sesión fue cerrada por un administrador. Inicie sesión nuevamente para continuar.</p>
+                        </div>
                     </div>
                 )}
 

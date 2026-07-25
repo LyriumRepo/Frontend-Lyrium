@@ -485,7 +485,7 @@ function ReviewCard({
       <CardContent className="p-6">
         <div className="flex items-start gap-4">
           <Avatar className="w-12 h-12 flex-shrink-0">
-            <AvatarImage src={review.user?.avatar} alt={review.user?.name} />
+            <AvatarImage src={review.user?.avatar ?? undefined} alt={review.user?.name} />
             <AvatarFallback>
               {review.user?.name?.charAt(0).toUpperCase() ?? '?'}
             </AvatarFallback>

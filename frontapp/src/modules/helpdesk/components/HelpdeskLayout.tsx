@@ -21,7 +21,7 @@ export interface HelpdeskLayoutProps {
   
   onSelectTicket: (id: string) => void;
   onFilterChange: (filters: Partial<TicketFilters>) => void;
-  onSendMessage: (text: string, isQuick?: boolean) => Promise<void>;
+  onSendMessage: (payload: { text: string; isQuick?: boolean }) => Promise<void>;
   onCreateTicket?: (subject: string, content: string) => void;
   onCloseTicket?: () => void;
   
@@ -109,7 +109,7 @@ export function HelpdeskLayout({
             {selectedTicket ? (
               <ChatView
                 ticket={selectedTicket}
-                onSendMessage={onSendMessage}
+                onSendMessage={(payload: { text: string; isQuick?: boolean }) => onSendMessage(payload)}
                 onCloseTicket={onCloseTicket}
                 isSending={isSending}
                 isClosing={isClosing}

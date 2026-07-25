@@ -70,8 +70,10 @@ export interface LaravelProduct {
   updated_at: string | null;
 
   // Características — ya aplanadas desde el backend
-  characteristics: AttributeValue[]; // mainAttributes → tabla key/value
-  additional_info: AttributeValue[]; // additionalAttributes
+  characteristics: AttributeValue[];
+  additional_info: AttributeValue[];
+  mainAttributes: { values: (string | { label: string; value: string })[] }[];
+  additionalAttributes: { values: (string | { label: string; value: string })[] }[];
   nutritional_info: NutritionalInfo | null; // ficha nutricional
 
   // Solo physical

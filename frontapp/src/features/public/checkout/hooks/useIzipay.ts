@@ -42,14 +42,13 @@ interface KryptonError {
 declare global {
   interface Window {
     KR?: {
-      onLoaded: (callback: () => void) => void;
-      setFormConfig: (config: { formToken: string }) => Promise<void>;
-      setFormToken: (token: string) => Promise<void>;
-      // ✅ onSubmit — firma correcta: recibe callback, NO es window.KR() directamente
-      onSubmit: (
-        callback: (result: KryptonPaymentSuccessDetail) => boolean | void,
-      ) => void;
-      onError: (callback: (error: KryptonError) => boolean | void) => void;
+      setFormConfig?: (config: Record<string, string>) => Promise<void>;
+      setFormToken?: (token: string) => Promise<void>;
+      onSubmit?: (callback: (result: any) => boolean | void) => void;
+      onLoaded?: (callback: () => void) => void;
+      renderElements?: (selector: string) => void;
+      onError?: (callback: (error: any) => boolean | void) => void;
+      onPaymentSuccess?: (callback: (result: any) => void) => void;
     };
   }
 }
@@ -101,7 +100,7 @@ export function useIzipay({ onSuccess }: UseIzipayOptions): UseIzipayReturn {
           // setFormConfig se llama únicamente en loadSmartForm con el formToken real.
 
           // ✅ CORRECCIÓN: usar window.KR?.onSubmit(...) en lugar de window.KR?.()
-          window.KR?.onSubmit((response) => {
+          window.KR?.onSubmit?.((response) => {
             console.log('[Izipay] onSubmit disparado:', response);
 
             const orderStatus = response?.clientAnswer?.orderStatus;
@@ -115,7 +114,7 @@ export function useIzipay({ onSuccess }: UseIzipayOptions): UseIzipayReturn {
             return true;
           });
 
-          window.KR?.onError((err) => {
+          window.KR?.onError?.((err) => {
             const errorCode =
               err?.errorCode ?? err?.error?.errorCode ?? 'UNKNOWN';
             const msg =
@@ -181,11 +180,10 @@ export function useIzipay({ onSuccess }: UseIzipayOptions): UseIzipayReturn {
       setIsLoading(true);
       setError(null);
 
-      // ✅ Preferir setFormConfig (Smart Form moderno), caer en setFormToken si no existe
       if (hasSetFormConfig) {
-        await window.KR.setFormConfig({ formToken });
+        await window.KR.setFormConfig!({ formToken });
       } else {
-        await window.KR.setFormToken(formToken);
+        await window.KR.setFormToken!(formToken);
       }
 
       console.log('[Izipay] formToken cargado en el Smart Form ✓');

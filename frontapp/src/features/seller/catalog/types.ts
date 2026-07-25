@@ -154,11 +154,11 @@ export function etiquetasFromProduct(product: Product): EtiquetaConfig {
     case 'nuevo':
       return { nuevo: true };
     case 'descuento':
-      return { descuento: { valor: product.discountPercentage ?? 20, inicio: today, fin: null } };
+      return { nuevo: false, descuento: { valor: product.discountPercentage ?? 20, inicio: today, fin: null } };
     case 'oferta':
-      return { oferta: { valor: product.discountPercentage ?? 30, inicio: today, fin: nextMonthStr } };
+      return { nuevo: false, oferta: { valor: product.discountPercentage ?? 30, inicio: today, fin: nextMonthStr } };
     case 'liquidacion':
-      return { edicionLimitada: { inicio: today, fin: nextMonthStr } };
+      return { nuevo: false, edicionLimitada: { inicio: today, fin: nextMonthStr } };
     default:
       return { nuevo: false };
   }

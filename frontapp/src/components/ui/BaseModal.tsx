@@ -10,7 +10,7 @@ interface BaseModalProps {
     title?: string;
     subtitle?: string;
     children: React.ReactNode;
-    size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '4xl' | 'full';
+    size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '4xl' | '5xl' | 'full';
     showCloseButton?: boolean;
     accentColor?: string;
 }
@@ -22,8 +22,19 @@ const sizeClasses = {
     xl: 'max-w-2xl',
     '2xl': 'max-w-3xl',
     '4xl': 'max-w-5xl',
+    '5xl': 'max-w-6xl',
     full: 'max-w-[95vw] h-[90vh]'
 };
+
+interface BaseModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    title?: string;
+    subtitle?: string;
+    size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '4xl' | '5xl' | 'full';
+    rainbowHeader?: boolean;
+    children: React.ReactNode;
+}
 
 export default function BaseModal({
     isOpen,
@@ -33,7 +44,8 @@ export default function BaseModal({
     children,
     size = 'xl',
     showCloseButton = true,
-    accentColor = 'from-sky-400 to-indigo-400'
+    accentColor = 'from-sky-400 to-indigo-400',
+    rainbowHeader = false,
 }: BaseModalProps) {
     const titleId = useId();
     const subtitleId = useId();
@@ -61,7 +73,7 @@ export default function BaseModal({
                     aria-describedby={subtitle ? subtitleId : undefined}
                 >
                     {/* Top Accent Decorator */}
-                    <div className={`h-1.5 w-full bg-gradient-to-r ${accentColor}`}></div>
+                    <div className={`h-1.5 w-full bg-gradient-to-r ${rainbowHeader ? 'from-red-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500' : accentColor}`}></div>
 
                     {/* Header */}
                     {(title || subtitle || showCloseButton) && (

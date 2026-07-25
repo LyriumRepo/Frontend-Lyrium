@@ -11,8 +11,8 @@ import {
   Expense,
   OperationalRole,
   AuditLog,
-  OperationalKPI,
 } from '@/features/admin/operations/types/operations';
+import type { OperationalKPI } from '@/features/admin/operations/types';
 
 type TabId = 'proveedores' | 'gastos' | 'roles' | 'auditoria';
 

@@ -126,7 +126,7 @@ function SpecialistSchedule({ schedules }: { schedules: ServiceSchedule[] }) {
       {days.map((day) => (
         <div key={day} className="flex items-start gap-2 text-xs">
           <span className="w-20 shrink-0 font-semibold text-gray-700 dark:text-[var(--text-primary)]">
-            {DAY_NAMES[day]}
+            {DAY_NAMES[day as keyof typeof DAY_NAMES]}
           </span>
           <div className="flex flex-col gap-0.5">
             {byDay[day].map((block) => (
@@ -720,8 +720,8 @@ export default function ServicesCategoryPageClient({
               <Link
                 key={cat.id}
                 href={
-                  cat.parent_id
-                    ? `/servicios/${allCategories.find((p) => p.id === cat.parent_id)?.slug ?? cat.slug}/${cat.slug}`
+                  cat.parent
+                    ? `/servicios/${allCategories.find((p) => p.id === cat.parent)?.slug ?? cat.slug}/${cat.slug}`
                     : `/servicios/${cat.slug}`
                 }
                 className={`shrink-0 px-4 py-2 rounded-full text-xs font-bold transition-all border whitespace-nowrap ${

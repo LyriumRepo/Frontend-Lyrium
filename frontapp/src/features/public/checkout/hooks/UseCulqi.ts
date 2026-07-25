@@ -42,11 +42,13 @@ interface KryptonError {
 declare global {
   interface Window {
     KR?: {
-      setFormToken: (token: string) => Promise<void>;
-      onPaymentSuccess: (
-        callback: (result: KryptonPaymentSuccessDetail) => void,
-      ) => void;
-      onError: (callback: (error: KryptonError) => void) => void;
+      setFormToken?: (token: string) => Promise<void>;
+      onPaymentSuccess?: (callback: (result: any) => void) => void;
+      onError?: (callback: (error: any) => boolean | void) => void;
+      setFormConfig?: (config: Record<string, string>) => Promise<void>;
+      onSubmit?: (cb: (data: any) => boolean | void) => void;
+      onLoaded?: (callback: () => void) => void;
+      renderElements?: (selector: string) => void;
     };
   }
 }
@@ -85,7 +87,7 @@ export function useIzipay({ onSuccess }: UseIzipayOptions): UseIzipayReturn {
     const register = () => {
       if (typeof window === 'undefined') return;
 
-      if (window.KR) {
+      if (window.KR?.onPaymentSuccess) {
         // Pago exitoso — Izipay ya cobró; solo avisamos al componente padre
         window.KR.onPaymentSuccess((result) => {
           console.log('[Izipay] pago exitoso', result);
@@ -93,7 +95,7 @@ export function useIzipay({ onSuccess }: UseIzipayOptions): UseIzipayReturn {
         });
 
         // Error del SDK (tarjeta rechazada, timeout, etc.)
-        window.KR.onError((err) => {
+        window.KR?.onError?.((err) => {
           console.error('[Izipay] error', err);
           setError(
             err.detailedErrorMessage ||
@@ -140,7 +142,7 @@ export function useIzipay({ onSuccess }: UseIzipayOptions): UseIzipayReturn {
     try {
       setIsLoading(true);
       setError(null);
-      await window.KR.setFormToken(formToken);
+      await window.KR?.setFormToken?.(formToken);
     } catch (err) {
       const msg =
         err instanceof Error

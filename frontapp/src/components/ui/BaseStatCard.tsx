@@ -7,7 +7,7 @@ interface BaseStatCardProps {
   description?: string;
   icon?: string;
   color?: string;
-  trend?: { value: number; isPositive: boolean };
+  trend?: { value: string | number; isPositive: boolean };
   chart?: React.ReactNode;
   suffix?: string;
   className?: string;

@@ -24,9 +24,13 @@ interface Props {
 declare global {
   interface Window {
     KR?: {
-      setFormConfig: (cfg: Record<string, string>) => Promise<void>;
-      renderElements: (selector: string) => void;
-      onSubmit: (cb: (data: { clientAnswer: { orderStatus: string } }) => boolean) => void;
+      setFormConfig?: (config: Record<string, string>) => Promise<void>;
+      setFormToken?: (token: string) => Promise<void>;
+      onSubmit?: (cb: (data: any) => boolean | void) => void;
+      renderElements?: (selector: string) => void;
+      onLoaded?: (callback: () => void) => void;
+      onError?: (callback: (error: any) => boolean | void) => void;
+      onPaymentSuccess?: (callback: (result: any) => void) => void;
     };
   }
 }
@@ -51,22 +55,22 @@ export default function IzipayForm({ config, open, onPaid, onFailed }: Props) {
 
       if (!config) return;
 
-      window.KR.setFormConfig({
+      window.KR!.setFormConfig!({
         formToken:       config.formToken,
         'kr-public-key': config.publicKey,
         'kr-language':   'es-PE',
       }).then(() => {
-        window.KR!.renderElements('#izipayFormContainer');
+        window.KR!.renderElements!('#izipayFormContainer');
       });
 
-      window.KR.onSubmit((paymentData) => {
+      window.KR!.onSubmit!((paymentData) => {
         const status = paymentData.clientAnswer.orderStatus;
         if (status === 'PAID') {
           onPaid();
         } else {
           onFailed();
         }
-        return false; // Prevenir redirect de Izipay
+        return false;
       });
     }
 

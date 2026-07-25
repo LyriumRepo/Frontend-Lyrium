@@ -30,10 +30,10 @@ export function LogisticsHelpdeskPageClient() {
         }
     };
 
-    const handleSendMessage = async (text: string, _isQuick?: boolean) => {
+    const handleSendMessage = async (payload: { text: string; isQuick?: boolean }) => {
         if (!selectedTicket) return;
         await new Promise(resolve => setTimeout(resolve, 300));
-        addMessage(selectedTicket.id, text);
+        addMessage(selectedTicket.id, payload.text);
     };
 
     const ticketFilters: TicketFilters = {
