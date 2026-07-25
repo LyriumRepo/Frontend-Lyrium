@@ -309,7 +309,7 @@ export default function CustomerAddressesPage() {
               </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-10 space-y-6 overflow-y-auto flex-1">
+            <form onSubmit={handleSubmit} className="p-10 space-y-6 overflow-y-auto green-scrollbar flex-1">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-gray-400 dark:text-gray-400 uppercase">Etiqueta de ubicación</label>

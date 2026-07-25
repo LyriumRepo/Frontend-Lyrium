@@ -141,7 +141,7 @@ export default function ChatBotPanel({
                 <div
                     ref={messagesContainerRef}
                     onScroll={handleScroll}
-                    className="relative flex-1 min-h-0 sm:flex-none sm:min-h-[80px] sm:max-h-[200px] overflow-y-auto p-4 space-y-3 bg-white dark:bg-[var(--bg-card)] custom-scrollbar"
+                    className="relative flex-1 min-h-0 sm:flex-none sm:min-h-[80px] sm:max-h-[200px] overflow-y-auto p-4 space-y-3 bg-white dark:bg-[var(--bg-card)] green-scrollbar"
                 >
                     {messages.map((msg) => (
                         <ChatBotBubble key={msg.id} message={msg} onWhatsAppClick={onWhatsAppClick} />

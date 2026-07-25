@@ -5,7 +5,7 @@ import { TicketListProps, TicketFilters, TicketStatus, TicketPriority } from '..
 import { TicketItem } from './TicketItem';
 import { Search } from 'lucide-react';
 
-const scrollbarClass = 'custom-scrollbar scrollbar-thin';
+const scrollbarClass = 'green-scrollbar';
 
 const defaultFilters: TicketFilters = {
   search: '',

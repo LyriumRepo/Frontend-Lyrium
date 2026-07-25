@@ -54,7 +54,7 @@ export function ActiveSessionsPanel({ sessions, loading, error, onRevoke, onRefr
             <div key={session.id} className="flex items-center justify-between p-4 px-6 hover:bg-[var(--bg-secondary)]/50 transition-colors">
               <div className="flex items-center gap-4 min-w-0">
                 <div className={`p-2 rounded-xl ${session.is_active ? 'bg-emerald-100 dark:bg-emerald-900/20' : 'bg-gray-100 dark:bg-gray-800'}`}>
-                  {session.device === 'iPhone' || session.device === 'Android' || session.device === 'iPad' ? (
+                  {session.is_mobile ? (
                     <Smartphone className={`w-4 h-4 ${session.is_active ? 'text-emerald-600' : 'text-gray-400'}`} />
                   ) : (
                     <Monitor className={`w-4 h-4 ${session.is_active ? 'text-emerald-600' : 'text-gray-400'}`} />
@@ -65,10 +65,10 @@ export function ActiveSessionsPanel({ sessions, loading, error, onRevoke, onRefr
                     {session.user?.name || session.user?.email || `Usuario #${session.user_id}`}
                   </p>
                   <p className="text-xs text-[var(--text-secondary)] truncate">
-                    {session.device} &middot; {session.browser}
+                    {session.device} &middot; {session.platform} &middot; {session.browser} {session.browser_version}
                   </p>
                   <p className="text-[10px] text-[var(--text-muted)]">
-                    {session.ip_address} &middot; {new Date(session.last_activity).toLocaleString()}
+                    {session.ip_address}{session.country ? ` (${session.country})` : ''} &middot; {new Date(session.last_activity).toLocaleString()}
                   </p>
                 </div>
               </div>
@@ -83,11 +83,7 @@ export function ActiveSessionsPanel({ sessions, loading, error, onRevoke, onRefr
                   </span>
                 )}
                 <button
-                  onClick={() => {
-                    if (window.confirm('¿Revocar esta sesión? El usuario será desconectado.')) {
-                      onRevoke(session.id);
-                    }
-                  }}
+                  onClick={() => onRevoke(session.id)}
                   className="p-1.5 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/20 text-red-500 transition-colors"
                   title="Revocar sesión"
                 >

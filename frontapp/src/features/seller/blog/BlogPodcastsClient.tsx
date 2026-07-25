@@ -248,7 +248,7 @@ export function BlogPodcastsClient() {
                             </button>
                             <h3 className="text-lg font-bold text-white pr-12">{editingId ? 'Editar Podcast' : 'Nuevo Podcast'}</h3>
                         </div>
-                        <div className="p-6 space-y-4 overflow-y-auto">
+                        <div className="p-6 space-y-4 overflow-y-auto green-scrollbar">
 
                         <div className="grid grid-cols-2 gap-4">
                             <div>

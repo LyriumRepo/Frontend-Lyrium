@@ -614,7 +614,7 @@ export default function SellerReservasPage() {
             </div>
 
             {/* Body */}
-            <div className="overflow-y-auto flex-1 p-5 space-y-5">
+            <div className="overflow-y-auto green-scrollbar flex-1 p-5 space-y-5">
               <div className="p-5 bg-gray-50 dark:bg-[var(--bg-muted)]/50 rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)]">
                 <p className="text-[10px] font-black text-gray-400 dark:text-[var(--text-muted)] uppercase tracking-widest mb-3">
                   Seguimiento

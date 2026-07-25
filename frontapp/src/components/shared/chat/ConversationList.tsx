@@ -101,7 +101,7 @@ export default function ConversationList({
   }
 
   return (
-    <div className="flex-1 overflow-y-auto custom-scrollbar scrollbar-thin" role="listbox" aria-label="Conversaciones">
+    <div className="flex-1 overflow-y-auto green-scrollbar" role="listbox" aria-label="Conversaciones">
       {conversations.map((conv) => {
         const initial = (conv.storeName ?? conv.name).charAt(0).toUpperCase();
         const colors = [

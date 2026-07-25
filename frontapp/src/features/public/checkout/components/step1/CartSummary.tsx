@@ -53,7 +53,7 @@ export default function CartSummary({ onContinue }: Props) {
   }
 
   return (
-    <div className="rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] p-6 lg:sticky lg:top-24 max-h-[85vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-gray-700 scrollbar-track-transparent space-y-5">
+    <div className="rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] p-6 lg:sticky lg:top-24 max-h-[85vh] overflow-y-auto green-scrollbar space-y-5">
       {/* Título */}
         <h2 className="font-bold text-gray-900 dark:text-[var(--text-primary)] flex items-center gap-2">
           <ShoppingBag className="w-5 h-5 text-sky-500 dark:text-emerald-400" />

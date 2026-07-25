@@ -126,7 +126,7 @@ export default function BranchSelector() {
       </div>
 
       <div
-        className={needsScroll ? 'max-h-[180px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-gray-700 scrollbar-track-transparent' : ''}
+        className={needsScroll ? 'max-h-[180px] overflow-y-auto pr-1 green-scrollbar' : ''}
       >
       <div className="space-y-1.5">
       {branches.map(branch => {

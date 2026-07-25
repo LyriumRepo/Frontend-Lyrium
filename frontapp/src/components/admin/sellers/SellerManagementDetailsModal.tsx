@@ -119,7 +119,7 @@ export default function SellerManagementDetailsModal({ isOpen, onClose, contract
                         </button>
                     </div>
 
-                    <div className="p-4 sm:p-8 overflow-y-auto flex-1 space-y-6 sm:space-y-8 bg-[var(--bg-card)]">
+                    <div className="p-4 sm:p-8 overflow-y-auto green-scrollbar flex-1 space-y-6 sm:space-y-8 bg-[var(--bg-card)]">
                         {isSubmitted ? (
                             <div className="flex flex-col items-center justify-center py-16 text-center space-y-6 animate-fadeIn">
                                 <div className="w-24 h-24 rounded-full bg-[var(--color-success)]/10 text-[var(--color-success)] border border-[var(--color-success)]/30 flex items-center justify-center animate-bounce">

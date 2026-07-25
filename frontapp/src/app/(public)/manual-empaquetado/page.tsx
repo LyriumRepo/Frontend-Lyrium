@@ -103,9 +103,22 @@ export default function ManualEmpaquetadoPage() {
               }
               .terms-content table th,
               .terms-content table td {
-                border-color: #333 !important;
-                border-width: 2px !important;
-                border-style: solid !important;
+                border: none !important;
+                border-bottom: 1px solid #94b8c9 !important;
+                padding: 8px 12px !important;
+              }
+              .terms-content table th {
+                border-bottom: 2px solid #5a8fa8 !important;
+                font-weight: bold !important;
+              }
+              .terms-content table tr:last-child td {
+                border-bottom: 2px solid #5a8fa8 !important;
+              }
+              .terms-content table td,
+              .terms-content table th {
+                border-left: none !important;
+                border-right: none !important;
+                border-top: none !important;
               }
               .terms-content .bg-green-50,
               .terms-content .bg-red-50,

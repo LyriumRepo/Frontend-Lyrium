@@ -316,7 +316,7 @@ export default function AuditPageClient() {
                 </span>
               </div>
             ) : (
-              <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
+              <div className="space-y-2 max-h-[300px] overflow-y-auto green-scrollbar pr-1">
                 {realtimeEvents.map((ev) => (
                   <div
                     key={ev.id}

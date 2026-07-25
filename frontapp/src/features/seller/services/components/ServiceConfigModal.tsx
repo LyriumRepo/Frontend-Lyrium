@@ -745,7 +745,7 @@ export default function ServiceConfigModal({
           </div>
 
           {/* Body */}
-          <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+          <div className="flex-1 overflow-y-auto green-scrollbar px-6 py-5 space-y-5">
 
             {/* ════════════════ PASO 1: Información ════════════════ */}
             {step === 1 && (
@@ -1136,7 +1136,7 @@ export default function ServiceConfigModal({
                   </p>
 
                   {/* Lista compacta con scroll interno */}
-                  <div className="max-h-28 overflow-y-auto pr-1">
+                  <div className="max-h-28 overflow-y-auto green-scrollbar pr-1">
                     <div className="grid grid-cols-2 gap-2">
                       {form.caracteristicas.map((item, idx) => (
                         <div

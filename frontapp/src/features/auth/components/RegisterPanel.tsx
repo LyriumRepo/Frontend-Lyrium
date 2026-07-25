@@ -952,7 +952,7 @@ export function RegisterPanel({
                     </div>
 
                     {/* Contenido de los Términos y Condiciones (HTML desde Laravel) */}
-                    <div className="flex-1 overflow-y-auto px-8 py-6">
+                    <div className="flex-1 overflow-y-auto green-scrollbar px-8 py-6">
                         <div
                             className="prose prose-sm max-w-none text-slate-700 dark:text-[var(--text-primary)]
                                        prose-headings:text-slate-900 dark:prose-headings:text-[var(--text-primary)]
@@ -1031,7 +1031,7 @@ export function RegisterPanel({
                     </div>
 
                     {/* Contenido del acuerdo (HTML desde Laravel) */}
-                    <div className="flex-1 overflow-y-auto px-8 py-6">
+                    <div className="flex-1 overflow-y-auto green-scrollbar px-8 py-6">
                         <div
                             className="prose prose-sm max-w-none text-slate-700 dark:text-[var(--text-primary)]
                                        prose-headings:text-slate-900 dark:prose-headings:text-[var(--text-primary)]

@@ -596,7 +596,7 @@ export const AuditTab: React.FC<{ logs: AuditLog[] }> = ({ logs = [] }) => (
         Registro de todas las acciones del sistema
       </p>
     </div>
-    <div className="divide-y divide-[var(--border-subtle)] max-h-[560px] overflow-y-auto">
+    <div className="divide-y divide-[var(--border-subtle)] max-h-[560px] overflow-y-auto green-scrollbar">
       {logs.length === 0 && (
         <p className="py-10 text-center text-[13px] text-[var(--text-muted)]">
           No hay registros de auditoría.

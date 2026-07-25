@@ -60,7 +60,7 @@ export default function ModalRegistroUsuario({ isOpen, email, onClose }: Props) 
                     </div>
 
                     {/* Body */}
-                    <div className="bg-white dark:bg-[var(--bg-card)] p-5 space-y-4 overflow-y-auto [scrollbar-width:thin] [scrollbar-color:#bae6fd_transparent] dark:[scrollbar-color:#2A5A4D_transparent]">
+                    <div className="bg-white dark:bg-[var(--bg-card)] p-5 space-y-4 overflow-y-auto green-scrollbar">
                         <div className="space-y-3">
                             <div className="text-center space-y-1.5">
                                 <span className="text-[8px] font-black text-sky-500 dark:text-emerald-400 uppercase tracking-[0.3em]">Protocolo de Activación</span>

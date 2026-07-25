@@ -177,7 +177,7 @@ export default function TokenizeNewCardModal({ onClose, onSuccess }: Props) {
           </div>
         </div>
 
-        <div className="p-5 sm:p-10 space-y-4 sm:space-y-6 overflow-y-auto flex-1">
+        <div className="p-5 sm:p-10 space-y-4 sm:space-y-6 overflow-y-auto green-scrollbar flex-1">
           {error && (
             <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-2xl border border-red-200 dark:border-red-800 flex items-start gap-3">
               <Icon name="AlertCircle" className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />

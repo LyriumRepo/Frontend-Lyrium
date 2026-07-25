@@ -1,10 +1,10 @@
 import type { Service } from '../types';
 
 const C = {
-    primary:  [183, 224, 0]   as [number, number, number],
-    secondary:[143, 212, 0]   as [number, number, number],
-    teal:     [34,  139, 70]  as [number, number, number],
-    darkTeal: [22,  101, 52]  as [number, number, number],
+    primary:  [34,  197, 94]  as [number, number, number], // #22c55e
+    secondary:[22,  163, 74]  as [number, number, number], // #16a34a
+    teal:     [21,  128, 61]  as [number, number, number], // #15803d
+    darkTeal: [22,  101, 52]  as [number, number, number], // #166534
 };
 
 const G = {
@@ -28,22 +28,25 @@ function drawKpi(
     x: number, y: number, w: number, h: number,
     accent: [number, number, number]
 ): void {
-    doc.setFillColor(16, 48, 28);
+    doc.setFillColor(248, 250, 252);
     doc.roundedRect(x, y, w, h, 2, 2, 'F');
+    doc.setDrawColor(226, 232, 240);
+    doc.setLineWidth(0.2);
+    doc.roundedRect(x, y, w, h, 2, 2, 'S');
     doc.setFillColor(accent[0], accent[1], accent[2]);
     doc.rect(x, y, w, 1.5, 'F');
     doc.setFillColor(accent[0], accent[1], accent[2]);
     doc.rect(x, y, 2.5, h, 'F');
-    doc.setTextColor(110, 175, 85);
+    doc.setTextColor(100, 116, 139);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(5.5);
     doc.text(label.toUpperCase(), x + 5, y + 8);
-    doc.setTextColor(230, 248, 215);
+    doc.setTextColor(30, 41, 59);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(11);
     doc.text(value, x + 5, y + 16);
     if (sub) {
-        doc.setTextColor(70, 130, 55);
+        doc.setTextColor(100, 116, 139);
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(5);
         doc.text(sub, x + 5, y + 21);
@@ -55,15 +58,15 @@ function drawFooter(doc: any, page: number, total: number): void {
     doc.setDrawColor(C.primary[0], C.primary[1], C.primary[2]);
     doc.setLineWidth(0.5);
     doc.line(ML, y - 2, ML + 20, y - 2);
-    doc.setDrawColor(38, 90, 55);
+    doc.setDrawColor(226, 232, 240);
     doc.setLineWidth(0.3);
     doc.line(ML + 20, y - 2, ML + CW, y - 2);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(5.5);
-    doc.setTextColor(C.primary[0], C.primary[1], C.primary[2]);
+    doc.setTextColor(C.teal[0], C.teal[1], C.teal[2]);
     doc.text('Lyrium BioMarketplace', ML, y + 1);
     doc.setFont('helvetica', 'normal');
-    doc.setTextColor(70, 130, 55);
+    doc.setTextColor(100, 116, 139);
     doc.text(' — Mis Servicios · Panel Vendedor', ML + 22, y + 1);
     doc.text(`Generado: ${new Date().toLocaleString('es-PE')}  |  Pág. ${page} de ${total}`, ML + CW, y + 1, { align: 'right' });
 }
@@ -76,16 +79,16 @@ export async function exportServiciosToPdf(services: Service[]): Promise<void> {
     ]);
     const doc = new JsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
 
-    doc.setFillColor(8, 25, 15);
+    doc.setFillColor(248, 250, 252);
     doc.rect(0, 0, PW, 22, 'F');
     doc.setFillColor(C.primary[0], C.primary[1], C.primary[2]);
     doc.rect(0, 20, PW, 2, 'F');
 
-    doc.setTextColor(163, 230, 53);
+    doc.setTextColor(C.teal[0], C.teal[1], C.teal[2]);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(13);
     doc.text('MIS SERVICIOS', PW - MR, 9, { align: 'right' });
-    doc.setTextColor(120, 190, 80);
+    doc.setTextColor(100, 116, 139);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(7);
     doc.text(
@@ -144,12 +147,12 @@ export async function exportServiciosToPdf(services: Service[]): Promise<void> {
         ]),
         theme: 'striped',
         headStyles: {
-            fillColor: [18, 60, 38],
-            textColor: [163, 230, 53],
+            fillColor: [220, 252, 231],
+            textColor: [21, 128, 61],
             fontSize: 7, fontStyle: 'bold', halign: 'center',
         },
-        bodyStyles: { fontSize: 6.5, cellPadding: 2.5, fillColor: [12, 35, 22], textColor: [215, 235, 205] },
-        alternateRowStyles: { fillColor: [20, 52, 32] },
+        bodyStyles: { fontSize: 6.5, cellPadding: 2.5, fillColor: [255, 255, 255], textColor: [30, 41, 59] },
+        alternateRowStyles: { fillColor: [248, 250, 252] },
         columnStyles: {
             0: { cellWidth: 'auto', halign: 'left' },
             1: { cellWidth: 30, halign: 'center' },
@@ -161,7 +164,7 @@ export async function exportServiciosToPdf(services: Service[]): Promise<void> {
             7: { cellWidth: 22, halign: 'center' },
         },
         margin: { left: ML, right: MR },
-        tableLineColor: [38, 90, 55],
+        tableLineColor: [226, 232, 240],
         tableLineWidth: 0.1,
         showHead: 'everyPage',
     });

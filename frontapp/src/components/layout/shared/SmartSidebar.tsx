@@ -186,7 +186,7 @@ export default function SmartSidebar({
                 </div>
 
                 {/* 3. NAVEGACIÓN MÓDULOS */}
-                <div className="flex-1 overflow-y-auto custom-scrollbar py-6">
+                <div className="flex-1 overflow-y-auto green-scrollbar py-6">
                     <nav className="space-y-8 px-4">
                         {(Array.isArray(navigation) && typeof navigation[0] === 'object' && 'items' in navigation[0] ? (navigation as any[]) : [{ items: navigation }]).map((section, sidx) => (
                             <div key={sidx} className="space-y-1.5">

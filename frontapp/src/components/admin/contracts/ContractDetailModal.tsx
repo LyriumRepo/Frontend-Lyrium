@@ -79,7 +79,7 @@ export const ContractDetailModal: React.FC<ContractDetailModalProps> = ({
             </div>
 
             {/* Formulario — 3 secciones */}
-            <div className="p-4 sm:p-10 overflow-y-auto custom-scrollbar max-h-[55vh] sm:max-h-[65vh] space-y-6 sm:space-y-8">
+            <div className="p-4 sm:p-10 overflow-y-auto green-scrollbar max-h-[55vh] sm:max-h-[65vh] space-y-6 sm:space-y-8">
 
                 {/* ═══ SECCIÓN 1: DATOS DEL VENDEDOR ═══ */}
                 <div className={sectionClass}>

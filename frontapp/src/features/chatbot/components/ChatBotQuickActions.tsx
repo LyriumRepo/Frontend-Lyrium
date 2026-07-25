@@ -129,7 +129,7 @@ export default function ChatBotQuickActions({ onBotResponse }: Props) {
                 )}
 
                 {orders.length > 0 && (
-                    <div className="flex flex-col gap-1.5 max-h-48 overflow-y-auto custom-scrollbar pr-1">
+                    <div className="flex flex-col gap-1.5 max-h-48 overflow-y-auto green-scrollbar pr-1">
                         {orders.map((order) => (
                             <button
                                 key={order.id}

@@ -129,13 +129,13 @@ export function SalesPageClient(_props?: SalesPageClientProps) {
                     <BaseModal isOpen={!!selectedKpi} onClose={() => setSelectedKpi(null)}
                         title={selectedKpi?.label ?? ''} subtitle={selectedKpi?.status ?? ''} size="md">
                         <div className="space-y-6">
-                            <div className="bg-gray-900 p-6 rounded-[2rem] text-center">
-                                <p className="text-5xl font-black text-white">
+                            <div className="bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-100 dark:bg-gradient-to-br dark:from-emerald-950/50 dark:to-teal-950/50 dark:border dark:border-emerald-800/30 p-6 rounded-[2rem] text-center">
+                                <p className="text-5xl font-black text-emerald-800 dark:text-emerald-200">
                                     {selectedKpi?.label === 'Ingresos Mensuales'
                                         ? `S/ ${(selectedKpi?.count ?? 0).toLocaleString()}`
                                         : selectedKpi?.count}
                                 </p>
-                                <p className="text-[10px] font-black text-white/60 uppercase tracking-widest mt-2">{selectedKpi?.label}</p>
+                                <p className="text-[10px] font-black text-emerald-600/70 dark:text-emerald-400/70 uppercase tracking-widest mt-2">{selectedKpi?.label}</p>
                             </div>
                             <div className="p-4 rounded-2xl bg-[var(--bg-secondary)]">
                                 <p className="text-xs font-bold text-[var(--text-secondary)] text-center">{selectedKpi?.status}</p>

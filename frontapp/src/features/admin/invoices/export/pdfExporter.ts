@@ -1,16 +1,16 @@
 import type { AdminInvoiceRow, AdminInvoiceKPIs } from '../hooks/useAdminInvoices';
 
-// ── Paleta oficial Lyrium (igual que seller/sales) ────────────────────────
+// ── Paleta oficial Lyrium (clara/profesional, igual que seller/sales) ─────
 const C = {
-    primary:  [183, 224, 0]   as [number, number, number],
-    secondary:[143, 212, 0]   as [number, number, number],
-    teal:     [34,  139, 70]  as [number, number, number],
-    darkTeal: [22,  101, 52]  as [number, number, number],
-    blue:     [74,  222, 128] as [number, number, number],
-    navy:     [6,   78,  35]  as [number, number, number],
-    amber:    [52,  211, 153] as [number, number, number],
-    rose:     [244, 63,  94]  as [number, number, number],
-    indigo:   [34,  139, 70]  as [number, number, number],
+    primary:  [34,  197, 94]  as [number, number, number], // #22c55e
+    secondary:[22,  163, 74]  as [number, number, number], // #16a34a
+    teal:     [21,  128, 61]  as [number, number, number], // #15803d
+    darkTeal: [22,  101, 52]  as [number, number, number], // #166534
+    blue:     [34,  197, 94]  as [number, number, number], // #22c55e
+    navy:     [22,  101, 52]  as [number, number, number],
+    amber:    [217, 119, 6]   as [number, number, number], // #d97706
+    rose:     [220, 38,  38]  as [number, number, number], // #dc2626
+    indigo:   [21,  128, 61]  as [number, number, number],
 };
 
 const G = {
@@ -38,11 +38,11 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 const STATUS_COLOR: Record<string, [number, number, number]> = {
-    ACCEPTED:      [34,  139, 70],
-    SENT_WAIT_CDR: [132, 204, 22],
+    ACCEPTED:      [21,  128, 61],
+    SENT_WAIT_CDR: [161, 98,  7],
     REJECTED:      [220, 38,  38],
-    OBSERVED:      [132, 204, 22],
-    DRAFT:         [156, 163, 175],
+    OBSERVED:      [161, 98,  7],
+    DRAFT:         [107, 114, 128],
 };
 
 const STATUS_BG: Record<string, [number, number, number]> = {
@@ -98,22 +98,25 @@ function drawKpi(
     x: number, y: number, w: number, h: number,
     accent: [number, number, number]
 ): void {
-    doc.setFillColor(16, 48, 28);
+    doc.setFillColor(248, 250, 252);
     doc.roundedRect(x, y, w, h, 2.5, 2.5, 'F');
+    doc.setDrawColor(226, 232, 240);
+    doc.setLineWidth(0.2);
+    doc.roundedRect(x, y, w, h, 2.5, 2.5, 'S');
     doc.setFillColor(accent[0], accent[1], accent[2]);
     doc.rect(x, y, w, 1.2, 'F');
     doc.setFillColor(accent[0], accent[1], accent[2]);
     doc.rect(x, y, 2, h, 'F');
-    doc.setTextColor(110, 175, 85);
+    doc.setTextColor(100, 116, 139);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(5);
     doc.text(label.toUpperCase(), x + 5, y + 7);
-    doc.setTextColor(230, 248, 215);
+    doc.setTextColor(30, 41, 59);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(9.5);
     doc.text(value, x + 5, y + 14);
     if (sub) {
-        doc.setTextColor(70, 130, 55);
+        doc.setTextColor(100, 116, 139);
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(4.8);
         doc.text(sub, x + 5, y + 19);
@@ -128,15 +131,15 @@ function drawFooter(doc: any, page: number, total: number): void {
     doc.setDrawColor(C.primary[0], C.primary[1], C.primary[2]);
     doc.setLineWidth(0.6);
     doc.line(ML, y - 2, ML + CW * 0.3, y - 2);
-    doc.setDrawColor(38, 90, 55);
+    doc.setDrawColor(226, 232, 240);
     doc.setLineWidth(0.3);
     doc.line(ML + CW * 0.3, y - 2, ML + CW, y - 2);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(5.5);
-    doc.setTextColor(C.primary[0], C.primary[1], C.primary[2]);
+    doc.setTextColor(C.teal[0], C.teal[1], C.teal[2]);
     doc.text('Lyrium BioMarketplace', ML, y + 1);
     doc.setFont('helvetica', 'normal');
-    doc.setTextColor(70, 130, 55);
+    doc.setTextColor(100, 116, 139);
     doc.text(' — Reporte de Facturación Electrónica · Confidencial', ML + 22, y + 1);
     doc.setTextColor(G[500][0], G[500][1], G[500][2]);
     doc.text(
@@ -159,18 +162,18 @@ export async function exportAdminInvoicesToPdf(
     const doc  = new JsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
 
     // ── Header (estilo ventas) ───────────────────────────────────────────
-    doc.setFillColor(8, 25, 15);
+    doc.setFillColor(248, 250, 252);
     doc.rect(0, 0, PW, 22, 'F');
     doc.setFillColor(C.primary[0], C.primary[1], C.primary[2]);
     doc.rect(0, 20, PW, 2, 'F');
 
     if (logo) doc.addImage(logo, 'PNG', ML, 2, 36, 16);
 
-    doc.setTextColor(163, 230, 53);
+    doc.setTextColor(C.teal[0], C.teal[1], C.teal[2]);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(13);
     doc.text('FACTURACIÓN ELECTRÓNICA', PW - MR, 9, { align: 'right' });
-    doc.setTextColor(120, 190, 80);
+    doc.setTextColor(100, 116, 139);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(7);
     const rangeTxt = dateRange?.from && dateRange?.to
@@ -196,7 +199,7 @@ export async function exportAdminInvoicesToPdf(
             { label: 'Comisiones Generadas',   value: fmtCurrency(totalComisiones),               sub: 'sobre comprobantes filtrados',                                 color: C.darkTeal },
             { label: 'Crecimiento Mensual',    value: `${kpis.porcentajeCrecimiento >= 0 ? '+' : ''}${kpis.porcentajeCrecimiento.toFixed(1)}%`, sub: 'respecto mes anterior', color: kpis.porcentajeCrecimiento >= 0 ? C.secondary : C.rose },
             { label: 'Aceptados SUNAT',        value: String(aceptados),                          sub: `${rechazados} observados/rechazados`,                          color: C.teal     },
-            { label: 'Ticket Promedio',        value: fmtCurrency(kpis.montoPromedio),            sub: 'por comprobante emitido',                                      color: C.blue     },
+            { label: 'Ticket Promedio',        value: fmtCurrency(kpis.montoPromedio),            sub: 'por comprobante emitido',                                      color: C.primary  },
         ];
 
         const cardW = (CW - 5 * 4) / 6;
@@ -208,11 +211,11 @@ export async function exportAdminInvoicesToPdf(
 
         // Top Sellers mini-table
         if (kpis.topSellers.length > 0) {
-            doc.setFillColor(C.darkTeal[0], C.darkTeal[1], C.darkTeal[2]);
+            doc.setFillColor(220, 252, 231);
             doc.roundedRect(ML, y, 92, 6, 1, 1, 'F');
             doc.setFont('helvetica', 'bold');
             doc.setFontSize(6);
-            doc.setTextColor(G[900][0], G[900][1], G[900][2]);
+            doc.setTextColor(C.teal[0], C.teal[1], C.teal[2]);
             doc.text('TOP VENDEDORES — MES ACTUAL', ML + 3, y + 4);
             y += 8;
 
@@ -226,15 +229,15 @@ export async function exportAdminInvoicesToPdf(
                 }),
                 theme: 'plain',
                 headStyles: {
-                    fillColor: [18, 60, 38],
-                    textColor: [163, 230, 53],
+                    fillColor: [220, 252, 231],
+                    textColor: [21, 128, 61],
                     fontSize: 6, fontStyle: 'bold',
                 },
-                bodyStyles: { fontSize: 6 },
-                alternateRowStyles: { fillColor: [235, 240, 247] },
+                bodyStyles: { fontSize: 6, textColor: [30, 41, 59] },
+                alternateRowStyles: { fillColor: [248, 250, 252] },
                 columnStyles: { 0: { cellWidth: 8 }, 1: { cellWidth: 52 }, 2: { cellWidth: 26, halign: 'right' }, 3: { cellWidth: 18, halign: 'right' } },
                 margin: { left: ML, right: ML + CW - 108 },
-                tableLineColor: [38, 90, 55],
+                tableLineColor: [226, 232, 240],
                 tableLineWidth: 0.15,
             });
 
@@ -247,11 +250,11 @@ export async function exportAdminInvoicesToPdf(
     doc.rect(ML, y, CW, 0.7, 'F');
     y += 5;
 
-    doc.setFillColor(C.darkTeal[0], C.darkTeal[1], C.darkTeal[2]);
+    doc.setFillColor(220, 252, 231);
     doc.roundedRect(ML, y - 0.5, 62, 6.5, 1, 1, 'F');
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(6.5);
-    doc.setTextColor(G[900][0], G[900][1], G[900][2]);
+    doc.setTextColor(C.teal[0], C.teal[1], C.teal[2]);
     doc.text('DETALLE DE COMPROBANTES', ML + 3, y + 4);
     y += 9;
 
@@ -282,13 +285,13 @@ export async function exportAdminInvoicesToPdf(
             }),
             theme: 'striped',
             headStyles: {
-                fillColor: [18, 60, 38],
-                textColor: [163, 230, 53],
+                fillColor: [220, 252, 231],
+                textColor: [21, 128, 61],
                 fontSize: 6.5, fontStyle: 'bold', halign: 'center',
                 cellPadding: { top: 3, bottom: 3, left: 2, right: 2 },
             },
-            bodyStyles: { fontSize: 6, cellPadding: 2, fillColor: [12, 35, 22], textColor: [215, 235, 205] },
-            alternateRowStyles: { fillColor: [20, 52, 32] },
+            bodyStyles: { fontSize: 6, cellPadding: 2, fillColor: [255, 255, 255], textColor: [30, 41, 59] },
+            alternateRowStyles: { fillColor: [248, 250, 252] },
             columnStyles: {
                 0: { cellWidth: 36, halign: 'left' },
                 1: { cellWidth: 16, halign: 'center' },
@@ -301,7 +304,7 @@ export async function exportAdminInvoicesToPdf(
                 8: { cellWidth: 20, halign: 'center' },
             },
             margin: { left: ML, right: MR },
-            tableLineColor: [38, 90, 55],
+            tableLineColor: [226, 232, 240],
             tableLineWidth: 0.15,
             showHead: 'everyPage',
             didDrawCell: (data) => {

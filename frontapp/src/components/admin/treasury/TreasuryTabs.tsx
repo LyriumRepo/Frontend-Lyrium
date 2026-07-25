@@ -95,7 +95,7 @@ export const CashInTab: React.FC<{
                     <Download className="w-4 h-4" aria-hidden="true" /> Exportar Conciliación
                 </button>
             </div>
-            <div className="overflow-x-auto custom-scrollbar">
+            <div className="overflow-x-auto green-scrollbar">
                 <table className="w-full text-left" aria-label="Tabla de pagos cash-in">
                     <thead>
                         <tr className="bg-[var(--bg-secondary)]/50 border-b border-[var(--border-subtle)] text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest transition-colors">
@@ -194,7 +194,7 @@ export const CashOutTab: React.FC<{
                         <Zap className="w-4 h-4" aria-hidden="true" /> Desembolso Masivo (Batch)
                     </button>
                 </div>
-                <div className="overflow-x-auto custom-scrollbar">
+                <div className="overflow-x-auto green-scrollbar">
                     <table className="w-full text-left" aria-label="Tabla de liquidaciones cash-out">
                         <thead>
                             <tr className="bg-[var(--bg-secondary)]/50 border-b border-[var(--border-subtle)] text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest transition-colors">

@@ -373,6 +373,44 @@
         background: var(--icons-green);
     }
 
+    /* Scrollbar verde unificada — vertical */
+    .green-scrollbar {
+        scrollbar-width: thin;
+        scrollbar-color: #d1d5db transparent;
+    }
+
+    .green-scrollbar::-webkit-scrollbar {
+        width: 5px;
+    }
+
+    .green-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .green-scrollbar::-webkit-scrollbar-thumb {
+        background: linear-gradient(180deg, #d1d5db, #b0b5ba);
+        border-radius: 999px;
+    }
+
+    .green-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #9ca3af;
+    }
+
+    :root.dark .green-scrollbar,
+    .dark .green-scrollbar {
+        scrollbar-color: #4a7c6a transparent;
+    }
+
+    :root.dark .green-scrollbar::-webkit-scrollbar-thumb,
+    .dark .green-scrollbar::-webkit-scrollbar-thumb {
+        background: linear-gradient(180deg, #4a7c6a, #3d5c4e);
+    }
+
+    :root.dark .green-scrollbar::-webkit-scrollbar-thumb:hover,
+    .dark .green-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #5a9a82;
+    }
+
     .no-scrollbar {
         scrollbar-width: none;
         -ms-overflow-style: none;

@@ -207,7 +207,7 @@ export function BankStatementReviewModal({
         </select>
       </div>
 
-      <div className="max-h-[360px] overflow-y-auto border border-[var(--border-subtle)] rounded-xl">
+      <div className="max-h-[360px] overflow-y-auto green-scrollbar border border-[var(--border-subtle)] rounded-xl">
         <table className="w-full border-collapse text-[13px]">
           <thead>
             <tr className="bg-[var(--bg-muted)] sticky top-0">

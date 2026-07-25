@@ -141,7 +141,7 @@ export default function BaseModal({
             )}
           </div>
         </div>
-        <div className="flex-1 p-4 sm:p-8 overflow-y-auto">{children}</div>
+        <div className="flex-1 p-4 sm:p-8 overflow-y-auto green-scrollbar">{children}</div>
 
         {footer && (
           <div className="shrink-0 flex items-center gap-3 px-4 sm:px-8 py-4 sm:py-5 border-t border-[var(--border-subtle)] bg-[var(--bg-card)] rounded-b-[2.5rem]">

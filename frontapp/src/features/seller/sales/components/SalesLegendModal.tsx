@@ -52,7 +52,7 @@ export default function SalesLegendModal({ isOpen, onClose }: SalesLegendModalPr
                     </button>
                 </div>
 
-                <div className="p-4 sm:p-5 overflow-y-auto space-y-6">
+                <div className="p-4 sm:p-5 overflow-y-auto green-scrollbar space-y-6">
                     {/* Sección 1 + 2 en dos columnas */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {/* Tipos de envío */}

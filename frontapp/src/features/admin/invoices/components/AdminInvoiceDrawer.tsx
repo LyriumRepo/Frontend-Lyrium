@@ -113,7 +113,7 @@ export default function AdminInvoiceDrawer({ invoice, isOpen, onClose }: Props) 
                 </div>
 
                 {/* Scrollable body */}
-                <div className="flex-1 overflow-y-auto px-6 pb-6 space-y-5 custom-scrollbar">
+                <div className="flex-1 overflow-y-auto px-6 pb-6 space-y-5 green-scrollbar">
 
                     {/* Store chip */}
                     {invoice.stores.length > 0 && (

@@ -264,7 +264,7 @@ export function HelpdeskPageClient() {
             </div>
 
             {/* Items — scrollable en móvil */}
-            <div className="p-8 space-y-4 overflow-y-auto flex-1">
+            <div className="p-8 space-y-4 overflow-y-auto green-scrollbar flex-1">
               {[
                 { icon: Store, title: 'Tickets de vendedores', desc: 'Gestiona incidencias técnicas, consultas administrativas y solicitudes de soporte de las tiendas registradas en Lyrium.' },
                 { icon: Users, title: 'Tickets de clientes', desc: 'Atiende reclamos, consultas y problemas de los compradores que no pudieron ser resueltos por el vendedor.' },

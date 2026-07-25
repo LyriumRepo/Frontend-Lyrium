@@ -38,4 +38,4 @@ export const PriorityDot: React.FC<{ priority: string }> = ({ priority }) => {
 };
 
 export const glassCardClass = "bg-[var(--glass-bg)] backdrop-blur-md border border-[var(--border-subtle)] rounded-[2rem] shadow-sm";
-export const scrollbarClass = "overflow-y-auto pr-2 custom-scrollbar";
+export const scrollbarClass = "overflow-y-auto pr-2 green-scrollbar";

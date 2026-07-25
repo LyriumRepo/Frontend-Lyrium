@@ -194,7 +194,7 @@ export const ContratosModule: React.FC<ContratosModuleProps> = ({ state, actions
 
             {/* TABLA DE EXPEDIENTES - Rediseño Híbrido Premium (tablet+) */}
             <div className="hidden sm:block bg-[var(--bg-card)] rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm overflow-hidden p-2">
-                <div className="overflow-x-auto custom-scrollbar">
+                <div className="overflow-x-auto green-scrollbar">
                     <table className="w-full text-left border-collapse" aria-label="Tabla de contratos">
                         <thead>
                             <tr className="bg-[var(--bg-secondary)]/50 border-b border-[var(--border-subtle)] text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest">

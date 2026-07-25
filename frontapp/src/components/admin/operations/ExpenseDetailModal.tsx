@@ -576,7 +576,7 @@ export function ExpenseDetailModal({
           )}
         </div>
 
-        <div className="flex-1 overflow-y-auto px-5 py-4">
+        <div className="flex-1 overflow-y-auto green-scrollbar px-5 py-4">
           {scan ? (
             <>
               {isBankStatement && (

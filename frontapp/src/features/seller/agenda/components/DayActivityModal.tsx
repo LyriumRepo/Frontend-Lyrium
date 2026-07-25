@@ -242,7 +242,7 @@ export default function DayActivityModal({ isOpen, eventId, allEvents, onClose }
                     </div>
 
                     {/* Content */}
-                    <div className="flex-1 overflow-y-auto p-5 sm:p-8 custom-scrollbar">
+                    <div className="flex-1 overflow-y-auto p-5 sm:p-8 green-scrollbar">
                         {event ? (
                             <div className="space-y-6">
                                 {/* Status badge */}

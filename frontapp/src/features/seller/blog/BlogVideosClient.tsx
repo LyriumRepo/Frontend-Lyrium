@@ -234,7 +234,7 @@ export function BlogVideosClient() {
                             </button>
                             <h3 className="text-lg font-bold text-white pr-12">{editingId ? 'Editar Video' : 'Nuevo Video'}</h3>
                         </div>
-                        <div className="p-6 space-y-4 overflow-y-auto">
+                        <div className="p-6 space-y-4 overflow-y-auto green-scrollbar">
                         <div>
                             <label className="block text-xs font-semibold text-gray-500 mb-1">Plataforma</label>
                             <select value={form.platform} onChange={e => setForm(f => ({ ...f, platform: e.target.value }))} className="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200">

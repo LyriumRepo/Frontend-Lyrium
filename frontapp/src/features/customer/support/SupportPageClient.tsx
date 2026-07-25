@@ -397,7 +397,7 @@ export function SupportPageClient() {
                 </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto bg-[var(--bg-card)]/50 custom-scrollbar">
+            <div className="flex-1 overflow-y-auto bg-[var(--bg-card)]/50 green-scrollbar">
                 {activeTicket.messages.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full text-center px-8 py-16">
                         <div className="w-16 h-16 rounded-full bg-[var(--turquesa-500)]/10 flex items-center justify-center mx-auto mb-4">

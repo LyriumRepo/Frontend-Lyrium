@@ -28,7 +28,7 @@ export const PaymentModal: React.FC<{
                     </div>
                 </div>
 
-                <div className="p-4 sm:p-8 grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8 overflow-y-auto custom-scrollbar">
+                <div className="p-4 sm:p-8 grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8 overflow-y-auto green-scrollbar">
                     <div className="space-y-4">
                         <h4 className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest border-b border-[var(--border-subtle)] pb-2">Datos Transaccionales</h4>
                         <div>
@@ -117,7 +117,7 @@ export const PaymentModal: React.FC<{
                     </div>
                 </div>
 
-                <div className="p-4 sm:p-8 grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8 overflow-y-auto custom-scrollbar">
+                <div className="p-4 sm:p-8 grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8 overflow-y-auto green-scrollbar">
                     <div className="space-y-4">
                         <h4 className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest border-b border-[var(--border-subtle)] pb-2">Destinatario Bancario</h4>
                         <div>

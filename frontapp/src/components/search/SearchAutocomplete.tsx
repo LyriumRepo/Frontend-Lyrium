@@ -263,7 +263,7 @@ export default function SearchAutocomplete({
             onClick={(e) => e.stopPropagation()}
             onKeyDown={(e) => e.stopPropagation()}
           >
-            <div className="overflow-y-auto max-h-[320px]">
+            <div className="overflow-y-auto green-scrollbar max-h-[320px]">
             {isLoading ? (
               <div className="p-4 flex items-center justify-center gap-2 text-gray-500">
                 <Loader2 className="w-5 h-5 animate-spin" />

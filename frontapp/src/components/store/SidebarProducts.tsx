@@ -87,7 +87,7 @@ export default function SidebarProducts({ productos, titulo = 'Artículos de ten
       {/* Cards apiladas */}
       <div 
         ref={scrollRef}
-        className="flex flex-col gap-3 overflow-y-auto max-h-[500px] custom-scrollbar"
+        className="flex flex-col gap-3 overflow-y-auto max-h-[500px] green-scrollbar"
       >
         {productosVisibles.map((producto) => {
           const stickerTag = producto.tag?.toLowerCase();

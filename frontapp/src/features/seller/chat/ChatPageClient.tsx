@@ -45,7 +45,7 @@ function NewChatForm({
                 <p className="text-xs text-[var(--text-secondary)] mt-1">Inicia una conversación con un cliente</p>
             </div>
 
-            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-4">
+            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto green-scrollbar p-6 space-y-4">
                 <div>
                     <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-1.5">Tu Tienda</label>
                     <select
@@ -321,7 +321,7 @@ export function ChatPageClient() {
                 </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto bg-[var(--bg-card)]/50 custom-scrollbar">
+            <div className="flex-1 overflow-y-auto bg-[var(--bg-card)]/50 green-scrollbar">
                 <MessageBubble
                     messages={mappedMessages}
                     isSentOverride={(msg) => {
@@ -423,7 +423,7 @@ export function ChatPageClient() {
                                 </button>
                             </div>
                         </div>
-                        <div className="p-8 space-y-4 overflow-y-auto">
+                        <div className="p-8 space-y-4 overflow-y-auto green-scrollbar">
                             {[
                                 { icon: 'Package', title: 'Pedidos y logística', desc: 'Resuelve dudas de tus clientes sobre pedidos, coordina entregas y confirma detalles del envío.' },
                                 { icon: 'RotateCcw', title: 'Devoluciones, cambios y reembolsos', desc: 'Atiende solicitudes de devolución, cambio de producto o reembolso que te hayan hecho los clientes.' },

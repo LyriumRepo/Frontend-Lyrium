@@ -76,7 +76,7 @@ export default function BaseDrawer({
         className={`
           relative w-full ${widthClass} bg-[var(--bg-card)]
           h-full shadow-2xl border-l border-[var(--border-subtle)]
-          overflow-y-auto animate-slideInRight
+          overflow-y-auto green-scrollbar animate-slideInRight
         `}
       >
         <div

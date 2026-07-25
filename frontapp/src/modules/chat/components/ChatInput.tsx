@@ -103,7 +103,7 @@ export function ChatInput({
       <div className="flex-1 rounded-[1.5rem] border border-[var(--border-subtle)] bg-[var(--bg-input)] shadow-inner shadow-slate-200/40 dark:shadow-black/25">
         {/* Image previews strip */}
         {pendingFiles.length > 0 && (
-          <div className="flex gap-2 overflow-x-auto px-3 pt-3 pb-1 custom-scrollbar">
+          <div className="flex gap-2 overflow-x-auto px-3 pt-3 pb-1 green-scrollbar">
             {pendingFiles.map((pf, idx) => (
               <div key={idx} className="relative shrink-0">
                 {/* eslint-disable-next-line @next/next/no-img-element */}

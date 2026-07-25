@@ -6,7 +6,7 @@ import MessageBubble, { Message } from '@/components/shared/chat/MessageBubble';
 import MessageInput from '@/components/shared/chat/MessageInput';
 import { AlertTriangle, ArrowLeft, CheckSquare, Headset, Loader2, MessageSquareText, ShieldCheck, Star, SlidersHorizontal, UserCog } from 'lucide-react';
 
-const scrollbarClass = 'custom-scrollbar';
+const scrollbarClass = 'green-scrollbar';
 const EMPTY_QUICK_REPLIES: string[] = [];
 
 // ─── Type bridge: UnifiedMessage → Message (MessageBubble format) ─────────────
@@ -453,7 +453,7 @@ export function ChatView({
                 <span className="hidden sm:inline">Respuestas</span>
               </button>
               {showQuickReplies && (
-                <div className="absolute bottom-full left-0 mb-2 w-72 max-h-48 overflow-y-auto rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-2 shadow-xl z-20 custom-scrollbar">
+                <div className="absolute bottom-full left-0 mb-2 w-72 max-h-48 overflow-y-auto rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-2 shadow-xl z-20 green-scrollbar">
                   <div className="flex flex-wrap gap-1.5">
                     {effectiveQuickReplies.map((qr, idx) => (
                       <button

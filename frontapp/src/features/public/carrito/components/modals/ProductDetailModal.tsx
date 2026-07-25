@@ -150,7 +150,7 @@ export default function ProductDetailModal({
           </div>
 
           {/* Body */}
-          <div className="overflow-y-auto flex-1">
+          <div className="overflow-y-auto green-scrollbar flex-1">
             <div className="grid grid-cols-1 lg:grid-cols-2">
               {/* Left: imagen + zoom */}
               <div className="p-4 border-b lg:border-b-0 lg:border-r border-sky-50 dark:border-[var(--border-subtle)]">

@@ -349,7 +349,7 @@ export const HelpDeskModule: React.FC<HelpDeskModuleProps> = ({
                     </div>
 
                     {/* Conversation list */}
-                    <div className="flex-1 overflow-y-auto space-y-2.5 max-h-[420px] pr-1 custom-scrollbar">
+                    <div className="flex-1 overflow-y-auto space-y-2.5 max-h-[420px] pr-1 green-scrollbar">
                         {loading && activeMode === 'vendedores' && vendedorConvItems.length === 0 ? (
                             <div className="text-center py-8 text-[var(--text-muted)] font-bold italic text-xs">
                                 Cargando tickets...
@@ -448,7 +448,7 @@ export const HelpDeskModule: React.FC<HelpDeskModuleProps> = ({
                             </div>
 
                             {/* Messages */}
-                            <div ref={chatContainerRef} className="p-6 flex-1 overflow-y-auto space-y-6 max-h-[380px] min-h-[350px] bg-[var(--bg-card)]/50 custom-scrollbar">
+                            <div ref={chatContainerRef} className="p-6 flex-1 overflow-y-auto space-y-6 max-h-[380px] min-h-[350px] bg-[var(--bg-card)]/50 green-scrollbar">
                                 {activeMessages.length === 0 && activeMode === 'vendedores' ? (
                                     <div className="flex items-center justify-center h-full">
                                         <p className="text-xs font-bold text-[var(--text-muted)]">

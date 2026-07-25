@@ -465,7 +465,7 @@ export function ServicesPageClient() {
                 </div>
 
                 {/* Drawer body — scroll interno */}
-                <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+                <div className="flex-1 overflow-y-auto green-scrollbar px-4 py-4 space-y-3">
                     {specialists.length > 0 ? (
                         pagedSpecialists.map((esp) => (
                             <SpecialistItem

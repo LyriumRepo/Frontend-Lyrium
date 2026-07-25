@@ -238,7 +238,7 @@ export default function ProductModerationModal({
           </div>
 
           {/* ── Body (scrollable) ── */}
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto green-scrollbar">
             {/* Loading */}
             {loading && (
               <div className="flex flex-col items-center justify-center py-24 gap-3 text-[var(--text-secondary)]">

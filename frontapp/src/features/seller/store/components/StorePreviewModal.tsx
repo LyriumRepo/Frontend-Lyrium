@@ -84,7 +84,7 @@ export default function StorePreviewModal({ isOpen, onClose, layoutId, config, s
             size="full"
             accentColor="from-sky-500 via-sky-600 to-sky-700 dark:from-[var(--brand-green)] dark:via-[var(--icons-green)] dark:to-[var(--brand-green)]"
         >
-            <div className="flex-1 overflow-y-auto bg-slate-50 dark:bg-[#0A0F0D] min-h-[600px]">
+            <div className="flex-1 overflow-y-auto green-scrollbar bg-slate-50 dark:bg-[#0A0F0D] min-h-[600px]">
                 {loadingProducts ? (
                     <div className="flex items-center justify-center h-96">
                         <div className="text-gray-400 text-lg">Cargando productos...</div>

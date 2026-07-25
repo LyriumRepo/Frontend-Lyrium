@@ -244,7 +244,7 @@ export default function PublicHeader() {
 
                     <div className="flex-1 flex overflow-hidden">
                         {activeMobileMegaMenuItem.children && (
-                            <aside className="w-[30%] max-w-[110px] min-w-[85px] bg-gray-50 dark:bg-[var(--bg-muted)] border-r border-gray-200 dark:border-[var(--border-subtle)] overflow-y-auto h-full flex-shrink-0">
+                            <aside className="w-[30%] max-w-[110px] min-w-[85px] bg-gray-50 dark:bg-[var(--bg-muted)] border-r border-gray-200 dark:border-[var(--border-subtle)] overflow-y-auto green-scrollbar h-full flex-shrink-0">
                                 <ul className="flex flex-col">
                                     {activeMobileMegaMenuItem.children.map((child) => {
                                         const isActive = activeMobileCategory === child.label;
@@ -268,7 +268,7 @@ export default function PublicHeader() {
                             </aside>
                         )}
 
-                        <div className="flex-1 overflow-y-auto p-3.5 space-y-5 bg-white dark:bg-[var(--bg-secondary)] h-full">
+                        <div className="flex-1 overflow-y-auto green-scrollbar p-3.5 space-y-5 bg-white dark:bg-[var(--bg-secondary)] h-full">
                             {(() => {
                                 const megaData = megaMenuData[activeMobileCategory] || Object.values(megaMenuData)[0];
                                 if (!megaData) return null;

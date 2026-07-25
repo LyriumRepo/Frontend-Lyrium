@@ -199,7 +199,7 @@ function KpiDetailModal({ isOpen, onClose, kpi }: KpiDetailModalProps) {
                 Total: {total.toLocaleString('es-PE')}{kpi.suffix ? ` ${kpi.suffix}` : ''}
               </span>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-[220px] overflow-y-auto pr-1 custom-scrollbar">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-[220px] overflow-y-auto pr-1 green-scrollbar">
               {kpi.chartLabels.map((label, i) => {
                 const pct = Math.max((kpi.chartData[i] / maxVal) * 100, 2);
                 return (

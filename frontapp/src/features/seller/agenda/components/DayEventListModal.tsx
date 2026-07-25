@@ -132,7 +132,7 @@ export default function DayEventListModal({ isOpen, date, allEvents, onClose, on
                     </div>
 
                     {/* Event List */}
-                    <div className="flex-1 overflow-y-auto p-5 sm:p-8 space-y-2.5 custom-scrollbar">
+                    <div className="flex-1 overflow-y-auto p-5 sm:p-8 space-y-2.5 green-scrollbar">
                         {paginatedEvents.length > 0 ? (
                             paginatedEvents.map(event => {
                                 const badge = getStatusBadge(event);

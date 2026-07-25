@@ -58,7 +58,7 @@ export default function ServicesGuideModal({ isOpen, onClose }: ServicesGuideMod
                 </div>
 
                 {/* ── Contenido ── */}
-                <div className="p-6 lg:p-8 overflow-y-auto space-y-8">
+                <div className="p-6 lg:p-8 overflow-y-auto green-scrollbar space-y-8">
 
                     {/* Sección 1: Qué hacer */}
                     <section className="space-y-4">

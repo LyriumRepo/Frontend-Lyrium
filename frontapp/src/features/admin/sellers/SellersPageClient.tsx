@@ -97,7 +97,7 @@ const ManagementModal = ({
           }}
         />
 
-        <div className="bg-[var(--bg-card)] w-full max-w-md max-h-[90vh] overflow-y-auto rounded-[2.5rem] shadow-2xl relative overflow-x-hidden p-6 sm:p-10 animate-scaleUp border border-[var(--border-subtle)] font-industrial">
+        <div className="bg-[var(--bg-card)] w-full max-w-md max-h-[90vh] overflow-y-auto green-scrollbar rounded-[2.5rem] shadow-2xl relative overflow-x-hidden p-6 sm:p-10 animate-scaleUp border border-[var(--border-subtle)] font-industrial">
           <button
             type="button"
             onClick={onClose}

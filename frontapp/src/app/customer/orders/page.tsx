@@ -1395,7 +1395,7 @@ export default function CustomerOrdersPage() {
               </div>
             </div>
 
-            <div className="p-6 lg:p-8 overflow-y-auto space-y-8">
+            <div className="p-6 lg:p-8 overflow-y-auto green-scrollbar space-y-8">
               <section className="space-y-4">
                 <h4 className="text-sm font-black text-gray-800 dark:text-[var(--text-primary)] uppercase tracking-widest">
                   Tipo de envíos para productos
@@ -1549,7 +1549,7 @@ export default function CustomerOrdersPage() {
               </div>
             </div>
 
-            <div className="p-6 lg:p-8 space-y-6 overflow-y-auto flex-1">
+            <div className="p-6 lg:p-8 space-y-6 overflow-y-auto green-scrollbar flex-1">
               <div className="p-8 bg-sky-50 dark:bg-[var(--bg-muted)]/50 rounded-[2.5rem] border border-sky-100/50 flex flex-col md:flex-row items-center gap-6">
                 <div className="w-20 h-20 bg-white dark:bg-[var(--bg-secondary)] rounded-[1.5rem] flex items-center justify-center shadow-lg border border-sky-50">
                   <Icon name="Store" className="w-10 h-10 text-sky-600 dark:text-[var(--icons-green)]" />

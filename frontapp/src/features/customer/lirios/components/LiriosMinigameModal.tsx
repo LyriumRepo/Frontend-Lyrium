@@ -296,7 +296,7 @@ export default function LiriosMinigameModal({
         </div>
 
         {/* Body scrolleable */}
-        <div className="overflow-y-auto flex-1">
+        <div className="overflow-y-auto green-scrollbar flex-1">
           <div className="flex items-center justify-center gap-1.5 bg-gray-100 dark:bg-[var(--bg-muted)] rounded-xl p-1">
             {DIFFICULTIES.map((d) => (
               <button

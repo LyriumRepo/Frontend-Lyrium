@@ -203,7 +203,7 @@ export function ForumClient() {
       {viewingTopic && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" onClick={() => setViewingTopic(null)}>
           <div
-            className="bg-white dark:bg-[var(--bg-secondary)] rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+            className="bg-white dark:bg-[var(--bg-secondary)] rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 w-full max-w-2xl max-h-[90vh] overflow-y-auto green-scrollbar"
             onClick={e => e.stopPropagation()}
           >
             {/* Header */}
@@ -291,7 +291,7 @@ export function ForumClient() {
               </button>
               <h3 className="text-lg font-bold text-white pr-12">Crear Tema</h3>
             </div>
-            <div className="p-6 space-y-4 overflow-y-auto">
+            <div className="p-6 space-y-4 overflow-y-auto green-scrollbar">
 
               <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300 text-xs space-y-1">
                 <p className="font-semibold">Flujo de aprobación:</p>
@@ -345,7 +345,7 @@ export function ForumClient() {
               </button>
               <h3 className="text-lg font-bold text-white pr-12">Editar Tema</h3>
             </div>
-            <div className="p-6 space-y-4 overflow-y-auto">
+            <div className="p-6 space-y-4 overflow-y-auto green-scrollbar">
 
               {errorMsg && (
                 <div className="p-3 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-sm">

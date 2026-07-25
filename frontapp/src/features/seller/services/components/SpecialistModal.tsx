@@ -274,7 +274,7 @@ export default function SpecialistModal({
         </div>
 
         {/* Body */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-5 max-h-[72vh] overflow-y-auto">
+        <form onSubmit={handleSubmit} className="p-6 space-y-5 max-h-[72vh] overflow-y-auto green-scrollbar">
 
           {/* Foto */}
           <div className="flex flex-col items-center gap-2">

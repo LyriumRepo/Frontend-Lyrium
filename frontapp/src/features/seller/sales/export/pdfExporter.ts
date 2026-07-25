@@ -5,11 +5,11 @@ let autoTableFn: any = null;
 
 // ── Brand palette ──
 const C = {
-    primary:  [183, 224, 0],
-    secondary:[143, 212, 0],
-    teal:     [34,  139, 70],
-    darkTeal: [22,  101, 52],
-    blue:     [74,  222, 128],
+    primary:  [34,  197, 94],  // #22c55e
+    secondary:[22,  163, 74],  // #16a34a
+    teal:     [21,  128, 61],  // #15803d
+    darkTeal: [22,  101, 52],  // #166534
+    blue:     [34,  197, 94],  // #22c55e
 } as const;
 
 const G = {
@@ -25,13 +25,13 @@ const G = {
 };
 
 const KPI_COLORS: number[][] = [
-    [183, 224, 0],    // Total órdenes
-    [143, 212, 0],    // Total ventas
-    [34,  139, 70],   // Productos
+    [34,  197, 94],   // Total órdenes
+    [22,  163, 74],   // Total ventas
+    [21,  128, 61],   // Productos
     [22,  101, 52],   // Servicios
-    [74,  222, 128],  // Mixtas
+    [34,  197, 94],   // Mixtas
     [22,  101, 52],   // Pendientes
-    [34,  139, 70],   // En proceso
+    [21,  128, 61],   // En proceso
     [34,  197, 94],   // Completadas
 ];
 
@@ -144,13 +144,16 @@ function drawKpiCard(
 ): void {
     doc.setFillColor(color[0], color[1], color[2]);
     doc.rect(x, y, 2.5, h, 'F');
-    doc.setFillColor(16, 48, 28);
+    doc.setFillColor(248, 250, 252);
     doc.rect(x + 2.5, y, w - 2.5, h, 'F');
-    doc.setTextColor(110, 175, 85);
+    doc.setDrawColor(226, 232, 240);
+    doc.setLineWidth(0.2);
+    doc.rect(x + 2.5, y, w - 2.5, h, 'S');
+    doc.setTextColor(100, 116, 139);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(5.5);
     doc.text(label.toUpperCase(), x + 5, y + 5.5);
-    doc.setTextColor(230, 248, 215);
+    doc.setTextColor(30, 41, 59);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(13);
     doc.text(value, x + 5, y + 13.5);
@@ -164,7 +167,7 @@ function sectionTitle(doc: any, title: string, y: number): number {
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(9);
     doc.text(title.toUpperCase(), ML + 6, y + 7.5);
-    doc.setDrawColor(38, 90, 55);
+    doc.setDrawColor(226, 232, 240);
     doc.setLineWidth(0.3);
     doc.line(ML, y + 13, ML + CW, y + 13);
     return y + 18;
@@ -200,10 +203,10 @@ function fieldGrid(doc: any, fields: Array<[string, string]>, y: number, colCoun
 }
 
 function footerText(doc: any, page: number, total: number): void {
-    doc.setDrawColor(38, 90, 55);
+    doc.setDrawColor(226, 232, 240);
     doc.setLineWidth(0.3);
     doc.line(ML, 282, ML + CW, 282);
-    doc.setTextColor(70, 130, 55);
+    doc.setTextColor(100, 116, 139);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(6);
     doc.text('Generado por Lyrium — Reporte General de Órdenes', ML, 287);
@@ -246,7 +249,7 @@ function drawOrderDetail(doc: any, order: Order, idx: number): number {
     // Status
     const statusLabel = (STATUS_LABEL[order.estado] || order.estado).toUpperCase();
     const sw = doc.getTextWidth(statusLabel) + 4;
-    doc.setFillColor(99, 102, 241);
+    doc.setFillColor(22, 163, 74);
     doc.roundedRect(PW - MR - sw, y + 1.5, sw + 4, 7, 1, 1, 'F');
     doc.setTextColor(255, 255, 255);
     doc.text(statusLabel, PW - MR - sw + 2, y + 6);
@@ -367,13 +370,13 @@ function drawOrderDetail(doc: any, order: Order, idx: number): number {
             body: prodRows,
             theme: 'striped',
             headStyles: {
-                fillColor: [18, 60, 38],
-                textColor: [163, 230, 53],
+                fillColor: [220, 252, 231],
+                textColor: [21, 128, 61],
                 fontSize: 6.5,
                 fontStyle: 'bold',
             },
-            bodyStyles: { fontSize: 6.5, fillColor: [12, 35, 22], textColor: [215, 235, 205] },
-            alternateRowStyles: { fillColor: [20, 52, 32] },
+            bodyStyles: { fontSize: 6.5, fillColor: [255, 255, 255], textColor: [30, 41, 59] },
+            alternateRowStyles: { fillColor: [248, 250, 252] },
             columnStyles: {
                 0: { cellWidth: 'auto', halign: 'left' },
                 1: { cellWidth: 14, halign: 'center' },
@@ -381,7 +384,7 @@ function drawOrderDetail(doc: any, order: Order, idx: number): number {
                 3: { cellWidth: 22, halign: 'right' },
             },
             margin: { left: ML, right: MR },
-            tableLineColor: [38, 90, 55],
+            tableLineColor: [226, 232, 240],
             tableLineWidth: 0.1,
             showHead: 'everyPage',
         });
@@ -410,13 +413,13 @@ function drawOrderDetail(doc: any, order: Order, idx: number): number {
             body: svcRows,
             theme: 'striped',
             headStyles: {
-                fillColor: [18, 60, 38],
-                textColor: [163, 230, 53],
+                fillColor: [220, 252, 231],
+                textColor: [21, 128, 61],
                 fontSize: 6.5,
                 fontStyle: 'bold',
             },
-            bodyStyles: { fontSize: 6.5, fillColor: [12, 35, 22], textColor: [215, 235, 205] },
-            alternateRowStyles: { fillColor: [20, 52, 32] },
+            bodyStyles: { fontSize: 6.5, fillColor: [255, 255, 255], textColor: [30, 41, 59] },
+            alternateRowStyles: { fillColor: [248, 250, 252] },
             columnStyles: {
                 0: { cellWidth: 'auto', halign: 'left' },
                 1: { cellWidth: 24, halign: 'center' },
@@ -424,7 +427,7 @@ function drawOrderDetail(doc: any, order: Order, idx: number): number {
                 3: { cellWidth: 18, halign: 'right' },
             },
             margin: { left: ML, right: MR },
-            tableLineColor: [38, 90, 55],
+            tableLineColor: [226, 232, 240],
             tableLineWidth: 0.1,
             showHead: 'everyPage',
         });
@@ -433,7 +436,7 @@ function drawOrderDetail(doc: any, order: Order, idx: number): number {
     }
 
     // ── Separator between orders ──
-    doc.setDrawColor(38, 90, 55);
+    doc.setDrawColor(226, 232, 240);
     doc.setLineWidth(0.2);
     doc.line(ML, y, ML + CW, y);
     return y + 6;
@@ -454,7 +457,7 @@ export async function generateSalesReportPdf(
     const doc = new JsPDF('p', 'mm', 'a4');
 
     // ═══════ 1. HEADER BAR ═══════
-    doc.setFillColor(8, 25, 15);
+    doc.setFillColor(248, 250, 252);
     doc.rect(0, 0, PW, 22, 'F');
     doc.setFillColor(C.primary[0], C.primary[1], C.primary[2]);
     doc.rect(0, 20, PW, 2, 'F');
@@ -463,11 +466,11 @@ export async function generateSalesReportPdf(
         doc.addImage(logo, 'PNG', ML, 2, 38, 17);
     }
 
-    doc.setTextColor(163, 230, 53);
+    doc.setTextColor(C.teal[0], C.teal[1], C.teal[2]);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(14);
     doc.text('REPORTE GENERAL DE ÓRDENES', PW - MR, 8, { align: 'right' });
-    doc.setTextColor(120, 190, 80);
+    doc.setTextColor(100, 116, 139);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(7);
     doc.text('Panel de Ventas — Seller', PW - MR, 14, { align: 'right' });
@@ -565,14 +568,14 @@ export async function generateSalesReportPdf(
             body: tableBody,
             theme: 'striped',
             headStyles: {
-                fillColor: [18, 60, 38],
-                textColor: [163, 230, 53],
+                fillColor: [220, 252, 231],
+                textColor: [21, 128, 61],
                 fontSize: 7,
                 fontStyle: 'bold',
                 halign: 'center',
             },
-            bodyStyles: { fontSize: 6.5, halign: 'center', fillColor: [12, 35, 22], textColor: [215, 235, 205] },
-            alternateRowStyles: { fillColor: [20, 52, 32] },
+            bodyStyles: { fontSize: 6.5, halign: 'center', fillColor: [255, 255, 255], textColor: [30, 41, 59] },
+            alternateRowStyles: { fillColor: [248, 250, 252] },
             columnStyles: {
                 0: { cellWidth: 26, halign: 'left' },
                 1: { cellWidth: 22, halign: 'center' },
@@ -584,7 +587,7 @@ export async function generateSalesReportPdf(
                 7: { cellWidth: 22, halign: 'right' },
             },
             margin: { left: ML, right: MR },
-            tableLineColor: [38, 90, 55],
+            tableLineColor: [226, 232, 240],
             tableLineWidth: 0.1,
             showHead: 'everyPage',
         });

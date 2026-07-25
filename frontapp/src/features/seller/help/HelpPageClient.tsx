@@ -165,7 +165,7 @@ function TicketList({
             </div>
 
             {/* ── Lista filtrada ── */}
-            <div className="flex-1 overflow-y-auto divide-y divide-[var(--border-subtle)]">
+            <div className="flex-1 overflow-y-auto green-scrollbar divide-y divide-[var(--border-subtle)]">
                 {filteredTickets.map((ticket) => (
                     <button
                         key={ticket.id}
@@ -276,7 +276,7 @@ function NewTicketForm({
                 <p className="text-xs text-[var(--text-secondary)] mt-1">Crea una nueva solicitud de soporte</p>
             </div>
 
-            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-4">
+            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto green-scrollbar p-6 space-y-4">
                 <div>
                     <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-1.5">Categoría</label>
                     <select
@@ -532,7 +532,7 @@ export function HelpPageClient() {
                                 </button>
                             </div>
                         </div>
-                        <div className="p-4 sm:p-6 space-y-2.5 sm:space-y-3 overflow-y-auto flex-1">
+                        <div className="p-4 sm:p-6 space-y-2.5 sm:space-y-3 overflow-y-auto green-scrollbar flex-1">
                             {[
                                 { icon: 'Settings', title: 'Incidencias técnicas', desc: 'Reporta errores de la plataforma, fallas en el sistema, problemas con módulos o funcionalidades.' },
                                 { icon: 'Shield', title: 'Soporte administrativo', desc: 'Consulta sobre validaciones, configuraciones de tienda, actualizaciones de documentación o estados de aprobación.' },

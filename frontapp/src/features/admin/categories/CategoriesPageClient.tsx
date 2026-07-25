@@ -201,7 +201,7 @@ export function CategoriesPageClient() {
                             </div>
                             <span className="text-xs text-[var(--text-muted)]">{totalCount} categorias</span>
                         </div>
-                        <div className="p-3 max-h-[40vh] sm:max-h-[50vh] lg:max-h-[60vh] overflow-y-auto">
+                        <div className="p-3 max-h-[40vh] sm:max-h-[50vh] lg:max-h-[60vh] overflow-y-auto green-scrollbar">
                             <CategoryTree
                                 tree={categoryTree}
                                 selectedId={selectedCategoryId}

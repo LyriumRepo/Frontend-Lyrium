@@ -61,7 +61,7 @@ export function StockAlertsModal({ isOpen, alerts, onClose }: Props) {
                     </div>
 
                     {/* Table */}
-                    <div className="overflow-y-auto flex-1">
+                    <div className="overflow-y-auto green-scrollbar flex-1">
                         <table className="w-full border-separate border-spacing-0">
                             <thead className="sticky top-0">
                                 <tr className="bg-[var(--bg-secondary)] border-b border-[var(--border-subtle)]">

@@ -82,7 +82,7 @@ export default function ModalPostCompra({ isOpen, email, onClose, onSync, onOpen
             <div className="fixed inset-0 bg-white/80 dark:bg-black/60 backdrop-blur-sm z-[20000] animate-fade-in" />
 
             {/* Modal */}
-            <div className="fixed inset-0 z-[30000] flex items-center justify-center p-4 overflow-y-auto">
+            <div className="fixed inset-0 z-[30000] flex items-center justify-center p-4 overflow-y-auto green-scrollbar">
                 <div
                     ref={modalRef}
                     role="dialog"

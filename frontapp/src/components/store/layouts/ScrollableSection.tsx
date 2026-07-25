@@ -48,7 +48,7 @@ export default function ScrollableSection({ children, visibleRows, className = '
   return (
     <div
       ref={ref}
-      className={`custom-scrollbar ${className}`}
+      className={`green-scrollbar ${className}`}
       style={{
         maxHeight: maxH !== undefined ? `${maxH}px` : undefined,
         overflowY: maxH !== undefined ? 'auto' : undefined,

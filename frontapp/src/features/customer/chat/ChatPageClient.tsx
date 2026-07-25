@@ -345,7 +345,7 @@ export function ChatPageClient({ conversationId }: { conversationId?: string }) 
                 </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto bg-[var(--bg-card)]/50 custom-scrollbar">
+            <div className="flex-1 overflow-y-auto bg-[var(--bg-card)]/50 green-scrollbar">
                 <MessageBubble
                     messages={mappedMessages}
                     isSentOverride={(msg) => {

@@ -329,7 +329,7 @@ export default function ClientRescheduleModal({
         </div>
 
         {/* ─── Body (scrollable) ────────────────────────────────────────── */}
-        <div className="p-4 sm:p-5 space-y-4 overflow-y-auto flex-1">
+        <div className="p-4 sm:p-5 space-y-4 overflow-y-auto green-scrollbar flex-1">
 
           {/* ── VIEW: blocked_same_day ───────────────────────────────── */}
           {view === 'blocked_same_day' && (

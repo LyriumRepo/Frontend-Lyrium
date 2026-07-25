@@ -1008,7 +1008,7 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit }:
                                 <p className="text-[9px] text-[var(--text-secondary)]">
                                     Al comprar este producto, el cliente puede agregar los seleccionados. Vigente hasta agotar stock.
                                 </p>
-                                <div className="grid grid-cols-2 gap-1.5 max-h-44 overflow-y-auto pr-1">
+                                <div className="grid grid-cols-2 gap-1.5 max-h-44 overflow-y-auto green-scrollbar pr-1">
                                     {otherProducts.length === 0 ? (
                                         <p className="col-span-2 text-[9px] text-[var(--text-secondary)] italic text-center py-6">
                                             Sin otros productos en el catálogo

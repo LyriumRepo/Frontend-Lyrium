@@ -1159,7 +1159,7 @@ function BookingModal({
             </div>
           )}
         </div>
-        <div className="flex-1 overflow-y-auto p-5">
+        <div className="flex-1 overflow-y-auto green-scrollbar p-5">
           {step === 'specialist' && specialistStep()}
           {step === 'datetime' && dateTimeStep()}
           {step === 'payment' && paymentStep()}

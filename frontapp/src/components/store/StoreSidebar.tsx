@@ -98,7 +98,7 @@ export default function StoreSidebar({ productos, titulo }: StoreSidebarProps) {
             )}
           </button>
           {expandedSections.categorias && (
-            <div className="py-2 space-y-2 max-h-48 overflow-y-auto custom-scrollbar">
+            <div className="py-2 space-y-2 max-h-48 overflow-y-auto green-scrollbar">
               {categorias.map((cat, idx) => (
                 <label key={idx} className="flex items-center gap-2 cursor-pointer">
                   <input 

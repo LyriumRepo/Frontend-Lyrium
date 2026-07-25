@@ -116,7 +116,7 @@ export default function MegaMenu({
         >
             <div className="max-w-7xl mx-auto grid grid-cols-12 gap-0 h-full overflow-hidden">
                 {/* LISTA DE CATEGORÍAS (IZQUIERDA) */}
-                <aside className="col-span-12 md:col-span-4 lg:col-span-3 bg-gray-50 dark:bg-[var(--bg-muted)] border-r border-gray-200 dark:border-[var(--border-subtle)] p-3 overflow-y-auto h-full">
+                <aside className="col-span-12 md:col-span-4 lg:col-span-3 bg-gray-50 dark:bg-[var(--bg-muted)] border-r border-gray-200 dark:border-[var(--border-subtle)] p-3 overflow-y-auto green-scrollbar h-full">
 
                     <ul className="mt-3 space-y-1 text-sm">
                         {item.children.map((child) => (
@@ -145,7 +145,7 @@ export default function MegaMenu({
                 </aside>
 
                 {/* CONTENIDO DERECHO */}
-                <section className="col-span-12 md:col-span-8 lg:col-span-9 p-5 overflow-y-auto h-full bg-white dark:bg-[var(--bg-secondary)]">
+                <section className="col-span-12 md:col-span-8 lg:col-span-9 p-5 overflow-y-auto green-scrollbar h-full bg-white dark:bg-[var(--bg-secondary)]">
                     {/* ICONS */}
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
                         {megaData.icons?.slice(0, 6).map((icon, index) => (

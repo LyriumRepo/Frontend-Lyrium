@@ -153,7 +153,7 @@ export const ContratosModule: React.FC<ContratosModuleProps> = ({ state, actions
             </div>
 
             <div className="bg-[var(--bg-card)] rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm overflow-hidden">
-                <div className="overflow-x-auto custom-scrollbar">
+                <div className="overflow-x-auto green-scrollbar">
                     <table className="w-full text-left">
                         <thead>
                             <tr className="bg-[var(--bg-secondary)]/50 border-b border-[var(--border-subtle)] text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest">

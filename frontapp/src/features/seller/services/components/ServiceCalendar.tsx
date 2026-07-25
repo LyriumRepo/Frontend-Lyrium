@@ -502,7 +502,7 @@ export default function ServiceCalendar({
         </div>
 
         {/* Body */}
-        <div className="flex flex-col md:flex-row flex-1 overflow-y-auto md:overflow-hidden">
+        <div className="flex flex-col md:flex-row flex-1 overflow-y-auto green-scrollbar md:overflow-hidden">
 
           {/* Calendario */}
           <div className="flex-1 px-4 md:px-6 py-4 md:py-5 flex flex-col gap-3 md:gap-4 md:overflow-hidden">
@@ -830,7 +830,7 @@ export default function ServiceCalendar({
       {/* Detail modal */}
       {selectedAppointment && (
         <div className="fixed inset-0 z-[100000] flex items-center justify-center bg-black/70 backdrop-blur-sm p-3 sm:p-4">
-          <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-[1.5rem] sm:rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--bg-card)] shadow-2xl">
+          <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto green-scrollbar rounded-[1.5rem] sm:rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--bg-card)] shadow-2xl">
 
             <div className="flex items-center justify-between px-5 py-4 bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--verde-500)] rounded-t-[1.5rem] sm:rounded-t-[2rem]">
               <div>

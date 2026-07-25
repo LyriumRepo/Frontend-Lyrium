@@ -377,7 +377,7 @@ export default function LiriosWalletPageClient() {
               </span>
             </span>
           </h3>
-          <div className="space-y-2 max-h-[340px] overflow-y-auto overscroll-contain custom-scrollbar pr-1">
+          <div className="space-y-2 max-h-[340px] overflow-y-auto overscroll-contain green-scrollbar pr-1">
             {TIERS.map((t) => {
               const unlocked = bal >= t.min;
               const isCurrent = tier.label === t.label;
@@ -562,7 +562,7 @@ export default function LiriosWalletPageClient() {
           />
         ) : (
           <>
-            <div className="divide-y divide-gray-100 dark:divide-[var(--border-subtle)] max-h-[460px] overflow-y-auto overscroll-contain custom-scrollbar">
+            <div className="divide-y divide-gray-100 dark:divide-[var(--border-subtle)] max-h-[460px] overflow-y-auto overscroll-contain green-scrollbar">
               {filteredTxs.map((tx, idx) => (
                 <div
                   key={tx.id}

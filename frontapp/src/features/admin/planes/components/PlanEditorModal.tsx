@@ -68,7 +68,7 @@ export default function PlanEditorModal({ open, title, activeTab, editingPlan: e
           </button>
         ))}
       </div>
-      <div className="editor-content max-h-[60vh] overflow-y-auto pr-1">
+      <div className="editor-content max-h-[60vh] overflow-y-auto green-scrollbar pr-1">
 
         {/* BÁSICO */}
         {activeTab === 'basic' && (

@@ -569,7 +569,7 @@ export default function SearchBar({ categoriasServicios = [], categoriasProducto
               role="dialog"
               aria-modal="true"
               tabIndex={-1}
-              className="fixed bg-white/95 dark:bg-[var(--bg-card)]/95 backdrop-blur-2xl border border-gray-200 dark:border-[var(--border-subtle)] rounded-[2.5rem] shadow-[0_30px_70px_rgba(0,0,0,0.15)] dark:shadow-[0_30px_70px_rgba(0,0,0,0.4)] p-6 overflow-y-auto overscroll-contain max-h-[90vh] z-[99998]"
+              className="fixed bg-white/95 dark:bg-[var(--bg-card)]/95 backdrop-blur-2xl border border-gray-200 dark:border-[var(--border-subtle)] rounded-[2.5rem] shadow-[0_30px_70px_rgba(0,0,0,0.15)] dark:shadow-[0_30px_70px_rgba(0,0,0,0.4)] p-6 overflow-y-auto green-scrollbar overscroll-contain max-h-[90vh] z-[99998]"
               style={(() => {
                 const rect = searchContainerRef.current?.getBoundingClientRect();
                 if (!rect) return {};

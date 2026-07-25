@@ -438,7 +438,7 @@ export default function RescheduleModal({
                                 </p>
                             </div>
                         ) : (
-                            <div className="space-y-1.5 max-h-[200px] overflow-y-auto pr-1">
+                            <div className="space-y-1.5 max-h-[200px] overflow-y-auto green-scrollbar pr-1">
                                 {allSessions.map((ses) => {
                                     const occupied = occupiedStarts.has(ses.inicio);
                                     const isSelected = selectedSession?.inicio === ses.inicio;

@@ -63,7 +63,7 @@ export default function NewsletterSection() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Escribe tu correo aquí"
-                className="flex-1 px-6 py-4 rounded-full text-gray-800 dark:text-[var(--text-primary)] text-base border border-teal-200 dark:border-[var(--border-subtle)] focus:outline-none focus:ring-2 focus:ring-teal-500 dark:bg-[var(--bg-secondary)] dark:placeholder:text-[var(--text-placeholder)]"
+                className="flex-1 px-6 py-4 rounded-full bg-white text-gray-800 placeholder:text-gray-400 text-base border border-teal-200 dark:border-[var(--border-subtle)] focus:outline-none focus:ring-2 focus:ring-teal-500"
                 required
               />
               <button
