@@ -94,7 +94,7 @@ export default function CartItemList({ onDeleteSelected }: Props) {
           Tu carrito está vacío
         </p>
         <a
-          href="/tiendas"
+          href="/productos"
           className="inline-block text-sm text-sky-500 hover:underline font-medium"
         >
           Explorar productos →

@@ -3,6 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import ModalPortal from '@/components/ModalPortal';
 import Icon from '@/components/ui/Icon';
+import Pagination from '@/components/ui/Pagination';
 import type { AgendaEvent, AgendaFilterType } from '@/features/seller/agenda/types';
 
 interface DayEventListModalProps {
@@ -84,16 +85,16 @@ export default function DayEventListModal({ isOpen, date, allEvents, onClose, on
                 <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-md" onClick={onClose} role="presentation" onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }} />
                 <div className="relative w-full h-full sm:h-auto sm:max-h-[85vh] sm:max-w-2xl bg-[var(--bg-card)] rounded-none sm:rounded-[2.5rem] flex flex-col overflow-hidden sm:border sm:border-[var(--border-subtle)] sm:shadow-2xl">
                     {/* Header */}
-                    <div className="p-5 sm:p-8 flex items-center justify-between border-b border-[var(--border-subtle)]/50 shrink-0">
+                    <div className="p-5 sm:p-8 flex items-center justify-between bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--verde-500)] shrink-0">
                         <div>
-                            <h2 className="text-xl sm:text-2xl font-black text-[var(--text-primary)] tracking-tighter">{dateLabel}</h2>
-                            <p className="text-[10px] sm:text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest mt-1">
+                            <h2 className="text-xl sm:text-2xl font-black text-white tracking-tighter">{dateLabel}</h2>
+                            <p className="text-[10px] sm:text-xs font-bold text-white/80 uppercase tracking-widest mt-1">
                                 {dayEvents.length} Actividades Programadas
                             </p>
                         </div>
                         <button
                             onClick={onClose}
-                            className="w-10 h-10 flex items-center justify-center bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl hover:bg-[var(--bg-danger)] hover:text-[var(--text-danger)] transition-all active:scale-90 shrink-0"
+                            className="w-10 h-10 flex items-center justify-center bg-white/20 backdrop-blur-md rounded-xl hover:bg-white/30 text-white transition-all active:scale-90 shrink-0"
                             aria-label="Cerrar"
                         >
                             <Icon name="X" className="w-5 h-5" />
@@ -103,12 +104,12 @@ export default function DayEventListModal({ isOpen, date, allEvents, onClose, on
                     {/* Metrics + Filter */}
                     <div className="px-5 sm:px-8 pt-5 space-y-4 shrink-0">
                         <div className="grid grid-cols-2 gap-3">
-                            <div className="bg-sky-500/10 p-4 rounded-2xl border border-sky-500/20 flex items-center justify-between">
-                                <span className="text-[10px] font-black text-sky-500 uppercase tracking-widest">Servicios</span>
+                            <div className="bg-[var(--icons-green)]/10 p-4 rounded-2xl border border-[var(--icons-green)]/20 flex items-center justify-between">
+                                <span className="text-[10px] font-black text-[var(--icons-green)] uppercase tracking-widest">Servicios</span>
                                 <span className="text-xl font-black text-[var(--text-primary)]">{serviceEvents.length}</span>
                             </div>
-                            <div className="bg-amber-500/10 p-4 rounded-2xl border border-amber-500/20 flex items-center justify-between">
-                                <span className="text-[10px] font-black text-amber-500 uppercase tracking-widest">Productos</span>
+                            <div className="bg-[var(--color-success)]/10 p-4 rounded-2xl border border-[var(--color-success)]/20 flex items-center justify-between">
+                                <span className="text-[10px] font-black text-[var(--color-success)] uppercase tracking-widest">Productos</span>
                                 <span className="text-xl font-black text-[var(--text-primary)]">{orderEvents.length}</span>
                             </div>
                         </div>
@@ -182,26 +183,8 @@ export default function DayEventListModal({ isOpen, date, allEvents, onClose, on
 
                     {/* Pagination */}
                     {totalPages > 1 && (
-                        <div className="px-5 sm:px-8 pb-5 flex items-center justify-between shrink-0">
-                            <span className="text-xs font-bold text-[var(--text-secondary)]">
-                                Pág. {safePage} de {totalPages} ({filteredEvents.length} registros)
-                            </span>
-                            <div className="flex items-center gap-2">
-                                <button
-                                    onClick={() => setPage(p => Math.max(1, p - 1))}
-                                    disabled={safePage <= 1}
-                                    className="w-8 h-8 flex items-center justify-center rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-card)] text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-                                >
-                                    <Icon name="ChevronLeft" className="w-4 h-4" />
-                                </button>
-                                <button
-                                    onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                                    disabled={safePage >= totalPages}
-                                    className="w-8 h-8 flex items-center justify-center rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-card)] text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-                                >
-                                    <Icon name="ChevronRight" className="w-4 h-4" />
-                                </button>
-                            </div>
+                        <div className="px-5 sm:px-8 pb-5 shrink-0">
+                            <Pagination page={safePage} totalPages={totalPages} onPageChange={setPage} totalItems={filteredEvents.length} itemLabel="registros" />
                         </div>
                     )}
                 </div>

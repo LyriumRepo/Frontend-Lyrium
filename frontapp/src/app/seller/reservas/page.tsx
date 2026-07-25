@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import {
   Calendar, Clock, User, Star, Loader2, CheckCircle,
@@ -332,133 +333,222 @@ export default function SellerReservasPage() {
           <p className="text-gray-500 dark:text-[var(--text-secondary)] font-semibold">No hay reservas</p>
         </div>
       ) : (
-        <div className="space-y-3">
-          {filtered.map((booking) => (
-            <div key={booking.id} className="bg-white dark:bg-[var(--bg-card)] rounded-xl border border-gray-100 dark:border-[var(--border-subtle)] p-5">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h3 className="font-bold text-gray-900 dark:text-[var(--text-primary)] text-sm truncate">{booking.service_name}</h3>
-                    <span className={`shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full ${STATUS_LABELS[booking.status]?.color ?? ''}`}>
-                      {STATUS_LABELS[booking.status]?.label ?? booking.status}
-                    </span>
-                  </div>
-
-                  <div className="flex flex-wrap gap-x-5 gap-y-1.5 text-xs text-gray-600 dark:text-[var(--text-secondary)] mt-2">
-                    <span className="flex items-center gap-1.5">
-                      <User className="w-3.5 h-3.5 text-sky-400 dark:text-[var(--icons-green)]" />
+        <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-[2.5rem] shadow-xl border border-slate-100 dark:border-[var(--border-subtle)] overflow-hidden">
+          <p className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest px-8 pt-6 pb-3">
+            {filtered.length} reserva{filtered.length !== 1 ? 's' : ''}
+          </p>
+          <div className="overflow-x-auto no-scrollbar">
+            <table className="hidden md:table w-full text-left border-collapse min-w-[900px]">
+              <thead>
+                <tr className="bg-[var(--bg-secondary)]/50 border-b border-[var(--border-subtle)]">
+                  {['Servicio', 'Cliente', 'Fecha', 'Horario', 'Especialista', 'Monto', 'Pago', 'Estado', 'Acciones'].map((h) => (
+                    <th key={h} className="px-6 py-5 text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest whitespace-nowrap">
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[var(--border-subtle)]">
+                {filtered.map((booking) => (
+                  <tr key={booking.id} className="hover:bg-[var(--bg-secondary)]/30 transition-colors">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="text-sm font-bold text-gray-800 dark:text-[var(--text-primary)]">{booking.service_name}</span>
+                      {booking.notes && (
+                        <p className="text-[11px] text-gray-400 dark:text-[var(--text-muted)] mt-0.5 flex items-center gap-1">
+                          <MessageSquare className="w-3 h-3 shrink-0" /> {booking.notes}
+                        </p>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-sm font-bold text-gray-600 dark:text-[var(--text-secondary)] whitespace-nowrap">
                       {booking.customer_name}
-                    </span>
-                    <span className="flex items-center gap-1.5">
-                      <Calendar className="w-3.5 h-3.5 text-sky-400 dark:text-[var(--icons-green)]" />
-                      {booking.date && formatDate(booking.date)}
-                    </span>
-                    <span className="flex items-center gap-1.5">
-                      <Clock className="w-3.5 h-3.5 text-sky-400 dark:text-[var(--icons-green)]" />
+                    </td>
+                    <td className="px-6 py-4 text-sm font-bold text-gray-700 dark:text-[var(--text-primary)] whitespace-nowrap">
+                      {booking.date ? formatDate(booking.date) : '—'}
+                    </td>
+                    <td className="px-6 py-4 text-sm font-bold text-gray-700 dark:text-[var(--text-primary)] whitespace-nowrap">
                       {booking.start_time} - {booking.end_time}
-                    </span>
-                    {booking.specialist && (
-                      <span className="flex items-center gap-1.5">
-                        <User className="w-3.5 h-3.5 text-sky-400 dark:text-[var(--icons-green)]" />
-                        {booking.specialist.name}
+                    </td>
+                    <td className="px-6 py-4 text-sm font-bold text-gray-600 dark:text-[var(--text-secondary)] whitespace-nowrap">
+                      {booking.specialist?.name ?? '—'}
+                    </td>
+                    <td className="px-6 py-4 text-sm font-bold text-gray-900 dark:text-[var(--text-primary)] whitespace-nowrap">
+                      {booking.payment_amount > 0 ? `S/ ${booking.payment_amount.toFixed(2)}` : '—'}
+                    </td>
+                    <td className="px-6 py-4 text-xs font-bold text-gray-600 dark:text-[var(--text-secondary)] whitespace-nowrap">
+                      {booking.payment_method && (
+                        <span className="flex items-center gap-1">
+                          <CreditCard className="w-3 h-3" />
+                          {PAYMENT_LABELS[booking.payment_method] ?? booking.payment_method}
+                        </span>
+                      )}
+                      {booking.payment_status && (
+                        <span className={`mt-0.5 block ${
+                          booking.payment_status === 'paid' ? 'text-emerald-600 dark:text-emerald-400' :
+                          booking.payment_status === 'refunded' ? 'text-red-500' : 'text-amber-500'
+                        }`}>
+                          {booking.payment_status === 'paid' ? 'Pagado' :
+                           booking.payment_status === 'refunded' ? 'Reembolsado' :
+                           booking.payment_status === 'pending' ? 'Pendiente' : booking.payment_status}
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${STATUS_LABELS[booking.status]?.color ?? ''}`}>
+                        {STATUS_LABELS[booking.status]?.label ?? booking.status}
                       </span>
-                    )}
-                  </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => openDetail(booking)}
+                          className="p-2 rounded-xl bg-sky-50 dark:bg-[var(--brand-green)] text-sky-600 dark:text-white hover:bg-sky-100 dark:hover:bg-[var(--brand-green-hover)] border border-sky-200 dark:border-[var(--border-subtle)] transition-colors"
+                          title="Ver detalle"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
+                        {booking.status === 'pending' && (
+                          <button
+                            onClick={() => handleConfirm(booking.id)}
+                            disabled={completingId === booking.id}
+                            className="px-3 py-2 text-[10px] font-bold text-white bg-emerald-500 hover:bg-emerald-600 rounded-lg transition-colors disabled:opacity-50 flex items-center gap-1"
+                          >
+                            <CheckCircle className="w-3 h-3" />
+                            Validar
+                          </button>
+                        )}
+                        {booking.status === 'confirmed' && booking.is_home_service && (
+                          <button
+                            onClick={() => handleOnTheWay(booking.id)}
+                            disabled={completingId === booking.id}
+                            className="px-3 py-2 text-[10px] font-bold text-white bg-lime-500 hover:bg-lime-600 rounded-lg transition-colors disabled:opacity-50 flex items-center gap-1"
+                          >
+                            <Loader2 className="w-3 h-3" />
+                            En camino
+                          </button>
+                        )}
+                        {(booking.status === 'confirmed' || booking.status === 'on_the_way') && (
+                          <button
+                            onClick={() => handleComplete(booking.id)}
+                            disabled={completingId === booking.id}
+                            className="px-3 py-2 text-[10px] font-bold text-white bg-emerald-500 hover:bg-emerald-600 rounded-lg transition-colors disabled:opacity-50 flex items-center gap-1"
+                          >
+                            {completingId === booking.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle className="w-3 h-3" />}
+                            Completar
+                          </button>
+                        )}
+                        {(booking.status === 'pending' || booking.status === 'confirmed') && (
+                          <button
+                            onClick={() => setCancelTarget(booking)}
+                            disabled={completingId === booking.id}
+                            className="px-3 py-2 text-[10px] font-bold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 hover:bg-red-100 dark:hover:bg-red-950/50 rounded-lg transition-colors disabled:opacity-50"
+                          >
+                            Cancelar
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
-                  <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-xs">
-                    {booking.payment_amount > 0 && (
-                      <span className="font-semibold text-gray-800 dark:text-[var(--text-primary)]">
-                        S/ {booking.payment_amount.toFixed(2)}
-                      </span>
-                    )}
-                    {booking.payment_method && (
-                      <span className="text-gray-400 dark:text-[var(--text-secondary)] flex items-center gap-1">
-                        <CreditCard className="w-3 h-3" />
-                        {booking.payment_method}
-                      </span>
-                    )}
-                    {booking.payment_status && (
-                      <span className={`font-semibold ${
-                        booking.payment_status === 'paid' ? 'text-emerald-600 dark:text-emerald-400' :
-                        booking.payment_status === 'refunded' ? 'text-red-500' : 'text-amber-500'
-                      }`}>
-                        {booking.payment_status === 'paid' ? 'Pagado' :
-                         booking.payment_status === 'refunded' ? 'Reembolsado' :
-                         booking.payment_status === 'pending' ? 'Pendiente' : booking.payment_status}
-                      </span>
-                    )}
-                  </div>
-
-                  {booking.notes && (
-                    <p className="text-xs text-gray-400 dark:text-[var(--text-secondary)] mt-2 flex items-start gap-1.5">
-                      <MessageSquare className="w-3 h-3 mt-0.5 shrink-0" />
-                      {booking.notes}
+          {/* Mobile cards */}
+          <div className="block md:hidden space-y-3 p-4">
+            {filtered.map((booking) => (
+              <div key={booking.id}
+                className="group bg-white dark:bg-[var(--bg-card)] rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)] p-4 transition-all hover:shadow-lg hover:border-sky-200 dark:hover:border-[var(--icons-green)]/40">
+                <div className="flex items-start justify-between gap-3 mb-2">
+                  <div className="min-w-0 max-w-full break-words">
+                    <h3 className="font-bold text-gray-900 dark:text-[var(--text-primary)] text-sm truncate">{booking.service_name}</h3>
+                    <p className="text-xs text-gray-400 dark:text-[var(--text-muted)] mt-0.5 flex items-center gap-1.5">
+                      <User className="w-3 h-3" /> {booking.customer_name}
                     </p>
+                  </div>
+                  <span className={`shrink-0 text-[9px] font-bold px-2 py-0.5 rounded-full ${STATUS_LABELS[booking.status]?.color ?? ''}`}>
+                    {STATUS_LABELS[booking.status]?.label ?? booking.status}
+                  </span>
+                </div>
+
+                <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-600 dark:text-[var(--text-secondary)] mb-3">
+                  <span className="flex items-center gap-1">
+                    <Calendar className="w-3 h-3 text-sky-500 dark:text-[var(--icons-green)]" />
+                    {booking.date && formatDate(booking.date)}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Clock className="w-3 h-3 text-sky-500 dark:text-[var(--icons-green)]" />
+                    {booking.start_time} - {booking.end_time}
+                  </span>
+                  {booking.specialist && (
+                    <span className="flex items-center gap-1">
+                      <User className="w-3 h-3 text-sky-500 dark:text-[var(--icons-green)]" />
+                      {booking.specialist.name}
+                    </span>
                   )}
                 </div>
 
-                {/* Actions */}
-                <div className="flex flex-col gap-2 shrink-0">
-                  <button
-                    onClick={() => openDetail(booking)}
-                    className="p-2 rounded-xl bg-emerald-50 dark:bg-[var(--bg-muted)] text-emerald-600 dark:text-[var(--icons-green)] hover:bg-emerald-100 dark:hover:bg-[var(--bg-secondary)] transition-colors"
-                    title="Ver detalle"
-                  >
-                    <Eye className="w-4 h-4" />
-                  </button>
-                  {booking.status === 'pending' && (
-                    <button
-                      onClick={() => handleConfirm(booking.id)}
-                      disabled={completingId === booking.id}
-                      className="px-4 py-2 text-xs font-bold text-white bg-emerald-500 hover:bg-emerald-600 rounded-lg transition-colors disabled:opacity-50 flex items-center gap-1.5"
-                    >
-                      <CheckCircle className="w-3 h-3" />
-                      Validar
+                {booking.notes && (
+                  <p className="text-[11px] text-gray-400 dark:text-[var(--text-muted)] mb-3 flex items-center gap-1">
+                    <MessageSquare className="w-3 h-3 shrink-0" /> {booking.notes}
+                  </p>
+                )}
+
+                <div className="flex items-center justify-between gap-2 pt-3 border-t border-gray-50 dark:border-[var(--border-subtle)]">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="text-sm font-bold text-gray-900 dark:text-[var(--text-primary)] whitespace-nowrap">
+                      {booking.payment_amount > 0 ? `S/ ${booking.payment_amount.toFixed(2)}` : ''}
+                    </span>
+                    {booking.payment_method && (
+                      <span className="text-[10px] text-gray-400 dark:text-[var(--text-muted)] flex items-center gap-0.5 whitespace-nowrap">
+                        <CreditCard className="w-3 h-3" />
+                        {PAYMENT_LABELS[booking.payment_method] ?? booking.payment_method}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <button onClick={() => openDetail(booking)}
+                      className="px-2 py-1.5 rounded-xl bg-sky-50 dark:bg-[var(--brand-green)] text-sky-600 dark:text-white hover:bg-sky-100 dark:hover:bg-[var(--brand-green-hover)] border border-sky-200 dark:border-[var(--border-subtle)] transition-colors flex items-center gap-1">
+                      <Eye className="w-3.5 h-3.5" />
+                      <span className="text-[9px] font-black uppercase tracking-wide">Ver</span>
                     </button>
-                  )}
-                  {booking.status === 'confirmed' && booking.is_home_service && (
-                    <button
-                      onClick={() => handleOnTheWay(booking.id)}
-                      disabled={completingId === booking.id}
-                      className="px-4 py-2 text-xs font-bold text-white bg-lime-500 hover:bg-lime-600 rounded-lg transition-colors disabled:opacity-50 flex items-center gap-1.5"
-                    >
-                      <Loader2 className="w-3 h-3" />
-                      En camino
-                    </button>
-                  )}
-                  {(booking.status === 'confirmed' || booking.status === 'on_the_way') && (
-                    <button
-                      onClick={() => handleComplete(booking.id)}
-                      disabled={completingId === booking.id}
-                      className="px-4 py-2 text-xs font-bold text-white bg-emerald-500 hover:bg-emerald-600 rounded-lg transition-colors disabled:opacity-50 flex items-center gap-1.5"
-                    >
-                      {completingId === booking.id ? (
-                        <Loader2 className="w-3 h-3 animate-spin" />
-                      ) : (
-                        <CheckCircle className="w-3 h-3" />
-                      )}
-                      Completar
-                    </button>
-                  )}
-                  {(booking.status === 'pending' || booking.status === 'confirmed') && (
-                    <button
-                      onClick={() => setCancelTarget(booking)}
-                      disabled={completingId === booking.id}
-                      className="px-4 py-2 text-xs font-bold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 hover:bg-red-100 dark:hover:bg-red-950/50 rounded-lg transition-colors disabled:opacity-50"
-                    >
-                      Cancelar
-                    </button>
-                  )}
+                    {booking.status === 'pending' && (
+                      <button onClick={() => handleConfirm(booking.id)} disabled={completingId === booking.id}
+                        className="px-2 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-[9px] font-bold transition-colors disabled:opacity-50 flex items-center gap-1 whitespace-nowrap">
+                        {completingId === booking.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle className="w-3 h-3" />}
+                        Validar
+                      </button>
+                    )}
+                    {booking.status === 'confirmed' && booking.is_home_service && (
+                      <button onClick={() => handleOnTheWay(booking.id)} disabled={completingId === booking.id}
+                        className="px-2 py-1.5 rounded-xl bg-lime-500 hover:bg-lime-600 text-white text-[9px] font-bold transition-colors disabled:opacity-50 flex items-center gap-1 whitespace-nowrap">
+                        {completingId === booking.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Loader2 className="w-3 h-3" />}
+                        En camino
+                      </button>
+                    )}
+                    {(booking.status === 'confirmed' || booking.status === 'on_the_way') && (
+                      <button onClick={() => handleComplete(booking.id)} disabled={completingId === booking.id}
+                        className="px-2 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-[9px] font-bold transition-colors disabled:opacity-50 flex items-center gap-1 whitespace-nowrap">
+                        {completingId === booking.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle className="w-3 h-3" />}
+                        Completar
+                      </button>
+                    )}
+                    {(booking.status === 'pending' || booking.status === 'confirmed') && (
+                      <button onClick={() => setCancelTarget(booking)} disabled={completingId === booking.id}
+                        className="px-2 py-1.5 rounded-xl bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-950/50 text-[9px] font-bold transition-colors disabled:opacity-50 whitespace-nowrap">
+                        Cancelar
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       )}
 
-      {/* Cancel modal */}
-      {cancelTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={() => setCancelTarget(null)} onKeyDown={(e) => { if (e.key === 'Escape') setCancelTarget(null); }} role="dialog" aria-modal="true" tabIndex={-1}>
+      {/* Cancel modal — via portal for consistent z-index */}
+      {cancelTarget && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={() => setCancelTarget(null)} onKeyDown={(e) => { if (e.key === 'Escape') setCancelTarget(null); }} role="dialog" aria-modal="true" tabIndex={-1}>
           <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-sm w-full p-6 relative" onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()} role="dialog" aria-modal="true" tabIndex={-1}>
             <button onClick={() => setCancelTarget(null)} className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
               <X className="w-5 h-5" />
@@ -483,19 +573,25 @@ export default function SellerReservasPage() {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
-      {/* Detail drawer */}
-      {detailTarget && (
-        <div className="fixed inset-0 z-50" onClick={closeDetail} onKeyDown={(e) => { if (e.key === 'Escape') closeDetail(); }} role="dialog" aria-modal="true" tabIndex={-1}>
+      {/* Detail drawer — via portal to avoid layout containing block issues */}
+      {detailTarget && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-[100]" role="dialog" aria-modal="true" aria-label={`Detalle de reserva: ${detailTarget.service_name}`} tabIndex={-1} onClick={closeDetail} onKeyDown={(e) => { if (e.key === 'Escape') closeDetail(); }}>
+          {/* Overlay */}
           <div className={`absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300 ${drawerOpen ? 'opacity-100' : 'opacity-0'}`} />
+          {/* Drawer */}
           <div
+            tabIndex={-1}
             onClick={(e) => e.stopPropagation()}
             onKeyDown={(e) => e.stopPropagation()}
-            role="dialog" aria-modal="true" tabIndex={-1}
-            className={`absolute right-0 top-0 bottom-0 w-full sm:w-[520px] bg-white dark:bg-[var(--bg-secondary)] shadow-[-40px_0_100px_rgba(0,0,0,0.25)] flex flex-col transition-transform duration-300 ease-out ${drawerOpen ? 'translate-x-0' : 'translate-x-full'}`}>
-            <div className="relative px-6 pt-7 pb-5 bg-gradient-to-r from-[#2A5A4D] via-emerald-600 to-[#6BAF7B] dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] text-white flex-shrink-0">
+            role="dialog"
+            aria-modal="true"
+            className={`absolute right-0 top-0 bottom-0 w-full sm:w-[520px] bg-white dark:bg-[var(--bg-secondary)] shadow-[-40px_0_100px_rgba(0,0,0,0.25)] flex flex-col transition-transform duration-300 ease-out will-change-transform ${drawerOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+            {/* Header gradiente */}
+            <div className="sticky top-0 z-10 px-6 pt-7 pb-5 bg-gradient-to-r from-[#2A5A4D] via-emerald-600 to-[#6BAF7B] dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] text-white flex-shrink-0">
               <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full -mr-24 -mt-24 blur-3xl" />
               <div className="relative z-10 flex items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
@@ -517,6 +613,7 @@ export default function SellerReservasPage() {
               </div>
             </div>
 
+            {/* Body */}
             <div className="overflow-y-auto flex-1 p-5 space-y-5">
               <div className="p-5 bg-gray-50 dark:bg-[var(--bg-muted)]/50 rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)]">
                 <p className="text-[10px] font-black text-gray-400 dark:text-[var(--text-muted)] uppercase tracking-widest mb-3">
@@ -560,7 +657,8 @@ export default function SellerReservasPage() {
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

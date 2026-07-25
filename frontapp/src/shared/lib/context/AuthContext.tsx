@@ -116,7 +116,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       const effectiveUser = sessionData?.authenticated
         ? sessionData.user
         : user;
-      const isAuthPath = pathname === '/login';
+      const isVendorRegistration =
+        typeof window !== 'undefined' &&
+        new URLSearchParams(window.location.search).get('mode') === 'vendor';
+      const isAuthPath = pathname === '/login' && !isVendorRegistration;
       const isProtectedPath =
         pathname.startsWith('/admin') ||
         pathname.startsWith('/seller') ||

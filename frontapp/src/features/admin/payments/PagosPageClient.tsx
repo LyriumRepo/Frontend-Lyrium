@@ -10,12 +10,14 @@ interface SelectOption { value: string; label: string; }
 import Skeleton from '@/components/ui/Skeleton';
 import BaseStatusBadge from '@/components/ui/BaseStatusBadge';
 import BaseModal from '@/components/ui/BaseModal';
+import Pagination from '@/components/ui/Pagination';
 import DataTable, { type Column } from '@/components/ui/DataTable';
 import { useTransactions, useTransactionDetail } from '@/features/admin/payments/hooks/useTransactions';
 import type { Transaction, TransactionFilters } from '@/features/admin/payments/types/transactions';
-import { CreditCard, Wallet, Smartphone, BarChart3, TrendingUp, Calendar, CheckCircle } from 'lucide-react';
+import { CreditCard, Wallet, Smartphone } from 'lucide-react';
 import Icon from '@/components/ui/Icon';
 import { exportPaymentsToExcel, exportPaymentsToPdf } from './export';
+import AdminIndicatorGrid from '@/components/admin/AdminIndicatorGrid';
 
 interface StatusMapping { status: string; label: string; class: string; icon?: string; }
 
@@ -203,101 +205,34 @@ export function PagosPageClient() {
         icon="CreditCard"
       />
 
-      {/* KPI Cards — TreasuryModule style */}
-      {stats.loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={`kpi-skel-${i}`} className="bg-[var(--bg-card)] p-6 rounded-2xl shadow-sm space-y-4">
-              <div className="flex justify-between items-center">
-                <Skeleton className="h-12 w-12 rounded-xl" />
-                <Skeleton className="h-8 w-20 rounded-md" />
-              </div>
-              <Skeleton className="h-4 w-32 rounded" />
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {kpiItems.map((kpi) => {
-            const borderMap: Record<string, string> = {
-              sky: 'border-[var(--color-info)]',
-              emerald: 'border-[var(--color-success)]',
-              indigo: 'border-[var(--icons-green)]',
-              amber: 'border-[var(--color-success)]',
-              rose: 'border-[var(--color-error)]',
-              violet: 'border-[var(--color-info)]',
-            };
-            const bgMap: Record<string, string> = {
-              sky: 'bg-[var(--color-info)]/10 text-[var(--color-info)]',
-              emerald: 'bg-[var(--color-success)]/10 text-[var(--color-success)]',
-              indigo: 'bg-[var(--icons-green)]/10 text-[var(--icons-green)]',
-              amber: 'bg-[var(--color-success)]/10 text-[var(--color-success)]',
-              rose: 'bg-[var(--color-error)]/10 text-[var(--color-error)]',
-              violet: 'bg-[var(--color-info)]/10 text-[var(--color-info)]',
-            };
-            const iconMap: Record<string, React.ReactNode> = {
-              BarChart3: <BarChart3 className="w-8 h-8" />,
-              TrendingUp: <TrendingUp className="w-8 h-8" />,
-              Calendar: <Calendar className="w-8 h-8" />,
-              CheckCircle: <CheckCircle className="w-8 h-8" />,
-            };
-            return (
-              <div
-                key={kpi.label}
-                className={`bg-[var(--bg-card)] p-6 border-l-4 ${borderMap[kpi.color] || borderMap.sky} transition-all hover:scale-[1.02] rounded-2xl shadow-sm`}
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <div className={`p-3 ${bgMap[kpi.color] || bgMap.sky} rounded-2xl`}>
-                    {iconMap[kpi.icon] || <TrendingUp className="w-8 h-8" />}
-                  </div>
-                  <span className="text-2xl font-black text-[var(--text-primary)] tracking-tighter">{kpi.value}</span>
-                </div>
-                <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest leading-none mt-2">{kpi.label}</p>
-              </div>
-            );
-          })}
-        </div>
-      )}
+      {/* KPI Cards */}
+      <AdminIndicatorGrid
+        indicators={kpiItems.map((kpi) => ({
+          label: kpi.label,
+          value: kpi.value,
+          icon: kpi.icon,
+          color: ({ sky: 'turquesa', emerald: 'verde', indigo: 'turquesaClaro' }[kpi.color] ?? 'turquesa') as 'turquesa' | 'verde' | 'turquesaClaro',
+          description: kpi.description,
+        }))}
+        columns={4}
+        isLoading={stats.loading}
+      />
 
-      {/* Method Distribution — same card style */}
+      {/* Method Distribution */}
       {methodItems.length > 0 && (
         <div className="space-y-3">
           <p className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1">
             Distribución por método de pago
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-            {methodItems.map((m) => {
-              const borderMap: Record<string, string> = {
-                sky: 'border-[var(--color-info)]',
-                emerald: 'border-[var(--color-success)]',
-                indigo: 'border-[var(--icons-green)]',
-              };
-              const bgMap: Record<string, string> = {
-                sky: 'bg-[var(--color-info)]/10 text-[var(--color-info)]',
-                emerald: 'bg-[var(--color-success)]/10 text-[var(--color-success)]',
-                indigo: 'bg-[var(--icons-green)]/10 text-[var(--icons-green)]',
-              };
-              const iconMap: Record<string, React.ReactNode> = {
-                CreditCard: <CreditCard className="w-8 h-8" />,
-                Smartphone: <Smartphone className="w-8 h-8" />,
-                Wallet: <Wallet className="w-8 h-8" />,
-              };
-              return (
-                <div
-                  key={m.label}
-                  className={`bg-[var(--bg-card)] p-6 border-l-4 ${borderMap[m.color] || 'border-[var(--border-subtle)]'} transition-all hover:scale-[1.02] rounded-2xl shadow-sm`}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <div className={`p-3 ${bgMap[m.color] || 'bg-[var(--bg-secondary)]'} rounded-2xl`}>
-                      {iconMap[m.icon] || <CreditCard className="w-8 h-8" />}
-                    </div>
-                    <span className="text-2xl font-black text-[var(--text-primary)] tracking-tighter">{m.value}</span>
-                  </div>
-                  <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest leading-none mt-2">{m.label}</p>
-                </div>
-              );
-            })}
-          </div>
+          <AdminIndicatorGrid
+            indicators={methodItems.map((m) => ({
+              label: m.label,
+              value: m.value,
+              icon: m.icon,
+              color: ({ sky: 'turquesa', emerald: 'verde', indigo: 'turquesaClaro' }[m.color] ?? 'turquesa') as 'turquesa' | 'verde' | 'turquesaClaro',
+            }))}
+            columns={3}
+          />
         </div>
       )}
 
@@ -533,30 +468,7 @@ export function PagosPageClient() {
       </div>
 
       {pagination && pagination.totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <span className="text-[11px] text-[var(--text-secondary)] font-medium">
-            Página {pagination.page} de {pagination.totalPages} ({pagination.total} registros)
-          </span>
-          <div className="flex items-center gap-2">
-            <BaseButton
-              variant="outline"
-              size="sm"
-              leftIcon="ArrowLeft"
-              disabled={pagination.page <= 1}
-              onClick={() => goToPage(pagination.page - 1)}
-            >
-              Anterior
-            </BaseButton>
-            <BaseButton
-              variant="outline"
-              size="sm"
-              disabled={pagination.page >= pagination.totalPages}
-              onClick={() => goToPage(pagination.page + 1)}
-            >
-              Siguiente
-            </BaseButton>
-          </div>
-        </div>
+        <Pagination page={pagination.page} totalPages={pagination.totalPages} onPageChange={goToPage} />
       )}
 
       <BaseModal

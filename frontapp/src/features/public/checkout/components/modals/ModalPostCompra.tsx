@@ -21,14 +21,14 @@ export default function ModalPostCompra({ isOpen, email, onClose, onSync, onOpen
         if (isOpen && !confettiRef.current) {
             confettiRef.current = true;
             import('canvas-confetti').then(({ default: confetti }) => {
-                const duration = 3000;
+                const duration = 1600;
                 const end = Date.now() + duration;
 
                 const LYRIUM_COLORS = ['#0d9488', '#bef264', '#0ea5e9', '#10b981', '#2db8b0', '#64c695'];
 
                 // Burst inicial desde el centro
                 confetti({
-                    particleCount: 80,
+                    particleCount: 50,
                     spread: 100,
                     origin: { x: 0.5, y: 0.55 },
                     colors: LYRIUM_COLORS,
@@ -38,7 +38,7 @@ export default function ModalPostCompra({ isOpen, email, onClose, onSync, onOpen
 
                 const frame = () => {
                     confetti({
-                        particleCount: 12,
+                        particleCount: 6,
                         angle: 60,
                         spread: 70,
                         scalar: 1.3,
@@ -47,22 +47,12 @@ export default function ModalPostCompra({ isOpen, email, onClose, onSync, onOpen
                         zIndex: 40000,
                     });
                     confetti({
-                        particleCount: 12,
+                        particleCount: 6,
                         angle: 120,
                         spread: 70,
                         scalar: 1.3,
                         origin: { x: 1, y: 0.6 },
                         colors: LYRIUM_COLORS,
-                        zIndex: 40000,
-                    });
-                    confetti({
-                        particleCount: 6,
-                        angle: 90,
-                        spread: 50,
-                        scalar: 1.1,
-                        origin: { x: 0.5, y: 0.7 },
-                        colors: LYRIUM_COLORS,
-                        shapes: ['star'],
                         zIndex: 40000,
                     });
 

@@ -114,7 +114,7 @@ export function ForumTopicClient() {
                     placeholder="Escribe tu respuesta..." />
                 <div className="flex justify-end mt-3">
                     <button onClick={handleReply} disabled={sending || !replyContent.trim()}
-                        className="px-6 py-2.5 bg-sky-500 hover:bg-sky-600 text-white rounded-xl text-sm font-semibold transition disabled:opacity-50">
+                        className="px-6 py-2.5 bg-gradient-to-r from-emerald-400 to-sky-400 dark:from-[var(--brand-green)] dark:to-[var(--icons-green)] hover:from-emerald-500 hover:to-sky-500 dark:hover:from-[var(--brand-green)] dark:hover:to-[var(--icons-green)] text-white rounded-xl text-sm font-semibold transition disabled:opacity-50 shadow-lg shadow-sky-500/25 dark:shadow-[#8FC3A1]/70">
                         {sending ? 'Enviando...' : 'Publicar Respuesta'}
                     </button>
                 </div>

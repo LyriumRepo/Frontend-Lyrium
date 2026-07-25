@@ -57,13 +57,13 @@ function AnimatedNumber({ value, isHidden }: { value: number; isHidden: boolean 
 /* ── Tier definitions ── */
 const TIERS = [
   { min: 0,     label: 'Brote',        discount: '1%',   color: 'from-green-600 to-green-400' },
-  { min: 200,   label: 'Retoño',       discount: '1%',   color: 'from-emerald-600 to-emerald-400' },
-  { min: 500,   label: 'Hoja',         discount: '1.5%', color: 'from-teal-600 to-teal-400' },
-  { min: 1000,  label: 'Flor',         discount: '2%',   color: 'from-cyan-600 to-cyan-400' },
-  { min: 2000,  label: 'Ramo',         discount: '2.5%', color: 'from-sky-600 to-sky-400' },
-  { min: 3500,  label: 'Jardín',       discount: '3%',   color: 'from-indigo-500 to-indigo-400' },
-  { min: 5500,  label: 'Bosque',       discount: '3%',   color: 'from-violet-600 to-violet-400' },
-  { min: 8000,  label: 'Lirio Épico',  discount: '3%',   color: 'from-amber-500 to-yellow-400' },
+  { min: 500,   label: 'Retoño',       discount: '1%',   color: 'from-emerald-600 to-emerald-400' },
+  { min: 1000,  label: 'Hoja',         discount: '1.5%', color: 'from-teal-600 to-teal-400' },
+  { min: 2000,  label: 'Flor',         discount: '2%',   color: 'from-cyan-600 to-cyan-400' },
+  { min: 4000,  label: 'Ramo',         discount: '2.5%', color: 'from-sky-600 to-sky-400' },
+  { min: 8000,  label: 'Jardín',       discount: '3%',   color: 'from-indigo-500 to-indigo-400' },
+  { min: 16000, label: 'Bosque',       discount: '3%',   color: 'from-violet-600 to-violet-400' },
+  { min: 32000, label: 'Lirio Épico',  discount: '3%',   color: 'from-amber-500 to-yellow-400' },
 ];
 
 function getTier(balance: number) {
@@ -130,7 +130,9 @@ export default function LiriosWalletPageClient() {
   const [rewardToast, setRewardToast] = useState(false);
 
   const handleEarnLirios = useCallback((amount: number) => {
-    setBalance((prev) => prev ? { balance: prev.balance + amount } : prev);
+    setBalance((prev) => prev
+      ? { ...prev, balance: prev.balance + amount, total_earned: prev.total_earned + amount }
+      : prev);
     setRewardToast(true);
     setTimeout(() => setRewardToast(false), 3000);
   }, []);
@@ -177,12 +179,8 @@ export default function LiriosWalletPageClient() {
   const nextTier = getNextTier(bal);
   const tierProgress = getTierProgress(bal);
 
-  const totalEarned = transactions
-    .filter((t) => t.type === 'accrue')
-    .reduce((s, t) => s + t.amount, 0);
-  const totalRedeemed = transactions
-    .filter((t) => t.type === 'redeem')
-    .reduce((s, t) => s + t.amount, 0);
+  const totalEarned = balance?.total_earned ?? 0;
+  const totalRedeemed = balance?.total_redeemed ?? 0;
 
   const filteredTxs =
     filterTab === 'all'

@@ -5,6 +5,7 @@ import { AlertTriangle } from 'lucide-react';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import BaseLoading from '@/components/ui/BaseLoading';
 import Icon from '@/components/ui/Icon';
+import Pagination from '@/components/ui/Pagination';
 import { useInventory } from './hooks/useInventory';
 import { exportInventoryToExcel, exportInventoryToPdf } from './export';
 import { StockAlertsModal } from './components/StockAlertsModal';
@@ -55,7 +56,7 @@ export function InventoryPageClient() {
         return (
             <div className="space-y-8 animate-fadeIn pb-20">
                 <ModuleHeader
-                    title="Inventario"
+                    title="Gestión de Stock"
                     subtitle="Control de existencias y alertas de stock."
                     icon="Boxes"
                 />
@@ -68,7 +69,7 @@ export function InventoryPageClient() {
         return (
             <div className="space-y-8 animate-fadeIn pb-20">
                 <ModuleHeader
-                    title="Inventario"
+                    title="Gestión de Stock"
                     subtitle="Control de existencias y alertas de stock."
                     icon="Boxes"
                 />
@@ -91,7 +92,7 @@ export function InventoryPageClient() {
         <div className="space-y-8 animate-fadeIn pb-20">
 
             <ModuleHeader
-                title="Inventario"
+                title="Gestión de Stock"
                 subtitle="Control de existencias y alertas de stock."
                 icon="Boxes"
             />
@@ -110,49 +111,11 @@ export function InventoryPageClient() {
 
                 <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest px-1">
                     {totalItems} producto{totalItems !== 1 ? 's' : ''}
-                    {totalPages > 1 && (
-                        <span className="text-[var(--text-secondary)] font-normal normal-case tracking-normal">
-                            {' · Página '}{currentPage} de {totalPages}
-                        </span>
-                    )}
                 </p>
 
                 <InventoryTable items={pagedItems} onUpdateStock={updateStock} />
 
-                {totalPages > 1 && (
-                    <div className="flex items-center justify-between px-1 pt-1">
-                        <div />
-                        <div className="flex items-center gap-1">
-                            <button
-                                onClick={prevPage}
-                                disabled={currentPage === 1}
-                                className="w-7 h-7 flex items-center justify-center rounded-lg border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                            >
-                                <Icon name="ChevronLeft" className="w-3.5 h-3.5" />
-                            </button>
-                            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                                <button
-                                    key={page}
-                                    onClick={() => goToPage(page)}
-                                    className={`w-7 h-7 flex items-center justify-center rounded-lg text-[10px] font-black transition-colors
-                                        ${currentPage === page
-                                            ? 'bg-sky-500/20 dark:bg-[#8FC3A1]/20 text-sky-500 dark:text-[#8FC3A1] border border-sky-500/30 dark:border-[#8FC3A1]/30'
-                                            : 'border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]'
-                                        }`}
-                                >
-                                    {page}
-                                </button>
-                            ))}
-                            <button
-                                onClick={nextPage}
-                                disabled={currentPage === totalPages}
-                                className="w-7 h-7 flex items-center justify-center rounded-lg border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                            >
-                                <Icon name="ChevronRight" className="w-3.5 h-3.5" />
-                            </button>
-                        </div>
-                    </div>
-                )}
+                <Pagination page={currentPage} totalPages={totalPages} onPageChange={goToPage} totalItems={totalItems} itemLabel="productos" />
             </div>
 
             <StockAlertsModal

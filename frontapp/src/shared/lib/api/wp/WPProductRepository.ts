@@ -46,4 +46,8 @@ export class WPProductRepository implements IProductRepository {
     async uploadProductImage(productId: string, file: File): Promise<{ url: string }> {
         throw new Error('Not implemented for WooCommerce');
     }
+
+    async getSellerBranchStock(): Promise<Record<string, number>> {
+        throw new Error('Not implemented for WooCommerce');
+    }
 }

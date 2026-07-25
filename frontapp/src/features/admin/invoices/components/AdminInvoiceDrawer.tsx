@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import Icon from '@/components/ui/Icon';
 import { formatCurrency } from '@/shared/lib/utils/formatters';
 import { getAuthHeaders } from '@/shared/lib/api/token-store';
@@ -21,15 +22,20 @@ const statusConfig: Record<string, { label: string; color: string; iconName: str
 };
 
 const statusColorClasses: Record<string, string> = {
-    emerald: 'bg-[var(--color-success)]/10 text-[var(--color-success)] border-[var(--color-success)]/20',
-    sky:     'bg-[var(--color-info)]/10 text-[var(--color-info)] border-[var(--color-info)]/20',
-    rose:    'bg-[var(--color-error)]/10 text-[var(--color-error)] border-[var(--color-error)]/20',
-    amber:   'bg-[var(--color-warning)]/10 text-[var(--color-warning)] border-[var(--color-warning)]/20',
+    emerald: 'bg-emerald-50 text-emerald-600 border-emerald-100',
+    sky:     'bg-sky-50 text-sky-600 border-sky-100',
+    rose:    'bg-rose-50 text-rose-600 border-rose-100',
+    amber:   'bg-amber-50 text-amber-600 border-amber-100',
     gray:    'bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-[var(--border-subtle)]',
 };
 
 export default function AdminInvoiceDrawer({ invoice, isOpen, onClose }: Props) {
     const [isDownloading, setIsDownloading] = useState(false);
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     const handleOpenPdf = useCallback(async () => {
         if (!invoice?.id || isDownloading) return;
@@ -56,144 +62,182 @@ export default function AdminInvoiceDrawer({ invoice, isOpen, onClose }: Props) 
         }
     }, [invoice, isDownloading]);
 
-    if (!isOpen || !invoice) return null;
+    if (!isOpen || !invoice || !mounted) return null;
+
+    const modalRoot = document.getElementById('modal-root');
+    if (!modalRoot) return null;
 
     const status = statusConfig[invoice.sunat_status] ?? statusConfig.DRAFT;
     const statusClasses = statusColorClasses[status.color] ?? statusColorClasses.gray;
+    const storeName = invoice.stores[0]?.name ?? '—';
+    const unitPrice = (item: { total: number; cantidad?: number }) =>
+        item.cantidad && item.cantidad > 0 ? item.total / item.cantidad : 0;
 
-    return (
-        <div className="fixed inset-0 md:top-[60px] z-50 flex items-end md:items-stretch justify-end">
-            <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-md" onClick={onClose} onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }} role="presentation" aria-hidden="true" />
+    return createPortal(
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 sm:p-6">
+            <div
+                className="absolute inset-0 bg-gray-900/60 backdrop-blur-md"
+                onClick={onClose}
+                onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }}
+                role="presentation"
+                aria-hidden="true"
+            />
 
-            <div className="relative bg-[var(--bg-card)] shadow-[-20px_0_60px_-10px_rgba(0,0,0,0.25)] flex flex-col animate-slideInRight
-                w-full md:w-[420px] lg:w-[480px]
-                max-h-[88dvh] md:max-h-none md:h-full
-                rounded-t-[2rem] md:rounded-tl-2xl md:rounded-bl-none md:rounded-r-none
-                pb-safe">
+            <div className="relative w-full max-w-[640px] max-h-[90vh] bg-white rounded-3xl shadow-2xl flex flex-col animate-fadeInScale overflow-hidden dark:bg-[var(--bg-card)]">
+
                 {/* Header */}
-                <div className="p-4 sm:p-6 flex items-center justify-between border-b border-[var(--border-subtle)] bg-[var(--bg-card)]/80 backdrop-blur-xl">
-                    <div className="flex-1 min-w-0 pr-4">
-                        <div className="flex items-center gap-3 mb-3">
-                            <span className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest border border-[var(--border-default)] px-2 py-1 rounded-lg bg-[var(--bg-secondary)]">
+                <div className="px-6 pt-6 pb-5 shrink-0 bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--verde-500)] relative">
+                    <button
+                        onClick={onClose}
+                        className="absolute top-6 right-6 w-10 h-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center text-white hover:bg-white/30 transition-all active:scale-90 shrink-0"
+                    >
+                        <Icon name="X" className="w-5 h-5" />
+                    </button>
+                    <div className="flex-1 min-w-0 pr-12">
+                        <div className="flex items-center gap-2 mb-3 flex-wrap">
+                            <span className="text-[10px] font-black text-white uppercase tracking-widest border border-white/30 px-2 py-0.5 rounded-md bg-white/20 backdrop-blur-md">
                                 {invoice.type}
                             </span>
-                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${statusClasses}`}>
-                                <Icon name={status.iconName} className="w-3.5 h-3.5" /> {status.label}
+                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${statusClasses}`}>
+                                <Icon name={status.iconName} className="w-3 h-3" /> {status.label}
                             </span>
                         </div>
-                        <h2 className="text-3xl font-black text-[var(--text-primary)] tracking-tighter leading-none">
+                        <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-none">
                             {invoice.series}-{invoice.number}
                         </h2>
-                        <p className="text-xs text-[var(--text-secondary)] font-bold mt-2 uppercase tracking-widest">
-                            {new Date(invoice.emission_date).toLocaleDateString('es-PE', { day: '2-digit', month: 'long', year: 'numeric' })}
+                        <p className="text-xs text-white/70 font-semibold mt-2">
+                            {invoice.seller_name && <span>Vendedor: {invoice.seller_name} · </span>}
+                            {invoice.order_id && <span>Pedido: {invoice.order_id}</span>}
                         </p>
                     </div>
-                    <button onClick={onClose} className="w-12 h-12 flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-secondary)] rounded-2xl hover:bg-[var(--bg-danger)] hover:text-[var(--text-danger)] transition-all">
-                        <Icon name="X" className="w-6 h-6" />
-                    </button>
                 </div>
 
-                {/* Body */}
-                <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5 custom-scrollbar">
-                    {/* Tienda */}
+                {/* Scrollable body */}
+                <div className="flex-1 overflow-y-auto px-6 pb-6 space-y-5 custom-scrollbar">
+
+                    {/* Store chip */}
                     {invoice.stores.length > 0 && (
-                        <div className="space-y-4">
-                            <h3 className="text-xs font-black text-[var(--text-secondary)] uppercase tracking-widest flex items-center gap-2">
-                                <Icon name="Store" className="w-4 h-4" /> Tienda
-                            </h3>
-                            <div className="bg-[var(--bg-secondary)] p-5 rounded-[2rem] space-y-1">
-                                {invoice.stores.map(s => (
-                                    <p key={s.id} className="text-lg font-black text-[var(--text-primary)]">{s.name}</p>
-                                ))}
-                            </div>
+                        <div className="inline-flex items-center gap-2 bg-teal-50 border border-teal-100 text-teal-700 rounded-full px-4 py-2 text-sm font-semibold dark:bg-teal-900/20 dark:border-teal-800 dark:text-teal-300">
+                            <Icon name="Store" className="w-4 h-4" />
+                            {storeName}
+                            {invoice.stores.length > 1 && (
+                                <span className="text-xs text-teal-500 font-bold">+{invoice.stores.length - 1}</span>
+                            )}
                         </div>
                     )}
 
-                    {/* Cliente */}
-                    <div className="space-y-4">
-                        <h3 className="text-xs font-black text-[var(--text-secondary)] uppercase tracking-widest flex items-center gap-2">
-                            <Icon name="User" className="w-4 h-4" /> Cliente
-                        </h3>
-                        <div className="bg-[var(--bg-secondary)] p-5 rounded-[2rem]">
-                            <p className="text-lg font-black text-[var(--text-primary)]">{invoice.customer_name}</p>
-                            <p className="text-sm font-bold text-[var(--text-secondary)]">RUC / DNI: {invoice.customer_ruc}</p>
+                    {/* Customer + Amount cards */}
+                    <div className="grid grid-cols-2 gap-3">
+                        <div className="bg-[var(--bg-secondary)] rounded-2xl p-4 border border-[var(--border-subtle)]">
+                            <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-2">Cliente</p>
+                            <p className="text-sm font-bold text-[var(--text-primary)] leading-snug">{invoice.customer_name}</p>
+                            <p className="text-xs text-[var(--text-secondary)] mt-0.5">RUC: {invoice.customer_ruc}</p>
+                        </div>
+                        <div className="bg-[var(--bg-secondary)] rounded-2xl p-4 border border-[var(--border-subtle)]">
+                            <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-2">Monto Total</p>
+                            <p className="text-xl font-black text-[var(--text-primary)] leading-none">{formatCurrency(invoice.amount)}</p>
                         </div>
                     </div>
 
-                    {/* Monto */}
-                    <div className="space-y-2">
-                        <h3 className="text-xs font-black text-[var(--text-secondary)] uppercase tracking-widest flex items-center gap-2">
-                            <Icon name="DollarSign" className="w-4 h-4" /> Monto Total
-                        </h3>
-                        <p className="text-4xl font-black text-[var(--text-primary)] tracking-tighter">
-                            {formatCurrency(invoice.amount)}
-                        </p>
-                    </div>
-
-                    {/* Orden */}
-                    {invoice.order_id && (
-                        <div className="space-y-2">
-                            <p className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Pedido</p>
-                            <span className="text-xs font-black text-[var(--color-info)] bg-[var(--color-info)]/10 px-3 py-1.5 rounded-lg border border-[var(--color-info)]/20 inline-block">{invoice.order_id}</span>
-                        </div>
-                    )}
-
-                    {/* Items */}
+                    {/* Items table */}
                     {invoice.items && invoice.items.length > 0 && (
-                        <div className="space-y-4">
-                            <h3 className="text-xs font-black text-[var(--text-secondary)] uppercase tracking-widest flex items-center gap-2">
-                                <Icon name="List" className="w-4 h-4" /> Ítems
+                        <div className="space-y-2">
+                            <h3 className="text-xs font-black text-[var(--text-muted)] uppercase tracking-widest flex items-center gap-2">
+                                <Icon name="Package" className="w-4 h-4" /> Productos / Servicios
                             </h3>
-                            <div className="space-y-2">
-                                {invoice.items.map((item, i) => (
-                                    <div key={i} className="flex justify-between items-center p-4 bg-[var(--bg-secondary)] rounded-2xl">
-                                        <div>
-                                            <p className="text-sm font-bold text-[var(--text-primary)]">{item.descripcion}</p>
-                                            <p className="text-[10px] text-[var(--text-secondary)] font-black">
-                                                Cant: {item.cantidad} × {formatCurrency(item.precio_unitario)}
-                                            </p>
-                                        </div>
-                                        <p className="text-sm font-black text-[var(--text-primary)]">{formatCurrency(item.total)}</p>
-                                    </div>
-                                ))}
+                            <div className="border border-[var(--border-subtle)] rounded-2xl overflow-hidden">
+                                <table className="w-full text-sm">
+                                    <thead>
+                                        <tr className="bg-[var(--bg-secondary)] border-b border-[var(--border-subtle)]">
+                                            <th className="text-left px-4 py-2.5 text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest">Producto</th>
+                                            <th className="text-center px-3 py-2.5 text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest">Cant.</th>
+                                            <th className="text-right px-3 py-2.5 text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest">P. Unit.</th>
+                                            <th className="text-right px-4 py-2.5 text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest">Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {invoice.items.map((item, idx) => (
+                                            <tr key={idx} className="border-b border-[var(--border-subtle)] last:border-b-0">
+                                                <td className="px-4 py-3 font-semibold text-[var(--text-primary)]">{item.descripcion}</td>
+                                                <td className="px-3 py-3 text-center text-[var(--text-secondary)]">{item.cantidad}</td>
+                                                <td className="px-3 py-3 text-right text-[var(--text-secondary)]">{formatCurrency(unitPrice(item))}</td>
+                                                <td className="px-4 py-3 text-right font-bold text-[var(--text-primary)]">{formatCurrency(item.total)}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     )}
 
-                    {/* PDF */}
-                    <div className="space-y-4">
-                        <h3 className="text-xs font-black text-[var(--text-secondary)] uppercase tracking-widest flex items-center gap-2">
-                            <Icon name="FileText" className="w-4 h-4" /> Comprobante Digital
-                        </h3>
-                        <button
-                            onClick={handleOpenPdf}
-                            disabled={!invoice.pdf_url || isDownloading}
-                            className="flex items-center justify-center gap-3 p-6 bg-[var(--bg-card)] rounded-[2.5rem] border border-[var(--border-subtle)] shadow-xl hover:bg-[var(--icons-green)]/5 transition-all group w-full text-left disabled:opacity-40 disabled:cursor-not-allowed"
-                        >
-                            <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-[var(--color-error)]/10 text-[var(--color-error)] group-hover:scale-110 transition-all shadow-lg shadow-[var(--color-error)]/10">
-                                <Icon name={isDownloading ? 'Loader' : 'FileText'} className={`w-8 h-8 ${isDownloading ? 'animate-spin' : ''}`} />
+                    {/* Commission card */}
+                    {(invoice.commission_rate != null || invoice.commission_amount != null) && (
+                        <div className="space-y-2">
+                            <h3 className="text-xs font-black text-[var(--text-muted)] uppercase tracking-widest flex items-center gap-2">
+                                <Icon name="DollarSign" className="w-4 h-4" /> Comisión
+                            </h3>
+                            <div className="bg-[var(--bg-secondary)] rounded-2xl p-4 border border-[var(--border-subtle)] space-y-3">
+                                <div className="grid grid-cols-3 gap-3">
+                                    <div>
+                                        <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-1">Tasa</p>
+                                        <p className="text-sm font-bold text-[var(--text-primary)]">
+                                            {invoice.commission_rate != null ? `${(invoice.commission_rate * 100).toFixed(1)}%` : '—'}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-1">Comisión</p>
+                                        <p className="text-sm font-bold text-[var(--text-primary)]">
+                                            {invoice.commission_amount != null ? formatCurrency(invoice.commission_amount) : '—'}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-1">Tienda</p>
+                                        <p className="text-sm font-bold text-[var(--text-primary)]">{formatCurrency(invoice.store_amount ?? invoice.order_total)}</p>
+                                    </div>
+                                </div>
+                                {invoice.commission_amount != null && (
+                                    <div className="border-t border-[var(--border-subtle)] pt-3 flex items-center justify-between">
+                                        <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest">Total Comisión</p>
+                                        <p className="text-lg font-black text-[var(--text-primary)]">{formatCurrency(invoice.commission_amount)}</p>
+                                    </div>
+                                )}
                             </div>
-                            <div className="text-left">
-                                <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]">
-                                    {isDownloading ? 'Descargando…' : invoice.pdf_url ? 'Descargar Comprobante PDF' : 'PDF no disponible'}
-                                </p>
-                                <p className="text-xs text-[var(--text-muted)] mt-1">SUNAT · Nubefact</p>
-                            </div>
-                            <Icon name="Download" className="w-5 h-5 text-[var(--text-muted)] ml-auto" />
-                        </button>
+                        </div>
+                    )}
+
+                    {/* PDF button */}
+                    <button
+                        onClick={handleOpenPdf}
+                        disabled={!invoice.pdf_url || isDownloading}
+                        className="flex items-center gap-3 w-full p-4 bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--brand-teal)] text-white rounded-2xl font-bold text-sm tracking-wide hover:opacity-90 transition-all active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed shadow-lg shadow-teal-500/20"
+                    >
+                        <Icon name="FileText" className="w-5 h-5" />
+                        <span className="flex-1 text-left">
+                            {isDownloading ? 'Descargando…' : invoice.pdf_url ? 'Ver / Descargar Factura' : 'PDF no disponible'}
+                        </span>
+                        <Icon name="Download" className="w-5 h-5" />
+                    </button>
+
+                    {/* Emission date */}
+                    <div className="text-right">
+                        <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest">Fecha de emisión</p>
+                        <p className="text-xs font-bold text-[var(--text-secondary)]">
+                            {new Date(invoice.emission_date).toLocaleDateString('es-PE', { day: '2-digit', month: 'long', year: 'numeric' })}
+                        </p>
                     </div>
                 </div>
 
                 {/* Footer */}
-                <div className="p-4 sm:p-6 border-t border-[var(--border-subtle)] bg-[var(--bg-card)]/80 backdrop-blur-xl">
+                <div className="px-6 py-4 border-t border-[var(--border-subtle)] bg-[var(--bg-card)]/80 backdrop-blur-xl shrink-0 dark:bg-[var(--bg-secondary)]/80">
                     <button
                         onClick={onClose}
-                        className="w-full py-4 bg-[var(--bg-secondary)] text-[var(--text-secondary)] rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-[var(--bg-hover)] transition-all"
+                        className="w-full py-3 bg-[var(--bg-secondary)] text-[var(--text-secondary)] rounded-xl font-bold text-[11px] uppercase tracking-widest hover:bg-[var(--bg-hover)] transition-all dark:bg-white/10 dark:text-white/70"
                     >
                         Cerrar
                     </button>
                 </div>
             </div>
-        </div>
+        </div>,
+        modalRoot,
     );
 }

@@ -160,6 +160,7 @@ export const useControlVendedores = () => {
       productsTotal: item.store?.total_sales ?? 0,
       productsPending: 0,
       regDate: new Date(item.created_at).toLocaleDateString('es-PE'),
+      createdAt: item.created_at,
       contractStatus: mapContractStatus(item),
       avatar: item.avatar,
       phone: item.phone,

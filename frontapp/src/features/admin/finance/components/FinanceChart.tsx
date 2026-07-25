@@ -15,7 +15,7 @@ export interface FinanceChartDataset {
 }
 
 export interface FinanceChartProps {
-    type: 'line' | 'bar' | 'doughnut' | 'radar';
+    type: 'line' | 'bar' | 'doughnut' | 'pie' | 'radar';
     labels: string[];
     data: number[];
     label?: string;
@@ -153,7 +153,7 @@ export default function FinanceChart({
                 backgroundStyle = grad;
             }
 
-            if (type === 'doughnut') {
+            if (type === 'doughnut' || type === 'pie') {
                 backgroundStyle = index === 0
                     ? resolved
                     : (isDark ? '#1E3028' : '#F1F5F9');
@@ -164,7 +164,7 @@ export default function FinanceChart({
                 data: dsData,
                 borderColor: resolved,
                 backgroundColor: backgroundStyle,
-                borderWidth: type === 'doughnut' ? 0 : (type === 'line' ? 2.5 : 0),
+                borderWidth: (type === 'doughnut' || type === 'pie') ? 0 : (type === 'line' ? 2.5 : 0),
                 tension: type === 'line' ? tension : 0,
                 fill: type === 'line' ? fill : false,
                 pointBackgroundColor: resolved,
@@ -187,6 +187,7 @@ export default function FinanceChart({
                 responsive: true,
                 maintainAspectRatio: false,
                 cutout: type === 'doughnut' ? cutout : undefined,
+                layout: (type === 'doughnut' || type === 'pie') ? { padding: { top: 28 } } : undefined,
                 interaction: ZOOMABLE_TYPES.includes(type)
                     ? { mode: 'index' as const, intersect: false }
                     : { mode: 'nearest' as const, intersect: true },
@@ -267,7 +268,7 @@ export default function FinanceChart({
                             font: { size: 9, weight: 'bold' },
                         },
                     },
-                } : (type !== 'doughnut' ? {
+                } : (type !== 'doughnut' && type !== 'pie' ? {
                     y: {
                         beginAtZero: true,
                         grid: { color: gridColor },

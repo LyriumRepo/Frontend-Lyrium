@@ -211,6 +211,7 @@ export function HelpdeskPageClient() {
                 isLoadingMore={loadingMoreMessages}
                 hasMoreMessages={hasMoreMessages}
                 showAdminControls
+                className="!rounded-none !border-none !shadow-none"
               />
             ) : (
               <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
@@ -230,7 +231,7 @@ export function HelpdeskPageClient() {
 
       {showLegend && (
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-end sm:items-center justify-center p-4 pt-[calc(60px+1rem)] sm:pt-4"
+          className="fixed inset-0 bg-black/60 backdrop-blur-md z-[99999] flex items-end sm:items-center justify-center p-4 pt-[calc(60px+1rem)] sm:pt-4"
           onClick={() => setShowLegend(false)}
           onKeyDown={(e) => { if (e.key === 'Escape') setShowLegend(false); }}
           role="dialog"
@@ -244,7 +245,7 @@ export function HelpdeskPageClient() {
             onKeyDown={(e) => e.stopPropagation()}
           >
             {/* Header — mismos colores que HelpPageClient */}
-            <div className="bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--turquesa-500)]/70 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-8 text-white relative shrink-0">
+            <div className="bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--verde-500)] p-8 text-white relative shrink-0">
               <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl" />
               <div className="relative z-10 flex items-center justify-between">
                 <div className="flex items-center gap-4">

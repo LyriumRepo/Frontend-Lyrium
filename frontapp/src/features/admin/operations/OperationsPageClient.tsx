@@ -2,9 +2,6 @@
 
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import {
-  CircleDollarSign,
-  Receipt,
-  Landmark,
   Eye,
   Download,
   CheckCircle2,
@@ -13,7 +10,7 @@ import {
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import Icon from '@/components/ui/Icon';
 import { exportExpensesToExcel, exportExpensesToPdf } from './export';
-import { CVCard } from '@/components/admin/sellers/SharedCVUI';
+import AdminIndicatorGrid from '@/components/admin/AdminIndicatorGrid';
 import { ScanDropzone } from '@/components/admin/operations/ScanDropzone';
 import { ScanResultCard } from '@/components/admin/operations/ScanResultCard';
 import { ExpenseDetailModal } from '@/components/admin/operations/ExpenseDetailModal';
@@ -21,6 +18,7 @@ import { useScan } from './hooks/useScan';
 import { useExpenses } from './hooks/usepenses';
 import BaseModal from '@/components/ui/BaseModal';
 import BaseDatePicker from '@/components/ui/BaseDatePicker';
+import PaginationComponent from '@/components/ui/Pagination';
 import BaseSelectField from '@/components/ui/BaseSelectField';
 import { BankStatementReviewModal } from '@/components/admin/operations/BankStatementReviewModal';
 import type {
@@ -251,7 +249,7 @@ function TableHonorarios({
           <thead>
             <tr>
               {['Nombre emisor','RUC emisor','Tipo documento','Nro. documento','Fecha emisión','Monto','Estado',''].map((h) => (
-                <th key={h} className="text-left text-[11px] font-medium text-[var(--text-muted)] px-3 py-2.5 border-b border-[var(--border-subtle)]">{h}</th>
+                <th key={h} className="text-left text-[11px] font-medium text-[var(--text-muted)] whitespace-nowrap px-3 py-2.5 border-b border-[var(--border-subtle)]">{h}</th>
               ))}
             </tr>
           </thead>
@@ -263,14 +261,14 @@ function TableHonorarios({
               const issuer = e.scan_data?.issuer as { name?: string; ruc?: string } | null | undefined;
               return (
                 <tr key={e.id} className="border-b border-[var(--border-subtle)] hover:bg-[var(--bg-muted)] transition-colors">
-                  <td className="px-3 py-2.5 text-[13px] text-[var(--text-primary)] truncate">{issuer?.name ?? e.supplier?.name ?? '—'}</td>
-                  <td className="px-3 py-2.5 font-mono text-[12px] text-[var(--text-secondary)] truncate">{issuer?.ruc ?? '—'}</td>
-                  <td className="px-3 py-2.5"><TipoBadge tipo={e.voucher_type ?? 'Honorarios'} /></td>
-                  <td className="px-3 py-2.5 font-mono text-[12px] text-[var(--text-secondary)] truncate">{e.voucher_number ?? e.receipt_number ?? '—'}</td>
-                  <td className="px-3 py-2.5 text-[13px] text-[var(--text-secondary)]">{e.issued_at}</td>
-                  <td className="px-3 py-2.5 text-[13px] font-medium text-[var(--text-primary)]">S/ {Number(e.amount).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</td>
-                  <td className="px-3 py-2.5"><StatusBadge status={e.status} /></td>
-                  <td className="px-3 py-2.5"><RowActions expense={e} onDetail={onDetail} onMarkPaid={onMarkPaid} onAnular={onAnular} /></td>
+                  <td className="px-3 py-2.5 text-[13px] text-[var(--text-primary)] whitespace-nowrap">{issuer?.name ?? e.supplier?.name ?? '—'}</td>
+                  <td className="px-3 py-2.5 font-mono text-[12px] text-[var(--text-secondary)] whitespace-nowrap">{issuer?.ruc ?? '—'}</td>
+                  <td className="px-3 py-2.5 whitespace-nowrap"><TipoBadge tipo={e.voucher_type ?? 'Honorarios'} /></td>
+                  <td className="px-3 py-2.5 font-mono text-[12px] text-[var(--text-secondary)] whitespace-nowrap">{e.voucher_number ?? e.receipt_number ?? '—'}</td>
+                  <td className="px-3 py-2.5 text-[13px] text-[var(--text-secondary)] whitespace-nowrap">{e.issued_at}</td>
+                  <td className="px-3 py-2.5 text-[13px] font-medium text-[var(--text-primary)] whitespace-nowrap">S/ {Number(e.amount).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</td>
+                  <td className="px-3 py-2.5 whitespace-nowrap"><StatusBadge status={e.status} /></td>
+                  <td className="px-3 py-2.5 whitespace-nowrap"><RowActions expense={e} onDetail={onDetail} onMarkPaid={onMarkPaid} onAnular={onAnular} /></td>
                 </tr>
               );
             })}
@@ -335,7 +333,7 @@ function TableFacturas({
           <thead>
             <tr>
               {['Emisor (proveedor)','RUC emisor','Tipo documento','Nro. documento','Fecha emisión','Total','Estado',''].map((h) => (
-                <th key={h} className="text-left text-[11px] font-medium text-[var(--text-muted)] px-3 py-2.5 border-b border-[var(--border-subtle)]">{h}</th>
+                <th key={h} className="text-left text-[11px] font-medium text-[var(--text-muted)] whitespace-nowrap px-3 py-2.5 border-b border-[var(--border-subtle)]">{h}</th>
               ))}
             </tr>
           </thead>
@@ -347,14 +345,14 @@ function TableFacturas({
               const issuer = e.scan_data?.issuer as { name?: string; ruc?: string } | null | undefined;
               return (
                 <tr key={e.id} className="border-b border-[var(--border-subtle)] hover:bg-[var(--bg-muted)] transition-colors">
-                  <td className="px-3 py-2.5 text-[13px] text-[var(--text-primary)] truncate">{issuer?.name ?? e.supplier?.name ?? '—'}</td>
-                  <td className="px-3 py-2.5 font-mono text-[12px] text-[var(--text-secondary)] truncate">{issuer?.ruc ?? '—'}</td>
-                  <td className="px-3 py-2.5"><TipoBadge tipo={e.voucher_type ?? ''} /></td>
-                  <td className="px-3 py-2.5 font-mono text-[12px] text-[var(--text-secondary)] truncate">{e.voucher_number ?? e.receipt_number ?? '—'}</td>
-                  <td className="px-3 py-2.5 text-[13px] text-[var(--text-secondary)]">{e.issued_at}</td>
-                  <td className="px-3 py-2.5 text-[13px] font-medium text-[var(--text-primary)]">S/ {Number(e.amount).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</td>
-                  <td className="px-3 py-2.5"><StatusBadge status={e.status} /></td>
-                  <td className="px-3 py-2.5"><RowActions expense={e} onDetail={onDetail} onMarkPaid={onMarkPaid} onAnular={onAnular} /></td>
+                  <td className="px-3 py-2.5 text-[13px] text-[var(--text-primary)] whitespace-nowrap">{issuer?.name ?? e.supplier?.name ?? '—'}</td>
+                  <td className="px-3 py-2.5 font-mono text-[12px] text-[var(--text-secondary)] whitespace-nowrap">{issuer?.ruc ?? '—'}</td>
+                  <td className="px-3 py-2.5 whitespace-nowrap"><TipoBadge tipo={e.voucher_type ?? ''} /></td>
+                  <td className="px-3 py-2.5 font-mono text-[12px] text-[var(--text-secondary)] whitespace-nowrap">{e.voucher_number ?? e.receipt_number ?? '—'}</td>
+                  <td className="px-3 py-2.5 text-[13px] text-[var(--text-secondary)] whitespace-nowrap">{e.issued_at}</td>
+                  <td className="px-3 py-2.5 text-[13px] font-medium text-[var(--text-primary)] whitespace-nowrap">S/ {Number(e.amount).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</td>
+                  <td className="px-3 py-2.5 whitespace-nowrap"><StatusBadge status={e.status} /></td>
+                  <td className="px-3 py-2.5 whitespace-nowrap"><RowActions expense={e} onDetail={onDetail} onMarkPaid={onMarkPaid} onAnular={onAnular} /></td>
                 </tr>
               );
             })}
@@ -418,7 +416,7 @@ function TableGeneric({
           <thead>
             <tr>
               {['Tipo','Nro. comprobante','Proveedor / Trabajador','Concepto','Fecha','Monto','Estado',''].map((h) => (
-                <th key={h} className="text-left text-[11px] font-medium text-[var(--text-muted)] px-3 py-2.5 border-b border-[var(--border-subtle)]">{h}</th>
+                <th key={h} className="text-left text-[11px] font-medium text-[var(--text-muted)] whitespace-nowrap px-3 py-2.5 border-b border-[var(--border-subtle)]">{h}</th>
               ))}
             </tr>
           </thead>
@@ -428,58 +426,20 @@ function TableGeneric({
             )}
             {expenses.map((e) => (
               <tr key={e.id} className="border-b border-[var(--border-subtle)] hover:bg-[var(--bg-muted)] transition-colors">
-                <td className="px-3 py-2.5"><TipoBadge tipo={e.voucher_type ?? ''} /></td>
-                <td className="px-3 py-2.5 font-mono text-[12px] text-[var(--text-secondary)] truncate">{e.receipt_number ?? '—'}</td>
-                <td className="px-3 py-2.5 text-[13px] text-[var(--text-primary)] truncate">{e.supplier?.name ?? '—'}</td>
-                <td className="px-3 py-2.5 text-[13px] text-[var(--text-primary)] truncate">{e.concept}</td>
-                <td className="px-3 py-2.5 text-[13px] text-[var(--text-secondary)]">{e.issued_at}</td>
-                <td className="px-3 py-2.5 text-[13px] font-medium text-[var(--text-primary)]">S/ {Number(e.amount).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</td>
-                <td className="px-3 py-2.5"><StatusBadge status={e.status} /></td>
-                <td className="px-3 py-2.5"><RowActions expense={e} onDetail={onDetail} onMarkPaid={onMarkPaid} onAnular={onAnular} /></td>
+                <td className="px-3 py-2.5 whitespace-nowrap"><TipoBadge tipo={e.voucher_type ?? ''} /></td>
+                <td className="px-3 py-2.5 font-mono text-[12px] text-[var(--text-secondary)] whitespace-nowrap">{e.receipt_number ?? '—'}</td>
+                <td className="px-3 py-2.5 text-[13px] text-[var(--text-primary)] whitespace-nowrap">{e.supplier?.name ?? '—'}</td>
+                <td className="px-3 py-2.5 text-[13px] text-[var(--text-primary)] whitespace-nowrap">{e.concept}</td>
+                <td className="px-3 py-2.5 text-[13px] text-[var(--text-secondary)] whitespace-nowrap">{e.issued_at}</td>
+                <td className="px-3 py-2.5 text-[13px] font-medium text-[var(--text-primary)] whitespace-nowrap">S/ {Number(e.amount).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</td>
+                <td className="px-3 py-2.5 whitespace-nowrap"><StatusBadge status={e.status} /></td>
+                <td className="px-3 py-2.5 whitespace-nowrap"><RowActions expense={e} onDetail={onDetail} onMarkPaid={onMarkPaid} onAnular={onAnular} /></td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
     </>
-  );
-}
-
-// ─── Pagination ───────────────────────────────────────────────────────────────
-
-function PaginationBar({
-  pagination,
-  onPrev,
-  onNext,
-}: {
-  pagination: Pagination;
-  onPrev: () => void;
-  onNext: () => void;
-}) {
-  if (pagination.totalPages <= 1) return null;
-  return (
-    <div className="flex items-center justify-between px-4 py-3 border-t border-[var(--border-subtle)]">
-      <span className="text-[12px] text-[var(--text-muted)]">
-        Página {pagination.page} de {pagination.totalPages} — {pagination.total}{' '}
-        comprobantes
-      </span>
-      <div className="flex gap-2">
-        <button
-          disabled={pagination.page <= 1}
-          onClick={onPrev}
-          className="text-[13px] px-3 py-[5px] border border-[var(--border-subtle)] rounded-lg text-[var(--text-secondary)] hover:bg-[var(--bg-muted)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-        >
-          Anterior
-        </button>
-        <button
-          disabled={!pagination.hasMore}
-          onClick={onNext}
-          className="text-[13px] px-3 py-[5px] border border-[var(--border-subtle)] rounded-lg text-[var(--text-secondary)] hover:bg-[var(--bg-muted)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-        >
-          Siguiente
-        </button>
-      </div>
-    </div>
   );
 }
 
@@ -623,7 +583,7 @@ export function OperationsPageClient() {
   return (
     <div className="px-4 sm:px-8 pb-20 space-y-8 animate-fadeIn font-industrial">
       <ModuleHeader
-        title="Gestión Operativa"
+        title="Pagos"
         subtitle="Recibos, honorarios y servicios"
         icon="Briefcase"
         actions={
@@ -638,83 +598,15 @@ export function OperationsPageClient() {
       />
 
       {/* ── Stats ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <CVCard className="p-6 border-l-4 border-[var(--icons-green)] shadow-sm hover:shadow-md transition-all">
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-2.5 bg-[var(--bg-secondary)] rounded-xl text-[var(--icons-green)]">
-              <CircleDollarSign className="w-5 h-5" />
-            </div>
-            <span className="text-2xl font-black text-[var(--text-primary)] tracking-tight">
-              S/{' '}
-              {Number(totalInvertido).toLocaleString('es-PE', {
-                minimumFractionDigits: 0,
-              })}
-            </span>
-          </div>
-          <h3 className="text-[11px] font-black text-[var(--text-secondary)] uppercase tracking-[0.15em]">
-            Total invertido
-          </h3>
-          <p className="text-[10px] text-[var(--text-muted)] font-medium mt-0.5">
-            {expenses.length} comprobantes
-          </p>
-        </CVCard>
-        <CVCard className="p-6 border-l-4 border-[var(--color-success)] shadow-sm hover:shadow-md transition-all">
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-2.5 bg-[var(--bg-secondary)] rounded-xl text-[var(--color-success)]">
-              <Receipt className="w-5 h-5" />
-            </div>
-            <span className="text-2xl font-black text-[var(--text-primary)] tracking-tight">
-              S/{' '}
-              {Number(totalPagado).toLocaleString('es-PE', {
-                minimumFractionDigits: 0,
-              })}
-            </span>
-          </div>
-          <h3 className="text-[11px] font-black text-[var(--text-secondary)] uppercase tracking-[0.15em]">
-            Pagado
-          </h3>
-          <p className="text-[10px] text-[var(--text-muted)] font-medium mt-0.5">
-            {filtered.filter((e) => e.voucher_type === 'Honorarios').length}{' '}
-            honorarios
-          </p>
-        </CVCard>
-        <CVCard className="p-6 border-l-4 border-[var(--color-info)] shadow-sm hover:shadow-md transition-all">
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-2.5 bg-[var(--bg-secondary)] rounded-xl text-[var(--color-info)]">
-              <Landmark className="w-5 h-5" />
-            </div>
-            <span className="text-2xl font-black text-[var(--text-primary)] tracking-tight">
-              S/{' '}
-              {Number(totalPendiente).toLocaleString('es-PE', {
-                minimumFractionDigits: 0,
-              })}
-            </span>
-          </div>
-          <h3 className="text-[11px] font-black text-[var(--text-secondary)] uppercase tracking-[0.15em]">
-            Pendiente
-          </h3>
-          <p className="text-[10px] text-[var(--text-muted)] font-medium mt-0.5">
-            {recibosPendientes} recibo(s)
-          </p>
-        </CVCard>
-        <CVCard className="p-6 border-l-4 border-[var(--color-info)] shadow-sm hover:shadow-md transition-all">
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-2.5 bg-[var(--bg-secondary)] rounded-xl text-[var(--color-info)]">
-              <Receipt className="w-5 h-5" />
-            </div>
-            <span className="text-2xl font-black text-[var(--text-primary)] tracking-tight">
-              {filtered.filter((e) => e.voucher_type === 'Factura').length}
-            </span>
-          </div>
-          <h3 className="text-[11px] font-black text-[var(--text-secondary)] uppercase tracking-[0.15em]">
-            Facturas
-          </h3>
-          <p className="text-[10px] text-[var(--text-muted)] font-medium mt-0.5">
-            {filtered.filter((e) => e.voucher_type === 'Boleta').length}{' '}
-            boleta(s)
-          </p>
-        </CVCard>
-      </div>
+      <AdminIndicatorGrid
+        indicators={[
+          { label: 'Total invertido', value: `S/ ${Number(totalInvertido).toLocaleString('es-PE', { minimumFractionDigits: 0 })}`, icon: 'CircleDollarSign', color: 'turquesa', description: `${expenses.length} comprobantes` },
+          { label: 'Pagado', value: `S/ ${Number(totalPagado).toLocaleString('es-PE', { minimumFractionDigits: 0 })}`, icon: 'Receipt', color: 'verde', description: `${filtered.filter((e) => e.voucher_type === 'Honorarios').length} honorarios` },
+          { label: 'Pendiente', value: `S/ ${Number(totalPendiente).toLocaleString('es-PE', { minimumFractionDigits: 0 })}`, icon: 'Landmark', color: 'turquesaClaro', description: `${recibosPendientes} recibo(s)` },
+          { label: 'Facturas', value: filtered.filter((e) => e.voucher_type === 'Factura').length, icon: 'Receipt', color: 'verde', description: `${filtered.filter((e) => e.voucher_type === 'Boleta').length} boleta(s)` },
+        ]}
+        columns={4}
+      />
 
       {/* ── Tabs ── */}
       <div className="flex gap-0.5 border-b border-[var(--border-subtle)] pb-2 overflow-x-auto no-scrollbar">
@@ -872,10 +764,10 @@ export function OperationsPageClient() {
                   <TableGeneric {...tableProps} />
                 )}
               </div>
-              <PaginationBar
-                pagination={localPagination}
-                onPrev={() => goToPage(safePage - 1)}
-                onNext={() => goToPage(safePage + 1)}
+              <PaginationComponent
+                page={localPagination.page}
+                totalPages={localPagination.totalPages}
+                onPageChange={(p) => goToPage(p)}
               />
             </>
           )}

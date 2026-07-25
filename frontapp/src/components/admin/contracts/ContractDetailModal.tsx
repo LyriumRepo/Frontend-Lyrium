@@ -61,16 +61,16 @@ export const ContractDetailModal: React.FC<ContractDetailModalProps> = ({
         <div className="bg-[var(--bg-card)] w-full max-w-4xl rounded-2xl sm:rounded-[3rem] shadow-2xl relative overflow-hidden flex flex-col font-industrial animate-scaleUp text-left border border-[var(--border-subtle)]">
 
             {/* Header */}
-            <div className="px-4 py-5 sm:px-10 sm:py-8 border-b border-[var(--border-subtle)] flex justify-between items-center gap-3 bg-gradient-to-r from-[var(--celeste-500)]/10 to-zinc-900/10">
+            <div className="px-4 py-5 sm:px-10 sm:py-8 flex justify-between items-center gap-3 bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--verde-500)]">
                 <div className="flex items-center gap-3 sm:gap-5 min-w-0">
-                    <div className="w-10 h-10 sm:w-16 sm:h-16 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl shadow-sm flex items-center justify-center text-[var(--celeste-500)] shrink-0">
+                    <div className="w-10 h-10 sm:w-16 sm:h-16 bg-white/20 backdrop-blur-md rounded-2xl shadow-sm flex items-center justify-center text-white shrink-0 border border-white/30">
                         <FileText className="w-5 h-5 sm:w-8 sm:h-8" />
                     </div>
                     <div className="min-w-0">
-                        <h3 className="text-sm sm:text-xl font-black text-[var(--text-primary)] tracking-tight uppercase leading-none">
+                        <h3 className="text-sm sm:text-xl font-black text-white tracking-tight uppercase leading-none">
                             {isNewContract ? 'Registrar Nuevo Contrato' : 'Expediente Legal Vendedor'}
                         </h3>
-                        <p className="text-[10px] font-black text-[var(--celeste-500)] uppercase tracking-[0.2em] mt-1 sm:mt-2 truncate">
+                        <p className="text-[10px] font-black text-white/70 uppercase tracking-[0.2em] mt-1 sm:mt-2 truncate">
                             ID Contrato: {contract.id}
                         </p>
                     </div>

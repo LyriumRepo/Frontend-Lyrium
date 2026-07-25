@@ -360,16 +360,16 @@ export default function CustomerPaymentMethodsPage() {
       )}
 
       {(editingMethod && editingMethod.tipo_metodo !== 'tarjeta' || creatingMethod) && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[60] flex items-center justify-center p-4" onClick={() => { setEditingMethod(null); setCreatingMethod(null); }} onKeyDown={(e) => { if (e.key === 'Escape') { setEditingMethod(null); setCreatingMethod(null); } }} role="dialog" aria-modal="true" tabIndex={-1}>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[99999] flex items-center justify-center p-4" onClick={() => { setEditingMethod(null); setCreatingMethod(null); }} onKeyDown={(e) => { if (e.key === 'Escape') { setEditingMethod(null); setCreatingMethod(null); } }} role="dialog" aria-modal="true" tabIndex={-1}>
           <div
-            className="bg-white dark:bg-[var(--bg-secondary)] rounded-[3.5rem] max-w-xl w-full overflow-hidden shadow-2xl"
+            className="bg-white dark:bg-[var(--bg-secondary)] rounded-[3.5rem] max-w-xl w-full overflow-hidden shadow-2xl flex flex-col"
             onClick={(e) => e.stopPropagation()}
             onKeyDown={(e) => e.stopPropagation()}
             role="dialog"
             aria-modal="true"
             tabIndex={-1}
           >
-            <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-6 md:p-8 text-white relative">
+            <div className="bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--verde-500)] p-6 md:p-8 text-white relative shrink-0">
               <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl" />
               <div className="relative z-10 flex items-center justify-between">
                 <div className="flex items-center gap-4">
@@ -382,15 +382,15 @@ export default function CustomerPaymentMethodsPage() {
                         ? `Editar ${editingMethod.tipo_metodo === 'yape' ? 'Yape' : 'Plin'}`
                         : `Nuevo ${creatingMethod === 'yape' ? 'Yape' : 'Plin'}`}
                     </h3>
-                    <p className="text-[10px] font-bold text-sky-100 uppercase tracking-wide">Configuración</p>
+                    <p className="text-[10px] font-bold text-white/80 uppercase tracking-wide">Configuración</p>
                   </div>
                 </div>
-                <button onClick={() => { setEditingMethod(null); setCreatingMethod(null); setSaveError(''); }} className="w-10 h-10 rounded-full bg-black/10 flex items-center justify-center hover:bg-black/20">
+                <button onClick={() => { setEditingMethod(null); setCreatingMethod(null); setSaveError(''); }} className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center hover:bg-white/30">
                   <Icon name="X" className="w-5 h-5 text-white" />
                 </button>
               </div>
             </div>
-            <div className="p-5 md:p-10 overflow-y-auto scrollbar-none max-h-[calc(90vh-200px)]">
+            <div className="p-5 md:p-10 overflow-y-auto scrollbar-none flex-1">
               <form onSubmit={handleSubmitYapePlin} className="space-y-6">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-gray-400 dark:text-gray-400 uppercase">Número de Celular</label>

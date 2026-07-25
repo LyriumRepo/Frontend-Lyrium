@@ -1,0 +1,754 @@
+{
+  "communities": {
+    "0": [
+      "treasury_types_basepayment",
+      "treasury_types_cashinpayment",
+      "treasury_types_cashoutpayment"
+    ],
+    "1": [
+      "categories_hooks_usecategories_category",
+      "categories_hooks_usecategories_categorynode"
+    ],
+    "2": [
+      "planes_api_planesadminapi_buttoncolors",
+      "planes_hooks_useplanesadmin_adminstate"
+    ],
+    "3": [
+      "categories_components_categoryform_categoryform"
+    ],
+    "4": [
+      "contracts_types_auditevent"
+    ],
+    "5": [
+      "contracts_types_contract"
+    ],
+    "6": [
+      "contracts_types_contractfilters"
+    ],
+    "7": [
+      "contracts_types_contractkpi"
+    ],
+    "8": [
+      "contracts_types_contractmodality"
+    ],
+    "9": [
+      "contracts_types_contractstatus"
+    ],
+    "10": [
+      "contracts_types_expiryurgency"
+    ],
+    "11": [
+      "finance_components_financechart_financechart"
+    ],
+    "12": [
+      "finance_components_financechart_financechartdataset"
+    ],
+    "13": [
+      "finance_components_financechart_financechartprops"
+    ],
+    "14": [
+      "finance_hooks_usefinance_financedata"
+    ],
+    "15": [
+      "finance_hooks_usefinanceanalytics_financefilters"
+    ],
+    "16": [
+      "finance_hooks_usefinanceanalytics_usefinanceanalytics"
+    ],
+    "17": [
+      "finance_types_customerkpi"
+    ],
+    "18": [
+      "finance_types_financechartdata"
+    ],
+    "19": [
+      "finance_types_financedata"
+    ],
+    "20": [
+      "finance_types_financialbreakdown"
+    ],
+    "21": [
+      "finance_types_heatmapdata"
+    ],
+    "22": [
+      "finance_types_recentinvoice"
+    ],
+    "23": [
+      "finance_types_topbuyer"
+    ],
+    "24": [
+      "helpdesk_types_actiontype"
+    ],
+    "25": [
+      "helpdesk_types_admin"
+    ],
+    "26": [
+      "helpdesk_types_adminticketfilters"
+    ],
+    "27": [
+      "helpdesk_types_auditentry"
+    ],
+    "28": [
+      "helpdesk_types_faqarticle"
+    ],
+    "29": [
+      "helpdesk_types_mesaayudadata"
+    ],
+    "30": [
+      "helpdesk_types_message"
+    ],
+    "31": [
+      "helpdesk_types_priority"
+    ],
+    "32": [
+      "helpdesk_types_ticketstatus"
+    ],
+    "33": [
+      "helpdesk_types_tickettype"
+    ],
+    "34": [
+      "helpdesk_types_user"
+    ],
+    "35": [
+      "invoices_export_excelexporter_exportadmininvoicestoexcel"
+    ],
+    "36": [
+      "invoices_export_pdfexporter_exportadmininvoicestopdf"
+    ],
+    "37": [
+      "invoices_hooks_useadmininvoices_admininvoicekpis"
+    ],
+    "38": [
+      "invoices_hooks_useadmininvoices_admininvoicerow"
+    ],
+    "39": [
+      "invoices_hooks_useadmininvoices_useadmininvoices"
+    ],
+    "40": [
+      "invoices_hooks_useplaninvoices_planinvoicerow"
+    ],
+    "41": [
+      "invoices_hooks_useplaninvoices_useplaninvoices"
+    ],
+    "42": [
+      "operations_export_excelexporter_exportexpensestoexcel"
+    ],
+    "43": [
+      "operations_export_pdfexporter_exportexpensestopdf"
+    ],
+    "44": [
+      "operations_hooks_usegestionoperativa_operationalkpi"
+    ],
+    "45": [
+      "operations_hooks_usegestionoperativa_operationaltab"
+    ],
+    "46": [
+      "operations_hooks_usegestionoperativa_usegestionoperativa"
+    ],
+    "47": [
+      "operations_hooks_usepenses_useexpenses"
+    ],
+    "48": [
+      "operations_hooks_usescan_usescan"
+    ],
+    "49": [
+      "operations_types_auditlog"
+    ],
+    "50": [
+      "operations_types_credential"
+    ],
+    "51": [
+      "operations_types_expense"
+    ],
+    "52": [
+      "operations_types_expensefilters"
+    ],
+    "53": [
+      "operations_types_expensestatus"
+    ],
+    "54": [
+      "operations_types_operationaldata"
+    ],
+    "55": [
+      "operations_types_operationalkpi"
+    ],
+    "56": [
+      "operations_types_operationaltab"
+    ],
+    "57": [
+      "operations_types_operations_auditlog"
+    ],
+    "58": [
+      "operations_types_operations_auditlogfilters"
+    ],
+    "59": [
+      "operations_types_operations_expense"
+    ],
+    "60": [
+      "operations_types_operations_expensefilters"
+    ],
+    "61": [
+      "operations_types_operations_expensestats"
+    ],
+    "62": [
+      "operations_types_operations_operationalkpi"
+    ],
+    "63": [
+      "operations_types_operations_operationalrole"
+    ],
+    "64": [
+      "operations_types_operations_operationsstats"
+    ],
+    "65": [
+      "operations_types_operations_paginatedresponse"
+    ],
+    "66": [
+      "operations_types_operations_pagination"
+    ],
+    "67": [
+      "operations_types_operations_storeexpensepayload"
+    ],
+    "68": [
+      "operations_types_operations_storeoperationalrolepayload"
+    ],
+    "69": [
+      "operations_types_operations_storesupplierpayload"
+    ],
+    "70": [
+      "operations_types_operations_supplier"
+    ],
+    "71": [
+      "operations_types_operations_supplierfilters"
+    ],
+    "72": [
+      "operations_types_operations_updateexpensepayload"
+    ],
+    "73": [
+      "operations_types_operations_updateoperationalrolepayload"
+    ],
+    "74": [
+      "operations_types_operations_updatesupplierpayload"
+    ],
+    "75": [
+      "operations_types_provider"
+    ],
+    "76": [
+      "operations_types_providerfilters"
+    ],
+    "77": [
+      "operations_types_providerstatus"
+    ],
+    "78": [
+      "operations_types_providertype"
+    ],
+    "79": [
+      "operations_types_scan_bankstatementline"
+    ],
+    "80": [
+      "operations_types_scan_bankstatementscanresponse"
+    ],
+    "81": [
+      "operations_types_scan_batchstoreline"
+    ],
+    "82": [
+      "operations_types_scan_customerdata"
+    ],
+    "83": [
+      "operations_types_scan_isbankstatementresponse"
+    ],
+    "84": [
+      "operations_types_scan_issuerdata"
+    ],
+    "85": [
+      "operations_types_scan_itemdata"
+    ],
+    "86": [
+      "operations_types_scan_paymentdata"
+    ],
+    "87": [
+      "operations_types_scan_scanapiresponse"
+    ],
+    "88": [
+      "operations_types_scan_scanbatchstorepayload"
+    ],
+    "89": [
+      "operations_types_scan_scanbatchstoreresponse"
+    ],
+    "90": [
+      "operations_types_scan_scanfileresponse"
+    ],
+    "91": [
+      "operations_types_scan_scannedboletaresponse"
+    ],
+    "92": [
+      "operations_types_scan_scanneddataresponse"
+    ],
+    "93": [
+      "operations_types_scan_scannedfacturaresponse"
+    ],
+    "94": [
+      "operations_types_scan_scannedhonorariosresponse"
+    ],
+    "95": [
+      "operations_types_scan_totalsdata"
+    ],
+    "96": [
+      "payments_export_excelexporter_exportpaymentstoexcel"
+    ],
+    "97": [
+      "payments_export_pdfexporter_exportpaymentstopdf"
+    ],
+    "98": [
+      "payments_hooks_usetransactions_usetransactiondetail"
+    ],
+    "99": [
+      "payments_hooks_usetransactions_usetransactions"
+    ],
+    "100": [
+      "payments_types_transactions_transaction"
+    ],
+    "101": [
+      "payments_types_transactions_transactioncustomer"
+    ],
+    "102": [
+      "payments_types_transactions_transactionfilters"
+    ],
+    "103": [
+      "payments_types_transactions_transactionitem"
+    ],
+    "104": [
+      "payments_types_transactions_transactionitemproduct"
+    ],
+    "105": [
+      "payments_types_transactions_transactionlistresponse"
+    ],
+    "106": [
+      "payments_types_transactions_transactionpagination"
+    ],
+    "107": [
+      "payments_types_transactions_transactionstats"
+    ],
+    "108": [
+      "payments_types_transactions_transactionstatsresponse"
+    ],
+    "109": [
+      "payments_types_transactions_transactionstore"
+    ],
+    "110": [
+      "planes_api_planesadminapi_pagofromapi"
+    ],
+    "111": [
+      "planes_api_planesadminapi_planfromapi"
+    ],
+    "112": [
+      "planes_api_planesadminapi_planrequestfromapi"
+    ],
+    "113": [
+      "planes_api_planesadminapi_vendedorfromapi"
+    ],
+    "114": [
+      "planes_hooks_useplanesadmin_admintab"
+    ],
+    "115": [
+      "planes_hooks_useplanesadmin_paymentfilter"
+    ],
+    "116": [
+      "planes_hooks_useplanesadmin_paymentnotif"
+    ],
+    "117": [
+      "planes_hooks_useplanesadmin_paymenttotals"
+    ],
+    "118": [
+      "planes_hooks_useplanesadmin_planstatusfilter"
+    ],
+    "119": [
+      "planes_hooks_useplanesadmin_requestfilter"
+    ],
+    "120": [
+      "planes_hooks_useplanesadmin_transaccion"
+    ],
+    "121": [
+      "planes_hooks_useplanesadmin_useadmin"
+    ],
+    "122": [
+      "planes_hooks_useplanesadmin_vendedorfilter"
+    ],
+    "123": [
+      "planes_hooks_useplanesadmin_vendedorpago"
+    ],
+    "124": [
+      "security_hooks_useadminsecurity_useadminsecurity"
+    ],
+    "125": [
+      "security_hooks_usealerts_usealerts"
+    ],
+    "126": [
+      "security_hooks_useblockedips_useblockedips"
+    ],
+    "127": [
+      "security_hooks_useprotectionrules_useprotectionrules"
+    ],
+    "128": [
+      "security_hooks_usesecuritysettings_usesecuritysettings"
+    ],
+    "129": [
+      "security_types_loginattemptitem"
+    ],
+    "130": [
+      "security_types_paginationmeta"
+    ],
+    "131": [
+      "security_types_securityeventitem"
+    ],
+    "132": [
+      "security_types_securitysessionitem"
+    ],
+    "133": [
+      "security_types_securitystats"
+    ],
+    "134": [
+      "sellers_export_excelexporter_exportsellerstoexcel"
+    ],
+    "135": [
+      "sellers_export_pdfexporter_exportsellerstopdf"
+    ],
+    "136": [
+      "sellers_hooks_usecontrolvendedores_sellerfilters"
+    ],
+    "137": [
+      "sellers_hooks_usecontrolvendedores_tabkey"
+    ],
+    "138": [
+      "sellers_hooks_usesellers_estadosolicitud"
+    ],
+    "139": [
+      "sellers_hooks_usesellers_filtroestado"
+    ],
+    "140": [
+      "sellers_hooks_usesellers_riesgosolicitud"
+    ],
+    "141": [
+      "sellers_hooks_usesellers_solicitud"
+    ],
+    "142": [
+      "sellers_hooks_usesellers_usesellers"
+    ],
+    "143": [
+      "sellers_types_auditaction"
+    ],
+    "144": [
+      "sellers_types_auditentry"
+    ],
+    "145": [
+      "sellers_types_controlvendedoresdata"
+    ],
+    "146": [
+      "sellers_types_credentials"
+    ],
+    "147": [
+      "sellers_types_notification"
+    ],
+    "148": [
+      "sellers_types_notificationtype"
+    ],
+    "149": [
+      "sellers_types_product"
+    ],
+    "150": [
+      "sellers_types_productstatus"
+    ],
+    "151": [
+      "sellers_types_seller"
+    ],
+    "152": [
+      "sellers_types_sellerstatus"
+    ],
+    "153": [
+      "sellers_types_servicestatus"
+    ],
+    "154": [
+      "sellers_types_stats"
+    ],
+    "155": [
+      "trainings_hooks_useadmintrainings_useadmintrainings"
+    ],
+    "156": [
+      "trainings_hooks_usetrainingcompliance_usetrainingcompliance"
+    ],
+    "157": [
+      "trainings_types_admintraining"
+    ],
+    "158": [
+      "trainings_types_admintrainingform"
+    ],
+    "159": [
+      "treasury_types_financesummary"
+    ],
+    "160": [
+      "treasury_types_money"
+    ],
+    "161": [
+      "treasury_types_monthlyliquidation"
+    ],
+    "162": [
+      "treasury_types_payment"
+    ],
+    "163": [
+      "treasury_types_paymenttimelineevent"
+    ],
+    "164": [
+      "treasury_types_treasurydata"
+    ],
+    "165": [
+      "treasury_types_treasuryfilters"
+    ],
+    "166": [
+      "treasury_types_treasurykpi"
+    ],
+    "167": [
+      "treasury_types_treasurytab"
+    ]
+  },
+  "cohesion": {
+    "0": 0.6666666666666666,
+    "1": 1.0,
+    "2": 1.0,
+    "3": 1.0,
+    "4": 1.0,
+    "5": 1.0,
+    "6": 1.0,
+    "7": 1.0,
+    "8": 1.0,
+    "9": 1.0,
+    "10": 1.0,
+    "11": 1.0,
+    "12": 1.0,
+    "13": 1.0,
+    "14": 1.0,
+    "15": 1.0,
+    "16": 1.0,
+    "17": 1.0,
+    "18": 1.0,
+    "19": 1.0,
+    "20": 1.0,
+    "21": 1.0,
+    "22": 1.0,
+    "23": 1.0,
+    "24": 1.0,
+    "25": 1.0,
+    "26": 1.0,
+    "27": 1.0,
+    "28": 1.0,
+    "29": 1.0,
+    "30": 1.0,
+    "31": 1.0,
+    "32": 1.0,
+    "33": 1.0,
+    "34": 1.0,
+    "35": 1.0,
+    "36": 1.0,
+    "37": 1.0,
+    "38": 1.0,
+    "39": 1.0,
+    "40": 1.0,
+    "41": 1.0,
+    "42": 1.0,
+    "43": 1.0,
+    "44": 1.0,
+    "45": 1.0,
+    "46": 1.0,
+    "47": 1.0,
+    "48": 1.0,
+    "49": 1.0,
+    "50": 1.0,
+    "51": 1.0,
+    "52": 1.0,
+    "53": 1.0,
+    "54": 1.0,
+    "55": 1.0,
+    "56": 1.0,
+    "57": 1.0,
+    "58": 1.0,
+    "59": 1.0,
+    "60": 1.0,
+    "61": 1.0,
+    "62": 1.0,
+    "63": 1.0,
+    "64": 1.0,
+    "65": 1.0,
+    "66": 1.0,
+    "67": 1.0,
+    "68": 1.0,
+    "69": 1.0,
+    "70": 1.0,
+    "71": 1.0,
+    "72": 1.0,
+    "73": 1.0,
+    "74": 1.0,
+    "75": 1.0,
+    "76": 1.0,
+    "77": 1.0,
+    "78": 1.0,
+    "79": 1.0,
+    "80": 1.0,
+    "81": 1.0,
+    "82": 1.0,
+    "83": 1.0,
+    "84": 1.0,
+    "85": 1.0,
+    "86": 1.0,
+    "87": 1.0,
+    "88": 1.0,
+    "89": 1.0,
+    "90": 1.0,
+    "91": 1.0,
+    "92": 1.0,
+    "93": 1.0,
+    "94": 1.0,
+    "95": 1.0,
+    "96": 1.0,
+    "97": 1.0,
+    "98": 1.0,
+    "99": 1.0,
+    "100": 1.0,
+    "101": 1.0,
+    "102": 1.0,
+    "103": 1.0,
+    "104": 1.0,
+    "105": 1.0,
+    "106": 1.0,
+    "107": 1.0,
+    "108": 1.0,
+    "109": 1.0,
+    "110": 1.0,
+    "111": 1.0,
+    "112": 1.0,
+    "113": 1.0,
+    "114": 1.0,
+    "115": 1.0,
+    "116": 1.0,
+    "117": 1.0,
+    "118": 1.0,
+    "119": 1.0,
+    "120": 1.0,
+    "121": 1.0,
+    "122": 1.0,
+    "123": 1.0,
+    "124": 1.0,
+    "125": 1.0,
+    "126": 1.0,
+    "127": 1.0,
+    "128": 1.0,
+    "129": 1.0,
+    "130": 1.0,
+    "131": 1.0,
+    "132": 1.0,
+    "133": 1.0,
+    "134": 1.0,
+    "135": 1.0,
+    "136": 1.0,
+    "137": 1.0,
+    "138": 1.0,
+    "139": 1.0,
+    "140": 1.0,
+    "141": 1.0,
+    "142": 1.0,
+    "143": 1.0,
+    "144": 1.0,
+    "145": 1.0,
+    "146": 1.0,
+    "147": 1.0,
+    "148": 1.0,
+    "149": 1.0,
+    "150": 1.0,
+    "151": 1.0,
+    "152": 1.0,
+    "153": 1.0,
+    "154": 1.0,
+    "155": 1.0,
+    "156": 1.0,
+    "157": 1.0,
+    "158": 1.0,
+    "159": 1.0,
+    "160": 1.0,
+    "161": 1.0,
+    "162": 1.0,
+    "163": 1.0,
+    "164": 1.0,
+    "165": 1.0,
+    "166": 1.0,
+    "167": 1.0
+  },
+  "gods": [
+    {
+      "id": "treasury_types_basepayment",
+      "label": "BasePayment",
+      "degree": 2
+    },
+    {
+      "id": "categories_hooks_usecategories_category",
+      "label": "Category",
+      "degree": 1
+    },
+    {
+      "id": "categories_hooks_usecategories_categorynode",
+      "label": "CategoryNode",
+      "degree": 1
+    },
+    {
+      "id": "planes_api_planesadminapi_buttoncolors",
+      "label": "ButtonColors",
+      "degree": 1
+    },
+    {
+      "id": "planes_hooks_useplanesadmin_adminstate",
+      "label": "AdminState",
+      "degree": 1
+    },
+    {
+      "id": "treasury_types_cashinpayment",
+      "label": "CashInPayment",
+      "degree": 1
+    },
+    {
+      "id": "treasury_types_cashoutpayment",
+      "label": "CashOutPayment",
+      "degree": 1
+    },
+    {
+      "id": "categories_components_categoryform_categoryform",
+      "label": "CategoryForm",
+      "degree": 0
+    },
+    {
+      "id": "contracts_types_contractstatus",
+      "label": "ContractStatus",
+      "degree": 0
+    },
+    {
+      "id": "contracts_types_contractmodality",
+      "label": "ContractModality",
+      "degree": 0
+    }
+  ],
+  "surprises": [
+    {
+      "source": "AdminState",
+      "target": "ButtonColors",
+      "source_files": [
+        "planes/hooks/usePlanesAdmin.ts",
+        "planes/api/planesAdminApi.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "cross-file semantic connection"
+    }
+  ],
+  "questions": [
+    {
+      "type": "isolated_nodes",
+      "question": "What connects `CategoryForm`, `Category`, `CategoryNode` to the rest of the system?",
+      "why": "171 weakly-connected nodes found - possible documentation gaps or missing edges."
+    }
+  ]
+}

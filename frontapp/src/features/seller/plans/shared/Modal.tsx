@@ -1,5 +1,6 @@
 'use client';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 interface Props {
   open: boolean;
@@ -10,6 +11,10 @@ interface Props {
 }
 
 export default function Modal({ open, onClose, className = '', children, showClose = true }: Props) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => { setMounted(true); }, []);
+
   useEffect(() => {
     if (!open) return;
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
@@ -17,9 +22,12 @@ export default function Modal({ open, onClose, className = '', children, showClo
     return () => document.removeEventListener('keydown', handler);
   }, [open, onClose]);
 
-  if (!open) return null;
+  if (!open || !mounted) return null;
 
-  return (
+  const modalRoot = document.getElementById('modal-root');
+  if (!modalRoot) return null;
+
+  return createPortal(
     <div
       role="dialog"
       aria-modal="true"
@@ -28,13 +36,14 @@ export default function Modal({ open, onClose, className = '', children, showClo
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}
       onKeyDown={e => { if (e.key === 'Escape') onClose(); }}
     >
-      <div className={`bg-white dark:bg-[var(--bg-card)] rounded-2xl p-5 md:p-6 max-h-[75vh] overflow-y-auto scrollbar-hide relative animate-[slideUp_0.3s_ease] w-full ${className}`}>
+      <div className={`bg-white dark:bg-[var(--bg-card)] rounded-2xl p-4 md:p-6 max-h-[75vh] overflow-y-auto scrollbar-hide relative animate-[slideUp_0.3s_ease] w-full ${className}`}>
         {showClose && (
           <button className="absolute top-4 right-4 w-9 h-9 bg-gray-100 dark:bg-[var(--bg-muted)] border-none rounded-lg text-gray-500 dark:text-[var(--text-muted)] text-xl cursor-pointer flex items-center justify-center transition-colors hover:bg-red-500 hover:text-white"
             onClick={onClose}>×</button>
         )}
         {children}
       </div>
-    </div>
+    </div>,
+    modalRoot,
   );
 }

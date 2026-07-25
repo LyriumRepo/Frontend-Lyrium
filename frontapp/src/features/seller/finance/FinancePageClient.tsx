@@ -23,6 +23,8 @@ import { formatCurrency } from '@/shared/lib/utils/formatters';
 import { companyColors, chartColorMap } from '@/features/seller/finance/colors';
 import type { FinanceData } from '@/features/seller/finance/types';
 import type { FinanceChartDataset } from '@/features/seller/finance/components/FinanceChart';
+import { getKpiLevel } from './kpiThresholds';
+import KpiBadge from '@/components/ui/KpiBadge';
 
 interface KpiConfig {
   label: string;
@@ -30,7 +32,7 @@ interface KpiConfig {
   description: string;
   icon: string;
   color: string;
-  chartType: 'line' | 'bar' | 'doughnut' | 'radar';
+  chartType: 'line' | 'bar' | 'doughnut' | 'pie' | 'radar' | 'gauge' | 'stars';
   chartLabels: string[];
   chartData: number[];
   chartColor: string;
@@ -45,7 +47,7 @@ function buildKpiConfig(
   description: string,
   icon: string,
   color: string,
-  chartType: 'line' | 'bar' | 'doughnut' | 'radar',
+  chartType: 'line' | 'bar' | 'doughnut' | 'pie' | 'radar' | 'gauge' | 'stars',
   chartLabels: string[],
   chartData: number[],
   chartColor: string,
@@ -102,27 +104,6 @@ export function FinancePageClient() {
     showToast('Datos sincronizados según el periodo seleccionado', 'success');
   };
 
-  const renderDateFilterControls = () => (
-    <>
-      <BaseDatePicker value={filters.startDate}
-        onChange={(v) => setFilters(v, filters.endDate)} placeholder="Desde" />
-      <span className="text-[var(--text-secondary)] text-lg font-thin">|</span>
-      <BaseDatePicker value={filters.endDate}
-        onChange={(v) => setFilters(filters.startDate, v)} placeholder="Hasta" />
-      <button
-        onClick={handleApplyFilters}
-        disabled={isRefreshing}
-        className="p-2 bg-[var(--celeste-500)] text-white rounded-lg hover:brightness-110 transition active:scale-95 disabled:opacity-50"
-      >
-        {isRefreshing ? (
-          <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-        ) : (
-          <Icon name="Search" className="w-4 h-4" />
-        )}
-      </button>
-    </>
-  );
-
   if (isLoading && !data) {
     return <BaseLoading message="Sincronizando Finanzas..." />;
   }
@@ -159,7 +140,7 @@ export function FinancePageClient() {
     description: string,
     icon: string,
     color: string,
-    chartType: 'line' | 'bar' | 'doughnut' | 'radar',
+    chartType: 'line' | 'bar' | 'doughnut' | 'pie' | 'radar' | 'gauge' | 'stars',
     chartLabels: string[],
     chartData: number[],
     chartColor: string,
@@ -173,7 +154,7 @@ export function FinancePageClient() {
     label: string,
     dataField: keyof FinanceData,
     d: FinanceData,
-    chartType: 'line' | 'bar' | 'doughnut' | 'radar',
+    chartType: 'line' | 'bar' | 'doughnut' | 'pie' | 'radar' | 'gauge' | 'stars',
     colorKey: string,
   ) => {
     const field = d[dataField] as { labels: string[]; data: number[] } | undefined;
@@ -192,7 +173,9 @@ export function FinancePageClient() {
             ? `${chartData[chartData.length - 1] ?? 0}`
             : dataField === 'ltv'
               ? `S/ ${chartData[chartData.length - 1] ?? 0}`
-              : formatCurrency(total);
+              : dataField === 'cuotaMercado'
+                ? `${chartData.length > 0 ? Math.round((total / chartData.length) * 100) / 100 : 0}%`
+                : formatCurrency(total);
     const suff = dataField === 'ventasTotales' ? 'Ord.' : undefined;
     openKpi(label, val, field.labels.join(', '), '', '', chartType, chartLabels, chartData, chartColor, suff);
   };
@@ -205,24 +188,63 @@ export function FinancePageClient() {
         icon="PieChart"
       />
 
-      {/* Filtros de fecha */}
-      <div className="flex items-center gap-3 bg-[var(--bg-card)] p-2 rounded-2xl border border-[var(--border-subtle)] w-full overflow-x-auto no-scrollbar">
-        {renderDateFilterControls()}
+      {/* Card de filtros — mismo estilo que Facturación y Pagos */}
+      <div className="bg-[var(--bg-card)] p-6 sm:p-8 rounded-[2.5rem] shadow-2xl border border-[var(--border-subtle)]">
+        <div className="flex items-center gap-4 mb-6">
+          <div className="w-12 h-12 bg-[var(--brand-green)] rounded-2xl flex items-center justify-center shadow-lg shrink-0">
+            <Icon name="CalendarDays" className="w-6 h-6 text-white" />
+          </div>
+          <h3 className="text-xl font-black text-[var(--text-primary)]">
+            Periodo de Análisis
+          </h3>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-4 items-end">
+          <div className="space-y-2">
+            <BaseDatePicker
+              label="Desde"
+              value={filters.startDate}
+              onChange={(v) => setFilters(v, filters.endDate)}
+              placeholder="dd/mm/aaaa"
+            />
+          </div>
+          <div className="space-y-2">
+            <BaseDatePicker
+              label="Hasta"
+              value={filters.endDate}
+              onChange={(v) => setFilters(filters.startDate, v)}
+              placeholder="dd/mm/aaaa"
+            />
+          </div>
+          <button
+            onClick={handleApplyFilters}
+            disabled={isRefreshing}
+            className="flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-sky-500 to-sky-400 dark:from-emerald-700 dark:to-teal-600 text-white font-black text-xs uppercase tracking-widest transition-all shadow-lg shadow-sky-500/25 dark:shadow-emerald-900/25 hover:shadow-xl hover:-translate-y-0.5 active:scale-95 disabled:opacity-50 w-full sm:w-auto"
+          >
+            {isRefreshing ? (
+              <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <Icon name="Search" className="w-4 h-4" />
+            )}
+            Aplicar
+          </button>
+        </div>
       </div>
 
-      <div className="flex flex-wrap gap-2 border-b border-gray-100 dark:border-[var(--border-subtle)] pb-4 overflow-x-auto no-scrollbar">
-        {tabs.map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`px-6 py-2.5 rounded-xl text-sm font-black whitespace-nowrap transition-all duration-300 flex items-center gap-2 ${activeTab === tab.id
-              ? 'bg-[#5AAFE6] text-white shadow-lg shadow-[#5AAFE6]/30'
-              : 'text-[var(--text-secondary)] bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:bg-[var(--bg-secondary)]'
-              }`}
-          >
-            <Icon name={tab.icon as unknown as 'LayoutGrid'} className="w-4 h-4" /> {tab.label}
-          </button>
-        ))}
+      <div className="relative border-b border-gray-100 dark:border-[var(--border-subtle)] pb-1">
+        <div className="flex flex-nowrap overflow-x-auto gap-2 pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {tabs.map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex-shrink-0 px-6 py-2.5 rounded-xl text-sm font-black whitespace-nowrap transition-all duration-300 flex items-center gap-2 active:scale-[0.98] ${activeTab === tab.id
+                ? 'bg-gradient-to-r from-sky-500 to-sky-400 dark:from-emerald-700 dark:to-teal-600 text-white shadow-lg shadow-sky-500/25 dark:shadow-emerald-900/25'
+                : 'text-[var(--text-secondary)] bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:bg-[var(--bg-secondary)]'
+                }`}
+            >
+              <Icon name={tab.icon as unknown as 'LayoutGrid'} className="w-4 h-4" /> {tab.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="space-y-12">
@@ -289,6 +311,7 @@ export function FinancePageClient() {
                 icon="TrendingUp"
                 color="turquesaClaro"
                 trend={trendOf(data.roi.data)}
+                badge={getKpiLevel('roi', data.roi.data[data.roi.data.length - 1] ?? 0) ?? undefined}
                 chart={<FinanceChart type="bar" labels={data.roi.labels} data={data.roi.data} color={chartColorMap.roi} />}
                 onClick={() => openStatCard('ROI de Ventas', 'roi', data, 'bar', 'turquesaClaro')}
               />
@@ -303,6 +326,11 @@ export function FinancePageClient() {
                 icon="Tag"
                 color="turquesa"
                 trend={trendOf(data.ticketPromedio.data)}
+                badge={getKpiLevel('ticketPromedio', (() => {
+                  const totalVentas = data.ventasTotales.data.reduce((a, b) => a + b, 0);
+                  const totalBrutos = data.ingresosBrutos.data.reduce((a, b) => a + b, 0);
+                  return totalVentas > 0 ? totalBrutos / totalVentas : 0;
+                })()) ?? undefined}
                 chart={<FinanceChart type="bar" labels={data.ticketPromedio.labels} data={data.ticketPromedio.data} color={chartColorMap.ticketPromedio} />}
                 onClick={() => openStatCard('Ticket Promedio', 'ticketPromedio', data, 'bar', 'turquesa')}
               />
@@ -341,6 +369,11 @@ export function FinancePageClient() {
                 description="Distribución de frecuencias (histograma)"
                 icon="Timer"
                 color="turquesaClaro"
+                badge={getKpiLevel('leadTime', (() => {
+                  const total = data.leadTime.data.reduce((a, b) => a + b, 0);
+                  const count = data.leadTime.data.length;
+                  return count > 0 && total > 0 ? Math.round(total / count) : 0;
+                })()) ?? undefined}
                 chart={<FinanceChart type="bar" labels={data.leadTime.labels} data={data.leadTime.data} color={chartColorMap.leadTime} />}
                 onClick={() => openStatCard('Lead Time de Despacho', 'leadTime', data, 'bar', 'turquesaClaro')}
               />
@@ -363,12 +396,12 @@ export function FinancePageClient() {
                   'Productos con reportes de fallas',
                   'AlertOctagon',
                   companyColors.turquesa,
-                  'doughnut',
+                  'pie',
                   data.defectuosos.labels,
                   data.defectuosos.data,
                   chartColorMap.defectuosos,
                 )}
-                className="group text-left bg-[var(--bg-card)] p-8 rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm hover:shadow-xl hover:shadow-black/10 hover:-translate-y-1 transition-all duration-300 active:scale-[0.98]"
+                className="group text-left bg-[var(--bg-card)] p-8 rounded-[2.5rem] border border-[var(--border-subtle)] shadow-lg hover:shadow-xl hover:shadow-black/10 hover:-translate-y-1 transition-all duration-300 active:scale-[0.98]"
               >
                 <div className="flex items-center justify-between w-full mb-6">
                   <span className="text-xs font-bold uppercase tracking-wider" style={{ color: companyColors.turquesa }}>Tasa de Productos Defectuosos</span>
@@ -377,10 +410,15 @@ export function FinancePageClient() {
                   </div>
                 </div>
                 <div className="w-full h-[260px]">
-                  <FinanceChart type="doughnut" labels={data.defectuosos.labels} data={data.defectuosos.data} color={chartColorMap.defectuosos} />
+                  <FinanceChart type="pie" labels={data.defectuosos.labels} data={data.defectuosos.data} color={chartColorMap.defectuosos} height="260px" />
                 </div>
                 <p className="text-2xl font-black mt-6" style={{ color: companyColors.turquesa }}>{data.defectuosos.data[1] ?? 0}%</p>
                 <p className="text-xs text-[var(--text-secondary)] mt-2 font-bold uppercase tracking-widest">Productos con reportes de fallas</p>
+                {(() => {
+                  const badge = getKpiLevel('defectos', data.defectuosos.data[1] ?? 0);
+                  if (!badge) return null;
+                  return <KpiBadge label={badge.label} level={badge.level} scale={badge.scale} />;
+                })()}
                 <div className="mt-4 pt-3 border-t border-[var(--border-subtle)] opacity-0 group-hover:opacity-100 transition-opacity">
                   <span className="text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest flex items-center gap-1">
                     <Icon name="ArrowRight" className="w-3 h-3" />
@@ -406,6 +444,7 @@ export function FinancePageClient() {
                 description="Ticket Promedio × Frecuencia de Compra"
                 icon="Coins"
                 color="celeste"
+                badge={getKpiLevel('ltv', data.ltv.data[data.ltv.data.length - 1] ?? 0) ?? undefined}
                 chart={<FinanceChart type="line" labels={data.ltv.labels} data={data.ltv.data} color={chartColorMap.ltv} fill={true} />}
                 onClick={() => openStatCard('LTV (Lifetime Value)', 'ltv', data, 'line', 'celeste')}
               />
@@ -428,12 +467,12 @@ export function FinancePageClient() {
                   'Tiempo promedio de respuesta en chat',
                   'Clock',
                   companyColors.turquesaClaro,
-                  'bar',
+                  'gauge',
                   data.tiempoRespuesta.labels,
                   data.tiempoRespuesta.data,
                   chartColorMap.tiempoRespuesta,
                 )}
-                className="group text-left bg-[var(--bg-card)] p-8 rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm hover:shadow-xl hover:shadow-black/10 hover:-translate-y-1 transition-all duration-300 active:scale-[0.98]"
+                className="group text-left bg-[var(--bg-card)] p-8 rounded-[2.5rem] border border-[var(--border-subtle)] shadow-lg hover:shadow-xl hover:shadow-black/10 hover:-translate-y-1 transition-all duration-300 active:scale-[0.98]"
               >
                 <div className="flex items-center justify-between w-full mb-6">
                   <span className="text-xs font-bold uppercase tracking-wider" style={{ color: companyColors.turquesaClaro }}>Tiempo de Respuesta (Chat)</span>
@@ -455,6 +494,11 @@ export function FinancePageClient() {
                   </div>
                 </div>
                 <p className="text-xs text-[var(--text-secondary)] font-bold uppercase tracking-widest text-center">minutos promedio</p>
+                {(() => {
+                  const badge = getKpiLevel('tiempoRespuesta', data.tiempoRespuesta.data[data.tiempoRespuesta.data.length - 1] ?? 0);
+                  if (!badge) return null;
+                  return <KpiBadge label={badge.label} level={badge.level} scale={badge.scale} />;
+                })()}
                 <div className="mt-4 pt-3 border-t border-[var(--border-subtle)] opacity-0 group-hover:opacity-100 transition-opacity">
                   <span className="text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest flex items-center gap-1">
                     <Icon name="ArrowRight" className="w-3 h-3" />
@@ -483,10 +527,18 @@ export function FinancePageClient() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 stagger-grid">
               <BaseStatCard
                 label="Cuota de Mercado Interna"
-                value={`${data.cuotaMercado.data[0] ?? 0}%`}
-                description="(Ventas del Vendedor / Ventas Totales) × 100"
+                value={(() => {
+                  const avg = data.cuotaMercado.data.length > 0
+                    ? data.cuotaMercado.data.reduce((a, b) => a + b, 0) / data.cuotaMercado.data.length
+                    : 0;
+                  return `${Math.round(avg * 100) / 100}%`;
+                })()}
+                description="(Ventas del Vendedor / Ventas Totales de la Categoría) × 100, por categoría"
                 icon="PieChart"
                 color="azulCeleste"
+                badge={getKpiLevel('cuotaMercado', data.cuotaMercado.data.length > 0
+                  ? data.cuotaMercado.data.reduce((a, b) => a + b, 0) / data.cuotaMercado.data.length
+                  : 0) ?? undefined}
                 chart={<FinanceChart type="radar" labels={data.cuotaMercado.labels} data={data.cuotaMercado.data} color={chartColorMap.cuotaMercado} />}
                 onClick={() => openStatCard('Cuota de Mercado Interna', 'cuotaMercado', data, 'radar', 'azulCeleste')}
               />
@@ -508,6 +560,7 @@ export function FinancePageClient() {
                 description="Costo de Ventas / Inventario Promedio"
                 icon="RefreshCw"
                 color="verde"
+                badge={getKpiLevel('stockRotacion', data.stockRotacion.data[data.stockRotacion.data.length - 1] ?? 0) ?? undefined}
                 chart={<FinanceChart type="bar" labels={data.stockRotacion.labels} data={data.stockRotacion.data} color={chartColorMap.stockRotacion} />}
                 onClick={() => openStatCard('Rotación de Stock', 'stockRotacion', data, 'bar', 'verde')}
               />
@@ -530,12 +583,12 @@ export function FinancePageClient() {
                   'Porcentaje de clientes satisfechos',
                   'Star',
                   companyColors.turquesa,
-                  'bar',
+                  'stars',
                   data.csat.labels,
                   data.csat.data,
                   chartColorMap.csat,
                 )}
-                className="group text-left bg-[var(--bg-card)] p-8 rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm hover:shadow-xl hover:shadow-black/10 hover:-translate-y-1 transition-all duration-300 active:scale-[0.98]"
+                className="group text-left bg-[var(--bg-card)] p-8 rounded-[2.5rem] border border-[var(--border-subtle)] shadow-lg hover:shadow-xl hover:shadow-black/10 hover:-translate-y-1 transition-all duration-300 active:scale-[0.98]"
               >
                 <div className="flex items-center justify-between w-full mb-6">
                   <span className="text-xs font-bold uppercase tracking-wider" style={{ color: companyColors.turquesa }}>CSAT - Satisfacción del Cliente</span>
@@ -547,12 +600,17 @@ export function FinancePageClient() {
                       key={star}
                       name="Star"
                       className="w-8 h-8"
-                      style={{ color: companyColors.turquesa, fill: star <= Math.round(4.5) ? companyColors.turquesa : undefined }}
+                      style={{ color: companyColors.turquesa, fill: star <= Math.round((data.csat.data[0] ?? 0) / 20) ? companyColors.turquesa : undefined }}
                     />
                   ))}
                 </div>
                 <p className="text-xl font-black text-center" style={{ color: companyColors.turquesa }}>{data.csat.data[0] > 0 ? `${data.csat.data[0]}%` : 'N/A'}</p>
                 <p className="text-xs text-[var(--text-secondary)] mt-1 font-bold uppercase tracking-widest text-center">Calificaciones positivas</p>
+                {(() => {
+                  const badge = getKpiLevel('csat', data.csat.data[0] ?? 0);
+                  if (!badge) return null;
+                  return <KpiBadge label={badge.label} level={badge.level} scale={badge.scale} />;
+                })()}
                 <div className="mt-4 pt-3 border-t border-[var(--border-subtle)] opacity-0 group-hover:opacity-100 transition-opacity">
                   <span className="text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest flex items-center gap-1">
                     <Icon name="ArrowRight" className="w-3 h-3" />
@@ -630,7 +688,7 @@ export function FinancePageClient() {
                       nivelColor,
                     ));
                   }}
-                  className="group text-left bg-[var(--bg-card)] p-8 rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm hover:shadow-xl hover:shadow-black/10 hover:-translate-y-1 transition-all duration-300 active:scale-[0.98]"
+                  className="group text-left bg-[var(--bg-card)] p-8 rounded-[2.5rem] border border-[var(--border-subtle)] shadow-lg hover:shadow-xl hover:shadow-black/10 hover:-translate-y-1 transition-all duration-300 active:scale-[0.98]"
                 >
                   <div className="flex items-center justify-between w-full mb-2">
                     <span className="text-xs font-bold uppercase tracking-wider" style={{ color: nivelColor }}>Medida de Desempeño</span>
@@ -663,7 +721,7 @@ export function FinancePageClient() {
                 </button>
 
                 {/* Progress bars por métrica */}
-                <div className="bg-[var(--bg-card)] p-8 rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm">
+                <div className="bg-[var(--bg-card)] p-8 rounded-[2.5rem] border border-[var(--border-subtle)] shadow-lg">
                   <div className="flex items-center gap-2 mb-6">
                     <Icon name="BarChart3" className="w-4 h-4" style={{ color: nivelColor }} />
                     <span className="text-xs font-black uppercase tracking-wider" style={{ color: nivelColor }}>Desglose por Métrica</span>

@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Headphones, Plus, Edit, Trash2, Music, Video, Globe, Clock, User, Send, CheckCircle, Save, Info, FileText, BookOpen, Clapperboard } from 'lucide-react';
+import { Headphones, Plus, Edit, Trash2, Music, Video, Globe, Clock, User, Send, CheckCircle, Save, Info, FileText, BookOpen, Clapperboard, X } from 'lucide-react';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import BaseButton from '@/components/ui/BaseButton';
+import Pagination from '@/components/ui/Pagination';
 import { blogApi, BlogPodcast } from '@/shared/lib/api/bioblogRepository';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -18,7 +19,12 @@ export function BlogPodcastsClient() {
     const [error, setError] = useState<string | null>(null);
     const [preview, setPreview] = useState<{ title?: string; thumbnail?: string; duration?: number; channel?: string; type?: string } | null>(null);
     const [fetchingPreview, setFetchingPreview] = useState(false);
+    const [page, setPage] = useState(1);
     const debounceRef = useRef<NodeJS.Timeout | null>(null);
+
+    const PAGE_SIZE = 10;
+    const totalPages = Math.ceil(items.length / PAGE_SIZE);
+    const pageItems = items.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
     const fetch = useCallback(async () => {
         setLoading(true); setError(null);
@@ -176,25 +182,25 @@ export function BlogPodcastsClient() {
                     <table className="w-full text-sm">
                         <thead>
                             <tr className="border-b border-gray-100 dark:border-gray-800 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider">
-                                <th className="px-5 py-4">Portada</th>
-                                <th className="px-5 py-4">Título</th>
-                                <th className="px-5 py-4">Plataforma</th>
-                                <th className="px-5 py-4">Duración</th>
-                                <th className="px-5 py-4">Estado</th>
-                                <th className="px-5 py-4 w-24">Acciones</th>
+                                <th className="px-5 py-4 whitespace-nowrap">Portada</th>
+                                <th className="px-5 py-4 whitespace-nowrap">Título</th>
+                                <th className="px-5 py-4 whitespace-nowrap">Plataforma</th>
+                                <th className="px-5 py-4 whitespace-nowrap">Duración</th>
+                                <th className="px-5 py-4 whitespace-nowrap">Estado</th>
+                                <th className="px-5 py-4 whitespace-nowrap w-24">Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {items.map(p => (
+                            {pageItems.map(p => (
                                 <tr key={p.id} className="border-b border-gray-50 dark:border-gray-800/50 hover:bg-gray-50 dark:hover:bg-gray-800/30 transition">
                                     <td className="px-5 py-4">{p.cover_image ? <img src={p.cover_image} alt="" className="w-10 h-10 rounded-lg object-cover" /> : <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center"><Headphones className="w-5 h-5 text-gray-400" /></div>}</td>
-                                    <td className="px-5 py-4 font-semibold text-gray-700 dark:text-gray-300 truncate max-w-[200px]">{p.title}</td>
+                                    <td className="px-5 py-4 font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">{p.title}</td>
                                     <td className="px-5 py-4"><div className="flex items-center gap-1.5 text-xs text-gray-500 uppercase">{platformIcon(p.platform)}{p.platform}</div></td>
                                     <td className="px-5 py-4 text-gray-500">{fmtDuration(p.duration) || '—'}</td>
                                     <td className="px-5 py-4">{statusBadge(p.status)}</td>
                                     <td className="px-5 py-4"><div className="flex gap-1.5 items-center">
                                         {p.status === 'draft' && (
-                                            <button onClick={() => updateStatus(p.id, 'pending_review')} className="px-2.5 py-1.5 text-[11px] font-bold uppercase rounded-lg bg-teal-500 hover:bg-teal-600 text-white transition">
+                                            <button onClick={() => updateStatus(p.id, 'pending_review')} className="px-2.5 py-1.5 text-[11px] font-bold uppercase rounded-lg bg-gradient-to-r from-emerald-400 to-sky-400 dark:from-[var(--brand-green)] dark:to-[var(--icons-green)] text-white transition shadow-md shadow-sky-500/20 dark:shadow-[#8FC3A1]/50">
                                                 <Send className="w-3 h-3 inline mr-1" />Enviar
                                             </button>
                                         )}
@@ -203,7 +209,7 @@ export function BlogPodcastsClient() {
                                         )}
                                         {p.status === 'approved' && (
                                             <>
-                                                <button onClick={() => updateStatus(p.id, 'published')} className="px-2.5 py-1.5 text-[11px] font-bold uppercase rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white transition">
+                                                <button onClick={() => updateStatus(p.id, 'published')} className="px-2.5 py-1.5 text-[11px] font-bold uppercase rounded-lg bg-gradient-to-r from-emerald-400 to-sky-400 dark:from-[var(--brand-green)] dark:to-[var(--icons-green)] text-white transition shadow-md shadow-sky-500/20 dark:shadow-[#8FC3A1]/50">
                                                     <CheckCircle className="w-3 h-3 inline mr-1" />Publicar
                                                 </button>
                                                 <button onClick={() => updateStatus(p.id, 'draft')} className="px-2.5 py-1.5 text-[11px] font-bold uppercase rounded-lg bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 text-gray-700 dark:text-gray-300 transition">
@@ -230,12 +236,19 @@ export function BlogPodcastsClient() {
                         </tbody>
                     </table>
                 </div>}
+                <Pagination page={page} totalPages={totalPages} onPageChange={setPage} totalItems={items.length} itemLabel="podcasts" />
             </div>
 
             {showEditor && (
                 <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 backdrop-blur-sm overflow-y-auto py-10" onClick={() => setShowEditor(false)}>
-                    <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 w-full max-w-lg mx-4 p-6 space-y-4 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-                        <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200">{editingId ? 'Editar Podcast' : 'Nuevo Podcast'}</h3>
+                    <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 w-full max-w-lg mx-4 overflow-hidden max-h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
+                        <div className="relative px-6 py-5 bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--verde-500)] rounded-t-3xl flex-shrink-0">
+                            <button onClick={() => setShowEditor(false)} className="absolute top-5 right-5 w-10 h-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center text-white hover:bg-white/30 transition-all active:scale-90">
+                                <X className="w-5 h-5" />
+                            </button>
+                            <h3 className="text-lg font-bold text-white pr-12">{editingId ? 'Editar Podcast' : 'Nuevo Podcast'}</h3>
+                        </div>
+                        <div className="p-6 space-y-4 overflow-y-auto">
 
                         <div className="grid grid-cols-2 gap-4">
                             <div>
@@ -312,11 +325,12 @@ export function BlogPodcastsClient() {
                         {error && <div className="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 p-3 rounded-xl">{error}</div>}
                         <div className="flex justify-end gap-3 pt-2">
                             <button onClick={() => setShowEditor(false)} className="px-5 py-2.5 text-sm font-semibold text-gray-500 hover:text-gray-700 transition">Cancelar</button>
-                            <button onClick={handleSave} disabled={saving || !form.title.trim() || !form.url.trim()} className="flex items-center gap-1.5 px-6 py-2.5 bg-teal-500 hover:bg-teal-600 text-white rounded-xl text-sm font-semibold transition disabled:opacity-50">
+                            <button onClick={handleSave} disabled={saving || !form.title.trim() || !form.url.trim()} className="flex items-center gap-1.5 px-6 py-2.5 bg-gradient-to-r from-emerald-400 to-sky-400 dark:from-[var(--brand-green)] dark:to-[var(--icons-green)] hover:from-emerald-500 hover:to-sky-500 dark:hover:from-[var(--brand-green)] dark:hover:to-[var(--icons-green)] text-white rounded-xl text-sm font-semibold transition disabled:opacity-50 shadow-lg shadow-sky-500/25 dark:shadow-[#8FC3A1]/70">
                                 <Save className="w-4 h-4" /> {saving ? 'Guardando...' : (editingId ? 'Guardar Cambios' : 'Crear Borrador')}
                             </button>
                         </div>
                     </div>
+                </div>
                 </div>
             )}
         </div>

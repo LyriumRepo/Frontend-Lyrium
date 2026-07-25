@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef, Suspense } from 'react';
-import { FileText, Plus, Search, Edit, Trash2, Eye, Send, Save, CheckCircle, Folder, Info, AlertCircle, BookOpen, Headphones, Video, Clapperboard } from 'lucide-react';
+import { FileText, Plus, Search, Edit, Trash2, Eye, Send, Save, CheckCircle, Folder, Info, AlertCircle, BookOpen, Headphones, Video, Clapperboard, X } from 'lucide-react';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import BaseButton from '@/components/ui/BaseButton';
+import Pagination from '@/components/ui/Pagination';
 import dynamic from 'next/dynamic';
 const BlogEditor = dynamic(() => import('@/components/ui/BlogEditor').then(m => ({ default: m.BlogEditor })), { ssr: false, loading: () => <div className="h-[300px] bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse" /> });
 import { GooglePreview } from '@/components/ui/GooglePreview';
@@ -24,7 +25,14 @@ export function BlogArticlesClient() {
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [previewHtml, setPreviewHtml] = useState<string | null>(null);
+    const [page, setPage] = useState(1);
     const editorRef = useRef<HTMLDivElement>(null);
+
+    const PAGE_SIZE = 10;
+    const totalPages = Math.ceil(articles.length / PAGE_SIZE);
+    const pageArticles = articles.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+    useEffect(() => { setPage(1); }, [search, statusFilter]);
 
     const pathname = usePathname();
 
@@ -181,23 +189,23 @@ export function BlogArticlesClient() {
                     <table className="w-full text-sm">
                         <thead>
                             <tr className="border-b border-gray-100 dark:border-gray-800 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider">
-                                <th className="px-5 py-4">Título</th>
-                                <th className="px-5 py-4">Estado</th>
-                                <th className="px-5 py-4">Vistas</th>
-                                <th className="px-5 py-4">Fecha</th>
-                                <th className="px-5 py-4 w-28">Acciones</th>
+                                <th className="px-5 py-4 whitespace-nowrap">Título</th>
+                                <th className="px-5 py-4 whitespace-nowrap">Estado</th>
+                                <th className="px-5 py-4 whitespace-nowrap">Vistas</th>
+                                <th className="px-5 py-4 whitespace-nowrap">Fecha</th>
+                                <th className="px-5 py-4 whitespace-nowrap w-28">Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {articles.map(a => (
+                            {pageArticles.map(a => (
                                 <tr key={a.id} className="border-b border-gray-50 dark:border-gray-800/50 hover:bg-gray-50 dark:hover:bg-gray-800/30 transition">
-                                    <td className="px-5 py-4 font-semibold text-gray-700 dark:text-gray-300 max-w-xs truncate">{a.title}</td>
+                                    <td className="px-5 py-4 font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">{a.title}</td>
                                     <td className="px-5 py-4">{statusBadge(a.status)}</td>
                                     <td className="px-5 py-4 text-gray-500">{a.views_count}</td>
                                     <td className="px-5 py-4 text-xs text-gray-400">{a.published_at ? new Date(a.published_at).toLocaleDateString('es-PE') : new Date(a.created_at).toLocaleDateString('es-PE')}</td>
                                     <td className="px-5 py-4"><div className="flex gap-1.5 items-center">
                                         {a.status === 'draft' && (
-                                            <button onClick={() => updateStatus(a.id, 'pending_review')} className="px-2.5 py-1.5 text-[11px] font-bold uppercase rounded-lg bg-teal-500 hover:bg-teal-600 text-white transition">
+                                            <button onClick={() => updateStatus(a.id, 'pending_review')} className="px-2.5 py-1.5 text-[11px] font-bold uppercase rounded-lg bg-gradient-to-r from-emerald-400 to-sky-400 dark:from-[var(--brand-green)] dark:to-[var(--icons-green)] text-white transition shadow-md shadow-sky-500/20 dark:shadow-[#8FC3A1]/50">
                                                 <Send className="w-3 h-3 inline mr-1" />Enviar
                                             </button>
                                         )}
@@ -206,7 +214,7 @@ export function BlogArticlesClient() {
                                         )}
                                         {a.status === 'approved' && (
                                             <>
-                                                <button onClick={() => updateStatus(a.id, 'published')} className="px-2.5 py-1.5 text-[11px] font-bold uppercase rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white transition">
+                                                <button onClick={() => updateStatus(a.id, 'published')} className="px-2.5 py-1.5 text-[11px] font-bold uppercase rounded-lg bg-gradient-to-r from-emerald-400 to-sky-400 dark:from-[var(--brand-green)] dark:to-[var(--icons-green)] text-white transition shadow-md shadow-sky-500/20 dark:shadow-[#8FC3A1]/50">
                                                     <CheckCircle className="w-3 h-3 inline mr-1" />Publicar
                                                 </button>
                                                 <button onClick={() => updateStatus(a.id, 'draft')} className="px-2.5 py-1.5 text-[11px] font-bold uppercase rounded-lg bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 text-gray-700 dark:text-gray-300 transition">
@@ -233,12 +241,19 @@ export function BlogArticlesClient() {
                         </tbody>
                     </table>
                 </div>}
+                <Pagination page={page} totalPages={totalPages} onPageChange={setPage} totalItems={articles.length} itemLabel="artículos" />
             </div>
 
             {showEditor && (
                 <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 backdrop-blur-sm overflow-y-auto py-10" onClick={() => setShowEditor(false)}>
-                    <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 w-full max-w-4xl mx-4 p-6 space-y-5" onClick={e => e.stopPropagation()} ref={editorRef}>
-                        <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200">{editingId ? 'Editar Artículo' : 'Nuevo Artículo'}</h3>
+                    <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 w-full max-w-4xl mx-4 overflow-hidden" onClick={e => e.stopPropagation()} ref={editorRef}>
+                        <div className="relative px-6 py-5 bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--verde-500)] rounded-t-3xl">
+                            <button onClick={() => setShowEditor(false)} className="absolute top-5 right-5 w-10 h-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center text-white hover:bg-white/30 transition-all active:scale-90">
+                                <X className="w-5 h-5" />
+                            </button>
+                            <h3 className="text-lg font-bold text-white pr-12">{editingId ? 'Editar Artículo' : 'Nuevo Artículo'}</h3>
+                        </div>
+                        <div className="p-6 space-y-5">
 
                         {/* Encabezado */}
                         <div className="grid grid-cols-3 gap-4">
@@ -387,11 +402,12 @@ export function BlogArticlesClient() {
                                 <Eye className="w-4 h-4" /> Vista Previa
                             </button>
                             <button onClick={() => saveWithStatus(form.status)} disabled={saving || !form.title.trim()}
-                                className="flex items-center gap-1.5 px-6 py-2.5 text-sm font-semibold text-white bg-teal-500 hover:bg-teal-600 rounded-xl transition disabled:opacity-50">
+                                className="flex items-center gap-1.5 px-6 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-emerald-400 to-sky-400 dark:from-[var(--brand-green)] dark:to-[var(--icons-green)] hover:from-emerald-500 hover:to-sky-500 dark:hover:from-[var(--brand-green)] dark:hover:to-[var(--icons-green)] rounded-xl transition disabled:opacity-50 shadow-lg shadow-sky-500/25 dark:shadow-[#8FC3A1]/70">
                                 <Save className="w-4 h-4" /> {saving ? 'Guardando...' : (editingId ? 'Guardar Cambios' : 'Crear Borrador')}
                             </button>
                         </div>
                     </div>
+                </div>
                 </div>
             )}
         </div>

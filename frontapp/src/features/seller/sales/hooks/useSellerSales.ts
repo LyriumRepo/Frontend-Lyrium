@@ -115,10 +115,10 @@ export function useSellerSales() {
     });
 
     const advanceStepMutation = useMutation({
-        mutationFn: async ({ orderId, section }: { orderId: string; section?: 'products' | 'services' | 'confirm' }) => {
-            console.log('[useSellerSales::advanceStepMutation] START', { orderId, section });
-            const result = await orderRepository.advanceOrderStep(orderId, section);
-            console.log('[useSellerSales::advanceStepMutation] DONE', { orderId, section });
+        mutationFn: async ({ orderId, section, serviceItemId }: { orderId: string; section?: 'products' | 'services' | 'confirm'; serviceItemId?: string }) => {
+            console.log('[useSellerSales::advanceStepMutation] START', { orderId, section, serviceItemId });
+            const result = await orderRepository.advanceOrderStep(orderId, section, serviceItemId);
+            console.log('[useSellerSales::advanceStepMutation] DONE', { orderId, section, serviceItemId });
             return result;
         },
         onSuccess: async (order) => {
@@ -183,8 +183,8 @@ export function useSellerSales() {
         updateFilters: (newFilters: { dateStart?: string | null; dateEnd?: string | null; orderType?: string | null }) =>
             setFilters({ ...filters, ...newFilters }),
         clearFilters: () => setFilters({ dateStart: null, dateEnd: null, orderType: null }),
-        advanceStep: (id: string, section?: 'products' | 'services' | 'confirm') =>
-            advanceStepMutation.mutateAsync({ orderId: id, section }),
+        advanceStep: (id: string, section?: 'products' | 'services' | 'confirm', serviceItemId?: string) =>
+            advanceStepMutation.mutateAsync({ orderId: id, section, serviceItemId }),
         isAdvancing: advanceStepMutation.isPending,
         shipWithCarrier: (orderId: string, carrierCode: string, carrierData: Record<string, string>) =>
             shipWithCarrierMutation.mutateAsync({ orderId, carrierCode, carrierData }),

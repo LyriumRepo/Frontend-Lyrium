@@ -38,23 +38,23 @@ export function StockAlertsModal({ isOpen, alerts, onClose }: Props) {
                 <div className="w-full max-w-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl shadow-2xl overflow-hidden pointer-events-auto flex flex-col max-h-[80vh]">
 
                     {/* Header */}
-                    <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--border-subtle)] flex-shrink-0">
+                    <div className="relative flex items-center justify-between px-5 py-4 bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--verde-500)] flex-shrink-0 rounded-t-2xl">
                         <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 bg-sky-500/10 dark:bg-[#8FC3A1]/10 rounded-xl flex items-center justify-center border border-sky-500/20 dark:border-[#8FC3A1]/20 text-sky-500 dark:text-[#8FC3A1]">
-                                <AlertTriangle className="w-4 h-4" />
+                            <div className="w-8 h-8 bg-white/20 rounded-xl flex items-center justify-center">
+                                <AlertTriangle className="w-4 h-4 text-white" />
                             </div>
                             <div>
-                                <h3 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-widest">
+                                <h3 className="text-sm font-black text-white uppercase tracking-widest">
                                     Alertas de Stock
                                 </h3>
-                                <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wide">
+                                <p className="text-[10px] font-bold text-white/80 uppercase tracking-wide">
                                     {alerts.length} producto{alerts.length !== 1 ? 's' : ''} requieren atención
                                 </p>
                             </div>
                         </div>
                         <button
                             onClick={onClose}
-                            className="w-7 h-7 flex items-center justify-center rounded-lg text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] transition-colors"
+                            className="w-7 h-7 flex items-center justify-center rounded-lg bg-white/20 text-white hover:bg-white/30 transition-colors"
                         >
                             <X className="w-4 h-4" />
                         </button>

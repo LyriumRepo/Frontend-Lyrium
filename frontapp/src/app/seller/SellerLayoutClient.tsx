@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { useRouter, usePathname } from 'next/navigation';
 import SellerSidebar from '@/components/layout/seller/SellerSidebar';
 import SellerHeader from '@/components/layout/seller/SellerHeader';
@@ -19,7 +20,7 @@ const SellerWelcomeGuide = dynamic(
 );
 import { useAuth } from '@/shared/lib/context/AuthContext';
 import Icon from '@/components/ui/Icon';
-import { WELCOME_MODAL_LIGHT_TEXT, WELCOME_MODAL_LIGHT_BADGE, WELCOME_MODAL_LIGHT_CARD } from '@/shared/lib/theme/welcomeModalTheme';
+import { WELCOME_MODAL_LIGHT_TEXT, WELCOME_MODAL_LIGHT_BADGE, WELCOME_MODAL_LIGHT_CARD, WELCOME_MODAL_LIGHT_ACCENT } from '@/shared/lib/theme/welcomeModalTheme';
 
 // ─── Paleta ────────────────────────────────────────────────────────────────
 const SELLER_COLORS = ['#0ea5e9', '#38bdf8', '#06b6d4', '#22d3ee', '#7dd3fc', '#818cf8'];
@@ -121,6 +122,13 @@ const WELCOME_CSS = `
     0%   { transform:translateY(0) scale(1); opacity:.9; }
     100% { transform:translateY(-60px) scale(0); opacity:0; }
   }
+
+  @media (max-width: 640px) {
+    .sw-halo { inset: -18px !important; border-radius: 36px !important; filter: blur(18px) !important; }
+    .sw-orbit1 { inset: -12px !important; }
+    .sw-orbit2 { inset: -20px !important; }
+    .sw-rays { width: 180px !important; height: 180px !important; margin-top: -30px !important; }
+  }
 `;
 
 const SW_PARTICLES = [
@@ -221,13 +229,16 @@ function SellerWelcomeToast() {
             });
         }, 700);
 
-        const autoClose = setTimeout(close, 7500);
-
         return () => {
             clearTimeout(confettiTimer);
-            clearTimeout(autoClose);
         };
     }, [user, close, isDark]);
+
+    useEffect(() => {
+        if (!visible) return;
+        const autoClose = setTimeout(close, 4000);
+        return () => clearTimeout(autoClose);
+    }, [visible, close]);
 
     if (!visible) return null;
 
@@ -251,6 +262,7 @@ function SellerWelcomeToast() {
         closeHover:    'rgba(14,165,233,0.2)',
         logoBg:        'rgba(14,165,233,0.08)',
         logoBorder:    '1px solid rgba(14,165,233,0.2)',
+        logoShadow:    undefined as string | undefined,
         logoSrc:       '/img/logo_lyrium_blanco_01-scaled.webp',
         storeBg:       'rgba(14,165,233,0.1)',
         storeBorder:   '1px solid rgba(14,165,233,0.2)',
@@ -273,39 +285,18 @@ function SellerWelcomeToast() {
         conicRays:     'conic-gradient(from 0deg, transparent 0deg, rgba(14,165,233,0.06) 25deg, transparent 50deg, rgba(129,140,248,0.04) 85deg, transparent 110deg, rgba(6,182,212,0.05) 145deg, transparent 170deg, rgba(56,189,248,0.05) 205deg, transparent 230deg, rgba(14,165,233,0.04) 265deg, transparent 290deg, rgba(6,182,212,0.05) 330deg, transparent 360deg)',
         confettiColors:SELLER_COLORS,
     } : {
-        overlay:       'radial-gradient(ellipse 72% 62% at 50% 38%, rgba(14,165,233,0.18) 0%, rgba(15,23,42,0.72) 82%)',
-        cardShadow:    'inset 0 0 0 1.5px rgba(14,165,233,0.30), inset 0 0 80px rgba(14,165,233,0.04), 0 32px 80px rgba(0,0,0,0.32), 0 0 120px rgba(14,165,233,0.10)',
-        glowTop:       'radial-gradient(ellipse at 50% -20%, rgba(14,165,233,0.10) 0%, transparent 70%)',
         ...WELCOME_MODAL_LIGHT_CARD,
         ...WELCOME_MODAL_LIGHT_BADGE,
         ...WELCOME_MODAL_LIGHT_TEXT,
         closeBg:       'rgba(0,0,0,0.05)',
         closeBorder:   '1px solid rgba(0,0,0,0.1)',
         closeIcon:     'text-black/40',
-        closeHover:    'rgba(14,165,233,0.12)',
-        logoBg:        'rgba(14,165,233,0.07)',
-        logoBorder:    '1px solid rgba(14,165,233,0.18)',
         logoSrc:       '/img/iconologo.png',
-        storeBg:       'rgba(14,165,233,0.10)',
-        storeBorder:   '1px solid rgba(14,165,233,0.30)',
-        storeColor:    '#0369a1',
-        divider:       'linear-gradient(90deg, transparent, rgba(14,165,233,0.40), rgba(129,140,248,0.28), transparent)',
-        spark1:        'rgba(56,189,248,0.50)',
-        spark2:        'rgba(129,140,248,0.42)',
-        halo:          'radial-gradient(ellipse, rgba(14,165,233,0.25) 0%, rgba(56,189,248,0.14) 45%, transparent 78%)',
-        orb1Border:    '1px solid rgba(14,165,233,0.18)',
-        orb1Dot:       '#0ea5e9',
-        orb1Shadow:    '0 0 10px #0ea5e9, 0 0 22px rgba(14,165,233,0.55)',
-        orb2Border:    '1px solid rgba(129,140,248,0.12)',
-        orb2Dot:       '#818cf8',
-        orb2Shadow:    '0 0 8px #818cf8, 0 0 16px rgba(129,140,248,0.5)',
-        gradientBorder:'linear-gradient(135deg, rgba(14,165,233,0.8) 0%, rgba(129,140,248,0.5) 35%, rgba(56,189,248,0.65) 65%, rgba(125,211,252,0.5) 100%)',
-        ripple:        (i: number) => `1px solid rgba(14,165,233,${0.25 - i * 0.06})`,
-        logoGlow:      'radial-gradient(circle, rgba(14,165,233,0.35) 0%, rgba(56,189,248,0.18) 45%, transparent 78%)',
-        nameGradient:  'linear-gradient(135deg, #0ea5e9 0%, #38bdf8 28%, #818cf8 60%, #06b6d4 100%)',
-        bottomBar:     'linear-gradient(90deg, #0ea5e9, #818cf8, #06b6d4, #38bdf8, #0ea5e9)',
-        conicRays:     'conic-gradient(from 0deg, transparent 0deg, rgba(14,165,233,0.06) 25deg, transparent 50deg, rgba(129,140,248,0.04) 85deg, transparent 110deg, rgba(56,189,248,0.05) 145deg, transparent 170deg, rgba(125,211,252,0.05) 205deg, transparent 230deg, rgba(14,165,233,0.04) 265deg, transparent 290deg, rgba(56,189,248,0.05) 330deg, transparent 360deg)',
-        confettiColors:['#0ea5e9','#38bdf8','#06b6d4','#22d3ee','#7dd3fc','#818cf8'],
+        storeBg:       'rgba(13,148,136,0.10)',
+        storeBorder:   '1px solid rgba(13,148,136,0.30)',
+        storeColor:    '#0f766e',
+        ...WELCOME_MODAL_LIGHT_ACCENT,
+        confettiColors:['#0d9488','#bef264','#0ea5e9','#38bdf8','#65a30d','#22d3ee'],
     };
 
     const D = {
@@ -317,7 +308,7 @@ function SellerWelcomeToast() {
         divider:  700 + firstName.length * 46 + 480,
     };
 
-    return (
+    return createPortal(
         <>
             <style>{WELCOME_CSS}</style>
 
@@ -338,7 +329,7 @@ function SellerWelcomeToast() {
             >
                 {/* Card wrapper — tilt 3D */}
                 <div
-                    className="relative w-full max-w-[480px]"
+                    className="relative w-full max-w-[480px] overflow-hidden"
                     style={{
                         transform: `perspective(1200px) rotateX(${tilt.y}deg) rotateY(${tilt.x}deg)`,
                         transition: 'transform 0.14s ease-out',
@@ -363,7 +354,7 @@ function SellerWelcomeToast() {
                     ))}
 
                     {/* Halo exterior */}
-                    <div className="absolute pointer-events-none" style={{
+                    <div className="absolute pointer-events-none sw-halo" style={{
                         inset: '-38px', borderRadius: '62px',
                         background: T.halo,
                         filter: 'blur(30px)',
@@ -371,7 +362,7 @@ function SellerWelcomeToast() {
                     }} />
 
                     {/* Anillo orbital 1 */}
-                    <div className="absolute pointer-events-none" style={{
+                    <div className="absolute pointer-events-none sw-orbit1" style={{
                         inset: '-24px', borderRadius: '50%',
                         border: T.orb1Border,
                         animation: 'swOrbitCW 16s linear infinite',
@@ -384,7 +375,7 @@ function SellerWelcomeToast() {
                     </div>
 
                     {/* Anillo orbital 2 */}
-                    <div className="absolute pointer-events-none" style={{
+                    <div className="absolute pointer-events-none sw-orbit2" style={{
                         inset: '-46px', borderRadius: '50%',
                         border: T.orb2Border,
                         animation: 'swOrbitCCW 24s linear infinite',
@@ -423,7 +414,7 @@ function SellerWelcomeToast() {
                             }} />
 
                             {/* Rayos cónicos */}
-                            <div className="absolute pointer-events-none" style={{
+                            <div className="absolute pointer-events-none sw-rays" style={{
                                 top: 0, left: '50%',
                                 width: '320px', height: '320px', marginTop: '-55px',
                                 borderRadius: '50%',
@@ -449,7 +440,7 @@ function SellerWelcomeToast() {
                                 onClick={e => { e.stopPropagation(); close(); }}
                                 className="absolute top-4 right-4 z-10 flex items-center justify-center rounded-full transition-all duration-200 active:scale-90"
                                 style={{
-                                    width: 34, height: 34,
+                                    width: 44, height: 44,
                                     background: T.closeBg,
                                     border: T.closeBorder,
                                     backdropFilter: 'blur(8px)',
@@ -457,11 +448,11 @@ function SellerWelcomeToast() {
                                 onMouseEnter={e => (e.currentTarget.style.background = T.closeHover)}
                                 onMouseLeave={e => (e.currentTarget.style.background = T.closeBg)}
                             >
-                                <Icon name="X" className={`w-3.5 h-3.5 ${T.closeIcon}`} />
+                                <Icon name="X" className={`w-4 h-4 ${T.closeIcon}`} />
                             </button>
 
                             {/* Contenido */}
-                            <div className="px-8 pt-10 pb-8 relative">
+                            <div className="px-5 sm:px-8 pt-10 pb-8 relative">
 
                                 {/* 1 — Logo Lyrium animado flotando */}
                                 <div className="flex justify-center mb-6" style={{
@@ -487,6 +478,7 @@ function SellerWelcomeToast() {
                                         <div className="relative flex items-center justify-center px-5 py-3 rounded-2xl" style={{
                                             background: T.logoBg,
                                             border: T.logoBorder,
+                                            boxShadow: T.logoShadow,
                                             animation: 'swLogoFloat 4.5s ease-in-out infinite, swLogoPulse 4.5s ease-in-out infinite',
                                         }}>
                                             <img
@@ -524,7 +516,7 @@ function SellerWelcomeToast() {
                                     </p>
 
                                     {/* Nombre — hero, letra por letra */}
-                                    <h2 className="text-[50px] font-black leading-none mb-4 flex justify-center flex-wrap"
+                                    <h2 className="text-[32px] sm:text-[50px] font-black leading-none mb-4 flex justify-center flex-wrap"
                                         style={{ letterSpacing: '-0.025em' }}>
                                         {firstName.split('').map((char, i) => (
                                             <span key={i} className="inline-block" style={{
@@ -592,7 +584,8 @@ function SellerWelcomeToast() {
                     </div>
                 </div>
             </div>
-        </>
+        </>,
+        document.body
     );
 }
 
@@ -707,7 +700,7 @@ export function SellerLayoutClient({ children }: SellerLayoutClientProps) {
             {children}
             <ChatBotWidget />
             <SellerWelcomeToast />
-            {user && <SellerWelcomeGuide userId={user.id} />}
+            {user && <SellerWelcomeGuide userId={user.id} createdAt={user.created_at} />}
         </DashboardLayout>
         </InventoryAlertsProvider>
     );

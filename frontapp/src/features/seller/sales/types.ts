@@ -1,4 +1,4 @@
-export type OrderStatus = 'pending_seller' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+export type OrderStatus = 'pending_seller' | 'confirmed' | 'on_the_way' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
 
 export type ItemStatus = 'pending_seller' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
 
@@ -7,6 +7,7 @@ export type TipoEnvio = 'domicilio' | 'agencia' | 'retiro_tienda';
 export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
     pending_seller: 'Pendiente Confirmar',
     confirmed: 'Confirmado',
+    on_the_way: 'En Camino',
     processing: 'Preparando',
     shipped: 'Enviado',
     delivered: 'Entregado',
@@ -81,6 +82,7 @@ export interface ServiceOrderItem {
     durationMinutes: number | null;
     serviceBookingId: string | null;
     bookingStatus: string | null;
+    customerValidatedAt?: string | null;
 }
 
 export interface Order {
@@ -121,6 +123,10 @@ export interface Order {
     couponCode: string | null;
     notes: string | null;
     paidAt: string | null;
+    /** ISO timestamp — cuándo el cliente validó la recepción (null si aún no) */
+    customerValidatedAt?: string | null;
+    /** manual | email | auto_expired */
+    validationSource?: string | null;
     envio: ShippingInfo;
     branch: BranchInfo | null;
     items: OrderItem[];

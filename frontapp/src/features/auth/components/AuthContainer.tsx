@@ -94,7 +94,7 @@ export function AuthContainer({ onSuccess }: AuthContainerProps) {
                 buttonText="Entrar"
                 onEnter={handleEnterPortal}
                 autoHideAfter={0}
-                backgroundImage="/img/intro/tienda2.png"
+                backgroundImage="/img/intro/contactanos.jpg"
             />
         );
     }

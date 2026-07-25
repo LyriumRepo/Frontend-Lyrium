@@ -44,7 +44,7 @@ export default function ProductDetailModal({ product, isOpen, onClose }: Product
             title={product.name}
             subtitle="Detalle del Producto"
             size="4xl"
-            accentColor="from-sky-500 to-sky-700 dark:from-[var(--icons-green)] dark:to-[var(--brand-green)]"
+            accentColor="from-[var(--turquesa-500)] to-[var(--verde-500)]"
         >
             <div className="flex flex-col md:flex-row gap-8">
                 {/* Image Side */}
@@ -120,9 +120,9 @@ export default function ProductDetailModal({ product, isOpen, onClose }: Product
                             <p className="text-xs font-black text-[var(--text-secondary)] uppercase">Stock</p>
                             <p className="text-lg font-black text-[var(--text-primary)]">{product.stock ?? 0}</p>
                         </div>
-                        <div className="p-3 bg-sky-500/10 dark:bg-[var(--icons-green)]/15 rounded-xl">
-                            <p className="text-xs font-black text-sky-400 dark:text-[var(--icons-green)] uppercase">Precio</p>
-                            <p className="text-lg font-black text-sky-500 dark:text-[var(--icons-green)]">{formatCurrency(product.price)}</p>
+                        <div className="p-3 bg-[var(--icons-green)]/10 rounded-xl">
+                            <p className="text-xs font-black text-[var(--icons-green)] uppercase">Precio</p>
+                            <p className="text-lg font-black text-[var(--icons-green)]">{formatCurrency(product.price)}</p>
                         </div>
                     </div>
                 </div>

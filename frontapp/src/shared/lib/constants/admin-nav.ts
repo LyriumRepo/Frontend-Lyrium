@@ -74,7 +74,7 @@ export const adminNavigation: PanelNavigation = [
         items: [
             {
                 id: 'security',
-                label: 'Centro de Seguridad',
+                label: 'Seguridad',
                 href: '/admin/security',
                 icon: 'Shield',
             },

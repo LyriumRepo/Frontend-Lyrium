@@ -6,6 +6,46 @@ import Image from 'next/image';
 
 const SEGMENTS = Array.from({ length: 12 });
 
+/**
+ * Genera un contorno cerrado ondulado tipo flor en coordenadas polares:
+ * r = R + a1·sin(n·θ + fase) + a2·sin(m·θ) — la segunda onda le da un
+ * trazo orgánico, no perfectamente simétrico (como dibujado a mano).
+ */
+function flowerPath(
+  cx: number,
+  cy: number,
+  baseR: number,
+  petals: number,
+  amp: number,
+  wobbleAmp: number,
+  phase = 0,
+): string {
+  const steps = 120;
+  const pts: string[] = [];
+  for (let i = 0; i <= steps; i++) {
+    const t = (i / steps) * Math.PI * 2;
+    const r =
+      baseR +
+      amp * Math.sin(petals * t + phase) +
+      wobbleAmp * Math.sin(3 * t + phase * 2);
+    const x = cx + r * Math.cos(t);
+    const y = cy + r * Math.sin(t);
+    pts.push(`${x.toFixed(2)},${y.toFixed(2)}`);
+  }
+  return `M${pts.join(' L')} Z`;
+}
+
+const FLOWER_RINGS_A = [
+  flowerPath(100, 100, 72, 7, 9, 3, 0),
+  flowerPath(100, 100, 78, 7, 8, 4, 0.9),
+  flowerPath(100, 100, 84, 7, 10, 3, 1.7),
+];
+
+const FLOWER_RINGS_B = [
+  flowerPath(100, 100, 88, 6, 8, 4, 0.4),
+  flowerPath(100, 100, 94, 6, 9, 5, 1.3),
+];
+
 export function PageTransitionLoader() {
   const pathname = usePathname();
   const [visible, setVisible] = useState(true);
@@ -36,64 +76,57 @@ export function PageTransitionLoader() {
         backdropFilter: 'blur(6px)',
       }}
     >
-      {/* Cloud drift — persists, outside key */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-90 dark:opacity-65" style={{ zIndex: -1 }}>
-        <div className="relative w-[200px] h-[200px] md:w-[230px] md:h-[230px] flex items-center justify-center">
-          {/* Layer 1: inner cloud bands (forward) */}
+      {/* Contorno floral ondulado — persists, outside key */}
+      <style>{`
+        @keyframes flower-spin-cw  { from { transform: rotate(0deg); }  to { transform: rotate(360deg); } }
+        @keyframes flower-spin-ccw { from { transform: rotate(0deg); }  to { transform: rotate(-360deg); } }
+        @keyframes flower-breathe  { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+      `}</style>
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-90 dark:opacity-70" style={{ zIndex: -1 }}>
+        <div
+          className="relative w-[250px] h-[250px] md:w-[290px] md:h-[290px] flex items-center justify-center"
+          style={{ animation: 'flower-breathe 4s ease-in-out infinite' }}
+        >
+          {/* Capa 1: anillos internos girando en sentido horario */}
           <svg
             viewBox="0 0 200 200"
             className="absolute inset-0 w-full h-full"
-            style={{ animation: 'cloud-drift-a 6s ease-in-out infinite' }}
+            style={{ animation: 'flower-spin-cw 24s linear infinite' }}
           >
-            <defs>
-              <filter id="blurCloud">
-                <feGaussianBlur stdDeviation="3.5" />
-              </filter>
-              <filter id="blurCloudWide">
-                <feGaussianBlur stdDeviation="6" />
-              </filter>
-            </defs>
-
-            {/* Inner bands — 8 cloud puffs, fanned 45° apart around the center */}
-            {[0,45,90,135,180,225,270,315].map(angle => (
-              <g key={angle} transform={`rotate(${angle} 100 100)`}>
-                <path
-                  d="M100,100 C108,88 124,76 142,72 C156,68 168,76 168,90 C168,104 156,114 140,116 C126,118 112,110 100,100 Z"
-                  className="fill-gray-200 dark:fill-gray-500" filter="url(#blurCloud)" opacity="0.6"
-                />
-              </g>
-            ))}
-
-            {/* Middle bands — 6, rotated 60°, offset 22.5° from inner */}
-            {[22.5,82.5,142.5,202.5,262.5,322.5].map(angle => (
-              <g key={angle} transform={`rotate(${angle} 100 100)`}>
-                <path
-                  d="M100,100 C112,82 138,64 162,58 C178,54 190,68 190,88 C190,108 176,122 158,124 C138,126 116,114 100,100 Z"
-                  className="fill-gray-200 dark:fill-gray-500" filter="url(#blurCloud)" opacity="0.45"
-                />
-              </g>
+            {FLOWER_RINGS_A.map((d, i) => (
+              <path
+                key={i}
+                d={d}
+                fill="none"
+                stroke={i % 2 === 0 ? 'var(--brand-sky)' : 'var(--brand-green)'}
+                strokeWidth={1.4}
+                strokeLinejoin="round"
+                opacity={0.55 - i * 0.12}
+              />
             ))}
           </svg>
 
-          {/* Layer 2: outer cloud bands (reverse, more diffuse) */}
+          {/* Capa 2: anillos externos girando en sentido antihorario */}
           <svg
             viewBox="0 0 200 200"
-            className="absolute inset-0 w-full h-full scale-110"
-            style={{ animation: 'cloud-drift-b 9s ease-in-out infinite' }}
+            className="absolute inset-0 w-full h-full"
+            style={{ animation: 'flower-spin-ccw 36s linear infinite' }}
           >
-            {/* Outer bands — 5, rotated 72°, wider and more blurred */}
-            {[0,72,144,216,288].map(angle => (
-              <g key={angle} transform={`rotate(${angle} 100 100)`}>
-                <path
-                  d="M100,100 C118,68 155,44 182,38 C200,34 210,58 208,86 C206,114 185,134 158,136 C130,138 110,118 100,100 Z"
-                  className="fill-gray-200 dark:fill-gray-500" filter="url(#blurCloudWide)" opacity="0.35"
-                />
-              </g>
+            {FLOWER_RINGS_B.map((d, i) => (
+              <path
+                key={i}
+                d={d}
+                fill="none"
+                stroke={i % 2 === 0 ? 'var(--brand-green)' : 'var(--brand-sky)'}
+                strokeWidth={1.2}
+                strokeLinejoin="round"
+                opacity={0.35 - i * 0.1}
+              />
             ))}
           </svg>
 
           {/* Soft glow center */}
-          <div className="absolute inset-0 rounded-full" style={{ background: 'radial-gradient(circle, rgba(229,231,235,0) 25%, rgba(229,231,235,0.4) 65%)' }} />
+          <div className="absolute inset-0 rounded-full" style={{ background: 'radial-gradient(circle, rgba(229,231,235,0) 30%, rgba(229,231,235,0.25) 70%)' }} />
         </div>
       </div>
 

@@ -202,7 +202,6 @@ export function ProfilePageClient(_props: ProfilePageClientProps) {
             variant="action"
             leftIcon={isEditMode ? "Save" : "Edit3"}
             size="md"
-            fullWidth
         >
             {isEditMode ? "Guardar Cambios" : "Editar Información"}
         </BaseButton>
@@ -226,7 +225,7 @@ export function ProfilePageClient(_props: ProfilePageClientProps) {
                 icon={moduleConfig.icon || 'User'}
             />
 
-            <div className="w-full sm:max-w-xs mx-auto">
+            <div className="flex justify-center sm:justify-end">
                 {editBtn}
             </div>
 

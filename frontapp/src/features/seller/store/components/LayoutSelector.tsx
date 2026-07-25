@@ -286,14 +286,14 @@ export default function LayoutSelector({ config, updateConfig, storeId }: Layout
                             </span>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 md:gap-6 max-w-3xl mx-auto">
                             {layouts.map(layout => {
                                 const isLocked = isEmprende && layout.id !== 'emprende';
                                 return (
                                     <label
                                         htmlFor={`layout-${layout.id}`}
                                         key={layout.id}
-                                        className={isLocked ? 'cursor-not-allowed group' : 'cursor-pointer group'}
+                                        className={`h-full ${isLocked ? 'cursor-not-allowed group' : 'cursor-pointer group'}`}
                                         aria-label={`Seleccionar diseño ${layout.name}`}
                                     >
                                         <input
@@ -306,7 +306,7 @@ export default function LayoutSelector({ config, updateConfig, storeId }: Layout
                                             className="sr-only peer"
                                             disabled={isLocked}
                                         />
-                                        <div className={`p-4 sm:p-5 md:p-6 rounded-[2rem] sm:rounded-[2.5rem] border-2 bg-[var(--bg-card)] transition-all relative overflow-hidden ${
+                                        <div className={`h-full flex flex-col p-4 sm:p-5 md:p-6 rounded-[2rem] sm:rounded-[2.5rem] border-2 bg-[var(--bg-card)] transition-all relative overflow-hidden ${
                                             isLocked
                                                 ? 'border-[var(--border-subtle)] opacity-40'
                                                 : 'border-[var(--border-subtle)] hover:border-sky-500/30 dark:hover:border-emerald-500/30 hover:shadow-lg peer-checked:border-sky-500 dark:peer-checked:border-[var(--icons-green)] peer-checked:shadow-2xl peer-checked:shadow-sky-500/20 dark:peer-checked:shadow-emerald-500/30 peer-checked:-translate-y-1'
@@ -331,14 +331,15 @@ export default function LayoutSelector({ config, updateConfig, storeId }: Layout
                                             <p className="text-[9px] font-bold text-[var(--text-secondary)] uppercase mt-1 text-center transition-colors">
                                                 {layout.desc}
                                             </p>
-                                            {layout.isDefault && (
-                                                <div className="flex justify-center mt-2">
+                                            {/* Espacio del badge reservado siempre (visible o no) para que las 4 tarjetas midan igual */}
+                                            <div className="flex justify-center mt-2 h-[22px]">
+                                                {layout.isDefault && (
                                                     <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
                                                         <Icon name="Star" className="w-2.5 h-2.5" />
                                                         Predeterminada
                                                     </span>
-                                                </div>
-                                            )}
+                                                )}
+                                            </div>
                                         </div>
                                     </label>
                                 );

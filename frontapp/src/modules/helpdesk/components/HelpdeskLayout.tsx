@@ -115,6 +115,7 @@ export function HelpdeskLayout({
                 isSending={isSending}
                 isClosing={isClosing}
                 showAdminControls={showAdminControls}
+                className="!rounded-none !border-none !shadow-none"
               />
             ) : (
               <div className="h-full flex items-center justify-center bg-[var(--bg-card)]">

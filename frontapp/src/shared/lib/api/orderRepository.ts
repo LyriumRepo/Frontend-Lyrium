@@ -186,6 +186,13 @@ export const orderApi = {
     return response.data!;
   },
 
+  validateReceipt: async (orderId: number): Promise<{ liriosBonus: number }> => {
+    const response = await request<{ success: boolean; data: { order: OrderResource; lirios_bonus: number } }>(`/orders/${orderId}/validate-receipt`, {
+      method: 'POST',
+    });
+    return { liriosBonus: response.data?.lirios_bonus ?? 0 };
+  },
+
   requestReceipt: async (orderId: number): Promise<{ conversationId: string }> => {
     const response = await request<{ success: boolean; data: { id: string }; message: string }>(`/orders/${orderId}/request-receipt`, {
       method: 'POST',

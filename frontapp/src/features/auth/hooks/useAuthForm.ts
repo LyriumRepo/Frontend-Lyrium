@@ -201,7 +201,7 @@ export function useAuthForm(): UseAuthFormReturn {
                     setRegistroStep('result');
                     setRpaResult({
                         estado: 'REVISION',
-                        score: 50,
+                        score: 0,
                         riesgo: 'MEDIO',
                         etapa: 1,
                         email: data.email,

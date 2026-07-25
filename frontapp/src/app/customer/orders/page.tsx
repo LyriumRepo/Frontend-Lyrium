@@ -5,11 +5,13 @@ import { useEcho } from '@laravel/echo-react';
 import { useAuth } from '@/shared/lib/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import Icon from '@/components/ui/Icon';
+import Pagination from '@/components/ui/Pagination';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import { Eye, Info } from "lucide-react";
 import { orderApi, OrderResource } from '@/shared/lib/api/orderRepository';
 import { BaseDatePicker } from '@/components/ui';
 import ClientRescheduleModal, { SelectedSpecialist } from './ClientRescheduleModal';
+import { TrackingStepper } from '@/shared/components/tracking/TrackingStepper';
 
 // ─── Tipos ───────────────────────────────────────────────────────────────────
 
@@ -27,6 +29,7 @@ type EstadoPedido =
   | 'en_domicilio'
   | 'listo_recojo_agencia'
   | 'listo_recojo_tienda'
+  | 'entregado'
   | 'confirmado_cliente'
   | 'validacion_centro_salud'
   | 'en_camino'
@@ -52,6 +55,10 @@ interface EnvioInfo {
 interface Order {
   id: string;
   originalId: number;
+  /** ISO timestamp — cuándo el cliente validó la recepción (null si aún no) */
+  customerValidatedAt?: string | null;
+  /** manual | email | auto_expired */
+  validationSource?: string | null;
   fecha: string;
   hora: string;
   tienda: string;
@@ -169,9 +176,10 @@ const FLOW_CONFIG: Record<
     accent: 'bg-sky-500/10 border-sky-700/20 text-sky-400',
     steps: [
       { id: 1, label: 'Validado', icon: 'CheckSquare' },
-      { id: 2, label: 'Despacho', icon: 'Package' },
-      { id: 3, label: 'Listo en Tienda', icon: 'Store' },
-      { id: 4, label: 'Confirmado', icon: 'UserCheck' },
+      { id: 2, label: 'Despachado', icon: 'Package' },
+      { id: 3, label: 'En Transporte', icon: 'Truck' },
+      { id: 4, label: 'Listo en Sucursal', icon: 'MapPin' },
+      { id: 5, label: 'Confirmado', icon: 'UserCheck' },
     ],
   },
   atencion_domicilio: {
@@ -204,7 +212,9 @@ const STATUS_MAP: Record<string, EstadoPedido> = {
   confirmed: 'despachado',
   processing: 'en_transporte',
   shipped: 'en_domicilio',
-  delivered: 'confirmado_cliente',
+  // "delivered" solo significa que el vendedor lo marcó entregado; el estado
+  // "confirmado_cliente" se muestra únicamente cuando customer_validated_at existe.
+  delivered: 'entregado',
   cancelled: 'cancelado',
 };
 
@@ -213,9 +223,11 @@ const STATUS_LABEL_MAP: Record<string, string> = {
   confirmed: 'Despachado',
   processing: 'En transporte',
   shipped: 'En domicilio',
-  delivered: 'Confirmado por cliente',
+  delivered: 'Entregado — pendiente de tu confirmación',
   cancelled: 'Cancelado',
 };
+
+const VALIDATED_LABEL = 'Confirmado por cliente';
 
 const STATUS_STEP_MAP: Record<string, number> = {
   pending_seller: 1,
@@ -226,19 +238,11 @@ const STATUS_STEP_MAP: Record<string, number> = {
   cancelled: 0,
 };
 
-const STATUS_STEP_MAP_RETiro: Record<string, number> = {
-  pending_seller: 1,
-  confirmed: 2,
-  processing: 2,
-  shipped: 3,
-  delivered: 4,
-  cancelled: 0,
-};
-
-function getStatusStep(statusKey: string, tipoEnvio: TipoEnvio): number {
-  if (tipoEnvio === 'retiro_en_tienda') {
-    return STATUS_STEP_MAP_RETiro[statusKey] ?? 1;
-  }
+// Retiro en tienda sigue exactamente los mismos 5 estados que domicilio
+// (pending_seller→confirmed→processing→shipped→delivered, nunca "on_the_way"
+// a nivel de producto) — solo cambian las etiquetas/íconos de los pasos 3-5,
+// así que reutiliza STATUS_STEP_MAP tal cual, sin comprimir a 4 pasos.
+function getStatusStep(statusKey: string, _tipoEnvio: TipoEnvio): number {
   return STATUS_STEP_MAP[statusKey] ?? 1;
 }
 
@@ -280,10 +284,14 @@ function mapOrderResourceToOrder(raw: OrderResource): Order {
   const statusKey = item.status ?? 'pending_seller';
   const shippingTypeRaw = item.shipping?.type;
   const tipoEnvio = shippingTypeRaw ? (SHIPPING_TYPE_MAP[shippingTypeRaw] ?? 'domicilio') : 'domicilio';
+  const customerValidatedAt = item.customerValidatedAt ?? item.customer_validated_at ?? null;
+  const validationSource = item.validationSource ?? item.validation_source ?? null;
 
   return {
     id: item.orderNumber ?? item.order_number ?? `#ORD-${item.id}`,
     originalId: Number(item.id),
+    customerValidatedAt,
+    validationSource,
     fecha,
     hora,
     tienda,
@@ -296,9 +304,12 @@ function mapOrderResourceToOrder(raw: OrderResource): Order {
         if (tipoEnvio === 'agencia') return 'listo_recojo_agencia';
       }
       if (statusKey === 'processing' && tipoEnvio === 'retiro_en_tienda') return 'despachado';
+      if (statusKey === 'delivered' && customerValidatedAt) return 'confirmado_cliente';
       return base;
     })(),
-    estadoLabel: item.statusLabel ?? STATUS_LABEL_MAP[statusKey] ?? statusKey,
+    estadoLabel: statusKey === 'delivered'
+      ? (customerValidatedAt ? VALIDATED_LABEL : STATUS_LABEL_MAP.delivered)
+      : (item.statusLabel ?? STATUS_LABEL_MAP[statusKey] ?? statusKey),
     tipo: 'productos',
     tipo_envio: tipoEnvio,
     currentStep: getStatusStep(statusKey, tipoEnvio),
@@ -361,6 +372,8 @@ const getStatusStyles = (estado: EstadoPedido) => {
       return { bg: 'bg-emerald-100', text: 'text-emerald-700', icon: 'MapPin' };
     case 'listo_recojo_tienda':
       return { bg: 'bg-sky-100', text: 'text-sky-700', icon: 'Store' };
+    case 'entregado':
+      return { bg: 'bg-amber-100', text: 'text-amber-700', icon: 'PackageCheck' };
     case 'confirmado_cliente':
       return { bg: 'bg-green-100', text: 'text-green-700', icon: 'CheckCircle' };
 
@@ -410,106 +423,24 @@ function combineAddressParts(parts: (string | null | undefined)[]): string {
 
 // ─── Sub-componente: Stepper de seguimiento ───────────────────────────────────
 
-// Paleta de progresión para pasos completados: de lima claro → verde profundo
-const STEP_COMPLETED_COLORS = [
-  { border: 'border-[#bde90d]', shadow: 'shadow-[#bde90d]/40', dot: '#bde90d' },
-  { border: 'border-[#6BAF7B]', shadow: 'shadow-[#6BAF7B]/40', dot: '#6BAF7B' },
-  { border: 'border-emerald-500', shadow: 'shadow-emerald-400/40', dot: '#10b981' },
-  { border: 'border-teal-500',   shadow: 'shadow-teal-400/40',   dot: '#14b8a6' },
-];
-
 function OrderTrackingCards({
   tipoEnvio,
   currentStep,
+  validated = false,
 }: {
   tipoEnvio: TipoEnvio;
   currentStep: number;
+  validated?: boolean;
 }) {
-  const steps = FLOW_CONFIG[tipoEnvio].steps;
-  const activeIndex = Math.min(Math.max(currentStep - 1, 0), steps.length - 1);
-  const totalSteps = steps.length;
-  const progress = totalSteps > 1
-    ? ((activeIndex) / (totalSteps - 1)) * 100
-    : 100;
+  // Retiro en tienda tiene su propio set de íconos (clipboard→tienda→tienda+pin→persona),
+  // distinto del genérico de domicilio/agencia (que usa una casa en el paso final).
+  const steps = FLOW_CONFIG[tipoEnvio].steps.map((s, i) => ({
+    key: s.id,
+    label: s.label,
+    image: tipoEnvio === 'retiro_en_tienda' ? `retiro-tienda-${i + 1}.png` : `${i + 1}.png`,
+  }));
 
-  return (
-    <div className="space-y-4 animate-card-entrance">
-      <div className="relative flex justify-between items-start pt-2 pb-6">
-        {/* Línea base + barra de progreso con gradiente */}
-        <div className="absolute top-[20px] sm:top-[28px] left-[5%] right-[5%] h-[3px] bg-gray-100 dark:bg-[var(--bg-secondary)] rounded-full z-0">
-          <div
-            className="h-full rounded-full transition-all duration-1000 ease-in-out"
-            style={{
-              width: `${progress}%`,
-              background: 'linear-gradient(to right, #bde90d, #6BAF7B, #2A5A4D)',
-            }}
-          />
-        </div>
-
-        {steps.map((s, i) => {
-          const imgSrc = `/imagenes-seguimiento/${i + 1}.png`;
-          const isCompleted = i < activeIndex;
-          const isActive = i === activeIndex;
-          const color = STEP_COMPLETED_COLORS[Math.min(i, STEP_COMPLETED_COLORS.length - 1)];
-
-          return (
-            <div
-              key={s.id}
-              className="flex flex-col items-center relative z-10 gap-1 sm:gap-2"
-              style={{ width: `${100 / totalSteps}%` }}
-            >
-              {/* Círculo del paso */}
-              <div className="relative">
-                <div
-                  className={`w-10 h-10 sm:w-14 sm:h-14 rounded-full border-2 sm:border-[3px] overflow-hidden transition-all duration-700 flex-shrink-0 flex items-center justify-center bg-white dark:bg-[var(--bg-card)]
-                    ${isCompleted
-                      ? `${color.border} shadow-lg ${color.shadow}`
-                      : isActive
-                        ? 'border-sky-500 dark:border-[var(--turquesa-500)] shadow-lg shadow-sky-400/30 dark:shadow-[var(--turquesa-500)]/30 scale-110 ring-4 ring-sky-200/50 dark:ring-[var(--turquesa-500)]/20'
-                        : 'border-gray-200 dark:border-[var(--border-subtle)] opacity-50'
-                    }`}
-                >
-                  <img
-                    src={imgSrc}
-                    alt={`Paso ${s.id}`}
-                    className={`w-[90%] h-[90%] rounded-full object-cover transition-all duration-700 ${!isCompleted && !isActive ? 'grayscale opacity-60' : ''}`}
-                  />
-                </div>
-
-                {/* Badge de completado */}
-                {isCompleted && (
-                  <div
-                    className="absolute -bottom-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center border-2 border-white dark:border-[var(--bg-card)]"
-                    style={{ backgroundColor: color.dot }}
-                  >
-                    <svg className="w-2 h-2 sm:w-2.5 sm:h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
-                )}
-
-                {/* Anillo pulsante del paso activo */}
-                {isActive && (
-                  <div className="absolute inset-0 rounded-full border-2 border-sky-400 dark:border-[var(--turquesa-500)] animate-ping opacity-25 pointer-events-none" />
-                )}
-              </div>
-
-              {/* Etiqueta del paso */}
-              <p className={`text-center text-[9px] sm:text-[10px] font-black uppercase tracking-wider leading-tight px-0.5 transition-all duration-700
-                ${isActive
-                  ? 'text-sky-600 dark:text-[var(--icons-green)]'
-                  : isCompleted
-                    ? 'text-gray-500 dark:text-gray-400'
-                    : 'text-gray-300 dark:text-[var(--border-subtle)]'
-                }`}>
-                {s.label}
-              </p>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
+  return <TrackingStepper steps={steps} currentStep={currentStep} validated={validated} />;
 }
 
 // ─── Sub-componente: Card de tracking ────────────────────────────────────────
@@ -810,7 +741,7 @@ export default function CustomerOrdersPage() {
   const [showRescheduleModal, setShowRescheduleModal] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [fetchError, setFetchError] = useState('');
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(1);
 
   const handleCloseLegend = useCallback(() => {
     if (isLegendClosing) return;
@@ -850,9 +781,9 @@ export default function CustomerOrdersPage() {
 
   const PAGE_SIZE = 10;
   const totalPages = Math.max(1, Math.ceil(filteredOrders.length / PAGE_SIZE));
-  const safePage = Math.min(page, totalPages - 1);
+  const safePage = Math.min(page, totalPages);
   const paginatedOrders = useMemo(
-    () => filteredOrders.slice(safePage * PAGE_SIZE, (safePage + 1) * PAGE_SIZE),
+    () => filteredOrders.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE),
     [filteredOrders, safePage],
   );
 
@@ -940,13 +871,42 @@ export default function CustomerOrdersPage() {
     }
 
     setFiltered(result);
-    setPage(0);
+    setPage(1);
   }, [filters, orders]);
 
   const openDetails = (order: Order) => {
     setSelected(order);
     setShowPaymentBreakdown(false);
     setShowModal(true);
+  };
+
+  // ─── Validación de recepción por el cliente ───────────────────────────────
+
+  const [validating, setValidating] = useState(false);
+
+  const handleValidateReceipt = async (order: Order) => {
+    if (validating) return;
+    setValidating(true);
+    try {
+      const { liriosBonus } = await orderApi.validateReceipt(order.originalId);
+
+      const applyValidated = (o: Order): Order =>
+        o.originalId === order.originalId
+          ? { ...o, estado: 'confirmado_cliente', estadoLabel: VALIDATED_LABEL, customerValidatedAt: new Date().toISOString(), validationSource: 'manual' }
+          : o;
+
+      setOrders(prev => prev.map(applyValidated));
+      setFiltered(prev => prev.map(applyValidated));
+      setSelected(prev => (prev && prev.originalId === order.originalId ? applyValidated(prev) : prev));
+
+      alert(`¡Gracias por confirmar tu pedido! Has ganado ${liriosBonus} Lirios para tu próxima compra. 🎉`);
+    } catch (err) {
+      console.error('Error al validar recepción:', err);
+      const msg = err instanceof Error && err.message ? err.message : 'No se pudo validar el pedido. Intenta nuevamente.';
+      alert(msg);
+    } finally {
+      setValidating(false);
+    }
   };
 
   const closeModal = () => {
@@ -1033,6 +993,7 @@ export default function CustomerOrdersPage() {
       { value: 'despachado', label: 'Despachado' },
       { value: 'en_transporte', label: 'En transporte' },
       { value: 'en_domicilio', label: 'En domicilio' },
+      { value: 'entregado', label: 'Entregado — pendiente de confirmación' },
       { value: 'confirmado_cliente', label: 'Confirmado por cliente' },
     ],
     agencia: [
@@ -1040,6 +1001,7 @@ export default function CustomerOrdersPage() {
       { value: 'despachado', label: 'Despachado' },
       { value: 'en_transporte', label: 'En transporte' },
       { value: 'listo_recojo_agencia', label: 'Listo para recojo en agencia' },
+      { value: 'entregado', label: 'Entregado — pendiente de confirmación' },
       { value: 'confirmado_cliente', label: 'Confirmado por cliente' },
     ],
     retiro_en_tienda: [
@@ -1047,6 +1009,7 @@ export default function CustomerOrdersPage() {
       { value: 'despachado', label: 'Despachado' },
       { value: 'en_transporte', label: 'En transporte' },
       { value: 'listo_recojo_tienda', label: 'Listo para recoger en tienda' },
+      { value: 'entregado', label: 'Entregado — pendiente de confirmación' },
       { value: 'confirmado_cliente', label: 'Confirmado por cliente' },
     ],
     atencion_domicilio: [
@@ -1234,7 +1197,7 @@ export default function CustomerOrdersPage() {
                   {['ID Pedido', 'Fecha', 'Hora', 'Tienda', 'Detalle', 'Total', 'Tipo Envío', 'Estado', 'Acciones'].map((h) => (
                     <th
                       key={h}
-                      className="px-6 py-5 text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest"
+                      className="px-6 py-5 text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest whitespace-nowrap"
                     >
                       {h}
                     </th>
@@ -1248,39 +1211,19 @@ export default function CustomerOrdersPage() {
 
                   return (
                     <tr key={order.id} className="border-b border-gray-50 dark:border-[var(--border-subtle)] hover:bg-gray-50 dark:hover:bg-[#182420] transition-colors">
-                      <td className="py-4 px-4">
+                      <td className="py-4 px-4 whitespace-nowrap">
                         <span className="text-sm font-black text-sky-600 dark:text-[var(--icons-green)]">{order.id}</span>
                       </td>
-                      <td className="py-4 px-4 font-bold text-gray-700 dark:text-[var(--text-primary)]">{order.fecha}</td>
-                      <td className="py-4 px-4 font-bold text-gray-700 dark:text-[var(--text-primary)]">{order.hora}</td>
-                      <td className="py-4 px-4 font-bold text-gray-800 dark:text-[var(--text-primary)]">
-                        {order.tienda.length > 5 ? (
-                          <div className="relative group w-[50px]">
-                            <span className="block truncate whitespace-nowrap overflow-hidden text-ellipsis">{order.tienda}</span>
-                            <div className="pointer-events-none absolute left-1/2 top-full z-50 mt-2 hidden -translate-x-1/2 whitespace-nowrap rounded-xl bg-black px-3 py-2 text-xs font-bold text-white shadow-lg group-hover:block">
-                              {order.tienda}
-                              <div className="absolute -top-1 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 bg-black" />
-                            </div>
-                          </div>
-                        ) : (
-                          <span>{order.tienda}</span>
-                        )}
+                      <td className="py-4 px-4 font-bold text-gray-700 dark:text-[var(--text-primary)] whitespace-nowrap">{order.fecha}</td>
+                      <td className="py-4 px-4 font-bold text-gray-700 dark:text-[var(--text-primary)] whitespace-nowrap">{order.hora}</td>
+                      <td className="py-4 px-4 font-bold text-gray-800 dark:text-[var(--text-primary)] whitespace-nowrap">
+                        {order.tienda}
                       </td>
-                      <td className="py-4 px-4 font-bold text-gray-600 dark:text-[var(--text-muted)]">
-                        {order.detalle.length > 5 ? (
-                          <div className="relative group w-[50px]">
-                            <span className="block truncate whitespace-nowrap overflow-hidden text-ellipsis">{order.detalle}</span>
-                            <div className="pointer-events-none absolute left-1/2 top-full z-50 mt-2 hidden -translate-x-1/2 whitespace-nowrap rounded-xl bg-black px-3 py-2 text-xs font-bold text-white shadow-lg group-hover:block">
-                              {order.detalle}
-                              <div className="absolute -top-1 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 bg-black" />
-                            </div>
-                          </div>
-                        ) : (
-                          <span>{order.detalle}</span>
-                        )}
+                      <td className="py-4 px-4 font-bold text-gray-600 dark:text-[var(--text-muted)] whitespace-nowrap">
+                        {order.detalle}
                       </td>
-                      <td className="py-4 px-4 font-bold text-gray-900 dark:text-[var(--text-primary)]">{order.total}</td>
-                      <td className="py-4 px-4">
+                      <td className="py-4 px-4 font-bold text-gray-900 dark:text-[var(--text-primary)] whitespace-nowrap">{order.total}</td>
+                      <td className="py-4 px-4 whitespace-nowrap">
                         {tipoConfig ? (() => {
                           const servicio = tipoConfig.label
                             .replace('Entrega a ', '')
@@ -1308,7 +1251,7 @@ export default function CustomerOrdersPage() {
                           <span className="text-[10px] font-bold text-gray-400">Servicio</span>
                         )}
                       </td>
-                      <td className="py-4 px-4">
+                      <td className="py-4 px-4 whitespace-nowrap">
                         {order.estadoLabel.length > 5 ? (
                           <div className="relative group w-[90px]">
                             <span className={`flex items-center gap-1 block truncate whitespace-nowrap overflow-hidden text-ellipsis px-2 py-1 rounded-full ${statusStyles.bg} ${statusStyles.text} text-[10px] font-black uppercase tracking-wider`}>
@@ -1404,30 +1347,7 @@ export default function CustomerOrdersPage() {
             </div>
 
             {totalPages > 1 && (
-              <div className="flex items-center justify-between px-1 pt-4">
-                <span className="text-[10px] font-bold text-[var(--text-secondary)]">
-                  {filteredOrders.length} pedido{filteredOrders.length !== 1 ? 's' : ''} · Pág. {safePage + 1}/{totalPages}
-                </span>
-                <div className="flex items-center gap-1">
-                  <button
-                    onClick={() => setPage((p) => Math.max(0, p - 1))}
-                    disabled={safePage === 0}
-                    className="px-3 py-1.5 rounded-xl text-[11px] font-bold text-[var(--text-secondary)] bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-sky-300/30 hover:text-sky-500 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-                  >
-                    Anterior
-                  </button>
-                  <span className="px-2 text-[11px] font-bold text-[var(--text-secondary)]">
-                    Pág. {safePage + 1} de {totalPages}
-                  </span>
-                  <button
-                    onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
-                    disabled={safePage >= totalPages - 1}
-                    className="px-3 py-1.5 rounded-xl text-[11px] font-bold text-[var(--text-secondary)] bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-sky-300/30 hover:text-sky-500 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-                  >
-                    Siguiente
-                  </button>
-                </div>
-              </div>
+              <Pagination page={safePage} totalPages={totalPages} onPageChange={setPage} totalItems={filteredOrders.length} itemLabel="pedidos" />
             )}
             </>
           )}
@@ -1436,7 +1356,7 @@ export default function CustomerOrdersPage() {
 
       {(showLegendModal || isLegendClosing) && (
         <div
-          className={`fixed inset-0 bg-black/40 backdrop-blur-xl z-50 flex justify-center items-center p-4 lg:p-6 ${isLegendClosing ? 'animate-fade-out-overlay' : 'animate-fadeIn'}`}
+          className={`fixed inset-0 bg-black/40 backdrop-blur-xl z-[99999] flex justify-center items-center p-4 lg:p-6 ${isLegendClosing ? 'animate-fade-out-overlay' : 'animate-fadeIn'}`}
           onClick={handleCloseLegend}
           onKeyDown={(e) => { if (e.key === 'Escape') handleCloseLegend(); }}
           role="dialog"
@@ -1451,7 +1371,7 @@ export default function CustomerOrdersPage() {
             aria-modal="true"
             tabIndex={-1}
           >
-            <div className="bg-gradient-to-r from-sky-500 via-sky-500 to-sky-300 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-6 text-white relative flex-shrink-0">
+            <div className="bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--verde-500)] p-6 text-white relative flex-shrink-0">
               <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full -mr-24 -mt-24 blur-3xl" />
               <div className="relative z-10 flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -1460,7 +1380,7 @@ export default function CustomerOrdersPage() {
                   </div>
                   <div>
                     <h3 className="text-xl font-black tracking-tighter leading-none">Leyenda</h3>
-                    <p className="text-[9px] font-bold text-sky-100 uppercase tracking-[0.2em] mt-1">
+                    <p className="text-[9px] font-bold text-white/80 uppercase tracking-[0.2em] mt-1">
                       Tipos de envío y estados
                     </p>
                   </div>
@@ -1468,7 +1388,7 @@ export default function CustomerOrdersPage() {
 
                 <button
                   onClick={handleCloseLegend}
-                  className="w-9 h-9 rounded-full bg-black/10 flex items-center justify-center hover:bg-black/20 transition-all"
+                  className="w-9 h-9 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center hover:bg-white/30 transition-all"
                 >
                   <Icon name="X" className="w-5 h-5 text-white" />
                 </button>
@@ -1593,7 +1513,7 @@ export default function CustomerOrdersPage() {
       
       {showModal && selectedOrder && (
         <div
-          className="fixed inset-0 bg-black/40 backdrop-blur-xl z-[60] flex justify-center items-center p-4 lg:p-6 animate-fadeIn"
+          className="fixed inset-0 bg-black/40 backdrop-blur-xl z-[99999] flex justify-center items-center p-4 lg:p-6 animate-fadeIn"
           onClick={closeModal}
           onKeyDown={(e) => { if (e.key === 'Escape') closeModal(); }}
           role="dialog"
@@ -1608,7 +1528,7 @@ export default function CustomerOrdersPage() {
             aria-modal="true"
             tabIndex={-1}
           >
-            <div className="bg-gradient-to-r from-sky-500 via-sky-500 to-sky-300 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-6 text-white relative flex-shrink-0">
+            <div className="bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--verde-500)] p-6 text-white relative flex-shrink-0">
               <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full -mr-24 -mt-24 blur-3xl" />
               <div className="relative z-10 flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -1617,12 +1537,12 @@ export default function CustomerOrdersPage() {
                   </div>
                   <div>
                     <h3 className="text-xl font-black tracking-tighter leading-none">Detalles del Pedido</h3>
-                    <p className="text-[9px] font-bold text-sky-100 uppercase tracking-[0.2em] mt-1">Información detallada</p>
+                    <p className="text-[9px] font-bold text-white/80 uppercase tracking-[0.2em] mt-1">Información detallada</p>
                   </div>
                 </div>
                 <button
                   onClick={closeModal}
-                  className="w-9 h-9 rounded-full bg-black/10 flex items-center justify-center hover:bg-black/20 transition-all"
+                  className="w-9 h-9 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center hover:bg-white/30 transition-all"
                 >
                   <Icon name="X" className="w-5 h-5 text-white" />
                 </button>
@@ -1677,7 +1597,11 @@ export default function CustomerOrdersPage() {
                       </button>
                     )}
                   </div>
-                  <OrderTrackingCards tipoEnvio={selectedOrder.tipo_envio} currentStep={selectedOrder.currentStep} />
+                  <OrderTrackingCards
+                    tipoEnvio={selectedOrder.tipo_envio}
+                    currentStep={selectedOrder.currentStep}
+                    validated={!!selectedOrder.customerValidatedAt}
+                  />
                   {/* Info badge: reprogramaciones restantes */}
                   {canShowRescheduleButton(selectedOrder) && (
                     <div className="mt-4 flex items-center gap-2 px-3 py-2 rounded-xl bg-white dark:bg-[var(--bg-secondary)] border border-gray-100 dark:border-[var(--border-subtle)]">
@@ -1791,6 +1715,17 @@ export default function CustomerOrdersPage() {
                   </div>
                 </div>
               </div>
+
+              {selectedOrder.estado === 'entregado' && (
+                <button
+                  onClick={() => handleValidateReceipt(selectedOrder)}
+                  disabled={validating}
+                  className="w-full py-5 rounded-2xl bg-gradient-to-r from-emerald-500 to-green-600 text-white font-black text-xs uppercase tracking-[0.2em] hover:shadow-lg hover:shadow-emerald-200 dark:hover:shadow-emerald-500/30 transition-all flex items-center justify-center gap-3 disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  <Icon name="BadgeCheck" className="w-5 h-5" />
+                  {validating ? 'Validando…' : 'Validar Recepción y Ganar Lirios'}
+                </button>
+              )}
 
               {selectedOrder.estado !== 'cancelado' && (
                 <button

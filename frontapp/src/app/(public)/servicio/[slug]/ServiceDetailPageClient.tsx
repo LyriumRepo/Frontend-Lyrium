@@ -907,64 +907,6 @@ function BookingModal({
           )}
         </div>
       )}
-      {service.is_home_service && (
-        <div className="border-t border-gray-100 dark:border-gray-800 pt-3 space-y-3">
-          <p className="text-xs font-bold text-cyan-600 dark:text-cyan-400 uppercase tracking-wide flex items-center gap-1">
-            <MapPin className="w-3 h-3" /> Dirección de atención
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-            <div>
-              <label className="text-xs font-bold text-gray-500 dark:text-[var(--text-muted)] uppercase tracking-wide mb-1 block">Departamento *</label>
-              <CustomSelect
-                value={addressDepto}
-                onChange={(v) => { setAddressDepto(v); setAddressProv(''); setAddressDist(''); }}
-                options={PERU_DEPTOS}
-                placeholder="Seleccionar..."
-              />
-            </div>
-            <div>
-              <label className="text-xs font-bold text-gray-500 dark:text-[var(--text-muted)] uppercase tracking-wide mb-1 block">Provincia *</label>
-              <CustomSelect
-                value={addressProv}
-                onChange={(v) => { setAddressProv(v); setAddressDist(''); }}
-                options={provincias}
-                placeholder="Seleccionar..."
-                disabled={!addressDepto}
-              />
-            </div>
-            <div>
-              <label className="text-xs font-bold text-gray-500 dark:text-[var(--text-muted)] uppercase tracking-wide mb-1 block">Distrito *</label>
-              <CustomSelect
-                value={addressDist}
-                onChange={(v) => setAddressDist(v)}
-                options={distritos}
-                placeholder="Seleccionar..."
-                disabled={!addressProv}
-              />
-            </div>
-          </div>
-          <div>
-            <label className="text-xs font-bold text-gray-500 dark:text-[var(--text-muted)] uppercase tracking-wide mb-1 block">Dirección *</label>
-            <input
-              type="text"
-              value={serviceAddress}
-              onChange={(e) => setServiceAddress(e.target.value)}
-              placeholder="Ej: Av. La Marina 1234"
-              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[var(--bg-card)] text-sm text-gray-700 dark:text-[var(--text-primary)] focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/30 outline-none transition-all"
-            />
-          </div>
-          <div>
-            <label className="text-xs font-bold text-gray-500 dark:text-[var(--text-muted)] uppercase tracking-wide mb-1 block">Referencia (opcional)</label>
-            <input
-              type="text"
-              value={addressRef}
-              onChange={(e) => setAddressRef(e.target.value)}
-              placeholder="Ej: Cerca al parque central"
-              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[var(--bg-card)] text-sm text-gray-700 dark:text-[var(--text-primary)] focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/30 outline-none transition-all"
-            />
-          </div>
-        </div>
-      )}
       {paymentError && (
         <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 flex items-start gap-2">
           <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
@@ -1182,7 +1124,7 @@ function BookingModal({
         aria-modal="true"
         tabIndex={-1}
       >
-        <div className="shrink-0 bg-gradient-to-r from-sky-500 to-sky-400 p-4">
+        <div className="shrink-0 bg-gradient-to-r from-sky-500 to-sky-400 dark:from-emerald-700 dark:to-teal-600 p-4">
           <div className="flex items-center justify-between">
             <h2 className="text-white font-bold flex items-center gap-2">
               <Calendar className="w-4 h-4" /> Adquirir cita
@@ -1289,7 +1231,7 @@ function SpecialistProfileModal({
         aria-modal="true"
         tabIndex={-1}
       >
-        <div className="shrink-0 bg-gradient-to-r from-sky-500 to-sky-400 p-4 flex items-center justify-between">
+        <div className="shrink-0 bg-gradient-to-r from-sky-500 to-sky-400 dark:from-emerald-700 dark:to-teal-600 p-4 flex items-center justify-between">
           <h2 className="text-white font-bold flex items-center gap-2">
             <User className="w-4 h-4" /> Perfil del especialista
           </h2>

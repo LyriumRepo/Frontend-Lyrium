@@ -13,11 +13,15 @@ import type { UnifiedTicket, UnifiedMessage } from '@/modules/chat/types';
 function TicketList({
     tickets,
     activeTicketId,
-    onSelect
+    onSelect,
+    onNewTicket,
+    onShowLegend,
 }: {
     tickets: SellerTicket[];
     activeTicketId: string | null;
     onSelect: (id: string) => void;
+    onNewTicket: () => void;
+    onShowLegend: () => void;
 }) {
     const getStatusColor = (status: TicketStatus) => {
         switch (status) {
@@ -63,6 +67,32 @@ function TicketList({
     return (
         <div className="flex flex-col h-full min-h-0 rounded-[2rem] lg:rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm overflow-hidden" style={{ background: 'linear-gradient(180deg, color-mix(in srgb,#9cb04e 4%,var(--bg-card)) 0%, var(--bg-card) 100%)' }}>
           <div className="h-1 w-full shrink-0 bg-gradient-to-r from-[#9cb04e] via-[#64c695] to-[#499bbf]" />
+
+            {/* ── Acciones (nuevo ticket / leyenda) ── */}
+            <div className="px-4 pt-3 pb-2 flex items-center gap-2 shrink-0">
+                <button
+                    onClick={onNewTicket}
+                    title="Nuevo Ticket"
+                    className="md:hidden w-9 h-9 flex items-center justify-center rounded-xl bg-[var(--turquesa-500)]/10 text-[var(--turquesa-500)] hover:bg-[var(--turquesa-500)]/20 transition-colors shrink-0"
+                >
+                    <Icon name="Plus" className="w-4 h-4" />
+                </button>
+                <button
+                    onClick={onNewTicket}
+                    className="hidden md:flex flex-1 items-center justify-center gap-1.5 px-3 py-2 bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--verde-500)] text-white rounded-xl font-bold text-[10px] uppercase tracking-wider hover:opacity-90 transition-all shadow-sm"
+                >
+                    <Icon name="Plus" className="w-3.5 h-3.5" />
+                    Nuevo Ticket
+                </button>
+                <button
+                    onClick={onShowLegend}
+                    title="Leyenda"
+                    className="w-9 h-9 flex items-center justify-center rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--turquesa-500)] hover:border-[var(--turquesa-500)] transition-all shadow-sm shrink-0"
+                >
+                    <Icon name="Info" className="w-4 h-4" />
+                </button>
+            </div>
+
             {/* ── Cabecera con filtro ── */}
             <div className="p-5 border-b border-[var(--border-subtle)]">
                 <div className="flex items-center justify-between">
@@ -222,11 +252,13 @@ function toUnifiedHelpTicket(ticket: SellerTicket): UnifiedTicket {
 function NewTicketForm({
     onSubmit,
     onCancel,
-    isSubmitting
+    isSubmitting,
+    error,
 }: {
     onSubmit: (data: { subject: string; description: string; category: string }) => void;
     onCancel: () => void;
     isSubmitting: boolean;
+    error?: string | null;
 }) {
     const [subject, setSubject] = useState('');
     const [description, setDescription] = useState('');
@@ -267,6 +299,8 @@ function NewTicketForm({
                         onChange={(e) => setSubject(e.target.value)}
                         placeholder="Describe brevemente el problema"
                         className="w-full px-4 py-2.5 bg-[var(--bg-secondary)] rounded-xl outline-none text-sm font-medium text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--turquesa-500)]/20 border border-[var(--border-subtle)]"
+                        minLength={5}
+                        maxLength={200}
                         required
                     />
                 </div>
@@ -279,9 +313,17 @@ function NewTicketForm({
                         placeholder="Explica detalladamente tu problema..."
                         rows={5}
                         className="w-full px-4 py-2.5 bg-[var(--bg-secondary)] rounded-xl outline-none text-sm font-medium text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--turquesa-500)]/20 border border-[var(--border-subtle)] resize-none"
+                        minLength={10}
+                        maxLength={5000}
                         required
                     />
                 </div>
+
+                {error && (
+                    <p className="text-xs font-semibold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-xl px-3 py-2">
+                        {error}
+                    </p>
+                )}
 
                 <div className="flex gap-2 pt-4">
                     <button
@@ -316,6 +358,7 @@ export function HelpPageClient() {
         handleSendMessage,
         handleCreateTicket,
         handleCloseTicket,
+        error,
         openTicketsCount,
         fetchTicketDetail,
     } = useSellerHelp();
@@ -369,34 +412,6 @@ export function HelpPageClient() {
                 icon="Headset"
             />
 
-            {!showNewTicketForm && (
-                <div className={`${!isMobileListVisible ? 'hidden md:flex' : 'flex'} bg-[var(--bg-card)] p-3 rounded-[1.5rem] shadow-sm border border-[var(--border-subtle)] items-center justify-center md:justify-start gap-2 mb-4 md:w-72 lg:w-96`}>
-                    {/* Mobile / Tablet: solo ícono */}
-                    <button
-                        onClick={() => { setShowNewTicketForm(true); setIsMobileListVisible(false); }}
-                        title="Nuevo Ticket"
-                        className="md:hidden w-9 h-9 flex items-center justify-center rounded-xl bg-white dark:bg-[var(--bg-secondary)] text-[var(--turquesa-500)] border border-[var(--border-subtle)] hover:bg-[var(--turquesa-500)]/10 transition-colors shadow-sm"
-                    >
-                        <Icon name="Plus" className="w-4 h-4" />
-                    </button>
-                    {/* Desktop: texto completo */}
-                    <button
-                        onClick={() => setShowNewTicketForm(true)}
-                        className="hidden md:flex items-center gap-1.5 px-4 py-2 bg-white dark:bg-[var(--bg-secondary)] text-[var(--turquesa-500)] rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-[var(--turquesa-500)]/10 transition-colors border border-[var(--border-subtle)] shadow-sm"
-                    >
-                        <Icon name="Plus" className="w-3.5 h-3.5" />
-                        Nuevo Ticket
-                    </button>
-                    <button
-                        onClick={() => setShowLegend(true)}
-                        title="Leyenda"
-                        className="w-9 h-9 flex items-center justify-center rounded-xl bg-white dark:bg-[var(--bg-secondary)] border border-[var(--border-subtle)] text-gray-500 dark:text-[var(--text-secondary)] hover:text-[var(--turquesa-500)] dark:hover:text-[var(--icons-green)] hover:border-[var(--turquesa-500)] dark:hover:border-[var(--icons-green)] transition-all shadow-sm"
-                    >
-                        <Icon name="Info" className="w-4 h-4" />
-                    </button>
-                </div>
-            )}
-
             <div className="flex-1 overflow-hidden">
 
                 {/* ─────────────────────────────────────────────────────────────────
@@ -409,15 +424,21 @@ export function HelpPageClient() {
                                 tickets={tickets}
                                 activeTicketId={activeTicketId}
                                 onSelect={setActiveTicketId}
+                                onNewTicket={() => { setShowNewTicketForm(true); setIsMobileListVisible(false); }}
+                                onShowLegend={() => setShowLegend(true)}
                             />
                         </div>
                     )}
-                    <div className="flex-1 min-w-0">
+                    <div className="flex-1 min-w-0 flex flex-col">
                         {showNewTicketForm ? (
                             <NewTicketForm
-                                onSubmit={(data) => { handleCreateTicket(data); setShowNewTicketForm(false); }}
+                                onSubmit={async (data) => {
+                                    const ok = await handleCreateTicket(data);
+                                    if (ok) setShowNewTicketForm(false);
+                                }}
                                 onCancel={() => setShowNewTicketForm(false)}
                                 isSubmitting={isSending}
+                                error={error}
                             />
                         ) : activeTicket ? (
                             <ChatView
@@ -455,20 +476,25 @@ export function HelpPageClient() {
                         tickets={tickets}
                         activeTicketId={activeTicketId}
                         onSelect={handleSelectTicket}
+                        onNewTicket={() => { setShowNewTicketForm(true); setIsMobileListVisible(false); }}
+                        onShowLegend={() => setShowLegend(true)}
                     />
                 </div>
 
                 {/* Panel detalle / formulario */}
-                <div className={`md:hidden h-full ${(!isMobileListVisible || showNewTicketForm) ? 'block' : 'hidden'}`}>
+                <div className={`md:hidden h-full ${(!isMobileListVisible || showNewTicketForm) ? 'flex flex-col' : 'hidden'}`}>
                     {showNewTicketForm ? (
                         <NewTicketForm
-                            onSubmit={(data) => {
-                                handleCreateTicket(data);
-                                setShowNewTicketForm(false);
-                                setIsMobileListVisible(true);
+                            onSubmit={async (data) => {
+                                const ok = await handleCreateTicket(data);
+                                if (ok) {
+                                    setShowNewTicketForm(false);
+                                    setIsMobileListVisible(true);
+                                }
                             }}
                             onCancel={() => { setShowNewTicketForm(false); setIsMobileListVisible(true); }}
                             isSubmitting={isSending}
+                            error={error}
                         />
                     ) : activeTicket ? (
                         <ChatView
@@ -487,34 +513,34 @@ export function HelpPageClient() {
             </div>
 
             {showLegend && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4" onClick={() => setShowLegend(false)} onKeyDown={(e) => { if (e.key === 'Escape') setShowLegend(false); }} role="dialog" aria-modal="true" tabIndex={-1}>
-                    <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-[1.5rem] sm:rounded-[3rem] max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl" onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
-                        <div className="bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--turquesa-500)]/70 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-4 sm:p-8 text-white relative">
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[99999] flex items-center justify-center p-4" onClick={() => setShowLegend(false)} onKeyDown={(e) => { if (e.key === 'Escape') setShowLegend(false); }} role="dialog" aria-modal="true" tabIndex={-1}>
+                    <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-[2rem] max-w-lg w-full max-h-[85vh] shadow-2xl overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
+                        <div className="bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--verde-500)] p-4 sm:p-6 text-white relative flex-shrink-0">
                             <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl" />
                             <div className="relative z-10 flex items-center justify-between">
-                                <div className="flex items-center gap-2.5 sm:gap-4">
-                                    <div className="w-9 h-9 sm:w-12 sm:h-12 bg-white/20 backdrop-blur-md rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0">
-                                        <Icon name="Headset" className="w-4.5 h-4.5 sm:w-6 sm:h-6" />
+                                <div className="flex items-center gap-2.5 sm:gap-3">
+                                    <div className="w-9 h-9 sm:w-10 sm:h-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center shrink-0">
+                                        <Icon name="Headset" className="w-4 h-4 sm:w-5 sm:h-5" />
                                     </div>
                                     <div>
-                                        <h3 className="text-base sm:text-2xl font-black tracking-tighter">Soporte Lyrium</h3>
+                                        <h3 className="text-base sm:text-lg font-black tracking-tighter">Soporte Lyrium</h3>
                                         <p className="text-[8px] sm:text-[10px] font-bold text-white/70 uppercase tracking-[0.2em]">¿Para qué sirve este canal?</p>
                                     </div>
                                 </div>
-                                <button onClick={() => setShowLegend(false)} className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-black/10 flex items-center justify-center hover:bg-black/20 shrink-0">
+                                <button onClick={() => setShowLegend(false)} className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center hover:bg-white/30 shrink-0 transition-all active:scale-90">
                                     <Icon name="X" className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                                 </button>
                             </div>
                         </div>
-                        <div className="p-4 sm:p-8 space-y-2.5 sm:space-y-4">
+                        <div className="p-4 sm:p-6 space-y-2.5 sm:space-y-3 overflow-y-auto flex-1">
                             {[
                                 { icon: 'Settings', title: 'Incidencias técnicas', desc: 'Reporta errores de la plataforma, fallas en el sistema, problemas con módulos o funcionalidades.' },
                                 { icon: 'Shield', title: 'Soporte administrativo', desc: 'Consulta sobre validaciones, configuraciones de tienda, actualizaciones de documentación o estados de aprobación.' },
                                 { icon: 'CreditCard', title: 'Facturación y planes', desc: 'Resuelve dudas sobre tu suscripción, planes de vendedor o comisiones.' },
                                 { icon: 'AlertCircle', title: 'No gestiona ventas', desc: 'Para coordinar pedidos, devoluciones o postventa con clientes, usa el Chat con Clientes.' },
                             ].map((item) => (
-                                <div key={item.title} className="flex items-start gap-2.5 sm:gap-4 p-2.5 sm:p-4 bg-gray-50 dark:bg-[var(--bg-muted)]/50 rounded-xl sm:rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)]">
-                                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-white dark:bg-[var(--bg-secondary)] flex items-center justify-center shadow-sm border border-gray-100 dark:border-[var(--border-subtle)] shrink-0">
+                                <div key={item.title} className="flex items-start gap-2.5 sm:gap-3 p-2.5 sm:p-3 bg-gray-50 dark:bg-[var(--bg-muted)]/50 rounded-xl sm:rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)]">
+                                    <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-white dark:bg-[var(--bg-secondary)] flex items-center justify-center shadow-sm border border-gray-100 dark:border-[var(--border-subtle)] shrink-0">
                                         <Icon name={item.icon as any} className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--turquesa-500)] dark:text-[var(--icons-green)]" />
                                     </div>
                                     <div>

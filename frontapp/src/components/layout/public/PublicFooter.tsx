@@ -23,26 +23,26 @@ export default function PublicFooter() {
                         <Image src="/img/logo_lyrium_blanco_01-scaled.webp" alt="Lyrium" width={200} height={48} className="h-10 md:h-12 w-auto" />
                     </div>
                     <p className="text-sm text-sky-100 dark:text-[var(--text-secondary)] max-w-xs">Biomarketplace de productos y servicios saludables.</p>
-                    <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 mt-2">
-                        <a href="https://www.instagram.com/lyrium_biomarketplace/" target="_blank" rel="noopener noreferrer" className="social-icon-btn w-9 h-9 flex items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 dark:text-[var(--text-secondary)] dark:hover:text-[#9BAF9F] transition-colors" title="Síguenos en Instagram">
-                            <Icon name="Instagram" className="text-lg" />
+                    <div className="flex flex-nowrap items-center justify-center md:justify-start gap-1.5 min-[360px]:gap-2 mt-2">
+                        <a href="https://www.instagram.com/lyrium_biomarketplace/" target="_blank" rel="noopener noreferrer" className="social-icon-btn w-8 h-8 shrink-0 flex items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 dark:text-[var(--text-secondary)] dark:hover:text-[#9BAF9F] transition-colors" title="Síguenos en Instagram">
+                            <Icon name="Instagram" className="text-base" />
                         </a>
-                        <a href="https://www.facebook.com/people/Lyrium-Biomarketplace/61579938364350/" target="_blank" rel="noopener noreferrer" className="social-icon-btn w-9 h-9 flex items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 dark:text-[var(--text-secondary)] dark:hover:text-[#9BAF9F] transition-colors" title="Síguenos en Facebook">
-                            <Icon name="Facebook" className="text-lg" />
+                        <a href="https://www.facebook.com/people/Lyrium-Biomarketplace/61579938364350/" target="_blank" rel="noopener noreferrer" className="social-icon-btn w-8 h-8 shrink-0 flex items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 dark:text-[var(--text-secondary)] dark:hover:text-[#9BAF9F] transition-colors" title="Síguenos en Facebook">
+                            <Icon name="Facebook" className="text-base" />
                         </a>
-                        <a href="https://www.tiktok.com/@lyrium.biomarkep" target="_blank" rel="noopener noreferrer" className="social-icon-btn w-9 h-9 flex items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 dark:text-[var(--text-secondary)] dark:hover:text-[#9BAF9F] transition-colors" title="Síguenos en TikTok">
-                            <Icon name="TiktokLogo" className="text-lg" />
+                        <a href="https://www.tiktok.com/@lyrium.biomarkep" target="_blank" rel="noopener noreferrer" className="social-icon-btn w-8 h-8 shrink-0 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors" title="Síguenos en TikTok">
+                            <Image src="/img/tiktok-icon.png" alt="TikTok" width={16} height={16} className="w-4 h-4 object-contain brightness-0 invert" />
                         </a>
                         <button
                             type="button"
                             onClick={() => window.dispatchEvent(new CustomEvent('lyrium:open-chatbot'))}
-                            className="social-icon-btn w-9 h-9 flex items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 dark:text-[var(--text-secondary)] dark:hover:text-[#9BAF9F] transition-colors"
+                            className="social-icon-btn w-8 h-8 shrink-0 flex items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 dark:text-[var(--text-secondary)] dark:hover:text-[#9BAF9F] transition-colors"
                             title="Chatea con nuestro asistente virtual"
                         >
-                            <Icon name="MessageCircle" className="text-lg" />
+                            <Icon name="Bot" className="text-base" />
                         </button>
-                        <a href="https://wa.me/51937093420" target="_blank" rel="noopener noreferrer" className="social-icon-btn w-9 h-9 flex items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 dark:text-[var(--text-secondary)] dark:hover:text-[#9BAF9F] transition-colors" title="Escríbenos por WhatsApp">
-                            <Icon name="WhatsAppLogo" className="text-lg" />
+                        <a href="https://wa.me/51937093420" target="_blank" rel="noopener noreferrer" className="social-icon-btn w-8 h-8 shrink-0 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors" title="Escríbenos por WhatsApp">
+                            <Image src="/img/whatsapp-icon.png" alt="WhatsApp" width={16} height={16} className="w-4 h-4 object-contain brightness-0 invert" />
                         </a>
                     </div>
                 </div>

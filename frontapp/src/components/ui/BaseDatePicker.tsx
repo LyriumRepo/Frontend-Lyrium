@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 
 interface BaseDatePickerProps {
@@ -19,44 +19,69 @@ export default function BaseDatePicker({ label, value, onChange, name, className
   const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0, width: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
   const calendarRef = useRef<HTMLDivElement>(null);
+  const rafRef = useRef<number>(0);
 
   const selectedDate = value ? new Date(value + 'T12:00:00') : null;
   const year = viewDate.getFullYear();
   const month = viewDate.getMonth();
   const today = new Date();
 
-  const updatePosition = useCallback(() => {
+  /** Calcula la posición usando una altura de calendario dada (estimada o medida). */
+  const computePosition = useCallback((calH: number) => {
     if (!containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
-    const calH = 340; // altura estimada del calendario
-    const spaceBelow = window.innerHeight - rect.bottom;
-    const top = spaceBelow >= calH
-      ? rect.bottom + window.scrollY + 6
-      : rect.top + window.scrollY - calH - 6;
-    setDropdownPos({ top, left: rect.left + window.scrollX, width: rect.width });
+    const gap = 6;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const calW = Math.min(280, vw - 16);
+    const spaceBelow = vh - rect.bottom;
+    const spaceAbove = rect.top;
+    const opensAbove = spaceBelow < calH + gap && spaceAbove > spaceBelow;
+    const top = opensAbove
+      ? Math.max(8, rect.top - calH - gap)
+      : Math.min(rect.bottom + gap, Math.max(8, vh - calH - 8));
+    let left = rect.left + (rect.width - calW) / 2;
+    left = Math.max(8, Math.min(left, vw - calW - 8));
+    setDropdownPos({ top, left, width: calW });
   }, []);
+
+  // Estimación inicial (sin medir aún el calendario real) — se corrige con
+  // la altura real en el useLayoutEffect de abajo antes del primer paint,
+  // evitando el flash en top:0/left:0 que causaba el bug de desalineación.
+  const updatePosition = useCallback(() => {
+    cancelAnimationFrame(rafRef.current);
+    computePosition(340);
+  }, [computePosition]);
 
   useEffect(() => {
     if (!isOpen) return;
     updatePosition();
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as Node;
-      if (
-        containerRef.current && !containerRef.current.contains(target) &&
-        calendarRef.current && !calendarRef.current.contains(target)
-      ) {
-        setIsOpen(false);
-      }
+      if (containerRef.current?.contains(target)) return;
+      if (calendarRef.current?.contains(target)) return;
+      setIsOpen(false);
     };
-    window.addEventListener('scroll', updatePosition, true);
-    window.addEventListener('resize', updatePosition);
+    const onScroll = () => updatePosition();
+    window.addEventListener('scroll', onScroll, true);
+    window.addEventListener('resize', onScroll);
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
-      window.removeEventListener('scroll', updatePosition, true);
-      window.removeEventListener('resize', updatePosition);
+      cancelAnimationFrame(rafRef.current);
+      window.removeEventListener('scroll', onScroll, true);
+      window.removeEventListener('resize', onScroll);
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [isOpen, updatePosition]);
+
+  // Corrige la posición con la altura REAL del calendario ya montado, antes
+  // de que el navegador pinte — la estimación de 340px podía quedar corta
+  // (mes con 6 filas de días) y hacer que el calendario se saliera del
+  // viewport por arriba cuando se abría "hacia arriba".
+  useLayoutEffect(() => {
+    if (!isOpen || !calendarRef.current) return;
+    computePosition(calendarRef.current.getBoundingClientRect().height);
+  }, [isOpen, viewDate, computePosition]);
 
   useEffect(() => {
     if (value) setViewDate(new Date(value + 'T12:00:00'));
@@ -125,8 +150,12 @@ export default function BaseDatePicker({ label, value, onChange, name, className
       {isOpen && typeof document !== 'undefined' && createPortal(
         <div
           ref={calendarRef}
-          className="fixed z-[300] bg-sky-50 dark:bg-[#1A3A32] rounded-2xl shadow-2xl border border-gray-200 dark:border-[var(--border-subtle)] p-4 w-[280px]"
-          style={{ top: dropdownPos.top, left: dropdownPos.left }}
+          className="fixed z-[300] bg-sky-50 dark:bg-[#1A3A32] rounded-2xl shadow-2xl border border-gray-200 dark:border-[var(--border-subtle)] p-4"
+          style={{
+            top: dropdownPos.top,
+            left: dropdownPos.left,
+            width: dropdownPos.width,
+          }}
         >
           <div className="flex items-center justify-between mb-4">
             <button

@@ -259,7 +259,7 @@ export default function LiriosMinigameModal({
   });
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4">
       <style>{`
         @keyframes liriosConfetti {
           0%   { transform: translateY(0) scale(0) rotate(0deg); opacity: 0; }
@@ -281,22 +281,22 @@ export default function LiriosMinigameModal({
         }
       `}</style>
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }} role="presentation" />
-      <div className="relative bg-white dark:bg-[var(--bg-card)] rounded-3xl shadow-2xl border border-gray-200 dark:border-[var(--border-subtle)] w-full max-w-sm animate-fade-slide-in">
-        <div className="bg-gradient-to-r from-sky-500 to-cyan-500 dark:from-emerald-700 dark:to-teal-700 p-5 text-white flex items-center justify-between">
+      <div className="relative bg-white dark:bg-[var(--bg-card)] rounded-3xl shadow-2xl border border-gray-200 dark:border-[var(--border-subtle)] w-full max-w-sm animate-fade-slide-in flex flex-col overflow-hidden max-h-[85vh]">
+        <div className="bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--verde-500)] p-5 text-white flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2">
             <Sparkles className="w-5 h-5" />
             <h3 className="font-black text-sm uppercase tracking-wider">Tres en Raya Lirio</h3>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-white/20 backdrop-blur flex items-center justify-center hover:bg-white/30 transition"
+            className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center hover:bg-white/30 transition"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Difficulty selector */}
-        <div className="px-6 pt-4">
+        {/* Body scrolleable */}
+        <div className="overflow-y-auto flex-1">
           <div className="flex items-center justify-center gap-1.5 bg-gray-100 dark:bg-[var(--bg-muted)] rounded-xl p-1">
             {DIFFICULTIES.map((d) => (
               <button
@@ -334,7 +334,6 @@ export default function LiriosMinigameModal({
               </button>
             ))}
           </div>
-        </div>
 
         <div className="p-6 space-y-5">
           {result && showResult ? (
@@ -463,6 +462,7 @@ export default function LiriosMinigameModal({
               )}
             </>
           )}
+        </div>
         </div>
       </div>
     </div>

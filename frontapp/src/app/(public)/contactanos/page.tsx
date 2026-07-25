@@ -95,7 +95,7 @@ export default function ContactPage() {
                             src="/img/intro/Flor6.png"
                             alt=""
                             aria-hidden="true"
-                            className="absolute -bottom-12 -right-16 sm:-right-24 md:-right-32 w-[420px] sm:w-[560px] md:w-[760px] max-w-none opacity-70 mix-blend-overlay pointer-events-none select-none"
+                            className="absolute -bottom-16 -left-64 sm:-bottom-20 sm:-left-72 md:-bottom-24 md:-left-80 w-[500px] sm:w-[650px] md:w-[760px] max-w-none opacity-70 mix-blend-overlay pointer-events-none select-none"
                         />
 
                         <div className="relative z-10">

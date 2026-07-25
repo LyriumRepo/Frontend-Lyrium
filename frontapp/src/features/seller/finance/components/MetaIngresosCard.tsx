@@ -16,7 +16,7 @@ export default function MetaIngresosCard({ data, formatCurrency }: MetaIngresosC
 
     return (
         <div
-            className="bg-[var(--bg-card)] p-6 md:p-8 rounded-[2.5rem] border shadow-sm relative overflow-hidden animate-section-reveal"
+            className="bg-[var(--bg-card)] p-6 md:p-8 rounded-[2.5rem] border shadow-lg relative overflow-hidden animate-section-reveal"
             style={{ borderColor: `${companyColors.lima}40` }}
         >
             <div

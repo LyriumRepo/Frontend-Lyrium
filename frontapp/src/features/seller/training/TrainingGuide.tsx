@@ -7,6 +7,7 @@ import '@/features/customer/onboarding/welcome-tour.css';
 
 interface TrainingGuideProps {
   userId: number | string;
+  planSlug?: string;
 }
 
 const SPOTLIGHT_STEPS: DriveStep[] = [
@@ -67,7 +68,7 @@ const INTRO_STEP: DriveStep = {
 };
 
 function storageKey(userId: number | string) {
-  return `lyrium_training_guide_seen_${userId}`;
+  return `lyrium_training_guide_session_${userId}`;
 }
 
 function stepElementExists(step: DriveStep) {
@@ -95,9 +96,15 @@ function waitAndBuildSteps(maxAttempts: number, onDone: (steps: DriveStep[]) => 
   check();
 }
 
-export default function TrainingGuide({ userId }: TrainingGuideProps) {
+export default function TrainingGuide({ userId, planSlug }: TrainingGuideProps) {
   useEffect(() => {
-    if (localStorage.getItem(storageKey(userId))) return;
+    const storageKeyVal = storageKey(userId);
+    const stored = localStorage.getItem(storageKeyVal);
+    const storedPlan = stored ? JSON.parse(stored).planSlug : null;
+
+    if (storedPlan && storedPlan === planSlug) return;
+
+    localStorage.setItem(storageKeyVal, JSON.stringify({ planSlug }));
 
     let cancelled = false;
     let activeTour: ReturnType<typeof driver> | null = null;
@@ -118,7 +125,7 @@ export default function TrainingGuide({ userId }: TrainingGuideProps) {
         prevBtnText: 'Atrás',
         doneBtnText: 'Entendido',
         onDestroyed: () => {
-          localStorage.setItem(storageKey(userId), '1');
+          localStorage.setItem(storageKey(userId), JSON.stringify({ planSlug }));
         },
         steps: [INTRO_STEP, ...bodySteps],
       });
@@ -145,7 +152,7 @@ export default function TrainingGuide({ userId }: TrainingGuideProps) {
       activeTour?.destroy();
       cancelAnimationFrame(raf);
     };
-  }, [userId]);
+  }, [userId, planSlug]);
 
   return null;
 }

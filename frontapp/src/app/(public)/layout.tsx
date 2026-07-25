@@ -26,7 +26,7 @@ export default function PublicLayout({
 
             <PublicHeader />
 
-            <main id="main-content" tabIndex={-1} className="flex-1 min-h-0 flex flex-col overflow-y-auto">
+            <main id="main-content" tabIndex={-1} className="flex-1 min-h-0 flex flex-col overflow-y-auto overflow-x-hidden">
                 {children}
             </main>
             

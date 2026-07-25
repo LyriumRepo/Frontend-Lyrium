@@ -175,7 +175,7 @@ export function InventoryTable({ items, onUpdateStock }: Props) {
                             {HEADERS.map((h, i, arr) => (
                                 <th
                                     key={i}
-                                    className={`px-4 py-2.5 text-left text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)]
+                                    className={`px-4 py-2.5 text-left text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)] whitespace-nowrap
                                         ${i === 0 ? 'rounded-tl-2xl' : ''}
                                         ${i === arr.length - 1 ? 'rounded-tr-2xl' : ''}`}
                                 >

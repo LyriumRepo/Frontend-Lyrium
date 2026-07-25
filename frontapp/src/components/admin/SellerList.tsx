@@ -23,6 +23,7 @@ import {
   XCircle,
 } from 'lucide-react';
 import AdminTable, { Column } from '@/components/admin/AdminTable';
+import Pagination from '@/components/ui/Pagination';
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -46,6 +47,7 @@ export interface SellerRow {
     status: string;
     strikes: number;
     rating: number;
+    review_count: number;
     total_sales: number;
     logo?: string | null;
   } | null;
@@ -178,7 +180,7 @@ const TiendaCell = ({ seller }: { seller: SellerRow }) =>
           {seller.company}
         </p>
         <p className="text-[10px] text-[var(--text-secondary)]">
-          {seller.store.total_sales} ventas · ⭐ {seller.store.rating ?? '—'}
+          {seller.store.total_sales} ventas · ⭐ {seller.store.rating ?? '—'} ({seller.store.review_count ?? 0} reseñas)
         </p>
       </div>
     </div>
@@ -416,12 +418,18 @@ const SellerMobileCard = ({ seller }: { seller: SellerRow }) => {
 
 // ─── Componente principal ─────────────────────────────────────────────────────
 
+const PAGE_SIZE = 10;
+
 export default function SellerList({
   sellers,
   loading,
   onResetPassword,
   onStatusChange,
 }: SellerListProps) {
+  const [page, setPage] = useState(1);
+  const totalPages = Math.ceil(sellers.length / PAGE_SIZE);
+  const pageSellers = sellers.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
   const columns: Column<SellerRow>[] = [
     { key: 'contacto', header: 'Vendedor / Contacto', render: (seller) => <ContactoCell seller={seller} /> },
     { key: 'tienda', header: 'Tienda Registrada', hideMobile: true, render: (seller) => <TiendaCell seller={seller} /> },
@@ -438,15 +446,18 @@ export default function SellerList({
   ];
 
   return (
-    <AdminTable
-      data={sellers}
-      columns={columns}
-      loading={loading}
-      countLabel={sellers.length === 1 ? 'vendedor' : 'vendedores'}
-      emptyIcon="Search"
-      emptyTitle="No se encontraron vendedores registrados"
-      emptyDescription="Ajusta los filtros de búsqueda"
-      mobileCardRender={(seller) => <SellerMobileCard seller={seller} />}
-    />
+    <>
+      <AdminTable
+        data={pageSellers}
+        columns={columns}
+        loading={loading}
+        countLabel={sellers.length === 1 ? 'vendedor' : 'vendedores'}
+        emptyIcon="Search"
+        emptyTitle="No se encontraron vendedores registrados"
+        emptyDescription="Ajusta los filtros de búsqueda"
+        mobileCardRender={(seller) => <SellerMobileCard seller={seller} />}
+      />
+      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+    </>
   );
 }

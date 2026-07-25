@@ -1,9 +1,13 @@
 'use client';
 import type { ReactNode } from 'react';
+import React, { useState, useEffect } from 'react';
 import { formatAdminDate } from '@/features/seller/plans/lib/helpers';
 import AdminModal from '@/components/admin/AdminModal';
 import type { Vendedor } from '@/features/seller/plans/types';
 import AdminTable, { Column } from '@/components/admin/AdminTable';
+import Pagination from '@/components/ui/Pagination';
+
+const PAGE_SIZE = 10;
 
 function getEstado(v: Vendedor): 'activo' | 'por_vencer' | 'vencido' | 'indefinido' {
   if (!v.fecha_expiracion || v.plan_actual === 'basic') return 'indefinido';
@@ -121,6 +125,12 @@ export default function VendedoresPanel({ vendedores, loading, filter, search, s
     return true;
   });
 
+  const [page, setPage] = useState(1);
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  const pageFiltered = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  useEffect(() => { setPage(1); }, [filtered.length, filter, search]);
+
   return (
     <>
       <div className="flex flex-col md:flex-row gap-4 mb-6">
@@ -149,7 +159,7 @@ export default function VendedoresPanel({ vendedores, loading, filter, search, s
 
       <div id="vendedoresList">
         <AdminTable
-          data={filtered}
+          data={pageFiltered}
           columns={vendedorColumns}
           keyField="usuario_id"
           loading={loading}
@@ -158,6 +168,8 @@ export default function VendedoresPanel({ vendedores, loading, filter, search, s
           emptyTitle="No se encontraron vendedores"
           mobileCardRender={(v) => <VendedorMobileCard vendedor={v} onOpenModal={onOpenModal} />}
         />
+
+        <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
       </div>
 
       <AdminModal

@@ -3,9 +3,12 @@ import type { Expense } from '../types/operations';
 const C = {
     primary:  [183, 224, 0]   as [number, number, number],
     secondary:[143, 212, 0]   as [number, number, number],
-    teal:     [102, 214, 168] as [number, number, number],
-    darkTeal: [78,  199, 184] as [number, number, number],
-    blue:     [105, 190, 235] as [number, number, number],
+    teal:     [34,  139, 70]  as [number, number, number],
+    darkTeal: [22,  101, 52]  as [number, number, number],
+    blue:     [74,  222, 128] as [number, number, number],
+    navy:     [6,   78,  35]  as [number, number, number],
+    amber:    [52,  211, 153] as [number, number, number],
+    rose:     [244, 63,  94]  as [number, number, number],
 };
 
 const G = {
@@ -20,6 +23,18 @@ const G = {
 const PW = 297, PH = 210;
 const ML = 14, MR = 14, CW = PW - ML - MR;
 
+const EXPENSE_COLOR: Record<string, [number, number, number]> = {
+    'Pagado':    [34,  139, 70],
+    'Pendiente': [132, 204, 22],
+    'Anulado':   [156, 163, 175],
+};
+
+const EXPENSE_BG: Record<string, [number, number, number]> = {
+    'Pagado':    [220, 252, 231],
+    'Pendiente': [236, 253, 215],
+    'Anulado':   [243, 244, 246],
+};
+
 function fmtDate(s: string | null | undefined): string {
     if (!s) return '—';
     try { return new Date(s).toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' }); }
@@ -29,6 +44,19 @@ function fmtDate(s: string | null | undefined): string {
 function fmtCurrency(n: number | null | undefined): string {
     if (n == null) return '—';
     return `S/ ${n.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
+async function loadImageB64(url: string): Promise<string | null> {
+    try {
+        const r = await fetch(url);
+        const b = await r.blob();
+        return new Promise((resolve, reject) => {
+            const fr = new FileReader();
+            fr.onload  = () => resolve(fr.result as string);
+            fr.onerror = reject;
+            fr.readAsDataURL(b);
+        });
+    } catch { return null; }
 }
 
 function drawKpi(
@@ -56,6 +84,16 @@ function drawKpi(
         doc.setFontSize(5);
         doc.text(sub, x + 5, y + 21);
     }
+    doc.setFillColor(accent[0], accent[1], accent[2]);
+    doc.circle(x + w - 5, y + h - 5, 2.5, 'F');
+}
+
+function checkPage(doc: any, needed: number, y: number): number {
+    if (y + needed > PH - 10) {
+        doc.addPage();
+        return ML;
+    }
+    return y;
 }
 
 function drawFooter(doc: any, page: number, total: number): void {
@@ -72,7 +110,7 @@ function drawFooter(doc: any, page: number, total: number): void {
     doc.text('Lyrium BioMarketplace', ML, y + 1);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(70, 130, 55);
-    doc.text(' — Gestión Operativa · Confidencial', ML + 22, y + 1);
+    doc.text(' — Pagos · Confidencial', ML + 22, y + 1);
     doc.text(`Generado: ${new Date().toLocaleString('es-PE')}  |  Pág. ${page} de ${total}`, ML + CW, y + 1, { align: 'right' });
 }
 
@@ -82,12 +120,15 @@ export async function exportExpensesToPdf(expenses: Expense[]): Promise<void> {
         import('jspdf-autotable'),
         import('file-saver'),
     ]);
+    const logo = await loadImageB64('/img/logo.png');
     const doc = new JsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
 
     doc.setFillColor(8, 25, 15);
     doc.rect(0, 0, PW, 22, 'F');
     doc.setFillColor(C.primary[0], C.primary[1], C.primary[2]);
     doc.rect(0, 20, PW, 2, 'F');
+
+    if (logo) doc.addImage(logo, 'PNG', ML, 2, 36, 16);
 
     doc.setTextColor(163, 230, 53);
     doc.setFont('helvetica', 'bold');
@@ -171,17 +212,37 @@ export async function exportExpensesToPdf(expenses: Expense[]): Promise<void> {
         tableLineColor: [38, 90, 55],
         tableLineWidth: 0.1,
         showHead: 'everyPage',
+        didDrawCell: (data) => {
+            if (data.column.index === 4 && data.section === 'body') {
+                const rawStatus = expenses[data.row.index]?.status;
+                if (!rawStatus) return;
+                const label = rawStatus;
+                const color   = EXPENSE_COLOR[label] ?? G[400];
+                const bgColor = EXPENSE_BG[label]   ?? G[100];
+                const cx = data.cell.x + 1.5;
+                const cy = data.cell.y + 1.5;
+                const cw = data.cell.width - 3;
+                const ch = data.cell.height - 3;
+                doc.setFillColor(bgColor[0], bgColor[1], bgColor[2]);
+                doc.roundedRect(cx, cy, cw, ch, ch / 2, ch / 2, 'F');
+                doc.setTextColor(color[0], color[1], color[2]);
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(5.5);
+                doc.text(label, data.cell.x + data.cell.width / 2, data.cell.y + data.cell.height / 2 + 1, { align: 'center' });
+            }
+        },
     });
 
     const finalY = (doc as any).lastAutoTable.finalY + 4;
+    const summaryY = checkPage(doc, 12, finalY);
     doc.setFillColor(C.primary[0], C.primary[1], C.primary[2]);
-    doc.rect(ML, finalY, CW, 8, 'F');
+    doc.rect(ML, summaryY, CW, 8, 'F');
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(7);
     doc.setTextColor(G[900][0], G[900][1], G[900][2]);
     doc.text(
         `TOTAL EGRESOS: ${fmtCurrency(total)}   ·   Pagados: ${pagados}   ·   Pendientes: ${pendientes}   ·   Anulados: ${anulados}`,
-        ML + 4, finalY + 5
+        ML + 4, summaryY + 5
     );
 
     const totalPages = doc.getNumberOfPages();

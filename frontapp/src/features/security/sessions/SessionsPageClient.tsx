@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
-import { Monitor, Smartphone, XCircle, Search, ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react';
+import { Monitor, Smartphone, XCircle, Search, RefreshCw } from 'lucide-react';
+import Pagination from '@/components/ui/Pagination';
 import { useSecuritySessions } from '@/features/security/sessions/hooks/useSecuritySessions';
 
 export default function SessionsPageClient() {
@@ -110,23 +111,8 @@ export default function SessionsPageClient() {
           </table>
         </div>
 
-        {pagination && pagination.totalPages > 1 && (
-          <div className="flex items-center justify-between px-6 py-4 border-t border-[var(--border-subtle)]">
-            <p className="text-xs text-[var(--text-secondary)]">Página {pagination.page} de {pagination.totalPages} ({pagination.total} sesiones)</p>
-            <div className="flex items-center gap-2">
-              <button onClick={() => fetch({ page: pagination.page - 1, per_page: 15, search: searchInput || undefined })} disabled={pagination.page <= 1} className="p-2 rounded-lg hover:bg-[var(--bg-secondary)] disabled:opacity-30"><ChevronLeft className="w-4 h-4" /></button>
-              {Array.from({ length: pagination.totalPages }, (_, i) => i + 1)
-                .filter((p) => p === 1 || p === pagination.totalPages || Math.abs(p - pagination.page) <= 2)
-                .map((p, idx, arr) => (
-                  <React.Fragment key={p}>
-                    {idx > 0 && arr[idx - 1] !== p - 1 && <span className="text-xs text-[var(--text-muted)]">...</span>}
-                    <button onClick={() => fetch({ page: p, per_page: 15, search: searchInput || undefined })}
-                      className={`w-8 h-8 rounded-xl text-xs font-bold transition-colors ${p === pagination.page ? 'bg-cyan-500 text-white' : 'hover:bg-[var(--bg-secondary)] text-[var(--text-secondary)]'}`}>{p}</button>
-                  </React.Fragment>
-                ))}
-              <button onClick={() => fetch({ page: pagination.page + 1, per_page: 15, search: searchInput || undefined })} disabled={!pagination.hasMore} className="p-2 rounded-lg hover:bg-[var(--bg-secondary)] disabled:opacity-30"><ChevronRight className="w-4 h-4" /></button>
-            </div>
-          </div>
+        {pagination && (
+          <Pagination page={pagination.page} totalPages={pagination.totalPages} onPageChange={(p) => fetch({ page: p, per_page: 15, search: searchInput || undefined })} totalItems={pagination.total} itemLabel="sesiones" />
         )}
       </div>
     </div>

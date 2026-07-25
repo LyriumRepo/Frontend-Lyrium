@@ -165,7 +165,7 @@ export default function CartSummary({ onContinue }: Props) {
 
         {/* Seguir comprando */}
         <a
-          href="/tiendas"
+          href="/productos"
           className="block text-center text-sm text-gray-500 dark:text-[var(--text-muted)]
             hover:text-sky-500 dark:hover:text-emerald-400 transition"
         >

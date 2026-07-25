@@ -90,7 +90,7 @@ export default function ProductsGrid({ categorias, titulo = 'Categorías de prod
 
   return (
     <section 
-      className="space-y-4 md:space-y-6 max-w-7xl mx-auto px-4"
+      className="space-y-4 md:space-y-6 px-4"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >

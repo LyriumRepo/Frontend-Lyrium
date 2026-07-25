@@ -33,6 +33,28 @@ export const aboutData = {
             },
         ],
     },
+    premiumIcons: [
+        {
+            title: 'Orgánico',
+            description: 'Libre de químicos y pesticidas, cultivado respetando la naturaleza.',
+            image: 'img/nosotros/organic-1024x1024.avif',
+        },
+        {
+            title: 'Natural',
+            description: 'Ingredientes que conservan su pureza y propiedades originales.',
+            image: 'img/nosotros/natural-1024x1024.avif',
+        },
+        {
+            title: 'Bienestar',
+            description: 'Apoya tu salud física y emocional de manera equilibrada.',
+            image: 'img/nosotros/Bienestar.avif',
+        },
+        {
+            title: 'Saludable',
+            description: 'Promueve hábitos sanos y un estilo de vida activo.',
+            image: 'img/nosotros/Saludable.avif',
+        },
+    ],
     acrosticSection: {
         title: 'Nuestra Relación Contigo',
         subtitle: 'Nuestra bio comunidad LYRIUM BIOMARKETPLACE fomenta que sus tiendas vendedoras:',
@@ -41,31 +63,37 @@ export const aboutData = {
                 letter: 'L',
                 title: 'Lleven tus productos a tu hogar',
                 description: 'Con calidad y excelencia en el servicio brindándote una diferencia hacia tu persona en cada momento de tu compra.',
+                icon: 'Truck',
             },
             {
                 letter: 'Y',
                 title: 'Y siempre reciban tus consultas',
                 description: 'Con mucha alegría, solucionando todas tus dudas.',
+                icon: 'MessageCircle',
             },
             {
                 letter: 'R',
                 title: 'Respeten siempre a tu persona',
                 description: 'En todo momento brindándote opción al reclamo y/o devolución de tu producto(s) y/o servicio(s).',
+                icon: 'Shield',
             },
             {
                 letter: 'I',
                 title: 'Intenten siempre ponerse en tus zapatos',
                 description: 'Como comprador, entendiendo tus necesidades y expectativas.',
+                icon: 'UserCheck',
             },
             {
                 letter: 'U',
                 title: 'Utilicen siempre la honradez',
                 description: 'En tu atención y servicio, construyendo confianza en cada interacción.',
+                icon: 'BadgeCheck',
             },
             {
                 letter: 'M',
                 title: 'Manden los productos a tu hogar',
                 description: 'En el tiempo prometido logrando que quedes totalmente satisfecho con la atención que recibiste.',
+                icon: 'Package',
             },
         ],
     },

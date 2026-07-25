@@ -25,7 +25,7 @@ export default function ProductCard({
         <tr className="border-b border-[var(--border-subtle)] last:border-b-0 hover:bg-[var(--bg-secondary)]/60 transition-colors group">
 
             {/* ── Producto ── */}
-            <td className="px-4 py-3 w-[260px] max-w-[260px]">
+            <td className="px-4 py-3 w-[260px]">
                 <div className="flex items-center gap-3">
                     {/* Imagen — siempre visible (en móvil se usa el accordion) */}
                     <div className="w-9 h-9 rounded-xl overflow-hidden flex-shrink-0 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] relative">
@@ -52,30 +52,20 @@ export default function ProductCard({
                             );
                         })()}
                     </div>
-                    <div className="relative group/name min-w-0">
-                        <p className="text-sm font-semibold text-[var(--text-primary)] truncate leading-tight cursor-default">
+                    <div className="min-w-0">
+                        <p className="text-sm font-semibold text-[var(--text-primary)] whitespace-nowrap leading-tight">
                             {product.name}
                         </p>
-                        <div className="pointer-events-none absolute left-1/2 top-full z-50 mt-2 hidden -translate-x-1/2 whitespace-nowrap rounded-xl bg-black px-3 py-2 text-xs font-bold text-white shadow-lg group-hover/name:block">
-                            {product.name}
-                            <div className="absolute -top-1 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 bg-black" />
-                        </div>
                     </div>
                 </div>
             </td>
 
             {/* ── Categoría ── */}
-            <td className="px-4 py-3 w-[220px] max-w-[220px]">
+            <td className="px-4 py-3 w-[220px]">
                 {product.category ? (
-                    <div className="relative group/cat">
-                        <span className="block truncate text-xs text-[var(--text-secondary)] cursor-default">
-                            {product.category}
-                        </span>
-                        <div className="pointer-events-none absolute left-1/2 top-full z-50 mt-2 hidden -translate-x-1/2 whitespace-nowrap rounded-xl bg-black px-3 py-2 text-xs font-bold text-white shadow-lg group-hover/cat:block">
-                            {product.category}
-                            <div className="absolute -top-1 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 bg-black" />
-                        </div>
-                    </div>
+                    <span className="whitespace-nowrap text-xs text-[var(--text-secondary)]">
+                        {product.category}
+                    </span>
                 ) : (
                     <span className="text-[var(--text-secondary)] opacity-30 text-sm">—</span>
                 )}

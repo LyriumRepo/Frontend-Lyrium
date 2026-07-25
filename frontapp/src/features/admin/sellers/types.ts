@@ -32,6 +32,7 @@ export interface Seller {
   productsTotal: number;
   productsPending: number;
   regDate: string;
+  createdAt?: string;
   credenciales?: Credentials;
   contractStatus?: 'VIGENTE' | 'PENDIENTE' | 'VENCIDO';
 }

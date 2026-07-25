@@ -113,14 +113,11 @@ export default function OrderSummary() {
     if (!isReady || cartTotalForLirios <= 0) return;
     let cancelled = false;
     setLiriosLoading(true);
-    console.log('[Lirios] requesting eligibility, cartTotal:', cartTotalForLirios);
     liriosApi.getCheckoutEligibility(cartTotalForLirios)
       .then((res) => {
-        console.log('[Lirios] response:', res);
         if (!cancelled) setLiriosEligibility(res);
       })
-      .catch((err) => {
-        console.error('[Lirios] error:', err);
+      .catch(() => {
         if (!cancelled) setLiriosEligibility(null);
       })
       .finally(() => { if (!cancelled) setLiriosLoading(false); });
@@ -132,7 +129,8 @@ export default function OrderSummary() {
     const num = parseInt(value, 10);
     if (!isNaN(num) && num > 0 && liriosEligibility) {
       const clamped = Math.min(num, liriosEligibility.max_lirios_usables);
-      const discountInSoles = clamped * (liriosEligibility.max_discount / liriosEligibility.max_lirios_usables);
+      // Misma conversión fija que "Mis Lirios" y el backend (LiriosService::SOLES_PER_LIRIO_REDEEMED): 1,000 Lirios = S/ 1.
+      const discountInSoles = Math.round(clamped * 0.001 * 100) / 100;
       setOrderData({ liriosUsed: clamped, liriosDiscount: discountInSoles });
     } else {
       setOrderData({ liriosUsed: 0, liriosDiscount: 0 });
@@ -299,17 +297,37 @@ export default function OrderSummary() {
                 />
                 <button
                   type="button"
-                  onClick={() => {
-                    const max = liriosEligibility.max_lirios_usables;
-                    const discountInSoles = liriosEligibility.max_discount;
-                    setLiriosInput(String(max));
-                    setOrderData({ liriosUsed: max, liriosDiscount: discountInSoles });
-                  }}
+                  onClick={() => handleLiriosChange(String(liriosEligibility.max_lirios_usables))}
                   className="px-3 py-2 bg-emerald-100 dark:bg-emerald-800/40 hover:bg-emerald-200 dark:hover:bg-emerald-700/50 text-emerald-700 dark:text-emerald-300 rounded-xl font-bold text-[10px] transition-all whitespace-nowrap"
                 >
                   Usar máx
                 </button>
               </div>
+            </div>
+          </>
+        )}
+
+        {/* Lirios: carrito aún no alcanza el descuento mínimo (S/ 2.00) */}
+        {isAuthenticated && liriosEligibility && !liriosEligibility.eligible && !liriosLoading && (
+          <>
+            <div className="h-px bg-gray-100 dark:bg-[var(--border-subtle)]" />
+            <div className="p-3 rounded-xl bg-gray-50 dark:bg-[var(--bg-muted)] border border-gray-100 dark:border-[var(--border-subtle)] flex items-center gap-2">
+              <div className="relative w-5 h-5 flex-shrink-0 opacity-50">
+                <Image src="/img/intro/Flor6.png" alt="" fill className="object-contain" />
+              </div>
+              <p className="text-[10px] text-gray-500 dark:text-[var(--text-muted)] leading-relaxed">
+                {liriosEligibility.lirios_percent > 0 ? (
+                  <>
+                    Agrega{' '}
+                    <strong>
+                      S/ {Math.max(0, (2.00 / (liriosEligibility.lirios_percent / 100) - liriosEligibility.valor_venta) * 1.18).toFixed(2)}
+                    </strong>{' '}
+                    más a tu carrito para poder usar tus Lirios.
+                  </>
+                ) : (
+                  'Esta tienda no permite pagos con Lirios.'
+                )}
+              </p>
             </div>
           </>
         )}

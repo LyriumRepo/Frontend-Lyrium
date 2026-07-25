@@ -29,10 +29,47 @@ interface Category {
 
 type FilterType = string;
 
+const STORAGE_KEY = 'lyrium_wishlist_categories';
+
 const predefinedCategories: Category[] = [
   { id: 'all', label: 'Todos', slug: 'all' },
   { id: 'ofertas', label: 'En Oferta', slug: 'ofertas' },
+  { id: 'especiales', label: 'Días especiales', slug: 'especiales' },
+  { id: 'indispensable', label: 'Mis Indispensables', slug: 'indispensable' },
+  { id: 'servicio', label: 'Prevención y Chequeos', slug: 'servicio' },
 ];
+
+function loadCustomCategories(): Category[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(
+      (c: Category) => c.id && c.label && c.slug && c.custom
+    );
+  } catch {
+    return [];
+  }
+}
+
+function saveCustomCategories(cats: Category[]) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(cats));
+  } catch {
+    // storage full or blocked — silently fail
+  }
+}
+
+function normalizeSlug(value: string) {
+  return value
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, '_');
+}
 
 function mapApiItem(item: WishlistItemType): WishlistItem {
   const p = item.product;
@@ -59,6 +96,16 @@ export default function CustomerWishlistPage() {
   const [fetchError, setFetchError] = useState('');
   const [removeError, setRemoveError] = useState('');
   const [confirmRemoveId, setConfirmRemoveId] = useState<number | null>(null);
+  const [customCategories, setCustomCategories] = useState<Category[]>(() => loadCustomCategories());
+  const [newCategory, setNewCategory] = useState('');
+
+  useEffect(() => {
+    saveCustomCategories(customCategories);
+  }, [customCategories]);
+
+  const allCategories = useMemo(() => {
+    return [...predefinedCategories, ...customCategories];
+  }, [customCategories]);
 
   const loadItems = useCallback(async () => {
     try {
@@ -90,7 +137,7 @@ export default function CustomerWishlistPage() {
   const filteredItems = items.filter(item => {
     if (activeFilter === 'all') return true;
     if (activeFilter === 'ofertas') return item.enOferta;
-    return false;
+    return item.categoria === activeFilter;
   });
 
   const removeFromWishlist = async (id: number) => {
@@ -106,13 +153,69 @@ export default function CustomerWishlistPage() {
   };
 
   const getCounts = () => {
-    return {
+    const base: Record<string, number> = {
       all: items.length,
       ofertas: items.filter(i => i.enOferta).length,
+      especiales: items.filter(i => i.categoria === 'especiales').length,
+      indispensable: items.filter(i => i.categoria === 'indispensable').length,
+      servicio: items.filter(i => i.categoria === 'servicio').length,
     };
+    for (const cat of customCategories) {
+      base[cat.slug] = items.filter(i => i.categoria === cat.slug).length;
+    }
+    return base;
   };
 
   const counts = getCounts();
+
+  const handleAddCategory = () => {
+    const label = newCategory.trim();
+
+    if (!label) {
+      alert('Escribe un nombre para la categoría.');
+      return;
+    }
+
+    if (customCategories.length >= 3) {
+      alert('Solo puedes crear hasta 3 categorías personalizadas.');
+      return;
+    }
+
+    const slug = normalizeSlug(label);
+
+    const alreadyExists = allCategories.some(cat => cat.slug === slug);
+    if (alreadyExists) {
+      alert('Esa categoría ya existe.');
+      return;
+    }
+
+    const newCat: Category = {
+      id: `custom-${Date.now()}`,
+      label,
+      slug,
+      custom: true,
+    };
+
+    setCustomCategories(prev => [...prev, newCat]);
+    setActiveFilter(slug);
+    setNewCategory('');
+  };
+
+  const handleRemoveCustomCategory = (slug: string) => {
+    setCustomCategories(prev => prev.filter(cat => cat.slug !== slug));
+
+    setItems(prev =>
+      prev.map(item =>
+        item.categoria === slug
+          ? { ...item, categoria: 'all' }
+          : item
+      )
+    );
+
+    if (activeFilter === slug) {
+      setActiveFilter('all');
+    }
+  };
 
   if (loading || fetching) {
     return (
@@ -147,25 +250,68 @@ export default function CustomerWishlistPage() {
         icon="Heart"
       />
 
-      <div className="flex flex-wrap items-center gap-3">
-        {predefinedCategories.map(category => {
-          const isActive = activeFilter === category.slug;
-          const count = category.slug === 'all' ? counts.all : counts.ofertas;
+      <div className="space-y-4">
+        <div className="flex flex-wrap items-center gap-3">
+          {allCategories.map(category => {
+            const isActive = activeFilter === category.slug;
+            const count =
+              category.slug === 'all'
+                ? counts.all
+                : category.slug === 'ofertas'
+                  ? counts.ofertas
+                  : category.slug === 'especiales'
+                    ? counts.especiales
+                    : category.slug === 'indispensable'
+                      ? counts.indispensable
+                      : category.slug === 'servicio'
+                        ? counts.servicio
+                        : items.filter(i => i.categoria === category.slug).length;
 
-          return (
-            <button
-              key={category.id}
-              onClick={() => setActiveFilter(category.slug)}
-              className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${
-                isActive
-                  ? 'bg-sky-500 dark:bg-[var(--brand-green)] text-white shadow-lg shadow-sky-100'
-                  : 'bg-gray-100 dark:bg-[var(--bg-muted)] text-gray-700 dark:text-[var(--text-primary)] hover:bg-gray-200 dark:hover:bg-[var(--border-default)]'
-              }`}
-            >
-              {category.label} ({count})
-            </button>
-          );
-        })}
+            return (
+              <div key={category.id} className="relative">
+                <button
+                  onClick={() => setActiveFilter(category.slug)}
+                  className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${
+                    isActive
+                      ? 'bg-sky-500 dark:bg-[var(--brand-green)] text-white shadow-lg shadow-sky-100'
+                      : 'bg-gray-100 dark:bg-[var(--bg-muted)] text-gray-700 dark:text-[var(--text-primary)] hover:bg-gray-200 dark:hover:bg-[var(--border-default)]'
+                  }`}
+                >
+                  {category.label} ({count})
+                </button>
+
+                {category.custom && (
+                  <button
+                    onClick={() => handleRemoveCustomCategory(category.slug)}
+                    className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-black flex items-center justify-center shadow-md"
+                    title="Eliminar categoría"
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+          <input
+            type="text"
+            value={newCategory}
+            onChange={(e) => setNewCategory(e.target.value)}
+            placeholder="Crear nueva categoría"
+            className="w-full sm:w-80 px-4 py-3 rounded-xl border border-gray-200 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-secondary)] text-sm outline-none focus:ring-2 focus:ring-sky-500 dark:focus:ring-[var(--icons-green)]"
+          />
+          <button
+            onClick={handleAddCategory}
+            className="px-5 py-3 rounded-xl bg-sky-500 dark:bg-[var(--brand-green)] text-white text-sm font-bold hover:bg-sky-600 dark:hover:bg-[var(--brand-green-hover)] transition-all"
+          >
+            Agregar categoría
+          </button>
+          <span className="text-xs font-bold text-gray-400 dark:text-gray-500">
+            {customCategories.length}/3 categorías personalizadas
+          </span>
+        </div>
       </div>
 
       {filteredItems.length === 0 ? (

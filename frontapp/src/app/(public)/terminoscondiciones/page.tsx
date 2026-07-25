@@ -115,10 +115,13 @@ export default function TermsAndConditionsPage() {
     return (
         <main className="max-w-7xl mx-auto px-4 py-8 md:py-16 space-y-12 relative animate-in">
             <style>{`
+              .terms-content table {
+                border-collapse: collapse !important;
+              }
               .terms-content table th,
               .terms-content table td {
-                border-color: #555 !important;
-                border-width: 1px !important;
+                border-color: #333 !important;
+                border-width: 2px !important;
                 border-style: solid !important;
               }
               .terms-content .bg-green-50,

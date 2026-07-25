@@ -7,9 +7,9 @@ let autoTableFn: any = null;
 const C = {
     primary:  [183, 224, 0],
     secondary:[143, 212, 0],
-    teal:     [102, 214, 168],
-    darkTeal: [78, 199, 184],
-    blue:     [105, 190, 235],
+    teal:     [34,  139, 70],
+    darkTeal: [22,  101, 52],
+    blue:     [74,  222, 128],
 } as const;
 
 const G = {
@@ -27,12 +27,12 @@ const G = {
 const KPI_COLORS: number[][] = [
     [183, 224, 0],    // Total órdenes
     [143, 212, 0],    // Total ventas
-    [102, 214, 168],  // Productos
-    [78, 199, 184],   // Servicios
-    [105, 190, 235],  // Mixtas
-    [78, 199, 184],   // Pendientes
-    [99, 102, 241],   // En proceso
-    [34, 197, 94],    // Completadas
+    [34,  139, 70],   // Productos
+    [22,  101, 52],   // Servicios
+    [74,  222, 128],  // Mixtas
+    [22,  101, 52],   // Pendientes
+    [34,  139, 70],   // En proceso
+    [34,  197, 94],   // Completadas
 ];
 
 const ORDER_TYPE_LABEL: Record<string, string> = {
@@ -361,18 +361,19 @@ function drawOrderDetail(doc: any, order: Order, idx: number): number {
             fmtCurrency(item.price * item.qty),
         ]);
 
-        const res = autoTableFn(doc, {
+        autoTableFn(doc, {
             startY: y,
             head: [['Producto', 'Cant.', 'Precio', 'Subtotal']],
             body: prodRows,
-            theme: 'plain',
+            theme: 'striped',
             headStyles: {
                 fillColor: [18, 60, 38],
                 textColor: [163, 230, 53],
                 fontSize: 6.5,
                 fontStyle: 'bold',
             },
-            bodyStyles: { fontSize: 6.5 },
+            bodyStyles: { fontSize: 6.5, fillColor: [12, 35, 22], textColor: [215, 235, 205] },
+            alternateRowStyles: { fillColor: [20, 52, 32] },
             columnStyles: {
                 0: { cellWidth: 'auto', halign: 'left' },
                 1: { cellWidth: 14, halign: 'center' },
@@ -403,18 +404,19 @@ function drawOrderDetail(doc: any, order: Order, idx: number): number {
             fmtCurrency(item.unitPrice),
         ]);
 
-        const res = autoTableFn(doc, {
+        autoTableFn(doc, {
             startY: y,
             head: [['Servicio', 'Modalidad', 'Especialista', 'Precio']],
             body: svcRows,
-            theme: 'plain',
+            theme: 'striped',
             headStyles: {
                 fillColor: [18, 60, 38],
                 textColor: [163, 230, 53],
                 fontSize: 6.5,
                 fontStyle: 'bold',
             },
-            bodyStyles: { fontSize: 6.5 },
+            bodyStyles: { fontSize: 6.5, fillColor: [12, 35, 22], textColor: [215, 235, 205] },
+            alternateRowStyles: { fillColor: [20, 52, 32] },
             columnStyles: {
                 0: { cellWidth: 'auto', halign: 'left' },
                 1: { cellWidth: 24, halign: 'center' },
@@ -570,6 +572,7 @@ export async function generateSalesReportPdf(
                 halign: 'center',
             },
             bodyStyles: { fontSize: 6.5, halign: 'center', fillColor: [12, 35, 22], textColor: [215, 235, 205] },
+            alternateRowStyles: { fillColor: [20, 52, 32] },
             columnStyles: {
                 0: { cellWidth: 26, halign: 'left' },
                 1: { cellWidth: 22, halign: 'center' },
@@ -591,7 +594,10 @@ export async function generateSalesReportPdf(
 
     // ═══════ 5. DETALLE POR ORDEN ═══════
     if (orders.length > 0) {
+        doc.addPage();
+        y = ML;
         y = sectionTitle(doc, 'Detalle por Orden', y);
+        (doc as any).lastAutoTable = { finalY: y };
 
         orders.forEach((order, idx) => {
             y = drawOrderDetail(doc, order, idx);

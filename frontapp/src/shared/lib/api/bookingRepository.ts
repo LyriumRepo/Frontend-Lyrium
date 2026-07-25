@@ -69,6 +69,9 @@ export interface BookingResponse {
   can_reschedule?: boolean;
   confirmed_at?: string;
   cancelled_at?: string;
+  completed_at?: string | null;
+  customer_validated_at?: string | null;
+  validation_source?: 'manual' | 'email' | 'auto_expired' | null;
   created_at: string;
   updated_at: string;
   review?: { rating: number; comment: string | null } | null;
@@ -186,6 +189,21 @@ export const bookingRepository = {
     const json = await res.json();
     if (!res.ok) throw new Error(json.message ?? 'Error al calificar');
     return json;
+  },
+
+  /**
+   * El cliente valida la finalización de una reserva completada (gana Lirios).
+   * POST /api/bookings/:id/validate-receipt
+   */
+  async validateReceipt(id: number): Promise<{ liriosBonus: number }> {
+    const headers = await getAuthHeaders();
+    const res = await fetch(`${LARAVEL_API_URL}/bookings/${id}/validate-receipt`, {
+      method: 'POST',
+      headers: { ...headers, 'Content-Type': 'application/json' },
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.message ?? 'Error al validar la reserva');
+    return { liriosBonus: json.lirios_bonus ?? 0 };
   },
 
   /**

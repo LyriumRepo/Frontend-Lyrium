@@ -58,8 +58,6 @@ export default function AdminInvoiceKPIsDisplay({ kpis }: Props) {
         },
     ];
 
-    const totalTopSellers = kpis.topSellers.reduce((acc, s) => acc + s.totalVendido, 0);
-
     return (
         <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -75,65 +73,6 @@ export default function AdminInvoiceKPIsDisplay({ kpis }: Props) {
                     />
                 ))}
             </div>
-
-            {kpis.topSellers.length > 0 && (
-                <div className="glass-card overflow-hidden">
-                    <div className="px-6 py-5 border-b border-[var(--border-subtle)] flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-[var(--color-success)]/10 flex items-center justify-center text-[var(--color-success)]">
-                            <Icon name="Trophy" className="w-5 h-5" />
-                        </div>
-                        <div>
-                            <p className="text-sm font-black text-[var(--text-primary)]">Top 5 Sellers por Facturación</p>
-                            <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest">Mes actual · comprobantes aceptados</p>
-                        </div>
-                    </div>
-                    <div className="overflow-x-auto no-scrollbar">
-                        <table className="w-full text-left">
-                            <thead>
-                                <tr className="bg-[var(--bg-secondary)]/50 text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest border-b border-[var(--border-subtle)]">
-                                    <th className="px-6 py-4 w-10">#</th>
-                                    <th className="px-6 py-4">Tienda</th>
-                                    <th className="px-6 py-4 text-right">Monto</th>
-                                    <th className="px-6 py-4 text-right">% del Total</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-[var(--border-subtle)]">
-                                {kpis.topSellers.map((seller, i) => {
-                                    const pct = totalTopSellers > 0
-                                        ? ((seller.totalVendido / totalTopSellers) * 100).toFixed(1)
-                                        : '0.0';
-                                    return (
-                                        <tr key={seller.id} className="hover:bg-[var(--bg-secondary)]/50 transition-colors">
-                                            <td className="px-6 py-4">
-                                                <span className="text-[10px] font-black text-[var(--text-secondary)] bg-[var(--bg-secondary)] w-7 h-7 rounded-lg flex items-center justify-center">
-                                                    {i + 1}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <p className="text-sm font-bold text-[var(--text-primary)]">{seller.name}</p>
-                                            </td>
-                                            <td className="px-6 py-4 text-right">
-                                                <p className="text-sm font-black text-[var(--text-primary)]">{formatCurrency(seller.totalVendido)}</p>
-                                            </td>
-                                            <td className="px-6 py-4 text-right">
-                                                <div className="flex items-center justify-end gap-2">
-                                                    <div className="w-16 h-1.5 bg-[var(--bg-secondary)] rounded-full overflow-hidden">
-                                                        <div
-                                                            className="h-full bg-[var(--color-success)] rounded-full"
-                                                            style={{ width: `${pct}%` }}
-                                                        />
-                                                    </div>
-                                                    <span className="text-xs font-black text-[var(--text-secondary)] w-10 text-right">{pct}%</span>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            )}
 
             {detail && (
                 <BaseModal

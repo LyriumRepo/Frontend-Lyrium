@@ -6,6 +6,7 @@ import DataTable from '@/components/ui/DataTable';
 import BaseButton from '@/components/ui/BaseButton';
 import BaseModal from '@/components/ui/BaseModal';
 import BaseStatusBadge from '@/components/ui/BaseStatusBadge';
+import Pagination from '@/components/ui/Pagination';
 import type { Column } from '@/components/ui/DataTable';
 import { useAlerts } from '@/features/admin/security/hooks/useAlerts';
 import type { SecurityAlertItem } from '@/shared/lib/api/alertRepository';
@@ -247,28 +248,8 @@ export default function AlertsPageClient() {
         />
       </div>
 
-      {pagination && pagination.last_page > 1 && (
-        <div className="flex items-center justify-between px-1">
-          <p className="text-xs text-[var(--text-secondary)]">
-            Página {pagination.current_page} de {pagination.last_page} ({pagination.total} alertas)
-          </p>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => goToPage(pagination.current_page - 1)}
-              disabled={pagination.current_page <= 1}
-              className="px-3 py-1.5 rounded-xl text-xs font-bold bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:bg-[var(--bg-secondary)] disabled:opacity-30 transition-colors"
-            >
-              Anterior
-            </button>
-            <button
-              onClick={() => goToPage(pagination.current_page + 1)}
-              disabled={pagination.current_page >= pagination.last_page}
-              className="px-3 py-1.5 rounded-xl text-xs font-bold bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:bg-[var(--bg-secondary)] disabled:opacity-30 transition-colors"
-            >
-              Siguiente
-            </button>
-          </div>
-        </div>
+      {pagination && (
+        <Pagination page={pagination.current_page} totalPages={pagination.last_page} onPageChange={goToPage} />
       )}
 
       {/* Detail Modal */}

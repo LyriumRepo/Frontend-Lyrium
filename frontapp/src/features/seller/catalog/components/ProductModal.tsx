@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import { useQuery } from '@tanstack/react-query';
 import { Product, ProductAttribute, ProductSticker, etiquetasFromProduct } from '@/features/seller/catalog/types';
@@ -34,7 +34,7 @@ function flattenCategoryTree(nodes: Category[], level = 0): Category[] {
 interface ProductModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSave: (product: Product, file?: File) => void | Promise<void>;
+    onSave: (product: Product, file?: File) => Product | void | Promise<Product | void>;
     productToEdit?: Product | null;
 }
 
@@ -76,7 +76,7 @@ interface BranchStockItem {
     is_principal: boolean;
 }
 
-function BranchStockSection({ productId, storeId }: { productId?: string | number; storeId?: number }) {
+function BranchStockSection({ productId, storeId, onStockChange }: { productId?: string | number; storeId?: number; onStockChange?: (totalRTStock: number, hasActiveRT: boolean) => void }) {
     const [branches, setBranches] = useState<BranchStockItem[]>([]);
     const [branchStockMap, setBranchStockMap] = useState<Record<number, { stock: number; pickup_enabled: boolean }>>({});
     const [loading, setLoading] = useState(false);
@@ -89,22 +89,28 @@ function BranchStockSection({ productId, storeId }: { productId?: string | numbe
         const token = localStorage.getItem('laravel_token');
         const headers = { ...(token ? { Authorization: `Bearer ${token}` } : {}) };
 
-        // Intentar cargar branch stock del producto; si falla (403/404), cargar sucursales desde /stores/me
-        fetch(`${LARAVEL_API_URL}/products/${productId}/branches`, { headers })
-            .then(async r => {
-                if (!r.ok) {
-                    // Fallback: obtener sucursales desde la tienda del vendedor
-                    const storeRes = await fetch(`${LARAVEL_API_URL}/stores/me`, { headers });
-                    if (!storeRes.ok) return [];
-                    const storeJson = await storeRes.json();
-                    const storeBranches = (storeJson.data?.branches || storeJson.branches || []) as any[];
-                    return storeBranches.filter((b: any) => b.is_active !== false).map((b: any) => ({
+        // Load store branches (always needed for names/addresses + default stock)
+        const loadStoreBranches = async (): Promise<BranchStockItem[]> => {
+            const storeRes = await fetch(`${LARAVEL_API_URL}/stores/me`, { headers });
+            if (!storeRes.ok) return [];
+            const storeJson = await storeRes.json();
+            const storeBranches = (storeJson.data?.branches || storeJson.branches || []) as any[];
+                return storeBranches
+                    .filter((b: any) => b.is_active !== false)
+                    .map((b: any) => ({
                         id: b.id, name: b.name, address: b.address, district: b.district,
+                        is_principal: b.is_principal ?? false,
                         branch_stock: 0, pickup_enabled: true,
                     }));
-                }
+        };
+
+        fetch(`${LARAVEL_API_URL}/products/${productId}/branches`, { headers })
+            .then(async r => {
+                if (!r.ok) return await loadStoreBranches();
                 const json = await r.json();
-                return json.data || [];
+                const data = json.data || [];
+                if (data.length === 0) return await loadStoreBranches();
+                return data;
             })
             .then(data => {
                 setBranches(data);
@@ -117,6 +123,14 @@ function BranchStockSection({ productId, storeId }: { productId?: string | numbe
             .catch(() => {})
             .finally(() => setLoading(false));
     }, [productId]);
+
+    useEffect(() => {
+        const hasActiveRT = Object.values(branchStockMap).some(v => v.pickup_enabled);
+        const totalRTStock = Object.values(branchStockMap)
+            .filter(v => v.pickup_enabled)
+            .reduce((sum, v) => sum + (v.stock || 0), 0);
+        onStockChange?.(totalRTStock, hasActiveRT);
+    }, [branchStockMap, onStockChange]);
 
     const handleSave = async () => {
         if (!productId) return;
@@ -138,6 +152,11 @@ function BranchStockSection({ productId, storeId }: { productId?: string | numbe
             if (res.ok) {
                 setSaved(true);
                 showToast('Stock por sucursal guardado', 'success');
+                const hasActiveRT = Object.values(branchStockMap).some(v => v.pickup_enabled);
+                const totalRTStock = Object.values(branchStockMap)
+                    .filter(v => v.pickup_enabled)
+                    .reduce((sum, v) => sum + (v.stock || 0), 0);
+                onStockChange?.(totalRTStock, hasActiveRT);
                 setTimeout(() => setSaved(false), 2000);
             } else {
                 const err = await res.json().catch(() => ({ message: 'Error al guardar' }));
@@ -261,6 +280,8 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit }:
     const [showTagPreview, setShowTagPreview] = useState(false);
     const [showStickerUpgrade, setShowStickerUpgrade] = useState(false);
     const [saving, setSaving] = useState(false);
+    const [hasActiveRT, setHasActiveRT] = useState(false);
+    const [rtStock, setRtStock] = useState(0);
     const { showToast } = useToast();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { stickerTypes, capabilities } = usePlanCapabilities();
@@ -313,6 +334,14 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit }:
         const observer = new MutationObserver(check);
         observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
         return () => observer.disconnect();
+    }, []);
+
+    const handleStockChange = useCallback((total: number, active: boolean) => {
+        setHasActiveRT(active);
+        setRtStock(total);
+        if (active) {
+            setFormData(prev => ({ ...prev, stock: total }));
+        }
     }, []);
 
     // ── Etiquetas helpers ──────────────────────────────────────────────────────
@@ -529,15 +558,23 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit }:
 
         setSaving(true);
         try {
-            await onSave({
+            const saved = await onSave({
                 ...formData,
                 sticker,
                 discountPercentage,
                 etiquetas,
             } as any, selectedFile ?? undefined);
+
+            if (saved && saved.id && String(saved.id) !== String(formData.id)) {
+                setFormData(prev => ({ ...prev, id: saved.id, image: saved.image || prev.image }));
+                showToast('Producto registrado. Ahora configura el stock por sucursal.', 'success');
+            } else if (saved) {
+                onClose();
+            }
+        } catch {
+            // onSave already shows toast on error; keep modal open so user can retry
         } finally {
             setSaving(false);
-            onClose();
         }
     };
 
@@ -548,7 +585,7 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit }:
             title={productToEdit ? 'Editar Producto' : 'Ficha de Producto'}
             subtitle="Gestión estratégica de catálogo e inventario"
             size="4xl"
-            accentColor={isDark ? 'from-[#0F2A24] via-[#2A5A4D] to-[#8FC3A1]' : 'from-emerald-400 via-sky-500 to-indigo-500'}
+            accentColor="from-[var(--turquesa-500)] to-[var(--verde-500)]"
         >
             {saving && (
                 <div className="absolute inset-0 z-50 bg-[var(--bg-card)]/80 backdrop-blur-sm flex flex-col items-center justify-center rounded-[inherit]">
@@ -671,11 +708,15 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit }:
                                         <td className="px-5 py-3">
                                             <div className="grid grid-cols-3 gap-6 divide-x divide-[var(--border-subtle)]">
                                                 <div className="flex flex-col gap-1">
-                                                    <span className="text-[8px] font-black text-[var(--text-secondary)] uppercase">Stock</span>
+                                                    <span className="text-[8px] font-black text-[var(--text-secondary)] uppercase">
+                                                        {hasActiveRT ? 'Stock (auto RT)' : 'Stock'}
+                                                    </span>
                                                     <input
                                                         type="number" name="stock" min="0" required
                                                         value={formData.stock} onChange={handleChange}
-                                                        className="w-full bg-transparent border-none focus:ring-0 font-black text-[var(--text-primary)] p-0 outline-none"
+                                                        readOnly={hasActiveRT}
+                                                        title={hasActiveRT ? 'Stock calculado automáticamente desde el total de sucursales con Retiro en Tienda' : undefined}
+                                                        className={`w-full bg-transparent border-none focus:ring-0 font-black text-[var(--text-primary)] p-0 outline-none ${hasActiveRT ? 'opacity-60 cursor-not-allowed' : ''}`}
                                                     />
                                                 </div>
                                                 <div className="flex flex-col gap-1 pl-4">
@@ -708,6 +749,7 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit }:
                                             <BranchStockSection
                                                 productId={formData.id}
                                                 storeId={(formData as any).store_id}
+                                                onStockChange={handleStockChange}
                                             />
                                         </td>
                                     </tr>

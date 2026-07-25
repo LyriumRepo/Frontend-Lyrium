@@ -3,6 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import BaseButton from '@/components/ui/BaseButton';
+import Pagination from '@/components/ui/Pagination';
 import BaseInputField from '@/components/ui/BaseInputField';
 import BaseSelectField from '@/components/ui/BaseSelectField';
 import BaseStatCard from '@/components/ui/BaseStatCard';
@@ -487,31 +488,8 @@ export default function AuditPageClient() {
       />
 
       {/* Pagination */}
-      {pagination && pagination.totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <span className="text-[11px] text-[var(--text-secondary)] font-medium">
-            Página {pagination.page} de {pagination.totalPages} ({pagination.total} registros)
-          </span>
-          <div className="flex items-center gap-2">
-            <BaseButton
-              variant="outline"
-              size="sm"
-              leftIcon="ArrowLeft"
-              disabled={pagination.page <= 1}
-              onClick={() => actions.goToPage(pagination.page - 1)}
-            >
-              Anterior
-            </BaseButton>
-            <BaseButton
-              variant="outline"
-              size="sm"
-              disabled={pagination.page >= pagination.totalPages}
-              onClick={() => actions.goToPage(pagination.page + 1)}
-            >
-              Siguiente
-            </BaseButton>
-          </div>
-        </div>
+      {pagination && (
+        <Pagination page={pagination.page} totalPages={pagination.totalPages} onPageChange={actions.goToPage} totalItems={pagination.total} itemLabel="registros" />
       )}
 
       {/* Detail Modal */}

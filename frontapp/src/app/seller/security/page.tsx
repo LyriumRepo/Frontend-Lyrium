@@ -53,7 +53,7 @@ export default function SellerSecurityPage() {
                     Protección de Cuenta
                   </h3>
                   <p className="text-[10px] font-bold text-sky-100 uppercase tracking-[0.2em]">
-                    Centro de Seguridad Avanzada
+                    Seguridad
                   </p>
                 </div>
               </div>

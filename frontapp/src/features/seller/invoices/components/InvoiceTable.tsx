@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Voucher, VoucherStatus, VoucherType } from '@/features/seller/invoices/types';
 import { formatDate } from '@/shared/lib/utils/formatters';
 import Icon from '@/components/ui/Icon';
 import BaseStatusBadge, { VOUCHER_STATUS_MAPPINGS } from '@/components/ui/BaseStatusBadge';
+import Pagination from '@/components/ui/Pagination';
 
 interface InvoiceTableProps {
     vouchers: Voucher[];
@@ -165,9 +166,17 @@ function MobileInvoiceCard({ voucher: v, onViewDetail }: MobileInvoiceCardProps)
 
 // ─── InvoiceTable ─────────────────────────────────────────────────────────────
 
+const PAGE_SIZE = 10;
+
 export default function InvoiceTable({ vouchers, onViewDetail }: InvoiceTableProps) {
+    const [page, setPage] = useState(1);
     const [tooltipVisible, setTooltipVisible] = useState(false);
     const iconRef = useRef<HTMLSpanElement>(null);
+
+    useEffect(() => { setPage(1); }, [vouchers.length]);
+
+    const totalPages = Math.ceil(vouchers.length / PAGE_SIZE);
+    const pageVouchers = vouchers.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
     const handleMouseEnter = () => setTooltipVisible(true);
     const handleMouseLeave = () => setTooltipVisible(false);
@@ -206,7 +215,7 @@ export default function InvoiceTable({ vouchers, onViewDetail }: InvoiceTablePro
         <>
             {/* ══ MÓVIL: accordion cards (sm:hidden) ════════════════════════ */}
             <div className="sm:hidden space-y-2 animate-fadeIn">
-                {vouchers.map((v) => (
+                {pageVouchers.map((v) => (
                     <MobileInvoiceCard
                         key={v.id}
                         voucher={v}
@@ -221,9 +230,9 @@ export default function InvoiceTable({ vouchers, onViewDetail }: InvoiceTablePro
                     <table className="w-full border-separate border-spacing-0">
                         <thead>
                             <tr className="border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)]">
-                                <th className="px-4 py-2.5 text-left text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)] rounded-tl-2xl">Comprobante</th>
-                                <th className="px-4 py-2.5 text-left text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)]">Serie-Código</th>
-                                <th className="px-4 py-2.5 text-left text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)]">
+                                <th className="px-4 py-2.5 text-left text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)] whitespace-nowrap rounded-tl-2xl">Comprobante</th>
+                                <th className="px-4 py-2.5 text-left text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)] whitespace-nowrap">Serie-Código</th>
+                                <th className="px-4 py-2.5 text-left text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)] whitespace-nowrap">
                                     <span className="flex items-center gap-1.5">
                                         Monto
                                         <span
@@ -236,19 +245,19 @@ export default function InvoiceTable({ vouchers, onViewDetail }: InvoiceTablePro
                                         </span>
                                     </span>
                                 </th>
-                                <th className="px-4 py-2.5 text-left text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)]">Comisión</th>
-                                <th className="px-4 py-2.5 text-left text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)]">Fecha</th>
-                                <th className="px-4 py-2.5 text-center text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)]">Estado</th>
-                                <th className="px-4 py-2.5 text-right text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)] rounded-tr-2xl">Acciones</th>
+                                <th className="px-4 py-2.5 text-left text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)] whitespace-nowrap">Comisión</th>
+                                <th className="px-4 py-2.5 text-left text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)] whitespace-nowrap">Fecha</th>
+                                <th className="px-4 py-2.5 text-center text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)] whitespace-nowrap">Estado</th>
+                                <th className="px-4 py-2.5 text-right text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)] whitespace-nowrap rounded-tr-2xl">Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {vouchers.map((v) => {
+                            {pageVouchers.map((v) => {
                                 const type = typeConfig[v.type] || typeConfig.FACTURA;
                                 return (
                                     <tr key={v.id} className="hover:bg-[var(--bg-secondary)]/50 transition-colors group border-b border-[var(--border-subtle)] last:border-b-0">
                                         {/* Comprobante: badge tipo + nombre tienda */}
-                                        <td className="px-4 py-3">
+                                        <td className="px-4 py-3 whitespace-nowrap">
                                             <div className="flex items-center gap-2">
                                                 <div className={`w-9 h-9 ${type.bg} rounded-xl flex items-center justify-center ${type.text} group-hover:scale-110 transition-transform shrink-0`}>
                                                     <Icon name={type.icon} className="w-4 h-4" />
@@ -260,32 +269,32 @@ export default function InvoiceTable({ vouchers, onViewDetail }: InvoiceTablePro
                                                             {v.order_type}
                                                         </span>
                                                     )}
-                                                    <p className="text-xs text-[var(--text-secondary)] truncate max-w-[150px] mt-0.5">{v.store_name || '—'}</p>
+                                                    <p className="text-xs text-[var(--text-secondary)] whitespace-nowrap mt-0.5">{v.store_name || '—'}</p>
                                                 </div>
                                             </div>
                                         </td>
                                         {/* Serie-Código */}
-                                        <td className="px-4 py-3">
+                                        <td className="px-4 py-3 whitespace-nowrap">
                                             <span className="text-sm font-black text-[var(--text-primary)] font-mono tracking-tight">{v.series}-{v.number}</span>
                                         </td>
                                         {/* Monto — subtotal productos/servicios sin envío */}
-                                        <td className="px-4 py-3">
+                                        <td className="px-4 py-3 whitespace-nowrap">
                                             <p className="text-sm font-black text-[var(--text-primary)]">
                                                 S/ {resolveMonto(v).toLocaleString('es-PE', { minimumFractionDigits: 2 })}
                                             </p>
                                         </td>
                                         {/* Comisión */}
-                                        <td className="px-4 py-3">
+                                        <td className="px-4 py-3 whitespace-nowrap">
                                             <p className="text-sm font-bold text-sky-500 dark:text-[#8FC3A1]">
                                                 {formatCommission(v.commission_rate, v.commission_amount)}
                                             </p>
                                         </td>
                                         {/* Fecha */}
-                                        <td className="px-4 py-3">
+                                        <td className="px-4 py-3 whitespace-nowrap">
                                             <p className="text-xs font-bold text-[var(--text-secondary)]">{formatDate(v.emission_date)}</p>
                                         </td>
                                         {/* Estado */}
-                                        <td className="px-4 py-3 text-center">
+                                        <td className="px-4 py-3 text-center whitespace-nowrap">
                                             <BaseStatusBadge
                                                 status={v.sunat_status}
                                                 mappings={VOUCHER_STATUS_MAPPINGS}
@@ -294,7 +303,7 @@ export default function InvoiceTable({ vouchers, onViewDetail }: InvoiceTablePro
                                             />
                                         </td>
                                         {/* Acciones — sin cambios */}
-                                        <td className="px-4 py-3 text-right">
+                                        <td className="px-4 py-3 text-right whitespace-nowrap">
                                             <button
                                                 onClick={() => onViewDetail(v)}
                                                 className="w-10 h-10 bg-[var(--bg-card)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-emerald-600 hover:border-emerald-200 rounded-xl transition-all shadow-sm active:scale-90 flex items-center justify-center m-auto mr-0"
@@ -320,6 +329,8 @@ export default function InvoiceTable({ vouchers, onViewDetail }: InvoiceTablePro
                     El comprobante electrónico emitido a SUNAT incluye también el envío en el total.
                 </p>
             </div>
+
+            <Pagination page={page} totalPages={totalPages} onPageChange={setPage} totalItems={vouchers.length} itemLabel="facturas" />
         </>
     );
 }

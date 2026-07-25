@@ -87,6 +87,8 @@ export interface StoreData {
     privacy?: string;
   };
   branches?: StoreBranch[];
+  layout?: '1' | '2' | '3' | 'emprende';
+  plan_capabilities?: Record<string, unknown>;
 }
 
 export interface StoreBranch {

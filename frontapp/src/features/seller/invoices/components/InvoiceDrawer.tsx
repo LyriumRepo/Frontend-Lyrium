@@ -98,124 +98,190 @@ export default function InvoiceDrawer({ voucher, isOpen, onClose }: InvoiceDrawe
     const status = statusConfig[voucher.sunat_status] || statusConfig.DRAFT;
     const statusClasses = statusColorClasses[status.color] || statusColorClasses.gray;
 
-    return createPortal(
-        <div className="fixed inset-0 z-[99999] flex items-center justify-end">
-            <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-md" onClick={onClose} onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }} role="presentation" aria-hidden="true"></div>
+    const formatDate = (date: string) =>
+        new Date(date).toLocaleDateString('es-PE', { day: '2-digit', month: 'long', year: 'numeric' });
 
-            <div className="relative h-full bg-[var(--bg-card)] shadow-[-40px_0_80px_-20px_rgba(0,0,0,0.15)] w-full md:w-[600px] flex flex-col animate-slideInRight">
-                <div className="p-8 flex items-center justify-between border-b border-[var(--border-subtle)] bg-[var(--bg-card)]/80 backdrop-blur-xl">
-                    <div className="flex-1 min-w-0 pr-4">
-                        <div className="flex items-center gap-3 mb-3">
-                            <span className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest border border-[var(--border-default)] px-2 py-1 rounded-lg bg-[var(--bg-secondary)]">
+    const fmt = (v: number | null | undefined) => (v != null ? formatCurrency(v) : '—');
+    const fmtPct = (v: number | null | undefined) => (v != null ? `${(v * 100).toFixed(1)}%` : '—');
+
+    return createPortal(
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 sm:p-6">
+            <div
+                className="absolute inset-0 bg-gray-900/60 backdrop-blur-md"
+                onClick={onClose}
+                onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }}
+                role="presentation"
+                aria-hidden="true"
+            />
+
+            <div className="relative w-full max-w-[640px] max-h-[90vh] bg-white rounded-3xl shadow-2xl flex flex-col animate-fadeInScale dark:bg-[var(--bg-card)] overflow-hidden">
+
+                {/* Header */}
+                <div className="px-6 pt-6 pb-5 shrink-0 bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--verde-500)] relative">
+                    <button
+                        onClick={onClose}
+                        className="absolute top-6 right-6 w-10 h-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center text-white hover:bg-white/30 transition-all active:scale-90 shrink-0"
+                    >
+                        <Icon name="X" className="w-5 h-5" />
+                    </button>
+                    <div className="flex-1 min-w-0 pr-12">
+                        <div className="flex items-center gap-2 mb-3 flex-wrap">
+                            <span className="text-[10px] font-black text-white uppercase tracking-widest border border-white/30 px-2 py-0.5 rounded-md bg-white/20 backdrop-blur-md">
                                 {voucher.type}
                             </span>
-                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${statusClasses}`}>
-                                <Icon name={status.iconName} className="w-3.5 h-3.5" /> {status.label}
+                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${statusClasses}`}>
+                                <Icon name={status.iconName} className="w-3 h-3" /> {status.label}
                             </span>
                         </div>
-                        <h2 className="text-3xl font-black text-[var(--text-primary)] tracking-tighter leading-none">
+                        <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-none">
                             {voucher.series}-{voucher.number}
                         </h2>
-                        <p className="text-xs text-[var(--text-secondary)] font-bold mt-2 uppercase tracking-widest">
-                            {new Date(voucher.emission_date).toLocaleDateString('es-PE', { day: '2-digit', month: 'long', year: 'numeric' })}
+                        <p className="text-xs text-white/70 font-semibold mt-2">
+                            ID #{voucher.id} · {voucher.order_id}
                         </p>
                     </div>
-                    <button onClick={onClose} className="w-12 h-12 flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-secondary)] rounded-2xl hover:bg-[var(--bg-danger)] hover:text-[var(--text-danger)] transition-all">
-                        <Icon name="X" className="w-6 h-6" />
-                    </button>
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-8 space-y-8 custom-scrollbar">
-                    <div className="space-y-4">
-                        <h3 className="text-xs font-black text-[var(--text-secondary)] uppercase tracking-widest flex items-center gap-2">
-                            <Icon name="Store" className="w-4 h-4" /> Datos de la Tienda
-                        </h3>
-                        <div className="bg-[var(--bg-secondary)] p-5 rounded-[2rem]">
-                            <p className="text-lg font-black text-[var(--text-primary)]">{voucher.store_name}</p>
-                            <p className="text-sm font-bold text-[var(--text-secondary)]">RUC: {voucher.store_ruc}</p>
+                {/* Scrollable body */}
+                <div className="flex-1 overflow-y-auto px-6 pb-6 space-y-5 custom-scrollbar">
+
+                    {/* Store chip */}
+                    <div className="inline-flex items-center gap-2 bg-teal-50 border border-teal-100 text-teal-700 rounded-full px-4 py-2 text-sm font-semibold dark:bg-teal-900/20 dark:border-teal-800 dark:text-teal-300">
+                        <Icon name="Store" className="w-4 h-4" />
+                        {voucher.store_name}
+                    </div>
+
+                    {/* Customer + Amount cards */}
+                    <div className="grid grid-cols-2 gap-3">
+                        <div className="bg-[var(--bg-secondary)] rounded-2xl p-4 border border-[var(--border-subtle)]">
+                            <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-2">Cliente</p>
+                            <p className="text-sm font-bold text-[var(--text-primary)] leading-snug">{voucher.customer_name}</p>
+                            <p className="text-xs text-[var(--text-secondary)] mt-0.5">RUC: {voucher.customer_ruc}</p>
+                        </div>
+                        <div className="bg-[var(--bg-secondary)] rounded-2xl p-4 border border-[var(--border-subtle)]">
+                            <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-2">Monto Total</p>
+                            <p className="text-xl font-black text-[var(--text-primary)] leading-none">{formatCurrency(voucher.amount)}</p>
                         </div>
                     </div>
 
-                    <div className="space-y-3">
-                        <h3 className="text-xs font-black text-[var(--text-secondary)] uppercase tracking-widest flex items-center gap-2">
+                    {/* Products table */}
+                    {voucher.items && voucher.items.length > 0 && (
+                        <div className="space-y-2">
+                            <h3 className="text-xs font-black text-[var(--text-muted)] uppercase tracking-widest flex items-center gap-2">
+                                <Icon name="Package" className="w-4 h-4" /> Productos / Servicios
+                            </h3>
+                            <div className="border border-[var(--border-subtle)] rounded-2xl overflow-hidden">
+                                <table className="w-full text-sm">
+                                    <thead>
+                                        <tr className="bg-[var(--bg-secondary)] border-b border-[var(--border-subtle)]">
+                                            <th className="text-left px-4 py-2.5 text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest">Producto</th>
+                                            <th className="text-center px-3 py-2.5 text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest">Cant.</th>
+                                            <th className="text-right px-3 py-2.5 text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest">P. Unit.</th>
+                                            <th className="text-right px-4 py-2.5 text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest">Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {voucher.items.map((item, idx) => {
+                                            const name = item.product_name || item.service_name || '—';
+                                            const unitPrice = item.quantity > 0 ? item.line_total / item.quantity : 0;
+                                            return (
+                                                <tr key={idx} className="border-b border-[var(--border-subtle)] last:border-b-0">
+                                                    <td className="px-4 py-3 font-semibold text-[var(--text-primary)]">{name}</td>
+                                                    <td className="px-3 py-3 text-center text-[var(--text-secondary)]">{item.quantity}</td>
+                                                    <td className="px-3 py-3 text-right text-[var(--text-secondary)]">{formatCurrency(unitPrice)}</td>
+                                                    <td className="px-4 py-3 text-right font-bold text-[var(--text-primary)]">{formatCurrency(item.line_total)}</td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Commission card */}
+                    <div className="space-y-2">
+                        <h3 className="text-xs font-black text-[var(--text-muted)] uppercase tracking-widest flex items-center gap-2">
                             <Icon name="DollarSign" className="w-4 h-4" /> Comisión
                         </h3>
-                        <div className="bg-[var(--bg-secondary)] rounded-2xl p-5 border border-[var(--border-subtle)]">
-                            <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest mb-2">Desglose</p>
-                            <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-                                El desglose exacto (Base Imponible, IGV y Total) se encuentra en la <span className="font-black text-[var(--text-primary)]">Factura PDF</span>. Descárgala abajo.
-                            </p>
+                        <div className="bg-[var(--bg-secondary)] rounded-2xl p-4 border border-[var(--border-subtle)] space-y-3">
+                            <div className="grid grid-cols-3 gap-3">
+                                <div>
+                                    <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-1">Tasa</p>
+                                    <p className="text-sm font-bold text-[var(--text-primary)]">{fmtPct(voucher.commission_rate)}</p>
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-1">Comisión</p>
+                                    <p className="text-sm font-bold text-[var(--text-primary)]">{fmt(voucher.commission_amount)}</p>
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-1">IGV</p>
+                                    <p className="text-sm font-bold text-[var(--text-primary)]">{fmt(voucher.igv_amount)}</p>
+                                </div>
+                            </div>
+                            <div className="border-t border-[var(--border-subtle)] pt-3 flex items-center justify-between">
+                                <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest">Total Comisión</p>
+                                <p className="text-lg font-black text-[var(--text-primary)]">{fmt(voucher.commission_amount)}</p>
+                            </div>
                         </div>
                     </div>
 
-                    <div className="space-y-2">
-                        <p className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Orden</p>
-                        <p className="text-sm font-bold text-[var(--text-secondary)]">{voucher.order_id}</p>
+                    {/* Ver PDF button */}
+                    <button
+                        onClick={() => handleDownloadPdf(voucher)}
+                        disabled={isDownloading}
+                        className="flex items-center gap-3 w-full p-4 bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--brand-teal)] text-white rounded-2xl font-bold text-sm tracking-wide hover:opacity-90 transition-all active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed shadow-lg shadow-teal-500/20"
+                    >
+                        <Icon name="FileText" className="w-5 h-5" />
+                        <span className="flex-1 text-left">{isDownloading ? 'Descargando...' : 'Ver / Descargar Factura'}</span>
+                        <Icon name="Download" className="w-5 h-5" />
+                    </button>
+
+                    {/* Emission date */}
+                    <div className="text-right">
+                        <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest">Fecha de emisión</p>
+                        <p className="text-xs font-bold text-[var(--text-secondary)]">{formatDate(voucher.emission_date)}</p>
                     </div>
 
-                    <div className="space-y-4">
-                        <h3 className="text-xs font-black text-[var(--text-secondary)] uppercase tracking-widest flex items-center gap-2">
-                            <Icon name="FileText" className="w-4 h-4" /> Comprobante Digital
-                        </h3>
-                        <button
-                            onClick={() => handleDownloadPdf(voucher)}
-                            disabled={isDownloading}
-                            className="flex items-center justify-center gap-3 p-6 bg-[var(--bg-card)] rounded-[2.5rem] border border-[var(--border-subtle)] shadow-xl shadow-[var(--border-subtle)]/50 hover:bg-emerald-500/5 transition-all group w-full text-left disabled:opacity-60 disabled:cursor-not-allowed"
-                        >
-                            <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-rose-50 text-rose-500 group-hover:scale-110 transition-all shadow-lg shadow-rose-100/50">
-                                <Icon name="FileText" className="w-8 h-8" />
-                            </div>
-                            <div className="text-left">
-                                <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]">
-                                    {isDownloading ? 'Descargando...' : 'Descargar Factura Electrónica'}
-                                </p>
-                                <p className="text-xs text-[var(--text-muted)] mt-1">Comprobante Lyrium</p>
-                            </div>
-                            <Icon name="Download" className="w-5 h-5 text-[var(--text-muted)] ml-auto" />
-                        </button>
-                    </div>
-
-
-                    <div className="space-y-4">
-                        <h3 className="text-xs font-black text-[var(--text-secondary)] uppercase tracking-widest flex items-center gap-2">
-                            <Icon name="Clock" className="w-4 h-4" /> Historial
-                        </h3>
-                        {voucher.history && voucher.history.length > 0 ? (
-                            <div className="space-y-6 relative before:absolute before:left-4 before:top-2 before:bottom-2 before:w-0.5 before:bg-[var(--border-subtle)]">
+                    {/* History (collapsed) */}
+                    {voucher.history && voucher.history.length > 0 && (
+                        <details className="group">
+                            <summary className="text-xs font-black text-[var(--text-muted)] uppercase tracking-widest flex items-center gap-2 cursor-pointer select-none hover:text-[var(--text-secondary)] transition-colors list-none">
+                                <Icon name="Clock" className="w-4 h-4" />
+                                Historial
+                                <Icon name="ChevronDown" className="w-3.5 h-3.5 ml-auto transition-transform group-open:rotate-180" />
+                            </summary>
+                            <div className="mt-3 space-y-4 relative before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-0.5 before:bg-[var(--border-subtle)]">
                                 {[...voucher.history].reverse().map((event, idx) => (
-                                    <div key={`history-${event.timestamp}-${idx}`} className="relative pl-10">
-                                        <div className="absolute left-2.5 top-1 w-3 h-3 bg-indigo-500 rounded-full border-4 border-[var(--bg-card)] shadow-sm -ml-0.5"></div>
+                                    <div key={`history-${event.timestamp}-${idx}`} className="relative pl-8">
+                                        <div className="absolute left-1.5 top-1 w-2.5 h-2.5 bg-indigo-500 rounded-full border-2 border-white dark:border-[var(--bg-card)] shadow-sm" />
                                         <div>
                                             <p className="text-[10px] font-black text-[var(--text-primary)] leading-none mb-1 uppercase tracking-tight">{event.note}</p>
                                             <div className="flex items-center gap-2">
                                                 <span className="text-[9px] font-bold text-[var(--text-secondary)] uppercase">{new Date(event.timestamp).toLocaleString()}</span>
-                                                <span className="w-1 h-1 bg-[var(--border-subtle)] rounded-full"></span>
+                                                <span className="w-1 h-1 bg-[var(--border-subtle)] rounded-full" />
                                                 <span className="text-[9px] font-bold text-indigo-500 uppercase">{event.user}</span>
                                             </div>
                                         </div>
                                     </div>
                                 ))}
                             </div>
-                        ) : (
-                            <div className="p-10 text-center border-2 border-dashed border-[var(--border-subtle)] rounded-[2rem]">
-                                <Icon name="Clock" className="w-10 h-10 text-[var(--text-secondary)] mb-2 mx-auto" />
-                                <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest">Sin historial registrado</p>
-                            </div>
-                        )}
-                    </div>
+                        </details>
+                    )}
                 </div>
 
-                <div className="p-8 border-t border-[var(--border-subtle)] bg-[var(--bg-card)]/80 backdrop-blur-xl flex gap-4">
+                {/* Footer */}
+                <div className="px-6 py-4 border-t border-[var(--border-subtle)] bg-[var(--bg-card)]/80 backdrop-blur-xl flex gap-3 shrink-0 dark:bg-[var(--bg-secondary)]/80">
                     <button
                         onClick={() => handleSharePdf(voucher)}
-                        className="flex items-center justify-center gap-2 flex-1 py-4 bg-[var(--bg-secondary)] text-[var(--text-secondary)] rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-[var(--bg-hover)] transition-all"
+                        className="flex items-center justify-center gap-2 flex-1 py-3 bg-[var(--bg-secondary)] text-[var(--text-secondary)] rounded-xl font-bold text-[11px] uppercase tracking-widest hover:bg-[var(--bg-hover)] transition-all dark:bg-white/10 dark:text-white/70"
                     >
                         <Icon name={shareStatus === 'copied' ? 'ClipboardCheck' : 'Share2'} className="w-4 h-4" />
                         {shareStatus === 'copied' ? 'Copiado' : 'Compartir'}
                     </button>
                     <button
                         onClick={onClose}
-                        className="flex-1 py-4 bg-[var(--bg-secondary)] text-[var(--text-secondary)] rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-[var(--bg-hover)] transition-all"
+                        className="flex-1 py-3 bg-[var(--bg-secondary)] text-[var(--text-secondary)] rounded-xl font-bold text-[11px] uppercase tracking-widest hover:bg-[var(--bg-hover)] transition-all dark:bg-white/10 dark:text-white/70"
                     >
                         Cerrar
                     </button>

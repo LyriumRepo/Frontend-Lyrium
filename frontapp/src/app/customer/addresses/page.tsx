@@ -176,7 +176,7 @@ export default function CustomerAddressesPage() {
         icon="MapPin"
       />
 
-      <div className="flex justify-center">
+      <div className="flex justify-center md:justify-end">
         <BaseButton
           onClick={openAddModal}
           variant="action"
@@ -283,13 +283,13 @@ export default function CustomerAddressesPage() {
       </div>
 
       {showModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[60] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label={editingAddress ? 'Editar Dirección' : 'Nueva Dirección'} tabIndex={-1} onClick={() => setShowModal(false)} onKeyDown={(e) => { if (e.key === 'Escape') setShowModal(false); }}>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[99999] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label={editingAddress ? 'Editar Dirección' : 'Nueva Dirección'} tabIndex={-1} onClick={() => setShowModal(false)} onKeyDown={(e) => { if (e.key === 'Escape') setShowModal(false); }}>
           <div
-            className="bg-white dark:bg-[var(--bg-secondary)] rounded-[3.5rem] max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl"
+            className="bg-white dark:bg-[var(--bg-secondary)] rounded-[3.5rem] max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl flex flex-col"
             onClick={(e) => e.stopPropagation()}
             onKeyDown={(e) => e.stopPropagation()}
           >
-            <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[var(--brand-green-hover)] dark:to-[var(--brand-green)] p-8 text-white relative">
+            <div className="bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--verde-500)] p-8 text-white relative shrink-0">
               <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl" />
               <div className="relative z-10 flex items-center justify-between">
                 <div className="flex items-center gap-4">
@@ -300,16 +300,16 @@ export default function CustomerAddressesPage() {
                     <h3 className="text-2xl font-black tracking-tighter">
                       {editingAddress ? 'Editar Dirección' : 'Nueva Dirección'}
                     </h3>
-                    <p className="text-[10px] font-bold text-sky-100 uppercase tracking-[0.2em]">Configuración de Entrega</p>
+                    <p className="text-[10px] font-bold text-white/80 uppercase tracking-[0.2em]">Configuración de Entrega</p>
                   </div>
                 </div>
-                <button onClick={() => setShowModal(false)} className="w-10 h-10 rounded-full bg-black/10 flex items-center justify-center hover:bg-black/20">
+                <button onClick={() => setShowModal(false)} className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center hover:bg-white/30">
                   <Icon name="X" className="w-5 h-5 text-white" />
                 </button>
               </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-10 space-y-6 overflow-y-auto max-h-[calc(90vh-140px)]">
+            <form onSubmit={handleSubmit} className="p-10 space-y-6 overflow-y-auto flex-1">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-gray-400 dark:text-gray-400 uppercase">Etiqueta de ubicación</label>

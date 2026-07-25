@@ -59,7 +59,7 @@ function SkeletonGrid() {
 
 export function TrainingClient() {
     const { user } = useAuth();
-    const { can, capabilitiesLoading } = usePlanCapabilities();
+    const { can, capabilitiesLoading, planSlug } = usePlanCapabilities();
 
     const hasAccess = can('can_training');
 
@@ -311,7 +311,7 @@ export function TrainingClient() {
                 onToggleComplete={toggleComplete}
                 toggling={togglingId === playing?.id}
             />
-            {user && <TrainingGuide userId={user.id} />}
+            {user && <TrainingGuide userId={user.id} planSlug={planSlug} />}
         </div>
     );
 }

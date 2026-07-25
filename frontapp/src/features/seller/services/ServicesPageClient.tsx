@@ -19,6 +19,7 @@ import { useSellerServices } from '@/features/seller/services/hooks/useSellerSer
 import { useToast } from '@/shared/lib/context/ToastContext';
 import BaseLoading from '@/components/ui/BaseLoading';
 import Icon from '@/components/ui/Icon';
+import Pagination from '@/components/ui/Pagination';
 import { useConfirmDialog } from '@/components/ui/confirm-dialog';
 import ServicesGuideModal from './components/ServicesGuideModal';
 
@@ -328,7 +329,7 @@ export function ServicesPageClient() {
                                         ].map((h, index, arr) => (
                                             <th
                                                 key={h}
-                                                className={`px-4 py-2.5 text-left text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)]
+                                                className={`px-4 py-2.5 text-left text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)] whitespace-nowrap
                                                     ${index === 0 ? 'rounded-tl-2xl' : ''}
                                                     ${index === arr.length - 1 ? 'rounded-tr-2xl' : ''}`}
                                             >
@@ -382,44 +383,7 @@ export function ServicesPageClient() {
                             ))}
                         </div>
 
-                        {totalPages > 1 && (
-                            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between px-1 pt-1">
-                                <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest">
-                                    Página {safePage} de {totalPages} · {filteredServices.length} servicio{filteredServices.length !== 1 ? 's' : ''}
-                                </p>
-                                <div className="flex items-center gap-1 overflow-x-auto pb-1 sm:pb-0">
-                                    <button
-                                        onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                                        disabled={safePage === 1}
-                                        className="w-7 h-7 flex-shrink-0 flex items-center justify-center rounded-lg border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                                    >
-                                        <Icon name="ChevronLeft" className="w-3.5 h-3.5" />
-                                    </button>
-
-                                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                                        <button
-                                            key={page}
-                                            onClick={() => setCurrentPage(page)}
-                                            className={`w-7 h-7 flex-shrink-0 flex items-center justify-center rounded-lg text-[10px] font-black transition-colors
-                                ${safePage === page
-                                                    ? 'bg-sky-500/20 dark:bg-[#8FC3A1]/20 text-sky-500 dark:text-[#8FC3A1] border border-sky-500/30 dark:border-[#8FC3A1]/30'
-                                                    : 'border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]'
-                                                }`}
-                                        >
-                                            {page}
-                                        </button>
-                                    ))}
-
-                                    <button
-                                        onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                                        disabled={safePage === totalPages}
-                                        className="w-7 h-7 flex-shrink-0 flex items-center justify-center rounded-lg border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                                    >
-                                        <Icon name="ChevronRight" className="w-3.5 h-3.5" />
-                                    </button>
-                                </div>
-                            </div>
-                        )}
+                        <Pagination page={safePage} totalPages={totalPages} onPageChange={setCurrentPage} totalItems={filteredServices.length} itemLabel="servicios" />
                     </>
                 ) : (
                     <BaseEmptyState
@@ -535,39 +499,8 @@ export function ServicesPageClient() {
 
                 {/* Drawer footer — paginación (visible sólo con >5 especialistas) */}
                 {specialistTotalPages > 1 && (
-                    <div className="flex-shrink-0 px-4 pt-3 pb-16 border-t border-[var(--border-subtle)] flex items-center justify-between">
-                        <p className="text-[9px] font-bold text-[var(--text-secondary)] uppercase tracking-widest">
-                            {safeSpecialistPage}/{specialistTotalPages} · {specialists.length} prof.
-                        </p>
-                        <div className="flex items-center gap-1 overflow-x-auto">
-                            <button
-                                onClick={() => setSpecialistPage((p) => Math.max(1, p - 1))}
-                                disabled={safeSpecialistPage === 1}
-                                className="w-7 h-7 flex items-center justify-center rounded-lg border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                            >
-                                <Icon name="ChevronLeft" className="w-3.5 h-3.5" />
-                            </button>
-                            {Array.from({ length: specialistTotalPages }, (_, i) => i + 1).map((page) => (
-                                <button
-                                    key={page}
-                                    onClick={() => setSpecialistPage(page)}
-                                    className={`w-7 h-7 flex items-center justify-center rounded-lg text-[10px] font-black transition-colors
-                                        ${safeSpecialistPage === page
-                                            ? 'bg-sky-500/20 dark:bg-[#8FC3A1]/20 text-sky-500 dark:text-[#8FC3A1] border border-sky-500/30 dark:border-[#8FC3A1]/30'
-                                            : 'border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]'
-                                        }`}
-                                >
-                                    {page}
-                                </button>
-                            ))}
-                            <button
-                                onClick={() => setSpecialistPage((p) => Math.min(specialistTotalPages, p + 1))}
-                                disabled={safeSpecialistPage === specialistTotalPages}
-                                className="w-7 h-7 flex items-center justify-center rounded-lg border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                            >
-                                <Icon name="ChevronRight" className="w-3.5 h-3.5" />
-                            </button>
-                        </div>
+                    <div className="flex-shrink-0 border-t border-[var(--border-subtle)]">
+                        <Pagination page={safeSpecialistPage} totalPages={specialistTotalPages} onPageChange={setSpecialistPage} totalItems={specialists.length} itemLabel="prof." />
                     </div>
                 )}
                 </aside>

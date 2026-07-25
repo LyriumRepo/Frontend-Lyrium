@@ -1,5 +1,6 @@
 import React from 'react';
 import Icon from '@/components/ui/Icon';
+import KpiBadge from '@/components/ui/KpiBadge';
 
 interface BaseStatCardProps {
   label: string;
@@ -13,6 +14,7 @@ interface BaseStatCardProps {
   className?: string;
   isLoading?: boolean;
   onClick?: () => void;
+  badge?: { label: string; level: 'regular' | 'good' | 'excellent'; tip?: string; scale?: string | null };
 }
 
 const _info    = { bg: 'bg-[var(--color-info)]/10 dark:bg-[var(--color-info)]/15',    iconBg: 'bg-[var(--color-info)]',    text: 'text-[var(--text-primary)] dark:text-[var(--color-info)]',    border: 'border-[var(--color-info)]/20 dark:border-[var(--color-info)]/25',    shadow: 'shadow-[var(--color-info)]/20' };
@@ -48,6 +50,7 @@ export default function BaseStatCard({
   suffix,
   className = '',
   onClick,
+  badge,
 }: BaseStatCardProps) {
   const Tag = onClick ? 'button' : 'div';
   const theme = isValidColor(color) ? colorMap[color] : colorMap.celeste;
@@ -55,7 +58,7 @@ export default function BaseStatCard({
   return (
     <Tag
       onClick={onClick}
-      className={`bg-[var(--bg-card)] p-6 rounded-2xl border ${theme.border} shadow-sm dark:shadow-none transition-all duration-300 hover:shadow-lg hover:shadow-[var(--border-subtle)]/20 hover:-translate-y-0.5 group relative overflow-hidden ${
+      className={`bg-[var(--bg-card)] p-6 rounded-2xl border ${theme.border} shadow-lg dark:shadow-none transition-all duration-300 hover:shadow-xl hover:shadow-[var(--border-subtle)]/20 hover:-translate-y-0.5 group relative overflow-hidden ${
         onClick ? 'cursor-pointer active:scale-[0.98] text-left w-full' : ''
       } ${className}`}
     >
@@ -96,6 +99,10 @@ export default function BaseStatCard({
             )}
           </div>
         </div>
+
+        {badge && (
+          <KpiBadge label={badge.label} level={badge.level} scale={badge.scale} />
+        )}
 
         {chart && (
           <div className="mt-4 mb-1 min-h-[120px] w-full">

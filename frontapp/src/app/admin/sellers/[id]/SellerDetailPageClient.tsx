@@ -224,6 +224,11 @@ export function SellerDetailPageClient() {
           icon={<TrendingUp className="w-5 h-5" />}
         />
         <StatBadge
+          value={store?.review_count ?? 0}
+          label="Reseñas"
+          icon={<Star className="w-5 h-5" />}
+        />
+        <StatBadge
           value={store?.strikes ?? 0}
           label="Strikes"
           icon={<AlertTriangle className="w-5 h-5" />}

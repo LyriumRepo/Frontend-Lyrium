@@ -10,9 +10,10 @@ import type { BookingResponse } from '@/shared/lib/api/bookingRepository';
 import { BookingTimeline } from '@/shared/components/booking/BookingTimeline';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import Icon from '@/components/ui/Icon';
+import Pagination from '@/components/ui/Pagination';
 import {
   Calendar, Clock, User, Loader2, X, Star, Eye,
-  MessageSquare, Store, CreditCard,
+  MessageSquare, Store, CreditCard, BadgeCheck, XCircle,
 } from 'lucide-react';
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
@@ -43,10 +44,9 @@ export default function CustomerBookingsPage() {
   const [bookings, setBookings] = useState<BookingResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<'upcoming' | 'past'>('upcoming');
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(1);
 
   const [detailTarget, setDetailTarget] = useState<BookingResponse | null>(null);
-  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const [rateTarget, setRateTarget] = useState<BookingResponse | null>(null);
   const [rateValue, setRateValue] = useState(0);
@@ -88,11 +88,9 @@ export default function CustomerBookingsPage() {
 
   const openDetail = (b: BookingResponse) => {
     setDetailTarget(b);
-    requestAnimationFrame(() => setDrawerOpen(true));
   };
   const closeDetail = () => {
-    setDrawerOpen(false);
-    setTimeout(() => setDetailTarget(null), 300);
+    setDetailTarget(null);
   };
 
   const now = new Date();
@@ -104,6 +102,52 @@ export default function CustomerBookingsPage() {
     b.status === 'completed' || b.status === 'cancelled' || b.status === 'no_show'
     || ((b.status === 'pending' || b.status === 'confirmed' || b.status === 'on_the_way') && b.date < todayStr)
   );
+
+  // ─── Validación de finalización por el cliente ────────────────────────────
+
+  const [validatingId, setValidatingId] = useState<number | null>(null);
+
+  const canValidate = (b: BookingResponse) => b.status === 'completed' && !b.customer_validated_at;
+
+  const handleValidateReceipt = async (booking: BookingResponse) => {
+    if (validatingId !== null) return;
+    setValidatingId(booking.id);
+    try {
+      const { liriosBonus } = await bookingRepository.validateReceipt(booking.id);
+      const applyValidated = (b: BookingResponse): BookingResponse =>
+        b.id === booking.id
+          ? { ...b, customer_validated_at: new Date().toISOString(), validation_source: 'manual' }
+          : b;
+      setBookings(prev => prev.map(applyValidated));
+      setDetailTarget(prev => (prev && prev.id === booking.id ? applyValidated(prev) : prev));
+      alert(`¡Gracias por confirmar tu servicio! Has ganado ${liriosBonus} Lirios para tu próxima compra. 🎉`);
+    } catch (e) {
+      alert(e instanceof Error && e.message ? e.message : 'No se pudo validar la reserva. Intenta nuevamente.');
+    } finally {
+      setValidatingId(null);
+    }
+  };
+
+  // ─── Cancelación por el cliente ────────────────────────────────────────────
+
+  const [cancellingId, setCancellingId] = useState<number | null>(null);
+
+  const handleCancelBooking = async (booking: BookingResponse) => {
+    if (cancellingId !== null) return;
+    if (!window.confirm(`¿Seguro que quieres cancelar la reserva de "${booking.service_name}"? Esta acción no se puede deshacer.`)) {
+      return;
+    }
+    setCancellingId(booking.id);
+    try {
+      const updated = await bookingRepository.cancel(booking.id);
+      setBookings(prev => prev.map(b => (b.id === booking.id ? { ...b, ...updated } : b)));
+      setDetailTarget(prev => (prev && prev.id === booking.id ? { ...prev, ...updated } : prev));
+    } catch (e) {
+      alert(e instanceof Error && e.message ? e.message : 'No se pudo cancelar la reserva. Intenta nuevamente.');
+    } finally {
+      setCancellingId(null);
+    }
+  };
 
   const handleRate = async () => {
     if (!rateTarget || rateValue === 0) return;
@@ -127,9 +171,9 @@ export default function CustomerBookingsPage() {
   const list = tab === 'upcoming' ? upcoming : past;
   const PAGE_SIZE = 10;
   const totalPages = Math.max(1, Math.ceil(list.length / PAGE_SIZE));
-  const safePage = Math.min(page, totalPages - 1);
+  const safePage = Math.min(page, totalPages);
   const paginatedList = useMemo(
-    () => list.slice(safePage * PAGE_SIZE, (safePage + 1) * PAGE_SIZE),
+    () => list.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE),
     [list, safePage],
   );
 
@@ -161,7 +205,7 @@ export default function CustomerBookingsPage() {
 
         {/* Tabs */}
         <div className="flex gap-1 bg-gray-100 dark:bg-[var(--bg-secondary)] rounded-xl p-1 w-fit">
-        <button onClick={() => { setTab('upcoming'); setPage(0); }}
+        <button onClick={() => { setTab('upcoming'); setPage(1); }}
           className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${
             tab === 'upcoming'
               ? 'bg-white dark:bg-[var(--bg-card)] text-gray-900 dark:text-[var(--text-primary)] shadow-sm'
@@ -169,7 +213,7 @@ export default function CustomerBookingsPage() {
           }`}>
           Próximas ({upcoming.length})
         </button>
-        <button onClick={() => { setTab('past'); setPage(0); }}
+        <button onClick={() => { setTab('past'); setPage(1); }}
           className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${
             tab === 'past'
               ? 'bg-white dark:bg-[var(--bg-card)] text-gray-900 dark:text-[var(--text-primary)] shadow-sm'
@@ -198,7 +242,7 @@ export default function CustomerBookingsPage() {
             <thead>
               <tr className="bg-[var(--bg-secondary)]/50 border-b border-[var(--border-subtle)]">
                 {['Servicio', 'Tienda', 'Fecha', 'Horario', 'Especialista', 'Monto', 'Estado', 'Acciones'].map((h) => (
-                  <th key={h} className="px-6 py-5 text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">
+                  <th key={h} className="px-6 py-5 text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest whitespace-nowrap">
                     {h}
                   </th>
                 ))}
@@ -207,19 +251,19 @@ export default function CustomerBookingsPage() {
             <tbody className="divide-y divide-[var(--border-subtle)]">
               {paginatedList.map((booking) => (
                 <tr key={booking.id} className="hover:bg-[var(--bg-secondary)]/30 transition-colors">
-                  <td className="px-6 py-4">
+                  <td className="px-6 py-4 whitespace-nowrap">
                     <span className="text-sm font-bold text-gray-800 dark:text-[var(--text-primary)]">{booking.service_name}</span>
                   </td>
-                  <td className="px-6 py-4 text-sm font-bold text-gray-600 dark:text-[var(--text-secondary)] max-w-[150px] truncate">{booking.store_name}</td>
-                  <td className="px-6 py-4 text-sm font-bold text-gray-700 dark:text-[var(--text-primary)]">{booking.date ? formatDate(booking.date) : '—'}</td>
-                  <td className="px-6 py-4 text-sm font-bold text-gray-700 dark:text-[var(--text-primary)]">{booking.start_time} - {booking.end_time}</td>
-                  <td className="px-6 py-4 text-sm font-bold text-gray-600 dark:text-[var(--text-secondary)]">
+                  <td className="px-6 py-4 text-sm font-bold text-gray-600 dark:text-[var(--text-secondary)] whitespace-nowrap">{booking.store_name}</td>
+                  <td className="px-6 py-4 text-sm font-bold text-gray-700 dark:text-[var(--text-primary)] whitespace-nowrap">{booking.date ? formatDate(booking.date) : '—'}</td>
+                  <td className="px-6 py-4 text-sm font-bold text-gray-700 dark:text-[var(--text-primary)] whitespace-nowrap">{booking.start_time} - {booking.end_time}</td>
+                  <td className="px-6 py-4 text-sm font-bold text-gray-600 dark:text-[var(--text-secondary)] whitespace-nowrap">
                     {booking.specialist?.name ?? '—'}
                   </td>
-                  <td className="px-6 py-4 text-sm font-bold text-gray-900 dark:text-[var(--text-primary)]">
+                  <td className="px-6 py-4 text-sm font-bold text-gray-900 dark:text-[var(--text-primary)] whitespace-nowrap">
                     {booking.payment_amount > 0 ? `S/ ${booking.payment_amount.toFixed(2)}` : '—'}
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${STATUS_LABELS[booking.status]?.color ?? ''}`}>
                       {STATUS_LABELS[booking.status]?.label ?? booking.status}
                     </span>
@@ -231,6 +275,34 @@ export default function CustomerBookingsPage() {
                         title="Ver detalle">
                         <Eye className="w-4 h-4" />
                       </button>
+                      {booking.can_cancel && (
+                        <button onClick={() => handleCancelBooking(booking)}
+                          disabled={cancellingId === booking.id}
+                          className="p-2 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 border border-red-200 dark:border-red-800/40 transition-colors disabled:opacity-50"
+                          title="Cancelar reserva">
+                          {cancellingId === booking.id
+                            ? <Loader2 className="w-4 h-4 animate-spin" />
+                            : <XCircle className="w-4 h-4" />}
+                        </button>
+                      )}
+                      {canValidate(booking) && (
+                        <button onClick={() => handleValidateReceipt(booking)}
+                          disabled={validatingId === booking.id}
+                          className="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 border border-emerald-200 dark:border-emerald-700/40 transition-colors disabled:opacity-50"
+                          title="Validar servicio y ganar Lirios">
+                          {validatingId === booking.id
+                            ? <Loader2 className="w-4 h-4 animate-spin" />
+                            : <BadgeCheck className="w-4 h-4" />}
+                        </button>
+                      )}
+                      {booking.status === 'completed' && booking.customer_validated_at && (
+                        <span
+                          className="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 text-emerald-500 dark:text-emerald-400 flex items-center"
+                          title={booking.validation_source === 'auto_expired' ? 'Cerrada automáticamente' : 'Validada por ti'}
+                        >
+                          <BadgeCheck className="w-4 h-4" />
+                        </span>
+                      )}
                       {booking.status === 'completed' && (
                         booking.review ? (
                           <span
@@ -299,6 +371,26 @@ export default function CustomerBookingsPage() {
                       <Eye className="w-4 h-4" />
                       <span className="text-[10px] font-black uppercase tracking-wide">Ver</span>
                     </button>
+                    {booking.can_cancel && (
+                      <button onClick={() => handleCancelBooking(booking)}
+                        disabled={cancellingId === booking.id}
+                        className="px-3 py-2 rounded-2xl bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400 border border-red-200 dark:border-red-800/40 transition-colors flex items-center gap-1.5 disabled:opacity-50">
+                        {cancellingId === booking.id
+                          ? <Loader2 className="w-4 h-4 animate-spin" />
+                          : <XCircle className="w-4 h-4" />}
+                        <span className="text-[10px] font-black uppercase tracking-wide">Cancelar</span>
+                      </button>
+                    )}
+                    {canValidate(booking) && (
+                      <button onClick={() => handleValidateReceipt(booking)}
+                        disabled={validatingId === booking.id}
+                        className="px-3 py-2 rounded-2xl bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-700/40 transition-colors flex items-center gap-1.5 disabled:opacity-50">
+                        {validatingId === booking.id
+                          ? <Loader2 className="w-4 h-4 animate-spin" />
+                          : <BadgeCheck className="w-4 h-4" />}
+                        <span className="text-[10px] font-black uppercase tracking-wide">Validar</span>
+                      </button>
+                    )}
                     {booking.status === 'completed' && !booking.review && (
                       <button onClick={() => { setRateTarget(booking); setRateValue(0); setRateComment(''); setRateError(''); }}
                         className="px-3 py-2 rounded-2xl bg-sky-50 dark:bg-[var(--bg-muted)] text-sky-600 dark:text-[var(--icons-green)] border border-sky-200 dark:border-[var(--border-subtle)] transition-colors flex items-center gap-1.5">
@@ -313,84 +405,108 @@ export default function CustomerBookingsPage() {
           </div>
 
           {totalPages > 1 && (
-            <div className="flex items-center justify-between px-6 py-4 border-t border-[var(--border-subtle)]">
-              <span className="text-[10px] font-bold text-[var(--text-secondary)]">
-                {list.length} reserva{list.length !== 1 ? 's' : ''} · Pág. {safePage + 1}/{totalPages}
-              </span>
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={() => setPage((p) => Math.max(0, p - 1))}
-                  disabled={safePage === 0}
-                  className="px-3 py-1.5 rounded-xl text-[11px] font-bold text-[var(--text-secondary)] bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-sky-300/30 hover:text-sky-500 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-                >
-                  Anterior
-                </button>
-                <span className="px-2 text-[11px] font-bold text-[var(--text-secondary)]">
-                  Pág. {safePage + 1} de {totalPages}
-                </span>
-                <button
-                  onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
-                  disabled={safePage >= totalPages - 1}
-                  className="px-3 py-1.5 rounded-xl text-[11px] font-bold text-[var(--text-secondary)] bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-sky-300/30 hover:text-sky-500 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-                >
-                  Siguiente
-                </button>
-              </div>
+            <div className="border-t border-[var(--border-subtle)]">
+              <Pagination page={safePage} totalPages={totalPages} onPageChange={setPage} totalItems={list.length} itemLabel="reservas" />
             </div>
           )}
         </div>
       )}
 
-      {/* Right-side drawer — vía portal a document.body: el <div className="animate-fadeIn">
-          de BaseLayout.tsx tiene un transform (translateY vía animación con forwards) que
-          crea un containing block y rompe el position:fixed relativo al viewport real. */}
+      {/* Modal de detalle — mismo diseño centrado que "Detalles del Pedido" en Mis Pedidos,
+          vía portal a document.body por el mismo motivo (transform en BaseLayout.tsx rompe
+          position:fixed relativo al viewport real). */}
       {detailTarget && typeof document !== 'undefined' && createPortal(
-        <div className="fixed inset-0 z-[100]" role="dialog" aria-modal="true" aria-label={`Detalle de reserva: ${detailTarget.service_name}`} tabIndex={-1} onClick={closeDetail} onKeyDown={(e) => { if (e.key === 'Escape') closeDetail(); }}>
-          {/* Overlay */}
-          <div className={`absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300 ${drawerOpen ? 'opacity-100' : 'opacity-0'}`} />
-          {/* Drawer */}
+        <div
+          className="fixed inset-0 bg-black/40 backdrop-blur-xl z-[99999] flex justify-center items-center p-4 lg:p-6 animate-fadeIn"
+          onClick={closeDetail}
+          onKeyDown={(e) => { if (e.key === 'Escape') closeDetail(); }}
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Detalle de reserva: ${detailTarget.service_name}`}
+          tabIndex={-1}
+        >
           <div
-            tabIndex={-1}
+            className="bg-white dark:bg-[var(--bg-secondary)] w-full md:max-w-xl lg:max-w-[700px] max-h-[80vh] rounded-[2.5rem] overflow-hidden shadow-[-40px_0_100px_rgba(0,0,0,0.1)] border border-white/20 relative flex flex-col transition-all duration-700"
             onClick={(e) => e.stopPropagation()}
-            onKeyDown={(e) => e.stopPropagation()}
+            onKeyDown={(e) => { if (e.key === 'Escape') e.stopPropagation(); }}
             role="dialog"
             aria-modal="true"
-            className={`absolute right-0 top-0 bottom-0 w-full sm:w-[520px] bg-white dark:bg-[var(--bg-secondary)] shadow-[-40px_0_100px_rgba(0,0,0,0.25)] flex flex-col transition-transform duration-300 ease-out will-change-transform ${drawerOpen ? 'translate-x-0' : 'translate-x-full'}`}>
-            {/* Header gradiente */}
-            <div className="sticky top-0 z-10 px-6 pt-7 pb-5 bg-gradient-to-r from-sky-500 via-sky-400 to-sky-300 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] text-white flex-shrink-0">
+            tabIndex={-1}
+          >
+            <div className="bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--verde-500)] p-6 text-white relative flex-shrink-0">
               <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full -mr-24 -mt-24 blur-3xl" />
-              <div className="relative z-10 flex items-start justify-between gap-3">
-                <div className="min-w-0 flex-1">
-                  <p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/70">Detalle de reserva</p>
-                  <h2 className="text-lg font-black mt-1 leading-tight">{detailTarget.service_name}</h2>
-                  <div className="flex items-center gap-2 mt-2 flex-wrap">
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/20 backdrop-blur-sm">
-                      {STATUS_LABELS[detailTarget.status]?.label ?? detailTarget.status}
-                    </span>
-                    <span className="text-[11px] font-semibold text-white/90 flex items-center gap-1">
-                      <Store className="w-3 h-3" /> {detailTarget.store_name}
-                    </span>
+              <div className="relative z-10 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-inner">
+                    <Icon name="CalendarCheck" className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-black tracking-tighter leading-none">Detalles de la Reserva</h3>
+                    <p className="text-[9px] font-bold text-white/80 uppercase tracking-[0.2em] mt-1">Información de tu servicio</p>
                   </div>
                 </div>
-                <button onClick={closeDetail}
-                  className="w-9 h-9 rounded-full bg-black/10 hover:bg-black/20 flex items-center justify-center transition-all shrink-0">
-                  <X className="w-4 h-4" />
+                <button
+                  onClick={closeDetail}
+                  className="w-9 h-9 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center hover:bg-white/30 transition-all"
+                >
+                  <Icon name="X" className="w-5 h-5 text-white" />
                 </button>
               </div>
             </div>
 
-            {/* Body */}
-            <div className="overflow-y-auto flex-1 p-5 space-y-5">
-              {/* Timeline */}
-              <div className="p-5 bg-gray-50 dark:bg-[var(--bg-muted)]/50 rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)]">
-                <p className="text-[10px] font-black text-gray-400 dark:text-[var(--text-muted)] uppercase tracking-widest mb-3">
-                  Seguimiento
-                </p>
-                <BookingTimeline status={detailTarget.status} isHome={!!detailTarget.is_home_service} />
+            <div className="p-6 lg:p-8 space-y-6 overflow-y-auto flex-1">
+              {/* Establecimiento + estado */}
+              <div className="p-8 bg-sky-50 dark:bg-[var(--bg-muted)]/50 rounded-[2.5rem] border border-sky-100/50 flex flex-col md:flex-row items-center gap-6">
+                <div className="w-20 h-20 bg-white dark:bg-[var(--bg-secondary)] rounded-[1.5rem] flex items-center justify-center shadow-lg border border-sky-50">
+                  <Icon name="Store" className="w-10 h-10 text-sky-600 dark:text-[var(--icons-green)]" />
+                </div>
+                <div className="flex-1 text-center md:text-left">
+                  <p className="text-[10px] font-black text-sky-400 dark:text-[var(--icons-green)] uppercase tracking-widest mb-1">Establecimiento</p>
+                  <h4 className="text-2xl font-black text-gray-800 dark:text-[var(--text-primary)] tracking-tighter">
+                    {detailTarget.store_name}
+                  </h4>
+                  <div className="flex items-center justify-center md:justify-start gap-2 mt-2">
+                    <span className="w-2 h-2 rounded-full bg-green-500" />
+                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Verificado por Lyrium</span>
+                  </div>
+                </div>
+                <div
+                  className={`px-5 py-2.5 rounded-2xl text-white ${
+                    detailTarget.status === 'completed'
+                      ? 'bg-gradient-to-r from-green-400 to-sky-500'
+                      : detailTarget.status === 'cancelled' || detailTarget.status === 'no_show'
+                        ? 'bg-gradient-to-r from-red-500 to-red-600'
+                        : detailTarget.status === 'on_the_way'
+                          ? 'bg-gradient-to-r from-sky-500 to-sky-600 dark:from-[var(--brand-green)] dark:to-[var(--brand-green-hover)]'
+                          : 'bg-gradient-to-r from-gray-400 to-gray-500'
+                  }`}
+                >
+                  <p className="text-[9px] font-black uppercase tracking-widest leading-none mb-1 opacity-70">Estado</p>
+                  <p className="text-xs font-black uppercase tracking-tighter">
+                    {STATUS_LABELS[detailTarget.status]?.label ?? detailTarget.status}
+                  </p>
+                </div>
+              </div>
+
+              {/* Seguimiento */}
+              <div className="p-6 bg-gray-50 dark:bg-[var(--bg-muted)]/50 rounded-[2rem] border border-gray-100 dark:border-[var(--border-subtle)]">
+                <h5 className="text-[10px] font-black text-gray-400 dark:text-gray-400 uppercase tracking-widest mb-5">
+                  Seguimiento de la Reserva
+                </h5>
+                <BookingTimeline status={detailTarget.status} isHome={!!detailTarget.is_home_service} validated={!!detailTarget.customer_validated_at} />
               </div>
 
               {/* Info cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="p-6 bg-gray-50 dark:bg-[var(--bg-muted)]/50 rounded-[2rem] border border-gray-100 dark:border-[var(--border-subtle)] flex items-center gap-4">
+                  <div className="w-12 h-12 bg-white dark:bg-[var(--bg-secondary)] rounded-2xl flex items-center justify-center shadow-sm text-sky-500 dark:text-[var(--icons-green)] border border-gray-100 dark:border-[var(--border-subtle)]">
+                    <Icon name="Briefcase" className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Servicio</p>
+                    <p className="text-sm font-bold text-gray-700 dark:text-[var(--text-primary)]">{detailTarget.service_name}</p>
+                  </div>
+                </div>
                 <InfoCard icon={Calendar} label="Fecha" value={detailTarget.date ? formatDate(detailTarget.date) : '—'} />
                 <InfoCard icon={Clock} label="Horario" value={`${detailTarget.start_time} - ${detailTarget.end_time}`} />
                 {detailTarget.specialist && (
@@ -426,12 +542,55 @@ export default function CustomerBookingsPage() {
               )}
 
               {/* Total */}
-              <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-[var(--border-subtle)]">
-                <span className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-[var(--text-muted)]">Total</span>
-                <span className="text-2xl font-black text-sky-600 dark:text-[var(--icons-green)]">
-                  S/ {detailTarget.payment_amount.toFixed(2)}
-                </span>
+              <div className="pt-2">
+                <div className="bg-gradient-to-br from-slate-900 to-gray-900 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-5 rounded-[2.5rem] flex items-center justify-between text-white shadow-2xl">
+                  <div>
+                    <p className="text-[10px] font-bold text-sky-300 dark:text-[var(--icons-green)] uppercase tracking-[0.3em] mb-1">Monto Total</p>
+                    <h6 className="text-3xl font-black tracking-tighter">S/ {detailTarget.payment_amount.toFixed(2)}</h6>
+                  </div>
+                  <div className="w-16 h-16 bg-white/10 backdrop-blur-md rounded-[1.5rem] flex items-center justify-center border border-white/20">
+                    <Icon name="CheckCircle" className="w-8 h-8 text-green-400 dark:text-[var(--icons-green)]" />
+                  </div>
+                </div>
               </div>
+
+              {/* Validación de finalización */}
+              {canValidate(detailTarget) && (
+                <button
+                  onClick={() => handleValidateReceipt(detailTarget)}
+                  disabled={validatingId === detailTarget.id}
+                  className="w-full py-5 rounded-2xl bg-gradient-to-r from-emerald-500 to-green-600 text-white font-black text-xs uppercase tracking-[0.2em] hover:shadow-lg hover:shadow-emerald-200 dark:hover:shadow-emerald-500/30 transition-all flex items-center justify-center gap-3 disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {validatingId === detailTarget.id
+                    ? <Loader2 className="w-5 h-5 animate-spin" />
+                    : <BadgeCheck className="w-5 h-5" />}
+                  {validatingId === detailTarget.id ? 'Validando…' : 'Validar Servicio y Ganar Lirios'}
+                </button>
+              )}
+              {detailTarget.status === 'completed' && detailTarget.customer_validated_at && (
+                <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl border border-emerald-200 dark:border-emerald-700/40 flex items-center gap-2">
+                  <BadgeCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                  <p className="text-sm font-bold text-emerald-700 dark:text-emerald-300">
+                    {detailTarget.validation_source === 'auto_expired'
+                      ? 'Reserva cerrada automáticamente por inacción.'
+                      : 'Validaste esta reserva. ¡Gracias por confirmar!'}
+                  </p>
+                </div>
+              )}
+
+              {/* Cancelar reserva */}
+              {detailTarget.can_cancel && (
+                <button
+                  onClick={() => handleCancelBooking(detailTarget)}
+                  disabled={cancellingId === detailTarget.id}
+                  className="w-full py-4 rounded-2xl border-2 border-red-200 dark:border-red-800/40 text-red-500 dark:text-red-400 font-black text-xs uppercase tracking-[0.2em] hover:bg-red-50 dark:hover:bg-red-900/20 transition-all flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {cancellingId === detailTarget.id
+                    ? <Loader2 className="w-4 h-4 animate-spin" />
+                    : <XCircle className="w-4 h-4" />}
+                  {cancellingId === detailTarget.id ? 'Cancelando…' : 'Cancelar Reserva'}
+                </button>
+              )}
             </div>
           </div>
         </div>,

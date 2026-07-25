@@ -86,7 +86,7 @@ const ManagementModal = ({
 
   return (
     <ModalsPortal>
-      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4">
         <div
           role="button"
           tabIndex={0}
@@ -430,7 +430,7 @@ export function SellersPageClient(_props: SellersPageClientProps) {
                 { label: 'En Espera', value: stats.pending, icon: 'Clock', color: 'turquesa' },
                 { label: 'Alertas', value: stats.alerts, icon: 'Bell', color: 'turquesaClaro' },
             ]} />
-            <SellerList sellers={filteredSellers} loading={loading} />
+            <SellerList sellers={filteredSellers} loading={loading} onStatusChange={actions.updateSellerStatus as (id: number, status: string, reason?: string) => Promise<void>} />
           </div>
         )}
 
@@ -563,7 +563,7 @@ export function SellersPageClient(_props: SellersPageClientProps) {
 
       {contractsState.selectedContract && (
         <ModalsPortal>
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4">
             <div 
               role="button"
               tabIndex={0}

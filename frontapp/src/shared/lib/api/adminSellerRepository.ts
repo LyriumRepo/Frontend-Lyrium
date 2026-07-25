@@ -108,6 +108,7 @@ export interface SellerStoreInfo {
   profile_status: 'approved' | 'pending' | 'rejected';
   strikes: number;
   rating: number;
+  review_count: number;
   total_sales: number;
   approved_at: string | null;
   has_active_contract: boolean;

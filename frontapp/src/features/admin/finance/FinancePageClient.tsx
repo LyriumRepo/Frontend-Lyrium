@@ -20,6 +20,8 @@ import Icon from '@/components/ui/Icon';
 import { useFinanceAnalytics } from '@/features/admin/finance/hooks/useFinanceAnalytics';
 import { formatCurrency } from '@/shared/lib/utils/formatters';
 import { companyColors, chartColorMap } from '@/features/admin/finance/colors';
+import { getKpiLevel } from '@/features/seller/finance/kpiThresholds';
+import KpiBadge from '@/components/ui/KpiBadge';
 import type { FinanceData } from '@/features/admin/finance/types';
 
 interface KpiConfig {
@@ -28,7 +30,7 @@ interface KpiConfig {
   description: string;
   icon: string;
   color: string;
-  chartType: 'line' | 'bar' | 'doughnut' | 'radar';
+  chartType: 'line' | 'bar' | 'doughnut' | 'pie' | 'radar' | 'gauge' | 'stars';
   chartLabels: string[];
   chartData: number[];
   chartColor: string;
@@ -43,7 +45,7 @@ function buildKpiConfig(
   description: string,
   icon: string,
   color: string,
-  chartType: 'line' | 'bar' | 'doughnut' | 'radar',
+  chartType: 'line' | 'bar' | 'doughnut' | 'pie' | 'radar' | 'gauge' | 'stars',
   chartLabels: string[],
   chartData: number[],
   chartColor: string,
@@ -140,7 +142,7 @@ export function FinancePageClient() {
     description: string,
     icon: string,
     color: string,
-    chartType: 'line' | 'bar' | 'doughnut' | 'radar',
+    chartType: 'line' | 'bar' | 'doughnut' | 'pie' | 'radar' | 'gauge' | 'stars',
     chartLabels: string[],
     chartData: number[],
     chartColor: string,
@@ -154,7 +156,7 @@ export function FinancePageClient() {
     label: string,
     dataField: keyof FinanceData,
     d: FinanceData,
-    chartType: 'line' | 'bar' | 'doughnut' | 'radar',
+    chartType: 'line' | 'bar' | 'doughnut' | 'pie' | 'radar' | 'gauge' | 'stars',
     colorKey: string,
   ) => {
     const field = d[dataField] as { labels: string[]; data: number[] } | undefined;
@@ -309,6 +311,7 @@ export function FinancePageClient() {
                 icon="TrendingUp"
                 color="turquesaClaro"
                 trend={trendOf(data.roi.data)}
+                badge={getKpiLevel('roi', data.roi.data[data.roi.data.length - 1] ?? 0) ?? undefined}
                 chart={<FinanceChart type="bar" labels={data.roi.labels} data={data.roi.data} color={chartColorMap.roi} />}
                 onClick={() => openStatCard('ROI de Ventas', 'roi', data, 'bar', 'turquesaClaro')}
               />
@@ -323,6 +326,11 @@ export function FinancePageClient() {
                 icon="Tag"
                 color="turquesa"
                 trend={trendOf(data.ticketPromedio.data)}
+                badge={getKpiLevel('ticketPromedio', (() => {
+                  const totalVentas = data.ventasTotales.data.reduce((a, b) => a + b, 0);
+                  const totalBrutos = data.ingresosBrutos.data.reduce((a, b) => a + b, 0);
+                  return totalVentas > 0 ? totalBrutos / totalVentas : 0;
+                })()) ?? undefined}
                 chart={<FinanceChart type="bar" labels={data.ticketPromedio.labels} data={data.ticketPromedio.data} color={chartColorMap.ticketPromedio} />}
                 onClick={() => openStatCard('Ticket Promedio', 'ticketPromedio', data, 'bar', 'turquesa')}
               />
@@ -361,6 +369,11 @@ export function FinancePageClient() {
                 description="Distribución de frecuencias (histograma)"
                 icon="Timer"
                 color="turquesaClaro"
+                badge={getKpiLevel('leadTime', (() => {
+                  const total = data.leadTime.data.reduce((a, b) => a + b, 0);
+                  const count = data.leadTime.data.length;
+                  return count > 0 && total > 0 ? Math.round(total / count) : 0;
+                })()) ?? undefined}
                 chart={<FinanceChart type="bar" labels={data.leadTime.labels} data={data.leadTime.data} color={chartColorMap.leadTime} />}
                 onClick={() => openStatCard('Lead Time de Despacho', 'leadTime', data, 'bar', 'turquesaClaro')}
               />
@@ -383,7 +396,7 @@ export function FinancePageClient() {
                   'Productos con reportes de fallas',
                   'AlertOctagon',
                   companyColors.turquesa,
-                  'doughnut',
+                  'pie',
                   data.defectuosos.labels,
                   data.defectuosos.data,
                   chartColorMap.defectuosos,
@@ -397,10 +410,15 @@ export function FinancePageClient() {
                   </div>
                 </div>
                 <div className="w-full h-[200px]">
-                  <FinanceChart type="doughnut" labels={data.defectuosos.labels} data={data.defectuosos.data} color={chartColorMap.defectuosos} />
+                  <FinanceChart type="pie" labels={data.defectuosos.labels} data={data.defectuosos.data} color={chartColorMap.defectuosos} height="200px" />
                 </div>
                 <p className="text-2xl font-black mt-6" style={{ color: companyColors.turquesa }}>{data.defectuosos.data[1] ?? 0}%</p>
                 <p className="text-xs text-[var(--text-secondary)] mt-2 font-bold uppercase tracking-widest">Productos con reportes de fallas</p>
+                {(() => {
+                  const badge = getKpiLevel('defectos', data.defectuosos.data[1] ?? 0);
+                  if (!badge) return null;
+                  return <KpiBadge label={badge.label} level={badge.level} scale={badge.scale} />;
+                })()}
                 <div className="mt-4 pt-3 border-t border-[var(--border-subtle)] opacity-0 group-hover:opacity-100 transition-opacity">
                   <span className="text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest flex items-center gap-1">
                     <Icon name="ArrowRight" className="w-3 h-3" />
@@ -426,6 +444,7 @@ export function FinancePageClient() {
                 description="Ticket Promedio × Frecuencia de Compra"
                 icon="Coins"
                 color="lima"
+                badge={getKpiLevel('ltv', data.ltv.data[data.ltv.data.length - 1] ?? 0) ?? undefined}
                 chart={<FinanceChart type="line" labels={data.ltv.labels} data={data.ltv.data} color={chartColorMap.ltv} fill={true} />}
                 onClick={() => openStatCard('LTV (Lifetime Value)', 'ltv', data, 'line', 'lima')}
               />
@@ -448,7 +467,7 @@ export function FinancePageClient() {
                   'Tiempo promedio de respuesta en chat',
                   'Clock',
                   companyColors.turquesaClaro,
-                  'bar',
+                  'gauge',
                   data.tiempoRespuesta.labels,
                   data.tiempoRespuesta.data,
                   chartColorMap.tiempoRespuesta,
@@ -475,6 +494,11 @@ export function FinancePageClient() {
                   </div>
                 </div>
                 <p className="text-xs text-[var(--text-secondary)] font-bold uppercase tracking-widest text-center">minutos promedio</p>
+                {(() => {
+                  const badge = getKpiLevel('tiempoRespuesta', data.tiempoRespuesta.data[data.tiempoRespuesta.data.length - 1] ?? 0);
+                  if (!badge) return null;
+                  return <KpiBadge label={badge.label} level={badge.level} scale={badge.scale} />;
+                })()}
                 <div className="mt-4 pt-3 border-t border-[var(--border-subtle)] opacity-0 group-hover:opacity-100 transition-opacity">
                   <span className="text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest flex items-center gap-1">
                     <Icon name="ArrowRight" className="w-3 h-3" />
@@ -507,6 +531,7 @@ export function FinancePageClient() {
                 description="(Ventas del Vendedor / Ventas Totales) × 100"
                 icon="PieChart"
                 color="verde"
+                badge={getKpiLevel('cuotaMercado', data.cuotaMercado.data[0] ?? 0) ?? undefined}
                 chart={<FinanceChart type="radar" labels={data.cuotaMercado.labels} data={data.cuotaMercado.data} color={chartColorMap.cuotaMercado} />}
                 onClick={() => openStatCard('Cuota de Mercado Interna', 'cuotaMercado', data, 'radar', 'verde')}
               />
@@ -528,6 +553,7 @@ export function FinancePageClient() {
                 description="Costo de Ventas / Inventario Promedio"
                 icon="RefreshCw"
                 color="verde"
+                badge={getKpiLevel('stockRotacion', data.stockRotacion.data[data.stockRotacion.data.length - 1] ?? 0) ?? undefined}
                 chart={<FinanceChart type="bar" labels={data.stockRotacion.labels} data={data.stockRotacion.data} color={chartColorMap.stockRotacion} />}
                 onClick={() => openStatCard('Rotación de Stock', 'stockRotacion', data, 'bar', 'verde')}
               />
@@ -559,7 +585,7 @@ export function FinancePageClient() {
                   'Porcentaje de clientes satisfechos',
                   'Star',
                   companyColors.turquesa,
-                  'bar',
+                  'stars',
                   data.csat.labels,
                   data.csat.data,
                   chartColorMap.csat,
@@ -576,12 +602,17 @@ export function FinancePageClient() {
                       key={star}
                       name="Star"
                       className="w-8 h-8"
-                      style={{ color: companyColors.turquesa, fill: star <= Math.round(4.5) ? companyColors.turquesa : undefined }}
+                      style={{ color: companyColors.turquesa, fill: star <= Math.round((data.csat.data[0] ?? 0) / 20) ? companyColors.turquesa : undefined }}
                     />
                   ))}
                 </div>
                 <p className="text-xl font-black text-center" style={{ color: companyColors.turquesa }}>{data.csat.data[0] > 0 ? `${data.csat.data[0]}%` : 'N/A'}</p>
                 <p className="text-xs text-[var(--text-secondary)] mt-1 font-bold uppercase tracking-widest text-center">Calificaciones positivas</p>
+                {(() => {
+                  const badge = getKpiLevel('csat', data.csat.data[0] ?? 0);
+                  if (!badge) return null;
+                  return <KpiBadge label={badge.label} level={badge.level} scale={badge.scale} />;
+                })()}
                 <div className="mt-4 pt-3 border-t border-[var(--border-subtle)] opacity-0 group-hover:opacity-100 transition-opacity">
                   <span className="text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest flex items-center gap-1">
                     <Icon name="ArrowRight" className="w-3 h-3" />

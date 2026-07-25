@@ -1,13 +1,16 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import BaseButton from '@/components/ui/BaseButton';
 import Icon from '@/components/ui/Icon';
+import Pagination from '@/components/ui/Pagination';
 import { useAdminTrainings } from '@/features/admin/trainings/hooks/useAdminTrainings';
 import TrainingsList from '@/features/admin/trainings/components/TrainingsList';
 import TrainingEditorModal from '@/features/admin/trainings/components/TrainingEditorModal';
 import TrainingComplianceModal from '@/features/admin/trainings/components/TrainingComplianceModal';
+
+const PAGE_SIZE = 10;
 
 export function TrainingsPageClient() {
     const [complianceOpen, setComplianceOpen] = useState(false);
@@ -33,6 +36,12 @@ export function TrainingsPageClient() {
             </div>
         );
     }
+
+    const [page, setPage] = useState(1);
+    useEffect(() => { setPage(1); }, [trainings.length]);
+
+    const totalPages = Math.ceil(trainings.length / PAGE_SIZE);
+    const pageTrainings = trainings.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
     return (
         <div className="space-y-6 animate-fadeIn pb-12">
@@ -60,12 +69,14 @@ export function TrainingsPageClient() {
             )}
 
             <TrainingsList
-                trainings={trainings}
+                trainings={pageTrainings}
                 loading={loading}
                 deletingId={deletingId}
                 onEdit={openEdit}
                 onDelete={remove}
             />
+
+            <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
 
             <TrainingEditorModal
                 open={editorOpen}

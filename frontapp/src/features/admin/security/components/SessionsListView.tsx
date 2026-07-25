@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Monitor, Smartphone, XCircle, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Monitor, Smartphone, XCircle, Search } from 'lucide-react';
 import { SecuritySessionItem, PaginationMeta } from '@/shared/lib/api/adminSecurityRepository';
+import Pagination from '@/components/ui/Pagination';
 
 interface Props {
   sessions: SecuritySessionItem[];
@@ -121,12 +122,12 @@ export function SessionsListView({ sessions, pagination, loading, error, onRevok
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)]/50">
-              <th className="text-left px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)]">Usuario</th>
-              <th className="text-left px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)]">Dispositivo / Navegador</th>
-              <th className="text-left px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)]">IP</th>
-              <th className="text-left px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)]">Última Actividad</th>
-              <th className="text-center px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)]">Estado</th>
-              <th className="text-center px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)]">Acción</th>
+              <th className="text-left px-6 py-4 whitespace-nowrap text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)]">Usuario</th>
+              <th className="text-left px-6 py-4 whitespace-nowrap text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)]">Dispositivo / Navegador</th>
+              <th className="text-left px-6 py-4 whitespace-nowrap text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)]">IP</th>
+              <th className="text-left px-6 py-4 whitespace-nowrap text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)]">Última Actividad</th>
+              <th className="text-center px-6 py-4 whitespace-nowrap text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)]">Estado</th>
+              <th className="text-center px-6 py-4 whitespace-nowrap text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)]">Acción</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[var(--border-subtle)]">
@@ -151,7 +152,7 @@ export function SessionsListView({ sessions, pagination, loading, error, onRevok
             ) : (
               sessions.map((session) => (
                 <tr key={session.id} className="hover:bg-[var(--bg-secondary)]/30 transition-colors">
-                  <td className="px-6 py-4">
+                  <td className="px-6 py-4 whitespace-nowrap">
                     <div>
                       <p className="text-sm font-bold text-[var(--text-primary)]">
                         {session.user?.name || session.user?.email || `ID: ${session.user_id}`}
@@ -161,7 +162,7 @@ export function SessionsListView({ sessions, pagination, loading, error, onRevok
                       </p>
                     </div>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center gap-2">
                       <div className={`p-1.5 rounded-lg ${session.is_active ? 'bg-emerald-100 dark:bg-emerald-900/20' : 'bg-gray-100 dark:bg-gray-800'}`}>
                         {session.device === 'iPhone' || session.device === 'Android' || session.device === 'iPad' ? (
@@ -176,17 +177,17 @@ export function SessionsListView({ sessions, pagination, loading, error, onRevok
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-6 py-4 whitespace-nowrap">
                     <span className="font-mono text-xs text-[var(--text-secondary)]">
                       {session.ip_address || '—'}
                     </span>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-6 py-4 whitespace-nowrap">
                     <span className="text-xs text-[var(--text-secondary)]">
                       {new Date(session.last_activity).toLocaleString()}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-center">
+                  <td className="px-6 py-4 whitespace-nowrap text-center">
                     {session.is_active ? (
                       <span className="px-2.5 py-1 bg-emerald-100 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 text-[10px] font-black uppercase rounded-full">
                         Activa
@@ -197,7 +198,7 @@ export function SessionsListView({ sessions, pagination, loading, error, onRevok
                       </span>
                     )}
                   </td>
-                  <td className="px-6 py-4 text-center">
+                  <td className="px-6 py-4 whitespace-nowrap text-center">
                     <button
                       onClick={() => onRevoke(session.id)}
                       className="p-1.5 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/20 text-red-500 transition-colors"
@@ -214,46 +215,7 @@ export function SessionsListView({ sessions, pagination, loading, error, onRevok
       </div>
 
       {pagination && pagination.totalPages > 1 && (
-        <div className="flex items-center justify-between px-6 py-4 border-t border-[var(--border-subtle)]">
-          <p className="text-xs text-[var(--text-secondary)]">
-            Página {pagination.page} de {pagination.totalPages} ({pagination.total} sesiones)
-          </p>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => onPageChange(pagination.page - 1)}
-              disabled={pagination.page <= 1}
-              className="p-2 rounded-lg hover:bg-[var(--bg-secondary)] disabled:opacity-30 transition-colors"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            {Array.from({ length: pagination.totalPages }, (_, i) => i + 1)
-              .filter((p) => p === 1 || p === pagination.totalPages || Math.abs(p - pagination.page) <= 2)
-              .map((p, idx, arr) => (
-                <React.Fragment key={p}>
-                  {idx > 0 && arr[idx - 1] !== p - 1 && (
-                    <span className="text-xs text-[var(--text-muted)]">...</span>
-                  )}
-                  <button
-                    onClick={() => onPageChange(p)}
-                    className={`w-8 h-8 rounded-xl text-xs font-bold transition-colors ${
-                      p === pagination.page
-                        ? 'bg-cyan-500 text-white'
-                        : 'hover:bg-[var(--bg-secondary)] text-[var(--text-secondary)]'
-                    }`}
-                  >
-                    {p}
-                  </button>
-                </React.Fragment>
-              ))}
-            <button
-              onClick={() => onPageChange(pagination.page + 1)}
-              disabled={!pagination.hasMore}
-              className="p-2 rounded-lg hover:bg-[var(--bg-secondary)] disabled:opacity-30 transition-colors"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
+        <Pagination page={pagination.page} totalPages={pagination.totalPages} onPageChange={onPageChange} />
       )}
     </div>
   );

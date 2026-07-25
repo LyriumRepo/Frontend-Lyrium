@@ -103,6 +103,23 @@ function StatusBadge({ label, className }: { label: string; className: string })
   );
 }
 
+/** Badge de solo lectura: el cliente validó la recepción (o se cerró por inacción). */
+function ValidationBadge({ order }: { order: Order }) {
+  if (!order.customerValidatedAt) return null;
+  const autoClosed = order.validationSource === 'auto_expired';
+  return (
+    <span
+      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[8px] font-extrabold uppercase tracking-wider ${
+        autoClosed ? 'bg-gray-100 text-gray-500' : 'bg-green-100 text-green-700'
+      }`}
+      title={autoClosed ? 'Cerrado automáticamente por inacción del cliente' : 'El cliente confirmó la recepción'}
+    >
+      <Icon name={autoClosed ? 'Clock' : 'BadgeCheck'} className="w-2.5 h-2.5" />
+      {autoClosed ? 'Auto-cerrado' : 'Validado por cliente'}
+    </span>
+  );
+}
+
 function TypeBadge({ orderType }: { orderType: OrderType }) {
   const config = ORDER_TYPE_CONFIG[orderType] ?? ORDER_TYPE_CONFIG.product;
   return (
@@ -240,6 +257,7 @@ function MobileOrderCard({ order, onViewDetail, onConfirm, onCancel, isAdvancing
         {/* Estado + Total */}
         <div className="flex flex-col items-end gap-1 flex-shrink-0">
           <StatusBadge label={order.statusLabel} className={statusConfig.class} />
+          <ValidationBadge order={order} />
           <span className="text-sm font-black text-[var(--text-primary)] tracking-tight">
             {formatCurrency(order.total)}
           </span>
@@ -355,7 +373,7 @@ const SalesTable = memo(function SalesTable({
       columnHelper.accessor('orderNumber', {
         header: 'Número de Orden',
         cell: (info) => (
-          <span className="text-xs font-black text-sky-600 bg-sky-50 px-2 py-1 rounded-lg border border-sky-100 font-mono tracking-tight whitespace-nowrap truncate max-w-[160px] block">
+          <span className="text-xs font-black text-sky-600 bg-sky-50 px-2 py-1 rounded-lg border border-sky-100 font-mono tracking-tight whitespace-nowrap block">
             {info.getValue()}
           </span>
         ),
@@ -383,7 +401,7 @@ const SalesTable = memo(function SalesTable({
       columnHelper.accessor('cliente', {
         header: 'Cliente',
         cell: (info) => (
-          <span className="text-sm font-bold text-[var(--text-primary)] truncate max-w-[160px] block">
+          <span className="text-sm font-bold text-[var(--text-primary)] whitespace-nowrap block">
             {info.getValue()}
           </span>
         ),
@@ -391,7 +409,7 @@ const SalesTable = memo(function SalesTable({
       columnHelper.accessor('itemsSummary', {
         header: 'Concepto',
         cell: (info) => (
-          <span className="text-xs font-semibold text-[var(--text-secondary)] truncate max-w-[200px] block">
+          <span className="text-xs font-semibold text-[var(--text-secondary)] whitespace-nowrap block">
             {info.getValue() || '-'}
           </span>
         ),
@@ -421,7 +439,12 @@ const SalesTable = memo(function SalesTable({
         cell: (info) => {
           const order = info.row.original;
           const config = ORDER_STATUS_CONFIG[order.estado] ?? { class: 'bg-gray-100 text-gray-600' };
-          return <StatusBadge label={order.statusLabel} className={config.class} />;
+          return (
+            <div className="flex flex-col items-start gap-1">
+              <StatusBadge label={order.statusLabel} className={config.class} />
+              <ValidationBadge order={order} />
+            </div>
+          );
         },
       }),
       columnHelper.accessor((row) => row.sellerSubtotal ?? row.total, {
@@ -590,7 +613,7 @@ const SalesTable = memo(function SalesTable({
                   onClick={() => onViewDetail(row.original)}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className="px-4 py-3">
+                    <td key={cell.id} className="px-4 py-3 whitespace-nowrap">
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </td>
                   ))}

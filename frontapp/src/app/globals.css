@@ -335,6 +335,44 @@
         background: var(--text-secondary);
     }
 
+    /* Scrollbar temático de marca — pills/filtros compactos */
+    .brand-scrollbar {
+        scrollbar-width: thin;
+        scrollbar-color: var(--brand-sky) transparent;
+    }
+
+    .brand-scrollbar::-webkit-scrollbar {
+        height: 4px;
+    }
+
+    .brand-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .brand-scrollbar::-webkit-scrollbar-thumb {
+        background: linear-gradient(90deg, var(--brand-sky), var(--brand-sky-hover));
+        border-radius: 999px;
+    }
+
+    .brand-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: var(--brand-sky-active);
+    }
+
+    :root.dark .brand-scrollbar,
+    .dark .brand-scrollbar {
+        scrollbar-color: var(--icons-green) transparent;
+    }
+
+    :root.dark .brand-scrollbar::-webkit-scrollbar-thumb,
+    .dark .brand-scrollbar::-webkit-scrollbar-thumb {
+        background: linear-gradient(90deg, var(--icons-green), var(--brand-green));
+    }
+
+    :root.dark .brand-scrollbar::-webkit-scrollbar-thumb:hover,
+    .dark .brand-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: var(--icons-green);
+    }
+
     .no-scrollbar {
         scrollbar-width: none;
         -ms-overflow-style: none;
@@ -421,6 +459,14 @@
     }
     .animate-slideInRight {
         animation: slideInRight 0.25s ease-out forwards;
+    }
+
+    @keyframes fadeInScale {
+        from { opacity: 0; transform: scale(0.95); }
+        to   { opacity: 1; transform: scale(1); }
+    }
+    .animate-fadeInScale {
+        animation: fadeInScale 0.25s ease-out forwards;
     }
 
     /* ── Exit animations for modals ── */
@@ -653,17 +699,6 @@
     .animate-spin-slow          { animation: spinSlow 14s linear infinite; }
     .animate-ring-pulse         { animation: ringPulse 3s ease-in-out infinite; }
 
-    /* Transición modo día/noche — barrido circular desde el botón (View Transitions API) */
-    @keyframes themeVtReveal {
-        from { clip-path: circle(0px at var(--theme-vt-x, 50%) var(--theme-vt-y, 50%)); }
-        to   { clip-path: circle(var(--theme-vt-r, 150%) at var(--theme-vt-x, 50%) var(--theme-vt-y, 50%)); }
-    }
-    ::view-transition-old(root) {
-        animation: none;
-    }
-    ::view-transition-new(root) {
-        animation: themeVtReveal 420ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
-    }
     /* Lyrium brand gradient — celeste → turquesa → verde, lento y fluido */
     .lyrium-rainbow-header {
         background: linear-gradient(
@@ -907,4 +942,10 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     0%   { box-shadow: 0 0 0 0 var(--brand-green); }
     50%  { box-shadow: 0 0 12px 3px var(--brand-green); }
     100% { box-shadow: 0 0 0 0 var(--brand-green); }
+}
+
+@keyframes sidebarTextFlash {
+    0%   { color: inherit; }
+    35%  { color: var(--bg-sidebar); }
+    100% { color: inherit; }
 }

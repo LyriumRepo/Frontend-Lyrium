@@ -4,7 +4,10 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Plus, RefreshCw, Search, Check, X, AlertCircle, BookOpen, Clock, FileText } from 'lucide-react';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import BaseButton from '@/components/ui/BaseButton';
+import Pagination from '@/components/ui/Pagination';
 import { glossaryApi, GlossaryEntry, PendingTerm } from '@/shared/lib/api/glossaryRepository';
+
+const PAGE_SIZE = 10;
 
 export function GlossaryPageClient() {
     const [tab, setTab] = useState<'entries' | 'pending'>('entries');
@@ -14,6 +17,12 @@ export function GlossaryPageClient() {
     const [error, setError] = useState<string | null>(null);
     const [search, setSearch] = useState('');
     const [entryCount, setEntryCount] = useState(0);
+    const [page, setPage] = useState(1);
+
+    const totalPages = Math.ceil(entries.length / PAGE_SIZE);
+    const pageEntries = entries.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+    useEffect(() => { setPage(1); }, [entries.length, search]);
 
     // Editor modal state
     const [showEditor, setShowEditor] = useState(false);
@@ -247,7 +256,7 @@ export function GlossaryPageClient() {
                         <>
                         {/* ── Vista mobile: cards ── */}
                         <div className="sm:hidden divide-y divide-[var(--border-subtle)]">
-                            {entries.map(entry => (
+                            {pageEntries.map(entry => (
                                 <div key={entry.id} className="p-4 flex items-start gap-3 hover:bg-[var(--bg-secondary)] transition-colors">
                                     <div className="w-10 h-10 rounded-2xl bg-[var(--bg-secondary)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--icons-green)] font-black text-sm shrink-0">
                                         {entry.key?.[0]?.toUpperCase() ?? '#'}
@@ -283,33 +292,33 @@ export function GlossaryPageClient() {
                             <table className="w-full text-sm">
                                 <thead>
                                     <tr className="border-b border-[var(--border-subtle)] text-left text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">
-                                        <th className="px-5 py-4">Clave</th>
-                                        <th className="px-5 py-4">Descripción</th>
-                                        <th className="px-5 py-4">Patrones</th>
-                                        <th className="px-5 py-4">Monto</th>
-                                        <th className="px-5 py-4">Tipo</th>
-                                        <th className="px-5 py-4 w-24">Acciones</th>
+                                        <th className="px-5 py-4 whitespace-nowrap">Clave</th>
+                                        <th className="px-5 py-4 whitespace-nowrap">Descripción</th>
+                                        <th className="px-5 py-4 whitespace-nowrap">Patrones</th>
+                                        <th className="px-5 py-4 whitespace-nowrap">Monto</th>
+                                        <th className="px-5 py-4 whitespace-nowrap">Tipo</th>
+                                        <th className="px-5 py-4 whitespace-nowrap w-24">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {entries.map(entry => (
+                                    {pageEntries.map(entry => (
                                         <tr key={entry.id} className="border-b border-[var(--border-subtle)] hover:bg-[var(--bg-muted)] transition">
-                                            <td className="px-5 py-4 font-mono text-xs font-bold text-[var(--icons-green)]">{entry.key}</td>
-                                            <td className="px-5 py-4 text-[var(--text-secondary)] max-w-xs truncate">{entry.description}</td>
-                                            <td className="px-5 py-4">
+                                            <td className="px-5 py-4 whitespace-nowrap font-mono text-xs font-bold text-[var(--icons-green)]">{entry.key}</td>
+                                            <td className="px-5 py-4 whitespace-nowrap text-[var(--text-secondary)] whitespace-nowrap">{entry.description}</td>
+                                            <td className="px-5 py-4 whitespace-nowrap">
                                                 <div className="flex flex-wrap gap-1">
                                                     {entry.search_patterns.map((p, i) => (
                                                         <span key={i} className="px-2 py-0.5 bg-[var(--bg-muted)] rounded-md text-xs font-mono text-[var(--text-secondary)]">{p}</span>
                                                     ))}
                                                 </div>
                                             </td>
-                                            <td className="px-5 py-4 text-[var(--text-secondary)]">{entry.default_amount ?? '—'}</td>
-                                            <td className="px-5 py-4">
+                                            <td className="px-5 py-4 whitespace-nowrap text-[var(--text-secondary)]">{entry.default_amount ?? '—'}</td>
+                                            <td className="px-5 py-4 whitespace-nowrap">
                                                 <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${entry.is_income ? 'bg-[var(--color-success)]/15 text-[var(--color-success)]' : 'bg-[var(--color-error)]/15 text-[var(--color-error)]'}`}>
                                                     {entry.is_income ? 'Ingreso' : 'Gasto'}
                                                 </span>
                                             </td>
-                                            <td className="px-5 py-4">
+                                            <td className="px-5 py-4 whitespace-nowrap">
                                                 <div className="flex gap-2">
                                                     <button onClick={() => openEdit(entry)} className="text-xs px-3 py-1.5 bg-[var(--icons-green)]/10 text-[var(--icons-green)] rounded-lg hover:bg-[var(--icons-green)]/20 transition font-semibold">Editar</button>
                                                     <button onClick={() => handleDelete(entry.id)} className="text-xs px-3 py-1.5 bg-[var(--color-error)]/10 text-[var(--color-error)] rounded-lg hover:bg-[var(--color-error)]/20 transition font-semibold">Eliminar</button>
@@ -322,6 +331,7 @@ export function GlossaryPageClient() {
                         </div>
                         </>
                     )}
+                    <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
                 </div>
             )}
 
@@ -361,7 +371,7 @@ export function GlossaryPageClient() {
 
             {/* ─── Create/Edit Modal ─────────────────────────────────────── */}
             {showEditor && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setShowEditor(false)} onKeyDown={e => { if (e.key === 'Escape') setShowEditor(false); }} role="dialog" aria-modal="true" tabIndex={-1}>
+                <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setShowEditor(false)} onKeyDown={e => { if (e.key === 'Escape') setShowEditor(false); }} role="dialog" aria-modal="true" tabIndex={-1}>
                     <div className="bg-[var(--bg-card)] rounded-3xl shadow-2xl border border-[var(--border-subtle)] w-full max-w-lg mx-4 p-6 space-y-5" onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()}>
                         <h3 className="text-lg font-bold text-[var(--text-primary)]">
                             {editingId ? 'Editar Entrada' : 'Nueva Entrada'}
@@ -436,7 +446,7 @@ export function GlossaryPageClient() {
 
             {/* ─── Approve Modal ────────────────────────────────────────── */}
             {approvingId !== null && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setApprovingId(null)} onKeyDown={e => { if (e.key === 'Escape') setApprovingId(null); }} role="dialog" aria-modal="true" tabIndex={-1}>
+                <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setApprovingId(null)} onKeyDown={e => { if (e.key === 'Escape') setApprovingId(null); }} role="dialog" aria-modal="true" tabIndex={-1}>
                     <div className="bg-[var(--bg-card)] rounded-3xl shadow-2xl border border-[var(--border-subtle)] w-full max-w-md mx-4 p-6 space-y-5" onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()}>
                         <h3 className="text-lg font-bold text-[var(--text-primary)]">Aprobar Término</h3>
                         <p className="text-sm text-[var(--text-secondary)]">Crear una entrada de glosario para este término detectado automáticamente:</p>

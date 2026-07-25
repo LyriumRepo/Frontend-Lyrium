@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useSellers, type Solicitud, type FiltroEstado } from "./hooks/useSellers";
 import ModuleHeader from "@/components/layout/shared/ModuleHeader";
 import Icon from "@/components/ui/Icon";
+import Pagination from "@/components/ui/Pagination";
 import AdminIndicatorGrid from '@/components/admin/AdminIndicatorGrid';
 
 function formatFecha(iso: string) {
@@ -248,42 +249,7 @@ export default function SellersSolicitudes() {
             )}
 
             {/* Paginación */}
-            {totalPaginas > 1 && (
-              <div className="flex items-center justify-between px-4 py-3 border-t border-[var(--border-subtle)]">
-                <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest">
-                  Página {pagina} de {totalPaginas} · {totalFiltrado} resultado{totalFiltrado !== 1 ? "s" : ""}
-                </p>
-                <div className="flex items-center gap-1">
-                  <button
-                    onClick={() => cambiarPagina(pagina - 1)}
-                    disabled={pagina === 1}
-                    className="min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                  >
-                    <Icon name="ChevronLeft" className="w-3.5 h-3.5" />
-                  </button>
-                  {Array.from({ length: totalPaginas }, (_, i) => i + 1).map((n) => (
-                    <button
-                      key={n}
-                      onClick={() => cambiarPagina(n)}
-                      className={`min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg text-[10px] font-black transition-colors
-                        ${n === pagina
-                          ? "bg-[var(--icons-green)]/20 text-[var(--icons-green)] border border-[var(--icons-green)]/30"
-                          : "border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]"
-                        }`}
-                    >
-                      {n}
-                    </button>
-                  ))}
-                  <button
-                    onClick={() => cambiarPagina(pagina + 1)}
-                    disabled={pagina === totalPaginas}
-                    className="min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                  >
-                    <Icon name="ChevronRight" className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
-            )}
+            <Pagination page={pagina} totalPages={totalPaginas} onPageChange={cambiarPagina} />
           </div>
         </div>
       )}

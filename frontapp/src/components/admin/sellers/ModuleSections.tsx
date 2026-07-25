@@ -36,6 +36,7 @@ import {
   Loader2,
   Search,
 } from 'lucide-react';
+import Pagination from '@/components/ui/Pagination';
 
 // ─── Tipos extendidos ─────────────────────────────────────────────────────────
 
@@ -209,6 +210,8 @@ export const NotificationList: React.FC<{
 
 // ─── PRODUCT MODERATION (RF-03) ───────────────────────────────────────────────
 
+const PAGE_SIZE = 10;
+
 interface ProductModerationProps {
   products: (Product & { rejection_reason?: string | null })[];
   onAction: (product: Product, suggest: ProductStatus) => void;
@@ -225,6 +228,7 @@ export const ProductModeration: React.FC<ProductModerationProps> = ({
   const [storeFilter, setStoreFilter] = useState('');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
+  const [page, setPage] = useState(1);
 
   const pending = products.filter(
     (p) => p.status === 'en_espera' || p.status === 'PENDING',
@@ -255,6 +259,11 @@ export const ProductModeration: React.FC<ProductModerationProps> = ({
       return true;
     });
   }, [pending, search, storeFilter, dateFrom, dateTo]);
+
+  const filteredTotalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  const pageProducts = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  React.useEffect(() => { setPage(1); }, [search, storeFilter, dateFrom, dateTo]);
 
   const handleAction = async (product: Product, suggest: ProductStatus) => {
     setBusyId(product.id);
@@ -355,7 +364,7 @@ export const ProductModeration: React.FC<ProductModerationProps> = ({
 
       {/* Mobile: cards */}
       <div className="sm:hidden divide-y divide-[var(--border-subtle)] rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--bg-card)] overflow-hidden">
-        {filtered.map((p) => {
+        {pageProducts.map((p) => {
           const isBusy = busyId === p.id;
           const isEdition = !!p.rejection_reason;
           return (
@@ -455,7 +464,7 @@ export const ProductModeration: React.FC<ProductModerationProps> = ({
             </tr>
           </thead>
           <tbody>
-            {filtered.map((p) => {
+            {pageProducts.map((p) => {
               const isBusy = busyId === p.id;
               const isEdition = !!p.rejection_reason;
               return (
@@ -578,6 +587,8 @@ export const ProductModeration: React.FC<ProductModerationProps> = ({
           </tbody>
         </table>
       </div>
+
+      <Pagination page={page} totalPages={filteredTotalPages} onPageChange={setPage} />
     </div>
   );
 };
@@ -600,6 +611,7 @@ export const ServiceModeration: React.FC<ServiceModerationProps> = ({
   const [storeFilter, setStoreFilter] = useState('');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
+  const [page, setPage] = useState(1);
 
   const pending = services.filter(
     (s) => s.status === 'en_espera' || s.status === 'PENDING',
@@ -628,6 +640,11 @@ export const ServiceModeration: React.FC<ServiceModerationProps> = ({
       return true;
     });
   }, [pending, search, storeFilter, dateFrom, dateTo]);
+
+  const filteredTotalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  const pageServices = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  React.useEffect(() => { setPage(1); }, [search, storeFilter, dateFrom, dateTo]);
 
   const handleAction = async (service: Product, suggest: ServiceStatus) => {
     setBusyId(service.id);
@@ -727,7 +744,7 @@ export const ServiceModeration: React.FC<ServiceModerationProps> = ({
 
       {/* Mobile: cards */}
       <div className="sm:hidden divide-y divide-[var(--border-subtle)] rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--bg-card)] overflow-hidden">
-        {filtered.map((s) => {
+        {pageServices.map((s) => {
           const isBusy = busyId === s.id;
           return (
             <div
@@ -810,7 +827,7 @@ export const ServiceModeration: React.FC<ServiceModerationProps> = ({
             </tr>
           </thead>
           <tbody>
-            {filtered.map((s) => {
+            {pageServices.map((s) => {
               const isBusy = busyId === s.id;
               return (
                 <tr
@@ -897,6 +914,8 @@ export const ServiceModeration: React.FC<ServiceModerationProps> = ({
           </tbody>
         </table>
       </div>
+
+      <Pagination page={page} totalPages={filteredTotalPages} onPageChange={setPage} />
     </div>
   );
 };

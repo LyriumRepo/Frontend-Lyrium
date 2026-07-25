@@ -33,7 +33,7 @@ export interface IOrderRepository {
     updateOrder(id: string, input: UpdateOrderInput): Promise<Order>;
     confirmOrder(id: string): Promise<Order>;
     deleteOrder(id: string): Promise<boolean>;
-    advanceOrderStep(id: string, section?: 'products' | 'services' | 'confirm'): Promise<Order>;
+    advanceOrderStep(id: string, section?: 'products' | 'services' | 'confirm', serviceItemId?: string): Promise<Order>;
     confirmItem(orderId: string, itemId: string): Promise<Order>;
     updateItemStatus(orderId: string, itemId: string, status: OrderStatus): Promise<Order>;
     cancelItem(orderId: string, itemId: string): Promise<Order>;

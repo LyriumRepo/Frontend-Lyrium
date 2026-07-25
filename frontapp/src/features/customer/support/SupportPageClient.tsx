@@ -556,7 +556,6 @@ export function SupportPageClient() {
                 title="Soporte Lyrium"
                 subtitle="¿Para qué sirve este canal?"
                 size="lg"
-                accentColor="from-[var(--turquesa-500)] to-[var(--turquesa-500)]/70"
             >
                 <div className="space-y-4">
                     {[

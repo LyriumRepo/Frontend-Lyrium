@@ -245,7 +245,6 @@ export default function CustomerSettingsPage() {
         title="Leyenda de Notificaciones"
         subtitle="Conoce cada tipo de notificación"
         size="lg"
-        accentColor="from-sky-500 to-sky-300"
       >
         <div className="space-y-6">
           {NOTIFICATION_LEGEND.map((item) => (

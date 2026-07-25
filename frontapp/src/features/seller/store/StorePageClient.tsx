@@ -99,11 +99,11 @@ export function StorePageClient(_props: StorePageClientProps) {
     return (
         <div className="space-y-4 sm:space-y-6 md:space-y-8 pb-20">
             <ModuleHeader
-                title="Configuración de Mi Tienda"
+                title="Mi Tienda"
                 subtitle="Gestión integral de identidad, sucursales y experiencia visual"
             />
 
-            <div className="flex justify-center">
+            <div className="flex justify-center sm:justify-end">
                 {saveButton}
             </div>
 

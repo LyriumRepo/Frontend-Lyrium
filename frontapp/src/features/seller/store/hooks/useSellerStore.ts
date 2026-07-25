@@ -321,7 +321,7 @@ export function useSellerStore() {
                     ...old,
                     config: {
                         ...old.config,
-                        layout: (variables.layout as '1' | '2' | '3') || old.config.layout,
+                        layout: variables.layout || old.config.layout,
                         visual: {
                             ...old.config.visual,
                             logo: variables.logo || old.config.visual.logo,
@@ -431,25 +431,36 @@ export function useSellerStore() {
 
     const handleSave = (callback?: () => void) => {
         const cachedData = queryClient.getQueryData(['seller', 'store', user?.id]) as any;
-        const currentStoreId = cachedData?.storeId;
+        const currentStoreId = cachedData?.storeId || storeId;
         
         const updates = pendingUpdates.current;
         const layoutUpdate = pendingLayoutUpdate.current;
 
-        const saveLayout = () => {
+        const finalize = (layoutSaved: boolean) => {
+            if (!layoutSaved && layoutUpdate) {
+                console.warn('[useSellerStore] Layout change was not saved');
+            }
+            if (callback) callback();
+        };
+
+        const saveLayout = (afterStore?: boolean) => {
             if (layoutUpdate && currentStoreId) {
                 updateVisualMutation.mutate({ layout: layoutUpdate }, {
                     onSuccess: () => {
                         pendingLayoutUpdate.current = null;
-                        if (callback) callback();
+                        finalize(true);
                     },
-                    onError: () => {
+                    onError: (err) => {
+                        console.error('[useSellerStore] Layout save failed:', err);
                         pendingLayoutUpdate.current = null;
-                        if (callback) callback();
+                        finalize(false);
                     }
                 });
             } else {
-                if (callback) callback();
+                if (layoutUpdate && !currentStoreId) {
+                    console.warn('[useSellerStore] No storeId, cannot save layout');
+                }
+                finalize(!!layoutUpdate);
             }
         };
 
@@ -461,7 +472,12 @@ export function useSellerStore() {
             }, {
                 onSuccess: () => {
                     pendingUpdates.current = {};
-                    saveLayout();
+                    saveLayout(true);
+                },
+                onError: (err) => {
+                    console.error('[useSellerStore] Store save failed:', err);
+                    pendingUpdates.current = {};
+                    saveLayout(true);
                 }
             });
         } else {

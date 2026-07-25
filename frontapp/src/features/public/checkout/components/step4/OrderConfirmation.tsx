@@ -4,8 +4,6 @@ import { CheckCircle, MapPin, CreditCard, Home, ArrowRight } from 'lucide-react'
 import Link from 'next/link';
 import Image from 'next/image';
 import { useCheckoutStore } from '@/store/checkoutStore';
-import { useEffect } from 'react';
-import confetti from 'canvas-confetti';
 
 const PAYMENT_LABELS: Record<string, string> = {
   credit_card: 'Tarjeta de Crédito',
@@ -25,29 +23,9 @@ export default function OrderConfirmation() {
   const result  = useCheckoutStore((s) => s.orderResult);
   const setStep = useCheckoutStore((s) => s.setStep);
 
-  useEffect(() => {
-    const duration = 3000;
-    const end = Date.now() + duration;
-
-    const frame = () => {
-      confetti({
-        particleCount: 3,
-        angle: 60,
-        spread: 55,
-        origin: { x: 0, y: 0.7 },
-        colors: ['#10b981', '#06b6d4', '#f59e0b', '#ec4899', '#8b5cf6'],
-      });
-      confetti({
-        particleCount: 3,
-        angle: 120,
-        spread: 55,
-        origin: { x: 1, y: 0.7 },
-        colors: ['#10b981', '#06b6d4', '#f59e0b', '#ec4899', '#8b5cf6'],
-      });
-      if (Date.now() < end) requestAnimationFrame(frame);
-    };
-    frame();
-  }, []);
+  // El confeti de la celebración vive solo en ModalPostCompra — tener dos
+  // animaciones simultáneas (esta + la del modal) duplicaba partículas y
+  // se sentía "buggeado" al llegar a este paso.
 
   if (!result) return null;
 

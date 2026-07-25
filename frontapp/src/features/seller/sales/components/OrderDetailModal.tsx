@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Order, ItemStatus, ServiceOrderItem, ORDER_STATUS_LABELS, OrderType, TipoEnvio, ShippingInfo } from '@/features/seller/sales/types';
+import { Order, ItemStatus, ServiceOrderItem, OrderType, TipoEnvio, ShippingInfo } from '@/features/seller/sales/types';
 import ProductOrderStepper from './OrderStepper';
 import ServiceOrderStepper, { ServiceFlowType } from './ServiceOrderStepper';
 import OrderItemList from './OrderItemList';
@@ -17,7 +17,7 @@ interface OrderDetailModalProps {
     order: Order;
     isOpen: boolean;
     onClose: () => void;
-    onAdvanceStep: (orderId: string, section?: 'products' | 'services' | 'confirm') => Promise<void>;
+    onAdvanceStep: (orderId: string, section?: 'products' | 'services' | 'confirm', serviceItemId?: string) => Promise<void>;
     onConfirmItem?: (orderId: string, itemId: string) => Promise<void>;
     onCancelItem?: (orderId: string, itemId: string) => Promise<void>;
     onUpdateItemStatus?: (orderId: string, itemId: string, status: ItemStatus) => Promise<void>;
@@ -97,13 +97,28 @@ const ORDER_TYPE_BADGE: Record<OrderType, { icon: string; class: string }> = {
     mixed: { icon: 'LayoutGrid', class: 'bg-amber-100 text-amber-700' },
 };
 
+// Keys mirror ServiceBooking statuses ('pending_seller' kept as an alias for legacy data).
 const SERVICE_STATUS_STYLES: Record<string, { bg: string; text: string; icon: string }> = {
+    pending: { bg: 'bg-yellow-100', text: 'text-yellow-700', icon: 'Clock' },
     pending_seller: { bg: 'bg-yellow-100', text: 'text-yellow-700', icon: 'Clock' },
     confirmed: { bg: 'bg-sky-100', text: 'text-sky-700', icon: 'Check' },
     on_the_way: { bg: 'bg-orange-100', text: 'text-orange-700', icon: 'Truck' },
     processing: { bg: 'bg-indigo-100', text: 'text-indigo-700', icon: 'Package' },
     completed: { bg: 'bg-emerald-100', text: 'text-emerald-700', icon: 'CheckCircle' },
     cancelled: { bg: 'bg-red-100', text: 'text-red-700', icon: 'X' },
+    no_show: { bg: 'bg-gray-200', text: 'text-gray-700', icon: 'UserX' },
+};
+
+// Service items carry ServiceBooking's vocabulary (pending/confirmed/on_the_way/completed/cancelled/no_show),
+// distinct from ItemStatus (product) — ORDER_STATUS_LABELS doesn't cover 'pending'/'completed'/'no_show'.
+const SERVICE_STATUS_LABELS: Record<string, string> = {
+    pending: 'Pendiente',
+    pending_seller: 'Pendiente',
+    confirmed: 'Confirmado',
+    on_the_way: 'En camino',
+    completed: 'Completado',
+    cancelled: 'Cancelado',
+    no_show: 'No asistió',
 };
 
 const HEADER_STATUS_CONFIG: Record<string, { label: string; icon: string }> = {
@@ -116,6 +131,17 @@ const HEADER_STATUS_CONFIG: Record<string, { label: string; icon: string }> = {
     delivered: { label: 'Entregado', icon: 'Home' },
     completed: { label: 'Atención completada', icon: 'CheckCircle' },
     cancelled: { label: 'Cancelado', icon: 'XCircle' },
+};
+
+// Steps of PRODUCT_STATUS_STEP_MAP in LaravelOrderRepository, mirrored here to
+// resolve productCurrentStep back to a status key for the mixed-order "Productos" badge —
+// order.estado is the combined product+service status and must not be used for that badge.
+const PRODUCT_STEP_TO_STATUS: Record<number, string> = {
+    1: 'pending_seller',
+    2: 'confirmed',
+    3: 'processing',
+    4: 'shipped',
+    5: 'delivered',
 };
 
 function formatTime(time: string | null): string {
@@ -156,9 +182,24 @@ function FinancialRow({ label, value, bold }: { label: string; value: string; bo
     );
 }
 
-function ServiceItemRow({ item }: { item: ServiceOrderItem }) {
+// Mirrors LaravelOrderRepository::getServiceNextAction — one booking, one step per click,
+// same as products (OrderItemList): never batch-advance every service line at once.
+function resolveServiceItemAction(item: ServiceOrderItem): StepAction | null {
+    const bookingStatus = String(item.bookingStatus ?? item.status ?? '').trim().toLowerCase();
+    const modality = String(item.modality ?? '').trim().toLowerCase();
+    const isHome = modality === 'home' || modality === 'domicilio' || modality === 'home_service';
+
+    if (bookingStatus === 'pending') return { label: 'Validar atención', icon: 'CheckCircle2' };
+    if (bookingStatus === 'confirmed' && isHome) return { label: 'Marcar en camino', icon: 'Truck' };
+    if (bookingStatus === 'confirmed') return { label: 'Confirmar atención', icon: 'UserCheck' };
+    if (bookingStatus === 'on_the_way') return { label: 'Confirmar atención', icon: 'UserCheck' };
+    return null;
+}
+
+function ServiceItemRow({ item, onAdvance, isAdvancing }: { item: ServiceOrderItem; onAdvance?: (item: ServiceOrderItem) => void; isAdvancing?: boolean }) {
     const statusStyle = SERVICE_STATUS_STYLES[item.status] || { bg: 'bg-gray-100', text: 'text-gray-600', icon: 'Circle' };
-    const statusLabel = ORDER_STATUS_LABELS[item.status as keyof typeof ORDER_STATUS_LABELS] || item.status;
+    const statusLabel = SERVICE_STATUS_LABELS[item.status] || item.status;
+    const action = item.serviceBookingId ? resolveServiceItemAction(item) : null;
 
     return (
         <div className="bg-[var(--bg-secondary)]/30 p-4 flex justify-between items-center group hover:bg-[var(--bg-card)] transition-all">
@@ -206,6 +247,17 @@ function ServiceItemRow({ item }: { item: ServiceOrderItem }) {
                         {statusLabel}
                     </span>
                 </div>
+                {action && onAdvance && (
+                    <button
+                        onClick={() => onAdvance(item)}
+                        disabled={isAdvancing}
+                        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-emerald-500 text-white hover:bg-emerald-600 disabled:opacity-50 transition-colors text-[10px] font-black uppercase tracking-wide"
+                        title={action.label}
+                    >
+                        <Icon name={action.icon} className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">{action.label}</span>
+                    </button>
+                )}
             </div>
         </div>
     );
@@ -321,6 +373,15 @@ export default function OrderDetailModal({
         }
     };
 
+    const handleAdvanceServiceItem = async (item: ServiceOrderItem) => {
+        setIsAdvancing(true);
+        try {
+            await onAdvanceStep(order.id, 'services', item.id);
+        } finally {
+            setIsAdvancing(false);
+        }
+    };
+
     const handleShipWithCarrier = async (carrierCode: string, carrierData: Record<string, string>) => {
         if (!onShipWithCarrier) return;
         setShowLogistics(false);
@@ -418,7 +479,7 @@ export default function OrderDetailModal({
                         <>
                             <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[10px] font-black uppercase tracking-wider border-sky-200 bg-sky-50 text-sky-700 shadow-sm">
                                 <Icon name="Package" className="w-3.5 h-3.5" />
-                                Productos: {HEADER_STATUS_CONFIG[order.estado]?.label || order.estado}
+                                Productos: {HEADER_STATUS_CONFIG[PRODUCT_STEP_TO_STATUS[order.productCurrentStep] ?? 'pending_seller']?.label || 'Pendiente'}
                             </span>
                             <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[10px] font-black uppercase tracking-wider border-purple-200 bg-purple-50 text-purple-700 shadow-sm">
                                 <Icon name="Briefcase" className="w-3.5 h-3.5" />
@@ -431,6 +492,7 @@ export default function OrderDetailModal({
                             const colorMap: Record<string, { border: string; bg: string; text: string }> = {
                                 pending_seller: { border: 'border-amber-200', bg: 'bg-amber-50', text: 'text-amber-700' },
                                 confirmed: { border: 'border-sky-200', bg: 'bg-sky-50', text: 'text-sky-700' },
+                                on_the_way: { border: 'border-orange-200', bg: 'bg-orange-50', text: 'text-orange-700' },
                                 processing: { border: 'border-indigo-200', bg: 'bg-indigo-50', text: 'text-indigo-700' },
                                 shipped: { border: 'border-blue-200', bg: 'bg-blue-50', text: 'text-blue-700' },
                                 delivered: { border: 'border-emerald-200', bg: 'bg-emerald-50', text: 'text-emerald-700' },
@@ -480,7 +542,7 @@ export default function OrderDetailModal({
                         </div>
                         {openSection === 'products' && (
                             <div className="space-y-6">
-                                <ProductOrderStepper currentStep={order.productCurrentStep} tipoEnvio={tipoEnvio} />
+                                <ProductOrderStepper currentStep={order.productCurrentStep} tipoEnvio={tipoEnvio} validated={!!order.customerValidatedAt} />
                                 <div className="bg-[var(--bg-secondary)]/50 p-6 rounded-[2rem] border border-[var(--border-subtle)]">
                                     {tipoEnvio === 'retiro_tienda' ? (
                                         <>
@@ -636,7 +698,7 @@ export default function OrderDetailModal({
                         </div>
                         {openSection === 'services' && (
                             <div className="space-y-6">
-                                <ServiceOrderStepper currentStep={order.serviceCurrentStep} flowType={serviceFlowType} />
+                                <ServiceOrderStepper currentStep={order.serviceCurrentStep} flowType={serviceFlowType} validated={!!firstServiceItem?.customerValidatedAt} />
                                 <div className="bg-[var(--bg-secondary)]/50 p-6 rounded-[2rem] border border-[var(--border-subtle)]">
                                     <p className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest mb-4">
                                         <Icon name="CalendarClock" className="w-3 h-3 inline mr-1" /> Detalle de Atención
@@ -687,7 +749,7 @@ export default function OrderDetailModal({
                                 Productos
                             </span>
                         </div>
-                        <ProductOrderStepper currentStep={order.productCurrentStep} tipoEnvio={tipoEnvio} />
+                        <ProductOrderStepper currentStep={order.productCurrentStep} tipoEnvio={tipoEnvio} validated={!!order.customerValidatedAt} />
                     </div>
                 )}
 
@@ -700,7 +762,7 @@ export default function OrderDetailModal({
                                 Servicios
                             </span>
                         </div>
-                        <ServiceOrderStepper currentStep={order.serviceCurrentStep} flowType={serviceFlowType} />
+                        <ServiceOrderStepper currentStep={order.serviceCurrentStep} flowType={serviceFlowType} validated={!!firstServiceItem?.customerValidatedAt} />
                     </div>
                 )}
 
@@ -1025,7 +1087,7 @@ export default function OrderDetailModal({
                         </div>
                         <div className="space-y-px rounded-[2rem] overflow-hidden border border-[var(--border-subtle)]">
                             {order.serviceItems.map((item) => (
-                                <ServiceItemRow key={item.id} item={item} />
+                                <ServiceItemRow key={item.id} item={item} onAdvance={handleAdvanceServiceItem} isAdvancing={isAdvancing} />
                             ))}
                         </div>
                     </div>

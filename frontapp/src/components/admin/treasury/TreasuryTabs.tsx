@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { FinanceSummary, MonthlyLiquidation, CashInPayment, CashOutPayment, CashInStatus, CashOutStatus } from '@/lib/types/admin/treasury';
 import { FileText, CheckCircle, AlertTriangle, AlertOctagon, XCircle, Clock, CheckCircle2, Search, Zap, DollarSign, Wallet, ShieldCheck, Download } from 'lucide-react';
+import Pagination from '@/components/ui/Pagination';
 
 export const BalanceTab: React.FC<{ resume: FinanceSummary; monthly: MonthlyLiquidation[] }> = ({ resume, monthly }) => {
     return (
@@ -70,10 +71,16 @@ const CashInStatusBadge: React.FC<{ status: CashInStatus }> = ({ status }) => {
     }
 }
 
+const PAGE_SIZE = 10;
+
 export const CashInTab: React.FC<{
     payments: CashInPayment[];
     onSelect: (p: CashInPayment) => void;
 }> = ({ payments, onSelect }) => {
+    const [page, setPage] = useState(1);
+    const totalPages = Math.ceil(payments.length / PAGE_SIZE);
+    const pagePayments = payments.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
     return (
         <div className="bg-[var(--bg-card)] rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm overflow-hidden font-industrial">
             <div className="p-6 border-b border-[var(--border-subtle)] flex flex-wrap items-start sm:items-center justify-between gap-3">
@@ -100,7 +107,7 @@ export const CashInTab: React.FC<{
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-[var(--border-subtle)]">
-                        {payments.map(p => (
+                        {pagePayments.map(p => (
                             <tr 
                                 key={p.id} 
                                 onClick={() => onSelect(p)} 
@@ -135,6 +142,8 @@ export const CashInTab: React.FC<{
                     </tbody>
                 </table>
             </div>
+
+            <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
         </div>
     );
 };
@@ -155,6 +164,10 @@ export const CashOutTab: React.FC<{
     onSelect: (p: CashOutPayment) => void;
     windowOpen: boolean;
 }> = ({ payments, onSelect, windowOpen }) => {
+    const [page, setPage] = useState(1);
+    const totalPages = Math.ceil(payments.length / PAGE_SIZE);
+    const pagePayments = payments.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
     return (
         <div className="space-y-6 font-industrial">
             {!windowOpen && (
@@ -195,7 +208,7 @@ export const CashOutTab: React.FC<{
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-[var(--border-subtle)]">
-                            {payments.map(p => (
+                            {pagePayments.map(p => (
                                 <tr 
                                     key={p.id} 
                                     onClick={() => onSelect(p)} 
@@ -237,6 +250,8 @@ export const CashOutTab: React.FC<{
                     </table>
                 </div>
             </div>
+
+            <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
         </div>
     );
 };

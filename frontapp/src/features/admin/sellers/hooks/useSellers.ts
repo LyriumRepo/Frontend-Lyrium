@@ -41,7 +41,13 @@ function mapApiItem(item: any): Solicitud {
     score: item.score ?? 0,
     riesgo: (item.riesgo || "medio").toUpperCase() as RiesgoSolicitud,
     estado: item.estado as EstadoSolicitud,
-    diagnostico: Array.isArray(item.diagnostico) ? item.diagnostico : [],
+    diagnostico: (() => {
+      let d = item.diagnostico;
+      if (typeof d === "string") { try { d = JSON.parse(d); } catch {} }
+      if (typeof d === "string") d = d.split("\n").filter(Boolean);
+      const decode = (s: string) => s.replace(/\\u([0-9a-fA-F]{4})/g, (_, g) => String.fromCharCode(parseInt(g, 16)));
+      return Array.isArray(d) ? d.map((x: string) => typeof x === "string" ? decode(x) : String(x)) : [];
+    })(),
     fechaRegistro: item.created_at || new Date().toISOString(),
   };
 }

@@ -1,29 +1,38 @@
 /* Tema Lyrium para el tour de bienvenida (driver.js). Aplicado vía popoverClass="lyrium-tour-popover". */
+/* Modo día: mismo degradado arcoíris (teal → lima → celeste) que el membrete/header de los módulos. */
 .driver-popover.lyrium-tour-popover {
-  background: linear-gradient(158deg, #e0f2fe 0%, #e0f2fe 55%, #f0f9ff 100%);
-  border: 1.5px solid #38bdf8;
+  background: linear-gradient(158deg, #ffffff 0%, #f0fdfa 45%, #f0f9ff 100%);
+  border: 2px solid transparent;
+  background-image:
+    linear-gradient(158deg, #ffffff 0%, #f0fdfa 45%, #f0f9ff 100%),
+    linear-gradient(to right, var(--brand-teal), var(--brand-lime), var(--brand-sky));
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
   border-radius: 20px;
   padding: 20px;
   max-width: 320px;
-  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.28), 0 0 0 1px rgba(56, 189, 248, 0.12);
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.28), 0 0 0 1px rgba(13, 148, 136, 0.12);
 }
 
 .driver-popover.lyrium-tour-popover .driver-popover-title {
-  color: #0369a1;
+  color: var(--brand-teal);
   font-weight: 900;
   font-size: 16px;
   letter-spacing: -0.01em;
 }
 
 .driver-popover.lyrium-tour-popover .driver-popover-description {
-  color: #0284c7;
+  color: var(--brand-sky-hover);
   font-size: 13px;
   line-height: 1.6;
   margin-top: 6px;
 }
 
 .driver-popover.lyrium-tour-popover .driver-popover-progress-text {
-  color: #0ea5e9;
+  background: linear-gradient(to right, var(--brand-teal), var(--brand-sky));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
   font-weight: 700;
   font-size: 11px;
   text-transform: uppercase;
@@ -35,7 +44,7 @@
 }
 .driver-popover.lyrium-tour-popover .driver-popover-close-btn:hover,
 .driver-popover.lyrium-tour-popover .driver-popover-close-btn:focus {
-  color: #0369a1;
+  color: var(--brand-teal);
 }
 
 .driver-popover.lyrium-tour-popover .driver-popover-footer button {
@@ -54,7 +63,7 @@
 
 .driver-popover.lyrium-tour-popover .driver-popover-prev-btn {
   background: var(--bg-muted);
-  color: #0369a1;
+  color: var(--brand-teal);
 }
 .driver-popover.lyrium-tour-popover .driver-popover-prev-btn:hover {
   background: var(--border-default);
@@ -62,56 +71,81 @@
 
 .driver-popover.lyrium-tour-popover .driver-popover-next-btn,
 .driver-popover.lyrium-tour-popover .driver-popover-next-btn.driver-popover-btn-disabled {
-  background: #0ea5e9;
+  background: linear-gradient(to right, var(--brand-teal), var(--brand-lime), var(--brand-sky));
   color: #fff;
   opacity: 1;
 }
 .driver-popover.lyrium-tour-popover .driver-popover-next-btn:hover {
-  background: #0284c7;
+  background: linear-gradient(to right, var(--brand-sky-hover), var(--brand-lime), var(--brand-teal));
 }
 
-.driver-popover.lyrium-tour-popover .driver-popover-arrow-side-left { border-right-color: #e0f2fe; }
+.driver-popover.lyrium-tour-popover .driver-popover-arrow-side-left { border-right-color: #f0fdfa; }
 .driver-popover.lyrium-tour-popover .driver-popover-arrow-side-right { border-left-color: #f0f9ff; }
 .driver-popover.lyrium-tour-popover .driver-popover-arrow-side-top { border-bottom-color: #f0f9ff; }
-.driver-popover.lyrium-tour-popover .driver-popover-arrow-side-bottom { border-top-color: #e0f2fe; }
+.driver-popover.lyrium-tour-popover .driver-popover-arrow-side-bottom { border-top-color: #f0fdfa; }
 
-/* Modo noche — celeste agua sobre superficies oscuras */
+/* Modo noche — verde oscuro Lyrium (mismo esquema que el resto de la app en dark mode) */
 .dark .driver-popover.lyrium-tour-popover {
-  background: linear-gradient(158deg, #0c1929 0%, #0f1d2e 100%);
-  border-color: rgba(56, 189, 248, 0.35);
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(56, 189, 248, 0.1);
+  background: linear-gradient(158deg, #0F2A24 0%, #1E3028 100%);
+  border-color: rgba(143, 195, 161, 0.35);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(143, 195, 161, 0.1);
 }
 .dark .driver-popover.lyrium-tour-popover .driver-popover-title {
-  color: #e0f2fe;
+  color: var(--text-primary);
 }
 .dark .driver-popover.lyrium-tour-popover .driver-popover-description {
-  color: #bae6fd;
+  color: var(--text-secondary);
 }
 .dark .driver-popover.lyrium-tour-popover .driver-popover-progress-text {
-  color: #38bdf8;
+  color: var(--icons-green);
 }
 .dark .driver-popover.lyrium-tour-popover .driver-popover-close-btn {
   color: var(--text-placeholder);
 }
 .dark .driver-popover.lyrium-tour-popover .driver-popover-close-btn:hover,
 .dark .driver-popover.lyrium-tour-popover .driver-popover-close-btn:focus {
-  color: #e0f2fe;
+  color: var(--icons-green);
 }
 .dark .driver-popover.lyrium-tour-popover .driver-popover-prev-btn {
   background: var(--bg-muted);
-  color: #bae6fd;
+  color: var(--icons-green);
 }
 .dark .driver-popover.lyrium-tour-popover .driver-popover-prev-btn:hover {
   background: var(--bg-card);
 }
 .dark .driver-popover.lyrium-tour-popover .driver-popover-next-btn {
-  background: #0ea5e9;
+  background: var(--brand-green);
   color: #fff;
 }
 .dark .driver-popover.lyrium-tour-popover .driver-popover-next-btn:hover {
-  background: #0284c7;
+  background: var(--brand-green-hover);
 }
-.dark .driver-popover.lyrium-tour-popover .driver-popover-arrow-side-left { border-right-color: #0f1d2e; }
-.dark .driver-popover.lyrium-tour-popover .driver-popover-arrow-side-right { border-left-color: #0c1929; }
-.dark .driver-popover.lyrium-tour-popover .driver-popover-arrow-side-top { border-bottom-color: #0c1929; }
-.dark .driver-popover.lyrium-tour-popover .driver-popover-arrow-side-bottom { border-top-color: #0f1d2e; }
+.dark .driver-popover.lyrium-tour-popover .driver-popover-arrow-side-left { border-right-color: #1E3028; }
+.dark .driver-popover.lyrium-tour-popover .driver-popover-arrow-side-right { border-left-color: #0F2A24; }
+.dark .driver-popover.lyrium-tour-popover .driver-popover-arrow-side-top { border-bottom-color: #0F2A24; }
+.dark .driver-popover.lyrium-tour-popover .driver-popover-arrow-side-bottom { border-top-color: #1E3028; }
+
+@media (max-width: 640px) {
+  .driver-popover.lyrium-tour-popover {
+    max-width: min(92vw, 340px);
+    padding: 16px;
+    border-radius: 16px;
+  }
+  .driver-popover.lyrium-tour-popover .driver-popover-title {
+    font-size: 14px;
+  }
+  .driver-popover.lyrium-tour-popover .driver-popover-description {
+    font-size: 12px;
+  }
+  .driver-popover.lyrium-tour-popover .driver-popover-footer {
+    flex-direction: column;
+    gap: 6px;
+  }
+  .driver-popover.lyrium-tour-popover .driver-popover-footer button {
+    width: 100%;
+    padding: 10px;
+  }
+  .driver-popover.lyrium-tour-popover .driver-popover-progress-text {
+    font-size: 10px;
+  }
+}

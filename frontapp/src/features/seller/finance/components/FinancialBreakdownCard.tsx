@@ -24,7 +24,7 @@ export default function FinancialBreakdownCard({ data }: FinancialBreakdownCardP
     return (
         <>
             <button onClick={() => setIsModalOpen(true)} className="group w-full text-left">
-            <div className="bg-[var(--bg-card)] p-8 rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm transition-all duration-500 hover:shadow-2xl hover:shadow-[var(--border-subtle)]/30 hover:-translate-y-1 active:scale-[0.99]">
+            <div className="bg-[var(--bg-card)] p-8 rounded-[2.5rem] border border-[var(--border-subtle)] shadow-lg transition-all duration-500 hover:shadow-2xl hover:shadow-[var(--border-subtle)]/30 hover:-translate-y-1 active:scale-[0.99]">
             <div className="flex items-center gap-3 mb-6">
                 <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg text-white" style={{ backgroundColor: companyColors.azulCeleste }}>
                     <Icon name="PieChart" className="w-6 h-6 stroke-[2.5px]" />

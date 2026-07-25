@@ -85,6 +85,7 @@ export default function SmartSidebar({
     const pathname = usePathname();
     const [isExpanded, setIsExpanded] = useState(true);
     const [isMounted, setIsMounted] = useState(false);
+    const [flashingHref, setFlashingHref] = useState<string | null>(null);
 
     const colors = useMemo(() => colorVariants[brandColor], [brandColor]);
 
@@ -206,6 +207,8 @@ export default function SmartSidebar({
                                             key={module.href}
                                             href={module.href}
                                             data-tour={module.id ? `nav-${module.id}` : undefined}
+                                            title={!isExpanded && !isMobileOpen ? module.label : undefined}
+                                            onClick={() => setFlashingHref(module.href)}
                                             className={`
                                                 relative group block transition-all duration-500 overflow-hidden rounded-2xl mb-2
                                                 ${active ? colors.bgActive : colors.hover}
@@ -229,7 +232,10 @@ export default function SmartSidebar({
                                                     </div>
 
                                                     {(isExpanded || isMobileOpen) && (
-                                                        <span title={active ? module.label : ""} className={`text-[13px] font-black whitespace-nowrap transition-all duration-300 md:hidden lg:inline ${active
+                                                        <span
+                                                            title={active ? module.label : ""}
+                                                            onAnimationEnd={() => setFlashingHref((prev) => (prev === module.href ? null : prev))}
+                                                            className={`text-[13px] font-black whitespace-nowrap transition-all duration-300 md:hidden lg:inline ${flashingHref === module.href ? 'animate-[sidebarTextFlash_0.4s_ease-out]' : ''} ${active
                                                         ? 'max-w-[140px] overflow-hidden text-ellipsis text-[var(--text-primary)]'
                                                         : 'flex-shrink-0 text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]' }`} > {module.label}
                                                     </span>

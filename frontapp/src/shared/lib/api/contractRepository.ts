@@ -142,12 +142,11 @@ export const contractApi = {
     },
 
     updateStatus: async (id: string, status: string, updatedInfo: Partial<FrontendContract>): Promise<FrontendContract> => {
-        const dbId = updatedInfo.dbId?.toString() ?? id;
-        await apiRequest(`/contracts/${dbId}/status`, {
+        await apiRequest(`/contracts/${id}/status`, {
             method: 'PUT',
             body: JSON.stringify({ status }),
         });
-        const res = await apiRequest<{ data: ApiContractResponse }>(`/contracts/${dbId}`, {
+        const res = await apiRequest<{ data: ApiContractResponse }>(`/contracts/${id}`, {
             method: 'PUT',
             body: JSON.stringify(frontendToApi(updatedInfo)),
         });

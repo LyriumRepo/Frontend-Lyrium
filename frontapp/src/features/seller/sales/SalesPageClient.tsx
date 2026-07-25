@@ -83,7 +83,7 @@ export function SalesPageClient(_props?: SalesPageClientProps) {
             {/* Wrapper que fuerza el texto largo del título a romper en móvil */}
             <div className="[&_h1]:!whitespace-normal [&_h1]:!break-words [&_h2]:!whitespace-normal [&_h2]:!break-words [&_p]:!whitespace-normal">
             <ModuleHeader
-                title="Centro de Control de Ventas"
+                title="Ventas"
                 subtitle="Toda la información y trazabilidad sobre tus ventas generadas."
                 icon="Sales"
             />
@@ -102,7 +102,7 @@ export function SalesPageClient(_props?: SalesPageClientProps) {
             />
 
             {isLoading && orders.length === 0 ? (
-                <BaseLoading message="Cargando Centro de Control de Ventas..." />
+                <BaseLoading message="Cargando Ventas..." />
             ) : (
                 <>
             <div className="relative">
@@ -151,8 +151,8 @@ export function SalesPageClient(_props?: SalesPageClientProps) {
                         order={selectedOrder!}
                         isOpen={!!selectedOrder}
                         onClose={() => setSelectedOrder(null)}
-                        onAdvanceStep={async (id, section) => {
-                            await advanceStep(id, section);
+                        onAdvanceStep={async (id, section, serviceItemId) => {
+                            await advanceStep(id, section, serviceItemId);
                         }}
                         onShipWithCarrier={async (orderId, carrierCode, carrierData) => {
                             await shipWithCarrier(orderId, carrierCode, carrierData);

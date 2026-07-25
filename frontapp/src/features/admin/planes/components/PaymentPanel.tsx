@@ -2,6 +2,7 @@
 import type { VendedorPago, PaymentTotals } from '@/features/admin/planes/hooks/usePlanesAdmin';
 import { useState } from 'react';
 import AdminTable, { Column } from '@/components/admin/AdminTable';
+import AdminIndicatorGrid from '@/components/admin/AdminIndicatorGrid';
 
 interface Props {
   vendedorPagos: VendedorPago[]; totales: PaymentTotals;
@@ -131,34 +132,21 @@ export default function PaymentPanel({ vendedorPagos, totales, filter, onFilterC
         <h2 className="text-2xl font-extrabold text-[var(--text-primary)] mb-2">Historial de Pagos</h2>
         <p className="text-sm text-[var(--text-placeholder)]">Transacciones procesadas por Izipay — ordenadas por fecha</p>
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5 mb-2">
-        <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-3xl p-5 flex flex-col gap-1.5 relative overflow-hidden transition-shadow hover:shadow-md hover:-translate-y-0.5">
-          <div className="absolute top-0 left-0 right-0 h-1 rounded-t-3xl bg-gradient-to-r from-[var(--brand-sky)] to-[var(--brand-green)]" />
-          <div className="text-[11px] font-extrabold uppercase tracking-wide text-[var(--text-placeholder)]">Total recaudado</div>
-          <div className="text-[1.75rem] font-extrabold text-[var(--text-primary)] leading-tight">S/ {Number(totales.total_monto ?? 0).toFixed(2)}</div>
-        </div>
-        <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-3xl p-5 flex flex-col gap-1.5 relative overflow-hidden transition-shadow hover:shadow-md hover:-translate-y-0.5">
-          <div className="absolute top-0 left-0 right-0 h-1 rounded-t-3xl bg-[var(--color-success)]" />
-          <div className="text-[11px] font-extrabold uppercase tracking-wide text-[var(--text-placeholder)]">Pagos exitosos</div>
-          <div className="text-[1.75rem] font-extrabold text-[var(--color-success)] leading-tight">{totales.pagos_exitosos}</div>
-        </div>
-        <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-3xl p-5 flex flex-col gap-1.5 relative overflow-hidden transition-shadow hover:shadow-md hover:-translate-y-0.5">
-          <div className="absolute top-0 left-0 right-0 h-1 rounded-t-3xl bg-[var(--color-error)]" />
-          <div className="text-[11px] font-extrabold uppercase tracking-wide text-[var(--text-placeholder)]">Pagos fallidos</div>
-          <div className="text-[1.75rem] font-extrabold text-[var(--color-error)] leading-tight">{totales.pagos_fallidos}</div>
-        </div>
-        <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-3xl p-5 flex flex-col gap-1.5 relative overflow-hidden transition-shadow hover:shadow-md hover:-translate-y-0.5">
-          <div className="absolute top-0 left-0 right-0 h-1 rounded-t-3xl bg-[var(--color-warning)]" />
-          <div className="text-[11px] font-extrabold uppercase tracking-wide text-[var(--text-placeholder)]">Pendientes</div>
-          <div className="text-[1.75rem] font-extrabold text-[var(--color-warning)] leading-tight">{totales.pagos_pendientes}</div>
-        </div>
-      </div>
+      <AdminIndicatorGrid
+        indicators={[
+          { label: 'Total recaudado', value: `S/ ${Number(totales.total_monto ?? 0).toFixed(2)}`, icon: 'Wallet', color: 'turquesa' },
+          { label: 'Pagos exitosos', value: totales.pagos_exitosos, icon: 'CheckCircle', color: 'verde' },
+          { label: 'Pagos fallidos', value: totales.pagos_fallidos, icon: 'XCircle', color: 'rose' },
+          { label: 'Pendientes', value: totales.pagos_pendientes, icon: 'Clock', color: 'turquesaClaro' },
+        ]}
+        columns={4}
+      />
       <div className="flex gap-2 mb-5 flex-wrap" style={{ marginTop:'20px' }}>
         {(['all','paid','failed','pending'] as const).map(f => (
           <button key={f} className={`px-4 py-2.5 border-2 rounded-lg text-[13px] font-semibold cursor-pointer transition-all duration-300 flex items-center gap-2
             ${filter === f ? 'bg-gradient-to-r from-sky-500 to-sky-400 dark:from-emerald-700 dark:to-teal-600 text-white border-transparent shadow-lg shadow-sky-500/25 dark:shadow-emerald-900/25' : 'bg-[var(--bg-primary)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
             onClick={() => onFilterChange(f)}>
-            {f !== 'all' && <span className={`w-2 h-2 rounded-full ${f === 'paid' ? 'bg-[var(--color-success)]' : f === 'failed' ? 'bg-[var(--color-error)]' : 'bg-[var(--color-warning)]'}`} />}
+            {f !== 'all' && <span className="w-2 h-2 rounded-full bg-[var(--brand-sky)] dark:bg-[var(--color-success)]" />}
             {f === 'all' ? 'Todos' : f === 'paid' ? 'Exitosos' : f === 'failed' ? 'Fallidos' : 'Pendientes'}
           </button>
         ))}

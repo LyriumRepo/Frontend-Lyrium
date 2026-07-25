@@ -1,42 +1,14 @@
-import React from 'react';
-import { StatusBadge, ModalityBadge, KpiCard, ExpiryTrafficLight } from './ContractsUIComponents';
+import React, { useState, useEffect } from 'react';
+import { StatusBadge, ModalityBadge, ExpiryTrafficLight } from './ContractsUIComponents';
 import { Contract } from '@/lib/types/admin/contracts';
 import { ContractKPI } from '@/features/admin/contracts/types';
-import { Search, Plus, ArrowRight, ChevronRight, FileText, Calendar, Shield, Hash, Landmark, CheckCircle, Clock, AlertOctagon } from 'lucide-react';
+import { Search, Plus, ArrowRight, ChevronRight, Calendar, Hash, Landmark } from 'lucide-react';
 import Skeleton from '@/components/ui/Skeleton';
+import Pagination from '@/components/ui/Pagination';
+import AdminIndicatorGrid from '@/components/admin/AdminIndicatorGrid';
+import type { AdminIndicator } from '@/components/admin/AdminIndicatorGrid';
 
-const getKpiConfig = (iconKey: string, colorKey: string) => {
-    const icons: Record<string, React.ReactNode> = {
-        Files: <FileText className="w-5 h-5" />,
-        CheckCircle: <CheckCircle className="w-5 h-5" />,
-        Hourglass: <Clock className="w-5 h-5" />,
-        AlertOctagon: <AlertOctagon className="w-5 h-5" />
-    };
-
-    const colors: Record<string, { iconWrapper: string; glow: string }> = {
-        indigo: {
-            iconWrapper: 'bg-[var(--celeste-500)]/10 text-[var(--celeste-500)]',
-            glow: 'bg-[var(--celeste-500)]/5 group-hover:bg-[var(--celeste-500)]/10'
-        },
-        emerald: {
-            iconWrapper: 'bg-[var(--color-success)]/10 text-[var(--color-success)]',
-            glow: 'bg-[var(--color-success)]/5 group-hover:bg-[var(--color-success)]/10'
-        },
-        amber: {
-            iconWrapper: 'bg-[var(--color-warning)]/10 text-[var(--color-warning)]',
-            glow: 'bg-[var(--color-warning)]/5 group-hover:bg-[var(--color-warning)]/10'
-        },
-        red: {
-            iconWrapper: 'bg-[var(--color-error)]/10 text-[var(--color-error)]',
-            glow: 'bg-[var(--color-error)]/5 group-hover:bg-[var(--color-error)]/10'
-        }
-    };
-
-    return {
-        icon: icons[iconKey] || <FileText className="w-5 h-5" />,
-        classes: colors[colorKey] || colors.indigo
-    };
-};
+const PAGE_SIZE = 10;
 
 interface ContratosModuleProps {
     state: {
@@ -51,6 +23,12 @@ interface ContratosModuleProps {
 
 export const ContratosModule: React.FC<ContratosModuleProps> = ({ state, actions }) => {
     const { contracts, kpis, loading, error, filters } = state;
+
+    const [page, setPage] = useState(1);
+    useEffect(() => { setPage(1); }, [contracts.length]);
+
+    const totalPages = Math.ceil(contracts.length / PAGE_SIZE);
+    const pageContracts = contracts.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
     if (loading && contracts.length === 0) {
         return (
@@ -92,35 +70,15 @@ export const ContratosModule: React.FC<ContratosModuleProps> = ({ state, actions
     return (
         <div className="space-y-8 animate-fadeIn pb-20 text-left font-industrial">
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                {kpis.map((kpi) => {
-                    const config = getKpiConfig(kpi.icon, kpi.color);
-                    return (
-                        <div 
-                            key={kpi.label}
-                            className="bg-[var(--bg-card)] p-6 rounded-[2.2rem] border border-[var(--border-subtle)] shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 relative overflow-hidden group flex flex-col justify-between min-h-[140px]"
-                        >
-                            <div className={`absolute top-0 right-0 w-24 h-24 rounded-full -mr-8 -mt-8 blur-xl transition-all ${config.classes.glow}`}></div>
-                            <div className="flex items-center justify-between">
-                                <span className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest leading-none">
-                                    {kpi.label}
-                                </span>
-                                <div className={`p-2.5 rounded-xl ${config.classes.iconWrapper}`}>
-                                    {config.icon}
-                                </div>
-                            </div>
-                            <div className="mt-4">
-                                <p className="text-3xl font-black text-[var(--text-primary)] tracking-tighter leading-none">
-                                    {kpi.val}
-                                </p>
-                                <p className="text-[9px] text-[var(--text-muted)] font-bold uppercase tracking-wider mt-2">
-                                    Sistema de Registro Validado
-                                </p>
-                            </div>
-                        </div>
-                    );
-                })}
-            </div>
+            <AdminIndicatorGrid
+                indicators={kpis.map((kpi) => ({
+                    label: kpi.label,
+                    value: kpi.val,
+                    icon: kpi.icon,
+                    color: ({ indigo: 'turquesa', emerald: 'verde', amber: 'turquesaClaro', red: 'rose' }[kpi.color] ?? 'turquesa') as AdminIndicator['color'],
+                }))}
+                columns={4}
+            />
 
             {/* FILTROS - Diseño Premium */}
             <div className="bg-[var(--bg-card)] p-4 sm:p-8 rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm relative overflow-hidden group">
@@ -188,7 +146,7 @@ export const ContratosModule: React.FC<ContratosModuleProps> = ({ state, actions
 
             {/* EXPEDIENTES - Mobile: cards */}
             <div className="sm:hidden bg-[var(--bg-card)] rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm overflow-hidden divide-y divide-[var(--border-subtle)]">
-                {contracts.map((c: Contract) => (
+                {pageContracts.map((c: Contract) => (
                     <div
                         key={c.id}
                         role="button"
@@ -250,7 +208,7 @@ export const ContratosModule: React.FC<ContratosModuleProps> = ({ state, actions
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-[var(--border-subtle)]">
-                            {contracts.map((c: Contract) => (
+                            {pageContracts.map((c: Contract) => (
                                 <tr
                                     key={c.id}
                                     onClick={() => actions.setSelectedContract(c)}
@@ -326,6 +284,8 @@ export const ContratosModule: React.FC<ContratosModuleProps> = ({ state, actions
                     </table>
                 </div>
             </div>
+
+            <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
 
         </div>
     );

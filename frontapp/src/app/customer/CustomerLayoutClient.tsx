@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import CustomerSidebar from '@/components/layout/customer/CustomerSidebar';
 import CustomerHeader from '@/components/layout/customer/CustomerHeader';
 import { DashboardLayout } from '@/components/layout/shared/DashboardLayout';
@@ -13,7 +14,7 @@ const ChatBotWidget = dynamic(
   () => import('@/features/chatbot/components/ChatBotWidget'),
   { ssr: false }
 );
-import { WELCOME_MODAL_LIGHT_TEXT, WELCOME_MODAL_LIGHT_BADGE, WELCOME_MODAL_LIGHT_CARD } from '@/shared/lib/theme/welcomeModalTheme';
+import { WELCOME_MODAL_LIGHT_TEXT, WELCOME_MODAL_LIGHT_BADGE, WELCOME_MODAL_LIGHT_CARD, WELCOME_MODAL_LIGHT_ACCENT } from '@/shared/lib/theme/welcomeModalTheme';
 
 interface CustomerLayoutClientProps {
     children: React.ReactNode;
@@ -103,6 +104,13 @@ const CW_CSS = `
   @keyframes cwSparkle {
     0%,100%{ opacity:0; transform:scale(0) rotate(0deg); }
     40%,60%{ opacity:1; transform:scale(1) rotate(180deg); }
+  }
+
+  @media (max-width: 640px) {
+    .cw-halo { inset: -18px !important; border-radius: 36px !important; filter: blur(18px) !important; }
+    .cw-orbit1 { inset: -12px !important; }
+    .cw-orbit2 { inset: -20px !important; }
+    .cw-rays { width: 180px !important; height: 180px !important; margin-top: -30px !important; }
   }
 `;
 
@@ -205,13 +213,16 @@ function CustomerWelcomeToast() {
             });
         }, 700);
 
-        const autoClose = setTimeout(close, 7500);
-
         return () => {
             clearTimeout(confettiTimer);
-            clearTimeout(autoClose);
         };
     }, [user, close, isDark]);
+
+    useEffect(() => {
+        if (!visible) return;
+        const autoClose = setTimeout(close, 4000);
+        return () => clearTimeout(autoClose);
+    }, [visible, close]);
 
     if (!visible) return null;
 
@@ -242,6 +253,7 @@ function CustomerWelcomeToast() {
         closeHover:    'rgba(14,165,233,0.2)',
         logoBg:        'rgba(14,165,233,0.08)',
         logoBorder:    '1px solid rgba(14,165,233,0.2)',
+        logoShadow:    undefined as string | undefined,
         logoSrc:       '/img/logo_lyrium_blanco_01-scaled.webp',
         divider:       'linear-gradient(90deg, transparent, rgba(56,189,248,0.4), rgba(129,140,248,0.3), transparent)',
         spark1:        'rgba(56,189,248,0.5)',
@@ -260,38 +272,17 @@ function CustomerWelcomeToast() {
         bottomBar:     'linear-gradient(90deg, #0ea5e9, #06b6d4, #818cf8, #38bdf8, #0ea5e9)',
         conicRays:     'conic-gradient(from 0deg, transparent 0deg, rgba(14,165,233,0.06) 25deg, transparent 50deg, rgba(6,182,212,0.04) 85deg, transparent 110deg, rgba(56,189,248,0.05) 145deg, transparent 170deg, rgba(129,140,248,0.04) 205deg, transparent 230deg, rgba(14,165,233,0.04) 265deg, transparent 290deg, rgba(6,182,212,0.05) 330deg, transparent 360deg)',
     } : {
-        overlay:       'radial-gradient(ellipse 72% 62% at 50% 38%, rgba(14,165,233,0.18) 0%, rgba(15,23,42,0.72) 82%)',
-        cardShadow:    'inset 0 0 0 1.5px rgba(14,165,233,0.30), inset 0 0 80px rgba(14,165,233,0.04), 0 32px 80px rgba(0,0,0,0.32), 0 0 120px rgba(14,165,233,0.10)',
-        glowTop:       'radial-gradient(ellipse at 50% -20%, rgba(14,165,233,0.10) 0%, transparent 70%)',
         ...WELCOME_MODAL_LIGHT_CARD,
         ...WELCOME_MODAL_LIGHT_BADGE,
         ...WELCOME_MODAL_LIGHT_TEXT,
         closeBg:       'rgba(0,0,0,0.05)',
         closeBorder:   '1px solid rgba(0,0,0,0.1)',
         closeIcon:     'text-black/40',
-        closeHover:    'rgba(14,165,233,0.12)',
-        logoBg:        'rgba(14,165,233,0.07)',
-        logoBorder:    '1px solid rgba(14,165,233,0.18)',
         logoSrc:       '/img/iconologo.png',
-        divider:       'linear-gradient(90deg, transparent, rgba(14,165,233,0.40), rgba(6,182,212,0.28), transparent)',
-        spark1:        'rgba(56,189,248,0.50)',
-        spark2:        'rgba(6,182,212,0.42)',
-        halo:          'radial-gradient(ellipse, rgba(14,165,233,0.25) 0%, rgba(56,189,248,0.14) 45%, transparent 78%)',
-        orb1Border:    '1px solid rgba(14,165,233,0.18)',
-        orb1Dot:       '#0ea5e9',
-        orb1Shadow:    '0 0 10px #0ea5e9, 0 0 22px rgba(14,165,233,0.55)',
-        orb2Border:    '1px solid rgba(6,182,212,0.12)',
-        orb2Dot:       '#06b6d4',
-        orb2Shadow:    '0 0 8px #06b6d4, 0 0 16px rgba(6,182,212,0.5)',
-        gradientBorder:'linear-gradient(135deg, rgba(14,165,233,0.8) 0%, rgba(6,182,212,0.5) 35%, rgba(129,140,248,0.6) 65%, rgba(125,211,252,0.5) 100%)',
-        ripple:        (i: number) => `1px solid rgba(14,165,233,${0.25 - i * 0.06})`,
-        logoGlow:      'radial-gradient(circle, rgba(14,165,233,0.35) 0%, rgba(56,189,248,0.18) 45%, transparent 78%)',
-        nameGradient:  'linear-gradient(135deg, #0ea5e9 0%, #38bdf8 28%, #06b6d4 60%, #818cf8 100%)',
-        bottomBar:     'linear-gradient(90deg, #0ea5e9, #06b6d4, #818cf8, #38bdf8, #0ea5e9)',
-        conicRays:     'conic-gradient(from 0deg, transparent 0deg, rgba(14,165,233,0.06) 25deg, transparent 50deg, rgba(6,182,212,0.04) 85deg, transparent 110deg, rgba(56,189,248,0.05) 145deg, transparent 170deg, rgba(129,140,248,0.04) 205deg, transparent 230deg, rgba(14,165,233,0.04) 265deg, transparent 290deg, rgba(6,182,212,0.05) 330deg, transparent 360deg)',
+        ...WELCOME_MODAL_LIGHT_ACCENT,
     };
 
-    return (
+    return createPortal(
         <>
             <style>{CW_CSS}</style>
 
@@ -312,7 +303,7 @@ function CustomerWelcomeToast() {
             >
                 {/* Card wrapper — tilt 3D */}
                 <div
-                    className="relative w-full max-w-[480px]"
+                    className="relative w-full max-w-[480px] overflow-hidden"
                     style={{
                         transform: `perspective(1200px) rotateX(${tilt.y}deg) rotateY(${tilt.x}deg)`,
                         transition: 'transform 0.14s ease-out',
@@ -340,7 +331,7 @@ function CustomerWelcomeToast() {
                     ))}
 
                     {/* Halo exterior */}
-                    <div className="absolute pointer-events-none" style={{
+                    <div className="absolute pointer-events-none cw-halo" style={{
                         inset: '-38px', borderRadius: '62px',
                         background: T.halo,
                         filter: 'blur(30px)',
@@ -348,7 +339,7 @@ function CustomerWelcomeToast() {
                     }} />
 
                     {/* Anillo orbital 1 */}
-                    <div className="absolute pointer-events-none" style={{
+                    <div className="absolute pointer-events-none cw-orbit1" style={{
                         inset: '-24px', borderRadius: '50%',
                         border: T.orb1Border,
                         animation: 'cwOrbitCW 16s linear infinite',
@@ -361,7 +352,7 @@ function CustomerWelcomeToast() {
                     </div>
 
                     {/* Anillo orbital 2 */}
-                    <div className="absolute pointer-events-none" style={{
+                    <div className="absolute pointer-events-none cw-orbit2" style={{
                         inset: '-46px', borderRadius: '50%',
                         border: T.orb2Border,
                         animation: 'cwOrbitCCW 24s linear infinite',
@@ -400,7 +391,7 @@ function CustomerWelcomeToast() {
                             }} />
 
                             {/* Rayos cónicos */}
-                            <div className="absolute pointer-events-none" style={{
+                            <div className="absolute pointer-events-none cw-rays" style={{
                                 top: 0, left: '50%',
                                 width: '320px', height: '320px', marginTop: '-55px',
                                 borderRadius: '50%',
@@ -426,7 +417,7 @@ function CustomerWelcomeToast() {
                                 onClick={e => { e.stopPropagation(); close(); }}
                                 className="absolute top-4 right-4 z-10 flex items-center justify-center rounded-full transition-all duration-200 active:scale-90"
                                 style={{
-                                    width: 34, height: 34,
+                                    width: 44, height: 44,
                                     background: T.closeBg,
                                     border: T.closeBorder,
                                     backdropFilter: 'blur(8px)',
@@ -434,11 +425,11 @@ function CustomerWelcomeToast() {
                                 onMouseEnter={e => (e.currentTarget.style.background = T.closeHover)}
                                 onMouseLeave={e => (e.currentTarget.style.background = T.closeBg)}
                             >
-                                <Icon name="X" className={`w-3.5 h-3.5 ${T.closeIcon}`} />
+                                <Icon name="X" className={`w-4 h-4 ${T.closeIcon}`} />
                             </button>
 
                             {/* Contenido */}
-                            <div className="px-8 pt-10 pb-8 relative">
+                            <div className="px-5 sm:px-8 pt-10 pb-8 relative">
 
                                 {/* 1 — Logo Lyrium animado flotando */}
                                 <div className="flex justify-center mb-6" style={{
@@ -461,6 +452,7 @@ function CustomerWelcomeToast() {
                                         <div className="relative flex items-center justify-center px-5 py-3 rounded-2xl" style={{
                                             background: T.logoBg,
                                             border: T.logoBorder,
+                                            boxShadow: T.logoShadow,
                                             animation: 'cwLogoFloat 4.5s ease-in-out infinite, cwLogoPulse 4.5s ease-in-out infinite',
                                         }}>
                                             <img
@@ -498,7 +490,7 @@ function CustomerWelcomeToast() {
                                     </p>
 
                                     {/* Nombre — hero, letra por letra */}
-                                    <h2 className="text-[50px] font-black leading-none mb-4 flex justify-center flex-wrap"
+                                    <h2 className="text-[32px] sm:text-[50px] font-black leading-none mb-4 flex justify-center flex-wrap"
                                         style={{ letterSpacing: '-0.025em' }}>
                                         {firstName.split('').map((char, i) => (
                                             <span key={i} className="inline-block" style={{
@@ -550,7 +542,8 @@ function CustomerWelcomeToast() {
                     </div>
                 </div>
             </div>
-        </>
+        </>,
+        document.body
     );
 }
 
@@ -636,6 +629,14 @@ const BDAY_CSS = `
   @keyframes bdaySparkle {
     0%,100%{ opacity:0; transform:scale(0) rotate(0deg); }
     40%,60%{ opacity:1; transform:scale(1) rotate(180deg); }
+  }
+
+  @media (max-width: 640px) {
+    .bd-halo { inset: -18px !important; border-radius: 36px !important; filter: blur(18px) !important; }
+    .bd-orbit1 { inset: -12px !important; }
+    .bd-orbit2 { inset: -20px !important; }
+    .bd-rays { width: 180px !important; height: 180px !important; margin-top: -30px !important; }
+    .bd-orb { width: 72px !important; height: 72px !important; font-size: 2.2rem !important; }
   }
 `;
 
@@ -855,7 +856,7 @@ function BirthdayToast() {
         conicRays:     'conic-gradient(from 0deg, transparent 0deg, rgba(14,165,233,0.07) 25deg, transparent 50deg, rgba(56,189,248,0.05) 85deg, transparent 110deg, rgba(125,211,252,0.06) 145deg, transparent 170deg, rgba(14,165,233,0.05) 205deg, transparent 230deg, rgba(56,189,248,0.04) 265deg, transparent 290deg, rgba(14,165,233,0.06) 330deg, transparent 360deg)',
     };
 
-    return (
+    return createPortal(
         <>
             <style>{BDAY_CSS}</style>
 
@@ -875,7 +876,7 @@ function BirthdayToast() {
             >
                 {/* ── Card wrapper — perspectiva 3D + tilt ────────────────── */}
                 <div
-                    className="relative w-full max-w-[468px]"
+                    className="relative w-full max-w-[468px] overflow-hidden"
                     style={{
                         transform: `perspective(1200px) rotateX(${tilt.y}deg) rotateY(${tilt.x}deg)`,
                         transition: 'transform 0.14s ease-out',
@@ -908,7 +909,7 @@ function BirthdayToast() {
 
                     {/* Halo de glow exterior pulsante */}
                     <div
-                        className="absolute pointer-events-none"
+                        className="absolute pointer-events-none bd-halo"
                         style={{
                             inset: '-36px',
                             borderRadius: '60px',
@@ -920,7 +921,7 @@ function BirthdayToast() {
 
                     {/* Anillo orbital 1 — horario */}
                     <div
-                        className="absolute pointer-events-none"
+                        className="absolute pointer-events-none bd-orbit1"
                         style={{
                             inset: '-22px',
                             borderRadius: '50%',
@@ -938,7 +939,7 @@ function BirthdayToast() {
 
                     {/* Anillo orbital 2 — antihorario, más lento */}
                     <div
-                        className="absolute pointer-events-none"
+                        className="absolute pointer-events-none bd-orbit2"
                         style={{
                             inset: '-44px',
                             borderRadius: '50%',
@@ -986,7 +987,7 @@ function BirthdayToast() {
                             }} />
 
                             {/* Rayos cónicos giratorios */}
-                            <div className="absolute pointer-events-none" style={{
+                            <div className="absolute pointer-events-none bd-rays" style={{
                                 top: 0, left: '50%',
                                 width: '300px', height: '300px',
                                 marginTop: '-50px',
@@ -1013,7 +1014,7 @@ function BirthdayToast() {
                                 onClick={e => { e.stopPropagation(); close(); }}
                                 className="absolute top-4 right-4 z-10 flex items-center justify-center rounded-full transition-all duration-200 active:scale-90"
                                 style={{
-                                    width: 34, height: 34,
+                                    width: 44, height: 44,
                                     background: T.closeBg,
                                     border: T.closeBorder,
                                     backdropFilter: 'blur(8px)',
@@ -1021,11 +1022,11 @@ function BirthdayToast() {
                                 onMouseEnter={e => (e.currentTarget.style.background = T.closeHover)}
                                 onMouseLeave={e => (e.currentTarget.style.background = T.closeBg)}
                             >
-                                <Icon name="X" className={`w-3.5 h-3.5 ${T.closeIcon}`} />
+                                <Icon name="X" className={`w-4 h-4 ${T.closeIcon}`} />
                             </button>
 
                             {/* ── Contenido coreografiado ───────────────────── */}
-                            <div className="px-8 pt-10 pb-8 relative">
+                            <div className="px-5 sm:px-8 pt-10 pb-8 relative">
 
                                 {/* 1 — Logo pill */}
                                 <div className="flex justify-center mb-7" style={{
@@ -1064,7 +1065,7 @@ function BirthdayToast() {
                                             animation: 'bdayOrbPulse 3.8s ease-in-out infinite',
                                         }} />
                                         {/* El orb */}
-                                        <div className="relative flex items-center justify-center" style={{
+                                        <div className="relative flex items-center justify-center bd-orb" style={{
                                             width: 96, height: 96,
                                             borderRadius: '50%',
                                             background: T.orbBg,
@@ -1090,7 +1091,7 @@ function BirthdayToast() {
 
                                     {/* Nombre — HERO, letra por letra */}
                                     <h2
-                                        className="text-[52px] font-black leading-none mb-4 flex justify-center flex-wrap"
+                                        className="text-[32px] sm:text-[52px] font-black leading-none mb-4 flex justify-center flex-wrap"
                                         style={{ letterSpacing: '-0.025em' }}
                                     >
                                         {firstName.split('').map((char, i) => (
@@ -1150,7 +1151,8 @@ function BirthdayToast() {
                     </div>
                 </div>
             </div>
-        </>
+        </>,
+        document.body
     );
 }
 

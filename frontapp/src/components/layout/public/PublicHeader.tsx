@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
@@ -31,10 +32,25 @@ export default function PublicHeader() {
     const pathname = usePathname();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [userMenuOpen, setUserMenuOpen] = useState(false);
+    const [userMenuPosition, setUserMenuPosition] = useState({ top: 0, right: 0 });
+    const [isMounted, setIsMounted] = useState(false);
+    const userMenuTriggerRef = useRef<HTMLButtonElement>(null);
     const [activeMobileMegaMenuItem, setActiveMobileMegaMenuItem] = useState<MenuItem | null>(null);
     const [activeMobileCategory, setActiveMobileCategory] = useState<string>('');
     const [expandedCols, setExpandedCols] = useState<Record<string, boolean>>({});
     const cartItemCount = useCarritoStore((s) => s.cartItems.reduce((sum, i) => sum + Number(i.cantidad ?? 0), 0));
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
+
+    const handleToggleUserMenu = () => {
+        if (!userMenuOpen && userMenuTriggerRef.current) {
+            const rect = userMenuTriggerRef.current.getBoundingClientRect();
+            setUserMenuPosition({ top: rect.bottom + 8, right: window.innerWidth - rect.right });
+        }
+        setUserMenuOpen((prev) => !prev);
+    };
 
     const { menuItems: apiMenuItems, megaMenuData: apiMegaMenuData, hasData } = useMegaMenu();
     const { user, isAuthenticated, logout } = useAuth();
@@ -77,7 +93,8 @@ export default function PublicHeader() {
                             <>
                                 <div className="relative">
                                     <button
-                                        onClick={() => setUserMenuOpen(!userMenuOpen)}
+                                        ref={userMenuTriggerRef}
+                                        onClick={handleToggleUserMenu}
                                         className="flex items-center gap-1 sm:gap-3 p-1 min-[360px]:p-2 sm:p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] active:scale-95 transition-all"
                                     >
                                         <Icon name="UserCircle" className="text-base min-[360px]:text-[18px]" />
@@ -85,17 +102,20 @@ export default function PublicHeader() {
                                             {user.display_name || user.username || user.email}
                                         </span>
                                     </button>
-                                    {userMenuOpen && (
+                                    {userMenuOpen && isMounted && createPortal(
                                         <>
                                             <div
-                                                className="fixed inset-0 z-40"
+                                                className="fixed inset-0 z-[99998]"
                                                 onClick={() => setUserMenuOpen(false)}
                                                 onKeyDown={(e) => { if (e.key === 'Escape') setUserMenuOpen(false); }}
                                                 role="dialog"
                                                 aria-modal="true"
                                                 tabIndex={-1}
                                             />
-                                            <div className="absolute right-0 mt-2 w-48 max-w-[calc(100vw-2rem)] bg-white dark:bg-[var(--bg-card)] rounded-xl shadow-lg border border-gray-200 dark:border-[var(--border-subtle)] z-50 py-1">
+                                            <div
+                                                className="fixed w-48 max-w-[calc(100vw-2rem)] bg-white dark:bg-[var(--bg-card)] rounded-xl shadow-lg border border-gray-200 dark:border-[var(--border-subtle)] z-[99999] py-1"
+                                                style={{ top: userMenuPosition.top, right: userMenuPosition.right }}
+                                            >
                                                 <div className="px-3 py-2 border-b border-gray-100 dark:border-[var(--border-subtle)]">
                                                     <p className="text-xs font-bold text-slate-800 dark:text-[var(--text-primary)] truncate">
                                                         {user.display_name || user.username}
@@ -112,7 +132,8 @@ export default function PublicHeader() {
                                                     Cerrar Sesión
                                                 </button>
                                             </div>
-                                        </>
+                                        </>,
+                                        document.body
                                     )}
                                 </div>
                                 <Link
@@ -200,7 +221,7 @@ export default function PublicHeader() {
                 onOpenMegaMenu={handleMobileMegaMenuOpen}
             />
 
-            {activeMobileMegaMenuItem && (
+            {activeMobileMegaMenuItem && isMounted && createPortal(
                 <div className="fixed inset-0 bg-white dark:bg-[var(--bg-secondary)] z-[99999] flex flex-col font-[Outfit,sans-serif]">
                     <div className="flex items-center justify-between px-4 h-14 border-b border-gray-100 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-secondary)] flex-shrink-0">
                         <button
@@ -389,7 +410,8 @@ export default function PublicHeader() {
                             })()}
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
 
         </>

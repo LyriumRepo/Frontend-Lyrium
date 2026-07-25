@@ -9,6 +9,9 @@ import LogoLyrium from '@/components/LogoLyrium';
 
 const STORAGE_KEY = 'lyrium-chatbot-pos';
 const DRAG_THRESHOLD = 5;
+const EDGE_MARGIN = 8;
+
+interface NaturalRect { left: number; top: number; width: number; height: number }
 
 function loadPosition() {
     if (typeof window === 'undefined') return null;
@@ -25,9 +28,23 @@ function savePosition(x: number, y: number) {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ x, y })); } catch {}
 }
 
+// Limita la posición para que el widget nunca quede fuera de la pantalla.
+// `natural` es dónde estaría el widget con transform: translate(0, 0) — el
+// clamp se calcula sobre eso, no sobre la posición actual, porque el punto de
+// anclaje CSS (bottom-16 right-4) ya varía según breakpoint.
+function clampToViewport(x: number, y: number, natural: NaturalRect) {
+    const minX = EDGE_MARGIN - natural.left;
+    const maxX = window.innerWidth - EDGE_MARGIN - natural.width - natural.left;
+    const minY = EDGE_MARGIN - natural.top;
+    const maxY = window.innerHeight - EDGE_MARGIN - natural.height - natural.top;
+    return {
+        x: Math.min(Math.max(x, minX), maxX),
+        y: Math.min(Math.max(y, minY), maxY),
+    };
+}
+
 export default function ChatBotWidget() {
     const pathname = usePathname();
-    if (pathname === '/login') return null;
 
     const {
         isOpen, isMinimized, messages, isTyping,
@@ -44,55 +61,94 @@ export default function ChatBotWidget() {
     }, [isOpen, toggle]);
 
     const [savedPos, setSavedPos] = useState<{ x: number; y: number } | null>(loadPosition);
-    const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-    const [isDragging, setIsDragging] = useState(false);
+    const wrapperRef = useRef<HTMLDivElement>(null);
     const dragStart = useRef({ x: 0, y: 0 });
     const didDrag = useRef(false);
+    const isDraggingRef = useRef(false);
+    const naturalRect = useRef<NaturalRect | null>(null);
 
-    const currentPos = {
-        x: (savedPos?.x ?? 0) + dragOffset.x,
-        y: (savedPos?.y ?? 0) + dragOffset.y,
-    };
-
+    // El arrastre mueve el elemento directamente por DOM (ref), sin pasar por
+    // setState en cada pointermove: en móvil el touch dispara estos eventos con
+    // mucha más frecuencia que el mouse, y un re-render de React por evento
+    // competía por el mismo frame que la animación, produciendo el lag.
     const handlePointerDown = useCallback((e: React.PointerEvent) => {
         if (e.button !== 0) return;
         const el = e.currentTarget as HTMLElement;
         el.setPointerCapture(e.pointerId);
+        const wrapper = wrapperRef.current;
+        if (wrapper) {
+            const rect = wrapper.getBoundingClientRect();
+            naturalRect.current = {
+                left: rect.left - (savedPos?.x ?? 0),
+                top: rect.top - (savedPos?.y ?? 0),
+                width: rect.width,
+                height: rect.height,
+            };
+            wrapper.style.transition = 'none';
+        }
         dragStart.current = { x: e.clientX, y: e.clientY };
         didDrag.current = false;
-        setDragOffset({ x: 0, y: 0 });
-        setIsDragging(true);
-    }, []);
+        isDraggingRef.current = true;
+    }, [savedPos]);
 
     const handlePointerMove = useCallback((e: React.PointerEvent) => {
-        if (!isDragging) return;
+        if (!isDraggingRef.current) return;
         const dx = e.clientX - dragStart.current.x;
         const dy = e.clientY - dragStart.current.y;
         if (!didDrag.current && (Math.abs(dx) > DRAG_THRESHOLD || Math.abs(dy) > DRAG_THRESHOLD)) {
             didDrag.current = true;
         }
-        if (didDrag.current) {
-            setDragOffset({ x: dx, y: dy });
+        if (didDrag.current && wrapperRef.current && naturalRect.current) {
+            const baseX = savedPos?.x ?? 0;
+            const baseY = savedPos?.y ?? 0;
+            const { x, y } = clampToViewport(baseX + dx, baseY + dy, naturalRect.current);
+            wrapperRef.current.style.transform = `translate(${x}px, ${y}px)`;
         }
-    }, [isDragging]);
+    }, [savedPos]);
 
     const handlePointerUp = useCallback((e: React.PointerEvent) => {
-        if (!isDragging) return;
-        setIsDragging(false);
-        if (didDrag.current) {
-            const newX = (savedPos?.x ?? 0) + (e.clientX - dragStart.current.x);
-            const newY = (savedPos?.y ?? 0) + (e.clientY - dragStart.current.y);
-            setSavedPos({ x: newX, y: newY });
-            savePosition(newX, newY);
+        if (!isDraggingRef.current) return;
+        isDraggingRef.current = false;
+        if (wrapperRef.current) wrapperRef.current.style.transition = '';
+        if (didDrag.current && naturalRect.current) {
+            const baseX = (savedPos?.x ?? 0) + (e.clientX - dragStart.current.x);
+            const baseY = (savedPos?.y ?? 0) + (e.clientY - dragStart.current.y);
+            const { x, y } = clampToViewport(baseX, baseY, naturalRect.current);
+            setSavedPos({ x, y });
+            savePosition(x, y);
         }
-        setDragOffset({ x: 0, y: 0 });
-    }, [isDragging, savedPos]);
+    }, [savedPos]);
+
+    // Reencuadra el widget si la ventana cambia de tamaño (p. ej. rotar el
+    // celular) y la posición guardada quedó fuera de la pantalla nueva.
+    useEffect(() => {
+        const handleResize = () => {
+            const wrapper = wrapperRef.current;
+            if (!wrapper || !savedPos) return;
+            const rect = wrapper.getBoundingClientRect();
+            const natural: NaturalRect = {
+                left: rect.left - savedPos.x,
+                top: rect.top - savedPos.y,
+                width: rect.width,
+                height: rect.height,
+            };
+            const { x, y } = clampToViewport(savedPos.x, savedPos.y, natural);
+            if (x !== savedPos.x || y !== savedPos.y) {
+                setSavedPos({ x, y });
+                savePosition(x, y);
+            }
+        };
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, [savedPos]);
 
     const handleToggle = useCallback(() => {
         if (didDrag.current) return;
         if (isMinimized) restore();
         else toggle();
     }, [toggle, restore, isMinimized]);
+
+    if (pathname === '/login') return null;
 
     return (
         <>
@@ -114,12 +170,13 @@ export default function ChatBotWidget() {
             />
 
             <div
+                ref={wrapperRef}
                 className={`fixed bottom-16 right-4 sm:bottom-20 sm:right-6 z-[100] ${
                     isOpen && !isMinimized ? 'opacity-0 pointer-events-none scale-90' : 'opacity-100 scale-100'
                 }`}
                 style={{
-                    transform: `translate(${currentPos.x}px, ${currentPos.y}px)`,
-                    transition: isDragging ? 'none' : 'opacity 300ms, transform 300ms',
+                    transform: `translate(${savedPos?.x ?? 0}px, ${savedPos?.y ?? 0}px)`,
+                    transition: 'opacity 300ms, transform 300ms',
                     touchAction: 'none',
                 }}
             >

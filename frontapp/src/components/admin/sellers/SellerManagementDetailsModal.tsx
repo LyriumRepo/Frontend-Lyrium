@@ -100,21 +100,21 @@ export default function SellerManagementDetailsModal({ isOpen, onClose, contract
                 />
 
                 <div className="relative bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-[2.5rem] w-full max-w-5xl shadow-[0_0_50px_rgba(16,185,129,0.1)] overflow-hidden font-industrial animate-scaleUp flex flex-col max-h-[90vh]">
-                    <div className="flex items-center justify-between p-4 sm:p-8 border-b border-[var(--border-subtle)] bg-[var(--bg-muted)]">
+                    <div className="flex items-center justify-between p-4 sm:p-8 bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--verde-500)]">
                         <div className="flex items-center gap-3">
-                            <div className="p-2.5 bg-[var(--color-success)]/10 text-[var(--color-success)] rounded-2xl border border-[var(--color-success)]/20">
+                            <div className="p-2.5 bg-white/20 backdrop-blur-md text-white rounded-2xl border border-white/30">
                                 <Sparkles className="w-5 h-5" />
                             </div>
                             <div>
-                                <h2 className="text-2xl font-black text-[var(--text-primary)] tracking-tighter uppercase">
+                                <h2 className="text-2xl font-black text-white tracking-tighter uppercase">
                                     Gestión Estratégica de Vendedores
                                 </h2>
-                                <p className="text-[10px] text-[var(--text-secondary)] uppercase tracking-widest font-black mt-0.5">
+                                <p className="text-[10px] text-white/70 uppercase tracking-widest font-black mt-0.5">
                                     Asignación y Alta Operativa de Cuentas
                                 </p>
                             </div>
                         </div>
-                        <button onClick={handleClose} className="p-2 text-[var(--text-muted)] hover:text-[var(--icons-green)] hover:bg-[var(--icons-green)]/5 rounded-xl transition-all">
+                        <button onClick={handleClose} className="p-2 text-white/70 hover:text-white hover:bg-white/20 rounded-xl transition-all">
                             <X className="w-6 h-6" />
                         </button>
                     </div>

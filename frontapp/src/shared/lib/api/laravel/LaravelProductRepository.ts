@@ -278,4 +278,14 @@ export class LaravelProductRepository implements IProductRepository {
         const data = await response.json();
         return { url: data.data?.url || '' };
     }
+
+    async getSellerBranchStock(): Promise<Record<string, number>> {
+        const res = await this.request<any>('/seller/products/branch-stock');
+        const raw = res.data ?? res ?? {};
+        const result: Record<string, number> = {};
+        for (const [key, val] of Object.entries(raw)) {
+            result[String(key)] = Number(val) || 0;
+        }
+        return result;
+    }
 }

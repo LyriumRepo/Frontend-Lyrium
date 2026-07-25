@@ -82,47 +82,47 @@ export function BlogDashboardClient() {
             {/* KPI Cards */}
             <div className="grid grid-cols-4 lg:grid-cols-7 gap-4">
                 {[
-                    { label: 'Artículos', value: kpi.articles, icon: FileText, color: 'text-teal-500' },
-                    { label: 'Podcasts', value: kpi.podcasts, icon: Headphones, color: 'text-cyan-500' },
-                    { label: 'Videos', value: kpi.videos, icon: Video, color: 'text-emerald-500' },
-                    { label: 'Shorts', value: kpi.shorts, icon: Clapperboard, color: 'text-teal-400' },
-                    { label: 'Vistas', value: kpi.total_views, icon: Eye, color: 'text-cyan-600' },
-                    { label: 'Foro Temas', value: kpi.forum_topics, icon: MessageSquare, color: 'text-emerald-600' },
-                    { label: 'Foro Resp.', value: kpi.forum_replies, icon: MessageSquare, color: 'text-teal-600' },
+                    { label: 'Artículos', value: kpi.articles, icon: FileText, color: 'turquesa' },
+                    { label: 'Podcasts', value: kpi.podcasts, icon: Headphones, color: 'turquesaClaro' },
+                    { label: 'Videos', value: kpi.videos, icon: Video, color: 'verde' },
+                    { label: 'Shorts', value: kpi.shorts, icon: Clapperboard, color: 'turquesa' },
+                    { label: 'Vistas', value: kpi.total_views, icon: Eye, color: 'turquesaClaro' },
+                    { label: 'Foro Temas', value: kpi.forum_topics, icon: MessageSquare, color: 'lima' },
+                    { label: 'Foro Resp.', value: kpi.forum_replies, icon: MessageSquare, color: 'turquesa' },
                 ].map(stat => (
-                    <div key={stat.label} className="bg-white dark:bg-[var(--bg-secondary)] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-4 text-center">
-                        <stat.icon className={`w-5 h-5 mx-auto mb-2 ${stat.color}`} />
-                        <div className="text-2xl font-black text-gray-800 dark:text-gray-200">{stat.value}</div>
-                        <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mt-1">{stat.label}</div>
+                    <div key={stat.label} className="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-subtle)] shadow-sm p-4 text-center">
+                        <stat.icon className={`w-5 h-5 mx-auto mb-2 ${stat.color === 'verde' || stat.color === 'lima' ? 'text-[var(--color-success)]' : 'text-[var(--icons-green)]'}`} />
+                        <div className="text-2xl font-black text-[var(--text-primary)]">{stat.value}</div>
+                        <div className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mt-1">{stat.label}</div>
                     </div>
                 ))}
             </div>
 
             {/* Recent Publications */}
-            <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
-                <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
-                    <span className="text-sm font-bold text-gray-700 dark:text-gray-300">Últimas Publicaciones</span>
-                    <span className="text-xs text-gray-400">{recent.length} items</span>
+            <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-subtle)] shadow-sm overflow-hidden">
+                <div className="px-5 py-4 border-b border-[var(--border-subtle)] flex items-center justify-between">
+                    <span className="text-sm font-bold text-[var(--text-primary)]">Últimas Publicaciones</span>
+                    <span className="text-xs text-[var(--text-muted)]">{recent.length} items</span>
                 </div>
                 {recent.length === 0 ? (
-                    <div className="p-10 text-center text-gray-400 text-sm">Aún no hay publicaciones</div>
+                    <div className="p-10 text-center text-[var(--text-muted)] text-sm">Aún no hay publicaciones</div>
                 ) : (
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm">
                             <thead>
                                 <tr className="border-b border-gray-50 dark:border-gray-800/50 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider">
-                                    <th className="px-5 py-3">Tipo</th>
-                                    <th className="px-5 py-3">Título</th>
-                                    <th className="px-5 py-3">Estado</th>
-                                    <th className="px-5 py-3">Fecha</th>
-                                    <th className="px-5 py-3">Vistas</th>
+                                    <th className="px-5 py-3 whitespace-nowrap">Tipo</th>
+                                    <th className="px-5 py-3 whitespace-nowrap">Título</th>
+                                    <th className="px-5 py-3 whitespace-nowrap">Estado</th>
+                                    <th className="px-5 py-3 whitespace-nowrap">Fecha</th>
+                                    <th className="px-5 py-3 whitespace-nowrap">Vistas</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {recent.map((item, i) => (
-                                    <tr key={`${item.type}-${item.id}`} className="border-b border-gray-50 dark:border-gray-800/50 hover:bg-gray-50 dark:hover:bg-gray-800/30 transition">
+                                    <tr key={`${item.type}-${item.id}`} className="border-b border-[var(--border-subtle)] hover:bg-[var(--bg-secondary)]/30 transition">
                                         <td className="px-5 py-3">{typeIcon(item.type)}</td>
-                                        <td className="px-5 py-3 text-gray-700 dark:text-gray-300 font-semibold max-w-xs truncate">{item.title}</td>
+                                        <td className="px-5 py-3 text-gray-700 dark:text-gray-300 font-semibold whitespace-nowrap">{item.title}</td>
                                         <td className="px-5 py-3">{statusBadge(item.status)}</td>
                                         <td className="px-5 py-3 text-gray-400 text-xs">{new Date(item.published_at ?? item.created_at).toLocaleDateString('es-PE')}</td>
                                         <td className="px-5 py-3 text-gray-500">{item.views}</td>

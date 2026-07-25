@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Icon from '@/components/ui/Icon';
 import BaseStatusBadge, { VOUCHER_STATUS_MAPPINGS } from '@/components/ui/BaseStatusBadge';
 import { formatCurrency } from '@/shared/lib/utils/formatters';
+import Pagination from '@/components/ui/Pagination';
 import type { AdminInvoiceRow } from '../hooks/useAdminInvoices';
 
 interface Props {
@@ -22,9 +23,124 @@ function formatCommission(_rate: number | null, amount: number | null): string {
     return `S/ ${amount.toFixed(2)}`;
 }
 
+// ─── Mobile accordion card ────────────────────────────────────────────────────
+
+interface MobileCardProps {
+    invoice: AdminInvoiceRow;
+    onViewDetail: (invoice: AdminInvoiceRow) => void;
+}
+
+function MobileInvoiceCard({ invoice: inv, onViewDetail }: MobileCardProps) {
+    const [expanded, setExpanded] = useState(false);
+    const type = typeConfig[inv.type] ?? typeConfig.FACTURA;
+    const storeName = inv.stores[0]?.name ?? '—';
+
+    return (
+        <div className={`rounded-2xl border bg-[var(--bg-card)] overflow-hidden transition-colors ${
+            expanded ? 'border-sky-400/40' : 'border-[var(--border-subtle)]'
+        }`}>
+            <button
+                onClick={() => setExpanded(s => !s)}
+                className="w-full flex items-center gap-3 px-4 py-3.5 text-left active:bg-[var(--bg-secondary)]/60 transition-colors"
+            >
+                <div className={`w-9 h-9 ${type.bg} rounded-xl flex items-center justify-center ${type.text} flex-shrink-0 transition-transform ${expanded ? 'scale-110' : ''}`}>
+                    <Icon name={type.icon} className="w-4 h-4" />
+                </div>
+
+                <div className="flex-1 min-w-0">
+                    <p className="text-sm font-black text-[var(--text-primary)] font-mono tracking-tight leading-tight">
+                        {inv.series}-{inv.number}
+                    </p>
+                    <span className="text-[9px] font-black text-[var(--text-secondary)] uppercase bg-[var(--bg-secondary)] px-1.5 py-0.5 rounded-md inline-block mt-0.5">
+                        {inv.type}
+                    </span>
+                </div>
+
+                <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                    <BaseStatusBadge
+                        status={inv.sunat_status}
+                        mappings={VOUCHER_STATUS_MAPPINGS}
+                        variant="large"
+                        customClass="gap-1.5 rounded-xl font-black text-[10px]"
+                    />
+                    <span className="text-sm font-black text-[var(--text-primary)]">
+                        {formatCurrency(inv.store_amount ?? inv.order_total)}
+                    </span>
+                </div>
+
+                <Icon
+                    name={expanded ? 'ChevronUp' : 'ChevronDown'}
+                    className="w-4 h-4 flex-shrink-0 text-[var(--text-secondary)]"
+                />
+            </button>
+
+            {expanded && (
+                <div className="border-t border-[var(--border-subtle)] px-4 py-3 space-y-2.5">
+                    <div className="flex items-start justify-between gap-3">
+                        <span className="text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)] pt-0.5 flex-shrink-0">Tienda</span>
+                        <div className="text-right">
+                            <p className="text-xs font-bold text-[var(--text-primary)] leading-tight">{storeName}</p>
+                            <p className="text-[10px] font-black text-[var(--text-secondary)]">{inv.seller_name || '—'}</p>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                        <div>
+                            <p className="text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)] mb-1">Pedido</p>
+                            <span className="text-[10px] font-black text-sky-600 bg-sky-50 px-2 py-0.5 rounded-lg border border-sky-100 inline-block">
+                                {inv.order_id}
+                            </span>
+                        </div>
+                        <div>
+                            <p className="text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)] mb-1">Emisión</p>
+                            <p className="text-[10px] font-bold text-[var(--text-secondary)]">
+                                {new Date(inv.emission_date).toLocaleDateString('es-PE')}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                        <span className="text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)]">Monto</span>
+                        <span className="text-sm font-black text-[var(--text-primary)]">
+                            {formatCurrency(inv.store_amount ?? inv.order_total)}
+                        </span>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                        <span className="text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)]">Comisión</span>
+                        <span className="text-sm font-bold text-sky-500">
+                            {formatCommission(inv.commission_rate, inv.commission_amount)}
+                        </span>
+                    </div>
+
+                    <div className="pt-1">
+                        <button
+                            onClick={() => onViewDetail(inv)}
+                            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-[var(--border-subtle)] text-[11px] font-black text-[var(--text-secondary)] hover:border-emerald-200 hover:text-emerald-600 hover:bg-emerald-50/30 transition-colors"
+                        >
+                            <Icon name="Eye" className="w-3.5 h-3.5" />
+                            Ver comprobante
+                        </button>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
+// ─── AdminInvoiceTable ───────────────────────────────────────────────────────
+
+const PAGE_SIZE = 10;
+
 export default function AdminInvoiceTable({ invoices, onViewDetail }: Props) {
+    const [page, setPage] = useState(1);
     const [tooltipVisible, setTooltipVisible] = useState(false);
     const iconRef = useRef<HTMLSpanElement>(null);
+
+    useEffect(() => { setPage(1); }, [invoices.length]);
+
+    const totalPages = Math.ceil(invoices.length / PAGE_SIZE);
+    const pageInvoices = invoices.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
     const iconRect = iconRef.current?.getBoundingClientRect();
     const tooltipStyle: React.CSSProperties = tooltipVisible && iconRect ? {
@@ -35,133 +151,107 @@ export default function AdminInvoiceTable({ invoices, onViewDetail }: Props) {
         zIndex: 9999,
     } : { display: 'none' };
 
-    const emptyState = (
-        <div className="flex flex-col items-center gap-4 text-[var(--text-secondary)] py-20">
-            <Icon name="FileX" className="w-12 h-12 opacity-30" />
-            <div className="font-black uppercase text-xs tracking-widest">
-                No se encontraron comprobantes
+    if (invoices.length === 0) {
+        return (
+            <div className="w-full py-16 sm:py-24 flex flex-col items-center justify-center text-center px-6 bg-[var(--bg-card)] rounded-[2rem] sm:rounded-[3rem] border border-[var(--border-subtle)] shadow-sm">
+                <div className="relative inline-block">
+                    <div className="w-20 h-20 sm:w-24 sm:h-24 bg-[var(--bg-muted)] rounded-[2rem] sm:rounded-[2.5rem] flex items-center justify-center shadow-inner border border-[var(--border-subtle)] text-[var(--text-secondary)]">
+                        <Icon name="FileX" className="w-10 h-10 sm:w-12 sm:h-12 stroke-[1.5px]" />
+                    </div>
+                </div>
+                <div className="space-y-3 mt-6 sm:mt-8">
+                    <h3 className="text-xl sm:text-2xl font-black text-[var(--text-primary)] tracking-tighter">
+                        No se encontraron comprobantes
+                    </h3>
+                    <p className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest leading-relaxed">
+                        No hay registros que coincidan con los filtros aplicados actualmente.
+                    </p>
+                </div>
             </div>
-        </div>
-    );
+        );
+    }
 
     return (
         <>
-        <div className="glass-card overflow-hidden animate-fadeIn">
-            {/* ── Vista mobile: cards ── */}
-            <div className="sm:hidden divide-y divide-[var(--border-subtle)]">
-                {invoices.length === 0 ? emptyState : invoices.map((inv) => {
-                    const type = typeConfig[inv.type] ?? typeConfig.FACTURA;
-                    const storeName = inv.stores[0]?.name ?? '—';
-                    return (
-                        <div key={inv.id} className="p-4 flex items-start gap-3">
-                            <div className={`w-10 h-10 ${type.bg} rounded-2xl flex items-center justify-center ${type.text} shrink-0 mt-0.5`}>
-                                <Icon name={type.icon} className="w-4 h-4" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <div className="flex items-center justify-between gap-2">
-                                    <p className="text-sm font-black text-[var(--text-primary)] truncate">{inv.seller_name || '—'}</p>
-                                    <BaseStatusBadge
-                                        status={inv.sunat_status}
-                                        mappings={VOUCHER_STATUS_MAPPINGS}
-                                        variant="default"
-                                        customClass="shrink-0"
-                                    />
-                                </div>
-                                <p className="text-[11px] text-[var(--text-secondary)] truncate mt-0.5">{storeName}</p>
-                                <div className="flex items-center gap-3 mt-1.5 flex-wrap">
-                                    <span className={`text-[10px] font-black uppercase px-1.5 py-0.5 rounded-md ${type.bg} ${type.text}`}>{inv.type}</span>
-                                    <span className="text-xs font-mono text-[var(--text-secondary)]">{inv.series}-{inv.number}</span>
-                                    <span className="text-xs font-black text-[var(--text-primary)]">{formatCurrency(inv.store_amount ?? inv.order_total)}</span>
-                                    <span className="text-[10px] text-[var(--color-warning)] font-bold">{formatCommission(inv.commission_rate, inv.commission_amount)}</span>
-                                </div>
-                                <div className="flex items-center justify-between mt-2">
-                                    <span className="text-[10px] text-[var(--text-secondary)]">{new Date(inv.emission_date).toLocaleDateString('es-PE')}</span>
-                                    <button
-                                        onClick={() => onViewDetail(inv)}
-                                        className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--icons-green)] text-[10px] font-black transition-colors border border-[var(--border-subtle)]"
-                                    >
-                                        <Icon name="Eye" className="w-3.5 h-3.5" />
-                                        Ver
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    );
-                })}
+            {/* ══ MÓVIL: accordion cards (sm:hidden) ════════════════════════ */}
+            <div className="sm:hidden space-y-2 animate-fadeIn">
+                {pageInvoices.map((inv) => (
+                    <MobileInvoiceCard
+                        key={inv.id}
+                        invoice={inv}
+                        onViewDetail={onViewDetail}
+                    />
+                ))}
             </div>
 
-            {/* ── Vista desktop: tabla ── */}
-            <div className="hidden sm:block overflow-x-auto no-scrollbar">
-                <table className="w-full text-left">
-                    <thead>
-                        <tr className="bg-[var(--bg-secondary)]/50 border-b border-[var(--border-subtle)] text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">
-                            <th className="px-6 py-5">Vendedor</th>
-                            <th className="px-6 py-5">Comprobante</th>
-                            <th className="px-6 py-5">Serie-Código</th>
-                            <th className="px-6 py-5">
-                                <span className="flex items-center gap-1.5">
-                                    Monto
-                                    <span
-                                        ref={iconRef}
-                                        onMouseEnter={() => setTooltipVisible(true)}
-                                        onMouseLeave={() => setTooltipVisible(false)}
-                                        className="cursor-help"
-                                    >
-                                        <Icon name="Info" className="w-3 h-3 text-[var(--text-secondary)] opacity-60" />
+            {/* ══ DESKTOP: tabla completa (hidden sm:block) ════════════════ */}
+            <div className="hidden sm:block rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] overflow-visible animate-fadeIn">
+                <div className="overflow-x-auto no-scrollbar">
+                    <table className="w-full border-separate border-spacing-0">
+                        <thead>
+                            <tr className="border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)]">
+                                <th className="px-4 py-2.5 text-left text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)] whitespace-nowrap rounded-tl-2xl">Vendedor</th>
+                                <th className="px-4 py-2.5 text-left text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)] whitespace-nowrap">Comprobante</th>
+                                <th className="px-4 py-2.5 text-left text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)] whitespace-nowrap">Serie-Código</th>
+                                <th className="px-4 py-2.5 text-left text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)] whitespace-nowrap">
+                                    <span className="flex items-center gap-1.5">
+                                        Monto
+                                        <span
+                                            ref={iconRef}
+                                            onMouseEnter={() => setTooltipVisible(true)}
+                                            onMouseLeave={() => setTooltipVisible(false)}
+                                            className="cursor-help"
+                                        >
+                                            <Icon name="Info" className="w-3 h-3 text-[var(--text-secondary)] opacity-60" />
+                                        </span>
                                     </span>
-                                </span>
-                            </th>
-                            <th className="hidden md:table-cell px-6 py-5">Comisión</th>
-                            <th className="hidden md:table-cell px-6 py-5">Fecha</th>
-                            <th className="px-6 py-5 text-center">Estado</th>
-                            <th className="px-6 py-5 text-right">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-[var(--border-subtle)] text-[var(--text-primary)]">
-                        {invoices.length === 0 ? (
-                            <tr>
-                                <td colSpan={8} className="px-6">
-                                    {emptyState}
-                                </td>
+                                </th>
+                                <th className="hidden md:table-cell px-4 py-2.5 text-left text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)] whitespace-nowrap">Comisión</th>
+                                <th className="hidden md:table-cell px-4 py-2.5 text-left text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)] whitespace-nowrap">Fecha</th>
+                                <th className="px-4 py-2.5 text-center text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)] whitespace-nowrap">Estado</th>
+                                <th className="px-4 py-2.5 text-right text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)] whitespace-nowrap rounded-tr-2xl">Acciones</th>
                             </tr>
-                        ) : (
-                            invoices.map((inv) => {
+                        </thead>
+                        <tbody>
+                            {pageInvoices.map((inv) => {
                                 const type = typeConfig[inv.type] ?? typeConfig.FACTURA;
                                 const storeName = inv.stores[0]?.name ?? '—';
                                 return (
-                                    <tr key={inv.id} className="hover:bg-[var(--bg-secondary)]/50 transition-colors group">
-                                        <td className="px-6 py-4">
-                                            <p className="text-sm font-bold text-[var(--text-primary)] truncate max-w-[160px]">{inv.seller_name || '—'}</p>
-                                            <p className="text-[10px] text-[var(--text-secondary)] truncate max-w-[160px]">{storeName}</p>
+                                    <tr key={inv.id} className="hover:bg-[var(--bg-secondary)]/50 transition-colors group border-b border-[var(--border-subtle)] last:border-b-0">
+                                        <td className="px-4 py-3 whitespace-nowrap">
+                                            <p className="text-sm font-bold text-[var(--text-primary)]">{inv.seller_name || '—'}</p>
+                                            <p className="text-[10px] text-[var(--text-secondary)] whitespace-nowrap">{storeName}</p>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="px-4 py-3 whitespace-nowrap">
                                             <div className="flex items-center gap-2">
                                                 <div className={`w-9 h-9 ${type.bg} rounded-xl flex items-center justify-center ${type.text} group-hover:scale-110 transition-transform shrink-0`}>
                                                     <Icon name={type.icon} className="w-4 h-4" />
                                                 </div>
                                                 <div>
                                                     <span className={`text-[10px] font-black uppercase px-1.5 py-0.5 rounded-md ${type.bg} ${type.text}`}>{inv.type}</span>
-                                                    <p className="text-xs text-[var(--text-secondary)] truncate max-w-[130px] mt-0.5">{storeName}</p>
+                                                    <p className="text-xs text-[var(--text-secondary)] mt-0.5">{storeName}</p>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4">
-                                            <span className="text-sm font-bold text-[var(--text-primary)] font-mono tracking-tight">{inv.series}-{inv.number}</span>
+                                        <td className="px-4 py-3 whitespace-nowrap">
+                                            <span className="text-sm font-black text-[var(--text-primary)] font-mono tracking-tight">{inv.series}-{inv.number}</span>
                                         </td>
-                                        <td className="px-6 py-4">
-                                            <p className="text-sm font-bold text-[var(--text-primary)]">{formatCurrency(inv.store_amount ?? inv.order_total)}</p>
+                                        <td className="px-4 py-3 whitespace-nowrap">
+                                            <p className="text-sm font-black text-[var(--text-primary)]">
+                                                {formatCurrency(inv.store_amount ?? inv.order_total)}
+                                            </p>
                                         </td>
-                                        <td className="hidden md:table-cell px-6 py-4">
-                                            <p className="text-sm font-bold text-[var(--color-warning)]">
+                                        <td className="hidden md:table-cell px-4 py-3 whitespace-nowrap">
+                                            <p className="text-sm font-bold text-sky-500">
                                                 {formatCommission(inv.commission_rate, inv.commission_amount)}
                                             </p>
                                         </td>
-                                        <td className="hidden md:table-cell px-6 py-4">
+                                        <td className="hidden md:table-cell px-4 py-3 whitespace-nowrap">
                                             <p className="text-xs font-bold text-[var(--text-secondary)]">
                                                 {new Date(inv.emission_date).toLocaleDateString('es-PE')}
                                             </p>
                                         </td>
-                                        <td className="px-6 py-4 text-center">
+                                        <td className="px-4 py-3 text-center whitespace-nowrap">
                                             <BaseStatusBadge
                                                 status={inv.sunat_status}
                                                 mappings={VOUCHER_STATUS_MAPPINGS}
@@ -169,32 +259,34 @@ export default function AdminInvoiceTable({ invoices, onViewDetail }: Props) {
                                                 customClass="gap-2 rounded-xl font-black"
                                             />
                                         </td>
-                                        <td className="px-6 py-4 text-right">
+                                        <td className="px-4 py-3 text-right whitespace-nowrap">
                                             <button
                                                 onClick={() => onViewDetail(inv)}
-                                                className="w-10 h-10 bg-[var(--bg-card)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--icons-green)] hover:border-[var(--border-focus)] rounded-xl transition-all shadow-sm active:scale-90 flex items-center justify-center ml-auto"
+                                                className="w-10 h-10 bg-[var(--bg-card)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-emerald-600 hover:border-emerald-200 rounded-xl transition-all shadow-sm active:scale-90 flex items-center justify-center m-auto mr-0"
                                             >
                                                 <Icon name="Eye" className="w-5 h-5" />
                                             </button>
                                         </td>
                                     </tr>
                                 );
-                            })
-                        )}
-                    </tbody>
-                </table>
+                            })}
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        </div>
 
-        <div style={tooltipStyle} className="w-64 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl p-3 shadow-2xl pointer-events-none">
-            <p className="text-[11px] font-black text-[var(--text-primary)] mb-1">¿Qué es el Monto?</p>
-            <p className="text-[10px] text-[var(--text-secondary)] leading-relaxed">
-                Subtotal de <span className="text-[var(--color-success)] font-bold">productos/servicios con IGV</span>, sin incluir el costo de envío.
-            </p>
-            <p className="text-[10px] text-[var(--text-secondary)] leading-relaxed mt-1.5 pt-1.5 border-t border-[var(--border-subtle)]">
-                El comprobante electrónico emitido a SUNAT incluye también el envío en el total.
-            </p>
-        </div>
+            {/* Tooltip Monto */}
+            <div style={tooltipStyle} className="w-64 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl p-3 shadow-2xl pointer-events-none">
+                <p className="text-[11px] font-black text-[var(--text-primary)] mb-1">¿Qué es el Monto?</p>
+                <p className="text-[10px] text-[var(--text-secondary)] leading-relaxed">
+                    Subtotal de <span className="text-[var(--color-success)] font-bold">productos/servicios con IGV</span>, sin incluir el costo de envío.
+                </p>
+                <p className="text-[10px] text-[var(--text-secondary)] leading-relaxed mt-1.5 pt-1.5 border-t border-[var(--border-subtle)]">
+                    El comprobante electrónico emitido a SUNAT incluye también el envío en el total.
+                </p>
+            </div>
+
+            <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
         </>
     );
 }

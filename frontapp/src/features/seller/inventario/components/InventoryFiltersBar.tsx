@@ -68,12 +68,12 @@ export function InventoryFiltersBar({ filters, categories, onSearch, onStatus, o
             <div className={`grid grid-cols-1 sm:grid-cols-2 ${actions ? 'xl:grid-cols-3' : ''} gap-4`}>
                 <div className="space-y-2">
                     <label className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1">Estado de Stock</label>
-                    <div className="flex items-center gap-0.5 sm:gap-1 bg-[var(--bg-secondary)] rounded-xl p-1 border border-[var(--border-subtle)]">
+                    <div className="brand-scrollbar flex items-center gap-0.5 sm:gap-1 bg-[var(--bg-secondary)] rounded-xl p-1 border border-[var(--border-subtle)] overflow-x-auto pb-2">
                         {STATUS_OPTIONS.map(({ value, label }) => (
                             <button
                                 key={value}
                                 onClick={() => onStatus(value)}
-                                className={`px-2 sm:px-3 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${
+                                className={`shrink-0 px-2 sm:px-3 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${
                                     filters.status === value
                                         ? 'bg-[var(--bg-card)] text-[var(--text-primary)] shadow-sm border border-[var(--border-subtle)]'
                                         : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'

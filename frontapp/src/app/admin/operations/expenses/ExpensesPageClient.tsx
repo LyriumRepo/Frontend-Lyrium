@@ -9,6 +9,7 @@ import type {
   BatchStoreLine,
 } from '@/features/admin/operations/types/scan';
 import BaseModal from '@/components/ui/BaseModal';
+import Pagination from '@/components/ui/Pagination';
 import { BankStatementReviewModal } from '@/components/admin/operations/BankStatementReviewModal';
 
 // ─── Tabs ─────────────────────────────────────────────────────────────────────
@@ -514,7 +515,7 @@ export function ExpensesPageClient() {
               <thead>
                 <tr>
                   {['Tipo', 'Nro. comprobante', 'Proveedor / Trabajador', 'Concepto', 'Fecha', 'Monto', 'Estado', ''].map((h) => (
-                    <th key={h} className="text-left text-[11px] font-medium text-[var(--text-muted)] px-3 py-2.5 border-b border-[var(--border-subtle)]">
+                    <th key={h} className="text-left text-[11px] font-medium text-[var(--text-muted)] whitespace-nowrap px-3 py-2.5 border-b border-[var(--border-subtle)]">
                       {h}
                     </th>
                   ))}
@@ -530,14 +531,14 @@ export function ExpensesPageClient() {
                 )}
                 {expenses.map((e) => (
                   <tr key={e.id} className="border-b border-[var(--border-subtle)] hover:bg-[var(--bg-muted)] transition-colors">
-                    <td className="px-3 py-2.5"><TipoBadge tipo={e.voucher_type ?? ''} /></td>
-                    <td className="px-3 py-2.5 font-mono text-[12px] text-[var(--text-secondary)] max-w-[130px] truncate">{e.receipt_number ?? '—'}</td>
-                    <td className="px-3 py-2.5 text-[13px] text-[var(--text-primary)] max-w-[160px] truncate">{e.supplier?.name ?? '—'}</td>
-                    <td className="px-3 py-2.5 text-[13px] text-[var(--text-primary)] max-w-[150px] truncate">{e.concept}</td>
+                    <td className="px-3 py-2.5 whitespace-nowrap"><TipoBadge tipo={e.voucher_type ?? ''} /></td>
+                    <td className="px-3 py-2.5 font-mono text-[12px] text-[var(--text-secondary)] whitespace-nowrap">{e.receipt_number ?? '—'}</td>
+                    <td className="px-3 py-2.5 text-[13px] text-[var(--text-primary)]">{e.supplier?.name ?? '—'}</td>
+                    <td className="px-3 py-2.5 text-[13px] text-[var(--text-primary)] whitespace-nowrap">{e.concept}</td>
                     <td className="px-3 py-2.5 text-[13px] text-[var(--text-secondary)] whitespace-nowrap">{e.issued_at}</td>
                     <td className="px-3 py-2.5 text-[13px] font-medium text-[var(--text-primary)] whitespace-nowrap">S/ {e.amount.toLocaleString()}</td>
-                    <td className="px-3 py-2.5"><StatusBadge status={e.status} /></td>
-                    <td className="px-3 py-2.5">
+                    <td className="px-3 py-2.5 whitespace-nowrap"><StatusBadge status={e.status} /></td>
+                    <td className="px-3 py-2.5 whitespace-nowrap">
                       <div className="flex gap-1 justify-end">
                         {e.file_url && (
                           <IconBtn title="Ver PDF" onClick={() => e.file_url && window.open(e.file_url, '_blank')}><IconEye /></IconBtn>
@@ -557,33 +558,9 @@ export function ExpensesPageClient() {
                 ))}
               </tbody>
             </table>
-
-            {/* Paginación */}
-            {totalPages > 1 && (
-              <div className="flex items-center justify-between px-4 py-3 border-t border-[var(--border-subtle)]">
-                <span className="text-[12px] text-[var(--text-muted)]">
-                  Página {safePage} de {totalPages} — {pagination?.total ?? 0} comprobantes
-                </span>
-                <div className="flex gap-2">
-                  <button disabled={safePage <= 1} onClick={() => actions.goToPage(safePage - 1)} className="text-[13px] px-3 py-[5px] border border-[var(--border-subtle)] rounded-lg text-[var(--text-secondary)] hover:bg-[var(--bg-muted)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors">Anterior</button>
-                  <button disabled={!hasMore} onClick={() => actions.goToPage(safePage + 1)} className="text-[13px] px-3 py-[5px] border border-[var(--border-subtle)] rounded-lg text-[var(--text-secondary)] hover:bg-[var(--bg-muted)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors">Siguiente</button>
-                </div>
-              </div>
-            )}
           </div>
 
-          {/* Paginación móvil */}
-          {totalPages > 1 && (
-            <div className="flex sm:hidden items-center justify-between px-1 py-2">
-              <span className="text-[12px] text-[var(--text-muted)]">
-                Pág. {safePage}/{totalPages}
-              </span>
-              <div className="flex gap-2">
-                <button disabled={safePage <= 1} onClick={() => actions.goToPage(safePage - 1)} className="text-[13px] px-3 py-[5px] border border-[var(--border-subtle)] rounded-lg text-[var(--text-secondary)] hover:bg-[var(--bg-muted)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors">← Ant.</button>
-                <button disabled={!hasMore} onClick={() => actions.goToPage(safePage + 1)} className="text-[13px] px-3 py-[5px] border border-[var(--border-subtle)] rounded-lg text-[var(--text-secondary)] hover:bg-[var(--bg-muted)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors">Sig. →</button>
-              </div>
-            </div>
-          )}
+          <Pagination page={safePage} totalPages={totalPages} onPageChange={actions.goToPage} />
         </>
       )}
     </div>

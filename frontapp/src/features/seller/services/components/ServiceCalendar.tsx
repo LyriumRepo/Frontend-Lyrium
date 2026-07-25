@@ -382,13 +382,13 @@ export default function ServiceCalendar({
       <div className="bg-[var(--bg-card)] rounded-none sm:rounded-[2rem] w-full h-full sm:h-auto sm:max-w-6xl sm:max-h-[90vh] overflow-hidden flex flex-col border-0 sm:border border-[var(--border-subtle)] shadow-2xl">
 
         {/* Header */}
-        <div className="flex items-center justify-between gap-3 px-4 sm:px-5 md:px-8 py-3.5 sm:py-4 md:py-5 border-b border-[var(--border-subtle)] flex-shrink-0">
+        <div className="flex items-center justify-between gap-3 px-4 sm:px-5 md:px-8 py-3.5 sm:py-4 md:py-5 bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--verde-500)] flex-shrink-0">
           <div className="min-w-0">
-            <h2 className="text-sm sm:text-base md:text-lg font-black text-[var(--text-primary)] tracking-tight truncate">
+            <h2 className="text-sm sm:text-base md:text-lg font-black text-white tracking-tight truncate">
               {service.denominacion}
             </h2>
             <div className="mt-0.5 flex flex-wrap items-center gap-2">
-              <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-[0.28em]">
+              <p className="text-[10px] font-bold text-white/80 uppercase tracking-[0.28em]">
                 Calendario de Sesiones
               </p>
 
@@ -495,7 +495,7 @@ export default function ServiceCalendar({
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 sm:w-9 sm:h-9 flex-shrink-0 rounded-xl bg-[var(--bg-secondary)] flex items-center justify-center hover:bg-rose-500/10 hover:text-rose-500 transition-all"
+            className="w-8 h-8 sm:w-9 sm:h-9 flex-shrink-0 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/30 transition-all active:scale-90"
           >
             <Icon name="X" className="w-4 h-4" />
           </button>
@@ -832,27 +832,25 @@ export default function ServiceCalendar({
         <div className="fixed inset-0 z-[100000] flex items-center justify-center bg-black/70 backdrop-blur-sm p-3 sm:p-4">
           <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-[1.5rem] sm:rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--bg-card)] shadow-2xl">
 
-            <div className={`flex items-center justify-between px-5 py-4 border-b border-[var(--border-subtle)] ${
-              detailApptIsPast ? 'bg-emerald-500/5' : ''
-            }`}>
+            <div className="flex items-center justify-between px-5 py-4 bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--verde-500)] rounded-t-[1.5rem] sm:rounded-t-[2rem]">
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="text-base font-black text-[var(--text-primary)] uppercase tracking-tight">
+                  <h3 className="text-base font-black text-white uppercase tracking-tight">
                     Detalle de sesión
                   </h3>
                   {detailApptIsPast && (
-                    <span className="text-[8px] font-black text-[#69BEEB] dark:text-[#66D6A8] bg-[#69BEEB]/10 dark:bg-[#66D6A8]/10 border border-[#69BEEB]/20 dark:border-[#66D6A8]/20 px-2 py-0.5 rounded-md uppercase tracking-widest">
+                    <span className="text-[8px] font-black text-white bg-white/20 backdrop-blur-sm border border-white/30 px-2 py-0.5 rounded-md uppercase tracking-widest">
                       Completada
                     </span>
                   )}
                 </div>
-                <p className="text-[9px] font-bold text-[var(--text-secondary)] uppercase tracking-widest mt-0.5">
+                <p className="text-[9px] font-bold text-white/80 uppercase tracking-widest mt-0.5">
                   {selectedAppointment.sesion.inicio} – {selectedAppointment.sesion.fin}
                 </p>
               </div>
               <button
                 onClick={() => { setSelectedAppointment(null); setShowRescheduleWarning(false); }}
-                className="w-9 h-9 rounded-xl bg-[var(--bg-secondary)] flex items-center justify-center hover:bg-rose-500/10 hover:text-rose-500 transition-all"
+                className="w-9 h-9 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/30 transition-all active:scale-90"
               >
                 <Icon name="X" className="w-4 h-4" />
               </button>

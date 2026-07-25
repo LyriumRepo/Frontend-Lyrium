@@ -87,7 +87,7 @@ export default function DataTable<T extends Record<string, any>>({
               {columns.map((col) => (
                 <th
                   key={col.key}
-                  className={`px-6 py-5 text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest ${
+                  className={`px-6 py-5 text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest whitespace-nowrap ${
                     col.align === 'right'
                       ? 'text-right'
                       : col.align === 'center'
@@ -112,7 +112,7 @@ export default function DataTable<T extends Record<string, any>>({
                 {columns.map((col) => (
                   <td
                     key={col.key}
-                    className={`px-6 py-4 ${
+                    className={`px-6 py-4 whitespace-nowrap ${
                       col.align === 'right'
                         ? 'text-right'
                         : col.align === 'center'

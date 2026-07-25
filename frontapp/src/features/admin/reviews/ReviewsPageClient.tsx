@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import BaseButton from '@/components/ui/BaseButton';
+import Pagination from '@/components/ui/Pagination';
 import { BaseSkeleton } from '@/components/ui/BaseSkeleton';
 import {
   Star,
@@ -272,30 +273,7 @@ function TopProductsTab() {
       )}
 
       {/* Paginación */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between pt-2">
-          <p className="text-xs text-[var(--text-muted)]">{limited.length} productos</p>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page === 1}
-              className="p-1.5 rounded-lg border border-[var(--border-subtle)] disabled:opacity-40 hover:bg-[var(--bg-muted)] transition-colors"
-            >
-              <ChevronLeft className="w-4 h-4 text-[var(--text-secondary)]" />
-            </button>
-            <span className="text-xs font-bold text-[var(--text-secondary)]">
-              {page} / {totalPages}
-            </span>
-            <button
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              disabled={page === totalPages}
-              className="p-1.5 rounded-lg border border-[var(--border-subtle)] disabled:opacity-40 hover:bg-[var(--bg-muted)] transition-colors"
-            >
-              <ChevronRight className="w-4 h-4 text-[var(--text-secondary)]" />
-            </button>
-          </div>
-        </div>
-      )}
+      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
     </div>
   );
 }
@@ -528,30 +506,7 @@ function TopServicesTab() {
       )}
 
       {/* Paginación */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between pt-2">
-          <p className="text-xs text-[var(--text-muted)]">{limited.length} servicios</p>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page === 1}
-              className="p-1.5 rounded-lg border border-[var(--border-subtle)] disabled:opacity-40 hover:bg-[var(--bg-muted)] transition-colors"
-            >
-              <ChevronLeft className="w-4 h-4 text-[var(--text-secondary)]" />
-            </button>
-            <span className="text-xs font-bold text-[var(--text-secondary)]">
-              {page} / {totalPages}
-            </span>
-            <button
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              disabled={page === totalPages}
-              className="p-1.5 rounded-lg border border-[var(--border-subtle)] disabled:opacity-40 hover:bg-[var(--bg-muted)] transition-colors"
-            >
-              <ChevronRight className="w-4 h-4 text-[var(--text-secondary)]" />
-            </button>
-          </div>
-        </div>
-      )}
+      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
     </div>
   );
 }
@@ -956,27 +911,7 @@ function AllReviewsTab() {
       )}
 
       {/* Paginación */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-3 pt-2">
-          <button
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={page === 1}
-            className="p-2 rounded-xl border border-[var(--border-subtle)] disabled:opacity-40 hover:bg-[var(--bg-muted)] transition-colors"
-          >
-            <ChevronLeft className="w-4 h-4 text-[var(--text-secondary)]" />
-          </button>
-          <span className="text-sm font-bold text-[var(--text-secondary)]">
-            {page} / {totalPages}
-          </span>
-          <button
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            disabled={page === totalPages}
-            className="p-2 rounded-xl border border-[var(--border-subtle)] disabled:opacity-40 hover:bg-[var(--bg-muted)] transition-colors"
-          >
-            <ChevronRight className="w-4 h-4 text-[var(--text-secondary)]" />
-          </button>
-        </div>
-      )}
+      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
     </div>
   );
 }
@@ -1159,17 +1094,7 @@ function MedalsTab() {
       )}
 
       {/* Paginación */}
-      {meta.total_pages > 1 && (
-        <div className="flex items-center justify-center gap-3 pt-2">
-          <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1} className="p-2 rounded-xl border border-[var(--border-subtle)] disabled:opacity-40 hover:bg-[var(--bg-muted)] transition-colors text-[var(--text-muted)]">
-            <ChevronLeft className="w-4 h-4" />
-          </button>
-          <span className="text-sm font-bold text-[var(--text-secondary)]">{page} / {meta.total_pages}</span>
-          <button onClick={() => setPage((p) => Math.min(meta.total_pages, p + 1))} disabled={page === meta.total_pages} className="p-2 rounded-xl border border-[var(--border-subtle)] disabled:opacity-40 hover:bg-[var(--bg-muted)] transition-colors text-[var(--text-muted)]">
-            <ChevronRight className="w-4 h-4" />
-          </button>
-        </div>
-      )}
+      <Pagination page={page} totalPages={meta.total_pages} onPageChange={setPage} />
     </div>
   );
 }

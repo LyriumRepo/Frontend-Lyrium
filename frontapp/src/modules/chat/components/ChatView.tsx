@@ -155,6 +155,7 @@ export function ChatView({
   hasMoreMessages = false,
   showAdminControls = false,
   quickReplies = EMPTY_QUICK_REPLIES,
+  className,
 }: ChatViewProps) {
   const [showQuickReplies, setShowQuickReplies] = useState(false);
   const [showPriorityPopover, setShowPriorityPopover] = useState(false);
@@ -268,7 +269,7 @@ export function ChatView({
   };
 
   return (
-    <div className="relative flex flex-col flex-1 min-h-0 w-full overflow-hidden bg-[var(--bg-card)] overscroll-y-none">
+    <div className={`relative flex flex-col flex-1 min-h-0 w-full overflow-hidden bg-[var(--bg-card)] overscroll-y-none rounded-[2rem] lg:rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm ${className ?? ''}`}>
       {/* Header */}
       <div className="flex shrink-0 items-center gap-3 border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)]/90 px-3 py-3 backdrop-blur-sm sm:px-4">
         {onBack && (

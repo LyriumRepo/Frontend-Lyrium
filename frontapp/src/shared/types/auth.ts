@@ -24,6 +24,7 @@ export interface User {
     location?: UserLocation;
     admin_nombre?: string;
     admin_dni?: string;
+    created_at?: string;
 }
 
 export interface AuthState {

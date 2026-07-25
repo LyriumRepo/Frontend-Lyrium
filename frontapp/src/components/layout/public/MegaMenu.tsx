@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Icon from '@/components/ui/Icon';
 import { MenuItem, MegaCategoryData } from '@/data/menuData';
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from 'react-dom';
 
 interface MegaMenuProps {
     item: MenuItem;
@@ -69,6 +70,11 @@ export default function MegaMenu({
 }: MegaMenuProps) {
     const megaData = megaMenuData[activeCategory] || Object.values(megaMenuData)[0];
     const [expandedCols, setExpandedCols] = useState<Record<string, boolean>>({});
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     const circleColors = [
         'hover:text-[#B7E000]', // lima
@@ -95,13 +101,13 @@ export default function MegaMenu({
     };
     console.log(megaData.icons);
 
-    if (!item.children) return null;
+    if (!item.children || !isMounted) return null;
 
     const bgColor =
         item.label?.toLowerCase() === 'servicios'
             ? 'bg-[#78e69d]'
             : 'bg-[#bde90d]';
-    return (
+    return createPortal(
         <div
             className="fixed left-0 w-full bg-white dark:bg-[var(--bg-secondary)] shadow-2xl dark:shadow-none border-t border-gray-200 dark:border-[var(--border-subtle)] opacity-100 pointer-events-auto transition-all duration-150 z-[99999]"
             style={{ top: `${menuPosition.top}px`, bottom: 0 }}
@@ -237,6 +243,7 @@ export default function MegaMenu({
                     </div>
                 </section>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }

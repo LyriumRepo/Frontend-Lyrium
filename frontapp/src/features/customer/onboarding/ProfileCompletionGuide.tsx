@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 import { driver, type DriveStep } from 'driver.js';
 import 'driver.js/dist/driver.css';
 import './welcome-tour.css';
+import { POST_WELCOME_DELAY_MS, waitFor, waitForWelcomeToastGone } from './tourHelpers';
 
 interface MissingField {
   key: string;
@@ -15,26 +16,14 @@ interface ProfileCompletionGuideProps {
   missing: MissingField[];
 }
 
-function sessionKey(userId: number | string) {
-  return `lyrium_profile_reminder_shown_${userId}`;
+function storageKey(userId: number | string) {
+  return `lyrium_profile_reminder_seen_${userId}`;
 }
 
-function waitFor(condition: () => boolean, maxAttempts: number, onDone: (ok: boolean) => void) {
-  let attempts = 0;
-  const check = () => {
-    if (condition()) return onDone(true);
-    attempts += 1;
-    if (attempts >= maxAttempts) return onDone(false);
-    requestAnimationFrame(check);
-  };
-  check();
-}
-
-// Recordatorio de perfil incompleto: se muestra una vez por sesión de
-// navegador (no una sola vez para siempre, como el WelcomeGuide) mientras
-// falten campos. Espera a que el WelcomeGuide (si está activo) termine y
-// da un respiro de 5–12s tras sus animaciones antes de aparecer, para no
-// saturar al usuario apenas entra.
+// Recordatorio de perfil incompleto: se muestra una vez por sesión (sessionStorage)
+// para que cada vez que el usuario inicie sesión le recuerde completar su perfil
+// si tiene campos faltantes. Espera a que el toast de bienvenida desaparezca,
+// luego a que el WelcomeGuide termine, y da 1.5s de respiro antes de aparecer.
 export default function ProfileCompletionGuide({ userId, missing }: ProfileCompletionGuideProps) {
   const missingRef = useRef(missing);
 
@@ -43,17 +32,18 @@ export default function ProfileCompletionGuide({ userId, missing }: ProfileCompl
   }, [missing]);
 
   useEffect(() => {
-    if (sessionStorage.getItem(sessionKey(userId))) return;
+    if (sessionStorage.getItem(storageKey(userId))) return;
 
     let cancelled = false;
     let delayTimer: ReturnType<typeof setTimeout> | null = null;
     let activeTour: ReturnType<typeof driver> | null = null;
 
-    const startAfterGuide = setTimeout(() => {
+    // Cadena estricta: toast desaparece → popover del WelcomeGuide desaparece → 1.5s → tour
+    waitForWelcomeToastGone(() => {
+      if (cancelled) return;
       waitFor(() => !document.querySelector('.driver-popover'), 900, (guideGone) => {
         if (cancelled || !guideGone) return;
 
-        const delay = 5000 + Math.round(Math.random() * 7000);
         delayTimer = setTimeout(() => {
           if (cancelled) return;
 
@@ -71,7 +61,7 @@ export default function ProfileCompletionGuide({ userId, missing }: ProfileCompl
 
           if (steps.length === 0) return;
 
-          sessionStorage.setItem(sessionKey(userId), '1');
+          sessionStorage.setItem(storageKey(userId), '1');
 
           const tour = driver({
             allowClose: true,
@@ -90,13 +80,12 @@ export default function ProfileCompletionGuide({ userId, missing }: ProfileCompl
           });
           activeTour = tour;
           tour.drive();
-        }, delay);
+        }, POST_WELCOME_DELAY_MS);
       });
-    }, 400);
+    });
 
     return () => {
       cancelled = true;
-      clearTimeout(startAfterGuide);
       if (delayTimer) clearTimeout(delayTimer);
       activeTour?.destroy();
     };

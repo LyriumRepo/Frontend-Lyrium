@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import BaseLoading from '@/components/ui/BaseLoading';
 import Icon from '@/components/ui/Icon';
+import Pagination from '@/components/ui/Pagination';
 import { BaseDatePicker } from '@/components/ui';
 import { invoiceApi, type PaymentConfirmation } from '@/shared/lib/api/invoiceRepository';
 import { downloadPdf, downloadPng, downloadJpg } from '@/shared/lib/api/boletaExport';
@@ -163,7 +164,7 @@ export function InvoicesPageClient() {
               <thead>
                 <tr className="bg-[var(--bg-secondary)]/50 border-b border-[var(--border-subtle)]">
                   {['N° Pedido', 'Fecha', 'Productos', 'Subtotal', 'Envío', 'Descuento', 'Total', 'Método', 'Acciones'].map((h) => (
-                    <th key={h} className="px-6 py-5 text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">
+                    <th key={h} className="px-6 py-5 text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest whitespace-nowrap">
                       {h}
                     </th>
                   ))}
@@ -174,14 +175,14 @@ export function InvoicesPageClient() {
                   const itemCount = conf.items?.length ?? 0;
                   return (
                     <tr key={conf.id} className="hover:bg-[var(--bg-secondary)]/30 transition-colors">
-                      <td className="px-6 py-4 text-sm font-black text-gray-800 dark:text-[var(--text-primary)]">{conf.orderNumber}</td>
-                      <td className="px-6 py-4 text-sm font-bold text-gray-700 dark:text-[var(--text-primary)]">{formatDate(conf.createdAt)}</td>
-                      <td className="px-6 py-4 text-sm font-bold text-gray-600 dark:text-[var(--text-secondary)]">{itemCount}</td>
-                      <td className="px-6 py-4 text-sm font-bold text-gray-700 dark:text-[var(--text-primary)]">{formatCurrency(conf.subtotal)}</td>
-                      <td className="px-6 py-4 text-sm font-bold text-gray-700 dark:text-[var(--text-primary)]">{formatCurrency(conf.shippingCost)}</td>
-                      <td className="px-6 py-4 text-sm font-bold text-gray-700 dark:text-[var(--text-primary)]">{formatCurrency(conf.discountAmount)}</td>
-                      <td className="px-6 py-4 text-sm font-black text-emerald-600 dark:text-emerald-400">{formatCurrency(conf.total)}</td>
-                      <td className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-wider">{conf.paymentMethod || '—'}</td>
+                      <td className="px-6 py-4 text-sm font-black text-gray-800 dark:text-[var(--text-primary)] whitespace-nowrap">{conf.orderNumber}</td>
+                      <td className="px-6 py-4 text-sm font-bold text-gray-700 dark:text-[var(--text-primary)] whitespace-nowrap">{formatDate(conf.createdAt)}</td>
+                      <td className="px-6 py-4 text-sm font-bold text-gray-600 dark:text-[var(--text-secondary)] whitespace-nowrap">{itemCount}</td>
+                      <td className="px-6 py-4 text-sm font-bold text-gray-700 dark:text-[var(--text-primary)] whitespace-nowrap">{formatCurrency(conf.subtotal)}</td>
+                      <td className="px-6 py-4 text-sm font-bold text-gray-700 dark:text-[var(--text-primary)] whitespace-nowrap">{formatCurrency(conf.shippingCost)}</td>
+                      <td className="px-6 py-4 text-sm font-bold text-gray-700 dark:text-[var(--text-primary)] whitespace-nowrap">{formatCurrency(conf.discountAmount)}</td>
+                      <td className="px-6 py-4 text-sm font-black text-emerald-600 dark:text-emerald-400 whitespace-nowrap">{formatCurrency(conf.total)}</td>
+                      <td className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-wider whitespace-nowrap">{conf.paymentMethod || '—'}</td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-1.5">
                           <button
@@ -264,25 +265,7 @@ export function InvoicesPageClient() {
         )}
 
         {confirmations.length > 0 && pagination.totalPages > 1 && (
-          <div className="flex justify-center gap-2 pt-8">
-            <button
-              onClick={() => loadConfirmations(pagination.page - 1)}
-              disabled={pagination.page <= 1}
-              className="px-4 py-2 rounded-xl bg-white dark:bg-[var(--bg-secondary)] border border-gray-200 dark:border-[var(--border-subtle)] text-xs font-bold disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-[var(--bg-card)]"
-            >
-              Anterior
-            </button>
-            <span className="px-4 py-2 text-xs font-bold text-gray-500 dark:text-[var(--text-muted)]">
-              Pág. {pagination.page} de {pagination.totalPages}
-            </span>
-            <button
-              onClick={() => loadConfirmations(pagination.page + 1)}
-              disabled={pagination.page >= pagination.totalPages}
-              className="px-4 py-2 rounded-xl bg-white dark:bg-[var(--bg-secondary)] border border-gray-200 dark:border-[var(--border-subtle)] text-xs font-bold disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-[var(--bg-card)]"
-            >
-              Siguiente
-            </button>
-          </div>
+          <Pagination page={pagination.page} totalPages={pagination.totalPages} onPageChange={loadConfirmations} totalItems={confirmations.length} itemLabel="confirmaciones" />
         )}
       </div>
     </div>

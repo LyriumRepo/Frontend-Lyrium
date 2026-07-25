@@ -1,8 +1,10 @@
 'use client';
+import { useState, useEffect } from 'react';
 import type { AdminRequest, PlansMap } from '@/features/seller/plans/types';
 import type { PaymentNotif } from '@/features/admin/planes/hooks/usePlanesAdmin';
 import { sanitizeHtml } from '@/shared/lib/sanitize';
 import BaseButton from '@/components/ui/BaseButton';
+import Pagination from '@/components/ui/Pagination';
 
 interface Props {
   requests: AdminRequest[]; plansData: PlansMap;
@@ -14,8 +16,15 @@ interface Props {
   rejectingId?: number | null;
 }
 
+const PAGE_SIZE = 10;
+
 export default function RequestsPanel({ requests, plansData, filter, onFilterChange, notifs, onDismissNotif, onApprove, onReject, approvingId, rejectingId }: Props) {
+  const [page, setPage] = useState(1);
   const filtered = filter === 'all' ? requests : requests.filter(r => r.status === filter);
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  const pageFiltered = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  useEffect(() => { setPage(1); }, [filter]);
 
   return (
     <>
@@ -24,7 +33,7 @@ export default function RequestsPanel({ requests, plansData, filter, onFilterCha
           <button key={f} className={`px-4 py-2.5 border-2 rounded-lg text-[13px] font-semibold cursor-pointer transition-all duration-300 flex items-center gap-2
             ${filter === f ? 'bg-gradient-to-r from-sky-500 to-sky-400 dark:from-emerald-700 dark:to-teal-600 text-white border-transparent shadow-lg shadow-sky-500/25 dark:shadow-emerald-900/25' : 'bg-[var(--bg-primary)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
             data-filter={f} onClick={() => onFilterChange(f)}>
-            {f !== 'all' && <span className={`w-2 h-2 rounded-full ${f === 'approved' ? 'bg-emerald-500' : f === 'pending' ? 'bg-amber-500' : 'bg-red-500'}`} />}
+            {f !== 'all' && <span className="w-2 h-2 rounded-full bg-[var(--brand-sky)] dark:bg-[var(--color-success)]" />}
             {f === 'all' ? 'Todas' : f === 'approved' ? 'Exitosos' : f === 'pending' ? 'Pendientes' : 'Fallidos'}
           </button>
         ))}
@@ -32,8 +41,8 @@ export default function RequestsPanel({ requests, plansData, filter, onFilterCha
 
       <div className="space-y-3 mb-6">
         {notifs.map(n => (
-          <div key={n.id} className={`flex items-start gap-3 p-4 bg-[var(--bg-card)] rounded-xl shadow-sm border-l-4 ${n.type === 'success' ? 'border-emerald-500' : 'border-red-500'}`}>
-            <span className={`flex-shrink-0 ${n.type === 'success' ? 'text-emerald-500' : 'text-red-500'}`}>
+          <div key={n.id} className={`flex items-start gap-3 p-4 bg-[var(--bg-card)] rounded-xl shadow-sm border-l-4 border-[var(--brand-sky)] dark:border-[var(--color-success)]`}>
+            <span className={`flex-shrink-0 text-[var(--brand-sky)] dark:text-[var(--color-success)]`}>
               {n.type === 'success'
                 ? <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                 : <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
@@ -55,12 +64,12 @@ export default function RequestsPanel({ requests, plansData, filter, onFilterCha
                 <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>
                 <p className="mt-4 text-[15px] text-[var(--text-placeholder)]">No hay solicitudes</p>
               </div>
-            : filtered.map((r, i) => {
+            : pageFiltered.map((r, i) => {
               const fromName  = plansData[r.fromPlan]?.name ?? r.fromPlan;
               const toName    = plansData[r.toPlan]?.name   ?? r.toPlan;
               const fromColor = plansData[r.fromPlan]?.cssColor ?? '#9ca3af';
               const toColor   = plansData[r.toPlan]?.cssColor   ?? '#9ca3af';
-              const statusClass = r.status === 'pending' ? 'bg-amber-100 text-amber-700' : r.status === 'approved' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700';
+              const statusClass = r.status === 'pending' ? 'bg-[var(--brand-sky)]/10 dark:bg-[var(--color-success)]/10 text-[var(--brand-sky)] dark:text-[var(--color-success)]' : r.status === 'approved' ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400' : 'bg-[var(--brand-sky)]/10 dark:bg-[var(--color-success)]/10 text-[var(--brand-sky)] dark:text-[var(--color-success)]';
               const statusText  = r.status === 'pending' ? 'PENDIENTE' : r.status === 'approved' ? 'EXITOSO' : 'FALLIDO';
               return (
                 <div key={r.id ?? i} className="bg-[var(--bg-card)] rounded-2xl p-5 border border-[var(--border-subtle)] shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 mx-4 my-4">
@@ -111,6 +120,8 @@ export default function RequestsPanel({ requests, plansData, filter, onFilterCha
           }
         </div>
       </div>
+
+      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
     </>
   );
 }

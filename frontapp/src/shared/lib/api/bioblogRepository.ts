@@ -201,6 +201,12 @@ export const forumApi = {
         update: (id: number, data: Partial<ForumTopic>) =>
             request<{ success: boolean; data: ForumTopic }>(`/forum/topics/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
         delete: (id: number) => request<{ success: boolean }>(`/forum/topics/${id}`, { method: 'DELETE' }),
+        submitForReview: (id: number) =>
+            request<{ success: boolean; message: string }>(`/forum/topics/${id}/submit-review`, { method: 'POST' }),
+        publish: (id: number) =>
+            request<{ success: boolean; message: string }>(`/forum/topics/${id}/publish`, { method: 'POST' }),
+        hide: (id: number) =>
+            request<{ success: boolean; message: string }>(`/forum/topics/${id}/hide`, { method: 'POST' }),
         replies: (topicId: number) =>
             request<PaginatedResponse<ForumPost>>(`/forum/topics/${topicId}/replies`),
         addReply: (topicId: number, data: { content: string; reply_to_id?: number }) =>
@@ -210,4 +216,37 @@ export const forumApi = {
         deleteReply: (topicId: number, postId: number) =>
             request<{ success: boolean }>(`/forum/topics/${topicId}/replies/${postId}`, { method: 'DELETE' }),
     },
+};
+
+// ─── Admin BioForo Types ───────────────────────────────────────────────────
+
+export interface AdminBioForoPendingItem {
+    id: number;
+    store_id: number;
+    content_type: string;
+    title: string;
+    content: string;
+    status: string;
+    image: string | null;
+    created_at: string;
+    updated_at: string;
+    store?: { id: number; name: string; slug: string; logo?: string };
+}
+
+export interface AdminBioForoStats {
+    pending_topics: number;
+    total_pending: number;
+}
+
+// ─── Admin BioForo API ──────────────────────────────────────────────────────
+
+export const adminBioForoApi = {
+    pending: () =>
+        request<{ success: boolean; data: AdminBioForoPendingItem[] }>('/admin/bioforo/pending'),
+    stats: () =>
+        request<{ success: boolean; data: AdminBioForoStats }>('/admin/bioforo/stats'),
+    approve: (id: number) =>
+        request<{ success: boolean; message: string }>(`/admin/bioforo/${id}/approve`, { method: 'POST' }),
+    reject: (id: number, note = '') =>
+        request<{ success: boolean; message: string }>(`/admin/bioforo/${id}/reject`, { method: 'POST', body: JSON.stringify({ note }) }),
 };

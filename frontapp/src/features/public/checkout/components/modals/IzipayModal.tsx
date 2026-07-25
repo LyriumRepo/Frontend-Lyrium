@@ -1,4 +1,6 @@
 'use client';
+import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { ShieldCheck, X } from 'lucide-react';
 import Image from 'next/image';
 import { useFocusTrap } from '@/shared/hooks/useFocusTrap';
@@ -11,10 +13,16 @@ interface Props {
 
 export default function IzipayModal({ isOpen, onClose, error }: Props) {
   const modalRef = useFocusTrap<HTMLDivElement>(isOpen, onClose);
+  const [mounted, setMounted] = useState(false);
 
-  if (!isOpen) return null;
+  useEffect(() => { setMounted(true); }, []);
 
-  return (
+  if (!isOpen || !mounted) return null;
+
+  const modalRoot = document.getElementById('modal-root');
+  if (!modalRoot) return null;
+
+  return createPortal(
     <div className="fixed inset-0 z-[30000] flex items-center justify-center p-4">
       <div
         className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in"
@@ -80,6 +88,7 @@ export default function IzipayModal({ isOpen, onClose, error }: Props) {
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    modalRoot,
   );
 }

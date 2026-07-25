@@ -11,6 +11,7 @@ import BaseEmptyState from '@/components/ui/BaseEmptyState';
 import BaseButton from '@/components/ui/BaseButton';
 import BaseLoading from '@/components/ui/BaseLoading';
 import Icon from '@/components/ui/Icon';
+import Pagination from '@/components/ui/Pagination';
 import { useToast } from '@/shared/lib/context/ToastContext';
 import { deleteProduct, updateProductPrice } from '@/shared/lib/actions/catalog';
 import { productRepository } from '@/shared/lib/api/factory';
@@ -419,8 +420,7 @@ export default function CatalogClient({ initialProducts }: CatalogClientProps) {
             if (!selectedProduct) {
                 setShowSuccessModal(true);
                 setProducts((prev) => [savedProduct as Product, ...prev]);
-                closeModal();
-                return;
+                return savedProduct as Product;
             }
 
             showToast('Producto actualizado correctamente', 'success');
@@ -429,9 +429,10 @@ export default function CatalogClient({ initialProducts }: CatalogClientProps) {
                 prev.map((p) => (p.id === selectedProduct.id ? savedProduct as Product : p)),
             );
 
-            closeModal();
+            return savedProduct as Product;
         } catch (err: any) {
             showToast(err.message || 'Error al procesar el producto', 'error');
+            return undefined;
         }
     };
 
@@ -561,7 +562,7 @@ export default function CatalogClient({ initialProducts }: CatalogClientProps) {
                                             (h, i, arr) => (
                                                 <th
                                                     key={h}
-                                                    className={`px-4 py-2.5 text-[9px] font-semibold uppercase tracking-widest text-[var(--text-secondary)]
+                                                    className={`px-4 py-2.5 text-[9px] font-semibold uppercase tracking-widest text-[var(--text-secondary)] whitespace-nowrap
                                                         ${h === 'Precio' ? 'text-center' : 'text-left'}
                                                         ${i === 0 ? 'rounded-tl-2xl' : ''}
                                                         ${i === arr.length - 1 ? 'rounded-tr-2xl' : ''}`}
@@ -587,68 +588,8 @@ export default function CatalogClient({ initialProducts }: CatalogClientProps) {
                                 </tbody>
                             </table>
 
-                        {totalPages > 1 && (
-                            <div className="flex items-center justify-between px-1 pt-1">
-                                <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest">
-                                    Página {safePage} de {totalPages} · {filteredProducts.length} producto{filteredProducts.length !== 1 ? 's' : ''}
-                                </p>
-                                <div className="flex items-center gap-1">
-                                    <button
-                                        onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                                        disabled={safePage === 1}
-                                        className="w-7 h-7 flex items-center justify-center rounded-lg border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                                    >
-                                        <Icon name="ChevronLeft" className="w-3.5 h-3.5" />
-                                    </button>
-                                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                                        <button
-                                            key={page}
-                                            onClick={() => setCurrentPage(page)}
-                                            className={`w-7 h-7 flex items-center justify-center rounded-lg text-[10px] font-black transition-colors
-                                                ${safePage === page
-                                                    ? 'bg-sky-500/20 dark:bg-[#8FC3A1]/20 text-sky-500 dark:text-[#8FC3A1] border border-sky-500/30 dark:border-[#8FC3A1]/30'
-                                                    : 'border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]'
-                                                }`}
-                                        >
-                                            {page}
-                                        </button>
-                                    ))}
-                                    <button
-                                        onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                                        disabled={safePage === totalPages}
-                                        className="w-7 h-7 flex items-center justify-center rounded-lg border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                                    >
-                                        <Icon name="ChevronRight" className="w-3.5 h-3.5" />
-                                    </button>
-                                </div>
-                            </div>
-                        )}
+                        <Pagination page={safePage} totalPages={totalPages} onPageChange={setCurrentPage} totalItems={filteredProducts.length} itemLabel="productos" />
                         </div>{/* /desktop table */}
-
-                        {/* Paginación móvil */}
-                        {totalPages > 1 && (
-                            <div className="sm:hidden flex items-center justify-between px-1">
-                                <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest">
-                                    {safePage} / {totalPages}
-                                </p>
-                                <div className="flex items-center gap-1">
-                                    <button
-                                        onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                                        disabled={safePage === 1}
-                                        className="w-8 h-8 flex items-center justify-center rounded-xl border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                                    >
-                                        <Icon name="ChevronLeft" className="w-4 h-4" />
-                                    </button>
-                                    <button
-                                        onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                                        disabled={safePage === totalPages}
-                                        className="w-8 h-8 flex items-center justify-center rounded-xl border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                                    >
-                                        <Icon name="ChevronRight" className="w-4 h-4" />
-                                    </button>
-                                </div>
-                            </div>
-                        )}
                     </>
                 ) : (
                     <BaseEmptyState

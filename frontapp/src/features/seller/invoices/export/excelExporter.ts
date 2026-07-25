@@ -2,19 +2,17 @@
 
 import type * as ExcelJS from 'exceljs';
 import type { Voucher, InvoiceKPIs } from '../types';
-
-// ── Paleta oficial Lyrium — lima verde (igual que PDF) ────────────────────
-const COLORS = {
-    headerBg:     '08190F',  // dark green header background
-    headerFont:   'A3E635',  // lime — text on dark header
-    titleBg:      '0A1F12',  // slightly lighter dark for title rows
-    titleFont:    'A3E635',  // lime title text
-    accentStripe: '0F2A18',  // dark alternate row
-    border:       '1E5C2E',  // dark green border
-    accent:       '163D22',  // dark green accent bar
-    totalBg:      '061510',  // very dark total row
-    subText:      '78C850',  // medium green subtitle text
-};
+import {
+    EXCEL_COLORS,
+    EXCEL_STATUS_COLORS,
+    excelBorderHair,
+    styleExcelTitleCell,
+    styleExcelSubtitleCell,
+    styleExcelAccentBar,
+    styleExcelHeaderCell,
+    styleExcelDataRow,
+    styleExcelTotalRow,
+} from '@/shared/lib/excel/excelTheme';
 
 // Colores semánticos de estado (se mantienen para legibilidad)
 const STATUS_LABEL: Record<string, string> = {
@@ -26,11 +24,11 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 const STATUS_COLOR: Record<string, string> = {
-    ACCEPTED:      'FF10B981',
-    SENT_WAIT_CDR: 'FFF59E0B',
-    REJECTED:      'FFF43F5E',
-    OBSERVED:      'FFF59E0B',
-    DRAFT:         'FF9CA3AF',
+    ACCEPTED:      EXCEL_STATUS_COLORS.success,
+    SENT_WAIT_CDR: EXCEL_STATUS_COLORS.warning,
+    REJECTED:      EXCEL_STATUS_COLORS.danger,
+    OBSERVED:      EXCEL_STATUS_COLORS.warning,
+    DRAFT:         EXCEL_STATUS_COLORS.neutral,
 };
 
 function fmtDate(d: string): string {
@@ -43,11 +41,6 @@ function fmtCommission(rate: number | null | undefined, amount: number | null | 
     if (rate == null || amount == null) return '—';
     const pct = rate > 1 ? Math.round(rate) : Math.round(rate * 100);
     return `${pct}% · S/ ${amount.toFixed(2)}`;
-}
-
-function borderHair(): Partial<ExcelJS.Borders> {
-    const s = { style: 'hair' as ExcelJS.BorderStyle, color: { argb: 'FF' + COLORS.border } };
-    return { top: s, left: s, bottom: s, right: s };
 }
 
 export async function exportInvoicesToExcel(vouchers: Voucher[], kpis?: InvoiceKPIs | null): Promise<void> {
@@ -66,37 +59,33 @@ export async function exportInvoicesToExcel(vouchers: Voucher[], kpis?: InvoiceK
     // ══════════════════════════════════════════════════════════════════════
     const wsSummary = wb.addWorksheet('Resumen', {
         pageSetup: { paperSize: 9, orientation: 'portrait' },
-        properties: { tabColor: { argb: 'FF' + COLORS.headerBg } },
+        properties: { tabColor: { argb: 'FF' + EXCEL_COLORS.headerBg } },
     });
 
     // ── Branding header ──────────────────────────────────────────────────
     wsSummary.mergeCells('A1:F1');
     const h1 = wsSummary.getCell('A1');
     h1.value = 'LYRIUM BIOMARKETPLACE';
-    h1.font  = { name: 'Arial', bold: true, size: 16, color: { argb: 'FF' + COLORS.titleFont } };
-    h1.fill  = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + COLORS.titleBg } };
-    h1.alignment = { vertical: 'middle', horizontal: 'left', indent: 2 };
+    styleExcelTitleCell(h1, 16);
     wsSummary.getRow(1).height = 38;
 
     wsSummary.mergeCells('A2:F2');
     const h2 = wsSummary.getCell('A2');
     h2.value = 'Mis Comprobantes Electrónicos — Panel Vendedor';
-    h2.font  = { name: 'Arial', size: 11, color: { argb: 'FF' + COLORS.subText } };
-    h2.fill  = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + COLORS.titleBg } };
+    h2.font  = { name: 'Arial', size: 11, color: { argb: 'FF' + EXCEL_COLORS.subText } };
+    h2.fill  = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + EXCEL_COLORS.titleBg } };
     h2.alignment = { vertical: 'middle', horizontal: 'left', indent: 2 };
     wsSummary.getRow(2).height = 22;
 
     wsSummary.mergeCells('A3:F3');
     const h3 = wsSummary.getCell('A3');
     h3.value = `Generado el ${new Date().toLocaleString('es-PE')}   ·   ${vouchers.length} comprobante${vouchers.length !== 1 ? 's' : ''}`;
-    h3.font  = { name: 'Arial', size: 9, italic: true, color: { argb: 'FF' + COLORS.headerFont } };
-    h3.fill  = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + COLORS.accent } };
-    h3.alignment = { vertical: 'middle', horizontal: 'left', indent: 2 };
+    styleExcelSubtitleCell(h3);
     wsSummary.getRow(3).height = 18;
 
     // Accent bar
     wsSummary.mergeCells('A4:F4');
-    wsSummary.getCell('A4').fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + COLORS.accent } };
+    styleExcelAccentBar(wsSummary.getCell('A4'));
     wsSummary.getRow(4).height = 4;
 
     // ── KPIs ─────────────────────────────────────────────────────────────
@@ -108,7 +97,7 @@ export async function exportInvoicesToExcel(vouchers: Voucher[], kpis?: InvoiceK
 
     wsSummary.addRow([]);
     const kpiHeader = wsSummary.addRow(['RESUMEN DE MI FACTURACIÓN']);
-    kpiHeader.getCell(1).font = { name: 'Arial', bold: true, size: 10, color: { argb: 'FF' + COLORS.headerBg } };
+    kpiHeader.getCell(1).font = { name: 'Arial', bold: true, size: 10, color: { argb: 'FF' + EXCEL_COLORS.headerBg } };
     kpiHeader.height = 22;
 
     const kpiData: Array<[string, string]> = [
@@ -122,14 +111,15 @@ export async function exportInvoicesToExcel(vouchers: Voucher[], kpis?: InvoiceK
         ['Total comprobantes emitidos',    String(vouchers.length)                                              ],
     ];
 
-    kpiData.forEach(([label, value]) => {
+    kpiData.forEach(([label, value], idx) => {
         const row = wsSummary.addRow([label, value]);
-        row.getCell(1).font = { name: 'Arial', size: 9, color: { argb: 'FF' + COLORS.subText } };
-        row.getCell(2).font = { name: 'Arial', bold: true, size: 10, color: { argb: 'FF' + COLORS.headerFont } };
-        row.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + COLORS.accentStripe } };
-        row.getCell(2).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + COLORS.accentStripe } };
-        row.getCell(1).border = borderHair();
-        row.getCell(2).border = borderHair();
+        row.getCell(1).font = { name: 'Arial', size: 9, color: { argb: 'FF' + EXCEL_COLORS.bodyFont } };
+        row.getCell(2).font = { name: 'Arial', bold: true, size: 10, color: { argb: 'FF' + EXCEL_COLORS.totalFont } };
+        const stripeColor = idx % 2 === 0 ? EXCEL_COLORS.stripeBg : EXCEL_COLORS.bodyBg;
+        row.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + stripeColor } };
+        row.getCell(2).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + stripeColor } };
+        row.getCell(1).border = excelBorderHair();
+        row.getCell(2).border = excelBorderHair();
         row.height = 20;
     });
 
@@ -141,7 +131,7 @@ export async function exportInvoicesToExcel(vouchers: Voucher[], kpis?: InvoiceK
     // ══════════════════════════════════════════════════════════════════════
     const wsDetail = wb.addWorksheet('Comprobantes', {
         pageSetup: { paperSize: 9, orientation: 'portrait', fitToPage: true, fitToWidth: 1 },
-        properties: { tabColor: { argb: 'FF' + COLORS.accent } },
+        properties: { tabColor: { argb: 'FF' + EXCEL_COLORS.accent } },
     });
 
     const COLS = [
@@ -158,22 +148,18 @@ export async function exportInvoicesToExcel(vouchers: Voucher[], kpis?: InvoiceK
     wsDetail.mergeCells(1, 1, 1, COLS.length);
     const dTitle = wsDetail.getCell('A1');
     dTitle.value = 'Lyrium BioMarketplace — Mis Comprobantes Electrónicos';
-    dTitle.font  = { name: 'Arial', bold: true, size: 13, color: { argb: 'FF' + COLORS.titleFont } };
-    dTitle.fill  = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + COLORS.titleBg } };
-    dTitle.alignment = { vertical: 'middle', horizontal: 'left', indent: 1 };
+    styleExcelTitleCell(dTitle);
     wsDetail.getRow(1).height = 28;
 
     wsDetail.mergeCells(2, 1, 2, COLS.length);
     const dSub = wsDetail.getCell('A2');
     dSub.value = `Generado: ${new Date().toLocaleString('es-PE')}   ·   ${vouchers.length} registros`;
-    dSub.font  = { name: 'Arial', size: 9, italic: true, color: { argb: 'FF' + COLORS.headerFont } };
-    dSub.fill  = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + COLORS.accent } };
-    dSub.alignment = { vertical: 'middle', horizontal: 'left', indent: 1 };
+    styleExcelSubtitleCell(dSub);
     wsDetail.getRow(2).height = 18;
 
     // Accent bar
     wsDetail.mergeCells(3, 1, 3, COLS.length);
-    wsDetail.getCell('A3').fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + COLORS.accent } };
+    styleExcelAccentBar(wsDetail.getCell('A3'));
     wsDetail.getRow(3).height = 4;
 
     wsDetail.columns = COLS.map(c => ({ key: c.key, width: c.width })) as ExcelJS.Column[];
@@ -184,10 +170,7 @@ export async function exportInvoicesToExcel(vouchers: Voucher[], kpis?: InvoiceK
     COLS.forEach((c, i) => {
         const cell = hRow.getCell(i + 1);
         cell.value = c.header;
-        cell.font  = { name: 'Arial', bold: true, size: 9, color: { argb: 'FF' + COLORS.headerFont } };
-        cell.fill  = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + COLORS.headerBg } };
-        cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
-        cell.border = { bottom: { style: 'medium', color: { argb: 'FF' + COLORS.border } } };
+        styleExcelHeaderCell(cell, { wrapText: true });
     });
     hRow.commit();
 
@@ -216,15 +199,7 @@ export async function exportInvoicesToExcel(vouchers: Voucher[], kpis?: InvoiceK
             row.getCell('status').alignment = { horizontal: 'center', vertical: 'middle' };
         }
 
-        const isEven = idx % 2 === 0;
-        row.eachCell({ includeEmpty: true }, cell => {
-            if (!cell.font?.bold) cell.font = { name: 'Arial', size: 9 };
-            if (isEven) {
-                cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + COLORS.accentStripe } };
-            }
-            cell.border = borderHair();
-        });
-
+        styleExcelDataRow(row, idx);
         row.height = 18;
         row.commit();
     });
@@ -235,14 +210,8 @@ export async function exportInvoicesToExcel(vouchers: Voucher[], kpis?: InvoiceK
         amount:     totalMonto,
         commission: `Comisión: S/ ${totalComisiones.toFixed(2)}  ·  Neto: S/ ${netoVendedor.toFixed(2)}`,
     });
-    totalRow.getCell('type').font       = { name: 'Arial', bold: true, size: 9, color: { argb: 'FF' + COLORS.headerFont } };
-    totalRow.getCell('amount').font     = { name: 'Arial', bold: true, size: 9, color: { argb: 'FF' + COLORS.headerFont } };
-    totalRow.getCell('amount').numFmt   = '"S/ "#,##0.00';
-    totalRow.getCell('commission').font = { name: 'Arial', bold: true, size: 9, color: { argb: 'FF78C850' } };
-    totalRow.eachCell({ includeEmpty: true }, cell => {
-        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + COLORS.totalBg } };
-        cell.border = { top: { style: 'medium', color: { argb: 'FF' + COLORS.border } } };
-    });
+    totalRow.getCell('amount').numFmt = '"S/ "#,##0.00';
+    styleExcelTotalRow(totalRow);
     totalRow.height = 22;
     totalRow.commit();
 

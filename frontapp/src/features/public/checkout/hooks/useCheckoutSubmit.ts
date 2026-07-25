@@ -78,6 +78,12 @@ export function useCheckoutSubmit(): UseCheckoutSubmitReturn {
 
     const hasProducts = selectedItems.some((i) => i.id > 0);
 
+    // Solo los ítems que el cliente dejó marcados pasan a la orden — los que
+    // desmarcó (p. ej. un producto, para comprar solo el servicio) se quedan
+    // en el carrito y no deben cobrarse.
+    const selectedProductIds = selectedItems.filter((i) => i.id > 0).map((i) => i.id);
+    const selectedServiceHoldIds = selectedItems.filter((i) => i.id < 0).map((i) => Math.abs(i.id));
+
     // Validación de dirección: solo para envío, no para retiro en tienda
     if (hasProducts && deliveryMethod !== 'pickup') {
       if (
@@ -141,6 +147,8 @@ export function useCheckoutSubmit(): UseCheckoutSubmitReturn {
         store_shipping: storeShipping?.length ? storeShipping : undefined,
         branch_id:      isPickup ? selectedBranchId : undefined,
         shipping_cost:  isPickup ? 0 : orderData.deliveryCost,
+        selected_product_ids:      selectedProductIds,
+        selected_service_hold_ids: selectedServiceHoldIds,
       };
 
       let order;

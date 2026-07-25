@@ -13,7 +13,7 @@ interface KpiConfig {
   description: string;
   icon: string;
   color: string;
-  chartType: 'line' | 'bar' | 'doughnut' | 'radar';
+  chartType: 'line' | 'bar' | 'doughnut' | 'pie' | 'radar' | 'gauge' | 'stars';
   chartLabels: string[];
   chartData: number[];
   chartColor: string;
@@ -28,6 +28,44 @@ interface KpiDetailModalProps {
   kpi: KpiConfig | null;
 }
 
+function GaugeVisual({ value, color, max = 60 }: { value: number; color: string; max?: number }) {
+  const ratio = Math.min(Math.max(value / max, 0), 1);
+  return (
+    <div className="relative w-56 h-56 mx-auto">
+      <svg viewBox="0 0 120 120" className="w-full h-full">
+        <circle cx="60" cy="60" r="54" fill="none" stroke="currentColor" strokeWidth="8" className="text-gray-200 dark:text-gray-700" />
+        <circle
+          cx="60" cy="60" r="54" fill="none" stroke={color} strokeWidth="8" strokeLinecap="round"
+          strokeDasharray={`${ratio * 339.292} 339.292`}
+          transform="rotate(-90 60 60)"
+        />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <span className="text-4xl font-black" style={{ color }}>{value}</span>
+        <span className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest mt-1">minutos promedio</span>
+      </div>
+    </div>
+  );
+}
+
+function StarsVisual({ value, color }: { value: number; color: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center gap-3">
+      <div className="flex gap-1.5">
+        {[1, 2, 3, 4, 5].map(star => (
+          <Icon
+            key={star}
+            name="Star"
+            className="w-10 h-10"
+            style={{ color, fill: star <= Math.round(value / 20) ? color : undefined }}
+          />
+        ))}
+      </div>
+      <span className="text-2xl font-black" style={{ color }}>{value > 0 ? `${value}%` : 'N/A'}</span>
+    </div>
+  );
+}
+
 function ChartExpandedModal({ kpi, onClose }: { kpi: KpiConfig; onClose: () => void }) {
   return (
     <BaseModal
@@ -36,16 +74,21 @@ function ChartExpandedModal({ kpi, onClose }: { kpi: KpiConfig; onClose: () => v
       title={kpi.label}
       subtitle="Zoom con rueda del mouse · Arrastra para desplazar"
       size="5xl"
-      rainbowHeader
     >
-      <FinanceChart
-        type={kpi.chartType}
-        labels={kpi.chartLabels}
-        data={kpi.chartData}
-        color={kpi.chartColor}
-        datasets={kpi.chartDatasets}
-        height="58vh"
-      />
+      {kpi.chartType === 'gauge' ? (
+        <GaugeVisual value={kpi.chartData[kpi.chartData.length - 1] ?? 0} color={kpi.chartColor} />
+      ) : kpi.chartType === 'stars' ? (
+        <StarsVisual value={kpi.chartData[0] ?? 0} color={kpi.chartColor} />
+      ) : (
+        <FinanceChart
+          type={kpi.chartType}
+          labels={kpi.chartLabels}
+          data={kpi.chartData}
+          color={kpi.chartColor}
+          datasets={kpi.chartDatasets}
+          height="58vh"
+        />
+      )}
     </BaseModal>
   );
 }
@@ -59,6 +102,7 @@ function KpiDetailModal({ isOpen, onClose, kpi }: KpiDetailModalProps) {
 
   if (!kpi) return null;
 
+  const isVisualKpi = kpi.chartType === 'gauge' || kpi.chartType === 'stars';
   const total = kpi.chartData.reduce((a, b) => a + b, 0);
   const maxVal = Math.max(...kpi.chartData, 1);
 
@@ -72,7 +116,6 @@ function KpiDetailModal({ isOpen, onClose, kpi }: KpiDetailModalProps) {
         title={kpi.label}
         subtitle={kpi.description}
         size="4xl"
-        rainbowHeader
       >
         <div className="space-y-6 modal-stagger">
 
@@ -108,26 +151,36 @@ function KpiDetailModal({ isOpen, onClose, kpi }: KpiDetailModalProps) {
               <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: kpi.color }}>
                 Evolución
               </span>
-              <span className="text-[10px] text-[var(--text-secondary)] ml-2 hidden sm:block">
-                Zoom con rueda · Arrastra para desplazar
-              </span>
-              <button
-                onClick={() => setIsChartExpanded(true)}
-                className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all hover:scale-105 active:scale-95"
-                style={{ backgroundColor: `${kpi.color}20`, color: kpi.color, border: `1px solid ${kpi.color}40` }}
-              >
-                <Icon name="Maximize2" className="w-3 h-3" />
-                Ampliar gráfica
-              </button>
+              {!isVisualKpi && (
+                <span className="text-[10px] text-[var(--text-secondary)] ml-2 hidden sm:block">
+                  Zoom con rueda · Arrastra para desplazar
+                </span>
+              )}
+              {!isVisualKpi && (
+                <button
+                  onClick={() => setIsChartExpanded(true)}
+                  className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all hover:scale-105 active:scale-95"
+                  style={{ backgroundColor: `${kpi.color}20`, color: kpi.color, border: `1px solid ${kpi.color}40` }}
+                >
+                  <Icon name="Maximize2" className="w-3 h-3" />
+                  Ampliar gráfica
+                </button>
+              )}
             </div>
-            <FinanceChart
-              type={kpi.chartType}
-              labels={kpi.chartLabels}
-              data={kpi.chartData}
-              color={kpi.chartColor}
-              datasets={kpi.chartDatasets}
-              height="380px"
-            />
+            {kpi.chartType === 'gauge' ? (
+              <GaugeVisual value={kpi.chartData[kpi.chartData.length - 1] ?? 0} color={kpi.chartColor} />
+            ) : kpi.chartType === 'stars' ? (
+              <StarsVisual value={kpi.chartData[0] ?? 0} color={kpi.chartColor} />
+            ) : (
+              <FinanceChart
+                type={kpi.chartType}
+                labels={kpi.chartLabels}
+                data={kpi.chartData}
+                color={kpi.chartColor}
+                datasets={kpi.chartDatasets}
+                height="380px"
+              />
+            )}
           </div>
 
           {/* Desglose por período */}
@@ -199,7 +252,7 @@ const KPI_DETAILS: Record<string, string> = {
   'Tiempo de Respuesta (Chat)':
     'Tiempo promedio que tardas en responder a los mensajes de tus clientes a través del chat de la plataforma.',
   'CSAT - Satisfacción del Cliente':
-    'Customer Satisfaction Score. Porcentaje de clientes que calificaron positivamente su experiencia de compra en tu tienda.',
+    'Customer Satisfaction Score. Promedio de las reseñas (1-5 estrellas) que los clientes dejaron en los productos de tu tienda, expresado como porcentaje.',
   'Medida de Desempeño':
     'Score compuesto que agrega tu rendimiento financiero, logístico, de calidad, servicio y satisfacción. Se calcula como promedio ponderado de 6 métricas clave.',
 };

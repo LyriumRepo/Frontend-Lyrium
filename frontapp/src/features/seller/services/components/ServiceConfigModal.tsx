@@ -713,24 +713,17 @@ export default function ServiceConfigModal({
         <div className="relative w-full max-w-2xl bg-[var(--bg-primary)] rounded-[2rem] border border-[var(--border-subtle)] shadow-2xl flex flex-col max-h-[90vh] overflow-hidden animate-fadeIn">
 
           {/* Header */}
-          <div className="flex items-center justify-between px-6 py-5 border-b border-[var(--border-subtle)] flex-shrink-0">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-sky-500/10 dark:bg-[#8FC3A1]/10 rounded-2xl flex items-center justify-center border border-sky-500/20 dark:border-[#8FC3A1]/20 text-sky-500 dark:text-[#8FC3A1]">
-                <Icon name="Briefcase" className="w-5 h-5 stroke-[2.5px]" />
-              </div>
-              <div>
-                <h2 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-widest">
-                  {service ? 'Editar Servicio' : 'Nuevo Servicio'}
-                </h2>
-                <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wide">
-                  {STEP_LABELS[step - 1]}
-                </p>
-              </div>
-            </div>
+          <div className="relative px-6 py-5 bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--verde-500)] rounded-t-[2rem]">
             <button type="button" onClick={onClose}
-              className="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-[var(--bg-secondary)] text-[var(--text-secondary)] transition-colors">
-              <Icon name="X" className="w-4 h-4" />
+              className="absolute top-5 right-5 w-10 h-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center text-white hover:bg-white/30 transition-all active:scale-90">
+              <Icon name="X" className="w-5 h-5" />
             </button>
+            <h2 className="text-sm font-black text-white uppercase tracking-widest pr-12">
+              {service ? 'Editar Servicio' : 'Nuevo Servicio'}
+            </h2>
+            <p className="text-[10px] font-bold text-white/80 uppercase tracking-wide">
+              {STEP_LABELS[step - 1]}
+            </p>
           </div>
 
           {/* Step indicator */}

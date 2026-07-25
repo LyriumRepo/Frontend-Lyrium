@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
+import { createPortal } from 'react-dom';
 import Icon from '@/components/ui/Icon';
 
 interface BaseDrawerProps {
@@ -34,6 +35,10 @@ export default function BaseDrawer({
   children,
   size,
 }: BaseDrawerProps) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => { setMounted(true); }, []);
+
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -52,11 +57,14 @@ export default function BaseDrawer({
     };
   }, [isOpen, handleKeyDown]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
+
+  const modalRoot = document.getElementById('modal-root');
+  if (!modalRoot) return null;
 
   const widthClass = width || (size ? sizeMap[size] || sizeMap.md : 'md:w-[500px]');
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex justify-end" role="dialog" aria-modal="true" aria-label={title || 'Panel lateral'}>
       <div
         className="absolute inset-0 bg-black/40 backdrop-blur-sm"
@@ -72,7 +80,7 @@ export default function BaseDrawer({
         `}
       >
         <div
-          className={`sticky top-0 z-10 bg-gradient-to-r ${accentColor} backdrop-blur-md border-b border-[var(--border-subtle)] p-6`}
+          className={`sticky top-0 z-10 bg-gradient-to-r ${accentColor} backdrop-blur-md border-b border-[var(--border-subtle)] p-4 sm:p-6`}
         >
           <div className="flex items-start justify-between">
             <div className="pr-8">
@@ -101,14 +109,15 @@ export default function BaseDrawer({
           </div>
         </div>
 
-        <div className="p-6">{children}</div>
+        <div className="p-4 sm:p-6">{children}</div>
 
         {footer && (
-          <div className="sticky bottom-0 bg-[var(--bg-card)]/95 backdrop-blur-md border-t border-[var(--border-subtle)] p-6">
+          <div className="sticky bottom-0 bg-[var(--bg-card)]/95 backdrop-blur-md border-t border-[var(--border-subtle)] p-4 sm:p-6">
             {footer}
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    modalRoot,
   );
 }

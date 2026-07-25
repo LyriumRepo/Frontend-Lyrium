@@ -34,7 +34,7 @@ export default function ServicesGuideModal({ isOpen, onClose }: ServicesGuideMod
                 onKeyDown={(e) => e.stopPropagation()}
             >
                 {/* ── Header ── */}
-                <div className="bg-gradient-to-r from-emerald-500 via-emerald-400 to-emerald-300 dark:from-[#2A4A3A] dark:via-[#1A3A32] dark:to-[#2A4A3A] p-6 text-white relative flex-shrink-0">
+                <div className="bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--verde-500)] p-6 text-white relative flex-shrink-0">
                     <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full -mr-24 -mt-24 blur-3xl" />
                     <div className="relative z-10 flex items-center justify-between">
                         <div className="flex items-center gap-3">

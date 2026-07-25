@@ -12,6 +12,7 @@ import AdminInvoiceKPIsDisplay from './components/AdminInvoiceKPIs';
 import AdminInvoiceFilters from './components/AdminInvoiceFilters';
 import AdminInvoiceTable from './components/AdminInvoiceTable';
 import AdminInvoiceDrawer from './components/AdminInvoiceDrawer';
+import AdminPlanInvoiceDrawer from './components/AdminPlanInvoiceDrawer';
 import PlanInvoiceTable from './components/PlanInvoiceTable';
 import { exportAdminInvoicesToPdf, exportAdminInvoicesToExcel } from './export';
 
@@ -29,10 +30,6 @@ export function NubefactPageClient(_props: NubefactPageClientProps) {
         error,
         search,
         setSearch,
-        statusFilter,
-        setStatusFilter,
-        typeFilter,
-        setTypeFilter,
         storeFilter,
         setStoreFilter,
         dateFrom,
@@ -40,7 +37,6 @@ export function NubefactPageClient(_props: NubefactPageClientProps) {
         dateTo,
         setDateTo,
         allStores,
-        allTypes,
         selectedInvoice,
         isDrawerOpen,
         handleViewDetail,
@@ -55,6 +51,10 @@ export function NubefactPageClient(_props: NubefactPageClientProps) {
         error: planError,
         total: planTotal,
         refresh: planRefresh,
+        selectedRow: selectedPlanRow,
+        isDrawerOpen: isPlanDrawerOpen,
+        handleViewDetail: handleViewPlanDetail,
+        handleCloseDrawer: handleClosePlanDrawer,
     } = usePlanInvoices();
 
     const handleExportPDF = useCallback(() => {
@@ -126,16 +126,11 @@ export function NubefactPageClient(_props: NubefactPageClientProps) {
 
                             <AdminInvoiceFilters
                                 search={search}
-                                statusFilter={statusFilter}
-                                typeFilter={typeFilter}
                                 storeFilter={storeFilter}
                                 dateFrom={dateFrom}
                                 dateTo={dateTo}
                                 allStores={allStores}
-                                allTypes={allTypes}
                                 onSearch={setSearch}
-                                onStatusFilter={setStatusFilter}
-                                onTypeFilter={setTypeFilter}
                                 onStoreFilter={setStoreFilter}
                                 onDateFrom={setDateFrom}
                                 onDateTo={setDateTo}
@@ -204,7 +199,13 @@ export function NubefactPageClient(_props: NubefactPageClientProps) {
                                 </BaseButton>
                             </div>
 
-                            <PlanInvoiceTable rows={planRows} />
+                            <PlanInvoiceTable rows={planRows} onViewDetail={handleViewPlanDetail} />
+
+                            <AdminPlanInvoiceDrawer
+                                invoice={selectedPlanRow}
+                                isOpen={isPlanDrawerOpen}
+                                onClose={handleClosePlanDrawer}
+                            />
                         </>
                     )}
                 </>

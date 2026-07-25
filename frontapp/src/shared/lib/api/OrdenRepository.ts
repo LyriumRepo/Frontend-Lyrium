@@ -61,6 +61,11 @@ export interface CreateOrderPayload {
   notes?: string;
   lirios_used?: number;
   store_shipping?: Array<{ store_id: number; shipping_cost: number }>;
+  branch_id?: number | null;
+  /** IDs de producto de los ítems que el cliente dejó marcados en el checkout. */
+  selected_product_ids?: number[];
+  /** IDs de ServiceHold de los servicios que el cliente dejó marcados en el checkout. */
+  selected_service_hold_ids?: number[];
 }
 
 // ── Tipos Izipay ──────────────────────────────────────────────────────────────

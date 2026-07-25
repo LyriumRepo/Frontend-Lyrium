@@ -11,6 +11,8 @@ export interface LiriosEligibility {
 
 export interface LiriosBalance {
     balance: number;
+    total_earned: number;
+    total_redeemed: number;
 }
 
 export interface LiriosTransaction {

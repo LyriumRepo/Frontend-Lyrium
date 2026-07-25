@@ -21,7 +21,7 @@ export default function CardProxPago({ data, formatCurrency }: CardProxPagoProps
     return (
         <>
             <button onClick={() => setIsModalOpen(true)} className="group w-full text-left">
-            <div className="bg-[var(--bg-card)] p-8 rounded-[2.5rem] border shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-1 relative overflow-hidden group active:scale-[0.98]" style={{ borderColor: `${companyColors.celeste}40` }}>
+            <div className="bg-[var(--bg-card)] p-8 rounded-[2.5rem] border shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-1 relative overflow-hidden group active:scale-[0.98]" style={{ borderColor: `${companyColors.celeste}40` }}>
             <div className="absolute top-0 right-0 w-32 h-32 rounded-full -mr-16 -mt-16 blur-2xl transition-all duration-700 group-hover:scale-150" style={{ backgroundColor: `${companyColors.celeste}0D` }}></div>
 
             <div className="relative z-10">

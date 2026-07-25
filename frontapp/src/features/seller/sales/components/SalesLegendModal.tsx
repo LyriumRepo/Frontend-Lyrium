@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import Icon from '@/components/ui/Icon';
 
 interface SalesLegendModalProps {
@@ -7,11 +8,18 @@ interface SalesLegendModalProps {
 }
 
 export default function SalesLegendModal({ isOpen, onClose }: SalesLegendModalProps) {
-    if (!isOpen) return null;
+    const [mounted, setMounted] = useState(false);
 
-    return (
+    useEffect(() => { setMounted(true); }, []);
+
+    if (!isOpen || !mounted) return null;
+
+    const modalRoot = document.getElementById('modal-root');
+    if (!modalRoot) return null;
+
+    return createPortal(
         <div
-            className="fixed inset-0 bg-black/40 backdrop-blur-xl z-[100000] flex justify-center items-center p-4 lg:p-6 animate-fadeIn"
+            className="fixed inset-0 bg-black/40 backdrop-blur-xl z-[100000] flex justify-center items-center p-4 animate-fadeIn"
             onClick={onClose}
             onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }}
             role="dialog"
@@ -24,7 +32,7 @@ export default function SalesLegendModal({ isOpen, onClose }: SalesLegendModalPr
                 onKeyDown={(e) => e.stopPropagation()}
             >
                 {/* Header */}
-                <div className="bg-gradient-to-r from-emerald-600 to-emerald-500 dark:from-[#1A3A2A] dark:to-[#2A4A3A] px-5 py-4 text-white flex-shrink-0 flex items-center justify-between">
+                <div className="bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--verde-500)] px-5 py-4 text-white flex-shrink-0 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <div className="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center">
                             <Icon name="BookOpen" className="w-5 h-5" />
@@ -44,9 +52,9 @@ export default function SalesLegendModal({ isOpen, onClose }: SalesLegendModalPr
                     </button>
                 </div>
 
-                <div className="p-5 overflow-y-auto space-y-6">
+                <div className="p-4 sm:p-5 overflow-y-auto space-y-6">
                     {/* Sección 1 + 2 en dos columnas */}
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {/* Tipos de envío */}
                         <section className="space-y-3">
                             <h4 className="text-[10px] font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest">
@@ -95,7 +103,7 @@ export default function SalesLegendModal({ isOpen, onClose }: SalesLegendModalPr
                         <h4 className="text-[10px] font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest">
                             Estados
                         </h4>
-                        <div className="grid grid-cols-2 gap-2">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                             {[
                                 { title: 'Validado', desc: 'El vendedor o centro de salud validó el pedido.' },
                                 { title: 'Despachado', desc: 'El pedido terminó su preparación.' },
@@ -122,6 +130,7 @@ export default function SalesLegendModal({ isOpen, onClose }: SalesLegendModalPr
                     </div>
                 </div>
             </div>
-        </div>
+        </div>,
+        modalRoot,
     );
 }

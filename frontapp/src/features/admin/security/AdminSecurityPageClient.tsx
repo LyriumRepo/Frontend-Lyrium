@@ -82,7 +82,7 @@ export function AdminSecurityPageClient() {
   return (
     <div className="space-y-6 animate-fadeIn font-industrial pb-20">
       <ModuleHeader
-        title="Centro de Seguridad"
+        title="Seguridad"
         subtitle="Monitoreo y control de seguridad del sistema"
         icon="Shield"
         actions={

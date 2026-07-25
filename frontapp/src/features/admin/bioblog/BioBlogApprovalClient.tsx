@@ -5,6 +5,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FileText, Headphones, Video, Clapperboard, CheckCircle, XCircle, AlertCircle, RefreshCw, Store, Calendar, Search, X, Loader2, Eye, ExternalLink } from 'lucide-react';
 import { adminBioBlogApi, AdminPendingItem, AdminStats } from '@/shared/lib/api/bioblogRepository';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
+import AdminIndicatorGrid from '@/components/admin/AdminIndicatorGrid';
+import BaseButton from '@/components/ui/BaseButton';
+import Pagination from '@/components/ui/Pagination';
+
+const PAGE_SIZE = 10;
 
 const typeConfig: Record<string, { icon: any; label: string; color: string }> = {
     article: { icon: FileText, label: 'Artículo', color: 'from-sky-500 to-cyan-500' },
@@ -79,11 +84,17 @@ export function BioBlogApprovalClient() {
         ? items.filter(i => i.title?.toLowerCase().includes(search.toLowerCase()) || i.store?.name?.toLowerCase().includes(search.toLowerCase()))
         : items;
 
+    const [page, setPage] = useState(1);
+    const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+    const pageFiltered = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+    useEffect(() => { setPage(1); }, [filtered.length, search]);
+
     const statCards = [
-        { key: 'articles', icon: FileText, label: 'Artículos', count: stats?.pending_articles ?? 0, color: 'from-sky-500 to-cyan-500' },
-        { key: 'podcasts', icon: Headphones, label: 'Podcasts', count: stats?.pending_podcasts ?? 0, color: 'from-emerald-500 to-teal-500' },
-        { key: 'videos', icon: Video, label: 'Videos', count: stats?.pending_videos ?? 0, color: 'from-cyan-500 to-sky-500' },
-        { key: 'shorts', icon: Clapperboard, label: 'Shorts', count: stats?.pending_shorts ?? 0, color: 'from-teal-500 to-emerald-500' },
+        { key: 'articles', icon: 'FileText', label: 'Artículos', count: stats?.pending_articles ?? 0, color: 'lima' as const },
+        { key: 'podcasts', icon: 'Headphones', label: 'Podcasts', count: stats?.pending_podcasts ?? 0, color: 'verde' as const },
+        { key: 'videos', icon: 'Video', label: 'Videos', count: stats?.pending_videos ?? 0, color: 'turquesa' as const },
+        { key: 'shorts', icon: 'Clapperboard', label: 'Shorts', count: stats?.pending_shorts ?? 0, color: 'turquesaClaro' as const },
     ];
 
     return (
@@ -93,14 +104,15 @@ export function BioBlogApprovalClient() {
                 subtitle="Revisa y aprueba el contenido enviado por los vendedores"
                 icon="FileText"
                 actions={
-                    <button
+                    <BaseButton
+                        variant="action"
                         onClick={load}
                         disabled={loading}
-                        className="inline-flex items-center gap-1.5 border border-[var(--border-subtle)] rounded-lg px-3.5 py-[7px] text-[13px] font-medium text-[var(--text-primary)] hover:bg-[var(--bg-muted)] transition-colors shrink-0"
+                        leftIcon="RefreshCw"
+                        className={`shadow-xl shadow-sky-500/40 ${loading ? 'animate-pulse' : ''}`}
                     >
-                        <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
                         Actualizar
-                    </button>
+                    </BaseButton>
                 }
             />
 
@@ -127,35 +139,16 @@ export function BioBlogApprovalClient() {
                 </div>
             )}
 
-            {loading && !stats ? (
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                    {[1, 2, 3, 4].map(i => (
-                        <div key={i} className="h-28 bg-gray-100 dark:bg-gray-800 rounded-2xl animate-pulse" />
-                    ))}
-                </div>
-            ) : (
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                    {statCards.map(card => (
-                        <motion.div
-                            key={card.key}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="relative overflow-hidden bg-white dark:bg-[var(--bg-secondary)] rounded-2xl border border-[var(--border-subtle)] p-5 shadow-sm hover:shadow-md transition-all"
-                        >
-                            <div className={`absolute top-0 right-0 w-24 h-24 -mr-6 -mt-6 rounded-full bg-gradient-to-br ${card.color} opacity-10 dark:opacity-20`} />
-                            <div className="flex items-center gap-3">
-                                <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${card.color} flex items-center justify-center shadow-sm`}>
-                                    <card.icon className="w-5 h-5 text-white" />
-                                </div>
-                                <div>
-                                    <p className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider">{card.label}</p>
-                                    <p className="text-2xl font-bold text-[var(--text-primary)]">{card.count}</p>
-                                </div>
-                            </div>
-                        </motion.div>
-                    ))}
-                </div>
-            )}
+            <AdminIndicatorGrid
+                indicators={statCards.map(card => ({
+                    label: card.label,
+                    value: card.count,
+                    icon: card.icon,
+                    color: card.color,
+                }))}
+                columns={4}
+                isLoading={loading && !stats}
+            />
 
             <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-2xl border border-[var(--border-subtle)] shadow-sm overflow-hidden">
                 <div className="p-4 border-b border-[var(--border-subtle)]">
@@ -192,7 +185,7 @@ export function BioBlogApprovalClient() {
                 ) : (
                     <div className="divide-y divide-[var(--border-subtle)]">
                         <AnimatePresence>
-                            {filtered.map(item => {
+                            {pageFiltered.map(item => {
                                 const type = typeConfig[item.content_type] || { icon: FileText, label: item.content_type, color: 'from-gray-500 to-gray-600' };
                                 const TypeIcon = type.icon;
                                 return (
@@ -253,6 +246,8 @@ export function BioBlogApprovalClient() {
                         </AnimatePresence>
                     </div>
                 )}
+
+                <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
             </div>
 
             {/* Preview modal */}
@@ -260,7 +255,7 @@ export function BioBlogApprovalClient() {
                 {previewItem && (
                     <motion.div
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+                        className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
                         onClick={() => setPreviewItem(null)}
                         onKeyDown={(e) => { if (e.key === 'Escape') setPreviewItem(null); }}
                         role="dialog"
@@ -349,7 +344,7 @@ export function BioBlogApprovalClient() {
                 {rejectModal && (
                     <motion.div
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+                        className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
                         onClick={() => setRejectModal(null)}
                         onKeyDown={(e) => { if (e.key === 'Escape') setRejectModal(null); }}
                         role="dialog"

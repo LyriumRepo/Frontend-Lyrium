@@ -1,18 +1,18 @@
 import type * as ExcelJS from 'exceljs';
 import type { AdminInvoiceRow, AdminInvoiceKPIs } from '../hooks/useAdminInvoices';
-
-// ── Paleta oficial Lyrium — lima verde (igual que PDF) ────────────────────
-const COLORS = {
-    headerBg:     '08190F',
-    headerFont:   'A3E635',
-    titleBg:      '0A1F12',
-    titleFont:    'A3E635',
-    accentStripe: '0F2A18',
-    border:       '1E5C2E',
-    accent:       '163D22',
-    totalBg:      '061510',
-    subText:      '78C850',
-};
+import {
+    EXCEL_COLORS,
+    EXCEL_STATUS_COLORS,
+    styleExcelTitleCell,
+    styleExcelSubtitleCell,
+    styleExcelAccentBar,
+    styleExcelHeaderCell,
+    styleExcelDataRow,
+    styleExcelTotalRow,
+    styleExcelSectionTitleCell,
+    styleExcelKpiCardLabel,
+    styleExcelKpiCardValue,
+} from '@/shared/lib/excel/excelTheme';
 
 // Colores semánticos de estado
 const STATUS_LABEL: Record<string, string> = {
@@ -24,11 +24,11 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 const STATUS_STYLE: Record<string, { fg: string; bg: string }> = {
-    ACCEPTED:      { fg: 'FF10B981', bg: 'FFECFDF5' },
-    SENT_WAIT_CDR: { fg: 'FFF59E0B', bg: 'FFFEF3C7' },
-    REJECTED:      { fg: 'FFF43F5E', bg: 'FFFFE4E6' },
-    OBSERVED:      { fg: 'FFF59E0B', bg: 'FFFEF3C7' },
-    DRAFT:         { fg: 'FF9CA3AF', bg: 'FFF3F4F6' },
+    ACCEPTED:      { fg: EXCEL_STATUS_COLORS.success, bg: 'FFECFDF5' },
+    SENT_WAIT_CDR: { fg: EXCEL_STATUS_COLORS.warning, bg: 'FFFEF3C7' },
+    REJECTED:      { fg: EXCEL_STATUS_COLORS.danger,  bg: 'FFFFE4E6' },
+    OBSERVED:      { fg: EXCEL_STATUS_COLORS.warning, bg: 'FFFEF3C7' },
+    DRAFT:         { fg: EXCEL_STATUS_COLORS.neutral, bg: 'FFF3F4F6' },
 };
 
 function fmtDate(d: string): string {
@@ -43,17 +43,9 @@ function fmtCommission(rate: number | null, amount: number | null): string {
     return `${pct}% · S/ ${amount.toFixed(2)}`;
 }
 
-function borderHair(): Partial<ExcelJS.Borders> {
-    const s = { style: 'hair' as ExcelJS.BorderStyle, color: { argb: 'FF' + COLORS.border } };
-    return { top: s, left: s, bottom: s, right: s };
-}
-
 function applyHeaderCell(cell: ExcelJS.Cell, value: string): void {
     cell.value = value;
-    cell.font  = { name: 'Arial', bold: true, size: 9, color: { argb: 'FF' + COLORS.headerFont } };
-    cell.fill  = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + COLORS.headerBg } };
-    cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
-    cell.border = { bottom: { style: 'medium', color: { argb: 'FF' + COLORS.border } } };
+    styleExcelHeaderCell(cell, { wrapText: true });
 }
 
 // ── KPI card (2 filas × 1 columna) ───────────────────────────────────────
@@ -68,27 +60,13 @@ function writeKpiBlock(
     r1.height = 14;
     const c1 = r1.getCell(col);
     c1.value = label.toUpperCase();
-    c1.font  = { name: 'Arial', bold: true, size: 7, color: { argb: 'FF' + COLORS.subText } };
-    c1.fill  = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + COLORS.accentStripe } };
-    c1.alignment = { vertical: 'middle', horizontal: 'left', indent: 1 };
-    c1.border = {
-        top:   { style: 'medium', color: { argb: 'FF' + COLORS.border } },
-        left:  { style: 'thin',   color: { argb: 'FF' + COLORS.border } },
-        right: { style: 'thin',   color: { argb: 'FF' + COLORS.border } },
-    };
+    styleExcelKpiCardLabel(c1);
 
     const r2 = ws.getRow(startRow + 1);
     r2.height = 22;
     const c2 = r2.getCell(col);
     c2.value = value;
-    c2.font  = { name: 'Arial', bold: true, size: 13, color: { argb: 'FF' + COLORS.headerFont } };
-    c2.fill  = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + COLORS.accentStripe } };
-    c2.alignment = { vertical: 'middle', horizontal: 'left', indent: 1 };
-    c2.border = {
-        bottom: { style: 'thin', color: { argb: 'FF' + COLORS.border } },
-        left:   { style: 'thin', color: { argb: 'FF' + COLORS.border } },
-        right:  { style: 'thin', color: { argb: 'FF' + COLORS.border } },
-    };
+    styleExcelKpiCardValue(c2);
 }
 
 export async function exportAdminInvoicesToExcel(
@@ -110,37 +88,33 @@ export async function exportAdminInvoicesToExcel(
     // ══════════════════════════════════════════════════════════════════════
     const wsSummary = wb.addWorksheet('Resumen', {
         pageSetup: { paperSize: 9, orientation: 'landscape' },
-        properties: { tabColor: { argb: 'FF' + COLORS.headerBg } },
+        properties: { tabColor: { argb: 'FF' + EXCEL_COLORS.headerBg } },
     });
 
     // ── Branding header ─────────────────────────────────────────────────
     wsSummary.mergeCells('A1:I1');
     const h1 = wsSummary.getCell('A1');
     h1.value = 'LYRIUM BIOMARKETPLACE';
-    h1.font  = { name: 'Arial', bold: true, size: 20, color: { argb: 'FF' + COLORS.titleFont } };
-    h1.fill  = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + COLORS.titleBg } };
-    h1.alignment = { vertical: 'middle', horizontal: 'left', indent: 2 };
+    styleExcelTitleCell(h1, 20);
     wsSummary.getRow(1).height = 44;
 
     wsSummary.mergeCells('A2:I2');
     const h2 = wsSummary.getCell('A2');
     h2.value = 'Reporte de Facturación Electrónica — Panel Administrador';
-    h2.font  = { name: 'Arial', size: 11, color: { argb: 'FF' + COLORS.subText } };
-    h2.fill  = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + COLORS.titleBg } };
+    h2.font  = { name: 'Arial', size: 11, color: { argb: 'FF' + EXCEL_COLORS.subText } };
+    h2.fill  = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + EXCEL_COLORS.titleBg } };
     h2.alignment = { vertical: 'middle', horizontal: 'left', indent: 2 };
     wsSummary.getRow(2).height = 24;
 
     wsSummary.mergeCells('A3:I3');
     const h3 = wsSummary.getCell('A3');
     h3.value = `Generado el ${new Date().toLocaleString('es-PE')}   ·   ${rows.length} comprobante${rows.length !== 1 ? 's' : ''}`;
-    h3.font  = { name: 'Arial', size: 9, italic: true, color: { argb: 'FF' + COLORS.headerFont } };
-    h3.fill  = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + COLORS.accent } };
-    h3.alignment = { vertical: 'middle', horizontal: 'left', indent: 2 };
+    styleExcelSubtitleCell(h3);
     wsSummary.getRow(3).height = 18;
 
     // Accent bar
     wsSummary.mergeCells('A4:I4');
-    wsSummary.getCell('A4').fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + COLORS.accent } };
+    styleExcelAccentBar(wsSummary.getCell('A4'));
     wsSummary.getRow(4).height = 4;
 
     // ── KPIs en cuadrícula 4×2 ───────────────────────────────────────────
@@ -156,7 +130,7 @@ export async function exportAdminInvoicesToExcel(
         wsSummary.mergeCells('A6:I6');
         const kpiTitle = wsSummary.getCell('A6');
         kpiTitle.value = 'INDICADORES CLAVE DE RENDIMIENTO';
-        kpiTitle.font  = { name: 'Arial', bold: true, size: 8, color: { argb: 'FF' + COLORS.headerFont } };
+        styleExcelSectionTitleCell(kpiTitle);
         kpiTitle.alignment = { vertical: 'middle', indent: 1 };
         wsSummary.getRow(6).height = 18;
 
@@ -192,16 +166,12 @@ export async function exportAdminInvoicesToExcel(
             wsSummary.mergeCells(`A${tsTitleRow.number}:G${tsTitleRow.number}`);
             const tsTitle = tsTitleRow.getCell(1);
             tsTitle.value = 'TOP VENDEDORES — MES ACTUAL';
-            tsTitle.font  = { name: 'Arial', bold: true, size: 8, color: { argb: 'FF' + COLORS.headerBg } };
+            styleExcelSectionTitleCell(tsTitle);
             tsTitleRow.height = 18;
 
             const tsHeadRow = wsSummary.addRow(['#', 'Tienda / Vendedor', '', 'Total Vendido', '', '% del Total', '']);
             ['A', 'B', 'C', 'D', 'E', 'F', 'G'].forEach(col => {
-                const cell = tsHeadRow.getCell(col);
-                cell.font  = { name: 'Arial', bold: true, size: 9, color: { argb: 'FF' + COLORS.headerFont } };
-                cell.fill  = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + COLORS.headerBg } };
-                cell.alignment = { horizontal: 'center', vertical: 'middle' };
-                cell.border = { bottom: { style: 'medium', color: { argb: 'FF' + COLORS.border } } };
+                styleExcelHeaderCell(tsHeadRow.getCell(col));
             });
             tsHeadRow.height = 24;
 
@@ -214,12 +184,7 @@ export async function exportAdminInvoicesToExcel(
                 row.getCell(6).alignment = { horizontal: 'center', vertical: 'middle' };
                 row.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
 
-                const fillArgb = i % 2 === 0 ? 'FF' + COLORS.accentStripe : 'FFFFFFFF';
-                ['A', 'B', 'C', 'D', 'E', 'F', 'G'].forEach(col => {
-                    row.getCell(col).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: fillArgb } };
-                    row.getCell(col).border = borderHair();
-                    if (!row.getCell(col).font?.bold) row.getCell(col).font = { name: 'Arial', size: 9 };
-                });
+                styleExcelDataRow(row, i);
                 row.height = 20;
             });
         }
@@ -232,29 +197,25 @@ export async function exportAdminInvoicesToExcel(
     // ══════════════════════════════════════════════════════════════════════
     const wsDetail = wb.addWorksheet('Comprobantes', {
         pageSetup: { paperSize: 9, orientation: 'landscape', fitToPage: true, fitToWidth: 1 },
-        properties: { tabColor: { argb: 'FF' + COLORS.accent } },
+        properties: { tabColor: { argb: 'FF' + EXCEL_COLORS.accent } },
     });
 
     const NCOLS = 10;
     wsDetail.mergeCells(1, 1, 1, NCOLS);
     const dTitle = wsDetail.getCell('A1');
     dTitle.value = 'LYRIUM BIOMARKETPLACE — Detalle de Comprobantes Electrónicos';
-    dTitle.font  = { name: 'Arial', bold: true, size: 14, color: { argb: 'FF' + COLORS.titleFont } };
-    dTitle.fill  = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + COLORS.titleBg } };
-    dTitle.alignment = { vertical: 'middle', horizontal: 'left', indent: 2 };
+    styleExcelTitleCell(dTitle, 14);
     wsDetail.getRow(1).height = 38;
 
     wsDetail.mergeCells(2, 1, 2, NCOLS);
     const dSub = wsDetail.getCell('A2');
     dSub.value = `Generado: ${new Date().toLocaleString('es-PE')}   ·   ${rows.length} registro${rows.length !== 1 ? 's' : ''}`;
-    dSub.font  = { name: 'Arial', size: 9, italic: true, color: { argb: 'FF' + COLORS.headerFont } };
-    dSub.fill  = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + COLORS.accent } };
-    dSub.alignment = { vertical: 'middle', horizontal: 'left', indent: 2 };
+    styleExcelSubtitleCell(dSub);
     wsDetail.getRow(2).height = 20;
 
     // Accent bar
     wsDetail.mergeCells(3, 1, 3, NCOLS);
-    wsDetail.getCell('A3').fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + COLORS.accent } };
+    styleExcelAccentBar(wsDetail.getCell('A3'));
     wsDetail.getRow(3).height = 4;
 
     const COLS = [
@@ -308,16 +269,7 @@ export async function exportAdminInvoicesToExcel(
             row.getCell('status').alignment = { horizontal: 'center', vertical: 'middle' };
         }
 
-        const isEven = idx % 2 === 0;
-        row.eachCell({ includeEmpty: true }, (cell, colNum) => {
-            if (!cell.font?.bold) cell.font = { name: 'Arial', size: 9 };
-            if (colNum !== 9) {
-                cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: isEven ? 'FF' + COLORS.accentStripe : 'FFFFFFFF' } };
-            }
-            cell.border = borderHair();
-            if (!cell.alignment) cell.alignment = { vertical: 'middle' };
-        });
-
+        styleExcelDataRow(row, idx);
         row.height = 18;
         row.commit();
     });
@@ -331,17 +283,10 @@ export async function exportAdminInvoicesToExcel(
         amount:     totalMonto,
         commission: `S/ ${totalComisiones.toFixed(2)}`,
     });
-    totalRow.eachCell({ includeEmpty: true }, cell => {
-        cell.fill   = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + COLORS.totalBg } };
-        cell.border = { top: { style: 'medium', color: { argb: 'FF' + COLORS.border } } };
-        cell.font   = { name: 'Arial', size: 9, color: { argb: 'FF' + COLORS.headerFont } };
-    });
-    totalRow.getCell('seller').font     = { name: 'Arial', bold: true, size: 9, color: { argb: 'FF' + COLORS.headerFont } };
-    totalRow.getCell('amount').font     = { name: 'Arial', bold: true, size: 10, color: { argb: 'FF' + COLORS.headerFont } };
     totalRow.getCell('amount').numFmt   = '"S/ "#,##0.00';
     totalRow.getCell('amount').alignment = { horizontal: 'right', vertical: 'middle' };
-    totalRow.getCell('commission').font  = { name: 'Arial', bold: true, size: 9, color: { argb: 'FF78C850' } };
     totalRow.getCell('commission').alignment = { horizontal: 'center', vertical: 'middle' };
+    styleExcelTotalRow(totalRow);
     totalRow.height = 24;
     totalRow.commit();
 

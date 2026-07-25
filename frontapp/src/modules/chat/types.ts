@@ -80,6 +80,8 @@ export interface ChatViewProps {
   hasMoreMessages?: boolean;
   showAdminControls?: boolean;
   quickReplies?: string[];
+  /** Anula el borde/radio/sombra propios (para cuando ya vive dentro de otra tarjeta). */
+  className?: string;
 }
 
 export interface ChatInputProps {

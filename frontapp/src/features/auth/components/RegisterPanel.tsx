@@ -12,9 +12,14 @@ import type { RegisterFormData, UserType, TipoEvidencia, ContratoPreviewResponse
 // URL base de Laravel — misma convención que useAuthForm.ts
 const LARAVEL_API = process.env.NEXT_PUBLIC_LARAVEL_API_URL || 'http://127.0.0.1:8000/api';
 
-// Rutas de los PDFs estáticos de T&C (deben estar en /public/docs/)
-const TC_VENDEDOR_PDF = '/docs/terminos-vendedor.pdf';
-const TC_CLIENTE_PDF  = '/docs/terminos-cliente.pdf';
+// Ruta del PDF estático de T&C (debe estar en /public/docs/)
+const TC_SELLERS_PDF = '/docs/tyc-sellers.pdf';
+
+// PDF provisional del Acuerdo Comercial / Políticas Monetarias — placeholder
+// mientras diseño entrega la versión final. Reemplazar el archivo en
+// /public/docs/politicas-monetarias.pdf cuando esté listo (no requiere
+// tocar este componente).
+const ACUERDO_PDF_PLACEHOLDER = '/docs/politicas-monetarias.pdf';
 
 interface RegisterPanelProps {
     userType: UserType;
@@ -88,13 +93,22 @@ export function RegisterPanel({
     const [formData, setFormData]             = useState<RegisterFormData>(EMPTY_FORM);
     const [fileError, setFileError]           = useState<string | null>(null);
 
-    // ── Estado del flujo de acuerdo comercial ─────────────────────────────────
-    const [showTCModal, setShowTCModal]           = useState(false);  // modal T&C (2 PDFs)
-    const [showAcuerdoModal, setShowAcuerdoModal] = useState(false);  // modal acuerdo pre-llenado
-    const [acuerdoHtml, setAcuerdoHtml]           = useState('');     // HTML devuelto por Laravel
-    const [contratoAceptado, setContratoAceptado] = useState(false);  // usuario aceptó el acuerdo
-    const [loadingPreview, setLoadingPreview]     = useState(false);  // cargando preview
-    const [previewError, setPreviewError]         = useState<string | null>(null);
+    // ── Validación en tiempo real del RUC (debounced) ──────────────────────────
+    const [rucCheckStatus, setRucCheckStatus] = useState<'idle' | 'checking' | 'free' | 'taken'>('idle');
+    const [rucCheckEstado, setRucCheckEstado] = useState<'ACEPTADO' | 'REVISION' | 'RECHAZADO' | null>(null);
+
+    // ── Estado del flujo de aceptación (2 checks independientes) ──────────────
+    const [showTCModal, setShowTCModal]                 = useState(false);  // modal T&C (HTML completo)
+    const [tcHtml, setTcHtml]                            = useState('');    // HTML devuelto por Laravel
+    const [tcAceptado, setTcAceptado]                    = useState(false); // check 1: T&C aceptados
+    const [loadingTyc, setLoadingTyc]                     = useState(false); // cargando T&C
+    const [tcError, setTcError]                           = useState<string | null>(null);
+
+    const [showAcuerdoModal, setShowAcuerdoModal]         = useState(false); // modal acuerdo comercial pre-llenado
+    const [acuerdoHtml, setAcuerdoHtml]                   = useState('');    // HTML devuelto por Laravel
+    const [acuerdoAceptado, setAcuerdoAceptado]           = useState(false); // check 2: acuerdo comercial aceptado
+    const [loadingPreview, setLoadingPreview]             = useState(false); // cargando preview
+    const [previewError, setPreviewError]                 = useState<string | null>(null);
 
     const labels     = LABELS[userType];
     const isVendedor = userType === 'vendedor';
@@ -110,6 +124,7 @@ export function RegisterPanel({
         formData.phone.trim()                !== '' &&
         formData.password.trim()             !== '' &&
         formData.ruc.length                  === 11 &&
+        rucCheckStatus                       !== 'taken' &&
         formData.dni.length                  === 8  &&
         formData.categoria                   !== '' &&
         formData.descripcionActividad.trim() !== '' &&
@@ -121,20 +136,70 @@ export function RegisterPanel({
         )
     );
 
-    // ── Resetear aceptación si el usuario modifica el formulario ──────────────
-    // (el HTML del acuerdo ya no reflejaría los datos actuales)
-    const resetContrato = () => {
-        setContratoAceptado(false);
+    // ── Validación en tiempo real del RUC ──────────────────────────────────────
+    // Se dispara 600ms después de que el usuario termina de escribir un RUC
+    // de 11 dígitos. Consulta si ya existe una solicitud previa (con
+    // cualquier estado) para ese RUC, y muestra un mensaje amigable.
+    useEffect(() => {
+        if (!isVendedor || formData.ruc.length !== 11) {
+            setRucCheckStatus('idle');
+            setRucCheckEstado(null);
+            return;
+        }
+
+        setRucCheckStatus('checking');
+        const timer = setTimeout(async () => {
+            try {
+                const resp = await fetch(`${LARAVEL_API}/sellers/check-ruc?ruc=${formData.ruc}`, {
+                    headers: { Accept: 'application/json' },
+                });
+                const data = await resp.json();
+
+                if (data.exists) {
+                    setRucCheckStatus('taken');
+                    setRucCheckEstado(data.estado);
+                } else {
+                    setRucCheckStatus('free');
+                    setRucCheckEstado(null);
+                }
+            } catch {
+                // Si falla la verificación, no bloqueamos al usuario —
+                // el backend igual valida al momento de enviar el formulario.
+                setRucCheckStatus('idle');
+                setRucCheckEstado(null);
+            }
+        }, 600);
+
+        return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [formData.ruc, isVendedor]);
+
+    const RUC_MENSAJES: Record<'ACEPTADO' | 'REVISION' | 'RECHAZADO', string> = {
+        ACEPTADO:  'Este RUC ya está registrado como vendedor activo. Si es tu negocio, inicia sesión en vez de registrarte de nuevo.',
+        REVISION:  'Ya existe una solicitud con este RUC en proceso de revisión. Te contactaremos pronto con el resultado.',
+        RECHAZADO: 'Una solicitud anterior con este RUC no fue aprobada. Si crees que es un error, contáctanos para más información.',
+    };
+
+    // ── Resetear aceptación del acuerdo si el usuario modifica algún dato ─────
+    // (el HTML del acuerdo ya no reflejaría los datos actuales). El check de
+    // T&C NO se resetea: no depende de los datos del formulario.
+    const resetAcuerdo = () => {
+        setAcuerdoAceptado(false);
         setAcuerdoHtml('');
         setPreviewError(null);
     };
+
+    // Ambos checks deben estar marcados para poder enviar el formulario
+    const ambosCheckAceptados = tcAceptado && acuerdoAceptado;
 
     useEffect(() => {
         if (success) {
             const timer = setTimeout(() => {
                 setFormData(EMPTY_FORM);
                 setFileError(null);
-                resetContrato();
+                setTcAceptado(false);
+                setTcHtml('');
+                resetAcuerdo();
             }, 3000);
             return () => clearTimeout(timer);
         }
@@ -151,9 +216,9 @@ export function RegisterPanel({
             return;
         }
 
-        // El vendedor debe haber aceptado el acuerdo antes de enviar
-        if (isVendedor && !contratoAceptado) {
-            setPreviewError('Debes leer y aceptar el Acuerdo Comercial para continuar.');
+        // El vendedor debe haber aceptado ambos checks antes de enviar
+        if (isVendedor && !ambosCheckAceptados) {
+            setPreviewError('Debes aceptar los Términos y Condiciones y el Acuerdo Comercial para continuar.');
             return;
         }
 
@@ -171,7 +236,7 @@ export function RegisterPanel({
         }
 
         // Si ya había aceptado el acuerdo y cambia un dato, necesita re-aceptar
-        if (contratoAceptado) resetContrato();
+        if (acuerdoAceptado) resetAcuerdo();
         onClearError();
     };
 
@@ -185,7 +250,7 @@ export function RegisterPanel({
             archivoPDF: null,
         }));
         setFileError(null);
-        if (contratoAceptado) resetContrato();
+        if (acuerdoAceptado) resetAcuerdo();
         onClearError();
     };
 
@@ -205,16 +270,60 @@ export function RegisterPanel({
 
         setFileError(null);
         setFormData(prev => ({ ...prev, archivoPDF: file }));
-        if (contratoAceptado) resetContrato();
+        if (acuerdoAceptado) resetAcuerdo();
     };
 
-    // ── Handler del checkbox de acuerdo ───────────────────────────────────────
+    // ── Handler del checkbox 1 (Términos y Condiciones) ───────────────────────
+    // Si ya estaba aceptado → desmarca.
+    // Si no → llama a Laravel para obtener el HTML completo de los Términos y
+    // Condiciones Generales para Sellers y abre el modal de previsualización.
+    const handleCheckboxTC = async () => {
+        if (tcAceptado) {
+            setTcAceptado(false);
+            setTcHtml('');
+            setTcError(null);
+            return;
+        }
+
+        setTcError(null);
+        setLoadingTyc(true);
+
+        try {
+            const resp = await fetch(`${LARAVEL_API}/contracts/terms`, {
+                method: 'GET',
+                headers: { Accept: 'application/json' },
+            });
+
+            if (!resp.ok) throw new Error('El servidor no pudo cargar los Términos y Condiciones.');
+
+            const data: ContratoPreviewResponse = await resp.json();
+            setTcHtml(data.html);
+            setShowTCModal(true);
+
+        } catch {
+            setTcError('No se pudieron cargar los Términos y Condiciones. Verifica tu conexión e intenta de nuevo.');
+        } finally {
+            setLoadingTyc(false);
+        }
+    };
+
+    const handleAceptarTC = () => {
+        setTcAceptado(true);
+        setShowTCModal(false);
+    };
+
+    const handleRechazarTC = () => {
+        setTcAceptado(false);
+        setShowTCModal(false);
+    };
+
+    // ── Handler del checkbox 2 (Acuerdo Comercial) ────────────────────────────
     // Si ya estaba aceptado → desmarca.
     // Si no → llama a Laravel para obtener el HTML del acuerdo pre-llenado
-    // y abre el modal de previsualización.
+    // con los datos del formulario y abre el modal de previsualización.
     const handleCheckboxAcuerdo = async () => {
-        if (contratoAceptado) {
-            resetContrato();
+        if (acuerdoAceptado) {
+            resetAcuerdo();
             return;
         }
 
@@ -243,19 +352,19 @@ export function RegisterPanel({
             setShowAcuerdoModal(true);
 
         } catch {
-            setPreviewError('No se pudo cargar el acuerdo. Verifica tu conexión e intenta de nuevo.');
+            setPreviewError('No se pudo cargar el Acuerdo Comercial. Verifica tu conexión e intenta de nuevo.');
         } finally {
             setLoadingPreview(false);
         }
     };
 
     const handleAceptarAcuerdo = () => {
-        setContratoAceptado(true);
+        setAcuerdoAceptado(true);
         setShowAcuerdoModal(false);
     };
 
     const handleRechazarAcuerdo = () => {
-        setContratoAceptado(false);
+        setAcuerdoAceptado(false);
         setShowAcuerdoModal(false);
     };
 
@@ -459,7 +568,11 @@ export function RegisterPanel({
                                 RUC <span className="text-red-500">*</span>
                             </label>
                             <div className="relative">
-                                <CheckCircle className={iconClass} aria-hidden="true" />
+                                {rucCheckStatus === 'checking' ? (
+                                    <Loader2 className={`${iconClass} animate-spin`} aria-hidden="true" />
+                                ) : (
+                                    <CheckCircle className={iconClass} aria-hidden="true" />
+                                )}
                                 <input
                                     id="reg-ruc"
                                     type="text"
@@ -470,9 +583,25 @@ export function RegisterPanel({
                                     maxLength={11}
                                     inputMode="numeric"
                                     required
-                                    className={inputClass}
+                                    className={`${inputClass} ${
+                                        rucCheckStatus === 'taken'
+                                            ? '!border-red-400 focus:!border-red-500'
+                                            : rucCheckStatus === 'free'
+                                                ? '!border-emerald-400 focus:!border-emerald-500'
+                                                : ''
+                                    }`}
                                 />
                             </div>
+                            {rucCheckStatus === 'taken' && rucCheckEstado && (
+                                <p className="mt-1.5 text-xs text-red-500 font-medium leading-snug">
+                                    {RUC_MENSAJES[rucCheckEstado]}
+                                </p>
+                            )}
+                            {rucCheckStatus === 'free' && (
+                                <p className="mt-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+                                    RUC disponible para registro.
+                                </p>
+                            )}
                         </div>
                     )}
 
@@ -542,6 +671,9 @@ export function RegisterPanel({
                                 rows={3}
                                 className="w-full p-4 border-2 border-slate-200 dark:border-[var(--border-subtle)] rounded-xl text-sm text-slate-700 dark:text-[var(--text-primary)] bg-slate-50 dark:bg-[var(--bg-primary)] focus:outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)] focus:bg-white dark:focus:bg-[var(--bg-secondary)] focus:shadow-[0_0_0_4px_rgba(66,153,225,0.1)] transition-all duration-300 resize-none"
                             />
+                            <p className="mt-1.5 text-xs text-slate-400 dark:text-[var(--text-secondary)]">
+                                Esta descripción no se guarda — solo ayuda a nuestro sistema a validar tu solicitud con mayor precisión.
+                            </p>
                         </div>
                     )}
 
@@ -620,26 +752,57 @@ export function RegisterPanel({
                         </div>
                     )}
 
-                    {/* ── Sección T&C y Acuerdo Comercial (solo vendedor) ──────── */}
+                    {/* ── Sección de aceptación: 2 checks independientes (solo vendedor) ── */}
                     {isVendedor && (
                         <div className="col-span-2 border-t border-slate-100 dark:border-[var(--border-subtle)] pt-5 space-y-3">
 
-                            {/* Link para ver los Términos y Condiciones */}
-                            <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-[var(--text-secondary)]">
-                                <ScrollText className="w-4 h-4 flex-shrink-0 text-sky-400 dark:text-[var(--icons-green)]" />
-                                <span>Antes de continuar, revisa nuestros</span>
-                                <button
-                                    type="button"
-                                    onClick={() => setShowTCModal(true)}
-                                    className="text-sky-500 dark:text-[var(--icons-green)] font-semibold underline underline-offset-2 hover:text-sky-600 transition-colors"
-                                >
-                                    Términos y Condiciones
-                                </button>
+                            {/* ── Check 1: Términos y Condiciones ──────────────────────── */}
+                            <div className={`flex items-start gap-3 p-3.5 rounded-xl border-2 transition-all duration-300 ${
+                                tcAceptado
+                                    ? 'border-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 dark:border-emerald-600'
+                                    : 'border-slate-200 dark:border-[var(--border-subtle)] bg-slate-50 dark:bg-[var(--bg-primary)]'
+                            }`}>
+                                <div className="relative mt-0.5 flex-shrink-0">
+                                    {loadingTyc ? (
+                                        <Loader2 className="w-5 h-5 animate-spin text-sky-500 dark:text-[var(--icons-green)]" />
+                                    ) : (
+                                        <input
+                                            id="check-tc"
+                                            type="checkbox"
+                                            checked={tcAceptado}
+                                            disabled={loadingTyc}
+                                            onChange={handleCheckboxTC}
+                                            className="w-5 h-5 rounded border-2 border-slate-300 dark:border-[var(--border-subtle)] text-sky-500 dark:text-[var(--icons-green)] cursor-pointer disabled:cursor-not-allowed accent-sky-500"
+                                        />
+                                    )}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <label
+                                        htmlFor="check-tc"
+                                        className="text-sm font-semibold leading-tight text-slate-700 dark:text-[var(--text-primary)] cursor-pointer"
+                                    >
+                                        He leído y acepto los{' '}
+                                        <span className="text-sky-500 dark:text-[var(--icons-green)]">
+                                            Términos y Condiciones
+                                        </span>{' '}
+                                        de Lyrium Biomarketplace
+                                        <span className="text-red-500 ml-0.5">*</span>
+                                    </label>
+                                    {tcAceptado && (
+                                        <p className="mt-1 text-xs text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
+                                            <ShieldCheck className="w-3.5 h-3.5" />
+                                            Términos y Condiciones aceptados
+                                        </p>
+                                    )}
+                                    {tcError && (
+                                        <p className="mt-1 text-xs text-red-500 font-medium">{tcError}</p>
+                                    )}
+                                </div>
                             </div>
 
-                            {/* Checkbox del Acuerdo Comercial */}
+                            {/* ── Check 2: Acuerdo Comercial ────────────────────────────── */}
                             <div className={`flex items-start gap-3 p-3.5 rounded-xl border-2 transition-all duration-300 ${
-                                contratoAceptado
+                                acuerdoAceptado
                                     ? 'border-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 dark:border-emerald-600'
                                     : isFormComplete
                                         ? 'border-sky-200 dark:border-[var(--border-subtle)] bg-sky-50/50 dark:bg-[var(--bg-primary)]'
@@ -652,7 +815,7 @@ export function RegisterPanel({
                                         <input
                                             id="check-acuerdo"
                                             type="checkbox"
-                                            checked={contratoAceptado}
+                                            checked={acuerdoAceptado}
                                             disabled={!isFormComplete || loadingPreview}
                                             onChange={handleCheckboxAcuerdo}
                                             className="w-5 h-5 rounded border-2 border-slate-300 dark:border-[var(--border-subtle)] text-sky-500 dark:text-[var(--icons-green)] cursor-pointer disabled:cursor-not-allowed accent-sky-500"
@@ -672,7 +835,7 @@ export function RegisterPanel({
                                         <span className="text-sky-500 dark:text-[var(--icons-green)]">
                                             Acuerdo Comercial de Prestación de Servicios
                                         </span>{' '}
-                                        de Lyrium Biomarketplace, así como sus términos y condiciones.
+                                        de Lyrium Biomarketplace
                                         <span className="text-red-500 ml-0.5">*</span>
                                     </label>
                                     {!isFormComplete && (
@@ -680,10 +843,10 @@ export function RegisterPanel({
                                             Completa todos los campos del formulario para acceder al acuerdo.
                                         </p>
                                     )}
-                                    {contratoAceptado && (
+                                    {acuerdoAceptado && (
                                         <p className="mt-1 text-xs text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
                                             <ShieldCheck className="w-3.5 h-3.5" />
-                                            Acuerdo revisado y aceptado
+                                            Acuerdo Comercial revisado y aceptado
                                         </p>
                                     )}
                                 </div>
@@ -700,7 +863,7 @@ export function RegisterPanel({
                     <div className={isVendedor ? 'col-span-2' : ''}>
                         <button
                             type="submit"
-                            disabled={isLoading || (isVendedor && !contratoAceptado)}
+                            disabled={isLoading || (isVendedor && !ambosCheckAceptados)}
                             className="group relative w-full py-4 bg-gradient-to-r from-sky-500 to-sky-400 dark:from-[#1A3A32] dark:to-[var(--brand-green)] text-white font-bold text-sm uppercase tracking-wider rounded-xl shadow-[0_10px_25px_rgba(14,165,233,0.3)] dark:shadow-[0_10px_25px_rgba(74,124,89,0.3)] hover:shadow-[0_15px_35px_rgba(14,165,233,0.4)] dark:hover:shadow-[0_15px_35px_rgba(74,124,89,0.4)] hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex items-center justify-center gap-3 overflow-hidden"
                         >
                             <span className="relative z-10 flex items-center gap-3">
@@ -743,95 +906,77 @@ export function RegisterPanel({
         </div>
 
         {/* ════════════════════════════════════════════════════════════════════ */}
-        {/* Modal 1 — Términos y Condiciones (2 PDFs estáticos)               */}
+        {/* Modal 1 — Términos y Condiciones Generales para Sellers (completo) */}
         {/* ════════════════════════════════════════════════════════════════════ */}
-        {showTCModal && (
+        {showTCModal && tcHtml && (
             <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-                {/* Backdrop */}
-                <div
-                    className="absolute inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-md"
-                    onClick={() => setShowTCModal(false)}
-                    role="presentation"
-                    aria-hidden="true"
-                />
+                {/* Backdrop — no cierra al hacer clic: el usuario debe decidir */}
+                <div className="absolute inset-0 bg-black/70 dark:bg-black/85 backdrop-blur-md" aria-hidden="true" />
 
                 {/* Panel */}
-                <div className="relative z-10 w-full max-w-2xl bg-white dark:bg-[var(--bg-secondary)] rounded-2xl shadow-2xl overflow-hidden">
+                <div className="relative z-10 w-full max-w-3xl max-h-[90vh] bg-white dark:bg-[var(--bg-secondary)] rounded-2xl shadow-2xl flex flex-col overflow-hidden">
                     {/* Header */}
-                    <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-[var(--border-subtle)]">
+                    <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-[var(--border-subtle)] flex-shrink-0">
                         <div className="flex items-center gap-3">
                             <ScrollText className="w-5 h-5 text-sky-500 dark:text-[var(--icons-green)]" />
                             <h2 className="text-base font-bold text-slate-800 dark:text-[var(--text-primary)]">
-                                Términos y Condiciones
+                                Términos y Condiciones — solo lectura
                             </h2>
                         </div>
-                        <button
-                            type="button"
-                            onClick={() => setShowTCModal(false)}
-                            className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-[var(--bg-primary)] transition-colors"
-                            aria-label="Cerrar"
-                        >
-                            <X className="w-5 h-5" />
-                        </button>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                            <a
+                                href={TC_SELLERS_PDF}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-sky-600 dark:text-[var(--icons-green)] bg-sky-50 dark:bg-[var(--bg-primary)] hover:bg-sky-100 dark:hover:bg-[var(--bg-primary)]/80 transition-colors"
+                            >
+                                <ExternalLink className="w-3.5 h-3.5" />
+                                Ver PDF
+                            </a>
+                            <button
+                                type="button"
+                                onClick={handleRechazarTC}
+                                className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-[var(--bg-primary)] transition-colors"
+                                aria-label="Cerrar sin aceptar"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
                     </div>
 
-                    {/* Body */}
-                    <div className="p-6 space-y-4">
-                        <p className="text-sm text-slate-500 dark:text-[var(--text-secondary)]">
-                            Revisa los documentos antes de aceptar el Acuerdo Comercial:
+                    {/* Aviso de solo lectura */}
+                    <div className="px-6 py-2.5 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-100 dark:border-amber-800/40 flex-shrink-0">
+                        <p className="text-xs text-amber-700 dark:text-amber-400 font-medium">
+                            Léelo detenidamente antes de aceptar. Puedes ver o descargar el PDF original desde el botón dentro del documento.
                         </p>
-
-                        {/* Documento 1 */}
-                        <a
-                            href={TC_VENDEDOR_PDF}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-4 p-4 rounded-xl border-2 border-slate-200 dark:border-[var(--border-subtle)] hover:border-sky-400 dark:hover:border-[var(--icons-green)] bg-slate-50 dark:bg-[var(--bg-primary)] transition-all duration-200 group"
-                        >
-                            <div className="w-10 h-10 rounded-lg bg-sky-100 dark:bg-[var(--bg-secondary)] flex items-center justify-center flex-shrink-0">
-                                <FileText className="w-5 h-5 text-sky-500 dark:text-[var(--icons-green)]" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <p className="text-sm font-semibold text-slate-700 dark:text-[var(--text-primary)]">
-                                    Términos y Condiciones del Vendedor
-                                </p>
-                                <p className="text-xs text-slate-400 dark:text-[var(--text-secondary)] mt-0.5">
-                                    Condiciones aplicables a sellers de Lyrium Biomarketplace
-                                </p>
-                            </div>
-                            <ExternalLink className="w-4 h-4 text-slate-400 group-hover:text-sky-500 dark:group-hover:text-[var(--icons-green)] transition-colors flex-shrink-0" />
-                        </a>
-
-                        {/* Documento 2 */}
-                        <a
-                            href={TC_CLIENTE_PDF}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-4 p-4 rounded-xl border-2 border-slate-200 dark:border-[var(--border-subtle)] hover:border-sky-400 dark:hover:border-[var(--icons-green)] bg-slate-50 dark:bg-[var(--bg-primary)] transition-all duration-200 group"
-                        >
-                            <div className="w-10 h-10 rounded-lg bg-sky-100 dark:bg-[var(--bg-secondary)] flex items-center justify-center flex-shrink-0">
-                                <FileText className="w-5 h-5 text-sky-500 dark:text-[var(--icons-green)]" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <p className="text-sm font-semibold text-slate-700 dark:text-[var(--text-primary)]">
-                                    Términos y Condiciones del Cliente
-                                </p>
-                                <p className="text-xs text-slate-400 dark:text-[var(--text-secondary)] mt-0.5">
-                                    Condiciones generales para compradores en la plataforma
-                                </p>
-                            </div>
-                            <ExternalLink className="w-4 h-4 text-slate-400 group-hover:text-sky-500 dark:group-hover:text-[var(--icons-green)] transition-colors flex-shrink-0" />
-                        </a>
                     </div>
 
-                    {/* Footer */}
-                    <div className="px-6 pb-6">
+                    {/* Contenido de los Términos y Condiciones (HTML desde Laravel) */}
+                    <div className="flex-1 overflow-y-auto px-8 py-6">
+                        <div
+                            className="prose prose-sm max-w-none text-slate-700 dark:text-[var(--text-primary)]
+                                       prose-headings:text-slate-900 dark:prose-headings:text-[var(--text-primary)]
+                                       prose-strong:text-slate-800 dark:prose-strong:text-[var(--text-primary)]"
+                            dangerouslySetInnerHTML={{ __html: tcHtml }}
+                        />
+                    </div>
+
+                    {/* Acciones */}
+                    <div className="px-6 py-4 border-t border-slate-100 dark:border-[var(--border-subtle)] flex gap-3 flex-shrink-0">
                         <button
                             type="button"
-                            onClick={() => setShowTCModal(false)}
-                            className="w-full py-3 rounded-xl bg-slate-100 dark:bg-[var(--bg-primary)] text-slate-600 dark:text-[var(--text-primary)] text-sm font-semibold hover:bg-slate-200 dark:hover:bg-[var(--bg-primary)]/80 transition-colors"
+                            onClick={handleRechazarTC}
+                            className="flex-1 py-3 rounded-xl border-2 border-slate-200 dark:border-[var(--border-subtle)] text-slate-600 dark:text-[var(--text-primary)] text-sm font-semibold hover:bg-slate-50 dark:hover:bg-[var(--bg-primary)] transition-colors"
                         >
-                            Cerrar
+                            No acepto — Volver
+                        </button>
+                        <button
+                            type="button"
+                            onClick={handleAceptarTC}
+                            className="flex-1 py-3 rounded-xl bg-gradient-to-r from-sky-500 to-sky-400 dark:from-[#1A3A32] dark:to-[var(--brand-green)] text-white text-sm font-bold shadow-[0_8px_20px_rgba(14,165,233,0.3)] hover:shadow-[0_12px_25px_rgba(14,165,233,0.4)] hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2"
+                        >
+                            <ShieldCheck className="w-4 h-4" />
+                            Acepto los Términos y Condiciones
                         </button>
                     </div>
                 </div>
@@ -839,7 +984,7 @@ export function RegisterPanel({
         )}
 
         {/* ════════════════════════════════════════════════════════════════════ */}
-        {/* Modal 2 — Previsualización del Acuerdo Comercial pre-llenado       */}
+        {/* Modal 2 — Previsualización del Acuerdo Comercial pre-llenado        */}
         {/* ════════════════════════════════════════════════════════════════════ */}
         {showAcuerdoModal && acuerdoHtml && (
             <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
@@ -856,21 +1001,32 @@ export function RegisterPanel({
                                 Acuerdo Comercial — solo lectura
                             </h2>
                         </div>
-                        <button
-                            type="button"
-                            onClick={handleRechazarAcuerdo}
-                            className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-[var(--bg-primary)] transition-colors"
-                            aria-label="Cerrar sin aceptar"
-                        >
-                            <X className="w-5 h-5" />
-                        </button>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                            <a
+                                href={ACUERDO_PDF_PLACEHOLDER}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-sky-600 dark:text-[var(--icons-green)] bg-sky-50 dark:bg-[var(--bg-primary)] hover:bg-sky-100 dark:hover:bg-[var(--bg-primary)]/80 transition-colors"
+                            >
+                                <ExternalLink className="w-3.5 h-3.5" />
+                                Ver PDF
+                            </a>
+                            <button
+                                type="button"
+                                onClick={handleRechazarAcuerdo}
+                                className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-[var(--bg-primary)] transition-colors"
+                                aria-label="Cerrar sin aceptar"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
                     </div>
 
                     {/* Aviso de solo lectura */}
                     <div className="px-6 py-2.5 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-100 dark:border-amber-800/40 flex-shrink-0">
                         <p className="text-xs text-amber-700 dark:text-amber-400 font-medium">
                             Este documento ha sido generado con tus datos. Léelo detenidamente antes de aceptar.
-                            No podrás descargarlo desde aquí — estará disponible para el administrador una vez procesada tu solicitud.
+                            El PDF adjunto es una versión provisional mientras el equipo de diseño entrega la definitiva.
                         </p>
                     </div>
 

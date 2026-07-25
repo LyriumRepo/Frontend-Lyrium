@@ -16,11 +16,26 @@ export interface FinanceFilters {
     endDate: string;
 }
 
+interface CuotaMercadoCategoryShare {
+    category_id: number;
+    category_name: string;
+    store_sales: number;
+    marketplace_sales: number;
+    share_percentage: number;
+}
+
+interface CuotaMercadoData {
+    overall_percentage: number;
+    store_total_sales: number;
+    marketplace_total_sales: number;
+    by_category: CuotaMercadoCategoryShare[];
+}
+
 interface AnalyticsData {
     tiempoRespuesta: number[];
     csat: number;
     stockRotation: number[];
-    cuotaMercado: number;
+    cuotaMercado: CuotaMercadoData;
     categories: { labels: string[]; data: number[] };
 }
 
@@ -224,7 +239,14 @@ function computeFinanceData(
 
     const analyticsTiempo = analytics?.tiempoRespuesta ?? [0, 0, 0, 0];
     const analyticsStock = analytics?.stockRotation ?? [0, 0, 0, 0];
-    const analyticsCuota = analytics?.cuotaMercado ?? 0;
+    // Cuota de Mercado: (Ventas del Vendedor / Ventas Totales de la Categoría) × 100, por categoría
+    const cuotaByCategory = analytics?.cuotaMercado?.by_category ?? [];
+    const cuotaMercadoLabels = cuotaByCategory.length > 0
+        ? cuotaByCategory.map(c => c.category_name)
+        : ['Sin datos'];
+    const cuotaMercadoData = cuotaByCategory.length > 0
+        ? cuotaByCategory.map(c => c.share_percentage)
+        : [0];
     return {
         desgloseFinanciero: {
             totalConIgv,
@@ -281,8 +303,8 @@ function computeFinanceData(
             data: roiData,
         },
         cuotaMercado: {
-            labels: ['Tu Tienda', 'Otras Tiendas'],
-            data: [analyticsCuota, Math.max(0, 100 - analyticsCuota)],
+            labels: cuotaMercadoLabels,
+            data: cuotaMercadoData,
         },
         ltv: {
             labels: monthLabels,

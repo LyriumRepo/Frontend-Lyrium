@@ -290,7 +290,7 @@ export default function ClientRescheduleModal({
 
   return (
     <div
-      className="fixed inset-0 bg-black/50 backdrop-blur-md z-[100] flex justify-center items-center p-4"
+      className="fixed inset-0 bg-black/50 backdrop-blur-md z-[99999] flex justify-center items-center p-4"
       onClick={onClose}
       onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }}
       role="dialog"
@@ -303,7 +303,7 @@ export default function ClientRescheduleModal({
         onKeyDown={(e) => e.stopPropagation()}
       >
         {/* ─── Header ───────────────────────────────────────────────────── */}
-        <div className="bg-gradient-to-r from-sky-500 to-sky-400 dark:from-[var(--brand-green-hover)] dark:to-[var(--brand-green)] p-4 sm:p-5 text-white relative flex-shrink-0">
+        <div className="bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--verde-500)] p-4 sm:p-5 text-white relative flex-shrink-0">
           <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl pointer-events-none" />
           <div className="relative z-10 flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -313,7 +313,7 @@ export default function ClientRescheduleModal({
               <div>
                 <h3 className="text-sm font-black tracking-tighter leading-none">Reprogramar Cita</h3>
                 {order.tienda && (
-                  <p className="text-[9px] font-bold text-sky-100 uppercase tracking-[0.2em] mt-0.5 truncate max-w-[160px]">
+                  <p className="text-[9px] font-bold text-white/80 uppercase tracking-[0.2em] mt-0.5 truncate max-w-[160px]">
                     {order.tienda}
                   </p>
                 )}
@@ -321,7 +321,7 @@ export default function ClientRescheduleModal({
             </div>
             <button
               onClick={onClose}
-              className="w-8 h-8 rounded-full bg-black/10 flex items-center justify-center hover:bg-black/20 transition-all"
+              className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center hover:bg-white/30 transition-all"
             >
               <Icon name="X" className="w-4 h-4 text-white" />
             </button>

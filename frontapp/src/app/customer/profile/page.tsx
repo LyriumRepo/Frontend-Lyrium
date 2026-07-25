@@ -461,7 +461,7 @@ export default function CustomerProfilePage() {
 
   return (
     <>
-    <WelcomeGuide userId={user.id} />
+    <WelcomeGuide userId={user.id} createdAt={user.created_at} />
     <ProfileCompletionGuide userId={user.id} missing={profileCompletion.missing} />
     {isBirthday && <BirthdayCelebration name={firstName} />}
     <div className="space-y-8 animate-fadeIn">
@@ -500,7 +500,7 @@ export default function CustomerProfilePage() {
         )}
       </div>
 
-      <div className="flex justify-center">
+      <div className="flex justify-center md:justify-end">
         <BaseButton
           onClick={() => isEditMode ? handleSave() : setIsEditMode(true)}
           isLoading={saving}

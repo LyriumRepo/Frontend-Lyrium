@@ -158,7 +158,7 @@ export default function CheckoutPage() {
                     <PersonalDataForm />
                     <div className="absolute -bottom-5 left-6 right-6 h-px bg-gradient-to-r from-transparent via-gray-200 dark:via-[var(--border-subtle)] to-transparent" />
                   </div>
-                  {cartItems.some((i) => i.id > 0) && orderData.deliveryMethod !== 'pickup' && (
+                  {cartItems.some((i) => i.selected && i.id > 0) && orderData.deliveryMethod !== 'pickup' && (
                     <div className="relative">
                       <ShippingForm />
                       <div className="absolute -bottom-5 left-6 right-6 h-px bg-gradient-to-r from-transparent via-gray-200 dark:via-[var(--border-subtle)] to-transparent" />

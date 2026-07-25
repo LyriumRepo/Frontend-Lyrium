@@ -35,7 +35,7 @@ const statusLabels: Record<string, string> = {
 
 export default function ComprobantesSection({ invoices }: ComprobantesSectionProps) {
     return (
-        <div className="bg-[var(--bg-card)] p-8 rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm">
+        <div className="bg-[var(--bg-card)] p-8 rounded-[2.5rem] border border-[var(--border-subtle)] shadow-lg">
             <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg text-white" style={{ backgroundColor: 'var(--turquesa-500)', boxShadow: '0 10px 15px -3px color-mix(in srgb, var(--turquesa-500) 30%, transparent)' }}>

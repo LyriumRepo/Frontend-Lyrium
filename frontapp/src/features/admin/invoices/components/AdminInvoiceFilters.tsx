@@ -7,16 +7,11 @@ import { BaseDatePicker } from '@/components/ui';
 
 interface AdminInvoiceFiltersProps {
     search: string;
-    statusFilter: string;
-    typeFilter: string;
     storeFilter: string;
     dateFrom: string;
     dateTo: string;
     allStores: string[];
-    allTypes: string[];
     onSearch: (v: string) => void;
-    onStatusFilter: (v: string) => void;
-    onTypeFilter: (v: string) => void;
     onStoreFilter: (v: string) => void;
     onDateFrom: (v: string) => void;
     onDateTo: (v: string) => void;
@@ -27,9 +22,9 @@ interface AdminInvoiceFiltersProps {
 const selectClass = 'w-full p-3 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-2xl text-[10px] font-black uppercase tracking-widest text-[var(--icons-green)] focus:ring-2 focus:ring-[var(--icons-green)]/20 cursor-pointer outline-none appearance-none';
 
 export default function AdminInvoiceFilters({
-    search, statusFilter, typeFilter, storeFilter, dateFrom, dateTo,
-    allStores, allTypes,
-    onSearch, onStatusFilter, onTypeFilter, onStoreFilter, onDateFrom, onDateTo, onClear,
+    search, storeFilter, dateFrom, dateTo,
+    allStores,
+    onSearch, onStoreFilter, onDateFrom, onDateTo, onClear,
     actions,
 }: AdminInvoiceFiltersProps) {
     return (
@@ -69,31 +64,7 @@ export default function AdminInvoiceFilters({
                 />
             </div>
 
-            {/* Fila 2: Estado + Tipo */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                <div className="space-y-2">
-                    <label className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1">Estado</label>
-                    <select value={statusFilter} onChange={e => onStatusFilter(e.target.value)} className={selectClass}>
-                        <option value="">Todos los Estados</option>
-                        <option value="ACCEPTED">Aceptado</option>
-                        <option value="SENT_WAIT_CDR">Pendiente CDR</option>
-                        <option value="OBSERVED">Observado</option>
-                        <option value="REJECTED">Rechazado</option>
-                        <option value="DRAFT">Borrador</option>
-                    </select>
-                </div>
-                <div className="space-y-2">
-                    <label className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1">Tipo</label>
-                    <select value={typeFilter} onChange={e => onTypeFilter(e.target.value)} className={selectClass}>
-                        <option value="">Todos</option>
-                        {allTypes.map(t => (
-                            <option key={t} value={t}>{t}</option>
-                        ))}
-                    </select>
-                </div>
-            </div>
-
-            {/* Fila 3: Fechas + Tienda (si existe) — siempre llenan el ancho */}
+            {/* Fila 2: Fechas + Tienda (si existe) — siempre llenan el ancho */}
             <div className={`grid gap-4 mb-0 ${allStores.length > 0 ? 'grid-cols-1 sm:grid-cols-3' : 'grid-cols-1 sm:grid-cols-2'}`}>
                 <div className="space-y-2">
                     <BaseDatePicker label="Fecha Desde" value={dateFrom} onChange={onDateFrom} placeholder="dd/mm/aaaa" />

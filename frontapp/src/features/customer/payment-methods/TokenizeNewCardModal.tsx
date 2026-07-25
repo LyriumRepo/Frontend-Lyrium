@@ -155,9 +155,9 @@ export default function TokenizeNewCardModal({ onClose, onSuccess }: Props) {
   };
 
   return createPortal(
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[60] flex items-center justify-center p-4" onClick={onClose} onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }} role="dialog" aria-modal="true" tabIndex={-1}>
-      <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-[1.5rem] sm:rounded-[3.5rem] max-w-xl w-full max-h-[85vh] overflow-hidden shadow-2xl" onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
-        <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-5 sm:p-8 text-white relative">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[99999] flex items-center justify-center p-4" onClick={onClose} onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }} role="dialog" aria-modal="true" tabIndex={-1}>
+      <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-[1.5rem] sm:rounded-[3.5rem] max-w-xl w-full max-h-[85vh] overflow-hidden shadow-2xl flex flex-col" onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
+        <div className="bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--verde-500)] p-5 sm:p-8 text-white relative shrink-0">
           <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl" />
           <div className="relative z-10 flex items-center justify-between">
             <div className="flex items-center gap-3 sm:gap-4">
@@ -166,18 +166,18 @@ export default function TokenizeNewCardModal({ onClose, onSuccess }: Props) {
               </div>
               <div>
                 <h3 className="text-lg sm:text-2xl font-black tracking-tighter">Nueva Tarjeta</h3>
-                <p className="text-[10px] font-bold text-sky-100 uppercase tracking-[0.2em]">
+                <p className="text-[10px] font-bold text-white/80 uppercase tracking-[0.2em]">
                   Tokenización Segura
                 </p>
               </div>
             </div>
-            <button onClick={onClose} className="w-10 h-10 rounded-full bg-black/10 flex items-center justify-center hover:bg-black/20">
+            <button onClick={onClose} className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center hover:bg-white/30">
               <Icon name="X" className="w-5 h-5 text-white" />
             </button>
           </div>
         </div>
 
-        <div className="p-5 sm:p-10 space-y-4 sm:space-y-6 overflow-y-auto max-h-[calc(85vh-140px)] sm:max-h-[calc(85vh-200px)]">
+        <div className="p-5 sm:p-10 space-y-4 sm:space-y-6 overflow-y-auto flex-1">
           {error && (
             <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-2xl border border-red-200 dark:border-red-800 flex items-start gap-3">
               <Icon name="AlertCircle" className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
@@ -288,7 +288,7 @@ export default function TokenizeNewCardModal({ onClose, onSuccess }: Props) {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="flex-[2] px-4 sm:px-8 py-3 sm:py-4 rounded-2xl bg-gradient-to-r from-sky-500 to-sky-600 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] text-white font-black text-xs uppercase tracking-[0.2em] hover:shadow-lg disabled:opacity-50"
+                  className="flex-[2] px-4 sm:px-8 py-3 sm:py-4 rounded-2xl bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--verde-500)] text-white font-black text-xs uppercase tracking-[0.2em] hover:shadow-lg disabled:opacity-50"
                 >
                   {saving ? 'Guardando...' : 'Guardar Tarjeta'}
                 </button>

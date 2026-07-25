@@ -1326,7 +1326,7 @@ export function ProductDetailPageClient({
       <div ref={gridContainerRef} className="grid lg:grid-cols-[1fr_minmax(360px,420px)] gap-8 items-stretch">
         {/* Columna izquierda: galería */}
         <div className="sticky top-24 h-full flex flex-col justify-center">
-          <ProductGallery images={product.images} name={product.name} size={gallerySize} productId={product.id} />
+          <ProductGallery images={product.images} name={product.name} size={gallerySize} productId={product.id} storeLogo={product.store?.logo_marketplace} />
         </div>
 
         {/* Columna derecha: info de compra */}
@@ -1619,11 +1619,13 @@ function ProductGallery({
   name,
   size,
   productId,
+  storeLogo,
 }: {
   images: LaravelProduct['images'];
   name: string;
   size?: number | null;
   productId: string;
+  storeLogo?: string | null;
 }) {
   const [active, setActive] = useState(0);
   const [zooming, setZooming] = useState(false);
@@ -1714,6 +1716,16 @@ function ProductGallery({
         />
 
         <TopMedalBadge entityType="product" entityId={productId} size="xxl" className="absolute bottom-4 right-4 z-10" />
+
+        {storeLogo && (
+          <div className="absolute top-3 left-3 z-10 w-20 h-20 rounded-full bg-white shadow-md overflow-hidden flex items-center justify-center">
+            <img
+              src={storeLogo}
+              alt="Logo tienda"
+              className="w-[90%] h-[90%] object-contain rounded-full"
+            />
+          </div>
+        )}
 
         {/* Lupa */}
         <div

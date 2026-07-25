@@ -5,6 +5,7 @@ import { Shield, ShieldOff, ShieldCheck, Search, Plus, Trash2, AlertTriangle } f
 import DataTable from '@/components/ui/DataTable';
 import BaseButton from '@/components/ui/BaseButton';
 import BaseModal from '@/components/ui/BaseModal';
+import Pagination from '@/components/ui/Pagination';
 import BaseStatusBadge from '@/components/ui/BaseStatusBadge';
 import type { Column } from '@/components/ui/DataTable';
 import { useBlockedIps } from '@/features/admin/security/hooks/useBlockedIps';
@@ -249,28 +250,8 @@ export default function IpsPageClient() {
         />
       </div>
 
-      {pagination && pagination.last_page > 1 && (
-        <div className="flex items-center justify-between px-1">
-          <p className="text-xs text-[var(--text-secondary)]">
-            Página {pagination.current_page} de {pagination.last_page} ({pagination.total} IPs)
-          </p>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => goToPage(pagination.current_page - 1)}
-              disabled={pagination.current_page <= 1}
-              className="px-3 py-1.5 rounded-xl text-xs font-bold bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:bg-[var(--bg-secondary)] disabled:opacity-30 transition-colors"
-            >
-              Anterior
-            </button>
-            <button
-              onClick={() => goToPage(pagination.current_page + 1)}
-              disabled={pagination.current_page >= pagination.last_page}
-              className="px-3 py-1.5 rounded-xl text-xs font-bold bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:bg-[var(--bg-secondary)] disabled:opacity-30 transition-colors"
-            >
-              Siguiente
-            </button>
-          </div>
-        </div>
+      {pagination && (
+        <Pagination page={pagination.current_page} totalPages={pagination.last_page} onPageChange={goToPage} totalItems={pagination.total} itemLabel="IPs" />
       )}
 
       {/* Create Modal */}

@@ -4,10 +4,10 @@ import type { Voucher, InvoiceKPIs } from '../types';
 const C = {
     primary:  [183, 224, 0]   as [number, number, number],  // lima
     secondary:[143, 212, 0]   as [number, number, number],
-    teal:     [102, 214, 168] as [number, number, number],
-    darkTeal: [78,  199, 184] as [number, number, number],
-    blue:     [105, 190, 235] as [number, number, number],
-    navy:     [30,  58,  95]  as [number, number, number],  // #1E3A5F
+    teal:     [34,  139, 70]  as [number, number, number],
+    darkTeal: [22,  101, 52]  as [number, number, number],
+    blue:     [74,  222, 128] as [number, number, number],
+    navy:     [6,   78,  35]  as [number, number, number],
 };
 
 // Colores semánticos de estado
@@ -20,10 +20,10 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 const STATUS_COLOR: Record<string, [number, number, number]> = {
-    ACCEPTED:      [16, 185, 129],
-    SENT_WAIT_CDR: [59, 130, 246],
-    REJECTED:      [244, 63, 94],
-    OBSERVED:      [59, 130, 246],
+    ACCEPTED:      [34,  139, 70],
+    SENT_WAIT_CDR: [132, 204, 22],
+    REJECTED:      [220, 38,  38],
+    OBSERVED:      [132, 204, 22],
     DRAFT:         [156, 163, 175],
 };
 

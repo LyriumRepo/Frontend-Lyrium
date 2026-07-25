@@ -8,12 +8,15 @@ export interface PlanInvoiceRow {
     invoice_number: string;
     series: string;
     number: string;
+    type: string;
     store_name: string;
     customer_name: string;
     customer_ruc: string;
     plan_name: string;
     months: number;
     total: number;
+    subtotal_sin_igv: number;
+    igv_amount: number;
     sunat_status: string;
     sunat_label: string;
     emission_date: string;
@@ -26,12 +29,15 @@ function toRow(inv: PlanInvoice): PlanInvoiceRow {
         invoice_number: inv.invoice_number ?? '—',
         series: inv.series ?? 'F001',
         number: inv.number ?? '—',
+        type: inv.type ?? 'FACTURA',
         store_name: inv.store_name ?? '—',
         customer_name: inv.customer_name ?? '—',
         customer_ruc: inv.customer_ruc ?? '—',
         plan_name: inv.plan_name ?? '—',
         months: inv.months ?? 0,
         total: inv.total,
+        subtotal_sin_igv: inv.subtotal_sin_igv ?? 0,
+        igv_amount: inv.igv_amount ?? 0,
         sunat_status: inv.sunat_status,
         sunat_label: mapStatusLabel(inv.sunat_status),
         emission_date: inv.emission_date ?? inv.created_at,
@@ -44,6 +50,8 @@ export function usePlanInvoices() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [total, setTotal] = useState(0);
+    const [selectedRow, setSelectedRow] = useState<PlanInvoiceRow | null>(null);
+    const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
     const fetchData = useCallback(async () => {
         setIsLoading(true);
@@ -63,5 +71,25 @@ export function usePlanInvoices() {
         fetchData();
     }, [fetchData]);
 
-    return { rows, isLoading, error, total, refresh: fetchData };
+    const handleViewDetail = useCallback((row: PlanInvoiceRow) => {
+        setSelectedRow(row);
+        setIsDrawerOpen(true);
+    }, []);
+
+    const handleCloseDrawer = useCallback(() => {
+        setIsDrawerOpen(false);
+        setSelectedRow(null);
+    }, []);
+
+    return {
+        rows,
+        isLoading,
+        error,
+        total,
+        refresh: fetchData,
+        selectedRow,
+        isDrawerOpen,
+        handleViewDetail,
+        handleCloseDrawer,
+    };
 }

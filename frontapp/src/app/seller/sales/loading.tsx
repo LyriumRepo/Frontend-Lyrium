@@ -55,7 +55,7 @@ export default function SalesLoading() {
   return (
     <div className="space-y-8 animate-fadeIn pb-20 max-w-7xl mx-auto">
       <ModuleHeader
-        title="Centro de Control de Ventas"
+        title="Ventas"
         subtitle="Toda la información y trazabilidad sobre tus ventas generadas."
         icon="Sales"
       />

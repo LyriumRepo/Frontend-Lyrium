@@ -1,0 +1,1779 @@
+{
+  "directed": false,
+  "multigraph": false,
+  "graph": {},
+  "nodes": [
+    {
+      "label": "CategoryForm",
+      "file_type": "code",
+      "source_file": "categories/components/CategoryForm.tsx",
+      "source_location": "L16",
+      "_origin": "ast",
+      "id": "categories_components_categoryform_categoryform",
+      "community": 3,
+      "norm_label": "categoryform"
+    },
+    {
+      "label": "Category",
+      "file_type": "code",
+      "source_file": "categories/hooks/useCategories.ts",
+      "source_location": "L11",
+      "_origin": "ast",
+      "id": "categories_hooks_usecategories_category",
+      "community": 1,
+      "norm_label": "category"
+    },
+    {
+      "label": "CategoryNode",
+      "file_type": "code",
+      "source_file": "categories/hooks/useCategories.ts",
+      "source_location": "L24",
+      "_origin": "ast",
+      "id": "categories_hooks_usecategories_categorynode",
+      "community": 1,
+      "norm_label": "categorynode"
+    },
+    {
+      "label": "ContractStatus",
+      "file_type": "code",
+      "source_file": "contracts/types.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "contracts_types_contractstatus",
+      "community": 9,
+      "norm_label": "contractstatus"
+    },
+    {
+      "label": "ContractModality",
+      "file_type": "code",
+      "source_file": "contracts/types.ts",
+      "source_location": "L2",
+      "_origin": "ast",
+      "id": "contracts_types_contractmodality",
+      "community": 8,
+      "norm_label": "contractmodality"
+    },
+    {
+      "label": "ExpiryUrgency",
+      "file_type": "code",
+      "source_file": "contracts/types.ts",
+      "source_location": "L3",
+      "_origin": "ast",
+      "id": "contracts_types_expiryurgency",
+      "community": 10,
+      "norm_label": "expiryurgency"
+    },
+    {
+      "label": "AuditEvent",
+      "file_type": "code",
+      "source_file": "contracts/types.ts",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "contracts_types_auditevent",
+      "community": 4,
+      "norm_label": "auditevent"
+    },
+    {
+      "label": "Contract",
+      "file_type": "code",
+      "source_file": "contracts/types.ts",
+      "source_location": "L11",
+      "_origin": "ast",
+      "id": "contracts_types_contract",
+      "community": 5,
+      "norm_label": "contract"
+    },
+    {
+      "label": "ContractFilters",
+      "file_type": "code",
+      "source_file": "contracts/types.ts",
+      "source_location": "L33",
+      "_origin": "ast",
+      "id": "contracts_types_contractfilters",
+      "community": 6,
+      "norm_label": "contractfilters"
+    },
+    {
+      "label": "ContractKPI",
+      "file_type": "code",
+      "source_file": "contracts/types.ts",
+      "source_location": "L41",
+      "_origin": "ast",
+      "id": "contracts_types_contractkpi",
+      "community": 7,
+      "norm_label": "contractkpi"
+    },
+    {
+      "label": "FinanceChartDataset",
+      "file_type": "code",
+      "source_file": "finance/components/FinanceChart.tsx",
+      "source_location": "L11",
+      "_origin": "ast",
+      "id": "finance_components_financechart_financechartdataset",
+      "community": 12,
+      "norm_label": "financechartdataset"
+    },
+    {
+      "label": "FinanceChartProps",
+      "file_type": "code",
+      "source_file": "finance/components/FinanceChart.tsx",
+      "source_location": "L17",
+      "_origin": "ast",
+      "id": "finance_components_financechart_financechartprops",
+      "community": 13,
+      "norm_label": "financechartprops"
+    },
+    {
+      "label": "FinanceChart",
+      "file_type": "code",
+      "source_file": "finance/components/FinanceChart.tsx",
+      "source_location": "L94",
+      "_origin": "ast",
+      "id": "finance_components_financechart_financechart",
+      "community": 11,
+      "norm_label": "financechart"
+    },
+    {
+      "label": "FinanceData",
+      "file_type": "code",
+      "source_file": "finance/hooks/useFinance.ts",
+      "source_location": "L7",
+      "_origin": "ast",
+      "id": "finance_hooks_usefinance_financedata",
+      "community": 14,
+      "norm_label": "financedata"
+    },
+    {
+      "label": "FinanceFilters",
+      "file_type": "code",
+      "source_file": "finance/hooks/useFinanceAnalytics.ts",
+      "source_location": "L8",
+      "_origin": "ast",
+      "id": "finance_hooks_usefinanceanalytics_financefilters",
+      "community": 15,
+      "norm_label": "financefilters"
+    },
+    {
+      "label": "useFinanceAnalytics",
+      "file_type": "code",
+      "source_file": "finance/hooks/useFinanceAnalytics.ts",
+      "source_location": "L22",
+      "_origin": "ast",
+      "id": "finance_hooks_usefinanceanalytics_usefinanceanalytics",
+      "community": 16,
+      "norm_label": "usefinanceanalytics"
+    },
+    {
+      "label": "FinanceChartData",
+      "file_type": "code",
+      "source_file": "finance/types.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "finance_types_financechartdata",
+      "community": 18,
+      "norm_label": "financechartdata"
+    },
+    {
+      "label": "FinancialBreakdown",
+      "file_type": "code",
+      "source_file": "finance/types.ts",
+      "source_location": "L7",
+      "_origin": "ast",
+      "id": "finance_types_financialbreakdown",
+      "community": 20,
+      "norm_label": "financialbreakdown"
+    },
+    {
+      "label": "RecentInvoice",
+      "file_type": "code",
+      "source_file": "finance/types.ts",
+      "source_location": "L18",
+      "_origin": "ast",
+      "id": "finance_types_recentinvoice",
+      "community": 22,
+      "norm_label": "recentinvoice"
+    },
+    {
+      "label": "TopBuyer",
+      "file_type": "code",
+      "source_file": "finance/types.ts",
+      "source_location": "L28",
+      "_origin": "ast",
+      "id": "finance_types_topbuyer",
+      "community": 23,
+      "norm_label": "topbuyer"
+    },
+    {
+      "label": "HeatmapData",
+      "file_type": "code",
+      "source_file": "finance/types.ts",
+      "source_location": "L37",
+      "_origin": "ast",
+      "id": "finance_types_heatmapdata",
+      "community": 21,
+      "norm_label": "heatmapdata"
+    },
+    {
+      "label": "FinanceData",
+      "file_type": "code",
+      "source_file": "finance/types.ts",
+      "source_location": "L43",
+      "_origin": "ast",
+      "id": "finance_types_financedata",
+      "community": 19,
+      "norm_label": "financedata"
+    },
+    {
+      "label": "CustomerKPI",
+      "file_type": "code",
+      "source_file": "finance/types.ts",
+      "source_location": "L65",
+      "_origin": "ast",
+      "id": "finance_types_customerkpi",
+      "community": 17,
+      "norm_label": "customerkpi"
+    },
+    {
+      "label": "Priority",
+      "file_type": "code",
+      "source_file": "helpdesk/types.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "helpdesk_types_priority",
+      "community": 31,
+      "norm_label": "priority"
+    },
+    {
+      "label": "TicketStatus",
+      "file_type": "code",
+      "source_file": "helpdesk/types.ts",
+      "source_location": "L2",
+      "_origin": "ast",
+      "id": "helpdesk_types_ticketstatus",
+      "community": 32,
+      "norm_label": "ticketstatus"
+    },
+    {
+      "label": "ActionType",
+      "file_type": "code",
+      "source_file": "helpdesk/types.ts",
+      "source_location": "L3",
+      "_origin": "ast",
+      "id": "helpdesk_types_actiontype",
+      "community": 24,
+      "norm_label": "actiontype"
+    },
+    {
+      "label": "TicketType",
+      "file_type": "code",
+      "source_file": "helpdesk/types.ts",
+      "source_location": "L4",
+      "_origin": "ast",
+      "id": "helpdesk_types_tickettype",
+      "community": 33,
+      "norm_label": "tickettype"
+    },
+    {
+      "label": "User",
+      "file_type": "code",
+      "source_file": "helpdesk/types.ts",
+      "source_location": "L9",
+      "_origin": "ast",
+      "id": "helpdesk_types_user",
+      "community": 34,
+      "norm_label": "user"
+    },
+    {
+      "label": "Message",
+      "file_type": "code",
+      "source_file": "helpdesk/types.ts",
+      "source_location": "L15",
+      "_origin": "ast",
+      "id": "helpdesk_types_message",
+      "community": 30,
+      "norm_label": "message"
+    },
+    {
+      "label": "FAQArticle",
+      "file_type": "code",
+      "source_file": "helpdesk/types.ts",
+      "source_location": "L25",
+      "_origin": "ast",
+      "id": "helpdesk_types_faqarticle",
+      "community": 28,
+      "norm_label": "faqarticle"
+    },
+    {
+      "label": "AuditEntry",
+      "file_type": "code",
+      "source_file": "helpdesk/types.ts",
+      "source_location": "L36",
+      "_origin": "ast",
+      "id": "helpdesk_types_auditentry",
+      "community": 27,
+      "norm_label": "auditentry"
+    },
+    {
+      "label": "Admin",
+      "file_type": "code",
+      "source_file": "helpdesk/types.ts",
+      "source_location": "L45",
+      "_origin": "ast",
+      "id": "helpdesk_types_admin",
+      "community": 25,
+      "norm_label": "admin"
+    },
+    {
+      "label": "MesaAyudaData",
+      "file_type": "code",
+      "source_file": "helpdesk/types.ts",
+      "source_location": "L51",
+      "_origin": "ast",
+      "id": "helpdesk_types_mesaayudadata",
+      "community": 29,
+      "norm_label": "mesaayudadata"
+    },
+    {
+      "label": "AdminTicketFilters",
+      "file_type": "code",
+      "source_file": "helpdesk/types.ts",
+      "source_location": "L59",
+      "_origin": "ast",
+      "id": "helpdesk_types_adminticketfilters",
+      "community": 26,
+      "norm_label": "adminticketfilters"
+    },
+    {
+      "label": "exportAdminInvoicesToExcel",
+      "file_type": "code",
+      "source_file": "invoices/export/excelExporter.ts",
+      "source_location": "L94",
+      "_origin": "ast",
+      "id": "invoices_export_excelexporter_exportadmininvoicestoexcel",
+      "community": 35,
+      "norm_label": "exportadmininvoicestoexcel"
+    },
+    {
+      "label": "exportAdminInvoicesToPdf",
+      "file_type": "code",
+      "source_file": "invoices/export/pdfExporter.ts",
+      "source_location": "L140",
+      "_origin": "ast",
+      "id": "invoices_export_pdfexporter_exportadmininvoicestopdf",
+      "community": 36,
+      "norm_label": "exportadmininvoicestopdf"
+    },
+    {
+      "label": "AdminInvoiceKPIs",
+      "file_type": "code",
+      "source_file": "invoices/hooks/useAdminInvoices.ts",
+      "source_location": "L4",
+      "_origin": "ast",
+      "id": "invoices_hooks_useadmininvoices_admininvoicekpis",
+      "community": 37,
+      "norm_label": "admininvoicekpis"
+    },
+    {
+      "label": "AdminInvoiceRow",
+      "file_type": "code",
+      "source_file": "invoices/hooks/useAdminInvoices.ts",
+      "source_location": "L12",
+      "_origin": "ast",
+      "id": "invoices_hooks_useadmininvoices_admininvoicerow",
+      "community": 38,
+      "norm_label": "admininvoicerow"
+    },
+    {
+      "label": "useAdminInvoices",
+      "file_type": "code",
+      "source_file": "invoices/hooks/useAdminInvoices.ts",
+      "source_location": "L63",
+      "_origin": "ast",
+      "id": "invoices_hooks_useadmininvoices_useadmininvoices",
+      "community": 39,
+      "norm_label": "useadmininvoices"
+    },
+    {
+      "label": "PlanInvoiceRow",
+      "file_type": "code",
+      "source_file": "invoices/hooks/usePlanInvoices.ts",
+      "source_location": "L6",
+      "_origin": "ast",
+      "id": "invoices_hooks_useplaninvoices_planinvoicerow",
+      "community": 40,
+      "norm_label": "planinvoicerow"
+    },
+    {
+      "label": "usePlanInvoices",
+      "file_type": "code",
+      "source_file": "invoices/hooks/usePlanInvoices.ts",
+      "source_location": "L42",
+      "_origin": "ast",
+      "id": "invoices_hooks_useplaninvoices_useplaninvoices",
+      "community": 41,
+      "norm_label": "useplaninvoices"
+    },
+    {
+      "label": "exportExpensesToExcel",
+      "file_type": "code",
+      "source_file": "operations/export/excelExporter.ts",
+      "source_location": "L29",
+      "_origin": "ast",
+      "id": "operations_export_excelexporter_exportexpensestoexcel",
+      "community": 42,
+      "norm_label": "exportexpensestoexcel"
+    },
+    {
+      "label": "exportExpensesToPdf",
+      "file_type": "code",
+      "source_file": "operations/export/pdfExporter.ts",
+      "source_location": "L79",
+      "_origin": "ast",
+      "id": "operations_export_pdfexporter_exportexpensestopdf",
+      "community": 43,
+      "norm_label": "exportexpensestopdf"
+    },
+    {
+      "label": "OperationalTab",
+      "file_type": "code",
+      "source_file": "operations/hooks/useGestionOperativa.ts",
+      "source_location": "L24",
+      "_origin": "ast",
+      "id": "operations_hooks_usegestionoperativa_operationaltab",
+      "community": 45,
+      "norm_label": "operationaltab"
+    },
+    {
+      "label": "OperationalKPI",
+      "file_type": "code",
+      "source_file": "operations/hooks/useGestionOperativa.ts",
+      "source_location": "L26",
+      "_origin": "ast",
+      "id": "operations_hooks_usegestionoperativa_operationalkpi",
+      "community": 44,
+      "norm_label": "operationalkpi"
+    },
+    {
+      "label": "useGestionOperativa",
+      "file_type": "code",
+      "source_file": "operations/hooks/useGestionOperativa.ts",
+      "source_location": "L56",
+      "_origin": "ast",
+      "id": "operations_hooks_usegestionoperativa_usegestionoperativa",
+      "community": 46,
+      "norm_label": "usegestionoperativa"
+    },
+    {
+      "label": "useScan",
+      "file_type": "code",
+      "source_file": "operations/hooks/useScan.ts",
+      "source_location": "L45",
+      "_origin": "ast",
+      "id": "operations_hooks_usescan_usescan",
+      "community": 48,
+      "norm_label": "usescan"
+    },
+    {
+      "label": "useExpenses",
+      "file_type": "code",
+      "source_file": "operations/hooks/usepenses.ts",
+      "source_location": "L45",
+      "_origin": "ast",
+      "id": "operations_hooks_usepenses_useexpenses",
+      "community": 47,
+      "norm_label": "useexpenses"
+    },
+    {
+      "label": "ProviderType",
+      "file_type": "code",
+      "source_file": "operations/types.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "operations_types_providertype",
+      "community": 78,
+      "norm_label": "providertype"
+    },
+    {
+      "label": "ProviderStatus",
+      "file_type": "code",
+      "source_file": "operations/types.ts",
+      "source_location": "L2",
+      "_origin": "ast",
+      "id": "operations_types_providerstatus",
+      "community": 77,
+      "norm_label": "providerstatus"
+    },
+    {
+      "label": "Provider",
+      "file_type": "code",
+      "source_file": "operations/types.ts",
+      "source_location": "L4",
+      "_origin": "ast",
+      "id": "operations_types_provider",
+      "community": 75,
+      "norm_label": "provider"
+    },
+    {
+      "label": "ProviderFilters",
+      "file_type": "code",
+      "source_file": "operations/types.ts",
+      "source_location": "L18",
+      "_origin": "ast",
+      "id": "operations_types_providerfilters",
+      "community": 76,
+      "norm_label": "providerfilters"
+    },
+    {
+      "label": "ExpenseStatus",
+      "file_type": "code",
+      "source_file": "operations/types.ts",
+      "source_location": "L24",
+      "_origin": "ast",
+      "id": "operations_types_expensestatus",
+      "community": 53,
+      "norm_label": "expensestatus"
+    },
+    {
+      "label": "Expense",
+      "file_type": "code",
+      "source_file": "operations/types.ts",
+      "source_location": "L26",
+      "_origin": "ast",
+      "id": "operations_types_expense",
+      "community": 51,
+      "norm_label": "expense"
+    },
+    {
+      "label": "ExpenseFilters",
+      "file_type": "code",
+      "source_file": "operations/types.ts",
+      "source_location": "L37",
+      "_origin": "ast",
+      "id": "operations_types_expensefilters",
+      "community": 52,
+      "norm_label": "expensefilters"
+    },
+    {
+      "label": "Credential",
+      "file_type": "code",
+      "source_file": "operations/types.ts",
+      "source_location": "L44",
+      "_origin": "ast",
+      "id": "operations_types_credential",
+      "community": 50,
+      "norm_label": "credential"
+    },
+    {
+      "label": "AuditLog",
+      "file_type": "code",
+      "source_file": "operations/types.ts",
+      "source_location": "L52",
+      "_origin": "ast",
+      "id": "operations_types_auditlog",
+      "community": 49,
+      "norm_label": "auditlog"
+    },
+    {
+      "label": "OperationalData",
+      "file_type": "code",
+      "source_file": "operations/types.ts",
+      "source_location": "L60",
+      "_origin": "ast",
+      "id": "operations_types_operationaldata",
+      "community": 54,
+      "norm_label": "operationaldata"
+    },
+    {
+      "label": "OperationalTab",
+      "file_type": "code",
+      "source_file": "operations/types.ts",
+      "source_location": "L67",
+      "_origin": "ast",
+      "id": "operations_types_operationaltab",
+      "community": 56,
+      "norm_label": "operationaltab"
+    },
+    {
+      "label": "OperationalKPI",
+      "file_type": "code",
+      "source_file": "operations/types.ts",
+      "source_location": "L69",
+      "_origin": "ast",
+      "id": "operations_types_operationalkpi",
+      "community": 55,
+      "norm_label": "operationalkpi"
+    },
+    {
+      "label": "Supplier",
+      "file_type": "code",
+      "source_file": "operations/types/operations.ts",
+      "source_location": "L3",
+      "_origin": "ast",
+      "id": "operations_types_operations_supplier",
+      "community": 70,
+      "norm_label": "supplier"
+    },
+    {
+      "label": "SupplierFilters",
+      "file_type": "code",
+      "source_file": "operations/types/operations.ts",
+      "source_location": "L17",
+      "_origin": "ast",
+      "id": "operations_types_operations_supplierfilters",
+      "community": 71,
+      "norm_label": "supplierfilters"
+    },
+    {
+      "label": "StoreSupplierPayload",
+      "file_type": "code",
+      "source_file": "operations/types/operations.ts",
+      "source_location": "L25",
+      "_origin": "ast",
+      "id": "operations_types_operations_storesupplierpayload",
+      "community": 69,
+      "norm_label": "storesupplierpayload"
+    },
+    {
+      "label": "UpdateSupplierPayload",
+      "file_type": "code",
+      "source_file": "operations/types/operations.ts",
+      "source_location": "L35",
+      "_origin": "ast",
+      "id": "operations_types_operations_updatesupplierpayload",
+      "community": 74,
+      "norm_label": "updatesupplierpayload"
+    },
+    {
+      "label": "Expense",
+      "file_type": "code",
+      "source_file": "operations/types/operations.ts",
+      "source_location": "L41",
+      "_origin": "ast",
+      "id": "operations_types_operations_expense",
+      "community": 59,
+      "norm_label": "expense"
+    },
+    {
+      "label": "ExpenseStats",
+      "file_type": "code",
+      "source_file": "operations/types/operations.ts",
+      "source_location": "L67",
+      "_origin": "ast",
+      "id": "operations_types_operations_expensestats",
+      "community": 61,
+      "norm_label": "expensestats"
+    },
+    {
+      "label": "ExpenseFilters",
+      "file_type": "code",
+      "source_file": "operations/types/operations.ts",
+      "source_location": "L75",
+      "_origin": "ast",
+      "id": "operations_types_operations_expensefilters",
+      "community": 60,
+      "norm_label": "expensefilters"
+    },
+    {
+      "label": "StoreExpensePayload",
+      "file_type": "code",
+      "source_file": "operations/types/operations.ts",
+      "source_location": "L86",
+      "_origin": "ast",
+      "id": "operations_types_operations_storeexpensepayload",
+      "community": 67,
+      "norm_label": "storeexpensepayload"
+    },
+    {
+      "label": "UpdateExpensePayload",
+      "file_type": "code",
+      "source_file": "operations/types/operations.ts",
+      "source_location": "L99",
+      "_origin": "ast",
+      "id": "operations_types_operations_updateexpensepayload",
+      "community": 72,
+      "norm_label": "updateexpensepayload"
+    },
+    {
+      "label": "OperationalRole",
+      "file_type": "code",
+      "source_file": "operations/types/operations.ts",
+      "source_location": "L103",
+      "_origin": "ast",
+      "id": "operations_types_operations_operationalrole",
+      "community": 63,
+      "norm_label": "operationalrole"
+    },
+    {
+      "label": "StoreOperationalRolePayload",
+      "file_type": "code",
+      "source_file": "operations/types/operations.ts",
+      "source_location": "L115",
+      "_origin": "ast",
+      "id": "operations_types_operations_storeoperationalrolepayload",
+      "community": 68,
+      "norm_label": "storeoperationalrolepayload"
+    },
+    {
+      "label": "UpdateOperationalRolePayload",
+      "file_type": "code",
+      "source_file": "operations/types/operations.ts",
+      "source_location": "L124",
+      "_origin": "ast",
+      "id": "operations_types_operations_updateoperationalrolepayload",
+      "community": 73,
+      "norm_label": "updateoperationalrolepayload"
+    },
+    {
+      "label": "AuditLog",
+      "file_type": "code",
+      "source_file": "operations/types/operations.ts",
+      "source_location": "L128",
+      "_origin": "ast",
+      "id": "operations_types_operations_auditlog",
+      "community": 57,
+      "norm_label": "auditlog"
+    },
+    {
+      "label": "AuditLogFilters",
+      "file_type": "code",
+      "source_file": "operations/types/operations.ts",
+      "source_location": "L148",
+      "_origin": "ast",
+      "id": "operations_types_operations_auditlogfilters",
+      "community": 58,
+      "norm_label": "auditlogfilters"
+    },
+    {
+      "label": "OperationalKPI",
+      "file_type": "code",
+      "source_file": "operations/types/operations.ts",
+      "source_location": "L161",
+      "_origin": "ast",
+      "id": "operations_types_operations_operationalkpi",
+      "community": 62,
+      "norm_label": "operationalkpi"
+    },
+    {
+      "label": "OperationsStats",
+      "file_type": "code",
+      "source_file": "operations/types/operations.ts",
+      "source_location": "L168",
+      "_origin": "ast",
+      "id": "operations_types_operations_operationsstats",
+      "community": 64,
+      "norm_label": "operationsstats"
+    },
+    {
+      "label": "Pagination",
+      "file_type": "code",
+      "source_file": "operations/types/operations.ts",
+      "source_location": "L177",
+      "_origin": "ast",
+      "id": "operations_types_operations_pagination",
+      "community": 66,
+      "norm_label": "pagination"
+    },
+    {
+      "label": "PaginatedResponse",
+      "file_type": "code",
+      "source_file": "operations/types/operations.ts",
+      "source_location": "L185",
+      "_origin": "ast",
+      "id": "operations_types_operations_paginatedresponse",
+      "community": 65,
+      "norm_label": "paginatedresponse"
+    },
+    {
+      "label": "IssuerData",
+      "file_type": "code",
+      "source_file": "operations/types/scan.ts",
+      "source_location": "L3",
+      "_origin": "ast",
+      "id": "operations_types_scan_issuerdata",
+      "community": 84,
+      "norm_label": "issuerdata"
+    },
+    {
+      "label": "CustomerData",
+      "file_type": "code",
+      "source_file": "operations/types/scan.ts",
+      "source_location": "L9",
+      "_origin": "ast",
+      "id": "operations_types_scan_customerdata",
+      "community": 82,
+      "norm_label": "customerdata"
+    },
+    {
+      "label": "ItemData",
+      "file_type": "code",
+      "source_file": "operations/types/scan.ts",
+      "source_location": "L15",
+      "_origin": "ast",
+      "id": "operations_types_scan_itemdata",
+      "community": 85,
+      "norm_label": "itemdata"
+    },
+    {
+      "label": "PaymentData",
+      "file_type": "code",
+      "source_file": "operations/types/scan.ts",
+      "source_location": "L22",
+      "_origin": "ast",
+      "id": "operations_types_scan_paymentdata",
+      "community": 86,
+      "norm_label": "paymentdata"
+    },
+    {
+      "label": "TotalsData",
+      "file_type": "code",
+      "source_file": "operations/types/scan.ts",
+      "source_location": "L31",
+      "_origin": "ast",
+      "id": "operations_types_scan_totalsdata",
+      "community": 95,
+      "norm_label": "totalsdata"
+    },
+    {
+      "label": "ScannedHonorariosResponse",
+      "file_type": "code",
+      "source_file": "operations/types/scan.ts",
+      "source_location": "L46",
+      "_origin": "ast",
+      "id": "operations_types_scan_scannedhonorariosresponse",
+      "community": 94,
+      "norm_label": "scannedhonorariosresponse"
+    },
+    {
+      "label": "ScannedFacturaResponse",
+      "file_type": "code",
+      "source_file": "operations/types/scan.ts",
+      "source_location": "L60",
+      "_origin": "ast",
+      "id": "operations_types_scan_scannedfacturaresponse",
+      "community": 93,
+      "norm_label": "scannedfacturaresponse"
+    },
+    {
+      "label": "ScannedBoletaResponse",
+      "file_type": "code",
+      "source_file": "operations/types/scan.ts",
+      "source_location": "L80",
+      "_origin": "ast",
+      "id": "operations_types_scan_scannedboletaresponse",
+      "community": 91,
+      "norm_label": "scannedboletaresponse"
+    },
+    {
+      "label": "BankStatementLine",
+      "file_type": "code",
+      "source_file": "operations/types/scan.ts",
+      "source_location": "L95",
+      "_origin": "ast",
+      "id": "operations_types_scan_bankstatementline",
+      "community": 79,
+      "norm_label": "bankstatementline"
+    },
+    {
+      "label": "BankStatementScanResponse",
+      "file_type": "code",
+      "source_file": "operations/types/scan.ts",
+      "source_location": "L113",
+      "_origin": "ast",
+      "id": "operations_types_scan_bankstatementscanresponse",
+      "community": 80,
+      "norm_label": "bankstatementscanresponse"
+    },
+    {
+      "label": "BatchStoreLine",
+      "file_type": "code",
+      "source_file": "operations/types/scan.ts",
+      "source_location": "L130",
+      "_origin": "ast",
+      "id": "operations_types_scan_batchstoreline",
+      "community": 81,
+      "norm_label": "batchstoreline"
+    },
+    {
+      "label": "ScanBatchStorePayload",
+      "file_type": "code",
+      "source_file": "operations/types/scan.ts",
+      "source_location": "L144",
+      "_origin": "ast",
+      "id": "operations_types_scan_scanbatchstorepayload",
+      "community": 88,
+      "norm_label": "scanbatchstorepayload"
+    },
+    {
+      "label": "ScanBatchStoreResponse",
+      "file_type": "code",
+      "source_file": "operations/types/scan.ts",
+      "source_location": "L154",
+      "_origin": "ast",
+      "id": "operations_types_scan_scanbatchstoreresponse",
+      "community": 89,
+      "norm_label": "scanbatchstoreresponse"
+    },
+    {
+      "label": "ScanFileResponse",
+      "file_type": "code",
+      "source_file": "operations/types/scan.ts",
+      "source_location": "L160",
+      "_origin": "ast",
+      "id": "operations_types_scan_scanfileresponse",
+      "community": 90,
+      "norm_label": "scanfileresponse"
+    },
+    {
+      "label": "isBankStatementResponse",
+      "file_type": "code",
+      "source_file": "operations/types/scan.ts",
+      "source_location": "L164",
+      "_origin": "ast",
+      "id": "operations_types_scan_isbankstatementresponse",
+      "community": 83,
+      "norm_label": "isbankstatementresponse"
+    },
+    {
+      "label": "ScannedDataResponse",
+      "file_type": "code",
+      "source_file": "operations/types/scan.ts",
+      "source_location": "L170",
+      "_origin": "ast",
+      "id": "operations_types_scan_scanneddataresponse",
+      "community": 92,
+      "norm_label": "scanneddataresponse"
+    },
+    {
+      "label": "ScanApiResponse",
+      "file_type": "code",
+      "source_file": "operations/types/scan.ts",
+      "source_location": "L176",
+      "_origin": "ast",
+      "id": "operations_types_scan_scanapiresponse",
+      "community": 87,
+      "norm_label": "scanapiresponse"
+    },
+    {
+      "label": "exportPaymentsToExcel",
+      "file_type": "code",
+      "source_file": "payments/export/excelExporter.ts",
+      "source_location": "L45",
+      "_origin": "ast",
+      "id": "payments_export_excelexporter_exportpaymentstoexcel",
+      "community": 96,
+      "norm_label": "exportpaymentstoexcel"
+    },
+    {
+      "label": "exportPaymentsToPdf",
+      "file_type": "code",
+      "source_file": "payments/export/pdfExporter.ts",
+      "source_location": "L104",
+      "_origin": "ast",
+      "id": "payments_export_pdfexporter_exportpaymentstopdf",
+      "community": 97,
+      "norm_label": "exportpaymentstopdf"
+    },
+    {
+      "label": "useTransactions",
+      "file_type": "code",
+      "source_file": "payments/hooks/useTransactions.ts",
+      "source_location": "L33",
+      "_origin": "ast",
+      "id": "payments_hooks_usetransactions_usetransactions",
+      "community": 99,
+      "norm_label": "usetransactions"
+    },
+    {
+      "label": "useTransactionDetail",
+      "file_type": "code",
+      "source_file": "payments/hooks/useTransactions.ts",
+      "source_location": "L60",
+      "_origin": "ast",
+      "id": "payments_hooks_usetransactions_usetransactiondetail",
+      "community": 98,
+      "norm_label": "usetransactiondetail"
+    },
+    {
+      "label": "TransactionCustomer",
+      "file_type": "code",
+      "source_file": "payments/types/transactions.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "payments_types_transactions_transactioncustomer",
+      "community": 101,
+      "norm_label": "transactioncustomer"
+    },
+    {
+      "label": "TransactionStore",
+      "file_type": "code",
+      "source_file": "payments/types/transactions.ts",
+      "source_location": "L7",
+      "_origin": "ast",
+      "id": "payments_types_transactions_transactionstore",
+      "community": 109,
+      "norm_label": "transactionstore"
+    },
+    {
+      "label": "TransactionItemProduct",
+      "file_type": "code",
+      "source_file": "payments/types/transactions.ts",
+      "source_location": "L13",
+      "_origin": "ast",
+      "id": "payments_types_transactions_transactionitemproduct",
+      "community": 104,
+      "norm_label": "transactionitemproduct"
+    },
+    {
+      "label": "TransactionItem",
+      "file_type": "code",
+      "source_file": "payments/types/transactions.ts",
+      "source_location": "L19",
+      "_origin": "ast",
+      "id": "payments_types_transactions_transactionitem",
+      "community": 103,
+      "norm_label": "transactionitem"
+    },
+    {
+      "label": "Transaction",
+      "file_type": "code",
+      "source_file": "payments/types/transactions.ts",
+      "source_location": "L32",
+      "_origin": "ast",
+      "id": "payments_types_transactions_transaction",
+      "community": 100,
+      "norm_label": "transaction"
+    },
+    {
+      "label": "TransactionPagination",
+      "file_type": "code",
+      "source_file": "payments/types/transactions.ts",
+      "source_location": "L58",
+      "_origin": "ast",
+      "id": "payments_types_transactions_transactionpagination",
+      "community": 106,
+      "norm_label": "transactionpagination"
+    },
+    {
+      "label": "TransactionListResponse",
+      "file_type": "code",
+      "source_file": "payments/types/transactions.ts",
+      "source_location": "L66",
+      "_origin": "ast",
+      "id": "payments_types_transactions_transactionlistresponse",
+      "community": 105,
+      "norm_label": "transactionlistresponse"
+    },
+    {
+      "label": "TransactionStats",
+      "file_type": "code",
+      "source_file": "payments/types/transactions.ts",
+      "source_location": "L71",
+      "_origin": "ast",
+      "id": "payments_types_transactions_transactionstats",
+      "community": 107,
+      "norm_label": "transactionstats"
+    },
+    {
+      "label": "TransactionStatsResponse",
+      "file_type": "code",
+      "source_file": "payments/types/transactions.ts",
+      "source_location": "L79",
+      "_origin": "ast",
+      "id": "payments_types_transactions_transactionstatsresponse",
+      "community": 108,
+      "norm_label": "transactionstatsresponse"
+    },
+    {
+      "label": "TransactionFilters",
+      "file_type": "code",
+      "source_file": "payments/types/transactions.ts",
+      "source_location": "L91",
+      "_origin": "ast",
+      "id": "payments_types_transactions_transactionfilters",
+      "community": 102,
+      "norm_label": "transactionfilters"
+    },
+    {
+      "label": "PlanFromApi",
+      "file_type": "code",
+      "source_file": "planes/api/planesAdminApi.ts",
+      "source_location": "L94",
+      "_origin": "ast",
+      "id": "planes_api_planesadminapi_planfromapi",
+      "community": 111,
+      "norm_label": "planfromapi"
+    },
+    {
+      "label": "ButtonColors",
+      "file_type": "code",
+      "source_file": "planes/api/planesAdminApi.ts",
+      "source_location": "L133",
+      "_origin": "ast",
+      "id": "planes_api_planesadminapi_buttoncolors",
+      "community": 2,
+      "norm_label": "buttoncolors"
+    },
+    {
+      "label": "PlanRequestFromApi",
+      "file_type": "code",
+      "source_file": "planes/api/planesAdminApi.ts",
+      "source_location": "L143",
+      "_origin": "ast",
+      "id": "planes_api_planesadminapi_planrequestfromapi",
+      "community": 112,
+      "norm_label": "planrequestfromapi"
+    },
+    {
+      "label": "VendedorFromApi",
+      "file_type": "code",
+      "source_file": "planes/api/planesAdminApi.ts",
+      "source_location": "L159",
+      "_origin": "ast",
+      "id": "planes_api_planesadminapi_vendedorfromapi",
+      "community": 113,
+      "norm_label": "vendedorfromapi"
+    },
+    {
+      "label": "PagoFromApi",
+      "file_type": "code",
+      "source_file": "planes/api/planesAdminApi.ts",
+      "source_location": "L183",
+      "_origin": "ast",
+      "id": "planes_api_planesadminapi_pagofromapi",
+      "community": 110,
+      "norm_label": "pagofromapi"
+    },
+    {
+      "label": "AdminTab",
+      "file_type": "code",
+      "source_file": "planes/hooks/usePlanesAdmin.ts",
+      "source_location": "L18",
+      "_origin": "ast",
+      "id": "planes_hooks_useplanesadmin_admintab",
+      "community": 114,
+      "norm_label": "admintab"
+    },
+    {
+      "label": "RequestFilter",
+      "file_type": "code",
+      "source_file": "planes/hooks/usePlanesAdmin.ts",
+      "source_location": "L25",
+      "_origin": "ast",
+      "id": "planes_hooks_useplanesadmin_requestfilter",
+      "community": 119,
+      "norm_label": "requestfilter"
+    },
+    {
+      "label": "PlanStatusFilter",
+      "file_type": "code",
+      "source_file": "planes/hooks/usePlanesAdmin.ts",
+      "source_location": "L26",
+      "_origin": "ast",
+      "id": "planes_hooks_useplanesadmin_planstatusfilter",
+      "community": 118,
+      "norm_label": "planstatusfilter"
+    },
+    {
+      "label": "PaymentFilter",
+      "file_type": "code",
+      "source_file": "planes/hooks/usePlanesAdmin.ts",
+      "source_location": "L27",
+      "_origin": "ast",
+      "id": "planes_hooks_useplanesadmin_paymentfilter",
+      "community": 115,
+      "norm_label": "paymentfilter"
+    },
+    {
+      "label": "VendedorFilter",
+      "file_type": "code",
+      "source_file": "planes/hooks/usePlanesAdmin.ts",
+      "source_location": "L28",
+      "_origin": "ast",
+      "id": "planes_hooks_useplanesadmin_vendedorfilter",
+      "community": 122,
+      "norm_label": "vendedorfilter"
+    },
+    {
+      "label": "PaymentTotals",
+      "file_type": "code",
+      "source_file": "planes/hooks/usePlanesAdmin.ts",
+      "source_location": "L35",
+      "_origin": "ast",
+      "id": "planes_hooks_useplanesadmin_paymenttotals",
+      "community": 117,
+      "norm_label": "paymenttotals"
+    },
+    {
+      "label": "Transaccion",
+      "file_type": "code",
+      "source_file": "planes/hooks/usePlanesAdmin.ts",
+      "source_location": "L42",
+      "_origin": "ast",
+      "id": "planes_hooks_useplanesadmin_transaccion",
+      "community": 120,
+      "norm_label": "transaccion"
+    },
+    {
+      "label": "VendedorPago",
+      "file_type": "code",
+      "source_file": "planes/hooks/usePlanesAdmin.ts",
+      "source_location": "L57",
+      "_origin": "ast",
+      "id": "planes_hooks_useplanesadmin_vendedorpago",
+      "community": 123,
+      "norm_label": "vendedorpago"
+    },
+    {
+      "label": "PaymentNotif",
+      "file_type": "code",
+      "source_file": "planes/hooks/usePlanesAdmin.ts",
+      "source_location": "L69",
+      "_origin": "ast",
+      "id": "planes_hooks_useplanesadmin_paymentnotif",
+      "community": 116,
+      "norm_label": "paymentnotif"
+    },
+    {
+      "label": "AdminState",
+      "file_type": "code",
+      "source_file": "planes/hooks/usePlanesAdmin.ts",
+      "source_location": "L76",
+      "_origin": "ast",
+      "id": "planes_hooks_useplanesadmin_adminstate",
+      "community": 2,
+      "norm_label": "adminstate"
+    },
+    {
+      "label": "useAdmin",
+      "file_type": "code",
+      "source_file": "planes/hooks/usePlanesAdmin.ts",
+      "source_location": "L296",
+      "_origin": "ast",
+      "id": "planes_hooks_useplanesadmin_useadmin",
+      "community": 121,
+      "norm_label": "useadmin"
+    },
+    {
+      "label": "useAdminSecurity",
+      "file_type": "code",
+      "source_file": "security/hooks/useAdminSecurity.ts",
+      "source_location": "L44",
+      "_origin": "ast",
+      "id": "security_hooks_useadminsecurity_useadminsecurity",
+      "community": 124,
+      "norm_label": "useadminsecurity"
+    },
+    {
+      "label": "useAlerts",
+      "file_type": "code",
+      "source_file": "security/hooks/useAlerts.ts",
+      "source_location": "L29",
+      "_origin": "ast",
+      "id": "security_hooks_usealerts_usealerts",
+      "community": 125,
+      "norm_label": "usealerts"
+    },
+    {
+      "label": "useBlockedIps",
+      "file_type": "code",
+      "source_file": "security/hooks/useBlockedIps.ts",
+      "source_location": "L32",
+      "_origin": "ast",
+      "id": "security_hooks_useblockedips_useblockedips",
+      "community": 126,
+      "norm_label": "useblockedips"
+    },
+    {
+      "label": "useProtectionRules",
+      "file_type": "code",
+      "source_file": "security/hooks/useProtectionRules.ts",
+      "source_location": "L7",
+      "_origin": "ast",
+      "id": "security_hooks_useprotectionrules_useprotectionrules",
+      "community": 127,
+      "norm_label": "useprotectionrules"
+    },
+    {
+      "label": "useSecuritySettings",
+      "file_type": "code",
+      "source_file": "security/hooks/useSecuritySettings.ts",
+      "source_location": "L7",
+      "_origin": "ast",
+      "id": "security_hooks_usesecuritysettings_usesecuritysettings",
+      "community": 128,
+      "norm_label": "usesecuritysettings"
+    },
+    {
+      "label": "SecurityStats",
+      "file_type": "code",
+      "source_file": "security/types.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "security_types_securitystats",
+      "community": 133,
+      "norm_label": "securitystats"
+    },
+    {
+      "label": "SecuritySessionItem",
+      "file_type": "code",
+      "source_file": "security/types.ts",
+      "source_location": "L12",
+      "_origin": "ast",
+      "id": "security_types_securitysessionitem",
+      "community": 132,
+      "norm_label": "securitysessionitem"
+    },
+    {
+      "label": "SecurityEventItem",
+      "file_type": "code",
+      "source_file": "security/types.ts",
+      "source_location": "L24",
+      "_origin": "ast",
+      "id": "security_types_securityeventitem",
+      "community": 131,
+      "norm_label": "securityeventitem"
+    },
+    {
+      "label": "LoginAttemptItem",
+      "file_type": "code",
+      "source_file": "security/types.ts",
+      "source_location": "L34",
+      "_origin": "ast",
+      "id": "security_types_loginattemptitem",
+      "community": 129,
+      "norm_label": "loginattemptitem"
+    },
+    {
+      "label": "PaginationMeta",
+      "file_type": "code",
+      "source_file": "security/types.ts",
+      "source_location": "L43",
+      "_origin": "ast",
+      "id": "security_types_paginationmeta",
+      "community": 130,
+      "norm_label": "paginationmeta"
+    },
+    {
+      "label": "exportSellersToExcel",
+      "file_type": "code",
+      "source_file": "sellers/export/excelExporter.ts",
+      "source_location": "L39",
+      "_origin": "ast",
+      "id": "sellers_export_excelexporter_exportsellerstoexcel",
+      "community": 134,
+      "norm_label": "exportsellerstoexcel"
+    },
+    {
+      "label": "exportSellersToPdf",
+      "file_type": "code",
+      "source_file": "sellers/export/pdfExporter.ts",
+      "source_location": "L79",
+      "_origin": "ast",
+      "id": "sellers_export_pdfexporter_exportsellerstopdf",
+      "community": 135,
+      "norm_label": "exportsellerstopdf"
+    },
+    {
+      "label": "TabKey",
+      "file_type": "code",
+      "source_file": "sellers/hooks/useControlVendedores.ts",
+      "source_location": "L26",
+      "_origin": "ast",
+      "id": "sellers_hooks_usecontrolvendedores_tabkey",
+      "community": 137,
+      "norm_label": "tabkey"
+    },
+    {
+      "label": "SellerFilters",
+      "file_type": "code",
+      "source_file": "sellers/hooks/useControlVendedores.ts",
+      "source_location": "L28",
+      "_origin": "ast",
+      "id": "sellers_hooks_usecontrolvendedores_sellerfilters",
+      "community": 136,
+      "norm_label": "sellerfilters"
+    },
+    {
+      "label": "EstadoSolicitud",
+      "file_type": "code",
+      "source_file": "sellers/hooks/useSellers.ts",
+      "source_location": "L3",
+      "_origin": "ast",
+      "id": "sellers_hooks_usesellers_estadosolicitud",
+      "community": 138,
+      "norm_label": "estadosolicitud"
+    },
+    {
+      "label": "RiesgoSolicitud",
+      "file_type": "code",
+      "source_file": "sellers/hooks/useSellers.ts",
+      "source_location": "L4",
+      "_origin": "ast",
+      "id": "sellers_hooks_usesellers_riesgosolicitud",
+      "community": 140,
+      "norm_label": "riesgosolicitud"
+    },
+    {
+      "label": "Solicitud",
+      "file_type": "code",
+      "source_file": "sellers/hooks/useSellers.ts",
+      "source_location": "L6",
+      "_origin": "ast",
+      "id": "sellers_hooks_usesellers_solicitud",
+      "community": 141,
+      "norm_label": "solicitud"
+    },
+    {
+      "label": "FiltroEstado",
+      "file_type": "code",
+      "source_file": "sellers/hooks/useSellers.ts",
+      "source_location": "L55",
+      "_origin": "ast",
+      "id": "sellers_hooks_usesellers_filtroestado",
+      "community": 139,
+      "norm_label": "filtroestado"
+    },
+    {
+      "label": "useSellers",
+      "file_type": "code",
+      "source_file": "sellers/hooks/useSellers.ts",
+      "source_location": "L57",
+      "_origin": "ast",
+      "id": "sellers_hooks_usesellers_usesellers",
+      "community": 142,
+      "norm_label": "usesellers"
+    },
+    {
+      "label": "SellerStatus",
+      "file_type": "code",
+      "source_file": "sellers/types.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "sellers_types_sellerstatus",
+      "community": 152,
+      "norm_label": "sellerstatus"
+    },
+    {
+      "label": "ProductStatus",
+      "file_type": "code",
+      "source_file": "sellers/types.ts",
+      "source_location": "L11",
+      "_origin": "ast",
+      "id": "sellers_types_productstatus",
+      "community": 150,
+      "norm_label": "productstatus"
+    },
+    {
+      "label": "ServiceStatus",
+      "file_type": "code",
+      "source_file": "sellers/types.ts",
+      "source_location": "L12",
+      "_origin": "ast",
+      "id": "sellers_types_servicestatus",
+      "community": 153,
+      "norm_label": "servicestatus"
+    },
+    {
+      "label": "NotificationType",
+      "file_type": "code",
+      "source_file": "sellers/types.ts",
+      "source_location": "L13",
+      "_origin": "ast",
+      "id": "sellers_types_notificationtype",
+      "community": 148,
+      "norm_label": "notificationtype"
+    },
+    {
+      "label": "auditAction",
+      "file_type": "code",
+      "source_file": "sellers/types.ts",
+      "source_location": "L14",
+      "_origin": "ast",
+      "id": "sellers_types_auditaction",
+      "community": 143,
+      "norm_label": "auditaction"
+    },
+    {
+      "label": "Credentials",
+      "file_type": "code",
+      "source_file": "sellers/types.ts",
+      "source_location": "L20",
+      "_origin": "ast",
+      "id": "sellers_types_credentials",
+      "community": 146,
+      "norm_label": "credentials"
+    },
+    {
+      "label": "Seller",
+      "file_type": "code",
+      "source_file": "sellers/types.ts",
+      "source_location": "L26",
+      "_origin": "ast",
+      "id": "sellers_types_seller",
+      "community": 151,
+      "norm_label": "seller"
+    },
+    {
+      "label": "Product",
+      "file_type": "code",
+      "source_file": "sellers/types.ts",
+      "source_location": "L39",
+      "_origin": "ast",
+      "id": "sellers_types_product",
+      "community": 149,
+      "norm_label": "product"
+    },
+    {
+      "label": "Notification",
+      "file_type": "code",
+      "source_file": "sellers/types.ts",
+      "source_location": "L51",
+      "_origin": "ast",
+      "id": "sellers_types_notification",
+      "community": 147,
+      "norm_label": "notification"
+    },
+    {
+      "label": "AuditEntry",
+      "file_type": "code",
+      "source_file": "sellers/types.ts",
+      "source_location": "L61",
+      "_origin": "ast",
+      "id": "sellers_types_auditentry",
+      "community": 144,
+      "norm_label": "auditentry"
+    },
+    {
+      "label": "ControlVendedoresData",
+      "file_type": "code",
+      "source_file": "sellers/types.ts",
+      "source_location": "L72",
+      "_origin": "ast",
+      "id": "sellers_types_controlvendedoresdata",
+      "community": 145,
+      "norm_label": "controlvendedoresdata"
+    },
+    {
+      "label": "Stats",
+      "file_type": "code",
+      "source_file": "sellers/types.ts",
+      "source_location": "L79",
+      "_origin": "ast",
+      "id": "sellers_types_stats",
+      "community": 154,
+      "norm_label": "stats"
+    },
+    {
+      "label": "useAdminTrainings",
+      "file_type": "code",
+      "source_file": "trainings/hooks/useAdminTrainings.ts",
+      "source_location": "L19",
+      "_origin": "ast",
+      "id": "trainings_hooks_useadmintrainings_useadmintrainings",
+      "community": 155,
+      "norm_label": "useadmintrainings"
+    },
+    {
+      "label": "useTrainingCompliance",
+      "file_type": "code",
+      "source_file": "trainings/hooks/useTrainingCompliance.ts",
+      "source_location": "L7",
+      "_origin": "ast",
+      "id": "trainings_hooks_usetrainingcompliance_usetrainingcompliance",
+      "community": 156,
+      "norm_label": "usetrainingcompliance"
+    },
+    {
+      "label": "AdminTraining",
+      "file_type": "code",
+      "source_file": "trainings/types.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "trainings_types_admintraining",
+      "community": 157,
+      "norm_label": "admintraining"
+    },
+    {
+      "label": "AdminTrainingForm",
+      "file_type": "code",
+      "source_file": "trainings/types.ts",
+      "source_location": "L16",
+      "_origin": "ast",
+      "id": "trainings_types_admintrainingform",
+      "community": 158,
+      "norm_label": "admintrainingform"
+    },
+    {
+      "label": "Money",
+      "file_type": "code",
+      "source_file": "treasury/types.ts",
+      "source_location": "L22",
+      "_origin": "ast",
+      "id": "treasury_types_money",
+      "community": 160,
+      "norm_label": "money"
+    },
+    {
+      "label": "PaymentTimelineEvent",
+      "file_type": "code",
+      "source_file": "treasury/types.ts",
+      "source_location": "L27",
+      "_origin": "ast",
+      "id": "treasury_types_paymenttimelineevent",
+      "community": 163,
+      "norm_label": "paymenttimelineevent"
+    },
+    {
+      "label": "BasePayment",
+      "file_type": "code",
+      "source_file": "treasury/types.ts",
+      "source_location": "L41",
+      "_origin": "ast",
+      "id": "treasury_types_basepayment",
+      "community": 0,
+      "norm_label": "basepayment"
+    },
+    {
+      "label": "CashInPayment",
+      "file_type": "code",
+      "source_file": "treasury/types.ts",
+      "source_location": "L52",
+      "_origin": "ast",
+      "id": "treasury_types_cashinpayment",
+      "community": 0,
+      "norm_label": "cashinpayment"
+    },
+    {
+      "label": "CashOutPayment",
+      "file_type": "code",
+      "source_file": "treasury/types.ts",
+      "source_location": "L69",
+      "_origin": "ast",
+      "id": "treasury_types_cashoutpayment",
+      "community": 0,
+      "norm_label": "cashoutpayment"
+    },
+    {
+      "label": "Payment",
+      "file_type": "code",
+      "source_file": "treasury/types.ts",
+      "source_location": "L88",
+      "_origin": "ast",
+      "id": "treasury_types_payment",
+      "community": 162,
+      "norm_label": "payment"
+    },
+    {
+      "label": "FinanceSummary",
+      "file_type": "code",
+      "source_file": "treasury/types.ts",
+      "source_location": "L90",
+      "_origin": "ast",
+      "id": "treasury_types_financesummary",
+      "community": 159,
+      "norm_label": "financesummary"
+    },
+    {
+      "label": "MonthlyLiquidation",
+      "file_type": "code",
+      "source_file": "treasury/types.ts",
+      "source_location": "L101",
+      "_origin": "ast",
+      "id": "treasury_types_monthlyliquidation",
+      "community": 161,
+      "norm_label": "monthlyliquidation"
+    },
+    {
+      "label": "TreasuryData",
+      "file_type": "code",
+      "source_file": "treasury/types.ts",
+      "source_location": "L108",
+      "_origin": "ast",
+      "id": "treasury_types_treasurydata",
+      "community": 164,
+      "norm_label": "treasurydata"
+    },
+    {
+      "label": "TreasuryTab",
+      "file_type": "code",
+      "source_file": "treasury/types.ts",
+      "source_location": "L116",
+      "_origin": "ast",
+      "id": "treasury_types_treasurytab",
+      "community": 167,
+      "norm_label": "treasurytab"
+    },
+    {
+      "label": "TreasuryFilters",
+      "file_type": "code",
+      "source_file": "treasury/types.ts",
+      "source_location": "L118",
+      "_origin": "ast",
+      "id": "treasury_types_treasuryfilters",
+      "community": 165,
+      "norm_label": "treasuryfilters"
+    },
+    {
+      "label": "TreasuryKPI",
+      "file_type": "code",
+      "source_file": "treasury/types.ts",
+      "source_location": "L123",
+      "_origin": "ast",
+      "id": "treasury_types_treasurykpi",
+      "community": 166,
+      "norm_label": "treasurykpi"
+    }
+  ],
+  "links": [
+    {
+      "relation": "inherits",
+      "context": "type",
+      "confidence": "EXTRACTED",
+      "source_file": "categories/hooks/useCategories.ts",
+      "source_location": "L24",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "categories_hooks_usecategories_categorynode",
+      "target": "categories_hooks_usecategories_category",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "context": "field",
+      "confidence": "EXTRACTED",
+      "source_file": "planes/hooks/usePlanesAdmin.ts",
+      "source_location": "L85",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "planes_hooks_useplanesadmin_adminstate",
+      "target": "planes_api_planesadminapi_buttoncolors",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "inherits",
+      "context": "type",
+      "confidence": "EXTRACTED",
+      "source_file": "treasury/types.ts",
+      "source_location": "L52",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "treasury_types_cashinpayment",
+      "target": "treasury_types_basepayment",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "inherits",
+      "context": "type",
+      "confidence": "EXTRACTED",
+      "source_file": "treasury/types.ts",
+      "source_location": "L69",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "treasury_types_cashoutpayment",
+      "target": "treasury_types_basepayment",
+      "confidence_score": 1.0
+    }
+  ],
+  "hyperedges": [],
+  "built_at_commit": "0f53e23248718e063ceb409d174d3cce2f5cf098"
+}

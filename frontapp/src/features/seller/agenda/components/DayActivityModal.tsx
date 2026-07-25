@@ -214,19 +214,19 @@ export default function DayActivityModal({ isOpen, eventId, allEvents, onClose }
                 <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-md" onClick={onClose} role="presentation" onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }} />
                 <div className="relative w-full h-full sm:h-auto sm:max-h-[85vh] sm:max-w-2xl bg-[var(--bg-card)] rounded-none sm:rounded-[2.5rem] flex flex-col overflow-hidden sm:border sm:border-[var(--border-subtle)] sm:shadow-2xl">
                     {/* Header */}
-                    <div className="p-5 sm:p-8 flex items-center justify-between border-b border-[var(--border-subtle)]/50 shrink-0 gap-3">
+                    <div className="p-5 sm:p-8 flex items-center justify-between bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--verde-500)] shrink-0 gap-3">
                         <div className="flex items-center gap-3 min-w-0">
                             <button
                                 onClick={onClose}
-                                className="w-10 h-10 flex items-center justify-center bg-[var(--bg-secondary)]/50 border border-[var(--border-subtle)] rounded-xl hover:bg-[var(--bg-secondary)] transition-all active:scale-90 shrink-0"
+                                className="w-10 h-10 flex items-center justify-center bg-white/20 backdrop-blur-md rounded-xl hover:bg-white/30 text-white transition-all active:scale-90 shrink-0"
                                 aria-label="Volver"
                             >
                                 <Icon name="ChevronLeft" className="w-5 h-5" />
                             </button>
                             <div className="min-w-0">
-                                <h2 className="text-lg sm:text-xl font-black text-[var(--text-primary)] tracking-tighter truncate">{pageTitle}</h2>
+                                <h2 className="text-lg sm:text-xl font-black text-white tracking-tighter truncate">{pageTitle}</h2>
                                 {pageSubtitle && (
-                                    <p className="text-[10px] sm:text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest mt-0.5">
+                                    <p className="text-[10px] sm:text-xs font-bold text-white/80 uppercase tracking-widest mt-0.5">
                                         {pageSubtitle}
                                     </p>
                                 )}
@@ -234,7 +234,7 @@ export default function DayActivityModal({ isOpen, eventId, allEvents, onClose }
                         </div>
                         <button
                             onClick={onClose}
-                            className="w-10 h-10 flex items-center justify-center bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl hover:bg-[var(--bg-danger)] hover:text-[var(--text-danger)] transition-all active:scale-90 shrink-0"
+                            className="w-10 h-10 flex items-center justify-center bg-white/20 backdrop-blur-md rounded-xl hover:bg-white/30 text-white transition-all active:scale-90 shrink-0"
                             aria-label="Cerrar"
                         >
                             <Icon name="X" className="w-5 h-5" />

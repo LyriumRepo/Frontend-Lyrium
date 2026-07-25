@@ -3,18 +3,13 @@
 import type * as ExcelJS from 'exceljs';
 import type { SalesExportRow } from './types';
 import { EXPORT_COLUMNS } from './constants';
-
-const COLORS = {
-  headerBg:     '08190F',
-  headerFont:   'A3E635',
-  titleBg:      '0A1F12',
-  titleFont:    'A3E635',
-  accentStripe: '0F2A18',
-  border:       '1E5C2E',
-  accent:       '163D22',
-  totalBg:      '061510',
-  subText:      '78C850',
-};
+import {
+  EXCEL_COLORS,
+  styleExcelSubtitleCell,
+  styleExcelAccentBar,
+  styleExcelHeaderCell,
+  styleExcelDataRow,
+} from '@/shared/lib/excel/excelTheme';
 
 const CURRENCY_KEYS = new Set<keyof SalesExportRow>([
   'subtotal', 'shippingCost', 'taxAmount', 'discountAmount', 'total',
@@ -92,8 +87,8 @@ export async function exportSalesRowsToExcel(
   ws.mergeCells(1, 3, 1, colCount);
   const titleCell = ws.getCell('C1');
   titleCell.value     = `${companyName} — ${reportTitle}`;
-  titleCell.font      = { name: 'Arial', bold: true, size: 16, color: { argb: 'FF' + COLORS.titleFont } };
-  titleCell.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + COLORS.titleBg } };
+  titleCell.font      = { name: 'Arial', bold: true, size: 16, color: { argb: 'FF' + EXCEL_COLORS.titleFont } };
+  titleCell.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + EXCEL_COLORS.titleBg } };
   titleCell.alignment = { vertical: 'middle', horizontal: 'left', indent: 1 };
 
   ws.mergeCells(2, 3, 2, colCount);
@@ -101,13 +96,11 @@ export async function exportSalesRowsToExcel(
   const dateLabel = new Date().toLocaleDateString('es-PE', {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
   });
-  subtitleCell.value     = `Generado el ${dateLabel}  ·  ${rows.length} orden${rows.length !== 1 ? 'es' : ''}`;
-  subtitleCell.font      = { name: 'Arial', size: 10, italic: true, color: { argb: 'FF' + COLORS.subText } };
-  subtitleCell.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + COLORS.titleBg } };
-  subtitleCell.alignment = { vertical: 'middle', horizontal: 'left', indent: 1 };
+  subtitleCell.value = `Generado el ${dateLabel}  ·  ${rows.length} orden${rows.length !== 1 ? 'es' : ''}`;
+  styleExcelSubtitleCell(subtitleCell);
 
   ws.mergeCells(3, 1, 3, colCount);
-  ws.getCell('A3').fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + COLORS.accent } };
+  styleExcelAccentBar(ws.getCell('A3'));
 
   ws.getRow(1).height = 36;
   ws.getRow(2).height = 20;
@@ -117,7 +110,7 @@ export async function exportSalesRowsToExcel(
   ws.getColumn(2).width = 14;
 
   ['A1', 'A2', 'B1', 'B2'].forEach((addr) => {
-    ws.getCell(addr).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + COLORS.titleBg } };
+    ws.getCell(addr).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + EXCEL_COLORS.titleBg } };
   });
 
   // ── 2. LOGO ───────────────────────────────────────────────────────────────
@@ -140,12 +133,9 @@ export async function exportSalesRowsToExcel(
   const headerRow = ws.getRow(4);
   headerRow.height = 26;
   EXPORT_COLUMNS.forEach((c, i) => {
-    const cell     = headerRow.getCell(i + 1);
-    cell.value     = c.label;
-    cell.font      = { name: 'Arial', bold: true, size: 10, color: { argb: 'FF' + COLORS.headerFont } };
-    cell.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + COLORS.headerBg } };
-    cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
-    cell.border    = { bottom: { style: 'medium', color: { argb: 'FF' + COLORS.border } } };
+    const cell = headerRow.getCell(i + 1);
+    cell.value = c.label;
+    styleExcelHeaderCell(cell, { wrapText: true });
   });
   headerRow.commit();
 
@@ -158,15 +148,7 @@ export async function exportSalesRowsToExcel(
       dataRow.getCell(colIndex + 1).value = (r as any)[c.key] ?? null;
     });
 
-    const isEven = rowIndex % 2 === 0;
-    dataRow.eachCell({ includeEmpty: true }, (cell) => {
-      if (isEven) {
-        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + COLORS.accentStripe } };
-      }
-      cell.border = { bottom: { style: 'hair', color: { argb: 'FF' + COLORS.border } } };
-      cell.font   = { name: 'Arial', size: 9 };
-    });
-
+    styleExcelDataRow(dataRow, rowIndex);
     dataRow.height = 18;
     dataRow.commit();
   });

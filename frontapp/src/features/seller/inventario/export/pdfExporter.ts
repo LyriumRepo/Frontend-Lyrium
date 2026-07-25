@@ -3,8 +3,8 @@ import type { InventoryItem } from '../types';
 const C = {
     primary:  [183, 224, 0]   as [number, number, number],
     secondary:[143, 212, 0]   as [number, number, number],
-    teal:     [102, 214, 168] as [number, number, number],
-    darkTeal: [78,  199, 184] as [number, number, number],
+    teal:     [34,  139, 70]  as [number, number, number],
+    darkTeal: [22,  101, 52]  as [number, number, number],
 };
 
 const G = {

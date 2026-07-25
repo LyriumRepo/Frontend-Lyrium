@@ -376,13 +376,14 @@ export async function generateOrderPdf(order: Order): Promise<void> {
             body: prodBody,
             theme: 'striped',
             headStyles: {
-                fillColor: [C.primary[0], C.primary[1], C.primary[2]],
-                textColor: [G[900][0], G[900][1], G[900][2]],
+                fillColor: [18, 60, 38],
+                textColor: [163, 230, 53],
                 fontSize: 7,
                 fontStyle: 'bold',
                 halign: 'center',
             },
-            bodyStyles: { fontSize: 7, halign: 'center' },
+            bodyStyles: { fontSize: 7, halign: 'center', fillColor: [12, 35, 22], textColor: [215, 235, 205] },
+            alternateRowStyles: { fillColor: [20, 52, 32] },
             columnStyles: {
                 0: { cellWidth: 'auto', halign: 'left' },
                 1: { cellWidth: 14, halign: 'center' },
@@ -391,7 +392,7 @@ export async function generateOrderPdf(order: Order): Promise<void> {
                 4: { cellWidth: 22, halign: 'center' },
             },
             margin: { left: ML, right: MR },
-            tableLineColor: [G[200][0], G[200][1], G[200][2]],
+            tableLineColor: [38, 90, 55],
             tableLineWidth: 0.1,
             showHead: 'everyPage',
         });
@@ -417,13 +418,14 @@ export async function generateOrderPdf(order: Order): Promise<void> {
             body: svcBody,
             theme: 'striped',
             headStyles: {
-                fillColor: [C.sectionBar[0], C.sectionBar[1], C.sectionBar[2]],
-                textColor: [255, 255, 255],
+                fillColor: [18, 60, 38],
+                textColor: [163, 230, 53],
                 fontSize: 7,
                 fontStyle: 'bold',
                 halign: 'center',
             },
-            bodyStyles: { fontSize: 7, halign: 'center' },
+            bodyStyles: { fontSize: 7, halign: 'center', fillColor: [12, 35, 22], textColor: [215, 235, 205] },
+            alternateRowStyles: { fillColor: [20, 52, 32] },
             columnStyles: {
                 0: { cellWidth: 'auto', halign: 'left' },
                 1: { cellWidth: 22, halign: 'center' },
@@ -433,7 +435,7 @@ export async function generateOrderPdf(order: Order): Promise<void> {
                 5: { cellWidth: 18, halign: 'right' },
             },
             margin: { left: ML, right: MR },
-            tableLineColor: [G[200][0], G[200][1], G[200][2]],
+            tableLineColor: [38, 90, 55],
             tableLineWidth: 0.1,
             showHead: 'everyPage',
         });

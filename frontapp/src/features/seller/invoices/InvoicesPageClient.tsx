@@ -49,8 +49,6 @@ export function InvoicesPageClient() {
 
             <InvoiceFilters
                 search={filters.search}
-                status={filters.status}
-                type={filters.type}
                 dateFrom={filters.dateFrom}
                 dateTo={filters.dateTo}
                 onFilterChange={setFilters}

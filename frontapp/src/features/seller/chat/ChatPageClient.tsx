@@ -192,7 +192,7 @@ export function ChatPageClient() {
     }));
 
     const listContent = (
-        <div className={`flex-col h-full ${(!activeConversation || isMobileListVisible) ? 'flex' : 'hidden'} lg:flex`}>
+        <div className={`flex-col flex-1 min-h-0 ${(!activeConversation || isMobileListVisible) ? 'flex' : 'hidden'} lg:flex`}>
             {/* Barra de acciones: Nuevo Chat + Leyenda */}
             {!showNewChatForm && (
                 <div className="px-4 pt-3 pb-2 flex items-center gap-2 shrink-0">
@@ -296,7 +296,7 @@ export function ChatPageClient() {
     );
 
     const chatContent = activeConversation ? (
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col flex-1 min-h-0">
             <div className="p-4 md:p-5 border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)]/50 shrink-0">
                 <div className="flex items-center gap-3">
                     {/* Botón regreso — solo visible en mobile/tablet */}
@@ -378,33 +378,35 @@ export function ChatPageClient() {
                 icon="Messages"
             />
 
-            {showNewChatForm ? (
-                <div className="flex-1 flex items-center justify-center px-4 md:px-8">
-                    <div className="w-full max-w-xl">
-                        <NewChatForm
-                            stores={stores}
-                            customers={customers}
-                            onSubmit={(data) => {
-                                createConversation(data);
-                                setShowNewChatForm(false);
-                            }}
-                            onCancel={() => setShowNewChatForm(false)}
-                            isSubmitting={isCreating}
-                        />
+            <div className="flex-1 min-h-0">
+                {showNewChatForm ? (
+                    <div className="h-full flex items-center justify-center px-4 md:px-8">
+                        <div className="w-full max-w-xl">
+                            <NewChatForm
+                                stores={stores}
+                                customers={customers}
+                                onSubmit={(data) => {
+                                    createConversation(data);
+                                    setShowNewChatForm(false);
+                                }}
+                                onCancel={() => setShowNewChatForm(false)}
+                                isSubmitting={isCreating}
+                            />
+                        </div>
                     </div>
-                </div>
-            ) : (
-                <ChatLayout
-                    list={listContent}
-                    detail={chatContent}
-                    isMobileListVisible={isMobileListVisible}
-                />
-            )}
+                ) : (
+                    <ChatLayout
+                        list={listContent}
+                        detail={chatContent}
+                        isMobileListVisible={isMobileListVisible}
+                    />
+                )}
+            </div>
 
             {showLegend && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" tabIndex={-1} onClick={() => setShowLegend(false)} onKeyDown={(e) => { if (e.key === 'Escape') setShowLegend(false); }}>
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[99999] flex items-center justify-center p-4" role="dialog" aria-modal="true" tabIndex={-1} onClick={() => setShowLegend(false)} onKeyDown={(e) => { if (e.key === 'Escape') setShowLegend(false); }}>
                     <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-[3rem] max-w-lg w-full max-h-[80vh] shadow-2xl overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
-                        <div className="bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--turquesa-500)]/70 dark:from-[var(--brand-green-hover)] dark:via-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-8 text-white relative flex-shrink-0">
+                        <div className="bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--verde-500)] p-8 text-white relative flex-shrink-0">
                             <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl" />
                             <div className="relative z-10 flex items-center justify-between">
                                 <div className="flex items-center gap-4">

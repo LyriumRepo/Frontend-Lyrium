@@ -4,13 +4,13 @@ import type { AdminInvoiceRow, AdminInvoiceKPIs } from '../hooks/useAdminInvoice
 const C = {
     primary:  [183, 224, 0]   as [number, number, number],
     secondary:[143, 212, 0]   as [number, number, number],
-    teal:     [102, 214, 168] as [number, number, number],
-    darkTeal: [78,  199, 184] as [number, number, number],
-    blue:     [105, 190, 235] as [number, number, number],
-    navy:     [30,  58,  95]  as [number, number, number],
-    amber:    [78,  199, 184] as [number, number, number],
+    teal:     [34,  139, 70]  as [number, number, number],
+    darkTeal: [22,  101, 52]  as [number, number, number],
+    blue:     [74,  222, 128] as [number, number, number],
+    navy:     [6,   78,  35]  as [number, number, number],
+    amber:    [52,  211, 153] as [number, number, number],
     rose:     [244, 63,  94]  as [number, number, number],
-    indigo:   [99,  102, 241] as [number, number, number],
+    indigo:   [34,  139, 70]  as [number, number, number],
 };
 
 const G = {
@@ -38,18 +38,18 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 const STATUS_COLOR: Record<string, [number, number, number]> = {
-    ACCEPTED:      [16, 185, 129],
-    SENT_WAIT_CDR: [59, 130, 246],
-    REJECTED:      [244, 63, 94],
-    OBSERVED:      [59, 130, 246],
+    ACCEPTED:      [34,  139, 70],
+    SENT_WAIT_CDR: [132, 204, 22],
+    REJECTED:      [220, 38,  38],
+    OBSERVED:      [132, 204, 22],
     DRAFT:         [156, 163, 175],
 };
 
 const STATUS_BG: Record<string, [number, number, number]> = {
-    ACCEPTED:      [209, 250, 229],
-    SENT_WAIT_CDR: [254, 243, 199],
+    ACCEPTED:      [220, 252, 231],
+    SENT_WAIT_CDR: [236, 253, 215],
     REJECTED:      [255, 228, 230],
-    OBSERVED:      [254, 243, 199],
+    OBSERVED:      [236, 253, 215],
     DRAFT:         [243, 244, 246],
 };
 
@@ -81,6 +81,14 @@ async function loadImageB64(url: string): Promise<string | null> {
             fr.readAsDataURL(b);
         });
     } catch { return null; }
+}
+
+function checkPage(doc: any, needed: number, y: number): number {
+    if (y + needed > PH - 10) {
+        doc.addPage();
+        return ML;
+    }
+    return y;
 }
 
 // ── KPI card (estilo ventas) ─────────────────────────────────────────────
@@ -187,7 +195,7 @@ export async function exportAdminInvoicesToPdf(
             { label: 'Total Filtrado',         value: fmtCurrency(totalMonto),                    sub: `${rows.length} comprobantes`,                                  color: C.teal     },
             { label: 'Comisiones Generadas',   value: fmtCurrency(totalComisiones),               sub: 'sobre comprobantes filtrados',                                 color: C.darkTeal },
             { label: 'Crecimiento Mensual',    value: `${kpis.porcentajeCrecimiento >= 0 ? '+' : ''}${kpis.porcentajeCrecimiento.toFixed(1)}%`, sub: 'respecto mes anterior', color: kpis.porcentajeCrecimiento >= 0 ? C.secondary : C.rose },
-            { label: 'Aceptados SUNAT',        value: String(aceptados),                          sub: `${rechazados} observados/rechazados`,                          color: C.indigo   },
+            { label: 'Aceptados SUNAT',        value: String(aceptados),                          sub: `${rechazados} observados/rechazados`,                          color: C.teal     },
             { label: 'Ticket Promedio',        value: fmtCurrency(kpis.montoPromedio),            sub: 'por comprobante emitido',                                      color: C.blue     },
         ];
 
@@ -327,29 +335,30 @@ export async function exportAdminInvoicesToPdf(
         const totalMonto      = rows.reduce((s, r) => s + (r.order_total ?? r.amount), 0);
         const totalComisiones = rows.reduce((s, r) => s + (r.commission_amount ?? 0), 0);
 
+        const summaryY = checkPage(doc, 12, finalY);
         doc.setFillColor(C.primary[0], C.primary[1], C.primary[2]);
-        doc.roundedRect(ML, finalY, CW, 9, 1.5, 1.5, 'F');
+        doc.roundedRect(ML, summaryY, CW, 9, 1.5, 1.5, 'F');
         doc.setFillColor(C.darkTeal[0], C.darkTeal[1], C.darkTeal[2]);
-        doc.roundedRect(ML, finalY, 3, 9, 1.5, 1.5, 'F');
+        doc.roundedRect(ML, summaryY, 3, 9, 1.5, 1.5, 'F');
 
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(6.5);
         doc.setTextColor(G[900][0], G[900][1], G[900][2]);
-        doc.text('TOTAL GENERAL', ML + 6, finalY + 6);
+        doc.text('TOTAL GENERAL', ML + 6, summaryY + 6);
 
         doc.setFontSize(7.5);
-        doc.text(fmtCurrency(totalMonto), ML + 48, finalY + 6);
+        doc.text(fmtCurrency(totalMonto), ML + 48, summaryY + 6);
 
         doc.setFontSize(6);
-        doc.text('·  Comisiones:', ML + 78, finalY + 6);
+        doc.text('·  Comisiones:', ML + 78, summaryY + 6);
 
         doc.setTextColor(C.darkTeal[0], C.darkTeal[1], C.darkTeal[2]);
         doc.setFontSize(7.5);
-        doc.text(fmtCurrency(totalComisiones), ML + 102, finalY + 6);
+        doc.text(fmtCurrency(totalComisiones), ML + 102, summaryY + 6);
 
         doc.setTextColor(G[900][0], G[900][1], G[900][2]);
         doc.setFontSize(6);
-        doc.text(`·  ${rows.length} comprobantes`, ML + 130, finalY + 6);
+        doc.text(`·  ${rows.length} comprobantes`, ML + 130, summaryY + 6);
     }
 
     // ── Footers (todas las páginas) ───────────────────────────────────────

@@ -2,18 +2,16 @@
 
 import type * as ExcelJS from 'exceljs';
 import type { InventoryItem } from '../types';
-
-const COLORS = {
-    headerBg:     '08190F',
-    headerFont:   'A3E635',
-    titleBg:      '0A1F12',
-    titleFont:    'A3E635',
-    accentStripe: '0F2A18',
-    border:       '1E5C2E',
-    accent:       '163D22',
-    totalBg:      '061510',
-    subText:      '78C850',
-};
+import {
+    EXCEL_COLORS,
+    EXCEL_STATUS_COLORS,
+    styleExcelTitleCell,
+    styleExcelSubtitleCell,
+    styleExcelAccentBar,
+    styleExcelHeaderCell,
+    styleExcelDataRow,
+    styleExcelTotalRow,
+} from '@/shared/lib/excel/excelTheme';
 
 const STOCK_LABEL: Record<string, string> = {
     ok:       'OK',
@@ -35,11 +33,6 @@ function fmtDate(d: Date): string {
     catch { return '—'; }
 }
 
-function borderHair(): Partial<ExcelJS.Borders> {
-    const s = { style: 'hair' as ExcelJS.BorderStyle, color: { argb: 'FF' + COLORS.border } };
-    return { top: s, left: s, bottom: s, right: s };
-}
-
 export async function exportInventoryToExcel(items: InventoryItem[]): Promise<void> {
     const [{ default: ExcelJS }, { saveAs }] = await Promise.all([
         import('exceljs'),
@@ -53,7 +46,7 @@ export async function exportInventoryToExcel(items: InventoryItem[]): Promise<vo
 
     const wsDetail = wb.addWorksheet('Inventario', {
         pageSetup: { paperSize: 9, orientation: 'landscape', fitToPage: true, fitToWidth: 1 },
-        properties: { tabColor: { argb: 'FF' + COLORS.headerBg } },
+        properties: { tabColor: { argb: 'FF' + EXCEL_COLORS.headerBg } },
     });
 
     const COLS = [
@@ -71,22 +64,18 @@ export async function exportInventoryToExcel(items: InventoryItem[]): Promise<vo
     wsDetail.mergeCells(1, 1, 1, COLS.length);
     const dTitle = wsDetail.getCell('A1');
     dTitle.value = 'Lyrium BioMarketplace — Control de Inventario';
-    dTitle.font  = { name: 'Arial', bold: true, size: 13, color: { argb: 'FF' + COLORS.titleFont } };
-    dTitle.fill  = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + COLORS.titleBg } };
-    dTitle.alignment = { vertical: 'middle', horizontal: 'left', indent: 1 };
+    styleExcelTitleCell(dTitle);
     wsDetail.getRow(1).height = 28;
 
     const alerts = items.filter(i => ['out','critical'].includes(getStockStatus(i))).length;
     wsDetail.mergeCells(2, 1, 2, COLS.length);
     const dSub = wsDetail.getCell('A2');
     dSub.value = `Generado: ${new Date().toLocaleString('es-PE')}   ·   ${items.length} productos   ·   ${alerts} alertas de stock`;
-    dSub.font  = { name: 'Arial', size: 9, italic: true, color: { argb: 'FF' + COLORS.headerFont } };
-    dSub.fill  = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + COLORS.accent } };
-    dSub.alignment = { vertical: 'middle', horizontal: 'left', indent: 1 };
+    styleExcelSubtitleCell(dSub);
     wsDetail.getRow(2).height = 18;
 
     wsDetail.mergeCells(3, 1, 3, COLS.length);
-    wsDetail.getCell('A3').fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + COLORS.accent } };
+    styleExcelAccentBar(wsDetail.getCell('A3'));
     wsDetail.getRow(3).height = 4;
 
     wsDetail.columns = COLS.map(c => ({ key: c.key, width: c.width })) as ExcelJS.Column[];
@@ -96,10 +85,7 @@ export async function exportInventoryToExcel(items: InventoryItem[]): Promise<vo
     COLS.forEach((c, i) => {
         const cell = hRow.getCell(i + 1);
         cell.value = c.header;
-        cell.font  = { name: 'Arial', bold: true, size: 9, color: { argb: 'FF' + COLORS.headerFont } };
-        cell.fill  = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + COLORS.headerBg } };
-        cell.alignment = { vertical: 'middle', horizontal: 'center' };
-        cell.border = { bottom: { style: 'medium', color: { argb: 'FF' + COLORS.border } } };
+        styleExcelHeaderCell(cell);
     });
     hRow.commit();
 
@@ -129,19 +115,14 @@ export async function exportInventoryToExcel(items: InventoryItem[]): Promise<vo
 
         // Color critical stock
         if (status === 'out' || status === 'critical') {
-            row.getCell('available').font = { name: 'Arial', bold: true, size: 9, color: { argb: 'FFF43F5E' } };
-            row.getCell('stockStatus').font = { name: 'Arial', bold: true, size: 9, color: { argb: 'FFF43F5E' } };
+            row.getCell('available').font = { name: 'Arial', bold: true, size: 9, color: { argb: EXCEL_STATUS_COLORS.danger } };
+            row.getCell('stockStatus').font = { name: 'Arial', bold: true, size: 9, color: { argb: EXCEL_STATUS_COLORS.danger } };
         } else if (status === 'low') {
-            row.getCell('available').font = { name: 'Arial', bold: true, size: 9, color: { argb: 'FFF59E0B' } };
-            row.getCell('stockStatus').font = { name: 'Arial', bold: true, size: 9, color: { argb: 'FFF59E0B' } };
+            row.getCell('available').font = { name: 'Arial', bold: true, size: 9, color: { argb: EXCEL_STATUS_COLORS.warning } };
+            row.getCell('stockStatus').font = { name: 'Arial', bold: true, size: 9, color: { argb: EXCEL_STATUS_COLORS.warning } };
         }
 
-        const isEven = idx % 2 === 0;
-        row.eachCell({ includeEmpty: true }, cell => {
-            if (!cell.font?.bold) cell.font = { name: 'Arial', size: 9 };
-            if (isEven) cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + COLORS.accentStripe } };
-            cell.border = borderHair();
-        });
+        styleExcelDataRow(row, idx);
         row.height = 18;
         row.commit();
     });
@@ -151,13 +132,7 @@ export async function exportInventoryToExcel(items: InventoryItem[]): Promise<vo
         stock:    items.reduce((s, i) => s + i.stock, 0),
         available:items.reduce((s, i) => s + (i.stock - (i.reserved ?? 0)), 0),
     });
-    totalRow.getCell('sku').font   = { name: 'Arial', bold: true, size: 9, color: { argb: 'FF' + COLORS.headerFont } };
-    totalRow.getCell('stock').font = { name: 'Arial', bold: true, size: 9, color: { argb: 'FF' + COLORS.headerFont } };
-    totalRow.getCell('available').font = { name: 'Arial', bold: true, size: 9, color: { argb: 'FF' + COLORS.headerFont } };
-    totalRow.eachCell({ includeEmpty: true }, cell => {
-        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + COLORS.totalBg } };
-        cell.border = { top: { style: 'medium', color: { argb: 'FF' + COLORS.border } } };
-    });
+    styleExcelTotalRow(totalRow);
     totalRow.height = 22;
     totalRow.commit();
 

@@ -1,5 +1,6 @@
 import { Order, OrderItem, OrderStatus, ShippingInfo, TipoEnvio, ServiceOrderItem, OrderType, BranchInfo } from '@/features/seller/sales/types';
 import { IOrderRepository, OrderFilters, CreateOrderInput, UpdateOrderInput } from '../contracts/IOrderRepository';
+import { serviceStatusToStep } from '@/shared/lib/booking/serviceFlowSteps';
 
 interface BackendItem {
     id: string;
@@ -45,6 +46,7 @@ interface BackendServiceItem {
     durationMinutes: number | null;
     serviceBookingId: string | null;
     bookingStatus: string | null;
+    customerValidatedAt?: string | null;
     createdAt: string;
     updatedAt: string;
 }
@@ -91,6 +93,9 @@ interface BackendOrder {
     couponCode: string | null;
     notes: string | null;
     paidAt: string | null;
+    deliveredAt?: string | null;
+    customerValidatedAt?: string | null;
+    validationSource?: string | null;
     items: BackendItem[];
     serviceItems: BackendServiceItem[];
     user: { id: string; name: string; email: string; phone: string | null; documentType: string | null; documentNumber: string | null } | null;
@@ -105,15 +110,6 @@ const PRODUCT_STATUS_STEP_MAP: Record<string, number> = {
     shipped: 4,
     delivered: 5,
     cancelled: 0,
-};
-
-const SERVICE_STATUS_STEP_MAP: Record<string, number> = {
-    pending: 1,
-    confirmed: 1,
-    on_the_way: 2,
-    completed: 3,
-    cancelled: 0,
-    no_show: 0,
 };
 
 const ADVANCE_FLOW: Record<string, string> = {
@@ -226,6 +222,7 @@ export class LaravelOrderRepository implements IOrderRepository {
             durationMinutes: s.durationMinutes,
             serviceBookingId: s.serviceBookingId,
             bookingStatus: this.normalizeStatus(s.bookingStatus),
+            customerValidatedAt: s.customerValidatedAt ?? null,
         }));
 
         const serviceQty = serviceItems.reduce((sum, s) => sum + s.quantity, 0);
@@ -236,7 +233,7 @@ export class LaravelOrderRepository implements IOrderRepository {
             : 0;
 
         const serviceCurrentStep = serviceItems.length > 0
-            ? Math.max(...serviceItems.map((s) => SERVICE_STATUS_STEP_MAP[s.bookingStatus || s.status] ?? 0), 0) || 1
+            ? Math.max(...serviceItems.map((s) => serviceStatusToStep(s.bookingStatus || s.status)), 0) || 1
             : 0;
 
         const currentStep = productCurrentStep || serviceCurrentStep || 1;
@@ -281,6 +278,8 @@ export class LaravelOrderRepository implements IOrderRepository {
             couponCode: backend.couponCode ?? null,
             notes: backend.notes ?? null,
             paidAt: backend.paidAt ?? null,
+            customerValidatedAt: backend.customerValidatedAt ?? null,
+            validationSource: backend.validationSource ?? null,
             envio: {
                 direccion: backend.shipping?.address ?? '',
                 carrier: backend.carrier ?? '',
@@ -373,8 +372,8 @@ export class LaravelOrderRepository implements IOrderRepository {
         return this.mapOrder((raw as any).data as BackendOrder);
     }
 
-    async advanceOrderStep(id: string, section?: 'products' | 'services' | 'confirm'): Promise<Order> {
-        console.log('[LaravelOrderRepository::advanceOrderStep] START', { orderId: id, section });
+    async advanceOrderStep(id: string, section?: 'products' | 'services' | 'confirm', serviceItemId?: string): Promise<Order> {
+        console.log('[LaravelOrderRepository::advanceOrderStep] START', { orderId: id, section, serviceItemId });
 
         if (section === 'confirm') {
             console.log('[LaravelOrderRepository::advanceOrderStep] confirm action requested, calling confirmOrder');
@@ -412,53 +411,61 @@ export class LaravelOrderRepository implements IOrderRepository {
         });
 
         if (shouldAdvanceServices) {
-            const firstItem = order.serviceItems?.[0];
-            console.log('[LaravelOrderRepository::advanceOrderStep] firstItem', firstItem ? {
-                id: firstItem.id,
-                serviceBookingId: firstItem.serviceBookingId,
-                status: firstItem.status,
-                bookingStatus: firstItem.bookingStatus,
-                modality: firstItem.modality,
-            } : 'NO SERVICE ITEMS');
+            const itemsWithBooking = (order.serviceItems ?? []).filter((si) => !!si.serviceBookingId);
+            console.log('[LaravelOrderRepository::advanceOrderStep] itemsWithBooking', itemsWithBooking.map(si => ({
+                id: si.id,
+                serviceBookingId: si.serviceBookingId,
+                status: si.status,
+                bookingStatus: si.bookingStatus,
+                modality: si.modality,
+            })));
 
-            if (!firstItem?.serviceBookingId) {
-                console.error('[LaravelOrderRepository::advanceOrderStep] No serviceBookingId on firstItem');
+            if (itemsWithBooking.length === 0) {
+                console.error('[LaravelOrderRepository::advanceOrderStep] No serviceBookingId on any service item');
                 throw new Error('No se encontró reserva para este servicio');
             }
 
-            const action = this.getServiceNextAction(firstItem);
-            console.log('[LaravelOrderRepository::advanceOrderStep] action determined', { action, status: firstItem.status, bookingStatus: firstItem.bookingStatus, modality: firstItem.modality });
+            // A pedido can carry several service lines (mixed order with multiple bookings).
+            // Each click must advance exactly ONE booking one step — same as the product flow,
+            // where each item is confirmed individually. Never batch-advance every booking at once.
+            const targetItem = serviceItemId
+                ? itemsWithBooking.find((si) => si.id === serviceItemId || si.serviceBookingId === serviceItemId)
+                : itemsWithBooking.find((si) => this.getServiceNextAction(si) !== null) ?? itemsWithBooking[0];
+
+            if (!targetItem?.serviceBookingId) {
+                console.error('[LaravelOrderRepository::advanceOrderStep] No matching service item for target', { serviceItemId });
+                throw new Error('No se encontró la reserva de servicio indicada');
+            }
+
+            const action = this.getServiceNextAction(targetItem);
+            console.log('[LaravelOrderRepository::advanceOrderStep] action determined', { bookingId: targetItem.serviceBookingId, action, status: targetItem.status, bookingStatus: targetItem.bookingStatus, modality: targetItem.modality });
 
             if (!action) {
-                console.warn('[LaravelOrderRepository::advanceOrderStep] No valid next action, returning order unchanged');
+                console.warn('[LaravelOrderRepository::advanceOrderStep] No valid next action for target booking, returning order unchanged');
                 return order;
             }
 
-            const baseUrl = this.getBaseUrl();
-            const url = `${baseUrl}/bookings/${firstItem.serviceBookingId}/${action}`;
-            console.log('[LaravelOrderRepository::advanceOrderStep] calling booking endpoint', { url, bookingId: firstItem.serviceBookingId, action, method: 'PUT' });
-
             try {
-                await this.request<any>(`/bookings/${firstItem.serviceBookingId}/${action}`, { method: 'PUT' });
-                console.log('[LaravelOrderRepository::advanceOrderStep] booking endpoint succeeded');
+                await this.request<any>(`/bookings/${targetItem.serviceBookingId}/${action}`, { method: 'PUT' });
+                console.log('[LaravelOrderRepository::advanceOrderStep] booking endpoint succeeded', { bookingId: targetItem.serviceBookingId, action });
             } catch (err) {
-                console.error('[LaravelOrderRepository::advanceOrderStep] booking endpoint FAILED', err);
+                console.error('[LaravelOrderRepository::advanceOrderStep] booking endpoint FAILED', { bookingId: targetItem.serviceBookingId, action }, err);
                 throw err;
             }
 
             const nextStatus = action === 'confirm' ? 'confirmed'
                 : action === 'on-the-way' ? 'on_the_way'
                 : action === 'complete' ? 'completed'
-                : firstItem.status;
+                : targetItem.status;
 
             const updatedServiceItems = order.serviceItems.map((si) =>
-                si.serviceBookingId === firstItem.serviceBookingId
+                si.serviceBookingId === targetItem.serviceBookingId
                     ? { ...si, status: nextStatus, bookingStatus: nextStatus }
                     : si
             );
 
             const maxStep = Math.max(
-                ...updatedServiceItems.map((s) => SERVICE_STATUS_STEP_MAP[s.bookingStatus || s.status] ?? 0), 0
+                ...updatedServiceItems.map((s) => serviceStatusToStep(s.bookingStatus || s.status)), 0
             );
             const newEstado = maxStep >= 3 ? 'completed'
                 : maxStep >= 2 ? 'on_the_way'
@@ -470,7 +477,7 @@ export class LaravelOrderRepository implements IOrderRepository {
                 estado: newEstado as Order['estado'],
                 serviceItems: updatedServiceItems,
                 serviceCurrentStep: Math.max(
-                    ...updatedServiceItems.map((s) => SERVICE_STATUS_STEP_MAP[s.bookingStatus || s.status] ?? 0), 0
+                    ...updatedServiceItems.map((s) => serviceStatusToStep(s.bookingStatus || s.status)), 0
                 ) || 1,
             };
 

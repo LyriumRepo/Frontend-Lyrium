@@ -74,7 +74,7 @@ export default function ServiceCard({
       </td>
 
       {/* ── Servicio (imagen + nombre) ── */}
-      <td className="px-4 py-3 w-[260px] max-w-[260px]">
+      <td className="px-4 py-3 w-[260px]">
         <div className="flex items-center gap-3">
           {/* Imagen */}
           <div className="w-10 h-10 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-subtle)] overflow-hidden flex-shrink-0 relative">
@@ -111,16 +111,9 @@ export default function ServiceCard({
 
           {/* Nombre + etiquetas */}
           <div className="min-w-0 flex-1">
-            {/* Tooltip en el nombre */}
-            <div className="relative group/name">
-              <p className="text-sm font-black text-[var(--text-primary)] truncate leading-tight cursor-default">
+              <p className="text-sm font-black text-[var(--text-primary)] whitespace-nowrap leading-tight">
                 {service.denominacion}
               </p>
-              <div className="pointer-events-none absolute left-1/2 top-full z-50 mt-2 hidden -translate-x-1/2 whitespace-nowrap rounded-xl bg-black px-3 py-2 text-xs font-bold text-white shadow-lg group-hover/name:block">
-                {service.denominacion}
-                <div className="absolute -top-1 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 bg-black" />
-              </div>
-            </div>
             <div className="flex items-center gap-2 mt-0.5 flex-wrap">
               {service.domicilio && (
                 <span className="inline-flex items-center gap-0.5 text-[8px] font-black text-sky-500 dark:text-[#8FC3A1] uppercase tracking-wider">
@@ -128,7 +121,7 @@ export default function ServiceCard({
                   Domicilio
                 </span>
               )}
-              <span className="text-[10px] text-[var(--text-secondary)] font-bold truncate">
+              <span className="text-[10px] text-[var(--text-secondary)] font-bold whitespace-nowrap">
                 {ANTICIPACION_LABELS[service.anticipacionReserva]
                   ? `Anticipación: ${ANTICIPACION_LABELS[service.anticipacionReserva]}`
                   : ''}
@@ -139,17 +132,11 @@ export default function ServiceCard({
       </td>
 
       {/* ── Categoría ── */}
-      <td className="px-4 py-3 w-[240px] max-w-[240px]">
+      <td className="px-4 py-3 w-[240px]">
         {service.categoria ? (
-          <div className="relative group/cat">
-            <span className="block truncate text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wide cursor-default">
+            <span className="whitespace-nowrap text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wide">
               {service.categoria}
             </span>
-            <div className="pointer-events-none absolute left-1/2 top-full z-50 mt-2 hidden -translate-x-1/2 whitespace-nowrap rounded-xl bg-black px-3 py-2 text-xs font-bold text-white shadow-lg group-hover/cat:block">
-              {service.categoria}
-              <div className="absolute -top-1 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 bg-black" />
-            </div>
-          </div>
         ) : (
           <span className="text-[var(--text-secondary)] opacity-30 text-sm">
             —

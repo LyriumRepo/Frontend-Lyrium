@@ -4,9 +4,12 @@ import { useEffect } from 'react';
 import { driver, type DriveStep } from 'driver.js';
 import 'driver.js/dist/driver.css';
 import './welcome-tour.css';
+import { isNewUser, POST_WELCOME_DELAY_MS, waitFor, waitForWelcomeToastGone } from './tourHelpers';
 
 interface WelcomeGuideProps {
   userId: number | string;
+  /** ISO date de creación de la cuenta — solo se lanza la guía si el usuario es nuevo. */
+  createdAt?: string;
 }
 
 // Pasos que señalan el ítem real del menú lateral (requiere que el sidebar esté
@@ -62,17 +65,6 @@ function targetsReady() {
   );
 }
 
-function waitFor(condition: () => boolean, maxAttempts: number, onDone: (ok: boolean) => void) {
-  let attempts = 0;
-  const check = () => {
-    if (condition()) return onDone(true);
-    attempts += 1;
-    if (attempts >= maxAttempts) return onDone(false);
-    requestAnimationFrame(check);
-  };
-  check();
-}
-
 // El sidebar (SmartSidebar) renderiza un esqueleto vacío en su primer render
 // (evita mismatch de hidratación) y recién monta los links reales en su propio
 // useEffect — se espera unos frames a que ese ciclo termine antes de resolver
@@ -81,19 +73,13 @@ function waitForTargets(maxAttempts: number, onDone: (ready: boolean) => void) {
   waitFor(targetsReady, maxAttempts, onDone);
 }
 
-// El toast "¡Bienvenido/a de vuelta!" (CustomerWelcomeToast) vive en el layout
-// y se autocierra a los ~8s. Se espera explícitamente a que desaparezca (o a
-// que nunca haya aparecido) antes de arrancar el tour, en vez de depender de
-// que las duraciones de ambas animaciones coincidan por casualidad.
-function waitForWelcomeToastGone(onDone: () => void) {
-  waitFor(() => !document.querySelector('[data-lyrium-welcome-toast]'), 800, () => onDone());
-}
-
-export default function WelcomeGuide({ userId }: WelcomeGuideProps) {
+export default function WelcomeGuide({ userId, createdAt }: WelcomeGuideProps) {
   useEffect(() => {
+    if (!isNewUser(createdAt)) return;
     if (localStorage.getItem(storageKey(userId))) return;
 
     let cancelled = false;
+    let delayTimer: ReturnType<typeof setTimeout> | null = null;
     let activeTour: ReturnType<typeof driver> | null = null;
     const isDesktop = window.matchMedia('(min-width: 768px)').matches;
 
@@ -122,17 +108,21 @@ export default function WelcomeGuide({ userId }: WelcomeGuideProps) {
 
     waitForWelcomeToastGone(() => {
       if (cancelled) return;
-      waitForTargets(30, (ready) => {
+      delayTimer = setTimeout(() => {
         if (cancelled) return;
-        startTour(isDesktop && ready ? SPOTLIGHT_STEPS : FALLBACK_STEPS);
-      });
+        waitForTargets(30, (ready) => {
+          if (cancelled) return;
+          startTour(isDesktop && ready ? SPOTLIGHT_STEPS : FALLBACK_STEPS);
+        });
+      }, POST_WELCOME_DELAY_MS);
     });
 
     return () => {
       cancelled = true;
+      if (delayTimer) clearTimeout(delayTimer);
       activeTour?.destroy();
     };
-  }, [userId]);
+  }, [userId, createdAt]);
 
   return null;
 }

@@ -76,7 +76,7 @@ export default function ServicesGrid({ categorias }: ServicesGridProps) {
 
   return (
     <section 
-      className="!mt-0 space-y-4 md:space-y-6 max-w-7xl mx-auto px-4"
+      className="!mt-0 space-y-4 md:space-y-6 px-4"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
