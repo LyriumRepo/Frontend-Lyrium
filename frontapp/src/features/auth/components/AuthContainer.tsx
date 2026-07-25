@@ -13,9 +13,10 @@ import type { LoginFormData, RegisterFormData, UserType } from '../types/auth';
 
 interface AuthContainerProps {
     onSuccess?: () => void;
+    revokedReason?: string;
 }
 
-export function AuthContainer({ onSuccess }: AuthContainerProps) {
+export function AuthContainer({ onSuccess, revokedReason }: AuthContainerProps) {
     const [showIntro, setShowIntro] = useState(true);
     const router = useRouter();
 
@@ -187,6 +188,13 @@ export function AuthContainer({ onSuccess }: AuthContainerProps) {
 
                 {/* Right Side */}
                 <div className="relative w-full sm:ml-auto sm:w-[60%] p-4 sm:p-10 flex flex-col">
+                    {revokedReason && (
+                        <div className="mb-4 p-4 bg-sky-100 dark:bg-[var(--brand-green)]/20 border border-sky-300 dark:border-[var(--icons-green)]/30 rounded-2xl text-center">
+                            <p className="text-sm font-bold text-sky-700 dark:text-[var(--text-primary)]">
+                                {revokedReason}
+                            </p>
+                        </div>
+                    )}
                     <UserTypeToggle
                         value={userType}
                         onChange={(type) => {

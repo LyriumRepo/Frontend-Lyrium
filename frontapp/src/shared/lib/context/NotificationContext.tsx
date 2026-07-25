@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { useEcho } from '@laravel/echo-react';
 import { ProactiveNotification, NotificationLevel } from '@/shared/types/notifications';
 import { useSyncNotifications } from '@/shared/hooks/useSyncNotifications';
@@ -576,6 +577,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         } catch (e) { }
     }, []);
 
+    const router = useRouter();
+
     // WebSocket en tiempo real + polling como fallback
     useEcho<{ notification: Notification }>(
         user?.id ? `user.${user.id}` : 'user.__placeholder',
@@ -595,6 +598,18 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
             } catch (e) { }
         },
         [user]
+    );
+
+    // Escuchar revocación de sesión en tiempo real
+    useEcho<{ reason: string }>(
+        user?.id ? `user.${user.id}` : 'user.__placeholder',
+        'SessionRevoked',
+        () => {
+            localStorage.removeItem('laravel_token');
+            localStorage.removeItem('lyrium_user_cache');
+            router.push('/login?reason=revoked');
+        },
+        [user, router]
     );
 
     const contextValue = useMemo(() => ({
