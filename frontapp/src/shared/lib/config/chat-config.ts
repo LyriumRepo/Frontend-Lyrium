@@ -20,7 +20,7 @@ export const CHAT_CONFIG = {
     bg: 'bg-[var(--bg-card)]',
   },
   spacing: {
-    gap: 'gap-4',
+    gap: 'gap-6',
     padding: 'p-6',
   },
 } as const;

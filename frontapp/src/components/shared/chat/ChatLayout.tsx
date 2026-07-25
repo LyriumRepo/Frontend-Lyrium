@@ -60,17 +60,15 @@ export default function ChatLayout({
         col-span-12
         lg:${detailWidth}
         flex-col
+        bg-[var(--bg-card)]
         rounded-[2rem]
         lg:rounded-[2.5rem]
         border
         border-[var(--border-subtle)]
-        shadow-xl
+        shadow-sm
         overflow-hidden
         min-h-0
-      `}
-        style={{ background: 'linear-gradient(160deg, color-mix(in srgb,#9cb04e 6%,var(--bg-card)) 0%, var(--bg-card) 45%, color-mix(in srgb,#499bbf 5%,var(--bg-card)) 100%)' }}
-      >
-        <div className="h-1 w-full shrink-0 bg-gradient-to-r from-[#9cb04e] via-[#64c695] to-[#499bbf] rounded-t-[2rem] lg:rounded-t-[2.5rem]" />
+      `}>
         {detail}
       </div>
 
