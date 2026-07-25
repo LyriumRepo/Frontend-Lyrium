@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { User } from '@/shared/types/auth';
@@ -87,6 +87,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const router = useRouter();
   const pathname = usePathname();
   const queryClient = useQueryClient();
+  const wasAuthenticatedRef = useRef(false);
 
   const { isLoading: loading, data: sessionData } = useQuery({
     queryKey: ['auth', 'session'],
@@ -95,6 +96,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     retry: 0,
     refetchOnMount: true,
     refetchOnWindowFocus: false,
+    // Polling de respaldo: detecta una sesión revocada aunque el usuario
+    // no haga click en nada y el WebSocket (Reverb) no haya conectado.
+    refetchInterval: 30_000,
   });
 
   // Sincroniza el user con la query
@@ -102,12 +106,67 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     if (!loading) {
       setIsHydrated(true);
       if (sessionData?.authenticated && sessionData.user) {
+        wasAuthenticatedRef.current = true;
         setUser(sessionData.user);
       } else {
+        // Si veníamos autenticados y el validate ahora dice que no,
+        // la sesión fue revocada (o expiró) — expulsar sin depender de un click.
+        if (wasAuthenticatedRef.current) {
+          wasAuthenticatedRef.current = false;
+          localStorage.removeItem('laravel_token');
+          localStorage.removeItem('lyrium_user_cache');
+          setUser(null);
+          if (!window.location.pathname.startsWith('/login')) {
+            window.location.href = '/login?reason=revoked';
+          }
+          return;
+        }
         setUser(null);
       }
     }
   }, [loading, sessionData]);
+
+  // Fallback global: si CUALQUIER request a la API Laravel devuelve 401
+  // (token revocado/expirado), cierra sesión y redirige a /login.
+  // No depende del WebSocket (Reverb) — cubre el caso en que el evento
+  // en tiempo real de SessionRevoked no llegó (Reverb caído, socket
+  // desconectado, host mal configurado, etc.).
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const originalFetch = window.fetch.bind(window);
+
+    window.fetch = async (...args: Parameters<typeof fetch>) => {
+      const response = await originalFetch(...args);
+
+      if (response.status === 401) {
+        const input = args[0];
+        const url = typeof input === 'string'
+          ? input
+          : input instanceof Request
+            ? input.url
+            : input.toString();
+
+        const hadToken = !!localStorage.getItem('laravel_token');
+
+        if (url.startsWith(LARAVEL_API_URL) && hadToken) {
+          localStorage.removeItem('laravel_token');
+          localStorage.removeItem('lyrium_user_cache');
+          setUser(null);
+
+          if (!window.location.pathname.startsWith('/login')) {
+            window.location.href = '/login?reason=revoked';
+          }
+        }
+      }
+
+      return response;
+    };
+
+    return () => {
+      window.fetch = originalFetch;
+    };
+  }, []);
 
   // Redirecciones — solo actúa cuando la query ya hidrat ó
   useEffect(() => {
