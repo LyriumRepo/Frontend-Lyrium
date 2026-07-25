@@ -492,15 +492,6 @@ export function SellersPageClient(_props: SellersPageClientProps) {
                   Sistema de Contratos y Gestión Documental del Administrador (RF-16)
                 </p>
               </div>
-              <BaseButton 
-                onClick={contractsActions.openTemplates} 
-                variant="secondary" 
-                leftIcon="FolderOpen" 
-                size="md"
-                className="bg-gradient-to-r from-sky-500 to-sky-400 dark:from-emerald-700 dark:to-teal-600 text-white border-0 shadow-lg shadow-sky-500/25 dark:shadow-emerald-900/25 hover:shadow-xl hover:shadow-sky-500/30 dark:hover:shadow-emerald-900/30 hover:-translate-y-0.5 transition-all duration-200"
-              >
-                Plantillas Legales
-              </BaseButton>
             </div>
             <ContratosModule state={contractsState} actions={contractsActions} />
           </div>
