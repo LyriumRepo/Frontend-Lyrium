@@ -1,20 +1,53 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useRef, useState, type PointerEvent } from 'react';
 import Image from 'next/image';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion, useMotionValue, useTransform, type Variants } from 'framer-motion';
 import Icon from '@/components/ui/Icon';
 import { aboutData } from '@/features/public/nosotros/data/aboutData';
-import { useScrollParallax, useScrollReveal, useScrollProgressLine } from '@/shared/hooks/useGsapScroll';
+import { useScrollParallax, useScrollReveal } from '@/shared/hooks/useGsapScroll';
 import { fadeUp, staggerContainer, cardItem, wordUp } from '@/shared/lib/motion/variants';
+import { useAutoPingPong, useIsMobile, CarouselStage, CarouselDots } from '@/features/public/nosotros/components/AutoCarousel';
+
+/** Ensambla cada letra del acróstico con un salto elástico + destello final, tipo "juego" Google Labs. */
+const letterAssemble: Variants = {
+    hidden: { opacity: 0, scale: 0.3, y: 24, rotate: -12 },
+    show: (idx: number) => ({
+        opacity: 1,
+        scale: 1,
+        y: 0,
+        rotate: 0,
+        textShadow: [
+            '0 0 0px rgba(143,195,161,0)',
+            '0 0 26px rgba(56,189,248,0.9)',
+            '0 0 0px rgba(143,195,161,0)',
+        ],
+        transition: {
+            default: { type: 'spring', stiffness: 260, damping: 15, delay: idx * 0.09 },
+            textShadow: { duration: 0.9, times: [0, 0.5, 1], delay: idx * 0.09 + 0.15 },
+        },
+    }),
+};
 
 export default function AboutPage() {
-    const [expanded, setExpanded] = useState<Set<string>>(new Set());
-    const toggleExpanded = (letter: string) => {
-        setExpanded((prev) => {
+    const reduceMotion = useReducedMotion();
+
+    const [expandedLetters, setExpandedLetters] = useState<Set<string>>(new Set());
+    const toggleLetter = (letter: string) => {
+        setExpandedLetters((prev) => {
             const next = new Set(prev);
             if (next.has(letter)) next.delete(letter);
             else next.add(letter);
+            return next;
+        });
+    };
+
+    const [expandedBlocks, setExpandedBlocks] = useState<Set<number>>(new Set());
+    const toggleBlock = (idx: number) => {
+        setExpandedBlocks((prev) => {
+            const next = new Set(prev);
+            if (next.has(idx)) next.delete(idx);
+            else next.add(idx);
             return next;
         });
     };
@@ -23,16 +56,24 @@ export default function AboutPage() {
     const orb1Ref = useRef<HTMLDivElement>(null);
     const orb2Ref = useRef<HTMLDivElement>(null);
     const aboutImageRef = useRef<HTMLDivElement>(null);
-    const acrosticLineRef = useRef<HTMLDivElement>(null);
-    const acrosticSectionRef = useRef<HTMLElement>(null);
+
+    // Carruseles automáticos "ida y vuelta" — solo en móvil. En desktop se muestran los
+    // tres/cuatro elementos completos en grilla, sin auto-avance.
+    const isMobile = useIsMobile();
+    const [valuesPaused, setValuesPaused] = useState(false);
+    const values = useAutoPingPong(aboutData.values.items.length, { intervalMs: 3400, paused: reduceMotion || valuesPaused || !isMobile });
+    const activeValue = aboutData.values.items[values.index];
+
+    const [sealsPaused, setSealsPaused] = useState(false);
+    const seals = useAutoPingPong(aboutData.premiumIcons.length, { intervalMs: 3800, paused: reduceMotion || sealsPaused || !isMobile });
+    const activeSeal = aboutData.premiumIcons[seals.index];
 
     // Scroll-linked choreography via the shared GSAP hooks (src/shared/hooks/useGsapScroll.ts):
-    // hero parallax, image reveal, and timeline-growth lines. Each hook is self-cleaning and
-    // reduced-motion-gated — no local gsap.context() bookkeeping needed here.
+    // hero parallax and image reveal. Each hook is self-cleaning and reduced-motion-gated —
+    // no local gsap.context() bookkeeping needed here.
     useScrollParallax(orb1Ref, { yPercent: -30, xPercent: 10 }, { trigger: heroRef, start: 'top top', end: 'bottom top', scrub: 0.6 });
     useScrollParallax(orb2Ref, { yPercent: 24, xPercent: -8 }, { trigger: heroRef, start: 'top top', end: 'bottom top', scrub: 0.6 });
     useScrollReveal(aboutImageRef, { from: 'inset(0 0 100% 0 round 2.5rem)', to: 'inset(0 0 0% 0 round 2.5rem)' });
-    useScrollProgressLine(acrosticLineRef, { trigger: acrosticSectionRef, start: 'top 65%', end: 'bottom 75%' });
 
     return (
         <main className="min-h-screen bg-[#f8f9fa] dark:bg-[var(--bg-primary)] overflow-hidden">
@@ -46,19 +87,19 @@ export default function AboutPage() {
                 <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/45 to-black/70 dark:from-black/80 dark:via-black/55 dark:to-[var(--bg-primary)]" />
                 <div className="absolute inset-0 bg-gradient-to-tr from-sky-500/20 via-transparent to-cyan-300/10 dark:from-[var(--brand-green)]/30 dark:to-transparent" />
 
-                {/* Orbes decorativos — flotan ambientalmente y además responden al scroll */}
+                {/* Orbes decorativos — respiran en calma y además responden al scroll */}
                 <motion.div
                     ref={orb1Ref}
                     aria-hidden
                     className="absolute -top-20 -left-10 w-72 h-72 rounded-full bg-sky-400/25 dark:bg-[var(--icons-green)]/15 blur-[90px] pointer-events-none will-change-transform"
-                    animate={{ y: [0, 22, 0] }}
+                    animate={reduceMotion ? undefined : { y: [0, 22, 0], scale: [1, 1.06, 1] }}
                     transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }}
                 />
                 <motion.div
                     ref={orb2Ref}
                     aria-hidden
                     className="absolute -bottom-24 -right-16 w-96 h-96 rounded-full bg-cyan-300/20 dark:bg-[var(--brand-green)]/25 blur-[100px] pointer-events-none will-change-transform"
-                    animate={{ y: [0, -26, 0] }}
+                    animate={reduceMotion ? undefined : { y: [0, -26, 0], scale: [1, 1.05, 1] }}
                     transition={{ duration: 11, repeat: Infinity, ease: 'easeInOut' }}
                 />
 
@@ -123,14 +164,14 @@ export default function AboutPage() {
                 {/* Indicador de scroll */}
                 <motion.div
                     className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10"
-                    animate={{ y: [0, 8, 0] }}
+                    animate={reduceMotion ? undefined : { y: [0, 8, 0] }}
                     transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
                 >
                     <Icon name="ChevronDown" className="w-6 h-6 text-white/60" />
                 </motion.div>
             </section>
 
-            {/* ── ¿Qué es Lyrium? ── */}
+            {/* ── ¿Qué es Lyrium? — bloques jugables ── */}
             <section className="py-20 md:py-28 px-6">
                 <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
 
@@ -161,18 +202,50 @@ export default function AboutPage() {
                             {aboutData.aboutSection.title}
                         </motion.h2>
 
-                        <motion.div variants={fadeUp} className="space-y-5 text-slate-600 dark:text-[var(--text-muted)] leading-relaxed text-base md:text-lg">
-                            {aboutData.aboutSection.paragraphs.map((p, i) => (
-                                <p
-                                    key={`about-${i}`}
-                                    className={`text-justify ${i === 0
-                                        ? 'font-semibold text-slate-900 dark:text-[var(--text-primary)] border-l-4 border-sky-500 dark:border-[var(--icons-green)] pl-6 py-3 bg-sky-50/50 dark:bg-[var(--bg-secondary)]/50 rounded-r-2xl'
-                                        : ''
-                                    }`}
-                                >
-                                    {p}
-                                </p>
-                            ))}
+                        {/* Tarjetas jugables — toca para expandir/colapsar cada bloque */}
+                        <motion.div variants={fadeUp} className="space-y-3">
+                            {aboutData.aboutSection.paragraphs.map((p, i) => {
+                                const isOpen = expandedBlocks.has(i);
+                                return (
+                                    <motion.div
+                                        key={`about-${i}`}
+                                        layout
+                                        role="button"
+                                        tabIndex={0}
+                                        aria-expanded={isOpen}
+                                        onClick={() => toggleBlock(i)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter' || e.key === ' ') {
+                                                e.preventDefault();
+                                                toggleBlock(i);
+                                            }
+                                        }}
+                                        whileHover={{ y: -3 }}
+                                        whileTap={{ scale: 0.99 }}
+                                        className={`group cursor-pointer select-none rounded-2xl border transition-colors duration-300 p-5 md:p-6 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 dark:focus-visible:ring-[var(--icons-green)] ${
+                                            i === 0
+                                                ? 'border-l-4 border-sky-500 dark:border-[var(--icons-green)] bg-sky-50/50 dark:bg-[var(--bg-secondary)]/50'
+                                                : 'border-slate-100 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-secondary)] hover:border-sky-200 dark:hover:border-[var(--icons-green)]/40'
+                                        }`}
+                                    >
+                                        <div className="flex items-start justify-between gap-4">
+                                            <p
+                                                className={`text-justify text-slate-600 dark:text-[var(--text-muted)] leading-relaxed text-base md:text-lg ${
+                                                    i === 0 ? 'font-semibold text-slate-900 dark:text-[var(--text-primary)]' : ''
+                                                } ${isOpen ? '' : 'line-clamp-2'}`}
+                                            >
+                                                {p}
+                                            </p>
+                                            <Icon
+                                                name="ChevronDown"
+                                                className={`shrink-0 mt-1 w-4 h-4 text-slate-300 dark:text-[var(--text-muted)] transition-transform duration-300 ${
+                                                    isOpen ? 'rotate-180 text-sky-500 dark:text-[var(--icons-green)]' : 'group-hover:translate-y-0.5'
+                                                }`}
+                                            />
+                                        </div>
+                                    </motion.div>
+                                );
+                            })}
                         </motion.div>
                     </motion.div>
 
@@ -192,7 +265,7 @@ export default function AboutPage() {
                                 src={`/${aboutData.aboutSection.image}`}
                                 alt="Lyrium BioMarketplace"
                                 fill
-                                sizes="(max-width: 768px) 100vw, 50vw"
+                                sizes="(max-width: 1024px) 100vw, 50vw"
                                 className="object-cover object-[center_25%] transform group-hover:scale-105 transition-transform duration-[2000ms]"
                             />
                             <div className="absolute bottom-6 left-6 right-6 p-5 bg-white/90 dark:bg-[var(--bg-secondary)]/90 backdrop-blur-md rounded-2xl shadow-xl border border-white/50 dark:border-[var(--border-subtle)]">
@@ -205,16 +278,16 @@ export default function AboutPage() {
                 </div>
             </section>
 
-            {/* ── Nuestros Valores ── */}
+            {/* ── Nuestros Valores — tiles estilo Google Labs ── */}
             <section className="py-24 md:py-32 px-6 bg-white dark:bg-[var(--bg-secondary)]">
-                <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-[0.8fr_1.2fr] gap-12 lg:gap-20 items-start">
+                <div className="max-w-7xl mx-auto">
 
                     <motion.div
                         initial="hidden"
                         whileInView="show"
                         viewport={{ once: true, margin: '-100px' }}
                         variants={staggerContainer}
-                        className="lg:sticky lg:top-32 space-y-5"
+                        className="max-w-2xl mx-auto text-center space-y-5 mb-14 md:mb-20"
                     >
                         <motion.span
                             variants={fadeUp}
@@ -229,56 +302,95 @@ export default function AboutPage() {
                         >
                             {aboutData.values.title}
                         </motion.h2>
-                        <motion.div variants={fadeUp} className="h-1 w-16 bg-gradient-to-r from-sky-400 to-sky-600 dark:from-[var(--icons-green)] dark:to-[var(--brand-green)] rounded-full" />
-
-                        {/* Imagen decorativa — flota en loop continuo, en cualquier dispositivo */}
-                        <motion.div variants={fadeUp} className="relative mt-6">
-                            <motion.div
-                                aria-hidden
-                                animate={{ opacity: [0.35, 0.65, 0.35], scale: [1, 1.05, 1] }}
-                                transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
-                                className="absolute -inset-3 -z-10 rounded-[2rem] bg-gradient-to-br from-sky-300/40 to-cyan-200/30 dark:from-[var(--icons-green)]/25 dark:to-transparent blur-2xl pointer-events-none"
-                            />
-                            <motion.div
-                                animate={{ y: [0, -10, 0] }}
-                                transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-                                className="relative rounded-3xl overflow-hidden shadow-xl border border-sky-100 dark:border-[var(--border-subtle)]"
-                            >
-                                <Image
-                                    src="/img/nosotros/Mucho.jpg"
-                                    alt="Equipo de salud Lyrium acompañando con cuidado a un paciente"
-                                    width={640}
-                                    height={480}
-                                    className="w-full h-44 sm:h-52 md:h-60 object-cover"
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/45 via-slate-900/0 to-transparent" />
-                            </motion.div>
-                        </motion.div>
+                        <motion.div variants={fadeUp} className="h-1 w-16 bg-gradient-to-r from-sky-400 to-sky-600 dark:from-[var(--icons-green)] dark:to-[var(--brand-green)] rounded-full mx-auto" />
                     </motion.div>
 
-                    <div style={{ perspective: '1000px' }}>
+                    {/* ── Móvil: carrusel automático "ida y vuelta" ── */}
+                    <motion.div
+                        variants={fadeUp}
+                        initial="hidden"
+                        whileInView="show"
+                        viewport={{ once: true, margin: '-80px' }}
+                        onMouseEnter={() => setValuesPaused(true)}
+                        onMouseLeave={() => setValuesPaused(false)}
+                        onFocus={() => setValuesPaused(true)}
+                        onBlur={() => setValuesPaused(false)}
+                        className="mx-auto max-w-2xl md:hidden"
+                    >
+                        <CarouselStage activeKey={activeValue.title} direction={values.direction} className="min-h-[260px] sm:min-h-[240px]">
+                            <div className="group relative flex min-h-[260px] flex-col justify-between overflow-hidden rounded-3xl border border-slate-100 bg-[#f8f9fa]/80 p-7 backdrop-blur-sm sm:min-h-[240px] md:p-9 dark:border-[var(--border-subtle)] dark:bg-[var(--bg-primary)]/60">
+                                {/* Barrido de luz diagonal — loop suave */}
+                                {!reduceMotion && (
+                                    <motion.div
+                                        aria-hidden
+                                        className="pointer-events-none absolute -inset-y-16 -left-1/4 w-1/3 rotate-12 bg-gradient-to-r from-transparent via-white/50 to-transparent dark:via-white/10"
+                                        animate={{ x: ['-40%', '340%'] }}
+                                        transition={{ duration: 3.8, repeat: Infinity, ease: 'easeInOut', repeatDelay: 1.8 }}
+                                    />
+                                )}
+
+                                <div className="relative flex items-center justify-between">
+                                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-50 text-sky-600 md:h-14 md:w-14 dark:bg-[var(--bg-muted)] dark:text-[#6BAF7B]">
+                                        <Icon name={activeValue.icon} className="h-6 w-6 md:h-7 md:w-7" />
+                                    </div>
+                                    <span className="text-sm font-black tabular-nums tracking-tight text-sky-200 dark:text-[var(--icons-green)]/40">
+                                        0{values.index + 1}
+                                    </span>
+                                </div>
+
+                                <div className="relative min-w-0">
+                                    <h3 className="mb-1.5 text-lg font-black tracking-tight text-slate-800 md:text-xl dark:text-[var(--text-primary)]">
+                                        {activeValue.title}
+                                    </h3>
+                                    <p className="text-sm font-medium leading-relaxed text-slate-500 md:text-base dark:text-[var(--text-muted)]">
+                                        {activeValue.description}
+                                    </p>
+                                </div>
+                            </div>
+                        </CarouselStage>
+
+                        <div className="mt-6">
+                            <CarouselDots total={aboutData.values.items.length} activeIndex={values.index} label="Nuestros valores" />
+                        </div>
+                    </motion.div>
+
+                    {/* ── Desktop/tablet: los tres valores completos, en grilla, sin carrusel ── */}
                     <motion.div
                         initial="hidden"
                         whileInView="show"
                         viewport={{ once: true, margin: '-80px' }}
                         variants={staggerContainer}
-                        className="space-y-3"
+                        className="hidden md:grid grid-cols-3 gap-5 md:gap-6"
                     >
                         {aboutData.values.items.map((val, idx) => (
                             <motion.div
                                 key={val.title}
                                 variants={cardItem}
-                                whileHover={{ y: -4, rotateX: 3, rotateY: -2, scale: 1.01 }}
-                                className="group flex items-start gap-5 md:gap-6 p-6 md:p-7 rounded-2xl border border-slate-100 dark:border-[var(--border-subtle)] hover:border-sky-200 dark:hover:border-[var(--icons-green)]/40 hover:bg-[#f8f9fa] dark:hover:bg-[var(--bg-primary)]/60 transition-colors duration-300"
+                                whileHover={{ y: -6, scale: 1.015 }}
+                                transition={{ type: 'spring', stiffness: 260, damping: 20 }}
+                                className="group relative overflow-hidden rounded-3xl border border-slate-100 dark:border-[var(--border-subtle)] bg-[#f8f9fa]/80 dark:bg-[var(--bg-primary)]/60 backdrop-blur-sm p-7 md:p-8 flex flex-col justify-between min-h-[240px] md:min-h-[260px]"
                             >
-                                <span className="shrink-0 pt-1 text-sm font-black text-sky-200 dark:text-[var(--icons-green)]/40 tabular-nums tracking-tight">
-                                    0{idx + 1}
-                                </span>
-                                <div className="shrink-0 w-11 h-11 md:w-12 md:h-12 rounded-xl bg-sky-50 dark:bg-[var(--bg-muted)] flex items-center justify-center text-sky-600 dark:text-[#6BAF7B] group-hover:scale-105 transition-transform duration-300">
-                                    <Icon name={val.icon} className="w-5 h-5 md:w-6 md:h-6" />
+                                {/* Barrido de luz diagonal — loop suave y escalonado */}
+                                {!reduceMotion && (
+                                    <motion.div
+                                        aria-hidden
+                                        className="pointer-events-none absolute -inset-y-16 -left-1/4 w-1/3 rotate-12 bg-gradient-to-r from-transparent via-white/50 dark:via-white/10 to-transparent"
+                                        animate={{ x: ['-40%', '340%'] }}
+                                        transition={{ duration: 3.4, repeat: Infinity, ease: 'easeInOut', delay: idx * 0.6, repeatDelay: 1.6 }}
+                                    />
+                                )}
+
+                                <div className="relative flex items-center justify-between">
+                                    <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-sky-50 dark:bg-[var(--bg-muted)] flex items-center justify-center text-sky-600 dark:text-[#6BAF7B] group-hover:scale-105 transition-transform duration-300">
+                                        <Icon name={val.icon} className="w-6 h-6 md:w-7 md:h-7" />
+                                    </div>
+                                    <span className="text-sm font-black text-sky-200 dark:text-[var(--icons-green)]/40 tabular-nums tracking-tight">
+                                        0{idx + 1}
+                                    </span>
                                 </div>
-                                <div className="min-w-0 flex-1">
-                                    <h3 className="text-lg md:text-xl font-black text-slate-800 dark:text-[var(--text-primary)] mb-1 tracking-tight">
+
+                                <div className="relative min-w-0">
+                                    <h3 className="text-lg md:text-xl font-black text-slate-800 dark:text-[var(--text-primary)] mb-1.5 tracking-tight">
                                         {val.title}
                                     </h3>
                                     <p className="text-sm md:text-base text-slate-500 dark:text-[var(--text-muted)] font-medium leading-relaxed">
@@ -288,12 +400,41 @@ export default function AboutPage() {
                             </motion.div>
                         ))}
                     </motion.div>
-                    </div>
+
+                    {/* Imagen decorativa — flota en loop continuo */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 24 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true, margin: '-80px' }}
+                        transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+                        className="relative mt-10 md:mt-12 max-w-3xl mx-auto"
+                    >
+                        <motion.div
+                            aria-hidden
+                            animate={reduceMotion ? undefined : { opacity: [0.35, 0.65, 0.35], scale: [1, 1.05, 1] }}
+                            transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
+                            className="absolute -inset-3 -z-10 rounded-[2rem] bg-gradient-to-br from-sky-300/40 to-cyan-200/30 dark:from-[var(--icons-green)]/25 dark:to-transparent blur-2xl pointer-events-none"
+                        />
+                        <motion.div
+                            animate={reduceMotion ? undefined : { y: [0, -10, 0] }}
+                            transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+                            className="relative rounded-3xl overflow-hidden shadow-xl border border-sky-100 dark:border-[var(--border-subtle)]"
+                        >
+                            <Image
+                                src="/img/nosotros/Mucho.jpg"
+                                alt="Equipo de salud Lyrium acompañando con cuidado a un paciente"
+                                width={960}
+                                height={420}
+                                className="w-full h-56 sm:h-64 md:h-72 object-cover object-[center_20%]"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/45 via-slate-900/0 to-transparent" />
+                        </motion.div>
+                    </motion.div>
                 </div>
             </section>
 
-            {/* ── Nuestra Relación Contigo · Acróstico LYRIUM ── */}
-            <section ref={acrosticSectionRef} className="relative py-24 md:py-32 px-6 overflow-hidden bg-[#f8f9fa] dark:bg-[var(--bg-primary)]">
+            {/* ── Nuestra Relación Contigo · Acróstico LYRIUM — el juego estrella ── */}
+            <section className="relative py-24 md:py-32 px-6 overflow-hidden bg-[#f8f9fa] dark:bg-[var(--bg-primary)]">
                 <div className="relative max-w-6xl mx-auto">
                     <motion.div
                         initial="hidden"
@@ -327,27 +468,38 @@ export default function AboutPage() {
                             {aboutData.acrosticSection.subtitle}
                         </motion.p>
 
-                        {/* Acróstico LYRIUM — word mark */}
-                        <motion.div variants={fadeUp} className="flex items-center justify-center gap-1 pt-5">
-                            {aboutData.acrosticSection.items.map((item) => (
-                                <span
+                        {/* Acróstico LYRIUM — se ensambla solo con salto elástico + destello, y luego respira */}
+                        <div className="flex items-center justify-center gap-1 pt-5">
+                            {aboutData.acrosticSection.items.map((item, idx) => (
+                                <motion.span
                                     key={item.letter}
-                                    className={`text-4xl md:text-5xl font-black tracking-tighter transition-colors duration-300 ${
-                                        expanded.has(item.letter)
-                                            ? 'text-sky-600 dark:text-[var(--icons-green)]'
-                                            : 'text-sky-500/70 dark:text-[var(--icons-green)]/60'
-                                    }`}
+                                    custom={idx}
+                                    variants={letterAssemble}
+                                    initial="hidden"
+                                    whileInView="show"
+                                    viewport={{ once: true, margin: '-40px' }}
+                                    className="inline-block"
                                 >
-                                    {item.letter}
-                                </span>
+                                    <motion.span
+                                        animate={reduceMotion ? undefined : { scale: [1, 1.06, 1] }}
+                                        transition={{ duration: 3 + idx * 0.3, repeat: Infinity, ease: 'easeInOut', delay: idx * 0.15 + 1.1 }}
+                                        className={`inline-block text-4xl md:text-5xl font-black tracking-tighter transition-colors duration-300 ${
+                                            expandedLetters.has(item.letter)
+                                                ? 'text-sky-600 dark:text-[var(--icons-green)]'
+                                                : 'text-sky-500/70 dark:text-[var(--icons-green)]/60'
+                                        }`}
+                                    >
+                                        {item.letter}
+                                    </motion.span>
+                                </motion.span>
                             ))}
-                        </motion.div>
+                        </div>
 
                         {/* Pista didáctica — visible en cualquier dispositivo hasta que el usuario toque una letra */}
-                        {expanded.size === 0 && (
+                        {expandedLetters.size === 0 && (
                             <motion.p
                                 variants={fadeUp}
-                                animate={{ opacity: [0.5, 1, 0.5], y: [2, -2, 2] }}
+                                animate={reduceMotion ? undefined : { opacity: [0.5, 1, 0.5], y: [2, -2, 2] }}
                                 transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
                                 className="flex items-center justify-center gap-1.5 text-xs font-bold text-sky-500 dark:text-[var(--icons-green)] pt-1"
                             >
@@ -367,17 +519,18 @@ export default function AboutPage() {
                         className="relative flex flex-col gap-4 md:gap-5"
                         style={{ transformStyle: 'preserve-3d' }}
                     >
-                        {/* Línea conectora del timeline — crece con el progreso real de scroll */}
-                        <div className="absolute left-8 md:left-10 top-2 bottom-2 w-px bg-sky-100 dark:bg-[var(--border-subtle)] pointer-events-none overflow-hidden">
-                            <div
-                                ref={acrosticLineRef}
-                                className="absolute inset-x-0 top-0 bottom-0 bg-gradient-to-b from-sky-400 via-sky-500 to-sky-300 dark:from-[var(--icons-green)] dark:via-[var(--brand-green)] dark:to-transparent"
-                                style={{ transform: 'scaleY(0)' }}
-                            />
-                        </div>
+                        {/* Línea conectora — decorativa, ya no es una barra de progreso de scroll */}
+                        <motion.div
+                            initial={{ opacity: 0, scaleY: 0.6 }}
+                            whileInView={{ opacity: 1, scaleY: 1 }}
+                            viewport={{ once: true, margin: '-60px' }}
+                            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+                            style={{ transformOrigin: 'top' }}
+                            className="absolute left-8 md:left-10 top-2 bottom-2 w-px bg-gradient-to-b from-sky-300 via-sky-200 to-transparent dark:from-[var(--icons-green)]/70 dark:via-[var(--border-subtle)] dark:to-transparent pointer-events-none"
+                        />
 
                         {aboutData.acrosticSection.items.map((item, idx) => {
-                            const isOpen = expanded.has(item.letter);
+                            const isOpen = expandedLetters.has(item.letter);
                             return (
                                 <motion.div
                                     key={item.letter}
@@ -386,11 +539,11 @@ export default function AboutPage() {
                                     role="button"
                                     tabIndex={0}
                                     aria-expanded={isOpen}
-                                    onClick={() => toggleExpanded(item.letter)}
+                                    onClick={() => toggleLetter(item.letter)}
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter' || e.key === ' ') {
                                             e.preventDefault();
-                                            toggleExpanded(item.letter);
+                                            toggleLetter(item.letter);
                                         }
                                     }}
                                     whileHover={{ y: -4, rotateX: 3, rotateY: -1 }}
@@ -407,7 +560,7 @@ export default function AboutPage() {
                                         }`}
                                     >
                                         {/* Pulso continuo — invita a tocar en cualquier dispositivo, no solo hover */}
-                                        {!isOpen && (
+                                        {!isOpen && !reduceMotion && (
                                             <motion.span
                                                 aria-hidden
                                                 className="absolute inset-0 rounded-2xl ring-2 ring-sky-300 dark:ring-[var(--icons-green)]/70 pointer-events-none"
@@ -478,50 +631,38 @@ export default function AboutPage() {
                         </motion.span>
                     </motion.div>
 
+                    {/* ── Móvil: carrusel automático "ida y vuelta" ── */}
+                    <motion.div
+                        variants={fadeUp}
+                        initial="hidden"
+                        whileInView="show"
+                        viewport={{ once: true, margin: '-80px' }}
+                        onMouseEnter={() => setSealsPaused(true)}
+                        onMouseLeave={() => setSealsPaused(false)}
+                        onFocus={() => setSealsPaused(true)}
+                        onBlur={() => setSealsPaused(false)}
+                        className="mx-auto max-w-xs md:hidden"
+                    >
+                        <CarouselStage activeKey={activeSeal.title} direction={seals.direction} className="min-h-[360px]">
+                            <TiltMedallion icon={activeSeal} idx={seals.index} reduceMotion={reduceMotion} />
+                        </CarouselStage>
+
+                        <div className="mt-8">
+                            <CarouselDots total={aboutData.premiumIcons.length} activeIndex={seals.index} label="Sellos de calidad" />
+                        </div>
+                    </motion.div>
+
+                    {/* ── Desktop/tablet: los cuatro sellos completos, en grilla, sin carrusel ── */}
                     <motion.div
                         initial="hidden"
                         whileInView="show"
                         viewport={{ once: true, margin: '-80px' }}
                         variants={staggerContainer}
-                        className="grid grid-cols-2 xl:grid-cols-4 gap-8 md:gap-10 xl:gap-12"
+                        className="hidden md:grid grid-cols-2 xl:grid-cols-4 gap-8 md:gap-10 xl:gap-12"
                     >
                         {aboutData.premiumIcons.map((icon, idx) => (
-                            <motion.div
-                                key={icon.title}
-                                variants={cardItem}
-                                className="flex flex-col items-center text-center group"
-                            >
-                                <div className="relative w-36 h-36 md:w-44 md:h-44 xl:w-52 xl:h-52 mb-8">
-                                    {/* Anillo tipo "manecilla de reloj" — gira en loop continuo, siempre en movimiento */}
-                                    <motion.div
-                                        aria-hidden
-                                        className="absolute -inset-3 rounded-full bg-[conic-gradient(from_0deg,transparent_0%,rgba(14,165,233,0.35)_10%,transparent_22%)] dark:bg-[conic-gradient(from_0deg,transparent_0%,rgba(107,175,123,0.4)_10%,transparent_22%)] pointer-events-none"
-                                        animate={{ rotate: 360 }}
-                                        transition={{ duration: 7 + idx, repeat: Infinity, ease: 'linear' }}
-                                    />
-                                    <div className="absolute -inset-2 border border-sky-100 dark:border-[var(--border-subtle)] rounded-full group-hover:border-sky-300 dark:group-hover:border-[var(--icons-green)]/50 transition-colors duration-500" />
-
-                                    <div className="relative w-full h-full bg-white dark:bg-emerald-50 rounded-full shadow-md flex items-center justify-center p-6 border border-sky-50 dark:border-[var(--border-subtle)] group-hover:shadow-xl group-hover:shadow-sky-500/10 dark:group-hover:shadow-black/30 transition-all duration-500 transform group-hover:-translate-y-2">
-                                        <Image
-                                            src={`/${icon.image}`}
-                                            alt={icon.title}
-                                            width={160}
-                                            height={160}
-                                            className="w-4/5 h-4/5 object-contain transform group-hover:scale-110 transition-transform duration-500 drop-shadow-md"
-                                        />
-                                    </div>
-
-                                    <div className="absolute bottom-0 right-0 w-10 h-10 bg-sky-500 dark:bg-[#4A7C59] rounded-xl shadow-lg flex items-center justify-center transform translate-x-1/2 translate-y-1/2 group-hover:rotate-12 transition-transform">
-                                        <Icon name="Check" className="w-6 h-6 text-white" />
-                                    </div>
-                                </div>
-
-                                <h3 className="text-xl md:text-2xl font-black text-slate-800 dark:text-[var(--text-primary)] mb-4 tracking-tight group-hover:text-sky-500 dark:group-hover:text-[#6BAF7B] transition-colors">
-                                    {icon.title}
-                                </h3>
-                                <p className="text-sm md:text-base text-slate-500 dark:text-[var(--text-muted)] font-medium leading-relaxed max-w-[220px]">
-                                    {icon.description}
-                                </p>
+                            <motion.div key={icon.title} variants={cardItem}>
+                                <TiltMedallion icon={icon} idx={idx} reduceMotion={reduceMotion} />
                             </motion.div>
                         ))}
                     </motion.div>
@@ -529,5 +670,80 @@ export default function AboutPage() {
             </section>
 
         </main>
+    );
+}
+
+type PremiumIcon = (typeof aboutData.premiumIcons)[number];
+
+/**
+ * Medallón de "sello de calidad" con tilt 3D que sigue el cursor (desktop) y respira
+ * en loop continuo (todo dispositivo). Vive en su propio componente porque necesita
+ * hooks (useMotionValue/useTransform) que no pueden llamarse dentro de un .map().
+ */
+function TiltMedallion({ icon, idx, reduceMotion }: { icon: PremiumIcon; idx: number; reduceMotion: boolean | null }) {
+    const mouseX = useMotionValue(0.5);
+    const mouseY = useMotionValue(0.5);
+    const rotateX = useTransform(mouseY, [0, 1], [10, -10]);
+    const rotateY = useTransform(mouseX, [0, 1], [-10, 10]);
+
+    const handlePointerMove = (e: PointerEvent<HTMLDivElement>) => {
+        if (reduceMotion) return;
+        const rect = e.currentTarget.getBoundingClientRect();
+        mouseX.set((e.clientX - rect.left) / rect.width);
+        mouseY.set((e.clientY - rect.top) / rect.height);
+    };
+    const resetTilt = () => {
+        mouseX.set(0.5);
+        mouseY.set(0.5);
+    };
+
+    return (
+        <div className="flex flex-col items-center text-center group">
+            <div
+                className="relative w-40 h-40 sm:w-48 sm:h-48 md:w-52 md:h-52 mb-8"
+                style={{ perspective: 700 }}
+                onPointerMove={handlePointerMove}
+                onPointerLeave={resetTilt}
+            >
+                {/* Anillo tipo "manecilla de reloj" — gira en loop continuo, siempre en movimiento */}
+                {!reduceMotion && (
+                    <motion.div
+                        aria-hidden
+                        className="absolute -inset-3 rounded-full bg-[conic-gradient(from_0deg,transparent_0%,rgba(14,165,233,0.35)_10%,transparent_22%)] dark:bg-[conic-gradient(from_0deg,transparent_0%,rgba(107,175,123,0.4)_10%,transparent_22%)] pointer-events-none"
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 7 + idx, repeat: Infinity, ease: 'linear' }}
+                    />
+                )}
+                <div className="absolute -inset-2 border border-sky-100 dark:border-[var(--border-subtle)] rounded-full group-hover:border-sky-300 dark:group-hover:border-[var(--icons-green)]/50 transition-colors duration-500" />
+
+                {/* Medallón — sigue el cursor en 3D (desktop) y respira en loop, escalonado por índice */}
+                <motion.div
+                    style={reduceMotion ? undefined : { rotateX, rotateY, transformStyle: 'preserve-3d' }}
+                    animate={reduceMotion ? undefined : { scale: [1, 1.035, 1] }}
+                    whileHover={reduceMotion ? undefined : { y: -8 }}
+                    transition={{ duration: 4 + idx * 0.4, repeat: Infinity, ease: 'easeInOut', delay: idx * 0.3 }}
+                    className="relative w-full h-full bg-white dark:bg-emerald-50 rounded-full shadow-md flex items-center justify-center p-6 border border-sky-50 dark:border-[var(--border-subtle)] group-hover:shadow-xl group-hover:shadow-sky-500/10 dark:group-hover:shadow-black/30 transition-shadow duration-500"
+                >
+                    <Image
+                        src={`/${icon.image}`}
+                        alt={icon.title}
+                        width={160}
+                        height={160}
+                        className="w-4/5 h-4/5 object-contain transform translate-z-[28px] group-hover:scale-110 transition-transform duration-500 drop-shadow-md"
+                    />
+                </motion.div>
+
+                <div className="absolute bottom-0 right-0 w-10 h-10 bg-sky-500 dark:bg-[#4A7C59] rounded-xl shadow-lg flex items-center justify-center transform translate-x-1/2 translate-y-1/2 group-hover:rotate-12 transition-transform">
+                    <Icon name="Check" className="w-6 h-6 text-white" />
+                </div>
+            </div>
+
+            <h3 className="text-xl md:text-2xl font-black text-slate-800 dark:text-[var(--text-primary)] mb-4 tracking-tight group-hover:text-sky-500 dark:group-hover:text-[#6BAF7B] transition-colors">
+                {icon.title}
+            </h3>
+            <p className="text-sm md:text-base text-slate-500 dark:text-[var(--text-muted)] font-medium leading-relaxed max-w-[280px]">
+                {icon.description}
+            </p>
+        </div>
     );
 }

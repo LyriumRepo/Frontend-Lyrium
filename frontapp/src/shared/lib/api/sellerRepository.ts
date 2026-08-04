@@ -483,10 +483,11 @@ export const sellerApi = {
     }
   },
 
-  uploadAdBanner: async (storeId: number, file: File): Promise<{ url: string; id: number }> => {
+  uploadAdBanner: async (storeId: number, file: File, orientation: 'horizontal' | 'vertical' = 'horizontal'): Promise<{ url: string; id: number; orientation?: string }> => {
     const token = await getAuthToken();
     const formData = new FormData();
     formData.append('file', file);
+    formData.append('orientation', orientation);
 
     const response = await fetch(`${LARAVEL_API_URL}/stores/${storeId}/media/ad-banners`, {
       method: 'POST',

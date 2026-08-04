@@ -184,7 +184,7 @@ export default function CustomerAddressesPage() {
           leftIcon="Plus"
           size="lg"
           fullWidth
-          className="sm:w-auto"
+          className="sm:w-auto !py-2.5 sm:!py-4"
         >
           Agregar Dirección
         </BaseButton>

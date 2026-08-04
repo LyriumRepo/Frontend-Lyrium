@@ -9,7 +9,7 @@ interface Layout2Props {
   store: Tienda;
   products: Producto[];
   plan: 'basico' | 'premium';
-  banners?: { url: string; titulo: string; link?: string }[];
+  banners?: { url: string; titulo: string; link?: string; orientation?: 'horizontal' | 'vertical' }[];
 }
 
 export default function Layout2({ products, banners }: Layout2Props) {
@@ -18,7 +18,7 @@ export default function Layout2({ products, banners }: Layout2Props) {
 
   return (
     <div className="space-y-4 sm:space-y-5 md:space-y-6">
-      <AdBannersCarousel banners={banners} maxBanners={4} startIndex={0} fallback={4} />
+      <AdBannersCarousel banners={banners} maxBanners={4} startIndex={0} fallback={4} filterOrientation="horizontal" />
 
       <hr className="border-gray-200 dark:border-[var(--border-subtle)]" />
 
@@ -28,7 +28,7 @@ export default function Layout2({ products, banners }: Layout2Props) {
         </h2>
         <div className="flex flex-col md:flex-row gap-4 sm:gap-5 md:gap-6">
           <div className="w-full md:w-56 lg:w-80 flex-shrink-0">
-            <AdBannersCarousel banners={banners} maxBanners={4} vertical startIndex={4} fallback={4} />
+            <AdBannersCarousel banners={banners} maxBanners={4} vertical startIndex={0} fallback={4} filterOrientation="vertical" />
           </div>
           <ScrollableSection visibleRows={2} className="flex-1 min-h-0">
             <ProductGrid productos={productosNormales} />
@@ -36,7 +36,7 @@ export default function Layout2({ products, banners }: Layout2Props) {
         </div>
       </div>
 
-      <AdBannersCarousel banners={banners} maxBanners={4} startIndex={8} fallback={4} />
+      <AdBannersCarousel banners={banners} maxBanners={4} startIndex={4} fallback={4} filterOrientation="horizontal" />
 
       <hr className="border-gray-200 dark:border-[var(--border-subtle)]" />
 
@@ -50,7 +50,7 @@ export default function Layout2({ products, banners }: Layout2Props) {
               <ProductGrid productos={productosServicio} />
             </ScrollableSection>
             <div className="w-full md:w-56 lg:w-80 flex-shrink-0">
-              <AdBannersCarousel banners={banners} maxBanners={4} vertical startIndex={12} fallback={4} />
+              <AdBannersCarousel banners={banners} maxBanners={4} vertical startIndex={4} fallback={4} filterOrientation="vertical" />
             </div>
           </div>
         </div>

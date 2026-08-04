@@ -169,3 +169,49 @@
 {"ts":"2026-08-02T16:52:03.554Z","cmd":"wait","args":"--networkidle","origin":"http://localhost:3000/nosotros","durationMs":0,"status":"ok","hasCookies":false,"mode":"launched"}
 {"ts":"2026-08-02T16:52:04.666Z","cmd":"screenshot","args":"C:/Users/roaca/AppData/Local/Temp/nosotros-icons-dark2.png","origin":"http://localhost:3000/nosotros","durationMs":877,"status":"ok","hasCookies":false,"mode":"launched"}
 {"ts":"2026-08-02T16:52:20.038Z","cmd":"screenshot","args":"C:/Users/roaca/AppData/Local/Temp/nosotros-icons-dark-close.png --clip 0,1000,519,150","origin":"http://localhost:3000/nosotros","durationMs":11,"status":"error","hasCookies":false,"mode":"launched","error":"page.screenshot: Clipped area is either empty or outside the resulting image\nCall log:\n\u001b[2m  - taking page screenshot\u001b[22m\n\u001b[2m  - waiting for fonts to load...\u001b[22m\n\u001b[2m  - fonts loaded\u001b[22m\n"}
+{"ts":"2026-08-04T16:02:26.662Z","cmd":"viewport","args":"820x1180","origin":"about:blank","durationMs":8,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-04T16:02:38.174Z","cmd":"goto","args":"http://localhost:3000/","origin":"http://localhost:3000/","durationMs":11237,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-04T16:02:43.759Z","cmd":"wait","args":"--networkidle","origin":"http://localhost:3000/","durationMs":5219,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-04T16:02:44.005Z","cmd":"js","args":"document.querySelector('footer').scrollIntoView({block:'start'}); 'scrolled'","origin":"http://localhost:3000/","durationMs":6,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-04T16:02:44.424Z","cmd":"wait","args":"--networkidle","origin":"http://localhost:3000/","durationMs":1,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-04T16:02:53.101Z","cmd":"screenshot","args":"C:/Users/roaca/AppData/Local/Temp/footer-tablet.png","origin":"http://localhost:3000/","durationMs":2149,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-04T16:03:08.427Z","cmd":"scroll","args":"","origin":"http://localhost:3000/","durationMs":74,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-04T16:03:08.664Z","cmd":"wait","args":"--networkidle","origin":"http://localhost:3000/","durationMs":1,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-04T16:03:28.805Z","cmd":"screenshot","args":"C:/Users/roaca/AppData/Local/Temp/footer-tablet2.png","origin":"about:blank","durationMs":126,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-04T16:03:34.426Z","cmd":"viewport","args":"820x1180","origin":"about:blank","durationMs":9,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-04T16:03:41.333Z","cmd":"goto","args":"http://localhost:3000/","origin":"http://localhost:3000/","durationMs":6660,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-04T16:03:45.986Z","cmd":"wait","args":"--networkidle","origin":"http://localhost:3000/","durationMs":4267,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-04T16:03:46.228Z","cmd":"scroll","args":"","origin":"http://localhost:3000/","durationMs":7,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-04T16:03:46.530Z","cmd":"wait","args":"--networkidle","origin":"http://localhost:3000/","durationMs":2,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-04T16:03:48.709Z","cmd":"screenshot","args":"C:/Users/roaca/AppData/Local/Temp/footer-tablet3.png","origin":"http://localhost:3000/","durationMs":1922,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-04T16:04:01.673Z","cmd":"screenshot","args":"C:/Users/roaca/AppData/Local/Temp/footer-tablet-el.png --selector footer","origin":"http://localhost:3000/","durationMs":258,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-04T16:04:17.866Z","cmd":"viewport","args":"1440x900","origin":"http://localhost:3000/","durationMs":97,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-04T16:04:36.412Z","cmd":"reload","args":"","origin":"about:blank","durationMs":31,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-04T16:04:37.120Z","cmd":"wait","args":"--networkidle","origin":"about:blank","durationMs":3,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-04T16:04:38.071Z","cmd":"scroll","args":"","origin":"about:blank","durationMs":46,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-04T16:04:38.880Z","cmd":"wait","args":"--networkidle","origin":"about:blank","durationMs":1,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-04T16:04:44.888Z","cmd":"screenshot","args":"C:/Users/roaca/AppData/Local/Temp/footer-desktop.png --selector footer","origin":"about:blank","durationMs":5021,"status":"error","hasCookies":false,"mode":"launched","error":"locator.screenshot: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('footer')\u001b[22m\n"}
+{"ts":"2026-08-04T16:04:52.047Z","cmd":"viewport","args":"1440x900","origin":"about:blank","durationMs":5,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-04T16:05:02.145Z","cmd":"goto","args":"http://localhost:3000/","origin":"http://localhost:3000/","durationMs":9536,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-04T16:05:06.773Z","cmd":"wait","args":"--networkidle","origin":"http://localhost:3000/","durationMs":4181,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-04T16:05:07.061Z","cmd":"scroll","args":"","origin":"http://localhost:3000/","durationMs":3,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-04T16:05:07.394Z","cmd":"wait","args":"--networkidle","origin":"http://localhost:3000/","durationMs":1,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-04T16:05:08.226Z","cmd":"screenshot","args":"C:/Users/roaca/AppData/Local/Temp/footer-desktop2.png --selector footer","origin":"http://localhost:3000/","durationMs":595,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-04T16:05:22.613Z","cmd":"viewport","args":"390x844","origin":"http://localhost:3000/","durationMs":188,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-04T16:05:28.915Z","cmd":"goto","args":"http://localhost:3000/","origin":"http://localhost:3000/","durationMs":5937,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-04T16:05:33.011Z","cmd":"wait","args":"--networkidle","origin":"http://localhost:3000/","durationMs":3736,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-04T16:05:33.259Z","cmd":"scroll","args":"","origin":"http://localhost:3000/","durationMs":9,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-04T16:05:33.502Z","cmd":"wait","args":"--networkidle","origin":"http://localhost:3000/","durationMs":0,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-04T16:05:33.956Z","cmd":"screenshot","args":"C:/Users/roaca/AppData/Local/Temp/footer-mobile.png --selector footer","origin":"http://localhost:3000/","durationMs":224,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-04T16:08:01.529Z","cmd":"viewport","args":"820x1180","origin":"about:blank","durationMs":9,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-04T16:08:14.323Z","cmd":"goto","args":"http://localhost:3000/","origin":"http://localhost:3000/","durationMs":12545,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-04T16:08:21.420Z","cmd":"wait","args":"--networkidle","origin":"http://localhost:3000/","durationMs":6715,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-04T16:08:21.711Z","cmd":"scroll","args":"","origin":"http://localhost:3000/","durationMs":18,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-04T16:08:22.021Z","cmd":"wait","args":"--networkidle","origin":"http://localhost:3000/","durationMs":2,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-04T16:08:22.597Z","cmd":"screenshot","args":"C:/Users/roaca/AppData/Local/Temp/footer-fix-tablet.png --selector footer","origin":"http://localhost:3000/","durationMs":303,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-04T16:08:37.682Z","cmd":"viewport","args":"1440x900","origin":"http://localhost:3000/","durationMs":261,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-04T16:08:45.346Z","cmd":"goto","args":"http://localhost:3000/","origin":"http://localhost:3000/","durationMs":7011,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-04T16:08:49.752Z","cmd":"wait","args":"--networkidle","origin":"http://localhost:3000/","durationMs":4035,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-04T16:08:50.017Z","cmd":"scroll","args":"","origin":"http://localhost:3000/","durationMs":4,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-04T16:08:50.337Z","cmd":"wait","args":"--networkidle","origin":"http://localhost:3000/","durationMs":1,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-04T16:08:50.926Z","cmd":"screenshot","args":"C:/Users/roaca/AppData/Local/Temp/footer-fix-desktop.png --selector footer","origin":"http://localhost:3000/","durationMs":334,"status":"ok","hasCookies":false,"mode":"launched"}

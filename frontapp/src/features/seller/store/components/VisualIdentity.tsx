@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { ShopConfig } from '@/features/seller/store/types';
+import { ShopConfig, AdBanner } from '@/features/seller/store/types';
 import PolaroidCard from './PolaroidCard';
 import Icon from '@/components/ui/Icon';
 import { usePlanCapabilities } from '@/shared/lib/hooks/usePlanCapabilities';
@@ -16,7 +16,7 @@ interface VisualIdentityProps {
     uploadBanner?: (file: File, bannerNumber: 1 | 2 | 3) => Promise<any>;
     uploadGallery?: (file: File) => Promise<any>;
     deleteGalleryItem?: (index: number, mediaId: number) => Promise<any>;
-    uploadAdBanner?: (file: File) => Promise<any>;
+    uploadAdBanner?: (file: File, orientation?: 'horizontal' | 'vertical') => Promise<any>;
     deleteAdBanner?: (mediaId: number) => Promise<any>;
     deleteBanner?: (bannerNumber: 1 | 2 | 3) => Promise<any>;
     isUploading?: boolean;
@@ -41,7 +41,13 @@ export default function VisualIdentity(props: VisualIdentityProps): React.ReactE
     const [localBanner3, setLocalBanner3] = useState(config.visual.banner3);
     const [lastUpdated, setLastUpdated] = useState<string | null>(null);
     const gallery = Array.isArray(config.visual.gallery) ? config.visual.gallery : [];
-    const adBanners = Array.isArray(config.visual.adBanners) ? config.visual.adBanners : [];
+    const adBanners: AdBanner[] = Array.isArray(config.visual.adBanners) ? config.visual.adBanners : [];
+    const horizontalAdBanners = adBanners.filter((b) => b.orientation !== 'vertical');
+    const verticalAdBanners = adBanners.filter((b) => b.orientation === 'vertical');
+    // Los banners verticales solo tienen sentido (y solo se ven) en las plantillas
+    // con laterales — Plantilla 2 y Plantilla 3. En Emprende/Plantilla 1 se ocultan
+    // para no confundir al vendedor con un slot que no va a usar.
+    const showVerticalBanners = config.layout === '2' || config.layout === '3';
     const [uploading, setUploading] = useState<string | null>(null);
     const [showBannerUpgrade, setShowBannerUpgrade] = useState(false);
     const [showMainBannerUpgrade, setShowMainBannerUpgrade] = useState(false);
@@ -175,18 +181,18 @@ export default function VisualIdentity(props: VisualIdentityProps): React.ReactE
         }
     };
 
-    const handleAdBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleAdBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>, orientation: 'horizontal' | 'vertical' = 'horizontal') => {
         const file = e.target.files?.[0];
         if (!file || !uploadAdBanner) return;
         if (file.size > 5 * 1024 * 1024) {
             alert('El archivo no debe superar los 5 MB');
             return;
         }
-        setUploading('ad-banners');
+        setUploading(`ad-banners-${orientation}`);
         try {
-            const result = await uploadAdBanner(file);
-            const newBanners = [...adBanners, result.url];
-            updateConfig({ visual: { ...config.visual, adBanners: newBanners } });
+            const result = await uploadAdBanner(file, orientation);
+            const newBanner: AdBanner = { id: result.id, url: result.url, orientation };
+            updateConfig({ visual: { ...config.visual, adBanners: [...adBanners, newBanner] } });
             setShowBannerUpgrade(false);
         } catch (error) {
             const msg = error instanceof Error ? error.message : '';
@@ -197,37 +203,35 @@ export default function VisualIdentity(props: VisualIdentityProps): React.ReactE
             }
         } finally {
             setUploading(null);
+            e.target.value = '';
         }
     };
 
-    const handleAdBannerClick = () => {
+    const handleAdBannerClick = (orientation: 'horizontal' | 'vertical' = 'horizontal') => {
         if (adBannerAtLimit) {
             setShowBannerUpgrade(true);
             return;
         }
         setShowBannerUpgrade(false);
-        document.getElementById('input-ad-banner')?.click();
+        document.getElementById(orientation === 'vertical' ? 'input-ad-banner-vertical' : 'input-ad-banner')?.click();
     };
 
-    const handleDeleteAdBanner = async (index: number) => {
-        const url = adBanners[index];
-        const mediaIdMatch = url?.match(/\/storage\/(\d+)\//);
-        const mediaId = mediaIdMatch ? parseInt(mediaIdMatch[1]) : undefined;
-        if (!mediaId) {
-            const newBanners = [...adBanners];
-            newBanners.splice(index, 1);
+    const handleDeleteAdBanner = async (banner: AdBanner) => {
+        if (!confirm('¿Eliminar este banner promocional?')) return;
+        const removeLocally = () => {
+            const newBanners = adBanners.filter((b) => b !== banner);
             updateConfig({ visual: { ...config.visual, adBanners: newBanners } });
+        };
+        if (!banner.id) {
+            removeLocally();
             return;
         }
-        if (!confirm('¿Eliminar este banner promocional?')) return;
         setUploading('ad-banners-delete');
         try {
             if (deleteAdBanner) {
-                await deleteAdBanner(mediaId);
+                await deleteAdBanner(banner.id);
             }
-            const newBanners = [...adBanners];
-            newBanners.splice(index, 1);
-            updateConfig({ visual: { ...config.visual, adBanners: newBanners } });
+            removeLocally();
         } catch (error) {
             console.error('Error deleting ad banner:', error);
             alert('Error al eliminar el banner promocional');
@@ -554,69 +558,164 @@ export default function VisualIdentity(props: VisualIdentityProps): React.ReactE
                 {/* ══ TAB: Banners Promocionales ═══════════════════════════ */}
                 {activeTab === 'promos' && (
                     <div className="space-y-6">
-                        <div className="flex flex-wrap items-center justify-between gap-y-2">
-                            <p className="text-[10px] font-semibold text-[var(--text-secondary)] leading-relaxed">
-                                Imágenes de publicidad dentro de tu tienda. Se recomienda texto promocional u ofertas.
-                                Máximo {maxAdBanners} banners. El orden de carga determina la prioridad.
-                            </p>
-                            <button
-                                className={`flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-2xl font-semibold text-[10px] uppercase tracking-widest transition-all ${
-                                    adBannerAtLimit
-                                        ? 'bg-[var(--plan-lock-accent)]/10 text-[var(--plan-lock-accent)] cursor-not-allowed'
-                                        : 'bg-purple-500/10 dark:bg-emerald-500/10 text-purple-500 dark:text-[var(--icons-green)] hover:bg-purple-500 dark:hover:bg-[var(--brand-green)] hover:text-white'
-                                }`}
-                                onClick={handleAdBannerClick}
-                                disabled={uploading !== null || !isStoreReady}
-                            >
-                                <Icon name="PlusCircle" className="w-4 h-4" />
-                                <span>{uploading === 'ad-banners' ? 'Subiendo...' : 'Agregar Banner'}</span>
-                            </button>
-                        </div>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
-                            {adBanners.filter(Boolean).map((bannerUrl, i) => (
-                                <div key={`${bannerUrl}-${i}`} className="relative group aspect-[16/9] rounded-xl sm:rounded-2xl overflow-hidden bg-[var(--bg-secondary)] border border-[var(--border-subtle)] shadow-sm">
-                                    <Image src={bannerUrl} fill sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw" alt={`Banner ${i + 1}`} className="object-cover" />
-                                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <p className="text-[10px] font-semibold text-[var(--text-secondary)] leading-relaxed">
+                            Imágenes de publicidad dentro de tu tienda. Se recomienda texto promocional u ofertas.
+                            Máximo {maxAdBanners} banners en total. El orden de carga determina la prioridad.
+                        </p>
+
+                        {/* Horizontal y vertical van uno al lado del otro desde tablet
+                            (md:) para no estirar la sección con una sola columna de
+                            cuadros vacíos; en móvil se apilan. */}
+                        <div className={`grid grid-cols-1 ${showVerticalBanners ? 'md:grid-cols-2 md:gap-8' : ''} gap-6`}>
+                            <div className="flex flex-col md:h-full">
+                                <div className="space-y-3">
+                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                                        <h4 className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Horizontales</h4>
                                         <button
-                                            className="p-2 bg-red-500 rounded-full text-white hover:bg-red-600 transition-colors"
-                                            onClick={() => handleDeleteAdBanner(i)}
-                                            disabled={uploading !== null}
-                                            title="Eliminar banner"
+                                            className={`flex items-center justify-center gap-2 px-4 py-2 sm:py-2.5 rounded-2xl font-semibold text-[10px] uppercase tracking-widest transition-all ${
+                                                adBannerAtLimit
+                                                    ? 'bg-[var(--plan-lock-accent)]/10 text-[var(--plan-lock-accent)] cursor-not-allowed'
+                                                    : 'bg-purple-500/10 dark:bg-emerald-500/10 text-purple-500 dark:text-[var(--icons-green)] hover:bg-purple-500 dark:hover:bg-[var(--brand-green)] hover:text-white'
+                                            }`}
+                                            onClick={() => handleAdBannerClick('horizontal')}
+                                            disabled={uploading !== null || !isStoreReady}
                                         >
-                                            <Icon name="Trash2" className="w-4 h-4" />
+                                            <Icon name="PlusCircle" className="w-4 h-4" />
+                                            <span>{uploading === 'ad-banners-horizontal' ? 'Subiendo...' : 'Agregar Horizontal'}</span>
                                         </button>
                                     </div>
-                                    <span className="absolute top-2 left-2 px-2 py-0.5 bg-black/40 backdrop-blur-sm rounded-lg text-[8px] font-semibold text-white">
-                                        {i + 1}
-                                    </span>
+                                    <p className="text-[9px] font-medium text-[var(--text-secondary)] leading-relaxed">
+                                        Para el escaparate principal de tu tienda. Sube una imagen más ancha que alta.
+                                    </p>
                                 </div>
-                            ))}
-                            {adBanners.length < maxAdBanners && (
-                                <div
-                                    role="button"
-                                    tabIndex={0}
-                                    className={`aspect-[16/9] border-2 border-dashed rounded-xl sm:rounded-2xl flex flex-col items-center justify-center transition-all group ${
-                                        adBannerAtLimit
-                                            ? 'border-[var(--plan-lock-accent)]/30 bg-[var(--plan-lock-accent)]/5 cursor-not-allowed'
-                                            : 'border-[var(--border-subtle)] bg-[var(--bg-secondary)]/50 hover:bg-[var(--bg-card)] cursor-pointer'
-                                    }`}
-                                    onClick={handleAdBannerClick}
-                                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleAdBannerClick(); }}
-                                >
-                                    {adBannerAtLimit ? (
-                                        <Icon name="Lock" className="w-6 h-6 text-[var(--plan-lock-accent)] group-hover:text-white" />
-                                    ) : (
-                                        <Icon name="Image" className="w-6 h-6 text-[var(--text-secondary)] group-hover:text-purple-400 dark:group-hover:text-[var(--icons-green)]" />
+                                {/* md:flex-1 + md:items-center: el título/botón/texto de arriba
+                                    quedan fijos (al mismo nivel que "Verticales"), y solo el
+                                    cuadro de abajo se centra en el espacio vertical restante de
+                                    la columna, que es más alta por el banner lateral. */}
+                                <div className="flex flex-wrap justify-center gap-3 sm:gap-4 mt-3 md:mt-0 md:flex-1 md:items-center">
+                                    {horizontalAdBanners.map((banner, i) => (
+                                        <div key={banner.id ?? `${banner.url}-${i}`} className="relative group w-32 sm:w-36 aspect-[16/9] rounded-xl sm:rounded-2xl overflow-hidden bg-[var(--bg-secondary)] border border-[var(--border-subtle)] shadow-sm">
+                                            <Image src={banner.url} fill sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw" alt={`Banner horizontal ${i + 1}`} className="object-cover" />
+                                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                <button
+                                                    className="p-2 bg-red-500 rounded-full text-white hover:bg-red-600 transition-colors"
+                                                    onClick={() => handleDeleteAdBanner(banner)}
+                                                    disabled={uploading !== null}
+                                                    title="Eliminar banner"
+                                                >
+                                                    <Icon name="Trash2" className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                            <span className="absolute top-2 left-2 px-2 py-0.5 bg-black/40 backdrop-blur-sm rounded-lg text-[8px] font-semibold text-white">
+                                                {i + 1}
+                                            </span>
+                                        </div>
+                                    ))}
+                                    {adBanners.length < maxAdBanners && (
+                                        <div
+                                            role="button"
+                                            tabIndex={0}
+                                            className={`w-32 sm:w-36 aspect-[16/9] border-2 border-dashed rounded-xl sm:rounded-2xl flex flex-col items-center justify-center transition-all group ${
+                                                adBannerAtLimit
+                                                    ? 'border-[var(--plan-lock-accent)]/30 bg-[var(--plan-lock-accent)]/5 cursor-not-allowed'
+                                                    : 'border-[var(--border-subtle)] bg-[var(--bg-secondary)]/50 hover:bg-[var(--bg-card)] cursor-pointer'
+                                            }`}
+                                            onClick={() => handleAdBannerClick('horizontal')}
+                                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleAdBannerClick('horizontal'); }}
+                                        >
+                                            {adBannerAtLimit ? (
+                                                <Icon name="Lock" className="w-6 h-6 text-[var(--plan-lock-accent)] group-hover:text-white" />
+                                            ) : (
+                                                <Icon name="Image" className="w-6 h-6 text-[var(--text-secondary)] group-hover:text-purple-400 dark:group-hover:text-[var(--icons-green)]" />
+                                            )}
+                                            <span className="text-[8px] font-semibold text-[var(--text-secondary)] uppercase mt-1 text-center px-1">{horizontalAdBanners.length === 0 ? 'Agregar Banner' : `+ ${maxAdBanners - adBanners.length} disp.`}</span>
+                                            <input
+                                                type="file"
+                                                id="input-ad-banner"
+                                                className="hidden"
+                                                accept="image/*"
+                                                onChange={(e) => handleAdBannerUpload(e, 'horizontal')}
+                                                disabled={uploading !== null || !isStoreReady}
+                                            />
+                                        </div>
                                     )}
-                                    <span className="text-[8px] font-semibold text-[var(--text-secondary)] uppercase mt-1">{adBanners.length === 0 ? 'Agregar Banner' : `+ ${maxAdBanners - adBanners.length} disponibles`}</span>
-                                    <input
-                                        type="file"
-                                        id="input-ad-banner"
-                                        className="hidden"
-                                        accept="image/*"
-                                        onChange={handleAdBannerUpload}
-                                        disabled={uploading !== null || !isStoreReady}
-                                    />
+                                </div>
+                            </div>
+
+                            {/* Banners verticales: solo aplican en plantillas con laterales
+                                (Plantilla 2 y 3). Se ocultan en Emprende/Plantilla 1 porque ahí
+                                no hay dónde mostrarlos. */}
+                            {showVerticalBanners && (
+                                <div className="space-y-3 pt-6 border-t border-[var(--border-subtle)] md:pt-0 md:border-t-0 md:border-l md:pl-8 md:border-[var(--border-subtle)]">
+                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                                        <div className="flex items-start gap-1.5">
+                                            <Icon name="RectangleVertical" className="w-3.5 h-3.5 text-purple-500 dark:text-[var(--icons-green)] shrink-0 mt-0.5" />
+                                            <h4 className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Verticales (laterales)</h4>
+                                        </div>
+                                        <button
+                                            className={`flex items-center justify-center gap-2 px-4 py-2 sm:py-2.5 rounded-2xl font-semibold text-[10px] uppercase tracking-widest transition-all ${
+                                                adBannerAtLimit
+                                                    ? 'bg-[var(--plan-lock-accent)]/10 text-[var(--plan-lock-accent)] cursor-not-allowed'
+                                                    : 'bg-purple-500/10 dark:bg-emerald-500/10 text-purple-500 dark:text-[var(--icons-green)] hover:bg-purple-500 dark:hover:bg-[var(--brand-green)] hover:text-white'
+                                            }`}
+                                            onClick={() => handleAdBannerClick('vertical')}
+                                            disabled={uploading !== null || !isStoreReady}
+                                        >
+                                            <Icon name="PlusCircle" className="w-4 h-4" />
+                                            <span>{uploading === 'ad-banners-vertical' ? 'Subiendo...' : 'Agregar Vertical'}</span>
+                                        </button>
+                                    </div>
+                                    <p className="text-[9px] font-medium text-[var(--text-secondary)] leading-relaxed">
+                                        Para los espacios laterales de tu plantilla. Sube una imagen más alta que ancha.
+                                    </p>
+                                    <div className="flex flex-wrap justify-center gap-3 sm:gap-4">
+                                        {verticalAdBanners.map((banner, i) => (
+                                            <div key={banner.id ?? `${banner.url}-${i}`} className="relative group w-24 sm:w-28 aspect-[9/16] rounded-xl sm:rounded-2xl overflow-hidden bg-[var(--bg-secondary)] border border-[var(--border-subtle)] shadow-sm">
+                                                <Image src={banner.url} fill sizes="(max-width: 640px) 33vw, (max-width: 1024px) 25vw, 16vw" alt={`Banner vertical ${i + 1}`} className="object-cover" />
+                                                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                    <button
+                                                        className="p-2 bg-red-500 rounded-full text-white hover:bg-red-600 transition-colors"
+                                                        onClick={() => handleDeleteAdBanner(banner)}
+                                                        disabled={uploading !== null}
+                                                        title="Eliminar banner"
+                                                    >
+                                                        <Icon name="Trash2" className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                                <span className="absolute top-2 left-2 px-2 py-0.5 bg-black/40 backdrop-blur-sm rounded-lg text-[8px] font-semibold text-white">
+                                                    {i + 1}
+                                                </span>
+                                            </div>
+                                        ))}
+                                        {adBanners.length < maxAdBanners && (
+                                            <div
+                                                role="button"
+                                                tabIndex={0}
+                                                className={`w-24 sm:w-28 aspect-[9/16] border-2 border-dashed rounded-xl sm:rounded-2xl flex flex-col items-center justify-center transition-all group ${
+                                                    adBannerAtLimit
+                                                        ? 'border-[var(--plan-lock-accent)]/30 bg-[var(--plan-lock-accent)]/5 cursor-not-allowed'
+                                                        : 'border-[var(--border-subtle)] bg-[var(--bg-secondary)]/50 hover:bg-[var(--bg-card)] cursor-pointer'
+                                                }`}
+                                                onClick={() => handleAdBannerClick('vertical')}
+                                                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleAdBannerClick('vertical'); }}
+                                            >
+                                                {adBannerAtLimit ? (
+                                                    <Icon name="Lock" className="w-6 h-6 text-[var(--plan-lock-accent)] group-hover:text-white" />
+                                                ) : (
+                                                    <Icon name="RectangleVertical" className="w-6 h-6 text-[var(--text-secondary)] group-hover:text-purple-400 dark:group-hover:text-[var(--icons-green)]" />
+                                                )}
+                                                <span className="text-[8px] font-semibold text-[var(--text-secondary)] uppercase mt-1 text-center px-1">{verticalAdBanners.length === 0 ? 'Agregar' : `+ ${maxAdBanners - adBanners.length} disp.`}</span>
+                                                <input
+                                                    type="file"
+                                                    id="input-ad-banner-vertical"
+                                                    className="hidden"
+                                                    accept="image/*"
+                                                    onChange={(e) => handleAdBannerUpload(e, 'vertical')}
+                                                    disabled={uploading !== null || !isStoreReady}
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             )}
                         </div>

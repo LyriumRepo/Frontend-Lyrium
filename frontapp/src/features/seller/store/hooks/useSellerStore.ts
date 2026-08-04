@@ -90,8 +90,12 @@ export function useSellerStore() {
                     banner2: (storeData as any).banner2 || '',
                     banner3: (storeData as any).banner3 || '',
                     gallery: Array.isArray((storeData as any).gallery) ? (storeData as any).gallery : [],
-                    adBanners: Array.isArray((storeData as any).ad_banners) 
-                        ? (storeData as any).ad_banners.map((b: any) => (typeof b === 'string' ? b : (b?.url || '').trim())).filter(Boolean)
+                    adBanners: Array.isArray((storeData as any).ad_banners)
+                        ? (storeData as any).ad_banners
+                            .map((b: any) => (typeof b === 'string'
+                                ? { url: b.trim(), orientation: 'horizontal' as const }
+                                : { id: b?.id, url: (b?.url || '').trim(), orientation: (b?.orientation === 'vertical' ? ('vertical' as const) : ('horizontal' as const)) }))
+                            .filter((b: { url: string }) => b.url)
                         : [],
                 },
                 layout: ((storeData as any).layout as '1' | '2' | '3') || '1',
@@ -260,14 +264,14 @@ export function useSellerStore() {
     });
 
     const uploadAdBannerMutation = useMutation({
-        mutationFn: async (file: File) => {
+        mutationFn: async ({ file, orientation }: { file: File; orientation: 'horizontal' | 'vertical' }) => {
             if (!storeId) throw new Error('No store ID');
 
             if (USE_MOCKS) {
-                return { url: URL.createObjectURL(file), id: Date.now() };
+                return { url: URL.createObjectURL(file), id: Date.now(), orientation };
             }
 
-            return sellerApi.uploadAdBanner(storeId, file);
+            return sellerApi.uploadAdBanner(storeId, file, orientation);
         },
         onError: () => {},
     });
@@ -536,9 +540,9 @@ export function useSellerStore() {
             if (!storeId) throw new Error('Tienda no cargada. Por favor espera.');
             return deleteGalleryMutation.mutateAsync({ index, mediaId });
         },
-        uploadAdBanner: (file: File) => {
+        uploadAdBanner: (file: File, orientation: 'horizontal' | 'vertical' = 'horizontal') => {
             if (!storeId) throw new Error('Tienda no cargada. Por favor espera.');
-            return uploadAdBannerMutation.mutateAsync(file);
+            return uploadAdBannerMutation.mutateAsync({ file, orientation });
         },
         deleteAdBanner: (mediaId: number) => {
             if (!storeId) throw new Error('Tienda no cargada. Por favor espera.');

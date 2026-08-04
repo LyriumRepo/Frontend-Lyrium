@@ -29,7 +29,7 @@ function SubmitButton({ isSubmitting }: { isSubmitting: boolean }) {
     <button
       type="submit"
       disabled={pending || isSubmitting}
-      className="flex-1 py-4 bg-emerald-500 text-white font-black text-sm uppercase tracking-widest rounded-2xl hover:bg-emerald-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+      className="flex-1 py-2.5 sm:py-4 bg-emerald-500 text-white font-black text-sm uppercase tracking-widest rounded-2xl hover:bg-emerald-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
     >
       {pending || isSubmitting ? (
         <>
@@ -601,7 +601,7 @@ export default function ProductFormClient() {
           <button
             type="button"
             onClick={() => router.back()}
-            className="flex-1 py-4 bg-gray-100 text-gray-600 font-black text-sm uppercase tracking-widest rounded-2xl hover:bg-gray-200 transition-all"
+            className="flex-1 py-2.5 sm:py-4 bg-gray-100 text-gray-600 font-black text-sm uppercase tracking-widest rounded-2xl hover:bg-gray-200 transition-all"
           >
             Cancelar
           </button>

@@ -28,6 +28,12 @@ export interface ShopPolicies {
     privacyPdf?: string;
 }
 
+export interface AdBanner {
+    id?: number;
+    url: string;
+    orientation: 'horizontal' | 'vertical';
+}
+
 export interface VisualIdentity {
     logo: string;
     logoMarketplace: string;
@@ -35,7 +41,7 @@ export interface VisualIdentity {
     banner2?: string;
     banner3?: string;
     gallery: string[];
-    adBanners: string[];
+    adBanners: AdBanner[];
 }
 
 export interface Medal {

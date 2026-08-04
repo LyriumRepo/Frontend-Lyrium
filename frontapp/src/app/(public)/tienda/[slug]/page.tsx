@@ -158,6 +158,9 @@ export default function TiendaPage({ params }: StorePageProps) {
             url: typeof b === 'string' ? b : (b.url || ''),
             titulo: b.title || 'Banner promocional',
             link: b.link || '',
+            // Banners subidos antes de este campo no traen 'orientation' del
+            // backend; se tratan como 'horizontal' (ver StoreResource.php).
+            orientation: (typeof b === 'object' && b.orientation === 'vertical') ? 'vertical' : 'horizontal',
           }))
           .filter((b: { url: string }) => b.url);
 

@@ -509,7 +509,7 @@ export default function CustomerProfilePage() {
           leftIcon={isEditMode ? "Check" : "Pencil"}
           size="lg"
           fullWidth
-          className="sm:w-auto"
+          className="sm:w-auto !py-2.5 sm:!py-4"
         >
           {isEditMode ? "Guardar Cambios" : "Editar Información"}
         </BaseButton>

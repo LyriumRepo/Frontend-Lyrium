@@ -97,7 +97,7 @@ export function StorePageClient(_props: StorePageClientProps) {
             leftIcon="Save"
             size="lg"
             fullWidth
-            className="sm:w-auto"
+            className="sm:w-auto !py-2.5 sm:!py-4"
         >
             {saving ? 'Guardando...' : 'Guardar Cambios'}
         </BaseButton>

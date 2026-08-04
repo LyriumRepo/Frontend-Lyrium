@@ -562,6 +562,7 @@ export default function CatalogClient({ initialProducts }: CatalogClientProps) {
                                 leftIcon="PlusCircle"
                                 size="lg"
                                 disabled={atProductLimit}
+                                className="!py-2.5 sm:!py-4"
                             >
                                 {atProductLimit ? 'Límite Alcanzado' : 'Nuevo Producto'}
                             </BaseButton>

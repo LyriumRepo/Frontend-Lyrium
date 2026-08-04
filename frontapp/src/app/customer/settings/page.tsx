@@ -98,7 +98,7 @@ export default function CustomerSettingsPage() {
           size="lg"
           leftIcon="Info"
           fullWidth
-          className="sm:w-auto"
+          className="sm:w-auto !py-2.5 sm:!py-4"
         >
           Leyenda
         </BaseButton>
@@ -109,7 +109,7 @@ export default function CustomerSettingsPage() {
           size="lg"
           leftIcon="Check"
           fullWidth
-          className="sm:w-auto"
+          className="sm:w-auto !py-2.5 sm:!py-4"
         >
           Guardar Cambios
         </BaseButton>

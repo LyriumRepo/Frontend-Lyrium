@@ -12,6 +12,7 @@ interface Banner {
   url: string;
   titulo: string;
   link?: string;
+  orientation?: 'horizontal' | 'vertical';
 }
 
 interface AdBannersCarouselProps {
@@ -20,6 +21,14 @@ interface AdBannersCarouselProps {
   startIndex?: number;
   vertical?: boolean;
   fallback?: number;
+  /**
+   * Cuando se pasa, filtra `banners` por su `orientation` ANTES de aplicar
+   * startIndex/maxBanners, en vez de repartir la lista completa de banners
+   * en bloques posicionales sin importar su forma real. Los banners sin
+   * `orientation` (subidos antes de este campo) cuentan como 'horizontal'
+   * para no perder banners ya existentes.
+   */
+  filterOrientation?: 'horizontal' | 'vertical';
 }
 
 const LYRIUM_DEFAULTS: Banner[] = [
@@ -36,8 +45,11 @@ function padWithDefaults(banners: Banner[], target: number): Banner[] {
   return result;
 }
 
-export default function AdBannersCarousel({ banners = [], maxBanners = 4, startIndex = 0, vertical = false, fallback }: AdBannersCarouselProps) {
-  const visible = banners.slice(startIndex, startIndex + maxBanners);
+export default function AdBannersCarousel({ banners = [], maxBanners = 4, startIndex = 0, vertical = false, fallback, filterOrientation }: AdBannersCarouselProps) {
+  const pool = filterOrientation
+    ? banners.filter((b) => (b.orientation || 'horizontal') === filterOrientation)
+    : banners;
+  const visible = pool.slice(startIndex, startIndex + maxBanners);
   const allBanners: Banner[] = fallback && visible.length < fallback
     ? padWithDefaults(visible, fallback)
     : visible;

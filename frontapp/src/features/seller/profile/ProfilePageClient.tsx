@@ -226,7 +226,7 @@ export function ProfilePageClient(_props: ProfilePageClientProps) {
             leftIcon={isEditMode ? "Save" : "Edit3"}
             size="lg"
             fullWidth
-            className="sm:w-auto"
+            className="sm:w-auto !py-2.5 sm:!py-4"
         >
             {isEditMode ? "Guardar Cambios" : "Editar Información"}
         </BaseButton>
